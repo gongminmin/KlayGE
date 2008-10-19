@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../bin/Render"
+			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -67,7 +67,6 @@
 				OutputFile="$(OutDir)/KlayGE_RenderEngine_D3D10_vc90_x86_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -89,11 +88,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="../../bin/Render"
+			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -140,7 +141,6 @@
 				OutputFile="$(OutDir)/KlayGE_RenderEngine_D3D10_vc90_x64_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -162,11 +162,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../bin/Render"
+			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -215,7 +217,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_RenderEngine_D3D10_vc90_x86.dll"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -237,11 +238,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="../../bin/Render"
+			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="2"
 			CharacterSet="1"
@@ -291,7 +294,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_RenderEngine_D3D10_vc90_x64.dll"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -313,6 +315,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
 			/>
 		</Configuration>
 	</Configurations>

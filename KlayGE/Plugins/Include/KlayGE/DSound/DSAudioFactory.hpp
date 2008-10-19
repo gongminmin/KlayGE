@@ -28,7 +28,7 @@
 
 extern "C"
 {
-	KLAYGE_DSOUND_AE_API KlayGE::AudioFactoryPtr const & AudioFactoryInstance();
+	KLAYGE_DSOUND_AE_API void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr);
 	KLAYGE_DSOUND_AE_API std::string const & Name();
 }
 

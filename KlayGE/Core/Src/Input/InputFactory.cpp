@@ -29,9 +29,9 @@ namespace KlayGE
 			return name;
 		}
 
-		InputEngine& InputEngineInstance()
+		InputEnginePtr DoMakeInputEngine()
 		{
-			return *InputEngine::NullObject();
+			return InputEngine::NullObject();
 		}
 	};
 
@@ -39,5 +39,15 @@ namespace KlayGE
 	{
 		static InputFactoryPtr obj = MakeSharedPtr<NullInputFactory>();
 		return obj;
+	}
+
+	InputEngine& InputFactory::InputEngineInstance()
+	{
+		if (!ie_)
+		{
+			ie_ = this->DoMakeInputEngine();
+		}
+
+		return *ie_;
 	}
 }

@@ -93,7 +93,7 @@ namespace KlayGE
 			init_data.row_pitch = sizeof(float);
 			init_data.slice_pitch = 0;
 
-			adapted_textures_[i] = Context::Instance().RenderFactoryInstance().MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 
 			fb_[i] = rf.MakeFrameBuffer();
 			fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));

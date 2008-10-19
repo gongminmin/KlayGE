@@ -62,6 +62,7 @@ namespace KlayGE
 		virtual ~App3DFramework();
 
 		virtual void Create();
+		virtual void Destroy();
 
 		WindowPtr MakeWindow(std::string const & name, int32_t left, int32_t top,
 			uint32_t width, uint32_t height);

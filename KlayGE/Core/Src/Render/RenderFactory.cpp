@@ -27,6 +27,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
+#include <boost/foreach.hpp>
 #include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -39,11 +40,6 @@ namespace KlayGE
 		{
 			static std::wstring const name(L"Null Render Factory");
 			return name;
-		}
-
-		RenderEngine& RenderEngineInstance()
-		{
-			return *RenderEngine::NullObject();
 		}
 
 		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
@@ -130,6 +126,11 @@ namespace KlayGE
 			return ShaderObject::NullObject();
 		}
 
+		RenderEnginePtr DoMakeRenderEngine()
+		{
+			return RenderEngine::NullObject();
+		}
+
 		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & /*desc*/)
 		{
 			return RasterizerStateObject::NullObject();
@@ -154,6 +155,33 @@ namespace KlayGE
 
 	RenderFactory::~RenderFactory()
 	{
+		BOOST_FOREACH(BOOST_TYPEOF(effect_pool_)::reference effect, effect_pool_)
+		{
+			effect.second.clear();
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(font_pool_)::reference font, font_pool_)
+		{
+			font.second.first.reset();
+			font.second.second.clear();
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(rs_pool_)::reference rs, rs_pool_)
+		{
+			rs.second.reset();
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(dss_pool_)::reference dss, dss_pool_)
+		{
+			dss.second.reset();
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(bs_pool_)::reference bs, bs_pool_)
+		{
+			bs.second.reset();
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(ss_pool_)::reference ss, ss_pool_)
+		{
+			ss.second.reset();
+		}
+
+		re_.reset();
 	}
 
 	RenderFactoryPtr RenderFactory::NullObject()
@@ -162,19 +190,41 @@ namespace KlayGE
 		return obj;
 	}
 
+	RenderEngine& RenderFactory::RenderEngineInstance()
+	{
+		if (!re_)
+		{
+			re_ = this->DoMakeRenderEngine();
+		}
+
+		return *re_;
+	}
+
 	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
 	{
 		FontPtr ret;
 
-		BOOST_AUTO(fiter, font_pool_.find(std::make_pair(fontName, fontHeight)));
+		BOOST_AUTO(fiter, font_pool_.find(fontName));
 		if (fiter == font_pool_.end())
 		{
-			ret = MakeSharedPtr<Font>(fontName, fontHeight, flags);
-			font_pool_.insert(std::make_pair(std::make_pair(fontName, fontHeight), ret));
+			RenderablePtr font_renderable = MakeSharedPtr<FontRenderable>(fontName);
+
+			ret = MakeSharedPtr<Font>(font_renderable, fontHeight, flags);
+			font_pool_[fontName].first = font_renderable;
+			font_pool_[fontName].second.insert(std::make_pair(fontHeight, ret));
 		}
 		else
 		{
-			ret = fiter->second;
+			BOOST_AUTO(iter, fiter->second.second.find(fontHeight));
+			if (iter == fiter->second.second.end())
+			{
+				ret = MakeSharedPtr<Font>(fiter->second.first, fontHeight, flags);
+				fiter->second.second.insert(std::make_pair(fontHeight, ret));
+			}
+			else
+			{
+				ret = iter->second;
+			}
 		}
 
 		return ret;

@@ -39,12 +39,6 @@ namespace KlayGE
 		return name;
 	}
 
-	RenderEngine& D3D10RenderFactory::RenderEngineInstance()
-	{
-		static D3D10RenderEngine renderEngine;
-		return renderEngine;
-	}
-
 	TexturePtr D3D10RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
@@ -133,6 +127,11 @@ namespace KlayGE
 		return MakeSharedPtr<D3D10ShaderObject>();
 	}
 
+	RenderEnginePtr D3D10RenderFactory::DoMakeRenderEngine()
+	{
+		return MakeSharedPtr<D3D10RenderEngine>();
+	}
+
 	RasterizerStateObjectPtr D3D10RenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
 	{
 		return MakeSharedPtr<D3D10RasterizerStateObject>(desc);
@@ -156,10 +155,9 @@ namespace KlayGE
 
 extern "C"
 {
-	KlayGE::RenderFactoryPtr const & RenderFactoryInstance()
+	void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr)
 	{
-		static KlayGE::RenderFactoryPtr rf = KlayGE::MakeSharedPtr<KlayGE::D3D10RenderFactory>();
-		return rf;
+		ptr = KlayGE::MakeSharedPtr<KlayGE::D3D10RenderFactory>();
 	}
 
 	std::string const & Name()

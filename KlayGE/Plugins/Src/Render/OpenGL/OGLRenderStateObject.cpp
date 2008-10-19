@@ -161,7 +161,6 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-
 		glActiveTexture(GL_TEXTURE0 + stage);
 
 		OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(texture);

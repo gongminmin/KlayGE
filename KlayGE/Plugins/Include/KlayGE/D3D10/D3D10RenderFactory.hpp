@@ -25,7 +25,7 @@
 
 extern "C"
 {
-	KLAYGE_D3D10_RE_API KlayGE::RenderFactoryPtr const & RenderFactoryInstance();
+	KLAYGE_D3D10_RE_API void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr);
 	KLAYGE_D3D10_RE_API std::string const & Name();
 }
 

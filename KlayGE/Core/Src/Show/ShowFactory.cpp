@@ -29,9 +29,9 @@ namespace KlayGE
 			return name;
 		}
 
-		ShowEngine& ShowEngineInstance()
+		ShowEnginePtr MakeShowEngine()
 		{
-			return *ShowEngine::NullObject();
+			return ShowEngine::NullObject();
 		}
 	};
 
@@ -39,5 +39,15 @@ namespace KlayGE
 	{
 		static ShowFactoryPtr obj = MakeSharedPtr<NullShowFactory>();
 		return obj;
+	}
+
+	ShowEngine& ShowFactory::ShowEngineInstance()
+	{
+		if (!se_)
+		{
+			se_ = this->MakeShowEngine();
+		}
+
+		return *se_;
 	}
 }

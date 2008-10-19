@@ -51,14 +51,11 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Box.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/ClosedHashMap.hpp>
 #include <KlayGE/MapVector.hpp>
 
 #include <algorithm>
@@ -70,16 +67,12 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
-#include <boost/functional/hash.hpp>
-
 #include <KlayGE/Font.hpp>
 
 using namespace std;
 
-namespace
+namespace KlayGE
 {
-	using namespace KlayGE;
-
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(push, 1)
 #endif
@@ -95,387 +88,305 @@ namespace
 		int16_t base;
 		int16_t scale;
 	};
-
-	struct font_info
-	{
-		int16_t top;
-		int16_t left;
-		uint16_t width;
-		uint16_t height;
-	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(pop)
 #endif
 
-	class FontRenderable : public RenderableHelper
-	{
-	public:
-		explicit FontRenderable(std::string const & fontName)
+	FontRenderable::FontRenderable(std::string const & fontName)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
 				three_dim_(false)
+	{
+		std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
+		BOOST_ASSERT(kfont_input);
+
+		kfont_header header;
+		kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
+		BOOST_ASSERT((1 == header.version));
+
+		kfont_char_size_ = header.char_size;
+		dist_base_ = header.base;
+		dist_scale_ = header.scale;
+
+		kfont_input.seekg(header.start_ptr, std::ios_base::beg);
+
+		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
+		kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]),
+			static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+		char_index_.insert(temp_char_index.begin(), temp_char_index.end());
+
+		std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
+		kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]),
+			static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+		char_advance_.insert(temp_char_advance.begin(), temp_char_advance.end());
+
+		char_info_.resize(header.non_empty_chars);
+		kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
+			static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
+
+		distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
+		kfont_input.read(reinterpret_cast<char*>(&distances_[0]),
+			static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+		RenderEngine const & renderEngine = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
+		dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
+			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_GPU_Read, NULL);
+		a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_L8, EAH_CPU_Write, NULL);
+
+		effect_ = rf.LoadEffect("Font.kfx");
+		*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
+		*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f * 32 + 1, (dist_scale_ / 32768.0f + 1.0f) * 32);
+
+		half_width_height_ep_ = effect_->ParameterByName("half_width_height");
+		texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
+		mvp_ep_ = effect_->ParameterByName("mvp");
+
+		vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+		vb_sys_mem_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+		rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+										vertex_element(VEU_Diffuse, 0, EF_ABGR8),
+										vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+
+		ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
+		ib_sys_mem_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+		rl_->BindIndexStream(ib_, EF_R16);
+
+		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+	}
+
+	RenderTechniquePtr FontRenderable::GetRenderTechnique() const
+	{
+		if (three_dim_)
 		{
-			std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
-			BOOST_ASSERT(kfont_input);
-
-			kfont_header header;
-			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
-			BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
-			BOOST_ASSERT((1 == header.version));
-
-			kfont_char_size_ = header.char_size;
-			dist_base_ = header.base;
-			dist_scale_ = header.scale;
-
-			kfont_input.seekg(header.start_ptr, std::ios_base::beg);
-
-			std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
-			kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]),
-				static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-			char_index_.insert(temp_char_index.begin(), temp_char_index.end());
-
-			std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
-			kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]),
-				static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
-			char_advance_.insert(temp_char_advance.begin(), temp_char_advance.end());
-
-			char_info_.resize(header.non_empty_chars);
-			kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
-				static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
-
-			distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
-			kfont_input.read(reinterpret_cast<char*>(&distances_[0]),
-				static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			RenderEngine const & renderEngine = rf.RenderEngineInstance();
-			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-			dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
-				std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_GPU_Read, NULL);
-			a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_L8, EAH_CPU_Write, NULL);
-
-			effect_ = rf.LoadEffect("Font.kfx");
-			*(effect_->ParameterByName("distance_sampler")) = dist_texture_;
-			*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f * 32 + 1, (dist_scale_ / 32768.0f + 1.0f) * 32);
-
-			half_width_height_ep_ = effect_->ParameterByName("half_width_height");
-			texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
-			mvp_ep_ = effect_->ParameterByName("mvp");
-
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
-			vb_sys_mem_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
-			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
-											vertex_element(VEU_Diffuse, 0, EF_ABGR8),
-											vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
-			ib_sys_mem_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
-			rl_->BindIndexStream(ib_, EF_R16);
-
-			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+			return effect_->TechniqueByName("Font3DTec");
 		}
-
-		RenderTechniquePtr GetRenderTechnique() const
+		else
 		{
-			if (three_dim_)
+			return effect_->TechniqueByName("Font2DTec");
+		}
+	}
+
+	void FontRenderable::OnRenderBegin()
+	{
+		vb_sys_mem_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+		vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+		{
+			GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
+			std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
+		}
+		vb_sys_mem_->CopyToBuffer(*vb_);
+
+		ib_sys_mem_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+		ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+		{
+			GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
+			std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
+		}
+		ib_sys_mem_->CopyToBuffer(*ib_);
+
+		if (!three_dim_)
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
+			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
+
+			*half_width_height_ep_ = float2(half_width, half_height);
+
+			float4 texel_to_pixel = re.TexelToPixelOffset();
+			texel_to_pixel.x() /= half_width;
+			texel_to_pixel.y() /= half_height;
+			*texel_to_pixel_offset_ep_ = texel_to_pixel;
+		}
+	}
+
+	void FontRenderable::OnRenderEnd()
+	{
+		vertices_.resize(0);
+		indices_.resize(0);
+
+		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+	}
+
+	void FontRenderable::Render()
+	{
+		RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		this->OnRenderBegin();
+		renderEngine.Render(*this->GetRenderTechnique(), *rl_);
+		this->OnRenderEnd();
+	}
+
+	Size_T<uint32_t> FontRenderable::CalcSize(std::wstring const & text, uint32_t font_height)
+	{
+		this->UpdateTexture(text);
+
+		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+
+		std::vector<uint32_t> lines(1, 0);
+
+		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+		{
+			if (ch != L'\n')
 			{
-				return effect_->TechniqueByName("Font3DTec");
+				BOOST_AUTO(iter, char_advance_.find(ch));
+				if (iter != char_advance_.end())
+				{
+					lines.back() += static_cast<uint32_t>(iter->second.x() * rel_size);
+				}
 			}
 			else
 			{
-				return effect_->TechniqueByName("Font2DTec");
+				lines.push_back(0);
 			}
 		}
 
-		void OnRenderBegin()
+		return Size_T<uint32_t>(*std::max_element(lines.begin(), lines.end()),
+			static_cast<uint32_t>(font_height * lines.size()));
+	}
+
+	void FontRenderable::AddText2D(float sx, float sy, float sz,
+		float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
+	{
+		three_dim_ = false;
+
+		this->AddText(sx, sy, sz, xScale, yScale, clr, text, font_height);
+	}
+
+	void FontRenderable::AddText2D(Rect const & rc, float sz,
+		float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
+	{
+		three_dim_ = false;
+
+		this->AddText(rc, sz, xScale, yScale, clr, text, font_height, align);
+	}
+
+	void FontRenderable::AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_height)
+	{
+		three_dim_ = true;
+		*mvp_ep_ = mvp;
+
+		this->AddText(0, 0, 0, 1, 1, clr, text, font_height);
+	}
+
+	void FontRenderable::AddText(Rect const & rc, float sz,
+		float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
+	{
+		this->UpdateTexture(text);
+
+		float const h = font_height * yScale;
+		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+
+		std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
+
+		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 		{
-			vb_sys_mem_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
-			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+			if (ch != L'\n')
 			{
-				GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
-				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
-			}
-			vb_sys_mem_->CopyToBuffer(*vb_);
-
-			ib_sys_mem_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
-				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
-			}
-			ib_sys_mem_->CopyToBuffer(*ib_);
-
-			if (!three_dim_)
-			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
-				float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
-
-				*half_width_height_ep_ = float2(half_width, half_height);
-
-				float4 texel_to_pixel = re.TexelToPixelOffset();
-				texel_to_pixel.x() /= half_width;
-				texel_to_pixel.y() /= half_height;
-				*texel_to_pixel_offset_ep_ = texel_to_pixel;
-			}
-		}
-
-		void OnRenderEnd()
-		{
-			vertices_.resize(0);
-			indices_.resize(0);
-
-			box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
-		}
-
-		void Render()
-		{
-			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-			this->OnRenderBegin();
-			renderEngine.Render(*this->GetRenderTechnique(), *rl_);
-			this->OnRenderEnd();
-		}
-
-		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_height)
-		{
-			this->UpdateTexture(text);
-
-			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
-
-			std::vector<uint32_t> lines(1, 0);
-
-			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
-			{
-				if (ch != L'\n')
+				BOOST_AUTO(iter, char_advance_.find(ch));
+				if (iter != char_advance_.end())
 				{
-					BOOST_AUTO(iter, char_advance_.find(ch));
-					if (iter != char_advance_.end())
-					{
-						lines.back() += static_cast<uint32_t>(iter->second.x() * rel_size);
-					}
+					lines.back().first += iter->second.x() * rel_size * xScale;
 				}
-				else
-				{
-					lines.push_back(0);
-				}
-			}
-
-			return Size_T<uint32_t>(*std::max_element(lines.begin(), lines.end()),
-				static_cast<uint32_t>(font_height * lines.size()));
-		}
-
-		void AddText2D(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
-		{
-			three_dim_ = false;
-
-			this->AddText(sx, sy, sz, xScale, yScale, clr, text, font_height);
-		}
-
-		void AddText2D(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
-		{
-			three_dim_ = false;
-
-			this->AddText(rc, sz, xScale, yScale, clr, text, font_height, align);
-		}
-
-		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_height)
-		{
-			three_dim_ = true;
-			*mvp_ep_ = mvp;
-
-			this->AddText(0, 0, 0, 1, 1, clr, text, font_height);
-		}
-
-	private:
-		void AddText(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height, uint32_t align)
-		{
-			this->UpdateTexture(text);
-
-			float const h = font_height * yScale;
-			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
-
-			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
-
-			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
-			{
-				if (ch != L'\n')
-				{
-					BOOST_AUTO(iter, char_advance_.find(ch));
-					if (iter != char_advance_.end())
-					{
-						lines.back().first += iter->second.x() * rel_size * xScale;
-					}
-					lines.back().second.push_back(ch);
-				}
-				else
-				{
-					lines.push_back(std::make_pair(0.0f, L""));
-				}
-			}
-
-			std::vector<float> sx;
-			sx.reserve(lines.size());
-			std::vector<float> sy;
-			sy.reserve(lines.size());
-
-			if (align & Font::FA_Hor_Left)
-			{
-				sx.resize(lines.size(), rc.left());
+				lines.back().second.push_back(ch);
 			}
 			else
 			{
-				if (align & Font::FA_Hor_Right)
+				lines.push_back(std::make_pair(0.0f, L""));
+			}
+		}
+
+		std::vector<float> sx;
+		sx.reserve(lines.size());
+		std::vector<float> sy;
+		sy.reserve(lines.size());
+
+		if (align & Font::FA_Hor_Left)
+		{
+			sx.resize(lines.size(), rc.left());
+		}
+		else
+		{
+			if (align & Font::FA_Hor_Right)
+			{
+				BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
-					{
-						sx.push_back(rc.right() - p.first);
-					}
-				}
-				else
-				{
-					// Font::FA_Hor_Center
-					BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
-					{
-						sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
-					}
+					sx.push_back(rc.right() - p.first);
 				}
 			}
+			else
+			{
+				// Font::FA_Hor_Center
+				BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
+				{
+					sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
+				}
+			}
+		}
 
-			if (align & Font::FA_Ver_Top)
+		if (align & Font::FA_Ver_Top)
+		{
+			for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
+			{
+				sy.push_back(rc.top() + (iter - lines.begin()) * h);
+			}
+		}
+		else
+		{
+			if (align & Font::FA_Ver_Bottom)
 			{
 				for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 				{
-					sy.push_back(rc.top() + (iter - lines.begin()) * h);
+					sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
 				}
 			}
 			else
 			{
-				if (align & Font::FA_Ver_Bottom)
+				// Font::FA_Ver_Middle
+				for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
 				{
-					for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
-					{
-						sy.push_back(rc.bottom() - (lines.size() - (iter - lines.begin())) * h);
-					}
+					sy.push_back((rc.top() + rc.bottom()) / 2
+						- lines.size() * h / 2 + (iter - lines.begin()) * h);
 				}
-				else
-				{
-					// Font::FA_Ver_Middle
-					for (BOOST_AUTO(iter, lines.begin()); iter != lines.end(); ++ iter)
-					{
-						sy.push_back((rc.top() + rc.bottom()) / 2
-							- lines.size() * h / 2 + (iter - lines.begin()) * h);
-					}
-				}
-			}
-
-			uint32_t const clr32 = clr.ABGR();
-			for (size_t i = 0; i < sx.size(); ++ i)
-			{
-				size_t const maxSize = lines[i].second.length();
-				float x = sx[i], y = sy[i];
-
-				vertices_.reserve(vertices_.size() + maxSize * 4);
-				indices_.reserve(indices_.size() + maxSize * 6);
-
-				uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
-
-				BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
-				{
-					BOOST_AUTO(iter, char_index_.find(ch));
-					if (iter != char_index_.end())
-					{
-						font_info const & ci = char_info_[iter->second];
-
-						float left = ci.left * rel_size * xScale;
-						float top = ci.top * rel_size * yScale;
-						float width = ci.width * rel_size * xScale;
-						float height = ci.height * rel_size * yScale;
-					
-						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-						Rect_T<float> const & texRect(cmiter->second);
-
-						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
-						Rect_T<float> intersect_rc = pos_rc & rc;
-						if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
-						{
-							vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
-													clr32,
-													float2(texRect.left(), texRect.top())));
-							vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
-													clr32,
-													float2(texRect.right(), texRect.top())));
-							vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
-													clr32,
-													float2(texRect.right(), texRect.bottom())));
-							vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
-													clr32,
-													float2(texRect.left(), texRect.bottom())));
-
-							indices_.push_back(lastIndex + 0);
-							indices_.push_back(lastIndex + 1);
-							indices_.push_back(lastIndex + 2);
-							indices_.push_back(lastIndex + 2);
-							indices_.push_back(lastIndex + 3);
-							indices_.push_back(lastIndex + 0);
-							lastIndex += 4;
-						}
-					}
-
-					BOOST_AUTO(aiter, char_advance_.find(ch));
-					if (aiter != char_advance_.end())
-					{
-						x += aiter->second.x() * rel_size * xScale;
-						y += aiter->second.y() * rel_size * yScale;
-					}
-				}
-
-				box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
 			}
 		}
 
-		void AddText(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
+		uint32_t const clr32 = clr.ABGR();
+		for (size_t i = 0; i < sx.size(); ++ i)
 		{
-			this->UpdateTexture(text);
-
-			uint32_t const clr32 = clr.ABGR();
-			float const h = font_height * yScale;
-			float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
-			size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
-			float x = sx, y = sy;
-			float maxx = sx, maxy = sy;
+			size_t const maxSize = lines[i].second.length();
+			float x = sx[i], y = sy[i];
 
 			vertices_.reserve(vertices_.size() + maxSize * 4);
 			indices_.reserve(indices_.size() + maxSize * 6);
 
 			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 
-			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+			BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 			{
-				if (ch != L'\n')
+				BOOST_AUTO(iter, char_index_.find(ch));
+				if (iter != char_index_.end())
 				{
-					BOOST_AUTO(iter, char_index_.find(ch));
-					if (iter != char_index_.end())
+					font_info const & ci = char_info_[iter->second];
+
+					float left = ci.left * rel_size * xScale;
+					float top = ci.top * rel_size * yScale;
+					float width = ci.width * rel_size * xScale;
+					float height = ci.height * rel_size * yScale;
+				
+					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+					Rect_T<float> const & texRect(cmiter->second);
+
+					Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
+					Rect_T<float> intersect_rc = pos_rc & rc;
+					if ((intersect_rc.Width() > 0) && (intersect_rc.Height() > 0))
 					{
-						font_info const & ci = char_info_[iter->second];
-
-						float left = ci.left * rel_size * xScale;
-						float top = ci.top * rel_size * yScale;
-						float width = ci.width * rel_size * xScale;
-						float height = ci.height * rel_size * yScale;
-
-						BOOST_AUTO(cmiter, charInfoMap_.find(ch));
-						Rect_T<float> const & texRect(cmiter->second);
-						Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
-
 						vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
 												clr32,
 												float2(texRect.left(), texRect.top())));
@@ -497,180 +408,191 @@ namespace
 						indices_.push_back(lastIndex + 0);
 						lastIndex += 4;
 					}
-
-					BOOST_AUTO(aiter, char_advance_.find(ch));
-					if (aiter != char_advance_.end())
-					{
-						x += aiter->second.x() * rel_size * xScale;
-						y += aiter->second.y() * rel_size * yScale;
-					}
-
-					if (x > maxx)
-					{
-						maxx = x;
-					}
 				}
-				else
-				{
-					y += h;
-					x = sx;
 
-					if (y > maxy)
-					{
-						maxy = y;
-					}
+				BOOST_AUTO(aiter, char_advance_.find(ch));
+				if (aiter != char_advance_.end())
+				{
+					x += aiter->second.x() * rel_size * xScale;
+					y += aiter->second.y() * rel_size * yScale;
 				}
 			}
 
-			box_ |= Box(float3(sx, sy, sz), float3(maxx, maxy, sz + 0.1f));
+			box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
 		}
+	}
 
-		// 更新纹理，使用LRU算法
-		/////////////////////////////////////////////////////////////////////////////////
-		void UpdateTexture(std::wstring const & text)
+	void FontRenderable::AddText(float sx, float sy, float sz,
+		float xScale, float yScale, Color const & clr, std::wstring const & text, uint32_t font_height)
+	{
+		this->UpdateTexture(text);
+
+		uint32_t const clr32 = clr.ABGR();
+		float const h = font_height * yScale;
+		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+		size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
+		float x = sx, y = sy;
+		float maxx = sx, maxy = sy;
+
+		vertices_.reserve(vertices_.size() + maxSize * 4);
+		indices_.reserve(indices_.size() + maxSize * 6);
+
+		uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
+
+		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 		{
-			uint32_t const tex_width = dist_texture_->Width(0);
-			uint32_t const tex_height = dist_texture_->Height(0);
-
-			BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+			if (ch != L'\n')
 			{
 				BOOST_AUTO(iter, char_index_.find(ch));
 				if (iter != char_index_.end())
 				{
-					if (charInfoMap_.find(ch) != charInfoMap_.end())
-					{
-						// 在现有纹理中找到了
+					font_info const & ci = char_info_[iter->second];
 
-						BOOST_AUTO(lruIter, std::find(charLRU_.begin(), charLRU_.end(), ch));
-						if (lruIter != charLRU_.begin())
-						{
-							charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
-						}
-					}
-					else
-					{
-						// 在现有纹理中找不到，所以得在现有纹理中添加新字
+					float left = ci.left * rel_size * xScale;
+					float top = ci.top * rel_size * yScale;
+					float width = ci.width * rel_size * xScale;
+					float height = ci.height * rel_size * yScale;
 
-						font_info const & ci = char_info_[iter->second];
+					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
+					Rect_T<float> const & texRect(cmiter->second);
+					Rect_T<float> pos_rc(x + left, y + top, x + left + width, y + top + height);
 
-						uint32_t width = ci.width;
-						uint32_t height = ci.height;
+					vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
+											clr32,
+											float2(texRect.left(), texRect.top())));
+					vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
+											clr32,
+											float2(texRect.right(), texRect.top())));
+					vertices_.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
+											clr32,
+											float2(texRect.right(), texRect.bottom())));
+					vertices_.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
+											clr32,
+											float2(texRect.left(), texRect.bottom())));
 
-						Vector_T<int32_t, 2> char_pos;
-						CharInfo charInfo;
-						if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
-						{
-							if (curX_ + kfont_char_size_ >= tex_width)
-							{
-								curX_ = 0;
-								curY_ += kfont_char_size_;
-							}
+					indices_.push_back(lastIndex + 0);
+					indices_.push_back(lastIndex + 1);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 2);
+					indices_.push_back(lastIndex + 3);
+					indices_.push_back(lastIndex + 0);
+					lastIndex += 4;
+				}
 
-							// 纹理还有空间
-							char_pos = Vector_T<int32_t, 2>(curX_, curY_);
+				BOOST_AUTO(aiter, char_advance_.find(ch));
+				if (aiter != char_advance_.end())
+				{
+					x += aiter->second.x() * rel_size * xScale;
+					y += aiter->second.y() * rel_size * yScale;
+				}
 
-							curX_ += kfont_char_size_;
-						}
-						else
-						{
-							// 找到使用最长时间没有使用的字
-							BOOST_AUTO(iter, charInfoMap_.find(charLRU_.back()));
-							BOOST_ASSERT(iter != charInfoMap_.end());
+				if (x > maxx)
+				{
+					maxx = x;
+				}
+			}
+			else
+			{
+				y += h;
+				x = sx;
 
-							char_pos.x() = static_cast<int32_t>(iter->second.left() * tex_width);
-							char_pos.y() = static_cast<int32_t>(iter->second.top() * tex_height);
-
-							charLRU_.pop_back();
-							charInfoMap_.erase(iter);
-						}
-
-						charInfo.left()		= static_cast<float>(char_pos.x()) / tex_width;
-						charInfo.top()		= static_cast<float>(char_pos.y()) / tex_height;
-						charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
-						charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
-
-						{
-							Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
-								0, 0, kfont_char_size_, kfont_char_size_);
-							uint8_t* tex_data = mapper.Pointer<uint8_t>();
-							uint8_t const * char_data = &distances_[iter->second * kfont_char_size_ * kfont_char_size_];
-							for (uint32_t y = 0; y < kfont_char_size_; ++ y)
-							{
-								std::memcpy(tex_data, char_data, kfont_char_size_);
-								tex_data += mapper.RowPitch();
-								char_data += kfont_char_size_;
-							}
-						}
-
-						a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
-							kfont_char_size_, kfont_char_size_, char_pos.x(), char_pos.y(),
-							kfont_char_size_, kfont_char_size_, 0, 0);
-
-						charInfoMap_.insert(std::make_pair(ch, charInfo));
-						charLRU_.push_front(ch);
-					}
+				if (y > maxy)
+				{
+					maxy = y;
 				}
 			}
 		}
 
-	private:
-		typedef Rect_T<float> CharInfo;
+		box_ |= Box(float3(sx, sy, sz), float3(maxx, maxy, sz + 0.1f));
+	}
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(push, 1)
-#endif
-		struct FontVert
+	// 更新纹理，使用LRU算法
+	/////////////////////////////////////////////////////////////////////////////////
+	void FontRenderable::UpdateTexture(std::wstring const & text)
+	{
+		uint32_t const tex_width = dist_texture_->Width(0);
+		uint32_t const tex_height = dist_texture_->Height(0);
+
+		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 		{
-			float3 pos;
-			uint32_t clr;
-			float2 tex;
-
-			FontVert()
+			BOOST_AUTO(iter, char_index_.find(ch));
+			if (iter != char_index_.end())
 			{
+				if (charInfoMap_.find(ch) != charInfoMap_.end())
+				{
+					// 在现有纹理中找到了
+
+					BOOST_AUTO(lruIter, std::find(charLRU_.begin(), charLRU_.end(), ch));
+					if (lruIter != charLRU_.begin())
+					{
+						charLRU_.splice(charLRU_.begin(), charLRU_, lruIter);
+					}
+				}
+				else
+				{
+					// 在现有纹理中找不到，所以得在现有纹理中添加新字
+
+					font_info const & ci = char_info_[iter->second];
+
+					uint32_t width = ci.width;
+					uint32_t height = ci.height;
+
+					Vector_T<int32_t, 2> char_pos;
+					CharInfo charInfo;
+					if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
+					{
+						if (curX_ + kfont_char_size_ >= tex_width)
+						{
+							curX_ = 0;
+							curY_ += kfont_char_size_;
+						}
+
+						// 纹理还有空间
+						char_pos = Vector_T<int32_t, 2>(curX_, curY_);
+
+						curX_ += kfont_char_size_;
+					}
+					else
+					{
+						// 找到使用最长时间没有使用的字
+						BOOST_AUTO(iter, charInfoMap_.find(charLRU_.back()));
+						BOOST_ASSERT(iter != charInfoMap_.end());
+
+						char_pos.x() = static_cast<int32_t>(iter->second.left() * tex_width);
+						char_pos.y() = static_cast<int32_t>(iter->second.top() * tex_height);
+
+						charLRU_.pop_back();
+						charInfoMap_.erase(iter);
+					}
+
+					charInfo.left()		= static_cast<float>(char_pos.x()) / tex_width;
+					charInfo.top()		= static_cast<float>(char_pos.y()) / tex_height;
+					charInfo.right()	= charInfo.left() + static_cast<float>(width) / tex_width;
+					charInfo.bottom()	= charInfo.top() + static_cast<float>(height) / tex_height;
+
+					{
+						Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
+							0, 0, kfont_char_size_, kfont_char_size_);
+						uint8_t* tex_data = mapper.Pointer<uint8_t>();
+						uint8_t const * char_data = &distances_[iter->second * kfont_char_size_ * kfont_char_size_];
+						for (uint32_t y = 0; y < kfont_char_size_; ++ y)
+						{
+							std::memcpy(tex_data, char_data, kfont_char_size_);
+							tex_data += mapper.RowPitch();
+							char_data += kfont_char_size_;
+						}
+					}
+
+					a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
+						kfont_char_size_, kfont_char_size_, char_pos.x(), char_pos.y(),
+						kfont_char_size_, kfont_char_size_, 0, 0);
+
+					charInfoMap_.insert(std::make_pair(ch, charInfo));
+					charLRU_.push_front(ch);
+				}
 			}
-			FontVert(float3 const & pos, uint32_t clr, float2 const & tex)
-				: pos(pos), clr(clr), tex(tex)
-			{
-			}
-		};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(pop)
-#endif
-
-		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
-			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
-		std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > charLRU_;
-
-		uint32_t curX_, curY_;
-
-		bool three_dim_;
-
-		std::vector<FontVert>	vertices_;
-		std::vector<uint16_t>	indices_;
-
-		GraphicsBufferPtr vb_;
-		GraphicsBufferPtr vb_sys_mem_;
-		GraphicsBufferPtr ib_;
-		GraphicsBufferPtr ib_sys_mem_;
-
-		TexturePtr		dist_texture_;
-		TexturePtr		a_char_texture_;
-		RenderEffectPtr	effect_;
-
-		RenderEffectParameterPtr half_width_height_ep_;
-		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
-		RenderEffectParameterPtr mvp_ep_;
-
-		uint32_t kfont_char_size_;
-		int16_t dist_base_;
-		int16_t dist_scale_;
-		closed_hash_map<int32_t, int32_t, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, int32_t> > > char_index_;
-		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
-		std::vector<font_info> char_info_;
-		std::vector<uint8_t> distances_;
-	};
+		}
+	}
 
 	class FontObject : public SceneObjectHelper
 	{
@@ -682,49 +604,10 @@ namespace
 	};
 
 
-	class FontRenderableSet
-	{
-	public:
-		static FontRenderableSet& Instance()
-		{
-			static FontRenderableSet ret;
-			return ret;
-		}
-
-		RenderablePtr LookupFontRenderable(std::string const & font_name)
-		{
-			BOOST_AUTO(iter, font_renderables_.find(font_name));
-			if (iter != font_renderables_.end())
-			{
-				return iter->second;
-			}
-			else
-			{
-				RenderablePtr ret = MakeSharedPtr<FontRenderable>(font_name);
-				font_renderables_.insert(std::make_pair(font_name, ret));
-				return ret;
-			}
-		}
-
-	private:
-		FontRenderableSet()
-		{
-		}
-
-		FontRenderableSet(FontRenderableSet const &);
-		FontRenderableSet& operator=(FontRenderableSet const &);
-
-	private:
-		std::map<std::string, RenderablePtr> font_renderables_;
-	};
-}
-
-namespace KlayGE
-{
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	Font::Font(std::string const & fontName, uint32_t height, uint32_t flags)
-			: font_renderable_(FontRenderableSet::Instance().LookupFontRenderable(fontName)),
+	Font::Font(RenderablePtr const & font_renderable, uint32_t height, uint32_t flags)
+			: font_renderable_(font_renderable),
 					font_height_(height)
 	{
 		fso_attrib_ = SceneObject::SOA_ShortAge;

@@ -523,9 +523,8 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../../../");
-	ResLoader::Instance().AddPath("../../media/Common");
-	ResLoader::Instance().AddPath("../../media/GPUParticleSystem");
+	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../Samples/media/GPUParticleSystem");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;

@@ -212,9 +212,8 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../../../");
-	ResLoader::Instance().AddPath("../../media/Common");
-	ResLoader::Instance().AddPath("../../media/AsciiArts");
+	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../Samples/media/AsciiArts");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;

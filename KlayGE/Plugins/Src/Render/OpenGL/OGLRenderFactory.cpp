@@ -50,12 +50,6 @@ namespace KlayGE
 		return name;
 	}
 
-	RenderEngine& OGLRenderFactory::RenderEngineInstance()
-	{
-		static OGLRenderEngine renderEngine;
-		return renderEngine;
-	}
-
 	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<OGLTexture1D>(width, numMipMaps, format, access_hint, init_data);
@@ -144,6 +138,11 @@ namespace KlayGE
 		return MakeSharedPtr<OGLShaderObject>();
 	}
 
+	RenderEnginePtr OGLRenderFactory::DoMakeRenderEngine()
+	{
+		return MakeSharedPtr<OGLRenderEngine>();
+	}
+
 	RasterizerStateObjectPtr OGLRenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
 	{
 		return MakeSharedPtr<OGLRasterizerStateObject>(desc);
@@ -167,10 +166,9 @@ namespace KlayGE
 
 extern "C"
 {
-	KlayGE::RenderFactoryPtr const & RenderFactoryInstance()
+	void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr)
 	{
-		static KlayGE::RenderFactoryPtr rf = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
-		return rf;
+		ptr = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
 	}
 
 	std::string const & Name()

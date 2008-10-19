@@ -44,7 +44,8 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		virtual RenderEngine& RenderEngineInstance() = 0;
+		RenderEngine& RenderEngineInstance();
+
 		virtual TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 			ElementFormat format, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
@@ -81,14 +82,18 @@ namespace KlayGE
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	private:
+		virtual RenderEnginePtr DoMakeRenderEngine() = 0;
+
 		virtual RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc) = 0;
 		virtual DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc) = 0;
 		virtual BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc) = 0;
 		virtual SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) = 0;
 
 	protected:
+		RenderEnginePtr re_;
+
 		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
-		std::map<std::pair<std::string, uint32_t>, FontPtr> font_pool_;
+		std::map<std::string, std::pair<RenderablePtr, std::map<uint32_t, FontPtr> > > font_pool_;
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
 		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;

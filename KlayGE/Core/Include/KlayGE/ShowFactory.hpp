@@ -29,7 +29,13 @@ namespace KlayGE
 		static ShowFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
-		virtual ShowEngine& ShowEngineInstance() = 0;
+		ShowEngine& ShowEngineInstance();
+
+	private:
+		virtual ShowEnginePtr MakeShowEngine() = 0;
+
+	protected:
+		ShowEnginePtr se_;
 	};
 
 	template <typename ShowEngineType>
@@ -43,10 +49,10 @@ namespace KlayGE
 		std::wstring const & Name() const
 			{ return name_; }
 
-		ShowEngine& ShowEngineInstance()
+	private:
+		ShowEnginePtr MakeShowEngine()
 		{
-			static ShowEngineType showEngine;
-			return showEngine;
+			return MakeSharedPtr<ShowEngineType>();
 		}
 
 	private:

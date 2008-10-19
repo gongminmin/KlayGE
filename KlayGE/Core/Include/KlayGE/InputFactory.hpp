@@ -32,7 +32,13 @@ namespace KlayGE
 		static InputFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
-		virtual InputEngine& InputEngineInstance() = 0;
+		InputEngine& InputEngineInstance();
+
+	private:
+		virtual InputEnginePtr DoMakeInputEngine() = 0;
+
+	protected:
+		InputEnginePtr ie_;
 	};
 
 	template <typename InputEngineType>
@@ -46,10 +52,10 @@ namespace KlayGE
 		std::wstring const & Name() const
 			{ return name_; }
 
-		InputEngine& InputEngineInstance()
+	private:
+		InputEnginePtr DoMakeInputEngine()
 		{
-			static InputEngineType inputEngine;
-			return inputEngine;
+			return MakeSharedPtr<InputEngineType>();
 		}
 
 	private:

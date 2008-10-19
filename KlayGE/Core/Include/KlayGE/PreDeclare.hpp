@@ -169,6 +169,7 @@ namespace KlayGE
 	class ParticleSystem;
 
 	class UIManager;
+	typedef boost::shared_ptr<UIManager> UIManagerPtr;
 	class UIElement;
 	typedef boost::shared_ptr<UIElement> UIElementPtr;
 	class UIControl;

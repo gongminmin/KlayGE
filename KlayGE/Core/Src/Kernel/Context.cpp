@@ -23,7 +23,6 @@
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/DllLoader.hpp>
 
 #include <fstream>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -40,18 +39,12 @@
 
 namespace KlayGE
 {
-	DllLoader render_loader;
-	DllLoader audio_loader;
-	DllLoader input_loader;
-	DllLoader show_loader;
-	DllLoader sm_loader;
-
 	typedef std::string const & (*NameFunc)();
-	typedef RenderFactoryPtr const & (*RenderFactoryInstanceFunc)();
-	typedef AudioFactoryPtr const & (*AudioFactoryInstanceFunc)();
-	typedef InputFactoryPtr const & (*InputFactoryInstanceFunc)();
-	typedef ShowFactoryPtr const & (*ShowFactoryInstanceFunc)();
-	typedef SceneManagerPtr const & (*SceneManagerFactoryInstanceFunc)(boost::program_options::variables_map const & vm);
+	typedef void (*RenderFactoryInstanceFunc)(RenderFactoryPtr& ptr);
+	typedef void (*AudioFactoryInstanceFunc)(AudioFactoryPtr& ptr);
+	typedef void (*InputFactoryInstanceFunc)(InputFactoryPtr& ptr);
+	typedef void (*ShowFactoryInstanceFunc)(ShowFactoryPtr& ptr);
+	typedef void (*SceneManagerFactoryInstanceFunc)(SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
 
 	Context::Context()
 	{
@@ -67,6 +60,22 @@ namespace KlayGE
 		audioFactory_ = AudioFactory::NullObject();
 		inputFactory_ = InputFactory::NullObject();
 		showFactory_ = ShowFactory::NullObject();
+	}
+
+	Context::~Context()
+	{
+		sceneMgr_.reset();
+
+		renderFactory_.reset();
+		audioFactory_.reset();
+		inputFactory_.reset();
+		showFactory_.reset();
+	}
+
+	Context& Context::Instance()
+	{
+		static Context context;
+		return context;
 	}
 
 	RenderSettings Context::LoadCfg(std::string const & cfg_file)
@@ -159,107 +168,132 @@ namespace KlayGE
 		}
 
 
-		std::string render_path = ResLoader::Instance().Locate("bin/Render");
-		for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			std::string fn = render_path + "/" + iter->path().filename();
-			if (".dll" == fn.substr(fn.length() - 4))
+			std::string render_path = ResLoader::Instance().Locate("Render");
+			for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				render_loader.Load(fn);
+				std::string fn = render_path + "/" + iter->path().filename();
+				if (".dll" == fn.substr(fn.length() - 4))
+				{
+					render_loader_.Load(fn);
 
-				NameFunc name_func = (NameFunc)render_loader.GetProcAddress("Name");
-				if ((name_func != NULL) && (rf_name == name_func()))
-				{
-					RenderFactoryInstanceFunc rfi = (RenderFactoryInstanceFunc)render_loader.GetProcAddress("RenderFactoryInstance");
-					Context::Instance().RenderFactoryInstance(rfi());
-				}
-				else
-				{
-					render_loader.Free();
+					NameFunc name_func = (NameFunc)render_loader_.GetProcAddress("Name");
+					if ((name_func != NULL) && (rf_name == name_func()))
+					{
+						RenderFactoryInstanceFunc rfi = (RenderFactoryInstanceFunc)render_loader_.GetProcAddress("RenderFactoryInstance");
+						RenderFactoryPtr ptr;
+						rfi(ptr);
+						Context::Instance().RenderFactoryInstance(ptr);
+						break;
+					}
+					else
+					{
+						render_loader_.Free();
+					}
 				}
 			}
 		}
 
-		std::string audio_path = ResLoader::Instance().Locate("bin/Audio");
-		for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			std::string fn = audio_path + "/" + iter->path().filename();
-			if (".dll" == fn.substr(fn.length() - 4))
+			std::string audio_path = ResLoader::Instance().Locate("Audio");
+			for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				audio_loader.Load(fn);
+				std::string fn = audio_path + "/" + iter->path().filename();
+				if (".dll" == fn.substr(fn.length() - 4))
+				{
+					audio_loader_.Load(fn);
 
-				NameFunc name_func = (NameFunc)audio_loader.GetProcAddress("Name");
-				if ((name_func != NULL) && (af_name == name_func()))
-				{
-					AudioFactoryInstanceFunc afi = (AudioFactoryInstanceFunc)audio_loader.GetProcAddress("AudioFactoryInstance");
-					Context::Instance().AudioFactoryInstance(afi());
-				}
-				else
-				{
-					audio_loader.Free();
+					NameFunc name_func = (NameFunc)audio_loader_.GetProcAddress("Name");
+					if ((name_func != NULL) && (af_name == name_func()))
+					{
+						AudioFactoryInstanceFunc afi = (AudioFactoryInstanceFunc)audio_loader_.GetProcAddress("AudioFactoryInstance");
+						AudioFactoryPtr ptr;
+						afi(ptr);
+						Context::Instance().AudioFactoryInstance(ptr);
+						break;
+					}
+					else
+					{
+						audio_loader_.Free();
+					}
 				}
 			}
 		}
 
-		std::string input_path = ResLoader::Instance().Locate("bin/Input");
-		for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			std::string fn = input_path + "/" + iter->path().filename();
-			if (".dll" == fn.substr(fn.length() - 4))
+			std::string input_path = ResLoader::Instance().Locate("Input");
+			for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				input_loader.Load(fn);
+				std::string fn = input_path + "/" + iter->path().filename();
+				if (".dll" == fn.substr(fn.length() - 4))
+				{
+					input_loader_.Load(fn);
 
-				NameFunc name_func = (NameFunc)input_loader.GetProcAddress("Name");
-				if ((name_func != NULL) && (if_name == name_func()))
-				{
-					InputFactoryInstanceFunc ifi = (InputFactoryInstanceFunc)input_loader.GetProcAddress("InputFactoryInstance");
-					Context::Instance().InputFactoryInstance(ifi());
-				}
-				else
-				{
-					input_loader.Free();
+					NameFunc name_func = (NameFunc)input_loader_.GetProcAddress("Name");
+					if ((name_func != NULL) && (if_name == name_func()))
+					{
+						InputFactoryInstanceFunc ifi = (InputFactoryInstanceFunc)input_loader_.GetProcAddress("InputFactoryInstance");
+						InputFactoryPtr ptr;
+						ifi(ptr);
+						Context::Instance().InputFactoryInstance(ptr);
+						break;
+					}
+					else
+					{
+						input_loader_.Free();
+					}
 				}
 			}
 		}
 
-		std::string show_path = ResLoader::Instance().Locate("bin/Show");
-		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			std::string fn = show_path + "/" + iter->path().filename();
-			if (".dll" == fn.substr(fn.length() - 4))
+			std::string show_path = ResLoader::Instance().Locate("Show");
+			for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				show_loader.Load(fn);
+				std::string fn = show_path + "/" + iter->path().filename();
+				if (".dll" == fn.substr(fn.length() - 4))
+				{
+					show_loader_.Load(fn);
 
-				NameFunc name_func = (NameFunc)show_loader.GetProcAddress("Name");
-				if ((name_func != NULL) && (sf_name == name_func()))
-				{
-					ShowFactoryInstanceFunc sfi = (ShowFactoryInstanceFunc)show_loader.GetProcAddress("ShowFactoryInstance");
-					Context::Instance().ShowFactoryInstance(sfi());
-				}
-				else
-				{
-					show_loader.Free();
+					NameFunc name_func = (NameFunc)show_loader_.GetProcAddress("Name");
+					if ((name_func != NULL) && (sf_name == name_func()))
+					{
+						ShowFactoryInstanceFunc sfi = (ShowFactoryInstanceFunc)show_loader_.GetProcAddress("ShowFactoryInstance");
+						ShowFactoryPtr ptr;
+						sfi(ptr);
+						Context::Instance().ShowFactoryInstance(ptr);
+						break;
+					}
+					else
+					{
+						show_loader_.Free();
+					}
 				}
 			}
 		}
 
-		std::string sm_path = ResLoader::Instance().Locate("bin/Scene");
-		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 		{
-			std::string fn = show_path + "/" + iter->path().filename();
-			if (".dll" == fn.substr(fn.length() - 4))
+			std::string sm_path = ResLoader::Instance().Locate("Scene");
+			for (boost::filesystem::directory_iterator iter(sm_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				sm_loader.Load(fn);
+				std::string fn = sm_path + "/" + iter->path().filename();
+				if (".dll" == fn.substr(fn.length() - 4))
+				{
+					sm_loader_.Load(fn);
 
-				NameFunc name_func = (NameFunc)sm_loader.GetProcAddress("Name");
-				if ((name_func != NULL) && (sm_name == name_func()))
-				{
-					SceneManagerFactoryInstanceFunc smi = (SceneManagerFactoryInstanceFunc)sm_loader.GetProcAddress("SceneManagerFactoryInstance");
-					Context::Instance().SceneManagerInstance(smi(vm));
-				}
-				else
-				{
-					sm_loader.Free();
+					NameFunc name_func = (NameFunc)sm_loader_.GetProcAddress("Name");
+					if ((name_func != NULL) && (sm_name == name_func()))
+					{
+						SceneManagerFactoryInstanceFunc smi = (SceneManagerFactoryInstanceFunc)sm_loader_.GetProcAddress("SceneManagerFactoryInstance");
+						SceneManagerPtr ptr;
+						smi(ptr, vm);
+						Context::Instance().SceneManagerInstance(ptr);
+						break;
+					}
+					else
+					{
+						sm_loader_.Free();
+					}
 				}
 			}
 		}

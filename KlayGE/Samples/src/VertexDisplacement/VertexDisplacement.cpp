@@ -100,9 +100,8 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../../../");
-	ResLoader::Instance().AddPath("../../media/Common");
-	ResLoader::Instance().AddPath("../../media/VertexDisplacement");
+	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../Samples/media/VertexDisplacement");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;

@@ -67,7 +67,6 @@
 				OutputFile="$(OutDir)/KlayGE_Core_vc90_x86_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -89,6 +88,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\"
 			/>
 		</Configuration>
 		<Configuration
@@ -140,7 +141,6 @@
 				OutputFile="$(OutDir)/KlayGE_Core_vc90_x64_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -162,6 +162,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\"
 			/>
 		</Configuration>
 		<Configuration
@@ -215,7 +217,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_Core_vc90_x86.dll"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -237,6 +238,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\"
 			/>
 		</Configuration>
 		<Configuration
@@ -291,7 +294,6 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_Core_vc90_x64.dll"
 				GenerateDebugInformation="true"
-				ImportLibrary="../../lib/$(PlatformName)/$(TargetName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -313,6 +315,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\"
 			/>
 		</Configuration>
 	</Configurations>

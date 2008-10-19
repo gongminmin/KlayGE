@@ -179,9 +179,8 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../../../");
-	ResLoader::Instance().AddPath("../../media/Common");
-	ResLoader::Instance().AddPath("../../media/DistanceMapping");
+	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../Samples/media/DistanceMapping");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;

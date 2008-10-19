@@ -36,6 +36,9 @@
 
 namespace KlayGE
 {
+	UIManagerPtr UIManager::ui_mgr_instance_;
+
+
 	class UIRectRenderable : public RenderableHelper
 	{
 	public:
@@ -200,8 +203,17 @@ namespace KlayGE
 
 	UIManager& UIManager::Instance()
 	{
-		static UIManager ret;
-		return ret;
+		if (!ui_mgr_instance_)
+		{
+			ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+		}
+
+		return *ui_mgr_instance_;
+	}
+
+	void UIManager::ForceDestroy()
+	{
+		ui_mgr_instance_.reset();
 	}
 
 	UIManager::UIManager()

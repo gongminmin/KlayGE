@@ -30,8 +30,6 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		RenderEngine& RenderEngineInstance();
-
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
 				ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
@@ -60,6 +58,8 @@ namespace KlayGE
 		ShaderObjectPtr MakeShaderObject();
 
 	private:
+		RenderEnginePtr DoMakeRenderEngine();
+
 		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);

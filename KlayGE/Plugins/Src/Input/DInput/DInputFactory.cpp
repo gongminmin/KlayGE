@@ -22,10 +22,9 @@
 
 extern "C"
 {
-	KlayGE::InputFactoryPtr const & InputFactoryInstance()
+	void InputFactoryInstance(KlayGE::InputFactoryPtr& ptr)
 	{
-		static KlayGE::InputFactoryPtr ifactory = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::DInputEngine> >(L"DirectInput Input Factory");
-		return ifactory;
+		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::DInputEngine> >(L"DirectInput Input Factory");
 	}
 
 	std::string const & Name()

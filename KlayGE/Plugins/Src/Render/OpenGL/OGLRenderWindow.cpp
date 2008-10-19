@@ -211,6 +211,14 @@ namespace KlayGE
 
 	OGLRenderWindow::~OGLRenderWindow()
 	{
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		main_wnd->OnActive().disconnect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
+		main_wnd->OnPaint().disconnect(boost::bind(&OGLRenderWindow::OnPaint, this, _1));
+		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&OGLRenderWindow::OnEnterSizeMove, this, _1));
+		main_wnd->OnExitSizeMove().disconnect(boost::bind(&OGLRenderWindow::OnExitSizeMove, this, _1));
+		main_wnd->OnSize().disconnect(boost::bind(&OGLRenderWindow::OnSize, this, _1, _2));
+		main_wnd->OnClose().disconnect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
+
 		this->Destroy();
 	}
 

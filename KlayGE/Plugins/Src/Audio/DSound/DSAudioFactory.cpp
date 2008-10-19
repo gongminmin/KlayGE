@@ -19,11 +19,10 @@
 
 extern "C"
 {
-	KlayGE::AudioFactoryPtr const & AudioFactoryInstance()
+	void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr)
 	{
-		static KlayGE::AudioFactoryPtr af = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
+		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
 			KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");
-		return af;
 	}	
 
 	std::string const & Name()

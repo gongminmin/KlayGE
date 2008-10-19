@@ -19,10 +19,9 @@
 
 extern "C"
 {
-	KlayGE::ShowFactoryPtr const & ShowFactoryInstance()
+	void ShowFactoryInstance(KlayGE::ShowFactoryPtr& ptr)
 	{
-		static KlayGE::ShowFactoryPtr sf = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
-		return sf;
+		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
 	}
 
 	std::string const & Name()

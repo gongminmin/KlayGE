@@ -26,9 +26,9 @@ namespace KlayGE
 			return name;
 		}
 
-		AudioEngine& AudioEngineInstance()
+		AudioEnginePtr MakeAudioEngine()
 		{
-			return *AudioEngine::NullObject();
+			return AudioEngine::NullObject();
 		}
 
 		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & /*dataSource*/, uint32_t /*numSource*/)
@@ -46,5 +46,15 @@ namespace KlayGE
 	{
 		static AudioFactoryPtr obj = MakeSharedPtr<NullAudioFactory>();
 		return obj;
+	}
+
+	AudioEngine& AudioFactory::AudioEngineInstance()
+	{
+		if (!ae_)
+		{
+			ae_ = this->MakeAudioEngine();
+		}
+
+		return *ae_;
 	}
 }

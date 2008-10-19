@@ -28,7 +28,7 @@
 
 extern "C"
 {
-	KLAYGE_DINPUT_IE_API KlayGE::InputFactoryPtr const & InputFactoryInstance();
+	KLAYGE_DINPUT_IE_API void InputFactoryInstance(KlayGE::InputFactoryPtr& ptr);
 	KLAYGE_DINPUT_IE_API std::string const & Name();
 }
 

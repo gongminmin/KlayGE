@@ -25,7 +25,7 @@
 
 extern "C"
 {
-	KLAYGE_DSHOW_SE_API KlayGE::ShowFactoryPtr const & ShowFactoryInstance();
+	KLAYGE_DSHOW_SE_API void ShowFactoryInstance(KlayGE::ShowFactoryPtr& ptr);
 	KLAYGE_DSHOW_SE_API std::string const & Name();
 }
 

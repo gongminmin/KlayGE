@@ -353,6 +353,15 @@ namespace KlayGE
 
 	D3D9RenderWindow::~D3D9RenderWindow()
 	{
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		main_wnd->OnActive().disconnect(boost::bind(&D3D9RenderWindow::OnActive, this, _1, _2));
+		main_wnd->OnPaint().disconnect(boost::bind(&D3D9RenderWindow::OnPaint, this, _1));
+		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&D3D9RenderWindow::OnEnterSizeMove, this, _1));
+		main_wnd->OnExitSizeMove().disconnect(boost::bind(&D3D9RenderWindow::OnExitSizeMove, this, _1));
+		main_wnd->OnSize().disconnect(boost::bind(&D3D9RenderWindow::OnSize, this, _1, _2));
+		main_wnd->OnSetCursor().disconnect(boost::bind(&D3D9RenderWindow::OnSetCursor, this, _1));
+		main_wnd->OnClose().disconnect(boost::bind(&D3D9RenderWindow::OnClose, this, _1));
+
 		this->Destroy();
 	}
 
@@ -490,6 +499,7 @@ namespace KlayGE
 	{
 		renderZBuffer_.reset();
 		renderSurface_.reset();
+		d3d_swap_chain_.reset();
 		d3dDevice_.reset();
 		d3d_.reset();
 	}

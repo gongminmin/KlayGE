@@ -32,16 +32,16 @@
 #include <string>
 #include <boost/assert.hpp>
 
+#include <KlayGE/DllLoader.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API Context
 	{
 	public:
-		static Context& Instance()
-		{
-			static Context context;
-			return context;
-		}
+		~Context();
+
+		static Context& Instance();
 
 		RenderSettings LoadCfg(std::string const & cfg_file);
 
@@ -116,6 +116,12 @@ namespace KlayGE
 		AudioFactoryPtr		audioFactory_;
 		InputFactoryPtr		inputFactory_;
 		ShowFactoryPtr		showFactory_;
+
+		DllLoader render_loader_;
+		DllLoader audio_loader_;
+		DllLoader input_loader_;
+		DllLoader show_loader_;
+		DllLoader sm_loader_;
 	};
 }
 

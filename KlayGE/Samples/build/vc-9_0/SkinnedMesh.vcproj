@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../bin/$(PlatformName)"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
+				OutputFile="$(OutDir)/$(ProjectName)_x86_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
@@ -97,7 +97,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="../../bin/$(PlatformName)"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
+				OutputFile="$(OutDir)/$(ProjectName)_x64_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
@@ -174,7 +174,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../bin/$(PlatformName)"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -222,7 +222,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName).exe"
+				OutputFile="$(OutDir)/$(ProjectName)_x86.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
@@ -257,7 +257,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="../../bin/$(PlatformName)"
+			OutputDirectory="../../../bin"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -305,7 +305,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName).exe"
+				OutputFile="$(OutDir)/$(ProjectName)_x64.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"

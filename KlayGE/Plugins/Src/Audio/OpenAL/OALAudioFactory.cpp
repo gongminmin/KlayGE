@@ -22,11 +22,10 @@
 
 extern "C"
 {
-	KlayGE::AudioFactoryPtr const & AudioFactoryInstance()
+	void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr)
 	{
-		static KlayGE::AudioFactoryPtr af = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
+		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
 			KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer> >(L"OpenAL Audio Factory");
-		return af;
 	}
 
 	std::string const & Name()

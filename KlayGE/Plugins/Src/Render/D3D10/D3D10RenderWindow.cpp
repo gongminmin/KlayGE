@@ -303,6 +303,15 @@ namespace KlayGE
 
 	D3D10RenderWindow::~D3D10RenderWindow()
 	{
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		main_wnd->OnActive().disconnect(boost::bind(&D3D10RenderWindow::OnActive, this, _1, _2));
+		main_wnd->OnPaint().disconnect(boost::bind(&D3D10RenderWindow::OnPaint, this, _1));
+		main_wnd->OnEnterSizeMove().disconnect(boost::bind(&D3D10RenderWindow::OnEnterSizeMove, this, _1));
+		main_wnd->OnExitSizeMove().disconnect(boost::bind(&D3D10RenderWindow::OnExitSizeMove, this, _1));
+		main_wnd->OnSize().disconnect(boost::bind(&D3D10RenderWindow::OnSize, this, _1, _2));
+		main_wnd->OnSetCursor().disconnect(boost::bind(&D3D10RenderWindow::OnSetCursor, this, _1));
+		main_wnd->OnClose().disconnect(boost::bind(&D3D10RenderWindow::OnClose, this, _1));
+
 		this->Destroy();
 	}
 

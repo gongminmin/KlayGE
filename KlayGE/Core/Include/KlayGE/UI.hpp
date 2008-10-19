@@ -575,7 +575,7 @@ namespace KlayGE
 		float depth_base_;
 	};
 
-	class KLAYGE_CORE_API UIManager
+	class KLAYGE_CORE_API UIManager : public boost::enable_shared_from_this<UIManager>
 	{
 	public:
 		struct VertexFormat
@@ -593,8 +593,10 @@ namespace KlayGE
 			}
 		};
 
+		UIManager();
 
 		static UIManager& Instance();
+		void ForceDestroy();
 
 		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
 
@@ -648,7 +650,7 @@ namespace KlayGE
 		size_t NumElementTextureRect(uint32_t ctrl) const;
 
 	private:
-		UIManager();
+		static UIManagerPtr ui_mgr_instance_;
 
 		// Shared between all dialogs
 		RenderEffectPtr effect_;

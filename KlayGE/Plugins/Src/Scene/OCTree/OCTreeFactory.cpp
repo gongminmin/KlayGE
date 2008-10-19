@@ -19,10 +19,9 @@
 
 extern "C"
 {
-	KlayGE::SceneManagerPtr const & OCTreeFactoryInstance(boost::program_options::variables_map const & vm)
+	void OCTreeFactoryInstance(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm)
 	{
-		static KlayGE::SceneManagerPtr sm = KlayGE::MakeSharedPtr<KlayGE::OCTree>(vm["octree.depth"].as<int>());
-		return sm;
+		ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>(vm["octree.depth"].as<int>());
 	}	
 
 	std::string const & Name()
