@@ -8,12 +8,12 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_Core_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\win\x86\KlayGE_Core_mgw43_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Debug\win\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
@@ -24,18 +24,29 @@
 					<Add option="-D_LIB" />
 					<Add option="-DSTRICT" />
 				</Compiler>
+				<Linker>
+					<Add library="boost_filesystem-mgw43-mt-d" />
+					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_signals-mgw43-mt-d" />
+					<Add library="boost_program_options-mgw43-mt-d" />
+					<Add library="boost_thread-mgw43-mt-d" />
+					<Add library="libgdi32.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="libwsock32.a" />
+					<Add library="libpython25_d.a" />
+				</Linker>
 				<Environment>
 					<Variable name="yasm_objfmt" value="win32" />
 				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_Core.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\win\x86\KlayGE_Core_mgw43_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Release\win\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
@@ -48,6 +59,15 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="boost_filesystem-mgw43-mt" />
+					<Add library="boost_system-mgw43-mt" />
+					<Add library="boost_signals-mgw43-mt" />
+					<Add library="boost_program_options-mgw43-mt" />
+					<Add library="boost_thread-mgw43-mt" />
+					<Add library="libgdi32.a" />
+					<Add library="liboleaut32.a" />
+					<Add library="libwsock32.a" />
+					<Add library="libpython25.a" />
 				</Linker>
 				<Environment>
 					<Variable name="yasm_objfmt" value="win32" />
@@ -55,12 +75,12 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\libKlayGE_Core_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\linux\x86\KlayGE_Core_gcc42_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x86" />
 				<Option object_output="..\..\Debug\linux\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
@@ -75,12 +95,12 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\libKlayGE_Core.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\linux\x86\KlayGE_Core_gcc42_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x86" />
 				<Option object_output="..\..\Release\linux\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
@@ -98,12 +118,12 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\libKlayGE_Core_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\linux\x64\KlayGE_Core_gcc42_x64_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x64" />
 				<Option object_output="..\..\Debug\linux\x64" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-march=nocona" />
@@ -119,12 +139,12 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\libKlayGE_Core.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\linux\x64\KlayGE_Core_gcc42_x64.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x64" />
 				<Option object_output="..\..\Release\linux\x64" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-march=nocona" />
@@ -146,6 +166,7 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Unit filename="..\..\Core\Include\KlayGE\App3D.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Audio.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\AudioFactory.hpp" />
@@ -162,6 +183,7 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Context.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\CpuInfo.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\DllLoader.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ElementFormat.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Extract7z.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Font.hpp" />
@@ -224,6 +246,8 @@
 		<Unit filename="..\..\Core\Include\KlayGE\config\auto_link.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\half.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\thread.hpp" />
+		<Unit filename="..\..\Core\Src\AppLayer\App3D.cpp" />
+		<Unit filename="..\..\Core\Src\AppLayer\Window.cpp" />
 		<Unit filename="..\..\Core\Src\Audio\AudioBuffer.cpp" />
 		<Unit filename="..\..\Core\Src\Audio\AudioDataSource.cpp" />
 		<Unit filename="..\..\Core\Src\Audio\AudioEngine.cpp" />
@@ -239,6 +263,7 @@
 		<Unit filename="..\..\Core\Src\Input\Mouse.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\Context.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\CpuInfo.cpp" />
+		<Unit filename="..\..\Core\Src\Kernel\DllLoader.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ResLoader.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\Timer.cpp" />
@@ -256,8 +281,6 @@
 		<Unit filename="..\..\Core\Src\Pack\BSTR.cpp" />
 		<Unit filename="..\..\Core\Src\Pack\BSTR.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\BaseDefines.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\Dll.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\Dll.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\Extract7z.cpp" />
 		<Unit filename="..\..\Core\Src\Pack\IArchive.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\IPassword.hpp" />

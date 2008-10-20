@@ -6,7 +6,6 @@
 		<Project filename="DInput.cbp" />
 		<Project filename="DShow.cbp" />
 		<Project filename="OggVorbis.cbp" />
-		<Project filename="AppLayer.cbp" />
 		<Project filename="DSound.cbp" />
 		<Project filename="D3D9.cbp" />
 		<Project filename="OpenGL.cbp" />

@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
 #include <glloader/glloader.h>

@@ -9,12 +9,12 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D9_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Debug\win\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
@@ -25,15 +25,23 @@
 					<Add option="-D_LIB" />
 					<Add option="-DSTRICT" />
 				</Compiler>
+				<Linker>
+					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_signals-mgw43-mt-d" />
+					<Add library="libKlayGE_Core_mgw43_x86_d.a" />
+					<Add library="libd3d9.a" />
+					<Add library="libd3dx9d.a" />
+					<Add library="libgdi32.a" />
+				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_RenderEngine_D3D9.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Release\win\x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
@@ -46,6 +54,12 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="boost_system-mgw43-mt" />
+					<Add library="boost_signals-mgw43-mt" />
+					<Add library="libKlayGE_Core_mgw43_x86.a" />
+					<Add library="libd3d9.a" />
+					<Add library="libd3dx9.a" />
+					<Add library="libgdi32.a" />
 				</Linker>
 			</Target>
 		</Build>
