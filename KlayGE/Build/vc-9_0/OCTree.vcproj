@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_Octree_vc90_x86_d.dll"
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_vc90_x86_d.dll"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -137,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_Octree_vc90_x64_d.dll"
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_vc90_x64_d.dll"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -213,7 +213,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_Octree_vc90_x86.dll"
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_vc90_x86.dll"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -290,7 +290,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_Scene_Octree_vc90_x64.dll"
+				OutputFile="$(OutDir)/KlayGE_Scene_OCTree_vc90_x64.dll"
 				GenerateDebugInformation="true"
 			/>
 			<Tool

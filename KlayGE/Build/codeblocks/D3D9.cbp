@@ -9,7 +9,7 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw43_x86_d.dll" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Debug\win\x86" />
 				<Option type="3" />
@@ -33,10 +33,13 @@
 					<Add library="libd3dx9d.a" />
 					<Add library="libgdi32.a" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
+				</ExtraCommands>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw43_x86.dll" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Release\win\x86" />
 				<Option type="3" />
@@ -61,6 +64,9 @@
 					<Add library="libd3dx9.a" />
 					<Add library="libgdi32.a" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<VirtualTargets>
