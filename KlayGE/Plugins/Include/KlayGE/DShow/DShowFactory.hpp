@@ -13,6 +13,15 @@
 #ifndef _DSHOWFACTORY_HPP
 #define _DSHOWFACTORY_HPP
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DSHOW_SE_SOURCE				// Build dll
 		#define KLAYGE_DSHOW_SE_API __declspec(dllexport)
@@ -25,8 +34,8 @@
 
 extern "C"
 {
-	KLAYGE_DSHOW_SE_API void ShowFactoryInstance(KlayGE::ShowFactoryPtr& ptr);
-	KLAYGE_DSHOW_SE_API std::string const & Name();
+	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/);
+	KLAYGE_DSHOW_SE_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _DSHOWFACTORY_HPP

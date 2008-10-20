@@ -19,14 +19,20 @@
 
 extern "C"
 {
-	void OCTreeFactoryInstance(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm)
+	void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm)
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>(vm["octree.depth"].as<int>());
 	}	
 
-	std::string const & Name()
+	bool Match(std::string const & name, std::string const & compiler)
 	{
-		static std::string const name("OCTree");
-		return name;
+		if (("OCTree" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -16,6 +16,15 @@
 #ifndef _DINPUTFACTORY_HPP
 #define _DINPUTFACTORY_HPP
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DINPUT_IE_SOURCE			// Build dll
 		#define KLAYGE_DINPUT_IE_API __declspec(dllexport)
@@ -28,8 +37,8 @@
 
 extern "C"
 {
-	KLAYGE_DINPUT_IE_API void InputFactoryInstance(KlayGE::InputFactoryPtr& ptr);
-	KLAYGE_DINPUT_IE_API std::string const & Name();
+	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	KLAYGE_DINPUT_IE_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _DINPUTFACTORY_HPP

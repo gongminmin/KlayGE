@@ -19,14 +19,20 @@
 
 extern "C"
 {
-	void ShowFactoryInstance(KlayGE::ShowFactoryPtr& ptr)
+	void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
 	}
 
-	std::string const & Name()
+	bool Match(std::string const & name, std::string const & compiler)
 	{
-		static std::string const name("DShow");
-		return name;
+		if (("DShow" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

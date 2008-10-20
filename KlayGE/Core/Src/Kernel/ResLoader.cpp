@@ -89,11 +89,9 @@ namespace KlayGE
 		{
 			std::string const res_name(path + name);
 
-			ResIdentifierPtr ret = MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary);
-
-			if (!ret->fail())
+			if (boost::filesystem::exists(res_name))
 			{
-				return ret;
+				return MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary);
 			}
 			else
 			{

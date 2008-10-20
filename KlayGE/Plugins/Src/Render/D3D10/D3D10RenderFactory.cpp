@@ -155,14 +155,20 @@ namespace KlayGE
 
 extern "C"
 {
-	void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr)
+	void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::D3D10RenderFactory>();
 	}
 
-	std::string const & Name()
+	bool Match(std::string const & name, std::string const & compiler)
 	{
-		static std::string const name("D3D10");
-		return name;
+		if (("D3D10" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -19,15 +19,21 @@
 
 extern "C"
 {
-	void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr)
+	void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
 			KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");
 	}	
 
-	std::string const & Name()
+	bool Match(std::string const & name, std::string const & compiler)
 	{
-		static std::string const name("DSound");
-		return name;
+		if (("DSound" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

@@ -39,12 +39,12 @@
 
 namespace KlayGE
 {
-	typedef std::string const & (*NameFunc)();
-	typedef void (*RenderFactoryInstanceFunc)(RenderFactoryPtr& ptr);
-	typedef void (*AudioFactoryInstanceFunc)(AudioFactoryPtr& ptr);
-	typedef void (*InputFactoryInstanceFunc)(InputFactoryPtr& ptr);
-	typedef void (*ShowFactoryInstanceFunc)(ShowFactoryPtr& ptr);
-	typedef void (*SceneManagerFactoryInstanceFunc)(SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef bool (*MatchFunc)(std::string const & name, std::string const & compiler);
+	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
 
 	Context::Context()
 	{
@@ -135,7 +135,6 @@ namespace KlayGE
 				af_name = "OpenAL";
 			}
 
-
 			if (vm.count("context.input_factory"))
 			{
 				if_name = vm["context.input_factory"].as<std::string>();
@@ -177,13 +176,13 @@ namespace KlayGE
 				{
 					render_loader_.Load(fn);
 
-					NameFunc name_func = (NameFunc)render_loader_.GetProcAddress("Name");
-					if ((name_func != NULL) && (rf_name == name_func()))
+					MatchFunc match_func = (MatchFunc)render_loader_.GetProcAddress("Match");
+					if ((match_func != NULL) && match_func(rf_name, KLAYGE_COMPILER_TOOLSET))
 					{
-						RenderFactoryInstanceFunc rfi = (RenderFactoryInstanceFunc)render_loader_.GetProcAddress("RenderFactoryInstance");
-						if (rfi != NULL)
+						MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
+						if (mrf != NULL)
 						{
-							rfi(renderFactory_);
+							mrf(renderFactory_, vm);
 							break;
 						}
 						else
@@ -208,13 +207,13 @@ namespace KlayGE
 				{
 					audio_loader_.Load(fn);
 
-					NameFunc name_func = (NameFunc)audio_loader_.GetProcAddress("Name");
-					if ((name_func != NULL) && (af_name == name_func()))
+					MatchFunc match_func = (MatchFunc)audio_loader_.GetProcAddress("Match");
+					if ((match_func != NULL) && match_func(af_name, KLAYGE_COMPILER_TOOLSET))
 					{
-						AudioFactoryInstanceFunc afi = (AudioFactoryInstanceFunc)audio_loader_.GetProcAddress("AudioFactoryInstance");
-						if (afi != NULL)
+						MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
+						if (maf != NULL)
 						{
-							afi(audioFactory_);
+							maf(audioFactory_, vm);
 							break;
 						}
 						else
@@ -239,13 +238,13 @@ namespace KlayGE
 				{
 					input_loader_.Load(fn);
 
-					NameFunc name_func = (NameFunc)input_loader_.GetProcAddress("Name");
-					if ((name_func != NULL) && (if_name == name_func()))
+					MatchFunc match_func = (MatchFunc)input_loader_.GetProcAddress("Match");
+					if ((match_func != NULL) && match_func(if_name, KLAYGE_COMPILER_TOOLSET))
 					{
-						InputFactoryInstanceFunc ifi = (InputFactoryInstanceFunc)input_loader_.GetProcAddress("InputFactoryInstance");
-						if (ifi != NULL)
+						MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
+						if (mif != NULL)
 						{
-							ifi(inputFactory_);
+							mif(inputFactory_, vm);
 							break;
 						}
 						else
@@ -270,13 +269,13 @@ namespace KlayGE
 				{
 					show_loader_.Load(fn);
 
-					NameFunc name_func = (NameFunc)show_loader_.GetProcAddress("Name");
-					if ((name_func != NULL) && (sf_name == name_func()))
+					MatchFunc match_func = (MatchFunc)show_loader_.GetProcAddress("Match");
+					if ((match_func != NULL) && match_func(sf_name, KLAYGE_COMPILER_TOOLSET))
 					{
-						ShowFactoryInstanceFunc sfi = (ShowFactoryInstanceFunc)show_loader_.GetProcAddress("ShowFactoryInstance");
-						if (sfi != NULL)
+						MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
+						if (msf != NULL)
 						{
-							sfi(showFactory_);
+							msf(showFactory_, vm);
 							break;
 						}
 						else
@@ -301,13 +300,13 @@ namespace KlayGE
 				{
 					sm_loader_.Load(fn);
 
-					NameFunc name_func = (NameFunc)sm_loader_.GetProcAddress("Name");
-					if ((name_func != NULL) && (sm_name == name_func()))
+					MatchFunc match_func = (MatchFunc)sm_loader_.GetProcAddress("Match");
+					if ((match_func != NULL) && match_func(sm_name, KLAYGE_COMPILER_TOOLSET))
 					{
-						SceneManagerFactoryInstanceFunc smi = (SceneManagerFactoryInstanceFunc)sm_loader_.GetProcAddress("SceneManagerFactoryInstance");
-						if (smi != NULL)
+						MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
+						if (msm != NULL)
 						{
-							smi(sceneMgr_, vm);
+							msm(sceneMgr_, vm);
 							break;
 						}
 						else

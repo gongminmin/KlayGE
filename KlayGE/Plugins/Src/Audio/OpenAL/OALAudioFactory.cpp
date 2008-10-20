@@ -22,15 +22,21 @@
 
 extern "C"
 {
-	void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr)
+	void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
 			KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer> >(L"OpenAL Audio Factory");
 	}
 
-	std::string const & Name()
+	bool Match(std::string const & name, std::string const & compiler)
 	{
-		static std::string const name("OpenAL");
-		return name;
+		if (("OpenAL" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

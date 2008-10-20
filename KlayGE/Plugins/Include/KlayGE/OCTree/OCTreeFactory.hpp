@@ -34,8 +34,8 @@
 
 extern "C"
 {
-	KLAYGE_OCTREE_SM_API void SceneManagerFactoryInstance(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
-	KLAYGE_OCTREE_SM_API std::string const & Name();
+	KLAYGE_OCTREE_SM_API void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
+	KLAYGE_OCTREE_SM_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _OCTREEFACTORY_HPP

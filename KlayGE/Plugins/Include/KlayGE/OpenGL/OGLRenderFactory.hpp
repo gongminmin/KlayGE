@@ -13,6 +13,15 @@
 #ifndef _OGLRENDERFACTORY_HPP
 #define _OGLRENDERFACTORY_HPP
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_OGL_RE_SOURCE					// Build dll
 		#define KLAYGE_OGL_RE_API __declspec(dllexport)
@@ -25,8 +34,8 @@
 
 extern "C"
 {
-	KLAYGE_OGL_RE_API void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr);
-	KLAYGE_OGL_RE_API std::string const & Name();
+	KLAYGE_OGL_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	KLAYGE_OGL_RE_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _OGLRENDERFACTORY_HPP

@@ -16,6 +16,15 @@
 #ifndef _DSAUDIOFACTORY_HPP
 #define _DSAUDIOFACTORY_HPP
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DSOUND_AE_SOURCE				// Build dll
 		#define KLAYGE_DSOUND_AE_API __declspec(dllexport)
@@ -28,8 +37,8 @@
 
 extern "C"
 {
-	KLAYGE_DSOUND_AE_API void AudioFactoryInstance(KlayGE::AudioFactoryPtr& ptr);
-	KLAYGE_DSOUND_AE_API std::string const & Name();
+	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	KLAYGE_DSOUND_AE_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

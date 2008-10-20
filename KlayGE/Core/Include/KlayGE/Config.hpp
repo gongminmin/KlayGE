@@ -30,7 +30,7 @@
 	#endif
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
-	#define KLAYGE_COMPILER_NAME "vc"
+	#define KLAYGE_COMPILER_NAME vc
 
 	#define KLAYGE_HAS_DECLSPEC
 
@@ -98,15 +98,15 @@
 	#endif
 
 	#if defined(__MINGW32__)
-		#define KLAYGE_COMPILER_NAME "mgw"
+		#define KLAYGE_COMPILER_NAME mgw
 		#include <_mingw.h>
 	#endif
 #elif defined(__CYGWIN__)
 	#define KLAYGE_PLATFORM_CYGWIN
-	#define KLAYGE_COMPILER_NAME "cyg"
+	#define KLAYGE_COMPILER_NAME cyg
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
-	#define KLAYGE_COMPILER_NAME "gcc"
+	#define KLAYGE_COMPILER_NAME gcc
 #else
 	#error Unknown platform.
 #endif
@@ -115,23 +115,23 @@
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(KLAYGE_PLATFORM_XBOX360)
 		#define KLAYGE_CPU_PPC
-		#define KLAYGE_COMPILER_TARGET "ppc"
+		#define KLAYGE_COMPILER_TARGET ppc
 	#elif defined(_M_X64)
 		#define KLAYGE_CPU_X64
-		#define KLAYGE_COMPILER_TARGET "x64"
+		#define KLAYGE_COMPILER_TARGET x64
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
-		#define KLAYGE_COMPILER_TARGET "x86"
+		#define KLAYGE_COMPILER_TARGET x86
 	#else
 		#error Unknown CPU type.
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC)
 	#if defined(__x86_64__)
 		#define KLAYGE_CPU_X64
-		#define KLAYGE_COMPILER_TARGET "x64"
+		#define KLAYGE_COMPILER_TARGET x64
 	#elif defined(__i386__)
 		#define KLAYGE_CPU_X86
-		#define KLAYGE_COMPILER_TARGET "x86"
+		#define KLAYGE_COMPILER_TARGET x86
 	#else
 		#error Unknown CPU type.
 	#endif
@@ -188,7 +188,7 @@
 #define KLAYGE_DO_JOIN(X, Y) KLAYGE_DO_JOIN2(X, Y)
 #define KLAYGE_DO_JOIN2(X, Y) X##Y
 
-#define KLAYGE_COMPILER_TOOLSET KLAYGE_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION)
+#define KLAYGE_COMPILER_TOOLSET KLAYGE_STRINGIZE(KLAYGE_JOIN(KLAYGE_COMPILER_NAME, KLAYGE_COMPILER_VERSION))
 
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_CORE_SOURCE		// Build dll

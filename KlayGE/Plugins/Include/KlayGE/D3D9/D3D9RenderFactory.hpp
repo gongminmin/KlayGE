@@ -22,6 +22,15 @@
 #ifndef _D3D9RENDERFACTORY_HPP
 #define _D3D9RENDERFACTORY_HPP
 
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_D3D9_RE_SOURCE				// Build dll
 		#define KLAYGE_D3D9_RE_API __declspec(dllexport)
@@ -34,8 +43,8 @@
 
 extern "C"
 {
-	KLAYGE_D3D9_RE_API void RenderFactoryInstance(KlayGE::RenderFactoryPtr& ptr);
-	KLAYGE_D3D9_RE_API std::string const & Name();
+	KLAYGE_D3D9_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+	KLAYGE_D3D9_RE_API bool Match(std::string const & name, std::string const & compiler);
 }
 
 #endif			// _D3D9RENDERFACTORY_HPP
