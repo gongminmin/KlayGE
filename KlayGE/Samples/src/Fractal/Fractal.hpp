@@ -14,6 +14,8 @@ private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
+	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	KlayGE::FontPtr font_;

@@ -58,21 +58,36 @@ namespace KlayGE
 
 	D3D9ConditionalRender::D3D9ConditionalRender()
 	{
+		D3D9RenderEngine const & render_eng = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D9DevicePtr const & d3d_device = render_eng.D3DDevice();
+
+		IDirect3DQuery9* query;
+		d3d_device->CreateQuery(D3DQUERYTYPE_OCCLUSION, &query);
+		query_ = MakeCOMPtr(query);
 	}
 
 	void D3D9ConditionalRender::Begin()
 	{
+		TIF(query_->Issue(D3DISSUE_BEGIN));
 	}
 
 	void D3D9ConditionalRender::End()
 	{
+		TIF(query_->Issue(D3DISSUE_END));
 	}
 
 	void D3D9ConditionalRender::BeginConditionalRender()
 	{
+		uint32_t ret;
+		while (S_FALSE == query_->GetData(&ret, sizeof(ret), D3DGETDATA_FLUSH));
+
+		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.ConditionalRender(ret != 0);
 	}
 
 	void D3D9ConditionalRender::EndConditionalRender()
 	{
+		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.ConditionalRender(true);
 	}
 }

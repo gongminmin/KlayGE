@@ -77,6 +77,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D9RenderEngine::D3D9RenderEngine()
 		: last_num_vertex_stream_(0),
+			conditional_render_(true),
 			vertex_shader_cache_(NULL), pixel_shader_cache_(NULL)
 	{
 		// Create our Direct3D object
@@ -445,13 +446,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		if (rl.InstanceStream() && !rl.UseIndices())
+		if (conditional_render_)
 		{
-			this->DoRenderSWInstance(tech, rl);
-		}
-		else
-		{
-			this->RenderInstance(tech, rl);
+			if (rl.InstanceStream() && !rl.UseIndices())
+			{
+				this->DoRenderSWInstance(tech, rl);
+			}
+			else
+			{
+				this->RenderInstance(tech, rl);
+			}
 		}
 	}
 
@@ -664,6 +668,11 @@ namespace KlayGE
 	void D3D9RenderEngine::FullScreen(bool fs)
 	{
 		checked_pointer_cast<D3D9RenderWindow>(default_frame_buffer_)->FullScreen(fs);
+	}
+
+	void D3D9RenderEngine::ConditionalRender(bool cr)
+	{
+		conditional_render_ = cr;
 	}
 
 	// 填充设备能力

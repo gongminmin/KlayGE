@@ -84,6 +84,8 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
+		void ConditionalRender(bool cr);
+
 		void OnLostDevice();
 		void OnResetDevice();
 
@@ -125,6 +127,8 @@ namespace KlayGE
 		D3D9AdapterList adapterList_;
 
 		uint32_t last_num_vertex_stream_;
+
+		bool conditional_render_;
 
 		boost::function<void (RenderTechnique const &, RenderLayout const &)> RenderInstance;
 

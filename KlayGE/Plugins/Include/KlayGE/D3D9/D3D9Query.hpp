@@ -44,6 +44,9 @@ namespace KlayGE
 
 		void BeginConditionalRender();
 		void EndConditionalRender();
+
+	private:
+		ID3D9QueryPtr query_;
 	};
 }
 

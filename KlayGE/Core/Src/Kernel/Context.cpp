@@ -181,10 +181,15 @@ namespace KlayGE
 					if ((name_func != NULL) && (rf_name == name_func()))
 					{
 						RenderFactoryInstanceFunc rfi = (RenderFactoryInstanceFunc)render_loader_.GetProcAddress("RenderFactoryInstance");
-						RenderFactoryPtr ptr;
-						rfi(ptr);
-						Context::Instance().RenderFactoryInstance(ptr);
-						break;
+						if (rfi != NULL)
+						{
+							rfi(renderFactory_);
+							break;
+						}
+						else
+						{
+							render_loader_.Free();
+						}
 					}
 					else
 					{
@@ -207,10 +212,15 @@ namespace KlayGE
 					if ((name_func != NULL) && (af_name == name_func()))
 					{
 						AudioFactoryInstanceFunc afi = (AudioFactoryInstanceFunc)audio_loader_.GetProcAddress("AudioFactoryInstance");
-						AudioFactoryPtr ptr;
-						afi(ptr);
-						Context::Instance().AudioFactoryInstance(ptr);
-						break;
+						if (afi != NULL)
+						{
+							afi(audioFactory_);
+							break;
+						}
+						else
+						{
+							audio_loader_.Free();
+						}
 					}
 					else
 					{
@@ -233,10 +243,15 @@ namespace KlayGE
 					if ((name_func != NULL) && (if_name == name_func()))
 					{
 						InputFactoryInstanceFunc ifi = (InputFactoryInstanceFunc)input_loader_.GetProcAddress("InputFactoryInstance");
-						InputFactoryPtr ptr;
-						ifi(ptr);
-						Context::Instance().InputFactoryInstance(ptr);
-						break;
+						if (ifi != NULL)
+						{
+							ifi(inputFactory_);
+							break;
+						}
+						else
+						{
+							input_loader_.Free();
+						}
 					}
 					else
 					{
@@ -259,10 +274,15 @@ namespace KlayGE
 					if ((name_func != NULL) && (sf_name == name_func()))
 					{
 						ShowFactoryInstanceFunc sfi = (ShowFactoryInstanceFunc)show_loader_.GetProcAddress("ShowFactoryInstance");
-						ShowFactoryPtr ptr;
-						sfi(ptr);
-						Context::Instance().ShowFactoryInstance(ptr);
-						break;
+						if (sfi != NULL)
+						{
+							sfi(showFactory_);
+							break;
+						}
+						else
+						{
+							show_loader_.Free();
+						}
 					}
 					else
 					{
@@ -285,10 +305,15 @@ namespace KlayGE
 					if ((name_func != NULL) && (sm_name == name_func()))
 					{
 						SceneManagerFactoryInstanceFunc smi = (SceneManagerFactoryInstanceFunc)sm_loader_.GetProcAddress("SceneManagerFactoryInstance");
-						SceneManagerPtr ptr;
-						smi(ptr, vm);
-						Context::Instance().SceneManagerInstance(ptr);
-						break;
+						if (smi != NULL)
+						{
+							smi(sceneMgr_, vm);
+							break;
+						}
+						else
+						{
+							sm_loader_.Free();
+						}
 					}
 					else
 					{

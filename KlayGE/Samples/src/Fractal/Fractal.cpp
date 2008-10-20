@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <sstream>
+#include <boost/bind.hpp>
 
 #include "Fractal.hpp"
 
@@ -142,6 +143,18 @@ namespace
 		}
 	};
 
+	enum
+	{
+		Exit,
+		FullScreen,
+	};
+
+	InputActionDefine actions[] =
+	{
+		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(FullScreen, KS_Enter),
+	};
+
 	bool ConfirmDevice()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -199,6 +212,14 @@ void Fractal::InitObjects()
 
 	renderFractal_.reset(new RenderFractal);
 	renderPlane_.reset(new RenderPlane);
+
+	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputActionMap actionMap;
+	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&Fractal::InputHandler, this, _1, _2));
+	inputEngine.ActionMap(actionMap, input_handler, true);
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)
@@ -228,6 +249,26 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	for (int i = 0; i < 2; ++ i)
 	{
 		render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+	}
+}
+
+void Fractal::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+{
+	switch (action.first)
+	{
+	case FullScreen:
+		{
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			renderEngine.EndFrame();
+			renderEngine.Resize(800, 600);
+			renderEngine.FullScreen(!renderEngine.FullScreen());
+			renderEngine.BeginFrame();
+		}
+		break;
+
+	case Exit:
+		this->Quit();
+		break;
 	}
 }
 

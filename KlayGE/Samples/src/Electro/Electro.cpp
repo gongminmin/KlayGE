@@ -22,6 +22,7 @@
 #include <vector>
 #include <sstream>
 #include <ctime>
+#include <boost/bind.hpp>
 
 #include "Electro.hpp"
 
@@ -132,6 +133,19 @@ namespace
 		}
 	};
 
+
+	enum
+	{
+		Exit,
+		FullScreen,
+	};
+
+	InputActionDefine actions[] =
+	{
+		InputActionDefine(Exit, KS_Escape),
+		InputActionDefine(FullScreen, KS_Enter),
+	};
+
 	bool ConfirmDevice()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -169,6 +183,34 @@ void Electro::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
 	renderElectro_.reset(new RenderElectro);
+
+	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+	InputActionMap actionMap;
+	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+
+	action_handler_t input_handler(new input_signal);
+	input_handler->connect(boost::bind(&Electro::InputHandler, this, _1, _2));
+	inputEngine.ActionMap(actionMap, input_handler, true);
+}
+
+void Electro::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+{
+	switch (action.first)
+	{
+	case FullScreen:
+		{
+			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			renderEngine.EndFrame();
+			renderEngine.Resize(800, 600);
+			renderEngine.FullScreen(!renderEngine.FullScreen());
+			renderEngine.BeginFrame();
+		}
+		break;
+
+	case Exit:
+		this->Quit();
+		break;
+	}
 }
 
 uint32_t Electro::DoUpdate(uint32_t /*pass*/)
