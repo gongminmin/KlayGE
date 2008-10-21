@@ -35,7 +35,7 @@
 extern "C"
 {
 	KLAYGE_OGL_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	KLAYGE_OGL_RE_API bool Match(std::string const & name, std::string const & compiler);
+	KLAYGE_OGL_RE_API bool Match(char const * name, char const * compiler);
 }
 
 #endif			// _OGLRENDERFACTORY_HPP

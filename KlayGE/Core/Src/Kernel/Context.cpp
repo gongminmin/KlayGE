@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	typedef bool (*MatchFunc)(std::string const & name, std::string const & compiler);
+	typedef bool (*MatchFunc)(char const * name, char const * compiler);
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
@@ -166,6 +166,11 @@ namespace KlayGE
 			}
 		}
 
+		std::string compiler_str = KLAYGE_COMPILER_TOOLSET;
+#ifdef KLAYGE_DEBUG
+		compiler_str += "_d";
+#endif
+
 
 		{
 			std::string render_path = ResLoader::Instance().Locate("Render");
@@ -177,7 +182,7 @@ namespace KlayGE
 					render_loader_.Load(fn);
 
 					MatchFunc match_func = (MatchFunc)render_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(rf_name, KLAYGE_COMPILER_TOOLSET))
+					if ((match_func != NULL) && match_func(rf_name.c_str(), compiler_str.c_str()))
 					{
 						MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 						if (mrf != NULL)
@@ -208,7 +213,7 @@ namespace KlayGE
 					audio_loader_.Load(fn);
 
 					MatchFunc match_func = (MatchFunc)audio_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(af_name, KLAYGE_COMPILER_TOOLSET))
+					if ((match_func != NULL) && match_func(af_name.c_str(), compiler_str.c_str()))
 					{
 						MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 						if (maf != NULL)
@@ -239,7 +244,7 @@ namespace KlayGE
 					input_loader_.Load(fn);
 
 					MatchFunc match_func = (MatchFunc)input_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(if_name, KLAYGE_COMPILER_TOOLSET))
+					if ((match_func != NULL) && match_func(if_name.c_str(), compiler_str.c_str()))
 					{
 						MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 						if (mif != NULL)
@@ -270,7 +275,7 @@ namespace KlayGE
 					show_loader_.Load(fn);
 
 					MatchFunc match_func = (MatchFunc)show_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(sf_name, KLAYGE_COMPILER_TOOLSET))
+					if ((match_func != NULL) && match_func(sf_name.c_str(), compiler_str.c_str()))
 					{
 						MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 						if (msf != NULL)
@@ -301,7 +306,7 @@ namespace KlayGE
 					sm_loader_.Load(fn);
 
 					MatchFunc match_func = (MatchFunc)sm_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(sm_name, KLAYGE_COMPILER_TOOLSET))
+					if ((match_func != NULL) && match_func(sm_name.c_str(), compiler_str.c_str()))
 					{
 						MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 						if (msm != NULL)

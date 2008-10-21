@@ -128,7 +128,8 @@ namespace KlayGE
 			return D3D10_MAP_READ;
 
 		case TMA_Write_Only:
-			if ((EAH_CPU_Write == access_hint) && (1 == numMipMaps) && (type != Texture::TT_Cube))
+			if (((EAH_CPU_Write | EAH_GPU_Read) == access_hint)
+				|| ((EAH_CPU_Write == access_hint) && (1 == numMipMaps) && (type != Texture::TT_Cube)))
 			{
 				return D3D10_MAP_WRITE_DISCARD;
 			}

@@ -59,7 +59,7 @@ namespace KlayGE
 
 	void D3D10GraphicsBuffer::GetD3DFlags(D3D10_USAGE& usage, UINT& cpu_access_flags)
 	{
-		if (EAH_CPU_Write == access_hint_)
+		if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
 			usage = D3D10_USAGE_DYNAMIC;
 		}
@@ -120,7 +120,7 @@ namespace KlayGE
 			break;
 
 		case BA_Write_Only:
-			if (EAH_CPU_Write == access_hint_)
+			if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
 				type = D3D10_MAP_WRITE_DISCARD;
 			}

@@ -160,9 +160,14 @@ extern "C"
 		ptr = KlayGE::MakeSharedPtr<KlayGE::D3D10RenderFactory>();
 	}
 
-	bool Match(std::string const & name, std::string const & compiler)
+	bool Match(char const * name, char const * compiler)
 	{
-		if (("D3D10" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		std::string cur_compiler_str = KLAYGE_COMPILER_TOOLSET;
+#ifdef KLAYGE_DEBUG
+		cur_compiler_str += "_d";
+#endif
+
+		if ((std::string("D3D10") == name) && (cur_compiler_str == compiler))
 		{
 			return true;
 		}

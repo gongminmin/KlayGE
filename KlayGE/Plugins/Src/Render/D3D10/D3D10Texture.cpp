@@ -106,26 +106,33 @@ namespace KlayGE
 
 	void D3D10Texture::GetD3DFlags(D3D10_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags)
 	{
-		if (EAH_CPU_Write == access_hint_)
+		if ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_)
 		{
-			if ((numMipMaps_ != 1) || (TT_Cube == type_))
-			{
-				usage = D3D10_USAGE_STAGING;
-			}
-			else
-			{
-				usage = D3D10_USAGE_DYNAMIC;
-			}
+			usage = D3D10_USAGE_DYNAMIC;
 		}
 		else
 		{
-			if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
+			if (EAH_CPU_Write == access_hint_)
 			{
-				usage = D3D10_USAGE_DEFAULT;
+				if ((numMipMaps_ != 1) || (TT_Cube == type_))
+				{
+					usage = D3D10_USAGE_STAGING;
+				}
+				else
+				{
+					usage = D3D10_USAGE_DYNAMIC;
+				}
 			}
 			else
 			{
-				usage = D3D10_USAGE_STAGING;
+				if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
+				{
+					usage = D3D10_USAGE_DEFAULT;
+				}
+				else
+				{
+					usage = D3D10_USAGE_STAGING;
+				}
 			}
 		}
 

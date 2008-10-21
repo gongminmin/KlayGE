@@ -38,7 +38,7 @@
 extern "C"
 {
 	KLAYGE_OAL_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	KLAYGE_OAL_AE_API bool Match(std::string const & name, std::string const & compiler);
+	KLAYGE_OAL_AE_API bool Match(char const * name, char const * compiler);
 }
 
 #endif			// _OALAUDIOFACTORY_HPP

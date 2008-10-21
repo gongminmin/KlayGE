@@ -129,9 +129,7 @@ namespace KlayGE
 		std::vector<uint16_t>	indices_;
 
 		GraphicsBufferPtr vb_;
-		GraphicsBufferPtr vb_sys_mem_;
 		GraphicsBufferPtr ib_;
-		GraphicsBufferPtr ib_sys_mem_;
 
 		TexturePtr		dist_texture_;
 		TexturePtr		a_char_texture_;

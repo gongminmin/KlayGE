@@ -105,7 +105,6 @@ namespace KlayGE
 
 		ID3D9SurfacePtr		cache_surf_;
 		TexturePtr			present_tex_;
-		TexturePtr			present_sys_mem_tex_;
 
 		D3DPRESENT_PARAMETERS d3dpp_;
 	};

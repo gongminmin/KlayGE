@@ -49,14 +49,12 @@ namespace KlayGE
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
-			vb_sys_mem_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, NULL);
-			ib_sys_mem_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write, NULL);
+			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 			rl_->BindIndexStream(ib_, EF_R16);
 
 			if (texture)
@@ -98,22 +96,17 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			vb_sys_mem_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
-			vb_->Resize(vb_sys_mem_->Size());
+			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*vb_sys_mem_, BA_Write_Only);
-				std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_sys_mem_->Size());
+				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+				std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_->Size());
 			}
 
-			ib_sys_mem_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-			ib_->Resize(ib_sys_mem_->Size());
+			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
 			{
-				GraphicsBuffer::Mapper mapper(*ib_sys_mem_, BA_Write_Only);
-				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_sys_mem_->Size());
+				GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
+				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_->Size());
 			}
-
-			vb_sys_mem_->CopyToBuffer(*vb_);
-			ib_sys_mem_->CopyToBuffer(*ib_);
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
@@ -145,8 +138,6 @@ namespace KlayGE
 
 		GraphicsBufferPtr vb_;
 		GraphicsBufferPtr ib_;
-		GraphicsBufferPtr vb_sys_mem_;
-		GraphicsBufferPtr ib_sys_mem_;
 	};
 
 	class UIRectObject : public SceneObjectHelper

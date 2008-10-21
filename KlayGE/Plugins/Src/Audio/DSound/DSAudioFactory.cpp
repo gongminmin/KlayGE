@@ -25,9 +25,14 @@ extern "C"
 			KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");
 	}	
 
-	bool Match(std::string const & name, std::string const & compiler)
+	bool Match(char const * name, char const * compiler)
 	{
-		if (("DSound" == name) && (KLAYGE_COMPILER_TOOLSET == compiler))
+		std::string cur_compiler_str = KLAYGE_COMPILER_TOOLSET;
+#ifdef KLAYGE_DEBUG
+		cur_compiler_str += "_d";
+#endif
+
+		if ((std::string("DSound") == name) && (cur_compiler_str == compiler))
 		{
 			return true;
 		}
