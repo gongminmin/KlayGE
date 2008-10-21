@@ -13,13 +13,10 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Vector.hpp>
-#include <KlayGE/Matrix.hpp>
-#include <KlayGE/Color.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 
 #include <KlayGE/D3D10/D3D10MinGWDefs.hpp>

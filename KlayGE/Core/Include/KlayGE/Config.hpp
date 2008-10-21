@@ -99,6 +99,7 @@
 
 	#if defined(__MINGW32__)
 		#define KLAYGE_COMPILER_NAME mgw
+		#define KLAYGE_HAS_DECLSPEC
 		#include <_mingw.h>
 	#endif
 #elif defined(__CYGWIN__)

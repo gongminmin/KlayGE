@@ -21,8 +21,9 @@
 					<Add option="-O0" />
 					<Add option="-DWIN32" />
 					<Add option="-D_DEBUG" />
-					<Add option="-D_LIB" />
-					<Add option="-DSTRICT" />
+					<Add option="-D_USRDLL" />
+					<Add option="-DKLAYGE_BUILD_DLL" />
+					<Add option="-DKLAYGE_OGL_RE_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add library="boost_system-mgw43-mt-d" />
@@ -32,7 +33,7 @@
 					<Add library="libopengl32.a" />
 					<Add library="libglu32.a" />
 					<Add library="libgdi32.a" />
-                                        <Add library="cg" />
+					<Add library="cg" />
 					<Add library="cgGL" />
 				</Linker>
 				<ExtraCommands>
@@ -54,8 +55,9 @@
 					<Add option="-Wall" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
-					<Add option="-D_LIB" />
-					<Add option="-DSTRICT" />
+					<Add option="-D_USRDLL" />
+					<Add option="-DKLAYGE_BUILD_DLL" />
+					<Add option="-DKLAYGE_OGL_RE_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
