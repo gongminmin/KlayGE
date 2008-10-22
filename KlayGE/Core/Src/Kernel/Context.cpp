@@ -148,10 +148,7 @@ namespace KlayGE
 
 			if (vm.count("context.show_factory"))
 			{
-#ifdef KLAYGE_COMPILER_MSVC
-				// DShow plugin can only be compiled by vc for now
 				sf_name = vm["context.show_factory"].as<std::string>();
-#endif
 			}
 			else
 			{
