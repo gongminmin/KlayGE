@@ -884,6 +884,7 @@ namespace KlayGE
 			ss << "#endif" << std::endl << std::endl;
 		}
 
+		uint32_t tex_unit = 0;
 		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
 		{
 			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
@@ -900,7 +901,14 @@ namespace KlayGE
 					ss << "[" << param.ArraySize() << "]";
 				}
 
+				ss << std::endl;
+				ss << "#ifdef OGL_EXPLICIT_TEXUNIT" << std::endl;
+				ss << ": TEXUNIT" << tex_unit << std::endl;
+				ss << "#endif" << std::endl;
+
 				ss << ";" << std::endl;
+
+				++ tex_unit;
 				break;
 
 			default:

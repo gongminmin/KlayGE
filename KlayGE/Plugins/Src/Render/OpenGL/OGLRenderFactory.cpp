@@ -37,6 +37,7 @@ namespace KlayGE
 	OGLRenderFactory::OGLRenderFactory()
 	{
 		context_ = cgCreateContext();
+		cgSetParameterSettingMode(context_, CG_DEFERRED_PARAMETER_SETTING);
 	}
 
 	CGcontext OGLRenderFactory::CGContext() const
