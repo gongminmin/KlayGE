@@ -39,8 +39,8 @@ half fast_fresnel(half3 eye, half3 normal, half R0)
 {
 	// R0 = pow(1.0 - refractionIndexRatio, 2.0) / pow(1.0 + refractionIndexRatio, 2.0);
 
-	half edn = max(0, dot(eye, normal));
-	return R0 + (1.0 - R0) * pow(1.0 - edn, 5);
+	half edn = max(0.0f, dot(eye, normal));
+	return R0 + (1.0f - R0) * pow(1.0f - edn, 5);
 }
 
 float3x3 my_refract3(float3 i, float3 n, float3 eta)
@@ -92,12 +92,11 @@ float4 RefractPS(float4 pos : POSITION,
 	half2 tex = pos_ss.xy / pos_ss.w;
 	tex.y *= flip;
 	tex = tex / 2 + 0.5f;
-	pos_ss += dir_ss * (tex2D(BackFace_Sampler, tex).w - incident.w);
+	float4 backface = tex2D(BackFace_Sampler, tex);
+	
+	pos_ss += dir_ss * (backface.w - incident.w);
 
-	tex = pos_ss.xy / pos_ss.w;
-	tex.y *= flip;
-	tex = tex / 2 + 0.5f;
-	half3 back_face_normal = tex2D(BackFace_Sampler, tex).xyz;
+	half3 back_face_normal = backface.xyz;
 
 	half3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
 	half3 reflect_vec = reflect(incident.xyz, normal);

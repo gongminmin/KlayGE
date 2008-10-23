@@ -641,13 +641,11 @@ namespace KlayGE
 
 	void OGLShaderObject::Bind()
 	{
-		cgGLBindProgram(shaders_[ST_VertexShader]);
-		cgGLEnableProfile(profiles_[ST_VertexShader]);
-		cgGLBindProgram(shaders_[ST_PixelShader]);
-		cgGLEnableProfile(profiles_[ST_PixelShader]);
-
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
+			cgGLBindProgram(shaders_[i]);
+			cgGLEnableProfile(profiles_[i]);
+
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
 			{
 				pb.func();

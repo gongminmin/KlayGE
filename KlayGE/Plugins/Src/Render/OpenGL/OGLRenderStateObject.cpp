@@ -188,7 +188,7 @@ namespace KlayGE
 		{
 		case TFO_Point:
 			re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 			break;
 
 		case TFO_Bilinear:
