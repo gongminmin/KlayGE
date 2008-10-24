@@ -151,30 +151,30 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9SurfacePtr src, dst;
 		for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 		{
 			for (uint32_t level = 0; level < maxLevel; ++ level)
 			{
-				IDirect3DSurface9* temp;
+				IDirect3DSurface9* src;
+				TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &src));
 
-				TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-				src = MakeCOMPtr(temp);
-
-				TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-				dst = MakeCOMPtr(temp);
+				IDirect3DSurface9* dst;
+				TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &dst));
 
 				if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 				{
-					if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
+					if (FAILED(d3dDevice_->StretchRect(src, NULL, dst, NULL, D3DTEXF_LINEAR)))
 					{
-						TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+						TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 					}
 				}
 				else
 				{
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 				}
+
+				src->Release();
+				dst->Release();
 			}
 		}
 
@@ -202,29 +202,29 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9SurfacePtr src, dst;
 		{
-			IDirect3DSurface9* temp;
+			IDirect3DSurface9* src;
+			TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &src));
 
-			TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-			src = MakeCOMPtr(temp);
-
-			TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &temp));
-			dst = MakeCOMPtr(temp);
+			IDirect3DSurface9* dst;
+			TIF(other.d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &dst));
 
 			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
-				if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), &dstRc, D3DTEXF_LINEAR)))
+				if (FAILED(d3dDevice_->StretchRect(src, &srcRc, dst, &dstRc, D3DTEXF_LINEAR)))
 				{
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
 				}
 			}
 			else
 			{
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
 			}
+
+			src->Release();
+			dst->Release();
 		}
 	}
 
@@ -247,8 +247,6 @@ namespace KlayGE
 
 	void D3D9TextureCube::BuildMipSubLevels()
 	{
-		ID3D9BaseTexturePtr d3dBaseTexture;
-
 		if (auto_gen_mipmaps_)
 		{
 			d3dTextureCube_->GenerateMipSubLevels();
@@ -267,14 +265,16 @@ namespace KlayGE
 
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
-					IDirect3DSurface9* temp;
-					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					ID3D9SurfacePtr src = MakeCOMPtr(temp);
+					IDirect3DSurface9* src;
+					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &src));
 
-					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+					IDirect3DSurface9* dst;
+					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &dst));
 
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
+
+					src->Release();
+					dst->Release();
 				}
 
 				d3dTextureCube->GenerateMipSubLevels();
@@ -288,22 +288,25 @@ namespace KlayGE
 
 				IDirect3DBaseTexture9* base;
 				d3dTextureCube->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
 
 				for (uint32_t face = D3DCUBEMAP_FACE_POSITIVE_X; face <= D3DCUBEMAP_FACE_NEGATIVE_Z; ++ face)
 				{
-					IDirect3DSurface9* temp;
-					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					ID3D9SurfacePtr src = MakeCOMPtr(temp);
+					IDirect3DSurface9* src;
+					TIF(d3dTextureCube_->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &src));
 
-					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &temp));
-					ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+					IDirect3DSurface9* dst;
+					TIF(d3dTextureCube->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), 0, &dst));
 
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
+
+					src->Release();
+					dst->Release();
 				}
 
-				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, 0, filter));
-				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
+				TIF(D3DXFilterTexture(base, NULL, 0, filter));
+				TIF(d3dDevice_->UpdateTexture(base, d3dBaseTexture_.get()));
+
+				base->Release();
 			}
 		}
 	}

@@ -165,18 +165,18 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9VolumePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
-			IDirect3DVolume9* temp;
+			IDirect3DVolume9* src;
+			TIF(d3dTexture3D_->GetVolumeLevel(level, &src));
 
-			TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
-			src = MakeCOMPtr(temp);
+			IDirect3DVolume9* dst;
+			TIF(other.d3dTexture3D_->GetVolumeLevel(level, &dst));
 
-			TIF(other.d3dTexture3D_->GetVolumeLevel(level, &temp));
-			dst = MakeCOMPtr(temp);
+			TIF(D3DXLoadVolumeFromVolume(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 
-			TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+			src->Release();
+			dst->Release();
 		}
 
 		if (this->NumMipMaps() != target.NumMipMaps())
@@ -206,21 +206,21 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9VolumePtr src, dst;
 		{
-			IDirect3DVolume9* temp;
+			IDirect3DVolume9* src;
+			TIF(d3dTexture3D_->GetVolumeLevel(level, &src));
 
-			TIF(d3dTexture3D_->GetVolumeLevel(level, &temp));
-			src = MakeCOMPtr(temp);
-
-			TIF(other.d3dTexture3D_->GetVolumeLevel(level, &temp));
-			dst = MakeCOMPtr(temp);
+			IDirect3DVolume9* dst;
+			TIF(other.d3dTexture3D_->GetVolumeLevel(level, &dst));
 
 			D3DBOX srcBox = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
 				src_zOffset, src_zOffset + src_depth };
 			D3DBOX dstBox = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
 				dst_zOffset, dst_zOffset + dst_depth };
-			TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, &dstBox, src.get(), NULL, &srcBox, filter, 0));
+			TIF(D3DXLoadVolumeFromVolume(dst, NULL, &dstBox, src, NULL, &srcBox, filter, 0));
+
+			src->Release();
+			dst->Release();
 		}
 	}
 
@@ -244,8 +244,6 @@ namespace KlayGE
 
 	void D3D9Texture3D::BuildMipSubLevels()
 	{
-		ID3D9BaseTexturePtr d3dBaseTexture;
-
 		if (auto_gen_mipmaps_)
 		{
 			d3dTexture3D_->GenerateMipSubLevels();
@@ -262,19 +260,21 @@ namespace KlayGE
 			{
 				ID3D9VolumeTexturePtr d3dTexture3D = this->CreateTexture3D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
-				IDirect3DVolume9* temp;
-				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
-				ID3D9VolumePtr src = MakeCOMPtr(temp);
+				IDirect3DVolume9* src;
+				TIF(d3dTexture3D_->GetVolumeLevel(0, &src));
 
-				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
-				ID3D9VolumePtr dst = MakeCOMPtr(temp);
+				IDirect3DVolume9* dst;
+				TIF(d3dTexture3D->GetVolumeLevel(0, &dst));
 
-				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+				TIF(D3DXLoadVolumeFromVolume(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 
 				d3dTexture3D->GenerateMipSubLevels();
 				d3dTexture3D_ = d3dTexture3D;
 
 				auto_gen_mipmaps_ = true;
+
+				src->Release();
+				dst->Release();
 			}
 			else
 			{
@@ -282,19 +282,21 @@ namespace KlayGE
 
 				IDirect3DBaseTexture9* base;
 				d3dTexture3D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
 
-				IDirect3DVolume9* temp;
-				TIF(d3dTexture3D_->GetVolumeLevel(0, &temp));
-				ID3D9VolumePtr src = MakeCOMPtr(temp);
+				IDirect3DVolume9* src;
+				TIF(d3dTexture3D_->GetVolumeLevel(0, &src));
 
-				TIF(d3dTexture3D->GetVolumeLevel(0, &temp));
-				ID3D9VolumePtr dst = MakeCOMPtr(temp);
+				IDirect3DVolume9* dst;
+				TIF(d3dTexture3D->GetVolumeLevel(0, &dst));
 
-				TIF(D3DXLoadVolumeFromVolume(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+				TIF(D3DXLoadVolumeFromVolume(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 
-				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, 0, filter));
-				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
+				TIF(D3DXFilterTexture(base, NULL, 0, filter));
+				TIF(d3dDevice_->UpdateTexture(base, d3dBaseTexture_.get()));
+
+				base->Release();
+				src->Release();
+				dst->Release();
 			}
 		}
 	}

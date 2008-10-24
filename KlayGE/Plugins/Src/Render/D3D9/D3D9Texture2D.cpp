@@ -152,28 +152,28 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9SurfacePtr src, dst;
 		for (uint32_t level = 0; level < maxLevel; ++ level)
 		{
-			IDirect3DSurface9* temp;
+			IDirect3DSurface9* src;
+			TIF(d3dTexture2D_->GetSurfaceLevel(level, &src));
 
-			TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
-			src = MakeCOMPtr(temp);
-
-			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
-			dst = MakeCOMPtr(temp);
+			IDirect3DSurface9* dst;
+			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &dst));
 
 			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
-				if (FAILED(d3dDevice_->StretchRect(src.get(), NULL, dst.get(), NULL, D3DTEXF_LINEAR)))
+				if (FAILED(d3dDevice_->StretchRect(src, NULL, dst, NULL, D3DTEXF_LINEAR)))
 				{
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 				}
 			}
 			else
 			{
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 			}
+
+			src->Release();
+			dst->Release();
 		}
 
 		if (this->NumMipMaps() != target.NumMipMaps())
@@ -200,29 +200,29 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9SurfacePtr src, dst;
 		{
-			IDirect3DSurface9* temp;
+			IDirect3DSurface9* src;
+			TIF(d3dTexture2D_->GetSurfaceLevel(level, &src));
 
-			TIF(d3dTexture2D_->GetSurfaceLevel(level, &temp));
-			src = MakeCOMPtr(temp);
-
-			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &temp));
-			dst = MakeCOMPtr(temp);
+			IDirect3DSurface9* dst;
+			TIF(other.d3dTexture2D_->GetSurfaceLevel(level, &dst));
 
 			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
 			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
 			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
 			{
-				if (FAILED(d3dDevice_->StretchRect(src.get(), &srcRc, dst.get(), &dstRc, D3DTEXF_LINEAR)))
+				if (FAILED(d3dDevice_->StretchRect(src, &srcRc, dst, &dstRc, D3DTEXF_LINEAR)))
 				{
-					TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
 				}
 			}
 			else
 			{
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, &dstRc, src.get(), NULL, &srcRc, filter, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
 			}
+
+			src->Release();
+			dst->Release();
 		}
 	}
 
@@ -244,8 +244,6 @@ namespace KlayGE
 
 	void D3D9Texture2D::BuildMipSubLevels()
 	{
-		ID3D9BaseTexturePtr d3dBaseTexture;
-
 		if (auto_gen_mipmaps_)
 		{
 			d3dTexture2D_->GenerateMipSubLevels();
@@ -262,19 +260,21 @@ namespace KlayGE
 			{
 				ID3D9TexturePtr d3dTexture2D = this->CreateTexture2D(D3DUSAGE_AUTOGENMIPMAP | D3DUSAGE_RENDERTARGET, D3DPOOL_DEFAULT);
 
-				IDirect3DSurface9* temp;
-				TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
-				ID3D9SurfacePtr src = MakeCOMPtr(temp);
+				IDirect3DSurface9* src;
+				TIF(d3dTexture2D_->GetSurfaceLevel(0, &src));
 
-				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
-				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+				IDirect3DSurface9* dst;
+				TIF(d3dTexture2D->GetSurfaceLevel(0, &dst));
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 
 				d3dTexture2D->GenerateMipSubLevels();
 				d3dTexture2D_ = d3dTexture2D;
 
 				auto_gen_mipmaps_ = true;
+
+				src->Release();
+				dst->Release();
 			}
 			else
 			{
@@ -282,19 +282,21 @@ namespace KlayGE
 
 				IDirect3DBaseTexture9* base;
 				d3dTexture2D->QueryInterface(IID_IDirect3DBaseTexture9, reinterpret_cast<void**>(&base));
-				d3dBaseTexture = MakeCOMPtr(base);
 
-				IDirect3DSurface9* temp;
-				TIF(d3dTexture2D_->GetSurfaceLevel(0, &temp));
-				ID3D9SurfacePtr src = MakeCOMPtr(temp);
+				IDirect3DSurface9* src;
+				TIF(d3dTexture2D_->GetSurfaceLevel(0, &src));
 
-				TIF(d3dTexture2D->GetSurfaceLevel(0, &temp));
-				ID3D9SurfacePtr dst = MakeCOMPtr(temp);
+				IDirect3DSurface9* dst;
+				TIF(d3dTexture2D->GetSurfaceLevel(0, &dst));
 
-				TIF(D3DXLoadSurfaceFromSurface(dst.get(), NULL, NULL, src.get(), NULL, NULL, filter, 0));
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, NULL, src, NULL, NULL, filter, 0));
 
-				TIF(D3DXFilterTexture(d3dBaseTexture.get(), NULL, 0, filter));
-				TIF(d3dDevice_->UpdateTexture(d3dBaseTexture.get(), d3dBaseTexture_.get()));
+				TIF(D3DXFilterTexture(base, NULL, 0, filter));
+				TIF(d3dDevice_->UpdateTexture(base, d3dBaseTexture_.get()));
+
+				base->Release();
+				src->Release();
+				dst->Release();
 			}
 		}
 	}
