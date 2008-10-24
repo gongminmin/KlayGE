@@ -83,9 +83,10 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
-		void SetTexture(TexturePtr texture)
+		void SetTexture(TexturePtr texture, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
+			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 	};
 
@@ -137,9 +138,10 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
-		void SetTexture(TexturePtr texture)
+		void SetTexture(TexturePtr texture, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
+			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 	};
 
@@ -284,7 +286,7 @@ uint32_t Fractal::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(render_buffer_[!odd]);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd]);
+		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd], render_buffer_[odd]->RequiresFlipping());
 		renderFractal_->AddToRenderQueue();
 		return App3DFramework::URV_Need_Flush;
 
@@ -292,7 +294,7 @@ uint32_t Fractal::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd]);
+		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd], render_buffer_[!odd]->RequiresFlipping());
 		renderPlane_->AddToRenderQueue();
 
 		odd = !odd;

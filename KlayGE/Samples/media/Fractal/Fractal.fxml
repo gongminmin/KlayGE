@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<parameter type="int" name="flip"/>
 	<parameter type="sampler2D" name="fractal_sampler">
 		<state name="filtering" value="point"/>
 		<state name="address_u" value="wrap"/>
@@ -18,7 +19,8 @@ void MandelbrotVS(float4 pos : POSITION,
 {
 	oPos = pos;
 	oTexcoord0 = texcoord0;
-	oTexcoord1 = texcoord0 * 2.4 - float2(1.8, 1.2);
+	oTexcoord0.y *= -flip;
+	oTexcoord1 = oTexcoord0 * 2.4 - float2(1.8, -1.2 * flip);
 }
 
 half4 MandelbrotPS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
@@ -29,7 +31,7 @@ half4 MandelbrotPS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
 
 	z = half2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 
-	return half4(z.xy, 0, 1);
+	return half4(z.xy, 1, 1);
 }
 		]]>
 	</shader>
@@ -54,7 +56,7 @@ void ShowVS(float4 pos : POSITION,
 
 float4 ShowPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
 {
-	half2 z = tex2D(fractal_sampler, texCoord0).rg;
+	half2 z = tex2D(fractal_sampler, texCoord0.xy).rg;
 	return float4((dot(z, z) >= 4) * texCoord0, 1);
 }
 		]]>
