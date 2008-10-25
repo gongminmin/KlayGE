@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_swizzle">
+	<tokens>
+		<token name="GL_TEXTURE_SWIZZLE_R_EXT" value="0x8E42"/>
+		<token name="GL_TEXTURE_SWIZZLE_G_EXT" value="0x8E43"/>
+		<token name="GL_TEXTURE_SWIZZLE_B_EXT" value="0x8E44"/>
+		<token name="GL_TEXTURE_SWIZZLE_A_EXT" value="0x8E45"/>
+		<token name="GL_TEXTURE_SWIZZLE_RGBA_EXT" value="0x8E46"/>
+	</tokens>
+</gl_extension>
