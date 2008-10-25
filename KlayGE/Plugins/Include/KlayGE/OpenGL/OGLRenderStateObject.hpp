@@ -24,6 +24,7 @@ namespace KlayGE
 		explicit OGLRasterizerStateObject(RasterizerStateDesc const & desc);
 
 		void Active();
+		void ForceDefaultState();
 	};
 
 	class OGLDepthStencilStateObject : public DepthStencilStateObject
@@ -32,6 +33,7 @@ namespace KlayGE
 		explicit OGLDepthStencilStateObject(DepthStencilStateDesc const & desc);
 
 		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
+		void ForceDefaultState();
 	};
 
 	class OGLBlendStateObject : public BlendStateObject
@@ -40,6 +42,7 @@ namespace KlayGE
 		explicit OGLBlendStateObject(BlendStateDesc const & desc);
 
 		void Active(Color const & blend_factor, uint32_t sample_mask);
+		void ForceDefaultState();
 	};
 
 	class OGLSamplerStateObject : public SamplerStateObject
@@ -48,6 +51,7 @@ namespace KlayGE
 		explicit OGLSamplerStateObject(SamplerStateDesc const & desc);
 
 		void Active(uint32_t stage, TexturePtr texture);
+		void Active(TexturePtr const & texture);
 	};
 }
 

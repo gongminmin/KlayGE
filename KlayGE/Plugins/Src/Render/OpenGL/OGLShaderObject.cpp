@@ -49,6 +49,7 @@
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
+#include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 namespace
@@ -355,59 +356,10 @@ namespace
 
 			if (sampler_ && sampler_->first)
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				GLuint const gl_tex = checked_pointer_cast<OGLTexture>(sampler_->first)->GLTexture();
+				checked_pointer_cast<OGLSamplerStateObject>(sampler_->second)->Active(sampler_->first);
 
-				OGLTexture& gl_tex = *checked_pointer_cast<OGLTexture>(sampler_->first);
-				GLenum tex_type = gl_tex.GLType();
-
-				SamplerStateDesc const & desc = sampler_->second->GetDesc();
-
-				glBindTexture(tex_type, gl_tex.GLTexture());
-
-				re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(desc.addr_mode_u));
-				re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(desc.addr_mode_v));
-				re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(desc.addr_mode_w));
-
-				{
-					float tmp[4];
-					glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
-					if ((tmp[0] != desc.border_clr.r())
-						|| (tmp[1] != desc.border_clr.g())
-						|| (tmp[2] != desc.border_clr.b())
-						|| (tmp[3] != desc.border_clr.a()))
-					{
-						glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &desc.border_clr.r());
-					}
-				}
-
-				switch (desc.filter)
-				{
-				case TFO_Point:
-					re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-					break;
-
-				case TFO_Bilinear:
-					re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-					break;
-
-				case TFO_Trilinear:
-				case TFO_Anisotropic:
-					re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc.anisotropy);
-				re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, desc.max_mip_level);
-				re.TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc.mip_map_lod_bias);
-
-				cgGLSetTextureParameter(cg_param_, gl_tex.GLTexture());
+				cgGLSetTextureParameter(cg_param_, gl_tex);
 			}
 		}
 

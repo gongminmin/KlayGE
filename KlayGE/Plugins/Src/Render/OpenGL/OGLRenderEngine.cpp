@@ -69,6 +69,7 @@
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -203,9 +204,13 @@ namespace KlayGE
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
 		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
-		cur_rs_obj_->Active();
-		cur_dss_obj_->Active(0, 0);
-		cur_bs_obj_->Active(Color(1, 1, 1, 1), 0xFFFFFFFF);
+		checked_pointer_cast<OGLRasterizerStateObject>(cur_rs_obj_)->ForceDefaultState();
+		checked_pointer_cast<OGLDepthStencilStateObject>(cur_dss_obj_)->ForceDefaultState();
+		checked_pointer_cast<OGLBlendStateObject>(cur_bs_obj_)->ForceDefaultState();
+
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glEnable(GL_POLYGON_OFFSET_LINE);
 	}
 
 	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)

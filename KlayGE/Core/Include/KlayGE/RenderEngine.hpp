@@ -111,6 +111,35 @@ namespace KlayGE
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
+		
+		RasterizerStateObjectPtr const & CurRSObj() const
+		{
+			return cur_rs_obj_;
+		}
+		DepthStencilStateObjectPtr const & CurDSSObj() const
+		{
+			return cur_dss_obj_;
+		}
+		uint16_t CurFrontStencilRef() const
+		{
+			return cur_front_stencil_ref_;
+		}
+		uint16_t CurBackStencilRef() const
+		{
+			return cur_back_stencil_ref_;
+		}
+		BlendStateObjectPtr const & CurBSObj() const
+		{
+			return cur_bs_obj_;
+		}
+		Color const & CurBlendFactor() const
+		{
+			return cur_blend_factor_;
+		}
+		uint32_t CurSampleMask() const
+		{
+			return cur_sample_mask_;
+		}
 
 	protected:
 		virtual void DoBindFrameBuffer(FrameBufferPtr fb) = 0;
