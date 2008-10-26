@@ -140,8 +140,4 @@ namespace KlayGE
 		TIF(d3d_device->CreateSamplerState(&d3d_desc, &sampler_state));
 		sampler_state_ = MakeCOMPtr(sampler_state);
 	}
-
-	void D3D10SamplerStateObject::Active(uint32_t /*stage*/, TexturePtr /*texture*/)
-	{
-	}
 }

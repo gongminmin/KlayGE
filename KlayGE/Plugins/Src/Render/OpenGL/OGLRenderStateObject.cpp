@@ -24,7 +24,10 @@
 namespace KlayGE
 {
 	OGLRasterizerStateObject::OGLRasterizerStateObject(RasterizerStateDesc const & desc)
-		: RasterizerStateObject(desc)
+		: RasterizerStateObject(desc),
+			ogl_polygon_mode_(OGLMapping::Mapping(desc_.polygon_mode)),
+			ogl_shade_mode_(OGLMapping::Mapping(desc_.shade_mode)),
+			ogl_front_face_(desc_.front_face_ccw ? GL_CCW : GL_CW)
 	{
 	}
 
@@ -36,11 +39,11 @@ namespace KlayGE
 
 		if (cur_desc.polygon_mode != desc_.polygon_mode)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, OGLMapping::Mapping(desc_.polygon_mode));
+			glPolygonMode(GL_FRONT_AND_BACK, ogl_polygon_mode_);
 		}
 		if (cur_desc.shade_mode != desc_.shade_mode)
 		{
-			glShadeModel(OGLMapping::Mapping(desc_.shade_mode));
+			glShadeModel(ogl_shade_mode_);
 		}
 		if (cur_desc.cull_mode != desc_.cull_mode)
 		{
@@ -64,7 +67,7 @@ namespace KlayGE
 
 		if (cur_desc.front_face_ccw != desc_.front_face_ccw)
 		{
-			glFrontFace(desc_.front_face_ccw ? GL_CCW : GL_CW);
+			glFrontFace(ogl_front_face_);
 		}
 
 		if ((cur_desc.polygon_offset_factor != desc_.polygon_offset_factor)
@@ -151,7 +154,17 @@ namespace KlayGE
 
 
 	OGLDepthStencilStateObject::OGLDepthStencilStateObject(DepthStencilStateDesc const & desc)
-		: DepthStencilStateObject(desc)
+		: DepthStencilStateObject(desc),
+			ogl_depth_write_mask_(desc_.depth_write_mask ? GL_TRUE : GL_FALSE),
+			ogl_depth_func_(OGLMapping::Mapping(desc_.depth_func)),
+			ogl_front_stencil_func_(OGLMapping::Mapping(desc_.front_stencil_func)),
+			ogl_front_stencil_fail_(OGLMapping::Mapping(desc_.front_stencil_fail)),
+			ogl_front_stencil_depth_fail_(OGLMapping::Mapping(desc_.front_stencil_depth_fail)),
+			ogl_front_stencil_pass_(OGLMapping::Mapping(desc_.front_stencil_pass)),
+			ogl_back_stencil_func_(OGLMapping::Mapping(desc_.back_stencil_func)),
+			ogl_back_stencil_fail_(OGLMapping::Mapping(desc_.back_stencil_fail)),
+			ogl_back_stencil_depth_fail_(OGLMapping::Mapping(desc_.back_stencil_depth_fail)),
+			ogl_back_stencil_pass_(OGLMapping::Mapping(desc_.back_stencil_pass))
 	{
 	}
 
@@ -176,26 +189,26 @@ namespace KlayGE
 		}
 		if (cur_desc.depth_write_mask != desc_.depth_write_mask)
 		{
-			glDepthMask(desc_.depth_write_mask ? GL_TRUE : GL_FALSE);
+			glDepthMask(ogl_depth_write_mask_);
 		}
 		if (cur_desc.depth_func != desc_.depth_func)
 		{
-			glDepthFunc(OGLMapping::Mapping(desc_.depth_func));
+			glDepthFunc(ogl_depth_func_);
 		}
 
 		if ((cur_desc.front_stencil_func != desc_.front_stencil_func)
 			|| (cur_front_stencil_ref != front_stencil_ref)
 			|| (cur_desc.front_stencil_read_mask != desc_.front_stencil_read_mask))
 		{
-			glStencilFuncSeparate(GL_FRONT, OGLMapping::Mapping(desc_.front_stencil_func),
+			glStencilFuncSeparate(GL_FRONT, ogl_front_stencil_func_,
 					front_stencil_ref, desc_.front_stencil_read_mask);
 		}
 		if ((cur_desc.front_stencil_fail != desc_.front_stencil_fail)
 			|| (cur_desc.front_stencil_depth_fail != desc_.front_stencil_depth_fail)
 			|| (cur_desc.front_stencil_pass != desc_.front_stencil_pass))
 		{
-			glStencilOpSeparate(GL_FRONT, OGLMapping::Mapping(desc_.front_stencil_fail),
-					OGLMapping::Mapping(desc_.front_stencil_depth_fail), OGLMapping::Mapping(desc_.front_stencil_pass));
+			glStencilOpSeparate(GL_FRONT, ogl_front_stencil_fail_,
+					ogl_front_stencil_depth_fail_, ogl_front_stencil_pass_);
 		}
 		if (cur_desc.front_stencil_write_mask != desc_.front_stencil_write_mask)
 		{
@@ -206,15 +219,15 @@ namespace KlayGE
 			|| (cur_back_stencil_ref != back_stencil_ref)
 			|| (cur_desc.back_stencil_read_mask != desc_.back_stencil_read_mask))
 		{
-			glStencilFuncSeparate(GL_BACK, OGLMapping::Mapping(desc_.back_stencil_func),
+			glStencilFuncSeparate(GL_BACK, ogl_back_stencil_func_,
 					back_stencil_ref, desc_.back_stencil_read_mask);
 		}
 		if ((cur_desc.back_stencil_fail != desc_.back_stencil_fail)
 			|| (cur_desc.back_stencil_depth_fail != desc_.back_stencil_depth_fail)
 			|| (cur_desc.back_stencil_pass != desc_.back_stencil_pass))
 		{
-			glStencilOpSeparate(GL_BACK, OGLMapping::Mapping(desc_.back_stencil_fail),
-					OGLMapping::Mapping(desc_.back_stencil_depth_fail), OGLMapping::Mapping(desc_.back_stencil_pass));
+			glStencilOpSeparate(GL_BACK, ogl_back_stencil_fail_,
+					ogl_back_stencil_depth_fail_, ogl_back_stencil_pass_);
 		}
 		if (cur_desc.back_stencil_write_mask != desc_.back_stencil_write_mask)
 		{
@@ -274,7 +287,13 @@ namespace KlayGE
 
 
 	OGLBlendStateObject::OGLBlendStateObject(BlendStateDesc const & desc)
-		: BlendStateObject(desc)
+		: BlendStateObject(desc),
+			ogl_blend_op_(OGLMapping::Mapping(desc_.blend_op[0])),
+			ogl_blend_op_alpha_(OGLMapping::Mapping(desc_.blend_op_alpha[0])),
+			ogl_src_blend_(OGLMapping::Mapping(desc_.src_blend[0])),
+			ogl_dest_blend_(OGLMapping::Mapping(desc_.dest_blend[0])),
+			ogl_src_blend_alpha_(OGLMapping::Mapping(desc_.src_blend_alpha[0])),
+			ogl_dest_blend_alpha_(OGLMapping::Mapping(desc_.dest_blend_alpha[0]))
 	{
 	}
 
@@ -309,15 +328,15 @@ namespace KlayGE
 		}
 		if (cur_desc.blend_op[0] != desc_.blend_op[0])
 		{
-			glBlendEquationSeparate(OGLMapping::Mapping(desc_.blend_op[0]), OGLMapping::Mapping(desc_.blend_op_alpha[0]));
+			glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
 		}
 		if ((cur_desc.src_blend[0] != desc_.src_blend[0])
 			|| (cur_desc.dest_blend[0] != desc_.dest_blend[0])
 			|| (cur_desc.src_blend_alpha[0] != desc_.src_blend_alpha[0])
 			|| (cur_desc.dest_blend_alpha[0] != desc_.dest_blend_alpha[0]))
 		{
-			glBlendFuncSeparate(OGLMapping::Mapping(desc_.src_blend[0]), OGLMapping::Mapping(desc_.dest_blend[0]),
-					OGLMapping::Mapping(desc_.src_blend_alpha[0]), OGLMapping::Mapping(desc_.dest_blend_alpha[0]));
+			glBlendFuncSeparate(ogl_src_blend_, ogl_dest_blend_,
+					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
 		}
 		if (cur_desc.color_write_mask[0] != desc_.color_write_mask[0])
 		{
@@ -366,8 +385,35 @@ namespace KlayGE
 
 
 	OGLSamplerStateObject::OGLSamplerStateObject(SamplerStateDesc const & desc)
-		: SamplerStateObject(desc)
+		: SamplerStateObject(desc),
+			ogl_addr_mode_u_(OGLMapping::Mapping(desc_.addr_mode_u)),
+			ogl_addr_mode_v_(OGLMapping::Mapping(desc_.addr_mode_v)),
+			ogl_addr_mode_w_(OGLMapping::Mapping(desc_.addr_mode_w))
 	{
+		switch (desc_.filter)
+		{
+		case TFO_Point:
+			ogl_min_filter_ = GL_NEAREST;
+			ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+			break;
+
+		case TFO_Bilinear:
+			ogl_min_filter_ = GL_LINEAR;
+			ogl_mag_filter_ = GL_LINEAR_MIPMAP_NEAREST;
+			break;
+
+		case TFO_Trilinear:
+		case TFO_Anisotropic:
+			ogl_min_filter_ = GL_LINEAR;
+			ogl_mag_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			ogl_min_filter_ = GL_NEAREST;
+			ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+			break;
+		}
 	}
 
 	void OGLSamplerStateObject::Active(uint32_t /*stage*/, TexturePtr /*texture*/)
@@ -384,9 +430,9 @@ namespace KlayGE
 
 		glBindTexture(tex_type, gl_tex);
 
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(desc_.addr_mode_u));
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(desc_.addr_mode_v));
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(desc_.addr_mode_w));
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
+		re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
 
 		{
 			float tmp[4];
@@ -400,33 +446,8 @@ namespace KlayGE
 			}
 		}
 
-		GLint min_filter, mag_filter;
-		switch (desc_.filter)
-		{
-		case TFO_Point:
-			min_filter = GL_NEAREST;
-			mag_filter = GL_NEAREST_MIPMAP_NEAREST;
-			break;
-
-		case TFO_Bilinear:
-			min_filter = GL_LINEAR;
-			mag_filter = GL_LINEAR_MIPMAP_NEAREST;
-			break;
-
-		case TFO_Trilinear:
-		case TFO_Anisotropic:
-			min_filter = GL_LINEAR;
-			mag_filter = GL_LINEAR_MIPMAP_LINEAR;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			min_filter = GL_NEAREST;
-			mag_filter = GL_NEAREST_MIPMAP_NEAREST;
-			break;
-		}
-		re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, min_filter);
-		re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, mag_filter);
+		re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, ogl_min_filter_);
+		re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, ogl_mag_filter_);
 
 		re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
 		re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);

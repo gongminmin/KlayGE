@@ -16,6 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -26,6 +27,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 
@@ -73,6 +75,8 @@ namespace KlayGE
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
 		GLint old_fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
 
@@ -85,13 +89,13 @@ namespace KlayGE
 		if (flags & CBM_Color)
 		{
 			ogl_flags |= GL_COLOR_BUFFER_BIT;
-			glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
 		}
 		bool depth_mask_changed = false;
 		if (flags & CBM_Depth)
 		{
 			ogl_flags |= GL_DEPTH_BUFFER_BIT;
-			glClearDepth(depth);
+			re.ClearDepth(depth);
 
 			GLint m;
 			glGetIntegerv(GL_DEPTH_WRITEMASK, &m);
@@ -105,7 +109,7 @@ namespace KlayGE
 		if (flags & CBM_Stencil)
 		{
 			ogl_flags |= GL_STENCIL_BUFFER_BIT;
-			glClearStencil(stencil);
+			re.ClearStencil(stencil);
 
 			GLint m;
 			glGetIntegerv(GL_STENCIL_WRITEMASK, &m);

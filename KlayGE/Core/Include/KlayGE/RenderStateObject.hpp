@@ -334,8 +334,6 @@ namespace KlayGE
 
 		static SamplerStateObjectPtr NullObject();
 
-		virtual void Active(uint32_t stage, TexturePtr texture) = 0;
-
 	protected:
 		SamplerStateDesc desc_;
 	};

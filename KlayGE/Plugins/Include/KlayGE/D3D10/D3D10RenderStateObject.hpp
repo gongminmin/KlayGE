@@ -71,8 +71,6 @@ namespace KlayGE
 	public:
 		explicit D3D10SamplerStateObject(SamplerStateDesc const & desc);
 
-		void Active(uint32_t stage, TexturePtr texture);
-
 		ID3D10SamplerStatePtr const & D3DSamplerState() const
 		{
 			return sampler_state_;

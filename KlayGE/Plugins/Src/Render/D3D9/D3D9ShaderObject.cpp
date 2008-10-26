@@ -34,6 +34,7 @@
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>
+#include <KlayGE/D3D9/D3D9RenderStateObject.hpp>
 #include <KlayGE/D3D9/D3D9ShaderObject.hpp>
 
 namespace
@@ -879,7 +880,7 @@ namespace KlayGE
 				}
 				else
 				{
-					sampler.second->Active(stage, sampler.first);
+					checked_pointer_cast<D3D9SamplerStateObject>(sampler.second)->Active(stage, sampler.first);
 				}
 			}
 		}

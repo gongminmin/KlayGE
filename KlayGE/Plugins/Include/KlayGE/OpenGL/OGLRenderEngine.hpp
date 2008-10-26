@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <map>
+#include <boost/array.hpp>
 
 #include <glloader/glloader.h>
 
@@ -72,6 +73,9 @@ namespace KlayGE
 
 		void TexParameter(GLenum target, GLenum pname, GLint param);
 		void TexEnv(GLenum target, GLenum pname, GLfloat param);
+		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
+		void ClearDepth(GLfloat depth);
+		void ClearStencil(GLuint stencil);
 
 		void GetFBOForBlit(GLuint& src, GLuint& dst)
 		{
@@ -89,6 +93,10 @@ namespace KlayGE
 	private:
 		GLuint fbo_blit_src_;
 		GLuint fbo_blit_dst_;
+
+		boost::array<GLfloat, 4> clear_clr_;
+		GLfloat clear_depth_;
+		GLuint clear_stencil_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

@@ -86,8 +86,10 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
-		: fbo_blit_src_(0), fbo_blit_dst_(0)
+		: fbo_blit_src_(0), fbo_blit_dst_(0),
+			clear_depth_(1), clear_stencil_(0)
 	{
+		clear_clr_.assign(0);
 	}
 
 	// 析构函数
@@ -230,6 +232,36 @@ namespace KlayGE
 		if (tmp != param)
 		{
 			glTexEnvf(target, pname, param);
+		}
+	}
+
+	void OGLRenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+	{
+		if ((clear_clr_[0] != r) || (clear_clr_[1] != g) || (clear_clr_[2] != b) || (clear_clr_[3] != a))
+		{
+			glClearColor(r, g, b, a);
+			clear_clr_[0] = r;
+			clear_clr_[1] = g;
+			clear_clr_[2] = b;
+			clear_clr_[3] = a;
+		}
+	}
+
+	void OGLRenderEngine::ClearDepth(GLfloat depth)
+	{
+		if (depth != clear_depth_)
+		{
+			glClearDepth(depth);
+			clear_depth_ = depth;
+		}
+	}
+
+	void OGLRenderEngine::ClearStencil(GLuint stencil)
+	{
+		if (stencil != clear_stencil_)
+		{
+			glClearStencil(stencil);
+			clear_stencil_ = stencil;
 		}
 	}
 
