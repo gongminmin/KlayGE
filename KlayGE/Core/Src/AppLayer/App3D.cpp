@@ -107,7 +107,7 @@ namespace KlayGE
 	Camera const & App3DFramework::ActiveCamera() const
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		CameraPtr camera = re.CurFrameBuffer()->GetViewport().camera;
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
 		BOOST_ASSERT(camera);
 
 		return *camera;
@@ -116,7 +116,7 @@ namespace KlayGE
 	Camera& App3DFramework::ActiveCamera()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		CameraPtr camera = re.CurFrameBuffer()->GetViewport().camera;
+		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
 		BOOST_ASSERT(camera);
 
 		return *camera;

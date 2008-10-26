@@ -56,16 +56,15 @@ namespace KlayGE
 
 		bpp_ = NumFormatBits(format);
 
-		D3D10_TEXTURE2D_DESC desc;
-		desc.Width = width;
-		desc.Height = height;
-		desc.MipLevels = numMipMaps_;
-		desc.ArraySize = 1;
-		desc.Format = D3D10Mapping::MappingFormat(format_);
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
+		desc_.Width = width;
+		desc_.Height = height;
+		desc_.MipLevels = numMipMaps_;
+		desc_.ArraySize = 1;
+		desc_.Format = D3D10Mapping::MappingFormat(format_);
+		desc_.SampleDesc.Count = 1;
+		desc_.SampleDesc.Quality = 0;
 
-		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
+		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
 		D3D10_SUBRESOURCE_DATA subres_data;
 		if (init_data != NULL)
@@ -76,7 +75,7 @@ namespace KlayGE
 		}
 
 		ID3D10Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc, (init_data != NULL) ? &subres_data : NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != NULL) ? &subres_data : NULL, &d3d_tex));
 		d3dTexture2D_ = MakeCOMPtr(d3d_tex);
 
 		if (access_hint_ & EAH_GPU_Read)
@@ -227,6 +226,22 @@ namespace KlayGE
 	{
 		if (d3d_sr_view_)
 		{
+			if (!(desc_.MiscFlags & D3D10_RESOURCE_MISC_GENERATE_MIPS))
+			{
+				desc_.MiscFlags |= D3D10_RESOURCE_MISC_GENERATE_MIPS;
+
+				ID3D10Texture2D* d3d_tex;
+				TIF(d3d_device_->CreateTexture2D(&desc_, NULL, &d3d_tex));
+
+				d3d_device_->CopyResource(d3d_tex, d3dTexture2D_.get());
+
+				d3dTexture2D_ = MakeCOMPtr(d3d_tex);
+
+				ID3D10ShaderResourceView* d3d_sr_view;
+				d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), NULL, &d3d_sr_view);
+				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
+			}
+
 			d3d_device_->GenerateMips(d3d_sr_view_.get());
 		}
 		else
@@ -237,23 +252,22 @@ namespace KlayGE
 
 	void D3D10Texture2D::UpdateParams()
 	{
-		D3D10_TEXTURE2D_DESC desc;
-		d3dTexture2D_->GetDesc(&desc);
+		d3dTexture2D_->GetDesc(&desc_);
 
-		numMipMaps_ = static_cast<uint16_t>(desc.MipLevels);
+		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);
 		heights_.resize(numMipMaps_);
-		widthes_[0] = desc.Width;
-		heights_[0] = desc.Height;
+		widthes_[0] = desc_.Width;
+		heights_[0] = desc_.Height;
 		for (uint16_t level = 1; level < numMipMaps_; ++ level)
 		{
 			widthes_[level] = widthes_[level - 1] / 2;
 			heights_[level] = heights_[level - 1] / 2;
 		}
 
-		format_ = D3D10Mapping::MappingFormat(desc.Format);
+		format_ = D3D10Mapping::MappingFormat(desc_.Format);
 		bpp_	= NumFormatBits(format_);
 	}
 }

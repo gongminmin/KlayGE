@@ -87,7 +87,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
-			clear_depth_(1), clear_stencil_(0)
+			clear_depth_(1), clear_stencil_(0),
+			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0)
 	{
 		clear_clr_.assign(0);
 	}
@@ -215,23 +216,47 @@ namespace KlayGE
 		glEnable(GL_POLYGON_OFFSET_LINE);
 	}
 
-	void OGLRenderEngine::TexParameter(GLenum target, GLenum pname, GLint param)
+	void OGLRenderEngine::TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param)
 	{
-		GLint tmp;
-		glGetTexParameteriv(target, pname, &tmp);
-		if (tmp != param)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-			glTexParameteri(target, pname, param);
+			GLint tmp;
+			glGetTextureParameterivEXT(tex, target, pname, &tmp);
+			if (tmp != param)
+			{
+				glTextureParameteriEXT(tex, target, pname, param);
+			}
+		}
+		else
+		{
+			GLint tmp;
+			glGetTexParameteriv(target, pname, &tmp);
+			if (tmp != param)
+			{
+				glTexParameteri(target, pname, param);
+			}
 		}
 	}
 
-	void OGLRenderEngine::TexEnv(GLenum target, GLenum pname, GLfloat param)
+	void OGLRenderEngine::TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param)
 	{
-		GLfloat tmp;
-		glGetTexEnvfv(target, pname, &tmp);
-		if (tmp != param)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-			glTexEnvf(target, pname, param);
+			GLfloat tmp;
+			glGetMultiTexEnvfvEXT(tex_unit, target, pname, &tmp);
+			if (tmp != param)
+			{
+				glMultiTexEnvfEXT(tex_unit, target, pname, param);
+			}
+		}
+		else
+		{
+			GLfloat tmp;
+			glGetTexEnvfv(target, pname, &tmp);
+			if (tmp != param)
+			{
+				glTexEnvf(target, pname, param);
+			}
 		}
 	}
 
@@ -267,12 +292,20 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoBindFrameBuffer(FrameBufferPtr fb)
+	void OGLRenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
 	{
 		BOOST_ASSERT(fb);
 
-		Viewport const & vp(fb->GetViewport());
-		glViewport(vp.left, vp.top, vp.width, vp.height);
+		Viewport const & vp = fb->GetViewport();
+		if ((vp_x_ != vp.left) || (vp_y_ != vp.top) || (vp_width_ != vp.width) || (vp_height_ != vp.height))
+		{
+			glViewport(vp.left, vp.top, vp.width, vp.height);
+
+			vp_x_ = vp.left;
+			vp_y_ = vp.top;
+			vp_width_ = vp.width;
+			vp_height_ = vp.height;
+		}
 	}
 
 	// 开始一帧
@@ -285,12 +318,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+		glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
 
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
-		FrameBufferPtr fb = this->CurFrameBuffer();
+		FrameBufferPtr const & fb = this->CurFrameBuffer();
 		if (fb != this->DefaultFrameBuffer())
 		{
 			std::vector<GLenum> targets;
@@ -362,10 +395,18 @@ namespace KlayGE
 					break;
 
 				case VEU_TextureCoord:
-					glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
 					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-					stream.Active();
-					glTexCoordPointer(num_components, type, size, offset);
+					if (glloader_GL_EXT_direct_state_access())
+					{
+						stream.Active();
+						glMultiTexCoordPointerEXT(GL_TEXTURE0 + vs_elem.usage_index, num_components, type, size, offset);
+					}
+					else
+					{
+						glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+						stream.Active();
+						glTexCoordPointer(num_components, type, size, offset);
+					}
 					break;
 
 				case VEU_Tangent:

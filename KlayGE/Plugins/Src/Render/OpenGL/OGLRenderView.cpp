@@ -26,28 +26,6 @@
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 
-namespace
-{
-	bool CheckFrameBufferStatus()
-	{
-		GLenum status;
-		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		switch (status)
-		{
-		case GL_FRAMEBUFFER_COMPLETE_EXT:
-			return true;
-
-		case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-			// choose different formats
-			return false;
-
-		default:
-			BOOST_ASSERT(false);
-			return false;
-		}
-	}
-}
-
 namespace KlayGE
 {
 	OGLRenderView::OGLRenderView()
@@ -252,31 +230,56 @@ namespace KlayGE
 	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			switch (att)
 			{
-				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture1DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture1DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+				}
+				break;
 
-		default:
-			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
-			break;
+			default:
+				glNamedFramebufferTexture1DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+				break;
+			}
 		}
-		BOOST_ASSERT(CheckFrameBufferStatus());
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, tex_, level_);
+				}
+				break;
+
+			default:
+				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -284,30 +287,56 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			switch (att)
 			{
-				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture1DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture1DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+				}
+				break;
 
-		default:
-			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
-			break;
+			default:
+				glNamedFramebufferTexture1DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+				break;
+			}
 		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_1D, 0, 0);
+				}
+				break;
+
+			default:
+				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 
@@ -342,31 +371,56 @@ namespace KlayGE
 	void OGLTexture2DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			switch (att)
 			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+				}
+				break;
 
-		default:
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
-			break;
+			default:
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+				break;
+			}
 		}
-		BOOST_ASSERT(CheckFrameBufferStatus());
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+				}
+				break;
+
+			default:
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -374,30 +428,56 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			switch (att)
 			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+				}
+				break;
 
-		default:
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
-			break;
+			default:
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+				break;
+			}
 		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+				}
+				break;
+
+			default:
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 
@@ -433,86 +513,169 @@ namespace KlayGE
 	void OGLTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		if (0 == copy_to_tex_)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-			glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
-
-			GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-			if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+			if (0 == copy_to_tex_)
 			{
-				glGenTextures(1, &tex_2d_);
-				glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_2d_);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
-					0, GL_RGBA, GL_FLOAT, NULL);
-				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glNamedFramebufferTexture3DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
 
-				copy_to_tex_ = 2;
+				GLenum status = glCheckNamedFramebufferStatusEXT(fbo_, GL_FRAMEBUFFER_EXT);
+				if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+				{
+					glGenTextures(1, &tex_2d_);
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+					glTextureImage2DEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB,
+                               0, GL_RGBA32F_ARB,
+                               width_, height_, 0,
+                               GL_RGBA, GL_FLOAT, NULL);
+					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+					copy_to_tex_ = 2;
+				}
+				else
+				{
+					copy_to_tex_ = 1;
+				}
+			}
+
+			if (1 == copy_to_tex_)
+			{
+				switch (att)
+				{
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture3DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture3DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+					}
+					break;
+
+				default:
+					glNamedFramebufferTexture3DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_3D, tex_, level_, slice_);
+					break;
+				}
 			}
 			else
 			{
-				copy_to_tex_ = 1;
-			}
-		}
+				BOOST_ASSERT(2 == copy_to_tex_);
 
-		if (1 == copy_to_tex_)
-		{
-			switch (att)
-			{
-			case FrameBuffer::ATT_DepthStencil:
-				if (IsDepthFormat(pf_))
+				switch (att)
 				{
-					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
-				}
-				if (IsStencilFormat(pf_))
-				{
-					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
-				}
-				break;
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					}
+					break;
 
-			default:
-				glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-					GL_TEXTURE_3D, tex_, level_, slice_);
-				break;
+				default:
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					break;
+				}
 			}
 		}
 		else
 		{
-			BOOST_ASSERT(2 == copy_to_tex_);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-			switch (att)
+			if (0 == copy_to_tex_)
 			{
-			case FrameBuffer::ATT_DepthStencil:
-				if (IsDepthFormat(pf_))
-				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
-				}
-				if (IsStencilFormat(pf_))
-				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
-				}
-				break;
+				glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
 
-			default:
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-					GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
-				break;
+				GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+				if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+				{
+					glGenTextures(1, &tex_2d_);
+					glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_2d_);
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+					glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
+						0, GL_RGBA, GL_FLOAT, NULL);
+					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+					copy_to_tex_ = 2;
+				}
+				else
+				{
+					copy_to_tex_ = 1;
+				}
 			}
-		}
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			if (1 == copy_to_tex_)
+			{
+				switch (att)
+				{
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, tex_, level_, slice_);
+					}
+					break;
+
+				default:
+					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_3D, tex_, level_, slice_);
+					break;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(2 == copy_to_tex_);
+
+				switch (att)
+				{
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					}
+					break;
+
+				default:
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_RECTANGLE_ARB, tex_2d_, 0);
+					break;
+				}
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLTexture3DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -520,63 +683,122 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		BOOST_ASSERT(copy_to_tex_ != 0);
-		if (1 == copy_to_tex_)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-			switch (att)
+			BOOST_ASSERT(copy_to_tex_ != 0);
+			if (1 == copy_to_tex_)
 			{
-			case FrameBuffer::ATT_DepthStencil:
-				if (IsDepthFormat(pf_))
+				switch (att)
 				{
-					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
-				}
-				if (IsStencilFormat(pf_))
-				{
-					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
-				}
-				break;
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture3DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture3DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+					}
+					break;
 
-			default:
-				glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-					GL_TEXTURE_3D, 0, 0, 0);
-				break;
+				default:
+					glNamedFramebufferTexture3DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_3D, 0, 0, 0);
+					break;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(2 == copy_to_tex_);
+
+				switch (att)
+				{
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					}
+					break;
+
+				default:
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					break;
+				}
+
+				this->CopyToSlice(att);
 			}
 		}
 		else
 		{
-			BOOST_ASSERT(2 == copy_to_tex_);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-			switch (att)
+			BOOST_ASSERT(copy_to_tex_ != 0);
+			if (1 == copy_to_tex_)
 			{
-			case FrameBuffer::ATT_DepthStencil:
-				if (IsDepthFormat(pf_))
+				switch (att)
 				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
-				}
-				if (IsStencilFormat(pf_))
-				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
-				}
-				break;
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_3D, 0, 0, 0);
+					}
+					break;
 
-			default:
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-					GL_TEXTURE_RECTANGLE_ARB, 0, 0);
-				break;
+				default:
+					glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_3D, 0, 0, 0);
+					break;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(2 == copy_to_tex_);
+
+				switch (att)
+				{
+				case FrameBuffer::ATT_DepthStencil:
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					}
+					break;
+
+				default:
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+						GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+					break;
+				}
+
+				this->CopyToSlice(att);
 			}
 
-			this->CopyToSlice(att);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		}
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
 	void OGLTexture3DRenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t att)
@@ -638,33 +860,60 @@ namespace KlayGE
 	void OGLTextureCubeRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+			switch (att)
 			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+				}
+				break;
 
-		default:
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-				face, tex_, level_);
-			break;
+			default:
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					face, tex_, level_);
+				break;
+			}
 		}
-		BOOST_ASSERT(CheckFrameBufferStatus());
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+				}
+				break;
+
+			default:
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					face, tex_, level_);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -672,32 +921,60 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
-		switch (att)
+		if (glloader_GL_EXT_direct_state_access())
 		{
-		case FrameBuffer::ATT_DepthStencil:
-			if (IsDepthFormat(pf_))
+			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+			switch (att)
 			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
-			}
-			if (IsStencilFormat(pf_))
-			{
-				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
-			}
-			break;
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glNamedFramebufferTexture2DEXT(fbo_,
+						GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+				}
+				break;
 
-		default:
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-				face, 0, 0);
-			break;
+			default:
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					face, 0, 0);
+				break;
+			}
 		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+			switch (att)
+			{
+			case FrameBuffer::ATT_DepthStencil:
+				if (IsDepthFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+				}
+				if (IsStencilFormat(pf_))
+				{
+					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+				}
+				break;
+
+			default:
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					face, 0, 0);
+				break;
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 
@@ -745,14 +1022,22 @@ namespace KlayGE
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
+		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-				GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
-		BOOST_ASSERT(CheckFrameBufferStatus());
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					GL_TEXTURE_RECTANGLE_ARB, tex_, 0);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -760,15 +1045,26 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			this->CopyToGB(att);
 
-		this->CopyToGB(att);
+			glNamedFramebufferTexture2DEXT(fbo_,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-				GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
-				GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+			this->CopyToGB(att);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
+					GL_TEXTURE_RECTANGLE_ARB, 0, 0);
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLGraphicsBufferRenderView::OnUnbind(FrameBuffer& fb, uint32_t att)
@@ -838,20 +1134,34 @@ namespace KlayGE
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
-
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-								GL_DEPTH_ATTACHMENT_EXT,
-								GL_RENDERBUFFER_EXT, rbo_);
-		if (IsStencilFormat(pf_))
+		if (glloader_GL_EXT_direct_state_access())
 		{
-			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-								GL_STENCIL_ATTACHMENT_EXT,
-								GL_RENDERBUFFER_EXT, rbo_);
+			glNamedFramebufferRenderbufferEXT(fbo_,
+									GL_DEPTH_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, rbo_);
+			if (IsStencilFormat(pf_))
+			{
+				glNamedFramebufferRenderbufferEXT(fbo_,
+									GL_STENCIL_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, rbo_);
+			}
 		}
-		BOOST_ASSERT(CheckFrameBufferStatus());
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+									GL_DEPTH_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, rbo_);
+			if (IsStencilFormat(pf_))
+			{
+				glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+									GL_STENCIL_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, rbo_);
+			}
+
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 
 	void OGLDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
@@ -862,15 +1172,27 @@ namespace KlayGE
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			glNamedFramebufferRenderbufferEXT(fbo_,
+									GL_DEPTH_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, 0);
+			glNamedFramebufferRenderbufferEXT(fbo_,
+									GL_STENCIL_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, 0);
+		}
+		else
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-								GL_DEPTH_ATTACHMENT_EXT,
-								GL_RENDERBUFFER_EXT, 0);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
-								GL_STENCIL_ATTACHMENT_EXT,
-								GL_RENDERBUFFER_EXT, 0);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+									GL_DEPTH_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, 0);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,
+									GL_STENCIL_ATTACHMENT_EXT,
+									GL_RENDERBUFFER_EXT, 0);
 
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		}
 	}
 }

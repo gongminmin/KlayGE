@@ -89,12 +89,13 @@ namespace KlayGE
 
 		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 
-		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj, DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
+		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
+			DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
 			BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask);
 
-		void BindFrameBuffer(FrameBufferPtr fb);
-		FrameBufferPtr CurFrameBuffer() const;
-		FrameBufferPtr DefaultFrameBuffer() const;
+		void BindFrameBuffer(FrameBufferPtr const & fb);
+		FrameBufferPtr const & CurFrameBuffer() const;
+		FrameBufferPtr const & DefaultFrameBuffer() const;
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
@@ -142,7 +143,7 @@ namespace KlayGE
 		}
 
 	protected:
-		virtual void DoBindFrameBuffer(FrameBufferPtr fb) = 0;
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 
 	protected:

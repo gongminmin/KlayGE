@@ -96,7 +96,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoBindFrameBuffer(FrameBufferPtr /*fb*/)
+		void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/)
 		{
 		}
 
@@ -162,7 +162,7 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::BindFrameBuffer(FrameBufferPtr fb)
+	void RenderEngine::BindFrameBuffer(FrameBufferPtr const & fb)
 	{
 		if (cur_frame_buffer_)
 		{
@@ -185,14 +185,14 @@ namespace KlayGE
 
 	// 获取当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	FrameBufferPtr RenderEngine::CurFrameBuffer() const
+	FrameBufferPtr const & RenderEngine::CurFrameBuffer() const
 	{
 		return cur_frame_buffer_;
 	}
 
 	// 获取默认渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	FrameBufferPtr RenderEngine::DefaultFrameBuffer() const
+	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
 		return default_frame_buffer_;
 	}

@@ -22,7 +22,10 @@
 #endif
 
 #include <glloader/glloader.h>
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma comment(lib, "opengl32.lib")
+#endif
 
 using namespace KlayGE;
 
@@ -116,13 +119,7 @@ int main()
 {
 	using namespace KlayGE;
 
-	Context::Instance().RenderFactoryInstance(OGLRenderFactoryInstance());
-
-	RenderSettings settings;
-	settings.width = 800;
-	settings.height = 600;
-	settings.color_fmt = EF_ARGB8;
-	settings.full_screen = false;
+	RenderSettings settings = Context::Instance().LoadCfg("GLCompatibility.cfg");
 
 	EmptyApp app("GL Compatibility", settings);
 	app.Create();

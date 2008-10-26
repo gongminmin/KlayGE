@@ -75,8 +75,7 @@ namespace KlayGE
 	public:
 		explicit OGLSamplerStateObject(SamplerStateDesc const & desc);
 
-		void Active(uint32_t stage, TexturePtr texture);
-		void Active(TexturePtr const & texture);
+		void Active(uint32_t stage, TexturePtr const & texture);
 
 	private:
 		GLenum ogl_addr_mode_u_;

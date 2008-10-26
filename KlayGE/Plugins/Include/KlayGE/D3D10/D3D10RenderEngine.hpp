@@ -94,7 +94,7 @@ namespace KlayGE
 		void PSSetShader(ID3D10PixelShaderPtr const & shader);
 
 	private:
-		void DoBindFrameBuffer(FrameBufferPtr fb);
+		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();

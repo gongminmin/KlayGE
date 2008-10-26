@@ -427,8 +427,10 @@ namespace KlayGE
 
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoBindFrameBuffer(FrameBufferPtr fb)
+	void D3D9RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
 	{
+		UNREF_PARAM(fb);
+
 		BOOST_ASSERT(d3dDevice_);
 		BOOST_ASSERT(fb);
 	}

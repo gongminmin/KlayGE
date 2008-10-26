@@ -44,10 +44,18 @@ namespace KlayGE
 		{
 			size_in_byte_ = init_data->row_pitch;
 
-			glBindBuffer(target_, vb_);
-			glBufferData(target_,
-					static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
-					(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
+						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			}
+			else
+			{
+				glBindBuffer(target_, vb_);
+				glBufferData(target_,
+						static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
+						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			}
 		}
 	}
 
@@ -60,16 +68,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
-		glBindBuffer(target_, vb_);
-		glBufferData(target_,
-				static_cast<GLsizeiptr>(size_in_byte_), NULL,
-				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), NULL,
+						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
+		else
+		{
+			glBindBuffer(target_, vb_);
+			glBufferData(target_,
+					static_cast<GLsizeiptr>(size_in_byte_), NULL,
+					(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
 	}
 
 	void* OGLGraphicsBuffer::Map(BufferAccess ba)
 	{
-		glBindBuffer(target_, vb_);
-
 		GLenum flag = 0;
 		switch (ba)
 		{
@@ -86,13 +100,30 @@ namespace KlayGE
 			break;
 		}
 
-		return glMapBuffer(target_, flag);
+		void* p;
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			p = glMapNamedBufferEXT(vb_, flag);
+		}
+		else
+		{
+			glBindBuffer(target_, vb_);
+			p = glMapBuffer(target_, flag);
+		}
+		return p;
 	}
 
 	void OGLGraphicsBuffer::Unmap()
 	{
-		glBindBuffer(target_, vb_);
-		glUnmapBuffer(target_);
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			glUnmapNamedBufferEXT(vb_);
+		}
+		else
+		{
+			glBindBuffer(target_, vb_);
+			glUnmapBuffer(target_);
+		}
 	}
 
 	void OGLGraphicsBuffer::Active()

@@ -75,11 +75,17 @@ namespace KlayGE
 
 	void OGLConditionalRender::BeginConditionalRender()
 	{
-		glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
+		if (glloader_GL_NV_conditional_render())
+		{
+			glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
+		}
 	}
 
 	void OGLConditionalRender::EndConditionalRender()
 	{
-		glEndConditionalRenderNV();
+		if (glloader_GL_NV_conditional_render())
+		{
+			glEndConditionalRenderNV();
+		}
 	}
 }

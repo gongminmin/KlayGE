@@ -102,7 +102,7 @@ namespace KlayGE
 		void SetPixelShaderConstantF(uint32_t start_register, float const * constant_data, uint32_t register_count);
 
 	private:
-		void DoBindFrameBuffer(FrameBufferPtr fb);
+		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();

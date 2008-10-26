@@ -71,8 +71,8 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		void TexParameter(GLenum target, GLenum pname, GLint param);
-		void TexEnv(GLenum target, GLenum pname, GLfloat param);
+		void TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param);
+		void TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param);
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);
 		void ClearStencil(GLuint stencil);
@@ -84,7 +84,7 @@ namespace KlayGE
 		}
 
 	private:
-		void DoBindFrameBuffer(FrameBufferPtr fb);
+		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
@@ -97,6 +97,9 @@ namespace KlayGE
 		boost::array<GLfloat, 4> clear_clr_;
 		GLfloat clear_depth_;
 		GLuint clear_stencil_;
+
+		GLint vp_x_, vp_y_;
+		GLsizei vp_width_, vp_height_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

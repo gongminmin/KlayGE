@@ -123,6 +123,22 @@ namespace KlayGE
 
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
+
+		if (glloader_WGL_ARB_create_context())
+		{
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
+			if (hRC3 != NULL)
+			{
+				::wglDeleteContext(hRC_);
+				hRC_ = hRC3;
+
+				::wglMakeCurrent(hDC_, hRC_);
+
+				// reinit glloader
+				glloader_init();
+			}
+		}
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (isFullScreen_)
 		{
@@ -157,6 +173,22 @@ namespace KlayGE
 					GL_TRUE);	// Direct rendering if possible
 
 		glXMakeCurrent(x_display_, x_window_, x_context_);
+
+		if (glloader_GLX_ARB_create_context())
+		{
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, visual_info, NULL, GL_TRUE, attribs);
+			if (x_context3 != NULL)
+			{
+				glXDestroyContext(x_display_, x_context_);
+				x_context_ = x_context3;
+
+				glXMakeCurrent(x_display_, x_window_, x_context_);
+
+				// reinit glloader
+				glloader_init();
+			}
+		}
 #endif
 
 		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object()

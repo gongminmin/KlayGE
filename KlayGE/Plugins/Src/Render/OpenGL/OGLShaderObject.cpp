@@ -345,8 +345,8 @@ namespace
 	class SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >
 	{
 	public:
-		SetOGLShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, CGparameter cg_param, RenderEffectParameterPtr const & param)
-			: sampler_(&sampler), cg_param_(cg_param), param_(param)
+		SetOGLShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, CGparameter cg_param, GLuint stage, RenderEffectParameterPtr const & param)
+			: sampler_(&sampler), cg_param_(cg_param), stage_(stage), param_(param)
 		{
 		}
 
@@ -357,7 +357,7 @@ namespace
 			if (sampler_ && sampler_->first)
 			{
 				GLuint const gl_tex = checked_pointer_cast<OGLTexture>(sampler_->first)->GLTexture();
-				checked_pointer_cast<OGLSamplerStateObject>(sampler_->second)->Active(sampler_->first);
+				checked_pointer_cast<OGLSamplerStateObject>(sampler_->second)->Active(stage_, sampler_->first);
 
 				cgGLSetTextureParameter(cg_param_, gl_tex);
 			}
@@ -366,6 +366,7 @@ namespace
 	private:
 		std::pair<TexturePtr, SamplerStateObjectPtr>* sampler_;
 		CGparameter cg_param_;
+		GLuint stage_;
 		RenderEffectParameterPtr param_;
 	};
 }
@@ -638,7 +639,7 @@ namespace KlayGE
 				uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
 				BOOST_ASSERT(index < samplers_[type].size());
 
-				ret.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type][index], cg_param, param);
+				ret.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type][index], cg_param, index, param);
 			}
 			break;
 

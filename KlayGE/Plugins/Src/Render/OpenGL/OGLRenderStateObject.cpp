@@ -315,17 +315,38 @@ namespace KlayGE
 				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			}
 		}
-		if (cur_desc.blend_enable[0] != desc_.blend_enable[0])
+		if (glloader_GL_EXT_draw_buffers2())
 		{
-			if (desc_.blend_enable[0])
+			for (int i = 0; i < 8; ++ i)
 			{
-				glEnable(GL_BLEND);
-			}
-			else
-			{
-				glDisable(GL_BLEND);
+				if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
+				{
+					if (desc_.blend_enable[i])
+					{
+						glEnableIndexedEXT(GL_BLEND, i);
+					}
+					else
+					{
+						glDisableIndexedEXT(GL_BLEND, i);
+					}
+				}
 			}
 		}
+		else
+		{
+			if (cur_desc.blend_enable[0] != desc_.blend_enable[0])
+			{
+				if (desc_.blend_enable[0])
+				{
+					glEnable(GL_BLEND);
+				}
+				else
+				{
+					glDisable(GL_BLEND);
+				}
+			}
+		}
+
 		if (cur_desc.blend_op[0] != desc_.blend_op[0])
 		{
 			glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
@@ -338,12 +359,28 @@ namespace KlayGE
 			glBlendFuncSeparate(ogl_src_blend_, ogl_dest_blend_,
 					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
 		}
-		if (cur_desc.color_write_mask[0] != desc_.color_write_mask[0])
+		if (glloader_GL_EXT_draw_buffers2())
 		{
-			glColorMask((desc_.color_write_mask[0] & CMASK_Red) != 0,
-					(desc_.color_write_mask[0] & CMASK_Green) != 0,
-					(desc_.color_write_mask[0] & CMASK_Blue) != 0,
-					(desc_.color_write_mask[0] & CMASK_Alpha) != 0);
+			for (int i = 0; i < 8; ++ i)
+			{
+				if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
+				{
+					glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
+							(desc_.color_write_mask[i] & CMASK_Green) != 0,
+							(desc_.color_write_mask[i] & CMASK_Blue) != 0,
+							(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
+				}
+			}
+		}
+		else
+		{
+			if (cur_desc.color_write_mask[0] != desc_.color_write_mask[0])
+			{
+				glColorMask((desc_.color_write_mask[0] & CMASK_Red) != 0,
+						(desc_.color_write_mask[0] & CMASK_Green) != 0,
+						(desc_.color_write_mask[0] & CMASK_Blue) != 0,
+						(desc_.color_write_mask[0] & CMASK_Alpha) != 0);
+			}
 		}
 
 		if (cur_blend_factor != blend_factor)
@@ -364,21 +401,51 @@ namespace KlayGE
 		{
 			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		}
-		if (desc.blend_enable[0])
+		if (glloader_GL_EXT_draw_buffers2())
 		{
-			glEnable(GL_BLEND);
+			for (int i = 0; i < 8; ++ i)
+			{
+				if (desc.blend_enable[i])
+				{
+					glEnableIndexedEXT(GL_BLEND, i);
+				}
+				else
+				{
+					glDisableIndexedEXT(GL_BLEND, i);
+				}
+			}
 		}
 		else
 		{
-			glDisable(GL_BLEND);
+			if (desc.blend_enable[0])
+			{
+				glEnable(GL_BLEND);
+			}
+			else
+			{
+				glDisable(GL_BLEND);
+			}
 		}
 		glBlendEquationSeparate(OGLMapping::Mapping(desc.blend_op[0]), OGLMapping::Mapping(desc.blend_op_alpha[0]));
 		glBlendFuncSeparate(OGLMapping::Mapping(desc.src_blend[0]), OGLMapping::Mapping(desc.dest_blend[0]),
 				OGLMapping::Mapping(desc.src_blend_alpha[0]), OGLMapping::Mapping(desc.dest_blend_alpha[0]));
-		glColorMask((desc.color_write_mask[0] & CMASK_Red) != 0,
-				(desc.color_write_mask[0] & CMASK_Green) != 0,
-				(desc.color_write_mask[0] & CMASK_Blue) != 0,
-				(desc.color_write_mask[0] & CMASK_Alpha) != 0);
+		if (glloader_GL_EXT_draw_buffers2())
+		{
+			for (int i = 0; i < 8; ++ i)
+			{
+				glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
+						(desc_.color_write_mask[i] & CMASK_Green) != 0,
+						(desc_.color_write_mask[i] & CMASK_Blue) != 0,
+						(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
+			}
+		}
+		else
+		{
+			glColorMask((desc.color_write_mask[0] & CMASK_Red) != 0,
+					(desc.color_write_mask[0] & CMASK_Green) != 0,
+					(desc.color_write_mask[0] & CMASK_Blue) != 0,
+					(desc.color_write_mask[0] & CMASK_Alpha) != 0);
+		}
 
 		glBlendColor(1, 1, 1, 1);
 	}
@@ -416,11 +483,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLSamplerStateObject::Active(uint32_t /*stage*/, TexturePtr /*texture*/)
-	{
-	}
-
-	void OGLSamplerStateObject::Active(TexturePtr const & texture)
+	void OGLSamplerStateObject::Active(uint32_t stage, TexturePtr const & texture)
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -428,12 +491,28 @@ namespace KlayGE
 		GLuint const gl_tex = tex.GLTexture();
 		GLenum tex_type = tex.GLType();
 
-		glBindTexture(tex_type, gl_tex);
+		if (!glloader_GL_EXT_direct_state_access())
+		{
+			glBindTexture(tex_type, gl_tex);
+		}
 
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		re.TexParameter(tex_type, GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
 
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			float tmp[4];
+			glGetTextureParameterfvEXT(gl_tex, tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
+			if ((tmp[0] != desc_.border_clr.r())
+				|| (tmp[1] != desc_.border_clr.g())
+				|| (tmp[2] != desc_.border_clr.b())
+				|| (tmp[3] != desc_.border_clr.a()))
+			{
+				glTextureParameterfvEXT(gl_tex, tex_type, GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
+			}
+		}
+		else
 		{
 			float tmp[4];
 			glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
@@ -446,11 +525,11 @@ namespace KlayGE
 			}
 		}
 
-		re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, ogl_min_filter_);
-		re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, ogl_mag_filter_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_min_filter_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_mag_filter_);
 
-		re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
-		re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);
-		re.TexEnv(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);
+		re.TexEnv(GL_TEXTURE0 + stage, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
 	}
 }

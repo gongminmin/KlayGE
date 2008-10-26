@@ -164,10 +164,6 @@ namespace KlayGE
 		}
 
 		misc_flags = 0;
-		if ((access_hint_ & EAH_GPU_Read) && (access_hint_ & EAH_GPU_Write))
-		{
-			misc_flags |= D3D10_RESOURCE_MISC_GENERATE_MIPS;
-		}
 	}
 
 	void D3D10Texture::Map1D(int /*level*/, TextureMapAccess /*tma*/,

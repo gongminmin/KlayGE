@@ -113,6 +113,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
+		D3D10_TEXTURE1D_DESC desc_;
 		ID3D10Texture1DPtr d3dTexture1D_;
 
 		std::vector<uint32_t> widthes_;
@@ -147,6 +148,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
+		D3D10_TEXTURE2D_DESC desc_;
 		ID3D10Texture2DPtr d3dTexture2D_;
 
 		std::vector<uint32_t>	widthes_;
@@ -186,6 +188,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
+		D3D10_TEXTURE3D_DESC desc_;
 		ID3D10Texture3DPtr d3dTexture3D_;
 
 		std::vector<uint32_t>	widthes_;
@@ -222,6 +225,7 @@ namespace KlayGE
 		void UpdateParams();
 
 	private:
+		D3D10_TEXTURE2D_DESC desc_;
 		ID3D10TextureCubePtr d3dTextureCube_;
 
 		std::vector<uint32_t>	widthes_;
