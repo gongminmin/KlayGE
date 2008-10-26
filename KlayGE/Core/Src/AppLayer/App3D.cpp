@@ -55,7 +55,7 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance(*this);
 
-		main_wnd_ = this->MakeWindow(name_, settings_.left, settings_.top, settings_.width, settings_.height);
+		main_wnd_ = this->MakeWindow(name_, settings_.left, settings_.top, settings_.width, settings_.height, settings_.full_screen);
 		settings_.left = main_wnd_->Left();
 		settings_.top = main_wnd_->Top();
 		settings_.width = main_wnd_->Width();
@@ -83,16 +83,16 @@ namespace KlayGE
 	{
 		this->DelObjects();
 
-		Context::Instance().SceneManagerInstance().Clear();
+		Context::Instance().SceneManagerInstance(SceneManagerPtr());
 
 		UIManager::Instance().ForceDestroy();
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
 	}
 
 	WindowPtr App3DFramework::MakeWindow(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height)
+			uint32_t width, uint32_t height, bool full_screen)
 	{
-		return MakeSharedPtr<Window>(name, left, top, width, height);
+		return MakeSharedPtr<Window>(name, left, top, width, height, full_screen);
 	}
 
 	void App3DFramework::Run()

@@ -65,7 +65,7 @@ namespace KlayGE
 		virtual void Destroy();
 
 		WindowPtr MakeWindow(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height);
+			uint32_t width, uint32_t height, bool full_screen);
 		WindowPtr MainWnd() const
 		{
 			return main_wnd_;

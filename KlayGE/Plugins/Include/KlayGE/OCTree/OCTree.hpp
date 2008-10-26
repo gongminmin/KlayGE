@@ -77,6 +77,10 @@ namespace KlayGE
 		uint32_t max_tree_depth_;
 
 		bool rebuild_tree_;
+
+#ifdef KLAYGE_DEBUG
+		RenderablePtr node_renderable_;
+#endif
 	};
 }
 

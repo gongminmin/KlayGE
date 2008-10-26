@@ -95,8 +95,6 @@ namespace
 	private:
 		std::vector<float4x4> instances_;
 	};
-
-	boost::shared_ptr<NodeRenderable> node_renderable;
 }
 #endif
 
@@ -223,12 +221,12 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_DEBUG
-		if (!node_renderable)
+		if (!node_renderable_)
 		{
-			node_renderable = MakeSharedPtr<NodeRenderable>();
+			node_renderable_ = MakeSharedPtr<NodeRenderable>();
 		}
-		node_renderable->ClearInstances();
-		node_renderable->AddToRenderQueue();
+		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
+		node_renderable_->AddToRenderQueue();
 #endif
 		if (!octree_.empty())
 		{
@@ -316,7 +314,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
 		{
-			node_renderable->AddInstance(MathLib::scaling(node.bb_half_size) * MathLib::translation(node.bb_center));
+			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb_half_size) * MathLib::translation(node.bb_center));
 		}
 #endif
 	}

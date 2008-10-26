@@ -45,7 +45,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height)
+			uint32_t width, uint32_t height, bool full_screen)
 	{
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
@@ -80,18 +80,28 @@ namespace KlayGE
 		::RegisterClassExW(&wc);
 #endif
 
+		uint32_t style;
+		if (full_screen)
+		{
+			style = WS_POPUP;
+		}
+		else
+		{
+			style = WS_OVERLAPPEDWINDOW;
+		}
+
 		RECT rc = { 0, 0, width, height };
-		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
+		::AdjustWindowRect(&rc, style, false);
 
 		// Create our main window
 		// Pass pointer to self
 #ifdef KLAYGE_COMPILER_GCC
 		wnd_ = ::CreateWindowA(name.c_str(), name.c_str(),
-			WS_OVERLAPPEDWINDOW, left, top,
+			style, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #else
 		wnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
-			WS_OVERLAPPEDWINDOW, left, top,
+			style, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #endif
 
@@ -137,6 +147,9 @@ namespace KlayGE
 				this->OnActive()(*this, true);
 			}
 			break;
+
+		case WM_ERASEBKGND:
+			return 1;
 
 		case WM_PAINT:
 			this->OnPaint()(*this);
