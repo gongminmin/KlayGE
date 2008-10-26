@@ -241,8 +241,6 @@ namespace KlayGE
 
 		Viewport const & vp(fb->GetViewport());
 		glViewport(vp.left, vp.top, vp.width, vp.height);
-
-		glDepthMask(GL_TRUE);
 	}
 
 	// ¿ªÊ¼Ò»Ö¡

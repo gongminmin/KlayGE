@@ -73,20 +73,6 @@ namespace KlayGE
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
-		GLbitfield ogl_flags = 0;
-		if (flags & CBM_Color)
-		{
-			ogl_flags |= GL_COLOR_BUFFER_BIT;
-		}
-		if (flags & CBM_Depth)
-		{
-			ogl_flags |= GL_DEPTH_BUFFER_BIT;
-		}
-		if (flags & CBM_Stencil)
-		{
-			ogl_flags |= GL_STENCIL_BUFFER_BIT;
-		}
-
 		GLint old_fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
 
@@ -95,10 +81,51 @@ namespace KlayGE
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 		}
 
-		glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-		glClearDepth(depth);
-		glClearStencil(stencil);
+		GLbitfield ogl_flags = 0;
+		if (flags & CBM_Color)
+		{
+			ogl_flags |= GL_COLOR_BUFFER_BIT;
+			glClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+		}
+		bool depth_mask_changed = false;
+		if (flags & CBM_Depth)
+		{
+			ogl_flags |= GL_DEPTH_BUFFER_BIT;
+			glClearDepth(depth);
+
+			GLint m;
+			glGetIntegerv(GL_DEPTH_WRITEMASK, &m);
+			if (GL_FALSE == m)
+			{
+				depth_mask_changed = true;
+				glDepthMask(GL_TRUE);
+			}
+		}
+		bool stencil_mask_changed = false;
+		if (flags & CBM_Stencil)
+		{
+			ogl_flags |= GL_STENCIL_BUFFER_BIT;
+			glClearStencil(stencil);
+
+			GLint m;
+			glGetIntegerv(GL_STENCIL_WRITEMASK, &m);
+			if (GL_FALSE == m)
+			{
+				stencil_mask_changed = true;
+				glStencilMask(GL_TRUE);
+			}
+		}
+
 		glClear(ogl_flags);
+
+		if (depth_mask_changed)
+		{
+			glDepthMask(GL_FALSE);
+		}
+		if (stencil_mask_changed)
+		{
+			glStencilMask(GL_FALSE);
+		}
 
 		if (static_cast<GLuint>(old_fbo) != fbo_)
 		{

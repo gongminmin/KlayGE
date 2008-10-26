@@ -425,8 +425,8 @@ namespace KlayGE
 			mag_filter = GL_NEAREST_MIPMAP_NEAREST;
 			break;
 		}
-		re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		re.TexParameter(tex_type, GL_TEXTURE_MAG_FILTER, min_filter);
+		re.TexParameter(tex_type, GL_TEXTURE_MIN_FILTER, mag_filter);
 
 		re.TexParameter(tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
 		re.TexParameter(tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);
