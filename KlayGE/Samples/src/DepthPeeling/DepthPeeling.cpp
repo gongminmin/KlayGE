@@ -352,8 +352,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
 			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-			depth_view_[0]->Clear(1.0f);
-			depth_view_[1]->Clear(1.0f);
+			depth_view_[0]->Clear(Color(1, 0, 0, 0));
 			return App3DFramework::URV_Need_Flush;
 		}
 		else
@@ -390,7 +389,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 				re.BindFrameBuffer(peeling_fbs_[i + j]);
 				peeling_fbs_[i + j]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-				depth_view_[(i + j) % 2]->Clear(1.0f);
+				depth_view_[(i + j) % 2]->Clear(Color(1, 0, 0, 0));
 
 				oc_queries_[j]->Begin();
 				sceneMgr.Flush();
