@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 3.7.0 Demo
+粘土游戏引擎(KlayGE) 3.8.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
@@ -45,7 +45,7 @@ Depth of field
 4) UI
 
 需求：Geforce 6600以上或Radeon 9500以上。
-渲染引擎支持：D3D10/D3D9。
+渲染引擎支持：D3D10/D3D9/OpenGL。
 
 ====================================================================================
 Depth peeling
@@ -58,7 +58,7 @@ Depth peeling
 3) UI
 
 需求：Geforce 6600以上或Radeon 9500以上。
-渲染引擎支持：D3D10/D3D9。
+渲染引擎支持：D3D10/D3D9/OpenGL。
 
 ====================================================================================
 Distance mapping
@@ -93,7 +93,7 @@ Fractal
 1) 双缓存切换
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
-渲染引擎支持：D3D10/D3D9。
+渲染引擎支持：D3D10/D3D9/OpenGL。
 
 ====================================================================================
 GPU Particle System
@@ -159,7 +159,7 @@ Refract
 6) 双面折射
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
-渲染引擎支持：D3D10/D3D9。
+渲染引擎支持：D3D10/D3D9/OpenGL。
 
 ====================================================================================
 Shadow cube map

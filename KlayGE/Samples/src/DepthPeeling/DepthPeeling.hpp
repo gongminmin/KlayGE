@@ -32,7 +32,7 @@ private:
 	KlayGE::RenderViewPtr peeled_depth_view_;
 
 	KlayGE::TexturePtr depth_texs_[2];
-	KlayGE::RenderViewPtr depth_view_;
+	KlayGE::RenderViewPtr depth_view_[2];
 
 	boost::array<KlayGE::QueryPtr, 2> oc_queries_;
 

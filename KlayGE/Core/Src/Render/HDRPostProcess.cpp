@@ -88,15 +88,26 @@ namespace KlayGE
 
 		for (int i = 0; i < 2; ++ i)
 		{
+			fb_[i] = rf.MakeFrameBuffer();
+				
 			ElementInitData init_data;
-			init_data.data.assign(sizeof(float), 0);
 			init_data.row_pitch = sizeof(float);
 			init_data.slice_pitch = 0;
+			init_data.data.assign(init_data.row_pitch, 0);
 
-			adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			try
+			{
+				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+				fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
+			}
+			catch (...)
+			{
+				init_data.row_pitch = sizeof(float) * 4;
+				init_data.data.assign(init_data.row_pitch, 0);
 
-			fb_[i] = rf.MakeFrameBuffer();
-			fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
+				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+				fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
+			}
 		}
 
 		this->Destinate(fb_[last_index_]);
@@ -166,24 +177,6 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-		lum_texs_.clear();
-		int len = 1;
-		for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
-		{
-			try
-			{
-				lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_R16F, EAH_GPU_Read | EAH_GPU_Write, NULL));
-			}
-			catch (...)
-			{
-				lum_texs_.push_back(rf.MakeTexture2D(len, len, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL));
-			}
-			len *= 4;
-		}
-		std::reverse(lum_texs_.begin(), lum_texs_.end());
-
 		bool tmp_flipping;
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
@@ -193,6 +186,7 @@ namespace KlayGE
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
+		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0));
@@ -201,20 +195,56 @@ namespace KlayGE
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
+		lum_texs_.resize(sum_lums_.size() + 1);
+		try
 		{
-			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-			sum_lums_1st_.Source(src_texture_, tmp_flipping);
-			sum_lums_1st_.Destinate(fb);
-			tmp_flipping = fb->RequiresFlipping();
+			int len = 1;
+			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+			{
+				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_R16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				len *= 4;
+			}
+
+			{
+				FrameBufferPtr fb = rf.MakeFrameBuffer();
+				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
+				sum_lums_1st_.Source(src_texture_, tmp_flipping);
+				sum_lums_1st_.Destinate(fb);
+				tmp_flipping = fb->RequiresFlipping();
+			}
+			for (size_t i = 0; i < sum_lums_.size(); ++ i)
+			{
+				FrameBufferPtr fb = rf.MakeFrameBuffer();
+				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
+				sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
+				sum_lums_[i].Destinate(fb);
+				tmp_flipping = fb->RequiresFlipping();
+			}
 		}
-		for (size_t i = 0; i < sum_lums_.size(); ++ i)
+		catch (...)
 		{
-			FrameBufferPtr fb = rf.MakeFrameBuffer();
-			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
-			sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
-			sum_lums_[i].Destinate(fb);
-			tmp_flipping = fb->RequiresFlipping();
+			int len = 1;
+			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+			{
+				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				len *= 4;
+			}
+
+			{
+				FrameBufferPtr fb = rf.MakeFrameBuffer();
+				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
+				sum_lums_1st_.Source(src_texture_, tmp_flipping);
+				sum_lums_1st_.Destinate(fb);
+				tmp_flipping = fb->RequiresFlipping();
+			}
+			for (size_t i = 0; i < sum_lums_.size(); ++ i)
+			{
+				FrameBufferPtr fb = rf.MakeFrameBuffer();
+				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
+				sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
+				sum_lums_[i].Destinate(fb);
+				tmp_flipping = fb->RequiresFlipping();
+			}
 		}
 
 		{

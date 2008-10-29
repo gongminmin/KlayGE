@@ -282,15 +282,17 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	try
 	{
 		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0);
 		peel_format = EF_ARGB8;
 	}
 	catch (...)
 	{
 		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0);
 		peel_format = EF_ABGR32F;
 	}
 	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, depth_texs_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
-	depth_view_ = rf.Make2DRenderView(*depth_texs_[0], 0);
+	depth_view_[1] = rf.Make2DRenderView(*depth_texs_[1], 0);
 
 	peeled_depth_view_ = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
 
@@ -308,7 +310,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color1, depth_view_);
+		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color1, depth_view_[i % 2]);
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, peeled_depth_view_);
 	}
 
@@ -350,6 +352,8 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
 			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+			depth_view_[0]->Clear(1.0f);
+			depth_view_[1]->Clear(1.0f);
 			return App3DFramework::URV_Need_Flush;
 		}
 		else
@@ -378,19 +382,15 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 	case 1:
 		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-		checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[1], peeling_fbs_[pass - 1]->RequiresFlipping());
 		for (size_t i = 1; i < peeled_texs_.size(); i += oc_queries_.size())
 		{
 			for (size_t j = 0; j < oc_queries_.size(); ++ j)
 			{
-				re.BindFrameBuffer(peeling_fbs_[i + j]);
-				peeled_views_[i + j]->Clear(Color(0, 0, 0, 0));
-				peeled_depth_view_->Clear(1.0f);
-				depth_texs_[0]->CopyToTexture(*depth_texs_[1]);
+				checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(i + j - 1) % 2], peeling_fbs_[i + j - 1]->RequiresFlipping());
 
-				/*stringstream stream;
-				stream << "depth_texs_" << i + j << ".dds";
-				SaveTexture(depth_texs_[0], stream.str());*/
+				re.BindFrameBuffer(peeling_fbs_[i + j]);
+				peeling_fbs_[i + j]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+				depth_view_[(i + j) % 2]->Clear(1.0f);
 
 				oc_queries_[j]->Begin();
 				sceneMgr.Flush();

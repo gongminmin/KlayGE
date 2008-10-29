@@ -153,48 +153,58 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		GLint gl_internalFormat;
-		GLenum gl_format;
-		GLenum gl_type;
-		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-		for (int level = 0; level < numMipMaps_; ++ level)
+		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)))
 		{
-			glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+			GLint gl_internalFormat;
+			GLenum gl_format;
+			GLenum gl_type;
+			OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-			glBindTexture(GL_TEXTURE_1D, texture_);
-			if (IsCompressedFormat(format_))
+			for (int level = 0; level < numMipMaps_; ++ level)
 			{
-				glGetCompressedTexImage(GL_TEXTURE_1D, level, NULL);
-			}
-			else
-			{
-				glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
-			}
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
-			glBindTexture(GL_TEXTURE_1D, checked_cast<OGLTexture*>(&target)->GLTexture());
-
-			if (IsCompressedFormat(format_))
-			{
-				int block_size;
-				if (EF_BC1 == format_)
+				glBindTexture(GL_TEXTURE_1D, texture_);
+				if (IsCompressedFormat(format_))
 				{
-					block_size = 8;
+					glGetCompressedTexImage(GL_TEXTURE_1D, level, NULL);
 				}
 				else
 				{
-					block_size = 16;
+					glGetTexImage(GL_TEXTURE_1D, level, gl_format, gl_type, NULL);
 				}
 
-				GLsizei const image_size = ((this->Width(level) + 3) / 4) * block_size;
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				glBindTexture(GL_TEXTURE_1D, checked_cast<OGLTexture*>(&target)->GLTexture());
 
-				glCompressedTexSubImage1D(GL_TEXTURE_1D, level, 0,
-					this->Width(level), gl_format, image_size, NULL);
+				if (IsCompressedFormat(format_))
+				{
+					int block_size;
+					if (EF_BC1 == format_)
+					{
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
+					}
+
+					GLsizei const image_size = ((this->Width(level) + 3) / 4) * block_size;
+
+					glCompressedTexSubImage1D(GL_TEXTURE_1D, level, 0,
+						this->Width(level), gl_format, image_size, NULL);
+				}
+				else
+				{
+					glTexSubImage1D(GL_TEXTURE_1D, level, 0, this->Width(level), gl_format, gl_type, NULL);
+				}
 			}
-			else
+		}
+		else
+		{
+			for (int level = 0; level < numMipMaps_; ++ level)
 			{
-				glTexSubImage1D(GL_TEXTURE_1D, level, 0, this->Width(level), gl_format, gl_type, NULL);
+				this->CopyToTexture1D(target, level, target.Width(level), 0, this->Width(level), 0);
 			}
 		}
 	}

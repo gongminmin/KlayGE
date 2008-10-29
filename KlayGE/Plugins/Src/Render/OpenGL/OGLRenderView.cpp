@@ -205,6 +205,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 
+		if ((NumComponents(texture_1d.Format()) != 3) && (NumComponents(texture_1d.Format()) != 4))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
 		tex_ = texture_1d_.GLTexture();
 
 		width_ = texture_1d_.Width(level);
@@ -345,6 +350,11 @@ namespace KlayGE
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
+
+		if ((NumComponents(texture_2d.Format()) != 3) && (NumComponents(texture_2d.Format()) != 4))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		tex_ = texture_2d_.GLTexture();
 
@@ -487,6 +497,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
+
+		if ((NumComponents(texture_3d.Format()) != 3) && (NumComponents(texture_3d.Format()) != 4))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		tex_ = texture_3d_.GLTexture();
 
@@ -833,6 +848,11 @@ namespace KlayGE
 			face_(face), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
+
+		if ((NumComponents(texture_cube.Format()) != 3) && (NumComponents(texture_cube.Format()) != 4))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		tex_ = texture_cube_.GLTexture();
 
