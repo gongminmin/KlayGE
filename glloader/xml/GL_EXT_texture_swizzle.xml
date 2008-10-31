@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_texture_swizzle">
+<gl_extension name="GL_EXT_texture_swizzle" reg_no="356">
 	<tokens>
 		<token name="GL_TEXTURE_SWIZZLE_R_EXT" value="0x8E42"/>
 		<token name="GL_TEXTURE_SWIZZLE_G_EXT" value="0x8E43"/>
