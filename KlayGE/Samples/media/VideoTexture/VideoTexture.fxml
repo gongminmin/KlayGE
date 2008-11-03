@@ -3,7 +3,7 @@
 <effect>
 	<parameter type="float4x4" name="mvp"/>
 	<parameter type="sampler2D" name="video_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>

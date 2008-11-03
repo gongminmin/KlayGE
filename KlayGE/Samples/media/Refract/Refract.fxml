@@ -15,19 +15,19 @@
 	<parameter type="float3" name="eta_ratio"/>
 
 	<parameter type="samplerCUBE" name="skybox_YcubeMapSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
 	<parameter type="samplerCUBE" name="skybox_CcubeMapSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
 	<parameter type="sampler2D" name="BackFace_Sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>

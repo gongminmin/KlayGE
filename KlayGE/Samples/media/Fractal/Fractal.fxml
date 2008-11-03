@@ -3,7 +3,7 @@
 <effect>
 	<parameter type="int" name="flip"/>
 	<parameter type="sampler2D" name="fractal_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>

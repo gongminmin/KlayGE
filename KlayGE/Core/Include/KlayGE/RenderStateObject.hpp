@@ -147,10 +147,25 @@ namespace KlayGE
 
 	enum TexFilterOp
 	{
-		TFO_Point,
-		TFO_Bilinear,
-		TFO_Trilinear,
-		TFO_Anisotropic
+		// Dont' use these enum directly
+		TFOE_Mip_Point = 0x0,
+		TFOE_Mip_Linear = 0x1,
+		TFOE_Mag_Point = 0x0,
+		TFOE_Mag_Linear = 0x2,
+		TFOE_Min_Point = 0x0,
+		TFOE_Min_Linear = 0x4,
+		TFOE_Anisotropic = 0x0F,
+
+		// Use these
+		TFO_Min_Mag_Mip_Point				= TFOE_Min_Point  | TFOE_Mag_Point  | TFOE_Mip_Point,
+		TFO_Min_Mag_Point_Mip_Linear		= TFOE_Min_Point  | TFOE_Mag_Point  | TFOE_Mip_Linear,
+		TFO_Min_Point_Mag_Linear_Mip_Point	= TFOE_Min_Point  | TFOE_Mag_Linear | TFOE_Mip_Point,
+		TFO_Min_Point_Mag_Mip_Linear		= TFOE_Min_Point  | TFOE_Mag_Linear | TFOE_Mip_Linear,
+		TFO_Min_Linear_Mag_Mip_Point		= TFOE_Min_Linear | TFOE_Mag_Point  | TFOE_Mip_Point,
+		TFO_Min_Linear_Mag_Point_Mip_Linear	= TFOE_Min_Linear | TFOE_Mag_Point  | TFOE_Mip_Linear,
+		TFO_Min_Mag_Linear_Mip_Point		= TFOE_Min_Linear | TFOE_Mag_Linear | TFOE_Mip_Point,
+		TFO_Min_Mag_Mip_Linear				= TFOE_Min_Linear | TFOE_Mag_Linear | TFOE_Mip_Linear,
+		TFO_Anisotropic						= TFOE_Anisotropic
 	};
 
 #ifdef KLAYGE_PLATFORM_WINDOWS

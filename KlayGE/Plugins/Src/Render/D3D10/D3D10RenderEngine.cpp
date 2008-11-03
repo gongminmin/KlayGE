@@ -434,7 +434,8 @@ namespace KlayGE
 		caps_.max_simultaneous_rts = 8;
 		caps_.max_vertices = 8388607;
 		caps_.max_indices = 16777215;
-		caps_.texture_2d_filter_caps = TFO_Point | TFO_Bilinear | TFO_Trilinear | TFO_Anisotropic;
+		caps_.texture_2d_filter_caps = TFOE_Min_Point | TFOE_Min_Linear
+			| TFOE_Mag_Point | TFOE_Mag_Linear | TFOE_Mip_Point | TFOE_Mip_Linear | TFO_Anisotropic;
 		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;

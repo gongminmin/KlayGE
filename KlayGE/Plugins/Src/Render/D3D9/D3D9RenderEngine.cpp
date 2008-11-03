@@ -358,54 +358,41 @@ namespace KlayGE
 				samplers_cache_[type][i].second[D3DSAMP_ADDRESSV] = D3D9Mapping::Mapping(default_ss_desc.addr_mode_v);
 				samplers_cache_[type][i].second[D3DSAMP_ADDRESSW] = D3D9Mapping::Mapping(default_ss_desc.addr_mode_w);
 
-				switch (default_ss_desc.filter)
+				uint32_t min_filter, mag_filter, mip_filter;
+				if (default_ss_desc.filter & TFOE_Min_Linear)
 				{
-				case TFO_Point:
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
-					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
-					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
-					break;
-
-				case TFO_Bilinear:
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_LINEAR;
-					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
-					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
-					break;
-
-				case TFO_Trilinear:
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_LINEAR;
-					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
-					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_LINEAR;
-					break;
-
-				case TFO_Anisotropic:
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_ANISOTROPIC;
-					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_LINEAR;
-					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_LINEAR;
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-					d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-					samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = D3DTEXF_POINT;
-					samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = D3DTEXF_POINT;
-					samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = D3DTEXF_POINT;
-					break;
+					min_filter = D3DTEXF_LINEAR;
 				}
+				else
+				{
+					min_filter = D3DTEXF_POINT;
+				}
+				if (default_ss_desc.filter & TFOE_Mag_Linear)
+				{
+					mag_filter = D3DTEXF_LINEAR;
+				}
+				else
+				{
+					mag_filter = D3DTEXF_POINT;
+				}
+				if (default_ss_desc.filter & TFOE_Mip_Linear)
+				{
+					mip_filter = D3DTEXF_LINEAR;
+				}
+				else
+				{
+					mip_filter = D3DTEXF_POINT;
+				}
+				if (default_ss_desc.filter & TFOE_Anisotropic)
+				{
+					min_filter = D3DTEXF_ANISOTROPIC;
+				}
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MINFILTER, min_filter);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAGFILTER, mag_filter);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPFILTER, mip_filter);
+				samplers_cache_[type][i].second[D3DSAMP_MINFILTER] = min_filter;
+				samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = mag_filter;
+				samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = mip_filter;
 
 				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_ss_desc.anisotropy);
 				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, default_ss_desc.max_mip_level);

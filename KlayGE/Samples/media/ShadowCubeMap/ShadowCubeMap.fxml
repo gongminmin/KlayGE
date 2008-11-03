@@ -39,42 +39,42 @@ half4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : 
 	<parameter type="float4x4" name="light_view_proj" array_size="6"/>
 
 	<parameter type="samplerCUBE" name="lamp_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_x_pos_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_x_neg_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_y_pos_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_y_neg_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_z_pos_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	<parameter type="sampler2D" name="shadow_map_z_neg_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>

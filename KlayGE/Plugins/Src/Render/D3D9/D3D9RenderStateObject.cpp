@@ -161,6 +161,34 @@ namespace KlayGE
 			d3d9_addr_mode_v_(D3D9Mapping::Mapping(desc.addr_mode_v)),
 			d3d9_addr_mode_w_(D3D9Mapping::Mapping(desc.addr_mode_w))
 	{
+		if (desc_.filter & TFOE_Min_Linear)
+		{
+			d3d9_min_filter_ = D3DTEXF_LINEAR;
+		}
+		else
+		{
+			d3d9_min_filter_ = D3DTEXF_POINT;
+		}
+		if (desc_.filter & TFOE_Mag_Linear)
+		{
+			d3d9_mag_filter_ = D3DTEXF_LINEAR;
+		}
+		else
+		{
+			d3d9_mag_filter_ = D3DTEXF_POINT;
+		}
+		if (desc_.filter & TFOE_Mip_Linear)
+		{
+			d3d9_mip_filter_ = D3DTEXF_LINEAR;
+		}
+		else
+		{
+			d3d9_mip_filter_ = D3DTEXF_POINT;
+		}
+		if (desc_.filter & TFOE_Anisotropic)
+		{
+			d3d9_min_filter_ = D3DTEXF_ANISOTROPIC;
+		}
 	}
 
 	void D3D9SamplerStateObject::Active(uint32_t stage, TexturePtr texture)
@@ -176,39 +204,9 @@ namespace KlayGE
 		re.SetSamplerState(stage, D3DSAMP_ADDRESSV, d3d9_addr_mode_v_);
 		re.SetSamplerState(stage, D3DSAMP_ADDRESSW, d3d9_addr_mode_w_);
 
-		switch (desc_.filter)
-		{
-		case TFO_Point:
-			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-			break;
-
-		case TFO_Bilinear:
-			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-			break;
-
-		case TFO_Trilinear:
-			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-			break;
-
-		case TFO_Anisotropic:
-			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
-			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			re.SetSamplerState(stage, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-			re.SetSamplerState(stage, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-			re.SetSamplerState(stage, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-			break;
-		}
+		re.SetSamplerState(stage, D3DSAMP_MINFILTER, d3d9_min_filter_);
+		re.SetSamplerState(stage, D3DSAMP_MAGFILTER, d3d9_mag_filter_);
+		re.SetSamplerState(stage, D3DSAMP_MIPFILTER, d3d9_mip_filter_);
 
 		re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, desc_.anisotropy);
 		re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, desc_.max_mip_level);

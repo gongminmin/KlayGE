@@ -84,6 +84,9 @@ namespace KlayGE
 		uint32_t d3d9_addr_mode_u_;
 		uint32_t d3d9_addr_mode_v_;
 		uint32_t d3d9_addr_mode_w_;
+		uint32_t d3d9_min_filter_;
+		uint32_t d3d9_mag_filter_;
+		uint32_t d3d9_mip_filter_;
 	};
 }
 

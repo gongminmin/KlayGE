@@ -457,29 +457,35 @@ namespace KlayGE
 			ogl_addr_mode_v_(OGLMapping::Mapping(desc_.addr_mode_v)),
 			ogl_addr_mode_w_(OGLMapping::Mapping(desc_.addr_mode_w))
 	{
-		switch (desc_.filter)
+		if (desc_.filter & TFOE_Min_Linear)
 		{
-		case TFO_Point:
-			ogl_min_filter_ = GL_NEAREST;
-			ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
-			break;
-
-		case TFO_Bilinear:
 			ogl_min_filter_ = GL_LINEAR;
-			ogl_mag_filter_ = GL_LINEAR_MIPMAP_NEAREST;
-			break;
-
-		case TFO_Trilinear:
-		case TFO_Anisotropic:
-			ogl_min_filter_ = GL_LINEAR;
-			ogl_mag_filter_ = GL_LINEAR_MIPMAP_LINEAR;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
+		}
+		else
+		{
 			ogl_min_filter_ = GL_NEAREST;
-			ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
-			break;
+		}
+		if (desc_.filter & TFOE_Mag_Linear)
+		{
+			if (desc_.filter & TFOE_Mip_Linear)
+			{
+				ogl_mag_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			}
+			else
+			{
+				ogl_mag_filter_ = GL_LINEAR_MIPMAP_NEAREST;
+			}
+		}
+		else
+		{
+			if (desc_.filter & TFOE_Mip_Linear)
+			{
+				ogl_mag_filter_ = GL_NEAREST_MIPMAP_LINEAR;
+			}
+			else
+			{
+				ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+			}
 		}
 	}
 

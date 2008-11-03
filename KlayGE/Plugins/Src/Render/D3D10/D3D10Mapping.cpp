@@ -279,13 +279,22 @@ namespace KlayGE
 	{
 		switch (filter)
 		{
-		case TFO_Point:
+		case TFO_Min_Mag_Mip_Point:
 			return D3D10_FILTER_MIN_MAG_MIP_POINT;
 
-		case TFO_Bilinear:
+		case TFO_Min_Mag_Point_Mip_Linear:
+			return D3D10_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+
+		case TFO_Min_Point_Mag_Linear_Mip_Point:
+			return D3D10_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+
+		case TFO_Min_Point_Mag_Mip_Linear:
+			return D3D10_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+
+		case TFO_Min_Mag_Linear_Mip_Point:
 			return D3D10_FILTER_MIN_MAG_LINEAR_MIP_POINT;
 
-		case TFO_Trilinear:
+		case TFO_Min_Mag_Mip_Linear:
 			return D3D10_FILTER_MIN_MAG_MIP_LINEAR;
 
 		case TFO_Anisotropic:

@@ -93,7 +93,7 @@ namespace KlayGE
 	SamplerStateDesc::SamplerStateDesc()
 		: border_clr(0, 0, 0, 0),
 			addr_mode_u(TAM_Wrap), addr_mode_v(TAM_Wrap), addr_mode_w(TAM_Wrap),
-			filter(TFO_Point),
+			filter(TFO_Min_Mag_Mip_Point),
 			anisotropy(1),
 			max_mip_level(1),
 			mip_map_lod_bias(0)

@@ -8,7 +8,6 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-		<parameter type="float4x4" name="mv" semantic="WORLDVIEW"/>
 		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
 
@@ -17,7 +16,7 @@
 	</cbuffer>
 	
 	<parameter type="sampler2D" name="last_depth_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -31,10 +30,8 @@ void DepthPeelingVS(float4 pos				: POSITION,
 					out float4 oClr			: COLOR0)
 {
 	oPos = mul(pos, mvp);
-	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal), 0).xxx, 0.5f);
-	float4 pos_es = mul(pos, mv);
+	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal), 0.0f).xxx, 0.5f);
 	oPosSS = oPos;
-	oPosSS.z = pos_es.z;
 }
 
 void DepthPeeling1stPS(float4 pos : POSITION,
@@ -44,7 +41,7 @@ void DepthPeeling1stPS(float4 pos : POSITION,
 					out float4 oDepth : COLOR1)
 {
 	oClr = clr;
-	oDepth = (pos_ss.z - depth_min) * inv_depth_range;
+	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
 }
 
 void DepthPeelingNthPS(float4 pos : POSITION,
@@ -53,7 +50,7 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 					out float4 oClr : COLOR0,
 					out float4 oDepth : COLOR1)
 {
-	oDepth = (pos_ss.z - depth_min) * inv_depth_range;
+	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
   
 	float2 tex_coord = pos_ss.xy / pos_ss.w - offset;
 	tex_coord.y *= flip;
@@ -92,7 +89,7 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 	</technique>
 
 	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>

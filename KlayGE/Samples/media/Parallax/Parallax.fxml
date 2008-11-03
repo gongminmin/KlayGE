@@ -14,17 +14,17 @@
 	<parameter type="float" name="parallax_bias"/>
 
 	<parameter type="sampler2D" name="diffuseMapSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	<parameter type="sampler2D" name="normalMapSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	<parameter type="sampler2D" name="heightMapSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>

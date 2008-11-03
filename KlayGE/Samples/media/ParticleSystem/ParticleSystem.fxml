@@ -21,12 +21,12 @@
 		<parameter type="int" name="flip"/>
 	</cbuffer>
 	<parameter type="sampler2D" name="particle_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	<parameter type="sampler2D" name="scene_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -114,7 +114,7 @@ float4 ParticlePS(float4 pos : POSITION,
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
 	<parameter type="sampler2D" name="grass_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
@@ -157,7 +157,7 @@ float4 TerrainPS(float4 pos : POSITION,
 	</technique>
 
 	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>

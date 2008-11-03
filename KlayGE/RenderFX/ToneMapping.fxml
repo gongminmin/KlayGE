@@ -4,19 +4,19 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<parameter type="sampler2D" name="lum_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<parameter type="sampler2D" name="bloom_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>

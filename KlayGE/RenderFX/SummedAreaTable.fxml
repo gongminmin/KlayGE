@@ -8,14 +8,14 @@
 	<parameter type="float" name="scale"/>
 
 	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 
 	<parameter type="sampler2D" name="child_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>

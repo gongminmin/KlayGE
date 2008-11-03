@@ -5,12 +5,12 @@
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
 	<parameter type="sampler2D" name="particle_pos_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 	<parameter type="sampler3D" name="noise_vol_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 		<state name="address_w" value="wrap"/>
@@ -35,12 +35,12 @@
 	</cbuffer>
 
 	<parameter type="sampler2D" name="particle_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	<parameter type="sampler2D" name="scene_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -154,7 +154,7 @@ float4 ParticlesPS(float4 pos : POSITION,
 	</technique>
 
 	<parameter type="sampler2D" name="particle_vel_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -166,23 +166,23 @@ float4 ParticlesPS(float4 pos : POSITION,
 	</cbuffer>
 
 	<parameter type="sampler2D" name="particle_init_vel_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 	<parameter type="sampler2D" name="particle_birth_time_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 	
 	<parameter type="sampler2D" name="height_map_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 	<parameter type="sampler2D" name="normal_map_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -260,7 +260,7 @@ void UpdatePS(float4 pos : POSITION,
 	</cbuffer>
 	
 	<parameter type="sampler2D" name="grass_sampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
@@ -304,12 +304,12 @@ float4 TerrainPS(float4 pos : POSITION, float4 tex : TEXCOORD0, float3 pos_os : 
 	</technique>
 
 	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 	<parameter type="sampler2D" name="tex_with_alpha_sampler">
-		<state name="filtering" value="point"/>
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>

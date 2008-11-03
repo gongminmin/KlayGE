@@ -72,10 +72,15 @@ color_mask_enum = {
 }
 
 texture_filter_enum = {
-	"point" : 0,
-	"bilinear" : 1,
-	"trilinear" : 2,
-	"anisotropic" : 3,
+	"min_mag_mip_point" : 0x00,
+	"min_mag_point_mip_linear" : 0x01,
+	"min_point_mag_linear_mip_point" : 0x02,
+	"min_point_mag_mip_linear" : 0x03,
+	"min_linear_mag_mip_point" : 0x04,
+	"min_linear_mag_point_mip_linear" : 0x05,
+	"min_mag_linear_mip_point" : 0x06,
+	"min_mag_mip_linear" : 0x07,
+	"anisotropic" : 0x0F,
 }
 
 texture_addressing_mode_enum = {
@@ -455,7 +460,7 @@ class parameter:
 			self.annotations.append(annotation(ann))
 
 		if self.type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
-			self.filtering = texture_filter_enum['point']
+			self.filtering = texture_filter_enum['min_mag_mip_point']
 			self.address_u = texture_addressing_mode_enum['wrap']
 			self.address_v = texture_addressing_mode_enum['wrap']
 			self.address_w = texture_addressing_mode_enum['wrap']

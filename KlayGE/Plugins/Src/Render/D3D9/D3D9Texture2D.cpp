@@ -47,6 +47,11 @@ namespace KlayGE
 					: D3D9Texture(TT_2D, access_hint),
 						auto_gen_mipmaps_(false)
 	{
+		if (IsDepthFormat(format))
+		{
+			BOOST_ASSERT(!((access_hint & EAH_CPU_Read) || (access_hint & EAH_CPU_Write)));
+		}
+
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 

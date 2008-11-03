@@ -5,7 +5,7 @@
 	<parameter type="float" name="z"/>
 	
 	<parameter type="sampler3D" name="electroSampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 		<state name="address_w" value="wrap"/>

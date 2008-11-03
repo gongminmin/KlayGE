@@ -9,7 +9,7 @@
 	</cbuffer>
 
 	<parameter type="sampler2D" name="texUISampler">
-		<state name="filtering" value="bilinear"/>
+		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
