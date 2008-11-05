@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x86_d.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc_x86_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -130,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x64_d.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc_x64_d.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -197,7 +197,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x86.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc_x86.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -265,7 +265,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc90_x64.lib"
+				OutputFile="$(OutDir)/KlayGE_Terrain_HeightMap_vc_x64.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

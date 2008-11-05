@@ -9,7 +9,7 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw43_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Debug\win\x86" />
 				<Option type="3" />
@@ -29,7 +29,7 @@
 				<Linker>
 					<Add library="boost_system-mgw43-mt-d" />
 					<Add library="boost_signals-mgw43-mt-d" />
-					<Add library="libKlayGE_Core_mgw43_x86_d.a" />
+					<Add library="libKlayGE_Core_mgw_x86_d.a" />
 					<Add library="libd3d9.a" />
 					<Add library="libd3dx9d.a" />
 					<Add library="libgdi32.a" />
@@ -40,7 +40,7 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw43_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_D3D9_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="..\..\lib\win\x86" />
 				<Option object_output="..\..\Release\win\x86" />
 				<Option type="3" />
@@ -61,7 +61,7 @@
 					<Add option="-s" />
 					<Add library="boost_system-mgw43-mt" />
 					<Add library="boost_signals-mgw43-mt" />
-					<Add library="libKlayGE_Core_mgw43_x86.a" />
+					<Add library="libKlayGE_Core_mgw_x86.a" />
 					<Add library="libd3d9.a" />
 					<Add library="libd3dx9.a" />
 					<Add library="libgdi32.a" />

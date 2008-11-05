@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc90_x86_d.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x86_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 			/>
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc90_x64_d.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x64_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 			/>
@@ -215,8 +215,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc90_x86.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x86.dll"
 				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -292,8 +294,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc90_x64.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x64.dll"
 				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"

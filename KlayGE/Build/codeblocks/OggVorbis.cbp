@@ -8,7 +8,7 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw43_x86_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw_x86_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="..\..\Debug\win\x86" />
 				<Option type="2" />
@@ -27,7 +27,7 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw43_x86.a" prefix_auto="0" extension_auto="0" />
+				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw_x86.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="..\..\Release\win\x86" />
 				<Option type="2" />
