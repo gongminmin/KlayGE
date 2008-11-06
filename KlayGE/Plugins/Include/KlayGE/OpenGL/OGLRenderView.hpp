@@ -187,6 +187,7 @@ namespace KlayGE
 	{
 	public:
 		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
+		OGLDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample);
 		~OGLDepthStencilRenderView();
 
 		void Clear(Color const & clr);
@@ -195,6 +196,7 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
+		int level_;
 		uint32_t multi_sample_;
 		GLuint rbo_;
 	};

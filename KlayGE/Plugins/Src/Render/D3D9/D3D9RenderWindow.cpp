@@ -153,9 +153,9 @@ namespace KlayGE
 				// Try 32-bit zbuffer
 				if (SUCCEEDED(d3d_->CheckDeviceFormat(adapter_.AdapterNo(),
 					D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, D3DUSAGE_DEPTHSTENCIL,
-					D3DRTYPE_SURFACE, D3DFMT_D32)))
+					D3DRTYPE_SURFACE, D3DFMT_D32F_LOCKABLE)))
 				{
-					d3dpp_.AutoDepthStencilFormat = D3DFMT_D32;
+					d3dpp_.AutoDepthStencilFormat = D3DFMT_D32F_LOCKABLE;
 					stencilBits_ = 0;
 				}
 				else

@@ -154,6 +154,13 @@ namespace KlayGE
 		return ret;
 	}
 
+	RenderViewPtr D3D9RenderFactory::MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample)
+	{
+		D3D9RenderViewPtr ret = MakeSharedPtr<D3D9DepthStencilRenderView>(texture, level, multi_sample);
+		resource_pool_.push_back(ret);
+		return ret;
+	}
+
 	ShaderObjectPtr D3D9RenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<D3D9ShaderObject>();

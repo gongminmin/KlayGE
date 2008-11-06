@@ -441,7 +441,10 @@ namespace KlayGE
 		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;
-		caps_.alpha_to_coverage_support = true;;
+		caps_.alpha_to_coverage_support = true;
+		caps_.depth_texture_support = true;
+		caps_.bc4_support = true;
+		caps_.bc5_support = true;
 	}
 
 	void D3D10RenderEngine::RSSetState(ID3D10RasterizerStatePtr const & ras)

@@ -604,6 +604,38 @@ namespace KlayGE
 			ret.alpha_to_coverage_support = false;
 		}
 
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_TEXTURE,
+			D3DFMT_D16))
+		{
+			ret.depth_texture_support = true;
+		}
+		else
+		{
+			ret.depth_texture_support = false;
+		}
+		
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
+			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))
+		{
+			ret.bc4_support = true;
+		}
+		else
+		{
+			ret.bc4_support = false;
+		}
+		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
+			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
+			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))
+		{
+			ret.bc5_support = true;
+		}
+		else
+		{
+			ret.bc5_support = false;
+		}
+
 		return ret;
 	}
 
@@ -692,17 +724,40 @@ namespace KlayGE
 
 		case EF_BC4:
 		case EF_BC4_SRGB:
-			return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value);
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				if (re.DeviceCaps().bc4_support)
+				{
+					return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value);
+				}
+				else
+				{
+					THR(boost::system::posix_error::not_supported);
+				}
+			}
 
 		case EF_BC5:
 		case EF_BC5_SRGB:
-			return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '2'>::value);
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				if (re.DeviceCaps().bc5_support)
+				{
+					return static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '2'>::value);
+				}
+				else
+				{
+					THR(boost::system::posix_error::not_supported);
+				}
+			}
 
 		case EF_D16:
 			return D3DFMT_D16;
 
 		case EF_D24S8:
 			return D3DFMT_D24S8;
+
+		case EF_D32F:
+			return D3DFMT_D32F_LOCKABLE;
 
 		default:
 			THR(boost::system::posix_error::not_supported);
@@ -806,6 +861,9 @@ namespace KlayGE
 		case D3DFMT_D24X8:
 		case D3DFMT_D24S8:
 			return EF_D24S8;
+
+		case D3DFMT_D32F_LOCKABLE:
+			return EF_D32F;
 
 		default:
 			THR(boost::system::posix_error::not_supported);

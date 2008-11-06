@@ -7,6 +7,7 @@
 // 3.8.0
 // 增加了MakeSamplerStateObject (2008.9.21)
 // 增加了MakeConditionalRender (2008.10.11)
+// 支持depth texture (2008.11.6)
 //
 // 3.0.0
 // 增加了MakeVertexBuffer (2005.9.7)
@@ -74,6 +75,7 @@ namespace KlayGE
 		virtual RenderViewPtr Make3DRenderView(Texture& texture, uint32_t slice, int level) = 0;
 		virtual RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf) = 0;
 		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample) = 0;
+		virtual RenderViewPtr MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample) = 0;
 
 		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);

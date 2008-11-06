@@ -179,6 +179,11 @@ namespace KlayGE
 					stencilBits_ = 8;
 					break;
 
+				case EF_D32F:
+					depthBits_ = 32;
+					stencilBits_ = 0;
+					break;
+
 				default:
 					BOOST_ASSERT(false);
 

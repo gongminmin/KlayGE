@@ -300,6 +300,27 @@ namespace KlayGE
 		case TFO_Anisotropic:
 			return D3D10_FILTER_ANISOTROPIC;
 
+		case TFO_Cmp_Min_Mag_Mip_Point:
+			return D3D10_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+
+		case TFO_Cmp_Min_Mag_Point_Mip_Linear:
+			return D3D10_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+
+		case TFO_Cmp_Min_Point_Mag_Linear_Mip_Point:
+			return D3D10_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+
+		case TFO_Cmp_Min_Point_Mag_Mip_Linear:
+			return D3D10_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+
+		case TFO_Cmp_Min_Mag_Linear_Mip_Point:
+			return D3D10_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+
+		case TFO_Cmp_Min_Mag_Mip_Linear:
+			return D3D10_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+
+		case TFO_Cmp_Anisotropic:
+			return D3D10_FILTER_COMPARISON_ANISOTROPIC;
+
 		default:
 			BOOST_ASSERT(false);
 			return D3D10_FILTER_MIN_MAG_MIP_POINT;

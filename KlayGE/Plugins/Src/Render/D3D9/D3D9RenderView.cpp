@@ -476,6 +476,31 @@ namespace KlayGE
 		surface_ = this->CreateSurface();
 	}
 
+	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(Texture& texture_1d_2d, int level, uint32_t multi_sample)
+	{
+		BOOST_ASSERT(IsDepthFormat(texture_1d_2d.Format()));
+
+		BOOST_ASSERT((Texture::TT_2D == texture_1d_2d.Type()) || (Texture::TT_1D == texture_1d_2d.Type()));
+		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
+
+		IDirect3DSurface9* surface;
+		checked_cast<D3D9Texture2D*>(&texture_1d_2d)->D3DTexture2D()->GetSurfaceLevel(level, &surface);
+		surface_ = MakeCOMPtr(surface);
+
+		width_ = texture_1d_2d.Width(level);
+		height_ = texture_1d_2d.Height(level);
+		pf_ = texture_1d_2d.Format();
+
+		if (multi_sample > 16)
+		{
+			multi_sample_ = D3DMULTISAMPLE_16_SAMPLES;
+		}
+		else
+		{
+			multi_sample_ = D3DMULTISAMPLE_TYPE(multi_sample);
+		}
+	}
+
 	void D3D9DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
 	{
 		UNREF_PARAM(att);

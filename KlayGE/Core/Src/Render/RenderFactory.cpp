@@ -121,6 +121,11 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
+		RenderViewPtr MakeDepthStencilRenderView(Texture& /*texture*/, int /*level*/, uint32_t /*multi_sample*/)
+		{
+			return RenderView::NullObject();
+		}
+
 		ShaderObjectPtr MakeShaderObject()
 		{
 			return ShaderObject::NullObject();

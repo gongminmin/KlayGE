@@ -43,6 +43,9 @@ namespace KlayGE
 		bool hw_instancing_support;
 		bool stream_output_support;
 		bool alpha_to_coverage_support;
+		bool depth_texture_support;
+		bool bc4_support;
+		bool bc5_support;
 	};
 }
 

@@ -167,7 +167,7 @@ namespace KlayGE
 	}
 
 
-	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level)
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level, uint32_t multi_sample)
 	{
 		BOOST_ASSERT((Texture::TT_1D == texture_1d_2d.Type()) || (Texture::TT_2D == texture_1d_2d.Type()));
 		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
@@ -198,7 +198,7 @@ namespace KlayGE
 		pf_ = texture_1d_2d.Format();
 	}
 
-	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level, uint32_t multi_sample)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(texture_cube.AccessHint() & EAH_GPU_Write);

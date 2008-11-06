@@ -134,6 +134,11 @@ namespace KlayGE
 		return MakeSharedPtr<OGLDepthStencilRenderView>(width, height, pf, multi_sample);
 	}
 
+	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample)
+	{
+		return MakeSharedPtr<OGLDepthStencilRenderView>(texture, level, multi_sample);
+	}
+
 	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()
 	{
 		return MakeSharedPtr<OGLShaderObject>();

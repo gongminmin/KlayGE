@@ -328,7 +328,7 @@ namespace KlayGE
 
 		ID3D10Blob* code;
 		ID3D10Blob* err_msg;
-		D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "0" }, { NULL, NULL } };
+		D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, {"KLAYGE_D3D10", "1" }, { NULL, NULL } };
 		D3DX10CompileFromMemory(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, macros,
 			NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 			D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, NULL, &code, &err_msg, NULL);

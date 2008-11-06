@@ -303,8 +303,6 @@ namespace KlayGE
 
 	D3D10RenderWindow::~D3D10RenderWindow()
 	{
-		swap_chain_->SetFullscreenState(false, NULL);
-
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().disconnect(boost::bind(&D3D10RenderWindow::OnActive, this, _1, _2));
 		main_wnd->OnPaint().disconnect(boost::bind(&D3D10RenderWindow::OnPaint, this, _1));
@@ -471,6 +469,11 @@ namespace KlayGE
 		if (d3d_device_)
 		{
 			d3d_device_->ClearState();
+		}
+
+		if (swap_chain_)
+		{
+			swap_chain_->SetFullscreenState(false, NULL);
 		}
 
 		render_target_view_.reset();

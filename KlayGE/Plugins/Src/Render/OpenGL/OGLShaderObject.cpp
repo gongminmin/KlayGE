@@ -398,7 +398,7 @@ namespace KlayGE
 
 		shader_descs_ = shader_descs;
 		shader_text_ = shader_text;
-		*shader_text_ = "#define OGL_EXPLICIT_TEXUNIT\n\n" + *shader_text_;
+		*shader_text_ = "#define OGL_EXPLICIT_TEXUNIT 1\n#define KLAYGE_OPENGL 1\n\n" + *shader_text_;
 
 		std::string profile = (*shader_descs_)[type].profile;
 		switch (type)

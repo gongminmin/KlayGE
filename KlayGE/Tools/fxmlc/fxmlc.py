@@ -81,6 +81,15 @@ texture_filter_enum = {
 	"min_mag_linear_mip_point" : 0x06,
 	"min_mag_mip_linear" : 0x07,
 	"anisotropic" : 0x0F,
+	"cmp_min_mag_mip_point" : 0x10,
+	"cmp_min_mag_point_mip_linear" : 0x11,
+	"cmp_min_point_mag_linear_mip_point" : 0x12,
+	"cmp_min_point_mag_mip_linear" : 0x13,
+	"cmp_min_linear_mag_mip_point" : 0x14,
+	"cmp_min_linear_mag_point_mip_linear" : 0x15,
+	"cmp_min_mag_linear_mip_point" : 0x16,
+	"cmp_min_mag_mip_linear" : 0x17,
+	"cmp_anisotropic" : 0x1F,
 }
 
 texture_addressing_mode_enum = {

@@ -60,7 +60,24 @@ namespace KlayGE
 		desc_.Height = height;
 		desc_.MipLevels = numMipMaps_;
 		desc_.ArraySize = 1;
-		desc_.Format = D3D10Mapping::MappingFormat(format_);
+		switch (format_)
+		{
+		case EF_D16:
+			desc_.Format = DXGI_FORMAT_R16_TYPELESS;
+			break;
+
+		case EF_D24S8:
+			desc_.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			desc_.Format = DXGI_FORMAT_R32_TYPELESS;
+			break;
+
+		default:
+			desc_.Format = D3D10Mapping::MappingFormat(format_);
+			break;
+		}
 		desc_.SampleDesc.Count = 1;
 		desc_.SampleDesc.Quality = 0;
 
@@ -80,8 +97,32 @@ namespace KlayGE
 
 		if (access_hint_ & EAH_GPU_Read)
 		{
+			D3D10_SHADER_RESOURCE_VIEW_DESC sr_desc;
+			switch (format_)
+			{
+			case EF_D16:
+				sr_desc.Format = DXGI_FORMAT_R16_FLOAT;
+				break;
+
+			case EF_D24S8:
+				sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+				break;
+
+			case EF_D32F:
+				sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+				break;
+
+			default:
+				sr_desc.Format = desc_.Format;
+				break;
+			}
+
+			sr_desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+			sr_desc.Texture2D.MostDetailedMip = 0;
+			sr_desc.Texture2D.MipLevels = numMipMaps_;
+
 			ID3D10ShaderResourceView* d3d_sr_view;
-			d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), NULL, &d3d_sr_view);
+			d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), &sr_desc, &d3d_sr_view);
 			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
 		}
 
@@ -267,7 +308,24 @@ namespace KlayGE
 			heights_[level] = heights_[level - 1] / 2;
 		}
 
-		format_ = D3D10Mapping::MappingFormat(desc_.Format);
+		switch (desc_.Format)
+		{
+		case DXGI_FORMAT_R16_TYPELESS:
+			format_ = EF_D16;
+			break;
+
+		case DXGI_FORMAT_R24G8_TYPELESS:
+			format_ = EF_D24S8;
+			break;
+
+		case DXGI_FORMAT_R32_TYPELESS:
+			format_ = EF_D32F;
+			break;
+
+		default:
+			format_ = D3D10Mapping::MappingFormat(desc_.Format);
+			break;
+		}
 		bpp_	= NumFormatBits(format_);
 	}
 }

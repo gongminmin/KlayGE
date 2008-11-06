@@ -400,7 +400,8 @@ namespace KlayGE
 
 		ID3DXBuffer* code;
 		ID3DXBuffer* err_msg;
-		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, NULL,
+		D3DXMACRO macros[] = { { "KLAYGE_D3D9", "1" }, { NULL, NULL } };
+		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), macros, NULL,
 			(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 			0, &code, &err_msg, &constant_table);
 		if (err_msg != NULL)
