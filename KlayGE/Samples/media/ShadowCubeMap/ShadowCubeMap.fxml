@@ -16,11 +16,14 @@ void GenShadowMapVS(float4 Position : POSITION,
     oLightWorldPos = mul(Position, obj_model_to_light_model);
 }
 
-half4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : COLOR
+float4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : COLOR
 {
 	LightWorldPos /= LightWorldPos.w;
-	half dist = length(LightWorldPos.xyz);
-	return half4(dist, dist * dist, 0, 1);
+	float dist = length(LightWorldPos.xyz);
+	
+	float2 dxdy = float2(ddx(dist), ddy(dist));
+
+	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
 	</shader>
@@ -34,6 +37,8 @@ half4 GenShadowMapPS(float4 pos : POSITION, float4 LightWorldPos : TEXCOORD0) : 
 		</pass>
 	</technique>
 
+	<parameter type="float" name="min_variance"/>
+	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="int" name="flip"/>
 	<parameter type="float4x4" name="light_view_proj" array_size="6"/>
@@ -103,22 +108,28 @@ void RenderSceneVS(float4 Position : POSITION,
 	oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
 }
 
+float linstep(float min, float max, float v)
+{
+	return clamp((v - min) / (max - min), 0, 1);
+}
+
 float4 RenderScenePS(float4 pos : POSITION, float3 diffuse : COLOR0,
 				float4 LightWorldPos : TEXCOORD0,
 				float4 LightProjPos[6] : TEXCOORD1) : COLOR 
 {
-	half3 ori_color = diffuse * texCUBE(lamp_sampler, LightWorldPos).rgb;
+	float3 ori_color = diffuse * texCUBE(lamp_sampler, LightWorldPos).rgb;
 	LightWorldPos /= LightWorldPos.w;
-	half dist = length(LightWorldPos.xyz);
+	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);
+	float dist = sqrt(dist_sq);
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		LightProjPos[i].xy /= LightProjPos[i].w;
+		LightProjPos[i] /= LightProjPos[i].w;
 		LightProjPos[i].y *= flip;
 		LightProjPos[i].xy = LightProjPos[i].xy / 2 + 0.5f;
 	}
 	
-	half2 moments[6];
+	float2 moments[6];
 	moments[0] = tex2D(shadow_map_x_pos_sampler, LightProjPos[0].xy);
 	moments[1] = tex2D(shadow_map_x_neg_sampler, LightProjPos[1].xy);
 	moments[2] = tex2D(shadow_map_y_pos_sampler, LightProjPos[2].xy);
@@ -126,21 +137,22 @@ float4 RenderScenePS(float4 pos : POSITION, float3 diffuse : COLOR0,
 	moments[4] = tex2D(shadow_map_z_pos_sampler, LightProjPos[4].xy);
 	moments[5] = tex2D(shadow_map_z_neg_sampler, LightProjPos[5].xy);
 
-	half3 final_color = 0;
+	float3 final_color = 0;
 	for (int j = 0; j < 6; ++ j)
 	{
 		if (LightProjPos[j].z > 0)
 		{
-			half3 color = ori_color / (0.001f + 0.4 * moments[j].y);
-			if (dist > moments[j].x + 0.1f)
-			{
-				// Variance shadow mapping
-				half variance = moments[j].y - moments[j].x * moments[j].x;
-				half m_d = moments[j].x - dist;
-				half p_max = variance / (variance + m_d * m_d);
+			float3 color = ori_color / (0.01f + 0.5f * dist * dist);
+			
+			float p = (dist <= moments[j].x);
+			// Variance shadow mapping
+			float variance = moments[j].y - moments[j].x * moments[j].x;
+			variance = max(variance, min_variance);
+			float m_d = moments[j].x - dist;
+			float p_max = variance / (variance + m_d * m_d);
+			p_max = linstep(bleeding_reduce, 1, p_max);
 
-				color *= p_max;
-			}
+			color *= max(p, p_max);
 			
 			final_color += color;
 		}

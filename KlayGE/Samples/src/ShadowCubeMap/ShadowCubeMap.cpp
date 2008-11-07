@@ -137,6 +137,16 @@ namespace
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.kfx");
 		}
 
+		void MinVariance(float min_variance)
+		{
+			*(effect_->ParameterByName("min_variance")) = min_variance;
+		}
+
+		void BleedingReduce(float bleeding_reduce)
+		{
+			*(effect_->ParameterByName("bleeding_reduce")) = bleeding_reduce;
+		}
+
 		void SetModelMatrix(float4x4 const & model)
 		{
 			model_ = model;
@@ -165,7 +175,7 @@ namespace
 
 	private:
 		float4x4 model_;
-
+	
 		RenderEffectPtr effect_;
 	};
 
@@ -243,6 +253,16 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 		}
 
+		void MinVariance(float min_variance)
+		{
+			*(effect_->ParameterByName("min_variance")) = min_variance;
+		}
+
+		void BleedingReduce(float bleeding_reduce)
+		{
+			*(effect_->ParameterByName("bleeding_reduce")) = bleeding_reduce;
+		}
+
 		void GenShadowMapPass(bool gen_sm)
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm);
@@ -269,7 +289,7 @@ namespace
 
 	private:
 		float4x4 model_;
-
+	
 		RenderEffectPtr effect_;
 	};
 
@@ -288,6 +308,15 @@ namespace
 		float4x4 model_;
 	};
 
+
+	enum
+	{
+		MinVarianceSlider,
+		MinVarianceStatic,
+		BleedingReduceSlider,
+		BleedingReduceStatic,
+		CtrlCamera,
+	};
 
 	enum
 	{
@@ -400,7 +429,6 @@ void ShadowCubeMap::InitObjects()
 		camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
 	}
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -410,6 +438,33 @@ void ShadowCubeMap::InitObjects()
 	action_handler_t input_handler(new input_signal);
 	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	dialog_ = UIManager::Instance().MakeDialog();
+
+	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, MinVarianceStatic, L"Min Variance:", 60, 200, 100, 24, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, MinVarianceSlider, 60, 220, 100, 24, 0, 100, 50, false)));
+	dialog_->Control<UISlider>(MinVarianceSlider)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, _1));
+
+	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, BleedingReduceStatic, L"Bleeding Reduce:", 60, 268, 100, 24, false)));
+	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, BleedingReduceSlider, 60, 288, 100, 24, 0, 100, 50, false)));
+	dialog_->Control<UISlider>(BleedingReduceSlider)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, _1));
+
+	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
+                            60, 356, 350, 24, false, 0, false)));
+	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
+	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&ShadowCubeMap::CtrlCameraHandler, this, _1));
+
+	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));
+	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));
+}
+
+void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
+{
+	dialog_->GetControl(MinVarianceStatic)->SetLocation(width - 120, 200);
+	dialog_->GetControl(MinVarianceSlider)->SetLocation(width - 120, 220);
+	dialog_->GetControl(BleedingReduceStatic)->SetLocation(width - 120, 268);
+	dialog_->GetControl(BleedingReduceSlider)->SetLocation(width - 120, 288);
+	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 356);
 }
 
 void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -422,6 +477,30 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 	}
 }
 
+void ShadowCubeMap::MinVarianceChangedHandler(KlayGE::UISlider const & sender)
+{
+	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->MinVariance(sender.GetValue() / 2000.0f + 0.001f);
+	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->MinVariance(sender.GetValue() / 2000.0f + 0.001f);
+}
+
+void ShadowCubeMap::BleedingReduceChangedHandler(KlayGE::UISlider const & sender)
+{
+	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->BleedingReduce(sender.GetValue() / 500.0f + 0.45f);
+	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->BleedingReduce(sender.GetValue() / 500.0f + 0.45f);
+}
+
+void ShadowCubeMap::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+{
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
+	}
+}
+
 uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -430,6 +509,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		{
+			UIManager::Instance().HandleInput();
+
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(true);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(true);
 
@@ -478,6 +559,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);
+
+			UIManager::Instance().Render();
 
 			std::wostringstream stream;
 			stream << this->FPS();

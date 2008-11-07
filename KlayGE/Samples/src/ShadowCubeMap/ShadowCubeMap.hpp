@@ -4,6 +4,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
+#include <KlayGE/UI.hpp>
 
 class ShadowCubeMap : public KlayGE::App3DFramework
 {
@@ -12,10 +13,14 @@ public:
 
 private:
 	void InitObjects();
+	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void MinVarianceChangedHandler(KlayGE::UISlider const & sender);
+	void BleedingReduceChangedHandler(KlayGE::UISlider const & sender);
+	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 
@@ -30,6 +35,8 @@ private:
 	KlayGE::TexturePtr lamp_tex_;
 
 	KlayGE::float4x4 light_model_;
+
+	KlayGE::UIDialogPtr dialog_;
 };
 
 #endif		// _SHADOWCUBEMAP_HPP

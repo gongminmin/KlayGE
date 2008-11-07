@@ -62,7 +62,7 @@ float4 BlurPS(float4 iPos : POSITION,
 				float4 iTex2 : TEXCOORD2,
 				float4 iTex3 : TEXCOORD3) : COLOR0
 {
-	half4 color = half4(0, 0, 0, 1);
+	float4 color = float4(0, 0, 0, 1);
 	float4 tex[4] = { iTex0, iTex1, iTex2, iTex3 };
 
 	for (int i = 0; i < 4; ++ i)
