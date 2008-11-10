@@ -86,6 +86,11 @@ namespace KlayGE
 		{
 			return DynamicD3D10GetPixelShaderProfile_(pDevice);
 		}
+		HRESULT D3D10ReflectShader(void const * pShaderBytecode, SIZE_T BytecodeLength,
+			ID3D10ShaderReflection** ppReflector) const
+		{
+			return DynamicD3D10ReflectShader_(pShaderBytecode, BytecodeLength, ppReflector);
+		}
 
 		void RSSetState(ID3D10RasterizerStatePtr const & ras);
 		void OMSetDepthStencilState(ID3D10DepthStencilStatePtr const & ds, uint16_t stencil_ref);
@@ -116,11 +121,14 @@ namespace KlayGE
 								ID3D10Device** ppDevice);
 		typedef LPCSTR (WINAPI *D3D10GetVertexShaderProfileFunc)(ID3D10Device* pDevice);
 		typedef LPCSTR (WINAPI *D3D10GetPixelShaderProfileFunc)(ID3D10Device* pDevice);
+		typedef HRESULT (WINAPI *D3D10ReflectShaderFunc)(void const * pShaderBytecode, SIZE_T BytecodeLength,
+			ID3D10ShaderReflection** ppReflector);
 
 		CreateDXGIFactoryFunc DynamicCreateDXGIFactory_;
 		D3D10CreateDeviceAndSwapChainFunc DynamicD3D10CreateDeviceAndSwapChain_;
 		D3D10GetVertexShaderProfileFunc DynamicD3D10GetVertexShaderProfile_;
 		D3D10GetPixelShaderProfileFunc DynamicD3D10GetPixelShaderProfile_;
+		D3D10ReflectShaderFunc DynamicD3D10ReflectShader_;
 
 
 		// Direct3D rendering device

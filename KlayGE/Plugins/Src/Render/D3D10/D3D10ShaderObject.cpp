@@ -30,7 +30,7 @@
 #include <boost/foreach.hpp>
 
 #include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
-#include <d3d10_1.h>
+#include <d3d10.h>
 #include <d3dx10.h>
 
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>
@@ -375,8 +375,8 @@ namespace KlayGE
 				break;
 			}
 
-			ID3D10ShaderReflection1* reflection;
-			D3DX10ReflectShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &reflection);
+			ID3D10ShaderReflection* reflection;
+			render_eng.D3D10ReflectShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &reflection);
 			if (reflection != NULL)
 			{
 				D3D10_SHADER_DESC desc;

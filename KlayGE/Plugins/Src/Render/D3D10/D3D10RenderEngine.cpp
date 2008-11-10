@@ -64,6 +64,7 @@ namespace KlayGE
 			DynamicD3D10CreateDeviceAndSwapChain_ = reinterpret_cast<D3D10CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d10_, "D3D10CreateDeviceAndSwapChain"));
 			DynamicD3D10GetVertexShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetVertexShaderProfile"));
 			DynamicD3D10GetPixelShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetPixelShaderProfile"));
+			DynamicD3D10ReflectShader_ = reinterpret_cast<D3D10ReflectShaderFunc>(::GetProcAddress(mod_d3d10_, "D3D10ReflectShader"));
 		}
 
 		IDXGIFactory* gi_factory; 
