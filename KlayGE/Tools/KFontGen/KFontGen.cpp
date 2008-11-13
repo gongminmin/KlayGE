@@ -215,12 +215,15 @@ public:
 
 			if (!edge_points.empty())
 			{
+				float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
+				float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
+
 				kdtree<int2> kd(&edge_points[0], edge_points.size());
 
-				ci.left = static_cast<uint16_t>(static_cast<float>(ft_slot->bitmap_left) / INTERNAL_CHAR_SIZE * char_size_);
-				ci.top = static_cast<uint16_t>((3 / 4.0f - static_cast<float>(ft_slot->bitmap_top) / INTERNAL_CHAR_SIZE) * char_size_);
-				ci.width = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_width) / INTERNAL_CHAR_SIZE + 0.1f) * char_size_);
-				ci.height = static_cast<uint16_t>(std::min<float>(1.0f, static_cast<float>(buf_height) / INTERNAL_CHAR_SIZE + 0.1f) * char_size_);
+				ci.left = static_cast<int16_t>((ft_slot->bitmap_left - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
+				ci.top = static_cast<int16_t>((3 / 4.0f - (ft_slot->bitmap_top + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
+				ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
+				ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
 
 				ci.dist.resize(char_size_ * char_size_);
 				for (uint32_t y = 0; y < char_size_; ++ y)
@@ -228,7 +231,7 @@ public:
 					for (uint32_t x = 0; x < char_size_; ++ x)
 					{
 						float value;
-						int2 const map_xy = float2(x - 1.0f, y - 1.0f) * (INTERNAL_CHAR_SIZE / static_cast<float>(char_size_ - 2)) + INTERNAL_CHAR_SIZE / 2.0f / (char_size_ - 2);
+						int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / (char_size_ - 2) - float2(x_offset, y_offset);
 						if (kd.query_position(map_xy) > 0)
 						{
 							value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
@@ -734,12 +737,16 @@ int main(int argc, char* argv[])
 			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
 	}
 
-	Timer timer;
+	Timer timer_total;
+	Timer timer_stage;
 
+	timer_stage.restart();
 	cout << "Compute distance field..." << endl;
 	compute_distance(char_info, num_threads, ttf, start_code, end_code, header.char_size);
-	cout << "\rTime elapsed: " << timer.elapsed() << " s                                        " << endl;
+	cout << "\rTime elapsed: " << timer_stage.elapsed() << " s                                        " << endl;
 
+	timer_stage.restart();
+	cout << "Locate non-empty characters..." << endl;
 	char_index.clear();
 	header.non_empty_chars = 0;
 	for (size_t i = 0; i < char_info.size(); ++ i)
@@ -761,12 +768,16 @@ int main(int argc, char* argv[])
 			++ header.validate_chars;
 		}
 	}
+	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
 	cout << "Quantize..." << endl;
-	timer.restart();
+	timer_stage.restart();
 	std::vector<uint8_t> uint8_dist(header.non_empty_chars * header.char_size * header.char_size);
 	quantizer(uint8_dist, char_index, char_info, header.base, header.scale);
-	cout << "Time elapsed: " << timer.elapsed() << " s" << endl;
+	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
+
+	cout.precision(2);
+	cout << fixed << header.non_empty_chars / timer_total.elapsed() << " Characters/Second" << endl;
 
 	{
 		ofstream kfont_output(kfont_name.c_str(), ios_base::binary);
