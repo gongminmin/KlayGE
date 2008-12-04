@@ -65,16 +65,19 @@ namespace KlayGE
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
-		D3D10_SUBRESOURCE_DATA subres_data;
+		std::vector<D3D10_SUBRESOURCE_DATA> subres_data(numMipMaps_);
 		if (init_data != NULL)
 		{
-			subres_data.pSysMem = &init_data->data[0];
-			subres_data.SysMemPitch = init_data->row_pitch;
-			subres_data.SysMemSlicePitch = init_data->slice_pitch;
+			for (int i = 0; i < numMipMaps_; ++ i)
+			{
+				subres_data[i].pSysMem = &init_data[i].data[0];
+				subres_data[i].SysMemPitch = init_data[i].row_pitch;
+				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
+			}
 		}
 
 		ID3D10Texture3D* d3d_tex;
-		TIF(d3d_device_->CreateTexture3D(&desc_, (init_data != NULL) ? &subres_data : NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture3D(&desc_, (init_data != NULL) ? &subres_data[0] : NULL, &d3d_tex));
 		d3dTexture3D_ = MakeCOMPtr(d3d_tex);
 
 		if (access_hint_ & EAH_GPU_Read)

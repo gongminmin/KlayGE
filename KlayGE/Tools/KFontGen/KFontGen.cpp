@@ -776,8 +776,17 @@ int main(int argc, char* argv[])
 	quantizer(uint8_dist, char_index, char_info, header.base, header.scale);
 	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
+	int processed_chars = 0;
+	for (int i = start_code; i <= end_code; ++ i)
+	{
+		if (!char_info[i].dist.empty())
+		{
+			++ processed_chars;
+		}
+	}
+
 	cout.precision(2);
-	cout << fixed << header.non_empty_chars / timer_total.elapsed() << " Characters/Second" << endl;
+	cout << fixed << processed_chars / timer_total.elapsed() << " Characters/Second" << endl;
 
 	{
 		ofstream kfont_output(kfont_name.c_str(), ios_base::binary);

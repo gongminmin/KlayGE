@@ -108,7 +108,7 @@ namespace KlayGE
 					}
 					else
 					{
-						memcpy(p, &init_data->data[0], image_size);
+						memcpy(p, &init_data[face * numMipMaps_ + level].data[0], image_size);
 					}
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
@@ -130,7 +130,7 @@ namespace KlayGE
 					{
 						for (uint32_t h = 0; h < s; ++ h)
 						{
-							memcpy(p + h * s * bpp_ / 8, &init_data->data[h * init_data->row_pitch], s * bpp_ / 8);
+							memcpy(p + h * s * bpp_ / 8, &init_data[face * numMipMaps_ + level].data[h * init_data[face * numMipMaps_ + level].row_pitch], s * bpp_ / 8);
 						}
 					}
 					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);

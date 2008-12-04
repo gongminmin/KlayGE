@@ -65,16 +65,22 @@ namespace KlayGE
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 		desc_.MiscFlags |= D3D10_RESOURCE_MISC_TEXTURECUBE;
 
-		D3D10_SUBRESOURCE_DATA subres_data;
+		std::vector<D3D10_SUBRESOURCE_DATA> subres_data(6 * numMipMaps_);
 		if (init_data != NULL)
 		{
-			subres_data.pSysMem = &init_data->data[0];
-			subres_data.SysMemPitch = init_data->row_pitch;
-			subres_data.SysMemSlicePitch = init_data->slice_pitch;
+			for (int face = 0; face < 6; ++ face)
+			{
+				for (int i = 0; i < numMipMaps_; ++ i)
+				{
+					subres_data[face * numMipMaps_ + i].pSysMem = &init_data[face * numMipMaps_ + i].data[0];
+					subres_data[face * numMipMaps_ + i].SysMemPitch = init_data[face * numMipMaps_ + i].row_pitch;
+					subres_data[face * numMipMaps_ + i].SysMemSlicePitch = init_data[face * numMipMaps_ + i].slice_pitch;
+				}
+			}
 		}
 
 		ID3D10Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != NULL) ? &subres_data : NULL, &d3d_tex));
+		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != NULL) ? &subres_data[0] : NULL, &d3d_tex));
 		d3dTextureCube_ = MakeCOMPtr(d3d_tex);
 
 		if (access_hint_ & EAH_GPU_Read)
