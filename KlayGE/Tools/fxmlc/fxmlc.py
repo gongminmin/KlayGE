@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import StringIO
 import struct
+import sys
+
+def MyPrint(str):
+	if 3 == sys.version_info[0]:
+		print(str)
+	else:
+		print str
 
 shade_mode_enum = {
 	"flat" : 0,
@@ -192,7 +198,7 @@ def type_code(type_name):
 		if (types_define[i] == type_name):
 			return i
 	else:
-		print "Wrong type name: ", type_name
+		MyPrint("Wrong type name: " + type_name)
 		assert False
 
 def render_state_code(state_name):
@@ -200,7 +206,7 @@ def render_state_code(state_name):
 		if (render_states_define[i][0] == state_name):
 			return i
 	else:
-		print "Wrong state name: ", state_name
+		MyPrint("Wrong state name: " + state_name)
 		assert False
 
 def get_matrix(result, col, row, node):
@@ -333,7 +339,10 @@ def get_value(result, type, node):
 
 def write_short_string(stream, str):
 	stream.write(struct.pack('B', len(str)))
-	stream.write(str)
+	if 3 == sys.version_info[0]:
+		stream.write(bytes(str, encoding = 'ascii'))
+	else:
+		stream.write(str)
 
 def write_matrix(stream, col, row, var):
 	for y in range(row):
@@ -515,7 +524,7 @@ class parameter:
 					self.border_clr[2] = float(state.getAttribute('b'))
 					self.border_clr[3] = float(state.getAttribute('a'))
 				else:
-					print "Wrong sampler state name:", self.name
+					MyPrint("Wrong sampler state name:" + self.name)
 
 	def write(self, stream):
 		stream.write(struct.pack('I', self.array_size))
@@ -568,7 +577,10 @@ class shader_func:
 
 	def write(self, stream):
 		stream.write(struct.pack('I', len(self.str)))
-		stream.write(self.str)
+		if 3 == sys.version_info[0]:
+			stream.write(bytes(self.str, encoding = 'ascii'))
+		else:
+			stream.write(self.str)
 
 	def __str__(self):
 		return self.str
@@ -581,7 +593,7 @@ class render_state:
 				self.type = state_define[1]
 				break
 		else:
-			print "Wrong render state name:", self.name
+			MyPrint("Wrong render state name:" + self.name)
 
 		if tag.getAttributeNode('index') != None:
 			self.index = int(tag.getAttribute('index'))
@@ -647,7 +659,7 @@ class render_state:
 		elif "sample_mask" == self.name:
 			self.value = int(value_str)
 		else:
-			print "Wrong render state name:", self.name
+			MyPrint("Wrong render state name:" + self.name)
 			assert False
 
 	def write(self, stream):
@@ -834,7 +846,10 @@ class effect:
 			self.techniques.append(technique(tech, render_state_blocks))
 
 	def write(self, stream):
-		stream.write('FXML')
+		if 3 == sys.version_info[0]:
+			stream.write(b'FXML')
+		else:
+			stream.write('FXML')
 		stream.write(struct.pack('I', 2))
 		stream.write(struct.pack('I', len(self.parameters)))
 		stream.write(struct.pack('I', len(self.cbuffers)))
@@ -890,7 +905,10 @@ def preprocess(file_name):
 	include_files = dom.documentElement.getElementsByTagName('include')
 	while len(include_files) != 0:
 		for include_file in include_files:
-			include_name = include_file.getAttribute('name').encode(encoding)
+			if 3 == sys.version_info[0]:
+				include_name = include_file.getAttribute('name')
+			else:
+				include_name = include_file.getAttribute('name').encode(encoding)
 			if len(include_name) != 0:
 				include_dom = parse(dir + include_name)
 				for child in include_dom.documentElement.childNodes:

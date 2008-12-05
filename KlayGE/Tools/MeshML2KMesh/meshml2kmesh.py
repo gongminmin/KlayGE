@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
+def MyPrint(str):
+	import sys
+	if 3 == sys.version_info[0]:
+		print(str)
+	else:
+		print str
+
 VEU_Position = 0
 VEU_Normal = 1
 VEU_Diffuse = 2
@@ -109,7 +116,7 @@ def parse_model(dom):
 
 	ret.version = int(dom.documentElement.getAttribute('version'))
 	if ret.version != 3:
-		print "model version must be 3"
+		MyPrint("model version must be 3")
 		raise
 
 	if len(dom.documentElement.getElementsByTagName('bones_chunk')) > 0:
@@ -224,7 +231,7 @@ if __name__ == '__main__':
 	import sys
 
 	if len(sys.argv) < 2:
-		print "Usage: meshml2kmesh.py src.meshml [dst.kmodel]"
+		MyPrint("Usage: meshml2kmesh.py src.meshml [dst.kmodel]")
 		sys.exit()
 
 	in_file_name = sys.argv[1]	
@@ -237,7 +244,7 @@ if __name__ == '__main__':
 	else:
 		out_file_name = sys.argv[2]
 
-	print "Parsing:", in_file_name
+	MyPrint("Parsing:" + in_file_name)
 	from xml.dom.minidom import parse
 	model = parse_model(parse(in_file_name))
 
@@ -251,7 +258,7 @@ if __name__ == '__main__':
 
 	ofs.write(pack('L', model.version))
 
-	print "Model version:", model.version
+	MyPrint("Model version:" + model.version)
 
 	ofs.write(pack('B', len(model.meshes)))
 	ofs.write(pack('B', len(model.joints)))
@@ -261,7 +268,7 @@ if __name__ == '__main__':
 	ofs.write(pack('L', model.frame_rate))
 
 	for mesh in model.meshes:
-		print "Compiling mesh:", mesh.name
+		MyPrint("Compiling mesh:" + mesh.name)
 
 		ofs.write(pack('B', len(mesh.name)))
 		ofs.write(mesh.name)
@@ -320,7 +327,7 @@ if __name__ == '__main__':
 			ofs.write(pack('HHH', triangle.a, triangle.b, triangle.c))
 
 	for jo in model.joints:
-		print "Compiling joint:", jo.name
+		MyPrint("Compiling joint:" + jo.name)
 
 		ofs.write(pack('B', len(jo.name)))
 		ofs.write(jo.name)
@@ -330,7 +337,7 @@ if __name__ == '__main__':
 		ofs.write(pack('ffff', jo.bind_quat.x, jo.bind_quat.y, jo.bind_quat.z, jo.bind_quat.w))
 
 	for key_frame in model.key_frames:
-		print "Compiling key frame:", key_frame.name
+		MyPrint("Compiling key frame:" + key_frame.name)
 
 		ofs.write(pack('B', len(key_frame.name)))
 		ofs.write(key_frame.name)
@@ -340,5 +347,5 @@ if __name__ == '__main__':
 		for key in key_frame.keys:
 			ofs.write(pack('ffff', key.quat.x, key.quat.y, key.quat.z, key.quat.w))
 
-	print "DONE!!"
+	MyPrint("DONE!!")
 

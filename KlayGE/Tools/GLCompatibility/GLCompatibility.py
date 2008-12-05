@@ -1,3 +1,10 @@
+def MyPrint(str):
+	import sys
+	if 3 == sys.version_info[0]:
+		print(str)
+	else:
+		print str
+
 def is_supported(feature_name):
 	return feature_name in is_supported.exts
 
@@ -207,8 +214,8 @@ def gl_compatibility(info_name):
 	for ext in ext_tags:
 		exts.append(ext.getAttribute('name'))
 
-	print 'OpenGL Compatibility Viewer'
-	print 'Copyright(C) 2004-2008 Minmin Gong\n'
+	MyPrint('OpenGL Compatibility Viewer')
+	MyPrint('Copyright(C) 2004-2008 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
@@ -217,7 +224,7 @@ def gl_compatibility(info_name):
 
 	info.to_xml(open(report_file_name, 'w'))
 
-	print 'The results are saved in the file ' + report_file_name
+	MyPrint('The results are saved in the file ' + report_file_name)
 
 
 if __name__ == '__main__':
@@ -226,4 +233,4 @@ if __name__ == '__main__':
 	if len(sys.argv) >= 2:
 		gl_compatibility(sys.argv[1])
 	else:
-		print 'Usage: GLCompatibility.py info.xml'
+		MyPrint('Usage: GLCompatibility.py info.xml')
