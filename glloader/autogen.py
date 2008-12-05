@@ -97,7 +97,7 @@ class Extension:
 			self.predefined = None
 
 		if dom.documentElement.getAttributeNode("reg_no") == None:
-			print "\tWarning:", dom.documentElement.getAttribute("name"), "is not in the OpenGL Extension Registry."
+			print("\tWarning:", dom.documentElement.getAttribute("name"), "is not in the OpenGL Extension Registry.")
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
@@ -424,18 +424,18 @@ if __name__ == "__main__":
 	from xml.dom.minidom import parse
 	for ext in exts:
 		if ext[-4:] == ".xml":
-			print "Processing " + ext
+			print("Processing " + ext)
 			prefix = ext[0 : ext.find("_")]
-			if not extension_set.has_key(prefix):
+			if prefix not in extension_set:
 				extension_set[prefix] = []
 			extension_set[prefix].append(Extension(parse("xml/" + ext)))
 
-	print
+	print()
 
-	print "Creating Header Files..."
+	print("Creating Header Files...")
 	for extensions in extension_set.items():
 		create_header(extensions[0], extensions[1])
 
-	print "Creating Source Files..."
+	print("Creating Source Files...")
 	for extensions in extension_set.items():
 		create_source(extensions[0], extensions[1])
