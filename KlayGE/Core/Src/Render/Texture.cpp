@@ -690,7 +690,7 @@ namespace KlayGE
 			break;
 
 		case Texture::TT_3D:
-			texture = renderFactory.MakeTexture3D(width, height, height, numMipMaps, format, access_hint, &init_data[0]);
+			texture = renderFactory.MakeTexture3D(width, height, depth, numMipMaps, format, access_hint, &init_data[0]);
 			break;
 
 		case Texture::TT_Cube:
