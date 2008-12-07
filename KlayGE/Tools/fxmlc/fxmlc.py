@@ -1,14 +1,9 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
+from __future__ import print_function
 import struct
 import sys
-
-def MyPrint(str):
-	if 3 == sys.version_info[0]:
-		print(str)
-	else:
-		print str
 
 shade_mode_enum = {
 	"flat" : 0,
@@ -198,7 +193,7 @@ def type_code(type_name):
 		if (types_define[i] == type_name):
 			return i
 	else:
-		MyPrint("Wrong type name: " + type_name)
+		print("Wrong type name: " + type_name)
 		assert False
 
 def render_state_code(state_name):
@@ -206,7 +201,7 @@ def render_state_code(state_name):
 		if (render_states_define[i][0] == state_name):
 			return i
 	else:
-		MyPrint("Wrong state name: " + state_name)
+		print("Wrong state name: " + state_name)
 		assert False
 
 def get_matrix(result, col, row, node):
@@ -524,7 +519,7 @@ class parameter:
 					self.border_clr[2] = float(state.getAttribute('b'))
 					self.border_clr[3] = float(state.getAttribute('a'))
 				else:
-					MyPrint("Wrong sampler state name:" + self.name)
+					print("Wrong sampler state name:" + self.name)
 
 	def write(self, stream):
 		stream.write(struct.pack('I', self.array_size))
@@ -593,7 +588,7 @@ class render_state:
 				self.type = state_define[1]
 				break
 		else:
-			MyPrint("Wrong render state name:" + self.name)
+			print("Wrong render state name:" + self.name)
 
 		if tag.getAttributeNode('index') != None:
 			self.index = int(tag.getAttribute('index'))
@@ -659,7 +654,7 @@ class render_state:
 		elif "sample_mask" == self.name:
 			self.value = int(value_str)
 		else:
-			MyPrint("Wrong render state name:" + self.name)
+			print("Wrong render state name:" + self.name)
 			assert False
 
 	def write(self, stream):
