@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
+from __future__ import print_function
+
 GPLNotice = """// glloader
 // Copyright (C) 2004-2005 Minmin Gong
 //
@@ -18,13 +20,6 @@ GPLNotice = """// glloader
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 """
-
-def MyPrint(str):
-	import sys
-	if 3 == sys.version_info[0]:
-		print(str)
-	else:
-		print str
 
 class Typedef:
 	def __init__(self, type_name, synonym):
@@ -104,7 +99,7 @@ class Extension:
 			self.predefined = None
 
 		if dom.documentElement.getAttributeNode("reg_no") == None:
-			MyPrint("\tWarning:" + dom.documentElement.getAttribute("name") + "is not in the OpenGL Extension Registry.")
+			print("\tWarning:" + dom.documentElement.getAttribute("name") + "is not in the OpenGL Extension Registry.")
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
@@ -431,18 +426,18 @@ if __name__ == "__main__":
 	from xml.dom.minidom import parse
 	for ext in exts:
 		if ext[-4:] == ".xml":
-			MyPrint("Processing " + ext)
+			print("Processing " + ext)
 			prefix = ext[0 : ext.find("_")]
 			if prefix not in extension_set:
 				extension_set[prefix] = []
 			extension_set[prefix].append(Extension(parse("xml/" + ext)))
 
-	MyPrint("")
+	print("")
 
-	MyPrint("Creating Header Files...")
+	print("Creating Header Files...")
 	for extensions in extension_set.items():
 		create_header(extensions[0], extensions[1])
 
-	MyPrint("Creating Source Files...")
+	print("Creating Source Files...")
 	for extensions in extension_set.items():
 		create_source(extensions[0], extensions[1])
