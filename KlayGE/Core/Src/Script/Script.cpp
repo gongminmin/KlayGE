@@ -72,7 +72,20 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RegisterModule::Regiter()
 	{
+#if PY_MAJOR_VERSION >= 3
+		static struct PyModuleDef module =
+		{
+			PyModuleDef_HEAD_INIT,
+			const_cast<char*>(moduleName_.c_str()),
+			NULL,
+			-1,
+			&methods_[0]
+		};
+
+		PyModule_Create(&module);
+#else
 		Py_InitModule(const_cast<char*>(moduleName_.c_str()), &methods_[0]);
+#endif
 	}
 
 
