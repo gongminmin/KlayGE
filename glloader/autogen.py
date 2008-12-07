@@ -19,6 +19,13 @@ GPLNotice = """// glloader
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 """
 
+def MyPrint(str):
+	import sys
+	if 3 == sys.version_info[0]:
+		print(str)
+	else:
+		print str
+
 class Typedef:
 	def __init__(self, type_name, synonym):
 		assert len(type_name) > 0
@@ -97,7 +104,7 @@ class Extension:
 			self.predefined = None
 
 		if dom.documentElement.getAttributeNode("reg_no") == None:
-			print("\tWarning:", dom.documentElement.getAttribute("name"), "is not in the OpenGL Extension Registry.")
+			MyPrint("\tWarning:" + dom.documentElement.getAttribute("name") + "is not in the OpenGL Extension Registry.")
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
@@ -424,18 +431,18 @@ if __name__ == "__main__":
 	from xml.dom.minidom import parse
 	for ext in exts:
 		if ext[-4:] == ".xml":
-			print("Processing " + ext)
+			MyPrint("Processing " + ext)
 			prefix = ext[0 : ext.find("_")]
 			if prefix not in extension_set:
 				extension_set[prefix] = []
 			extension_set[prefix].append(Extension(parse("xml/" + ext)))
 
-	print()
+	MyPrint("")
 
-	print("Creating Header Files...")
+	MyPrint("Creating Header Files...")
 	for extensions in extension_set.items():
 		create_header(extensions[0], extensions[1])
 
-	print("Creating Source Files...")
+	MyPrint("Creating Source Files...")
 	for extensions in extension_set.items():
 		create_source(extensions[0], extensions[1])
