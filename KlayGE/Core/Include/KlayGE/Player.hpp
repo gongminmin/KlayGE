@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <boost/smart_ptr.hpp>
+#include <boost/date_time/date_defs.hpp>
 
 #include <KlayGE/thread.hpp>
 #include <KlayGE/Socket.hpp>
