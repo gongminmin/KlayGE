@@ -230,6 +230,14 @@ namespace KlayGE
 			case MakeFourCC<'D', 'X', 'T', '5'>::value:
 				format = EF_BC3;
 				break;
+
+			case MakeFourCC<'A', 'T', 'I', '1'>::value:
+				format = EF_BC4;
+				break;
+
+			case MakeFourCC<'A', 'T', 'I', '2'>::value:
+				format = EF_BC5;
+				break;
 			}
 		}
 		else
@@ -792,6 +800,16 @@ namespace KlayGE
 			case EF_BC3:
 			case EF_BC3_SRGB:
 				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
+				break;
+
+			case EF_BC4:
+			case EF_BC4_SRGB:
+				desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '1'>::value;
+				break;
+
+			case EF_BC5:
+			case EF_BC5_SRGB:
+				desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '2'>::value;
 				break;
 
 			default:

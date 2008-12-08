@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
@@ -29,6 +30,12 @@ namespace
 	{
 		BC4_layout alpha;
 		BC1_layout bc1;
+	};
+
+	struct BC5_layout
+	{
+		BC4_layout red;
+		BC4_layout green;
 	};
 
 	Color RGB565_to_Color(uint16_t rgb)
@@ -111,171 +118,21 @@ namespace
 		}
 	}
 
-	void EncodeBC1_G_Only(BC1_layout& bc1, uint8_t const * green)
+	void DecodeBC5(uint32_t* argb, uint8_t const * bc5)
 	{
-		float max_value = 0;
-		float min_value = 1;
-		boost::array<float, 16> float_green;
-		for (size_t i = 0; i < float_green.size(); ++ i)
+		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
+
+		boost::array<uint8_t, 16> block_0;
+		DecodeBC4Internal(&block_0[0], bc5_layout->red);
+		boost::array<uint8_t, 16> block_1;
+		DecodeBC4Internal(&block_1[0], bc5_layout->green);
+
+		for (size_t i = 0; i < block_0.size(); ++ i)
 		{
-			float value = green[i] / 255.0f;
-
-			float_green[i] = value;
-
-			min_value = std::min(min_value, value);
-			max_value = std::max(max_value, value);
+			argb[i] &= 0x00FF00FF;
+			argb[i] |= block_0[i] << 24;
+			argb[i] |= block_1[i] << 8;
 		}
-
-		int const L = 4;
-		float const num_steps = L - 1.0f;
-
-		/*// Newton's Method
-		// x_{n+1} = x_n-\frac{f(x_n)}{f'(x_n)}\,
-		// f_min(x) = \int (1-f)(src-(x(1-f)-bf))\, dx
-		// f_min'(x) = (1-f)(src-(x(1-f)-bf))
-		// f_min''(x) = (1-fs)^2
-		// f_max(x) = \int f(src-(a(1-f)-xf))\, dx
-		// f_max'(x) = f(src-(a(1-f)-xf))\
-		// f_max''(x) = fs^2
-		for (size_t i = 0; i < 3; ++ i)
-		{
-			if ((max_value - min_value) < 1.0f / 256.0f)
-			{
-				break;
-			}
-
-			float const inv_scale = num_steps / (max_value - min_value);
-
-			float steps[4];
-			for (size_t j = 0; j < L; ++ j)
-			{
-				steps[j] = MathLib::lerp(min_value, max_value, j / num_steps);
-			}
-
-			float d_min = 0;
-			float d_max = 0;
-			float d_2_min = 0;
-			float d_2_max = 0;
-			for (size_t j = 0; j < float_green.size(); ++ j)
-			{
-				float d = (float_green[j] - min_value) * inv_scale;
-
-				uint32_t s;
-				if (d <= 0.0f)
-				{
-					s = 0;
-				}
-				else
-				{
-					if (d >= num_steps)
-					{
-						s = 1;
-					}
-					else
-					{
-						s = static_cast<int>(d + 0.5f);
-					}
-				}
-
-				if (s < L)
-				{
-					float const diff = float_green[j] - steps[s];
-					float const fs = s / num_steps;
-
-					d_min += (1 - fs) * diff;
-					d_2_min += (1 - fs) * (1 - fs);
-
-					d_max += fs * diff;
-					d_2_max += fs * fs;
-				}
-			}
-
-			if (d_2_min > 0.0f)
-			{
-				min_value -= d_min / d_2_min;
-			}
-			if (d_2_max > 0.0f)
-			{
-				max_value -= d_max / d_2_max;
-			}
-
-			if (min_value > max_value)
-			{
-				std::swap(min_value, max_value);
-			}
-
-			if ((d_min * d_min < 1.0f / 64) && (d_max * d_max < 1.0f / 64))
-			{
-				break;
-			}
-		}*/
-
-		min_value = (min_value < 0.0f) ? 0.0f : (min_value > 1.0f) ? 1.0f : min_value;
-		max_value = (max_value < 0.0f) ? 0.0f : (max_value > 1.0f) ? 1.0f : max_value;
-
-		float ref_green0, ref_green1;
-		ref_green0 = max_value;
-		ref_green1 = min_value;
-
-		bc1.clr_0 = static_cast<uint16_t>(ref_green0 * 255 + 0.5f) >> 2 << 5;
-		bc1.clr_1 = static_cast<uint16_t>(ref_green1 * 255 + 0.5f) >> 2 << 5;
-
-		boost::array<float, 4> steps;
-		steps[0] = ref_green0;
-		steps[1] = ref_green1;
-		for (uint32_t i = 1; i < L - 1; ++ i)
-		{
-			steps[i + 1] = MathLib::lerp(steps[0], steps[1], i / num_steps);
-		}
-
-		float inv_scale = (steps[0] != steps[1]) ? (num_steps / (steps[1] - steps[0])) : 0.0f;
-
-		boost::array<uint8_t, 16> bit_code;
-		for (uint8_t i = 0; i < float_green.size(); ++ i)
-		{
-			bit_code[i] = 0;
-
-			float d = (float_green[i] - steps[0]) * inv_scale;
-
-			uint8_t s;
-			if (d <= 0.0f)
-			{
-				s = 0;
-			}
-			else
-			{
-				if (d >= num_steps)
-				{
-					s = 1;
-				}
-				else
-				{
-					int id = static_cast<int>(d + 0.5f);
-					if (0 == id)
-					{
-						s = 0;
-					}
-					else
-					{
-						if (num_steps == id)
-						{
-							s = 1;
-						}
-						else
-						{
-							s = static_cast<uint8_t>(id + 1);
-						}
-					}
-				}
-			}
-
-			bit_code[i] = s;
-		}
-
-		bc1.bitmap[0] = (bit_code[7] << 14) | (bit_code[6] << 12) | (bit_code[5] << 10) | (bit_code[4] << 8)
-			| (bit_code[3] << 6) | (bit_code[2] << 4) | (bit_code[1] << 2) | (bit_code[0] << 0);
-		bc1.bitmap[1] = (bit_code[15] << 14) | (bit_code[14] << 12) | (bit_code[13] << 10) | (bit_code[12] << 8)
-			| (bit_code[11] << 6) | (bit_code[10] << 4) | (bit_code[9] << 2) | (bit_code[8] << 0);
 	}
 
 	void EncodeBC4(BC4_layout& bc4, uint8_t const * alpha)
@@ -472,16 +329,81 @@ namespace
 		bc4.bitmap[5] = (bit_code[15] << 5) | (bit_code[14] << 2) | ((bit_code[13] >> 1) << 0);
 	}
 
-	void CompressNormal(std::vector<uint8_t>& normals)
+	void BC4ToBC1G(BC1_layout& bc1, BC4_layout const & bc4)
 	{
-		for (size_t i = 0; i < normals.size() / 4; ++ i)
+		bc1.clr_0 = (bc4.alpha_0 >> 2) << 5;
+		bc1.clr_1 = (bc4.alpha_1 >> 2) << 5;
+		bool swap_clr = false;
+		if (bc4.alpha_0 < bc4.alpha_1)
 		{
-			normals[i * 4 + 1] = normals[i * 4 + 1];
-			normals[i * 4 + 3] = normals[i * 4 + 2];
-			normals[i * 4 + 0] = 0;
-			normals[i * 4 + 2] = 0;		
+			std::swap(bc1.clr_0, bc1.clr_1);
+			swap_clr = true;
+		}
+		for (int i = 0; i < 2; ++ i)
+		{
+			uint32_t alpha32 = (bc4.bitmap[i * 3 + 2] << 16) | (bc4.bitmap[i * 3 + 1] << 8) | (bc4.bitmap[i * 3 + 0] << 0);
+			uint16_t mask = 0;
+			for (int j = 0; j < 8; ++ j)
+			{
+				uint16_t bit = (alpha32 >> (j * 3)) & 0x7;
+				if (swap_clr)
+				{
+					switch (bit)
+					{
+					case 0:
+					case 6:
+						bit = 0;
+						break;
+
+					case 1:
+					case 7:
+						bit = 1;
+						break;
+
+					case 2:
+					case 3:
+						bit = 2;
+						break;
+
+					case 4:
+					case 5:
+						bit = 3;
+						break;
+					}
+				}
+				else
+				{
+					switch (bit)
+					{
+					case 0:
+					case 2:
+						bit = 0;
+						break;
+
+					case 1:
+					case 7:
+						bit = 1;
+						break;
+
+					case 3:
+					case 4:
+						bit = 2;
+						break;
+
+					case 5:
+					case 6:
+						bit = 3;
+						break;
+					}
+				}
+
+				mask |= bit << (j * 2);
+			}
+
+			bc1.bitmap[i] = mask;
 		}
 	}
+
 
 	void DecompressNormal(std::vector<uint8_t>& res_normals, std::vector<uint8_t> const & com_normals)
 	{
@@ -500,38 +422,80 @@ namespace
 	void CompressNormalMapSubresource(uint32_t width, uint32_t height, ElementFormat in_format, 
 		ElementInitData const & in_data, ElementFormat new_format, ElementInitData& new_data)
 	{
+		UNREF_PARAM(in_format);
+		BOOST_ASSERT(EF_ARGB8 == in_format);
+
 		std::vector<uint8_t> const & normals = in_data.data;
 
-		new_data.data.resize(width * height);
-		new_data.row_pitch = width;
-		new_data.slice_pitch = width * height;
-
-		std::vector<uint8_t>& com_normals = new_data.data;
-		int dest = 0;
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		if (EF_AL8 == new_format)
 		{
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			new_data.data.resize(width * height * 2);
+			new_data.row_pitch = width * 2;
+			new_data.slice_pitch = width * 2 * height;
+
+			std::vector<uint8_t>& com_normals = new_data.data;
+
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				uint8_t uncom_x[16];
-				uint8_t uncom_y[16];
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t x = 0; x < width; ++ x)
 				{
-					for (int x = 0; x < 4; ++ x)
+					com_normals[(y * width + x) * 2 + 0] = normals[(y * width + x) * 4 + 1];
+					com_normals[(y * width + x) * 2 + 1] = normals[(y * width + x) * 4 + 2];
+				}
+			}
+		}
+		else
+		{
+			new_data.data.resize(width * height);
+			new_data.row_pitch = width;
+			new_data.slice_pitch = width * height;
+
+			std::vector<uint8_t>& com_normals = new_data.data;
+
+			int dest = 0;
+			for (uint32_t y_base = 0; y_base < height; y_base += 4)
+			{
+				for (uint32_t x_base = 0; x_base < width; x_base += 4)
+				{
+					uint8_t uncom_x[16];
+					uint8_t uncom_y[16];
+					for (int y = 0; y < 4; ++ y)
 					{
-						uncom_y[y * 4 + x] = normals[((y_base + y) * width + (x_base + x)) * 4 + 1];
-						uncom_x[y * 4 + x] = normals[((y_base + y) * width + (x_base + x)) * 4 + 2];
+						for (int x = 0; x < 4; ++ x)
+						{
+							uncom_y[y * 4 + x] = normals[((y_base + y) * width + (x_base + x)) * 4 + 1];
+							uncom_x[y * 4 + x] = normals[((y_base + y) * width + (x_base + x)) * 4 + 2];
+						}
+					}
+
+					BC4_layout x_bc4;
+					EncodeBC4(x_bc4, uncom_x);
+					BC4_layout y_bc4;
+					EncodeBC4(y_bc4, uncom_y);
+
+					if (EF_BC5 == new_format)
+					{
+						BC5_layout com_bc5;
+						com_bc5.red = x_bc4;
+						com_bc5.green = y_bc4;
+
+						memcpy(&com_normals[dest], &com_bc5, sizeof(com_bc5));
+						dest += sizeof(com_bc5);
+					}
+					else
+					{
+						if (EF_BC3 == new_format)
+						{
+							BC3_layout com_bc3;
+							com_bc3.alpha = x_bc4;
+
+							BC4ToBC1G(com_bc3.bc1, y_bc4);
+
+							memcpy(&com_normals[dest], &com_bc3, sizeof(com_bc3));
+							dest += sizeof(com_bc3);
+						}
 					}
 				}
-
-				BC4_layout x_bc4;
-				EncodeBC4(x_bc4, uncom_x);
-				BC1_layout y_bc1;
-				EncodeBC1_G_Only(y_bc1, uncom_y);
-
-				memcpy(&com_normals[dest], &x_bc4, sizeof(x_bc4));
-				dest += sizeof(x_bc4);
-				memcpy(&com_normals[dest], &y_bc1, sizeof(y_bc1));
-				dest += sizeof(y_bc1);
 			}
 		}
 	}
@@ -539,19 +503,49 @@ namespace
 	void DecompressNormalMapSubresource(uint32_t width, uint32_t height, ElementFormat restored_format, 
 		ElementInitData& restored_data, ElementFormat com_format, ElementInitData const & com_data)
 	{
-		std::vector<uint8_t> normals(width * height * 4);
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
-		{
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
-			{
-				uint32_t argb[16];
-				DecodeBC3(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+		UNREF_PARAM(restored_format);
+		BOOST_ASSERT(EF_ARGB8 == restored_format);
 
-				for (int y = 0; y < 4; ++ y)
+		std::vector<uint8_t> normals(width * height * 4);
+
+		if (EF_AL8 == com_format)
+		{
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				for (uint32_t x = 0; x < width; ++ x)
 				{
-					for (int x = 0; x < 4; ++ x)
+					normals[(y * width + x) * 4 + 0] = 0;
+					normals[(y * width + x) * 4 + 1] = com_data.data[(y * width + x) * 2 + 0];
+					normals[(y * width + x) * 4 + 2] = 0;
+					normals[(y * width + x) * 4 + 3] = com_data.data[(y * width + x) * 2 + 1];
+				}
+			}
+		}
+		else
+		{
+			for (uint32_t y_base = 0; y_base < height; y_base += 4)
+			{
+				for (uint32_t x_base = 0; x_base < width; x_base += 4)
+				{
+					uint32_t argb[16];
+					if (EF_BC5 == com_format)
 					{
-						memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+						DecodeBC5(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+					}
+					else
+					{
+						if (EF_BC3 == com_format)
+						{
+							DecodeBC3(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+						}
+					}
+
+					for (int y = 0; y < 4; ++ y)
+					{
+						for (int x = 0; x < 4; ++ x)
+						{
+							memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+						}
 					}
 				}
 			}
@@ -584,6 +578,8 @@ namespace
 				mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
 			}
 		}
+
+		mse /= width * height;
 
 		return mse;
 	}
@@ -634,19 +630,26 @@ int main(int argc, char* argv[])
 {
 	if (argc < 3)
 	{
-		cout << "使用方法: NormalMapCompressor xxx.dds yyy.dds [AL8 | DXT5]" << endl;
+		cout << "使用方法: NormalMapCompressor xxx.dds yyy.dds [AL8 | BC3 | BC5]" << endl;
 		return 1;
 	}
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	ElementFormat new_format = EF_BC3;
+	ElementFormat new_format = EF_BC5;
 	if (argc >= 4)
 	{
 		std::string format_str(argv[3]);
 		if ("AL8" == format_str)
 		{
 			new_format = EF_AL8;
+		}
+		else
+		{
+			if ("BC3" == format_str)
+			{
+				new_format = EF_BC3;
+			}
 		}
 	}
 
