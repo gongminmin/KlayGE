@@ -86,24 +86,6 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	uint32_t D3D10Texture::Width(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t D3D10Texture::Height(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t D3D10Texture::Depth(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
 	void D3D10Texture::GetD3DFlags(D3D10_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags)
 	{
 		if ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_)

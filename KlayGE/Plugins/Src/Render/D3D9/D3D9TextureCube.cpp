@@ -130,6 +130,14 @@ namespace KlayGE
 		return this->Width(level);
 	}
 
+	uint32_t D3D9TextureCube::Depth(int level) const
+	{
+		UNREF_PARAM(level);
+		BOOST_ASSERT(level < numMipMaps_);
+
+		return 1;
+	}
+
 	void D3D9TextureCube::CopyToTexture(Texture& target)
 	{
 		BOOST_ASSERT(type_ == target.Type());

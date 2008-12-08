@@ -82,24 +82,6 @@ namespace KlayGE
 		return name;
 	}
 
-	uint32_t OGLTexture::Width(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t OGLTexture::Height(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t OGLTexture::Depth(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
 	void OGLTexture::CopyToTexture1D(Texture& /*target*/, int /*level*/,
 			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/, uint32_t /*src_xOffset*/)
 	{

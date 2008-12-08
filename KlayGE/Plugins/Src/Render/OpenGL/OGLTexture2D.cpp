@@ -162,6 +162,14 @@ namespace KlayGE
 		return heights_[level];
 	}
 
+	uint32_t OGLTexture2D::Depth(int level) const
+	{
+		UNREF_PARAM(level);
+		BOOST_ASSERT(level < numMipMaps_);
+
+		return 1;
+	}
+
 	void OGLTexture2D::CopyToTexture(Texture& target)
 	{
 		BOOST_ASSERT(type_ == target.Type());

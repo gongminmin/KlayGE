@@ -47,10 +47,6 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
-		virtual uint32_t Width(int level) const;
-		virtual uint32_t Height(int level) const;
-		virtual uint32_t Depth(int level) const;
-
 		ID3D10ShaderResourceViewPtr const & D3DShaderResourceView() const
 		{
 			return d3d_sr_view_;
@@ -93,6 +89,8 @@ namespace KlayGE
 		D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
+		uint32_t Height(int level) const;
+		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToTexture1D(Texture& target, int level,
@@ -126,6 +124,7 @@ namespace KlayGE
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
+		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToTexture2D(Texture& target, int level,
@@ -203,6 +202,7 @@ namespace KlayGE
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
+		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToTextureCube(Texture& target, CubeFaces face, int level,

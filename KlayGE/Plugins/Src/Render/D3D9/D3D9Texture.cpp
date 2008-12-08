@@ -113,24 +113,6 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	uint32_t D3D9Texture::Width(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t D3D9Texture::Height(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
-	uint32_t D3D9Texture::Depth(int /*level*/) const
-	{
-		BOOST_ASSERT(false);
-		return 0;
-	}
-
 	void D3D9Texture::CopySurfaceToMemory(ID3D9SurfacePtr const & surface, void* data)
 	{
 		D3DLOCKED_RECT d3d_rc;
