@@ -1,8 +1,11 @@
 // Texture.cpp
 // KlayGE 纹理类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2005-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2005-2008
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 支持BC4/BC5纹理压缩的读写和转换 (2008.12.8)
 //
 // 3.5.0
 // 支持有符号格式 (2007.2.12)
@@ -20,6 +23,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
@@ -151,9 +155,96 @@ namespace
 		uint32_t		reserved2;
 	};
 
+	struct BC1_layout
+	{
+		uint16_t clr_0, clr_1;
+		uint16_t bitmap[2];
+	};
+
+	struct BC4_layout
+	{
+		uint8_t alpha_0, alpha_1;
+		uint8_t bitmap[6];
+	};
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
+
+	void BC4ToBC1G(BC1_layout& bc1, BC4_layout const & bc4)
+	{
+		bc1.clr_0 = (bc4.alpha_0 >> 2) << 5;
+		bc1.clr_1 = (bc4.alpha_1 >> 2) << 5;
+		bool swap_clr = false;
+		if (bc4.alpha_0 < bc4.alpha_1)
+		{
+			std::swap(bc1.clr_0, bc1.clr_1);
+			swap_clr = true;
+		}
+		for (int i = 0; i < 2; ++ i)
+		{
+			uint32_t alpha32 = (bc4.bitmap[i * 3 + 2] << 16) | (bc4.bitmap[i * 3 + 1] << 8) | (bc4.bitmap[i * 3 + 0] << 0);
+			uint16_t mask = 0;
+			for (int j = 0; j < 8; ++ j)
+			{
+				uint16_t bit = (alpha32 >> (j * 3)) & 0x7;
+				if (swap_clr)
+				{
+					switch (bit)
+					{
+					case 0:
+					case 6:
+						bit = 0;
+						break;
+
+					case 1:
+					case 7:
+						bit = 1;
+						break;
+
+					case 2:
+					case 3:
+						bit = 2;
+						break;
+
+					case 4:
+					case 5:
+						bit = 3;
+						break;
+					}
+				}
+				else
+				{
+					switch (bit)
+					{
+					case 0:
+					case 2:
+						bit = 0;
+						break;
+
+					case 1:
+					case 7:
+						bit = 1;
+						break;
+
+					case 3:
+					case 4:
+						bit = 2;
+						break;
+
+					case 5:
+					case 6:
+						bit = 3;
+						break;
+					}
+				}
+
+				mask |= bit << (j * 2);
+			}
+
+			bc1.bitmap[i] = mask;
+		}
+	}
 }
 
 namespace KlayGE
@@ -686,6 +777,28 @@ namespace KlayGE
 		LoadTexture(tex_name, type, width, height, depth, numMipMaps, format, init_data);
 
 		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
+
+		if ((EF_BC5 == format) && !renderFactory.RenderEngineInstance().DeviceCaps().bc5_support)
+		{
+			std::vector<ElementInitData> tran_data(init_data.size());
+			for (size_t i = 0; i < init_data.size(); ++ i)
+			{
+				tran_data[i].data.resize(init_data[i].data.size());
+				tran_data[i].row_pitch = init_data[i].row_pitch;
+				tran_data[i].slice_pitch = init_data[i].slice_pitch;
+
+				for (size_t j = 0; j < init_data[i].data.size(); j += sizeof(BC4_layout) * 2)
+				{
+					memcpy(&tran_data[i].data[j], &init_data[i].data[j], sizeof(BC4_layout));
+					BC4ToBC1G(*reinterpret_cast<BC1_layout*>(&tran_data[i].data[j + sizeof(BC4_layout)]),
+						*reinterpret_cast<BC4_layout*>(&init_data[i].data[j + sizeof(BC4_layout)]));
+				}
+			}
+
+			init_data = tran_data;
+			format = EF_BC3;
+		}
+
 		TexturePtr texture;
 		switch (type)
 		{

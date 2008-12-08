@@ -399,6 +399,10 @@ namespace KlayGE
 		shader_descs_ = shader_descs;
 		shader_text_ = shader_text;
 		*shader_text_ = "#define OGL_EXPLICIT_TEXUNIT 1\n#define KLAYGE_OPENGL 1\n\n" + *shader_text_;
+		if (!Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().bc5_support)
+		{
+			*shader_text_ = "#define KLAYGE_BC5_AS_BC3\n" + *shader_text_;
+		}
 
 		std::string profile = (*shader_descs_)[type].profile;
 		switch (type)

@@ -400,8 +400,17 @@ namespace KlayGE
 
 		ID3DXBuffer* code;
 		ID3DXBuffer* err_msg;
-		D3DXMACRO macros[] = { { "KLAYGE_D3D9", "1" }, { NULL, NULL } };
-		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), macros, NULL,
+		std::vector<D3DXMACRO> macros;
+		D3DXMACRO macro_d3d9 = { "KLAYGE_D3D9", "1" };
+		D3DXMACRO macro_end = { NULL, NULL };
+		macros.push_back(macro_d3d9);
+		if (!render_eng.DeviceCaps().bc5_support)
+		{
+			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_BC3", "1" };
+			macros.push_back(macro_bc5_as_bc3);
+		}
+		macros.push_back(macro_end);
+		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), &macros[0], NULL,
 			(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 			0, &code, &err_msg, &constant_table);
 		if (err_msg != NULL)
