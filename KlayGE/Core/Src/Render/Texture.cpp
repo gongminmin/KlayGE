@@ -630,7 +630,7 @@ namespace KlayGE
 						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 						init_data[level].data.resize(image_size);
-						init_data[level].row_pitch = the_width;
+						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
 						init_data[level].slice_pitch = image_size;
 						file->read(reinterpret_cast<char*>(&init_data[level].data[0]), static_cast<std::streamsize>(image_size));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
@@ -681,8 +681,8 @@ namespace KlayGE
 						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
 
 						init_data[level].data.resize(image_size);
-						init_data[level].row_pitch = the_width;
-						init_data[level].slice_pitch = the_width * the_height;
+						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
+						init_data[level].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 						file->read(reinterpret_cast<char*>(&init_data[level].data[0]), static_cast<std::streamsize>(image_size));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 					}
@@ -735,7 +735,7 @@ namespace KlayGE
 							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 							init_data[(face - Texture::CF_Positive_X) * numMipMaps + level].data.resize(image_size);
-							init_data[(face - Texture::CF_Positive_X) * numMipMaps + level].row_pitch = the_width;
+							init_data[(face - Texture::CF_Positive_X) * numMipMaps + level].row_pitch = (the_width + 3) / 4 * block_size;
 							init_data[(face - Texture::CF_Positive_X) * numMipMaps + level].slice_pitch = image_size;
 							file->read(reinterpret_cast<char*>(&init_data[(face - Texture::CF_Positive_X) * numMipMaps + level].data[0]), static_cast<std::streamsize>(image_size));
 							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
