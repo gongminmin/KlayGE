@@ -3,7 +3,6 @@
 	<Workspace title="Tools workspace">
 		<Project filename="NormalMapGen.cbp" />
 		<Project filename="DistanceMapCreator.cbp" />
-		<Project filename="NormalizerCubeMap.cbp" />
 		<Project filename="GLCompatibility.cbp" />
 		<Project filename="NormalMapCompressor.cbp" />
 		<Project filename="HDRCompressor.cbp" />

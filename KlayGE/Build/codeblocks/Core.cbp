@@ -178,6 +178,7 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Audio.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\AudioFactory.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\BlockCompression.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Bound.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Box.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\COMPtr.hpp" />
@@ -296,6 +297,7 @@
 		<Unit filename="..\..\Core\Src\Pack\IStream.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\Streams.cpp" />
 		<Unit filename="..\..\Core\Src\Pack\Streams.hpp" />
+		<Unit filename="..\..\Core\Src\Render\BlockCompression.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Camera.cpp" />
 		<Unit filename="..\..\Core\Src\Render\CameraController.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Font.cpp" />
