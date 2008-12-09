@@ -535,7 +535,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Effect Script Files"
+				Name="Effect Files"
 				>
 				<File
 					RelativePath="..\..\RenderFX\2D.fxml"

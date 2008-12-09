@@ -113,8 +113,8 @@ namespace
 				}
 
 				BC5_layout com_bc5;
-				EncodeBC4(com_bc5.green, uncom_u);
-				EncodeBC4(com_bc5.red, uncom_v);
+				EncodeBC4(com_bc5.red, uncom_u);
+				EncodeBC4(com_bc5.green, uncom_v);
 
 				memcpy(c_dst, &com_bc5, sizeof(com_bc5));
 				c_dst += sizeof(com_bc5);
@@ -158,8 +158,8 @@ namespace
 			for (uint32_t x = 0; x < width; ++ x)
 			{
 				float Y = exp((y_src[y * width + x] / 2048.0f - 16) * log2);
-				float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
-				float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 3] / 256.0f;
+				float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 2] / 256.0f;
+				float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
 				B = B * B * Y;
 				R = R * R * Y;
 				float G = (Y - R - B) / lum_weight.y();

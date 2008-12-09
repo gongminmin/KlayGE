@@ -109,7 +109,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < block_0.size(); ++ i)
 		{
-			argb[i] = (block_0[i] << 24) | (block_1[i] << 8);
+			argb[i] = (block_0[i] << 16) | (block_1[i] << 8);
 		}
 	}
 

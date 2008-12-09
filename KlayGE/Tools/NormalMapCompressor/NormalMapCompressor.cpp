@@ -141,6 +141,10 @@ namespace
 					if (EF_BC5 == com_format)
 					{
 						DecodeBC5(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+						for (int i = 0; i < 16; ++ i)
+						{
+							argb[i] = ((argb[i] << 8) & 0xFF000000) | (argb[i] & 0x0000FF00);
+						}
 					}
 					else
 					{
