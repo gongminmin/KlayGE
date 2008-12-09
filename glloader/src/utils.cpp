@@ -22,17 +22,7 @@
 #endif
 
 #include <algorithm>
-
-#include <boost/assert.hpp>
-#include <boost/bind.hpp>
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4819)
-#endif
-#include <boost/algorithm/string/split.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#include <cassert>
 
 #ifdef GLLOADER_DEBUG
 #include <iostream>
@@ -46,7 +36,22 @@ namespace
 	std::vector<std::string> split(std::string const & str)
 	{
 		std::vector<std::string> ret;
-		boost::algorithm::split(ret, str, boost::bind(std::equal_to<char>(), ' ', _1));
+		for (std::string::const_iterator iter = str.begin(); iter != str.end(); ++ iter)
+		{
+			std::string::const_iterator start_iter = iter;
+			while ((start_iter != str.end()) && (' ' == *start_iter))
+			{
+				++ start_iter;
+				++ iter;
+			}
+
+			while ((iter != str.end()) && (*iter != ' '))
+			{
+				++ iter;
+			}
+
+			ret.push_back(std::string(start_iter, iter));
+		}
 
 		return ret;
 	}
@@ -108,7 +113,7 @@ namespace glloader
 	void gl_features_extractor::gl_version(int& major, int& minor)
 	{
 		GLubyte const * str = ::glGetString(GL_VERSION);
-		BOOST_ASSERT(str != NULL);
+		assert(str != NULL);
 
 		std::string const ver(reinterpret_cast<char const *>(str));
 		std::string::size_type const pos(ver.find("."));
@@ -120,7 +125,7 @@ namespace glloader
 	void gl_features_extractor::gl_features()
 	{
 		GLubyte const * str = ::glGetString(GL_EXTENSIONS);
-		BOOST_ASSERT(str != NULL);
+		assert(str != NULL);
 
 		std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
 		gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
@@ -265,7 +270,7 @@ void* glloader_get_gl_proc_address(const char* name)
 	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, extname, kCFStringEncodingASCII);
 
 	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
-	BOOST_ASSERT(bundle != NULL);
+	assert(bundle != NULL);
 
 	ret = CFBundleGetFunctionPointerForName(bundle, functionName);
 
@@ -289,7 +294,7 @@ void* glloader_get_gl_proc_address(const char* name)
 
 int glloader_is_supported(char const * name)
 {
-	BOOST_ASSERT(name != NULL);
+	assert(name != NULL);
 
 	return glloader::gl_features_extractor::instance().is_supported(name);
 }
