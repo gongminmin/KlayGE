@@ -615,26 +615,8 @@ namespace KlayGE
 			ret.depth_texture_support = false;
 		}
 		
-		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
-			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
-			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))
-		{
-			ret.bc4_support = true;
-		}
-		else
-		{
-			ret.bc4_support = false;
-		}
-		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
-			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
-			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))
-		{
-			ret.bc5_support = true;
-		}
-		else
-		{
-			ret.bc5_support = false;
-		}
+		ret.bc4_support = false;
+		ret.bc5_support = false;
 
 		return ret;
 	}

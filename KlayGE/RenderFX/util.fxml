@@ -19,9 +19,9 @@ float4 decode_hdr_yc(float y, float4 c)
 {
 	float Y = exp2(y * 65536 / 2048 - 16);
 #ifdef KLAYGE_BC5_AS_BC3
-	float2 C = c.ga;
+	float2 C = c.ag;
 #else
-	float2 C = c.gr;
+	float2 C = c.rg;
 #endif
 	C *= C;
 	
