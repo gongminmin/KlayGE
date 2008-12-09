@@ -596,7 +596,7 @@ namespace KlayGE
 		UIManager();
 
 		static UIManager& Instance();
-		void ForceDestroy();
+		static void ForceDestroy();
 
 		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
 

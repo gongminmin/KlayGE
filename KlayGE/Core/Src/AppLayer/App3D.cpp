@@ -85,7 +85,7 @@ namespace KlayGE
 
 		Context::Instance().SceneManagerInstance(SceneManagerPtr());
 
-		UIManager::Instance().ForceDestroy();
+		UIManager::ForceDestroy();
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
 	}
 

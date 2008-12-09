@@ -1,9 +1,11 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
+#include <KlayGE/DllLoader.hpp>
 
 #include <iostream>
 #include <vector>
@@ -20,6 +22,15 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4251 4275 4512 4702)
+#endif
+#include <boost/program_options.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#include <boost/filesystem.hpp>
 
 #include <glloader/glloader.h>
 
@@ -119,7 +130,57 @@ int main()
 {
 	using namespace KlayGE;
 
-	RenderSettings settings = Context::Instance().LoadCfg("GLCompatibility.cfg");
+	ResLoader::Instance().AddPath("../../../bin");
+
+	std::string compiler_str = KLAYGE_COMPILER_TOOLSET;
+#ifdef KLAYGE_DEBUG
+	compiler_str += "_d";
+#endif
+
+	typedef bool (*MatchFunc)(char const * name, char const * compiler);
+	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
+
+	boost::program_options::variables_map vm;
+
+	RenderFactoryPtr rf;
+
+	DllLoader render_loader;
+	std::string render_path = ResLoader::Instance().Locate("Render");
+	for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+	{
+		std::string fn = render_path + "/" + iter->path().filename();
+		if (".dll" == fn.substr(fn.length() - 4))
+		{
+			render_loader.Load(fn);
+
+			MatchFunc match_func = (MatchFunc)render_loader.GetProcAddress("Match");
+			if ((match_func != NULL) && match_func("OpenGL", compiler_str.c_str()))
+			{
+				MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader.GetProcAddress("MakeRenderFactory");
+				if (mrf != NULL)
+				{
+					mrf(rf, vm);
+					break;
+				}
+				else
+				{
+					render_loader.Free();
+				}
+			}
+			else
+			{
+				render_loader.Free();
+			}
+		}
+	}
+
+	Context::Instance().RenderFactoryInstance(rf);
+
+	RenderSettings settings;
+	settings.width = 800;
+	settings.height = 600;
+	settings.color_fmt = EF_ARGB8;
+	settings.full_screen = false;
 
 	EmptyApp app("GL Compatibility", settings);
 	app.Create();
@@ -131,10 +192,12 @@ int main()
 	std::ofstream ofs(info_file_name.c_str());
 	ofs << info;
 
-	KlayGE::ScriptEngine scriptEng;
-	KlayGE::ScriptModule module("GLCompatibility");
+	ScriptEngine scriptEng;
+	ScriptModule module("GLCompatibility");
 
 	module.Call("gl_compatibility", boost::make_tuple(info_file_name));
+
+	rf.reset();
 
 	return 0;
 }

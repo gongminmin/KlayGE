@@ -204,7 +204,10 @@ namespace KlayGE
 
 	void UIManager::ForceDestroy()
 	{
-		ui_mgr_instance_.reset();
+		if (ui_mgr_instance_)
+		{
+			ui_mgr_instance_.reset();
+		}
 	}
 
 	UIManager::UIManager()
