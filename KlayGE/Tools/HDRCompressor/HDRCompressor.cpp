@@ -1,12 +1,10 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/half.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/RenderSettings.hpp>
-
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+#include <KlayGE/BlockCompression.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -42,289 +40,208 @@ namespace
 		return y;
 	}
 
-	void CompressHDR(std::vector<uint16_t>& y_data, std::vector<uint8_t>& c_data,
-		std::vector<float> const & hdr_data, uint32_t width, uint32_t height)
+	void CompressHDRSubresource(ElementInitData& y_data, ElementInitData& c_data, ElementInitData const & hdr_data)
 	{
-		BOOST_ASSERT(hdr_data.size() >= width * height * 4);
-
 		float const log2 = log(2.0f);
+
+		uint32_t width = hdr_data.row_pitch / (sizeof(float) * 4);
+		uint32_t height = hdr_data.slice_pitch / hdr_data.row_pitch;
+
+		y_data.row_pitch = width * sizeof(uint16_t);
+		y_data.slice_pitch = y_data.row_pitch * height;
+		y_data.data.resize(y_data.slice_pitch);
+
+		float const * hdr_src = reinterpret_cast<float const *>(&hdr_data.data[0]);
+		uint16_t* y_dst = reinterpret_cast<uint16_t*>(&y_data.data[0]);
 
 		for (uint32_t y = 0; y < height; ++ y)
 		{
 			for (uint32_t x = 0; x < width; ++ x)
 			{
-				float R = hdr_data[(y * width + x) * 4 + 0];
-				float G = hdr_data[(y * width + x) * 4 + 1];
-				float B = hdr_data[(y * width + x) * 4 + 2];
+				float R = hdr_src[(y * width + x) * 4 + 0];
+				float G = hdr_src[(y * width + x) * 4 + 1];
+				float B = hdr_src[(y * width + x) * 4 + 2];
 				float Y = CalcLum(R, G, B);
 
 				float log_y = log(Y) / log2 + 16;
 
-				y_data[y * width + x] = static_cast<uint16_t>(MathLib::clamp<uint32_t>(static_cast<uint32_t>(log_y * 2048), 0, 65535));
+				y_dst[y * width + x] = static_cast<uint16_t>(MathLib::clamp<uint32_t>(static_cast<uint32_t>(log_y * 2048), 0, 65535));
 			}
 		}
 
-		for (uint32_t y = 0; y < height / 2; ++ y)
+		c_data.row_pitch = (width / 2 + 3) / 4 * 16;
+		c_data.slice_pitch = y_data.row_pitch * (height / 2 + 3) / 4;
+		c_data.data.resize(c_data.slice_pitch);
+		uint8_t* c_dst = &c_data.data[0];
+
+		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
 		{
-			uint32_t const y0 = y * 2 + 0;
-			uint32_t const y1 = y * 2 + 1;
-
-			for (uint32_t x = 0; x < width / 2; ++ x)
+			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
 			{
-				uint32_t const x0 = x * 2 + 0;
-				uint32_t const x1 = x * 2 + 1;
+				uint8_t uncom_u[16];
+				uint8_t uncom_v[16];
+				for (int y = 0; y < 4; ++ y)
+				{
+					uint32_t const y0 = (y_base + y) * 2 + 0;
+					uint32_t const y1 = (y_base + y) * 2 + 1;
 
-				float R = hdr_data[(y0 * width + x0) * 4 + 0]
-					+ hdr_data[(y0 * width + x1) * 4 + 0]
-					+ hdr_data[(y1 * width + x0) * 4 + 0]
-					+ hdr_data[(y1 * width + x1) * 4 + 0];
-				float G = hdr_data[(y0 * width + x0) * 4 + 1]
-					+ hdr_data[(y0 * width + x1) * 4 + 1]
-					+ hdr_data[(y1 * width + x0) * 4 + 1]
-					+ hdr_data[(y1 * width + x1) * 4 + 1];
-				float B = hdr_data[(y0 * width + x0) * 4 + 2]
-					+ hdr_data[(y0 * width + x1) * 4 + 2]
-					+ hdr_data[(y1 * width + x0) * 4 + 2]
-					+ hdr_data[(y1 * width + x1) * 4 + 2];
-				float Y = CalcLum(R, G, B);
-				
-				float log_u = sqrt(lum_weight.z() * B / Y);
-				float log_v = sqrt(lum_weight.x() * R / Y);
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint32_t const x0 = (x_base + x) * 2 + 0;
+						uint32_t const x1 = (x_base + x) * 2 + 1;
 
-				c_data[(y * width / 2 + x) * 4 + 0] = 0;
-				c_data[(y * width / 2 + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(log_u * 256 + 0.5f, 0.0f, 255.0f));
-				c_data[(y * width / 2 + x) * 4 + 2] = 0;
-				c_data[(y * width / 2 + x) * 4 + 3] = static_cast<uint8_t>(MathLib::clamp(log_v * 256 + 0.5f, 0.0f, 255.0f));
+						float R = hdr_src[(y0 * width + x0) * 4 + 0]
+							+ hdr_src[(y0 * width + x1) * 4 + 0]
+							+ hdr_src[(y1 * width + x0) * 4 + 0]
+							+ hdr_src[(y1 * width + x1) * 4 + 0];
+						float G = hdr_src[(y0 * width + x0) * 4 + 1]
+							+ hdr_src[(y0 * width + x1) * 4 + 1]
+							+ hdr_src[(y1 * width + x0) * 4 + 1]
+							+ hdr_src[(y1 * width + x1) * 4 + 1];
+						float B = hdr_src[(y0 * width + x0) * 4 + 2]
+							+ hdr_src[(y0 * width + x1) * 4 + 2]
+							+ hdr_src[(y1 * width + x0) * 4 + 2]
+							+ hdr_src[(y1 * width + x1) * 4 + 2];
+						float Y = CalcLum(R, G, B);
+						
+						float log_u = sqrt(lum_weight.z() * B / Y);
+						float log_v = sqrt(lum_weight.x() * R / Y);
+
+						uncom_u[y * 4 + x] = static_cast<uint8_t>(MathLib::clamp(log_u * 256 + 0.5f, 0.0f, 255.0f));
+						uncom_v[y * 4 + x] = static_cast<uint8_t>(MathLib::clamp(log_v * 256 + 0.5f, 0.0f, 255.0f));
+					}
+				}
+
+				BC5_layout com_bc5;
+				EncodeBC4(com_bc5.green, uncom_u);
+				EncodeBC4(com_bc5.red, uncom_v);
+
+				memcpy(c_dst, &com_bc5, sizeof(com_bc5));
+				c_dst += sizeof(com_bc5);
 			}
 		}
 	}
 
-	void DecompressHDR(std::vector<float>& hdr_data,
-			std::vector<uint16_t> const & y_data, std::vector<uint8_t> const & c_data, uint32_t width, uint32_t height)
+	void DecompressHDRSubresource(ElementInitData& hdr_data, ElementInitData const & y_data, ElementInitData const & c_data)
 	{
-		BOOST_ASSERT(y_data.size() >= width * height);
-		BOOST_ASSERT(c_data.size() >= width * height);
-
 		float const log2 = log(2.0f);
 
+		uint32_t width = y_data.row_pitch / sizeof(uint16_t);
+		uint32_t height = y_data.slice_pitch / y_data.row_pitch;
+
+		hdr_data.row_pitch = width * sizeof(float) * 4;
+		hdr_data.slice_pitch = hdr_data.row_pitch * height;
+		hdr_data.data.resize(hdr_data.slice_pitch);
+
+		std::vector<uint8_t> c_data_uncom(width * height);
+		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
+			{
+				uint32_t argb[16];
+				DecodeBC5(argb, &c_data.data[((y_base / 4) * width / 2 / 4 + x_base / 4) * 16]);
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						memcpy(&c_data_uncom[((y_base + y) * width / 2 + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+					}
+				}
+			}
+		}
+
+		uint16_t const * y_src = reinterpret_cast<uint16_t const *>(&y_data.data[0]);
+		float* hdr = reinterpret_cast<float*>(&hdr_data.data[0]);
 		for (uint32_t y = 0; y < height; ++ y)
 		{
 			for (uint32_t x = 0; x < width; ++ x)
 			{
-				float Y = exp((y_data[y * width + x] / 2048.0f - 16) * log2);
-				float B = c_data[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
-				float R = c_data[(y / 2 * width / 2 + x / 2) * 4 + 3] / 256.0f;
+				float Y = exp((y_src[y * width + x] / 2048.0f - 16) * log2);
+				float B = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 1] / 256.0f;
+				float R = c_data_uncom[(y / 2 * width / 2 + x / 2) * 4 + 3] / 256.0f;
 				B = B * B * Y;
 				R = R * R * Y;
 				float G = (Y - R - B) / lum_weight.y();
 
-				hdr_data[(y * width + x) * 4 + 0] = R / lum_weight.x();
-				hdr_data[(y * width + x) * 4 + 1] = G;
-				hdr_data[(y * width + x) * 4 + 2] = B / lum_weight.z();
-				hdr_data[(y * width + x) * 4 + 3] = 1;
+				hdr[(y * width + x) * 4 + 0] = R / lum_weight.x();
+				hdr[(y * width + x) * 4 + 1] = G;
+				hdr[(y * width + x) * 4 + 2] = B / lum_weight.z();
+				hdr[(y * width + x) * 4 + 3] = 1;
 			}
 		}
 	}
 
-	std::pair<TexturePtr, TexturePtr> CompressHDRCube(TexturePtr tex)
+	void CompressHDR(std::string const & in_file,
+		std::string const & out_y_file, std::string const & out_c_file)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		Texture::TextureType in_type;
+		uint32_t in_width, in_height, in_depth;
+		uint16_t in_numMipMaps;
+		ElementFormat in_format;
+		std::vector<ElementInitData> in_data;
+		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data);
 
-		uint32_t const size = tex->Width(0);
-		TexturePtr y_cube_map = rf.MakeTextureCube(size, 1, EF_L16, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		TexturePtr c_cube_map = rf.MakeTextureCube(size / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		std::vector<float> hdr_data(size * size * 4);
-		std::vector<uint16_t> y_data(size * size);
-		std::vector<uint8_t> c_data(size / 2 * size / 2 * 4);
-
-		for (int i = 0; i < 6; ++ i)
+		if (EF_ABGR16F == in_format)
 		{
+			std::vector<ElementInitData> tran_data(in_data.size());
+			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
-				Texture::Mapper mapper(*tex, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < size; ++ y)
+				tran_data[i].row_pitch = in_data[i].row_pitch * 2;
+				tran_data[i].slice_pitch = in_data[i].slice_pitch * 2;
+				tran_data[i].data.resize(tran_data[i].slice_pitch);
+				for (size_t j = 0; j < in_data[i].data.size(); j += 8)
 				{
-					memcpy(&hdr_data[y * size * 4], data, size * tex->Bpp() / 8);
-					data += mapper.RowPitch();
+					float* f32 = reinterpret_cast<float*>(&tran_data[i].data[j * 2]);
+					half* f16 = reinterpret_cast<half*>(&in_data[i].data[j]);
+
+					f32[0] = f16[0];
+					f32[1] = f16[1];
+					f32[2] = f16[2];
+					f32[3] = f16[3];
 				}
 			}
 
-			CompressHDR(y_data, c_data, hdr_data, size, size);
-
-			{
-				Texture::Mapper mapper(*y_cube_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size, size);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < size; ++ y)
-				{
-					memcpy(data, &y_data[y * size], size * y_cube_map->Bpp() / 8);
-					data += mapper.RowPitch();
-				}
-			}
-			{
-				Texture::Mapper mapper(*c_cube_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Write_Only, 0, 0, size / 2, size / 2);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < size / 2; ++ y)
-				{
-					memcpy(data, &c_data[y * size / 2 * 4], size / 2 * c_cube_map->Bpp() / 8);
-					data += mapper.RowPitch();
-				}
-			}
+			in_data = tran_data;
+			in_format = EF_ABGR32F;
 		}
 
-		TexturePtr c_cube_map_bc3 = rf.MakeTextureCube(size / 2, 1, EF_BC3, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		c_cube_map->CopyToTexture(*c_cube_map_bc3);
+		if (in_format != EF_ABGR32F)
+		{
+			cout << "Unsupported texture format" << endl;
+			return;
+		}
+
+		std::vector<ElementInitData> y_data(in_data.size());
+		std::vector<ElementInitData> c_data(in_data.size());
+		for (size_t i = 0; i < in_data.size(); ++ i)
+		{
+			CompressHDRSubresource(y_data[i], c_data[i], in_data[i]);
+		}
+
+		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_L16, y_data);
+		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_numMipMaps, EF_BC5, c_data);
 
 		float mse = 0;
 		{
-			TexturePtr c_cube_map_restored = rf.MakeTextureCube(size / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
-			c_cube_map_bc3->CopyToTexture(*c_cube_map_restored);
-
-			std::vector<float> restored_hdr_data(size * size * 4);
-			std::vector<uint16_t> restored_y_data(size * size);
-			std::vector<uint8_t> restored_c_data(size / 2 * size / 2 * 4);
-		
-			for (int i = 0; i < 6; ++ i)
+			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
-				{
-					Texture::Mapper mapper(*y_cube_map, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
-					uint8_t* data = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < size; ++ y)
-					{
-						memcpy(&restored_y_data[y * size], data, size * y_cube_map->Bpp() / 8);
-						data += mapper.RowPitch();
-					}
-				}
-				{
-					Texture::Mapper mapper(*c_cube_map_restored, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size / 2, size / 2);
-					uint8_t* data = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < size / 2; ++ y)
-					{
-						memcpy(&restored_c_data[y * size / 2 * 4], data, size / 2 * c_cube_map_restored->Bpp() / 8);
-						data += mapper.RowPitch();
-					}
-				}
+				ElementInitData restored_data;
+				DecompressHDRSubresource(restored_data, y_data[i], c_data[i]);
 
-				DecompressHDR(restored_hdr_data, restored_y_data, restored_c_data, size, size);
+				uint32_t width = in_data[i].row_pitch / (sizeof(float) * 4);
+				uint32_t height = in_data[i].slice_pitch / in_data[i].row_pitch;
 
-				{
-					Texture::Mapper mapper(*tex, static_cast<Texture::CubeFaces>(i), 0, TMA_Read_Only, 0, 0, size, size);
-					uint8_t* data = mapper.Pointer<uint8_t>();
-					for (uint32_t y = 0; y < size; ++ y)
-					{
-						memcpy(&hdr_data[y * size * 4], data, size * tex->Bpp() / 8);
-						data += mapper.RowPitch();
-					}
-
-					for (uint32_t y = 0; y < size; ++ y)
-					{
-						for (uint32_t x = 0; x < size; ++ x)
-						{
-							float diff_r = hdr_data[(y * size + x) * 4 + 0] - restored_hdr_data[(y * size + x) * 4 + 0];
-							float diff_g = hdr_data[(y * size + x) * 4 + 1] - restored_hdr_data[(y * size + x) * 4 + 1];
-							float diff_b = hdr_data[(y * size + x) * 4 + 2] - restored_hdr_data[(y * size + x) * 4 + 2];
-
-							mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
-						}
-					}
-				}
-			}
-		}
-
-		cout << "MSE: " << mse << endl;
-
-		return std::make_pair(y_cube_map, c_cube_map_bc3);
-	}
-
-	std::pair<TexturePtr, TexturePtr> CompressHDR2D(TexturePtr tex)
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		uint32_t const width = tex->Width(0);
-		uint32_t const height = tex->Height(0);
-		TexturePtr y_map = rf.MakeTexture2D(width, height, 1, EF_L16, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		TexturePtr c_map = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		std::vector<float> hdr_data(width * height * 4);
-		std::vector<uint16_t> y_data(width * height);
-		std::vector<uint8_t> c_data(width / 2 * height / 2 * 4);
-
-		{
-			Texture::Mapper mapper(*tex, 0, TMA_Read_Only, 0, 0, width, height);
-			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < height; ++ y)
-			{
-				memcpy(&hdr_data[y * width * 4], data, width * tex->Bpp() / 8);
-				data += mapper.RowPitch();
-			}
-		}
-
-		{
-			Texture::Mapper mapper(*y_map, 0, TMA_Write_Only, 0, 0, width, height);
-			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < height; ++ y)
-			{
-				memcpy(data, &y_data[y * width], width * y_map->Bpp() / 8);
-				data += mapper.RowPitch();
-			}
-		}
-		{
-			Texture::Mapper mapper(*c_map, 0, TMA_Write_Only, 0, 0, width / 2, height / 2);
-			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < height / 2; ++ y)
-			{
-				memcpy(data, &c_data[y * width / 2 * 4], width / 2 * c_map->Bpp() / 8);
-				data += mapper.RowPitch();
-			}
-		}
-
-		TexturePtr c_map_bc3 = rf.MakeTexture2D(width / 2, height / 2, 1, EF_BC3, EAH_CPU_Read | EAH_CPU_Write, NULL);
-		c_map->CopyToTexture(*c_map_bc3);
-
-		float mse = 0;
-		{
-			TexturePtr c_map_restored = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ARGB8, EAH_CPU_Read | EAH_CPU_Write, NULL);
-			c_map_bc3->CopyToTexture(*c_map_restored);
-
-			std::vector<float> restored_hdr_data(width * height * 4);
-			std::vector<uint16_t> restored_y_data(width * height);
-			std::vector<uint8_t> restored_c_data(width / 2 * height / 2 * 4);
-
-			{
-				Texture::Mapper mapper(*y_map, 0, TMA_Read_Only, 0, 0, width, height);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < height; ++ y)
-				{
-					memcpy(&restored_y_data[y * width], data, width * y_map->Bpp() / 8);
-					data += mapper.RowPitch();
-				}
-			}
-			{
-				Texture::Mapper mapper(*c_map_restored, 0, TMA_Read_Only, 0, 0, width / 2, height / 2);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < width / 2; ++ y)
-				{
-					memcpy(&restored_c_data[y * width / 2 * 4], data, width / 2 * c_map_restored->Bpp() / 8);
-					data += mapper.RowPitch();
-				}
-			}
-
-			DecompressHDR(restored_hdr_data, restored_y_data, restored_c_data, width, height);
-
-			{
-				Texture::Mapper mapper(*tex, 0, TMA_Read_Only, 0, 0, width, height);
-				uint8_t* data = mapper.Pointer<uint8_t>();
-				for (uint32_t y = 0; y < height; ++ y)
-				{
-					memcpy(&hdr_data[y * width * 4], data, width * tex->Bpp() / 8);
-					data += mapper.RowPitch();
-				}
+				float const * org = reinterpret_cast<float*>(&in_data[i].data[0]);
+				float const * restored = reinterpret_cast<float*>(&restored_data.data[0]);
 
 				for (uint32_t y = 0; y < height; ++ y)
 				{
 					for (uint32_t x = 0; x < width; ++ x)
 					{
-						float diff_r = hdr_data[(y * width + x) * 4 + 0] - restored_hdr_data[(y * width + x) * 4 + 0];
-						float diff_g = hdr_data[(y * width + x) * 4 + 1] - restored_hdr_data[(y * width + x) * 4 + 1];
-						float diff_b = hdr_data[(y * width + x) * 4 + 2] - restored_hdr_data[(y * width + x) * 4 + 2];
+						float diff_r = org[(y * width + x) * 4 + 0] - restored[(y * width + x) * 4 + 0];
+						float diff_g = org[(y * width + x) * 4 + 1] - restored[(y * width + x) * 4 + 1];
+						float diff_b = org[(y * width + x) * 4 + 2] - restored[(y * width + x) * 4 + 2];
 
 						mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
 					}
@@ -333,56 +250,8 @@ namespace
 		}
 
 		cout << "MSE: " << mse << endl;
-
-		return std::make_pair(y_map, c_map_bc3);
-	}
-
-	std::pair<TexturePtr, TexturePtr> CompressHDR(TexturePtr tex)
-	{
-		std::pair<TexturePtr, TexturePtr> ret;
-
-		switch (tex->Type())
-		{
-		case Texture::TT_2D:
-			{
-				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTexture2D(
-					tex->Width(0), tex->Height(0), 1, EF_ABGR32F, EAH_CPU_Read | EAH_CPU_Write, NULL);
-				tex->CopyToTexture(*temp);
-				ret = CompressHDR2D(temp);
-			}
-			break;
-
-		case Texture::TT_Cube:
-			{
-				TexturePtr temp = Context::Instance().RenderFactoryInstance().MakeTextureCube(
-					tex->Width(0), 1, EF_ABGR32F, EAH_CPU_Read | EAH_CPU_Write, NULL);
-				tex->CopyToTexture(*temp);
-				ret = CompressHDRCube(temp);
-			}
-			break;
-
-		default:
-			cout << "Unsupported texture type" << endl;
-			break;
-		}
-
-		return ret;
 	}
 }
-
-class EmptyApp : public KlayGE::App3DFramework
-{
-public:
-	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
-		: App3DFramework(name, settings)
-	{
-	}
-
-	uint32_t DoUpdate(uint32_t /*pass*/)
-	{
-		return URV_Finished;
-	}
-};
 
 int main(int argc, char* argv[])
 {
@@ -395,24 +264,13 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	Context::Instance().RenderFactoryInstance(D3D9RenderFactoryInstance());
-
-	RenderSettings settings;
-	settings.width = 800;
-	settings.height = 600;
-	settings.color_fmt = EF_ARGB8;
-	settings.full_screen = false;
-
-	EmptyApp app("HDRCompressor", settings);
-	app.Create();
-
-	std::pair<TexturePtr, TexturePtr> new_texs = CompressHDR(LoadTexture(argv[1], EAH_CPU_Read | EAH_CPU_Write));
+	ResLoader::Instance().AddPath("../../../bin");
 
 	path output_path(argv[1]);
 	std::string y_file = basename(output_path) + "_y" + extension(output_path);
 	std::string c_file = basename(output_path) + "_c" + extension(output_path);
-	SaveTexture(new_texs.first, y_file);
-	SaveTexture(new_texs.second, c_file);
+
+	CompressHDR(argv[1], y_file, c_file);
 
 	cout << "HDR texture is compressed into " << y_file << " and " << c_file << endl;
 

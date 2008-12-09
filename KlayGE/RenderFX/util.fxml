@@ -18,7 +18,11 @@ float3 decompress_normal(float4 comp_normal)
 float4 decode_hdr_yc(float y, float4 c)
 {
 	float Y = exp2(y * 65536 / 2048 - 16);
+#ifdef KLAYGE_BC5_AS_BC3
 	float2 C = c.ga;
+#else
+	float2 C = c.gr;
+#endif
 	C *= C;
 	
 	return float4(Y * float3(C.g, (1 - C.g - C.r), C.r) / float3(0.299f, 0.587f, 0.114f), 1);

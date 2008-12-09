@@ -334,6 +334,10 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath="..\..\Core\Src\Render\BlockCompression.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\Camera.cpp"
 					>
 				</File>
@@ -421,6 +425,10 @@
 			<Filter
 				Name="Header Files"
 				>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\BlockCompression.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Camera.hpp"
 					>
