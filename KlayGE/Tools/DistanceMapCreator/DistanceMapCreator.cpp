@@ -7,6 +7,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <cmath>
@@ -16,9 +17,8 @@
 #include <vector>
 #include <cassert>
 #include <ctime>
-using namespace std;
 
-#include <KlayGE/D3D9/D3D9RenderFactory.hpp>
+using namespace std;
 using namespace KlayGE;
 
 // A type to hold the distance map while it's being constructed
@@ -259,14 +259,10 @@ int main(int argc, char* argv[])
 		ss >> depth;
 	}
 
-	RenderFactory& render_factory(D3D9RenderFactoryInstance());
-	Context::Instance().RenderFactoryInstance(render_factory);
+	ResLoader::Instance().AddPath("../../../bin");
 
-	RenderSettings settings;
-	settings.width = 800;
-	settings.height = 600;
-	settings.color_fmt = EF_ARGB8;
-	settings.full_screen = false;
+	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
+	RenderFactory& render_factory = Context::Instance().RenderFactoryInstance();
 
 	EmptyApp app("DistanceMapCreator", settings);
 	app.Create();

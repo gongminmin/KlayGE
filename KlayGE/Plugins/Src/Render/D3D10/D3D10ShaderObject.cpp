@@ -193,7 +193,7 @@ namespace
 
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				target_[i] = static_cast<DstType>(v[i]);
+				target_[i * 4] = static_cast<DstType>(v[i]);
 			}
 			*dirty_ = true;
 		}
