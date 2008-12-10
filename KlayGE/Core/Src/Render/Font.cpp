@@ -533,14 +533,13 @@ namespace KlayGE
 
 					Vector_T<int32_t, 2> char_pos;
 					CharInfo charInfo;
+					if (curX_ + kfont_char_size_ >= tex_width)
+					{
+						curX_ = 0;
+						curY_ += kfont_char_size_;
+					}
 					if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
 					{
-						if (curX_ + kfont_char_size_ >= tex_width)
-						{
-							curX_ = 0;
-							curY_ += kfont_char_size_;
-						}
-
 						// 纹理还有空间
 						char_pos = Vector_T<int32_t, 2>(curX_, curY_);
 
