@@ -511,6 +511,11 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 	float const num_steps = L - 1;
 	for (size_t i = 0; i < 16; ++ i)
 	{
+		if ((max_value - min_value) < 2.0f / 65536)
+		{
+			break;
+		}
+
 		float const inv_scale = num_steps / (max_value - min_value);
 
 		float steps[L];
@@ -551,10 +556,15 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 			std::swap(min_value, max_value);
 		}
 
-		if ((d_min * d_min < 1.0f / L / L) && (d_max * d_max < 1.0f / L / L))
+		if ((d_min * d_min < 2.0f / L / L) && (d_max * d_max < 2.0f / L / L))
 		{
 			break;
 		}
+	}
+
+	if (abs(max_value - min_value) < 2.0f / 65536)
+	{
+		max_value = min_value + 2.0f / 65536;
 	}
 
 	float fscale = max_value - min_value;
