@@ -62,6 +62,11 @@ private:
 		{
 			if (!is_leaf)
 			{
+				kd_node* leaf0 = &node_data.children[0];
+				leaf0->~kd_node();
+				kd_node* leaf1 = &node_data.children[1];
+				leaf1->~kd_node();
+
 				kdtree_pool::free(node_data.children);
 			}
 		}
