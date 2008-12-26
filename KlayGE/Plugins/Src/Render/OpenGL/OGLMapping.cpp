@@ -360,16 +360,34 @@ namespace KlayGE
 			break;
 
 		case EF_R16F:
-			internalFormat = GL_LUMINANCE16F_ARB;
-			glformat = GL_LUMINANCE;
-			gltype = GL_HALF_FLOAT_ARB;
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			{
+				internalFormat = GL_R16F;
+				glformat = GL_R;
+				gltype = GL_HALF_FLOAT_ARB;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE16F_ARB;
+				glformat = GL_LUMINANCE;
+				gltype = GL_HALF_FLOAT_ARB;
+			}
 			break;
 
-		/*case EF_GR16F:
-			internalFormat = GL_LUMINANCE_ALPHA16F_ARB;
-			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_HALF_FLOAT_ARB;
-			break;*/
+		case EF_GR16F:
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			{
+				internalFormat = GL_RG16F;
+				glformat = GL_RG;
+				gltype = GL_HALF_FLOAT_ARB;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE_ALPHA16F_ARB;
+				glformat = GL_LUMINANCE_ALPHA;
+				gltype = GL_FLOAT;
+			}
+			break;
 
 		case EF_BGR16F:
 			internalFormat = GL_RGB16F_ARB;
@@ -384,16 +402,34 @@ namespace KlayGE
 			break;
 
 		case EF_R32F:
-			internalFormat = GL_LUMINANCE32F_ARB;
-			glformat = GL_LUMINANCE;
-			gltype = GL_FLOAT;
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			{
+				internalFormat = GL_R32F;
+				glformat = GL_R;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE32F_ARB;
+				glformat = GL_LUMINANCE;
+				gltype = GL_FLOAT;
+			}
 			break;
 
-		/*case EF_GR32F:
-			internalFormat = GL_LUMINANCE_ALPHA32F_ARB;
-			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_FLOAT;
-			break;*/
+		case EF_GR32F:
+			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			{
+				internalFormat = GL_RG32F;
+				glformat = GL_RG;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				internalFormat = GL_LUMINANCE_ALPHA32F_ARB;
+				glformat = GL_LUMINANCE_ALPHA;
+				gltype = GL_FLOAT;
+			}
+			break;
 
 		case EF_BGR32F:
 			internalFormat = GL_RGB32F_ARB;

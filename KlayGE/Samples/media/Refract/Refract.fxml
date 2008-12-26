@@ -106,17 +106,10 @@ float4 RefractPS(float4 pos : POSITION,
 									texCUBE(skybox_YcubeMapSampler, refract_rgb[2]).r,
 									texCUBE(skybox_YcubeMapSampler, reflect_vec).r);
 	y = exp2(y * 65536 / 2048 - 16);
-#ifdef KLAYGE_BC5_AS_BC3
-	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_rgb[0]).g,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[1]).a,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[2]).ag);
-	half2 reflected_c = texCUBE(skybox_CcubeMapSampler, reflect_vec).ag;
-#else
-	half4 refracted_c = half4(texCUBE(skybox_CcubeMapSampler, refract_rgb[0]).g,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[1]).r,
-									texCUBE(skybox_CcubeMapSampler, refract_rgb[2]).rg);
-	half2 reflected_c = texCUBE(skybox_CcubeMapSampler, reflect_vec).rg;
-#endif
+	half4 refracted_c = half4(get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[0])).y,
+									get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[1])).x,
+									get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[2])));
+	half2 reflected_c = get_xy_channel(texCUBE(skybox_CcubeMapSampler, reflect_vec));
 	refracted_c *= refracted_c;
 	reflected_c *= reflected_c;
 

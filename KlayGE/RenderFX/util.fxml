@@ -3,14 +3,27 @@
 <effect>
 	<shader>
 		<![CDATA[
+float2 get_xy_channel(float4 v)
+{
+#ifdef KLAYGE_BC5_AS_AG
+	return v.ag;
+#else
+#ifdef KLAYGE_BC5_AS_GA
+	return v.ga;
+#else
+#ifdef KLAYGE_BC5_AS_GR
+	return v.gr;
+#else
+	return v.rg;
+#endif
+#endif
+#endif
+}
+
 float3 decompress_normal(float4 comp_normal)
 {
 	float3 normal;
-#ifdef KLAYGE_BC5_AS_BC3
-	normal.xy = comp_normal.ag * 2 - 1;
-#else
-	normal.xy = comp_normal.rg * 2 - 1;
-#endif
+	normal.xy = get_xy_channel(comp_normal) * 2 - 1;
 	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
 	return normal;
 }
@@ -18,11 +31,7 @@ float3 decompress_normal(float4 comp_normal)
 float4 decode_hdr_yc(float y, float4 c)
 {
 	float Y = exp2(y * 65536 / 2048 - 16);
-#ifdef KLAYGE_BC5_AS_BC3
-	float2 C = c.ag;
-#else
-	float2 C = c.rg;
-#endif
+	float2 C = get_xy_channel(c);
 	C *= C;
 	
 	return float4(Y * float3(C.g, (1 - C.g - C.r), C.r) / float3(0.299f, 0.587f, 0.114f), 1);

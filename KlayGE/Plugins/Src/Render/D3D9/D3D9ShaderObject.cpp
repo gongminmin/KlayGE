@@ -406,7 +406,12 @@ namespace KlayGE
 		macros.push_back(macro_d3d9);
 		if (!render_eng.DeviceCaps().bc5_support)
 		{
-			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_BC3", "1" };
+			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+			macros.push_back(macro_bc5_as_bc3);
+		}
+		else
+		{
+			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GR", "1" };
 			macros.push_back(macro_bc5_as_bc3);
 		}
 		macros.push_back(macro_end);
