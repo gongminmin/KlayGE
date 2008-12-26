@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>KlayGE技术特性</title>
+</head>
+<body>
+<h1>KlayGE技术特性</h1>
+<h2>概览</h2>
+<p>KlayGE是用于下一代游戏的一个完整的游戏开发框架。它是API无关的插件式结构，提供了很多先进技术，并且有无限的扩展性。</p>
+<p>KlayGE的设计目的非常明确，用最先进的技术武装引擎。它所提供框架使游戏的开发、测试、移植得到简化。KlayGE的目标平台是当年发布的最高硬件到前一年发布的最低硬件。</p>
+<h2>图形</h2>
+<ul>
+	<li>采用fxml作为可渲染物体的特效脚本，可以直接把美工生成的特效导出使用</li>
+	<li>Python脚本可以在运行器动态解释，所以修改脚本以后不需要重新编译</li>
+	<li>可以通过height map来建立地形场景</li>
+	<li>支持骨骼动画</li>
+	<li>硬件Occlusion culling</li>
+	<li>粒子系统</li>
+	<li>Post processing技术</li>
+	<li>自适应硬件状态缓存和延迟更新机制</li>
+	<li>支持逐像素光照和渲染技术</li>
+	<li>基于distance的字体系统，兼有矢量和点阵的优点</li>
+	<li>着色
+		<ul>
+			<li>包含常用操作的shader库</li>
+			<li>完全抽象出图形API</li>
+			<li>多遍渲染</li>
+			<li>完全支持可编程着色</li>
+			<li>可以使用多条渲染流</li>
+		</ul>
+	</li>
+	<li>光照
+		<ul>
+			<li>动态光照</li>
+			<li>全方向shadow map</li>
+		</ul>
+	</li>
+</ul>
+<h2>音频</h2>
+<ul>
+	<li>支持各种平台的音频输出</li>
+	<li>支持3D声音定位和多普勒效应</li>
+	<li>输入格式支持Ogg Vorbis</li>
+	<li>支持流式播放</li>
+</ul>
+<h2>工具</h2>
+<ul>
+	<li>法线图生成器，可以从高度图生成法线图</li>
+	<li>距离图生成器，可以从高度图或3D纹理生成距离图</li>
+	<li>MeshML导出器，从3DS Max导出模型</li>
+	<li>MeshML2KMesh，把MeshML转换成引擎使用的KModel格式</li>
+	<li>OpenGL兼容性检测工具</li>
+	<li>HDR压缩器，支持cubemap和2D HDR纹理的压缩</li>
+	<li>Normal map压缩器，2:1或4:1的压缩率</li>
+    <li>基于distance的字体生成器，可以把矢量字体转换成引擎使用的字体格式</li>
+</ul>
+<h2>程序特性</h2>
+<ul>
+	<li>引擎是开放源代码的，包含了100%的引擎、工具的源代码</li>
+	<li>可扩展的、面向对象的C++引擎，带有用于静态和动态加载代码和资源的软件架构，可移植性，易于调试</li>
+	<li>用Python作为脚本语言，提供了对动态数据的自动支持，开发调试方便，并很容易和C++主程序配合工作</li>
+</ul>
+</body>
+</html>
