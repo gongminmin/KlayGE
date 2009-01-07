@@ -75,8 +75,8 @@ class Function:
 	def params_str(self):
 		ret = ''
 		i = 0
-		for i in range(0, len(self.params)):
-			ret += str(self.params[i])
+		for i, param in enumerate(self.params):
+			ret += str(param)
 			if i != len(self.params) - 1:
 				ret += ', '
 		return ret
@@ -84,8 +84,8 @@ class Function:
 	def param_names_str(self):
 		ret = ''
 		i = 0
-		for i in range(0, len(self.params)):
-			ret += self.params[i].name
+		for i, param in enumerate(self.params):
+			ret += param.name
 			if i != len(self.params) - 1:
 				ret += ', '
 		return ret
@@ -99,36 +99,36 @@ class Extension:
 			self.predefined = None
 
 		if dom.documentElement.getAttributeNode("reg_no") == None:
-			print("\tWarning:" + dom.documentElement.getAttribute("name") + "is not in the OpenGL Extension Registry.")
+			print("\tWarning: %s is not in the OpenGL Extension Registry." % dom.documentElement.getAttribute("name"))
 
 		self.typedefs = []
 		typedefsTag = dom.documentElement.getElementsByTagName("typedefs")
-		if (len(typedefsTag) != 0):
+		if (typedefsTag):
 			for typedef in typedefsTag[0].getElementsByTagName("typedef"):
 				self.typedefs.append(Typedef(typedef.getAttribute("type"),
 								typedef.getAttribute("synonym")))
 
 		self.tokens = []
 		tokensTag = dom.documentElement.getElementsByTagName("tokens")
-		if (len(tokensTag) != 0):
+		if (tokensTag):
 			for token in tokensTag[0].getElementsByTagName("token"):
 				self.tokens.append(Token(token.getAttribute("name"),
 								token.getAttribute("value")))
 
 		self.functions = []
 		funcionsTag = dom.documentElement.getElementsByTagName("functions")
-		if (len(funcionsTag) != 0):
+		if (funcionsTag):
 			for function in funcionsTag[0].getElementsByTagName("function"):
 				params = []
 				paramsTag = function.getElementsByTagName("params")
-				if (len(paramsTag) != 0):
+				if (paramsTag):
 					for param in paramsTag[0].getElementsByTagName("param"):
 						params.append(Param(param.getAttribute("type"),
 								param.getAttribute("name")))
 
 				mappings = []
 				mappingsTag = function.getElementsByTagName("mappings")
-				if (len(mappingsTag) != 0):
+				if (mappingsTag):
 					for mapping in mappingsTag[0].getElementsByTagName("mapping"):
 						mappings.append(Mapping(mapping.getAttribute("from"),
 								mapping.getAttribute("name")))
@@ -139,7 +139,7 @@ class Extension:
 
 		self.additionals = []
 		additionalsTag = dom.documentElement.getElementsByTagName("additionals")
-		if (len(additionalsTag) != 0):
+		if (additionalsTag):
 			for ext_tag in additionalsTag[0].getElementsByTagName("ext"):
 				if ext_tag.parentNode == additionalsTag[0]:
 					self.additionals.append([ext_tag.getAttribute("name")])
@@ -163,25 +163,25 @@ def create_header(prefix, extensions):
 		if extension.predefined != None:
 			headerFile.write("#ifdef %s\n\n" % extension.predefined)
 
-		if (len(extension.tokens) != 0):
+		if (extension.tokens):
 			for token in extension.tokens:
-				headerFile.write(str(token) + "\n")
+				headerFile.write("%s\n" % token)
 
 			headerFile.write("\n")
 
-		if (len(extension.typedefs) != 0):
+		if (extension.typedefs):
 			for typedef in extension.typedefs:
-				headerFile.write(str(typedef) + "\n")
+				headerFile.write("%s\n" % typedef)
 
 			headerFile.write("\n")
 
-		if (len(extension.functions) != 0):
+		if (extension.functions):
 			for function in extension.functions:
 				headerFile.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
 
 			headerFile.write("\n")
 
-		if (len(extension.functions) != 0):
+		if (extension.functions):
 			for function in extension.functions:
 				headerFile.write("extern %sFUNC %s;\n" % (function.name, function.name))
 
@@ -301,11 +301,11 @@ def create_source(prefix, extensions):
 		sourceFile.write("\t\t}\n")
 
 		backup = False
-		if len(extension.additionals) > 0:
+		if extension.additionals:
 			backup = True
 		else:
 			for function in extension.functions:
-				if len(function.mappings) > 0:
+				if function.mappings:
 					backup = True
 					break
 
