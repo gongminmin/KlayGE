@@ -204,6 +204,7 @@ Vertex displacement
 Video texture
 ====================================================================================
 演示了Show engine，解码后的视频作为纹理贴到3D物体上。
+其中用到的视频来自开源电影Big Buck Bunny(http://www.bigbuckbunny.org/)
 
 技术点：
 1) DirectShow解码到纹理

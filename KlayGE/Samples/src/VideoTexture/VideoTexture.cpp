@@ -146,7 +146,7 @@ void VideoTextureApp::InitObjects()
 	ground_->AddToSceneManager();
 
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
-	se.Load(ResLoader::Instance().Locate("planete.avi"));
+	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
 }
 
