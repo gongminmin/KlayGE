@@ -84,7 +84,7 @@ namespace KlayGE
 				for (int level = 0; level < numMipMaps_; ++ level)
 				{
 					Texture::Mapper mapper(*this, level, TMA_Write_Only, 0, widths_[level]);
-					memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0],
+					memcpy(mapper.Pointer<uint8_t>(), init_data[level].data,
 						std::min(mapper.RowPitch(), init_data[level].row_pitch));
 				}
 			}

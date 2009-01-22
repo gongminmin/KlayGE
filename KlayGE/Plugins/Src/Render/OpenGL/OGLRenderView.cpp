@@ -205,7 +205,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 
-		if ((NumComponents(texture_1d.Format()) != 3) && (NumComponents(texture_1d.Format()) != 4))
+		uint32_t const channels = NumComponents(texture_1d.Format());
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
@@ -282,7 +283,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
 
-		if ((NumComponents(texture_2d.Format()) != 3) && (NumComponents(texture_2d.Format()) != 4))
+		uint32_t const channels = NumComponents(texture_2d.Format());
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
@@ -360,7 +362,8 @@ namespace KlayGE
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
 
-		if ((NumComponents(texture_3d.Format()) != 3) && (NumComponents(texture_3d.Format()) != 4))
+		uint32_t const channels = NumComponents(texture_3d.Format());
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
@@ -563,7 +566,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 
-		if ((NumComponents(texture_cube.Format()) != 3) && (NumComponents(texture_cube.Format()) != 4))
+		uint32_t const channels = NumComponents(texture_cube.Format());
+		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
 		{
 			THR(boost::system::posix_error::not_supported);
 		}

@@ -90,8 +90,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		ElementInitData init_data;
-		init_data.data.resize(size);
-		std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size, init_data.data.begin());
+		init_data.data = buf;
 		init_data.row_pitch = size;
 		init_data.slice_pitch = 0;
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, &init_data);
@@ -123,8 +122,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		ElementInitData init_data;
-		init_data.data.resize(size);
-		std::copy(static_cast<uint8_t const *>(buf), static_cast<uint8_t const *>(buf) + size, init_data.data.begin());
+		init_data.data = buf;
 		init_data.row_pitch = size;
 		init_data.slice_pitch = 0;
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, &init_data);

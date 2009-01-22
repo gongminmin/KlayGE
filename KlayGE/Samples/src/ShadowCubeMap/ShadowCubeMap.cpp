@@ -226,15 +226,13 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			init_data.data = xyzs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], indices, init_data.row_pitch);
+			init_data.data = indices;
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 
@@ -245,8 +243,7 @@ namespace
 
 			init_data.row_pitch = sizeof(normal);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], normal, init_data.row_pitch);
+			init_data.data = normal;
 			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
@@ -404,7 +401,7 @@ void ShadowCubeMap::InitObjects()
 	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read);
+	lamp_tex_ = (*LoadTexture("lamp.dds", EAH_GPU_Read))();
 
 	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
@@ -458,7 +455,7 @@ void ShadowCubeMap::InitObjects()
 	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));
 }
 
-void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
+void ShadowCubeMap::OnResize(uint32_t width, uint32_t /*height*/)
 {
 	dialog_->GetControl(MinVarianceStatic)->SetLocation(width - 120, 200);
 	dialog_->GetControl(MinVarianceSlider)->SetLocation(width - 120, 220);

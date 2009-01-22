@@ -72,7 +72,7 @@ namespace KlayGE
 			{
 				for (int i = 0; i < numMipMaps_; ++ i)
 				{
-					subres_data[face * numMipMaps_ + i].pSysMem = &init_data[face * numMipMaps_ + i].data[0];
+					subres_data[face * numMipMaps_ + i].pSysMem = init_data[face * numMipMaps_ + i].data;
 					subres_data[face * numMipMaps_ + i].SysMemPitch = init_data[face * numMipMaps_ + i].row_pitch;
 					subres_data[face * numMipMaps_ + i].SysMemSlicePitch = init_data[face * numMipMaps_ + i].slice_pitch;
 				}

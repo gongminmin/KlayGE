@@ -46,7 +46,7 @@ namespace KlayGE
 			hw_buf_size_ = init_data->row_pitch;
 
 			GraphicsBuffer::Mapper mapper(*this, BA_Write_Only);
-			memcpy(mapper.Pointer<uint8_t>(), &init_data->data[0], init_data->row_pitch);
+			memcpy(mapper.Pointer<uint8_t>(), init_data->data, init_data->row_pitch);
 		}
 	}
 

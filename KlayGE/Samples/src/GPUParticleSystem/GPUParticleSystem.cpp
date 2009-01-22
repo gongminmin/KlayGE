@@ -71,15 +71,16 @@ namespace
 	{
 		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen(boost::lagged_fibonacci607(), boost::uniform_real<float>(0, 255));
 
+		std::vector<uint8_t> data_block(vol_size * vol_size * vol_size * 4);
 		ElementInitData init_data;
-		init_data.data.resize(vol_size * vol_size * vol_size * 4);
+		init_data.data = &data_block[0];
 		init_data.row_pitch = vol_size * 4;
 		init_data.slice_pitch = vol_size * vol_size * 4;
 
 		// Gen a bunch of random values
-		for (size_t i = 0; i < init_data.data.size() / 4; ++ i)
+		for (size_t i = 0; i < data_block.size() / 4; ++ i)
 		{
-			init_data.data[i * 4 + 3] = static_cast<uint8_t>(random_gen());
+			data_block[i * 4 + 3] = static_cast<uint8_t>(random_gen());
 		}
 
 		// Generate normals from the density gradient
@@ -91,15 +92,15 @@ namespace
 			{
 				for (uint32_t x = 0; x < vol_size; ++ x)
 				{
-					normal.x() = (GetDensity(x + 1, y, z, init_data.data, vol_size) - GetDensity(x - 1, y, z, init_data.data, vol_size)) / height_adjust;
-					normal.y() = (GetDensity(x, y + 1, z, init_data.data, vol_size) - GetDensity(x, y - 1, z, init_data.data, vol_size)) / height_adjust;
-					normal.z() = (GetDensity(x, y, z + 1, init_data.data, vol_size) - GetDensity(x, y, z - 1, init_data.data, vol_size)) / height_adjust;
+					normal.x() = (GetDensity(x + 1, y, z, data_block, vol_size) - GetDensity(x - 1, y, z, data_block, vol_size)) / height_adjust;
+					normal.y() = (GetDensity(x, y + 1, z, data_block, vol_size) - GetDensity(x, y - 1, z, data_block, vol_size)) / height_adjust;
+					normal.z() = (GetDensity(x, y, z + 1, data_block, vol_size) - GetDensity(x, y, z - 1, data_block, vol_size)) / height_adjust;
 
 					normal = MathLib::normalize(normal);
 
-					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
-					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.y() / 2 + 0.5f) * 255.0f), 0, 255));
-					init_data.data[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
+					data_block[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
+					data_block[((z * vol_size + y) * vol_size + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.y() / 2 + 0.5f) * 255.0f), 0, 255));
+					data_block[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
 				}
 			}
 		}
@@ -114,7 +115,7 @@ namespace
 		{
 			for (uint32_t i = 0; i < vol_size * vol_size * vol_size; ++ i)
 			{
-				std::swap(init_data.data[i * 4 + 0], init_data.data[i * 4 + 2]);
+				std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 			}
 
 			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ABGR8, EAH_GPU_Read, &init_data);
@@ -137,6 +138,8 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_(max_num_particles / 256)
 		{
+			TextureLoaderPtr pt = LoadTexture("particle.dds", EAH_GPU_Read);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
 			float2 texs[] =
@@ -155,25 +158,23 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &texs[0], init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = max_num_particles * sizeof(float2);
-			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
+			std::vector<float2> p_in_tex(max_num_particles);
 			for (int i = 0; i < max_num_particles; ++ i)
 			{
-				float2 p((i % tex_width_ + 0.5f) / tex_width_,
+				p_in_tex[i] = float2((i % tex_width_ + 0.5f) / tex_width_,
 					(static_cast<float>(i) / tex_width_) / tex_height_);
-				memcpy(&init_data.data[i * sizeof(float2)], &p, sizeof(float2));
 			}
+			init_data.row_pitch = max_num_particles * sizeof(float2);
+			init_data.slice_pitch = 0;
+			init_data.data = &p_in_tex[0];
 			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			init_data.data = indices;
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_ = rf.MakeRenderLayout();
@@ -186,12 +187,11 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
 
-			particle_tex_ = LoadTexture("particle.dds", EAH_GPU_Read);
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_;
-
 			noise_vol_tex_ = CreateNoiseVolume(32);
 			*(technique_->Effect().ParameterByName("noise_vol_sampler")) = noise_vol_tex_;
-			
+
+			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_ = (*pt)();
+
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
 		}
@@ -270,15 +270,15 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Update");
 
+			std::vector<float4> p(tex_width_ * tex_height_);
+			for (size_t i = 0; i < p.size(); ++ i)
+			{
+				p[i] = float4(0, 0, 0, -1);
+			}
 			ElementInitData pos_init;
-			pos_init.data.resize(tex_width_ * tex_height_ * sizeof(float4));
+			pos_init.data = &p[0];
 			pos_init.row_pitch = tex_width_ * sizeof(float4);
 			pos_init.slice_pitch = 0;
-			for (int i = 0; i < tex_width_ * tex_height_; ++ i)
-			{
-				float4 p(0, 0, 0, -1);
-				memcpy(&pos_init.data[i * sizeof(float4)], &p, sizeof(float4));
-			}
 
 			particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
 			particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
@@ -297,18 +297,17 @@ namespace
 			pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
 				= screen_buffer->GetViewport().camera;
 
-			ElementInitData vel_init;
-			vel_init.data.resize(tex_width_ * tex_height_ * sizeof(float4));
-			vel_init.row_pitch = tex_width_ * sizeof(float4);
-			vel_init.slice_pitch = 0;
 			for (int i = 0; i < tex_width_ * tex_height_; ++ i)
 			{
 				float const angel = random_gen_() / 0.05f * PI;
 				float const r = random_gen_() * 3;
 
-				float4 v(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
-				memcpy(&vel_init.data[i * sizeof(float4)], &v, sizeof(float4));
+				p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
 			}
+			ElementInitData vel_init;
+			vel_init.data = &p[0];
+			vel_init.row_pitch = tex_width_ * sizeof(float4);
+			vel_init.slice_pitch = 0;
 
 			TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, EAH_GPU_Read, &vel_init);
 			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
@@ -340,15 +339,16 @@ namespace
 
 			float time = 0;
 
-			ElementInitData init_data;
-			init_data.data.resize(tex_width_ * tex_height_ * sizeof(float));
-			init_data.row_pitch = tex_width_ * sizeof(float);
-			init_data.slice_pitch = 0;
-			for (int i = 0; i < tex_width_ * tex_height_; ++ i)
+			std::vector<float> time_v(tex_width_ * tex_height_);
+			for (size_t i = 0; i < time_v.size(); ++ i)
 			{
-				memcpy(&init_data.data[i * sizeof(float)], &time, sizeof(float));
+				time_v[i] = time;
 				time += inv_emit_freq_;
 			}
+			ElementInitData init_data;
+			init_data.data = &time_v[0];
+			init_data.row_pitch = tex_width_ * sizeof(float);
+			init_data.slice_pitch = 0;
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, EAH_GPU_Read, &init_data);
@@ -420,6 +420,8 @@ namespace
 		explicit TerrainRenderable(TexturePtr height_map, TexturePtr normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
+			TextureLoaderPtr grass = LoadTexture("grass.dds", EAH_GPU_Read);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Terrain");
@@ -430,7 +432,7 @@ namespace
 			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_32f;
 			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("grass_sampler")) = (*grass)();
 		}
 
 		void OnRenderBegin()
@@ -547,6 +549,9 @@ void GPUParticleSystemApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
+	TextureLoaderPtr terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
+	TextureLoaderPtr terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
+
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
 
@@ -564,13 +569,10 @@ void GPUParticleSystemApp::InitObjects()
 	particles_.reset(new ParticlesObject(NUM_PARTICLE));
 	particles_->AddToSceneManager();
 
-	TexturePtr terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
-	TexturePtr terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
-
-	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, terrain_height, terrain_normal));
+	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, (*terrain_height)(), (*terrain_normal)()));
 	gpu_ps->AutoEmit(500);
 
-	terrain_.reset(new TerrainObject(terrain_height, terrain_normal));
+	terrain_.reset(new TerrainObject((*terrain_height)(), (*terrain_normal)()));
 	terrain_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

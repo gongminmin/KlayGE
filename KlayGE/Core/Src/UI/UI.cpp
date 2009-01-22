@@ -469,7 +469,7 @@ namespace KlayGE
 	{
 		if (!control_tex)
 		{
-			control_tex = LoadTexture("ui.dds", EAH_GPU_Read);
+			control_tex = (*LoadTexture("ui.dds", EAH_GPU_Read))();
 		}
 
 		this->SetTexture(0, control_tex);

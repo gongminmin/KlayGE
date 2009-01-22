@@ -67,14 +67,12 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			init_data.data = xyzs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -122,14 +120,12 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			init_data.data = xyzs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -230,9 +226,10 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	std::vector<uint8_t> data_v(width * NumFormatBytes(EF_ABGR16F) * height, 0);
 	ElementInitData init_data;
 	init_data.row_pitch = width * NumFormatBytes(EF_GR16F);
-	init_data.data.assign(init_data.row_pitch * height, 0);
+	init_data.data = &data_v[0];
 	init_data.slice_pitch = 0;
 
 	try
@@ -242,8 +239,6 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	catch (...)
 	{
 		init_data.row_pitch = width * NumFormatBytes(EF_ABGR16F);
-		init_data.data.resize(init_data.row_pitch * height, 0);
-
 		rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 	}
 	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, rendered_tex_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, &init_data);

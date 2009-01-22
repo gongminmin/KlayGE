@@ -37,13 +37,15 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
+			TextureLoaderPtr flag_tl = LoadTexture("Flag.dds", EAH_GPU_Read);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("VertexDisplacement.kfx")->TechniqueByName("VertexDisplacement");
 
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
-			*(technique_->Effect().ParameterByName("flagSampler")) = LoadTexture("Flag.dds", EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("flagSampler")) = (*flag_tl)();
 			*(technique_->Effect().ParameterByName("lightDir")) = float3(0, 0, -1);
 		}
 

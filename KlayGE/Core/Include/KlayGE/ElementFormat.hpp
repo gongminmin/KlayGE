@@ -711,7 +711,7 @@ namespace KlayGE
 
 	struct ElementInitData
 	{
-		std::vector<uint8_t> data;
+		void const * data;
 		uint32_t row_pitch;
 		uint32_t slice_pitch;
 	};

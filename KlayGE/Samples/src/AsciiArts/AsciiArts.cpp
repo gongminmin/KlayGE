@@ -121,7 +121,7 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Read);
+		TexturePtr ascii_tex = (*LoadTexture(tex_name, EAH_CPU_Read))();
 		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
@@ -158,22 +158,23 @@ namespace
 	{
 		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
 
-		ElementInitData init_data;
-		init_data.data.resize(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
-		init_data.row_pitch = OUTPUT_NUM_ASCII * ASCII_WIDTH;
-		init_data.slice_pitch = 0;
-
+		std::vector<uint8_t> data_v(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
 		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
 		{
 			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
 			{
 				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
 				{
-					init_data.data[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
+					data_v[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
 						= ascii_lums[i][y * ASCII_WIDTH + x];
 				}
 			}
 		}
+
+		ElementInitData init_data;
+		init_data.data = &data_v[0];
+		init_data.row_pitch = OUTPUT_NUM_ASCII * ASCII_WIDTH;
+		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
 			ASCII_HEIGHT, 1, EF_L8, EAH_GPU_Read, &init_data);

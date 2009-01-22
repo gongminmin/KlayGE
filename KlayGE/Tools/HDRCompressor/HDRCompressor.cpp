@@ -40,7 +40,8 @@ namespace
 		return y;
 	}
 
-	void CompressHDRSubresource(ElementInitData& y_data, ElementInitData& c_data, ElementInitData const & hdr_data)
+	void CompressHDRSubresource(ElementInitData& y_data, ElementInitData& c_data, std::vector<uint8_t>& y_data_block, std::vector<uint8_t>& c_data_block,
+		ElementInitData const & hdr_data)
 	{
 		float const log2 = log(2.0f);
 
@@ -49,10 +50,11 @@ namespace
 
 		y_data.row_pitch = width * sizeof(uint16_t);
 		y_data.slice_pitch = y_data.row_pitch * height;
-		y_data.data.resize(y_data.slice_pitch);
+		y_data_block.resize(y_data.slice_pitch);
+		y_data.data = &y_data_block[0];
 
-		float const * hdr_src = reinterpret_cast<float const *>(&hdr_data.data[0]);
-		uint16_t* y_dst = reinterpret_cast<uint16_t*>(&y_data.data[0]);
+		float const * hdr_src = static_cast<float const *>(hdr_data.data);
+		uint16_t* y_dst = reinterpret_cast<uint16_t*>(&y_data_block[0]);
 
 		for (uint32_t y = 0; y < height; ++ y)
 		{
@@ -71,8 +73,9 @@ namespace
 
 		c_data.row_pitch = (width / 2 + 3) / 4 * 16;
 		c_data.slice_pitch = y_data.row_pitch * (height / 2 + 3) / 4;
-		c_data.data.resize(c_data.slice_pitch);
-		uint8_t* c_dst = &c_data.data[0];
+		c_data_block.resize(c_data.slice_pitch);
+		c_data.data = &c_data_block[0];
+		uint8_t* c_dst = &c_data_block[0];
 
 		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
 		{
@@ -122,7 +125,7 @@ namespace
 		}
 	}
 
-	void DecompressHDRSubresource(ElementInitData& hdr_data, ElementInitData const & y_data, ElementInitData const & c_data)
+	void DecompressHDRSubresource(ElementInitData& hdr_data, std::vector<uint8_t>& hdr_data_block, ElementInitData const & y_data, ElementInitData const & c_data)
 	{
 		float const log2 = log(2.0f);
 
@@ -131,7 +134,8 @@ namespace
 
 		hdr_data.row_pitch = width * sizeof(float) * 4;
 		hdr_data.slice_pitch = hdr_data.row_pitch * height;
-		hdr_data.data.resize(hdr_data.slice_pitch);
+		hdr_data_block.resize(hdr_data.slice_pitch);
+		hdr_data.data = &hdr_data_block[0];
 
 		std::vector<uint8_t> c_data_uncom(width * height);
 		for (uint32_t y_base = 0; y_base < height / 2; y_base += 4)
@@ -139,7 +143,7 @@ namespace
 			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
 			{
 				uint32_t argb[16];
-				DecodeBC5(argb, &c_data.data[((y_base / 4) * width / 2 / 4 + x_base / 4) * 16]);
+				DecodeBC5(argb, static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16);
 
 				for (int y = 0; y < 4; ++ y)
 				{
@@ -151,8 +155,8 @@ namespace
 			}
 		}
 
-		uint16_t const * y_src = reinterpret_cast<uint16_t const *>(&y_data.data[0]);
-		float* hdr = reinterpret_cast<float*>(&hdr_data.data[0]);
+		uint16_t const * y_src = static_cast<uint16_t const *>(y_data.data);
+		float* hdr = reinterpret_cast<float*>(&hdr_data_block[0]);
 		for (uint32_t y = 0; y < height; ++ y)
 		{
 			for (uint32_t x = 0; x < width; ++ x)
@@ -180,20 +184,24 @@ namespace
 		uint16_t in_numMipMaps;
 		ElementFormat in_format;
 		std::vector<ElementInitData> in_data;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data);
+		std::vector<uint8_t> in_data_block;
+		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data, in_data_block);
 
 		if (EF_ABGR16F == in_format)
 		{
 			std::vector<ElementInitData> tran_data(in_data.size());
+			std::vector<size_t> base(in_data.size());
+			std::vector<uint8_t> tran_data_block;
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
 				tran_data[i].row_pitch = in_data[i].row_pitch * 2;
 				tran_data[i].slice_pitch = in_data[i].slice_pitch * 2;
-				tran_data[i].data.resize(tran_data[i].slice_pitch);
-				for (size_t j = 0; j < in_data[i].data.size(); j += 8)
+				base[i] = tran_data_block.size();
+				tran_data_block.resize(tran_data_block.size() + tran_data[i].slice_pitch);
+				for (size_t j = 0; j < tran_data[i].slice_pitch; j += 8)
 				{
-					float* f32 = reinterpret_cast<float*>(&tran_data[i].data[j * 2]);
-					half* f16 = reinterpret_cast<half*>(&in_data[i].data[j]);
+					float* f32 = reinterpret_cast<float*>(&tran_data_block[base[i]] + j * 2);
+					half const * f16 = static_cast<half const *>(in_data[i].data) + j / sizeof(half);
 
 					f32[0] = f16[0];
 					f32[1] = f16[1];
@@ -203,7 +211,13 @@ namespace
 			}
 
 			in_data = tran_data;
+			in_data_block = tran_data_block;
 			in_format = EF_ABGR32F;
+
+			for (size_t i = 0; i < in_data.size(); ++ i)
+			{
+				in_data[i].data = &in_data_block[base[i]];
+			}
 		}
 
 		if (in_format != EF_ABGR32F)
@@ -214,9 +228,11 @@ namespace
 
 		std::vector<ElementInitData> y_data(in_data.size());
 		std::vector<ElementInitData> c_data(in_data.size());
+		std::vector<uint8_t> y_data_block;
+		std::vector<uint8_t> c_data_block;
 		for (size_t i = 0; i < in_data.size(); ++ i)
 		{
-			CompressHDRSubresource(y_data[i], c_data[i], in_data[i]);
+			CompressHDRSubresource(y_data[i], c_data[i], y_data_block, c_data_block, in_data[i]);
 		}
 
 		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_L16, y_data);
@@ -227,13 +243,14 @@ namespace
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
 				ElementInitData restored_data;
-				DecompressHDRSubresource(restored_data, y_data[i], c_data[i]);
+				std::vector<uint8_t> restored_data_block;
+				DecompressHDRSubresource(restored_data, restored_data_block, y_data[i], c_data[i]);
 
 				uint32_t width = in_data[i].row_pitch / (sizeof(float) * 4);
 				uint32_t height = in_data[i].slice_pitch / in_data[i].row_pitch;
 
-				float const * org = reinterpret_cast<float*>(&in_data[i].data[0]);
-				float const * restored = reinterpret_cast<float*>(&restored_data.data[0]);
+				float const * org = static_cast<float const *>(in_data[i].data);
+				float const * restored = static_cast<float const *>(restored_data.data);
 
 				for (uint32_t y = 0; y < height; ++ y)
 				{

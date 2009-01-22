@@ -20,7 +20,8 @@ namespace
 		uint16_t numMipMaps;
 		ElementFormat format;
 		std::vector<ElementInitData> in_data;
-		LoadTexture(in_file, type, width, height, depth, numMipMaps, format, in_data);
+		std::vector<uint8_t> data_block;
+		LoadTexture(in_file, type, width, height, depth, numMipMaps, format, in_data, data_block);
 
 		if ((Texture::TT_2D == type) && (EF_L8 == format))
 		{
@@ -28,6 +29,8 @@ namespace
 			uint32_t the_height = height;
 
 			std::vector<ElementInitData> normals(in_data.size());
+			std::vector<uint8_t> data_block;
+			std::vector<size_t> base(in_data.size());
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
 				std::vector<uint8_t> heights(the_width * the_height);
@@ -35,7 +38,7 @@ namespace
 				{
 					for (uint32_t x = 0; x < the_width; ++ x)
 					{
-						heights[y * the_width + x] = in_data[i].data[y * in_data[i].row_pitch + x];
+						heights[y * the_width + x] = static_cast<uint8_t const *>(in_data[i].data)[y * in_data[i].row_pitch + x];
 					}
 				}
 
@@ -61,7 +64,8 @@ namespace
 					dy[(the_height - 1) * the_width + x] = 0;
 				}
 
-				normals[i].data.reserve(the_width * the_height * 4);
+				base[i] = data_block.size();
+				data_block.resize(data_block.size() + the_width * the_height * 4);
 				for (uint32_t y = 0; y < the_height; ++ y)
 				{
 					for (uint32_t x = 0; x < the_width; ++ x)
@@ -70,15 +74,20 @@ namespace
 							static_cast<float>(-dy[y * the_width + x]), 8));
 						normal = normal * 0.5f + float3(0.5f, 0.5f, 0.5f);
 
-						normals[0].data.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.z() * 255 + 0.5f), 0, 255)));
-						normals[0].data.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.y() * 255 + 0.5f), 0, 255)));
-						normals[0].data.push_back(static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.x() * 255 + 0.5f), 0, 255)));
-						normals[0].data.push_back(255);
+						data_block[base[i] + (y * the_width + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.z() * 255 + 0.5f), 0, 255));
+						data_block[base[i] + (y * the_width + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.y() * 255 + 0.5f), 0, 255));
+						data_block[base[i] + (y * the_width + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(normal.x() * 255 + 0.5f), 0, 255));
+						data_block[base[i] + (y * the_width + x) * 4 + 3] = 255;
 					}
 				}
 
 				the_width /= 2;
 				the_height /= 2;
+			}
+
+			for (size_t i = 0; i < in_data.size(); ++ i)
+			{
+				normals[i].data = &data_block[base[i]];
 			}
 
 			SaveTexture(out_file, type, width, height, depth, numMipMaps, EF_ARGB8, normals);

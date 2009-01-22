@@ -105,14 +105,14 @@ namespace KlayGE
 							block_size = 16;
 						}
 
-						memcpy(mapper.Pointer<uint8_t>(), &init_data[level].data[0],
+						memcpy(mapper.Pointer<uint8_t>(), init_data[level].data,
 							((widths_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size);
 					}
 					else
 					{
 						for (uint32_t h = 0; h < heights_[level]; ++ h)
 						{
-							memcpy(mapper.Pointer<uint8_t>() + mapper.RowPitch() * h, &init_data[level].data[init_data[level].row_pitch * h],
+							memcpy(mapper.Pointer<uint8_t>() + mapper.RowPitch() * h, static_cast<char const *>(init_data[level].data) + init_data[level].row_pitch * h,
 								std::min(mapper.RowPitch(), init_data[level].row_pitch));
 						}
 					}

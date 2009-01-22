@@ -51,8 +51,7 @@ namespace KlayGE
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 		ElementInitData init_data;
 		init_data.row_pitch = sizeof(pos);
-		init_data.data.resize(init_data.row_pitch);
-		std::memcpy(&init_data.data[0], &pos[0], init_data.row_pitch);
+		init_data.data = &pos[0];
 		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 

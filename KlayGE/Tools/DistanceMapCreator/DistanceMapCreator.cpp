@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 	app.Create();
 
 	std::vector<uint8_t> volume(width * height * depth);
-	TexturePtr src_texture = LoadTexture(src_name, EAH_CPU_Read | EAH_CPU_Write);
+	TexturePtr src_texture = (*LoadTexture(src_name, EAH_CPU_Read | EAH_CPU_Write))();
 	if (Texture::TT_2D == src_texture->Type())
 	{
 		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8, EAH_CPU_Read | EAH_CPU_Write, NULL);

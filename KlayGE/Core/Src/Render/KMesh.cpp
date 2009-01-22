@@ -87,7 +87,7 @@ namespace KlayGE
 		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex = LoadTexture(texture_slots_[0].second, EAH_GPU_Read);
+			tex = (*LoadTexture(texture_slots_[0].second, EAH_GPU_Read))();
 		}
 
 		if (tex)

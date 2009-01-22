@@ -1,12 +1,13 @@
 // Texture.hpp
 // KlayGE 纹理类 头文件
 // Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2003-2008
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
 // 增加了ElementInitData (2008.10.1)
+// 多线程纹理载入 (2009.1.22)
 //
 // 3.6.0
 // 可以通过Map直接访问纹理内容 (2007.7.7)
@@ -46,6 +47,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <string>
 #include <vector>
@@ -236,7 +238,6 @@ namespace KlayGE
 
 		virtual void BuildMipSubLevels() = 0;
 
-	private:
 		virtual void Map1D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
 			void*& data) = 0;
@@ -266,10 +267,34 @@ namespace KlayGE
 		uint32_t		access_hint_;
 	};
 
+	class KLAYGE_CORE_API TextureLoader
+	{
+	public:
+		TextureLoader(std::string const & tex_name, uint32_t access_hint);
+		TexturePtr operator()();
+
+	private:
+		void LoadDDS();
+
+	private:
+		joiner<void> tl_thread_;
+
+		std::string tex_name_;
+		uint32_t access_hint_;
+		Texture::TextureType type_;
+		uint32_t width_, height_, depth_;
+		uint16_t numMipMaps_;
+		ElementFormat format_;
+		std::vector<ElementInitData> tex_data_;
+		std::vector<uint8_t> data_block_;
+
+		TexturePtr texture_;
+	};
+
 	KLAYGE_CORE_API void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
-		ElementFormat& format, std::vector<ElementInitData>& init_data);
-	KLAYGE_CORE_API TexturePtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
+		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
+	KLAYGE_CORE_API TextureLoaderPtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
 	
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,

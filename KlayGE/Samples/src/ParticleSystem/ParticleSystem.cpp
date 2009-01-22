@@ -93,6 +93,8 @@ namespace
 		TerrainRenderable(std::vector<float3> const & vertices, std::vector<uint16_t> const & indices)
 			: RenderableHelper(L"Terrain")
 		{
+			TextureLoaderPtr grass = LoadTexture("grass.dds", EAH_GPU_Read);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Terrain");
@@ -103,15 +105,13 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &vertices[0], init_data.row_pitch);
+			init_data.data = &vertices[0];
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			init_data.data = &indices[0];
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 
@@ -122,14 +122,13 @@ namespace
 
 			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &normal[0], init_data.row_pitch);
+			init_data.data = &normal[0];
 			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = LoadTexture("grass.dds", EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("grass_sampler")) = (*grass)();
 		}
 
 		void OnRenderBegin()
@@ -165,6 +164,8 @@ namespace
 		RenderParticles()
 			: RenderableHelper(L"Particles")
 		{
+			TextureLoaderPtr particle_tl = LoadTexture("particle.dds", EAH_GPU_Read);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			float2 texs[] =
@@ -186,8 +187,7 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &texs[0], init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
@@ -199,15 +199,14 @@ namespace
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], &indices[0], init_data.row_pitch);
+			init_data.data = indices;
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
-			*(technique_->Effect().ParameterByName("particle_sampler")) = LoadTexture("particle.dds", EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("particle_sampler")) = (*particle_tl)();
 		}
 
 		void SceneTexture(TexturePtr tex, bool flip)
@@ -338,7 +337,7 @@ void ParticleSystemApp::InitObjects()
 	input_handler->connect(boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds", EAH_CPU_Read), 1));
+	height_img_.reset(new HeightImg(-2, -2, 2, 2, (*LoadTexture("grcanyon.dds", EAH_CPU_Read))(), 1));
 	particles_.reset(new ParticlesObject);
 	particles_->AddToSceneManager();
 

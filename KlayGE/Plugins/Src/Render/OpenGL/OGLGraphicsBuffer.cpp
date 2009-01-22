@@ -46,14 +46,14 @@ namespace KlayGE
 
 			if (glloader_GL_EXT_direct_state_access())
 			{
-				glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
+				glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), init_data->data,
 						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 			}
 			else
 			{
 				glBindBuffer(target_, vb_);
 				glBufferData(target_,
-						static_cast<GLsizeiptr>(size_in_byte_), &init_data->data[0],
+						static_cast<GLsizeiptr>(size_in_byte_), init_data->data,
 						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 			}
 		}

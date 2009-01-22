@@ -48,11 +48,8 @@ namespace
 			float const YSCALE = 0.08f;
 			float const ZSCALE = 0.08f;
 
-			ElementInitData init_data;
-			init_data.data.reserve(XSIZE * YSIZE * ZSIZE);
-			init_data.row_pitch = XSIZE;
-			init_data.slice_pitch = XSIZE * YSIZE;
-
+			std::vector<uint8_t> data_v;
+			data_v.reserve(XSIZE * YSIZE * ZSIZE);
 			uint16_t min = 255, max = 0;
 			for (int z = 0; z < ZSIZE; ++ z)
 			{
@@ -72,13 +69,18 @@ namespace
 							min = t;
 						}
 
-						init_data.data.push_back(t);
+						data_v.push_back(t);
 					}
 				}
 			}
+			ElementInitData init_data;
+			init_data.data = &data_v[0];
+			init_data.row_pitch = XSIZE;
+			init_data.slice_pitch = XSIZE * YSIZE;
+
 			for (uint32_t i = 0; i < XSIZE * YSIZE * ZSIZE; ++ i)
 			{
-				init_data.data[i] = static_cast<uint8_t>((255 * (init_data.data[i] - min)) / (max - min));
+				data_v[i] = static_cast<uint8_t>((255 * (data_v[i] - min)) / (max - min));
 			}
 
 			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, EAH_GPU_Read, &init_data);
@@ -107,14 +109,12 @@ namespace
 
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			init_data.data = xyzs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			tex0_vb->Resize(sizeof(texs));
 

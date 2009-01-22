@@ -105,7 +105,7 @@ namespace KlayGE
 				}
 				else
 				{
-					memcpy(p, &init_data[level].data[0], image_size);
+					memcpy(p, init_data[level].data, image_size);
 				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
@@ -125,7 +125,7 @@ namespace KlayGE
 				}
 				else
 				{
-					memcpy(p, &init_data[level].data[0], image_size);
+					memcpy(p, init_data[level].data, image_size);
 				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 

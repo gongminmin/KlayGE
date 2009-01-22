@@ -46,7 +46,7 @@ namespace KlayGE
 			size_in_byte_ = init_data->row_pitch;
 
 			D3D10_SUBRESOURCE_DATA subres_init;
-			subres_init.pSysMem = &init_data->data[0];
+			subres_init.pSysMem = init_data->data;
 			subres_init.SysMemPitch = init_data->row_pitch;
 			subres_init.SysMemSlicePitch = init_data->slice_pitch;
 

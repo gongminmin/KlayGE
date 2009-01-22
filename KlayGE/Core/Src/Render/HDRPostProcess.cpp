@@ -86,6 +86,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		std::vector<float> data_v(4, 0);
 		for (int i = 0; i < 2; ++ i)
 		{
 			fb_[i] = rf.MakeFrameBuffer();
@@ -93,7 +94,7 @@ namespace KlayGE
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(float);
 			init_data.slice_pitch = 0;
-			init_data.data.assign(init_data.row_pitch, 0);
+			init_data.data = &data_v[0];
 
 			try
 			{
@@ -102,9 +103,7 @@ namespace KlayGE
 			}
 			catch (...)
 			{
-				init_data.row_pitch = sizeof(float) * 4;
-				init_data.data.assign(init_data.row_pitch, 0);
-
+				init_data.row_pitch = 4 * sizeof(float);
 				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 				fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
 			}

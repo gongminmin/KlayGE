@@ -95,15 +95,15 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("diffuse_map")) = LoadTexture(iter->second, EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("diffuse_map")) = (*LoadTexture(iter->second, EAH_GPU_Read))();
 		}
 		if ("NormalMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("normal_map")) = LoadTexture(iter->second, EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("normal_map")) = (*LoadTexture(iter->second, EAH_GPU_Read))();
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("specular_map")) = (*LoadTexture(iter->second, EAH_GPU_Read))();
 		}
 	}
 }

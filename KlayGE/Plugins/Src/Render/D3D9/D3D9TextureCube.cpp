@@ -100,7 +100,7 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							memcpy(mapper.Pointer<uint8_t>(), &init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].data[0],
+							memcpy(mapper.Pointer<uint8_t>(), init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].data,
 								((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size);
 						}
 						else
@@ -108,7 +108,7 @@ namespace KlayGE
 							for (uint32_t h = 0; h < widths_[level]; ++ h)
 							{
 								memcpy(mapper.Pointer<uint8_t>() + mapper.RowPitch() * h,
-									&init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].data[init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].row_pitch * h],
+									static_cast<uint8_t const *>(init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].data) + init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].row_pitch * h,
 									std::min(mapper.RowPitch(), init_data[(face - Texture::CF_Positive_X) * numMipMaps_ + level].row_pitch));
 							}
 						}

@@ -46,16 +46,16 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
-			*(technique_->Effect().ParameterByName("diffuseMap")) = LoadTexture("diffuse.dds", EAH_GPU_Read);
-			*(technique_->Effect().ParameterByName("normalMap")) = LoadTexture("normal.dds", EAH_GPU_Read);
-			*(technique_->Effect().ParameterByName("distanceMap")) = LoadTexture("distance.dds", EAH_GPU_Read);
+			*(technique_->Effect().ParameterByName("diffuseMap")) = (*LoadTexture("diffuse.dds", EAH_GPU_Read))();
+			*(technique_->Effect().ParameterByName("normalMap")) = (*LoadTexture("normal.dds", EAH_GPU_Read))();
+			*(technique_->Effect().ParameterByName("distanceMap")) = (*LoadTexture("distance.dds", EAH_GPU_Read))();
 
 			float3 xyzs[] =
 			{
 				float3(-1, 1,  0),
 				float3(1,	1,	0),
 				float3(1,	-1,	0),
-				float3(-1, -1, 0),
+				float3(-1, -1, 0)
 			};
 
 			float2 texs[] =
@@ -87,26 +87,22 @@ namespace
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], xyzs, init_data.row_pitch);
+			init_data.data = xyzs;
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], texs, init_data.row_pitch);
+			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			init_data.row_pitch = sizeof(t);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], t, init_data.row_pitch);
+			init_data.data = t;
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
 			init_data.row_pitch = sizeof(b);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], b, init_data.row_pitch);
+			init_data.data = b;
 			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -116,8 +112,7 @@ namespace
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
-			init_data.data.resize(init_data.row_pitch);
-			memcpy(&init_data.data[0], indices, init_data.row_pitch);
+			init_data.data = indices;
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16);
 

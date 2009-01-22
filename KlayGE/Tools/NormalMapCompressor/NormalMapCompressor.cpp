@@ -30,20 +30,21 @@ namespace
 	}
 
 	void CompressNormalMapSubresource(uint32_t width, uint32_t height, ElementFormat in_format, 
-		ElementInitData const & in_data, ElementFormat new_format, ElementInitData& new_data)
+		ElementInitData const & in_data, ElementFormat new_format, ElementInitData& new_data, std::vector<uint8_t>& new_data_block)
 	{
 		UNREF_PARAM(in_format);
 		BOOST_ASSERT(EF_ARGB8 == in_format);
 
-		std::vector<uint8_t> const & normals = in_data.data;
+		uint8_t const * normals = static_cast<uint8_t const *>(in_data.data);
 
 		if (EF_AL8 == new_format)
 		{
-			new_data.data.resize(width * height * 2);
+			new_data_block.resize(width * height * 2);
+			new_data.data = &new_data_block[0];
 			new_data.row_pitch = width * 2;
 			new_data.slice_pitch = width * 2 * height;
 
-			std::vector<uint8_t>& com_normals = new_data.data;
+			uint8_t* com_normals = &new_data_block[0];
 
 			for (uint32_t y = 0; y < height; ++ y)
 			{
@@ -56,11 +57,12 @@ namespace
 		}
 		else
 		{
-			new_data.data.resize(width * height);
+			new_data_block.resize(width * height);
+			new_data.data = &new_data_block[0];
 			new_data.row_pitch = width;
 			new_data.slice_pitch = width * height;
 
-			std::vector<uint8_t>& com_normals = new_data.data;
+			uint8_t* com_normals = &new_data_block[0];
 
 			int dest = 0;
 			for (uint32_t y_base = 0; y_base < height; y_base += 4)
@@ -111,7 +113,7 @@ namespace
 	}
 
 	void DecompressNormalMapSubresource(uint32_t width, uint32_t height, ElementFormat restored_format, 
-		ElementInitData& restored_data, ElementFormat com_format, ElementInitData const & com_data)
+		ElementInitData& restored_data, std::vector<uint8_t>& restored_data_block, ElementFormat com_format, ElementInitData const & com_data)
 	{
 		UNREF_PARAM(restored_format);
 		BOOST_ASSERT(EF_ARGB8 == restored_format);
@@ -125,9 +127,9 @@ namespace
 				for (uint32_t x = 0; x < width; ++ x)
 				{
 					normals[(y * width + x) * 4 + 0] = 0;
-					normals[(y * width + x) * 4 + 1] = com_data.data[(y * width + x) * 2 + 0];
+					normals[(y * width + x) * 4 + 1] = static_cast<uint8_t const *>(com_data.data)[(y * width + x) * 2 + 0];
 					normals[(y * width + x) * 4 + 2] = 0;
-					normals[(y * width + x) * 4 + 3] = com_data.data[(y * width + x) * 2 + 1];
+					normals[(y * width + x) * 4 + 3] = static_cast<uint8_t const *>(com_data.data)[(y * width + x) * 2 + 1];
 				}
 			}
 		}
@@ -140,7 +142,7 @@ namespace
 					uint32_t argb[16];
 					if (EF_BC5 == com_format)
 					{
-						DecodeBC5(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+						DecodeBC5(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 						for (int i = 0; i < 16; ++ i)
 						{
 							argb[i] = ((argb[i] << 8) & 0xFF000000) | (argb[i] & 0x0000FF00);
@@ -150,7 +152,7 @@ namespace
 					{
 						if (EF_BC3 == com_format)
 						{
-							DecodeBC3(argb, &com_data.data[((y_base / 4) * width / 4 + x_base / 4) * 16]);
+							DecodeBC3(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 						}
 					}
 
@@ -165,20 +167,22 @@ namespace
 			}
 		}
 
+		restored_data_block.resize(restored_data.slice_pitch);
 		restored_data.row_pitch = width * 4;
 		restored_data.slice_pitch = width * height * 4;
-		restored_data.data.resize(restored_data.slice_pitch);
-		DecompressNormal(restored_data.data, normals);
+		restored_data.data = &restored_data_block[0];
+		DecompressNormal(restored_data_block, normals);
 	}	
 
 	float MSESubresource(uint32_t width, uint32_t height, ElementFormat in_format, 
 		ElementInitData const & in_data, ElementFormat new_format, ElementInitData const & new_data)
 	{
 		ElementInitData restored_data;
-		DecompressNormalMapSubresource(width, height, in_format, restored_data, new_format, new_data);
+		std::vector<uint8_t> restored_data_block;
+		DecompressNormalMapSubresource(width, height, in_format, restored_data, restored_data_block, new_format, new_data);
 
-		std::vector<uint8_t> const & restored_normals = restored_data.data;
-		std::vector<uint8_t> const & normals = in_data.data;
+		uint8_t const * restored_normals = static_cast<uint8_t const *>(restored_data.data);
+		uint8_t const * normals = static_cast<uint8_t const *>(in_data.data);
 
 		float mse = 0;
 		for (uint32_t y = 0; y < height; ++ y)
@@ -205,7 +209,8 @@ namespace
 		uint16_t in_numMipMaps;
 		ElementFormat in_format;
 		std::vector<ElementInitData> in_data;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data);
+		std::vector<uint8_t> in_data_block;
+		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data, in_data_block);
 
 		if (in_format != EF_ARGB8)
 		{
@@ -214,13 +219,14 @@ namespace
 		}
 
 		std::vector<ElementInitData> new_data(in_data.size());
+		std::vector<std::vector<uint8_t> > new_data_block(in_data.size());
 
 		for (size_t sub_res = 0; sub_res < in_data.size(); ++ sub_res)
 		{
 			uint32_t the_width = in_data[sub_res].row_pitch / 4;
 			uint32_t the_height = in_data[sub_res].slice_pitch / in_data[sub_res].row_pitch;
 
-			CompressNormalMapSubresource(the_width, the_height, in_format, in_data[sub_res], new_format, new_data[sub_res]);
+			CompressNormalMapSubresource(the_width, the_height, in_format, in_data[sub_res], new_format, new_data[sub_res], new_data_block[sub_res]);
 		}
 
 		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_numMipMaps, new_format, new_data);

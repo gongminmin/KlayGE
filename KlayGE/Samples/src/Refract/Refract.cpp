@@ -236,8 +236,8 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
-	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read);
-	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read);
+	y_cube_map_ = (*LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read))();
+	c_cube_map_ = (*LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read))();
 
 	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
 	refractor_->AddToSceneManager();
