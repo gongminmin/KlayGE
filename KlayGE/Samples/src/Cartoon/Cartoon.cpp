@@ -80,7 +80,7 @@ namespace
 		CartoonPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.kfx")->TechniqueByName("Cartoon"))
 		{
-			*(technique_->Effect().ParameterByName("toonmap_sampler")) = (*LoadTexture("toon.dds", EAH_GPU_Read))();
+			*(technique_->Effect().ParameterByName("toonmap_sampler")) = LoadTexture("toon.dds", EAH_GPU_Read)();
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)

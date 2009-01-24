@@ -93,7 +93,7 @@ namespace
 		TerrainRenderable(std::vector<float3> const & vertices, std::vector<uint16_t> const & indices)
 			: RenderableHelper(L"Terrain")
 		{
-			TextureLoaderPtr grass = LoadTexture("grass.dds", EAH_GPU_Read);
+			TextureLoader grass = LoadTexture("grass.dds", EAH_GPU_Read);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -128,7 +128,7 @@ namespace
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = (*grass)();
+			*(technique_->Effect().ParameterByName("grass_sampler")) = grass();
 		}
 
 		void OnRenderBegin()
@@ -164,7 +164,7 @@ namespace
 		RenderParticles()
 			: RenderableHelper(L"Particles")
 		{
-			TextureLoaderPtr particle_tl = LoadTexture("particle.dds", EAH_GPU_Read);
+			TextureLoader particle_tl = LoadTexture("particle.dds", EAH_GPU_Read);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -206,7 +206,7 @@ namespace
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
-			*(technique_->Effect().ParameterByName("particle_sampler")) = (*particle_tl)();
+			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tl();
 		}
 
 		void SceneTexture(TexturePtr tex, bool flip)
@@ -337,7 +337,7 @@ void ParticleSystemApp::InitObjects()
 	input_handler->connect(boost::bind(&ParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	height_img_.reset(new HeightImg(-2, -2, 2, 2, (*LoadTexture("grcanyon.dds", EAH_CPU_Read))(), 1));
+	height_img_.reset(new HeightImg(-2, -2, 2, 2, LoadTexture("grcanyon.dds", EAH_CPU_Read)(), 1));
 	particles_.reset(new ParticlesObject);
 	particles_->AddToSceneManager();
 

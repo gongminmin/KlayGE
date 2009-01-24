@@ -138,7 +138,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_(max_num_particles / 256)
 		{
-			TextureLoaderPtr pt = LoadTexture("particle.dds", EAH_GPU_Read);
+			TextureLoader pt = LoadTexture("particle.dds", EAH_GPU_Read);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -190,7 +190,7 @@ namespace
 			noise_vol_tex_ = CreateNoiseVolume(32);
 			*(technique_->Effect().ParameterByName("noise_vol_sampler")) = noise_vol_tex_;
 
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_ = (*pt)();
+			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_ = pt();
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
@@ -420,7 +420,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr height_map, TexturePtr normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			TextureLoaderPtr grass = LoadTexture("grass.dds", EAH_GPU_Read);
+			TextureLoader grass = LoadTexture("grass.dds", EAH_GPU_Read);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -432,7 +432,7 @@ namespace
 			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_32f;
 			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = (*grass)();
+			*(technique_->Effect().ParameterByName("grass_sampler")) = grass();
 		}
 
 		void OnRenderBegin()
@@ -549,8 +549,8 @@ void GPUParticleSystemApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
 
-	TextureLoaderPtr terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
-	TextureLoaderPtr terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
+	TextureLoader terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
+	TextureLoader terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
@@ -569,10 +569,10 @@ void GPUParticleSystemApp::InitObjects()
 	particles_.reset(new ParticlesObject(NUM_PARTICLE));
 	particles_->AddToSceneManager();
 
-	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, (*terrain_height)(), (*terrain_normal)()));
+	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, terrain_height(), terrain_normal()));
 	gpu_ps->AutoEmit(500);
 
-	terrain_.reset(new TerrainObject((*terrain_height)(), (*terrain_normal)()));
+	terrain_.reset(new TerrainObject(terrain_height(), terrain_normal()));
 	terrain_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

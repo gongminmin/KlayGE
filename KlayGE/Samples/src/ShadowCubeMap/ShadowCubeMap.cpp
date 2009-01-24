@@ -401,7 +401,7 @@ void ShadowCubeMap::InitObjects()
 	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	lamp_tex_ = (*LoadTexture("lamp.dds", EAH_GPU_Read))();
+	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read)();
 
 	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);

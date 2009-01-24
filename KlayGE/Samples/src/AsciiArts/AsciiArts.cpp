@@ -121,7 +121,7 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		TexturePtr ascii_tex = (*LoadTexture(tex_name, EAH_CPU_Read))();
+		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Read)();
 		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
