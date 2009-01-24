@@ -49,7 +49,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
-				ProgramDataBaseFileName="$(IntDir)\$(TargetName).pdb"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="KlayGE/KlayGE.hpp"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
