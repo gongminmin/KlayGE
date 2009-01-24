@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 增加了decompose (2009.1.24)
 //
 // 3.6.0
 // 重写了intersect_ray (2007.5.11)
@@ -1002,6 +1005,36 @@ namespace KlayGE
 			ret(2, 2) = -ret(2, 2);
 			ret(2, 3) = -ret(2, 3);
 			return ret;
+		}
+
+		template <typename T>
+		inline void
+		decompose(Vector_T<T, 3>& scale, Quaternion_T<T>& rot, Vector_T<T, 3>& trans, Matrix4_T<T> const & rhs)
+		{
+			scale.x() = sqrt(rhs(0, 0) * rhs(0, 0) + rhs(0, 1) * rhs(0, 1) + rhs(0, 2) * rhs(0, 2));
+			scale.y() = sqrt(rhs(1, 0) * rhs(1, 0) + rhs(1, 1) * rhs(1, 1) + rhs(1, 2) * rhs(1, 2));
+			scale.z() = sqrt(rhs(2, 0) * rhs(2, 0) + rhs(2, 1) * rhs(2, 1) + rhs(2, 2) * rhs(2, 2));
+
+			trans = Vector_T<T, 3>(rhs(3, 0), rhs(3, 1), rhs(3, 2));
+
+			Matrix4_T<T> rot_mat;
+			rot_mat(0, 0) = rhs(0, 0) / scale.x();
+			rot_mat(0, 1) = rhs(0, 1) / scale.x();
+			rot_mat(0, 2) = rhs(0, 2) / scale.x();
+			rot_mat(0, 3) = 0;
+			rot_mat(1, 0) = rhs(1, 0) / scale.y();
+			rot_mat(1, 1) = rhs(1, 1) / scale.y();
+			rot_mat(1, 2) = rhs(1, 2) / scale.y();
+			rot_mat(1, 3) = 0;
+			rot_mat(2, 0) = rhs(2, 0) / scale.z();
+			rot_mat(2, 1) = rhs(2, 1) / scale.z();
+			rot_mat(2, 2) = rhs(2, 2) / scale.z();
+			rot_mat(2, 3) = 0;
+			rot_mat(3, 0) = 0;
+			rot_mat(3, 1) = 0;
+			rot_mat(3, 2) = 0;
+			rot_mat(3, 3) = 1;
+			rot = to_quaternion(rot_mat);
 		}
 
 		template <typename T>
