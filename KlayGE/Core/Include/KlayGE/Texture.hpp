@@ -83,7 +83,7 @@ namespace KlayGE
 			// 3D texture, used in combination with 3D texture coordinates
 			TT_3D,
 			// cube map, used in combination with 3D texture coordinates
-			TT_Cube,
+			TT_Cube
 		};
 
 		enum CubeFaces
@@ -93,7 +93,7 @@ namespace KlayGE
 			CF_Positive_Y = 2,
 			CF_Negative_Y = 3,
 			CF_Positive_Z = 4,
-			CF_Negative_Z = 5,
+			CF_Negative_Z = 5
 		};
 
 	public:
@@ -269,32 +269,34 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API TextureLoader
 	{
+	private:
+		struct TexDesc
+		{
+			uint32_t access_hint;
+			Texture::TextureType type;
+			uint32_t width, height, depth;
+			uint16_t numMipMaps;
+			ElementFormat format;
+			std::vector<ElementInitData> tex_data;
+			std::vector<uint8_t> data_block;
+		};
+
 	public:
 		TextureLoader(std::string const & tex_name, uint32_t access_hint);
 		TexturePtr operator()();
 
 	private:
-		void LoadDDS();
+		boost::shared_ptr<TexDesc> LoadDDS(std::string const & tex_name, uint32_t access_hint);
 
 	private:
-		joiner<void> tl_thread_;
-
-		std::string tex_name_;
-		uint32_t access_hint_;
-		Texture::TextureType type_;
-		uint32_t width_, height_, depth_;
-		uint16_t numMipMaps_;
-		ElementFormat format_;
-		std::vector<ElementInitData> tex_data_;
-		std::vector<uint8_t> data_block_;
-
+		joiner<boost::shared_ptr<TexDesc> > tl_thread_;
 		TexturePtr texture_;
 	};
 
 	KLAYGE_CORE_API void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
-	KLAYGE_CORE_API TextureLoaderPtr LoadTexture(std::string const & tex_name, uint32_t access_hint);
+	KLAYGE_CORE_API TextureLoader LoadTexture(std::string const & tex_name, uint32_t access_hint);
 	
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,

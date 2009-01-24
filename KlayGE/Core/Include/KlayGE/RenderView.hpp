@@ -22,7 +22,7 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Texture.hpp>
+#include <KlayGE/ElementFormat.hpp>
 
 namespace KlayGE
 {	

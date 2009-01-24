@@ -87,7 +87,7 @@ namespace KlayGE
 		TexturePtr tex;
 		if (!texture_slots_.empty())
 		{
-			tex = (*LoadTexture(texture_slots_[0].second, EAH_GPU_Read))();
+			tex = LoadTexture(texture_slots_[0].second, EAH_GPU_Read)();
 		}
 
 		if (tex)
@@ -123,10 +123,9 @@ namespace KlayGE
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		typedef std::vector<StaticMeshPtr> MeshesType;
-		MeshesType meshes;
+		std::vector<StaticMeshPtr> meshes;
 
-		ResIdentifierPtr file(ResLoader::Instance().Load(kmodel_name));
+		ResIdentifierPtr file = ResLoader::Instance().Load(kmodel_name);
 
 		char fourcc[4];
 		file->read(fourcc, sizeof(fourcc));
