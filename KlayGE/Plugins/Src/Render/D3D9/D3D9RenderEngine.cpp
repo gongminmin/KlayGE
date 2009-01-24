@@ -34,8 +34,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 //////////////////////////////////////////////////////////////////////////////////
 
-#define INITGUID
 #include <KlayGE/KlayGE.hpp>
+#define INITGUID
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
