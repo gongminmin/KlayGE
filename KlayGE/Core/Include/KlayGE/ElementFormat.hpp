@@ -28,227 +28,310 @@
 
 namespace KlayGE
 {
-	enum ElementFormat
+	enum ElementChannel
 	{
-		// Unknown element format.
-		EF_Unknown,
-
-		// 8-bit element format, all bits alpha.
-		EF_A8,
-		// 8-bit element format, 4 bits alpha, 4 bits luminace.
-		EF_AL4,
-		// 16-bit element format, 8 bits alpha, 8 bits luminace.
-		EF_AL8,
-		// 32-bit element format, 16 bits alpha, 16 bits luminace.
-		EF_AL16,
-
-		// 8-bit element format, all bits luminace.
-		EF_L8,
-		// 16-bit element format, all bits for luminace.
-		EF_L16,
-
-		// 16-bit element format, 5 bits red, 6 bits green, 5 bits blue.
-		EF_R5G6B5,
-		// 16-bit element format, 4 bits for alpha, red, green and blue.
-		EF_ARGB4,
-		// 16-bit element format, 8 bits for red, green.
-		EF_RG8,
-		// 16-bit element format, 8 bits for signed red, green.
-		EF_SIGNED_GR8,
-		// 24-bit element format, 8 bits for red, green and blue.
-		EF_RGB8,
-		// 24-bit element format, 8 bits for signed red, green and blue.
-		EF_SIGNED_BGR8,
-		// 32-bit element format, 8 bits for alpha, red, green and blue.
-		EF_ARGB8,
-		// 32-bit element format, 8 bits for alpha, red, green and blue.
-		EF_ABGR8,
-		// 32-bit element format, 8 bits for signed alpha, red, green and blue.
-		EF_SIGNED_ABGR8,
-		// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
-		EF_A2BGR10,
-		// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
-		EF_SIGNED_A2BGR10,
-
-		// 16-bit element format, 16 bits for red.
-		EF_R16,
-		// 16-bit element format, 16 bits for signed red.
-		EF_SIGNED_R16,
-		// 32-bit element format, 16 bits for red and green.
-		EF_GR16,
-		// 32-bit element format, 16 bits for signed red and green.
-		EF_SIGNED_GR16,
-		// 48-bit element format, 16 bits for alpha, blue, green and red.
-		EF_BGR16,
-		// 48-bit element format, 16 bits for signed alpha, blue, green and red.
-		EF_SIGNED_BGR16,
-		// 64-bit element format, 16 bits for alpha, blue, green and red.
-		EF_ABGR16,
-		// 64-bit element format, 16 bits for signed alpha, blue, green and red.
-		EF_SIGNED_ABGR16,
-		// 32-bit element format, 32 bits for red.
-		EF_R32,
-		// 32-bit element format, 32 bits for signed red.
-		EF_SIGNED_R32,
-		// 64-bit element format, 16 bits for red and green.
-		EF_GR32,
-		// 64-bit element format, 16 bits for signed red and green.
-		EF_SIGNED_GR32,
-		// 96-bit element format, 16 bits for alpha, blue, green and red.
-		EF_BGR32,
-		// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
-		EF_SIGNED_BGR32,
-		// 128-bit element format, 16 bits for alpha, blue, green and red.
-		EF_ABGR32,
-		// 128-bit element format, 16 bits for signed alpha, blue, green and red.
-		EF_SIGNED_ABGR32,
-
-		// 16-bit element format, 16 bits floating-point for red.
-		EF_R16F,
-		// 32-bit element format, 16 bits floating-point for green and red.
-		EF_GR16F,
-		// 48-bit element format, 16 bits floating-point for blue, green and red.
-		EF_BGR16F,
-		// 64-bit element format, 16 bits floating-point for alpha, blue, green and red.
-		EF_ABGR16F,
-		// 32-bit element format, 32 bits floating-point for red.
-		EF_R32F,
-		// 64-bit element format, 32 bits floating-point for green and red.
-		EF_GR32F,
-		// 96-bit element format, 32 bits floating-point for blue, green and red.
-		EF_BGR32F,
-		// 128-bit element format, 32 bits floating-point for alpha, blue, green and red.
-		EF_ABGR32F,
-
-		// BC1 compression element format, DXT1
-		EF_BC1,
-		// BC1 compression element format, signed DXT1
-		EF_SIGNED_BC1,
-		// BC2 compression element format, DXT3
-		EF_BC2,
-		// BC2 compression element format, signed DXT3
-		EF_SIGNED_BC2,
-		// BC3 compression element format, DXT5
-		EF_BC3,
-		// BC3 compression element format, signed DXT5
-		EF_SIGNED_BC3,
-		// BC4 compression element format, 1 channel
-		EF_BC4,
-		// BC4 compression element format, 1 channel signed
-		EF_SIGNED_BC4,
-		// BC5 compression element format, 2 channels
-		EF_BC5,
-		// BC5 compression element format, 2 channels signed
-		EF_SIGNED_BC5,
-
-		// 16-bit element format, 16 bits depth
-		EF_D16,
-		// 32-bit element format, 24 bits depth and 8 bits stencil
-		EF_D24S8,
-		// 32-bit element format, 32 bits depth
-		EF_D32F,
-
-		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
-		EF_ARGB8_SRGB,
-		// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
-		EF_ABGR8_SRGB,
-		// BC1 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC1_SRGB,
-		// BC2 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC2_SRGB,
-		// BC3 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC3_SRGB,
-		// BC4 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC4_SRGB,
-		// BC5 compression element format. Standard RGB (gamma = 2.2).
-		EF_BC5_SRGB,
+		EC_R = 0UL,
+		EC_G = 1UL,
+		EC_B = 2UL,
+		EC_A = 3UL,
+		EC_L = 4UL,
+		EC_D = 5UL,
+		EC_S = 6UL,
+		EC_BC = 7UL,
+		EC_E = 8UL
 	};
+
+	enum ElementChannelType
+	{
+		ECT_UNorm = 0UL,
+		ECT_SNorm = 1UL,
+		ECT_UInt = 2UL,
+		ECT_SInt = 3UL,
+		ECT_Float = 4UL,
+		ECT_UNorm_SRGB = 5UL,
+		ECT_Typeless = 6UL,
+		ECT_SharedExp = 7UL
+	};
+
+	// element format is a 64-bit value:
+	// 00000000 T3[4] T2[4] T1[4] T0[4] S3[6] S2[6] S1[6] S0[6] C3[4] C2[4] C1[4] C0[4]
+
+	template <uint64_t ch0, uint64_t ch1, uint64_t ch2, uint64_t ch3,
+		uint64_t ch0_size, uint64_t ch1_size, uint64_t ch2_size, uint64_t ch3_size,
+		uint64_t ch0_type, uint64_t ch1_type, uint64_t ch2_type, uint64_t ch3_type>
+	struct MakeElementFormat4
+	{
+		static uint64_t const value = (ch0 << 0) | (ch1 << 4) | (ch2 << 8) | (ch3 << 12)
+			| (ch0_size << 16) | (ch1_size << 22) | (ch2_size << 28) | (ch3_size << 34)
+			| (ch0_type << 40) | (ch1_type << 44) | (ch2_type << 48) | (ch3_type << 52);
+	};
+
+	template <uint64_t ch0, uint64_t ch1, uint64_t ch2,
+		uint64_t ch0_size, uint64_t ch1_size, uint64_t ch2_size,
+		uint64_t ch0_type, uint64_t ch1_type, uint64_t ch2_type>
+	struct MakeElementFormat3
+	{
+		static uint64_t const value = MakeElementFormat4<ch0, ch1, ch2, 0, ch0_size, ch1_size, ch2_size, 0, ch0_type, ch1_type, ch2_type, 0>::value;
+	};
+
+	template <uint64_t ch0, uint64_t ch1,
+		uint64_t ch0_size, uint64_t ch1_size,
+		uint64_t ch0_type, uint64_t ch1_type>
+	struct MakeElementFormat2
+	{
+		static uint64_t const value = MakeElementFormat3<ch0, ch1, 0, ch0_size, ch1_size, 0, ch0_type, ch1_type, 0>::value;
+	};
+
+	template <uint64_t ch0,
+		uint64_t ch0_size,
+		uint64_t ch0_type>
+	struct MakeElementFormat1
+	{
+		static uint64_t const value = MakeElementFormat2<ch0, 0, ch0_size, 0, ch0_type, 0>::value;
+	};
+
+	typedef uint64_t ElementFormat;
+
+	// Unknown element format.
+	ElementFormat const EF_Unknown = 0;
+
+	// 8-bit element format, all bits alpha.
+	ElementFormat const EF_A8 = MakeElementFormat1<EC_A, 8, ECT_UNorm>::value;
+	// 8-bit element format, 4 bits alpha, 4 bits luminace.
+	ElementFormat const EF_AL4 = MakeElementFormat2<EC_A, EC_L, 4, 4, ECT_UNorm, ECT_UNorm>::value;
+	// 16-bit element format, 8 bits alpha, 8 bits luminace.
+	ElementFormat const EF_AL8 = MakeElementFormat2<EC_A, EC_L, 8, 8, ECT_UNorm, ECT_UNorm>::value;
+	// 32-bit element format, 16 bits alpha, 16 bits luminace.
+	ElementFormat const EF_AL16 = MakeElementFormat2<EC_A, EC_L, 16, 16, ECT_UNorm, ECT_UNorm>::value;
+
+	// 8-bit element format, all bits luminace.
+	ElementFormat const EF_L8 = MakeElementFormat1<EC_L, 8, ECT_UNorm>::value;
+	// 16-bit element format, all bits for luminace.
+	ElementFormat const EF_L16 = MakeElementFormat1<EC_L, 16, ECT_UNorm>::value;
+
+	// 16-bit element format, 4 bits for alpha, red, green and blue.
+	ElementFormat const EF_ARGB4 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 4, 4, 4, 4, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 16-bit element format, 8 bits for red, green.
+	ElementFormat const EF_RG8 = MakeElementFormat2<EC_R, EC_G, 8, 8, ECT_UNorm, ECT_UNorm>::value;
+	// 16-bit element format, 8 bits for signed red, green.
+	ElementFormat const EF_SIGNED_GR8 = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_SNorm, ECT_SNorm>::value;
+	// 24-bit element format, 8 bits for red, green and blue.
+	ElementFormat const EF_RGB8 = MakeElementFormat3<EC_R, EC_G, EC_B, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 24-bit element format, 8 bits for signed red, green and blue.
+	ElementFormat const EF_SIGNED_BGR8 = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+	// 32-bit element format, 8 bits for alpha, red, green and blue.
+	ElementFormat const EF_ARGB8 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 8, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 32-bit element format, 8 bits for alpha, red, green and blue.
+	ElementFormat const EF_ABGR8 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 32-bit element format, 8 bits for signed alpha, red, green and blue.
+	ElementFormat const EF_SIGNED_ABGR8 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+	// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
+	ElementFormat const EF_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
+	ElementFormat const EF_SIGNED_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+
+	// 16-bit element format, 16 bits for red.
+	ElementFormat const EF_R16 = MakeElementFormat1<EC_R, 16, ECT_UNorm>::value;
+	// 16-bit element format, 16 bits for signed red.
+	ElementFormat const EF_SIGNED_R16 = MakeElementFormat1<EC_R, 16, ECT_SNorm>::value;
+	// 32-bit element format, 16 bits for red and green.
+	ElementFormat const EF_GR16 = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_UNorm, ECT_UNorm>::value;
+	// 32-bit element format, 16 bits for signed red and green.
+	ElementFormat const EF_SIGNED_GR16 = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_SNorm, ECT_SNorm>::value;
+	// 48-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_BGR16 = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 48-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_SIGNED_BGR16 = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+	// 64-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_ABGR16 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 64-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_SIGNED_ABGR16 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+	// 32-bit element format, 32 bits for red.
+	ElementFormat const EF_R32 = MakeElementFormat1<EC_R, 32, ECT_UNorm>::value;
+	// 32-bit element format, 32 bits for signed red.
+	ElementFormat const EF_SIGNED_R32 = MakeElementFormat1<EC_R, 32, ECT_SNorm>::value;
+	// 64-bit element format, 16 bits for red and green.
+	ElementFormat const EF_GR32 = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_UNorm, ECT_UNorm>::value;
+	// 64-bit element format, 16 bits for signed red and green.
+	ElementFormat const EF_SIGNED_GR32 = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_SNorm, ECT_SNorm>::value;
+	// 96-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_BGR32 = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
+	ElementFormat const EF_SIGNED_BGR32 = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+	// 128-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	// 128-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_SIGNED_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+
+	// 16-bit element format, 16 bits floating-point for red.
+	ElementFormat const EF_R16F = MakeElementFormat1<EC_R, 16, ECT_Float>::value;
+	// 32-bit element format, 16 bits floating-point for green and red.
+	ElementFormat const EF_GR16F = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_Float, ECT_Float>::value;
+	// 48-bit element format, 16 bits floating-point for blue, green and red.
+	ElementFormat const EF_BGR16F = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_Float, ECT_Float, ECT_Float>::value;
+	// 64-bit element format, 16 bits floating-point for alpha, blue, green and red.
+	ElementFormat const EF_ABGR16F = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_Float, ECT_Float, ECT_Float, ECT_Float>::value;
+	// 32-bit element format, 32 bits floating-point for red.
+	ElementFormat const EF_R32F = MakeElementFormat1<EC_R, 32, ECT_Float>::value;
+	// 64-bit element format, 32 bits floating-point for green and red.
+	ElementFormat const EF_GR32F = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_Float, ECT_Float>::value;
+	// 96-bit element format, 32 bits floating-point for blue, green and red.
+	ElementFormat const EF_BGR32F = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_Float, ECT_Float, ECT_Float>::value;
+	// 128-bit element format, 32 bits floating-point for alpha, blue, green and red.
+	ElementFormat const EF_ABGR32F = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_Float, ECT_Float, ECT_Float, ECT_Float>::value;
+
+	// BC1 compression element format, DXT1
+	ElementFormat const EF_BC1 = MakeElementFormat1<EC_BC, 1, ECT_UNorm>::value;
+	// BC1 compression element format, signed DXT1
+	ElementFormat const EF_SIGNED_BC1 = MakeElementFormat1<EC_BC, 1, ECT_SNorm>::value;
+	// BC2 compression element format, DXT3
+	ElementFormat const EF_BC2 = MakeElementFormat1<EC_BC, 2, ECT_UNorm>::value;
+	// BC2 compression element format, signed DXT3
+	ElementFormat const EF_SIGNED_BC2 = MakeElementFormat1<EC_BC, 2, ECT_SNorm>::value;
+	// BC3 compression element format, DXT5
+	ElementFormat const EF_BC3 = MakeElementFormat1<EC_BC, 3, ECT_UNorm>::value;
+	// BC3 compression element format, signed DXT5
+	ElementFormat const EF_SIGNED_BC3 = MakeElementFormat1<EC_BC, 3, ECT_SNorm>::value;
+	// BC4 compression element format, 1 channel
+	ElementFormat const EF_BC4 = MakeElementFormat1<EC_BC, 4, ECT_UNorm>::value;
+	// BC4 compression element format, 1 channel signed
+	ElementFormat const EF_SIGNED_BC4 = MakeElementFormat1<EC_BC, 4, ECT_SNorm>::value;
+	// BC5 compression element format, 2 channels
+	ElementFormat const EF_BC5 = MakeElementFormat1<EC_BC, 5, ECT_UNorm>::value;
+	// BC5 compression element format, 2 channels signed
+	ElementFormat const EF_SIGNED_BC5 = MakeElementFormat1<EC_BC, 5, ECT_SNorm>::value;
+
+	// 16-bit element format, 16 bits depth
+	ElementFormat const EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value;
+	// 32-bit element format, 24 bits depth and 8 bits stencil
+	ElementFormat const EF_D24S8 = MakeElementFormat2<EC_D, EC_S, 24, 8, ECT_UNorm, ECT_UInt>::value;
+	// 32-bit element format, 32 bits depth
+	ElementFormat const EF_D32F = MakeElementFormat1<EC_D, 32, ECT_Float>::value;
+
+	// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_ARGB8_SRGB = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 8, 8, 8, 8, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value;
+	// 32-bit element format, 8 bits for alpha, red, green and blue. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_ABGR8_SRGB = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value;
+	// BC1 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC1_SRGB = MakeElementFormat1<EC_BC, 1, ECT_UNorm_SRGB>::value;
+	// BC2 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC2_SRGB = MakeElementFormat1<EC_BC, 2, ECT_UNorm_SRGB>::value;
+	// BC3 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC3_SRGB = MakeElementFormat1<EC_BC, 3, ECT_UNorm_SRGB>::value;
+	// BC4 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC4_SRGB = MakeElementFormat1<EC_BC, 4, ECT_UNorm_SRGB>::value;
+	// BC5 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC5_SRGB = MakeElementFormat1<EC_BC, 5, ECT_UNorm_SRGB>::value;
+
+
+	template <int c>
+	inline ElementChannel
+	Channel(ElementFormat ef)
+	{
+		return static_cast<ElementChannel>((ef >> (4 * c)) & 0xF);
+	}
+
+	template <int c>
+	inline ElementFormat
+	Channel(ElementFormat ef, ElementChannel new_c)
+	{
+		ef &= ~(0xFULL << (4 * c));
+		ef |= (static_cast<uint64_t>(new_c) << (4 * c));
+		return ef;
+	}
+
+	template <int c>
+	inline uint8_t
+	ChannelBits(ElementFormat ef)
+	{
+		return (ef >> (16 + 6 * c)) & 0x3F;
+	}
+
+	template <int c>
+	inline ElementFormat
+	ChannelBits(ElementFormat ef, uint64_t new_c)
+	{
+		ef &= ~(0x3FULL << (16 + 6 * c));
+		ef |= (new_c << (16 + 6 * c));
+		return ef;
+	}
+
+	template <int c>
+	inline ElementChannelType
+	ChannelType(ElementFormat ef)
+	{
+		return static_cast<ElementChannelType>((ef >> (40 + 4 * c)) & 0xF);
+	}
+
+	template <int c>
+	inline ElementFormat
+	ChannelType(ElementFormat ef, ElementChannelType new_c)
+	{
+		ef &= ~(0xFULL << (40 + 4 * c));
+		ef |= (static_cast<uint64_t>(new_c) << (40 + 4 * c));
+		return ef;
+	}
+
+	inline bool
+	IsFloatFormat(ElementFormat format)
+	{
+		return (ECT_Float == ChannelType<0>(format));
+	}
+
+	inline bool
+	IsCompressedFormat(ElementFormat format)
+	{
+		return (EC_BC == Channel<0>(format));
+	}
+
+	inline bool
+	IsDepthFormat(ElementFormat format)
+	{
+		return (EC_D == Channel<0>(format));
+	}
+
+	inline bool
+	IsStencilFormat(ElementFormat format)
+	{
+		return (EC_S == Channel<1>(format));
+	}
+
+	inline bool
+	IsSRGB(ElementFormat format)
+	{
+		return (ECT_UNorm_SRGB == ChannelType<0>(format));
+	}
+
+	inline bool
+	IsSigned(ElementFormat format)
+	{
+		return (ECT_SNorm == ChannelType<0>(format));
+	}
 
 	inline uint8_t
 	NumFormatBits(ElementFormat format)
 	{
-		switch (format)
+		if (IsCompressedFormat(format))
 		{
-		case EF_L8:
-		case EF_A8:
-		case EF_AL4:
-			return 8;
+			switch (ChannelBits<0>(format))
+			{
+			case 1:
+			case 4:
+				return 16;
 
-		case EF_L16:
-		case EF_AL8:
-		case EF_R5G6B5:
-		case EF_ARGB4:
-		case EF_RG8:
-		case EF_SIGNED_GR8:
-		case EF_R16:
-		case EF_SIGNED_R16:
-		case EF_R16F:
-		case EF_BC1:
-		case EF_SIGNED_BC1:
-		case EF_BC1_SRGB:
-		case EF_BC4:
-		case EF_SIGNED_BC4:
-		case EF_BC4_SRGB:
-		case EF_D16:
-			return 16;
+			case 2:
+			case 3:
+			case 5:
+				return 32;
 
-		case EF_RGB8:
-		case EF_SIGNED_BGR8:
-			return 24;
-
-		case EF_AL16:
-		case EF_ARGB8:
-		case EF_ABGR8:
-		case EF_SIGNED_ABGR8:
-		case EF_ARGB8_SRGB:
-		case EF_ABGR8_SRGB:
-		case EF_A2BGR10:
-		case EF_SIGNED_A2BGR10:
-		case EF_GR16:
-		case EF_SIGNED_GR16:
-		case EF_GR16F:
-		case EF_R32:
-		case EF_SIGNED_R32:
-		case EF_R32F:
-		case EF_BC2:
-		case EF_SIGNED_BC2:
-		case EF_BC2_SRGB:
-		case EF_BC3:
-		case EF_SIGNED_BC3:
-		case EF_BC3_SRGB:
-		case EF_BC5:
-		case EF_SIGNED_BC5:
-		case EF_BC5_SRGB:
-		case EF_D24S8:
-		case EF_D32F:
-			return 32;
-
-		case EF_BGR16:
-		case EF_SIGNED_BGR16:
-		case EF_BGR16F:
-			return 48;
-
-		case EF_ABGR16:
-		case EF_SIGNED_ABGR16:
-		case EF_ABGR16F:
-		case EF_GR32:
-		case EF_SIGNED_GR32:
-		case EF_GR32F:
-			return 64;
-
-		case EF_BGR32:
-		case EF_SIGNED_BGR32:
-		case EF_BGR32F:
-			return 96;
-
-		case EF_ABGR32:
-		case EF_SIGNED_ABGR32:
-		case EF_ABGR32F:
-			return 128;
-
-		default:
-			BOOST_ASSERT(false);
-			return 0;
+			default:
+				BOOST_ASSERT(false);
+				return 0;
+			}
+		}
+		else
+		{
+			return ChannelBits<0>(format) + ChannelBits<1>(format) + ChannelBits<2>(format) + ChannelBits<3>(format);
 		}
 	}
 
@@ -258,312 +341,141 @@ namespace KlayGE
 		return NumFormatBits(format) / 8;
 	}
 
-	inline bool
-	IsFloatFormat(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_R16F:
-		case EF_GR16F:
-		case EF_BGR16F:
-		case EF_ABGR16F:
-		case EF_R32F:
-		case EF_GR32F:
-		case EF_BGR32F:
-		case EF_ABGR32F:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsCompressedFormat(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_BC1:
-		case EF_BC2:
-		case EF_BC3:
-		case EF_BC4:
-		case EF_BC5:
-		case EF_SIGNED_BC1:
-		case EF_SIGNED_BC2:
-		case EF_SIGNED_BC3:
-		case EF_SIGNED_BC4:
-		case EF_SIGNED_BC5:
-		case EF_BC1_SRGB:
-		case EF_BC2_SRGB:
-		case EF_BC3_SRGB:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsDepthFormat(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_D16:
-		case EF_D24S8:
-		case EF_D32F:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsStencilFormat(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_D24S8:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsSRGB(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_ABGR8_SRGB:
-		case EF_ARGB8_SRGB:
-		case EF_BC1_SRGB:
-		case EF_BC2_SRGB:
-		case EF_BC3_SRGB:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
-	inline bool
-	IsSigned(ElementFormat format)
-	{
-		switch (format)
-		{
-		case EF_SIGNED_GR8:
-		case EF_SIGNED_BGR8:
-		case EF_SIGNED_ABGR8:
-		case EF_SIGNED_A2BGR10:
-		case EF_SIGNED_R16:
-		case EF_SIGNED_GR16:
-		case EF_SIGNED_BGR16:
-		case EF_SIGNED_ABGR16:
-		case EF_SIGNED_R32:
-		case EF_SIGNED_GR32:
-		case EF_SIGNED_BGR32:
-		case EF_SIGNED_ABGR32:
-		case EF_SIGNED_BC1:
-		case EF_SIGNED_BC2:
-		case EF_SIGNED_BC3:
-		case EF_SIGNED_BC4:
-		case EF_SIGNED_BC5:
-			return true;
-
-		default:
-			return false;
-		}
-	}
-
 	inline ElementFormat
 	MakeSRGB(ElementFormat format)
 	{
-		switch (format)
+		if (ECT_UNorm == ChannelType<0>(format))
 		{
-		case EF_ARGB8:
-			return EF_ARGB8_SRGB;
-
-		case EF_ABGR8:
-			return EF_ABGR8_SRGB;
-
-		case EF_BC1:
-			return EF_BC1_SRGB;
-
-		case EF_BC2:
-			return EF_BC2_SRGB;
-
-		case EF_BC3:
-			return EF_BC3_SRGB;
-
-		default:
-			return format;
+			format = ChannelType<0>(format, ECT_UNorm_SRGB);
 		}
+		if (ECT_UNorm == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_UNorm_SRGB);
+		}
+		if (ECT_UNorm == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_UNorm_SRGB);
+		}
+		if (ECT_UNorm == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_UNorm_SRGB);
+		}
+
+		return format;
 	}
 
 	inline ElementFormat
 	MakeNonSRGB(ElementFormat format)
 	{
-		switch (format)
+		if (ECT_UNorm_SRGB == ChannelType<0>(format))
 		{
-		case EF_ARGB8_SRGB:
-			return EF_ARGB8;
-
-		case EF_ABGR8_SRGB:
-			return EF_ABGR8;
-
-		case EF_BC1_SRGB:
-			return EF_BC1;
-
-		case EF_BC2_SRGB:
-			return EF_BC2;
-
-		case EF_BC3_SRGB:
-			return EF_BC3;
-
-		default:
-			return format;
+			format = ChannelType<0>(format, ECT_UNorm);
 		}
+		if (ECT_UNorm_SRGB == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_UNorm);
+		}
+		if (ECT_UNorm_SRGB == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_UNorm);
+		}
+		if (ECT_UNorm_SRGB == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_UNorm);
+		}
+
+		return format;
 	}
 
 	inline ElementFormat
 	MakeSigned(ElementFormat format)
 	{
-		switch (format)
+		if (ECT_UNorm == ChannelType<0>(format))
 		{
-		case EF_RG8:
-			return EF_SIGNED_GR8;
-
-		case EF_RGB8:
-			return EF_SIGNED_BGR8;
-
-		case EF_ABGR8:
-			return EF_SIGNED_ABGR8;
-
-		case EF_A2BGR10:
-			return EF_SIGNED_A2BGR10;
-
-		case EF_R16:
-			return EF_SIGNED_R16;
-
-		case EF_GR16:
-			return EF_SIGNED_GR16;
-
-		case EF_BGR16:
-			return EF_SIGNED_BGR16;
-
-		case EF_ABGR16:
-			return EF_SIGNED_ABGR16;
-
-		case EF_R32:
-			return EF_SIGNED_R32;
-
-		case EF_GR32:
-			return EF_SIGNED_GR32;
-
-		case EF_BGR32:
-			return EF_SIGNED_BGR32;
-
-		case EF_ABGR32:
-			return EF_SIGNED_ABGR32;
-
-		case EF_BC1:
-			return EF_SIGNED_BC1;
-
-		case EF_BC2:
-			return EF_SIGNED_BC2;
-
-		case EF_BC3:
-			return EF_SIGNED_BC3;
-
-		case EF_BC4:
-			return EF_SIGNED_BC4;
-
-		case EF_BC5:
-			return EF_SIGNED_BC5;
-
-		default:
-			return format;
+			format = ChannelType<0>(format, ECT_SNorm);
 		}
+		if (ECT_UNorm == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_SNorm);
+		}
+		if (ECT_UNorm == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_SNorm);
+		}
+		if (ECT_UNorm == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_SNorm);
+		}
+
+		if (ECT_UInt == ChannelType<0>(format))
+		{
+			format = ChannelType<0>(format, ECT_SInt);
+		}
+		if (ECT_UInt == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_SInt);
+		}
+		if (ECT_UInt == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_SInt);
+		}
+		if (ECT_UInt == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_SInt);
+		}
+
+		return format;
 	}
 
 	inline ElementFormat
 	MakeUnsigned(ElementFormat format)
 	{
-		switch (format)
+		if (ECT_SNorm == ChannelType<0>(format))
 		{
-		case EF_SIGNED_GR8:
-			return EF_RG8;
-
-		case EF_SIGNED_BGR8:
-			return EF_RGB8;
-
-		case EF_SIGNED_ABGR8:
-			return EF_ARGB8;
-
-		case EF_SIGNED_A2BGR10:
-			return EF_A2BGR10;
-
-		case EF_SIGNED_R16:
-			return EF_R16;
-
-		case EF_SIGNED_GR16:
-			return EF_GR16;
-
-		case EF_SIGNED_BGR16:
-			return EF_BGR16;
-
-		case EF_SIGNED_ABGR16:
-			return EF_ABGR16;
-
-		case EF_SIGNED_R32:
-			return EF_R32;
-
-		case EF_SIGNED_GR32:
-			return EF_GR32;
-
-		case EF_SIGNED_BGR32:
-			return EF_BGR32;
-
-		case EF_SIGNED_ABGR32:
-			return EF_ABGR32;
-
-		case EF_SIGNED_BC1:
-			return EF_BC1;
-
-		case EF_SIGNED_BC2:
-			return EF_BC2;
-
-		case EF_SIGNED_BC3:
-			return EF_BC3;
-
-		case EF_SIGNED_BC4:
-			return EF_BC4;
-
-		case EF_SIGNED_BC5:
-			return EF_BC5;
-
-		default:
-			return format;
+			format = ChannelType<0>(format, ECT_UNorm);
 		}
+		if (ECT_SNorm == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_UNorm);
+		}
+		if (ECT_SNorm == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_UNorm);
+		}
+		if (ECT_SNorm == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_UNorm);
+		}
+
+		if (ECT_SInt == ChannelType<0>(format))
+		{
+			format = ChannelType<0>(format, ECT_UInt);
+		}
+		if (ECT_SInt == ChannelType<1>(format))
+		{
+			format = ChannelType<1>(format, ECT_UInt);
+		}
+		if (ECT_SInt == ChannelType<2>(format))
+		{
+			format = ChannelType<2>(format, ECT_UInt);
+		}
+		if (ECT_SInt == ChannelType<3>(format))
+		{
+			format = ChannelType<3>(format, ECT_UInt);
+		}
+
+		return format;
 	}
 
 	inline uint8_t
 	NumDepthBits(ElementFormat format)
 	{
-		switch (format)
+		if (EC_D == Channel<0>(format))
 		{
-		case EF_D16:
-			return 16;
-
-		case EF_D24S8:
-			return 24;
-
-		case EF_D32F:
-			return 32;
-
-		default:
+			return ChannelBits<0>(format);
+		}
+		else
+		{
 			return 0;
 		}
 	}
@@ -571,12 +483,12 @@ namespace KlayGE
 	inline uint8_t
 	NumStencilBits(ElementFormat format)
 	{
-		switch (format)
+		if (EC_S == Channel<1>(format))
 		{
-		case EF_D24S8:
-			return 8;
-
-		default:
+			return ChannelBits<1>(format);
+		}
+		else
+		{
 			return 0;
 		}
 	}
@@ -584,120 +496,38 @@ namespace KlayGE
 	inline uint32_t
 	NumComponents(ElementFormat format)
 	{
-		switch (format)
+		if (IsCompressedFormat(format))
 		{
-		case EF_L8:
-		case EF_A8:
-		case EF_L16:
-		case EF_R16:
-		case EF_SIGNED_R16:
-		case EF_R32:
-		case EF_SIGNED_R32:
-		case EF_R16F:
-		case EF_R32F:
-		case EF_D16:
-		case EF_D32F:
-			return 1;
+			switch (ChannelBits<0>(format))
+			{
+			case 1:
+			case 2:
+			case 3:
+				return 4;
 
-		case EF_AL4:
-		case EF_AL8:
-		case EF_AL16:
-		case EF_RG8:
-		case EF_SIGNED_GR8:
-		case EF_GR16:
-		case EF_SIGNED_GR16:
-		case EF_GR32:
-		case EF_SIGNED_GR32:
-		case EF_GR16F:
-		case EF_GR32F:
-		case EF_D24S8:
-			return 2;
+			case 4:
+				return 1;
 
-		case EF_R5G6B5:
-		case EF_BGR16:
-		case EF_SIGNED_BGR16:
-		case EF_BGR32:
-		case EF_SIGNED_BGR32:
-		case EF_BGR16F:
-		case EF_BGR32F:
-			return 3;
+			case 5:
+				return 2;
 
-		case EF_ARGB4:
-		case EF_ARGB8:
-		case EF_ABGR8:
-		case EF_SIGNED_ABGR8:
-		case EF_A2BGR10:
-		case EF_SIGNED_A2BGR10:
-		case EF_ABGR16:
-		case EF_SIGNED_ABGR16:
-		case EF_ABGR32:
-		case EF_SIGNED_ABGR32:
-		case EF_ABGR16F:
-		case EF_ABGR32F:
-		case EF_BC1:
-		case EF_SIGNED_BC1:
-		case EF_BC2:
-		case EF_SIGNED_BC2:
-		case EF_BC3:
-		case EF_SIGNED_BC3:
-		case EF_ARGB8_SRGB:
-		case EF_ABGR8_SRGB:
-		case EF_BC1_SRGB:
-		case EF_BC2_SRGB:
-		case EF_BC3_SRGB:
-			return 4;
-
-		default:
-			BOOST_ASSERT(false);
-			return 0;
+			default:
+				BOOST_ASSERT(false);
+				return 0;
+			}
+		}
+		else
+		{
+			return (ChannelBits<0>(format) != 0) + (ChannelBits<1>(format) != 0)
+				+ (ChannelBits<2>(format) != 0) + (ChannelBits<3>(format) != 0);
 		}
 	}
 
 	inline uint32_t
 	ComponentBpps(ElementFormat format)
 	{
-		switch (format)
-		{
-		case EF_AL4:
-		case EF_ARGB4:
-			return 4;
-
-		case EF_L8:
-		case EF_A8:
-		case EF_AL8:
-		case EF_RG8:
-		case EF_SIGNED_GR8:
-		case EF_ARGB8:
-		case EF_ABGR8:
-		case EF_SIGNED_ABGR8:
-		case EF_ARGB8_SRGB:
-		case EF_ABGR8_SRGB:
-			return 8;
-
-		case EF_L16:
-		case EF_AL16:
-		case EF_GR16:
-		case EF_SIGNED_GR16:
-		case EF_ABGR16:
-		case EF_SIGNED_ABGR16:
-		case EF_R16F:
-		case EF_GR16F:
-		case EF_BGR16F:
-		case EF_ABGR16F:
-		case EF_D16:
-			return 16;
-
-		case EF_R32F:
-		case EF_GR32F:
-		case EF_BGR32F:
-		case EF_ABGR32F:
-		case EF_D32F:
-			return 32;
-
-		default:
-			BOOST_ASSERT(false);
-			return 0;
-		}
+		return std::max(std::max(ChannelBits<0>(format), ChannelBits<1>(format)),
+			std::max(ChannelBits<2>(format), ChannelBits<3>(format)));
 	}
 
 

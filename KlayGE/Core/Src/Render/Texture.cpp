@@ -327,25 +327,16 @@ namespace KlayGE
 				switch (desc.pixel_format.rgb_bit_count)
 				{
 				case 16:
-					if ((0xF800 == desc.pixel_format.r_bit_mask)
-						&& (0x7E0 == desc.pixel_format.g_bit_mask)
-						&& (0x1F == desc.pixel_format.b_bit_mask))
+					if ((0xF000 == desc.pixel_format.rgb_alpha_bit_mask)
+						&& (0x0F00 == desc.pixel_format.r_bit_mask)
+						&& (0x00F0 == desc.pixel_format.g_bit_mask)
+						&& (0x000F == desc.pixel_format.b_bit_mask))
 					{
-						format = EF_R5G6B5;
+						format = EF_ARGB4;
 					}
 					else
 					{
-						if ((0xF000 == desc.pixel_format.rgb_alpha_bit_mask)
-							&& (0x0F00 == desc.pixel_format.r_bit_mask)
-							&& (0x00F0 == desc.pixel_format.g_bit_mask)
-							&& (0x000F == desc.pixel_format.b_bit_mask))
-						{
-							format = EF_ARGB4;
-						}
-						else
-						{
-							BOOST_ASSERT(false);
-						}
+						BOOST_ASSERT(false);
 					}
 					break;
 
@@ -887,16 +878,6 @@ namespace KlayGE
 		{
 			switch (format)
 			{
-			case EF_R5G6B5:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.rgb_bit_count = 16;
-
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x0000F800;
-				desc.pixel_format.g_bit_mask = 0x000007E0;
-				desc.pixel_format.b_bit_mask = 0x0000001F;
-				break;
-
 			case EF_ARGB4:
 				desc.pixel_format.flags |= DDSPF_RGB;
 				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;

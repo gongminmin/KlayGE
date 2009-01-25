@@ -658,9 +658,6 @@ namespace KlayGE
 		case EF_AL8:
 			return D3DFMT_A8L8;
 
-		case EF_R5G6B5:
-			return D3DFMT_R5G6B5;
-
 		case EF_ARGB4:
 			return D3DFMT_A4R4G4B4;
 
@@ -786,9 +783,6 @@ namespace KlayGE
 
 		case D3DFMT_A8L8:
 			return EF_AL8;
-
-		case D3DFMT_R5G6B5:
-			return EF_R5G6B5;
 
 		case D3DFMT_X4R4G4B4:
 		case D3DFMT_A4R4G4B4:

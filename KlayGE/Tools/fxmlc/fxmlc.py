@@ -921,9 +921,14 @@ if __name__ == '__main__':
 	output_name = 'output.kfx'
 
 	import sys
-	if len(sys.argv) >= 3:
+	if len(sys.argv) >= 2:
 		input_name = sys.argv[1]
-		output_name = sys.argv[2]
+		if len(sys.argv) < 3:
+			for i in range(0, len(input_name) - 1):
+				if input_name[len(input_name) - 1 - i] == '.':
+					output_name = input_name[0 : len(input_name) - 1 - i] + ".kfx"
+		else:
+			output_name = sys.argv[2]
 
 	input_name = input_name.replace('\\', '/')
 	output_name = output_name.replace('\\', '/')

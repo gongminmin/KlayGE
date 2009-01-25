@@ -461,9 +461,6 @@ namespace KlayGE
 		case EF_R16:
 			return DXGI_FORMAT_R16_UINT;
 
-		case EF_R5G6B5:
-			return DXGI_FORMAT_B5G6R5_UNORM;
-
 		case EF_SIGNED_GR8:
 			return DXGI_FORMAT_R8G8_SNORM;
 
@@ -579,9 +576,6 @@ namespace KlayGE
 
 		case DXGI_FORMAT_R16_UINT:
 			return EF_R16;
-
-		case DXGI_FORMAT_B5G6R5_UNORM:
-			return EF_R5G6B5;
 
 		case DXGI_FORMAT_B8G8R8X8_UNORM:
 		case DXGI_FORMAT_B8G8R8A8_UNORM:

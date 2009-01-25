@@ -83,7 +83,7 @@ namespace KlayGE
 		int octree_depth = 3;
 		int width = 800;
 		int height = 600;
-		int color_fmt = EF_ARGB8;
+		std::string color_fmt_str = "ARGB8";
 		bool full_screen = false;
 
 		boost::program_options::options_description desc("Configuration");
@@ -96,8 +96,22 @@ namespace KlayGE
 			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
 			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
 			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<int>(&color_fmt)->default_value(13), "Screen Color Format")
+			("screen.color_fmt", boost::program_options::value<std::string>(&color_fmt_str)->default_value("ARGB8"), "Screen Color Format")
 			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
+
+		ElementFormat color_fmt = EF_ARGB8;
+		if ("ARGB8" == color_fmt_str)
+		{
+			color_fmt = EF_ARGB8;
+		}
+		if ("ABGR8" == color_fmt_str)
+		{
+			color_fmt = EF_ABGR8;
+		}
+		if ("A2BGR10" == color_fmt_str)
+		{
+			color_fmt = EF_A2BGR10;
+		}
 
 		std::string rf_name;
 		std::string af_name;
@@ -327,7 +341,7 @@ namespace KlayGE
 		RenderSettings settings;
 		settings.width = width;
 		settings.height = height;
-		settings.color_fmt = static_cast<ElementFormat>(color_fmt);
+		settings.color_fmt = color_fmt;
 		settings.full_screen = full_screen;
 
 		return settings;
