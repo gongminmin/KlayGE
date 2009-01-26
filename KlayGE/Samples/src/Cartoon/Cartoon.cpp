@@ -205,8 +205,7 @@ void Cartoon::InitObjects()
 
 	dialog_ = UIManager::Instance().MakeDialog();
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_Cartoon, L"Cartoon style",
-                            60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(Switch_Cartoon)->SetChecked(true);
+                            60, 550, 350, 24, true, 0, false)));
 	dialog_->Control<UICheckBox>(Switch_Cartoon)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
 }
 

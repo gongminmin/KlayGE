@@ -448,7 +448,6 @@ void ShadowCubeMap::InitObjects()
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
                             60, 356, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
 	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&ShadowCubeMap::CtrlCameraHandler, this, _1));
 
 	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));

@@ -206,7 +206,6 @@ void Parallax::InitObjects()
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
                             60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
 	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&Parallax::CtrlCameraHandler, this, _1));
 }
 

@@ -102,12 +102,16 @@ namespace KlayGE
 
 	QueryPtr D3D9RenderFactory::MakeOcclusionQuery()
 	{
-		return MakeSharedPtr<D3D9OcclusionQuery>();
+		D3D9OcclusionQueryPtr ret = MakeSharedPtr<D3D9OcclusionQuery>();
+		resource_pool_.push_back(ret);
+		return ret;
 	}
 
 	QueryPtr D3D9RenderFactory::MakeConditionalRender()
 	{
-		return MakeSharedPtr<D3D9ConditionalRender>();
+		D3D9ConditionalRenderPtr ret = MakeSharedPtr<D3D9ConditionalRender>();
+		resource_pool_.push_back(ret);
+		return ret;
 	}
 
 	RenderViewPtr D3D9RenderFactory::Make1DRenderView(Texture& texture, int level)

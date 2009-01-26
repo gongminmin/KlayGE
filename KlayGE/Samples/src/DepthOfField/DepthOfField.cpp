@@ -330,12 +330,10 @@ void DepthOfFieldApp::InitObjects()
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, BlurFactor, L"Blur factor",
                             60, 356, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(BlurFactor)->SetChecked(false);
 	dialog_->Control<UICheckBox>(BlurFactor)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::BlurFactorHandler, this, _1));
 
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
                             60, 424, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->SetChecked(false);
 	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::CtrlCameraHandler, this, _1));
 
 	this->FocusPlaneChangedHandler(*dialog_->Control<UISlider>(FocusPlaneSlider));

@@ -266,8 +266,7 @@ void DepthPeelingApp::InitObjects()
 
 	dialog_ = UIManager::Instance().MakeDialog();
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseDepthPeeling, L"Depth peeling",
-                            60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(UseDepthPeeling)->SetChecked(true);
+                            60, 550, 350, 24, true, 0, false)));
 	dialog_->Control<UICheckBox>(UseDepthPeeling)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CheckBoxHandler, this, _1));
 }
 

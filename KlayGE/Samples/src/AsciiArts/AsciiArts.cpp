@@ -274,8 +274,7 @@ void AsciiArtsApp::InitObjects()
 
 	dialog_ = UIManager::Instance().MakeDialog();
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_AscII, L"AscII filter",
-                            60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(Switch_AscII)->SetChecked(true);
+                            60, 550, 350, 24, true, 0, false)));
 	dialog_->Control<UICheckBox>(Switch_AscII)->OnChangedEvent().connect(boost::bind(&AsciiArtsApp::CheckBoxHandler, this, _1));
 }
 

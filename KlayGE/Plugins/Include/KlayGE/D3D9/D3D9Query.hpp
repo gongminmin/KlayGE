@@ -17,10 +17,11 @@
 #define _D3D9OCCLUSIONQUERY_HPP
 
 #include <KlayGE/Query.hpp>
+#include <KlayGE/D3D9/D3D9Resource.hpp>
 
 namespace KlayGE
 {
-	class D3D9OcclusionQuery : public OcclusionQuery
+	class D3D9OcclusionQuery : public OcclusionQuery, public D3D9Resource
 	{
 	public:
 		D3D9OcclusionQuery();
@@ -31,10 +32,15 @@ namespace KlayGE
 		uint64_t SamplesPassed();
 
 	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
 		ID3D9QueryPtr query_;
 	};
+	typedef boost::shared_ptr<D3D9OcclusionQuery> D3D9OcclusionQueryPtr;
 
-	class D3D9ConditionalRender : public ConditionalRender
+	class D3D9ConditionalRender : public ConditionalRender, public D3D9Resource
 	{
 	public:
 		D3D9ConditionalRender();
@@ -46,8 +52,13 @@ namespace KlayGE
 		void EndConditionalRender();
 
 	private:
+		void DoOnLostDevice();
+		void DoOnResetDevice();
+
+	private:
 		ID3D9QueryPtr query_;
 	};
+	typedef boost::shared_ptr<D3D9ConditionalRender> D3D9ConditionalRenderPtr;
 }
 
 #endif		// _D3D9QUERY_HPP

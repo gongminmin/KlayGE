@@ -267,8 +267,7 @@ void Instancing::InitObjects()
 
 	dialog_ = UIManager::Instance().MakeDialog();
 	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseInstanceing, L"Use instancing",
-                            60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(UseInstanceing)->SetChecked(true);
+                            60, 550, 350, 24, true, 0, false)));
 	dialog_->Control<UICheckBox>(UseInstanceing)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));
 }
 
