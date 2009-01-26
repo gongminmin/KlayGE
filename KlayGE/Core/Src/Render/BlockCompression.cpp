@@ -359,18 +359,15 @@ namespace KlayGE
 						break;
 
 					case 1:
+					case 5:
 					case 7:
 						bit = 1;
 						break;
 
 					case 3:
 					case 4:
-						bit = 2;
-						break;
-
-					case 5:
 					case 6:
-						bit = 3;
+						bit = 2;
 						break;
 					}
 				}

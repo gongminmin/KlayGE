@@ -5,13 +5,19 @@
 #include <string>
 #include <KlayGE/Mesh.hpp>
 
+class MD5SkinnedMesh;
+
 class MD5SkinnedModel : public KlayGE::SkinnedModel
 {
+	friend MD5SkinnedMesh;
+
 public:
 	MD5SkinnedModel();
 
 	void SetTime(float time);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
+
+	bool reversed_;
 };
 
 class MD5SkinnedMesh : public KlayGE::SkinnedMesh

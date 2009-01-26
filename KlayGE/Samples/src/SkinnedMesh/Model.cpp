@@ -11,6 +11,9 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Camera.hpp>
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
+
 #include "Model.hpp"
 
 using namespace KlayGE;
@@ -36,12 +39,24 @@ void MD5SkinnedMesh::BuildMeshInfo()
 		{
 		case VEU_Position:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read | EAH_CPU_Write, NULL);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Write);
+					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+
+					BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos, positions)
+					{
+						std::swap(pos.y(), pos.z());
+						pos.z() = -pos.z();
+					}
+
+					std::copy(positions.begin(), positions.end(), mapper.Pointer<float3>());
+				}
+
+				vb_cpu->CopyToBuffer(*vb);
 			}
 			break;
 
@@ -106,6 +121,43 @@ void MD5SkinnedMesh::BuildMeshInfo()
 			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
 	}
+
+	boost::shared_ptr<RenderModel> model = model_.lock();
+	if (model)
+	{
+		if (!checked_pointer_cast<MD5SkinnedModel>(model)->reversed_)
+		{
+			SkinnedModel::JointsType& joints = checked_pointer_cast<MD5SkinnedModel>(model)->joints_;
+
+			for (size_t i = 0; i < joints.size(); ++ i)
+			{
+				std::swap(joints[i].bind_quat.y(), joints[i].bind_quat.z());
+				joints[i].bind_quat.z() = -joints[i].bind_quat.z();
+
+				std::swap(joints[i].bind_pos.y(), joints[i].bind_pos.z());
+				joints[i].bind_pos.z() = -joints[i].bind_pos.z();
+
+				joints[i].inverse_origin_quat = MathLib::inverse(joints[i].bind_quat);
+				joints[i].inverse_origin_pos = MathLib::transform_quat(-joints[i].bind_pos, joints[i].inverse_origin_quat);
+			}
+			checked_pointer_cast<MD5SkinnedModel>(model)->UpdateBinds();
+
+			KeyFramesType& key_frames = *checked_pointer_cast<MD5SkinnedModel>(model)->key_frames_;
+			BOOST_FOREACH(BOOST_TYPEOF(key_frames)::reference kf, key_frames)
+			{
+				for (size_t i = 0; i < kf.second.bind_pos.size(); ++ i)
+				{
+					std::swap(kf.second.bind_quat[i].y(), kf.second.bind_quat[i].z());
+					kf.second.bind_quat[i].z() = -kf.second.bind_quat[i].z();
+
+					std::swap(kf.second.bind_pos[i].y(), kf.second.bind_pos[i].z());
+					kf.second.bind_pos[i].z() = -kf.second.bind_pos[i].z();
+				}
+			}
+
+			checked_pointer_cast<MD5SkinnedModel>(model)->reversed_ = true;
+		}
+	}
 }
 
 void MD5SkinnedMesh::OnRenderBegin()
@@ -134,7 +186,8 @@ void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 
 
 MD5SkinnedModel::MD5SkinnedModel()
-		: SkinnedModel(L"MD5SkinnedModel")
+		: SkinnedModel(L"MD5SkinnedModel"),
+			reversed_(false)
 {
 }
 

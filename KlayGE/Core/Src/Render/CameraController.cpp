@@ -141,7 +141,9 @@ namespace KlayGE
 
 	void FirstPersonCameraController::AttachCamera(Camera& camera)
 	{
-		Quaternion quat = MathLib::to_quaternion(camera.ViewMatrix());
+		float3 scale, trans;
+		Quaternion quat;
+		MathLib::decompose(scale, quat, trans, camera.ViewMatrix());
 		float sqx = quat.x() * quat.x();
 		float sqy = quat.y() * quat.y();
 		float sqz = quat.z() * quat.z();

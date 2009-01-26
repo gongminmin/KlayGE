@@ -188,7 +188,6 @@ namespace KlayGE
 				{
 					char* p = static_cast<char*>(const_cast<void*>(tex_desc->tex_data[i].data)) + j;
 
-					memcpy(&tmp, p, sizeof(BC4_layout));
 					BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
 					memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
 				}
