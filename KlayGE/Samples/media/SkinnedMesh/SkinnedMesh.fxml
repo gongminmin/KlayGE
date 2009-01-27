@@ -77,7 +77,7 @@ float4 SkinnedMeshPS(float4 pos : POSITION,
 				float3 H	: TEXCOORD2) : COLOR
 {
 	half3 bump_normal = decompress_normal(tex2D(normal_map, uv)).rgb;	
-	half3 diffuse = tex2D(diffuse_map, uv).rgb;
+	half4 diffuse = tex2D(diffuse_map, uv);
 	half3 specular = tex2D(specular_map, uv).rgb;
 	
 	half3 light_vec = normalize(L);
@@ -88,12 +88,14 @@ float4 SkinnedMeshPS(float4 pos : POSITION,
 	{
 		half3 half_way = normalize(H);
 		half specular_factor = pow(dot(half_way, bump_normal), 8);
-		clr = half4(diffuse * diffuse_factor + specular * specular_factor, 1);
+		clr = half4(diffuse.rgb * diffuse_factor + specular * specular_factor, diffuse.a);
 	}
 	else
 	{
-		clr = half4(0, 0, 0, 1);
+		clr = half4(0, 0, 0, diffuse.a);
 	}
+	
+	clip(clr.a - 0.2f);
 
 	return clr;	
 }

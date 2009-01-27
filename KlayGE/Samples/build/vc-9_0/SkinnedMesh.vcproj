@@ -408,6 +408,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\SkinnedMesh\SkinnedMesh.uiml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

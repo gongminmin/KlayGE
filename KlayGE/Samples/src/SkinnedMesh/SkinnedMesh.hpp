@@ -4,6 +4,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
+#include <KlayGE/UI.hpp>
 #include "Model.hpp"
 
 class SkinnedMeshApp : public KlayGE::App3DFramework
@@ -13,15 +14,32 @@ public:
 
 private:
 	void InitObjects();
+	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void SkinnedHandler(KlayGE::UICheckBox const & sender);
+	void FrameChangedHandler(KlayGE::UISlider const & sender);
+	void PlayHandler(KlayGE::UICheckBox const & sender);
+	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 
 	boost::shared_ptr<MD5SkinnedModel> model_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
+
+	float last_time_;
+	int frame_;
+
+	bool skinned_;
+	bool play_;
+	KlayGE::UIDialogPtr dialog_;
+	int id_skinned_;
+	int id_frame_static_;
+	int id_frame_slider_;
+	int id_play_;
+	int id_ctrl_camera_;
 };
 
 #endif		// _SKINNEDMESH_HPP

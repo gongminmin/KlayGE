@@ -292,7 +292,11 @@ namespace KlayGE
 			frame_rate_ = fr;
 		}
 
+		uint32_t GetFrame() const;
 		void SetFrame(uint32_t frame);
+
+		void RebindJoints();
+		void UnbindJoints();
 
 	protected:
 		void BuildBones(uint32_t frame);

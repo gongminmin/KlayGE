@@ -185,6 +185,11 @@ namespace KlayGE
 		key_frames_ = key_frames;
 	}
 
+	uint32_t SkinnedModel::GetFrame() const
+	{
+		return last_frame_;
+	}
+
 	void SkinnedModel::SetFrame(uint32_t frame)
 	{
 		if (last_frame_ != frame)
@@ -192,6 +197,20 @@ namespace KlayGE
 			last_frame_ = frame;
 
 			this->BuildBones(frame);
+		}
+	}
+
+	void SkinnedModel::RebindJoints()
+	{
+		this->BuildBones(last_frame_);
+	}
+
+	void SkinnedModel::UnbindJoints()
+	{
+		for (size_t i = 0; i < bind_rots_.size(); ++ i)
+		{
+			bind_rots_[i] = float4(0, 0, 0, 1);
+			bind_poss_[i] = float4(0, 0, 0, 1);
 		}
 	}
 
