@@ -43,6 +43,7 @@ private:
 	bool show_ascii_;
 
 	KlayGE::UIDialogPtr dialog_;
+	int id_switch_ascii_;
 };
 
 #endif		// _ASCIIARTS_HPP

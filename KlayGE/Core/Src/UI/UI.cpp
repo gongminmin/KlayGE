@@ -34,6 +34,21 @@
 
 #include <KlayGE/UI.hpp>
 
+namespace
+{
+	using namespace KlayGE;
+
+	std::string read_short_string(ResIdentifierPtr const & source)
+	{
+		uint8_t len;
+		source->read(reinterpret_cast<char*>(&len), sizeof(len));
+		std::string ret(len, '\0');
+		source->read(&ret[0], len);
+
+		return ret;
+	}
+}
+
 namespace KlayGE
 {
 	UIManagerPtr UIManager::ui_mgr_instance_;
@@ -251,6 +266,204 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 113, 246, 121));
 	}
 
+	void UIManager::Load(ResIdentifierPtr const & source)
+	{
+	#pragma pack(push, 1)
+		struct uiml_header
+		{
+			uint32_t fourcc;
+			uint32_t ver;
+			uint32_t num_dlgs;
+		};
+	#pragma pack(pop)
+
+		if (source)
+		{
+			uiml_header header;
+			source->read(reinterpret_cast<char*>(&header), sizeof(header));
+			BOOST_ASSERT((MakeFourCC<'U', 'I', 'M', 'L'>::value == header.fourcc));
+			BOOST_ASSERT(1 == header.ver);
+
+			for (uint32_t i = 0; i < header.num_dlgs; ++ i)
+			{
+				UIDialogPtr dlg;
+				{
+					std::string caption = read_short_string(source);
+					std::string skin = read_short_string(source);
+					TexturePtr tex;
+					if (!skin.empty())
+					{
+						tex = LoadTexture(skin, EAH_GPU_Read)();
+					}
+					dlg = this->MakeDialog(tex);
+					std::wstring wcaption;
+					Convert(wcaption, caption);
+					dlg->SetCaptionText(wcaption);
+				}
+				
+				uint32_t num_ids;
+				source->read(reinterpret_cast<char*>(&num_ids), sizeof(num_ids));
+				for (uint32_t j = 0; j < num_ids; ++ j)
+				{
+					dlg->AddIdName(read_short_string(source), j);
+				}
+
+				uint32_t num_ctrls;
+				source->read(reinterpret_cast<char*>(&num_ctrls), sizeof(num_ctrls));
+				for (uint32_t j = 0; j < num_ctrls; ++ j)
+				{
+					uint32_t type, id;
+					int32_t x, y;
+					uint32_t width, height;
+					bool is_default, align_x, align_y;
+					source->read(reinterpret_cast<char*>(&type), sizeof(type));
+					source->read(reinterpret_cast<char*>(&id), sizeof(id));
+					source->read(reinterpret_cast<char*>(&x), sizeof(x));
+					source->read(reinterpret_cast<char*>(&y), sizeof(y));
+					source->read(reinterpret_cast<char*>(&width), sizeof(width));
+					source->read(reinterpret_cast<char*>(&height), sizeof(height));
+					source->read(reinterpret_cast<char*>(&is_default), sizeof(is_default));
+					source->read(reinterpret_cast<char*>(&align_x), sizeof(align_x));
+					source->read(reinterpret_cast<char*>(&align_y), sizeof(align_y));
+
+					UIDialog::ControlLocation loc = { x, y,
+						static_cast<UIDialog::ControlAlignment>(align_x), static_cast<UIDialog::ControlAlignment>(align_y) };
+					dlg->CtrlLocation(id, loc);
+
+					switch (type)
+					{
+					case UICT_Static:
+						{
+							std::string caption = read_short_string(source);
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->AddControl(UIControlPtr(new UIStatic(dlg, id, wcaption,
+								x, y, width, height, is_default)));
+						}
+						break;
+
+					case UICT_Button:
+						{
+							std::string caption = read_short_string(source);
+							uint32_t hotkey;
+							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->AddControl(UIControlPtr(new UIButton(dlg, id, wcaption,
+								x, y, width, height, hotkey, is_default)));
+						}
+						break;
+
+					case UICT_CheckBox:
+						{
+							std::string caption = read_short_string(source);
+							bool checked;
+							uint32_t hotkey;
+							source->read(reinterpret_cast<char*>(&checked), sizeof(checked));
+							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->AddControl(UIControlPtr(new UICheckBox(dlg, id, wcaption,
+								x, y, width, height, checked, hotkey, is_default)));
+						}
+						break;
+
+					case UICT_RadioButton:
+						{
+							std::string caption = read_short_string(source);
+							int32_t button_group;
+							bool checked;
+							uint32_t hotkey;
+							source->read(reinterpret_cast<char*>(&button_group), sizeof(button_group));
+							source->read(reinterpret_cast<char*>(&checked), sizeof(checked));
+							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->AddControl(UIControlPtr(new UIRadioButton(dlg, id, button_group, wcaption,
+								x, y, width, height, checked, hotkey, is_default)));
+						}
+						break;
+
+					case UICT_Slider:
+						{
+							int32_t min_v, max_v, value;
+							source->read(reinterpret_cast<char*>(&min_v), sizeof(min_v));
+							source->read(reinterpret_cast<char*>(&max_v), sizeof(max_v));
+							source->read(reinterpret_cast<char*>(&value), sizeof(value));
+							dlg->AddControl(UIControlPtr(new UISlider(dlg, id,
+								x, y, width, height, min_v, max_v, value, is_default)));
+						}
+						break;
+
+					case UICT_ScrollBar:
+						{
+							int32_t track_start, track_end, track_pos, page_size;
+							source->read(reinterpret_cast<char*>(&track_start), sizeof(track_start));
+							source->read(reinterpret_cast<char*>(&track_end), sizeof(track_end));
+							source->read(reinterpret_cast<char*>(&track_pos), sizeof(track_pos));
+							source->read(reinterpret_cast<char*>(&page_size), sizeof(page_size));
+							dlg->AddControl(UIControlPtr(new UIScrollBar(dlg, id,
+								x, y, width, height, track_start, track_end, track_pos, page_size)));
+						}
+						break;
+
+					case UICT_ListBox:
+						{
+							bool style;
+							source->read(reinterpret_cast<char*>(&style), sizeof(style));
+							dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
+								x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
+
+							uint32_t num_items;
+							source->read(reinterpret_cast<char*>(&num_items), sizeof(num_items));
+							for (uint32_t j = 0; j < num_items; ++ j)
+							{
+								std::string caption = read_short_string(source);
+								std::wstring wcaption;
+								Convert(wcaption, caption);
+								dlg->Control<UIListBox>(id)->AddItem(wcaption);
+							}
+						}
+						break;
+
+					case UICT_ComboBox:
+						{
+							uint32_t hotkey;
+							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
+							dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
+								x, y, width, height, hotkey, is_default)));
+
+							uint32_t num_items;
+							source->read(reinterpret_cast<char*>(&num_items), sizeof(num_items));
+							for (uint32_t j = 0; j < num_items; ++ j)
+							{
+								std::string caption = read_short_string(source);
+								std::wstring wcaption;
+								Convert(wcaption, caption);
+								dlg->Control<UIComboBox>(id)->AddItem(wcaption);
+							}
+						}
+						break;
+
+					case UICT_EditBox:
+						{
+							std::string caption = read_short_string(source);
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->AddControl(UIControlPtr(new UIEditBox(dlg, id, wcaption,
+								x, y, width, height, is_default)));
+						}
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	UIDialogPtr UIManager::MakeDialog(TexturePtr control_tex)
 	{
 		UIDialogPtr ret = MakeSharedPtr<UIDialog>(control_tex);
@@ -455,6 +668,17 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(ctrl < elem_texture_rcs_.size());
 		return elem_texture_rcs_[ctrl].size();
+	}
+
+	void UIManager::SettleCtrls(uint32_t width, uint32_t height)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->SettleCtrls(width, height);
+			}
+		}
 	}
 
 
@@ -1009,6 +1233,73 @@ namespace KlayGE
 		}
 
 		return false;
+	}
+
+	void UIDialog::AddIdName(std::string const & name, int id)
+	{
+		id_name_.insert(std::make_pair(name, id));
+	}
+	
+	int UIDialog::IDFromName(std::string const & name)
+	{
+		return id_name_[name];
+	}
+
+	void UIDialog::CtrlLocation(int id, UIDialog::ControlLocation const & loc)
+	{
+		id_location_.insert(std::make_pair(id, loc));
+	}
+	
+	UIDialog::ControlLocation const & UIDialog::CtrlLocation(int id)
+	{
+		return id_location_[id];
+	}
+
+	void UIDialog::SettleCtrls(uint32_t width, uint32_t height)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(id_location_)::reference id_loc, id_location_)
+		{
+			int x = id_loc.second.x;
+			int y = id_loc.second.y;
+
+			switch (id_loc.second.align_x)
+			{
+			case CA_Left:
+				break;
+
+			case CA_Right:
+				x = width + x;
+				break;
+
+			case CA_Center:
+				x = width / 2 + x;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			switch (id_loc.second.align_y)
+			{
+			case CA_Top:
+				break;
+
+			case CA_Bottom:
+				y = height + y;
+				break;
+
+			case CA_Middle:
+				y = height / 2 + y;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			this->GetControl(id_loc.first)->SetLocation(x, y);
+		}
 	}
 
 	void UIDialog::HandleInput()

@@ -34,6 +34,12 @@ private:
 	KlayGE::PostProcessPtr depth_of_field_;
 
 	KlayGE::UIDialogPtr dialog_;
+	int id_focus_plane_static_;
+	int id_focus_plane_slider_;
+	int id_focus_range_static_;
+	int id_focus_range_slider_;
+	int id_blur_factor_;
+	int id_ctrl_camera_;
 };
 
 #endif		// _INFTERRAIN_HPP

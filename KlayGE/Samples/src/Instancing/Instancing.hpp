@@ -31,6 +31,7 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::UIDialogPtr dialog_;
+	int id_use_instancing_;
 };
 
 #endif		// _INSTANCING_HPP

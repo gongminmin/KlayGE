@@ -17,6 +17,9 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<ToolFile
+			RelativePath="..\..\Tools\Rules\fxml.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -31,6 +34,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -107,6 +113,9 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
+				Name="FXML"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -180,6 +189,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -258,6 +270,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -545,40 +560,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -589,40 +596,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -633,40 +632,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -677,40 +668,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -721,40 +704,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -765,40 +740,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -809,40 +776,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -853,40 +812,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -897,40 +848,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -941,40 +884,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -985,40 +920,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1029,40 +956,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1073,40 +992,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1117,40 +1028,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1161,40 +1064,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1205,40 +1100,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1249,40 +1136,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1893,40 +1772,32 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="VCCustomBuildTool"
-							Description="Compiling effect file $(InputPath)"
-							CommandLine="$(InputDir)\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\..\Samples\media\Common\$(InputName).kfx&#x0D;&#x0A;"
-							Outputs="$(InputDir)\..\Samples\media\Common\$(InputName).kfx"
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>

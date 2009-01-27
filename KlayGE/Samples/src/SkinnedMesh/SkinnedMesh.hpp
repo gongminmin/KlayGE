@@ -20,7 +20,6 @@ private:
 	KlayGE::FontPtr font_;
 
 	boost::shared_ptr<MD5SkinnedModel> model_;
-	boost::shared_ptr<KlayGE::KeyFramesType> anim_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
 };

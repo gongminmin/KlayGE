@@ -37,6 +37,11 @@ private:
 	KlayGE::float4x4 light_model_;
 
 	KlayGE::UIDialogPtr dialog_;
+	int id_min_variance_static_;
+	int id_min_variance_slider_;
+	int id_bleeding_reduce_static_;
+	int id_bleeding_reduce_slider_;
+	int id_ctrl_camera_;
 };
 
 #endif		// _SHADOWCUBEMAP_HPP

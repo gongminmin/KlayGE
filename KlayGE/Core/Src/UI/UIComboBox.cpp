@@ -577,16 +577,17 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::AddItem(std::wstring const & strText, boost::any const & data)
+	int UIComboBox::AddItem(std::wstring const & strText)
 	{
 		assert(!strText.empty());
 
 		// Create a new item and set the data
 		boost::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
-		pItem->data = data;
 		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pItem->bVisible = false;
+
+		int ret = static_cast<int>(items_.size());
 
 		items_.push_back(pItem);
 
@@ -600,6 +601,42 @@ namespace KlayGE
 			focused_ = 0;
 			this->OnSelectionChangedEvent()(*this);
 		}
+
+		return ret;
+	}
+	
+	void UIComboBox::SetItemData(int nIndex, boost::any const & data)
+	{
+		items_[nIndex]->data = data;
+	}
+
+	int UIComboBox::AddItem(std::wstring const & strText, boost::any const & data)
+	{
+		assert(!strText.empty());
+
+		// Create a new item and set the data
+		boost::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
+		pItem->strText = strText;
+		pItem->data = data;
+		pItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pItem->bVisible = false;
+
+		int ret = static_cast<int>(items_.size());
+
+		items_.push_back(pItem);
+
+		// Update the scroll bar with new range
+		scroll_bar_.SetTrackRange(0, items_.size());
+
+		// If this is the only item in the list, it's selected
+		if (1 == this->GetNumItems())
+		{
+			selected_ = 0;
+			focused_ = 0;
+			this->OnSelectionChangedEvent()(*this);
+		}
+
+		return ret;
 	}
 
 	void UIComboBox::RemoveItem(uint32_t index)

@@ -17,6 +17,12 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<ToolFile
+			RelativePath="..\..\..\Tools\Rules\uiml.rules"
+		/>
+		<ToolFile
+			RelativePath="..\..\..\Tools\Rules\fxml.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -30,7 +36,13 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="UIML"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -106,7 +118,13 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="UIML"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -184,7 +202,13 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="UIML"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -267,7 +291,13 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="UIML"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -376,90 +406,18 @@
 			<File
 				RelativePath="..\..\media\AsciiArts\AsciiArts.fxml"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\media\AsciiArts\Downsample8x8.fxml"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Compiling $(InputPath)"
-						CommandLine="$(InputDir)..\..\..\Tools\fxmlc\fxmlc.py $(InputPath) $(InputDir)\$(InputName).kfx&#x0D;&#x0A;"
-						Outputs="$(InputDir)\$(InputName).kfx"
-					/>
-				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\AsciiArts\AsciiArts.uiml"
+				>
 			</File>
 		</Filter>
 	</Files>

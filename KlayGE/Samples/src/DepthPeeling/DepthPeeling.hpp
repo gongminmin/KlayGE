@@ -42,6 +42,7 @@ private:
 
 	bool use_depth_peeling_;
 	KlayGE::UIDialogPtr dialog_;
+	int id_use_depth_peeling_;
 };
 
 #endif		// _DEPTHPEELING_HPP

@@ -165,11 +165,6 @@ namespace
 
 	enum
 	{
-		UseInstanceing
-	};
-
-	enum
-	{
 		Exit
 	};
 
@@ -265,17 +260,17 @@ void Instancing::InitObjects()
 	input_handler->connect(boost::bind(&Instancing::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	dialog_ = UIManager::Instance().MakeDialog();
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseInstanceing, L"Use instancing",
-                            60, 550, 350, 24, true, 0, false)));
-	dialog_->Control<UICheckBox>(UseInstanceing)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));
+	UIManager::Instance().Load(ResLoader::Instance().Load("Instancing.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+	id_use_instancing_ = dialog_->IDFromName("UseInstancing");
+	dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));
 }
 
 void Instancing::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	dialog_->GetControl(UseInstanceing)->SetLocation(60, height - 50);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -290,7 +285,7 @@ void Instancing::InputHandler(InputEngine const & /*sender*/, InputAction const 
 
 void Instancing::CheckBoxHandler(UICheckBox const & /*sender*/)
 {
-	use_instance_ = dialog_->Control<UICheckBox>(UseInstanceing)->GetChecked();
+	use_instance_ = dialog_->Control<UICheckBox>(id_use_instancing_)->GetChecked();
 
 	if (use_instance_)
 	{

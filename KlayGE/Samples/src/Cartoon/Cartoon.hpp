@@ -34,6 +34,7 @@ private:
 	bool cartoon_style_;
 
 	KlayGE::UIDialogPtr dialog_;
+	int id_switch_cartoon_;
 };
 
 #endif		// _CARTOON_HPP

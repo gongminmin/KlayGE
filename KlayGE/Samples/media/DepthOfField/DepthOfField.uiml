@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui version='1'>
+	<dialog caption="Depth of field">
+		<control type="static" id="FocusPlaneStatic" caption="Focus plane:" x="-120" y="200" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="slider" id="FocusPlaneSlider" x="-120" y="220" align_x="right" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
+
+		<control type="static" id="FocusRangeStatic" caption="Focus range:" x="-120" y="268" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="slider" id="FocusRangeSlider" x="-120" y="288" align_x="right" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
+
+		<control type="check_box" id="BlurFactor" caption="Blur factor" x="-120" y="356" align_x="right" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="-120" y="424" align_x="right" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+</ui>

@@ -160,11 +160,6 @@ namespace
 
 	enum
 	{
-		UseDepthPeeling
-	};
-
-	enum
-	{
 		Exit,
 	};
 
@@ -264,10 +259,12 @@ void DepthPeelingApp::InitObjects()
 
 	blend_pp_.reset(new BlendPostProcess);
 
-	dialog_ = UIManager::Instance().MakeDialog();
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, UseDepthPeeling, L"Depth peeling",
-                            60, 550, 350, 24, true, 0, false)));
-	dialog_->Control<UICheckBox>(UseDepthPeeling)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CheckBoxHandler, this, _1));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	id_use_depth_peeling_ = dialog_->IDFromName("UseDepthPeeling");
+
+	dialog_->Control<UICheckBox>(id_use_depth_peeling_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CheckBoxHandler, this, _1));
 }
 
 void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
@@ -314,7 +311,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 
 	blend_pp_->Destinate(FrameBufferPtr());
 
-	dialog_->GetControl(UseDepthPeeling)->SetLocation(60, height - 50);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -329,7 +326,7 @@ void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 void DepthPeelingApp::CheckBoxHandler(UICheckBox const & /*sender*/)
 {
-	use_depth_peeling_ = dialog_->Control<UICheckBox>(UseDepthPeeling)->GetChecked();
+	use_depth_peeling_ = dialog_->Control<UICheckBox>(id_use_depth_peeling_)->GetChecked();
 }
 
 uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)

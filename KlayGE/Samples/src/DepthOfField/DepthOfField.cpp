@@ -209,16 +209,7 @@ namespace
 
 	enum
 	{
-		FocusPlaneSlider,
-		FocusPlaneStatic,
-		FocusRangeSlider,
-		FocusRangeStatic,
-		BlurFactor,
 		CtrlCamera,
-	};
-
-	enum
-	{
 		Exit,
 	};
 
@@ -318,27 +309,25 @@ void DepthOfFieldApp::InitObjects()
 	clear_float_.reset(new ClearFloatPostProcess);
 	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f - 0.5f, 0.4f - 0.5f, 0.6f - 0.5f, 1 - 0.5f));
 
-	dialog_ = UIManager::Instance().MakeDialog();
+	UIManager::Instance().Load(ResLoader::Instance().Load("DepthOfField.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusPlaneStatic, L"Focus plane:", 60, 200, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusPlaneSlider, 60, 220, 100, 24, 0, 200, 100, false)));
-	dialog_->Control<UISlider>(FocusPlaneSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
+	id_focus_plane_static_ = dialog_->IDFromName("FocusPlaneStatic");
+	id_focus_plane_slider_ = dialog_->IDFromName("FocusPlaneSlider");
+	id_focus_range_static_ = dialog_->IDFromName("FocusRangeStatic");
+	id_focus_range_slider_ = dialog_->IDFromName("FocusRangeSlider");
+	id_blur_factor_ = dialog_->IDFromName("BlurFactor");
+	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, FocusRangeStatic, L"Focus range:", 60, 268, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, FocusRangeSlider, 60, 288, 100, 24, 0, 200, 100, false)));
-	dialog_->Control<UISlider>(FocusRangeSlider)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusRangeChangedHandler, this, _1));
 
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, BlurFactor, L"Blur factor",
-                            60, 356, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(BlurFactor)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::BlurFactorHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::BlurFactorHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::CtrlCameraHandler, this, _1));
 
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
-                            60, 424, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::CtrlCameraHandler, this, _1));
-
-	this->FocusPlaneChangedHandler(*dialog_->Control<UISlider>(FocusPlaneSlider));
-	this->FocusRangeChangedHandler(*dialog_->Control<UISlider>(FocusRangeSlider));
-	this->BlurFactorHandler(*dialog_->Control<UICheckBox>(BlurFactor));
+	this->FocusPlaneChangedHandler(*dialog_->Control<UISlider>(id_focus_plane_slider_));
+	this->FocusRangeChangedHandler(*dialog_->Control<UISlider>(id_focus_range_slider_));
+	this->BlurFactorHandler(*dialog_->Control<UICheckBox>(id_blur_factor_));
 }
 
 void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
@@ -353,12 +342,7 @@ void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
 
 	clear_float_->Destinate(clr_depth_buffer_);
 
-	dialog_->GetControl(FocusPlaneStatic)->SetLocation(width - 120, 200);
-	dialog_->GetControl(FocusPlaneSlider)->SetLocation(width - 120, 220);
-	dialog_->GetControl(FocusRangeStatic)->SetLocation(width - 120, 268);
-	dialog_->GetControl(FocusRangeSlider)->SetLocation(width - 120, 288);
-	dialog_->GetControl(BlurFactor)->SetLocation(width - 120, 356);
-	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 424);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void DepthOfFieldApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

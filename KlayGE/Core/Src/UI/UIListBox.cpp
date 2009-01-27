@@ -126,7 +126,27 @@ namespace KlayGE
 		bounding_box_ = selection_rc_ | text_rc_ | scroll_bar_.BoundingBoxRect();
 	}
 
-	void UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
+	int UIListBox::AddItem(std::wstring const & strText)
+	{
+		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		pNewItem->strText = strText;
+		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
+		pNewItem->bSelected = false;
+
+		int ret = static_cast<int>(items_.size());
+
+		items_.push_back(pNewItem);
+		scroll_bar_.SetTrackRange(0, items_.size());
+
+		return ret;
+	}
+
+	void UIListBox::SetItemData(int nIndex, boost::any const & data)
+	{
+		items_[nIndex]->data = data;
+	}
+
+	int UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
 		boost::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
@@ -134,8 +154,12 @@ namespace KlayGE
 		pNewItem->rcActive = Rect_T<int32_t>(0, 0, 0, 0);
 		pNewItem->bSelected = false;
 
+		int ret = static_cast<int>(items_.size());
+
 		items_.push_back(pNewItem);
 		scroll_bar_.SetTrackRange(0, items_.size());
+
+		return ret;
 	}
 
 	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)

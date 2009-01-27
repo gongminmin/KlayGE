@@ -308,15 +308,6 @@ namespace
 
 	enum
 	{
-		MinVarianceSlider,
-		MinVarianceStatic,
-		BleedingReduceSlider,
-		BleedingReduceStatic,
-		CtrlCamera,
-	};
-
-	enum
-	{
 		Exit,
 	};
 
@@ -436,31 +427,26 @@ void ShadowCubeMap::InitObjects()
 	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	dialog_ = UIManager::Instance().MakeDialog();
+	UIManager::Instance().Load(ResLoader::Instance().Load("ShadowCubemap.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, MinVarianceStatic, L"Min Variance:", 60, 200, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, MinVarianceSlider, 60, 220, 100, 24, 0, 100, 50, false)));
-	dialog_->Control<UISlider>(MinVarianceSlider)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, _1));
+	id_min_variance_static_ = dialog_->IDFromName("MinVarianceStatic");
+	id_min_variance_slider_ = dialog_->IDFromName("MinVarianceSlider");
+	id_bleeding_reduce_static_ = dialog_->IDFromName("BleedingReduceStatic");
+	id_bleeding_reduce_slider_ = dialog_->IDFromName("BleedingReduceSlider");
+	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, BleedingReduceStatic, L"Bleeding Reduce:", 60, 268, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, BleedingReduceSlider, 60, 288, 100, 24, 0, 100, 50, false)));
-	dialog_->Control<UISlider>(BleedingReduceSlider)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_min_variance_slider_)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::MinVarianceChangedHandler, this, _1));
+	dialog_->Control<UISlider>(id_bleeding_reduce_slider_)->OnValueChangedEvent().connect(boost::bind(&ShadowCubeMap::BleedingReduceChangedHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&ShadowCubeMap::CtrlCameraHandler, this, _1));
 
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
-                            60, 356, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&ShadowCubeMap::CtrlCameraHandler, this, _1));
-
-	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));
-	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(MinVarianceSlider));
+	this->MinVarianceChangedHandler(*dialog_->Control<UISlider>(id_min_variance_slider_));
+	this->BleedingReduceChangedHandler(*dialog_->Control<UISlider>(id_bleeding_reduce_slider_));
 }
 
-void ShadowCubeMap::OnResize(uint32_t width, uint32_t /*height*/)
+void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
 {
-	dialog_->GetControl(MinVarianceStatic)->SetLocation(width - 120, 200);
-	dialog_->GetControl(MinVarianceSlider)->SetLocation(width - 120, 220);
-	dialog_->GetControl(BleedingReduceStatic)->SetLocation(width - 120, 268);
-	dialog_->GetControl(BleedingReduceSlider)->SetLocation(width - 120, 288);
-	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 356);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction const & action)

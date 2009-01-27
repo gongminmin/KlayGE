@@ -407,8 +407,33 @@ namespace KlayGE
 		friend class UIManager;
 
 	public:
+		enum ControlAlignment
+		{
+			CA_Left,
+			CA_Right,
+			CA_Center,
+			CA_Top,
+			CA_Bottom,
+			CA_Middle
+		};
+
+		struct ControlLocation
+		{
+			int x, y;
+			ControlAlignment align_x, align_y;
+		};
+
+	public:
 		explicit UIDialog(TexturePtr control_tex = TexturePtr());
 		~UIDialog();
+
+		void AddIdName(std::string const & name, int id);
+		int IDFromName(std::string const & name);
+
+		void CtrlLocation(int id, ControlLocation const & loc);
+		ControlLocation const & CtrlLocation(int id);
+
+		void SettleCtrls(uint32_t width, uint32_t height);
 
 		void HandleInput();
 
@@ -573,6 +598,9 @@ namespace KlayGE
 		UIElement cap_element_;  // Element for the caption
 
 		float depth_base_;
+
+		std::map<std::string, int> id_name_;
+		std::map<int, ControlLocation> id_location_;
 	};
 
 	class KLAYGE_CORE_API UIManager : public boost::enable_shared_from_this<UIManager>
@@ -597,6 +625,8 @@ namespace KlayGE
 
 		static UIManager& Instance();
 		static void ForceDestroy();
+
+		void Load(ResIdentifierPtr const & source);
 
 		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
 
@@ -648,6 +678,8 @@ namespace KlayGE
 
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
 		size_t NumElementTextureRect(uint32_t ctrl) const;
+
+		void SettleCtrls(uint32_t width, uint32_t height);
 
 	private:
 		static UIManagerPtr ui_mgr_instance_;
@@ -1077,7 +1109,9 @@ namespace KlayGE
 		int  GetScrollBarWidth() const { return sb_width_; }
 		void SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
 		void SetBorder(int nBorder, int nMargin) { border_ = nBorder; margin_ = nMargin; }
-		void AddItem(std::wstring const & strText, boost::any const & data);
+		int AddItem(std::wstring const & strText);
+		void SetItemData(int nIndex, boost::any const & data);
+		int AddItem(std::wstring const & strText, boost::any const & data);
 		void InsertItem(int nIndex, std::wstring const & strText, boost::any const & data);
 		void RemoveItem(int nIndex);
 		void RemoveAllItems();
@@ -1163,11 +1197,13 @@ namespace KlayGE
 
 		virtual void UpdateRects();
 
-		void	AddItem(std::wstring const & strText, boost::any const & data);
-		void    RemoveAllItems();
-		void    RemoveItem(uint32_t index);
-		bool    ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
-		int     FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
+		int AddItem(std::wstring const & strText);
+		void SetItemData(int nIndex, boost::any const & data);
+		int AddItem(std::wstring const & strText, boost::any const & data);
+		void RemoveAllItems();
+		void RemoveItem(uint32_t index);
+		bool ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
+		int FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		boost::any const GetItemData(std::wstring const & strText) const;
 		boost::any const GetItemData(int nIndex) const;
 		void    SetDropHeight(uint32_t nHeight) { drop_height_ = nHeight; this->UpdateRects(); }

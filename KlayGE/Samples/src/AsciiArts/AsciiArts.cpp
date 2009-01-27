@@ -182,11 +182,6 @@ namespace
 
 	enum
 	{
-		Switch_AscII
-	};
-
-	enum
-	{
 		Switch,
 		Exit,
 		FullScreen,
@@ -272,10 +267,12 @@ void AsciiArtsApp::InitObjects()
 	ascii_arts_.reset(new AsciiArts);
 	checked_pointer_cast<AsciiArts>(ascii_arts_)->SetLumsTex(ascii_lums_tex_);
 
-	dialog_ = UIManager::Instance().MakeDialog();
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_AscII, L"AscII filter",
-                            60, 550, 350, 24, true, 0, false)));
-	dialog_->Control<UICheckBox>(Switch_AscII)->OnChangedEvent().connect(boost::bind(&AsciiArtsApp::CheckBoxHandler, this, _1));
+	UIManager::Instance().Load(ResLoader::Instance().Load("AsciiArts.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	id_switch_ascii_ = dialog_->IDFromName("SwitchAscII");
+
+	dialog_->Control<UICheckBox>(id_switch_ascii_)->OnChangedEvent().connect(boost::bind(&AsciiArtsApp::CheckBoxHandler, this, _1));
 }
 
 void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
@@ -307,7 +304,7 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 	ascii_arts_->Source(downsample_tex_, fb->RequiresFlipping());
 	ascii_arts_->Destinate(FrameBufferPtr());
 
-	dialog_->GetControl(Switch_AscII)->SetLocation(60, height - 50);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -316,7 +313,7 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 	{
 	case Switch:
 		show_ascii_ = !show_ascii_;
-		dialog_->Control<UICheckBox>(Switch_AscII)->SetChecked(show_ascii_);
+		dialog_->Control<UICheckBox>(id_switch_ascii_)->SetChecked(show_ascii_);
 		KlayGE::Sleep(150);
 		break;
 
@@ -338,7 +335,7 @@ void AsciiArtsApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 
 void AsciiArtsApp::CheckBoxHandler(UICheckBox const & /*sender*/)
 {
-	show_ascii_ = dialog_->Control<UICheckBox>(Switch_AscII)->GetChecked();
+	show_ascii_ = dialog_->Control<UICheckBox>(id_switch_ascii_)->GetChecked();
 }
 
 uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)

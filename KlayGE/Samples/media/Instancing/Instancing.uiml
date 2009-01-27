@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui version='1'>
+	<dialog caption="Instancing">
+		<control type="check_box" id="UseInstancing" caption="Use instancing" x="60" y="-50" align_y="bottom" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+	</dialog>
+</ui>

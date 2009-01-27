@@ -118,15 +118,6 @@ namespace
 
 	enum
 	{
-		ScaleStatic,
-		ScaleSlider,
-		BiasStatic,
-		BiasSlider,
-		CtrlCamera
-	};
-
-	enum
-	{
 		Exit,
 	};
 
@@ -190,32 +181,29 @@ void Parallax::InitObjects()
 	input_handler->connect(boost::bind(&Parallax::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	dialog_ = UIManager::Instance().MakeDialog();
+	UIManager::Instance().Load(ResLoader::Instance().Load("Parallax.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, ScaleStatic, L"Scale:", 60, 280, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, ScaleSlider, 60, 300, 100, 24, 0, 20,
-		static_cast<int>(parallax_scale_ * 100), false)));
-	dialog_->Control<UISlider>(ScaleSlider)->OnValueChangedEvent().connect(boost::bind(&Parallax::ScaleChangedHandler, this, _1));
-	this->ScaleChangedHandler(*dialog_->Control<UISlider>(ScaleSlider));
+	id_scale_static_ = dialog_->IDFromName("ScaleStatic");
+	id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
+	id_bias_static_ = dialog_->IDFromName("BiasStatic");
+	id_bias_slider_ = dialog_->IDFromName("BiasSlider");
+	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->AddControl(UIControlPtr(new UIStatic(dialog_, BiasStatic, L"Bias:", 60, 348, 100, 24, false)));
-	dialog_->AddControl(UIControlPtr(new UISlider(dialog_, BiasSlider, 60, 368, 100, 24, 0, 10,
-		static_cast<int>(parallax_bias_ * 100), false)));
-	dialog_->Control<UISlider>(BiasSlider)->OnValueChangedEvent().connect(boost::bind(&Parallax::BiasChangedHandler, this, _1));
-	this->BiasChangedHandler(*dialog_->Control<UISlider>(BiasSlider));
+	dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(parallax_scale_ * 100));
+	dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::ScaleChangedHandler, this, _1));
+	this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
 
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, CtrlCamera, L"Control camera",
-                            60, 550, 350, 24, false, 0, false)));
-	dialog_->Control<UICheckBox>(CtrlCamera)->OnChangedEvent().connect(boost::bind(&Parallax::CtrlCameraHandler, this, _1));
+	dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(parallax_bias_ * 100));
+	dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::BiasChangedHandler, this, _1));
+	this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
+
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&Parallax::CtrlCameraHandler, this, _1));
 }
 
-void Parallax::OnResize(uint32_t width, uint32_t /*height*/)
+void Parallax::OnResize(uint32_t width, uint32_t height)
 {
-	dialog_->GetControl(ScaleStatic)->SetLocation(width - 120, 280);
-	dialog_->GetControl(ScaleSlider)->SetLocation(width - 120, 300);
-	dialog_->GetControl(BiasStatic)->SetLocation(width - 120, 348);
-	dialog_->GetControl(BiasSlider)->SetLocation(width - 120, 368);
-	dialog_->GetControl(CtrlCamera)->SetLocation(width - 120, 416);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void Parallax::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -235,7 +223,7 @@ void Parallax::ScaleChangedHandler(KlayGE::UISlider const & sender)
 
 	std::wostringstream stream;
 	stream << L"Scale: " << parallax_scale_;
-	dialog_->Control<UIStatic>(ScaleStatic)->SetText(stream.str());
+	dialog_->Control<UIStatic>(id_scale_static_)->SetText(stream.str());
 }
 
 void Parallax::BiasChangedHandler(KlayGE::UISlider const & sender)
@@ -245,7 +233,7 @@ void Parallax::BiasChangedHandler(KlayGE::UISlider const & sender)
 
 	std::wostringstream stream;
 	stream << L"Bias: " << parallax_bias_;
-	dialog_->Control<UIStatic>(BiasStatic)->SetText(stream.str());
+	dialog_->Control<UIStatic>(id_bias_static_)->SetText(stream.str());
 }
 
 void Parallax::CtrlCameraHandler(KlayGE::UICheckBox const & sender)

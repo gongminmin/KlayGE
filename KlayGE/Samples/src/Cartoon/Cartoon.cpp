@@ -112,12 +112,6 @@ namespace
 
 	enum
 	{
-		Switch_Cartoon
-	};
-
-
-	enum
-	{
 		Exit,
 	};
 
@@ -203,10 +197,12 @@ void Cartoon::InitObjects()
 
 	cartoon_.reset(new CartoonPostProcess);
 
-	dialog_ = UIManager::Instance().MakeDialog();
-	dialog_->AddControl(UIControlPtr(new UICheckBox(dialog_, Switch_Cartoon, L"Cartoon style",
-                            60, 550, 350, 24, true, 0, false)));
-	dialog_->Control<UICheckBox>(Switch_Cartoon)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
+	UIManager::Instance().Load(ResLoader::Instance().Load("Cartoon.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	id_switch_cartoon_ = dialog_->IDFromName("Switch_Cartoon");
+
+	dialog_->Control<UICheckBox>(id_switch_cartoon_)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
 }
 
 void Cartoon::OnResize(uint32_t width, uint32_t height)
@@ -224,7 +220,7 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	checked_pointer_cast<CartoonPostProcess>(cartoon_)->ColorTex(color_tex_);
 	cartoon_->Destinate(FrameBufferPtr());
 
-	dialog_->GetControl(Switch_Cartoon)->SetLocation(60, height - 50);
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -239,7 +235,7 @@ void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 
 void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
 {
-	cartoon_style_ = dialog_->Control<UICheckBox>(Switch_Cartoon)->GetChecked();
+	cartoon_style_ = dialog_->Control<UICheckBox>(id_switch_cartoon_)->GetChecked();
 }
 
 uint32_t Cartoon::DoUpdate(uint32_t pass)

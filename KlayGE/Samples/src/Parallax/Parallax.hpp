@@ -30,6 +30,12 @@ private:
 	KlayGE::UIDialogPtr dialog_;
 	float parallax_scale_;
 	float parallax_bias_;
+
+	int id_scale_static_;
+	int id_scale_slider_;
+	int id_bias_static_;
+	int id_bias_slider_;
+	int id_ctrl_camera_;
 };
 
 #endif		// _PARALLAX_HPP
