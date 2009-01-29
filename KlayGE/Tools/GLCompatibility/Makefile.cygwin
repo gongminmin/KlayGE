@@ -1,9 +1,0 @@
-# Makefile
-
-all:
-	g++ GLCompatibility.cpp $(CXXFLAGS) -o GLCompatibility -lglut32 -lopengl32
-
-install: all
-	install -m 777 GLCompatibility /usr/bin
-	
-.PHONY: all
