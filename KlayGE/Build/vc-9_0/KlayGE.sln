@@ -46,6 +46,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D3D10 Rendering System", "D
 		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "D3D11 Rendering System", "D3D11.vcproj", "{252CD729-6D08-4B70-98AE-944353E6D937}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -142,6 +147,14 @@ Global
 		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|Win32.Build.0 = Release|Win32
 		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|x64.ActiveCfg = Release|x64
 		{B6655D46-44F4-4B48-ADCC-557F5BD4CBD3}.Release|x64.Build.0 = Release|x64
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Debug|Win32.ActiveCfg = Debug|Win32
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Debug|Win32.Build.0 = Debug|Win32
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Debug|x64.ActiveCfg = Debug|x64
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Debug|x64.Build.0 = Debug|x64
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Release|Win32.ActiveCfg = Release|Win32
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Release|Win32.Build.0 = Release|Win32
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Release|x64.ActiveCfg = Release|x64
+		{252CD729-6D08-4B70-98AE-944353E6D937}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

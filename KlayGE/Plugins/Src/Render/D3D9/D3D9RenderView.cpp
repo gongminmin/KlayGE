@@ -456,7 +456,7 @@ namespace KlayGE
 
 
 	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
-											ElementFormat pf, uint32_t multi_sample)
+											ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
@@ -464,19 +464,13 @@ namespace KlayGE
 		height_ = height;
 		pf_ = pf;
 
-		if (multi_sample > 16)
-		{
-			multi_sample_ = D3DMULTISAMPLE_16_SAMPLES;
-		}
-		else
-		{
-			multi_sample_ = D3DMULTISAMPLE_TYPE(multi_sample);
-		}
+		multi_sample_ = (sample_count > 1) ? static_cast<D3DMULTISAMPLE_TYPE>(sample_count) : D3DMULTISAMPLE_NONE;
+		multi_sample_quality_ = sample_quality;
 
 		surface_ = this->CreateSurface();
 	}
 
-	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(Texture& texture_1d_2d, int level, uint32_t multi_sample)
+	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(Texture& texture_1d_2d, int level)
 	{
 		BOOST_ASSERT(IsDepthFormat(texture_1d_2d.Format()));
 
@@ -491,14 +485,8 @@ namespace KlayGE
 		height_ = texture_1d_2d.Height(level);
 		pf_ = texture_1d_2d.Format();
 
-		if (multi_sample > 16)
-		{
-			multi_sample_ = D3DMULTISAMPLE_16_SAMPLES;
-		}
-		else
-		{
-			multi_sample_ = D3DMULTISAMPLE_TYPE(multi_sample);
-		}
+		multi_sample_ = (texture_1d_2d.SampleCount() > 1) ? static_cast<D3DMULTISAMPLE_TYPE>(texture_1d_2d.SampleCount()) : D3DMULTISAMPLE_NONE;
+		multi_sample_quality_ = texture_1d_2d.SampleQuality();
 	}
 
 	void D3D9DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
@@ -522,7 +510,7 @@ namespace KlayGE
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
 		TIF(d3d_device->CreateDepthStencilSurface(width_, height_, D3D9Mapping::MappingFormat(pf_),
-			multi_sample_, 0, false, &surface, NULL));
+			multi_sample_, multi_sample_quality_, false, &surface, NULL));
 
 		return MakeCOMPtr(surface);
 	}

@@ -21,9 +21,9 @@ using namespace KlayGE;
 
 MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name*/)
 	: SkinnedMesh(model, L"MD5SkinnedMesh"),
-		world_(float4x4::Identity())
+		world_(float4x4::Identity()),
+			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx"))
 {
-	technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx")->TechniqueByName("SkinnedMeshTech");
 }
 
 void MD5SkinnedMesh::BuildMeshInfo()
@@ -105,21 +105,36 @@ void MD5SkinnedMesh::BuildMeshInfo()
 			vertex_element(VEU_Binormal, 0, EF_BGR32F), EAH_GPU_Read);
 
 	// ½¨Á¢ÎÆÀí
+	bool has_normal_map = false;
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 		iter != texture_slots_.end(); ++ iter)
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("diffuse_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			*(effect_->ParameterByName("diffuse_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
 		if ("NormalMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("normal_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			TexturePtr nm = LoadTexture(iter->second, EAH_GPU_Read)();
+			*(effect_->ParameterByName("normal_map")) = nm;
+			if (nm)
+			{
+				has_normal_map = true;
+			}
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			*(technique_->Effect().ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			*(effect_->ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
+	}
+
+	if (has_normal_map)
+	{
+		technique_ = effect_->TechniqueByName("SkinnedMeshTech");
+	}
+	else
+	{
+		technique_ = effect_->TechniqueByName("SkinnedMeshNoNormalMapTech");
 	}
 
 	boost::shared_ptr<RenderModel> model = model_.lock();
@@ -164,13 +179,13 @@ void MD5SkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
-	*(technique_->Effect().ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
+	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
 
 	boost::shared_ptr<RenderModel> model = model_.lock();
 	if (model)
 	{
-		*(technique_->Effect().ParameterByName("joint_rots")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindRotations();
-		*(technique_->Effect().ParameterByName("joint_poss")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindPositions();
+		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindRotations();
+		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindPositions();
 	}
 }
 
@@ -181,7 +196,7 @@ void MD5SkinnedMesh::SetWorld(const float4x4& mat)
 
 void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
 {
-	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos;
+	*(effect_->ParameterByName("eye_pos")) = eye_pos;
 }
 
 

@@ -42,7 +42,7 @@ namespace KlayGE
 	class D3D9Texture : public Texture, public D3D9Resource
 	{
 	public:
-		explicit D3D9Texture(TextureType type, uint32_t access_hint);
+		explicit D3D9Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~D3D9Texture();
 
 		std::wstring const & Name() const;
@@ -100,7 +100,7 @@ namespace KlayGE
 	class D3D9Texture1D : public D3D9Texture
 	{
 	public:
-		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D9Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -140,7 +140,7 @@ namespace KlayGE
 	class D3D9Texture2D : public D3D9Texture
 	{
 	public:
-		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -183,7 +183,7 @@ namespace KlayGE
 	class D3D9Texture3D : public D3D9Texture
 	{
 	public:
-		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D9Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -230,7 +230,7 @@ namespace KlayGE
 	class D3D9TextureCube : public D3D9Texture
 	{
 	public:
-		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

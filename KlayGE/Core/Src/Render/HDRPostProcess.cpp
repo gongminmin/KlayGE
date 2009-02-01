@@ -98,13 +98,13 @@ namespace KlayGE
 
 			try
 			{
-				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 				fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
 			}
 			catch (...)
 			{
 				init_data.row_pitch = 4 * sizeof(float);
-				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+				adapted_textures_[i] = rf.MakeTexture2D(1, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 				fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*adapted_textures_[i], 0));
 			}
 		}
@@ -175,7 +175,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		downsample_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, EF_ABGR16F, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		bool tmp_flipping;
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
@@ -185,7 +186,8 @@ namespace KlayGE
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
-		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		blur_tex_ = rf.MakeTexture2D(width / 4, height / 4, 1, EF_ABGR16F, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0));
@@ -200,7 +202,8 @@ namespace KlayGE
 			int len = 1;
 			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 			{
-				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_R16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_R16F, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				len *= 4;
 			}
 
@@ -225,7 +228,8 @@ namespace KlayGE
 			int len = 1;
 			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
 			{
-				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, EF_ABGR16F, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				len *= 4;
 			}
 

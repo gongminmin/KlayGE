@@ -98,9 +98,6 @@ namespace KlayGE
 			desc.BindFlags = (D3D10_USAGE_STAGING == desc.Usage) ? 0 : bind_flags_;
 			desc.MiscFlags = 0;
 
-			D3D10RenderEngine const & renderEngine(*checked_cast<D3D10RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			d3d_device_ = renderEngine.D3DDevice();
-
 			ID3D10Buffer* buffer;
 			TIF(d3d_device_->CreateBuffer(&desc, NULL, &buffer));
 			buffer_ = MakeCOMPtr(buffer);

@@ -42,13 +42,10 @@
 
 namespace KlayGE
 {
-	D3D10Texture2D::D3D10Texture2D(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
-					: D3D10Texture(TT_2D, access_hint)
+	D3D10Texture2D::D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format,
+						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+					: D3D10Texture(TT_2D, sample_count, sample_quality, access_hint)
 	{
-		D3D10RenderEngine& renderEngine(*checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-
 		numMipMaps_ = numMipMaps;
 		format_		= format;
 		widthes_.assign(1, width);

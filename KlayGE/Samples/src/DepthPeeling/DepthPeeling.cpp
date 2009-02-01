@@ -184,7 +184,7 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0);
 		}
 		catch (...)
@@ -276,31 +276,31 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	ElementFormat peel_format;
 	try
 	{
-		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0);
 		peel_format = EF_ARGB8;
 	}
 	catch (...)
 	{
-		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0);
 		peel_format = EF_ABGR32F;
 	}
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, depth_texs_[0]->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, depth_texs_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_[1] = rf.Make2DRenderView(*depth_texs_[1], 0);
 
-	peeled_depth_view_ = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
+	peeled_depth_view_ = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		try
 		{
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		catch (...)
 		{
 			peel_format = EF_ABGR8;
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 

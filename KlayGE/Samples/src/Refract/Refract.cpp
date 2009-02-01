@@ -198,9 +198,9 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0);
-			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 0);
+			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
 		{
@@ -277,13 +277,13 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 0);
+	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 

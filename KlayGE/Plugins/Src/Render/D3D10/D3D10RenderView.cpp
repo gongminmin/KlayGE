@@ -56,7 +56,14 @@ namespace KlayGE
 		}
 		else
 		{
-			desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
+			if (texture_1d_2d.SampleCount() > 1)
+			{
+				desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMS;
+			}
+			else
+			{
+				desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
+			}
 			desc.Texture2D.MipSlice = level;
 
 			ID3D10RenderTargetView* rt_view;
@@ -97,7 +104,14 @@ namespace KlayGE
 
 		D3D10_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D10Mapping::MappingFormat(texture_cube.Format());
-		desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DARRAY;
+		if (texture_cube.SampleCount() > 1)
+		{
+			desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DARRAY;
+		}
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.FirstArraySlice = face - Texture::CF_Positive_X;
 		desc.Texture2DArray.ArraySize = 1;
@@ -167,7 +181,7 @@ namespace KlayGE
 	}
 
 
-	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level, uint32_t multi_sample)
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level)
 	{
 		BOOST_ASSERT((Texture::TT_1D == texture_1d_2d.Type()) || (Texture::TT_2D == texture_1d_2d.Type()));
 		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
@@ -185,7 +199,14 @@ namespace KlayGE
 		}
 		else
 		{
-			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+			if (texture_1d_2d.SampleCount() > 1)
+			{
+				desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
+			}
+			else
+			{
+				desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+			}
 			desc.Texture2D.MipSlice = level;
 
 			ID3D10DepthStencilView* ds_view;
@@ -198,14 +219,21 @@ namespace KlayGE
 		pf_ = texture_1d_2d.Format();
 	}
 
-	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level, uint32_t multi_sample)
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(texture_cube.AccessHint() & EAH_GPU_Write);
 
 		D3D10_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = D3D10Mapping::MappingFormat(texture_cube.Format());
-		desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DARRAY;
+		if (texture_cube.SampleCount() > 1)
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DARRAY;
+		}
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.FirstArraySlice = face - Texture::CF_Positive_X;
 		desc.Texture2DArray.ArraySize = 1;
@@ -228,7 +256,7 @@ namespace KlayGE
 	}
 
 	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(uint32_t width, uint32_t height,
-											ElementFormat pf, uint32_t /*multi_sample*/)
+											ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
@@ -238,8 +266,8 @@ namespace KlayGE
 		tex_desc.MipLevels = 1;
 		tex_desc.ArraySize = 1;
 		tex_desc.Format = D3D10Mapping::MappingFormat(pf);
-		tex_desc.SampleDesc.Count = 1;
-		tex_desc.SampleDesc.Quality = 0;
+		tex_desc.SampleDesc.Count = sample_count;
+		tex_desc.SampleDesc.Quality = sample_quality;
 		tex_desc.Usage = D3D10_USAGE_DEFAULT;
 		tex_desc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
 		tex_desc.CPUAccessFlags = 0;
@@ -249,7 +277,14 @@ namespace KlayGE
 
 		D3D10_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = tex_desc.Format;
-		desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+		if (sample_count > 1)
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
+		}
+		else
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+		}
 		desc.Texture2D.MipSlice = 0;
 
 		ID3D10DepthStencilView* ds_view;

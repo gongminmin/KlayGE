@@ -29,7 +29,7 @@ namespace KlayGE
 		RenderSettings()
 			: left(0), top(0),
 				depth_stencil_fmt(EF_D16),
-				multi_sample(0)
+				sample_count(1)
 		{
 		}
 
@@ -42,7 +42,8 @@ namespace KlayGE
 		int		height;
 		ElementFormat color_fmt;
 		ElementFormat depth_stencil_fmt;
-		uint32_t multi_sample;
+		uint32_t sample_count;
+		uint32_t sample_quality;
 	};
 }
 

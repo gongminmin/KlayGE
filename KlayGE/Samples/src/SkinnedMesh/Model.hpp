@@ -34,6 +34,7 @@ public:
 
 private:
 	KlayGE::float4x4 world_;
+	KlayGE::RenderEffectPtr effect_;
 };
 
 #endif		// _MODEL_HPP

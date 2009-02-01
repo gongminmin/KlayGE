@@ -50,8 +50,7 @@
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				TreatWChar_tAsBuiltInType="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="KlayGE/KlayGE.hpp"
+				PrecompiledHeaderThrough=""
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>

@@ -177,7 +177,7 @@ namespace
 		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, EF_L8, EAH_GPU_Read, &init_data);
+			ASCII_HEIGHT, 1, EF_L8, 1, 0, EAH_GPU_Read, &init_data);
 	}
 
 	enum
@@ -283,18 +283,18 @@ void AsciiArtsApp::OnResize(uint32_t width, uint32_t height)
 
 	try
 	{
-		rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 	catch (...)
 	{
-		rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR8, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rendered_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_, 0));
-	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
 	downsample_tex_ = rf.MakeTexture2D(width / CELL_WIDTH, height / CELL_HEIGHT,
-		1, rendered_tex_->Format(), EAH_GPU_Read | EAH_GPU_Write, NULL);
+		1, rendered_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	FrameBufferPtr fb = rf.MakeFrameBuffer();
 	fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));

@@ -64,8 +64,8 @@
 
 namespace KlayGE
 {
-	D3D9Texture::D3D9Texture(TextureType type, uint32_t access_hint)
-					: Texture(type, access_hint)
+	D3D9Texture::D3D9Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+					: Texture(type, sample_count, sample_quality, access_hint)
 	{
 		if (access_hint & EAH_GPU_Write)
 		{

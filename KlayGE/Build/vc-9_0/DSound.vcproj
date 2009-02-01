@@ -49,8 +49,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="KlayGE/KlayGE.hpp"
+				PrecompiledHeaderThrough=""
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>

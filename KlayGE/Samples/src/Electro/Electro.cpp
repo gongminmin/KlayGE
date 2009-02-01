@@ -83,7 +83,7 @@ namespace
 				data_v[i] = static_cast<uint8_t>((255 * (data_v[i] - min)) / (max - min));
 			}
 
-			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, EAH_GPU_Read, &init_data);
+			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, 1, 0, EAH_GPU_Read, &init_data);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
 			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;

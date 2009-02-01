@@ -328,7 +328,7 @@ namespace
 
 		try
 		{
-			rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
+			rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
 		}
 		catch (...)
 		{
@@ -337,13 +337,13 @@ namespace
 
 		try
 		{
-			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		catch (...)
 		{
 			try
 			{
-				rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			}
 			catch (...)
 			{
@@ -397,16 +397,16 @@ void ShadowCubeMap::InitObjects()
 	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
 
-	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 0);
+	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
 	for (int i = 0; i < 6; ++ i)
 	{
 		try
 		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_GR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		catch (...)
 		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_ABGR16F, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 
 		shadow_buffers_[i] = rf.MakeFrameBuffer();

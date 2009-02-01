@@ -41,16 +41,16 @@
 
 namespace KlayGE
 {
-	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps,
-								ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
-					: OGLTexture(TT_Cube, access_hint)
+	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+					: OGLTexture(TT_Cube, sample_count, sample_quality, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
 		{
 			format = this->SRGBToRGB(format);
 		}
 
-		format_		= format;
+		format_ = format;
 
 		if (0 == numMipMaps)
 		{

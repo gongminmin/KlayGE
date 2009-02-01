@@ -84,6 +84,9 @@ namespace KlayGE
 		int width = 800;
 		int height = 600;
 		std::string color_fmt_str = "ARGB8";
+		std::string depth_stencil_fmt_str = "D16";
+		int sample_count = 1;
+		int sample_quality = 0;
 		bool full_screen = false;
 
 		boost::program_options::options_description desc("Configuration");
@@ -97,6 +100,9 @@ namespace KlayGE
 			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
 			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
 			("screen.color_fmt", boost::program_options::value<std::string>(&color_fmt_str)->default_value("ARGB8"), "Screen Color Format")
+			("screen.depth_stencil_fmt", boost::program_options::value<std::string>(&depth_stencil_fmt_str)->default_value("D16"), "Screen Depth Stencil Format")
+			("screen.sample_count", boost::program_options::value<int>(&sample_count)->default_value(0), "Screen Sample Count")
+			("screen.sample_quality", boost::program_options::value<int>(&sample_quality)->default_value(0), "Screen Sample Quality")
 			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
 
 		ElementFormat color_fmt = EF_ARGB8;
@@ -111,6 +117,20 @@ namespace KlayGE
 		if ("A2BGR10" == color_fmt_str)
 		{
 			color_fmt = EF_A2BGR10;
+		}
+
+		ElementFormat depth_stencil_fmt = EF_D16;
+		if ("D16" == depth_stencil_fmt_str)
+		{
+			depth_stencil_fmt = EF_D16;
+		}
+		if ("D24S8" == depth_stencil_fmt_str)
+		{
+			depth_stencil_fmt = EF_D24S8;
+		}
+		if ("D32F" == depth_stencil_fmt_str)
+		{
+			depth_stencil_fmt = EF_D32F;
 		}
 
 		std::string rf_name;
@@ -342,6 +362,9 @@ namespace KlayGE
 		settings.width = width;
 		settings.height = height;
 		settings.color_fmt = color_fmt;
+		settings.depth_stencil_fmt = depth_stencil_fmt;
+		settings.sample_count = sample_count;
+		settings.sample_quality = sample_quality;
 		settings.full_screen = full_screen;
 
 		return settings;

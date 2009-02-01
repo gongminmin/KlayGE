@@ -334,11 +334,40 @@ namespace KlayGE
 			D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, NULL, &code, &err_msg, NULL);
 		if (err_msg != NULL)
 		{
+			ID3D10Blob* code2;
+			ID3D10Blob* err_msg2;
+			D3DX10CompileFromMemory(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, macros,
+				NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
+				0, 0, NULL, &code2, &err_msg2, NULL);
+			if (err_msg2 != NULL)
+			{
 #ifdef KLAYGE_DEBUG
-			std::cerr << *shader_text << std::endl;
-			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+				std::cerr << *shader_text << std::endl;
+				std::cerr << static_cast<char*>(err_msg2->GetBufferPointer()) << std::endl;
 #endif
-			err_msg->Release();
+				err_msg->Release();
+				err_msg2->Release();
+
+				if (code)
+				{
+					code->Release();
+				}
+				if (code2)
+				{
+					code2->Release();
+				}
+			}
+			else
+			{
+				if (code)
+				{
+					code->Release();
+				}
+
+				err_msg->Release();
+
+				code = code2;
+			}
 		}
 
 		ID3D10BlobPtr code_blob;

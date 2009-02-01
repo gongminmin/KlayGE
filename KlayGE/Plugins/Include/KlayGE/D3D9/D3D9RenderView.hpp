@@ -171,8 +171,8 @@ namespace KlayGE
 	{
 	public:
 		D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
-			ElementFormat pf, uint32_t multi_sample);
-		D3D9DepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample);
+			ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		D3D9DepthStencilRenderView(Texture& texture, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -186,6 +186,7 @@ namespace KlayGE
 
 	private:
 		D3DMULTISAMPLE_TYPE multi_sample_;
+		uint32_t multi_sample_quality_;
 	};
 	typedef boost::shared_ptr<D3D9DepthStencilRenderView> D3D9DepthStencilRenderViewPtr;
 }

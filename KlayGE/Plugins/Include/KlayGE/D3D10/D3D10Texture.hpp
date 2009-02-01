@@ -28,7 +28,7 @@ namespace KlayGE
 	class D3D10Texture : public Texture
 	{
 	public:
-		explicit D3D10Texture(TextureType type, uint32_t access_hint);
+		explicit D3D10Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~D3D10Texture();
 
 		std::wstring const & Name() const;
@@ -86,7 +86,8 @@ namespace KlayGE
 	class D3D10Texture1D : public D3D10Texture
 	{
 	public:
-		D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -120,7 +121,8 @@ namespace KlayGE
 	class D3D10Texture2D : public D3D10Texture
 	{
 	public:
-		D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -157,7 +159,8 @@ namespace KlayGE
 	class D3D10Texture3D : public D3D10Texture
 	{
 	public:
-		D3D10Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D10Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -198,7 +201,8 @@ namespace KlayGE
 	class D3D10TextureCube : public D3D10Texture
 	{
 	public:
-		D3D10TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		D3D10TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

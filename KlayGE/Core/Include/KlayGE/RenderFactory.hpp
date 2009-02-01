@@ -48,13 +48,13 @@ namespace KlayGE
 		RenderEngine& RenderEngineInstance();
 
 		virtual TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data) = 0;
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data) = 0;
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data) = 0;
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data) = 0;
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual FrameBufferPtr MakeFrameBuffer() = 0;
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
@@ -74,8 +74,9 @@ namespace KlayGE
 		virtual RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level) = 0;
 		virtual RenderViewPtr Make3DRenderView(Texture& texture, uint32_t slice, int level) = 0;
 		virtual RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf) = 0;
-		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample) = 0;
-		virtual RenderViewPtr MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample) = 0;
+		virtual RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf,
+			uint32_t sample_count, uint32_t sample_quality) = 0;
+		virtual RenderViewPtr MakeDepthStencilRenderView(Texture& texture, int level) = 0;
 
 		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);

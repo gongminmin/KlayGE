@@ -48,15 +48,6 @@ namespace KlayGE
                             adapter_(adapter),
                             gi_factory_(gi_factory)
 	{
-		/*if (settings.multi_sample > 16)
-		{
-			multiSample_ = D3DMULTISAMPLE_16_SAMPLES;
-		}
-		else
-		{
-			multiSample_ = static_cast<D3DMULTISAMPLE_TYPE>(settings.multi_sample);
-		}*/
-
 		// Store info
 		name_				= name;
 		width_				= settings.width;
@@ -121,24 +112,11 @@ namespace KlayGE
 		sc_desc_.BufferDesc.RefreshRate.Denominator = 1;
 		sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		sc_desc_.OutputWindow = hWnd_;
-		sc_desc_.SampleDesc.Count = 1;
-		sc_desc_.SampleDesc.Quality = 0;
+		sc_desc_.SampleDesc.Count = settings.sample_count;
+		sc_desc_.SampleDesc.Quality = settings.sample_quality;
 		sc_desc_.Windowed = !this->FullScreen();
 		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		sc_desc_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-		/*if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(),
-			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
-			multiSample_, NULL)))
-		{
-			d3dpp_.MultiSampleType		= multiSample_;
-			d3dpp_.MultiSampleQuality	= 0;
-		}
-		else
-		{
-			d3dpp_.MultiSampleType		= D3DMULTISAMPLE_NONE;
-			d3dpp_.MultiSampleQuality	= 0;
-		}*/
 
 		viewport_.left		= 0;
 		viewport_.top		= 0;
@@ -491,6 +469,8 @@ namespace KlayGE
 		ID3D10Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D10Texture2D, reinterpret_cast<void**>(&back_buffer)));
 		back_buffer_ = MakeCOMPtr(back_buffer);
+		D3D10_TEXTURE2D_DESC bb_desc;
+		back_buffer_->GetDesc(&bb_desc);
 		ID3D10RenderTargetView* render_target_view;
 		TIF(d3d_device_->CreateRenderTargetView(back_buffer_.get(), NULL, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
@@ -502,8 +482,8 @@ namespace KlayGE
 		ds_desc.MipLevels = 1;
 		ds_desc.ArraySize = 1;
 		ds_desc.Format = depth_stencil_format_;
-		ds_desc.SampleDesc.Count = 1;
-		ds_desc.SampleDesc.Quality = 0;
+		ds_desc.SampleDesc.Count = bb_desc.SampleDesc.Count;
+		ds_desc.SampleDesc.Quality = bb_desc.SampleDesc.Quality;
 		ds_desc.Usage = D3D10_USAGE_DEFAULT;
 		ds_desc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
 		ds_desc.CPUAccessFlags = 0;
@@ -515,7 +495,14 @@ namespace KlayGE
 		// Create the depth stencil view
 		D3D10_DEPTH_STENCIL_VIEW_DESC dsv_desc;
 		dsv_desc.Format = depth_stencil_format_;
-		dsv_desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+		if (bb_desc.SampleDesc.Count > 0)
+		{
+			dsv_desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
+		}
+		else
+		{
+			dsv_desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+		}
 		dsv_desc.Texture2D.MipSlice = 0;
 		ID3D10DepthStencilView* depth_stencil_view;
 		TIF(d3d_device_->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));

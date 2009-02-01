@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
 	TexturePtr src_texture = LoadTexture(src_name, EAH_CPU_Read | EAH_CPU_Write)();
 	if (Texture::TT_2D == src_texture->Type())
 	{
-		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8, EAH_CPU_Read | EAH_CPU_Write, NULL);
+		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_L8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*height_map_texture);
 		
 		std::vector<uint8_t> height_map(height * width);
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 	{
 		BOOST_ASSERT(Texture::TT_3D == src_texture->Type());
 
-		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8, EAH_CPU_Read | EAH_CPU_Write, NULL);
+		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*vol_map_texture);
 
 		Texture::Mapper mapper(*vol_map_texture, 0, TMA_Read_Only, 0, 0, 0, width, height, depth);
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 
 	cout << endl << "Computing time: " << clock() - start << " ms" << endl;
 
-	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8, EAH_CPU_Read | EAH_CPU_Write, NULL);
+	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, EF_L8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 
 	{
 		Texture::Mapper mapper(*distance_map_texture, 0, TMA_Write_Only, 0, 0, 0, width, height, depth);

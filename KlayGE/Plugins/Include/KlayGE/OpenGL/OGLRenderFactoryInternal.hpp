@@ -31,13 +31,13 @@ namespace KlayGE
 		std::wstring const & Name() const;
 
 		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-				ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-				ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-				uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+				uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-				ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		FrameBufferPtr MakeFrameBuffer();
 
@@ -53,8 +53,8 @@ namespace KlayGE
 		RenderViewPtr Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level);
 		RenderViewPtr Make3DRenderView(Texture& texture, uint32_t slice, int level);
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf);
-		RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
-		RenderViewPtr MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample);
+		RenderViewPtr MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		RenderViewPtr MakeDepthStencilRenderView(Texture& texture, int level);
 
 		ShaderObjectPtr MakeShaderObject();
 

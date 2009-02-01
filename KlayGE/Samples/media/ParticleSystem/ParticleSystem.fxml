@@ -85,10 +85,10 @@ float4 ParticlePS(float4 pos : POSITION,
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = tex2D(scene_sampler, tex_coord).a;
+		float depth = tex2Dlod(scene_sampler, float4(tex_coord, 0, 0)).a;
 
 		float3 intersect = (v - sqrt(disc)) * view_dir;
-		clr *= tex2D(particle_sampler, (intersect.xy - CenterView.xy) / point_radius / 2 + 0.5);
+		clr *= tex2Dlod(particle_sampler, float4((intersect.xy - CenterView.xy) / point_radius / 2 + 0.5, 0, 0));
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 

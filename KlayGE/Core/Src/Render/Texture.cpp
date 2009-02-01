@@ -210,22 +210,22 @@ namespace KlayGE
 			{
 			case Texture::TT_1D:
 				texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps,
-					tex_desc->format, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 				break;
 
 			case Texture::TT_2D:
 				texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps,
-					tex_desc->format, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 				break;
 
 			case Texture::TT_3D:
 				texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps,
-					tex_desc->format, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 				break;
 
 			case Texture::TT_Cube:
 				texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps,
-					tex_desc->format, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 				break;
 
 			default:
@@ -1238,22 +1238,22 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, format, EAH_CPU_Read, NULL);
+				numMipMaps, 1, 0, format, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_2D:
 			texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
-				numMipMaps, format, EAH_CPU_Read, NULL);
+				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_3D:
 			texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
-				texture->Depth(0), numMipMaps, format, EAH_CPU_Read, NULL);
+				texture->Depth(0), numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_Cube:
 			texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
-				numMipMaps, format, EAH_CPU_Read, NULL);
+				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		default:
@@ -1479,8 +1479,8 @@ namespace KlayGE
 	class NullTexture : public Texture
 	{
 	public:
-		NullTexture(TextureType type, uint32_t access_hint)
-			: Texture(type, access_hint)
+		NullTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+			: Texture(type, sample_count, sample_quality, access_hint)
 		{
 		}
 
@@ -1573,8 +1573,8 @@ namespace KlayGE
 	};
 
 
-	Texture::Texture(Texture::TextureType type, uint32_t access_hint)
-			: type_(type), access_hint_(access_hint)
+	Texture::Texture(Texture::TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+			: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
 	{
 	}
 
@@ -1584,7 +1584,7 @@ namespace KlayGE
 
 	TexturePtr Texture::NullObject()
 	{
-		static TexturePtr obj = MakeSharedPtr<NullTexture>(TT_2D, 0);
+		static TexturePtr obj = MakeSharedPtr<NullTexture>(TT_2D, 1, 0, 0);
 		return obj;
 	}
 
@@ -1606,6 +1606,16 @@ namespace KlayGE
 	Texture::TextureType Texture::Type() const
 	{
 		return type_;
+	}
+
+	uint32_t Texture::SampleCount() const
+	{
+		return sample_count_;
+	}
+	
+	uint32_t Texture::SampleQuality() const
+	{
+		return sample_quality_;
 	}
 
 	uint32_t Texture::AccessHint() const

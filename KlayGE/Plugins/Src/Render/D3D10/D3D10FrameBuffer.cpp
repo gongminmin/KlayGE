@@ -122,8 +122,8 @@ namespace KlayGE
 
 	void D3D10FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
 	{
-		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine const *>(&re)->D3DDevice();
+		D3D10RenderEngine const & re = *checked_cast<D3D10RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D10DevicePtr const & d3d_device = re.D3DDevice();
 
 		if (flags & CBM_Color)
 		{

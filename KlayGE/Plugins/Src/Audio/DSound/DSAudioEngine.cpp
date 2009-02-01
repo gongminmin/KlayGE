@@ -10,8 +10,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#include <KlayGE/KlayGE.hpp>
 #define INITGUID
+#include <KlayGE/KlayGE.hpp>
 #include <KlayGE/COMPtr.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/AudioDataSource.hpp>

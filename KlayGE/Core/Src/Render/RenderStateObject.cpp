@@ -36,7 +36,7 @@ namespace KlayGE
 			polygon_offset_factor(0),
 			polygon_offset_units(0),
 			scissor_enable(false),
-			multisample_enable(false)
+			multisample_enable(true)
 	{
 	}
 

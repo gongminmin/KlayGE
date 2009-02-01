@@ -199,9 +199,9 @@ namespace KlayGE
 
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		if (settings.multi_sample != 0)
+		if (settings.sample_count > 1)
 		{
-			glSampleCoverage(settings.multi_sample / 16.0f, false);
+			glSampleCoverage(settings.sample_count / 16.0f, false);
 		}
 
 		if (glloader_GL_ARB_color_buffer_float())

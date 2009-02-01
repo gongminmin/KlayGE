@@ -40,24 +40,24 @@ namespace KlayGE
 	}
 
 	TexturePtr D3D10RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return MakeSharedPtr<D3D10Texture1D>(width, numMipMaps, format, access_hint, init_data);
+		return MakeSharedPtr<D3D10Texture1D>(width, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 	TexturePtr D3D10RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
-			ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return MakeSharedPtr<D3D10Texture2D>(width, height, numMipMaps, format, access_hint, init_data);
+		return MakeSharedPtr<D3D10Texture2D>(width, height, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 	TexturePtr D3D10RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth,
-			uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
+			uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return MakeSharedPtr<D3D10Texture3D>(width, height, depth, numMipMaps, format, access_hint, init_data);
+		return MakeSharedPtr<D3D10Texture3D>(width, height, depth, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 	TexturePtr D3D10RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
-		ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
+		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
-		return MakeSharedPtr<D3D10TextureCube>(size, numMipMaps, format, access_hint, init_data);
+		return MakeSharedPtr<D3D10TextureCube>(size, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
 	FrameBufferPtr D3D10RenderFactory::MakeFrameBuffer()
@@ -117,14 +117,14 @@ namespace KlayGE
 	}
 
 	RenderViewPtr D3D10RenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height,
-		ElementFormat pf, uint32_t multi_sample)
+		ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 	{
-		return MakeSharedPtr<D3D10DepthStencilRenderView>(width, height, pf, multi_sample);
+		return MakeSharedPtr<D3D10DepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr D3D10RenderFactory::MakeDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample)
+	RenderViewPtr D3D10RenderFactory::MakeDepthStencilRenderView(Texture& texture, int level)
 	{
-		return MakeSharedPtr<D3D10DepthStencilRenderView>(texture, level, multi_sample);
+		return MakeSharedPtr<D3D10DepthStencilRenderView>(texture, level);
 	}
 
 	ShaderObjectPtr D3D10RenderFactory::MakeShaderObject()

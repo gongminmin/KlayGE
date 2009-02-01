@@ -69,13 +69,13 @@ namespace KlayGE
                             adapter_(adapter),
                             d3d_(d3d)
 	{
-		if (settings.multi_sample > 16)
+		if (settings.sample_count > 16)
 		{
 			multiSample_ = D3DMULTISAMPLE_16_SAMPLES;
 		}
 		else
 		{
-			multiSample_ = static_cast<D3DMULTISAMPLE_TYPE>(settings.multi_sample);
+			multiSample_ = (settings.sample_count <= 1) ? D3DMULTISAMPLE_NONE : static_cast<D3DMULTISAMPLE_TYPE>(settings.sample_count);
 		}
 
 		// Store info
@@ -233,7 +233,7 @@ namespace KlayGE
 			multiSample_, NULL)))
 		{
 			d3dpp_.MultiSampleType		= multiSample_;
-			d3dpp_.MultiSampleQuality	= 0;
+			d3dpp_.MultiSampleQuality	= settings.sample_quality;
 		}
 		else
 		{
@@ -470,7 +470,7 @@ namespace KlayGE
 		return adapter_;
 	}
 
-	ID3D9DevicePtr D3D9RenderWindow::D3DDevice() const
+	ID3D9DevicePtr const & D3D9RenderWindow::D3DDevice() const
 	{
 		return d3dDevice_;
 	}

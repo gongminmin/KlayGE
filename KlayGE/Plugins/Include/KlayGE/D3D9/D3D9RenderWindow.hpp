@@ -50,7 +50,7 @@ namespace KlayGE
 		void FullScreen(bool fs);
 
 		D3D9Adapter const & Adapter() const;
-		ID3D9DevicePtr D3DDevice() const;
+		ID3D9DevicePtr const & D3DDevice() const;
 		ID3D9SurfacePtr D3DBackBuffer() const
 		{
 			return renderSurface_;

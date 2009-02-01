@@ -186,8 +186,8 @@ namespace KlayGE
 	class OGLDepthStencilRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
-		OGLDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample);
+		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		OGLDepthStencilRenderView(Texture& texture, int level);
 		~OGLDepthStencilRenderView();
 
 		void Clear(Color const & clr);
@@ -197,7 +197,7 @@ namespace KlayGE
 
 	private:
 		int level_;
-		uint32_t multi_sample_;
+		uint32_t sample_count_, sample_quality_;
 		GLuint rbo_;
 	};
 

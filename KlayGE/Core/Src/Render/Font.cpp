@@ -137,8 +137,8 @@ namespace KlayGE
 		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 		dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
-			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, EAH_GPU_Read, NULL);
-		a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_L8, EAH_CPU_Write, NULL);
+			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_L8, 1, 0, EAH_GPU_Read, NULL);
+		a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_L8, 1, 0, EAH_CPU_Write, NULL);
 
 		effect_ = rf.LoadEffect("Font.kfx");
 		*(effect_->ParameterByName("distance_sampler")) = dist_texture_;

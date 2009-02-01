@@ -29,7 +29,7 @@ namespace KlayGE
 	class OGLTexture : public Texture
 	{
 	public:
-		OGLTexture(TextureType type, uint32_t access_hint);
+		OGLTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~OGLTexture();
 
 		std::wstring const & Name() const;
@@ -101,7 +101,8 @@ namespace KlayGE
 	class OGLTexture1D : public OGLTexture
 	{
 	public:
-		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		OGLTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -129,7 +130,8 @@ namespace KlayGE
 	class OGLTexture2D : public OGLTexture
 	{
 	public:
-		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		OGLTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -160,7 +162,8 @@ namespace KlayGE
 	class OGLTexture3D : public OGLTexture
 	{
 	public:
-		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;
@@ -195,7 +198,8 @@ namespace KlayGE
 	class OGLTextureCube : public OGLTexture
 	{
 	public:
-		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data);
+		OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

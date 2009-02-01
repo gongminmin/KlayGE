@@ -42,9 +42,9 @@
 
 namespace KlayGE
 {
-	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height,
-								uint16_t numMipMaps, ElementFormat format, uint32_t access_hint, ElementInitData* init_data)
-					: D3D9Texture(TT_2D, access_hint),
+	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format,
+							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+					: D3D9Texture(TT_2D, sample_count, sample_quality, access_hint),
 						auto_gen_mipmaps_(false)
 	{
 		if (IsDepthFormat(format))
@@ -84,7 +84,7 @@ namespace KlayGE
 			if (access_hint & EAH_GPU_Write)
 			{
 				TexturePtr sys_mem = Context::Instance().RenderFactoryInstance().MakeTexture2D(widths_[0],
-					heights_[0], numMipMaps_, format_, EAH_CPU_Write, init_data);
+					heights_[0], numMipMaps_, format_, sample_count, sample_quality, EAH_CPU_Write, init_data);
 				sys_mem->CopyToTexture(*this);
 			}
 			else

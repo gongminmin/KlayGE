@@ -192,7 +192,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit Texture(TextureType type, uint32_t access_hint);
+		explicit Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~Texture();
 
 		static TexturePtr NullObject();
@@ -217,6 +217,9 @@ namespace KlayGE
 
 		// Returns the texture type of the texture.
 		TextureType Type() const;
+
+		uint32_t SampleCount() const;
+		uint32_t SampleQuality() const;
 
 		uint32_t AccessHint() const;
 
@@ -264,6 +267,7 @@ namespace KlayGE
 
 		ElementFormat	format_;
 		TextureType		type_;
+		uint32_t		sample_count_, sample_quality_; 
 		uint32_t		access_hint_;
 	};
 

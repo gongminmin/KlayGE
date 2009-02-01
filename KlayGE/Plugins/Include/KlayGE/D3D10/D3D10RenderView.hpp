@@ -70,10 +70,10 @@ namespace KlayGE
 	class D3D10DepthStencilRenderView : public D3D10RenderView
 	{
 	public:
-		D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level, uint32_t multi_sample);
-		D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level, uint32_t multi_sample);
+		D3D10DepthStencilRenderView(Texture& texture_1d_2d, int level);
+		D3D10DepthStencilRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
 		D3D10DepthStencilRenderView(ID3D10DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf);
-		D3D10DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t multi_sample);
+		D3D10DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
 
 		void Clear(Color const & clr);
 		void Clear(float depth);

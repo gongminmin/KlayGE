@@ -39,22 +39,22 @@ float4 SATScanXDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0)
 	int r = fmod(x, 4);
 	if (3 == r)
 	{
-		clr = tex2D(src_sampler, float2(tex_coord0.x * scale, tex_coord0.y));
+		clr = tex2Dlod(src_sampler, float4(tex_coord0.x * scale, tex_coord0.y, 0, 0));
 	}
 	else
 	{
-		clr = tex2D(child_sampler, tex_coord0);
+		clr = tex2Dlod(child_sampler, float4(tex_coord0, 0, 0));
 		if (x > 3)
 		{
-			clr += tex2D(src_sampler, float2(tex_coord0.x * scale - addr_offset.x, tex_coord0.y));
+			clr += tex2Dlod(src_sampler, float4(tex_coord0.x * scale - addr_offset.x, tex_coord0.y, 0, 0));
 		}
 		if (r >= 1)
 		{
-			clr += tex2D(child_sampler, tex_coord0 - float2(addr_offset.y, 0));
+			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(addr_offset.y, 0), 0, 0));
 		}
 		if (r >= 2)
 		{
-			clr += tex2D(child_sampler, tex_coord0 - float2(addr_offset.z, 0));
+			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(addr_offset.z, 0), 0, 0));
 		}
 	}
 	return clr;
@@ -76,22 +76,22 @@ float4 SATScanYDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0)
 	int r = fmod(y, 4);
 	if (3 == r)
 	{
-		clr = tex2D(src_sampler, float2(tex_coord0.x, tex_coord0.y * scale));
+		clr = tex2Dlod(src_sampler, float4(tex_coord0.x, tex_coord0.y * scale, 0, 0));
 	}
 	else
 	{
-		clr = tex2D(child_sampler, tex_coord0);
+		clr = tex2Dlod(child_sampler, float4(tex_coord0, 0, 0));
 		if (y > 3)
 		{
-			clr += tex2D(src_sampler, float2(tex_coord0.x, tex_coord0.y * scale - addr_offset.x));
+			clr += tex2Dlod(src_sampler, float4(tex_coord0.x, tex_coord0.y * scale - addr_offset.x, 0, 0));
 		}
 		if (r >= 1)
 		{
-			clr += tex2D(child_sampler, tex_coord0 - float2(0, addr_offset.y));
+			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(0, addr_offset.y), 0, 0));
 		}
 		if (r >= 2)
 		{
-			clr += tex2D(child_sampler, tex_coord0 - float2(0, addr_offset.z));
+			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(0, addr_offset.z), 0, 0));
 		}
 	}
 	return clr;

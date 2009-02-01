@@ -766,9 +766,9 @@ namespace KlayGE
 
 
 	OGLDepthStencilRenderView::OGLDepthStencilRenderView(uint32_t width, uint32_t height,
-									ElementFormat pf, uint32_t multi_sample)
+									ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 		: level_(-1),
-			multi_sample_(multi_sample)
+			sample_count_(sample_count), sample_quality_(sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
@@ -787,9 +787,8 @@ namespace KlayGE
 								glformat, width_, height_);
 	}
 
-	OGLDepthStencilRenderView::OGLDepthStencilRenderView(Texture& texture, int level, uint32_t multi_sample)
-		: multi_sample_(multi_sample),
-			level_(level)
+	OGLDepthStencilRenderView::OGLDepthStencilRenderView(Texture& texture, int level)
+		: level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture.Type());
 		BOOST_ASSERT(IsDepthFormat(texture.Format()));

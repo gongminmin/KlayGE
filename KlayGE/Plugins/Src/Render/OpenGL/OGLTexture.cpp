@@ -39,8 +39,8 @@
 
 namespace KlayGE
 {
-	OGLTexture::OGLTexture(TextureType type, uint32_t access_hint)
-					: Texture(type, access_hint)
+	OGLTexture::OGLTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+					: Texture(type, sample_count, sample_quality, access_hint)
 	{
 		switch (type_)
 		{

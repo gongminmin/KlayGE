@@ -14,6 +14,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
@@ -25,6 +26,7 @@
 #include <d3d10.h>
 #include <d3dx10.h>
 
+#include <KlayGE/D3D10/D3D10RenderEngine.hpp>
 #include <KlayGE/D3D10/D3D10Texture.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -37,14 +39,17 @@
 
 namespace KlayGE
 {
-	D3D10Texture::D3D10Texture(TextureType type, uint32_t access_hint)
-					: Texture(type, access_hint)
+	D3D10Texture::D3D10Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+					: Texture(type, sample_count, sample_quality, access_hint)
 	{
 		if (access_hint & EAH_GPU_Write)
 		{
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Read));
 			BOOST_ASSERT(!(access_hint & EAH_CPU_Write));
 		}
+
+		D3D10RenderEngine& renderEngine(*checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
+		d3d_device_ = renderEngine.D3DDevice();
 	}
 
 	D3D10Texture::~D3D10Texture()
