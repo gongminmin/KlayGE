@@ -49,11 +49,11 @@ namespace KlayGE
 	{
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
-		std::wstring wname;
-		Convert(wname, name);
+		Convert(wname_, name);
 
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
+		name_ = name;
 		WNDCLASSEXA wc;
 #else
 		WNDCLASSEXW wc;
@@ -69,9 +69,9 @@ namespace KlayGE
 		wc.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
 		wc.lpszMenuName		= NULL;
 #ifdef KLAYGE_COMPILER_GCC
-		wc.lpszClassName	= name.c_str();
+		wc.lpszClassName	= name_.c_str();
 #else
-		wc.lpszClassName	= wname.c_str();
+		wc.lpszClassName	= wname_.c_str();
 #endif
 		wc.hIconSm			= NULL;
 #ifdef KLAYGE_COMPILER_GCC
@@ -96,11 +96,11 @@ namespace KlayGE
 		// Create our main window
 		// Pass pointer to self
 #ifdef KLAYGE_COMPILER_GCC
-		wnd_ = ::CreateWindowA(name.c_str(), name.c_str(),
+		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
 			style, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #else
-		wnd_ = ::CreateWindowW(wname.c_str(), wname.c_str(),
+		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
 			style, left, top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #endif
@@ -131,6 +131,43 @@ namespace KlayGE
 			::DestroyWindow(wnd_);
 			wnd_ = NULL;
 		}
+	}
+
+	void Window::Recreate()
+	{
+		HINSTANCE hInst = ::GetModuleHandle(NULL);
+
+		uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
+		RECT rc = { 0, 0, width_, height_ };
+		::AdjustWindowRect(&rc, style, false);
+
+		::DestroyWindow(wnd_);
+
+#ifdef KLAYGE_COMPILER_GCC
+		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
+			style, left_, top_,
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+#else
+		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
+			style, left_, top_,
+			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
+#endif
+
+		::GetClientRect(wnd_, &rc);
+		width_ = rc.right - rc.left;
+		height_ = rc.bottom - rc.top;
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
+		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+		::ShowWindow(wnd_, SW_SHOWNORMAL);
+		::UpdateWindow(wnd_);
 	}
 
 	LRESULT Window::MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

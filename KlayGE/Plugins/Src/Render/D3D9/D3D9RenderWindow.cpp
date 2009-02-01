@@ -43,6 +43,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <vector>
+#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
@@ -69,15 +70,6 @@ namespace KlayGE
                             adapter_(adapter),
                             d3d_(d3d)
 	{
-		if (settings.sample_count > 16)
-		{
-			multiSample_ = D3DMULTISAMPLE_16_SAMPLES;
-		}
-		else
-		{
-			multiSample_ = (settings.sample_count <= 1) ? D3DMULTISAMPLE_NONE : static_cast<D3DMULTISAMPLE_TYPE>(settings.sample_count);
-		}
-
 		// Store info
 		name_				= name;
 		width_				= settings.width;
@@ -228,11 +220,17 @@ namespace KlayGE
 		d3dpp_.Flags					= isDepthBuffered_ ? D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL : 0;
 
 
-		if ((multiSample_ != 0) && SUCCEEDED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(),
-			D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
-			multiSample_, NULL)))
+		int sample_count = std::min(static_cast<uint32_t>(16), settings.sample_count);
+		if (sample_count > 1)
 		{
-			d3dpp_.MultiSampleType		= multiSample_;
+			while ((sample_count > 1) && (FAILED(d3d_->CheckDeviceMultiSampleType(this->adapter_.AdapterNo(),
+				D3DDEVTYPE_HAL, d3dpp_.BackBufferFormat, !isFullScreen_,
+				static_cast<D3DMULTISAMPLE_TYPE>(sample_count), NULL))))
+			{
+				-- sample_count;
+			}
+
+			d3dpp_.MultiSampleType		= (sample_count > 1) ? static_cast<D3DMULTISAMPLE_TYPE>(sample_count) : D3DMULTISAMPLE_NONE;
 			d3dpp_.MultiSampleQuality	= settings.sample_quality;
 		}
 		else
@@ -248,7 +246,6 @@ namespace KlayGE
 
 
 		Convert(description_, adapter_.Description());
-		description_ += L' ';
 
 		D3D9RenderEngine& re(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		if (re.D3DDevice())
@@ -330,7 +327,14 @@ namespace KlayGE
 					}
 					else
 					{
-						description_ += boost::get<2>(dev_type_beh);
+						std::wstringstream oss;
+						oss << description_ << L" " << boost::get<2>(dev_type_beh);
+						if (sample_count > 1)
+						{
+							oss << L" (" << sample_count << L"x AA)";
+						}
+						description_ = oss.str();
+
 						break;
 					}
 				}

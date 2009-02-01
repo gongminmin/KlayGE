@@ -94,12 +94,10 @@ namespace KlayGE
 			if (desc_.multisample_enable)
 			{
 				glEnable(GL_MULTISAMPLE);
-				glEnable(GL_SAMPLE_COVERAGE);
 			}
 			else
 			{
 				glDisable(GL_MULTISAMPLE);
-				glDisable(GL_SAMPLE_COVERAGE);
 			}
 		}
 	}
@@ -143,12 +141,10 @@ namespace KlayGE
 		if (desc.multisample_enable)
 		{
 			glEnable(GL_MULTISAMPLE);
-			glEnable(GL_SAMPLE_COVERAGE);
 		}
 		else
 		{
 			glDisable(GL_MULTISAMPLE);
-			glDisable(GL_SAMPLE_COVERAGE);
 		}
 	}
 

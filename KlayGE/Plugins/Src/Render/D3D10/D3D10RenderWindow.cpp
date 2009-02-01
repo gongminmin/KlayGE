@@ -22,6 +22,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <vector>
+#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
@@ -112,7 +113,7 @@ namespace KlayGE
 		sc_desc_.BufferDesc.RefreshRate.Denominator = 1;
 		sc_desc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		sc_desc_.OutputWindow = hWnd_;
-		sc_desc_.SampleDesc.Count = settings.sample_count;
+		sc_desc_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D10_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
 		sc_desc_.SampleDesc.Quality = settings.sample_quality;
 		sc_desc_.Windowed = !this->FullScreen();
 		sc_desc_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -123,8 +124,6 @@ namespace KlayGE
 		viewport_.width		= width_;
 		viewport_.height	= height_;
 
-
-		description_ = adapter_->Description() + L' ';
 
 		D3D10RenderEngine& re(*checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		if (re.D3DDevice())
@@ -196,7 +195,13 @@ namespace KlayGE
 						}
 						adapter_->Enumerate();
 
-						description_ += boost::get<1>(dev_type_beh);
+						std::wostringstream oss;
+						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);
+						if (settings.sample_count > 1)
+						{
+							oss << L" (" << settings.sample_count << "x AA)";
+						}
+						description_ = oss.str();
 						break;
 					}
 				}

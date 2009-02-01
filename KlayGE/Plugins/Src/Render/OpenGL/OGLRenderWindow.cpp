@@ -28,6 +28,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <map>
+#include <sstream>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
 
@@ -64,6 +65,9 @@ namespace KlayGE
 		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+		hWnd_ = main_wnd->HWnd();
+		hDC_ = ::GetDC(hWnd_);
+
 		uint32_t style;
 		if (isFullScreen_)
 		{
@@ -91,17 +95,12 @@ namespace KlayGE
 			style = WS_OVERLAPPEDWINDOW;
 		}
 
-		hWnd_ = main_wnd->HWnd();
-
 		RECT rc = { 0, 0, width_, height_ };
 		::AdjustWindowRect(&rc, style, false);
 
 		::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
 		::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_SHOWWINDOW | SWP_NOZORDER);
-
-
-		hDC_ = ::GetDC(hWnd_);
 
 		// there is no guarantee that the contents of the stack that become
 		// the pfd are zeroed, therefore _make sure_ to clear these bits.
@@ -113,9 +112,10 @@ namespace KlayGE
 		pfd.iPixelType	= PFD_TYPE_RGBA;
 		pfd.cColorBits	= static_cast<BYTE>(colorDepth_);
 		pfd.cDepthBits	= static_cast<BYTE>(depthBits_);
+		pfd.cStencilBits = static_cast<BYTE>(stencilBits_);
 		pfd.iLayerType	= PFD_MAIN_PLANE;
 
-		int pixelFormat(::ChoosePixelFormat(hDC_, &pfd));
+		int pixelFormat = ::ChoosePixelFormat(hDC_, &pfd);
 		BOOST_ASSERT(pixelFormat != 0);
 
 		::SetPixelFormat(hDC_, pixelFormat, &pfd);
@@ -123,6 +123,59 @@ namespace KlayGE
 
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
+
+		uint32_t sample_count = settings.sample_count;
+
+		if (sample_count > 1)
+		{
+			UINT num_formats;
+			float float_attrs[] = { 0, 0 };
+			BOOL valid;
+			do
+			{
+				int int_attrs[] =
+				{
+					WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+					WGL_COLOR_BITS_ARB, colorDepth_,
+					WGL_DEPTH_BITS_ARB, depthBits_,
+					WGL_STENCIL_BITS_ARB, stencilBits_,
+					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+					WGL_SAMPLES_ARB, sample_count,
+					0, 0
+				};
+
+				valid = wglChoosePixelFormatARB(hDC_, int_attrs, float_attrs, 1, &pixelFormat, &num_formats);
+				if (!valid || (num_formats < 1))
+				{
+					-- sample_count;
+				}
+			} while ((sample_count > 1) && (!valid || (num_formats < 1)));
+
+			if (valid && (sample_count > 1))
+			{
+				main_wnd->Recreate();
+
+				hWnd_ = main_wnd->HWnd();
+				hDC_ = ::GetDC(hWnd_);
+
+				::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
+				::SetWindowPos(hWnd_, NULL, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
+					SWP_SHOWWINDOW | SWP_NOZORDER);
+
+				::SetPixelFormat(hDC_, pixelFormat, &pfd);
+
+				::wglDeleteContext(hRC_);
+
+				hRC_ = ::wglCreateContext(hDC_);
+				::wglMakeCurrent(hDC_, hRC_);
+
+				// reinit glloader
+				glloader_init();
+			}
+		}
 
 		if (glloader_WGL_ARB_create_context())
 		{
@@ -139,6 +192,7 @@ namespace KlayGE
 				glloader_init();
 			}
 		}
+
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (isFullScreen_)
 		{
@@ -199,10 +253,6 @@ namespace KlayGE
 
 		glEnable(GL_COLOR_MATERIAL);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		if (settings.sample_count > 1)
-		{
-			glSampleCoverage(settings.sample_count / 16.0f, false);
-		}
 
 		if (glloader_GL_ARB_color_buffer_float())
 		{
@@ -235,7 +285,13 @@ namespace KlayGE
 		Convert(vendor, reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
 		Convert(renderer, reinterpret_cast<char const *>(glGetString(GL_RENDERER)));
 		Convert(version, reinterpret_cast<char const *>(glGetString(GL_VERSION)));
-		description_ = vendor + L" " + renderer + L" " + version;
+		std::wostringstream oss;
+		oss << vendor << L" " << renderer << L" " << version;
+		if (sample_count > 1)
+		{
+			oss << L" (" << sample_count << L"x AA)";
+		}
+		description_ = oss.str();
 
 		active_ = true;
 		ready_ = true;
