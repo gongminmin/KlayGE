@@ -61,6 +61,9 @@ float4 FontPS(float4 pos : POSITION, float2 texCoord : TEXCOORD0, float4 clr : C
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 			
 			<state name="vertex_shader" value="Font2DVS()"/>
 			<state name="pixel_shader" value="FontPS()"/>
@@ -72,6 +75,9 @@ float4 FontPS(float4 pos : POSITION, float2 texCoord : TEXCOORD0, float4 clr : C
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="Font3DVS()"/>
 			<state name="pixel_shader" value="FontPS()"/>

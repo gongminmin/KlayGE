@@ -131,12 +131,17 @@ uint32_t TextApp::DoUpdate(uint32_t /*pass*/)
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	std::wostringstream stream;
-	stream << this->FPS();
+	stream.precision(2);
+	stream << fixed << this->FPS() << L" FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+	
+	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
-	font_->RenderText(0, 0, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(16 * scale_));
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(16 * scale_));
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }
