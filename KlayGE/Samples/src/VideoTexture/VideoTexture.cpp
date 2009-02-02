@@ -126,7 +126,7 @@ VideoTextureApp::VideoTextureApp(std::string const & name, RenderSettings const 
 void VideoTextureApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
@@ -172,8 +172,8 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

@@ -195,7 +195,7 @@ DistanceMapping::DistanceMapping(std::string const & name, RenderSettings const 
 void DistanceMapping::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_.reset(new PolygonObject);
 	polygon_->AddToSceneManager();
@@ -243,9 +243,9 @@ uint32_t DistanceMapping::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS() << " FPS";
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Distance Mapping");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), renderEngine.Name());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Distance Mapping", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), renderEngine.Name(), 16);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

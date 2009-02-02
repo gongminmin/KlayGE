@@ -235,7 +235,7 @@ void AsciiArtsApp::BuildAsciiLumsTex()
 
 void AsciiArtsApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	this->LookAt(float3(0.0f, 0.3f, -0.2f), float3(0.0f, 0.1f, 0.0f));
 	this->Proj(0.1f, 100.0f);
@@ -384,14 +384,14 @@ uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII Arts");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ASCII Arts", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
 	if (!show_ascii_ && (0 == pass))
 	{

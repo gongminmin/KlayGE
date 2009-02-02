@@ -174,22 +174,19 @@ namespace KlayGE
 		};
 
 	public:
-		Font(RenderablePtr const & font_renderable, uint32_t fontHeight = 16, uint32_t flags = 0);
+		Font(RenderablePtr const & font_renderable, uint32_t flags = 0);
 
-		Size_T<uint32_t> CalcSize(std::wstring const & text);
+		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_size);
 		void RenderText(float x, float y, Color const & clr,
-			std::wstring const & text);
+			std::wstring const & text, uint32_t font_size);
 		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
-			std::wstring const & text);
+			std::wstring const & text, uint32_t font_size);
 		void RenderText(Rect const & rc, float z, float xScale, float yScale, Color const & clr, 
-			std::wstring const & text, uint32_t align);
-		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text);
-
-		uint32_t FontHeight() const;
+			std::wstring const & text, uint32_t font_size, uint32_t align);
+		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size);
 
 	private:
 		RenderablePtr	font_renderable_;
-		uint32_t		font_height_;
 		uint32_t		fso_attrib_;
 	};
 }

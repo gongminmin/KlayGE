@@ -172,7 +172,7 @@ namespace KlayGE
 		BOOST_FOREACH(BOOST_TYPEOF(font_pool_)::reference font, font_pool_)
 		{
 			font.second.first.reset();
-			font.second.second.clear();
+			font.second.second.reset();
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(rs_pool_)::reference rs, rs_pool_)
 		{
@@ -210,7 +210,7 @@ namespace KlayGE
 		return *re_;
 	}
 
-	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t fontHeight, uint32_t flags)
+	FontPtr RenderFactory::MakeFont(std::string const & fontName, uint32_t flags)
 	{
 		FontPtr ret;
 
@@ -219,22 +219,12 @@ namespace KlayGE
 		{
 			RenderablePtr font_renderable = MakeSharedPtr<FontRenderable>(fontName);
 
-			ret = MakeSharedPtr<Font>(font_renderable, fontHeight, flags);
-			font_pool_[fontName].first = font_renderable;
-			font_pool_[fontName].second.insert(std::make_pair(fontHeight, ret));
+			ret = MakeSharedPtr<Font>(font_renderable, flags);
+			font_pool_[fontName] = std::make_pair(font_renderable, ret);
 		}
 		else
 		{
-			BOOST_AUTO(iter, fiter->second.second.find(fontHeight));
-			if (iter == fiter->second.second.end())
-			{
-				ret = MakeSharedPtr<Font>(fiter->second.first, fontHeight, flags);
-				fiter->second.second.insert(std::make_pair(fontHeight, ret));
-			}
-			else
-			{
-				ret = iter->second;
-			}
+			ret = fiter->second.second;
 		}
 
 		return ret;

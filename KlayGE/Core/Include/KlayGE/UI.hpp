@@ -546,8 +546,9 @@ namespace KlayGE
 
 		// Shared resource access. Indexed fonts and textures are shared among
 		// all the controls.
-		void SetFont(size_t index, FontPtr font);
+		void SetFont(size_t index, FontPtr font, uint32_t font_size);
 		FontPtr GetFont(size_t index) const;
+		uint32_t GetFontSize(size_t index) const;
 
 		void SetTexture(size_t index, TexturePtr texture);
 		TexturePtr GetTexture(size_t index) const;
@@ -635,9 +636,9 @@ namespace KlayGE
 			texture_cache_.push_back(texture);
 			return texture_cache_.size() - 1;
 		}
-		size_t AddFont(FontPtr font)
+		size_t AddFont(FontPtr font, uint32_t font_size)
 		{
-			font_cache_.push_back(font);
+			font_cache_.push_back(std::make_pair(font, font_size));
 			return font_cache_.size() - 1;
 		}
 
@@ -647,7 +648,25 @@ namespace KlayGE
 		}
 		FontPtr GetFont(size_t index) const
 		{
-			return font_cache_[index];
+			if (index < font_cache_.size())
+			{
+				return font_cache_[index].first;
+			}
+			else
+			{
+				return FontPtr();
+			}
+		}
+		uint32_t GetFontSize(size_t index) const
+		{
+			if (index < font_cache_.size())
+			{
+				return font_cache_[index].second;
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 		bool RegisterDialog(UIDialogPtr dialog);
@@ -690,7 +709,7 @@ namespace KlayGE
 		std::vector<UIDialogPtr> dialogs_;            // Dialogs registered
 
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
-		std::vector<FontPtr> font_cache_;         // Shared fonts
+		std::vector<std::pair<FontPtr, uint32_t> > font_cache_;         // Shared fonts
 
 		boost::array<std::vector<Rect_T<int32_t> >, UICT_Num_Control_Types> elem_texture_rcs_;
 
@@ -704,7 +723,7 @@ namespace KlayGE
 			std::wstring text;
 			uint32_t align;
 		};
-		std::map<FontPtr, std::vector<string_cache> > strings_;
+		std::map<size_t, std::vector<string_cache> > strings_;
 	};
 
 	class KLAYGE_CORE_API UIStatic : public UIControl
@@ -1279,13 +1298,32 @@ namespace KlayGE
 	public:
 		explicit UniBuffer(int nInitialSize = 1);
 
-		uint32_t GetTextSize() const  { return static_cast<uint32_t>(buffer_.size()); }
-		std::wstring& GetBuffer() { return buffer_; }
-		std::wstring const & GetBuffer() const { return buffer_; }
-		wchar_t const & operator[](size_t n) const { return buffer_[n]; }
+		uint32_t GetTextSize() const
+		{
+			return static_cast<uint32_t>(buffer_.size());
+		}
+		std::wstring& GetBuffer()
+		{
+			return buffer_;
+		}
+		std::wstring const & GetBuffer() const
+		{
+			return buffer_;
+		}
+		wchar_t const & operator[](size_t n) const
+		{
+			return buffer_[n];
+		}
 		wchar_t& operator[](size_t n);
-		FontPtr GetFont() const { return font_; }
-		void SetFont(FontPtr font) { font_ = font; }
+		FontPtr GetFont() const
+		{
+			return font_;
+		}
+		void SetFont(FontPtr font, uint32_t font_size)
+		{
+			font_ = font;
+			font_size_ = font_size;
+		}
 		void Clear();
 
 		void InsertChar(size_t index, wchar_t wChar); // Inserts the char at specified index
@@ -1307,6 +1345,7 @@ namespace KlayGE
 
 		// Uniscribe-specific
 		FontPtr font_;				// Font node for the font that this buffer uses
+		uint32_t font_size_;
 		bool analyse_required_;			// True if the string has changed since last analysis.
 	};
 

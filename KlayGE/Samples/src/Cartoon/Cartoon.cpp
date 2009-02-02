@@ -172,7 +172,7 @@ Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
 
 void Cartoon::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	torus_.reset(new TorusObject);
 	torus_->AddToSceneManager();
@@ -273,17 +273,17 @@ uint32_t Cartoon::DoUpdate(uint32_t pass)
 
 	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cartoon Rendering");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cartoon Rendering", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
 	std::wostringstream stream;
 	stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
 	stream.str(L"");
 	stream.precision(2);
 	stream << fixed << this->FPS() << " FPS";
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
 
 	if (!cartoon_style_ && (0 == pass))
 	{

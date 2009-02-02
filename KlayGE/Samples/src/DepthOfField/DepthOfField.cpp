@@ -267,7 +267,7 @@ DepthOfFieldApp::DepthOfFieldApp(std::string const & name, RenderSettings const 
 
 void DepthOfFieldApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	boost::shared_ptr<KlayGE::Renderable> renderInstance = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int i = 0; i < 10; ++ i)
@@ -406,12 +406,12 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 
 		FrameBuffer& rw = *renderEngine.CurFrameBuffer();
 
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth of field");
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth of field", 16);
+		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
 		std::wostringstream stream;
 		stream << this->FPS() << " FPS";
-		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
+		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

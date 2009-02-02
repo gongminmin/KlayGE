@@ -321,7 +321,7 @@ ParticleSystemApp::ParticleSystemApp(std::string const & name, RenderSettings co
 void ParticleSystemApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
@@ -480,8 +480,9 @@ uint32_t ParticleSystemApp::DoUpdate(uint32_t pass)
 		std::wostringstream stream;
 		stream << this->FPS();
 
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Particle System");
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Particle System", 16);
+		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

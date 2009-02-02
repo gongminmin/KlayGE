@@ -209,7 +209,7 @@ Instancing::Instancing(std::string const & name, RenderSettings const & settings
 void Instancing::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	ScriptEngine scriptEng;
 	ScriptModule module("Instancing_init");
@@ -315,8 +315,8 @@ uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Instancing");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Instancing", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
@@ -324,15 +324,15 @@ uint32_t Instancing::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
 	if (use_instance_)
 	{
-		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is enabled");
+		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is enabled", 16);
 	}
 	else
 	{
-		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is disabled");
+		font_->RenderText(0, 54, Color(1, 1, 1, 1), L"Instancing is disabled", 16);
 	}
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

@@ -547,7 +547,7 @@ GPUParticleSystemApp::GPUParticleSystemApp(std::string const & name, RenderSetti
 
 void GPUParticleSystemApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	TextureLoader terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
 	TextureLoader terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
@@ -669,8 +669,8 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			std::wostringstream stream;
 			stream << this->FPS();
 
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System");
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str());
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System", 16);
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str(), 16);
 
 			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 		}

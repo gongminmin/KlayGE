@@ -599,9 +599,8 @@ namespace KlayGE
 
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	Font::Font(RenderablePtr const & font_renderable, uint32_t height, uint32_t flags)
-			: font_renderable_(font_renderable),
-					font_height_(height)
+	Font::Font(RenderablePtr const & font_renderable, uint32_t flags)
+			: font_renderable_(font_renderable)
 	{
 		fso_attrib_ = SceneObject::SOA_ShortAge;
 		if (flags & Font::FS_Cullable)
@@ -610,20 +609,13 @@ namespace KlayGE
 		}
 	}
 
-	// 获取字体高度
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t Font::FontHeight() const
-	{
-		return font_height_;
-	}
-
 	// 计算文字大小
 	/////////////////////////////////////////////////////////////////////////////////
-	Size_T<uint32_t> Font::CalcSize(std::wstring const & text)
+	Size_T<uint32_t> Font::CalcSize(std::wstring const & text, uint32_t font_size)
 	{
 		if (!text.empty())
 		{
-			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(text, font_height_);
+			return checked_pointer_cast<FontRenderable>(font_renderable_)->CalcSize(text, font_size);
 		}
 		else
 		{
@@ -634,22 +626,22 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float sx, float sy, Color const & clr,
-		std::wstring const & text)
+		std::wstring const & text, uint32_t font_size)
 	{
-		this->RenderText(sx, sy, 0, 1, 1, clr, text);
+		this->RenderText(sx, sy, 0, 1, 1, clr, text, font_size);
 	}
 
 	// 在指定位置画出放缩的文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float x, float y, float z,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text)
+		std::wstring const & text, uint32_t font_size)
 	{
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
-				x, y, z, xScale, yScale, clr, text, font_height_);
+				x, y, z, xScale, yScale, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}
 	}
@@ -658,25 +650,25 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(Rect const & rc, float z,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, uint32_t align)
+		std::wstring const & text, uint32_t font_size, uint32_t align)
 	{
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
 			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText2D(
-				rc, z, xScale, yScale, clr, text, font_height_, align);
+				rc, z, xScale, yScale, clr, text, font_size, align);
 			font_obj->AddToSceneManager();
 		}
 	}
 
 	// 在指定位置画出3D的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Font::RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text)
+	void Font::RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size)
 	{
 		if (!text.empty())
 		{
 			boost::shared_ptr<FontObject> font_obj = MakeSharedPtr<FontObject>(font_renderable_, fso_attrib_);
-			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text, font_height_);
+			checked_pointer_cast<FontRenderable>(font_renderable_)->AddText3D(mvp, clr, text, font_size);
 			font_obj->AddToSceneManager();
 		}
 	}

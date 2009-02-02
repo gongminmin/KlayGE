@@ -575,9 +575,10 @@ namespace KlayGE
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
 		{
+			BOOST_TYPEOF(font_cache_)::reference font = font_cache_[string.first];
 			BOOST_FOREACH(BOOST_TYPEOF(string.second)::reference s, string.second)
 			{
-				string.first->RenderText(s.rc, s.depth, 1, 1, s.clr, s.text, s.align);
+				font.first->RenderText(s.rc, s.depth, 1, 1, s.clr, s.text, font.second, s.align);
 			}
 		}
 	}
@@ -636,8 +637,8 @@ namespace KlayGE
 	void UIManager::DrawText(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align)
 	{
-		strings_[font_cache_[font_index]].push_back(string_cache());
-		string_cache& sc = strings_[font_cache_[font_index]].back();
+		strings_[font_index].push_back(string_cache());
+		string_cache& sc = strings_[font_index].back();
 		sc.rc = rc;
 		sc.depth = depth;
 		sc.clr = clr;
@@ -1064,19 +1065,24 @@ namespace KlayGE
 
 	// Shared resource access. Indexed fonts and textures are shared among
 	// all the controls.
-	void UIDialog::SetFont(size_t index, FontPtr font)
+	void UIDialog::SetFont(size_t index, FontPtr font, uint32_t font_size)
 	{
 		// Make sure the list is at least as large as the index being set
 		if (index + 1 > fonts_.size())
 		{
 			fonts_.resize(index + 1, -1);
 		}
-		fonts_[index] = static_cast<int>(UIManager::Instance().AddFont(font));
+		fonts_[index] = static_cast<int>(UIManager::Instance().AddFont(font, font_size));
 	}
 
 	FontPtr UIDialog::GetFont(size_t index) const
 	{
 		return UIManager::Instance().GetFont(fonts_[index]);
+	}
+
+	uint32_t UIDialog::GetFontSize(size_t index) const
+	{
+		return UIManager::Instance().GetFontSize(fonts_[index]);
 	}
 
 	void UIDialog::SetTexture(size_t index, TexturePtr texture)
@@ -1184,7 +1190,7 @@ namespace KlayGE
 	// Initialize default Elements
 	void UIDialog::InitDefaultElements()
 	{
-		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 12));
+		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont"), 12);
 
 		UIElement Element;
 

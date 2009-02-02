@@ -80,7 +80,7 @@ SkinnedMeshApp::SkinnedMeshApp(std::string const & name, RenderSettings const & 
 
 void SkinnedMeshApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	this->LookAt(float3(250.0f, 48.0f, 0.0f), float3(0.0f, 48.0f, 0.0f), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(10, 500);
@@ -212,12 +212,12 @@ uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 
 	model_->AddToRenderQueue();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name(), 16);
 
 	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description());
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

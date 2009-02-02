@@ -175,9 +175,10 @@ namespace KlayGE
 			scroll_bar_.SetLocation(dropdown_rc_.right(), dropdown_rc_.top() + 2);
 			scroll_bar_.SetSize(sb_width_, dropdown_rc_.Height() - 2);
 			FontPtr font = UIManager::Instance().GetFont(elements_[2]->FontIndex());
-			if (font && font->FontHeight())
+			uint32_t font_size = UIManager::Instance().GetFontSize(elements_[2]->FontIndex());
+			if (font && (font_size != 0))
 			{
-				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / font->FontHeight());
+				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / font_size);
 
 				// The selected item may have been scrolled off the page.
 				// Ensure that it is in page again.
@@ -438,9 +439,9 @@ namespace KlayGE
 		if (!bSBInit)
 		{
 			// Update the page size of the scroll bar
-			if (UIManager::Instance().GetFont(pElement->FontIndex())->FontHeight())
+			if (UIManager::Instance().GetFontSize(pElement->FontIndex()) != 0)
 			{
-				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / UIManager::Instance().GetFont(pElement->FontIndex())->FontHeight());
+				scroll_bar_.SetPageSize(dropdown_text_rc_.Height() / UIManager::Instance().GetFontSize(pElement->FontIndex()));
 			}
 			else
 			{
@@ -467,6 +468,7 @@ namespace KlayGE
 		pSelectionElement->FontColor().Current = pSelectionElement->FontColor().States[UICS_Normal];
 
 		FontPtr font = this->GetDialog()->GetFont(pElement->FontIndex());
+		uint32_t font_size = this->GetDialog()->GetFontSize(pElement->FontIndex());
 		if (font)
 		{
 			int curY = dropdown_text_rc_.top();
@@ -477,15 +479,15 @@ namespace KlayGE
 				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
 
 				// Make sure there's room left in the dropdown
-				nRemainingHeight -= font->FontHeight();
+				nRemainingHeight -= font_size;
 				if (nRemainingHeight < 0)
 				{
 					pItem->bVisible = false;
 					continue;
 				}
 
-				pItem->rcActive = Rect_T<int32_t>(dropdown_text_rc_.left(), curY, dropdown_text_rc_.right(), curY + font->FontHeight());
-				curY += font->FontHeight();
+				pItem->rcActive = Rect_T<int32_t>(dropdown_text_rc_.left(), curY, dropdown_text_rc_.right(), curY + font_size);
+				curY += font_size;
 
 				//debug
 				//int blue = 50 * i;

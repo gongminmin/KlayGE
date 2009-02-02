@@ -122,7 +122,7 @@ VertexDisplacement::VertexDisplacement(std::string const & name, RenderSettings 
 
 void VertexDisplacement::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont", 16);
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	flag_.reset(new FlagObject(8 * 2, 6 * 2));
 	flag_->AddToSceneManager();
@@ -160,16 +160,16 @@ uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Vertex displacement");
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Vertex displacement", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
 	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str());
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name());
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name(), 16);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

@@ -80,7 +80,7 @@ namespace KlayGE
 			for (size_t i = 0; i <= buffer_.size(); ++ i)
 			{
 				std::wstring str = buffer_.substr(0, i);
-				char_width_[i] = font_->CalcSize(str).cx();
+				char_width_[i] = font_->CalcSize(str, font_size_).cx();
 			}
 
 			analyse_required_ = false;
@@ -778,7 +778,7 @@ namespace KlayGE
 		UIElementPtr pElement = this->GetElement(0);
 		if (pElement)
 		{
-			buffer_.SetFont(this->GetDialog()->GetFont(pElement->FontIndex()));
+			buffer_.SetFont(this->GetDialog()->GetFont(pElement->FontIndex()), this->GetDialog()->GetFontSize(pElement->FontIndex()));
 			this->PlaceCaret(caret_pos_);  // Call PlaceCaret now that we have the font info (node),
 			// so that scrolling can be handled.
 		}

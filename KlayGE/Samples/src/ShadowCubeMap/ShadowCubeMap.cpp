@@ -381,7 +381,7 @@ void ShadowCubeMap::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	// ½¨Á¢×ÖÌå
-	font_ = rf.MakeFont("gkai00mp.kfont", 16);
+	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	ground_.reset(new GroundObject);
 	ground_->AddToSceneManager();
@@ -547,8 +547,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			std::wostringstream stream;
 			stream << this->FPS();
 
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap");
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str());
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap", 16);
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 		}
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

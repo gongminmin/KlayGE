@@ -57,7 +57,7 @@ namespace KlayGE
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data) = 0;
 		virtual FrameBufferPtr MakeFrameBuffer() = 0;
 
-		FontPtr MakeFont(std::string const & fontName, uint32_t fontHeight = 12, uint32_t flags = 0);
+		FontPtr MakeFont(std::string const & fontName, uint32_t flags = 0);
 
 		RenderEffectPtr LoadEffect(std::string const & effectName);
 
@@ -96,7 +96,7 @@ namespace KlayGE
 		RenderEnginePtr re_;
 
 		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
-		std::map<std::string, std::pair<RenderablePtr, std::map<uint32_t, FontPtr> > > font_pool_;
+		std::map<std::string, std::pair<RenderablePtr, FontPtr> > font_pool_;
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
 		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;
