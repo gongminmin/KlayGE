@@ -108,46 +108,11 @@ void ParticleVS2(float4 pos : POSITION,
 }
 
 #ifdef KLAYGE_OPENGL
-TRIANGLE void triangle_shrinky(AttribArray<PS_IN> input)
-{
-	PS_IN gs_out;
-
-	for (int i = 0; i < 4; ++ i)
-	{
-		float2 tex;
-		if (i == 0)
-		{
-			tex = float2(0, 0);
-		}
-		if (i == 1)
-		{
-			tex = float2(1, 0);
-		}
-		if (i == 2)
-		{
-			tex = float2(0, 1);
-		}
-		if (i == 3)
-		{
-			tex = float2(1, 1);
-		}
-		
-		float4 view_pos = input[0].CenterView;
-		gs_out.CenterView = view_pos;
-		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
-		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr = input[0].clr;
-		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
-		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
-		
-		emitVertex(gs_out);
-	}
-	
-	restartStrip();
-}
+TRIANGLE void ParticleGS(AttribArray<PS_IN> input)
 #else
 [maxvertexcount(4)]
 void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
+#endif
 {
 	PS_IN gs_out;
 
@@ -170,7 +135,7 @@ void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
 		{
 			tex = float2(1, 1);
 		}
-
+		
 		float4 view_pos = input[0].CenterView;
 		gs_out.CenterView = view_pos;
 		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
@@ -179,12 +144,19 @@ void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
 		
+#ifdef KLAYGE_OPENGL
+		emitVertex(gs_out);
+#else
 		out_stream.Append(gs_out);
+#endif
 	}
 	
-	 out_stream.RestartStrip();
-}
+#ifdef KLAYGE_OPENGL
+	restartStrip();
+#else
+	out_stream.RestartStrip();
 #endif
+}
 
 float4 ParticlePS(PS_IN ps_in) : SV_Target
 {
