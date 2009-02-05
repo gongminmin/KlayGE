@@ -645,6 +645,17 @@ namespace KlayGE
 			}
 			break;
 
+		case ST_GeometryShader:
+			if ("auto" == profile)
+			{
+				profiles_[type] = cgGLGetLatestProfile(CG_GL_GEOMETRY);
+			}
+			else
+			{
+				profiles_[type] = cgGetProfile(profile.c_str());
+			}
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -691,6 +702,10 @@ namespace KlayGE
 			break;
 
 		case ST_PixelShader:
+			samplers_[type].resize(re.DeviceCaps().max_texture_units);
+			break;
+
+		case ST_GeometryShader:
 			samplers_[type].resize(re.DeviceCaps().max_texture_units);
 			break;
 

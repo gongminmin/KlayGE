@@ -22,6 +22,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <vector>
+#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>

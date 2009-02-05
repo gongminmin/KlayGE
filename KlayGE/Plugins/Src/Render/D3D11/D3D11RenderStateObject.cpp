@@ -90,7 +90,6 @@ namespace KlayGE
 		: BlendStateObject(desc)
 	{
 		D3D11_BLEND_DESC d3d_desc;
-		memset(&d3d_desc, 0, sizeof(d3d_desc));
 		d3d_desc.AlphaToCoverageEnable = desc.alpha_to_coverage_enable;
 		d3d_desc.IndependentBlendEnable = desc.independent_blend_enable;
 		for (int i = 0; i < 8; ++ i)

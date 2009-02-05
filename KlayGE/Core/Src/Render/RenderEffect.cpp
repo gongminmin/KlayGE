@@ -816,6 +816,11 @@ namespace KlayGE
 					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_PixelShader];
 					var->Value(sd);
 				}
+				if ("geometry_shader" == state_name)
+				{
+					shader_desc& sd = (*shader_descs_)[ShaderObject::ST_GeometryShader];
+					var->Value(sd);
+				}
 			}
 		}
 
@@ -826,7 +831,10 @@ namespace KlayGE
 		shader_text_ = MakeSharedPtr<BOOST_TYPEOF(*shader_text_)>(shader_obj_->GenShaderText(effect_));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
-			shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
+			if (!(*shader_descs_)[i].profile.empty())
+			{
+				shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
+			}
 		}
 
 		is_validate_ = shader_obj_->Validate();

@@ -175,6 +175,7 @@ render_states_define = [
 
 	("pixel_shader", "shader"),
 	("vertex_shader", "shader"),
+	("geometry_shader", "shader"),
 ]
 
 sampler_states_define = [

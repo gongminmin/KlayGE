@@ -72,10 +72,11 @@ float4 ColorDepthPS(float4 pos		: SV_Position, float3 clr : COLOR,
 		<![CDATA[
 float4 DepthOfFieldPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
+	float4 clr;
 	float blur_factor = saturate(abs(src_tex.Sample(point_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
 	if (show_blur_factor)
 	{
-		return blur_factor;
+		clr = blur_factor;
 	}
 	else
 	{
@@ -84,10 +85,12 @@ float4 DepthOfFieldPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) :
 		float2 left_top = max(0.5f * sat_size.zw, corner.zw);
 		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
 		float2 width_height = (right_bottom - left_top) * sat_size.xy;
-		return (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
+		clr = (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
 				- sat_tex.Sample(point_sampler, corner.xw) + sat_tex.Sample(point_sampler, corner.zw))
 							/ (width_height.x * width_height.y) + 0.5f;
 	}
+	
+	return clr;
 }
 		]]>
 	</shader>

@@ -44,6 +44,7 @@ namespace KlayGE
 		bool stream_output_support;
 		bool alpha_to_coverage_support;
 		bool depth_texture_support;
+		bool primitive_restart;
 		bool bc4_support;
 		bool bc5_support;
 	};

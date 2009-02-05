@@ -10,8 +10,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D10MINGWDEFS_HPP
-#define _D3D10MINGWDEFS_HPP
+#ifndef _D3D11MINGWDEFS_HPP
+#define _D3D11MINGWDEFS_HPP
 
 #ifdef KLAYGE_COMPILER_GCC
 	#define __bcount(size)
@@ -34,4 +34,4 @@
 	typedef unsigned char UINT8;
 #endif
 
-#endif			// _D3D10MINGWDEFS_HPP
+#endif			// _D3D11MINGWDEFS_HPP

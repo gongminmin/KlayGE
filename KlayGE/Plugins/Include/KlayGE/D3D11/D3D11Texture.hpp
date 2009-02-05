@@ -199,7 +199,8 @@ namespace KlayGE
 	class D3D11TextureCube : public D3D11Texture
 	{
 	public:
-		D3D11TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+		D3D11TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		uint32_t Width(int level) const;
 		uint32_t Height(int level) const;

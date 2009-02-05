@@ -604,108 +604,110 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
+			is_shader_validate_[type] = false;
 			break;
 		}
 
 		ID3DXConstantTable* constant_table = NULL;
-
-		ID3DXBuffer* code;
-		ID3DXBuffer* err_msg;
-		std::vector<D3DXMACRO> macros;
-		D3DXMACRO macro_d3d9 = { "KLAYGE_D3D9", "1" };
-		D3DXMACRO macro_end = { NULL, NULL };
-		macros.push_back(macro_d3d9);
-		if (!render_eng.DeviceCaps().bc5_support)
+		ID3DXBuffer* code = NULL;
+		if (is_shader_validate_[type])
 		{
-			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
-			macros.push_back(macro_bc5_as_bc3);
-		}
-		else
-		{
-			D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GR", "1" };
-			macros.push_back(macro_bc5_as_bc3);
-		}
-		macros.push_back(macro_end);
-		D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), &macros[0], NULL,
-			(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-			0, &code, &err_msg, &constant_table);
-		if (err_msg != NULL)
-		{
-#ifdef D3DXSHADER_USE_LEGACY_D3DX9_31_DLL
-			ID3DXConstantTable* constant_table_legacy;
-			ID3DXBuffer* code_legacy;
-			ID3DXBuffer* err_msg_legacy;
-			D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, NULL,
-				(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-				D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
-			if (err_msg_legacy != NULL)
+			ID3DXBuffer* err_msg;
+			std::vector<D3DXMACRO> macros;
+			D3DXMACRO macro_d3d9 = { "KLAYGE_D3D9", "1" };
+			D3DXMACRO macro_end = { NULL, NULL };
+			macros.push_back(macro_d3d9);
+			if (!render_eng.DeviceCaps().bc5_support)
 			{
-#ifdef KLAYGE_DEBUG
-				std::istringstream iss(*shader_text);
-				std::string s;
-				int line = 1;
-				while (iss)
-				{
-					std::getline(iss, s);
-					std::cerr << line << " " << s << std::endl;
-					++ line;
-				}
-				std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
-#endif
-
-				if (code_legacy)
-				{
-					code_legacy->Release();
-				}
-				if (constant_table_legacy)
-				{
-					constant_table_legacy->Release();
-				}
-				if (err_msg_legacy)
-				{
-					err_msg_legacy->Release();
-				}
-
-				if (code)
-				{
-					code->Release();
-				}
-				if (constant_table)
-				{
-					constant_table->Release();
-				}
-				if (err_msg)
-				{
-					err_msg->Release();
-				}
+				D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+				macros.push_back(macro_bc5_as_bc3);
 			}
 			else
 			{
-				if (code)
-				{
-					code->Release();
-				}
-				if (constant_table)
-				{
-					constant_table->Release();
-				}
-				if (err_msg)
-				{
-					err_msg->Release();
-				}
-
-				code = code_legacy;
-				constant_table = constant_table_legacy;
+				D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GR", "1" };
+				macros.push_back(macro_bc5_as_bc3);
 			}
+			macros.push_back(macro_end);
+			D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), &macros[0], NULL,
+				(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
+				0, &code, &err_msg, &constant_table);
+			if (err_msg != NULL)
+			{
+#ifdef D3DXSHADER_USE_LEGACY_D3DX9_31_DLL
+				ID3DXConstantTable* constant_table_legacy;
+				ID3DXBuffer* code_legacy;
+				ID3DXBuffer* err_msg_legacy;
+				D3DXCompileShader(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, NULL,
+					(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
+					D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
+				if (err_msg_legacy != NULL)
+				{
+#ifdef KLAYGE_DEBUG
+					std::istringstream iss(*shader_text);
+					std::string s;
+					int line = 1;
+					while (iss)
+					{
+						std::getline(iss, s);
+						std::cerr << line << " " << s << std::endl;
+						++ line;
+					}
+					std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
+#endif
+
+					if (code_legacy)
+					{
+						code_legacy->Release();
+					}
+					if (constant_table_legacy)
+					{
+						constant_table_legacy->Release();
+					}
+					if (err_msg_legacy)
+					{
+						err_msg_legacy->Release();
+					}
+
+					if (code)
+					{
+						code->Release();
+					}
+					if (constant_table)
+					{
+						constant_table->Release();
+					}
+					if (err_msg)
+					{
+						err_msg->Release();
+					}
+				}
+				else
+				{
+					if (code)
+					{
+						code->Release();
+					}
+					if (constant_table)
+					{
+						constant_table->Release();
+					}
+					if (err_msg)
+					{
+						err_msg->Release();
+					}
+
+					code = code_legacy;
+					constant_table = constant_table_legacy;
+				}
 #else
 #ifdef KLAYGE_DEBUG
-			std::cerr << *shader_text << std::endl;
-			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+				std::cerr << *shader_text << std::endl;
+				std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
 
-			err_msg->Release();
+				err_msg->Release();
 #endif
+			}
 		}
 
 		if (NULL == code)
@@ -735,7 +737,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
+				is_shader_validate_[type] = false;
 				break;
 			}
 
@@ -754,7 +756,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
+			is_shader_validate_[type] = false;
 			break;
 		}
 

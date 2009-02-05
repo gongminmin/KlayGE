@@ -34,6 +34,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<ID3D11Predicate>			ID3D11PredicatePtr;
 	typedef boost::shared_ptr<ID3D11VertexShader>		ID3D11VertexShaderPtr;
 	typedef boost::shared_ptr<ID3D11PixelShader>		ID3D11PixelShaderPtr;
+	typedef boost::shared_ptr<ID3D11GeometryShader>		ID3D11GeometryShaderPtr;
 	typedef boost::shared_ptr<ID3D11RenderTargetView>	ID3D11RenderTargetViewPtr;
 	typedef boost::shared_ptr<ID3D11DepthStencilView>	ID3D11DepthStencilViewPtr;
 	typedef boost::shared_ptr<ID3D11RasterizerState>	ID3D11RasterizerStatePtr;

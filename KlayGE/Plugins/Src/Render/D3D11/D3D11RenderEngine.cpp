@@ -201,6 +201,7 @@ namespace KlayGE
 
 		vertex_shader_cache_.reset();
 		pixel_shader_cache_.reset();
+		geometry_shader_cache_.reset();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
@@ -450,6 +451,7 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
+		caps_.primitive_restart = true;
 		caps_.bc4_support = true;
 		caps_.bc5_support = true;
 	}
@@ -499,6 +501,15 @@ namespace KlayGE
 		{
 			d3d_imm_ctx_->PSSetShader(shader.get(), NULL, 0);
 			pixel_shader_cache_ = shader;
+		}
+	}
+
+	void D3D11RenderEngine::GSSetShader(ID3D11GeometryShaderPtr const & shader)
+	{
+		if (geometry_shader_cache_ != shader)
+		{
+			d3d_imm_ctx_->GSSetShader(shader.get(), NULL, 0);
+			geometry_shader_cache_ = shader;
 		}
 	}
 }

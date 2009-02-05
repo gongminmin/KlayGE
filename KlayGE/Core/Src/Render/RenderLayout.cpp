@@ -131,11 +131,6 @@ namespace KlayGE
 		return instance_stream_.stream;
 	}
 
-	GraphicsBufferPtr& RenderLayout::InstanceStreamSysMem()
-	{
-		return instance_stream_sys_mem_;
-	}
-
 	uint32_t RenderLayout::NumInstance() const
 	{
 		return vertex_streams_[0].freq;
@@ -157,8 +152,8 @@ namespace KlayGE
 
 		std::vector<uint8_t> instance_buffer(instance_stream_.stream->Size());
 		{
-			GraphicsBuffer::Mapper mapper(*instance_stream_sys_mem_, BA_Read_Only);
-			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_sys_mem_->Size(),
+			GraphicsBuffer::Mapper mapper(*instance_stream_.stream, BA_Read_Only);
+			std::copy(mapper.Pointer<uint8_t>(), mapper.Pointer<uint8_t>() + instance_stream_.stream->Size(),
 				instance_buffer.begin());
 		}
 		GraphicsBufferPtr hint_sys_mem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Write, NULL);

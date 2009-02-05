@@ -86,6 +86,10 @@ namespace KlayGE
 		{
 			return DynamicD3D10GetPixelShaderProfile_(pDevice);
 		}
+		LPCSTR D3D10GetGeometryShaderProfile(ID3D10Device* pDevice) const
+		{
+			return DynamicD3D10GetGeometryShaderProfile_(pDevice);
+		}
 		HRESULT D3D10ReflectShader(void const * pShaderBytecode, SIZE_T BytecodeLength,
 			ID3D10ShaderReflection** ppReflector) const
 		{
@@ -97,6 +101,7 @@ namespace KlayGE
 		void OMSetBlendState(ID3D10BlendStatePtr const & bs, Color const & blend_factor, uint32_t sample_mask);
 		void VSSetShader(ID3D10VertexShaderPtr const & shader);
 		void PSSetShader(ID3D10PixelShaderPtr const & shader);
+		void GSSetShader(ID3D10GeometryShaderPtr const & shader);
 
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -121,6 +126,7 @@ namespace KlayGE
 								ID3D10Device** ppDevice);
 		typedef LPCSTR (WINAPI *D3D10GetVertexShaderProfileFunc)(ID3D10Device* pDevice);
 		typedef LPCSTR (WINAPI *D3D10GetPixelShaderProfileFunc)(ID3D10Device* pDevice);
+		typedef LPCSTR (WINAPI *D3D10GetGeometryShaderProfileFunc)(ID3D10Device* pDevice);
 		typedef HRESULT (WINAPI *D3D10ReflectShaderFunc)(void const * pShaderBytecode, SIZE_T BytecodeLength,
 			ID3D10ShaderReflection** ppReflector);
 
@@ -128,6 +134,7 @@ namespace KlayGE
 		D3D10CreateDeviceAndSwapChainFunc DynamicD3D10CreateDeviceAndSwapChain_;
 		D3D10GetVertexShaderProfileFunc DynamicD3D10GetVertexShaderProfile_;
 		D3D10GetPixelShaderProfileFunc DynamicD3D10GetPixelShaderProfile_;
+		D3D10GetGeometryShaderProfileFunc DynamicD3D10GetGeometryShaderProfile_;
 		D3D10ReflectShaderFunc DynamicD3D10ReflectShader_;
 
 
@@ -148,6 +155,7 @@ namespace KlayGE
 		uint32_t sample_mask_cache_;
 		ID3D10VertexShaderPtr vertex_shader_cache_;
 		ID3D10PixelShaderPtr pixel_shader_cache_;
+		ID3D10GeometryShaderPtr geometry_shader_cache_;
 	};
 
 	typedef boost::shared_ptr<D3D10RenderEngine> D3D10RenderEnginePtr;

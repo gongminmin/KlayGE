@@ -781,6 +781,14 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
+		if (glloader_GL_NV_primitive_restart())
+		{
+			caps_.primitive_restart = true;
+		}
+		else
+		{
+			caps_.primitive_restart = false;
+		}
 		if (glloader_GL_EXT_texture_compression_rgtc())
 		{
 			caps_.bc4_support = true;

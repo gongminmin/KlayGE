@@ -615,6 +615,8 @@ namespace KlayGE
 			ret.depth_texture_support = false;
 		}
 
+		ret.primitive_restart = false;
+
 		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
 			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
 			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))

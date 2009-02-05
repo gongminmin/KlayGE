@@ -46,56 +46,135 @@ float3 texcoord_to_view(float2 tex)
 	
 	<shader>
 		<![CDATA[
-void ParticleVS(float4 pos			: TEXCOORD0,
-					float2 tex			: POSITION,
-					out float4 oPos		: SV_Position,
-					out float4 oClr     : COLOR0,
-					out float4 oPosSS	: TEXCOORD0,
-					out float4 oCenterView : TEXCOORD1,
-					out float3 oViewDir : TEXCOORD2)
+float2 texs[4] =
 {
-	oCenterView = mul(float4(pos.xyz, 1), View);
-	float4 view_pos = oCenterView;
+	float2(0.0f, 0.0f),
+	float2(1.0f, 0.0f),
+	float2(0.0f, 1.0f),
+	float2(1.0f, 1.0f)
+};
+	
+struct PS_IN
+{
+	float4 pos : SV_Position;
+	float4 clr : COLOR0;
+	float4 PosSS : TEXCOORD0;
+	float4 CenterView : TEXCOORD1;
+	float3 view_dir : TEXCOORD2;
+};
+
+void ParticleVS(float4 pos : TEXCOORD0,
+					float index : POSITION,
+					out PS_IN vs_out)
+{
+	int iindex = int(index + 0.1f);
+	
+	float2 tex;
+	if (iindex == 0)
+	{
+		tex = float2(0, 0);
+	}
+	if (iindex == 1)
+	{
+		tex = float2(1, 0);
+	}
+	if (iindex == 2)
+	{
+		tex = float2(0, 1);
+	}
+	if (iindex == 3)
+	{
+		tex = float2(1, 1);
+	}
+	
+	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
+	float4 view_pos = vs_out.CenterView;
 	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
-	oPos = mul(view_pos, Proj);
-	oClr = float4(1, 1, 1, pos.w);
-	oPosSS = oPos / oPos.w;
-	   
-	oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
+	vs_out.pos = mul(view_pos, Proj);
+	vs_out.clr = float4(1, 1, 1, pos.w);
+	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
+	vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
 }
 
-float4 ParticlePS(float4 pos : SV_Position,
-						float4 clr : COLOR0,
-						float4 PosSS : TEXCOORD0,
-						float4 CenterView : TEXCOORD1,
-						float3 view_dir : TEXCOORD2) : SV_Target
+void ParticleVS2(float4 pos : POSITION,
+					out PS_IN vs_out)
 {
-	CenterView /= CenterView.w;
-	float dir = view_dir.z;
-	view_dir = normalize(view_dir);
+	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
+	vs_out.clr = float4(1, 1, 1, pos.w);
 	
-	float v = dot(CenterView.xyz, view_dir);
-	float disc = point_radius * point_radius - (dot(CenterView.xyz, CenterView.xyz) - v * v);
+	vs_out.pos = 0;
+	vs_out.PosSS = 0;
+	vs_out.view_dir = 0;
+}
+
+[maxvertexcount(4)]
+void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
+{
+	PS_IN gs_out;
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		float2 tex;
+		if (i == 0)
+		{
+			tex = float2(0, 0);
+		}
+		if (i == 1)
+		{
+			tex = float2(1, 0);
+		}
+		if (i == 2)
+		{
+			tex = float2(0, 1);
+		}
+		if (i == 3)
+		{
+			tex = float2(1, 1);
+		}
+
+		float4 view_pos = input[0].CenterView;
+		gs_out.CenterView = view_pos;
+		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
+		gs_out.pos = mul(view_pos, Proj);
+		gs_out.clr = input[0].clr;
+		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
+		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
+		
+		out_stream.Append(gs_out);
+	}
+	
+	 out_stream.RestartStrip();
+}
+
+float4 ParticlePS(PS_IN ps_in) : SV_Target
+{
+	ps_in.CenterView /= ps_in.CenterView.w;
+	float dir = ps_in.view_dir.z;
+	ps_in.view_dir = normalize(ps_in.view_dir);
+	
+	float4 clr = ps_in.clr;
+	
+	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir);
+	float disc = point_radius * point_radius - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
 	if (disc < 0)
 	{
 		clip(-1);
-		return 0;
 	}
 	else
 	{
-		float2 tex_coord = PosSS.xy + offset;
+		float2 tex_coord = ps_in.PosSS.xy + offset;
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
-		float3 intersect = (v - sqrt(disc)) * view_dir;
-		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - CenterView.xy) / point_radius / 2 + 0.5, 0);
+		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
+		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / point_radius / 2 + 0.5, 0);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
-
-		return clr;
 	}
+
+	return clr;
 }
 		]]>
 	</shader>
@@ -110,6 +189,21 @@ float4 ParticlePS(float4 pos : SV_Position,
 			<state name="dest_blend" value="inv_src_alpha"/>
 			
 			<state name="vertex_shader" value="ParticleVS()"/>
+			<state name="pixel_shader" value="ParticlePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParticleWithGS">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="vertex_shader" value="ParticleVS2()"/>
+			<state name="geometry_shader" value="ParticleGS()"/>
 			<state name="pixel_shader" value="ParticlePS()"/>
 		</pass>
 	</technique>

@@ -1,10 +1,11 @@
 // D3D10ShaderObject.cpp
 // KlayGE D3D10 shader对象类 实现文件
 // Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2008
+// 版权所有(C) 龚敏敏, 2008-2009
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.8.0
+// 支持Gemoetry Shader (2009.2.5)
 // 初次建立 (2008.9.21)
 //
 // 修改记录
@@ -411,8 +412,15 @@ namespace KlayGE
 			}
 			break;
 
+		case ST_GeometryShader:
+			if ("auto" == shader_profile)
+			{
+				shader_profile = render_eng.D3D10GetGeometryShaderProfile(d3d_device.get());
+			}
+			break;
+
 		default:
-			BOOST_ASSERT(false);
+			is_shader_validate_[type] = false;
 			break;
 		}
 
@@ -469,8 +477,17 @@ namespace KlayGE
 				pixel_shader_ = MakeCOMPtr(ps);
 				break;
 
+			case ST_GeometryShader:
+				ID3D10GeometryShader* gs;
+				if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &gs)))
+				{
+					is_shader_validate_[type] = false;
+				}
+				geometry_shader_ = MakeCOMPtr(gs);
+				break;
+
 			default:
-				BOOST_ASSERT(false);
+				is_shader_validate_[type] = false;
 				break;
 			}
 
@@ -500,22 +517,22 @@ namespace KlayGE
 						reflection_var->GetDesc(&var_desc);
 						if (var_desc.uFlags & D3D10_SVF_USED)
 						{
-							D3D10_SHADER_TYPE_DESC type_desc;
-							reflection_var->GetType()->GetDesc(&type_desc);
-
-							D3D10ShaderParameterHandle p_handle;
-							p_handle.shader_type = static_cast<uint8_t>(type);
-							p_handle.param_class = type_desc.Class;
-							p_handle.param_type = type_desc.Type;
-							p_handle.cbuff = c;
-							p_handle.offset = var_desc.StartOffset;
-							p_handle.elements = type_desc.Elements;
-							p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
-							p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
-
 							RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
 							if (p)
 							{
+								D3D10_SHADER_TYPE_DESC type_desc;
+								reflection_var->GetType()->GetDesc(&type_desc);
+
+								D3D10ShaderParameterHandle p_handle;
+								p_handle.shader_type = static_cast<uint8_t>(type);
+								p_handle.param_class = type_desc.Class;
+								p_handle.param_type = type_desc.Type;
+								p_handle.cbuff = c;
+								p_handle.offset = var_desc.StartOffset;
+								p_handle.elements = type_desc.Elements;
+								p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
+								p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
+
 								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 							}
 						}
@@ -596,6 +613,7 @@ namespace KlayGE
 		ret->is_shader_validate_ = is_shader_validate_;
 		ret->vertex_shader_ = vertex_shader_;
 		ret->pixel_shader_ = pixel_shader_;
+		ret->geometry_shader_ = geometry_shader_;
 		ret->vs_code_ = vs_code_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -781,6 +799,7 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = re.D3DDevice();
 
 		re.VSSetShader(vertex_shader_);
+		re.GSSetShader(geometry_shader_);
 		re.PSSetShader(pixel_shader_);
 
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
@@ -866,6 +885,42 @@ namespace KlayGE
 			d3d_device->PSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
 		}
 
+		BOOST_TYPEOF(textures_)::const_reference gs_textures = textures_[ST_GeometryShader];
+		srs.resize(gs_textures.size());
+		for (size_t i = 0; i < gs_textures.size(); ++ i)
+		{
+			if (gs_textures[i])
+			{
+				srs[i] = checked_pointer_cast<D3D10Texture>(gs_textures[i])->D3DShaderResourceView().get();
+			}
+			else
+			{
+				srs[i] = NULL;
+			}
+		}
+		if (!srs.empty())
+		{
+			d3d_device->GSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
+		}
+
+		BOOST_TYPEOF(samplers_)::const_reference gs_samplers = samplers_[ST_GeometryShader];
+		sss.resize(gs_samplers.size());
+		for (size_t i = 0; i < gs_samplers.size(); ++ i)
+		{
+			if (gs_samplers[i])
+			{
+				sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(gs_samplers[i])->D3DSamplerState().get();
+			}
+			else
+			{
+				sss[i] = NULL;
+			}
+		}
+		if (!sss.empty())
+		{
+			d3d_device->GSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
+		}
+
 		for (size_t i = 0; i < d3d_cbufs_.size(); ++ i)
 		{
 			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
@@ -898,6 +953,15 @@ namespace KlayGE
 			}
 			d3d_device->PSSetConstantBuffers(0, static_cast<UINT>(cb.size()), &cb[0]);
 		}
+		if (!d3d_cbufs_[ST_GeometryShader].empty())
+		{
+			std::vector<ID3D10Buffer*> cb(d3d_cbufs_[ST_GeometryShader].size());
+			for (size_t i = 0; i < cb.size(); ++ i)
+			{
+				cb[i] = d3d_cbufs_[ST_GeometryShader][i].get();
+			}
+			d3d_device->GSSetConstantBuffers(0, static_cast<UINT>(cb.size()), &cb[0]);
+		}
 	}
 
 	void D3D10ShaderObject::Unbind()
@@ -914,6 +978,11 @@ namespace KlayGE
 		if (!srs.empty())
 		{
 			d3d_device->PSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
+		}
+		srs.resize(textures_[ST_GeometryShader].size(), NULL);
+		if (!srs.empty())
+		{
+			d3d_device->GSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
 		}
 	}
 }

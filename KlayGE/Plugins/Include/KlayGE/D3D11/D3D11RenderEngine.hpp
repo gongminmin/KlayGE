@@ -17,9 +17,8 @@
 #include <KlayGE/Color.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#include <D3D11.h>
-#include <D3DX11.h>
-#include <D3D11Shader.h>
+#include <d3d11.h>
+#include <d3dx11.h>
 
 #include <vector>
 #include <boost/array.hpp>
@@ -87,6 +86,7 @@ namespace KlayGE
 		void OMSetBlendState(ID3D11BlendStatePtr const & bs, Color const & blend_factor, uint32_t sample_mask);
 		void VSSetShader(ID3D11VertexShaderPtr const & shader);
 		void PSSetShader(ID3D11PixelShaderPtr const & shader);
+		void GSSetShader(ID3D11GeometryShaderPtr const & shader);
 
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -103,7 +103,6 @@ namespace KlayGE
 
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
-		HMODULE mod_d3dcompiler_;
 
 		typedef HRESULT (WINAPI *CreateDXGIFactoryFunc)(REFIID riid, void** ppFactory);
 		typedef HRESULT (WINAPI *D3D11CreateDeviceAndSwapChainFunc)(IDXGIAdapter* pAdapter,
@@ -134,6 +133,7 @@ namespace KlayGE
 		uint32_t sample_mask_cache_;
 		ID3D11VertexShaderPtr vertex_shader_cache_;
 		ID3D11PixelShaderPtr pixel_shader_cache_;
+		ID3D11GeometryShaderPtr geometry_shader_cache_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

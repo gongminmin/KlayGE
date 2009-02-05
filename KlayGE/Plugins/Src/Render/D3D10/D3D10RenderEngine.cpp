@@ -63,7 +63,8 @@ namespace KlayGE
 		{
 			DynamicD3D10CreateDeviceAndSwapChain_ = reinterpret_cast<D3D10CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d10_, "D3D10CreateDeviceAndSwapChain"));
 			DynamicD3D10GetVertexShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetVertexShaderProfile"));
-			DynamicD3D10GetPixelShaderProfile_ = reinterpret_cast<D3D10GetVertexShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetPixelShaderProfile"));
+			DynamicD3D10GetPixelShaderProfile_ = reinterpret_cast<D3D10GetPixelShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetPixelShaderProfile"));
+			DynamicD3D10GetGeometryShaderProfile_ = reinterpret_cast<D3D10GetGeometryShaderProfileFunc>(::GetProcAddress(mod_d3d10_, "D3D10GetGeometryShaderProfile"));
 			DynamicD3D10ReflectShader_ = reinterpret_cast<D3D10ReflectShaderFunc>(::GetProcAddress(mod_d3d10_, "D3D10ReflectShader"));
 		}
 
@@ -195,6 +196,7 @@ namespace KlayGE
 
 		vertex_shader_cache_.reset();
 		pixel_shader_cache_.reset();
+		geometry_shader_cache_.reset();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
@@ -444,6 +446,7 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
+		caps_.primitive_restart = true;
 		caps_.bc4_support = true;
 		caps_.bc5_support = true;
 	}
@@ -493,6 +496,15 @@ namespace KlayGE
 		{
 			d3d_device_->PSSetShader(shader.get());
 			pixel_shader_cache_ = shader;
+		}
+	}
+
+	void D3D10RenderEngine::GSSetShader(ID3D10GeometryShaderPtr const & shader)
+	{
+		if (geometry_shader_cache_ != shader)
+		{
+			d3d_device_->GSSetShader(shader.get());
+			geometry_shader_cache_ = shader;
 		}
 	}
 }

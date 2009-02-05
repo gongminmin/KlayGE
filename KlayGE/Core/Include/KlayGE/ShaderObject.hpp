@@ -1,8 +1,11 @@
 // ShaderObject.hpp
 // KlayGE shader对象类 头文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.8.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.8.0
+// 支持Gemoetry Shader (2009.2.5)
 //
 // 3.7.0
 // 改为直接传入RenderEffect (2008.7.4)
@@ -42,6 +45,7 @@ namespace KlayGE
 		{
 			ST_VertexShader,
 			ST_PixelShader,
+			ST_GeometryShader,
 
 			ST_NumShaderTypes
 		};
