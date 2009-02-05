@@ -42,15 +42,6 @@ namespace KlayGE
 #ifndef KLAYGE_DEBUG
 		cgGLSetDebugMode(CG_FALSE);
 #endif
-
-		{
-			CGerror error;
-			char const * err_string = cgGetLastErrorString(&error);
-			if (error != CG_NO_ERROR)
-			{
-				int a = 0;
-			}
-		}
 	}
 
 	CGcontext OGLRenderFactory::CGContext() const
