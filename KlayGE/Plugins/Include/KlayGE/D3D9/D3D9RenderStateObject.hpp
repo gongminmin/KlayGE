@@ -77,7 +77,7 @@ namespace KlayGE
 	public:
 		explicit D3D9SamplerStateObject(SamplerStateDesc const & desc);
 
-		void Active(uint32_t stage, TexturePtr texture);
+		void Active(uint32_t stage, TexturePtr const & texture);
 
 	private:
 		uint32_t d3d9_border_clr_;

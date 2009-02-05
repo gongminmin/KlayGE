@@ -191,7 +191,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9SamplerStateObject::Active(uint32_t stage, TexturePtr texture)
+	void D3D9SamplerStateObject::Active(uint32_t stage, TexturePtr const & texture)
 	{
 		D3D9RenderEngine& re = *checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

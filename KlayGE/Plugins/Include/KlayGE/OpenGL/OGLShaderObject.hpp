@@ -52,7 +52,7 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		parameter_bind_t GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param, ShaderType type);
+		parameter_bind_t GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param);
 
 	private:
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;

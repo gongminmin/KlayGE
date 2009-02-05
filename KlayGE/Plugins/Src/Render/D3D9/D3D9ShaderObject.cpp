@@ -844,7 +844,7 @@ namespace KlayGE
 				p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
 
 				RenderEffectParameterPtr const & p = effect.ParameterByName(constant_desc.Name);
-				if (p != RenderEffectParameter::NullObject())
+				if (p)
 				{
 					param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 				}

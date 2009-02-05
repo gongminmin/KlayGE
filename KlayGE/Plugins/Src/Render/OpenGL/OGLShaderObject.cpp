@@ -708,9 +708,9 @@ namespace KlayGE
 				char const * pname = cgGetParameterName(cg_param);
 
 				RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
-				if (p != RenderEffectParameter::NullObject())
+				if (p)
 				{
-					param_binds_[type].push_back(this->GetBindFunc(cg_param, p, type));
+					param_binds_[type].push_back(this->GetBindFunc(cg_param, p));
 				}
 				else
 				{
@@ -801,9 +801,9 @@ namespace KlayGE
 					char const * pname = cgGetParameterName(cg_param);
 
 					RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
-					if (p != RenderEffectParameter::NullObject())
+					if (p)
 					{
-						ret->param_binds_[i].push_back(ret->GetBindFunc(cg_param, p, static_cast<ShaderType>(i)));
+						ret->param_binds_[i].push_back(ret->GetBindFunc(cg_param, p));
 					}
 					else
 					{
@@ -841,7 +841,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param, ShaderType type)
+	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param)
 	{
 		parameter_bind_t ret;
 		ret.param = param;

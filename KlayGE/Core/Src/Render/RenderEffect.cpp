@@ -432,7 +432,7 @@ namespace KlayGE
 		return obj;
 	}
 
-	RenderEffectParameterPtr const & RenderEffect::ParameterByName(std::string const & name) const
+	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -441,10 +441,10 @@ namespace KlayGE
 				return param;
 			}
 		}
-		return RenderEffectParameter::NullObject();
+		return RenderEffectParameterPtr();
 	}
 
-	RenderEffectParameterPtr const & RenderEffect::ParameterBySemantic(std::string const & semantic) const
+	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
 		{
@@ -453,7 +453,7 @@ namespace KlayGE
 				return param;
 			}
 		}
-		return RenderEffectParameter::NullObject();
+		return RenderEffectParameterPtr();
 	}
 
 	RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
@@ -866,138 +866,6 @@ namespace KlayGE
 	}
 
 
-	class NullRenderEffectParameter : public RenderEffectParameter
-	{
-	public:
-		NullRenderEffectParameter()
-			: RenderEffectParameter(*RenderEffect::NullObject())
-		{
-		}
-
-		RenderEffectParameter& operator=(bool const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(int const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(float const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(float2 const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(float3 const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(float4 const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(float4x4 const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(TexturePtr const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(SamplerStateObjectPtr const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(std::vector<bool> const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(std::vector<int> const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(std::vector<float> const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(std::vector<float4> const & /*value*/)
-		{
-			return *this;
-		}
-		RenderEffectParameter& operator=(std::vector<float4x4> const & /*value*/)
-		{
-			return *this;
-		}
-
-		void Value(bool& val) const
-		{
-			val = false;
-		}
-		void Value(int& val) const
-		{
-			val = 0;
-		}
-		void Value(float& val) const
-		{
-			val = 0;
-		}
-		void Value(float2& val) const
-		{
-			val = float2::Zero();
-		}
-		void Value(float3& val) const
-		{
-			val = float3::Zero();
-		}
-		void Value(float4& val) const
-		{
-			val = float4::Zero();
-		}
-		void Value(float4x4& val) const
-		{
-			val = float4x4::Identity();
-		}
-		void Value(TexturePtr& val) const
-		{
-			val = TexturePtr();
-		}
-		void Value(SamplerStateObjectPtr& val) const
-		{
-			val = SamplerStateObject::NullObject();
-		}
-		void Value(std::vector<bool>& val) const
-		{
-			val.clear();
-		}
-		void Value(std::vector<int>& val) const
-		{
-			val.clear();
-		}
-		void Value(std::vector<float>& val) const
-		{
-			val.clear();
-		}
-		void Value(std::vector<float4>& val) const
-		{
-			val.clear();
-		}
-		void Value(std::vector<float4x4>& val) const
-		{
-			val.clear();
-		}
-
-		void Flush()
-		{
-		}
-
-	private:
-		NullRenderEffectParameter(NullRenderEffectParameter const & rhs);
-		NullRenderEffectParameter& operator=(NullRenderEffectParameter const & rhs);
-	};
-
-
 	RenderEffectParameter::RenderEffectParameter(RenderEffect& effect)
 		: effect_(effect)
 	{
@@ -1043,166 +911,6 @@ namespace KlayGE
 		ret->annotations_ = annotations_;
 
 		return ret;
-	}
-
-	RenderEffectParameterPtr const & RenderEffectParameter::NullObject()
-	{
-		static RenderEffectParameterPtr obj = MakeSharedPtr<NullRenderEffectParameter>();
-		return obj;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(bool const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(int const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(float const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(float2 const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(float3 const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(float4 const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(float4x4 const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(SamplerStateObjectPtr const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<bool> const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<int> const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float> const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4> const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	RenderEffectParameter& RenderEffectParameter::operator=(std::vector<float4x4> const & value)
-	{
-		*var_ = value;
-		return *this;
-	}
-
-	void RenderEffectParameter::Value(bool& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(int& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(float& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(float2& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(float3& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(float4& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(float4x4& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(TexturePtr& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(SamplerStateObjectPtr& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(std::vector<bool>& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(std::vector<int>& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(std::vector<float>& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(std::vector<float4>& val) const
-	{
-		var_->Value(val);
-	}
-
-	void RenderEffectParameter::Value(std::vector<float4x4>& val) const
-	{
-		var_->Value(val);
 	}
 
 

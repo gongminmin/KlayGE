@@ -188,6 +188,21 @@ namespace KlayGE
 	public:
 		void Load(ResIdentifierPtr const & source);
 
+		uint32_t Type() const
+		{
+			return type_;
+		}
+		std::string const & Name() const
+		{
+			return name_;
+		}
+
+		template <typename T>
+		void Value(T& val) const
+		{
+			var_->Value(val);
+		}
+
 	private:
 		uint32_t type_;
 		std::string name_;
@@ -234,9 +249,9 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameterPtr const & ParameterBySemantic(std::string const & semantic) const;
-		RenderEffectParameterPtr const & ParameterByName(std::string const & name) const;
-		RenderEffectParameterPtr const & ParameterByIndex(uint32_t n) const
+		RenderEffectParameterPtr ParameterBySemantic(std::string const & semantic) const;
+		RenderEffectParameterPtr ParameterByName(std::string const & name) const;
+		RenderEffectParameterPtr ParameterByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumParameters());
 			return params_[n];
@@ -423,9 +438,7 @@ namespace KlayGE
 	{
 	public:
 		explicit RenderEffectParameter(RenderEffect& effect);
-		virtual ~RenderEffectParameter();
-
-		static RenderEffectParameterPtr const & NullObject();
+		~RenderEffectParameter();
 
 		void Load(ResIdentifierPtr const & source);
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
@@ -464,35 +477,18 @@ namespace KlayGE
 			return (*annotations_)[n];
 		}
 
-		virtual RenderEffectParameter& operator=(bool const & value);
-		virtual RenderEffectParameter& operator=(int const & value);
-		virtual RenderEffectParameter& operator=(float const & value);
-		virtual RenderEffectParameter& operator=(float2 const & value);
-		virtual RenderEffectParameter& operator=(float3 const & value);
-		virtual RenderEffectParameter& operator=(float4 const & value);
-		virtual RenderEffectParameter& operator=(float4x4 const & value);
-		virtual RenderEffectParameter& operator=(TexturePtr const & value);
-		virtual RenderEffectParameter& operator=(SamplerStateObjectPtr const & value);
-		virtual RenderEffectParameter& operator=(std::vector<bool> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<int> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<float> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<float4> const & value);
-		virtual RenderEffectParameter& operator=(std::vector<float4x4> const & value);
+		template <typename T>
+		RenderEffectParameter& operator=(T const & value)
+		{
+			*var_ = value;
+			return *this;
+		}
 
-		virtual void Value(bool& val) const;
-		virtual void Value(int& val) const;
-		virtual void Value(float& val) const;
-		virtual void Value(float2& val) const;
-		virtual void Value(float3& val) const;
-		virtual void Value(float4& val) const;
-		virtual void Value(float4x4& val) const;
-		virtual void Value(TexturePtr& val) const;
-		virtual void Value(SamplerStateObjectPtr& val) const;
-		virtual void Value(std::vector<bool>& val) const;
-		virtual void Value(std::vector<int>& val) const;
-		virtual void Value(std::vector<float>& val) const;
-		virtual void Value(std::vector<float4>& val) const;
-		virtual void Value(std::vector<float4x4>& val) const;
+		template <typename T>
+		void Value(T& val) const
+		{
+			var_->Value(val);
+		}
 
 	protected:
 		RenderEffect& effect_;

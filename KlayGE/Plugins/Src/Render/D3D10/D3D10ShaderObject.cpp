@@ -514,7 +514,7 @@ namespace KlayGE
 							p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
 
 							RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
-							if (p != RenderEffectParameter::NullObject())
+							if (p)
 							{
 								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 							}
@@ -559,45 +559,22 @@ namespace KlayGE
 					D3D10_SHADER_INPUT_BIND_DESC si_desc;
 					reflection->GetResourceBindingDesc(i, &si_desc);
 
-					switch (si_desc.Type)
+					if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
 					{
-					case D3D10_SIT_TEXTURE:
+						RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+						if (p)
 						{
 							D3D10ShaderParameterHandle p_handle;
 							p_handle.shader_type = static_cast<uint8_t>(type);
 							p_handle.param_class = D3D10_SVC_OBJECT;
-							p_handle.param_type = D3D10_SVT_TEXTURE;
+							p_handle.param_type = (D3D10_SIT_TEXTURE == si_desc.Type) ? D3D10_SVT_TEXTURE : D3D10_SVT_SAMPLER;
 							p_handle.offset = si_desc.BindPoint;
 							p_handle.elements = 1;
 							p_handle.rows = 0;
 							p_handle.columns = 1;
 
-							RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-							if (p != RenderEffectParameter::NullObject())
-							{
-								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
-							}
+							param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 						}
-						break;
-
-					case D3D10_SIT_SAMPLER:
-						{
-							D3D10ShaderParameterHandle p_handle;
-							p_handle.shader_type = static_cast<uint8_t>(type);
-							p_handle.param_class = D3D10_SVC_OBJECT;
-							p_handle.param_type = D3D10_SVT_SAMPLER;
-							p_handle.offset = si_desc.BindPoint;
-							p_handle.elements = 1;
-							p_handle.rows = 0;
-							p_handle.columns = 1;
-
-							RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-							if (p != RenderEffectParameter::NullObject())
-							{
-								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
-							}
-						}
-						break;
 					}
 				}
 
