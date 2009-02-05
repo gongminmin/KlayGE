@@ -41,9 +41,9 @@ namespace
 
 			technique_ = rf.LoadEffect("parallax.kfx")->TechniqueByName("Parallax");
 
-			*(technique_->Effect().ParameterByName("diffuseMapSampler")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("normalMapSampler")) = LoadTexture("normal.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("heightMapSampler")) = LoadTexture("height.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("diffuse_tex")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("normal_tex")) = LoadTexture("normal.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("height_tex")) = LoadTexture("height.dds", EAH_GPU_Read)();
 		}
 
 		void BuildMeshInfo()

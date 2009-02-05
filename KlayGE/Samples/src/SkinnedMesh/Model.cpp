@@ -111,12 +111,12 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	{
 		if ("DiffuseMap" == iter->first)
 		{
-			*(effect_->ParameterByName("diffuse_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
 		if ("NormalMap" == iter->first)
 		{
 			TexturePtr nm = LoadTexture(iter->second, EAH_GPU_Read)();
-			*(effect_->ParameterByName("normal_map")) = nm;
+			*(effect_->ParameterByName("normal_tex")) = nm;
 			if (nm)
 			{
 				has_normal_map = true;
@@ -124,7 +124,7 @@ void MD5SkinnedMesh::BuildMeshInfo()
 		}
 		if ("SpecularMap" == iter->first)
 		{
-			*(effect_->ParameterByName("specular_map")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			*(effect_->ParameterByName("specular_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
 	}
 

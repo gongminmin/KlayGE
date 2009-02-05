@@ -83,7 +83,7 @@ namespace
 
 		void SetTexture(TexturePtr texture, bool flip)
 		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
+			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
 			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 	};
@@ -136,7 +136,7 @@ namespace
 
 		void SetTexture(TexturePtr texture, bool flip)
 		{
-			*(technique_->Effect().ParameterByName("fractal_sampler")) = texture;
+			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
 			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 	};
@@ -234,18 +234,20 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 
 	try
 	{
-		rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+		for (int i = 0; i < 2; ++ i)
+		{
+			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+		}
 	}
 	catch (...)
 	{
 		init_data.row_pitch = width * NumFormatBytes(EF_ABGR16F);
-		rendered_tex_[0] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-	}
-	rendered_tex_[1] = rf.MakeTexture2D(width, height, 1, rendered_tex_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-
-	for (int i = 0; i < 2; ++ i)
-	{
-		render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+		for (int i = 0; i < 2; ++ i)
+		{
+			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+		}
 	}
 }
 

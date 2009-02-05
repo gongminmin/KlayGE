@@ -49,6 +49,8 @@ namespace KlayGE
 	public:
 		D3D9ShaderObject();
 
+		std::string GenShaderText(RenderEffect const & effect) const;
+
 		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone(RenderEffect& effect);
@@ -59,6 +61,7 @@ namespace KlayGE
 	private:
 		struct parameter_bind_t
 		{
+			std::string combined_sampler_name;
 			RenderEffectParameterPtr param;
 			D3D9ShaderParameterHandle p_handle;
 			boost::function<void()> func;
@@ -82,6 +85,8 @@ namespace KlayGE
 		boost::array<std::vector<int4>, ST_NumShaderTypes> int_registers_;
 		boost::array<std::vector<float4>, ST_NumShaderTypes> float_registers_;
 		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
+
+		mutable std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
 	};
 
 	typedef boost::shared_ptr<D3D9ShaderObject> D3D9ShaderObjectPtr;

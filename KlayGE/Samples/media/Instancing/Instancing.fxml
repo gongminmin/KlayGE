@@ -16,7 +16,7 @@ void InstanceVS(float4 pos			: POSITION,
 					float4 row2			: TEXCOORD3,
 					float4 clr			: COLOR0,
 
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float4 oClr		: COLOR)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
@@ -29,7 +29,7 @@ void InstanceVS(float4 pos			: POSITION,
 	oClr = float4(clr.rgb * point_lighting(light_in_world, pos_ws, normal), clr.a);
 }
 
-float4 PS(float4 pos : POSITION, float4 clr : COLOR) : COLOR
+float4 PS(float4 pos : SV_Position, float4 clr : COLOR) : SV_Target
 {
 	return clr;
 }
@@ -51,7 +51,7 @@ float4 PS(float4 pos : POSITION, float4 clr : COLOR) : COLOR
 void NormalMeshVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float4 oClr		: COLOR)
 {
 	float4 pos_ws = mul(pos, modelmat);

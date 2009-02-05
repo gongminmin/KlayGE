@@ -11,23 +11,15 @@
 	<parameter type="float3" name="light_pos" x="300" y="100" z="100"/>
 	<parameter type="float3" name="eye_pos"/>
 
-	<parameter type="sampler2D" name="diffuse_map">
+	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="sampler2D" name="normal_map">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	
-	<parameter type="sampler2D" name="specular_map">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture2D" name="specular_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -38,7 +30,7 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 				float3 T	: TANGENT,	// in object space
 				float3 B	: BINORMAL,	// in object space
 				
-				out float4 oPos : POSITION,
+				out float4 oPos : SV_Position,
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,	// in tangent space
 				out float3 oH	: TEXCOORD2)	// in tangent space
@@ -71,23 +63,19 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 	oL = mul(obj2tan, L);
 }
 
-float4 SkinnedMeshPS(float4 pos : POSITION,
-				float2 uv : TEXCOORD0,
-				float3 L	: TEXCOORD1,
-				float3 H	: TEXCOORD2) : COLOR
+float4 PixelLighting(float3 normal, float2 uv, float3 L, float3 H)
 {
-	half3 bump_normal = decompress_normal(tex2D(normal_map, uv)).rgb;
-	half4 diffuse = tex2D(diffuse_map, uv);
-	half3 specular = tex2D(specular_map, uv).rgb;
+	half4 diffuse = diffuse_tex.Sample(linear_sampler, uv);
+	half3 specular = specular_tex.Sample(linear_sampler, uv).rgb;
 	
 	half3 light_vec = normalize(L);
-	half diffuse_factor = dot(light_vec, bump_normal);
+	half diffuse_factor = dot(light_vec, normal);
 
 	half4 clr;
 	if (diffuse_factor > 0)
 	{
 		half3 half_way = normalize(H);
-		half specular_factor = pow(dot(half_way, bump_normal), 8);
+		half specular_factor = pow(dot(half_way, normal), 8);
 		clr = half4(diffuse.rgb * diffuse_factor + specular * specular_factor, diffuse.a);
 	}
 	else
@@ -95,38 +83,26 @@ float4 SkinnedMeshPS(float4 pos : POSITION,
 		clr = half4(0, 0, 0, diffuse.a);
 	}
 	
-	clip(clr.a - 0.2f);
-
 	return clr;	
 }
 
-
-float4 SkinnedMeshNoNormalMapPS(float4 pos : POSITION,
+float4 SkinnedMeshPS(float4 pos : SV_Position,
 				float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
-				float3 H	: TEXCOORD2) : COLOR
+				float3 H	: TEXCOORD2) : SV_Target
 {
-	half3 bump_normal = half3(0, 0, 1);
-	half4 diffuse = tex2D(diffuse_map, uv);
-	half3 specular = tex2D(specular_map, uv).rgb;
-	
-	half3 light_vec = normalize(L);
-	half diffuse_factor = dot(light_vec, bump_normal);
-
-	half4 clr;
-	if (diffuse_factor > 0)
-	{
-		half3 half_way = normalize(H);
-		half specular_factor = pow(dot(half_way, bump_normal), 8);
-		clr = half4(diffuse.rgb * diffuse_factor + specular * specular_factor, diffuse.a);
-	}
-	else
-	{
-		clr = half4(0, 0, 0, diffuse.a);
-	}
-	
+	half4 clr = PixelLighting(decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb, uv, L, H);
 	clip(clr.a - 0.2f);
+	return clr;	
+}
 
+float4 SkinnedMeshNoNormalMapPS(float4 pos : SV_Position,
+				float2 uv : TEXCOORD0,
+				float3 L	: TEXCOORD1,
+				float3 H	: TEXCOORD2) : SV_Target
+{
+	half4 clr = PixelLighting(half3(0, 0, 1), uv, L, H);
+	clip(clr.a - 0.2f);
 	return clr;	
 }
 		]]>

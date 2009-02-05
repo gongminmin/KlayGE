@@ -31,7 +31,7 @@ namespace KlayGE
 	{
 		if (technique_)
 		{
-			child_sampler_ep_ = technique_->Effect().ParameterByName("child_sampler");
+			child_tex_ep_ = technique_->Effect().ParameterByName("child_tex");
 			addr_offset_ep_ = technique_->Effect().ParameterByName("addr_offset");
 			length_ep_ = technique_->Effect().ParameterByName("length");
 			scale_ep_ = technique_->Effect().ParameterByName("scale");
@@ -40,7 +40,7 @@ namespace KlayGE
 
 	void SATSeparableScanSweepPostProcess::ChildBuffer(TexturePtr const & tex)
 	{
-		*child_sampler_ep_ = tex;
+		*child_tex_ep_ = tex;
 	}
 
 	void SATSeparableScanSweepPostProcess::AddrOffset(float3 offset)

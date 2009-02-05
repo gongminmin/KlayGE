@@ -69,10 +69,11 @@ namespace KlayGE
 		REDT_bool = 0,
 		REDT_dword,
 		REDT_string,
-		REDT_sampler1D,
-		REDT_sampler2D,
-		REDT_sampler3D,
-		REDT_samplerCUBE,
+		REDT_texture1D,
+		REDT_texture2D,
+		REDT_texture3D,
+		REDT_textureCUBE,
+		REDT_sampler,
 		REDT_shader,
 		REDT_int,
 		REDT_int2,
@@ -108,7 +109,8 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float3 const & value);
 		virtual RenderVariable& operator=(float4 const & value);
 		virtual RenderVariable& operator=(float4x4 const & value);
-		virtual RenderVariable& operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & value);
+		virtual RenderVariable& operator=(TexturePtr const & value);
+		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(shader_desc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
@@ -124,7 +126,8 @@ namespace KlayGE
 		virtual void Value(float3& val) const;
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
-		virtual void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const;
+		virtual void Value(TexturePtr& val) const;
+		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(std::string& val) const;
 		virtual void Value(shader_desc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
@@ -169,7 +172,8 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
 	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
-	typedef RenderVariableConcrete<std::pair<TexturePtr, SamplerStateObjectPtr> > RenderVariableSampler;
+	typedef RenderVariableConcrete<TexturePtr> RenderVariableTexture;
+	typedef RenderVariableConcrete<SamplerStateObjectPtr> RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
@@ -258,11 +262,13 @@ namespace KlayGE
 		{
 			return shaders_ ? static_cast<uint32_t>(shaders_->size()) : 0;
 		}
-		RenderShaderFunc ShaderByIndex(uint32_t n) const
+		RenderShaderFunc const & ShaderByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumShaders());
 			return (*shaders_)[n];
 		}
+
+		std::string const & TypeName(uint32_t code) const;
 
 	protected:
 		std::vector<RenderEffectParameterPtr> params_;
@@ -394,9 +400,6 @@ namespace KlayGE
 			return (*annotations_)[n];
 		}
 
-	private:
-		std::string GenShaderText() const;
-
 	protected:
 		RenderEffect& effect_;
 
@@ -469,6 +472,7 @@ namespace KlayGE
 		virtual RenderEffectParameter& operator=(float4 const & value);
 		virtual RenderEffectParameter& operator=(float4x4 const & value);
 		virtual RenderEffectParameter& operator=(TexturePtr const & value);
+		virtual RenderEffectParameter& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderEffectParameter& operator=(std::vector<bool> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<int> const & value);
 		virtual RenderEffectParameter& operator=(std::vector<float> const & value);
@@ -482,7 +486,8 @@ namespace KlayGE
 		virtual void Value(float3& val) const;
 		virtual void Value(float4& val) const;
 		virtual void Value(float4x4& val) const;
-		virtual void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const;
+		virtual void Value(TexturePtr& val) const;
+		virtual void Value(SamplerStateObjectPtr& val) const;
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<int>& val) const;
 		virtual void Value(std::vector<float>& val) const;

@@ -8,7 +8,8 @@
 		<parameter type="float4" name="texel_to_pixel_offset"/>
 	</cbuffer>
 
-	<parameter type="sampler2D" name="texUISampler">
+	<parameter type="texture2D" name="ui_tex"/>
+	<parameter type="sampler" name="texUISampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -20,7 +21,7 @@ void UIVS(float4 position : POSITION,
 			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
-			out float4 oPosition : POSITION,
+			out float4 oPosition : SV_Position,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
@@ -31,13 +32,12 @@ void UIVS(float4 position : POSITION,
 	oTexCoord = texCoord;
 }
 
-float4 UIPS(float4 pos : POSITION, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : COLOR0
+float4 UIPS(float4 pos : SV_Position, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 {
-	clr *= tex2D(texUISampler, texCoord);
-	return clr;
+	return clr * ui_tex.Sample(texUISampler, texCoord);
 }
 
-float4 UINoTexPS(float4 clr : COLOR) : COLOR0
+float4 UINoTexPS(float4 pos : SV_Position, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 {
 	return clr;
 }

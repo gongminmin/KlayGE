@@ -20,12 +20,14 @@
 		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
-	<parameter type="sampler2D" name="particle_sampler">
+	<parameter type="texture2D" name="particle_tex"/>
+	<parameter type="sampler" name="particle_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
-	<parameter type="sampler2D" name="scene_sampler">
+	<parameter type="texture2D" name="scene_tex"/>
+	<parameter type="sampler" name="scene_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -46,7 +48,7 @@ float3 texcoord_to_view(float2 tex)
 		<![CDATA[
 void ParticleVS(float4 pos			: TEXCOORD0,
 					float2 tex			: POSITION,
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float4 oClr     : COLOR0,
 					out float4 oPosSS	: TEXCOORD0,
 					out float4 oCenterView : TEXCOORD1,
@@ -62,11 +64,11 @@ void ParticleVS(float4 pos			: TEXCOORD0,
 	oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
 }
 
-float4 ParticlePS(float4 pos : POSITION,
+float4 ParticlePS(float4 pos : SV_Position,
 						float4 clr : COLOR0,
 						float4 PosSS : TEXCOORD0,
 						float4 CenterView : TEXCOORD1,
-						float3 view_dir : TEXCOORD2) : COLOR
+						float3 view_dir : TEXCOORD2) : SV_Target
 {
 	CenterView /= CenterView.w;
 	float dir = view_dir.z;
@@ -85,10 +87,10 @@ float4 ParticlePS(float4 pos : POSITION,
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = tex2Dlod(scene_sampler, float4(tex_coord, 0, 0)).a;
+		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
 		float3 intersect = (v - sqrt(disc)) * view_dir;
-		clr *= tex2Dlod(particle_sampler, float4((intersect.xy - CenterView.xy) / point_radius / 2 + 0.5, 0, 0));
+		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - CenterView.xy) / point_radius / 2 + 0.5, 0);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 
@@ -113,7 +115,8 @@ float4 ParticlePS(float4 pos : POSITION,
 	</technique>
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
-	<parameter type="sampler2D" name="grass_sampler">
+	<parameter type="texture2D" name="grass_tex"/>
+	<parameter type="sampler" name="grass_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
@@ -123,7 +126,7 @@ float4 ParticlePS(float4 pos : POSITION,
 		<![CDATA[
 void TerrainVS(float4 Position : POSITION,
 					float3 Normal : NORMAL,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
 					out float3 oNormal : TEXCOORD2,
@@ -137,13 +140,13 @@ void TerrainVS(float4 Position : POSITION,
 	oTex0 = Position.xz;
 }
 
-float4 TerrainPS(float4 pos : POSITION,
+float4 TerrainPS(float4 pos : SV_Position,
 					float2 tex0 : TEXCOORD0,
 					float3 pos_os : TEXCOORD1,
 					float3 normal : TEXCOORD2,
-					float2 depth : TEXCOORD3) : COLOR 
+					float2 depth : TEXCOORD3) : SV_Target 
 {
-	return float4(tex2D(grass_sampler, tex0).rgb * dot(normalize(LightPos - pos_os), normal),
+	return float4(grass_tex.Sample(grass_sampler, tex0).rgb * dot(normalize(LightPos - pos_os), normal),
 				(depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
@@ -156,7 +159,8 @@ float4 TerrainPS(float4 pos : POSITION,
 		</pass>
 	</technique>
 
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -164,9 +168,9 @@ float4 TerrainPS(float4 pos : POSITION,
 	
 	<shader>
 		<![CDATA[
-float4 CopyPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 CopyPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 s = tex2D(src_sampler, tex);
+	float4 s = src_tex.Sample(src_sampler, tex);
 	return float4(s.rgb, 1);
 }
 		]]>

@@ -2,7 +2,9 @@
 
 <effect>
 	<parameter type="float4x4" name="mvp"/>
-	<parameter type="sampler2D" name="video_sampler">
+
+	<parameter type="texture2D" name="video_tex"/>
+	<parameter type="sampler" name="video_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
@@ -12,16 +14,16 @@
 		<![CDATA[
 void ObjectVS(float4 Position : POSITION,
 					float2 Tex0 : TEXCOORD0,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float2 oTex0 : TEXCOORD0)
 {
 	oPos = mul(Position, mvp);
 	oTex0 = Tex0;
 }
 
-float4 ObjectPS(float4 pos : POSITION, float2 Tex0 : TEXCOORD0) : COLOR 
+float4 ObjectPS(float4 pos : SV_Position, float2 Tex0 : TEXCOORD0) : SV_Target 
 {
-	return tex2D(video_sampler, Tex0);
+	return video_tex.Sample(video_sampler, Tex0);
 }
 		]]>
 	</shader>

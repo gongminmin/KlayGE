@@ -3,7 +3,8 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -11,7 +12,8 @@
 
 	<parameter type="float4" name="tex_coord_offset" array_size="2"/>
 
-	<parameter type="sampler2D" name="last_lum_sampler">
+	<parameter type="texture2D" name="last_lum_tex"/>
+	<parameter type="sampler" name="last_lum_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -22,7 +24,7 @@
 	<shader>
 		<![CDATA[
 void SumLumVS(float4 pos : POSITION,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1)
 {
@@ -33,8 +35,8 @@ void SumLumVS(float4 pos : POSITION,
 	oTex1 = tex.xyxy + tex_coord_offset[1];
 }
 
-float4 SumLum4x4LogPS(float4 pos : POSITION, float4 iTex0 : TEXCOORD0,
-						float4 iTex1 : TEXCOORD1) : COLOR
+float4 SumLum4x4LogPS(float4 pos : SV_Position, float4 iTex0 : TEXCOORD0,
+						float4 iTex1 : TEXCOORD1) : SV_Target
 {
 	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
 	float4 tex[2] = { iTex0, iTex1 };
@@ -42,31 +44,31 @@ float4 SumLum4x4LogPS(float4 pos : POSITION, float4 iTex0 : TEXCOORD0,
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += log(dot(tex2D(src_sampler, tex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
-		s += log(dot(tex2D(src_sampler, tex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(src_tex.Sample(src_sampler, tex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
+		s += log(dot(src_tex.Sample(src_sampler, tex[i].zw).rgb, RGB_TO_LUM) + 0.001f);
 	}
 
 	return s / 4;
 }
 
-float4 SumLum4x4IterativePS(float4 pos : POSITION, float4 iTex[2] : TEXCOORD) : COLOR
+float4 SumLum4x4IterativePS(float4 pos : SV_Position, float4 iTex[2] : TEXCOORD) : SV_Target
 {
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		s += tex2D(src_sampler, iTex[i].xy).r;
-		s += tex2D(src_sampler, iTex[i].zw).r;
+		s += src_tex.Sample(src_sampler, iTex[i].xy).r;
+		s += src_tex.Sample(src_sampler, iTex[i].zw).r;
 	}
 
 	return s / 4;
 }
 
-float4 AdaptedLumPS(float4 pos : POSITION,
+float4 AdaptedLumPS(float4 pos : SV_Position,
 				float4 tex0 : TEXCOORD0,
-				float4 tex1 : TEXCOORD1) : COLOR
+				float4 tex1 : TEXCOORD1) : SV_Target
 {
-	float adapted_lum = tex2D(last_lum_sampler, float2(0.5f, 0.5f)).r;
-	float current_lum = exp(tex2D(src_sampler, float2(0.5f, 0.5f)).r);
+	float adapted_lum = last_lum_tex.Sample(last_lum_sampler, float2(0.5f, 0.5f)).r;
+	float current_lum = exp(src_tex.Sample(src_sampler, float2(0.5f, 0.5f)).r);
 
 	return adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
 }

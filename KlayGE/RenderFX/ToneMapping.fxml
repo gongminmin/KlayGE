@@ -3,23 +3,21 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="sampler2D" name="lum_sampler">
+	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="sampler2D" name="bloom_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="lum_tex"/>
+	<parameter type="texture2D" name="bloom_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -44,24 +42,24 @@ float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 }
 
 void ToneMapping30VS(float4 pos : POSITION,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float3 oTex : TEXCOORD0)
 {
 	oPos = AdjustPos(pos);
 
 	oTex.xy = TexCoordFromPos(pos);
-	oTex.z = max(0.001f, tex2Dlod(lum_sampler, float4(0.5f, 0.5f, 0, 0)).r);
+	oTex.z = max(0.001f, lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r);
 }
 
-float4 ToneMapping30PS(float4 pos : POSITION, float3 iTex : TEXCOORD0) : COLOR
+float4 ToneMapping30PS(float4 pos : SV_Position, float3 iTex : TEXCOORD0) : SV_Target
 {
-	return ToneMapping(tex2D(src_sampler, iTex.xy), tex2D(bloom_sampler, iTex.xy), iTex.z);
+	return ToneMapping(src_tex.Sample(linear_sampler, iTex.xy), bloom_tex.Sample(linear_sampler, iTex.xy), iTex.z);
 }
 
-float4 ToneMapping20PS(float4 pos : POSITION, float2 iTex : TEXCOORD0) : COLOR
+float4 ToneMapping20PS(float4 pos : SV_Position, float2 iTex : TEXCOORD0) : SV_Target
 {
-	half lum = max(0.001f, tex2D(lum_sampler, float2(0.5f, 0.5f)).r);
-	return ToneMapping(tex2D(src_sampler, iTex), tex2D(bloom_sampler, iTex), lum);
+	half lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f).r);
+	return ToneMapping(src_tex.Sample(linear_sampler, iTex), bloom_tex.Sample(linear_sampler, iTex), lum);
 }
 		]]>
 	</shader>

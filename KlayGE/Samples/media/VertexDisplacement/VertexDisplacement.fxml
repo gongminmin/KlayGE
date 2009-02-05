@@ -12,7 +12,8 @@
 	<parameter type="float" name="half_length"/>
 	<parameter type="float" name="half_width"/>
 
-	<parameter type="sampler2D" name="flagSampler">
+	<parameter type="texture2D" name="flag_tex"/>
+	<parameter type="sampler" name="flagSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -22,7 +23,7 @@
 		<![CDATA[
 void VertexDisplacementVS(float4 pos			: POSITION,
 								float2 texcoord0	: TEXCOORD0,
-								out float4 oPos			: POSITION,
+								out float4 oPos			: SV_Position,
 								out float4 oClr			: COLOR0,
 								out float2 oTexcoord0	: TEXCOORD0)
 {
@@ -39,10 +40,10 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 	oTexcoord0 = texcoord0;
 }
 
-float4 VertexDisplacementPS(float4 pos : POSITION, float4 clr : COLOR0,
-							float2 texCoord : TEXCOORD0) : COLOR0
+float4 VertexDisplacementPS(float4 pos : SV_Position, float4 clr : COLOR0,
+							float2 texCoord : TEXCOORD0) : SV_Target
 {
-	return clr * tex2D(flagSampler, texCoord);
+	return clr * flag_tex.Sample(flagSampler, texCoord);
 }
 		]]>
 	</shader>

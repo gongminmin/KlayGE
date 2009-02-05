@@ -49,6 +49,8 @@ namespace KlayGE
 	public:
 		D3D10ShaderObject();
 
+		std::string GenShaderText(RenderEffect const & effect) const;
+
 		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone(RenderEffect& effect);

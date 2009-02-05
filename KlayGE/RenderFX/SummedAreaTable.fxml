@@ -7,14 +7,10 @@
 	<parameter type="int" name="length"/>
 	<parameter type="float" name="scale"/>
 
-	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="border"/>
-		<state name="address_v" value="border"/>
-		<state name="border_clr" r="0" g="0" b="0" a="0"/>
-	</parameter>
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="child_tex"/>
 
-	<parameter type="sampler2D" name="child_sampler">
+	<parameter type="sampler" name="tex_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
@@ -23,75 +19,75 @@
 
 	<shader>
 		<![CDATA[
-float4 SATScanXUpSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_x = tex_coord0.x * scale;
-	return tex2D(src_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
-				+ tex2D(src_sampler, float2(tar_x - addr_offset.x, tex_coord0.y))
-				+ tex2D(src_sampler, float2(tar_x + addr_offset.x, tex_coord0.y))
-				+ tex2D(src_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
+	return src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
+				+ src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.x, tex_coord0.y))
+				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.x, tex_coord0.y))
+				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
 }
 
-float4 SATScanXDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanXDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
 	float x = floor(tex_coord0.x * length);
 	int r = fmod(x, 4);
 	if (3 == r)
 	{
-		clr = tex2Dlod(src_sampler, float4(tex_coord0.x * scale, tex_coord0.y, 0, 0));
+		clr = src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x * scale, tex_coord0.y), 0);
 	}
 	else
 	{
-		clr = tex2Dlod(child_sampler, float4(tex_coord0, 0, 0));
+		clr = child_tex.SampleLevel(tex_sampler, tex_coord0, 0);
 		if (x > 3)
 		{
-			clr += tex2Dlod(src_sampler, float4(tex_coord0.x * scale - addr_offset.x, tex_coord0.y, 0, 0));
+			clr += src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x * scale - addr_offset.x, tex_coord0.y), 0);
 		}
 		if (r >= 1)
 		{
-			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(addr_offset.y, 0), 0, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(addr_offset.y, 0), 0);
 		}
 		if (r >= 2)
 		{
-			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(addr_offset.z, 0), 0, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(addr_offset.z, 0), 0);
 		}
 	}
 	return clr;
 }
 
-float4 SATScanYUpSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanYUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_y = tex_coord0.y * scale;
-	return tex2D(src_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
-				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y - addr_offset.x))
-				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y + addr_offset.x))
-				+ tex2D(src_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
+	return src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
+				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.x))
+				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.x))
+				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
 }
 
-float4 SATScanYDownSweepPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 SATScanYDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
 	float y = floor(tex_coord0.y * length);
 	int r = fmod(y, 4);
 	if (3 == r)
 	{
-		clr = tex2Dlod(src_sampler, float4(tex_coord0.x, tex_coord0.y * scale, 0, 0));
+		clr = src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale), 0);
 	}
 	else
 	{
-		clr = tex2Dlod(child_sampler, float4(tex_coord0, 0, 0));
+		clr = child_tex.SampleLevel(tex_sampler, tex_coord0, 0);
 		if (y > 3)
 		{
-			clr += tex2Dlod(src_sampler, float4(tex_coord0.x, tex_coord0.y * scale - addr_offset.x, 0, 0));
+			clr += src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale - addr_offset.x), 0);
 		}
 		if (r >= 1)
 		{
-			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(0, addr_offset.y), 0, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(0, addr_offset.y), 0);
 		}
 		if (r >= 2)
 		{
-			clr += tex2Dlod(child_sampler, float4(tex_coord0 - float2(0, addr_offset.z), 0, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(0, addr_offset.z), 0);
 		}
 	}
 	return clr;

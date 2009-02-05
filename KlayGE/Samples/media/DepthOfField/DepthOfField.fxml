@@ -22,7 +22,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 					float4 row2			: TEXCOORD3,
 					float3 clr			: COLOR0,
 
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float3 oClr		: COLOR,
 					out float2 oDepth : TEXCOORD0)
 {
@@ -36,8 +36,8 @@ void ColorDepthVS(float4 pos			: POSITION,
 	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
 }
 
-float4 ColorDepthPS(float4 pos		: POSITION, float3 clr : COLOR,
-				float2 depth : TEXCOORD0) : COLOR
+float4 ColorDepthPS(float4 pos		: SV_Position, float3 clr : COLOR,
+				float2 depth : TEXCOORD0) : SV_Target
 {
 	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
 }
@@ -58,12 +58,11 @@ float4 ColorDepthPS(float4 pos		: POSITION, float3 clr : COLOR,
 	</cbuffer>
 	<parameter type="float4" name="sat_size"/>
 	<parameter type="bool" name="show_blur_factor"/>
-	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	<parameter type="sampler2D" name="sat_sampler">
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="sat_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -71,9 +70,9 @@ float4 ColorDepthPS(float4 pos		: POSITION, float3 clr : COLOR,
 
 	<shader>
 		<![CDATA[
-float4 DepthOfFieldPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 DepthOfFieldPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	float blur_factor = saturate(abs(tex2D(src_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
+	float blur_factor = saturate(abs(src_tex.Sample(point_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
 	if (show_blur_factor)
 	{
 		return blur_factor;
@@ -85,8 +84,8 @@ float4 DepthOfFieldPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : CO
 		float2 left_top = max(0.5f * sat_size.zw, corner.zw);
 		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
 		float2 width_height = (right_bottom - left_top) * sat_size.xy;
-		return (tex2D(sat_sampler, corner.xy) - tex2D(sat_sampler, corner.zy)
-				- tex2D(sat_sampler, corner.xw) + tex2D(sat_sampler, corner.zw))
+		return (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
+				- sat_tex.Sample(point_sampler, corner.xw) + sat_tex.Sample(point_sampler, corner.zw))
 							/ (width_height.x * width_height.y) + 0.5f;
 	}
 }
@@ -105,7 +104,7 @@ float4 DepthOfFieldPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : CO
 	<parameter type="float4" name="clear_clr"/>
 	<shader>
 		<![CDATA[
-float4 ClearFloatPS(float4 pos : POSITION, float2 tex_coord0 : TEXCOORD0) : COLOR
+float4 ClearFloatPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	return clear_clr;
 }

@@ -30,6 +30,7 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
@@ -40,6 +41,30 @@
 namespace
 {
 	using namespace KlayGE;
+
+
+	char const * predefined_funcs = "\n								\
+	float4 tex1DLevel(sampler s, float location, float lod)\n		\
+	{\n																\
+		return tex1Dlod(s, float4(location, 0, 0, lod));\n			\
+	}\n																\
+	\n																\
+	float4 tex2DLevel(sampler s, float2 location, float lod)\n		\
+	{\n																\
+		return tex2Dlod(s, float4(location, 0, lod));\n				\
+	}\n																\
+	\n																\
+	float4 tex3DLevel(sampler s, float3 location, float lod)\n		\
+	{\n																\
+		return tex3Dlod(s, float4(location, lod));\n				\
+	}\n																\
+	\n																\
+	float4 texCUBELevel(sampler s, float3 location, float lod)\n	\
+	{\n																\
+		return texCUBElod(s, float4(location, lod));\n				\
+	}\n																\
+	";
+
 
 	template <typename SrcType, typename DstType>
 	class SetD3D9ShaderParameter
@@ -337,19 +362,22 @@ namespace
 	class SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >
 	{
 	public:
-		SetD3D9ShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler, RenderEffectParameterPtr const & param)
-			: sampler_(&sampler), param_(param)
+		SetD3D9ShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler,
+				RenderEffectParameterPtr const & tex_param, RenderEffectParameterPtr const & sampler_param)
+			: sampler_(&sampler), tex_param_(tex_param), sampler_param_(sampler_param)
 		{
 		}
 
 		void operator()()
 		{
-			param_->Value(*sampler_);
+			tex_param_->Value(sampler_->first);
+			sampler_param_->Value(sampler_->second);
 		}
 
 	private:
 		std::pair<TexturePtr, SamplerStateObjectPtr>* sampler_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameterPtr tex_param_;
+		RenderEffectParameterPtr sampler_param_;
 	};
 }
 
@@ -358,6 +386,190 @@ namespace KlayGE
 	D3D9ShaderObject::D3D9ShaderObject()
 	{
 		is_shader_validate_.assign(true);
+	}
+
+	std::string D3D9ShaderObject::GenShaderText(RenderEffect const & effect) const
+	{
+		std::stringstream shader_ss;
+		bool sample_helper = false;
+		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
+		{
+			std::string const & s = effect.ShaderByIndex(i).str();
+			boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
+			boost::tokenizer<boost::char_separator<char> > tok(s, sep);
+			std::string this_token;
+			for (BOOST_AUTO(beg, tok.begin()); beg != tok.end();)
+			{
+				this_token = *beg;
+
+				RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
+				if (param &&
+					((REDT_texture1D == param->type()) || (REDT_texture2D == param->type()) || (REDT_texture3D == param->type())
+						|| (REDT_textureCUBE == param->type())))
+				{
+					std::vector<std::string> sample_tokens;
+					sample_tokens.push_back(this_token);
+					++ beg;
+					if ("." == *beg)
+					{
+						while (*beg != ",")
+						{
+							if ((*beg != " ") && (*beg != "\t") && (*beg != "\n"))
+							{
+								sample_tokens.push_back(*beg);
+							}
+							++ beg;
+						}
+
+						std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
+						bool found = false;
+						for (uint32_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+						{
+							if (tex_sampler_binds_[i].first == combined_sampler_name)
+							{
+								found = true;
+								break;
+							}
+						}
+						if (!found)
+						{
+							tex_sampler_binds_.push_back(std::make_pair(combined_sampler_name,
+								std::make_pair(param, effect.ParameterByName(sample_tokens[4]))));
+						}
+
+						if ((!sample_helper) && ("SampleLevel" == sample_tokens[2]))
+						{
+							sample_helper = true;
+						}
+
+						switch (param->type())
+						{
+						case REDT_texture1D:
+							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
+							{
+								shader_ss << "tex1D";
+							}
+							else
+							{
+								if ("SampleLevel" == sample_tokens[2])
+								{
+									shader_ss << "tex1DLevel";
+								}
+							}
+							break;
+
+						case REDT_texture2D:
+							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
+							{
+								shader_ss << "tex2D";
+							}
+							else
+							{
+								if ("SampleLevel" == sample_tokens[2])
+								{
+									shader_ss << "tex2DLevel";
+								}
+							}
+							break;
+
+						case REDT_texture3D:
+							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
+							{
+								shader_ss << "tex3D";
+							}
+							else
+							{
+								if ("SampleLevel" == sample_tokens[2])
+								{
+									shader_ss << "tex3DLevel";
+								}
+							}
+							break;
+
+						case REDT_textureCUBE:
+							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
+							{
+								shader_ss << "texCUBE";
+							}
+							else
+							{
+								if ("SampleLevel" == sample_tokens[2])
+								{
+									shader_ss << "texCUBELevel";
+								}
+							}
+							break;
+						}
+						shader_ss << "(" << combined_sampler_name << ",";
+
+						++ beg;
+					}
+					else
+					{
+						shader_ss << this_token;
+					}
+				}
+				else
+				{
+					if ("SV_Position" == this_token)
+					{
+						shader_ss << "POSITION";
+					}
+					else
+					{
+						if ("SV_Depth" == this_token)
+						{
+							shader_ss << "DEPTH";
+						}
+						else
+						{
+							if (0 == this_token.find("SV_Target"))
+							{
+								shader_ss << "COLOR" << this_token.substr(9);
+							}
+							else
+							{
+								shader_ss << this_token;
+							}
+						}
+					}
+
+					++ beg;
+				}
+			}
+			shader_ss << std::endl;
+		}
+
+		std::stringstream ss;
+		if (sample_helper)
+		{
+			ss << predefined_funcs << std::endl;
+		}
+
+		BOOST_AUTO(cbuffers, effect.CBuffers());
+		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
+			{
+				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+
+				ss << effect.TypeName(param.type()) << " " << *param.Name();
+				if (param.ArraySize() != 0)
+				{
+					ss << "[" << param.ArraySize() << "]";
+				}
+				ss << ";" << std::endl;
+			}
+		}
+
+		for (uint32_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+		{
+			ss << "sampler " << tex_sampler_binds_[i].first << ";" << std::endl;
+		}
+
+		ss << shader_ss.str();
+
+		return ss.str();
 	}
 
 	void D3D9ShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
@@ -430,7 +642,15 @@ namespace KlayGE
 			if (err_msg_legacy != NULL)
 			{
 #ifdef KLAYGE_DEBUG
-				std::cerr << *shader_text << std::endl;
+				std::istringstream iss(*shader_text);
+				std::string s;
+				int line = 1;
+				while (iss)
+				{
+					std::getline(iss, s);
+					std::cerr << line << " " << s << std::endl;
+					++ line;
+				}
 				std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
 #endif
 
@@ -628,6 +848,23 @@ namespace KlayGE
 				{
 					param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 				}
+				else
+				{
+					for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+					{
+						if (tex_sampler_binds_[i].first == constant_desc.Name)
+						{
+							parameter_bind_t pb;
+							pb.combined_sampler_name = tex_sampler_binds_[i].first;
+							pb.p_handle = p_handle;
+							pb.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>,
+								std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[p_handle.shader_type][p_handle.register_index],
+								tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
+							param_binds_[type].push_back(pb);
+							break;
+						}
+					}
+				}
 			}
 
 			constant_table->Release();
@@ -650,6 +887,13 @@ namespace KlayGE
 		ret->bool_start_ = bool_start_;
 		ret->int_start_ = int_start_;
 		ret->float_start_ = float_start_;
+		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
+		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+		{
+			ret->tex_sampler_binds_[i].first = tex_sampler_binds_[i].first;
+			ret->tex_sampler_binds_[i].second.first = effect.ParameterByName(*(tex_sampler_binds_[i].second.first->Name()));
+			ret->tex_sampler_binds_[i].second.second = effect.ParameterByName(*(tex_sampler_binds_[i].second.second->Name()));
+		}
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->bool_registers_[i].resize(bool_registers_[i].size());
@@ -660,7 +904,27 @@ namespace KlayGE
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::const_reference pb, param_binds_[i])
 			{
-				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
+				if (pb.param)
+				{
+					ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
+				}
+				else
+				{
+					for (size_t j = 0; j < ret->tex_sampler_binds_.size(); ++ j)
+					{
+						if (ret->tex_sampler_binds_[j].first == pb.combined_sampler_name)
+						{
+							parameter_bind_t new_pb;
+							new_pb.combined_sampler_name = pb.combined_sampler_name;
+							new_pb.p_handle = pb.p_handle;
+							new_pb.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>,
+								std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[pb.p_handle.shader_type][pb.p_handle.register_index],
+								ret->tex_sampler_binds_[j].second.first, ret->tex_sampler_binds_[j].second.second);
+							ret->param_binds_[i].push_back(new_pb);
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -806,14 +1070,6 @@ namespace KlayGE
 				BOOST_ASSERT(D3DXRS_FLOAT4 == p_handle.register_set);
 				ret.func = SetD3D9ShaderParameter<float4x4, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
-			break;
-
-		case REDT_sampler1D:
-		case REDT_sampler2D:
-		case REDT_sampler3D:
-		case REDT_samplerCUBE:
-			BOOST_ASSERT(p_handle.register_index < samplers_[p_handle.shader_type].size());
-			ret.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[p_handle.shader_type][p_handle.register_index], param);
 			break;
 
 		default:

@@ -4,17 +4,21 @@
 	<include name="../../../RenderFX/util.fxml"/>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="sampler2D" name="particle_pos_sampler">
+	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler3D" name="noise_vol_sampler">
+	
+	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 		<state name="address_w" value="wrap"/>
 	</parameter>
+
+	<parameter type="texture2D" name="particle_pos_tex"/>
+	<parameter type="texture3D" name="noise_vol_tex"/>
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
 	<parameter type="float" name="point_radius"/>
@@ -34,16 +38,8 @@
 		<parameter type="int" name="flip"/>
 	</cbuffer>
 
-	<parameter type="sampler2D" name="particle_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
-	<parameter type="sampler2D" name="scene_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="particle_tex"/>
+	<parameter type="texture2D" name="scene_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -60,13 +56,13 @@ float3 texcoord_to_view(float2 tex)
 		<![CDATA[
 void ParticlesVS(float2 tex_pos		: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float4 oClr     : COLOR0,
 					out float4 oPosSS	: TEXCOORD0,
 					out float4 oCenterView : TEXCOORD1,
 					out float3 oViewDir : TEXCOORD2)
 {
-	float4 pos = tex2Dlod(particle_pos_sampler, float4(tex_pos, 0, 0));
+	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
 
 	if (pos.w <= 0)
 	{
@@ -90,11 +86,11 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 	}
 }
 
-float4 ParticlesPS(float4 pos : POSITION,
+float4 ParticlesPS(float4 pos : SV_Position,
 						float4 clr : COLOR0,
 						float4 PosSS : TEXCOORD0,
 						float4 CenterView : TEXCOORD1,
-						float3 view_dir : TEXCOORD2) : COLOR
+						float3 view_dir : TEXCOORD2) : SV_Target
 {
 	CenterView /= CenterView.w;
 	float dir = view_dir.z;
@@ -112,7 +108,7 @@ float4 ParticlesPS(float4 pos : POSITION,
 		tex_coord.y = -tex_coord.y;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = tex2D(scene_sampler, tex_coord).a;
+		float depth = scene_tex.Sample(point_sampler, tex_coord).a;
 		float3 intersect = (v - sqrt(disc)) * view_dir;
 		float optical_depth = dir * depth - intersect.z;
 		
@@ -127,7 +123,7 @@ float4 ParticlesPS(float4 pos : POSITION,
 			intersect_ws /= intersect_ws.w;
 			float2 dxdy = (intersect.xy - CenterView.xy) / point_radius;
 			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
-			float4 n = tex3D(noise_vol_sampler, intersect_ws.rgb / 50);
+			float4 n = noise_vol_tex.Sample(bilinear_sampler, intersect_ws.rgb / 50);
 			return float4((dot(normalize(LightPos - intersect_ws), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
 		}
 	}
@@ -153,11 +149,7 @@ float4 ParticlesPS(float4 pos : POSITION,
 		</pass>
 	</technique>
 
-	<parameter type="sampler2D" name="particle_vel_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="particle_vel_tex"/>
 
 	<cbuffer name="per_frame2">
 		<parameter type="float4x4" name="ps_model_mat"/>
@@ -165,23 +157,12 @@ float4 ParticlesPS(float4 pos : POSITION,
 		<parameter type="float" name="elapse_time"/>
 	</cbuffer>
 
-	<parameter type="sampler2D" name="particle_init_vel_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	<parameter type="sampler2D" name="particle_birth_time_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	
-	<parameter type="sampler2D" name="height_map_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	<parameter type="sampler2D" name="normal_map_sampler">
+	<parameter type="texture2D" name="particle_init_vel_tex"/>
+	<parameter type="texture2D" name="particle_birth_time_tex"/>
+
+	<parameter type="texture2D" name="height_map_tex"/>
+	<parameter type="texture2D" name="normal_map_tex"/>
+	<parameter type="sampler" name="normal_map_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -191,22 +172,22 @@ float4 ParticlesPS(float4 pos : POSITION,
 		<![CDATA[
 void UpdateVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float2 oTex		: TEXCOORD0)
 {
 	oPos = pos;
 	oTex = float2(tex.x, 1 - tex.y);
 }
 
-void UpdatePS(float4 pos : POSITION,
+void UpdatePS(float4 pos : SV_Position,
 				float2 tex : TEXCOORD0,
-				out float4 out_pos : COLOR0,
-				out float4 out_vel : COLOR1)
+				out float4 out_pos : SV_Target0,
+				out float4 out_vel : SV_Target1)
 {
-	float4 cur_pos = tex2D(particle_pos_sampler, tex);
+	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = tex2D(particle_vel_sampler, tex);
+		float3 cur_vel = particle_vel_tex.Sample(point_sampler, tex);
 
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
@@ -214,10 +195,10 @@ void UpdatePS(float4 pos : POSITION,
 		
 		float2 tex_pos = cur_pos.xz / 4 + 0.5;
 		tex_pos.y = 1 - tex_pos.y;
-		float height = tex2D(height_map_sampler, tex_pos).r;
+		float height = height_map_tex.Sample(point_sampler, tex_pos).r;
 		if (cur_pos.y < height)
 		{
-			cur_vel = reflect(cur_vel, decompress_normal(tex2D(normal_map_sampler, tex_pos)).xzy) * 0.99f;
+			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex_pos)).xzy) * 0.99f;
 		}
 		
 		out_pos = cur_pos;
@@ -225,13 +206,13 @@ void UpdatePS(float4 pos : POSITION,
 	}
 	else
 	{
-		float t = accumulate_time - tex2D(particle_birth_time_sampler, tex).r;
+		float t = accumulate_time - particle_birth_time_tex.Sample(point_sampler, tex).r;
 		if ((t > 0) && (t < elapse_time))
 		{
 			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
 			pos /= pos.w;
 
-			float3 vel = tex2D(particle_init_vel_sampler, tex + cur_pos.xz).xyz;
+			float3 vel = particle_init_vel_tex.Sample(point_sampler, tex + cur_pos.xz).xyz;
 			vel = mul(vel, (float3x3)ps_model_mat);
 
 			out_pos = float4(pos.xyz, init_pos_life.w);
@@ -258,18 +239,14 @@ void UpdatePS(float4 pos : POSITION,
 		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
 	</cbuffer>
-	
-	<parameter type="sampler2D" name="grass_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
+
+	<parameter type="texture2D" name="grass_tex"/>
 
 	<shader>
 		<![CDATA[
 void TerrainVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: POSITION,
+					out float4 oPos		: SV_Position,
 					out float4 oTex  : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
 					out float2 oDepth : TEXCOORD2)
@@ -278,7 +255,7 @@ void TerrainVS(float4 pos			: POSITION,
 	oTex.zw = oTex.xy * 4;
 
 	pos = pos.xzyw;
-	pos.y += tex2Dlod(height_map_sampler, float4(oTex.xy, 0, 0)).r;
+	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
 	
 	oPosOS = pos;
 	
@@ -287,10 +264,10 @@ void TerrainVS(float4 pos			: POSITION,
 	oDepth = pos_es.zw;
 }
 
-float4 TerrainPS(float4 pos : POSITION, float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : COLOR0
+float4 TerrainPS(float4 pos : SV_Position, float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : SV_Target
 {
-	float3 normal = decompress_normal(tex2D(normal_map_sampler, tex.xy)).xzy;
-	return float4(tex2D(grass_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
+	float3 normal = decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy;
+	return float4(grass_tex.Sample(bilinear_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
 		(depth.x / depth.y - depth_min) * inv_depth_range);
 }
 		]]>
@@ -303,24 +280,16 @@ float4 TerrainPS(float4 pos : POSITION, float4 tex : TEXCOORD0, float3 pos_os : 
 		</pass>
 	</technique>
 
-	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	<parameter type="sampler2D" name="tex_with_alpha_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="tex_with_alpha"/>
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 BlendPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 a = tex2D(tex_with_alpha_sampler, tex);
+	float4 a = tex_with_alpha.Sample(point_sampler, tex);
 	a.a = saturate(a.a);
-	float4 s = tex2D(src_sampler, tex);
+	float4 s = src_tex.Sample(point_sampler, tex);
 	return float4(lerp(s.rgb, a.rgb, a.a), 1);
 }
 		]]>

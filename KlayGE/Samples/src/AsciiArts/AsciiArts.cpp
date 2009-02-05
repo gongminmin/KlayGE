@@ -94,12 +94,12 @@ namespace
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArts.kfx")->TechniqueByName("AsciiArts"))
 		{
 			cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
-			lums_sampler_ep_ = technique_->Effect().ParameterByName("lums_sampler");
+			lums_tex_ep_ = technique_->Effect().ParameterByName("lums_tex");
 		}
 
 		void SetLumsTex(TexturePtr const & lums_tex)
 		{
-			*lums_sampler_ep_ = lums_tex;
+			*lums_tex_ep_ = lums_tex;
 		}
 
 		void OnRenderBegin()
@@ -114,7 +114,7 @@ namespace
 
 	private:
 		RenderEffectParameterPtr cell_per_row_line_ep_;
-		RenderEffectParameterPtr lums_sampler_ep_;
+		RenderEffectParameterPtr lums_tex_ep_;
 	};
 
 	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)

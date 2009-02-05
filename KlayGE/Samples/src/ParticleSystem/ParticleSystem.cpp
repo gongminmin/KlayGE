@@ -128,7 +128,7 @@ namespace
 
 			box_ = MathLib::compute_bounding_box<float>(&vertices[0], &vertices[0] + vertices.size());
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = grass();
+			*(technique_->Effect().ParameterByName("grass_tex")) = grass();
 		}
 
 		void OnRenderBegin()
@@ -206,12 +206,12 @@ namespace
 			technique_ = rf.LoadEffect("ParticleSystem.kfx")->TechniqueByName("Particle");
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tl();
+			*(technique_->Effect().ParameterByName("particle_tex")) = particle_tl();
 		}
 
 		void SceneTexture(TexturePtr tex, bool flip)
 		{
-			*(technique_->Effect().ParameterByName("scene_sampler")) = tex;
+			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
 			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 

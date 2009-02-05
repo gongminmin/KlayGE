@@ -61,7 +61,7 @@ namespace
 
 		void VideoTexture(TexturePtr video_tex)
 		{
-			*(technique_->Effect().ParameterByName("video_sampler")) = video_tex;
+			*(technique_->Effect().ParameterByName("video_tex")) = video_tex;
 		}
 	};
 

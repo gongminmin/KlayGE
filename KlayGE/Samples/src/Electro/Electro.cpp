@@ -86,7 +86,7 @@ namespace
 			TexturePtr electro_tex = rf.MakeTexture3D(XSIZE, YSIZE, ZSIZE, 1, EF_L8, 1, 0, EAH_GPU_Read, &init_data);
 
 			technique_ = rf.LoadEffect("Electro.kfx")->TechniqueByName("Electro");
-			*(technique_->Effect().ParameterByName("electroSampler")) = electro_tex;
+			*(technique_->Effect().ParameterByName("electro_tex")) = electro_tex;
 
 			float3 xyzs[] =
 			{

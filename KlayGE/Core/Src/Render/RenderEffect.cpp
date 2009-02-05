@@ -95,10 +95,11 @@ namespace
 			types_.push_back("bool");
 			types_.push_back("dword");
 			types_.push_back("string");
-			types_.push_back("sampler1D");
-			types_.push_back("sampler2D");
-			types_.push_back("sampler3D");
-			types_.push_back("samplerCUBE");
+			types_.push_back("texture1D");
+			types_.push_back("texture2D");
+			types_.push_back("texture3D");
+			types_.push_back("textureCUBE");
+			types_.push_back("sampler");
 			types_.push_back("shader");
 			types_.push_back("int");
 			types_.push_back("int2");
@@ -169,10 +170,15 @@ namespace
 			}
 			break;
 
-		case REDT_sampler1D:
-		case REDT_sampler2D:
-		case REDT_sampler3D:
-		case REDT_samplerCUBE:
+		case REDT_texture1D:
+		case REDT_texture2D:
+		case REDT_texture3D:
+		case REDT_textureCUBE:
+			var = MakeSharedPtr<RenderVariableTexture>();
+			*var = TexturePtr();
+			break;
+
+		case REDT_sampler:
 			{
 				var = MakeSharedPtr<RenderVariableSampler>();
 
@@ -203,7 +209,7 @@ namespace
 				source->read(reinterpret_cast<char*>(&border_clr), sizeof(border_clr));
 				desc.border_clr = border_clr;
 
-				*var = std::make_pair(TexturePtr(), Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc));
+				*var = Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(desc);
 			}
 			break;
 
@@ -359,7 +365,7 @@ namespace KlayGE
 			fxml_header header;
 			source->read(reinterpret_cast<char*>(&header), sizeof(header));
 			BOOST_ASSERT((MakeFourCC<'F', 'X', 'M', 'L'>::value == header.fourcc));
-			BOOST_ASSERT(2 == header.ver);
+			BOOST_ASSERT(3 == header.ver);
 
 			for (uint32_t i = 0; i < header.num_parameters; ++ i)
 			{
@@ -460,6 +466,11 @@ namespace KlayGE
 			}
 		}
 		return RenderTechnique::NullObject();
+	}
+
+	std::string const & RenderEffect::TypeName(uint32_t code) const
+	{
+		return type_define::instance().type_name(code);
 	}
 
 
@@ -812,7 +823,7 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		shader_text_ = MakeSharedPtr<BOOST_TYPEOF(*shader_text_)>(this->GenShaderText());
+		shader_text_ = MakeSharedPtr<BOOST_TYPEOF(*shader_text_)>(shader_obj_->GenShaderText(effect_));
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
 			shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
@@ -854,77 +865,6 @@ namespace KlayGE
 		shader_obj_->Unbind();
 	}
 
-	std::string RenderPass::GenShaderText() const
-	{
-		std::stringstream ss;
-
-		BOOST_AUTO(cbuffers, effect_.CBuffers());
-		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
-		{
-			ss << "#ifdef CONSTANT_BUFFER" << std::endl;
-			ss << "cbuffer " << cbuff.first << std::endl;
-			ss << "{" << std::endl;
-			ss << "#endif" << std::endl;
-
-			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
-			{
-				RenderEffectParameter& param = *effect_.ParameterByIndex(param_index);
-
-				ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
-				if (param.ArraySize() != 0)
-				{
-					ss << "[" << param.ArraySize() << "]";
-				}
-
-				ss << ";" << std::endl;
-			}
-
-			ss << "#ifdef CONSTANT_BUFFER" << std::endl;
-			ss << "};" << std::endl;
-			ss << "#endif" << std::endl << std::endl;
-		}
-
-		uint32_t tex_unit = 0;
-		for (uint32_t i = 0; i < effect_.NumParameters(); ++ i)
-		{
-			RenderEffectParameter& param = *effect_.ParameterByIndex(i);
-
-			switch (param.type())
-			{
-			case REDT_sampler1D:
-			case REDT_sampler2D:
-			case REDT_sampler3D:
-			case REDT_samplerCUBE:
-				ss << type_define::instance().type_name(param.type()) << " " << *param.Name();
-				if (param.ArraySize() != 0)
-				{
-					ss << "[" << param.ArraySize() << "]";
-				}
-
-				ss << std::endl;
-				ss << "#ifdef OGL_EXPLICIT_TEXUNIT" << std::endl;
-				ss << ": TEXUNIT" << tex_unit << std::endl;
-				ss << "#endif" << std::endl;
-
-				ss << ";" << std::endl;
-
-				++ tex_unit;
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		for (uint32_t i = 0; i < effect_.NumShaders(); ++ i)
-		{
-			ss << effect_.ShaderByIndex(i).str() << std::endl;
-		}
-
-		return ss.str();
-	}
-
-
 
 	class NullRenderEffectParameter : public RenderEffectParameter
 	{
@@ -962,7 +902,11 @@ namespace KlayGE
 		{
 			return *this;
 		}
-		RenderEffectParameter& operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & /*value*/)
+		RenderEffectParameter& operator=(TexturePtr const & /*value*/)
+		{
+			return *this;
+		}
+		RenderEffectParameter& operator=(SamplerStateObjectPtr const & /*value*/)
 		{
 			return *this;
 		}
@@ -1015,10 +959,13 @@ namespace KlayGE
 		{
 			val = float4x4::Identity();
 		}
-		void Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const
+		void Value(TexturePtr& val) const
 		{
-			val.first = TexturePtr();
-			val.second = SamplerStateObject::NullObject();
+			val = TexturePtr();
+		}
+		void Value(SamplerStateObjectPtr& val) const
+		{
+			val = SamplerStateObject::NullObject();
 		}
 		void Value(std::vector<bool>& val) const
 		{
@@ -1148,9 +1095,13 @@ namespace KlayGE
 
 	RenderEffectParameter& RenderEffectParameter::operator=(TexturePtr const & value)
 	{
-		std::pair<TexturePtr, SamplerStateObjectPtr> s;
-		var_->Value(s);
-		*var_ = std::make_pair(value, s.second);
+		*var_ = value;
+		return *this;
+	}
+
+	RenderEffectParameter& RenderEffectParameter::operator=(SamplerStateObjectPtr const & value)
+	{
+		*var_ = value;
 		return *this;
 	}
 
@@ -1219,7 +1170,12 @@ namespace KlayGE
 		var_->Value(val);
 	}
 
-	void RenderEffectParameter::Value(std::pair<TexturePtr, SamplerStateObjectPtr>& val) const
+	void RenderEffectParameter::Value(TexturePtr& val) const
+	{
+		var_->Value(val);
+	}
+
+	void RenderEffectParameter::Value(SamplerStateObjectPtr& val) const
 	{
 		var_->Value(val);
 	}
@@ -1309,7 +1265,13 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(std::pair<TexturePtr, SamplerStateObjectPtr> const & /*value*/)
+	RenderVariable& RenderVariable::operator=(TexturePtr const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -1392,7 +1354,12 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(std::pair<TexturePtr, SamplerStateObjectPtr>& /*value*/) const
+	void RenderVariable::Value(TexturePtr& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

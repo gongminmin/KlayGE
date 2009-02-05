@@ -46,9 +46,9 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
-			*(technique_->Effect().ParameterByName("diffuseMap")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("normalMap")) = LoadTexture("normal.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("distanceMap")) = LoadTexture("distance.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("diffuse_tex")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("normal_tex")) = LoadTexture("normal.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("distance_tex")) = LoadTexture("distance.dds", EAH_GPU_Read)();
 
 			float3 xyzs[] =
 			{

@@ -45,7 +45,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
-			*(technique_->Effect().ParameterByName("flagSampler")) = flag_tl();
+			*(technique_->Effect().ParameterByName("flag_tex")) = flag_tl();
 			*(technique_->Effect().ParameterByName("lightDir")) = float3(0, 0, -1);
 		}
 

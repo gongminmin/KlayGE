@@ -10,7 +10,8 @@
 
 	<parameter type="float4x4" name="mvp"/>
 
-	<parameter type="sampler2D" name="distance_sampler">
+	<parameter type="texture2D" name="distance_tex"/>
+	<parameter type="sampler" name="distance_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -23,7 +24,7 @@ void Font2DVS(float4 position : POSITION,
 			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
-			out float4 oPosition : POSITION,
+			out float4 oPosition : SV_Position,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
@@ -38,7 +39,7 @@ void Font3DVS(float4 position : POSITION,
 			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
-			out float4 oPosition : POSITION,
+			out float4 oPosition : SV_Position,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oColor : COLOR)
 {
@@ -48,9 +49,9 @@ void Font3DVS(float4 position : POSITION,
 	oTexCoord = texCoord;
 }
 
-float4 FontPS(float4 pos : POSITION, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : COLOR0
+float4 FontPS(float4 pos : SV_Position, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 {
-	clr.a = tex2D(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
+	clr.a = distance_tex.Sample(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
 	return clr;
 }
 		]]>

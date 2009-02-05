@@ -8,17 +8,11 @@
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
 
-	<parameter type="sampler2D" name="diffuseMap">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
-	<parameter type="sampler2D" name="normalMap">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
-	<parameter type="sampler3D" name="distanceMap">
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture3D" name="distance_tex"/>
+
+	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
@@ -32,7 +26,7 @@ void DistanceMappingVS(float4 pos		: POSITION,
 					float3 T			: TANGENT,	// in object space
 					float3 B			: BINORMAL,	// in object space
 					
-					out float4 oPos			: POSITION,
+					out float4 oPos			: SV_Position,
 					out float3 oTexcoord0	: TEXCOORD0,
 					out float3 oL			: TEXCOORD1,	// in tangent space
 					out float3 oV			: TEXCOORD2		// in tangent space
@@ -56,17 +50,17 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oV = vTanView;
 }
 
-half4 DistanceMappingPS(float4 pos			: POSITION,
+half4 DistanceMappingPS(float4 pos			: SV_Position,
 						float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2) : COLOR
+						float3 V		: TEXCOORD2) : SV_Target
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
-		texUV += view * tex3D(distanceMap, texUV).r;
+		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
 	}
 
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
@@ -77,26 +71,26 @@ half4 DistanceMappingPS(float4 pos			: POSITION,
 	half2 dx = ddx(texCoord0.xy);
 	half2 dy = ddy(texCoord0.xy);
 
-	half3 diffuse = tex2D(diffuseMap, texUV.xy, dx, dy).rgb;
+	half3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 
-	half3 bump_normal = decompress_normal(tex2D(normalMap, texUV.xy, dx, dy));
+	half3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
 	half3 light_vec = normalize(L);
 	half diffuse_factor = diffuse_lighting(light_vec, bump_normal);
 
 	return half4(diffuse * diffuse_factor, 1);
 }
 
-half4 DistanceMappingPS_20(float4 pos			: POSITION,
-            float3 texCoord0	: TEXCOORD0,
+half4 DistanceMappingPS_20(float4 pos			: SV_Position,
+						float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2) : COLOR
+						float3 V		: TEXCOORD2) : SV_Target
 {
 	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
 
 	half3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		texUV += view * tex3D(distanceMap, texUV).r;
+		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
 	}
 	
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
@@ -104,9 +98,9 @@ half4 DistanceMappingPS_20(float4 pos			: POSITION,
 		clip(-1);
 	}
 
-	half3 diffuse = tex2D(diffuseMap, texUV.xy);
+	half3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy);
 
-	half3 bump_normal = decompress_normal(tex2D(normalMap, texUV.xy));
+	half3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
 	half3 light_vec = normalize(L);
 	half diffuse_factor = diffuse_lighting(light_vec, bump_normal);
 

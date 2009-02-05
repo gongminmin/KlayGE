@@ -4,12 +4,14 @@
 	<include name="../../../RenderFX/util.fxml"/>
 
 	<parameter type="float4x4" name="inv_mvp"/>
-	<parameter type="samplerCUBE" name="skybox_cubeMapSampler">
+	<parameter type="textureCUBE" name="skybox_cube_tex"/>
+	<parameter type="sampler" name="skybox_cubeMapSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="samplerCUBE" name="skybox_CcubeMapSampler">
+	<parameter type="textureCUBE" name="skybox_Ccube_tex"/>
+	<parameter type="sampler" name="skybox_CcubeMapSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -18,17 +20,17 @@
 	<shader>
 		<![CDATA[
 void SkyBoxVS(float4 pos : POSITION,
-			out float4 oPos : POSITION,
+			out float4 oPos : SV_Position,
 			out float3 texcoord0 : TEXCOORD0)
 {
 	oPos = pos;
 	texcoord0 = mul(pos, inv_mvp);
 }
 
-float4 HDRSkyBoxPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
+float4 HDRSkyBoxPS(float4 pos : SV_Position, float3 texCoord0 : TEXCOORD0) : SV_Target
 {
-	float3 rgb = decode_hdr_yc(texCUBE(skybox_cubeMapSampler, texCoord0).r,
-					texCUBE(skybox_CcubeMapSampler, texCoord0));
+	float3 rgb = decode_hdr_yc(skybox_cube_tex.Sample(skybox_cubeMapSampler, texCoord0).r,
+					skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, texCoord0));
 	
 	return float4(rgb, 1);
 }

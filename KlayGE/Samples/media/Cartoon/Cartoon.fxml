@@ -18,7 +18,7 @@
 		<![CDATA[
 void NormalDepthVS(float4 pos : POSITION,
 			float3 normal : NORMAL,
-			out float4 oPos : POSITION,
+			out float4 oPos : SV_Position,
 			out float4 oNormal : TEXCOORD0,
 			out float3 oLightVec : TEXCOORD1,
 			out float3 oViewVec : TEXCOORD2)
@@ -31,9 +31,9 @@ void NormalDepthVS(float4 pos : POSITION,
 	oViewVec = eye_in_model - pos.xyz;
 }
 
-void NormalDepthPS(float4 pos : POSITION, float4 normal : TEXCOORD0,
+void NormalDepthPS(float4 pos : SV_Position, float4 normal : TEXCOORD0,
 			float3 light_vec : TEXCOORD1, float3 view_vec : TEXCOORD2,
-			out half4 oClr : COLOR0, out half4 oNormalDepth : COLOR1)
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = normal;
@@ -74,20 +74,15 @@ void NormalDepthPS(float4 pos : POSITION, float4 normal : TEXCOORD0,
 	<parameter type="float" name="inv_width"/>
 	<parameter type="float" name="inv_height"/>
 
-	<parameter type="sampler2D" name="toonmap_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-	</parameter>
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler2D" name="color_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+
+	<parameter type="texture2D" name="toonmap_tex"/>
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="color_tex"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="e_barrier"/>
@@ -97,7 +92,7 @@ void NormalDepthPS(float4 pos : POSITION, float4 normal : TEXCOORD0,
 	<shader>
 		<![CDATA[
 void PostToonVS(float4 pos : POSITION,
-				out float4 oPos : POSITION,
+				out float4 oPos : SV_Position,
 				out float2 oTc0 : TEXCOORD0, // center
 				out float4 oTc1 : TEXCOORD1, // left top / right bottom
 				out float4 oTc2 : TEXCOORD2, // right top / left bottom
@@ -112,30 +107,30 @@ void PostToonVS(float4 pos : POSITION,
 	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
 }
 
-float4 PostToonPS(float4 pos : POSITION,
+float4 PostToonPS(float4 pos : SV_Position,
 				float2 tc0 : TEXCOORD0,
 				float4 tc1 : TEXCOORD1,
 				float4 tc2 : TEXCOORD2,
 				float4 tc3 : TEXCOORD3,
-				float4 tc4 : TEXCOORD4) : COLOR
+				float4 tc4 : TEXCOORD4) : SV_Target
 {
-	half4 ndc = tex2D(src_sampler, tc0);
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
 	if (1 == ndc.w)
 	{
 		clip(-1);
 	}
 	
-	half4 color = tex2D(color_sampler, tc0);
+	half4 color = color_tex.Sample(point_sampler, tc0);
 	half toon = dot(color.rgb, half3(0.299f, 0.587f, 0.114f));
 
-	half4 s1 = tex2D(src_sampler, tc1.xy);
-	half4 s2 = tex2D(src_sampler, tc1.zw);
-	half4 s3 = tex2D(src_sampler, tc2.xy);
-	half4 s4 = tex2D(src_sampler, tc2.zw);
-	half4 s5 = tex2D(src_sampler, tc3.xy);
-	half4 s6 = tex2D(src_sampler, tc3.zw);
-	half4 s7 = tex2D(src_sampler, tc4.xy);
-	half4 s8 = tex2D(src_sampler, tc4.zw);
+	half4 s1 = src_tex.Sample(point_sampler, tc1.xy);
+	half4 s2 = src_tex.Sample(point_sampler, tc1.zw);
+	half4 s3 = src_tex.Sample(point_sampler, tc2.xy);
+	half4 s4 = src_tex.Sample(point_sampler, tc2.zw);
+	half4 s5 = src_tex.Sample(point_sampler, tc3.xy);
+	half4 s6 = src_tex.Sample(point_sampler, tc3.zw);
+	half4 s7 = src_tex.Sample(point_sampler, tc4.xy);
+	half4 s8 = src_tex.Sample(point_sampler, tc4.zw);
 
 	// Normal discontinuity filter
 	half4 nd = half4(dot(ndc.xyz, s1.xyz),
@@ -150,7 +145,7 @@ float4 PostToonPS(float4 pos : POSITION,
 	dd = step(e_barrier.y, abs(2 * ndc.w - dd));
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
-	return tex2D(toonmap_sampler, float2(toon, 0.5f)).r * de * ne;
+	return toonmap_tex.Sample(point_sampler, float2(toon, 0.5f)).r * de * ne;
 }
 		]]>
 	</shader>

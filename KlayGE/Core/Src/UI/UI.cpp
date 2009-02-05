@@ -75,7 +75,7 @@ namespace KlayGE
 			if (texture)
 			{
 				technique_ = effect->TechniqueByName("UITec");
-				*(technique_->Effect().ParameterByName("texUISampler")) = texture;
+				*(technique_->Effect().ParameterByName("ui_tex")) = texture;
 			}
 			else
 			{

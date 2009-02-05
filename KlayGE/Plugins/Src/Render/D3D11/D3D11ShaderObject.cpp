@@ -271,24 +271,39 @@ namespace
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >
+	class SetD3D11ShaderParameter<TexturePtr, TexturePtr>
 	{
 	public:
-		SetD3D11ShaderParameter(TexturePtr& texture, SamplerStateObjectPtr& sampler, RenderEffectParameterPtr const & param)
-			: texture_(&texture), sampler_(&sampler), param_(param)
+		SetD3D11ShaderParameter(TexturePtr& texture, RenderEffectParameterPtr const & param)
+			: texture_(&texture), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			std::pair<TexturePtr, SamplerStateObjectPtr> tex_sam;
-			param_->Value(tex_sam);
-			*texture_ = tex_sam.first;
-			*sampler_ = tex_sam.second;
+			param_->Value(*texture_);
 		}
 
 	private:
 		TexturePtr* texture_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>
+	{
+	public:
+		SetD3D11ShaderParameter(SamplerStateObjectPtr& sampler, RenderEffectParameterPtr const & param)
+			: sampler_(&sampler), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			param_->Value(*sampler_);
+		}
+
+	private:
 		SamplerStateObjectPtr* sampler_;
 		RenderEffectParameterPtr param_;
 	};
@@ -299,6 +314,81 @@ namespace KlayGE
 	D3D11ShaderObject::D3D11ShaderObject()
 	{
 		is_shader_validate_.assign(true);
+	}
+
+	std::string D3D11ShaderObject::GenShaderText(RenderEffect const & effect) const
+	{
+		std::stringstream ss;
+
+		BOOST_AUTO(cbuffers, effect.CBuffers());
+		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
+		{
+			ss << "cbuffer " << cbuff.first << std::endl;
+			ss << "{" << std::endl;
+
+			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
+			{
+				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
+				switch (param.type())
+				{
+				case REDT_texture1D:
+				case REDT_texture2D:
+				case REDT_texture3D:
+				case REDT_textureCUBE:
+				case REDT_sampler:
+					break;
+
+				default:
+					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					if (param.ArraySize() != 0)
+					{
+						ss << "[" << param.ArraySize() << "]";
+					}
+					ss << ";" << std::endl;
+					break;
+				}
+			}
+
+			ss << "};" << std::endl;
+		}
+
+		for (uint32_t i = 0; i < effect.NumParameters(); ++ i)
+		{
+			RenderEffectParameter& param = *effect.ParameterByIndex(i);
+
+			switch (param.type())
+			{
+			case REDT_texture1D:
+				ss << "Texture1D " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_texture2D:
+				ss << "Texture2D " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_texture3D:
+				ss << "Texture3D " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_textureCUBE:
+				ss << "TextureCube " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_sampler:
+				ss << "sampler " << *param.Name() << ";" << std::endl;
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
+		{
+			ss << effect.ShaderByIndex(i).str() << std::endl;
+		}
+
+		return ss.str();
 	}
 
 	void D3D11ShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
@@ -333,16 +423,25 @@ namespace KlayGE
 
 		ID3D10Blob* code;
 		ID3D10Blob* err_msg;
-		D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, {"KLAYGE_D3D11", "1" }, { NULL, NULL } };
+		D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D11", "1" }, { NULL, NULL } };
 		D3DX11CompileFromMemory(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, macros,
 			NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-			D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, NULL, &code, &err_msg, NULL);
+			0, 0, NULL, &code, &err_msg, NULL);
 		if (err_msg != NULL)
 		{
 #ifdef KLAYGE_DEBUG
-			std::cerr << *shader_text << std::endl;
+			std::istringstream iss(*shader_text);
+			std::string s;
+			int line = 1;
+			while (iss)
+			{
+				std::getline(iss, s);
+				std::cerr << line << " " << s << std::endl;
+				++ line;
+			}
 			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
+
 			err_msg->Release();
 		}
 
@@ -438,8 +537,6 @@ namespace KlayGE
 					d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 				}
 
-				std::map<std::string, int> texture_bind_point;
-
 				int num_textures = -1;
 				int num_samplers = -1;
 				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
@@ -447,16 +544,15 @@ namespace KlayGE
 					D3D11_SHADER_INPUT_BIND_DESC si_desc;
 					reflection->GetResourceBindingDesc(i, &si_desc);
 
-					if (D3D10_SIT_TEXTURE == si_desc.Type)
+					switch (si_desc.Type)
 					{
+					case D3D10_SIT_TEXTURE:
 						num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+						break;
 
-						texture_bind_point.insert(std::make_pair(si_desc.Name, si_desc.BindPoint));
-					}
-
-					if (D3D10_SIT_SAMPLER == si_desc.Type)
-					{
+					case D3D10_SIT_SAMPLER:
 						num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+						break;
 					}
 				}
 
@@ -468,22 +564,45 @@ namespace KlayGE
 					D3D11_SHADER_INPUT_BIND_DESC si_desc;
 					reflection->GetResourceBindingDesc(i, &si_desc);
 
-					if (D3D10_SIT_SAMPLER == si_desc.Type)
+					switch (si_desc.Type)
 					{
-						D3D11ShaderParameterHandle p_handle;
-						p_handle.shader_type = static_cast<uint8_t>(type);
-						p_handle.param_class = D3D10_SVC_OBJECT;
-						p_handle.param_type = D3D10_SVT_SAMPLER;
-						p_handle.offset = si_desc.BindPoint;
-						p_handle.elements = texture_bind_point[si_desc.Name];	// reuse elements
-						p_handle.rows = 0;
-						p_handle.columns = 1;
-
-						RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-						if (p != RenderEffectParameter::NullObject())
+					case D3D10_SIT_TEXTURE:
 						{
-							param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+							D3D11ShaderParameterHandle p_handle;
+							p_handle.shader_type = static_cast<uint8_t>(type);
+							p_handle.param_class = D3D10_SVC_OBJECT;
+							p_handle.param_type = D3D10_SVT_TEXTURE;
+							p_handle.offset = si_desc.BindPoint;
+							p_handle.elements = 1;
+							p_handle.rows = 0;
+							p_handle.columns = 1;
+
+							RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+							if (p != RenderEffectParameter::NullObject())
+							{
+								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+							}
 						}
+						break;
+
+					case D3D10_SIT_SAMPLER:
+						{
+							D3D11ShaderParameterHandle p_handle;
+							p_handle.shader_type = static_cast<uint8_t>(type);
+							p_handle.param_class = D3D10_SVC_OBJECT;
+							p_handle.param_type = D3D10_SVT_SAMPLER;
+							p_handle.offset = si_desc.BindPoint;
+							p_handle.elements = 1;
+							p_handle.rows = 0;
+							p_handle.columns = 1;
+
+							RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+							if (p != RenderEffectParameter::NullObject())
+							{
+								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+							}
+						}
+						break;
 					}
 				}
 
@@ -665,11 +784,15 @@ namespace KlayGE
 			}
 			break;
 
-		case REDT_sampler1D:
-		case REDT_sampler2D:
-		case REDT_sampler3D:
-		case REDT_samplerCUBE:
-			ret.func = SetD3D11ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>, std::pair<TexturePtr, SamplerStateObjectPtr> >(textures_[p_handle.shader_type][p_handle.elements], samplers_[p_handle.shader_type][p_handle.offset], param);
+		case REDT_texture1D:
+		case REDT_texture2D:
+		case REDT_texture3D:
+		case REDT_textureCUBE:
+			ret.func = SetD3D11ShaderParameter<TexturePtr, TexturePtr>(textures_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
+		case REDT_sampler:
+			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:

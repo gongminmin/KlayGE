@@ -33,7 +33,7 @@ namespace KlayGE
 		int length_;
 		bool dir_;
 
-		RenderEffectParameterPtr child_sampler_ep_;
+		RenderEffectParameterPtr child_tex_ep_;
 		RenderEffectParameterPtr addr_offset_ep_;
 		RenderEffectParameterPtr length_ep_;
 		RenderEffectParameterPtr scale_ep_;

@@ -188,9 +188,9 @@ namespace
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
-			*(technique_->Effect().ParameterByName("noise_vol_sampler")) = noise_vol_tex_;
+			*(technique_->Effect().ParameterByName("noise_vol_tex")) = noise_vol_tex_;
 
-			*(technique_->Effect().ParameterByName("particle_sampler")) = particle_tex_ = pt();
+			*(technique_->Effect().ParameterByName("particle_tex")) = particle_tex_ = pt();
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
@@ -198,12 +198,12 @@ namespace
 
 		void SceneTexture(TexturePtr tex)
 		{
-			*(technique_->Effect().ParameterByName("scene_sampler")) = tex;
+			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
 		}
 
 		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("particle_pos_sampler")) = particle_pos_tex_;
+			*(technique_->Effect().ParameterByName("particle_pos_tex")) = particle_pos_tex_;
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 
@@ -310,16 +310,16 @@ namespace
 			vel_init.slice_pitch = 0;
 
 			TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
-			*(technique_->Effect().ParameterByName("particle_init_vel_sampler")) = particle_init_vel;
+			*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
-			particle_pos_sampler_param_ = technique_->Effect().ParameterByName("particle_pos_sampler");
-			particle_vel_sampler_param_ = technique_->Effect().ParameterByName("particle_vel_sampler");
+			particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
+			particle_vel_tex_param_ = technique_->Effect().ParameterByName("particle_vel_tex");
 			accumulate_time_param_ = technique_->Effect().ParameterByName("accumulate_time");
 			elapse_time_param_ = technique_->Effect().ParameterByName("elapse_time");
 
 			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
-			*(technique_->Effect().ParameterByName("height_map_sampler")) = terrain_height_map;
-			*(technique_->Effect().ParameterByName("normal_map_sampler")) = terrain_normal_map;
+			*(technique_->Effect().ParameterByName("height_map_tex")) = terrain_height_map;
+			*(technique_->Effect().ParameterByName("normal_map_tex")) = terrain_normal_map;
 		}
 
 		void ModelMatrix(float4x4 const & model)
@@ -352,7 +352,7 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
-			*(technique_->Effect().ParameterByName("particle_birth_time_sampler")) = particle_birth_time_;
+			*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_;
 		}
 
 		void Update(float elapse_time)
@@ -369,8 +369,8 @@ namespace
 			*elapse_time_param_ = elapse_time;
 			*accumulate_time_param_ = accumulate_time_;
 
-			*particle_pos_sampler_param_ = this->PosTexture();
-			*particle_vel_sampler_param_ = this->VelTexture();
+			*particle_pos_tex_param_ = this->PosTexture();
+			*particle_vel_tex_param_ = this->VelTexture();
 
 			this->Render();
 
@@ -408,8 +408,8 @@ namespace
 		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
 
 		RenderEffectParameterPtr vel_offset_param_;
-		RenderEffectParameterPtr particle_pos_sampler_param_;
-		RenderEffectParameterPtr particle_vel_sampler_param_;
+		RenderEffectParameterPtr particle_pos_tex_param_;
+		RenderEffectParameterPtr particle_vel_tex_param_;
 		RenderEffectParameterPtr accumulate_time_param_;
 		RenderEffectParameterPtr elapse_time_param_;
 	};
@@ -429,10 +429,10 @@ namespace
 			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
 			height_map->CopyToTexture(*height_32f);
 
-			*(technique_->Effect().ParameterByName("height_map_sampler")) = height_32f;
-			*(technique_->Effect().ParameterByName("normal_map_sampler")) = normal_map;
+			*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
+			*(technique_->Effect().ParameterByName("normal_map_tex")) = normal_map;
 
-			*(technique_->Effect().ParameterByName("grass_sampler")) = grass();
+			*(technique_->Effect().ParameterByName("grass_tex")) = grass();
 		}
 
 		void OnRenderBegin()
@@ -473,7 +473,7 @@ namespace
 
 		void TexWithAlpha(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("tex_with_alpha_sampler")) = tex;
+			*(technique_->Effect().ParameterByName("tex_with_alpha")) = tex;
 		}
 	};
 

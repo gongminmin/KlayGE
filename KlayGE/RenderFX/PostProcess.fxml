@@ -20,7 +20,7 @@ float2 TexCoordFromPos(float4 pos)
 }
 
 void PostProcessVS(float4 pos : POSITION,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float2 oTex : TEXCOORD0)
 {
 	oPos = AdjustPos(pos);

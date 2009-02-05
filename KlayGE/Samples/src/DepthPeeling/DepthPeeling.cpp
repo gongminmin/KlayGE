@@ -70,7 +70,7 @@ namespace
 
 		void LastDepth(TexturePtr depth_tex, bool flip)
 		{
-			*(technique_->Effect().ParameterByName("last_depth_sampler")) = depth_tex;
+			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
 			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 

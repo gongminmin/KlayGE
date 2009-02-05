@@ -33,6 +33,8 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject();
 
+		std::string GenShaderText(RenderEffect const & effect) const;
+
 		void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
 			boost::shared_ptr<std::string> const & shader_text);
 		ShaderObjectPtr Clone(RenderEffect& effect);
@@ -43,6 +45,7 @@ namespace KlayGE
 	private:
 		struct parameter_bind_t
 		{
+			std::string combined_sampler_name;
 			RenderEffectParameterPtr param;
 			CGparameter cg_param;
 			boost::function<void()> func;
@@ -62,6 +65,8 @@ namespace KlayGE
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
+
+		mutable std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
 	};
 
 	typedef boost::shared_ptr<OGLShaderObject> OGLShaderObjectPtr;

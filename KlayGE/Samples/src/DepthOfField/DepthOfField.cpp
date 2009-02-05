@@ -181,7 +181,7 @@ namespace
 			if (!show_blur_factor_)
 			{
 				sat_.Apply();
-				*(technique_->Effect().ParameterByName("sat_sampler")) = sat_.SATTexture();
+				*(technique_->Effect().ParameterByName("sat_tex")) = sat_.SATTexture();
 			}
 
 			PostProcess::Apply();

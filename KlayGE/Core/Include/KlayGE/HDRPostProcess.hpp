@@ -68,7 +68,7 @@ namespace KlayGE
 
 		Timer timer_;
 
-		RenderEffectParameterPtr last_lum_sampler_ep_;
+		RenderEffectParameterPtr last_lum_tex_ep_;
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
 
@@ -80,8 +80,8 @@ namespace KlayGE
 		void SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex);
 
 	private:
-		RenderEffectParameterPtr lum_sampler_ep_;
-		RenderEffectParameterPtr bloom_sampler_ep_;
+		RenderEffectParameterPtr lum_tex_ep_;
+		RenderEffectParameterPtr bloom_tex_ep_;
 	};
 
 

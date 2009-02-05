@@ -104,10 +104,11 @@ types_define = [
 	"bool",
 	"dword",
 	"string",
-	"sampler1D",
-	"sampler2D",
-	"sampler3D",
-	"samplerCUBE",
+	"texture1D",
+	"texture2D",
+	"texture3D",
+	"textureCUBE",
+	"sampler",
 	"shader",
 	"int",
 	"int2",
@@ -407,7 +408,7 @@ def write_var(stream, type, name, var):
 		write_matrix(stream, 4, 3, var)
 	elif ('float4x4' == type):
 		write_matrix(stream, 4, 4, var)
-	elif type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
+	elif ('sampler' == type):
 		stream.write(struct.pack('i', var.filtering))
 		stream.write(struct.pack('i', var.address_u))
 		stream.write(struct.pack('i', var.address_v))
@@ -472,7 +473,7 @@ class parameter:
 		for ann in anns:
 			self.annotations.append(annotation(ann))
 
-		if self.type in ['sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE']:
+		if 'sampler' == self.type:
 			self.filtering = texture_filter_enum['min_mag_mip_point']
 			self.address_u = texture_addressing_mode_enum['wrap']
 			self.address_v = texture_addressing_mode_enum['wrap']
@@ -813,7 +814,7 @@ class effect:
 		for var in vars:
 			p = parameter(var)
 
-			if p.type != "sampler1D" and p.type != "sampler2D" and p.type != "sampler3D" and p.type != "samplerCUBE":
+			if p.type != "sampler":
 				found = False
 				for m in self.cbuffers:
 					if m[0] == p.cbuff:
@@ -845,7 +846,7 @@ class effect:
 			stream.write(b'FXML')
 		else:
 			stream.write('FXML')
-		stream.write(struct.pack('I', 2))
+		stream.write(struct.pack('I', 3))  # version
 		stream.write(struct.pack('I', len(self.parameters)))
 		stream.write(struct.pack('I', len(self.cbuffers)))
 		stream.write(struct.pack('I', len(self.shaders)))

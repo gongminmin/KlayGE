@@ -14,18 +14,20 @@
 		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
-	
-	<parameter type="sampler2D" name="last_depth_sampler">
+
+	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
+	<parameter type="texture2D" name="last_depth_tex"/>
+
 	<shader>
 		<![CDATA[
 void DepthPeelingVS(float4 pos				: POSITION,
 					float3 normal			: NORMAL,
-					out float4 oPos			: POSITION,
+					out float4 oPos			: SV_Position,
 					out float4 oPosSS		: TEXCOORD0,
 					out float4 oClr			: COLOR0)
 {
@@ -34,21 +36,21 @@ void DepthPeelingVS(float4 pos				: POSITION,
 	oPosSS = oPos;
 }
 
-void DepthPeeling1stPS(float4 pos : POSITION,
+void DepthPeeling1stPS(float4 pos : SV_Position,
 					float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
-					out float4 oClr : COLOR0,
-					out float4 oDepth : COLOR1)
+					out float4 oClr : SV_Target0,
+					out float4 oDepth : SV_Target1)
 {
 	oClr = clr;
 	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
 }
 
-void DepthPeelingNthPS(float4 pos : POSITION,
+void DepthPeelingNthPS(float4 pos : SV_Position,
 					float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
-					out float4 oClr : COLOR0,
-					out float4 oDepth : COLOR1)
+					out float4 oClr : SV_Target0,
+					out float4 oDepth : SV_Target1)
 {
 	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
   
@@ -56,7 +58,7 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 
-	float last_depth = tex2D(last_depth_sampler, tex_coord).r;
+	float last_depth = last_depth_tex.Sample(point_sampler, tex_coord).r;
 	if (oDepth.r <= last_depth)
 	{
 		oClr = 0;
@@ -88,17 +90,13 @@ void DepthPeelingNthPS(float4 pos : POSITION,
 		</pass>
 	</technique>
 
-	<parameter type="sampler2D" name="src_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
+	<parameter type="texture2D" name="src_tex"/>
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 BlendPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	return tex2D(src_sampler, tex);
+	return src_tex.Sample(point_sampler, tex);
 }
 		]]>
 	</shader>
@@ -118,10 +116,9 @@ float4 BlendPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
 
 	<shader>
 		<![CDATA[
-void NoDepthPeelingPS(float4 pos : POSITION, float4 clr : COLOR0,
-					out float4 oClr : COLOR0)
+float4 NoDepthPeelingPS(float4 pos : SV_Position, float4 clr : COLOR0) : SV_Target
 {
-	oClr = clr;
+	return clr;
 }
 		]]>
 	</shader>

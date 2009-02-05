@@ -312,13 +312,13 @@ namespace KlayGE
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 
-		skybox_cubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_cubeMapSampler");
+		skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_cube_tex");
 		inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 	}
 
 	void RenderableSkyBox::CubeMap(TexturePtr const & cube)
 	{
-		*skybox_cubeMapSampler_ep_ = cube;
+		*skybox_cube_tex_ep_ = cube;
 	}
 
 	void RenderableSkyBox::OnRenderBegin()

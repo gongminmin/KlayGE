@@ -124,7 +124,7 @@ namespace KlayGE
 
 	protected:
 		RenderEffectParameterPtr inv_mvp_ep_;
-		RenderEffectParameterPtr skybox_cubeMapSampler_ep_;
+		RenderEffectParameterPtr skybox_cube_tex_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper

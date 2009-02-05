@@ -3,7 +3,8 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -24,14 +25,14 @@ half4 BrightPass(half4 c)
 	}
 }
 
-float4 DownsamplePS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 DownsamplePS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	return tex2D(src_sampler, tex);
+	return src_tex.Sample(src_sampler, tex);
 }
 
-float4 BrightPassDownsamplePS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 BrightPassDownsamplePS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	return BrightPass(tex2D(src_sampler, tex));
+	return BrightPass(src_tex.Sample(src_sampler, tex));
 }
 		]]>
 	</shader>

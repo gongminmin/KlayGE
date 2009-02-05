@@ -100,13 +100,13 @@ namespace
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 				*(effect->ParameterByName("flip")) = flip_ ? -1 : 1;
 
-				*(effect->ParameterByName("lamp_sampler")) = lamp_tex_;
-				*(effect->ParameterByName("shadow_map_x_pos_sampler")) = sm_tex_[0];
-				*(effect->ParameterByName("shadow_map_x_neg_sampler")) = sm_tex_[1];
-				*(effect->ParameterByName("shadow_map_y_pos_sampler")) = sm_tex_[2];
-				*(effect->ParameterByName("shadow_map_y_neg_sampler")) = sm_tex_[3];
-				*(effect->ParameterByName("shadow_map_z_pos_sampler")) = sm_tex_[4];
-				*(effect->ParameterByName("shadow_map_z_neg_sampler")) = sm_tex_[5];
+				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
+				*(effect->ParameterByName("shadow_map_x_pos_tex")) = sm_tex_[0];
+				*(effect->ParameterByName("shadow_map_x_neg_tex")) = sm_tex_[1];
+				*(effect->ParameterByName("shadow_map_y_pos_tex")) = sm_tex_[2];
+				*(effect->ParameterByName("shadow_map_y_neg_tex")) = sm_tex_[3];
+				*(effect->ParameterByName("shadow_map_z_pos_tex")) = sm_tex_[4];
+				*(effect->ParameterByName("shadow_map_z_neg_tex")) = sm_tex_[5];
 
 				*(effect->ParameterByName("light_view_proj")) = light_view_proj_mat_;
 			}
@@ -400,17 +400,18 @@ void ShadowCubeMap::InitObjects()
 	RenderViewPtr depth_view = rf.MakeDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
 	for (int i = 0; i < 6; ++ i)
 	{
+		shadow_buffers_[i] = rf.MakeFrameBuffer();
 		try
 		{
 			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
 		}
 		catch (...)
 		{
 			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
 		}
 
-		shadow_buffers_[i] = rf.MakeFrameBuffer();
-		shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
 		CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;

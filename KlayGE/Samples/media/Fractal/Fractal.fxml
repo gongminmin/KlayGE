@@ -2,7 +2,8 @@
 
 <effect>
 	<parameter type="int" name="flip"/>
-	<parameter type="sampler2D" name="fractal_sampler">
+	<parameter type="texture2D" name="fractal_tex"/>
+	<parameter type="sampler" name="fractal_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
@@ -13,7 +14,7 @@
 void MandelbrotVS(float4 pos : POSITION,
 			float2 texcoord0 : TEXCOORD0,
 
-			out float4 oPos			: POSITION,
+			out float4 oPos			: SV_Position,
 			out float2 oTexcoord0	: TEXCOORD0,
 			out float2 oTexcoord1	: TEXCOORD1)
 {
@@ -23,10 +24,10 @@ void MandelbrotVS(float4 pos : POSITION,
 	oTexcoord1 = oTexcoord0 * 2.4 - float2(1.8, -1.2 * flip);
 }
 
-half4 MandelbrotPS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
-				float2 texcoord1 : TEXCOORD1) : COLOR
+half4 MandelbrotPS(float4 pos : SV_Position, float2 texcoord0 : TEXCOORD0,
+				float2 texcoord1 : TEXCOORD1) : SV_Target
 {
-	half2 z = tex2D(fractal_sampler, texcoord0).rg;
+	half2 z = fractal_tex.Sample(fractal_sampler, texcoord0).rg;
 	half2 c = texcoord1;
 
 	z = half2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
@@ -47,16 +48,16 @@ half4 MandelbrotPS(float4 pos : POSITION, float2 texcoord0 : TEXCOORD0,
 		<![CDATA[
 void ShowVS(float4 pos : POSITION,
 		float2 texcoord0 : TEXCOORD0,
-		out float4 oPos : POSITION,
+		out float4 oPos : SV_Position,
 		out float3 oTexcoord0 : TEXCOORD0)
 {
 	oPos = pos;
 	oTexcoord0 = float3(texcoord0, 1);
 }
 
-float4 ShowPS(float4 pos : POSITION, float3 texCoord0 : TEXCOORD0) : COLOR
+float4 ShowPS(float4 pos : SV_Position, float3 texCoord0 : TEXCOORD0) : SV_Target
 {
-	half2 z = tex2D(fractal_sampler, texCoord0.xy).rg;
+	half2 z = fractal_tex.Sample(fractal_sampler, texCoord0.xy).rg;
 	return float4((dot(z, z) >= 4) * texCoord0, 1);
 }
 		]]>

@@ -3,7 +3,8 @@
 <effect>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -15,7 +16,7 @@
 		<![CDATA[
 		
 void Downsample8x8VS(float4 pos : POSITION,
-					out float4 oPos : POSITION,
+					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
@@ -38,7 +39,7 @@ void Downsample8x8VS(float4 pos : POSITION,
 	oTex7 = tex_base.xyxy + tex_coord_offset[7];
 }
 
-float4 Downsample8x8PS(float4 pos : POSITION,
+float4 Downsample8x8PS(float4 pos : SV_Position,
 					float4 oTex0 : TEXCOORD0,
 					float4 oTex1 : TEXCOORD1,
 					float4 oTex2 : TEXCOORD2,
@@ -46,26 +47,26 @@ float4 Downsample8x8PS(float4 pos : POSITION,
 					float4 oTex4 : TEXCOORD4,
 					float4 oTex5 : TEXCOORD5,
 					float4 oTex6 : TEXCOORD6,
-					float4 oTex7 : TEXCOORD7) : COLOR
+					float4 oTex7 : TEXCOORD7) : SV_Target
 {
 	const half3 rgb_to_lum = half3(0.299, 0.587, 0.114);
 
-	half4 s = tex2D(src_sampler, oTex0.xy)
-				+ tex2D(src_sampler, oTex0.zw)
-				+ tex2D(src_sampler, oTex1.xy)
-				+ tex2D(src_sampler, oTex1.zw)
-				+ tex2D(src_sampler, oTex2.xy)
-				+ tex2D(src_sampler, oTex2.zw)
-				+ tex2D(src_sampler, oTex3.xy)
-				+ tex2D(src_sampler, oTex3.zw)
-				+ tex2D(src_sampler, oTex4.xy)
-				+ tex2D(src_sampler, oTex4.zw)
-				+ tex2D(src_sampler, oTex5.xy)
-				+ tex2D(src_sampler, oTex5.zw)
-				+ tex2D(src_sampler, oTex6.xy)
-				+ tex2D(src_sampler, oTex6.zw)
-				+ tex2D(src_sampler, oTex7.xy)
-				+ tex2D(src_sampler, oTex7.zw);
+	half4 s = src_tex.Sample(src_sampler, oTex0.xy)
+				+ src_tex.Sample(src_sampler, oTex0.zw)
+				+ src_tex.Sample(src_sampler, oTex1.xy)
+				+ src_tex.Sample(src_sampler, oTex1.zw)
+				+ src_tex.Sample(src_sampler, oTex2.xy)
+				+ src_tex.Sample(src_sampler, oTex2.zw)
+				+ src_tex.Sample(src_sampler, oTex3.xy)
+				+ src_tex.Sample(src_sampler, oTex3.zw)
+				+ src_tex.Sample(src_sampler, oTex4.xy)
+				+ src_tex.Sample(src_sampler, oTex4.zw)
+				+ src_tex.Sample(src_sampler, oTex5.xy)
+				+ src_tex.Sample(src_sampler, oTex5.zw)
+				+ src_tex.Sample(src_sampler, oTex6.xy)
+				+ src_tex.Sample(src_sampler, oTex6.zw)
+				+ src_tex.Sample(src_sampler, oTex7.xy)
+				+ src_tex.Sample(src_sampler, oTex7.zw);
 
 	return dot(s.rgb / 16, rgb_to_lum);
 }

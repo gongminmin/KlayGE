@@ -4,7 +4,8 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type='float' name='inv_gamma'/>
-	<parameter type="sampler2D" name="src_sampler">
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -12,9 +13,9 @@
 
 	<shader>
 		<![CDATA[
-float4 GammaCorrectionPS(float4 pos : POSITION, float2 tex : TEXCOORD0) : COLOR
+float4 GammaCorrectionPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 {
-	return pow(tex2D(src_sampler, tex), inv_gamma);
+	return pow(src_tex.Sample(src_sampler, tex), inv_gamma);
 }
 		]]>
 	</shader>

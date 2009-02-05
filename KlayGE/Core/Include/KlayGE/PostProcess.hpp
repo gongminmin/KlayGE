@@ -48,7 +48,7 @@ namespace KlayGE
 		GraphicsBufferPtr pos_vb_;
 
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
-		RenderEffectParameterPtr src_sampler_ep_;
+		RenderEffectParameterPtr src_tex_ep_;
 		RenderEffectParameterPtr flipping_ep_;
 	};
 

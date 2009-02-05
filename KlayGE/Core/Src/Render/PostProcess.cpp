@@ -60,7 +60,7 @@ namespace KlayGE
 		if (technique_)
 		{
 			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
-			src_sampler_ep_ = technique_->Effect().ParameterByName("src_sampler");
+			src_tex_ep_ = technique_->Effect().ParameterByName("src_tex");
 			flipping_ep_ = technique_->Effect().ParameterByName("flipping");
 		}
 	}
@@ -101,7 +101,7 @@ namespace KlayGE
 		texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
 		*texel_to_pixel_offset_ep_ = texel_to_pixel;
 
-		*src_sampler_ep_ = src_texture_;
+		*src_tex_ep_ = src_texture_;
 		*flipping_ep_ = flipping_ ? -1 : +1;
 	}
 

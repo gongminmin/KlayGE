@@ -40,8 +40,8 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			technique_ = rf.LoadEffect("HDRSkyBox.kfx")->TechniqueByName("HDRSkyBoxTec");
 
-			skybox_cubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_cubeMapSampler");
-			skybox_CcubeMapSampler_ep_ = technique_->Effect().ParameterByName("skybox_CcubeMapSampler");
+			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_cube_tex");
+			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_Ccube_tex");
 			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 		}
 
@@ -55,15 +55,15 @@ namespace
 		{
 			RenderableSkyBox::OnRenderBegin();
 
-			*skybox_cubeMapSampler_ep_ = y_tex_;
-			*skybox_CcubeMapSampler_ep_ = c_tex_;
+			*skybox_cube_tex_ep_ = y_tex_;
+			*skybox_Ccube_tex_ep_ = c_tex_;
 		}
 
 	private:
 		TexturePtr y_tex_;
 		TexturePtr c_tex_;
 
-		RenderEffectParameterPtr skybox_CcubeMapSampler_ep_;
+		RenderEffectParameterPtr skybox_Ccube_tex_ep_;
 	};
 
 	class HDRSceneObjectSkyBox : public SceneObjectSkyBox
@@ -120,14 +120,14 @@ namespace
 
 		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
 		{
-			*(technique_->Effect().ParameterByName("BackFace_Sampler")) = bf_tex;
+			*(technique_->Effect().ParameterByName("BackFace_tex")) = bf_tex;
 			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			*(technique_->Effect().ParameterByName("skybox_YcubeMapSampler")) = y_cube;
-			*(technique_->Effect().ParameterByName("skybox_CcubeMapSampler")) = c_cube;
+			*(technique_->Effect().ParameterByName("skybox_Ycube_tex")) = y_cube;
+			*(technique_->Effect().ParameterByName("skybox_Ccube_tex")) = c_cube;
 		}
 
 		void OnRenderBegin()

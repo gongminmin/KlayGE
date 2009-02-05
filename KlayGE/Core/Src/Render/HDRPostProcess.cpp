@@ -111,7 +111,7 @@ namespace KlayGE
 
 		this->Destinate(fb_[last_index_]);
 
-		last_lum_sampler_ep_ = technique_->Effect().ParameterByName("last_lum_sampler");
+		last_lum_tex_ep_ = technique_->Effect().ParameterByName("last_lum_tex");
 		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
 	}
 
@@ -126,7 +126,7 @@ namespace KlayGE
 	{
 		PostProcess::OnRenderBegin();
 
-		*last_lum_sampler_ep_ = adapted_textures_[last_index_];
+		*last_lum_tex_ep_ = adapted_textures_[last_index_];
 		*frame_delta_ep_ = float(timer_.elapsed());
 		timer_.restart();
 
@@ -148,14 +148,14 @@ namespace KlayGE
 			technique_ = effect.TechniqueByName("ToneMapping30");
 		}
 
-		lum_sampler_ep_ = technique_->Effect().ParameterByName("lum_sampler");
-		bloom_sampler_ep_ = technique_->Effect().ParameterByName("bloom_sampler");
+		lum_tex_ep_ = technique_->Effect().ParameterByName("lum_tex");
+		bloom_tex_ep_ = technique_->Effect().ParameterByName("bloom_tex");
 	}
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
 	{
-		*lum_sampler_ep_ = lum_tex;
-		*bloom_sampler_ep_ = bloom_tex;
+		*lum_tex_ep_ = lum_tex;
+		*bloom_tex_ep_ = bloom_tex;
 	}
 
 

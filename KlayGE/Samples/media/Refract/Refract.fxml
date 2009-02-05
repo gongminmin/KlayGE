@@ -14,19 +14,22 @@
 	</cbuffer>
 	<parameter type="float3" name="eta_ratio"/>
 
-	<parameter type="samplerCUBE" name="skybox_YcubeMapSampler">
+	<parameter type="textureCUBE" name="skybox_Ycube_tex"/>
+	<parameter type="sampler" name="skybox_YcubeMapSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
-	<parameter type="samplerCUBE" name="skybox_CcubeMapSampler">
+	<parameter type="textureCUBE" name="skybox_Ccube_tex"/>
+	<parameter type="sampler" name="skybox_CcubeMapSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
-	<parameter type="sampler2D" name="BackFace_Sampler">
+	<parameter type="texture2D" name="BackFace_tex"/>
+	<parameter type="sampler" name="BackFace_Sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -58,7 +61,7 @@ float3x3 my_refract3(float3 i, float3 n, float3 eta)
 
 void RefractVS(float4 pos			: POSITION,
 				float3 normal		: NORMAL,
-				out float4 oPos		: POSITION,
+				out float4 oPos		: SV_Position,
 				out float3 out_normal	: TEXCOORD0,
 				out float4 incident : TEXCOORD1,
 				out float4 refract_vec : TEXCOORD2,
@@ -79,12 +82,12 @@ void RefractVS(float4 pos			: POSITION,
 	dir_ss = mul(half4(refract_vec.xyz, 0), mvp);
 }
 
-float4 RefractPS(float4 pos : POSITION, 
+float4 RefractPS(float4 pos : SV_Position, 
 					float3 normal			: TEXCOORD0,
 					float4 incident		: TEXCOORD1,
 					float4 refract_vec	: TEXCOORD2,
 					float4 pos_ss		: TEXCOORD3,
-					float4 dir_ss		: TEXCOORD4) : COLOR
+					float4 dir_ss		: TEXCOORD4) : SV_Target
 {
 	normal = normalize(normal);
 	incident.xyz = normalize(incident.xyz);
@@ -92,7 +95,7 @@ float4 RefractPS(float4 pos : POSITION,
 	half2 tex = pos_ss.xy / pos_ss.w;
 	tex.y *= flip;
 	tex = tex / 2 + 0.5f;
-	float4 backface = tex2D(BackFace_Sampler, tex);
+	float4 backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 	
 	pos_ss += dir_ss * (backface.w - incident.w);
 
@@ -101,15 +104,15 @@ float4 RefractPS(float4 pos : POSITION,
 	half3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
 	half3 reflect_vec = reflect(incident.xyz, normal);
 
-	half4 y = half4(texCUBE(skybox_YcubeMapSampler, refract_rgb[0]).r,
-									texCUBE(skybox_YcubeMapSampler, refract_rgb[1]).r,
-									texCUBE(skybox_YcubeMapSampler, refract_rgb[2]).r,
-									texCUBE(skybox_YcubeMapSampler, reflect_vec).r);
+	half4 y = half4(skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[0]).r,
+									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[1]).r,
+									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[2]).r,
+									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, reflect_vec).r);
 	y = exp2(y * 65536 / 2048 - 16);
-	half4 refracted_c = half4(get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[0])).y,
-									get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[1])).x,
-									get_xy_channel(texCUBE(skybox_CcubeMapSampler, refract_rgb[2])));
-	half2 reflected_c = get_xy_channel(texCUBE(skybox_CcubeMapSampler, reflect_vec));
+	half4 refracted_c = half4(get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[0])).y,
+									get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[1])).x,
+									get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[2])));
+	half2 reflected_c = get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, reflect_vec));
 	refracted_c *= refracted_c;
 	reflected_c *= reflected_c;
 
@@ -135,7 +138,7 @@ float4 RefractPS(float4 pos : POSITION,
 		<![CDATA[
 void RefractBackFaceVS(float4 pos : POSITION,
 							float3 normal : NORMAL,
-							out float4 oPos : POSITION,
+							out float4 oPos : SV_Position,
 							out float3 out_normal : TEXCOORD0,
 							out float3 pos_es : TEXCOORD1)
 {
@@ -144,8 +147,8 @@ void RefractBackFaceVS(float4 pos : POSITION,
 	pos_es = mul(pos, model).xyz - eye_pos;
 }
 
-float4 RefractBackFacePS(float4 pos : POSITION, float3 normal : TEXCOORD0,
-							float3 pos_es : TEXCOORD1) : COLOR
+float4 RefractBackFacePS(float4 pos : SV_Position, float3 normal : TEXCOORD0,
+							float3 pos_es : TEXCOORD1) : SV_Target
 {
 	return float4(-normalize(normal), length(pos_es));
 }
