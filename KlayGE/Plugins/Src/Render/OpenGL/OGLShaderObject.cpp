@@ -78,6 +78,27 @@ namespace
 	{\n																\
 		return texCUBElod(s, float4(location, lod));\n				\
 	}\n																\
+	\n																\
+	\n																\
+	float4 tex1DBias(sampler s, float location, float lod)\n		\
+	{\n																\
+		return tex1Dbias(s, float4(location, 0, 0, lod));\n			\
+	}\n																\
+	\n																\
+	float4 tex2DBias(sampler s, float2 location, float lod)\n		\
+	{\n																\
+		return tex2Dbias(s, float4(location, 0, lod));\n				\
+	}\n																\
+	\n																\
+	float4 tex3DBias(sampler s, float3 location, float lod)\n		\
+	{\n																\
+		return tex3Dbias(s, float4(location, lod));\n				\
+	}\n																\
+	\n																\
+	float4 texCUBEBias(sampler s, float3 location, float lod)\n	\
+	{\n																\
+		return texCUBEbias(s, float4(location, lod));\n				\
+	}\n																\
 	";
 
 	template <typename SrcType>
@@ -472,7 +493,7 @@ namespace KlayGE
 								std::make_pair(param, effect.ParameterByName(sample_tokens[4]))));
 						}
 
-						if ((!sample_helper) && ("SampleLevel" == sample_tokens[2]))
+						if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
 						{
 							sample_helper = true;
 						}
@@ -480,59 +501,42 @@ namespace KlayGE
 						switch (param->type())
 						{
 						case REDT_texture1D:
-							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
-							{
-								shader_ss << "tex1D";
-							}
-							else
-							{
-								if ("SampleLevel" == sample_tokens[2])
-								{
-									shader_ss << "tex1DLevel";
-								}
-							}
-							break;
-
 						case REDT_texture2D:
-							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
-							{
-								shader_ss << "tex2D";
-							}
-							else
-							{
-								if ("SampleLevel" == sample_tokens[2])
-								{
-									shader_ss << "tex2DLevel";
-								}
-							}
-							break;
-
 						case REDT_texture3D:
-							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
-							{
-								shader_ss << "tex3D";
-							}
-							else
-							{
-								if ("SampleLevel" == sample_tokens[2])
-								{
-									shader_ss << "tex3DLevel";
-								}
-							}
-							break;
-
 						case REDT_textureCUBE:
-							if (("Sample" == sample_tokens[2]) || ("SampleGrad" == sample_tokens[2]))
+							shader_ss << "tex";
+
+							switch (param->type())
 							{
-								shader_ss << "texCUBE";
+							case REDT_texture1D:
+								shader_ss << "1D";
+								break;
+
+							case REDT_texture2D:
+								shader_ss << "2D";
+								break;
+
+							case REDT_texture3D:
+								shader_ss << "3D";
+								break;
+
+							case REDT_textureCUBE:
+								shader_ss << "CUBE";
+								break;
+							}
+
+							if ("SampleLevel" == sample_tokens[2])
+							{
+								shader_ss << "Level";
 							}
 							else
 							{
-								if ("SampleLevel" == sample_tokens[2])
+								if ("SampleBias" == sample_tokens[2])
 								{
-									shader_ss << "texCUBELevel";
+									shader_ss << "Bias";
 								}
 							}
+
 							break;
 						}
 						shader_ss << "(" << combined_sampler_name << ",";
