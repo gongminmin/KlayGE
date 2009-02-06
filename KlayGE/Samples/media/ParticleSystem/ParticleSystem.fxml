@@ -46,14 +46,6 @@ float3 texcoord_to_view(float2 tex)
 	
 	<shader>
 		<![CDATA[
-float2 texs[4] =
-{
-	float2(0.0f, 0.0f),
-	float2(1.0f, 0.0f),
-	float2(0.0f, 1.0f),
-	float2(1.0f, 1.0f)
-};
-	
 struct PS_IN
 {
 	float4 pos : SV_Position;
@@ -64,29 +56,9 @@ struct PS_IN
 };
 
 void ParticleVS(float4 pos : TEXCOORD0,
-					float index : POSITION,
+					float2 tex : POSITION,
 					out PS_IN vs_out)
 {
-	int iindex = int(index + 0.1f);
-	
-	float2 tex;
-	if (iindex == 0)
-	{
-		tex = float2(0, 0);
-	}
-	if (iindex == 1)
-	{
-		tex = float2(1, 0);
-	}
-	if (iindex == 2)
-	{
-		tex = float2(0, 1);
-	}
-	if (iindex == 3)
-	{
-		tex = float2(1, 1);
-	}
-	
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
 	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
@@ -118,23 +90,7 @@ void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
 
 	for (int i = 0; i < 4; ++ i)
 	{
-		float2 tex;
-		if (i == 0)
-		{
-			tex = float2(0, 0);
-		}
-		if (i == 1)
-		{
-			tex = float2(1, 0);
-		}
-		if (i == 2)
-		{
-			tex = float2(0, 1);
-		}
-		if (i == 3)
-		{
-			tex = float2(1, 1);
-		}
+		float2 tex = float2(i & 1, i & 2);
 		
 		float4 view_pos = input[0].CenterView;
 		gs_out.CenterView = view_pos;
@@ -143,7 +99,7 @@ void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
 		gs_out.clr = input[0].clr;
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
-		
+
 #ifdef KLAYGE_OPENGL
 		emitVertex(gs_out);
 #else

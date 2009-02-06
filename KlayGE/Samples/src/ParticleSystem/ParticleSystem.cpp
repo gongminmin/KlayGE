@@ -170,9 +170,12 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			float texs[] =
+			float2 texs[] =
 			{
-				0, 1, 2, 3
+				float2(0.0f, 0.0f),
+				float2(1.0f, 0.0f),
+				float2(0.0f, 1.0f),
+				float2(1.0f, 1.0f)
 			};
 
 			uint16_t indices[] =
@@ -199,7 +202,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
 				rl_->BindVertexStream(pos_vb,
