@@ -38,7 +38,6 @@
 extern "C"
 {
 	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	KLAYGE_DINPUT_IE_API bool Match(char const * name, char const * compiler);
 }
 
 #endif			// _DINPUTFACTORY_HPP

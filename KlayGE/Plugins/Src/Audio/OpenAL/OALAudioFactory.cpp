@@ -27,21 +27,4 @@ extern "C"
 		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
 			KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer> >(L"OpenAL Audio Factory");
 	}
-
-	bool Match(char const * name, char const * compiler)
-	{
-		std::string cur_compiler_str = KLAYGE_COMPILER_TOOLSET;
-#ifdef KLAYGE_DEBUG
-		cur_compiler_str += "_d";
-#endif
-
-		if ((std::string("OpenAL") == name) && (cur_compiler_str == compiler))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 }

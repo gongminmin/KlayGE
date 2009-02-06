@@ -44,7 +44,6 @@
 extern "C"
 {
 	KLAYGE_D3D9_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	KLAYGE_D3D9_RE_API bool Match(char const * name, char const * compiler);
 }
 
 #endif			// _D3D9RENDERFACTORY_HPP

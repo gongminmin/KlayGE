@@ -39,7 +39,6 @@
 
 namespace KlayGE
 {
-	typedef bool (*MatchFunc)(char const * name, char const * compiler);
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
@@ -197,34 +196,30 @@ namespace KlayGE
 			}
 		}
 
-		std::string compiler_str = KLAYGE_COMPILER_TOOLSET;
+		std::string dll_suffix = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
+		dll_suffix += "_";
+		dll_suffix += KLAYGE_STRINGIZE(KLAYGE_COMPILER_TARGET);
 #ifdef KLAYGE_DEBUG
-		compiler_str += "_d";
+		dll_suffix += "_d";
 #endif
-
+		dll_suffix += ".dll";
 
 		{
 			std::string render_path = ResLoader::Instance().Locate("Render");
 			for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				std::string fn = render_path + "/" + iter->path().filename();
-				if (".dll" == fn.substr(fn.length() - 4))
+				std::string fn = iter->path().filename();
+				std::string suffix = rf_name + "_" + dll_suffix;
+				std::string::size_type n = fn.rfind(suffix);
+				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 				{
-					render_loader_.Load(fn);
+					render_loader_.Load(render_path + "/" + fn);
 
-					MatchFunc match_func = (MatchFunc)render_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(rf_name.c_str(), compiler_str.c_str()))
+					MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
+					if (mrf != NULL)
 					{
-						MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
-						if (mrf != NULL)
-						{
-							mrf(renderFactory_, vm);
-							break;
-						}
-						else
-						{
-							render_loader_.Free();
-						}
+						mrf(renderFactory_, vm);
+						break;
 					}
 					else
 					{
@@ -238,24 +233,18 @@ namespace KlayGE
 			std::string audio_path = ResLoader::Instance().Locate("Audio");
 			for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				std::string fn = audio_path + "/" + iter->path().filename();
-				if (".dll" == fn.substr(fn.length() - 4))
+				std::string fn = iter->path().filename();
+				std::string suffix = af_name + "_" + dll_suffix;
+				std::string::size_type n = fn.rfind(suffix);
+				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 				{
-					audio_loader_.Load(fn);
+					audio_loader_.Load(audio_path + "/" + fn);
 
-					MatchFunc match_func = (MatchFunc)audio_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(af_name.c_str(), compiler_str.c_str()))
+					MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
+					if (maf != NULL)
 					{
-						MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
-						if (maf != NULL)
-						{
-							maf(audioFactory_, vm);
-							break;
-						}
-						else
-						{
-							audio_loader_.Free();
-						}
+						maf(audioFactory_, vm);
+						break;
 					}
 					else
 					{
@@ -269,24 +258,18 @@ namespace KlayGE
 			std::string input_path = ResLoader::Instance().Locate("Input");
 			for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				std::string fn = input_path + "/" + iter->path().filename();
-				if (".dll" == fn.substr(fn.length() - 4))
+				std::string fn = iter->path().filename();
+				std::string suffix = if_name + "_" + dll_suffix;
+				std::string::size_type n = fn.rfind(suffix);
+				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 				{
-					input_loader_.Load(fn);
+					input_loader_.Load(input_path + "/" + fn);
 
-					MatchFunc match_func = (MatchFunc)input_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(if_name.c_str(), compiler_str.c_str()))
+					MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
+					if (mif != NULL)
 					{
-						MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
-						if (mif != NULL)
-						{
-							mif(inputFactory_, vm);
-							break;
-						}
-						else
-						{
-							input_loader_.Free();
-						}
+						mif(inputFactory_, vm);
+						break;
 					}
 					else
 					{
@@ -300,24 +283,18 @@ namespace KlayGE
 			std::string show_path = ResLoader::Instance().Locate("Show");
 			for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				std::string fn = show_path + "/" + iter->path().filename();
-				if (".dll" == fn.substr(fn.length() - 4))
+				std::string fn = iter->path().filename();
+				std::string suffix = sf_name + "_" + dll_suffix;
+				std::string::size_type n = fn.rfind(suffix);
+				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 				{
-					show_loader_.Load(fn);
+					show_loader_.Load(show_path + "/" + fn);
 
-					MatchFunc match_func = (MatchFunc)show_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(sf_name.c_str(), compiler_str.c_str()))
+					MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
+					if (msf != NULL)
 					{
-						MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
-						if (msf != NULL)
-						{
-							msf(showFactory_, vm);
-							break;
-						}
-						else
-						{
-							show_loader_.Free();
-						}
+						msf(showFactory_, vm);
+						break;
 					}
 					else
 					{
@@ -331,24 +308,18 @@ namespace KlayGE
 			std::string sm_path = ResLoader::Instance().Locate("Scene");
 			for (boost::filesystem::directory_iterator iter(sm_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 			{
-				std::string fn = sm_path + "/" + iter->path().filename();
-				if (".dll" == fn.substr(fn.length() - 4))
+				std::string fn = iter->path().filename();
+				std::string suffix = sm_name + "_" + dll_suffix;
+				std::string::size_type n = fn.rfind(suffix);
+				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 				{
-					sm_loader_.Load(fn);
+					sm_loader_.Load(sm_path + "/" + fn);
 
-					MatchFunc match_func = (MatchFunc)sm_loader_.GetProcAddress("Match");
-					if ((match_func != NULL) && match_func(sm_name.c_str(), compiler_str.c_str()))
+					MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
+					if (msm != NULL)
 					{
-						MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
-						if (msm != NULL)
-						{
-							msm(sceneMgr_, vm);
-							break;
-						}
-						else
-						{
-							sm_loader_.Free();
-						}
+						msm(sceneMgr_, vm);
+						break;
 					}
 					else
 					{

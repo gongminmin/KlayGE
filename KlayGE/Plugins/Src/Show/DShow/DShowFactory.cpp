@@ -23,21 +23,4 @@ extern "C"
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
 	}
-
-	bool Match(char const * name, char const * compiler)
-	{
-		std::string cur_compiler_str = KLAYGE_COMPILER_TOOLSET;
-#ifdef KLAYGE_DEBUG
-		cur_compiler_str += "_d";
-#endif
-
-		if ((std::string("DShow") == name) && (cur_compiler_str == compiler))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 }

@@ -242,21 +242,4 @@ extern "C"
 	{
 		ptr = KlayGE::MakeSharedPtr<KlayGE::D3D9RenderFactory>();
 	}
-
-	bool Match(char const * name, char const * compiler)
-	{
-		std::string cur_compiler_str = KLAYGE_COMPILER_TOOLSET;
-#ifdef KLAYGE_DEBUG
-		cur_compiler_str += "_d";
-#endif
-
-		if ((std::string("D3D9") == name) && (cur_compiler_str == compiler))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 }

@@ -35,7 +35,6 @@
 extern "C"
 {
 	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/);
-	KLAYGE_DSHOW_SE_API bool Match(char const * name, char const * compiler);
 }
 
 #endif			// _DSHOWFACTORY_HPP
