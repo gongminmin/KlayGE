@@ -1,0 +1,147 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="texture2D" name="permutation_tex"/>
+	<parameter type="texture2D" name="grad_tex"/>
+
+	<parameter type="sampler" name="perlin_point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void setup(float i, out float b, out float r)
+{
+	float x = i + 0x1000;
+	b = fmod(floor(x), 256);
+	r = frac(x);
+}
+
+void setup(float2 i, out float2 b, out float2 r)
+{
+	float2 x = i + 0x1000;
+	b = fmod(floor(x), 256);
+	r = frac(x);
+}
+
+void setup(float3 i, out float3 b, out float3 r)
+{
+	float3 x = i + 0x1000;
+	b = fmod(floor(x), 256);
+	r = frac(x);
+}
+
+float grad(float hash, float3 p)
+{
+	return dot(grad_tex.Sample(perlin_point_sampler, hash / 16).xyz, p);
+}
+
+float grad(float hash, float2 p)
+{
+	return grad(hash, float3(p, 0));
+}
+
+float grad(float hash, float p)
+{
+	return grad(hash, float2(p, 0));
+}
+
+float fade(float t)
+{
+	return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+float2 fade(float2 t)
+{
+	return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+float3 fade(float3 t)
+{
+	return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+float perm(float x)
+{
+	return permutation_tex.Sample(perlin_point_sampler, x / 256.0).r * 256;
+}
+
+float perlin_noise(float p)
+{
+	float b;
+	float r;
+	setup(p, b, r);
+	float f = fade(r);
+
+	float A  = perm(b);
+	float AA = perm(A);    
+	float B  = perm(b + 1);
+	float BA = perm(B);
+
+	return lerp(grad(perm(AA), r),
+					grad(perm(BA), r - 1), f);
+}
+
+float perlin_noise(float2 p)
+{
+	float2 b;
+	float2 r;
+	setup(p, b, r);
+	float2 f = fade(r);
+
+	float A  = perm(b.x) + b.y;
+	float AA = perm(A);
+	float AB = perm(A + 1);
+	float B  = perm(b.x + 1) + b.y;
+	float BA = perm(B);
+	float BB = perm(B + 1);
+
+	return lerp(lerp(grad(perm(AA), r),
+						grad(perm(BA), r + float2(-1, 0)), f.x),
+					lerp(grad(perm(AB), r + float2(0, -1)),
+						grad(perm(BB), r +  + float2(-1, -1)), f.x), f.y);
+}
+			
+float perlin_noise(float3 p)
+{
+	float3 b;
+	float3 r;
+	setup(p, b, r);
+	float3 f = fade(r);
+
+	// HASH COORDINATES OF THE 8 CUBE CORNERS,
+	float A  = perm(b.x) + b.y;
+	float AA = perm(A) + b.z;
+	float AB = perm(A + 1) + b.z;
+	float B  = perm(b.x + 1) + b.y;
+	float BA = perm(B) + b.z;
+	float BB = perm(B + 1) + b.z;
+
+	return lerp(lerp(lerp(grad(perm(AA), r),								// AND ADD
+						grad(perm(BA), r + float3(-1, 0, 0)), f.x),			// BLENDED
+					lerp(grad(perm(AB), r + float3(0, -1, 0)),				// RESULTS
+						grad(perm(BB), r + float3(-1, -1, 0)), f.x), f.y),	// FROM  8
+				lerp(lerp(grad(perm(AA + 1), r + float3(0, 0, -1)),			// CORNERS
+						grad(perm(BA + 1), r + float3(-1, 0, -1)), f.x),	// OF CUBE
+					lerp(grad(perm(AB + 1), r + float3(0, -1, -1)),
+						grad(perm(BB + 1), r + float3(-1, -1, -1)), f.x), f.y), f.z);
+}
+
+float turbulence(int octaves, float3 p, float lacunarity, float gain)
+{	
+	float sum = 0;
+	float scale = 1;
+	float total_gain = 1;
+	for(int i = 0; i < octaves; ++ i)
+	{
+		sum += total_gain * perlin_noise(p * scale);
+		scale *= lacunarity;
+		total_gain *= gain;
+	}
+	return abs(sum);
+}
+		]]>
+	</shader>
+</effect>

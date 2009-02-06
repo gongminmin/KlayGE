@@ -1231,6 +1231,7 @@ namespace KlayGE
 
 		boost::any const GetSelectedData() const;
 		boost::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
+		uint32_t GetSelectedIndex() const;
 
 		uint32_t GetNumItems() const { return static_cast<uint32_t>(items_.size()); }
 		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const { return items_[index]; }

@@ -211,7 +211,7 @@ class ui_list_box(ui_control):
 		for item in self.items:
 			write_short_string(stream, item)
 
-class ui_commbo_box(ui_control):
+class ui_combo_box(ui_control):
 	def __init__(self, tag):
 		ui_control.__init__(self, tag)
 		try:

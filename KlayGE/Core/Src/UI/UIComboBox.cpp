@@ -701,6 +701,11 @@ namespace KlayGE
 		return items_[selected_];
 	}
 
+	uint32_t UIComboBox::GetSelectedIndex() const
+	{
+		return selected_;
+	}
+
 	boost::any const UIComboBox::GetItemData(std::wstring const & strText) const
 	{
 		int index = this->FindItem(strText);

@@ -1,0 +1,86 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/PerlinNoise.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+	</cbuffer>
+
+	<parameter type="float" name="freq"/>
+
+	<shader>
+		<![CDATA[
+float4 wood(float3 tex_coord)
+{
+	float3 color1 = float3(0.66f, 0.33f, 0.13f);
+	float3 color2 = float3(0.93f, 0.60f, 0.13f);
+
+	float g = perlin_noise(tex_coord * 0.8f) * 16;
+	float s = frac(g);
+
+	return float4(lerp(color1, color2, s), 1);
+}
+
+float4 marble(float3 tex_coord)
+{
+	float3 color1 = float3(0.1f, 0.1f, 0.1f);
+	float3 color2 = float3(0.8f, 0.8f, 0.8f);
+	return float4(lerp(color1, color2, cos(tex_coord.x * 0.1f + 6 * turbulence(5, tex_coord, 2, 0.6f))), 1);
+}
+
+float4 cloud(float3 tex_coord)
+{
+	float3 color1 = float3(0.1f, 0.1f, 0.99f);
+	float3 color2 = float3(0.8f, 0.8f, 0.8f);
+
+	return float4(lerp(color1, color2, cos(tex_coord.z * 0.5f + 2 * turbulence(6, tex_coord, 2, 0.5f)) * 0.9f), 1);
+}
+
+void ProceduralTexVS(float4 pos			: POSITION,
+					out float4 oPos		: SV_Position,
+					out float3 oTexCoord	: TEXCOORD0)
+{
+	oPos = mul(pos, mvp);
+	oTexCoord = pos.xyz * freq;
+}
+
+float4 WoodPS(float4 pos_ss	: SV_Position,
+					float3 tex_coord	: TEXCOORD0) : SV_Target
+{
+	return wood(tex_coord);
+}
+
+float4 MarblePS(float4 pos_ss	: SV_Position,
+					float3 tex_coord	: TEXCOORD0) : SV_Target
+{
+	return marble(tex_coord);
+}
+
+float4 CloudPS(float4 pos_ss	: SV_Position,
+					float3 tex_coord	: TEXCOORD0) : SV_Target
+{
+	return cloud(tex_coord);
+}
+		]]>
+	</shader>
+
+	<technique name="ProceduralWoodTex">
+		<pass name="p0">
+			<state name="vertex_shader" value="ProceduralTexVS()"/>
+			<state name="pixel_shader" value="WoodPS()"/>
+		</pass>
+	</technique>
+	<technique name="ProceduralMarbleTex">
+		<pass name="p0">
+			<state name="vertex_shader" value="ProceduralTexVS()"/>
+			<state name="pixel_shader" value="MarblePS()"/>
+		</pass>
+	</technique>
+	<technique name="ProceduralCloudTex">
+		<pass name="p0">
+			<state name="vertex_shader" value="ProceduralTexVS()"/>
+			<state name="pixel_shader" value="CloudPS()"/>
+		</pass>
+	</technique>
+</effect>

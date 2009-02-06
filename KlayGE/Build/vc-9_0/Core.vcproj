@@ -877,6 +877,42 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\RenderFX\PerlinNoise.fxml"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="FXML"
+							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\RenderFX\PointSprite.fxml"
 					>
 					<FileConfiguration
