@@ -255,10 +255,11 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-	float degree(std::clock() / 700.0f);
+	/*float degree(std::clock() / 700.0f);
 	float3 lightPos(2, 0, 1);
 	float4x4 matRot(MathLib::rotation_y(degree));
-	lightPos = MathLib::transform_coord(lightPos, matRot);
+	lightPos = MathLib::transform_coord(lightPos, matRot);*/
+	float3 lightPos(0.5f, 1, -2);
 	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(lightPos);
 
 	UIManager::Instance().Render();

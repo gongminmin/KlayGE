@@ -3,29 +3,47 @@
 <effect>
 	<shader>
 		<![CDATA[
-float directional_lighting(float3 lightDir, float3 normal)
+float directional_lighting(float3 light_dir, float3 normal)
 {
-	return dot(-lightDir, normal);
+	return dot(-light_dir, normal);
 }
 
-float point_lighting(float3 lightPos, float3 pos, float3 normal)
+float point_lighting(float3 light_pos, float3 pos, float3 normal)
 {
-	return dot(normalize(lightPos - pos), normal);
+	return dot(normalize(light_pos - pos), normal);
 }
 
-float diffuse_lighting(float3 light_vec, float3 normal)
+float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 pos)
+{
+	// cos_cone is (cos_outer_cone, cos_inner_cone)
+	
+	float3 v = normalize(pos - light_pos);
+	float cos_direction = dot(v, light_dir);
+
+	return smoothstep(cos_cone.x, cos_cone.y, cos_direction);
+}
+
+
+float diffuse_term(float3 light_vec, float3 normal)
 {
 	return dot(light_vec, normal);
 }
 
-float specular_lighting(float3 halfway_vec, float3 normal, float power)
+float specular_term(float3 halfway_vec, float3 normal, float power)
 {
 	return pow(dot(halfway_vec, normal), power);
 }
 
-float specular_lighting(float3 light_vec, float3 eye_vec, float3 normal, float power)
+float specular_term(float3 light_vec, float3 eye_vec, float3 normal, float power)
 {
-	return specular_lighting(normalize(light_vec + eye_vec), normal, power);
+	return specular_term(normalize(light_vec + eye_vec), normal, power);
+}
+
+float attenuation_term(float3 light_pos, float3 pos, float3 atten)
+{
+	float3 v = light_pos - pos;
+	float d = length(v);
+	return 1 / (atten.x + d * atten.y + d * d * atten.z);
 }
     ]]>
 	</shader>

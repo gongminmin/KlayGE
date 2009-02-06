@@ -41,7 +41,7 @@ void NormalDepthPS(float4 pos : SV_Position, float4 normal : TEXCOORD0,
 	light_vec = normalize(light_vec);
 	view_vec = normalize(view_vec);
 	
-	float diffuse = diffuse_lighting(light_vec, normal);
+	float diffuse = diffuse_term(light_vec, normal);
 	float specular = 0;
 	if (diffuse > 0)
 	{

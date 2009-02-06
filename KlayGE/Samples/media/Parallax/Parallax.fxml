@@ -67,13 +67,13 @@ half4 ParallaxPS(float4 oPos			: SV_Position,
 
 	half3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV));
 	half3 light_vec = normalize(L);
-	half diffuse_factor = diffuse_lighting(light_vec, bump_normal);
+	half diffuse_factor = diffuse_term(light_vec, bump_normal);
 
 	half4 clr;
 	if (diffuse_factor > 0)
 	{
 		half3 halfway = normalize(H);
-		half specular_factor = specular_lighting(halfway, bump_normal, 4);
+		half specular_factor = specular_term(halfway, bump_normal, 4);
 		clr = half4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
 	}
 	else
