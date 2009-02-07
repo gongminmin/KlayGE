@@ -58,11 +58,6 @@ namespace
 				138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 			};
 
-			ElementInitData init_data;
-			init_data.data = permutation;
-			init_data.slice_pitch = init_data.row_pitch = sizeof(permutation);
-			permutation_tex_ = rf.MakeTexture2D(256, 1, 1, EF_L8, 1, 0, EAH_GPU_Read, &init_data);
-
 			int8_t const grad[] = 
 			{
 				127, 127, 0, 0,
@@ -83,12 +78,56 @@ namespace
 				0, -128, -128, 0
 			};
 
-			init_data.data = grad;
-			init_data.slice_pitch = init_data.row_pitch = sizeof(grad);
-			grad_tex_ = rf.MakeTexture2D(16, 1, 1, EF_SIGNED_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+			uint8_t perm_2d[256][256 * 4];
+			for (int y = 0; y < 256; ++ y)
+			{
+				for (int x = 0; x < 256; ++ x)
+				{
+					int A = permutation[x & 255] + y;
+					int B = permutation[(x + 1) & 255] + y;
+					perm_2d[y][x * 4 + 2] = permutation[A & 255];
+					perm_2d[y][x * 4 + 1] = permutation[(A + 1) & 255];
+					perm_2d[y][x * 4 + 0] = permutation[B & 255];
+					perm_2d[y][x * 4 + 3] = permutation[(B + 1) & 255];
+				}
+			}
 
-			*(technique_->Effect().ParameterByName("permutation_tex")) = permutation_tex_;
-			*(technique_->Effect().ParameterByName("grad_tex")) = grad_tex_;
+			int8_t grad_perm[256 * 4];
+			for (int x = 0; x < 256; ++ x)
+			{
+				for (int i = 0; i < 4; ++ i)
+				{
+					grad_perm[x * 4 + i] = grad[(permutation[x] & 15) * 4 + i];
+				}
+			}
+
+			ElementInitData init_data;
+			init_data.data = perm_2d;
+			init_data.row_pitch = 256 * 4;
+			init_data.slice_pitch = sizeof(perm_2d);
+			try
+			{
+				perm_2d_tex_ = rf.MakeTexture2D(256, 256, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+			}
+			catch (...)
+			{
+				for (int y = 0; y < 256; ++ y)
+				{
+					for (int x = 0; x < 256; ++ x)
+					{
+						std::swap(perm_2d[y][x * 4 + 0], perm_2d[y][x * 4 + 2]);
+					}
+				}
+
+				perm_2d_tex_ = rf.MakeTexture2D(256, 256, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+			}
+
+			init_data.data = grad_perm;
+			init_data.slice_pitch = init_data.row_pitch = sizeof(grad_perm);
+			grad_perm_tex_ = rf.MakeTexture2D(256, 1, 1, EF_SIGNED_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+
+			*(technique_->Effect().ParameterByName("perm_2d_tex")) = perm_2d_tex_;
+			*(technique_->Effect().ParameterByName("grad_perm_tex")) = grad_perm_tex_;
 		}
 
 		void BuildMeshInfo()
@@ -104,6 +143,12 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+		}
+
+		void LightPos(float3 const & light_pos)
+		{
+			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
 
 		void ProceduralType(int type)
@@ -117,8 +162,8 @@ namespace
 		}
 
 	private:
-		TexturePtr permutation_tex_;
-		TexturePtr grad_tex_;
+		TexturePtr perm_2d_tex_;
+		TexturePtr grad_perm_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -128,6 +173,15 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>());
+		}
+
+		void LightPos(float3 const & light_pos)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+			}
 		}
 
 		void ProceduralType(int type)
@@ -285,6 +339,9 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	UIManager::Instance().Render();
+
+	float3 lightPos(0.5f, 1, -2);
+	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(lightPos);
 
 	std::wostringstream stream;
 	stream.precision(2);

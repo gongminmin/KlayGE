@@ -1,10 +1,13 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
 	<include name="../../../RenderFX/PerlinNoise.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+		<parameter type="float3" name="light_pos"/>
+		<parameter type="float3" name="eye_pos"/>
 	</cbuffer>
 
 	<parameter type="float" name="freq"/>
@@ -16,7 +19,7 @@ float4 wood(float3 tex_coord)
 	float3 color1 = float3(0.66f, 0.33f, 0.13f);
 	float3 color2 = float3(0.93f, 0.60f, 0.13f);
 
-	float g = perlin_noise(tex_coord * 0.8f) * 16;
+	float g = perlin_noise(tex_coord * 0.72f) * 16;
 	float s = frac(g);
 
 	return float4(lerp(color1, color2, s), 1);
@@ -38,29 +41,66 @@ float4 cloud(float3 tex_coord)
 }
 
 void ProceduralTexVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
 					out float4 oPos		: SV_Position,
-					out float3 oTexCoord	: TEXCOORD0)
+					out float3 oPosOS	: TEXCOORD0,
+					out float3 oNormalOS : TEXCOORD1,
+					out float3 oTexCoord : TEXCOORD2)
 {
 	oPos = mul(pos, mvp);
+	oPosOS = pos;
+	oNormalOS = normal;
 	oTexCoord = pos.xyz * freq;
 }
 
 float4 WoodPS(float4 pos_ss	: SV_Position,
-					float3 tex_coord	: TEXCOORD0) : SV_Target
+					float3 pos_os : TEXCOORD0,
+					float3 normal_os : TEXCOORD1,
+					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	return wood(tex_coord);
+	float3 light_os = light_pos - pos_os;
+	float3 view_os = eye_pos - pos_os;
+	float3 halfway_os = light_pos + view_os;
+	
+	light_os = normalize(light_os);
+	view_os = normalize(view_os);
+	halfway_os = normalize(halfway_os);
+	
+	return wood(tex_coord) * diffuse_term(light_os, normal_os) * 0.7f
+		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
 }
 
 float4 MarblePS(float4 pos_ss	: SV_Position,
-					float3 tex_coord	: TEXCOORD0) : SV_Target
+					float3 pos_os : TEXCOORD0,
+					float3 normal_os : TEXCOORD1,
+					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	return marble(tex_coord);
+	float3 light_os = light_pos - pos_os;
+	float3 view_os = eye_pos - pos_os;
+	float3 halfway_os = light_pos + view_os;
+	
+	light_os = normalize(light_os);
+	view_os = normalize(view_os);
+	halfway_os = normalize(halfway_os);
+	
+	return marble(tex_coord) * diffuse_term(light_os, normal_os) * 0.7f
+		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
 }
 
 float4 CloudPS(float4 pos_ss	: SV_Position,
-					float3 tex_coord	: TEXCOORD0) : SV_Target
+					float3 pos_os : TEXCOORD0,
+					float3 normal_os : TEXCOORD1,
+					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	return cloud(tex_coord);
+	float3 light_os = light_pos - pos_os;
+	float3 view_os = eye_pos - pos_os;
+	float3 halfway_os = light_pos + view_os;
+	
+	light_os = normalize(light_os);
+	view_os = normalize(view_os);
+	halfway_os = normalize(halfway_os);
+	
+	return cloud(tex_coord) * diffuse_term(light_os, normal_os);
 }
 		]]>
 	</shader>
