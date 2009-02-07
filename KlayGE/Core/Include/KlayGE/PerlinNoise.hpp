@@ -109,31 +109,56 @@ namespace KlayGE
 									this->grad(p_[BB + 1], r + Vector_T<T, 3>(-1, -1, -1)), u), v), w);
 			}
 
-
-			T turbulence(T const & x, T const & y, T freq)
+			T fBm(T const & x, T const & y, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
 			{
-				T t(0);
-
-				do
+				T sum(0);
+				T freq(1), amp(0.5);
+				for (int i = 0; i < octaves; ++ i)
 				{
-					t += this->noise(freq * x, freq * y) / freq;
-					freq *= T(0.5);
-				} while (freq >= 1);
-				
-				return t;
+					sum += this->noise(freq * x, freq * y) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
 			}
 
-			T turbulence(T const & x, T const & y, T const & z, T freq)
+			T fBm(T const & x, T const & y, T const & z, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
 			{
-				T t(0);
-
-				do
+				T sum(0);
+				T freq(1), amp(0.5);
+				for (int i = 0; i < octaves; ++ i)
 				{
-					t += this->noise(freq * x, freq * y, freq * z) / freq;
-					freq *= T(0.5);
-				} while (freq >= 1);
-				
-				return t;
+					sum += this->noise(freq * x, freq * y, freq * z) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
+			}
+
+			T turbulence(T const & x, T const & y, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
+			{
+				T sum(0);
+				T freq(1), amp(1);
+				for (int i = 0; i < octaves; ++ i)
+				{
+					sum += abs(this->noise(freq * x, freq * y)) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
+			}
+
+			T turbulence(T const & x, T const & y, T const & z, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
+			{
+				T sum(0);
+				T freq(1), amp(1);
+				for (int i = 0; i < octaves; ++ i)
+				{
+					sum += abs(this->noise(freq * x, freq * y, freq * z)) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
 			}
 
 			T tileable_noise(T const & x, T const & w)
@@ -164,32 +189,60 @@ namespace KlayGE
 					+ this->noise(x - w, y - h, z - d) * (0 + x) * (0 + y) * (0 + z)) / (w * h * d);
 			}
 
-			T tileable_turbulence(T const & x, T const & y,
-				T const & w, T const & h, T freq)
+			T tileable_fBm(T const & x, T const & y, T const & w, T const & h,
+				int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
 			{
-				T t(0);
-
-				do
+				T sum(0);
+				T freq(1), amp(0.5);
+				for (int i = 0; i < octaves; ++ i)
 				{
-					t += this->tileable_noise(freq * x, freq * y, w * freq, h * freq) / freq;
-					freq *= T(0.5);
-				} while (freq >= 1);
-				
-				return t;
+					sum += this->tileable_noise(freq * x, freq * y, freq * w, freq * h) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
+			}
+
+			T tileable_fBm(T const & x, T const & y, T const & z, T const & w, T const & h, T const & d,
+				int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
+			{
+				T sum(0);
+				T freq(1), amp(0.5);
+				for (int i = 0; i < octaves; ++ i)
+				{
+					sum += this->tileable_noise(freq * x, freq * y, freq * z, freq * w, freq * h, freq * d) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
+			}
+
+			T tileable_turbulence(T const & x, T const & y,
+				T const & w, T const & h, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
+			{
+				T sum(0);
+				T freq(1), amp(1);
+				for (int i = 0; i < octaves; ++ i)
+				{
+					sum += abs(this->tileable_noise(freq * x, freq * y, w * freq, h * freq)) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
 			}
 
 			T tileable_turbulence(T const & x, T const & y, T const & z,
-				T const & w, T const & h, T const & d, T freq)
+				T const & w, T const & h, T const & d, int octaves, T const & lacunarity = T(2), T const & gain = T(0.5))
 			{
-				T t(0);
-
-				do
+				T sum(0);
+				T freq(1), amp(1);
+				for (int i = 0; i < octaves; ++ i)
 				{
-					t += this->tileable_noise(freq * x, freq * y, freq * z, w * freq, h * freq, d * freq) / freq;
-					freq *= T(0.5);
-				} while (freq >= 1);
-				
-				return t;
+					sum += abs(this->tileable_noise(freq * x, freq * y, freq * z, w * freq, h * freq, d * freq)) * amp;
+					freq *= lacunarity;
+					amp *= gain;
+				}
+				return sum;
 			}
 
 		private:

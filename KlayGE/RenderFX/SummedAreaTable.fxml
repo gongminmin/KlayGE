@@ -22,10 +22,10 @@
 float4 SATScanXUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_x = tex_coord0.x * scale;
-	return src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.x, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.x, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
+	return src_tex.SampleLevel(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x - addr_offset.x, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x + addr_offset.x, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y), 0);
 }
 
 float4 SATScanXDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
@@ -59,10 +59,10 @@ float4 SATScanXDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOOR
 float4 SATScanYUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_y = tex_coord0.y * scale;
-	return src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.x))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.x))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
+	return src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.x), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.x), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y), 0);
 }
 
 float4 SATScanYDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target

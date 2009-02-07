@@ -36,6 +36,15 @@ float4 decode_hdr_yc(float y, float4 c)
 	
 	return float4(Y * float3(C.g, (1 - C.g - C.r), C.r) / float3(0.299f, 0.587f, 0.114f), 1);
 }
+
+float mipmap_level(float2 uv, float2 texture_size)
+{
+	float2 dx = ddx(uv * texture_size.x);
+	float2 dy = ddy(uv * texture_size.y);
+	float d = max(dot(dx, dx), dot(dy, dy));
+
+	return log2(sqrt(d));
+}
 		]]>
 	</shader>
 </effect>

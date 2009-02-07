@@ -58,8 +58,8 @@ namespace
 					for (int x = 0; x < XSIZE; ++ x)
 					{
 						uint8_t t = static_cast<uint8_t>(127 * (1
-							+ pn.tileable_turbulence(XSCALE * x, YSCALE * y, ZSCALE * z,
-								XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 16)));
+							+ pn.tileable_fBm(XSCALE * x, YSCALE * y, ZSCALE * z,
+								XSIZE * XSCALE, YSIZE * YSCALE, ZSIZE * ZSCALE, 6)));
 						if (t > max)
 						{
 							max = t;
