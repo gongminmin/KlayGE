@@ -7,6 +7,7 @@
 			<item name="Wood"/>
 			<item name="Marble"/>
 			<item name="Cloud"/>
+			<item name="Electro"/>
 		</control>
 
 		<control type="static" id="FreqStatic" caption="Bias:" x="-120" y="348" align_x="right" width="100" height="24" is_default="0"/>
