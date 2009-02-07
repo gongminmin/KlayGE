@@ -22,9 +22,9 @@ void ColorDepthVS(float4 pos			: POSITION,
 					float4 row2			: TEXCOORD3,
 					float3 clr			: COLOR0,
 
-					out float4 oPos		: SV_Position,
 					out float3 oClr		: COLOR,
-					out float2 oDepth : TEXCOORD0)
+					out float2 oDepth : TEXCOORD0,
+					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	model = transpose(model);
@@ -36,7 +36,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
 }
 
-float4 ColorDepthPS(float4 pos		: SV_Position, float3 clr : COLOR,
+float4 ColorDepthPS(float3 clr : COLOR,
 				float2 depth : TEXCOORD0) : SV_Target
 {
 	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
@@ -70,7 +70,7 @@ float4 ColorDepthPS(float4 pos		: SV_Position, float3 clr : COLOR,
 
 	<shader>
 		<![CDATA[
-float4 DepthOfFieldPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
 	float blur_factor = saturate(abs(src_tex.Sample(point_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
@@ -107,7 +107,7 @@ float4 DepthOfFieldPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) :
 	<parameter type="float4" name="clear_clr"/>
 	<shader>
 		<![CDATA[
-float4 ClearFloatPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	return clear_clr;
 }

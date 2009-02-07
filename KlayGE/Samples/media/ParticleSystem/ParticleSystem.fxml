@@ -188,11 +188,11 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		<![CDATA[
 void TerrainVS(float4 Position : POSITION,
 					float3 Normal : NORMAL,
-					out float4 oPos : SV_Position,
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
 					out float3 oNormal : TEXCOORD2,
-					out float2 oDepth : TEXCOORD3)
+					out float2 oDepth : TEXCOORD3,
+					out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(Position, View);
 	oPos = mul(pos_es, Proj);
@@ -202,8 +202,7 @@ void TerrainVS(float4 Position : POSITION,
 	oTex0 = Position.xz;
 }
 
-float4 TerrainPS(float4 pos : SV_Position,
-					float2 tex0 : TEXCOORD0,
+float4 TerrainPS(float2 tex0 : TEXCOORD0,
 					float3 pos_os : TEXCOORD1,
 					float3 normal : TEXCOORD2,
 					float2 depth : TEXCOORD3) : SV_Target 
@@ -230,7 +229,7 @@ float4 TerrainPS(float4 pos : SV_Position,
 	
 	<shader>
 		<![CDATA[
-float4 CopyPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
+float4 CopyPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 s = src_tex.Sample(src_sampler, tex);
 	return float4(s.rgb, 1);

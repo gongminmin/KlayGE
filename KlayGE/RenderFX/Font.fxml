@@ -24,9 +24,9 @@ void Font2DVS(float4 position : POSITION,
 			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
-			out float4 oPosition : SV_Position,
 			out float2 oTexCoord : TEXCOORD0,
-			out float4 oColor : COLOR)
+			out float4 oColor : COLOR,
+			out float4 oPosition : SV_Position)
 {
 	oPosition = Transform2D(position, half_width_height);
 	oPosition += texel_to_pixel_offset;
@@ -39,9 +39,9 @@ void Font3DVS(float4 position : POSITION,
 			float4 color : COLOR0,
 			float2 texCoord : TEXCOORD0,
 
-			out float4 oPosition : SV_Position,
 			out float2 oTexCoord : TEXCOORD0,
-			out float4 oColor : COLOR)
+			out float4 oColor : COLOR,
+			out float4 oPosition : SV_Position)
 {
 	oPosition = mul(position, mvp);
 
@@ -49,7 +49,7 @@ void Font3DVS(float4 position : POSITION,
 	oTexCoord = texCoord;
 }
 
-float4 FontPS(float4 pos : SV_Position, float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
+float4 FontPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 {
 	clr.a = distance_tex.Sample(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
 	return clr;

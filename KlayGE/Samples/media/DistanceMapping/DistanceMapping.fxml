@@ -26,11 +26,10 @@ void DistanceMappingVS(float4 pos		: POSITION,
 					float3 T			: TANGENT,	// in object space
 					float3 B			: BINORMAL,	// in object space
 					
-					out float4 oPos			: SV_Position,
 					out float3 oTexcoord0	: TEXCOORD0,
 					out float3 oL			: TEXCOORD1,	// in tangent space
-					out float3 oV			: TEXCOORD2		// in tangent space
-					)
+					out float3 oV			: TEXCOORD2,	// in tangent space
+					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, worldviewproj);
 	oTexcoord0 = float3(texcoord0, 1);
@@ -50,8 +49,7 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oV = vTanView;
 }
 
-half4 DistanceMappingPS(float4 pos			: SV_Position,
-						float3 texCoord0	: TEXCOORD0,
+half4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2) : SV_Target
 {
@@ -80,8 +78,7 @@ half4 DistanceMappingPS(float4 pos			: SV_Position,
 	return half4(diffuse * diffuse_factor, 1);
 }
 
-half4 DistanceMappingPS_20(float4 pos			: SV_Position,
-						float3 texCoord0	: TEXCOORD0,
+half4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2) : SV_Target
 {

@@ -61,12 +61,12 @@ float3x3 my_refract3(float3 i, float3 n, float3 eta)
 
 void RefractVS(float4 pos			: POSITION,
 				float3 normal		: NORMAL,
-				out float4 oPos		: SV_Position,
 				out float3 out_normal	: TEXCOORD0,
 				out float4 incident : TEXCOORD1,
 				out float4 refract_vec : TEXCOORD2,
 				out float4 pos_ss	: TEXCOORD3,
-				out float4 dir_ss	: TEXCOORD4)
+				out float4 dir_ss	: TEXCOORD4,
+				out float4 oPos		: SV_Position)
 {
 	oPos = mul(pos, mvp);
 	pos_ss = oPos;
@@ -82,8 +82,7 @@ void RefractVS(float4 pos			: POSITION,
 	dir_ss = mul(half4(refract_vec.xyz, 0), mvp);
 }
 
-float4 RefractPS(float4 pos : SV_Position, 
-					float3 normal			: TEXCOORD0,
+float4 RefractPS(float3 normal			: TEXCOORD0,
 					float4 incident		: TEXCOORD1,
 					float4 refract_vec	: TEXCOORD2,
 					float4 pos_ss		: TEXCOORD3,
@@ -138,16 +137,16 @@ float4 RefractPS(float4 pos : SV_Position,
 		<![CDATA[
 void RefractBackFaceVS(float4 pos : POSITION,
 							float3 normal : NORMAL,
-							out float4 oPos : SV_Position,
 							out float3 out_normal : TEXCOORD0,
-							out float3 pos_es : TEXCOORD1)
+							out float3 pos_es : TEXCOORD1,
+							out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	out_normal = mul(normal, (float3x3)modelit);
 	pos_es = mul(pos, model).xyz - eye_pos;
 }
 
-float4 RefractBackFacePS(float4 pos : SV_Position, float3 normal : TEXCOORD0,
+float4 RefractBackFacePS(float3 normal : TEXCOORD0,
 							float3 pos_es : TEXCOORD1) : SV_Target
 {
 	return float4(-normalize(normal), length(pos_es));

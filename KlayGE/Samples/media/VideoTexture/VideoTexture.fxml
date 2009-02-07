@@ -14,14 +14,14 @@
 		<![CDATA[
 void ObjectVS(float4 Position : POSITION,
 					float2 Tex0 : TEXCOORD0,
-					out float4 oPos : SV_Position,
-					out float2 oTex0 : TEXCOORD0)
+					out float2 oTex0 : TEXCOORD0,
+					out float4 oPos : SV_Position)
 {
 	oPos = mul(Position, mvp);
 	oTex0 = Tex0;
 }
 
-float4 ObjectPS(float4 pos : SV_Position, float2 Tex0 : TEXCOORD0) : SV_Target 
+float4 ObjectPS(float2 Tex0 : TEXCOORD0) : SV_Target 
 {
 	return video_tex.Sample(video_sampler, Tex0);
 }

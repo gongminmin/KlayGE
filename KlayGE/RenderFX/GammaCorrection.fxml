@@ -13,7 +13,7 @@
 
 	<shader>
 		<![CDATA[
-float4 GammaCorrectionPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
+float4 GammaCorrectionPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	return pow(src_tex.Sample(src_sampler, tex), inv_gamma);
 }

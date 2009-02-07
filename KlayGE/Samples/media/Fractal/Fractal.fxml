@@ -14,9 +14,9 @@
 void MandelbrotVS(float4 pos : POSITION,
 			float2 texcoord0 : TEXCOORD0,
 
-			out float4 oPos			: SV_Position,
 			out float2 oTexcoord0	: TEXCOORD0,
-			out float2 oTexcoord1	: TEXCOORD1)
+			out float2 oTexcoord1	: TEXCOORD1,
+			out float4 oPos			: SV_Position)
 {
 	oPos = pos;
 	oTexcoord0 = texcoord0;
@@ -24,7 +24,7 @@ void MandelbrotVS(float4 pos : POSITION,
 	oTexcoord1 = oTexcoord0 * 2.4 - float2(1.8, -1.2 * flip);
 }
 
-half4 MandelbrotPS(float4 pos : SV_Position, float2 texcoord0 : TEXCOORD0,
+half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
 				float2 texcoord1 : TEXCOORD1) : SV_Target
 {
 	half2 z = fractal_tex.Sample(fractal_sampler, texcoord0).rg;
@@ -48,14 +48,14 @@ half4 MandelbrotPS(float4 pos : SV_Position, float2 texcoord0 : TEXCOORD0,
 		<![CDATA[
 void ShowVS(float4 pos : POSITION,
 		float2 texcoord0 : TEXCOORD0,
-		out float4 oPos : SV_Position,
-		out float3 oTexcoord0 : TEXCOORD0)
+		out float3 oTexcoord0 : TEXCOORD0,
+		out float4 oPos : SV_Position)
 {
 	oPos = pos;
 	oTexcoord0 = float3(texcoord0, 1);
 }
 
-float4 ShowPS(float4 pos : SV_Position, float3 texCoord0 : TEXCOORD0) : SV_Target
+float4 ShowPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	half2 z = fractal_tex.Sample(fractal_sampler, texCoord0.xy).rg;
 	return float4((dot(z, z) >= 4) * texCoord0, 1);

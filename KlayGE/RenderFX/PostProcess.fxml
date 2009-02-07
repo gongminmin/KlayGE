@@ -20,11 +20,11 @@ float2 TexCoordFromPos(float4 pos)
 }
 
 void PostProcessVS(float4 pos : POSITION,
-					out float4 oPos : SV_Position,
-					out float2 oTex : TEXCOORD0)
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
 {
-	oPos = AdjustPos(pos);
 	oTex = TexCoordFromPos(pos);
+	oPos = AdjustPos(pos);
 }
 		]]>
 	</shader>

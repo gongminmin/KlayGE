@@ -23,9 +23,9 @@
 		<![CDATA[
 void VertexDisplacementVS(float4 pos			: POSITION,
 								float2 texcoord0	: TEXCOORD0,
-								out float4 oPos			: SV_Position,
 								out float4 oClr			: COLOR0,
-								out float2 oTexcoord0	: TEXCOORD0)
+								out float2 oTexcoord0	: TEXCOORD0,
+								out float4 oPos			: SV_Position)
 {
 	float4 v = pos;
 	float2 offset = pos.xy + float2(half_length, -half_width);
@@ -40,7 +40,7 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 	oTexcoord0 = texcoord0;
 }
 
-float4 VertexDisplacementPS(float4 pos : SV_Position, float4 clr : COLOR0,
+float4 VertexDisplacementPS(float4 clr : COLOR0,
 							float2 texCoord : TEXCOORD0) : SV_Target
 {
 	return clr * flag_tex.Sample(flagSampler, texCoord);

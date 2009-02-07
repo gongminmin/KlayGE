@@ -24,9 +24,9 @@
 	<shader>
 		<![CDATA[
 void SumLumVS(float4 pos : POSITION,
-					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
-					out float4 oTex1 : TEXCOORD1)
+					out float4 oTex1 : TEXCOORD1,
+					out float4 oPos : SV_Position)
 {
 	oPos = AdjustPos(pos);
 
@@ -35,7 +35,7 @@ void SumLumVS(float4 pos : POSITION,
 	oTex1 = tex.xyxy + tex_coord_offset[1];
 }
 
-float4 SumLum4x4LogPS(float4 pos : SV_Position, float4 iTex0 : TEXCOORD0,
+float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 						float4 iTex1 : TEXCOORD1) : SV_Target
 {
 	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
@@ -51,7 +51,7 @@ float4 SumLum4x4LogPS(float4 pos : SV_Position, float4 iTex0 : TEXCOORD0,
 	return s / 4;
 }
 
-float4 SumLum4x4IterativePS(float4 pos : SV_Position, float4 iTex[2] : TEXCOORD) : SV_Target
+float4 SumLum4x4IterativePS(float4 iTex[2] : TEXCOORD) : SV_Target
 {
 	half s = 0;
 	for (int i = 0; i < 2; ++ i)
@@ -63,8 +63,7 @@ float4 SumLum4x4IterativePS(float4 pos : SV_Position, float4 iTex[2] : TEXCOORD)
 	return s / 4;
 }
 
-float4 AdaptedLumPS(float4 pos : SV_Position,
-				float4 tex0 : TEXCOORD0,
+float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 				float4 tex1 : TEXCOORD1) : SV_Target
 {
 	float adapted_lum = last_lum_tex.Sample(last_lum_sampler, float2(0.5f, 0.5f)).r;

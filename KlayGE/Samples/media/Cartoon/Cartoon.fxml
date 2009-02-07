@@ -18,10 +18,10 @@
 		<![CDATA[
 void NormalDepthVS(float4 pos : POSITION,
 			float3 normal : NORMAL,
-			out float4 oPos : SV_Position,
 			out float4 oNormal : TEXCOORD0,
 			out float3 oLightVec : TEXCOORD1,
-			out float3 oViewVec : TEXCOORD2)
+			out float3 oViewVec : TEXCOORD2,
+			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, model_view_proj);
 	oNormal.xyz = mul(normal, (float3x3)model_view);
@@ -31,7 +31,7 @@ void NormalDepthVS(float4 pos : POSITION,
 	oViewVec = eye_in_model - pos.xyz;
 }
 
-void NormalDepthPS(float4 pos : SV_Position, float4 normal : TEXCOORD0,
+void NormalDepthPS(float4 normal : TEXCOORD0,
 			float3 light_vec : TEXCOORD1, float3 view_vec : TEXCOORD2,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
@@ -92,14 +92,14 @@ void NormalDepthPS(float4 pos : SV_Position, float4 normal : TEXCOORD0,
 	<shader>
 		<![CDATA[
 void PostToonVS(float4 pos : POSITION,
-				out float4 oPos : SV_Position,
 				out float2 oTc0 : TEXCOORD0, // center
 				out float4 oTc1 : TEXCOORD1, // left top / right bottom
 				out float4 oTc2 : TEXCOORD2, // right top / left bottom
 				out float4 oTc3 : TEXCOORD3, // left / right
-				out float4 oTc4 : TEXCOORD4) // top / bottom
+				out float4 oTc4 : TEXCOORD4, // top / bottom
+				out float4 oPos : SV_Position)
 {
-	PostProcessVS(pos, oPos, oTc0);
+	PostProcessVS(pos, oTc0, oPos);
 
 	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
 	oTc2 = oTc0.xyxy + float4(+inv_width, -inv_height, -inv_width, +inv_height);
@@ -107,8 +107,7 @@ void PostToonVS(float4 pos : POSITION,
 	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
 }
 
-float4 PostToonPS(float4 pos : SV_Position,
-				float2 tc0 : TEXCOORD0,
+float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc1 : TEXCOORD1,
 				float4 tc2 : TEXCOORD2,
 				float4 tc3 : TEXCOORD3,

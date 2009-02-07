@@ -29,11 +29,11 @@ void ParallaxVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float3 T			: TANGENT,
 					float3 B			: BINORMAL,
-					out float4 oPos			: SV_Position,
 					out float2 oTexcoord0	: TEXCOORD0,
 					out float3 oL			: TEXCOORD1,	// in tangent space
 					out float3 oV			: TEXCOORD2,	// in tangent space
-					out float3 oH			: TEXCOORD3)	// in tangent space
+					out float3 oH			: TEXCOORD3,	// in tangent space
+					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTexcoord0 = texcoord0;
@@ -52,8 +52,7 @@ void ParallaxVS(float4 pos				: POSITION,
 	oH = mul(objToTangentSpace, halfVec);
 }
 
-half4 ParallaxPS(float4 oPos			: SV_Position,
-					float2 texCoord0	: TEXCOORD0,
+half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
 					float3 H		: TEXCOORD3) : SV_Target

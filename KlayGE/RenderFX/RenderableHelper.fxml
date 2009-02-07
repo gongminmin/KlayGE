@@ -12,7 +12,7 @@ void HelperVS(float4 position : POSITION,
 	oPosition = mul(position, matViewProj);
 }
 
-float4 HelperPS(float4 pos : SV_Position) : SV_Target0
+float4 HelperPS() : SV_Target0
 {
 	return color;
 }
@@ -71,14 +71,14 @@ float4 HelperPS(float4 pos : SV_Position) : SV_Target0
 	<shader>
 		<![CDATA[
 void SkyBoxVS(float4 pos : POSITION,
-			out float4 oPos : SV_Position,
-			out float3 texcoord0 : TEXCOORD0)
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
 {
 	oPos = pos;
 	texcoord0 = mul(pos, inv_mvp);
 }
 
-float4 SkyBoxPS(float4 pos : SV_Position, float3 texCoord0 : TEXCOORD0) : SV_Target
+float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	return skybox_tex.Sample(skybox_cubeMapSampler, texCoord0);
 }

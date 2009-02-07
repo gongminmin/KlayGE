@@ -9,14 +9,14 @@
 		<![CDATA[
 void GenShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
-						out float4 oPos : SV_Position,
-						out float4 oLightWorldPos : TEXCOORD0)
+						out float4 oLightWorldPos : TEXCOORD0,
+						out float4 oPos : SV_Position)
 {
     oPos = mul(Position, model_view_proj);
     oLightWorldPos = mul(Position, obj_model_to_light_model);
 }
 
-float4 GenShadowMapPS(float4 pos : SV_Position, float4 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
 {
 	LightWorldPos /= LightWorldPos.w;
 	float dist = length(LightWorldPos.xyz);
@@ -68,10 +68,10 @@ float4 GenShadowMapPS(float4 pos : SV_Position, float4 LightWorldPos : TEXCOORD0
 		<![CDATA[
 void RenderSceneVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
-					out float4 oPos : SV_Position,
 					out float3 oDiffuse : COLOR0,
 					out float4 oLightWorldPos : TEXCOORD0,
-					out float4 oLightProjPos[6] : TEXCOORD1)
+					out float4 oLightProjPos[6] : TEXCOORD1,
+					out float4 oPos : SV_Position)
 {
 	float4 world_pos = mul(Position, model);
 	float3 world_normal = normalize(mul(Normal, (float3x3)model));
@@ -92,7 +92,7 @@ float linstep(float min, float max, float v)
 	return clamp((v - min) / (max - min), 0, 1);
 }
 
-float4 RenderScenePS(float4 pos : SV_Position, float3 diffuse : COLOR0,
+float4 RenderScenePS(float3 diffuse : COLOR0,
 				float4 LightWorldPos : TEXCOORD0,
 				float4 LightProjPos[6] : TEXCOORD1) : SV_Target 
 {

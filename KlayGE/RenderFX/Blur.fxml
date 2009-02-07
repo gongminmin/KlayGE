@@ -16,11 +16,11 @@
 	<shader>
 		<![CDATA[
 void BlurXVS(float4 pos : POSITION,
-					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
-					out float4 oTex3 : TEXCOORD3)
+					out float4 oTex3 : TEXCOORD3,
+					out float4 oPos : SV_Position)
 {
 	oPos = AdjustPos(pos);
 	
@@ -37,11 +37,11 @@ void BlurXVS(float4 pos : POSITION,
 }
 
 void BlurYVS(float4 pos : POSITION,
-					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
-					out float4 oTex3 : TEXCOORD3)
+					out float4 oTex3 : TEXCOORD3,
+					out float4 oPos : SV_Position)
 {
 	oPos = AdjustPos(pos);
 
@@ -57,8 +57,7 @@ void BlurYVS(float4 pos : POSITION,
 	oTex3 = tex[3];
 }
 
-float4 BlurPS(float4 iPos : SV_Position,
-				float4 iTex0 : TEXCOORD0,
+float4 BlurPS(float4 iTex0 : TEXCOORD0,
 				float4 iTex1 : TEXCOORD1,
 				float4 iTex2 : TEXCOORD2,
 				float4 iTex3 : TEXCOORD3) : SV_Target0

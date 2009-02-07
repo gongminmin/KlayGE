@@ -19,7 +19,7 @@
 
 	<shader>
 		<![CDATA[
-float4 SATScanXUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_x = tex_coord0.x * scale;
 	return src_tex.SampleLevel(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y), 0)
@@ -28,7 +28,7 @@ float4 SATScanXUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0
 				+ src_tex.SampleLevel(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y), 0);
 }
 
-float4 SATScanXDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
 	float x = floor(tex_coord0.x * length);
@@ -56,7 +56,7 @@ float4 SATScanXDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOOR
 	return clr;
 }
 
-float4 SATScanYUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_y = tex_coord0.y * scale;
 	return src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y), 0)
@@ -65,7 +65,7 @@ float4 SATScanYUpSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0
 				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y), 0);
 }
 
-float4 SATScanYDownSweepPS(float4 pos : SV_Position, float2 tex_coord0 : TEXCOORD0) : SV_Target
+float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
 	float y = floor(tex_coord0.y * length);

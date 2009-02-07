@@ -56,11 +56,11 @@ float3 texcoord_to_view(float2 tex)
 		<![CDATA[
 void ParticlesVS(float2 tex_pos		: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: SV_Position,
 					out float4 oClr     : COLOR0,
 					out float4 oPosSS	: TEXCOORD0,
 					out float4 oCenterView : TEXCOORD1,
-					out float3 oViewDir : TEXCOORD2)
+					out float3 oViewDir : TEXCOORD2,
+					out float4 oPos		: SV_Position)
 {
 	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
 
@@ -86,8 +86,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 	}
 }
 
-float4 ParticlesPS(float4 pos : SV_Position,
-						float4 clr : COLOR0,
+float4 ParticlesPS(float4 clr : COLOR0,
 						float4 PosSS : TEXCOORD0,
 						float4 CenterView : TEXCOORD1,
 						float3 view_dir : TEXCOORD2) : SV_Target
@@ -172,15 +171,14 @@ float4 ParticlesPS(float4 pos : SV_Position,
 		<![CDATA[
 void UpdateVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: SV_Position,
-					out float2 oTex		: TEXCOORD0)
+					out float2 oTex		: TEXCOORD0,
+					out float4 oPos		: SV_Position)
 {
 	oPos = pos;
 	oTex = float2(tex.x, 1 - tex.y);
 }
 
-void UpdatePS(float4 pos : SV_Position,
-				float2 tex : TEXCOORD0,
+void UpdatePS(float2 tex : TEXCOORD0,
 				out float4 out_pos : SV_Target0,
 				out float4 out_vel : SV_Target1)
 {
@@ -246,10 +244,10 @@ void UpdatePS(float4 pos : SV_Position,
 		<![CDATA[
 void TerrainVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oPos		: SV_Position,
 					out float4 oTex  : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
-					out float2 oDepth : TEXCOORD2)
+					out float2 oDepth : TEXCOORD2,
+					out float4 oPos		: SV_Position)
 {
 	oTex.xy = float2(tex.x, 1 - tex.y);
 	oTex.zw = oTex.xy * 4;
@@ -264,7 +262,7 @@ void TerrainVS(float4 pos			: POSITION,
 	oDepth = pos_es.zw;
 }
 
-float4 TerrainPS(float4 pos : SV_Position, float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : SV_Target
+float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : SV_Target
 {
 	float3 normal = decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy;
 	return float4(grass_tex.Sample(bilinear_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
@@ -285,7 +283,7 @@ float4 TerrainPS(float4 pos : SV_Position, float4 tex : TEXCOORD0, float3 pos_os
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
+float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	float4 a = tex_with_alpha.Sample(point_sampler, tex);
 	a.a = saturate(a.a);

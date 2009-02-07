@@ -16,7 +16,6 @@
 		<![CDATA[
 		
 void Downsample8x8VS(float4 pos : POSITION,
-					out float4 oPos : SV_Position,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
@@ -24,10 +23,11 @@ void Downsample8x8VS(float4 pos : POSITION,
 					out float4 oTex4 : TEXCOORD4,
 					out float4 oTex5 : TEXCOORD5,
 					out float4 oTex6 : TEXCOORD6,
-					out float4 oTex7 : TEXCOORD7)
+					out float4 oTex7 : TEXCOORD7,
+					out float4 oPos : SV_Position)
 {
 	float2 tex_base;
-	PostProcessVS(pos, oPos, tex_base);
+	PostProcessVS(pos, tex_base, oPos);
 	
 	oTex0 = tex_base.xyxy + tex_coord_offset[0];
 	oTex1 = tex_base.xyxy + tex_coord_offset[1];
@@ -39,8 +39,7 @@ void Downsample8x8VS(float4 pos : POSITION,
 	oTex7 = tex_base.xyxy + tex_coord_offset[7];
 }
 
-float4 Downsample8x8PS(float4 pos : SV_Position,
-					float4 oTex0 : TEXCOORD0,
+float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
 					float4 oTex1 : TEXCOORD1,
 					float4 oTex2 : TEXCOORD2,
 					float4 oTex3 : TEXCOORD3,

@@ -52,10 +52,10 @@ float4 electro(float3 tex_coord)
 
 void ProceduralTexVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
-					out float4 oPos		: SV_Position,
 					out float3 oPosOS	: TEXCOORD0,
 					out float3 oNormalOS : TEXCOORD1,
-					out float3 oTexCoord : TEXCOORD2)
+					out float3 oTexCoord : TEXCOORD2,
+					out float4 oPos		: SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oPosOS = pos;
@@ -63,8 +63,7 @@ void ProceduralTexVS(float4 pos			: POSITION,
 	oTexCoord = pos.xyz * freq;
 }
 
-float4 WoodPS(float4 pos_ss	: SV_Position,
-					float3 pos_os : TEXCOORD0,
+float4 WoodPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
@@ -83,8 +82,7 @@ float4 WoodPS(float4 pos_ss	: SV_Position,
 		+ specular_term(halfway_os, normal, 32) * 0.6f;
 }
 
-float4 MarblePS(float4 pos_ss	: SV_Position,
-					float3 pos_os : TEXCOORD0,
+float4 MarblePS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
@@ -102,8 +100,7 @@ float4 MarblePS(float4 pos_ss	: SV_Position,
 		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
 }
 
-float4 CloudPS(float4 pos_ss	: SV_Position,
-					float3 pos_os : TEXCOORD0,
+float4 CloudPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
@@ -120,8 +117,7 @@ float4 CloudPS(float4 pos_ss	: SV_Position,
 	return cloud(tex_coord) * diffuse_term(light_os, normal_os);
 }
 
-float4 ElectroPS(float4 pos_ss	: SV_Position,
-					float3 pos_os : TEXCOORD0,
+float4 ElectroPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {

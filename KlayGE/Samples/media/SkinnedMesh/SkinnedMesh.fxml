@@ -30,10 +30,10 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 				float3 T	: TANGENT,	// in object space
 				float3 B	: BINORMAL,	// in object space
 				
-				out float4 oPos : SV_Position,
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,	// in tangent space
-				out float3 oH	: TEXCOORD2)	// in tangent space
+				out float3 oH	: TEXCOORD2,	// in tangent space
+				out float4 oPos : SV_Position)
 {
 	oTex0 = tex0;
 
@@ -86,8 +86,7 @@ float4 PixelLighting(float3 normal, float2 uv, float3 L, float3 H)
 	return clr;	
 }
 
-float4 SkinnedMeshPS(float4 pos : SV_Position,
-				float2 uv : TEXCOORD0,
+float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : SV_Target
 {
@@ -96,8 +95,7 @@ float4 SkinnedMeshPS(float4 pos : SV_Position,
 	return clr;	
 }
 
-float4 SkinnedMeshNoNormalMapPS(float4 pos : SV_Position,
-				float2 uv : TEXCOORD0,
+float4 SkinnedMeshNoNormalMapPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : SV_Target
 {

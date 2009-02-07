@@ -27,17 +27,16 @@
 		<![CDATA[
 void DepthPeelingVS(float4 pos				: POSITION,
 					float3 normal			: NORMAL,
-					out float4 oPos			: SV_Position,
 					out float4 oPosSS		: TEXCOORD0,
-					out float4 oClr			: COLOR0)
+					out float4 oClr			: COLOR0,
+					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal), 0.0f).xxx, 0.5f);
 	oPosSS = oPos;
 }
 
-void DepthPeeling1stPS(float4 pos : SV_Position,
-					float4 pos_ss : TEXCOORD0,
+void DepthPeeling1stPS(float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
 					out float4 oClr : SV_Target0,
 					out float4 oDepth : SV_Target1)
@@ -46,8 +45,7 @@ void DepthPeeling1stPS(float4 pos : SV_Position,
 	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
 }
 
-void DepthPeelingNthPS(float4 pos : SV_Position,
-					float4 pos_ss : TEXCOORD0,
+void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
 					float4 clr : COLOR0,
 					out float4 oClr : SV_Target0,
 					out float4 oDepth : SV_Target1)
@@ -94,7 +92,7 @@ void DepthPeelingNthPS(float4 pos : SV_Position,
 
 	<shader>
 		<![CDATA[
-float4 BlendPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
+float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	return src_tex.Sample(point_sampler, tex);
 }
@@ -116,7 +114,7 @@ float4 BlendPS(float4 pos : SV_Position, float2 tex : TEXCOORD0) : SV_Target
 
 	<shader>
 		<![CDATA[
-float4 NoDepthPeelingPS(float4 pos : SV_Position, float4 clr : COLOR0) : SV_Target
+float4 NoDepthPeelingPS(float4 clr : COLOR0) : SV_Target
 {
 	return clr;
 }

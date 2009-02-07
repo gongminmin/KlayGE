@@ -20,14 +20,14 @@
 	<shader>
 		<![CDATA[
 void SkyBoxVS(float4 pos : POSITION,
-			out float4 oPos : SV_Position,
-			out float3 texcoord0 : TEXCOORD0)
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
 {
 	oPos = pos;
 	texcoord0 = mul(pos, inv_mvp);
 }
 
-float4 HDRSkyBoxPS(float4 pos : SV_Position, float3 texCoord0 : TEXCOORD0) : SV_Target
+float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	float3 rgb = decode_hdr_yc(skybox_cube_tex.Sample(skybox_cubeMapSampler, texCoord0).r,
 					skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, texCoord0));
