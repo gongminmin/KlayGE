@@ -12,6 +12,8 @@
 
 	<shader>
 		<![CDATA[
+// From "Implementing Improved Perlin Noise" in GPU Gems 2, Chapter 26
+
 void setup(float i, out float b, out float r)
 {
 	float x = i + 0x1000;
@@ -115,18 +117,67 @@ float perlin_noise(float3 p)
 						grad_perm(AA.w + 1, r + float3(-1, -1, -1)), f.x), f.y), f.z);
 }
 
-float turbulence(int octaves, float3 p, float lacunarity, float gain)
-{	
-	float sum = 0;
-	float scale = 1;
-	float total_gain = 1;
-	for(int i = 0; i < octaves; ++ i)
+// calculate gradient of noise (expensive!)
+float3 perlin_noise_gradient(float3 p, float d)
+{
+	float f0 = perlin_noise(p);
+	float fx = perlin_noise(p + float3(d, 0, 0));	
+	float fy = perlin_noise(p + float3(0, d, 0));
+	float fz = perlin_noise(p + float3(0, 0, d));
+	return float3(fx - f0, fy - f0, fz - f0) / d;
+}
+
+// fractal sum
+float fBm(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+{
+	float freq = 1, amp = 0.5f;
+	float sum = 0;	
+	for (int i = 0; i < octaves; ++ i)
 	{
-		sum += total_gain * perlin_noise(p * scale);
-		scale *= lacunarity;
-		total_gain *= gain;
+		sum += perlin_noise(p * freq) * amp;
+		freq *= lacunarity;
+		amp *= gain;
 	}
-	return abs(sum);
+	return sum;
+}
+
+float turbulence(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+{
+	float sum = 0;
+	float freq = 1, amp = 1;
+	for (int i = 0; i < octaves; ++ i)
+	{
+		sum += abs(perlin_noise(p * freq)) * amp;
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum;
+}
+
+// Ridged multifractal
+// See "Texturing & Modeling, A Procedural Approach", Chapter 12
+float ridge(float h, float offset)
+{
+    h = abs(h);
+    h = offset - h;
+    h = h * h;
+    return h;
+}
+
+float ridgedmf(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5, float offset = 1.0)
+{
+	float sum = 0;
+	float freq = 1, amp = 0.5f;
+	float prev = 1;
+	for (int i = 0; i < octaves; ++ i)
+	{
+		float n = ridge(perlin_noise(p * freq), offset);
+		sum += n * amp * prev;
+		prev = n;
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum;
 }
 		]]>
 	</shader>

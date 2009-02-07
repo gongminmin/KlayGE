@@ -2,7 +2,7 @@
 
 <effect>
 	<include name="../../../RenderFX/Lighting.fxml"/>
-	<include name="../../../RenderFX/PerlinNoise.fxml"/>
+	<include name="../../../RenderFX/Noise.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
@@ -29,7 +29,8 @@ float4 marble(float3 tex_coord)
 {
 	float3 color1 = float3(0.1f, 0.1f, 0.1f);
 	float3 color2 = float3(0.8f, 0.8f, 0.8f);
-	return float4(lerp(color1, color2, cos(tex_coord.x * 0.1f + 6 * turbulence(5, tex_coord, 2, 0.6f))), 1);
+
+	return float4(lerp(color1, color2, cos(tex_coord.x * 0.1f + 6 * fBm(tex_coord, 5, 2, 0.6f))), 1);
 }
 
 float4 cloud(float3 tex_coord)
@@ -37,7 +38,7 @@ float4 cloud(float3 tex_coord)
 	float3 color1 = float3(0.1f, 0.1f, 0.99f);
 	float3 color2 = float3(0.8f, 0.8f, 0.8f);
 
-	return float4(lerp(color1, color2, cos(tex_coord.z * 0.5f + 2 * turbulence(6, tex_coord, 2, 0.5f)) * 0.9f), 1);
+	return float4(lerp(color1, color2, cos(tex_coord.z * 0.5f + 2 * turbulence(tex_coord, 6, 2, 0.5f)) * 0.9f), 1);
 }
 
 void ProceduralTexVS(float4 pos			: POSITION,
@@ -66,8 +67,11 @@ float4 WoodPS(float4 pos_ss	: SV_Position,
 	view_os = normalize(view_os);
 	halfway_os = normalize(halfway_os);
 	
-	return wood(tex_coord) * diffuse_term(light_os, normal_os) * 0.7f
-		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
+	float3 bump = perlin_noise_gradient(tex_coord * 100, 0.1f);
+	float3 normal = normalize(normal_os + bump * 0.1f);
+
+	return wood(tex_coord) * diffuse_term(light_os, normal) * 0.7f
+		+ specular_term(halfway_os, normal, 32) * 0.6f;
 }
 
 float4 MarblePS(float4 pos_ss	: SV_Position,
@@ -82,6 +86,8 @@ float4 MarblePS(float4 pos_ss	: SV_Position,
 	light_os = normalize(light_os);
 	view_os = normalize(view_os);
 	halfway_os = normalize(halfway_os);
+	
+	normal_os = normalize(normal_os);
 	
 	return marble(tex_coord) * diffuse_term(light_os, normal_os) * 0.7f
 		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
@@ -99,6 +105,8 @@ float4 CloudPS(float4 pos_ss	: SV_Position,
 	light_os = normalize(light_os);
 	view_os = normalize(view_os);
 	halfway_os = normalize(halfway_os);
+	
+	normal_os = normalize(normal_os);
 	
 	return cloud(tex_coord) * diffuse_term(light_os, normal_os);
 }

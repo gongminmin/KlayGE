@@ -877,7 +877,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\RenderFX\PerlinNoise.fxml"
+					RelativePath="..\..\RenderFX\Noise.fxml"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
