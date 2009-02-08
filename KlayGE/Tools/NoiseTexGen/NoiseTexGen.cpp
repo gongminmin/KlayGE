@@ -76,7 +76,7 @@ int main()
 	init_data[0].row_pitch = 256 * 4;
 	init_data[0].slice_pitch = sizeof(grad_perm);
 	SaveTexture("noise_perm_2d.dds", Texture::TT_2D,
-		256, 256, 1, 1, EF_ABGR8, init_data);
+		256, 256, 1, 1, EF_ARGB8, init_data);
 
 	init_data[0].data = grad_perm;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(grad_perm);
