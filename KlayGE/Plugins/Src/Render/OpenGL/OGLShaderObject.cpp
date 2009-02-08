@@ -679,6 +679,7 @@ namespace KlayGE
 		{
 			shaders_[type] = cgCreateProgram(render_factory.CGContext(),
 					CG_SOURCE, shader_text->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), NULL);
+			cgGLSetOptimalOptions(profiles_[type]);
 
 			CGerror error;
 			char const * err_string = cgGetLastErrorString(&error);
@@ -801,6 +802,7 @@ namespace KlayGE
 				ret->shaders_[i] = cgCreateProgram(render_factory.CGContext(),
 						CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[i],
 						(*ret->shader_descs_)[i].func_name.c_str(), NULL);
+				cgGLSetOptimalOptions(ret->profiles_[i]);
 
 				CGerror error;
 				char const * err_string = cgGetLastErrorString(&error);

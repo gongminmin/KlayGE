@@ -52,12 +52,12 @@ float3 fade(float3 t)
 
 float4 perm2d(float2 xy)
 {
-	return perm_2d_tex.Sample(perlin_point_sampler, xy / 256.0) * 256;
+	return perm_2d_tex.Sample(perlin_point_sampler, xy / 256) * 256;
 }
 
 float grad_perm(float x, float3 p)
 {
-	return dot(grad_perm_tex.Sample(perlin_point_sampler, x / 256.0).xyz, p);
+	return dot(grad_perm_tex.Sample(perlin_point_sampler, float2(x / 256, 0.5f)).xyz, p);
 }
 
 float grad_perm(float x, float2 p)

@@ -451,9 +451,12 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
-		caps_.primitive_restart = true;
+		caps_.primitive_restart_support = true;
+		caps_.argb8_support = false;
 		caps_.bc4_support = true;
 		caps_.bc5_support = true;
+		caps_.bc6_support = true;
+		caps_.bc7_support = true;
 	}
 
 	void D3D11RenderEngine::RSSetState(ID3D11RasterizerStatePtr const & ras)

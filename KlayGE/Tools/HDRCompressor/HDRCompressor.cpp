@@ -235,7 +235,7 @@ namespace
 			CompressHDRSubresource(y_data[i], c_data[i], y_data_block, c_data_block, in_data[i]);
 		}
 
-		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_L16, y_data);
+		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_R16, y_data);
 		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_numMipMaps, EF_BC5, c_data);
 
 		float mse = 0;

@@ -783,12 +783,13 @@ namespace KlayGE
 		caps_.depth_texture_support = true;
 		if (glloader_GL_NV_primitive_restart())
 		{
-			caps_.primitive_restart = true;
+			caps_.primitive_restart_support = true;
 		}
 		else
 		{
-			caps_.primitive_restart = false;
+			caps_.primitive_restart_support = false;
 		}
+		caps_.argb8_support = true;
 		if (glloader_GL_EXT_texture_compression_rgtc())
 		{
 			caps_.bc4_support = true;
@@ -799,5 +800,8 @@ namespace KlayGE
 			caps_.bc4_support = false;
 			caps_.bc5_support = false;
 		}
+
+		caps_.bc6_support = false;
+		caps_.bc7_support = false;
 	}
 }

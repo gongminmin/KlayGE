@@ -23,7 +23,7 @@ namespace
 		std::vector<uint8_t> data_block;
 		LoadTexture(in_file, type, width, height, depth, numMipMaps, format, in_data, data_block);
 
-		if ((Texture::TT_2D == type) && (EF_L8 == format))
+		if ((Texture::TT_2D == type) && (EF_R8 == format))
 		{
 			uint32_t the_width = width;
 			uint32_t the_height = height;

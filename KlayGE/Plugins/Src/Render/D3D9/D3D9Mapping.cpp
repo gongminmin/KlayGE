@@ -615,7 +615,8 @@ namespace KlayGE
 			ret.depth_texture_support = false;
 		}
 
-		ret.primitive_restart = false;
+		ret.primitive_restart_support = false;
+		ret.argb8_support = true;
 
 		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
 			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
@@ -638,6 +639,9 @@ namespace KlayGE
 			ret.bc5_support = false;
 		}
 
+		ret.bc6_support = false;
+		ret.bc7_support = false;
+
 		return ret;
 	}
 
@@ -645,7 +649,7 @@ namespace KlayGE
 	{
 		switch (format)
 		{
-		case EF_L8:
+		case EF_R8:
 			return D3DFMT_L8;
 
 		case EF_A8:
@@ -654,7 +658,7 @@ namespace KlayGE
 		case EF_AL4:
 			return D3DFMT_A4L4;
 
-		case EF_L16:
+		case EF_R16:
 			return D3DFMT_L16;
 
 		case EF_AL8:
@@ -772,7 +776,7 @@ namespace KlayGE
 		switch (format)
 		{
 		case D3DFMT_L8:
-			return EF_L8;
+			return EF_R8;
 
 		case D3DFMT_A8:
 			return EF_A8;
@@ -781,7 +785,7 @@ namespace KlayGE
 			return EF_AL4;
 
 		case D3DFMT_L16:
-			return EF_L16;
+			return EF_R16;
 
 		case D3DFMT_A8L8:
 			return EF_AL8;

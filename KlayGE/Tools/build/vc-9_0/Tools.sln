@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7za", "7za.vcproj", "{54EEE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KFontGen", "KFontGen.vcproj", "{70E59123-49E0-41B1-B0CB-F92FA8FD0659}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseTexGen", "NoiseTexGen.vcproj", "{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -78,6 +80,14 @@ Global
 		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|Win32.Build.0 = Release|Win32
 		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|x64.ActiveCfg = Release|x64
 		{70E59123-49E0-41B1-B0CB-F92FA8FD0659}.Release|x64.Build.0 = Release|x64
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Debug|Win32.ActiveCfg = Debug|Win32
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Debug|Win32.Build.0 = Debug|Win32
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Debug|x64.ActiveCfg = Debug|x64
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Debug|x64.Build.0 = Debug|x64
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|Win32.ActiveCfg = Release|Win32
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|Win32.Build.0 = Release|Win32
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|x64.ActiveCfg = Release|x64
+		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

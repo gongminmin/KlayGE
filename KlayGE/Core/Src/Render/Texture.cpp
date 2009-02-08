@@ -179,7 +179,9 @@ namespace KlayGE
 			tex_desc->numMipMaps, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
 
 		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-		if ((EF_BC5 == tex_desc->format) && !renderFactory.RenderEngineInstance().DeviceCaps().bc5_support)
+		RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
+
+		if ((EF_BC5 == tex_desc->format) && !caps.bc5_support)
 		{
 			BC1_layout tmp;
 			for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
@@ -194,6 +196,24 @@ namespace KlayGE
 			}
 
 			tex_desc->format = EF_BC3;
+		}
+
+		if ((EF_ARGB8 == tex_desc->format) && !caps.argb8_support)
+		{
+			for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+			{
+				uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
+				for (size_t y = 0; y < tex_desc->height; ++ y)
+				{
+					for (size_t x = 0; x < tex_desc->width; ++ x)
+					{
+						std::swap(p[x * 4 + 0], p[x * 4 + 2]);
+					}
+					p += tex_desc->tex_data[i].row_pitch;
+				}
+			}
+
+			tex_desc->format = EF_ABGR8;
 		}
 
 		return tex_desc;
@@ -393,7 +413,7 @@ namespace KlayGE
 						}
 						else
 						{
-							format = EF_L8;
+							format = EF_R8;
 						}
 						break;
 
@@ -404,7 +424,7 @@ namespace KlayGE
 						}
 						else
 						{
-							format = EF_L16;
+							format = EF_R16;
 						}
 						break;
 
@@ -934,10 +954,9 @@ namespace KlayGE
 
 			case EF_SIGNED_ABGR8:
 				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
 				desc.pixel_format.rgb_bit_count = 32;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xFF00000;
+				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
 				desc.pixel_format.r_bit_mask = 0x000000FF;
 				desc.pixel_format.g_bit_mask = 0x0000FF00;
 				desc.pixel_format.b_bit_mask = 0x00FF0000;
@@ -995,7 +1014,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case EF_L8:
+			case EF_R8:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 8;
 
@@ -1016,7 +1035,7 @@ namespace KlayGE
 				desc.pixel_format.b_bit_mask = 0x00000000;
 				break;
 
-			case EF_L16:
+			case EF_R16:
 				desc.pixel_format.flags |= DDSPF_LUMINANCE;
 				desc.pixel_format.rgb_bit_count = 16;
 
@@ -1284,6 +1303,7 @@ namespace KlayGE
 		case Texture::TT_1D:
 			{
 				init_data.resize(numMipMaps);
+				base.resize(numMipMaps);
 				for (uint32_t level = 0; level < numMipMaps; ++ level)
 				{
 					uint32_t image_size;
@@ -1319,6 +1339,7 @@ namespace KlayGE
 		case Texture::TT_2D:
 			{
 				init_data.resize(numMipMaps);
+				base.resize(numMipMaps);
 				for (uint32_t level = 0; level < numMipMaps; ++ level)
 				{
 					uint32_t width = texture_sys_mem->Width(level);
@@ -1365,6 +1386,7 @@ namespace KlayGE
 		case Texture::TT_3D:
 			{
 				init_data.resize(numMipMaps);
+				base.resize(numMipMaps);
 				for (uint32_t level = 0; level < numMipMaps; ++ level)
 				{
 					uint32_t width = texture_sys_mem->Width(level);
@@ -1417,6 +1439,7 @@ namespace KlayGE
 		case Texture::TT_Cube:
 			{
 				init_data.resize(6 * numMipMaps);
+				base.resize(6 * numMipMaps);
 				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 				{
 					for (uint32_t level = 0; level < numMipMaps; ++ level)

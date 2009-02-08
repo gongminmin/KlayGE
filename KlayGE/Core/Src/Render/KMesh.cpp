@@ -195,15 +195,15 @@ namespace KlayGE
 					switch (num_components)
 					{
 					case 1:
-						ve.format = EF_L8;
+						ve.format = EF_R8;
 						break;
 
 					case 2:
-						ve.format = EF_AL8;
+						ve.format = EF_GR8;
 						break;
 
 					case 3:
-						ve.format = EF_RGB8;
+						ve.format = EF_BGR8;
 						break;
 
 					case 4:

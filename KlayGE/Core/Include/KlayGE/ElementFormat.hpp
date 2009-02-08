@@ -104,19 +104,19 @@ namespace KlayGE
 	// 32-bit element format, 16 bits alpha, 16 bits luminace.
 	ElementFormat const EF_AL16 = MakeElementFormat2<EC_A, EC_L, 16, 16, ECT_UNorm, ECT_UNorm>::value;
 
-	// 8-bit element format, all bits luminace.
-	ElementFormat const EF_L8 = MakeElementFormat1<EC_L, 8, ECT_UNorm>::value;
-	// 16-bit element format, all bits for luminace.
-	ElementFormat const EF_L16 = MakeElementFormat1<EC_L, 16, ECT_UNorm>::value;
-
 	// 16-bit element format, 4 bits for alpha, red, green and blue.
 	ElementFormat const EF_ARGB4 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 4, 4, 4, 4, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	
+	// 8-bit element format, 8 bits for red.
+	ElementFormat const EF_R8 = MakeElementFormat1<EC_R, 8, ECT_UNorm>::value;
+	// 8-bit element format, 8 bits for signed red.
+	ElementFormat const EF_SIGNED_R8 = MakeElementFormat1<EC_R, 8, ECT_SNorm>::value;
 	// 16-bit element format, 8 bits for red, green.
-	ElementFormat const EF_RG8 = MakeElementFormat2<EC_R, EC_G, 8, 8, ECT_UNorm, ECT_UNorm>::value;
+	ElementFormat const EF_GR8 = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_UNorm, ECT_UNorm>::value;
 	// 16-bit element format, 8 bits for signed red, green.
 	ElementFormat const EF_SIGNED_GR8 = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_SNorm, ECT_SNorm>::value;
 	// 24-bit element format, 8 bits for red, green and blue.
-	ElementFormat const EF_RGB8 = MakeElementFormat3<EC_R, EC_G, EC_B, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
+	ElementFormat const EF_BGR8 = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
 	// 24-bit element format, 8 bits for signed red, green and blue.
 	ElementFormat const EF_SIGNED_BGR8 = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
 	// 32-bit element format, 8 bits for alpha, red, green and blue.
@@ -129,6 +129,23 @@ namespace KlayGE
 	ElementFormat const EF_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
 	// 32-bit element format, 2 bits for alpha, 10 bits for signed red, green and blue.
 	ElementFormat const EF_SIGNED_A2BGR10 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+
+	// 32-bit element format, 8 bits for alpha, red, green and blue.
+	ElementFormat const EF_R8UI = MakeElementFormat1<EC_R, 8, ECT_UInt>::value;
+	// 32-bit element format, 8 bits for alpha, red, green and blue.
+	ElementFormat const EF_R8I = MakeElementFormat1<EC_R, 8, ECT_SInt>::value;
+	// 16-bit element format, 8 bits for red, green.
+	ElementFormat const EF_GR8UI = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_UInt, ECT_UInt>::value;
+	// 16-bit element format, 8 bits for red, green.
+	ElementFormat const EF_GR8I = MakeElementFormat2<EC_G, EC_R, 8, 8, ECT_SInt, ECT_SInt>::value;
+	// 24-bit element format, 8 bits for red, green and blue.
+	ElementFormat const EF_BGR8UI = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 24-bit element format, 8 bits for red, green and blue.
+	ElementFormat const EF_BGR8I = MakeElementFormat3<EC_B, EC_G, EC_R, 8, 8, 8, ECT_SInt, ECT_SInt, ECT_SInt>::value;
+	// 32-bit element format, 8 bits for alpha, red, green and blue.
+	ElementFormat const EF_ABGR8UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 32-bit element format, 8 bits for signed alpha, red, green and blue.
+	ElementFormat const EF_ABGR8I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 8, 8, 8, 8, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value;
 
 	// 16-bit element format, 16 bits for red.
 	ElementFormat const EF_R16 = MakeElementFormat1<EC_R, 16, ECT_UNorm>::value;
@@ -162,6 +179,39 @@ namespace KlayGE
 	ElementFormat const EF_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
 	// 128-bit element format, 16 bits for signed alpha, blue, green and red.
 	ElementFormat const EF_SIGNED_ABGR32 = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_SNorm, ECT_SNorm, ECT_SNorm, ECT_SNorm>::value;
+
+	// 16-bit element format, 16 bits for red.
+	ElementFormat const EF_R16UI = MakeElementFormat1<EC_R, 16, ECT_UInt>::value;
+	// 16-bit element format, 16 bits for signed red.
+	ElementFormat const EF_R16I = MakeElementFormat1<EC_R, 16, ECT_SInt>::value;
+	// 32-bit element format, 16 bits for red and green.
+	ElementFormat const EF_GR16UI = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_UInt, ECT_UInt>::value;
+	// 32-bit element format, 16 bits for signed red and green.
+	ElementFormat const EF_GR16I = MakeElementFormat2<EC_G, EC_R, 16, 16, ECT_SInt, ECT_SInt>::value;
+	// 48-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_BGR16UI = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 48-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_BGR16I = MakeElementFormat3<EC_B, EC_G, EC_R, 16, 16, 16, ECT_SInt, ECT_SInt, ECT_SInt>::value;
+	// 64-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_ABGR16UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 64-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_ABGR16I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 16, 16, 16, 16, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value;
+	// 32-bit element format, 32 bits for red.
+	ElementFormat const EF_R32UI = MakeElementFormat1<EC_R, 32, ECT_UInt>::value;
+	// 32-bit element format, 32 bits for signed red.
+	ElementFormat const EF_R32I = MakeElementFormat1<EC_R, 32, ECT_SInt>::value;
+	// 64-bit element format, 16 bits for red and green.
+	ElementFormat const EF_GR32UI = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_UInt, ECT_UInt>::value;
+	// 64-bit element format, 16 bits for signed red and green.
+	ElementFormat const EF_GR32I = MakeElementFormat2<EC_G, EC_R, 32, 32, ECT_SInt, ECT_SInt>::value;
+	// 96-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_BGR32UI = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 96-bit element format, 16 bits for signed_alpha, blue, green and red.
+	ElementFormat const EF_BGR32I = MakeElementFormat3<EC_B, EC_G, EC_R, 32, 32, 32, ECT_SInt, ECT_SInt, ECT_SInt>::value;
+	// 128-bit element format, 16 bits for alpha, blue, green and red.
+	ElementFormat const EF_ABGR32UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value;
+	// 128-bit element format, 16 bits for signed alpha, blue, green and red.
+	ElementFormat const EF_ABGR32I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 32, 32, 32, 32, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value;
 
 	// 16-bit element format, 16 bits floating-point for red.
 	ElementFormat const EF_R16F = MakeElementFormat1<EC_R, 16, ECT_Float>::value;
@@ -200,6 +250,12 @@ namespace KlayGE
 	ElementFormat const EF_BC5 = MakeElementFormat1<EC_BC, 5, ECT_UNorm>::value;
 	// BC5 compression element format, 2 channels signed
 	ElementFormat const EF_SIGNED_BC5 = MakeElementFormat1<EC_BC, 5, ECT_SNorm>::value;
+	// BC6 compression element format, 3 channels
+	ElementFormat const EF_BC6 = MakeElementFormat1<EC_BC, 6, ECT_UNorm>::value;
+	// BC6 compression element format, 3 channels
+	ElementFormat const EF_SIGNED_BC6 = MakeElementFormat1<EC_BC, 6, ECT_SNorm>::value;
+	// BC7 compression element format, 3 channels
+	ElementFormat const EF_BC7 = MakeElementFormat1<EC_BC, 7, ECT_UNorm>::value;
 
 	// 16-bit element format, 16 bits depth
 	ElementFormat const EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value;
@@ -222,6 +278,8 @@ namespace KlayGE
 	ElementFormat const EF_BC4_SRGB = MakeElementFormat1<EC_BC, 4, ECT_UNorm_SRGB>::value;
 	// BC5 compression element format. Standard RGB (gamma = 2.2).
 	ElementFormat const EF_BC5_SRGB = MakeElementFormat1<EC_BC, 5, ECT_UNorm_SRGB>::value;
+	// BC7 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_BC7_SRGB = MakeElementFormat1<EC_BC, 7, ECT_UNorm_SRGB>::value;
 
 
 	template <int c>
