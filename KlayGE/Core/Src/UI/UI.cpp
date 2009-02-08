@@ -70,7 +70,7 @@ namespace KlayGE
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 			ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-			rl_->BindIndexStream(ib_, EF_R16);
+			rl_->BindIndexStream(ib_, EF_R16UI);
 
 			if (texture)
 			{

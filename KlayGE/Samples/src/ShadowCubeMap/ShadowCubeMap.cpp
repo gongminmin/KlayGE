@@ -234,7 +234,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = indices;
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16);
+			rl_->BindIndexStream(ib, EF_R16UI);
 
 			float3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
 			MathLib::compute_normal<float>(&normal[0],

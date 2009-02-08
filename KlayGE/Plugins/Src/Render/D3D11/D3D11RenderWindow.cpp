@@ -475,6 +475,7 @@ namespace KlayGE
 		back_buffer_.reset();
 		depth_stencil_.reset();
 		swap_chain_.reset();
+		d3d_imm_ctx_.reset();
 		d3d_device_.reset();
 		gi_factory_.reset();
 	}

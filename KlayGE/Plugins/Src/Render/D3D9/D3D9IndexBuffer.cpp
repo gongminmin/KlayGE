@@ -28,7 +28,7 @@ namespace KlayGE
 {
 	D3D9IndexBuffer::D3D9IndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
 						: D3D9GraphicsBuffer(usage, access_hint),
-							format_(EF_R16)
+							format_(EF_R16UI)
 	{
 		if (init_data != NULL)
 		{
@@ -41,7 +41,7 @@ namespace KlayGE
 
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()),
-				usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+				usage, (EF_R32UI == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = init_data->row_pitch;
 
@@ -53,7 +53,7 @@ namespace KlayGE
 	void D3D9IndexBuffer::SwitchFormat(ElementFormat format)
 	{
 		BOOST_ASSERT(d3d_device_);
-		BOOST_ASSERT((EF_R16 == format) || (EF_R32 == format));
+		BOOST_ASSERT((EF_R16UI == format) || (EF_R32UI == format));
 
 		if (format_ != format)
 		{
@@ -62,11 +62,11 @@ namespace KlayGE
 			ElementFormat old_format = format_;
 			format_ = format;
 
-			if (EF_R16 == old_format)
+			if (EF_R16UI == old_format)
 			{
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() * (sizeof(uint32_t) / sizeof(uint16_t))),
-					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+					usage, (EF_R32UI == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint16_t* src;
 				uint32_t* dest;
@@ -85,11 +85,11 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(EF_R32 == old_format);
+				BOOST_ASSERT(EF_R32UI == old_format);
 
 				IDirect3DIndexBuffer9* buffer;
 				TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size() / (sizeof(uint32_t) / sizeof(uint16_t))),
-					usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+					usage, (EF_R32UI == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 
 				uint32_t* src;
 				uint16_t* dest;
@@ -122,7 +122,7 @@ namespace KlayGE
 
 			IDirect3DIndexBuffer9* buffer;
 			TIF(d3d_device_->CreateIndexBuffer(static_cast<UINT>(this->Size()),
-				usage, (EF_R32 == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
+				usage, (EF_R32UI == format_) ? D3DFMT_INDEX32 : D3DFMT_INDEX16, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
 		}

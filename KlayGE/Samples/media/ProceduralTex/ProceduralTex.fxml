@@ -46,7 +46,7 @@ float4 electro(float3 tex_coord)
 	float3 color = float3(1.70, 1.48, 1.78);
 
 	float turb = fBm(tex_coord * 2.5, 6);
-	float3 grow = (1 - pow(turb, 0.2)) * color;
+	float3 grow = (1 - pow(abs(turb), 0.2)) * color;
 	return float4(pow(grow, 4), 1);
 }
 

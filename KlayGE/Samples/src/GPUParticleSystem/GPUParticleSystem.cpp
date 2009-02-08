@@ -183,7 +183,7 @@ namespace
 									RenderLayout::ST_Geometry, max_num_particles);
 			rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
 									RenderLayout::ST_Instance, 1);
-			rl_->BindIndexStream(ib, EF_R16);
+			rl_->BindIndexStream(ib, EF_R16UI);
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
 

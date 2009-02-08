@@ -245,7 +245,7 @@ namespace KlayGE
 				file->read(reinterpret_cast<char*>(&indices[0]),
 					static_cast<std::streamsize>(sizeof(indices[0]) * indices.size()));
 
-				mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16, access_hint);
+				mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16UI, access_hint);
 			}
 
 			meshes.push_back(mesh);

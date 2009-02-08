@@ -218,7 +218,7 @@ namespace KlayGE
 		init_data.data = indices;
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-		rl_->BindIndexStream(ib, EF_R16);
+		rl_->BindIndexStream(ib, EF_R16UI);
 	}
 
 	void RenderableTriBox::OnRenderBegin()
@@ -271,7 +271,7 @@ namespace KlayGE
 		init_data.data = indices;
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-		rl_->BindIndexStream(ib, EF_R16);
+		rl_->BindIndexStream(ib, EF_R16UI);
 	}
 
 	void RenderableLineBox::OnRenderBegin()
@@ -400,7 +400,7 @@ namespace KlayGE
 		init_data.data = &index[0];
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-		rl_->BindIndexStream(ib, EF_R16);
+		rl_->BindIndexStream(ib, EF_R16UI);
 
 		box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 	}
