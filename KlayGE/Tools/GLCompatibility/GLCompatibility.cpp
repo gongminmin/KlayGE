@@ -132,12 +132,14 @@ int main()
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	std::string compiler_str = KLAYGE_COMPILER_TOOLSET;
+	std::string dll_suffix = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
+	dll_suffix += "_";
+	dll_suffix += KLAYGE_STRINGIZE(KLAYGE_COMPILER_TARGET);
 #ifdef KLAYGE_DEBUG
-	compiler_str += "_d";
+	dll_suffix += "_d";
 #endif
+	dll_suffix += ".dll";
 
-	typedef bool (*MatchFunc)(char const * name, char const * compiler);
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 
 	boost::program_options::variables_map vm;
@@ -148,24 +150,18 @@ int main()
 	std::string render_path = ResLoader::Instance().Locate("Render");
 	for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
 	{
-		std::string fn = render_path + "/" + iter->path().filename();
-		if (".dll" == fn.substr(fn.length() - 4))
+		std::string fn = iter->path().filename();
+		std::string suffix = "OpenGL_" + dll_suffix;
+		std::string::size_type n = fn.rfind(suffix);
+		if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
 		{
-			render_loader.Load(fn);
+			render_loader.Load(render_path + "/" + fn);
 
-			MatchFunc match_func = (MatchFunc)render_loader.GetProcAddress("Match");
-			if ((match_func != NULL) && match_func("OpenGL", compiler_str.c_str()))
+			MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader.GetProcAddress("MakeRenderFactory");
+			if (mrf != NULL)
 			{
-				MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader.GetProcAddress("MakeRenderFactory");
-				if (mrf != NULL)
-				{
-					mrf(rf, vm);
-					break;
-				}
-				else
-				{
-					render_loader.Free();
-				}
+				mrf(rf, vm);
+				break;
 			}
 			else
 			{
