@@ -384,16 +384,26 @@ namespace KlayGE
 						}
 						else
 						{
-							if ((0x00000000 == desc.pixel_format.rgb_alpha_bit_mask)
-								&& (0x0000FFFF == desc.pixel_format.r_bit_mask)
-								&& (0xFFFF0000 == desc.pixel_format.g_bit_mask)
-								&& (0x00000000 == desc.pixel_format.b_bit_mask))
+							if ((0xFF000000 == desc.pixel_format.rgb_alpha_bit_mask)
+								&& (0x000000FF == desc.pixel_format.r_bit_mask)
+								&& (0x0000FF00 == desc.pixel_format.g_bit_mask)
+								&& (0x00FF0000 == desc.pixel_format.b_bit_mask))
 							{
-								format = EF_GR16;
+								format = EF_ABGR8;
 							}
 							else
 							{
-								BOOST_ASSERT(false);
+								if ((0x00000000 == desc.pixel_format.rgb_alpha_bit_mask)
+									&& (0x0000FFFF == desc.pixel_format.r_bit_mask)
+									&& (0xFFFF0000 == desc.pixel_format.g_bit_mask)
+									&& (0x00000000 == desc.pixel_format.b_bit_mask))
+								{
+									format = EF_GR16;
+								}
+								else
+								{
+									BOOST_ASSERT(false);
+								}
 							}
 						}
 					}

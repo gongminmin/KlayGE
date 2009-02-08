@@ -444,7 +444,7 @@ namespace KlayGE
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetIndexStream()));
 			stream.Active();
 
-			if (EF_R16 == rl.IndexStreamFormat())
+			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
 			}

@@ -57,7 +57,7 @@ float4 perm2d(float2 xy)
 
 float grad_perm(float x, float3 p)
 {
-	return dot(grad_perm_tex.Sample(perlin_point_sampler, float2(x / 256, 0.5f)).xyz, p);
+	return dot(grad_perm_tex.Sample(perlin_point_sampler, float2(x / 256, 0.5f)).xyz * 2 - 1, p);
 }
 
 float grad_perm(float x, float2 p)

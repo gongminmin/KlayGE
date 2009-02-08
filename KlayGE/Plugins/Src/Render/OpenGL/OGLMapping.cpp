@@ -368,9 +368,16 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_BGR8:
-			internalFormat = GL_RGB8;
-			glformat = GL_RGB;
-			gltype = GL_BYTE;
+			if (glloader_GL_NV_texture_shader())
+			{
+				internalFormat = GL_SIGNED_RGB8_NV;
+				glformat = GL_RGB;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_ARGB8:
@@ -386,9 +393,16 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_ABGR8:
-			internalFormat = GL_RGBA8;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT_8_8_8_8;
+			if (glloader_GL_NV_texture_shader())
+			{
+				internalFormat = GL_SIGNED_RGBA8_NV;
+				glformat = GL_RGBA;
+				gltype = GL_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_A2BGR10:

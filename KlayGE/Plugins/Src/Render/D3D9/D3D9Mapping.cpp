@@ -649,17 +649,11 @@ namespace KlayGE
 	{
 		switch (format)
 		{
-		case EF_R8:
-			return D3DFMT_L8;
-
 		case EF_A8:
 			return D3DFMT_A8;
 
 		case EF_AL4:
 			return D3DFMT_A4L4;
-
-		case EF_R16:
-			return D3DFMT_L16;
 
 		case EF_AL8:
 			return D3DFMT_A8L8;
@@ -667,12 +661,18 @@ namespace KlayGE
 		case EF_ARGB4:
 			return D3DFMT_A4R4G4B4;
 
+		case EF_R8:
+			return D3DFMT_L8;
+
 		case EF_SIGNED_GR8:
 			return D3DFMT_V8U8;
 
 		case EF_ARGB8:
 		case EF_ARGB8_SRGB:
 			return D3DFMT_A8R8G8B8;
+
+		case EF_ABGR8:
+			return D3DFMT_A8B8G8R8;
 
 		case EF_SIGNED_ABGR8:
 			return D3DFMT_Q8W8V8U8;
@@ -682,6 +682,9 @@ namespace KlayGE
 
 		case EF_SIGNED_A2BGR10:
 			return D3DFMT_A2W10V10U10;
+
+		case EF_R16:
+			return D3DFMT_L16;
 
 		case EF_GR16:
 			return D3DFMT_G16R16;
@@ -775,17 +778,11 @@ namespace KlayGE
 #endif
 		switch (format)
 		{
-		case D3DFMT_L8:
-			return EF_R8;
-
 		case D3DFMT_A8:
 			return EF_A8;
 
 		case D3DFMT_A4L4:
 			return EF_AL4;
-
-		case D3DFMT_L16:
-			return EF_R16;
 
 		case D3DFMT_A8L8:
 			return EF_AL8;
@@ -794,12 +791,18 @@ namespace KlayGE
 		case D3DFMT_A4R4G4B4:
 			return EF_ARGB4;
 
+		case D3DFMT_L8:
+			return EF_R8;
+
+		case D3DFMT_V8U8:
+			return EF_SIGNED_GR8;
+
 		case D3DFMT_X8R8G8B8:
 		case D3DFMT_A8R8G8B8:
 			return EF_ARGB8;
 
-		case D3DFMT_V8U8:
-			return EF_SIGNED_GR8;
+		case D3DFMT_A8B8G8R8:
+			return EF_ABGR8;
 
 		case D3DFMT_Q8W8V8U8:
 			return EF_SIGNED_ABGR8;
@@ -809,6 +812,9 @@ namespace KlayGE
 
 		case D3DFMT_A2W10V10U10:
 			return EF_SIGNED_A2BGR10;
+
+		case D3DFMT_L16:
+			return EF_R16;
 
 		case D3DFMT_G16R16:
 			return EF_GR16;
