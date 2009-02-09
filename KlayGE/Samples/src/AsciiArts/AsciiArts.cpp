@@ -122,7 +122,7 @@ namespace
 		int const ASCII_IN_A_ROW = 16;
 
 		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Read)();
-		BOOST_ASSERT(EF_L8 == ascii_tex->Format());
+		BOOST_ASSERT(EF_R8 == ascii_tex->Format());
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
 
@@ -177,7 +177,7 @@ namespace
 		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, EF_L8, 1, 0, EAH_GPU_Read, &init_data);
+			ASCII_HEIGHT, 1, EF_R8, 1, 0, EAH_GPU_Read, &init_data);
 	}
 
 	enum

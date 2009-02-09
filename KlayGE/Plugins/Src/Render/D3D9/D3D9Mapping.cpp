@@ -630,7 +630,7 @@ namespace KlayGE
 		}
 		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,
 			d3d_caps.DeviceType, D3DFMT_X8R8G8B8, 0, D3DRTYPE_TEXTURE,
-			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '1'>::value)))
+			static_cast<D3DFORMAT>(MakeFourCC<'A', 'T', 'I', '2'>::value)))
 		{
 			ret.bc5_support = true;
 		}
@@ -651,12 +651,6 @@ namespace KlayGE
 		{
 		case EF_A8:
 			return D3DFMT_A8;
-
-		case EF_AL4:
-			return D3DFMT_A4L4;
-
-		case EF_AL8:
-			return D3DFMT_A8L8;
 
 		case EF_ARGB4:
 			return D3DFMT_A4R4G4B4;
@@ -780,12 +774,6 @@ namespace KlayGE
 		{
 		case D3DFMT_A8:
 			return EF_A8;
-
-		case D3DFMT_A4L4:
-			return EF_AL4;
-
-		case D3DFMT_A8L8:
-			return EF_AL8;
 
 		case D3DFMT_X4R4G4B4:
 		case D3DFMT_A4R4G4B4:

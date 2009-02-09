@@ -495,6 +495,9 @@ namespace KlayGE
 		case EF_ABGR8I:
 			return DXGI_FORMAT_R8G8B8A8_SINT;
 
+		case EF_A2BGR10UI:
+			return DXGI_FORMAT_R10G10B10A2_UINT;
+
 		case EF_R16:
 			return DXGI_FORMAT_R16_UNORM;
 
@@ -560,6 +563,9 @@ namespace KlayGE
 
 		case EF_GR16F:
 			return DXGI_FORMAT_R16G16_FLOAT;
+
+		case EF_B10G11R11F:
+			return DXGI_FORMAT_R11G11B10_FLOAT;
 
 		case EF_ABGR16F:
 			return DXGI_FORMAT_R16G16B16A16_FLOAT;
