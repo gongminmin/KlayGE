@@ -603,7 +603,27 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 		{
-			ss << "sampler " << tex_sampler_binds_[i].first << ": TEXUNIT" << i << ";" << std::endl;
+			RenderEffectParameterPtr const & param = tex_sampler_binds_[i].second.first;
+			ss << "sampler";
+			switch (param->type())
+			{
+			case REDT_texture1D:
+				ss << "1D";
+				break;
+
+			case REDT_texture2D:
+				ss << "2D";
+				break;
+
+			case REDT_texture3D:
+				ss << "3D";
+				break;
+
+			case REDT_textureCUBE:
+				ss << "CUBE";
+				break;
+			}
+			ss << " " << tex_sampler_binds_[i].first << ": TEXUNIT" << i << ";" << std::endl;
 		}
 
 		ss << shader_ss.str();

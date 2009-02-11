@@ -560,7 +560,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -568,7 +568,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -576,7 +576,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -584,7 +584,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -596,7 +596,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -604,7 +604,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -612,7 +612,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -620,7 +620,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -632,7 +632,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -640,7 +640,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -648,7 +648,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -656,7 +656,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -668,7 +668,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -676,7 +676,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -684,7 +684,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -692,7 +692,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -704,7 +704,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -712,7 +712,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -720,7 +720,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -728,7 +728,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -740,7 +740,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -748,7 +748,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -756,7 +756,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -764,7 +764,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -776,7 +776,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -784,7 +784,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -792,7 +792,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -800,7 +800,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -812,7 +812,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -820,7 +820,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -828,7 +828,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -836,7 +836,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -848,7 +848,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -856,7 +856,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -864,7 +864,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -872,7 +872,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -884,7 +884,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -892,7 +892,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -900,7 +900,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -908,7 +908,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -920,7 +920,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -928,7 +928,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -936,7 +936,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -944,7 +944,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -956,7 +956,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -964,7 +964,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -972,7 +972,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -980,7 +980,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -992,7 +992,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1000,7 +1000,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1008,7 +1008,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1016,7 +1016,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1028,7 +1028,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1036,7 +1036,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1044,7 +1044,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1052,7 +1052,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1064,7 +1064,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1072,7 +1072,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1080,7 +1080,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1088,7 +1088,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1100,7 +1100,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1108,7 +1108,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1116,7 +1116,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1124,7 +1124,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1136,7 +1136,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1144,7 +1144,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1152,7 +1152,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1160,7 +1160,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1172,7 +1172,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1180,7 +1180,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1188,7 +1188,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1196,7 +1196,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1808,7 +1808,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1816,7 +1816,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1824,7 +1824,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1832,7 +1832,7 @@
 						>
 						<Tool
 							Name="FXML"
-							OutputDir="$(KLAYGEHOME)\Samples\media\Common"
+							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
 						/>
 					</FileConfiguration>
 				</File>

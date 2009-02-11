@@ -8,6 +8,7 @@
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float" name="t"/>
 	</cbuffer>
 
 	<parameter type="float" name="freq"/>
@@ -38,14 +39,14 @@ float4 cloud(float3 tex_coord)
 	float3 color1 = float3(0.2f, 0.4f, 0.9f);
 	float3 color2 = float3(0.9f, 0.8f, 0.8f);
 
-	return float4(lerp(color1, color2, cos(tex_coord.z * 0.5f + 2 * turbulence(tex_coord, 6, 2, 0.5f)) * 0.9f), 1);
+	return float4(lerp(color1, color2, cos(tex_coord.z * 2.5f + 2 * turbulence(tex_coord * 5, 6, 2, 0.5f)) * 0.9f), 1);
 }
 
 float4 electro(float3 tex_coord)
 {
 	float3 color = float3(1.70, 1.48, 1.78);
 
-	float turb = fBm(tex_coord * 2.5, 6);
+	float turb = fBm(float4(tex_coord * 2.5, t), 6);
 	float3 grow = (1 - pow(abs(turb), 0.2)) * color;
 	return float4(pow(grow, 4), 1);
 }

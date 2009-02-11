@@ -7,7 +7,7 @@
 		<CustomBuildRule
 			Name="UIML"
 			DisplayName="UIML"
-			CommandLine="$(KLAYGEHOME)\Tools\uimlc\uimlc.py $(InputPath) [OutputDir]\$(InputName).kui"
+			CommandLine="$(KLAYGE_HOME)\Tools\uimlc\uimlc.py $(InputPath) [OutputDir]\$(InputName).kui"
 			Outputs="[OutputDir]\$(InputName).kui"
 			FileExtensions="*.uiml"
 			ExecutionDescription="Compiling $(InputPath)"

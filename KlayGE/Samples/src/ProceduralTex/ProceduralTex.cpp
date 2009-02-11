@@ -41,11 +41,10 @@ namespace
 
 			technique_ = rf.LoadEffect("ProceduralTex.kfx")->TechniqueByName("ProceduralMarbleTex");
 
-			perm_2d_tex_ = LoadTexture("noise_perm_2d.dds", EAH_GPU_Read)();
-			grad_perm_tex_ = LoadTexture("noise_grad_perm.dds", EAH_GPU_Read)();
-
-			*(technique_->Effect().ParameterByName("perm_2d_tex")) = perm_2d_tex_;
-			*(technique_->Effect().ParameterByName("grad_perm_tex")) = grad_perm_tex_;
+			*(technique_->Effect().ParameterByName("perm_tex")) = LoadTexture("noise_perm.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("perm_2d_tex")) = LoadTexture("noise_perm_2d.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("grad3_perm_tex")) = LoadTexture("noise_grad3_perm.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("grad4_perm_tex")) = LoadTexture("noise_grad4_perm.dds", EAH_GPU_Read)();
 		}
 
 		void BuildMeshInfo()
@@ -62,6 +61,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("t")) = clock() / 2000.0f;
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -78,10 +78,6 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("freq")) = freq;
 		}
-
-	private:
-		TexturePtr perm_2d_tex_;
-		TexturePtr grad_perm_tex_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

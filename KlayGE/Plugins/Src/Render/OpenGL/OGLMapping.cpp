@@ -291,7 +291,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R8;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -306,7 +306,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R8;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_BYTE;
 			}
 			else
@@ -507,7 +507,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R16;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_UNSIGNED_SHORT;
 			}
 			else
@@ -522,7 +522,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R16;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_SHORT;
 			}
 			else
@@ -795,7 +795,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R16F;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_HALF_FLOAT_ARB;
 			}
 			else
@@ -837,7 +837,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 			{
 				internalFormat = GL_R32F;
-				glformat = GL_R;
+				glformat = GL_RED;
 				gltype = GL_FLOAT;
 			}
 			else

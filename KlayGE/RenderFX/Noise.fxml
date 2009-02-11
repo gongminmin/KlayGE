@@ -1,8 +1,10 @@
 <?xml version='1.0'?>
 
 <effect>
+	<parameter type="texture2D" name="perm_tex"/>
 	<parameter type="texture2D" name="perm_2d_tex"/>
-	<parameter type="texture2D" name="grad_perm_tex"/>
+	<parameter type="texture2D" name="grad3_perm_tex"/>
+	<parameter type="texture2D" name="grad4_perm_tex"/>
 
 	<parameter type="sampler" name="perlin_point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -35,6 +37,13 @@ void setup(float3 i, out float3 b, out float3 r)
 	r = frac(x);
 }
 
+void setup(float4 i, out float4 b, out float4 r)
+{
+	float4 x = i + 0x1000;
+	b = fmod(floor(x), 256);
+	r = frac(x);
+}
+
 float fade(float t)
 {
 	return t * t * t * (t * (t * 6 - 15) + 10);
@@ -50,14 +59,29 @@ float3 fade(float3 t)
 	return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
+float4 fade(float4 t)
+{
+	return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+float perm(float x)
+{
+	return perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)).r * 256;
+}
+
 float4 perm2d(float2 xy)
 {
-	return perm_2d_tex.Sample(perlin_point_sampler, xy / 256) * 256;
+	return perm_2d_tex.Sample(perlin_point_sampler, (xy + 0.01f) / 256) * 256;
 }
 
 float grad_perm(float x, float3 p)
 {
-	return dot(grad_perm_tex.Sample(perlin_point_sampler, float2(x / 256, 0.5f)).xyz * 2 - 1, p);
+	return dot(grad3_perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)).xyz * 2 - 1, p);
+}
+
+float grad_perm(float x, float4 p)
+{
+	return dot(grad4_perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)) * 2 - 1, p);
 }
 
 float grad_perm(float x, float2 p)
@@ -117,11 +141,47 @@ float perlin_noise(float3 p)
 						grad_perm(AA.w + 1, r + float3(-1, -1, -1)), f.x), f.y), f.z);
 }
 
+float perlin_noise(float4 p)
+{
+	float4 b;
+	float4 r;
+	setup(p, b, r);
+	float4 f = fade(r);
+	
+	float4 AA = perm2d(b.xy) + b.z;
+
+	float AAA = perm(AA.x) + b.w;
+    float ABA = perm(AA.y) + b.w;
+    float BAA = perm(AA.z) + b.w;
+    float BBA = perm(AA.w) + b.w;
+	float AAB = perm(AA.x + 1) + b.w;
+	float ABB = perm(AA.y + 1) + b.w;
+	float BAB = perm(AA.z + 1) + b.w;
+	float BBB = perm(AA.w + 1) + b.w;
+
+	return lerp(lerp(lerp(lerp(grad_perm(AAA, r),  
+							grad_perm(BAA, r + float4(-1, 0, 0, 0)), f.x),
+						lerp(grad_perm(ABA, r + float4(0, -1, 0, 0)),
+							grad_perm(BBA, r + float4(-1, -1, 0, 0)), f.x), f.y),
+					lerp(lerp(grad_perm(AAB, r + float4(0, 0, -1, 0)),
+							grad_perm(BAB, r + float4(-1, 0, -1, 0)), f.x),
+						lerp(grad_perm(ABB, r + float4(0, -1, -1, 0)),
+							grad_perm(BBB, r + float4(-1, -1, -1, 0)), f.x), f.y), f.z),
+  					lerp(lerp(lerp(grad_perm(AAA + 1, r + float4(0, 0, 0, -1)),
+							grad_perm(BAA + 1, r + float4(-1, 0, 0, -1)), f.x),
+						lerp(grad_perm(ABA + 1, r + float4(0, -1, 0, -1)),
+							grad_perm(BBA + 1, r + float4(-1, -1, 0, -1)), f.x), f.y),
+					lerp(lerp(grad_perm(AAB + 1, r + float4(0, 0, -1, -1)),
+							grad_perm(BAB + 1, r + float4(-1, 0, -1, -1)), f.x),
+						lerp(grad_perm(ABB + 1, r + float4(0, -1, -1, -1)),
+							grad_perm(BBB + 1, r + float4(-1, -1, -1, -1)), f.x), f.y), f.z), f.w);
+}
+
 // calculate gradient of noise (expensive!)
 float3 perlin_noise_gradient(float3 p, float d)
 {
 	float f0 = perlin_noise(p);
-	float fx = perlin_noise(p + float3(d, 0, 0));	
+	float fx = perlin_noise(p + float3(d, 0, 0));
 	float fy = perlin_noise(p + float3(0, d, 0));
 	float fz = perlin_noise(p + float3(0, 0, d));
 	return float3(fx - f0, fy - f0, fz - f0) / d;
@@ -154,6 +214,19 @@ float fBm(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
 	return sum;
 }
 
+float fBm(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+{
+	float sum = 0;	
+	float freq = 1, amp = 0.5f;
+	for (int i = 0; i < octaves; ++ i)
+	{
+		sum += perlin_noise(p * freq) * amp;
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum;
+}
+
 float turbulence(float2 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
 {
 	float sum = 0;
@@ -168,6 +241,19 @@ float turbulence(float2 p, int octaves, float lacunarity = 2.0, float gain = 0.5
 }
 
 float turbulence(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
+{
+	float sum = 0;
+	float freq = 1, amp = 1;
+	for (int i = 0; i < octaves; ++ i)
+	{
+		sum += abs(perlin_noise(p * freq)) * amp;
+		freq *= lacunarity;
+		amp *= gain;
+	}
+	return sum;
+}
+
+float turbulence(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5)
 {
 	float sum = 0;
 	float freq = 1, amp = 1;
@@ -222,78 +308,16 @@ float ridgedmf(float3 p, int octaves, float lacunarity = 2.0, float gain = 0.5, 
 	return sum;
 }
 
-float tileable_noise(float p, float dim)
-{
-	return (perlin_noise(p + 0) * (dim - p)
-		+ perlin_noise(p - dim) * (0 + p)) / dim;
-}
-
-float tileable_noise(float2 p, float2 dim)
-{
-	return (perlin_noise(p) * (dim.x - p.x) * (dim.y - p.y)
-		+ perlin_noise(p + float2(-dim.x, 0)) * (0 + p.x) * (dim.y - p.y)
-		+ perlin_noise(p + float2(0, -dim.y)) * (dim.x - p.x) * (0 + p.y)
-		+ perlin_noise(p - dim) * (0 + p.x) * (0 + p.y)) / (dim.x * dim.y);
-}
-
-float tileable_noise(float3 p, float3 dim)
-{
-	return (perlin_noise(p) * (dim.x - p.x) * (dim.y - p.y) * (dim.z - p.z)
-		+ perlin_noise(p + float3(-dim.x, 0, 0)) * (0 + p.x) * (dim.y - p.y) * (dim.z - p.z)
-		+ perlin_noise(p + float3(0, -dim.y, 0)) * (dim.x - p.x) * (0 + p.y) * (dim.z - p.z)
-		+ perlin_noise(p + float3(-dim.x, -dim.y, 0)) * (0 + p.x) * (0 + p.y) * (dim.z - p.z)
-		+ perlin_noise(p + float3(0, 0, -dim.z)) * (dim.x - p.x) * (dim.y - p.y) * (0 + p.z)
-		+ perlin_noise(p + float3(-dim.x, 0, -dim.z)) * (0 + p.x) * (dim.y - p.y) * (0 + p.z)
-		+ perlin_noise(p + float3(0, -dim.y, -dim.z)) * (dim.x - p.x) * (0 + p.y) * (0 + p.z)
-		+ perlin_noise(p - dim) * (0 + p.x) * (0 + p.y) * (0 + p.z)) / (dim.x * dim.y * dim.z);
-}
-
-float tileable_fBm(float2 p, float2 dim, int octaves, float lacunarity = 2.0, float gain = 0.5)
+float ridgedmf(float4 p, int octaves, float lacunarity = 2.0, float gain = 0.5, float offset = 1.0)
 {
 	float sum = 0;
 	float freq = 1, amp = 0.5f;
+	float prev = 1;
 	for (int i = 0; i < octaves; ++ i)
 	{
-		sum += tileable_noise(freq * p, freq * dim) * amp;
-		freq *= lacunarity;
-		amp *= gain;
-	}
-	return sum;
-}
-
-float tileable_fBm(float3 p, float3 dim, int octaves, float lacunarity = 2.0, float gain = 0.5)
-{
-	float sum = 0;
-	float freq = 1, amp = 0.5f;
-	for (int i = 0; i < octaves; ++ i)
-	{
-		sum += tileable_noise(freq * p, freq * dim) * amp;
-		freq *= lacunarity;
-		amp *= gain;
-	}
-	return sum;
-}
-
-float tileable_turbulence(float2 p, float2 dim, int octaves, float lacunarity = 2.0, float gain = 0.5)
-{
-	float sum = 0;
-	float freq = 1, amp = 1;
-	for (int i = 0; i < octaves; ++ i)
-	{
-		sum += abs(tileable_noise(freq * p, freq * dim)) * amp;
-		freq *= lacunarity;
-		amp *= gain;
-	}
-	return sum;
-}
-
-float tileable_turbulence(float3 p, float3 dim, int octaves, float lacunarity = 2.0, float gain = 0.5)
-{
-	float sum = 0;
-	float freq = 1, amp = 1;
-	for (int i = 0; i < octaves; ++ i)
-	{
-		sum += abs(tileable_noise(freq * p, freq * dim)) * amp;
+		float n = ridge(perlin_noise(p * freq), offset);
+		sum += n * amp * prev;
+		prev = n;
 		freq *= lacunarity;
 		amp *= gain;
 	}
