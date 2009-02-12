@@ -59,43 +59,43 @@ namespace
 
 
 	char const * predefined_funcs = "\n								\
-	float4 tex1DLevel(sampler s, float location, float lod)\n		\
+	float4 tex1DLevel(sampler1D s, float location, float lod)\n		\
 	{\n																\
 		return tex1Dlod(s, float4(location, 0, 0, lod));\n			\
 	}\n																\
 	\n																\
-	float4 tex2DLevel(sampler s, float2 location, float lod)\n		\
+	float4 tex2DLevel(sampler2D s, float2 location, float lod)\n		\
 	{\n																\
 		return tex2Dlod(s, float4(location, 0, lod));\n				\
 	}\n																\
 	\n																\
-	float4 tex3DLevel(sampler s, float3 location, float lod)\n		\
+	float4 tex3DLevel(sampler3D s, float3 location, float lod)\n		\
 	{\n																\
 		return tex3Dlod(s, float4(location, lod));\n				\
 	}\n																\
 	\n																\
-	float4 texCUBELevel(sampler s, float3 location, float lod)\n	\
+	float4 texCUBELevel(samplerCUBE s, float3 location, float lod)\n	\
 	{\n																\
 		return texCUBElod(s, float4(location, lod));\n				\
 	}\n																\
 	\n																\
 	\n																\
-	float4 tex1DBias(sampler s, float location, float lod)\n		\
+	float4 tex1DBias(sampler1D s, float location, float lod)\n		\
 	{\n																\
 		return tex1Dbias(s, float4(location, 0, 0, lod));\n			\
 	}\n																\
 	\n																\
-	float4 tex2DBias(sampler s, float2 location, float lod)\n		\
+	float4 tex2DBias(sampler2D s, float2 location, float lod)\n		\
 	{\n																\
 		return tex2Dbias(s, float4(location, 0, lod));\n				\
 	}\n																\
 	\n																\
-	float4 tex3DBias(sampler s, float3 location, float lod)\n		\
+	float4 tex3DBias(sampler3D s, float3 location, float lod)\n		\
 	{\n																\
 		return tex3Dbias(s, float4(location, lod));\n				\
 	}\n																\
 	\n																\
-	float4 texCUBEBias(sampler s, float3 location, float lod)\n	\
+	float4 texCUBEBias(samplerCUBE s, float3 location, float lod)\n	\
 	{\n																\
 		return texCUBEbias(s, float4(location, lod));\n				\
 	}\n																\
@@ -623,7 +623,7 @@ namespace KlayGE
 				ss << "CUBE";
 				break;
 			}
-			ss << " " << tex_sampler_binds_[i].first << ": TEXUNIT" << i << ";" << std::endl;
+			ss << " " << tex_sampler_binds_[i].first/* << ": TEXUNIT" << i*/ << ";" << std::endl;
 		}
 
 		ss << shader_ss.str();
@@ -638,15 +638,18 @@ namespace KlayGE
 
 		shader_descs_ = shader_descs;
 		shader_text_ = shader_text;
-		*shader_text_ = "#define KLAYGE_OPENGL 1\n\n" + *shader_text_;
+
+		std::vector<char const *> args;
+		args.push_back("-DKLAYGE_OPENGL=1");
 		if (!Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().bc5_support)
 		{
-			*shader_text_ = "#define KLAYGE_BC5_AS_AG\n" + *shader_text_;
+			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
 		else
 		{
-			*shader_text_ = "#define KLAYGE_BC5_AS_GA\n" + *shader_text_;
+			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}
+		args.push_back(NULL);
 
 		std::string profile = (*shader_descs_)[type].profile;
 		switch (type)
@@ -698,7 +701,7 @@ namespace KlayGE
 		if (is_shader_validate_[type])
 		{
 			shaders_[type] = cgCreateProgram(render_factory.CGContext(),
-					CG_SOURCE, shader_text->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), NULL);
+					CG_SOURCE, shader_text->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), &args[0]);
 			cgGLSetOptimalOptions(profiles_[type]);
 
 			CGerror error;
@@ -812,6 +815,18 @@ namespace KlayGE
 			ret->tex_sampler_binds_[i].second.second = effect.ParameterByName(*(tex_sampler_binds_[i].second.second->Name()));
 		}
 
+		std::vector<char const *> args;
+		args.push_back("-DKLAYGE_OPENGL=1");
+		if (!Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().bc5_support)
+		{
+			args.push_back("-DKLAYGE_BC5_AS_AG");
+		}
+		else
+		{
+			args.push_back("-DKLAYGE_BC5_AS_GA");
+		}
+		args.push_back(NULL);
+
 		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -821,7 +836,7 @@ namespace KlayGE
 			{
 				ret->shaders_[i] = cgCreateProgram(render_factory.CGContext(),
 						CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[i],
-						(*ret->shader_descs_)[i].func_name.c_str(), NULL);
+						(*ret->shader_descs_)[i].func_name.c_str(), &args[0]);
 				cgGLSetOptimalOptions(ret->profiles_[i]);
 
 				CGerror error;
@@ -1024,6 +1039,7 @@ namespace KlayGE
 				}
 
 				cgGLUnbindProgram(profiles_[i]);
+				cgGLDisableProfile(profiles_[i]);
 			}
 		}
 	}

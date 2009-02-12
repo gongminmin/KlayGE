@@ -43,6 +43,8 @@ using namespace KlayGE;
 
 namespace
 {
+	bool use_gs = false;
+
 	int const NUM_PARTICLE = 65536;
 
 	float GetDensity(int x, int y, int z, std::vector<uint8_t> const & data, uint32_t vol_size)
@@ -144,10 +146,10 @@ namespace
 			
 			float2 texs[] =
 			{
-				float2(0.0f, 0.0f),
-				float2(1.0f, 0.0f),
-				float2(0.0f, 1.0f),
+				float2(-1.0f, 1.0f),
 				float2(1.0f, 1.0f),
+				float2(-1.0f, -1.0f),
+				float2(1.0f, -1.0f),
 			};
 
 			uint16_t indices[] =
@@ -156,10 +158,8 @@ namespace
 			};
 
 			ElementInitData init_data;
-			init_data.row_pitch = sizeof(texs);
-			init_data.slice_pitch = 0;
-			init_data.data = texs;
-			GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+			rl_ = rf.MakeRenderLayout();
 
 			std::vector<float2> p_in_tex(max_num_particles);
 			for (int i = 0; i < max_num_particles; ++ i)
@@ -172,20 +172,34 @@ namespace
 			init_data.data = &p_in_tex[0];
 			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
-			init_data.row_pitch = sizeof(indices);
-			init_data.slice_pitch = 0;
-			init_data.data = indices;
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			if (use_gs)
+			{
+				rl_->TopologyType(RenderLayout::TT_PointList);
+				rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-			rl_->BindVertexStream(tex0, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
-									RenderLayout::ST_Geometry, max_num_particles);
-			rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
-									RenderLayout::ST_Instance, 1);
-			rl_->BindIndexStream(ib, EF_R16UI);
+				technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("ParticlesWithGS");
+			}
+			else
+			{
+				init_data.row_pitch = sizeof(texs);
+				init_data.slice_pitch = 0;
+				init_data.data = texs;
+				GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
+				init_data.row_pitch = sizeof(indices);
+				init_data.slice_pitch = 0;
+				init_data.data = indices;
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rl_->BindVertexStream(tex0, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
+										RenderLayout::ST_Geometry, max_num_particles);
+				rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+										RenderLayout::ST_Instance, 1);
+				rl_->BindIndexStream(ib, EF_R16UI);
+
+				technique_ = rf.LoadEffect("GPUParticleSystem.kfx")->TechniqueByName("Particles");
+			}
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
 			*(technique_->Effect().ParameterByName("noise_vol_tex")) = noise_vol_tex_;
@@ -547,6 +561,8 @@ GPUParticleSystemApp::GPUParticleSystemApp(std::string const & name, RenderSetti
 
 void GPUParticleSystemApp::InitObjects()
 {
+	use_gs = (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_shader_model >= 4);
+
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	TextureLoader terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);

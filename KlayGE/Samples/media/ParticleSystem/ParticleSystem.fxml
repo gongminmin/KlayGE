@@ -46,6 +46,11 @@ float3 texcoord_to_view(float2 tex)
 	
 	<shader>
 		<![CDATA[
+struct VS_TO_GS
+{
+	float4 CenterView_Life : TEXCOORD0;
+};
+
 struct PS_IN
 {
 	float4 pos : SV_Position;
@@ -61,7 +66,7 @@ void ParticleVS(float4 pos : TEXCOORD0,
 {
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
-	view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
+	view_pos.xy += tex * point_radius;
 	vs_out.pos = mul(view_pos, Proj);
 	vs_out.clr = float4(1, 1, 1, pos.w);
 	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
@@ -69,39 +74,56 @@ void ParticleVS(float4 pos : TEXCOORD0,
 }
 
 void ParticleVS2(float4 pos : POSITION,
-					out PS_IN vs_out)
+					out VS_TO_GS vs_out)
 {
-	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
-	vs_out.clr = float4(1, 1, 1, pos.w);
-	
-	vs_out.pos = 0;
-	vs_out.PosSS = 0;
-	vs_out.view_dir = 0;
+	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
 
 #ifdef KLAYGE_OPENGL
-TRIANGLE void ParticleGS(AttribArray<PS_IN> input)
+TRIANGLE void ParticleGS(AttribArray<float4> input : TEXCOORD0)
+{
+	float4 CenterView_Life;
+	CenterView_Life = input[0];
 #else
 [maxvertexcount(4)]
-void ParticleGS(point PS_IN input[1], inout TriangleStream<PS_IN> out_stream)
-#endif
+void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 {
+	float4 CenterView_Life;
+	CenterView_Life = input[0].CenterView_Life;
+#endif
 	PS_IN gs_out;
 
 	for (int i = 0; i < 4; ++ i)
 	{
-		float2 tex = float2(i & 1, i & 2);
+		float2 tex;
+		if (0 == i)
+		{
+			tex = float2(-1, 1);
+		}
+		if (1 == i)
+		{
+			tex = float2(1, 1);
+		}
+		if (2 == i)
+		{
+			tex = float2(-1, -1);
+		}
+		if (3 == i)
+		{
+			tex = float2(1, -1);
+		}
 		
-		float4 view_pos = input[0].CenterView;
+		float4 view_pos = float4(CenterView_Life.xyz, 1);
 		gs_out.CenterView = view_pos;
-		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
+		view_pos.xy += tex * point_radius;
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr = input[0].clr;
+		gs_out.clr = float4(1, 1, 1, CenterView_Life.w);
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
 
 #ifdef KLAYGE_OPENGL
-		emitVertex(gs_out);
+		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
+			gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2);
 #else
 		out_stream.Append(gs_out);
 #endif

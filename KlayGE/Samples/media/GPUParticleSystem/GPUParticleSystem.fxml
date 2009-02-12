@@ -54,78 +54,158 @@ float3 texcoord_to_view(float2 tex)
 	
 	<shader>
 		<![CDATA[
+struct VS_TO_GS
+{
+	float4 CenterView_Life : TEXCOORD0;
+};
+
+struct PS_IN
+{
+	float4 pos : SV_Position;
+	float4 clr : COLOR0;
+	float4 PosSS : TEXCOORD0;
+	float4 CenterView : TEXCOORD1;
+	float3 view_dir : TEXCOORD2;
+};
+
 void ParticlesVS(float2 tex_pos		: POSITION,
 					float2 tex			: TEXCOORD0,
-					out float4 oClr     : COLOR0,
-					out float4 oPosSS	: TEXCOORD0,
-					out float4 oCenterView : TEXCOORD1,
-					out float3 oViewDir : TEXCOORD2,
-					out float4 oPos		: SV_Position)
+					out PS_IN vs_out)
 {
 	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
 
 	if (pos.w <= 0)
 	{
-		oPos = float4(-1, -1, 0, 0);
-		oClr = 0;
-		oCenterView = 0;
-		oPosSS = 0;
-		oViewDir = 0;
+		vs_out.pos = float4(-1, -1, 0, 0);
+		vs_out.clr = 0;
+		vs_out.PosSS = 0;
+		vs_out.CenterView = 0;
+		vs_out.view_dir = 0;
 	}
 	else
 	{
-		oCenterView = mul(float4(pos.xyz, 1), View);
-		float4 view_pos = oCenterView;
-		view_pos.xy += (float2(tex.x, 1 - tex.y) * 2 - 1) * point_radius;
-		oPos = mul(view_pos, Proj);
+		vs_out.CenterView = mul(float4(pos.xyz, 1), View);
+		float4 view_pos = vs_out.CenterView;
+		view_pos.xy += tex * point_radius;
+		vs_out.pos = mul(view_pos, Proj);
 			  
-		oClr = float4(1, 1, 1, pos.w);
-		oPosSS = oPos / oPos.w;
+		vs_out.clr = float4(1, 1, 1, pos.w);
+		vs_out.PosSS = vs_out.pos / vs_out.pos.w;
 		
-		oViewDir = texcoord_to_view(float2(oPosSS.x, -oPosSS.y) / 2 + 0.5f);
+		vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
 	}
 }
 
-float4 ParticlesPS(float4 clr : COLOR0,
-						float4 PosSS : TEXCOORD0,
-						float4 CenterView : TEXCOORD1,
-						float3 view_dir : TEXCOORD2) : SV_Target
+void ParticlesVS2(float2 tex_pos : POSITION,
+					out VS_TO_GS vs_out)
 {
-	CenterView /= CenterView.w;
-	float dir = view_dir.z;
-	view_dir = normalize(view_dir);
+	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
+
+	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+}
+
+#ifdef KLAYGE_OPENGL
+TRIANGLE void ParticlesGS(AttribArray<float4> input : TEXCOORD0)
+{
+	float4 CenterView_Life;
+	CenterView_Life = input[0];
+#else
+[maxvertexcount(4)]
+void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
+{
+	float4 CenterView_Life;
+	CenterView_Life = input[0].CenterView_Life;
+#endif
+
+	if (CenterView_Life.w > 0)
+	{
+		PS_IN gs_out;
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			float2 tex;
+			if (0 == i)
+			{
+				tex = float2(-1, 1);
+			}
+			if (1 == i)
+			{
+				tex = float2(1, 1);
+			}
+			if (2 == i)
+			{
+				tex = float2(-1, -1);
+			}
+			if (3 == i)
+			{
+				tex = float2(1, -1);
+			}
+			
+			float4 view_pos = float4(CenterView_Life.xyz, 1);
+			gs_out.CenterView = view_pos;
+			view_pos.xy += tex * point_radius;
+			gs_out.pos = mul(view_pos, Proj);
+			gs_out.clr = float4(1, 1, 1, CenterView_Life.w);
+			gs_out.PosSS = gs_out.pos / gs_out.pos.w;
+			gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
+
+#ifdef KLAYGE_OPENGL
+			emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
+				gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2);
+#else
+			out_stream.Append(gs_out);
+#endif
+		}
+		
+#ifdef KLAYGE_OPENGL
+		restartStrip();
+#else
+		out_stream.RestartStrip();
+#endif
+	}
+}
+
+float4 ParticlesPS(PS_IN ps_in) : SV_Target
+{
+	ps_in.CenterView /= ps_in.CenterView.w;
+	float dir = ps_in.view_dir.z;
+	ps_in.view_dir = normalize(ps_in.view_dir);
 	
-	float v = dot(CenterView.xyz, view_dir);
-	float disc = point_radius * point_radius - (dot(CenterView.xyz, CenterView.xyz) - v * v);
+	float4 clr = ps_in.clr;
+	
+	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir);
+	float disc = point_radius * point_radius - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
 	if (disc < 0)
 	{
-		return 0;
+		clr = 0;
 	}
 	else
 	{
-		float2 tex_coord = PosSS.xy + offset;
+		float2 tex_coord = ps_in.PosSS.xy + offset;
 		tex_coord.y = -tex_coord.y;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = scene_tex.Sample(point_sampler, tex_coord).a;
-		float3 intersect = (v - sqrt(disc)) * view_dir;
+		float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;
+		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
 		float optical_depth = dir * depth - intersect.z;
 		
 		if (optical_depth < 0)
 		{
-			return 0;
+			clr = 0;
 		}
 		else
 		{
-			optical_depth = min(optical_depth, 2 * sqrt(disc) * view_dir.z);
+			optical_depth = min(optical_depth, 2 * sqrt(disc) * ps_in.view_dir.z);
 			float4 intersect_ws = mul(float4(intersect, 1), inv_view);
 			intersect_ws /= intersect_ws.w;
-			float2 dxdy = (intersect.xy - CenterView.xy) / point_radius;
+			float2 dxdy = (intersect.xy - ps_in.CenterView.xy) / point_radius;
 			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
-			float4 n = noise_vol_tex.Sample(bilinear_sampler, intersect_ws.rgb / 50);
-			return float4((dot(normalize(LightPos - intersect_ws), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
+			float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb / 50, 0);
+			clr = float4((dot(normalize(LightPos - intersect_ws), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
 		}
 	}
+	
+	return clr;
 }
 		]]>
 	</shader>
@@ -144,6 +224,25 @@ float4 ParticlesPS(float4 clr : COLOR0,
 			<state name="dest_blend_alpha" value="one"/>
 			
 			<state name="vertex_shader" value="ParticlesVS()"/>
+			<state name="pixel_shader" value="ParticlesPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParticlesWithGS">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="ParticlesVS2()"/>
+			<state name="geometry_shader" value="ParticlesGS()"/>
 			<state name="pixel_shader" value="ParticlesPS()"/>
 		</pass>
 	</technique>
@@ -185,7 +284,7 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = particle_vel_tex.Sample(point_sampler, tex);
+		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0);
 
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
@@ -193,10 +292,10 @@ void UpdatePS(float2 tex : TEXCOORD0,
 		
 		float2 tex_pos = cur_pos.xz / 4 + 0.5;
 		tex_pos.y = 1 - tex_pos.y;
-		float height = height_map_tex.Sample(point_sampler, tex_pos).r;
+		float height = height_map_tex.SampleLevel(point_sampler, tex_pos, 0).r;
 		if (cur_pos.y < height)
 		{
-			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex_pos)).xzy) * 0.99f;
+			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.SampleLevel(normal_map_sampler, tex_pos, 0)).xzy) * 0.99f;
 		}
 		
 		out_pos = cur_pos;
@@ -204,13 +303,13 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	}
 	else
 	{
-		float t = accumulate_time - particle_birth_time_tex.Sample(point_sampler, tex).r;
+		float t = accumulate_time - particle_birth_time_tex.SampleLevel(point_sampler, tex, 0).r;
 		if ((t > 0) && (t < elapse_time))
 		{
 			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
 			pos /= pos.w;
 
-			float3 vel = particle_init_vel_tex.Sample(point_sampler, tex + cur_pos.xz).xyz;
+			float3 vel = particle_init_vel_tex.SampleLevel(point_sampler, tex + cur_pos.xz, 0).xyz;
 			vel = mul(vel, (float3x3)ps_model_mat);
 
 			out_pos = float4(pos.xyz, init_pos_life.w);

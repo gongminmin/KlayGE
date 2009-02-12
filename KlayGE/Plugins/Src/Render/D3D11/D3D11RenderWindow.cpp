@@ -138,7 +138,7 @@ namespace KlayGE
 		}
 		else
 		{
-			UINT create_device_flags = 0;
+			UINT create_device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
 #ifdef _DEBUG
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif

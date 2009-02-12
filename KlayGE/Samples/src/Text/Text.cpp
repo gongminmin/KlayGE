@@ -141,7 +141,7 @@ uint32_t TextApp::DoUpdate(uint32_t /*pass*/)
 
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(16 * scale_));
+	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }
