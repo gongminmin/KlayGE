@@ -242,7 +242,7 @@ namespace KlayGE
 		std::vector<UINT> offsets(this_num_vertex_stream);
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			GraphicsBufferPtr stream = rl.GetVertexStream(i);
+			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
 			D3D10GraphicsBuffer& d3dvb(*checked_pointer_cast<D3D10GraphicsBuffer>(stream));
 			vbs[i] = d3dvb.D3DBuffer().get();

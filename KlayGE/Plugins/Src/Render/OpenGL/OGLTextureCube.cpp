@@ -240,7 +240,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if (!IsCompressedFormat(format_) && (4 == NumComponents(format_)) && glloader_GL_EXT_framebuffer_blit())
+		if (!IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

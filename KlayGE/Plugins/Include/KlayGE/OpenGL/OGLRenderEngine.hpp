@@ -77,7 +77,7 @@ namespace KlayGE
 		void ClearDepth(GLfloat depth);
 		void ClearStencil(GLuint stencil);
 
-		void GetFBOForBlit(GLuint& src, GLuint& dst)
+		void GetFBOForBlit(GLuint& src, GLuint& dst) const
 		{
 			src = fbo_blit_src_;
 			dst = fbo_blit_dst_;

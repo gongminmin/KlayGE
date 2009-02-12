@@ -105,7 +105,7 @@ void ParticlesVS2(float2 tex_pos : POSITION,
 }
 
 #ifdef KLAYGE_OPENGL
-TRIANGLE void ParticlesGS(AttribArray<float4> input : TEXCOORD0)
+POINT TRIANGLE_OUT void ParticlesGS(AttribArray<float4> input : TEXCOORD0)
 {
 	float4 CenterView_Life;
 	CenterView_Life = input[0];

@@ -323,25 +323,6 @@ namespace KlayGE
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
-		FrameBufferPtr const & fb = this->CurFrameBuffer();
-		if (fb != this->DefaultFrameBuffer())
-		{
-			std::vector<GLenum> targets;
-			for (uint8_t i = 0; i < caps_.max_simultaneous_rts; ++ i)
-			{
-				if (fb->Attached(FrameBuffer::ATT_Color0 + i))
-				{
-					targets.push_back(GL_COLOR_ATTACHMENT0_EXT + i);
-				}
-			}
-			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
-		}
-		else
-		{
-			GLenum targets[] = { GL_BACK_LEFT };
-			glDrawBuffers(1, &targets[0]);
-		}
-
 		// Geometry streams
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{

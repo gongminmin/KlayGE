@@ -74,47 +74,29 @@ namespace KlayGE
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 		}
 
+		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{
 			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
 		}
-		bool depth_mask_changed = false;
 		if (flags & GL_DEPTH_BUFFER_BIT)
 		{
 			re.ClearDepth(depth);
 
-			GLint m;
-			glGetIntegerv(GL_DEPTH_WRITEMASK, &m);
-			if (GL_FALSE == m)
-			{
-				depth_mask_changed = true;
-				glDepthMask(GL_TRUE);
-			}
+			glDepthMask(GL_TRUE);
 		}
-		bool stencil_mask_changed = false;
 		if (flags & GL_STENCIL_BUFFER_BIT)
 		{
 			re.ClearStencil(stencil);
 
-			GLint m;
-			glGetIntegerv(GL_STENCIL_WRITEMASK, &m);
-			if (GL_FALSE == m)
-			{
-				stencil_mask_changed = true;
-				glStencilMask(GL_TRUE);
-			}
+			glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+			glStencilMaskSeparate(GL_BACK, GL_TRUE);
 		}
 
 		glClear(flags);
 
-		if (depth_mask_changed)
-		{
-			glDepthMask(GL_FALSE);
-		}
-		if (stencil_mask_changed)
-		{
-			glStencilMask(GL_FALSE);
-		}
+		glPopAttrib();
 
 		if (static_cast<GLuint>(old_fbo) != fbo_)
 		{

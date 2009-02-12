@@ -71,6 +71,21 @@ namespace KlayGE
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
+
+		if (fbo_ != 0)
+		{
+			std::vector<GLenum> targets(clr_views_.size());
+			for (size_t i = 0; i < clr_views_.size(); ++ i)
+			{
+				targets[i] = GL_COLOR_ATTACHMENT0_EXT + i;
+			}
+			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+		}
+		else
+		{
+			GLenum targets[] = { GL_BACK_LEFT };
+			glDrawBuffers(1, &targets[0]);
+		}
 	}
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
@@ -85,51 +100,33 @@ namespace KlayGE
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
 		}
 
+		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		GLbitfield ogl_flags = 0;
 		if (flags & CBM_Color)
 		{
 			ogl_flags |= GL_COLOR_BUFFER_BIT;
 			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
 		}
-		bool depth_mask_changed = false;
 		if (flags & CBM_Depth)
 		{
 			ogl_flags |= GL_DEPTH_BUFFER_BIT;
 			re.ClearDepth(depth);
 
-			GLint m;
-			glGetIntegerv(GL_DEPTH_WRITEMASK, &m);
-			if (GL_FALSE == m)
-			{
-				depth_mask_changed = true;
-				glDepthMask(GL_TRUE);
-			}
+			glDepthMask(GL_TRUE);
 		}
-		bool stencil_mask_changed = false;
 		if (flags & CBM_Stencil)
 		{
 			ogl_flags |= GL_STENCIL_BUFFER_BIT;
 			re.ClearStencil(stencil);
 
-			GLint m;
-			glGetIntegerv(GL_STENCIL_WRITEMASK, &m);
-			if (GL_FALSE == m)
-			{
-				stencil_mask_changed = true;
-				glStencilMask(GL_TRUE);
-			}
+			glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+			glStencilMaskSeparate(GL_BACK, GL_TRUE);
 		}
 
 		glClear(ogl_flags);
 
-		if (depth_mask_changed)
-		{
-			glDepthMask(GL_FALSE);
-		}
-		if (stencil_mask_changed)
-		{
-			glStencilMask(GL_FALSE);
-		}
+		glPopAttrib();
 
 		if (static_cast<GLuint>(old_fbo) != fbo_)
 		{

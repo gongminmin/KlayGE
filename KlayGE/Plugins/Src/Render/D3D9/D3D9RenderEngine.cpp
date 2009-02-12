@@ -496,7 +496,7 @@ namespace KlayGE
 		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			GraphicsBufferPtr stream = rl.GetVertexStream(i);
+			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
 			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
 			TIF(d3dDevice_->SetStreamSource(i, d3d9vb.D3D9Buffer().get(), 0, rl.VertexSize(i)));
@@ -544,7 +544,7 @@ namespace KlayGE
 		uint32_t this_num_vertex_stream = rl.NumVertexStreams();
 		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 		{
-			GraphicsBufferPtr stream = rl.GetVertexStream(i);
+			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
 			D3D9VertexBuffer& d3d9vb(*checked_pointer_cast<D3D9VertexBuffer>(stream));
 			TIF(d3dDevice_->SetStreamSource(i, d3d9vb.D3D9Buffer().get(), 0, rl.VertexSize(i)));

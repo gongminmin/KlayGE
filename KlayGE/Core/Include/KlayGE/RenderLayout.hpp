@@ -132,7 +132,7 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(vertex_streams_.size());
 		}
-		GraphicsBufferPtr GetVertexStream(uint32_t index) const
+		GraphicsBufferPtr const & GetVertexStream(uint32_t index) const
 		{
 			return vertex_streams_[index].stream;
 		}
@@ -162,13 +162,13 @@ namespace KlayGE
 		uint32_t NumIndices() const;
 
 		void BindIndexStream(GraphicsBufferPtr index_stream, ElementFormat format);
-		GraphicsBufferPtr GetIndexStream() const;
+		GraphicsBufferPtr const & GetIndexStream() const;
 		ElementFormat IndexStreamFormat() const
 		{
 			return index_format_;
 		}
 
-		GraphicsBufferPtr InstanceStream() const;
+		GraphicsBufferPtr const & InstanceStream() const;
 		vertex_elements_type const & InstanceStreamFormat() const
 		{
 			return instance_stream_.format;

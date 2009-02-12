@@ -120,13 +120,13 @@ namespace KlayGE
 		index_format_ = format;
 	}
 
-	GraphicsBufferPtr RenderLayout::GetIndexStream() const
+	GraphicsBufferPtr const & RenderLayout::GetIndexStream() const
 	{
 		BOOST_ASSERT(index_stream_);
 		return index_stream_;
 	}
 
-	GraphicsBufferPtr RenderLayout::InstanceStream() const
+	GraphicsBufferPtr const & RenderLayout::InstanceStream() const
 	{
 		return instance_stream_.stream;
 	}

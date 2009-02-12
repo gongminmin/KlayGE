@@ -374,7 +374,7 @@ namespace KlayGE
 			file.write(reinterpret_cast<char const *>(&num_vertices), sizeof(num_vertices));
 			for (uint8_t k = 0; k < num_vertex_elems; ++ k)
 			{
-				GraphicsBufferPtr vb = rl->GetVertexStream(k);
+				GraphicsBufferPtr const & vb = rl->GetVertexStream(k);
 				{
 					GraphicsBuffer::Mapper mapper(*vb, BA_Read_Only);
 					file.write(mapper.Pointer<char const>(), vb->Size());
