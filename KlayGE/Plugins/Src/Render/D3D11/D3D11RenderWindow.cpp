@@ -158,10 +158,13 @@ namespace KlayGE
 				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 			}
 
-			std::vector<D3D_FEATURE_LEVEL> feature_levels;
-			feature_levels.push_back(D3D_FEATURE_LEVEL_11_0);
-			feature_levels.push_back(D3D_FEATURE_LEVEL_10_0);
-			feature_levels.push_back(D3D_FEATURE_LEVEL_9_3);
+			D3D_FEATURE_LEVEL const feature_levels[] =
+			{
+				D3D_FEATURE_LEVEL_11_0,
+				D3D_FEATURE_LEVEL_10_0,
+				D3D_FEATURE_LEVEL_9_3
+			};
+			size_t const num_feature_levels = sizeof(feature_levels) / sizeof(feature_levels[0]);
 
 			BOOST_FOREACH(BOOST_TYPEOF(dev_type_behaviors)::reference dev_type_beh, dev_type_behaviors)
 			{
@@ -173,10 +176,10 @@ namespace KlayGE
 				{
 					dx_adapter = adapter_->Adapter().get();
 				}
-				std::vector<D3D_FEATURE_LEVEL> out_feature_levels(feature_levels.size(), D3D_FEATURE_LEVEL_9_1);
+				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
-					&feature_levels[0], feature_levels.size(), D3D11_SDK_VERSION, &sc_desc_, &sc, &d3d_device,
-					&out_feature_levels[0], &d3d_imm_ctx)))
+					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &sc_desc_, &sc, &d3d_device,
+					&out_feature_level, &d3d_imm_ctx)))
 				{
 					swap_chain_ = MakeCOMPtr(sc);
 

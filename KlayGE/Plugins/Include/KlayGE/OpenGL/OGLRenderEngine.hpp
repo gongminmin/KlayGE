@@ -83,6 +83,12 @@ namespace KlayGE
 			dst = fbo_blit_dst_;
 		}
 
+		void BindFramebuffer(GLuint fbo, bool force = false);
+		GLuint BindFramebuffer() const
+		{
+			return cur_fbo_;
+		}
+
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
@@ -100,6 +106,8 @@ namespace KlayGE
 
 		GLint vp_x_, vp_y_;
 		GLsizei vp_width_, vp_height_;
+
+		GLuint cur_fbo_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

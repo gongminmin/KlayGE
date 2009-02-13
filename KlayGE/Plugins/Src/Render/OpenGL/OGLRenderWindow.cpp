@@ -460,7 +460,6 @@ namespace KlayGE
 
 	void OGLRenderWindow::SwapBuffers()
 	{
-		::glFlush();
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::SwapBuffers(hDC_);
 #elif defined KLAYGE_PLATFORM_LINUX

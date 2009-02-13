@@ -251,8 +251,7 @@ namespace KlayGE
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
 
-			GLint old_fbo;
-			glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+			GLuint old_fbo = re.BindFramebuffer();
 
 			for (uint32_t depth = 0; depth < src_depth; ++ depth)
 			{
@@ -267,7 +266,7 @@ namespace KlayGE
 								GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			}
 
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
+			re.BindFramebuffer(old_fbo, true);
 		}
 		else
 		{

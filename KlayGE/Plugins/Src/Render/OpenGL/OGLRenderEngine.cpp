@@ -88,7 +88,8 @@ namespace KlayGE
 	OGLRenderEngine::OGLRenderEngine()
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0),
-			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0)
+			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
+			cur_fbo_(0)
 	{
 		clear_clr_.assign(0);
 	}
@@ -287,6 +288,15 @@ namespace KlayGE
 		{
 			glClearStencil(stencil);
 			clear_stencil_ = stencil;
+		}
+	}
+
+	void OGLRenderEngine::BindFramebuffer(GLuint fbo, bool force)
+	{
+		if (force || (cur_fbo_ != fbo))
+		{
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+			cur_fbo_ = fbo;
 		}
 	}
 

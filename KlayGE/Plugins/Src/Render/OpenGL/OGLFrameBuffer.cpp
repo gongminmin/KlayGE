@@ -64,7 +64,8 @@ namespace KlayGE
 
 	void OGLFrameBuffer::OnBind()
 	{
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindFramebuffer(fbo_);
 
 		GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 		if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
@@ -92,45 +93,57 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		GLint old_fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+		GLuint old_fbo = re.BindFramebuffer();
+		re.BindFramebuffer(fbo_);
 
-		if (static_cast<GLuint>(old_fbo) != fbo_)
+		if (glloader_GL_VERSION_3_0())
 		{
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo_);
+			if (flags & CBM_Color)
+			{
+				glClearBufferfv(GL_COLOR_BUFFER_BIT, &clr[0]);
+			}
+			GLbitfield ogl_flags = 0;
+			if (flags & CBM_Depth)
+			{
+				ogl_flags |= GL_DEPTH_BUFFER_BIT;
+			}
+			if (flags & CBM_Stencil)
+			{
+				ogl_flags |= GL_STENCIL_BUFFER_BIT;
+			}
+			glClearBufferfi(ogl_flags, depth, stencil);
+		}
+		else
+		{
+			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			GLbitfield ogl_flags = 0;
+			if (flags & CBM_Color)
+			{
+				ogl_flags |= GL_COLOR_BUFFER_BIT;
+				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			}
+			if (flags & CBM_Depth)
+			{
+				ogl_flags |= GL_DEPTH_BUFFER_BIT;
+				re.ClearDepth(depth);
+
+				glDepthMask(GL_TRUE);
+			}
+			if (flags & CBM_Stencil)
+			{
+				ogl_flags |= GL_STENCIL_BUFFER_BIT;
+				re.ClearStencil(stencil);
+
+				glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				glStencilMaskSeparate(GL_BACK, GL_TRUE);
+			}
+
+			glClear(ogl_flags);
+
+			glPopAttrib();
 		}
 
-		glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		GLbitfield ogl_flags = 0;
-		if (flags & CBM_Color)
-		{
-			ogl_flags |= GL_COLOR_BUFFER_BIT;
-			re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-		}
-		if (flags & CBM_Depth)
-		{
-			ogl_flags |= GL_DEPTH_BUFFER_BIT;
-			re.ClearDepth(depth);
-
-			glDepthMask(GL_TRUE);
-		}
-		if (flags & CBM_Stencil)
-		{
-			ogl_flags |= GL_STENCIL_BUFFER_BIT;
-			re.ClearStencil(stencil);
-
-			glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-			glStencilMaskSeparate(GL_BACK, GL_TRUE);
-		}
-
-		glClear(ogl_flags);
-
-		glPopAttrib();
-
-		if (static_cast<GLuint>(old_fbo) != fbo_)
-		{
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
-		}
+		re.BindFramebuffer(old_fbo);
 	}
 }

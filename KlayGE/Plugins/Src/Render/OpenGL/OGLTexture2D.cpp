@@ -245,8 +245,7 @@ namespace KlayGE
 			GLuint fbo_src, fbo_dst;
 			re.GetFBOForBlit(fbo_src, fbo_dst);
 
-			GLint old_fbo;
-			glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &old_fbo);
+			GLuint old_fbo = re.BindFramebuffer();
 
 			glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
 			glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture_, level);
@@ -258,7 +257,7 @@ namespace KlayGE
                             dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
                             GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, old_fbo);
+			re.BindFramebuffer(old_fbo, true);
 		}
 		else
 		{
