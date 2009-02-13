@@ -29,7 +29,10 @@ if ('nt' == os.name):
 
 	if klayge_bin_path.lower() not in env["path"].lower():
 		k = OpenKey(HKEY_LOCAL_MACHINE, env_key, 0, KEY_SET_VALUE)
-		SetValueEx(k, "path", None, REG_SZ, "%s;%%%s%%\\bin" % (env["path"], klayge_home))
+		cur_path = env["path"]
+		if (cur_path[-1] != ";"):
+			cur_path += ";"
+		SetValueEx(k, "path", None, REG_SZ, "%s%%%s%%\\bin" % (cur_path, klayge_home))
 		FlushKey(k)
 		CloseKey(k)
 
