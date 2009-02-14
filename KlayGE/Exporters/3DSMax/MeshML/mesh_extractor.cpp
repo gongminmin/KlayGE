@@ -806,7 +806,7 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::write_xml(std::string const & file_name)
+	void meshml_extractor::write_xml(std::string const & file_name, export_vertex_attrs const & eva)
 	{
 		std::ofstream ofs(file_name.c_str());
 		if (!ofs)
@@ -898,9 +898,16 @@ namespace KlayGE
 			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
 			{
-				ofs << "\t\t\t\t<vertex_element usage=\'" << ve.usage
-					<< "\' usage_index=\'" << int(ve.usage_index)
-					<< "\' num_components=\'" << int(ve.num_components) << "\'/>" << endl;
+				if ((VEU_Position == ve.usage)
+					|| ((VEU_Normal == ve.usage) && eva.normal)
+					|| ((VEU_Tangent == ve.usage) && eva.tangent)
+					|| ((VEU_Binormal == ve.usage) && eva.binormal)
+					|| ((VEU_TextureCoord == ve.usage) && eva.tex))
+				{
+					ofs << "\t\t\t\t<vertex_element usage=\'" << ve.usage
+						<< "\' usage_index=\'" << int(ve.usage_index)
+						<< "\' num_components=\'" << int(ve.num_components) << "\'/>" << endl;
+				}
 			}
 			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
 
@@ -919,22 +926,32 @@ namespace KlayGE
 					<< "\' y=\'" << vertex.pos.y
 					<< "\' z=\'" << vertex.pos.z << "\'>" << endl;
 
-				ofs << "\t\t\t\t\t<normal x=\'" << vertex.normal.x
-					<< "\' y=\'" << vertex.normal.y
-					<< "\' z=\'" << vertex.normal.z << "\'/>" << endl;
-
-				ofs << "\t\t\t\t\t<tangent x=\'" << vertex.tangent.x
-					<< "\' y=\'" << vertex.tangent.y
-					<< "\' z=\'" << vertex.tangent.z << "\'/>" << endl;
-
-				ofs << "\t\t\t\t\t<binormal x=\'" << vertex.binormal.x
-					<< "\' y=\'" << vertex.binormal.y
-					<< "\' z=\'" << vertex.binormal.z << "\'/>" << endl;
-
-				BOOST_FOREACH(BOOST_TYPEOF(vertex.tex)::const_reference tex, vertex.tex)
+				if (eva.normal)
 				{
-					ofs << "\t\t\t\t\t<tex_coord u=\'" << tex.x
-						<< "\' v=\'" << tex.y << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<normal x=\'" << vertex.normal.x
+						<< "\' y=\'" << vertex.normal.y
+						<< "\' z=\'" << vertex.normal.z << "\'/>" << endl;
+				}
+				if (eva.tangent)
+				{
+					ofs << "\t\t\t\t\t<tangent x=\'" << vertex.tangent.x
+						<< "\' y=\'" << vertex.tangent.y
+						<< "\' z=\'" << vertex.tangent.z << "\'/>" << endl;
+				}
+				if (eva.binormal)
+				{
+					ofs << "\t\t\t\t\t<binormal x=\'" << vertex.binormal.x
+						<< "\' y=\'" << vertex.binormal.y
+						<< "\' z=\'" << vertex.binormal.z << "\'/>" << endl;
+				}
+
+				if (eva.tex)
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(vertex.tex)::const_reference tex, vertex.tex)
+					{
+						ofs << "\t\t\t\t\t<tex_coord u=\'" << tex.x
+							<< "\' v=\'" << tex.y << "\'/>" << endl;
+					}
 				}
 
 				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)

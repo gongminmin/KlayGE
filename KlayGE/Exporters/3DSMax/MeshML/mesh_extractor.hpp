@@ -121,13 +121,21 @@ namespace KlayGE
 		Matrix3 mesh_init_matrix;
 	};
 
+	struct export_vertex_attrs
+	{
+		bool normal;
+		bool tangent;
+		bool binormal;
+		bool tex;
+	};
+
 	class meshml_extractor
 	{
 	public:
 		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame);
 
 		void export_objects(std::vector<INode*> const & nodes);
-		void write_xml(std::string const & file_name);
+		void write_xml(std::string const & file_name, export_vertex_attrs const & eva);
 
 	private:
 		void extract_object(INode* node);

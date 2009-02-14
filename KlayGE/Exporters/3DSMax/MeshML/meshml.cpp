@@ -70,7 +70,7 @@ namespace KlayGE
 
 	TCHAR const * meshml_export::CopyrightMessage()
 	{
-		return TEXT("Copyright 2005-2007");
+		return TEXT("Copyright 2005-2009");
 	}
 
 	TCHAR const * meshml_export::OtherMessage1()
@@ -90,7 +90,7 @@ namespace KlayGE
 
 	void meshml_export::ShowAbout(HWND hWnd)
 	{
-		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005-2007"), TEXT("About"), MB_OK);
+		::MessageBox(hWnd, TEXT("Minmin Gong, Copyright 2005-2009"), TEXT("About"), MB_OK);
 	}
 
 	BOOL meshml_export::SupportsOptions(int ext, DWORD options)
@@ -164,6 +164,18 @@ namespace KlayGE
 			assert(instance != NULL);
 
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
+
+			int const normal_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
+			int const tangent_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent")));
+			int const texcoord_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Texture coordinate")));
+
+			int const binormal_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Binormal")));
+
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, normal_index, static_cast<LPARAM>(VEU_Normal));
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, tangent_index, static_cast<LPARAM>(VEU_Tangent));
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, texcoord_index, static_cast<LPARAM>(VEU_TextureCoord));
+
+			::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, binormal_index, static_cast<LPARAM>(VEU_Binormal));
 		}
 		else
 		{
@@ -174,6 +186,54 @@ namespace KlayGE
 			case WM_COMMAND:
 				switch (LOWORD(wparam))
 				{
+				case IDC_BUTTON_ADD:
+					{
+						int const count = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0);
+						if (count > 0)
+						{
+							std::vector<int> sel_items(count);
+							::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELITEMS, count, reinterpret_cast<LPARAM>(&sel_items[0]));
+
+							for (size_t i = 0; i < sel_items.size(); ++ i)
+							{
+								int len = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL);
+								std::vector<TCHAR> text(len + 1);
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
+								int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL);
+
+								int const ind = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0]));
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
+
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
+							}
+						}
+					}
+					break;
+
+				case IDC_BUTTON_DEL:
+					{
+						int const count = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0);
+						if (count > 0)
+						{
+							std::vector<int> sel_items(count);
+							::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELITEMS, count, reinterpret_cast<LPARAM>(&sel_items[0]));
+
+							for (size_t i = 0; i < sel_items.size(); ++ i)
+							{
+								int len = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL);
+								std::vector<TCHAR> text(len + 1);
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
+								int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL);
+
+								int const ind = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0]));
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
+
+								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
+							}
+						}
+					}
+					break;
+
 				case IDOK:
 					{
 						assert(instance != NULL);
@@ -184,8 +244,41 @@ namespace KlayGE
 							instance->max_interface_->GetTime(),
 							se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
 
+						export_vertex_attrs eva;
+						eva.normal = false;
+						eva.tangent = false;
+						eva.binormal = false;
+						eva.tex = false;
+						for (int index = 0;; ++ index)
+						{
+							int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, index, NULL);
+							if (data == LB_ERR)
+							{
+								break;
+							}
+
+							switch (data)
+							{
+							case VEU_Normal:
+								eva.normal = true;
+								break;
+
+							case VEU_Tangent:
+								eva.tangent = true;
+								break;
+
+							case VEU_Binormal:
+								eva.binormal = true;
+								break;
+
+							case VEU_TextureCoord:
+								eva.tex = true;
+								break;
+							}
+						}
+
 						extractor.export_objects(instance->export_nodes_);
-						extractor.write_xml(instance->file_name_);
+						extractor.write_xml(instance->file_name_, eva);
 
 						::EndDialog(wnd, 1);
 					}

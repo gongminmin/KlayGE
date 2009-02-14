@@ -929,9 +929,11 @@ if __name__ == '__main__':
 	if len(sys.argv) >= 2:
 		input_name = sys.argv[1]
 		if len(sys.argv) < 3:
-			for i in range(0, len(input_name) - 1):
-				if input_name[len(input_name) - 1 - i] == '.':
-					output_name = input_name[0 : len(input_name) - 1 - i] + ".kfx"
+			index = input_name.rfind('.')
+			if index != -1:
+				output_name = input_name[0 : index] + ".kfx"
+			else:
+				output_name = input_name + ".kfx"
 		else:
 			output_name = sys.argv[2]
 
