@@ -20,28 +20,28 @@ void setup(float i, out float b, out float r)
 {
 	float x = i + 0x1000;
 	b = fmod(floor(x), 256);
-	r = frac(x);
+	r = x - floor(x);
 }
 
 void setup(float2 i, out float2 b, out float2 r)
 {
 	float2 x = i + 0x1000;
 	b = fmod(floor(x), 256);
-	r = frac(x);
+	r = x - floor(x);
 }
 
 void setup(float3 i, out float3 b, out float3 r)
 {
 	float3 x = i + 0x1000;
 	b = fmod(floor(x), 256);
-	r = frac(x);
+	r = x - floor(x);
 }
 
 void setup(float4 i, out float4 b, out float4 r)
 {
 	float4 x = i + 0x1000;
 	b = fmod(floor(x), 256);
-	r = frac(x);
+	r = x - floor(x);
 }
 
 float fade(float t)
@@ -66,22 +66,22 @@ float4 fade(float4 t)
 
 float perm(float x)
 {
-	return perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)).r * 256;
+	return perm_tex.SampleLevel(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f), 0).r * 256;
 }
 
 float4 perm2d(float2 xy)
 {
-	return perm_2d_tex.Sample(perlin_point_sampler, (xy + 0.01f) / 256) * 256;
+	return perm_2d_tex.SampleLevel(perlin_point_sampler, (xy + 0.01f) / 256, 0) * 256;
 }
 
 float grad_perm(float x, float3 p)
 {
-	return dot(grad3_perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)).xyz * 2 - 1, p);
+	return dot(grad3_perm_tex.SampleLevel(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f), 0).xyz * 2 - 1, p);
 }
 
 float grad_perm(float x, float4 p)
 {
-	return dot(grad4_perm_tex.Sample(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f)) * 2 - 1, p);
+	return dot(grad4_perm_tex.SampleLevel(perlin_point_sampler, float2((x + 0.01f) / 256, 0.5f), 0) * 2 - 1, p);
 }
 
 float grad_perm(float x, float2 p)
@@ -114,7 +114,7 @@ float perlin_noise(float2 p)
 	setup(p, b, r);
 	float2 f = fade(r);
 
-	float4 AA = perm2d(b.xy);
+	float4 AA = perm2d(b);
 
 	return lerp(lerp(grad_perm(AA.x, r),
 						grad_perm(AA.z, r + float2(-1, 0)), f.x),

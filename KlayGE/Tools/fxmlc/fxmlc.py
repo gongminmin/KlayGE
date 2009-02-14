@@ -907,7 +907,10 @@ def preprocess(file_name):
 			else:
 				include_name = include_file.getAttribute('name').encode(encoding)
 			if len(include_name) != 0:
-				include_dom = parse(dir + include_name)
+				try:
+					include_dom = parse(include_name)
+				except:
+					include_dom = parse(dir + include_name)
 				for child in include_dom.documentElement.childNodes:
 					if xml.dom.Node.ELEMENT_NODE == child.nodeType:
 						dom.documentElement.insertBefore(child, include_file)

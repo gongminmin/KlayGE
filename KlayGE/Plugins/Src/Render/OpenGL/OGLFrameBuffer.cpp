@@ -78,7 +78,7 @@ namespace KlayGE
 			std::vector<GLenum> targets(clr_views_.size());
 			for (size_t i = 0; i < clr_views_.size(); ++ i)
 			{
-				targets[i] = GL_COLOR_ATTACHMENT0_EXT + i;
+				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0_EXT + i);
 			}
 			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 		}
