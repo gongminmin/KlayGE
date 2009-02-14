@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
-				OutputFile="D:/Autodesk/3ds Max 9/plugins/MeshML.dle"
+				OutputFile="D:/3ds Max 9/plugins/MeshML.dle"
 				LinkIncremental="2"
 				ModuleDefinitionFile="..\..\export.def"
 				GenerateDebugInformation="true"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
-				OutputFile="D:/Autodesk/3ds Max 9/plugins/MeshML.dle"
+				OutputFile="D:/3ds Max 9/plugins/MeshML.dle"
 				LinkIncremental="2"
 				ModuleDefinitionFile="..\..\export.def"
 				GenerateDebugInformation="true"
@@ -217,7 +217,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
-				OutputFile="D:/Autodesk/3ds Max 9/plugins/MeshML.dle"
+				OutputFile="D:/3ds Max 9/plugins/MeshML.dle"
 				LinkIncremental="1"
 				ModuleDefinitionFile="..\..\export.def"
 				SubSystem="2"
@@ -295,7 +295,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="core.lib maxutil.lib geom.lib mesh.lib"
-				OutputFile="D:/Autodesk/3ds Max 9/plugins/MeshML.dle"
+				OutputFile="D:/3ds Max 9/plugins/MeshML.dle"
 				LinkIncremental="1"
 				ModuleDefinitionFile="..\..\export.def"
 				SubSystem="2"

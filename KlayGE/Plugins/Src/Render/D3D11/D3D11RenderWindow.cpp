@@ -161,6 +161,7 @@ namespace KlayGE
 			D3D_FEATURE_LEVEL const feature_levels[] =
 			{
 				D3D_FEATURE_LEVEL_11_0,
+				D3D_FEATURE_LEVEL_10_1,
 				D3D_FEATURE_LEVEL_10_0,
 				D3D_FEATURE_LEVEL_9_3
 			};
@@ -174,7 +175,7 @@ namespace KlayGE
 				IDXGIAdapter* dx_adapter = NULL;
 				if (D3D_DRIVER_TYPE_HARDWARE == boost::get<0>(dev_type_beh))
 				{
-					dx_adapter = adapter_->Adapter().get();
+					dx_adapter = NULL;
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
@@ -211,6 +212,32 @@ namespace KlayGE
 
 						std::wostringstream oss;
 						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);
+						switch (out_feature_level)
+						{
+						case D3D_FEATURE_LEVEL_11_0:
+							oss << " Full D3D11";
+							break;
+
+						case D3D_FEATURE_LEVEL_10_1:
+							oss << " D3D11 Level 10.1";
+							break;
+
+						case D3D_FEATURE_LEVEL_10_0:
+							oss << " D3D11 Level 10";
+							break;
+
+						case D3D_FEATURE_LEVEL_9_3:
+							oss << " D3D11 Level 9.3";
+							break;
+
+						case D3D_FEATURE_LEVEL_9_2:
+							oss << "  D3D11 Level 9.2";
+							break;
+
+						case D3D_FEATURE_LEVEL_9_1:
+							oss << " D3D11 Level 9.1";
+							break;
+						}
 						if (settings.sample_count > 1)
 						{
 							oss << L" (" << settings.sample_count << "x AA)";
