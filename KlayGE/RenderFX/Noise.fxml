@@ -1,10 +1,18 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="texture2D" name="perm_tex"/>
-	<parameter type="texture2D" name="perm_2d_tex"/>
-	<parameter type="texture2D" name="grad3_perm_tex"/>
-	<parameter type="texture2D" name="grad4_perm_tex"/>
+	<parameter type="texture2D" name="perm_tex">
+		<annotation type="string" name="SasResourceAddress" value="noise_perm.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="perm_2d_tex">
+		<annotation type="string" name="SasResourceAddress" value="noise_perm_2d.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="grad3_perm_tex">
+		<annotation type="string" name="SasResourceAddress" value="noise_grad3_perm.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="grad4_perm_tex">
+		<annotation type="string" name="SasResourceAddress" value="noise_grad4_perm.dds"/>
+	</parameter>
 
 	<parameter type="sampler" name="perlin_point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>

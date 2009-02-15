@@ -37,14 +37,7 @@ namespace
 		RenderPolygon(RenderModelPtr model, std::wstring const & name)
 			: KMesh(model, name)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("ProceduralTex.kfx")->TechniqueByName("ProceduralMarbleTex");
-
-			*(technique_->Effect().ParameterByName("perm_tex")) = LoadTexture("noise_perm.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("perm_2d_tex")) = LoadTexture("noise_perm_2d.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("grad3_perm_tex")) = LoadTexture("noise_grad3_perm.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("grad4_perm_tex")) = LoadTexture("noise_grad4_perm.dds", EAH_GPU_Read)();
+			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ProceduralTex.kfx")->TechniqueByName("ProceduralMarbleTex");
 		}
 
 		void BuildMeshInfo()

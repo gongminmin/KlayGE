@@ -357,6 +357,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderLayout.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGL\OGLRenderStateObject.cpp"
 				>
 			</File>

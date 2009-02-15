@@ -903,6 +903,23 @@ namespace KlayGE
 		}
 
 		semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(read_short_string(source));
+
+		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)))
+		{
+			for (size_t i = 0; i < annotations_->size(); ++ i)
+			{
+				if (REDT_string == (*annotations_)[i]->Type())
+				{
+					if ("SasResourceAddress" == (*annotations_)[i]->Name())
+					{
+						std::string val;
+						(*annotations_)[i]->Value(val);
+
+						*var_ = LoadTexture(val, EAH_GPU_Read)();
+					}
+				}
+			}
+		}
 	}
 
 	RenderEffectParameterPtr RenderEffectParameter::Clone(RenderEffect& effect)
