@@ -87,7 +87,7 @@ void SkinnedMeshApp::InitObjects()
 
 	fpsController_.Scalers(0.1f, 10);
 
-	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("sponza.kmodel", EAH_GPU_Read, CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
+	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("pinky.kmodel", EAH_GPU_Read, CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
 	model_->SetTime(0);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
