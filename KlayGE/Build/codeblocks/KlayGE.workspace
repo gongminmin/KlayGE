@@ -8,9 +8,10 @@
 		<Project filename="OggVorbis.cbp" />
 		<Project filename="DSound.cbp" />
 		<Project filename="D3D9.cbp" />
+		<Project filename="D3D10.cbp" />
+		<Project filename="D3D11.cbp" />
 		<Project filename="OpenGL.cbp" />
 		<Project filename="OCTree.cbp" />
 		<Project filename="Heightmap.cbp" />
-		<Project filename="D3D10.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

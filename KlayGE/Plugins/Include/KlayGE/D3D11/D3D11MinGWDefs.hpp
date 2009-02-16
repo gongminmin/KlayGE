@@ -17,6 +17,7 @@
 	#define __bcount(size)
 	#define __in
 	#define __in_ecount(size)
+	#define __in_bcount(size)
 	#define __out
 	#define __out_ecount(size)
 	#define __out_bcount(size)

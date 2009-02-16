@@ -5,7 +5,7 @@
 		<Project filename="Parallax.cbp" />
 		<Project filename="VertexDisplacement.cbp" active="1" />
 		<Project filename="DistanceMapping.cbp" />
-		<Project filename="Electro.cbp" />
+		<Project filename="ProceduralTex.cbp" />
 		<Project filename="Fractal.cbp" />
 		<Project filename="Refract.cbp" />
 		<Project filename="AsciiArts.cbp" />

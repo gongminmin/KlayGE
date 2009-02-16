@@ -10,7 +10,6 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#define INITGUID
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
@@ -64,7 +63,7 @@ namespace KlayGE
 			DynamicD3D11CreateDeviceAndSwapChain_ = reinterpret_cast<D3D11CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDeviceAndSwapChain"));
 		}
 
-		IDXGIFactory* gi_factory; 
+		IDXGIFactory* gi_factory;
 		TIF(DynamicCreateDXGIFactory_(IID_IDXGIFactory, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_ = MakeCOMPtr(gi_factory);
 

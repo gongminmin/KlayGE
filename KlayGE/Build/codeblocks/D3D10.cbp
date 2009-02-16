@@ -80,7 +80,6 @@
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10GraphicsBuffer.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Mapping.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10MinGWDefs.hpp" />
-		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10OcclusionQuery.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderEngine.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderFactory.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10RenderFactoryInternal.hpp" />

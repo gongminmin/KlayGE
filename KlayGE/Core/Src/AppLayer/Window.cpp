@@ -49,13 +49,12 @@ namespace KlayGE
 	{
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
-		Convert(wname_, name);
-
 		// Register the window class
 #ifdef KLAYGE_COMPILER_GCC
 		name_ = name;
 		WNDCLASSEXA wc;
 #else
+		Convert(wname_, name);
 		WNDCLASSEXW wc;
 #endif
 		wc.cbSize			= sizeof(wc);

@@ -444,7 +444,7 @@ namespace KlayGE
 			}
 			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
-			
+
 			err_msg->Release();
 		}
 
@@ -564,6 +564,9 @@ namespace KlayGE
 
 					case D3D10_SIT_SAMPLER:
 						num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+						break;
+
+					default:
 						break;
 					}
 				}

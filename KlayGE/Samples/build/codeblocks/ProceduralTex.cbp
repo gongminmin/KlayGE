@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Electro" />
+		<Option title="ProceduralTex" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\..\bin\Electro_d" prefix_auto="1" extension_auto="1" />
+				<Option output="..\..\..\bin\ProceduralTex_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="..\..\..\bin\" />
 				<Option object_output="..\..\Debug\Win32" />
 				<Option type="1" />
@@ -27,7 +27,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\..\bin\Electro" prefix_auto="1" extension_auto="1" />
+				<Option output="..\..\..\bin\ProceduralTex" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="..\..\..\bin\" />
 				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
@@ -51,12 +51,12 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug;Release;" />
 		</VirtualTargets>
-		<Unit filename="..\..\media\Electro\Electro.fxml">
+		<Unit filename="..\..\media\ProceduralTex\ProceduralTex.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python $file_dir\..\..\..\Tools\fxmlc\fxmlc.py $file $file_dir\$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\src\Electro\Electro.cpp" />
-		<Unit filename="..\..\src\Electro\Electro.hpp" />
+		<Unit filename="..\..\src\ProceduralTex\ProceduralTex.cpp" />
+		<Unit filename="..\..\src\ProceduralTex\ProceduralTex.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

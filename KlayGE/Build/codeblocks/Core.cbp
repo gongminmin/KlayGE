@@ -337,75 +337,79 @@
 		<Unit filename="..\..\Core\Src\UI\UIStatic.cpp" />
 		<Unit filename="..\..\RenderFX\2D.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Blur.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Bone.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\DownSample.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Fog.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Font.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\GammaCorrection.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\KMesh.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Lighting.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
+		</Unit>
+		<Unit filename="..\..\RenderFX\Noise.fxml">
+			<Option compile="1" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\PointSprite.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\PostProcess.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\Quaternion.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\RenderableHelper.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\SumLum.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\SummedAreaTable.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\ToneMapping.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\UI.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Unit filename="..\..\RenderFX\util.fxml">
 			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python $file_dir/../Tools/fxmlc/fxmlc.py $file $file_dir/../Samples/media/Common/$file_name.kfx" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
 		<Extensions>
 			<code_completion />
