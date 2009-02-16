@@ -27,6 +27,7 @@ namespace KlayGE
 		~OGLRenderLayout();
 
 		void Active() const;
+		void Deactive() const;
 
 	private:
 		mutable bool dirty_vao_;

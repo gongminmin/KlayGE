@@ -115,6 +115,8 @@ namespace KlayGE
 		}
 		else
 		{
+			DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
+
 			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			GLbitfield ogl_flags = 0;
@@ -128,15 +130,24 @@ namespace KlayGE
 				ogl_flags |= GL_DEPTH_BUFFER_BIT;
 				re.ClearDepth(depth);
 
-				glDepthMask(GL_TRUE);
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_TRUE);
+				}
 			}
 			if (flags & CBM_Stencil)
 			{
 				ogl_flags |= GL_STENCIL_BUFFER_BIT;
 				re.ClearStencil(stencil);
 
-				glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				}
 			}
 
 			glClear(ogl_flags);

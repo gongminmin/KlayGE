@@ -86,8 +86,9 @@ void NormalDepthPS(float4 normal : TEXCOORD0,
 
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="e_barrier"/>
-		<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
 	</cbuffer>
+
+	<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
 
 	<shader>
 		<![CDATA[

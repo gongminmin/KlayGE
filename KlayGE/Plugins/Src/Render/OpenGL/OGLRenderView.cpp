@@ -80,20 +80,18 @@ namespace KlayGE
 		}
 		else
 		{
+			DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
+
 			if (flags & GL_COLOR_BUFFER_BIT)
 			{
 				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
 			}
-			bool depth_mask_changed = false;
 			if (flags & GL_DEPTH_BUFFER_BIT)
 			{
 				re.ClearDepth(depth);
 
-				GLint m;
-				glGetIntegerv(GL_DEPTH_WRITEMASK, &m);
-				if (GL_FALSE == m)
+				if (!cur_desc.depth_write_mask)
 				{
-					depth_mask_changed = true;
 					glDepthMask(GL_TRUE);
 				}
 			}
@@ -101,8 +99,14 @@ namespace KlayGE
 			{
 				re.ClearStencil(stencil);
 
-				glStencilMaskSeparate(GL_FRONT, TRUE);
-				glStencilMaskSeparate(GL_BACK, TRUE);
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, TRUE);
+				}
 			}
 
 			glClear(flags);

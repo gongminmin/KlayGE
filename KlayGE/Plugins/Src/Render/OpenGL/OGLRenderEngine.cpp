@@ -328,8 +328,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
@@ -553,7 +551,7 @@ namespace KlayGE
 			}
 		}
 
-		glPopClientAttrib();
+		checked_cast<OGLRenderLayout const *>(&rl)->Deactive();
 	}
 
 	// Ω· ¯“ª÷°

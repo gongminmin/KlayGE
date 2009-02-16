@@ -55,40 +55,10 @@ namespace KlayGE
 		if (use_vao_)
 		{
 			glBindVertexArray(vao_);
-
-			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
-			{
-				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
-				uint32_t const size = this->VertexSize(i);
-				vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
-
-				uint8_t* elem_offset = NULL;
-				BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
-				{
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
-					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-
-					if (VEU_TextureCoord == vs_elem.usage)
-					{
-						glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-						if (glloader_GL_EXT_direct_state_access())
-						{
-							stream.Active();
-							glMultiTexCoordPointerEXT(GL_TEXTURE0 + vs_elem.usage_index, num_components, type, size, offset);
-						}
-						else
-						{
-							glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-							stream.Active();
-							glTexCoordPointer(num_components, type, size, offset);
-						}
-						break;
-					}
-
-					elem_offset += vs_elem.element_size();
-				}
-			}
+		}
+		else
+		{
+			glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
 		}
 
 		if (dirty_vao_ || !use_vao_)
@@ -181,6 +151,14 @@ namespace KlayGE
 			}
 
 			dirty_vao_ = false;
+		}
+	}
+
+	void OGLRenderLayout::Deactive() const
+	{
+		if (!use_vao_)
+		{
+			glPopClientAttrib();
 		}
 	}
 }
