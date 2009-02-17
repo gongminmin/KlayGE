@@ -34,6 +34,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Text", "Text.vcproj", "{1EC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProceduralTex", "ProceduralTex.vcproj", "{127F4D49-C643-4F02-B743-89051E027652}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredShading", "DeferredShading.vcproj", "{0724FDC0-38E1-4976-8177-6E4DF22D5C89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -178,6 +180,14 @@ Global
 		{127F4D49-C643-4F02-B743-89051E027652}.Release|Win32.Build.0 = Release|Win32
 		{127F4D49-C643-4F02-B743-89051E027652}.Release|x64.ActiveCfg = Release|x64
 		{127F4D49-C643-4F02-B743-89051E027652}.Release|x64.Build.0 = Release|x64
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Debug|Win32.Build.0 = Debug|Win32
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Debug|x64.ActiveCfg = Debug|x64
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Debug|x64.Build.0 = Debug|x64
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|Win32.ActiveCfg = Release|Win32
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|Win32.Build.0 = Release|Win32
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|x64.ActiveCfg = Release|x64
+		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

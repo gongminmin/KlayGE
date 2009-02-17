@@ -1,0 +1,163 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/Lighting.fxml"/>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="model_view_proj"/>
+		<parameter type="float4x4" name="model_view"/>
+		<parameter type="float3" name="light_in_eye"/>
+
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="upper_right"/>
+		<parameter type="float3" name="lower_left"/>
+		<parameter type="float3" name="lower_right"/>
+
+		<parameter type="float3" name="depth_min_invrange_range"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="bump_tex"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	
+	<shader>
+		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+		]]>
+	</shader>
+	
+	<shader>
+		<![CDATA[
+void GBufferVS(float4 pos : POSITION,
+			float3 normal : NORMAL,
+			float2 texcoord : TEXCOORD0,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oNormal : TEXCOORD1,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, model_view_proj);
+	float4 pos_es = mul(pos, model_view);
+	oNormal.xyz = normal;
+	oNormal.w = (pos_es.z - depth_min_invrange_range.x) * depth_min_invrange_range.y;
+	
+	oTexCoord = texcoord;
+}
+
+void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+{
+	normal.xyz = normalize(mul(normal.xyz + 0.1f * bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
+	oNormalDepth = normal;
+
+	oClr = diffuse_tex.Sample(linear_sampler, texcoord);
+}
+
+void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+{
+	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
+	oNormalDepth = normal;
+	
+	oClr = diffuse_tex.Sample(linear_sampler, texcoord);
+}
+		]]>
+	</shader>
+
+	<technique name="GBufferTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferNoBumpTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferNoBumpPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float" name="inv_width"/>
+	<parameter type="float" name="inv_height"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="color_tex"/>
+
+	<shader>
+		<![CDATA[
+void DeferredShadingVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 view_dir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	
+	float4 PosSS = oPos / oPos.w;
+	view_dir = texcoord_to_view(float2(PosSS.x, -PosSS.y) / 2 + 0.5f);
+}
+
+float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	view_dir = normalize(view_dir);
+	
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+
+	float3 pos_es = view_dir * (ndc.w * depth_min_invrange_range.z + depth_min_invrange_range.x);
+	float3 light_dir = normalize(light_in_eye - pos_es);
+	
+	float diffuse = diffuse_term(light_dir, ndc.xyz);
+	float specular = 0;
+	if (diffuse > 0)
+	{
+		specular = dot(normalize(light_dir - view_dir), ndc.xyz);
+		if (specular > 0)
+		{
+			specular = pow(specular, 8.0f);
+		}
+		else
+		{
+			specular = 0;
+		}
+	}
+	else
+	{
+		diffuse = 0;
+	}
+	
+	float4 color = color_tex.Sample(point_sampler, tc0);
+	
+	return float4(0.15f + color.xyz * diffuse * 0.7f + color.w * specular * 0.3f, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="DeferredShading">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadingPS()"/>
+		</pass>
+	</technique>
+</effect>

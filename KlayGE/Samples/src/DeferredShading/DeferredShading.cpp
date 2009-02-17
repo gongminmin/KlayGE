@@ -24,7 +24,7 @@
 #include <ctime>
 #include <boost/bind.hpp>
 
-#include "Cartoon.hpp"
+#include "DeferredShading.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -39,11 +39,38 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Cartoon.kfx")->TechniqueByName("NormalDepth");
+			effect_ = rf.LoadEffect("DeferredShading.kfx");
 		}
 
 		void BuildMeshInfo()
 		{
+			bool has_bump_map = false;
+			for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
+				iter != texture_slots_.end(); ++ iter)
+			{
+				if ("Diffuse Color" == iter->first)
+				{
+					*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+				}
+				if ("Bump" == iter->first)
+				{
+					TexturePtr bump = LoadTexture(iter->second, EAH_GPU_Read)();
+					*(effect_->ParameterByName("bump_tex")) = bump;
+					if (bump)
+					{
+						has_bump_map = true;
+					}
+				}
+			}
+
+			if (has_bump_map)
+			{
+				technique_ = effect_->TechniqueByName("GBufferTech");
+			}
+			else
+			{
+				technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
+			}
 		}
 
 		void OnRenderBegin()
@@ -56,10 +83,13 @@ namespace
 			*(technique_->Effect().ParameterByName("model_view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("model_view")) = view;
 
-			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
+			float const depth_range = camera.FarPlane() - camera.NearPlane();
+			*(technique_->Effect().ParameterByName("depth_min_invrange_range")) = float3(camera.NearPlane(), 1 / depth_range, depth_range);
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
 		}
+
+	private:
+		KlayGE::RenderEffectPtr effect_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -68,18 +98,17 @@ namespace
 		TorusObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadKModel("dino50.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
+			renderable_ = LoadKModel("sponza.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
 		}
 	};
 
 
-	class CartoonPostProcess : public PostProcess
+	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
-		CartoonPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.kfx")->TechniqueByName("Cartoon"))
+		DeferredShadingPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("DeferredShading"))
 		{
-			*(technique_->Effect().ParameterByName("toonmap_tex")) = LoadTexture("toon.dds", EAH_GPU_Read)();
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -103,8 +132,18 @@ namespace
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-			float depth_range = camera.FarPlane() - camera.NearPlane();
-			*(technique_->Effect().ParameterByName("e_barrier")) = float2(0.8f, 0.1f / depth_range);
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
+
+			float const depth_range = camera.FarPlane() - camera.NearPlane();
+			*(technique_->Effect().ParameterByName("depth_min_invrange_range")) = float3(camera.NearPlane(), 1 / depth_range, depth_range);
+			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 10, 0), view);
+
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 	};
 
@@ -151,78 +190,70 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Cartoon");
+	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Cartoon app("¿¨Í¨äÖÈ¾", settings);
+	DeferredShadingApp app("DeferredShading", settings);
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
-				cartoon_style_(true)
+DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings)
 {
 }
 
-void Cartoon::InitObjects()
+void DeferredShadingApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	torus_.reset(new TorusObject);
 	torus_->AddToSceneManager();
 
-	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
-	this->Proj(0.1f, 10.0f);
+	this->LookAt(float3(0, 2, -2), float3(0, 2, 0));
+	this->Proj(0.1f, 100.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.1f);
+	fpcController_.Scalers(0.05f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler(new input_signal);
-	input_handler->connect(boost::bind(&Cartoon::InputHandler, this, _1, _2));
+	input_handler->connect(boost::bind(&DeferredShadingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	cartoon_.reset(new CartoonPostProcess);
-
-	UIManager::Instance().Load(ResLoader::Instance().Load("Cartoon.kui"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
-
-	id_switch_cartoon_ = dialog_->IDFromName("Switch_Cartoon");
-
-	dialog_->Control<UICheckBox>(id_switch_cartoon_)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
+	deferred_shading_.reset(new DeferredShadingPostProcess);
 }
 
-void Cartoon::OnResize(uint32_t width, uint32_t height)
+void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	color_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
-	cartoon_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
-	checked_pointer_cast<CartoonPostProcess>(cartoon_)->ColorTex(color_tex_);
-	cartoon_->Destinate(FrameBufferPtr());
+	deferred_shading_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
+	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ColorTex(diffuse_specular_tex_);
+	deferred_shading_->Destinate(FrameBufferPtr());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -232,64 +263,38 @@ void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
-void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
+uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 {
-	cartoon_style_ = dialog_->Control<UICheckBox>(id_switch_cartoon_)->GetChecked();
-}
-
-uint32_t Cartoon::DoUpdate(uint32_t pass)
-{
-	if (0 == pass)
-	{
-		UIManager::Instance().HandleInput();
-	}
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if (cartoon_style_)
+	switch (pass)
 	{
-		switch (pass)
-		{
-		case 0:
-			renderEngine.BindFrameBuffer(g_buffer_);
-			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-			return App3DFramework::URV_Need_Flush;
+	case 0:
+		UIManager::Instance().HandleInput();
 
-		case 1:
-			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-			cartoon_->Apply();
-			break;
-		}
-	}
-	else
-	{
+		renderEngine.BindFrameBuffer(g_buffer_);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		return App3DFramework::URV_Need_Flush;
+
+	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-	}
+		deferred_shading_->Apply();
 
-	UIManager::Instance().Render();
+		UIManager::Instance().Render();
 
-	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
+		{
+			FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cartoon Rendering", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Shading", 16);
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
-	std::wostringstream stream;
-	stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-	stream.str(L"");
-	stream.precision(2);
-	stream << fixed << this->FPS() << " FPS";
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
-
-	if (!cartoon_style_ && (0 == pass))
-	{
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
-	}
-	else
-	{
+			std::wostringstream stream;
+			stream.precision(2);
+			stream << fixed << this->FPS() << " FPS";
+			font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+		}
+	
 		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

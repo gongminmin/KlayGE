@@ -7,8 +7,7 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model_view_proj"/>
 		<parameter type="float4x4" name="model_view"/>
-		<parameter type="float3" name="light_in_model"/>
-		<parameter type="float3" name="eye_in_model"/>
+		<parameter type="float3" name="light_in_eye"/>
 
 		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
@@ -24,11 +23,12 @@ void NormalDepthVS(float4 pos : POSITION,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, model_view_proj);
+	float4 pos_es = mul(pos, model_view);
 	oNormal.xyz = mul(normal, (float3x3)model_view);
-	oNormal.w = (oPos.z - depth_min) * inv_depth_range;
+	oNormal.w = (pos_es.z - depth_min) * inv_depth_range;
 	
-	oLightVec = light_in_model - pos.xyz;
-	oViewVec = eye_in_model - pos.xyz;
+	oLightVec = light_in_eye - pos_es.xyz;
+	oViewVec = -pos_es.xyz;
 }
 
 void NormalDepthPS(float4 normal : TEXCOORD0,
