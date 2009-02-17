@@ -9,7 +9,7 @@ class MD5SkinnedMesh;
 
 class MD5SkinnedModel : public KlayGE::SkinnedModel
 {
-	friend MD5SkinnedMesh;
+	friend class MD5SkinnedMesh;
 
 public:
 	MD5SkinnedModel();

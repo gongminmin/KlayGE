@@ -158,7 +158,7 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<OGLRasterizerStateObject>(desc);
 	}
-	
+
 	DepthStencilStateObjectPtr OGLRenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
 	{
 		return MakeSharedPtr<OGLDepthStencilStateObject>(desc);

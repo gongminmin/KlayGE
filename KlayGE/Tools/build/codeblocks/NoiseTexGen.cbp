@@ -2,14 +2,13 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Parallax" />
+		<Option title="NoiseTexGen" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\..\bin\Parallax_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Debug\Win32" />
+				<Option output="..\..\bin\Win32\NoiseTexGen_d" prefix_auto="1" extension_auto="1" />
+				<Option object_output="..\..\Debug\Win32\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -22,13 +21,11 @@
 				</Compiler>
 				<Linker>
 					<Add library="libKlayGE_Core_mgw_x86_d.a" />
-					<Add library="boost_signals-mgw43-mt-d" />
 					<Add library="boost_system-mgw43-mt-d" />
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\..\bin\Parallax" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\Win32\NoiseTexGen" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -43,7 +40,6 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="libKlayGE_Core_mgw_x86.a" />
-					<Add library="boost_signals-mgw43-mt" />
 					<Add library="boost_system-mgw43-mt" />
 				</Linker>
 			</Target>
@@ -51,16 +47,7 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug;Release;" />
 		</VirtualTargets>
-		<Unit filename="..\..\media\Parallax\Parallax.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%\Tools\fxmlc\fxmlc.py $file $file_dir\$file_name.kfx" />
-		</Unit>
-		<Unit filename="..\..\media\Parallax\Parallax.uiml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%\Tools\uimlc\uimlc.py $file $file_dir\$file_name.kui" />
-		</Unit>
-		<Unit filename="..\..\src\Parallax\Parallax.cpp" />
-		<Unit filename="..\..\src\Parallax\Parallax.hpp" />
+		<Unit filename="..\..\NoiseTexGen\NoiseTexGen.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

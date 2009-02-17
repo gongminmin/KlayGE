@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Samples workspace">
+		<Project filename="AsciiArts.cbp" active="1" />
 		<Project filename="Cartoon.cbp" />
-		<Project filename="Parallax.cbp" />
-		<Project filename="VertexDisplacement.cbp" active="1" />
-		<Project filename="DistanceMapping.cbp" />
-		<Project filename="ProceduralTex.cbp" />
-		<Project filename="Fractal.cbp" />
-		<Project filename="Refract.cbp" />
-		<Project filename="AsciiArts.cbp" />
-		<Project filename="ShadowCubeMap.cbp" />
-		<Project filename="Instancing.cbp" />
-		<Project filename="SkinnedMesh.cbp" />
-		<Project filename="VideoTexture.cbp" />
-		<Project filename="ParticleSystem.cbp" />
-		<Project filename="GPUParticleSystem.cbp" />
 		<Project filename="DepthOfField.cbp" />
 		<Project filename="DepthPeeling.cbp" />
+		<Project filename="DistanceMapping.cbp" />
+		<Project filename="Fractal.cbp" />
+		<Project filename="GPUParticleSystem.cbp" />
+		<Project filename="Instancing.cbp" />
+		<Project filename="Parallax.cbp" />
+		<Project filename="ParticleSystem.cbp" />
+		<Project filename="ProceduralTex.cbp" />
+		<Project filename="Refract.cbp" />
+		<Project filename="ShadowCubeMap.cbp" />
+		<Project filename="SkinnedMesh.cbp" />
+		<Project filename="Text.cbp" />
+		<Project filename="VertexDisplacement.cbp" />
+		<Project filename="VideoTexture.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

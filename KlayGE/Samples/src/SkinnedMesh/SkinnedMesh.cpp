@@ -73,8 +73,8 @@ int main()
 
 SkinnedMeshApp::SkinnedMeshApp(std::string const & name, RenderSettings const & settings)
 					: App3DFramework(name, settings),
-						skinned_(true), play_(false),
-						last_time_(0), frame_(0)
+						last_time_(0), frame_(0),
+						skinned_(true), play_(false)
 {
 }
 

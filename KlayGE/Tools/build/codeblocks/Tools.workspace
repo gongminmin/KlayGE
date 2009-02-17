@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Tools workspace">
-		<Project filename="NormalMapGen.cbp" />
+		<Project filename="7za.cbp" />
 		<Project filename="DistanceMapCreator.cbp" />
 		<Project filename="GLCompatibility.cbp" />
-		<Project filename="NormalMapCompressor.cbp" />
 		<Project filename="HDRCompressor.cbp" />
-		<Project filename="7za.cbp" />
 		<Project filename="KFontGen.cbp" active="1" />
+		<Project filename="NoiseTexGen.cbp" />
+		<Project filename="NormalMapCompressor.cbp" />
+		<Project filename="NormalMapGen.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

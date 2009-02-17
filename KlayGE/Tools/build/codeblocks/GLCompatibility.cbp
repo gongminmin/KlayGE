@@ -20,11 +20,12 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
-					<Add library="libglloader_d.a" />
-					<Add library="libKlayGE_Core_d.a" />
+					<Add library="libKlayGE_Core_mgw_x86_d.a" />
+					<Add library="boost_program_options-mgw43-mt-d" />
+					<Add library="boost_filesystem-mgw43-mt-d" />
+					<Add library="boost_system-mgw43-mt-d" />
 					<Add library="libopengl32.a" />
-					<Add library="libglut32.a" />
-					<Add library="libpython25.a" />
+					<Add library="libpython30_d.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -42,11 +43,12 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="libglloader.a" />
-					<Add library="libKlayGE_Core.a" />
+					<Add library="libKlayGE_Core_mgw_x86.a" />
+					<Add library="boost_program_options-mgw43-mt" />
+					<Add library="boost_filesystem-mgw43-mt" />
+					<Add library="boost_system-mgw43-mt" />
 					<Add library="libopengl32.a" />
-					<Add library="libglut32.a" />
-					<Add library="libpython25.a" />
+					<Add library="libpython30.a" />
 				</Linker>
 			</Target>
 		</Build>

@@ -3,6 +3,7 @@
 //
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -46,7 +47,7 @@ public:
 	{
 		return (0 <= x) && (x < width_)
 			&& (0 <= y) && (y < height_)
-			&& (0 <= z) && (z < depth_); 
+			&& (0 <= z) && (z < depth_);
 	}
 
 	// Do a single pass over the data.
@@ -273,7 +274,7 @@ int main(int argc, char* argv[])
 	{
 		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*height_map_texture);
-		
+
 		std::vector<uint8_t> height_map(height * width);
 		{
 			Texture::Mapper mapper(*height_map_texture, 0, TMA_Read_Only, 0, 0, width, height);
