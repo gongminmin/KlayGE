@@ -338,8 +338,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		UIManager::Instance().HandleInput();
-
 		if (use_depth_peeling_)
 		{
 			num_layers_ = 1;

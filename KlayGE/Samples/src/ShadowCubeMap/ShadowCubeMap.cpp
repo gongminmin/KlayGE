@@ -492,8 +492,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		{
-			UIManager::Instance().HandleInput();
-
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(true);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(true);
 

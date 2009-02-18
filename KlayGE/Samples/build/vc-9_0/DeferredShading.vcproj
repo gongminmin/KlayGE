@@ -400,6 +400,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\DeferredShading\DeferredShading.uiml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

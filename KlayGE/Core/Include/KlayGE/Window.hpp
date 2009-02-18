@@ -39,6 +39,17 @@
 
 namespace KlayGE
 {
+	enum MouseButtons
+	{
+		MB_None = 0,
+		MB_Left = 1UL << 0,
+		MB_Right = 1UL << 1,
+		MB_Middle = 1UL << 2,
+		MB_Shift = 1UL << 3,
+		MB_Ctrl = 1UL << 4,
+		MB_Alt = 1UL << 5
+	};
+
 	class KLAYGE_CORE_API Window
 	{
 	public:
@@ -93,6 +104,10 @@ namespace KlayGE
 		typedef boost::signal<void(Window const &, wchar_t)> CharEvent;
 		typedef boost::signal<void(Window const &, wchar_t)> KeyDownEvent;
 		typedef boost::signal<void(Window const &, wchar_t)> KeyUpEvent;
+		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseDownEvent;
+		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseUpEvent;
+		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &, int32_t)> MouseWheelEvent;
+		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseOverEvent;
 		typedef boost::signal<void(Window const &)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -131,6 +146,22 @@ namespace KlayGE
 		{
 			return key_up_event_;
 		}
+		MouseDownEvent& OnMouseDown()
+		{
+			return mouse_down_event_;
+		}
+		MouseUpEvent& OnMouseUp()
+		{
+			return mouse_up_event_;
+		}
+		MouseWheelEvent& OnMouseWheel()
+		{
+			return mouse_wheel_event_;
+		}
+		MouseOverEvent& OnMouseOver()
+		{
+			return mouse_over_event_;
+		}
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -146,6 +177,10 @@ namespace KlayGE
 		CharEvent char_event_;
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;
+		MouseDownEvent mouse_down_event_;
+		MouseUpEvent mouse_up_event_;
+		MouseWheelEvent mouse_wheel_event_;
+		MouseOverEvent mouse_over_event_;
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS

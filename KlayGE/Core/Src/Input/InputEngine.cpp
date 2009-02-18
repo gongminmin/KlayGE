@@ -100,7 +100,7 @@ namespace KlayGE
 	void InputEngine::Update()
 	{
 		elapsed_time_ = static_cast<float>(timer_.elapsed());
-		if (elapsed_time_ > 0.001f)
+		if (elapsed_time_ > 0.01f)
 		{
 			timer_.restart();
 

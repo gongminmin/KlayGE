@@ -126,6 +126,35 @@ namespace
 			*(technique_->Effect().ParameterByName("color_tex")) = tex;
 		}
 
+		void BufferType(int buffer_type)
+		{
+			switch (buffer_type)
+			{
+			case 0:
+				technique_ = technique_->Effect().TechniqueByName("DeferredShading");
+				break;
+
+			case 1:
+				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
+				break;
+
+			case 2:
+				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
+				break;
+
+			case 3:
+				technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
+				break;
+
+			case 4:
+				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
+				break;
+
+			default:
+				break;
+			}
+		}
+
 		void OnRenderBegin()
 		{
 			PostProcess::OnRenderBegin();
@@ -221,7 +250,6 @@ void DeferredShadingApp::InitObjects()
 	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -233,6 +261,17 @@ void DeferredShadingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	deferred_shading_.reset(new DeferredShadingPostProcess);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
+	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
+
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::BufferChangedHandler, this, _1));
+	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
+
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
 }
 
 void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
@@ -263,6 +302,24 @@ void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputActio
 	}
 }
 
+void DeferredShadingApp::BufferChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	buffer_type_ = sender.GetSelectedIndex();
+	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->BufferType(buffer_type_);
+}
+
+void DeferredShadingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+{
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
+	}
+}
+
 uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -270,8 +327,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		UIManager::Instance().HandleInput();
-
 		renderEngine.BindFrameBuffer(g_buffer_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;

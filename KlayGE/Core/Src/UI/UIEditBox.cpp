@@ -317,12 +317,6 @@ namespace KlayGE
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
 
-		key_down_event_.connect(boost::bind(&UIEditBox::KeyDownHandler, this, _1, _2));
-
-		mouse_over_event_.connect(boost::bind(&UIEditBox::MouseOverHandler, this, _1, _2));
-		mouse_down_event_.connect(boost::bind(&UIEditBox::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIEditBox::MouseUpHandler, this, _1, _2));
-
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnChar().connect(boost::bind(&UIEditBox::CharHandler, this, _1, _2));
 	}
@@ -462,9 +456,9 @@ namespace KlayGE
 	{
 	}
 
-	void UIEditBox::KeyDownHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UIEditBox::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		switch (arg.key)
+		switch (key)
 		{
 		case KS_Tab:
 			// We don't process Tab in case keyboard input is enabled and the user
@@ -473,7 +467,7 @@ namespace KlayGE
 
 		case KS_Home:
 			this->PlaceCaret(0);
-			if (!arg.all_keys[KS_LeftShift] && !arg.all_keys[KS_RightShift])
+			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -484,7 +478,7 @@ namespace KlayGE
 
 		case KS_End:
 			this->PlaceCaret(buffer_.GetTextSize());
-			if (!arg.all_keys[KS_LeftShift] && !arg.all_keys[KS_RightShift])
+			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -494,14 +488,14 @@ namespace KlayGE
 			break;
 
 		case KS_Insert:
-			if (arg.all_keys[KS_LeftCtrl] || arg.all_keys[KS_RightCtrl])
+			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
 			{
 				// Control Insert. Copy to clipboard
 				this->CopyToClipboard();
 			}
 			else
 			{
-				if (arg.all_keys[KS_LeftShift] || arg.all_keys[KS_RightShift])
+				if ((GetKeyState(VK_LSHIFT) & 0x8000) || (GetKeyState(VK_RSHIFT) & 0x8000))
 				{
 					// Shift Insert. Paste from clipboard
 					this->PasteFromClipboard();
@@ -531,7 +525,7 @@ namespace KlayGE
 			break;
 
 		case KS_LeftArrow:
-			if (arg.all_keys[KS_LeftCtrl] || arg.all_keys[KS_RightCtrl])
+			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -545,7 +539,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ - 1);
 				}
 			}
-			if (!arg.all_keys[KS_LeftShift] && !arg.all_keys[KS_RightShift])
+			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -555,7 +549,7 @@ namespace KlayGE
 			break;
 
 		case KS_RightArrow:
-			if (arg.all_keys[KS_LeftCtrl] || arg.all_keys[KS_RightCtrl])
+			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -569,7 +563,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ + 1);
 				}
 			}
-			if (!arg.all_keys[KS_LeftShift] && !arg.all_keys[KS_RightShift])
+			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -586,14 +580,14 @@ namespace KlayGE
 		}
 	}
 
-	void UIEditBox::MouseOverHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIEditBox::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
 	{
 		if (mouse_drag_)
 		{
 			// Determine the character corresponding to the coordinates.
 			int nX1st = buffer_.CPtoX(first_visible_, false);  // X offset of the 1st visible char
 			bool bTrail;
-			int nCP = buffer_.XtoCP(arg.location.x() - text_rc_.left() + nX1st, bTrail);
+			int nCP = buffer_.XtoCP(pt.x() - text_rc_.left() + nX1st, bTrail);
 			// Cap at the NULL character.
 			if (bTrail && (nCP < static_cast<int>(buffer_.GetTextSize())))
 			{
@@ -726,23 +720,23 @@ namespace KlayGE
 		}
 	}
 
-	void UIEditBox::MouseDownHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		if (arg.buttons & UIControl::MB_Left)
+		if (buttons & MB_Left)
 		{
 			if (!has_focus_)
 			{
 				this->GetDialog()->RequestFocus(*this);
 			}
 
-			if (this->ContainsPoint(arg.location))
+			if (this->ContainsPoint(pt))
 			{
 				mouse_drag_ = true;
 
 				// Determine the character corresponding to the coordinates.
 				int nX1st = buffer_.CPtoX(first_visible_, false);  // X offset of the 1st visible char
 				bool bTrail;
-				int nCP = buffer_.XtoCP(arg.location.x() - text_rc_.left() + nX1st, bTrail);
+				int nCP = buffer_.XtoCP(pt.x() - text_rc_.left() + nX1st, bTrail);
 
 				// Cap at the NULL character.
 				if (bTrail && (nCP < static_cast<int>(buffer_.GetTextSize())))
@@ -759,9 +753,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIEditBox::MouseUpHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIEditBox::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
 	{
-		if (arg.buttons & UIControl::MB_Left)
+		if (buttons & MB_Left)
 		{
 			mouse_drag_ = false;
 		}

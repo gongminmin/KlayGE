@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <boost/bind.hpp>
@@ -72,18 +73,11 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		key_down_event_.connect(boost::bind(&UISlider::KeyDownHandler, this, _1, _2));
-
-		mouse_over_event_.connect(boost::bind(&UISlider::MouseOverHandler, this, _1, _2));
-		mouse_down_event_.connect(boost::bind(&UISlider::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UISlider::MouseUpHandler, this, _1, _2));
-		mouse_wheel_event_.connect(boost::bind(&UISlider::MouseWheelHandler, this, _1, _2));
 	}
 
-	void UISlider::KeyDownHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UISlider::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		switch (arg.key)
+		switch (key)
 		{
 		case KS_Home:
 			this->SetValueInternal(min_);
@@ -113,24 +107,24 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseOverHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UISlider::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
 	{
 		if (pressed_)
 		{
-			this->SetValueInternal(ValueFromPos(x_ + arg.location.x() + drag_offset_));
+			this->SetValueInternal(ValueFromPos(x_ + pt.x() + drag_offset_));
 		}
 	}
 
-	void UISlider::MouseDownHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UISlider::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
-			if (button_rc_.PtInRect(arg.location))
+			if (button_rc_.PtInRect(pt))
 			{
 				// Pressed while inside the control
 				pressed_ = true;
 
-				drag_x_ = arg.location.x();
+				drag_x_ = pt.x();
 				//m_nDragY = arg.location.y();
 				drag_offset_ = button_x_ - drag_x_;
 
@@ -144,9 +138,9 @@ namespace KlayGE
 				return;
 			}
 
-			if (slider_rc_.PtInRect(arg.location))
+			if (slider_rc_.PtInRect(pt))
 			{
-				drag_x_ = arg.location.x();
+				drag_x_ = pt.x();
 				drag_offset_ = 0;
 				pressed_ = true;
 
@@ -155,13 +149,13 @@ namespace KlayGE
 					this->GetDialog()->RequestFocus(*this);
 				}
 
-				if (arg.location.x() > button_x_ + x_)
+				if (pt.x() > button_x_ + x_)
 				{
 					this->SetValueInternal(value_ + 1);
 					return;
 				}
 
-				if (arg.location.x() < button_x_ + x_)
+				if (pt.x() < button_x_ + x_)
 				{
 					this->SetValueInternal(value_ - 1);
 					return;
@@ -170,9 +164,9 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseUpHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UISlider::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			if (pressed_)
 			{
@@ -182,9 +176,9 @@ namespace KlayGE
 		}
 	}
 
-	void UISlider::MouseWheelHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UISlider::MouseWheelHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & /*pt*/, int32_t z_delta)
 	{
-		this->SetValueInternal(value_ - arg.z_delta);
+		this->SetValueInternal(value_ - z_delta);
 	}
 
 	void UISlider::UpdateRects()

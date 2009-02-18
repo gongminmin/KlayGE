@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <boost/bind.hpp>
 
@@ -114,10 +115,6 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		mouse_over_event_.connect(boost::bind(&UIScrollBar::MouseOverHandler, this, _1, _2));
-		mouse_down_event_.connect(boost::bind(&UIScrollBar::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIScrollBar::MouseUpHandler, this, _1, _2));
 	}
 
 	UIScrollBar::~UIScrollBar()
@@ -204,15 +201,15 @@ namespace KlayGE
 		this->UpdateThumbRect();
 	}
 
-	void UIScrollBar::MouseOverHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIScrollBar::MouseOverHandler(UIDialog const & /*sender*/, uint32_t /*buttons*/, Vector_T<int32_t, 2> const & pt)
 	{
-		last_mouse_ = arg.location;
+		last_mouse_ = pt;
 		is_mouse_over_ = true;
 
 		if (drag_)
 		{
-			thumb_rc_.bottom() += arg.location.y() - thumb_offset_y_ - thumb_rc_.top();
-			thumb_rc_.top() = arg.location.y() - thumb_offset_y_;
+			thumb_rc_.bottom() += pt.y() - thumb_offset_y_ - thumb_rc_.top();
+			thumb_rc_.top() = pt.y() - thumb_offset_y_;
 			if (thumb_rc_.top() < track_rc_.top())
 			{
 				thumb_rc_ += Vector_T<int32_t, 2>(0, track_rc_.top() - thumb_rc_.top());
@@ -237,12 +234,12 @@ namespace KlayGE
 		}
 	}
 
-	void UIScrollBar::MouseDownHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIScrollBar::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		last_mouse_ = arg.location;
-		if (arg.buttons & MB_Left)
+		last_mouse_ = pt;
+		if (buttons & MB_Left)
 		{
-			if (up_button_rc_.PtInRect(arg.location))
+			if (up_button_rc_.PtInRect(pt))
 			{
 				if (position_ > start_)
 				{
@@ -256,7 +253,7 @@ namespace KlayGE
 
 			// Check for click on down button
 
-			if (down_button_rc_.PtInRect(arg.location))
+			if (down_button_rc_.PtInRect(pt))
 			{
 				if (position_ + page_size_ < end_)
 				{
@@ -270,24 +267,24 @@ namespace KlayGE
 
 			// Check for click on thumb
 
-			if (thumb_rc_.PtInRect(arg.location))
+			if (thumb_rc_.PtInRect(pt))
 			{
 				drag_ = true;
-				thumb_offset_y_ = arg.location.y() - thumb_rc_.top();
+				thumb_offset_y_ = pt.y() - thumb_rc_.top();
 				return;
 			}
 
 			// Check for click on track
 
-			if ((thumb_rc_.left() <= arg.location.x()) && (thumb_rc_.right() > arg.location.x()))
+			if ((thumb_rc_.left() <= pt.x()) && (thumb_rc_.right() > pt.x()))
 			{
-				if ((thumb_rc_.top() > arg.location.y()) && (track_rc_.top() <= arg.location.y()))
+				if ((thumb_rc_.top() > pt.y()) && (track_rc_.top() <= pt.y()))
 				{
 					this->Scroll(-static_cast<int>(page_size_ - 1));
 				}
 				else
 				{
-					if ((thumb_rc_.bottom() <= arg.location.y()) && (track_rc_.bottom() > arg.location.y()))
+					if ((thumb_rc_.bottom() <= pt.y()) && (track_rc_.bottom() > pt.y()))
 					{
 						this->Scroll(static_cast<int>(page_size_ - 1));
 					}
@@ -296,10 +293,10 @@ namespace KlayGE
 		}
 	}
 
-	void UIScrollBar::MouseUpHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIScrollBar::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		last_mouse_ = arg.location;
-		if (arg.buttons & MB_Left)
+		last_mouse_ = pt;
+		if (buttons & MB_Left)
 		{
 			drag_ = false;
 			this->UpdateThumbRect();

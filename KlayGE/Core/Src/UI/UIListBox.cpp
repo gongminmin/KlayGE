@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <boost/bind.hpp>
@@ -85,14 +86,6 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		key_down_event_.connect(boost::bind(&UIListBox::KeyDownHandler, this, _1, _2));
-		key_up_event_.connect(boost::bind(&UIListBox::KeyUpHandler, this, _1, _2));
-
-		mouse_over_event_.connect(boost::bind(&UIListBox::MouseOverHandler, this, _1, _2));
-		mouse_down_event_.connect(boost::bind(&UIListBox::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIListBox::MouseUpHandler, this, _1, _2));
-		mouse_wheel_event_.connect(boost::bind(&UIListBox::MouseWheelHandler, this, _1, _2));
 	}
 
 	UIListBox::~UIListBox()
@@ -277,11 +270,11 @@ namespace KlayGE
 		this->OnSelectionEvent()(*this);
 	}
 
-	void UIListBox::KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg)
+	void UIListBox::KeyDownHandler(UIDialog const & sender, wchar_t key)
 	{
-		scroll_bar_.GetKeyDownEvent()(sender, arg);
+		scroll_bar_.KeyDownHandler(sender, key);
 
-		switch (arg.key)
+		switch (key)
 		{
 		case KS_UpArrow:
 		case KS_DownArrow:
@@ -299,7 +292,7 @@ namespace KlayGE
 				int nOldSelected = selected_;
 
 				// Adjust selected_
-				switch (arg.key)
+				switch (key)
 				{
 				case KS_UpArrow:
 					-- selected_;
@@ -348,7 +341,7 @@ namespace KlayGE
 							items_[i]->bSelected = false;
 						}
 
-						if (arg.all_keys[KS_LeftShift] || arg.all_keys[KS_RightShift])
+						if ((GetKeyState(VK_LSHIFT) & 0x8000) || (GetKeyState(VK_RSHIFT) & 0x8000))
 						{
 							// Select all items from sel_start_ to
 							// selected_
@@ -384,15 +377,15 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg)
+	void UIListBox::KeyUpHandler(UIDialog const & sender, wchar_t key)
 	{
-		scroll_bar_.GetKeyUpEvent()(sender, arg);
+		scroll_bar_.KeyUpHandler(sender, key);
 	}
 
-	void UIListBox::MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIListBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
 		// Let the scroll bar handle it first.
-		scroll_bar_.GetMouseOverEvent()(sender, arg);
+		scroll_bar_.MouseOverHandler(sender, buttons, pt);
 
 		if (drag_)
 		{
@@ -401,7 +394,7 @@ namespace KlayGE
 			int nItem;
 			if (text_height_ != 0)
 			{
-				nItem = static_cast<int>(scroll_bar_.GetTrackPos() + (arg.location.y() - text_rc_.top()) / text_height_);
+				nItem = static_cast<int>(scroll_bar_.GetTrackPos() + (pt.y() - text_rc_.top()) / text_height_);
 			}
 			else
 			{
@@ -440,9 +433,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIListBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			if (!has_focus_)
 			{
@@ -451,19 +444,19 @@ namespace KlayGE
 		}
 
 		// Let the scroll bar handle it first.
-		scroll_bar_.GetMouseDownEvent()(sender, arg);
+		scroll_bar_.MouseDownHandler(sender, buttons, pt);
 
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			// Check for clicks in the text area
-			if (!items_.empty() && selection_rc_.PtInRect(arg.location))
+			if (!items_.empty() && selection_rc_.PtInRect(pt))
 			{
 				// Compute the index of the clicked item
 
 				int nClicked;
 				if (text_height_ != 0)
 				{
-					nClicked = static_cast<int>(scroll_bar_.GetTrackPos() + (arg.location.y() - text_rc_.top()) / text_height_);
+					nClicked = static_cast<int>(scroll_bar_.GetTrackPos() + (pt.y() - text_rc_.top()) / text_height_);
 				}
 				else
 				{
@@ -479,7 +472,7 @@ namespace KlayGE
 					drag_ = true;
 
 					selected_ = nClicked;
-					if (!(arg.flags & UIControl::MF_Shift))
+					if (!(buttons & MB_Shift))
 					{
 						sel_start_ = selected_;
 					}
@@ -492,7 +485,7 @@ namespace KlayGE
 						// Determine behavior based on the state of Shift and Ctrl
 
 						boost::shared_ptr<UIListBoxItem> pSelItem = items_[selected_];
-						if (UIControl::MF_Ctrl == (arg.flags & (UIControl::MF_Shift | UIControl::MF_Ctrl)))
+						if (MB_Ctrl == (buttons & (MB_Shift | MB_Ctrl)))
 						{
 							// Control click. Reverse the selection of this item.
 
@@ -500,7 +493,7 @@ namespace KlayGE
 						}
 						else
 						{
-							if (UIControl::MF_Shift == (arg.flags & (UIControl::MF_Shift | UIControl::MF_Ctrl)))
+							if (MB_Shift == (buttons & (MB_Shift | MB_Ctrl)))
 							{
 								// Shift click. Set the selection for all items
 								// from last selected item to the current item.
@@ -526,7 +519,7 @@ namespace KlayGE
 							}
 							else
 							{
-								if ((UIControl::MF_Shift | UIControl::MF_Ctrl) == (arg.flags & (UIControl::MF_Shift | UIControl::MF_Ctrl)))
+								if ((MB_Shift | MB_Ctrl) == (buttons & (MB_Shift | MB_Ctrl)))
 								{
 									// Control-Shift-click.
 
@@ -576,12 +569,12 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIListBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
 		// Let the scroll bar handle it first.
-		scroll_bar_.GetMouseUpEvent()(sender, arg);
+		scroll_bar_.MouseUpHandler(sender, buttons, pt);
 
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			drag_ = false;
 
@@ -610,13 +603,13 @@ namespace KlayGE
 		}
 	}
 
-	void UIListBox::MouseWheelHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIListBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
 	{
 		// Let the scroll bar handle it first.
-		scroll_bar_.GetMouseWheelEvent()(sender, arg);
+		scroll_bar_.MouseWheelHandler(sender, buttons, pt, z_delta);
 
 		int const WHEELSCROLLLINES = 3;
-		scroll_bar_.Scroll(-arg.z_delta / 120 * WHEELSCROLLLINES);
+		scroll_bar_.Scroll(static_cast<int>(-z_delta / 120.0f * WHEELSCROLLLINES));
 	}
 
 	void UIListBox::Render()

@@ -13,6 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -264,6 +266,14 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(8, 113, 14, 121));
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 113, 241, 121));
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 113, 246, 121));
+
+		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
+		main_wnd->OnKeyDown().connect(boost::bind(&UIManager::KeyDownHandler, this, _2));
+		main_wnd->OnKeyUp().connect(boost::bind(&UIManager::KeyUpHandler, this, _2));
+		main_wnd->OnMouseDown().connect(boost::bind(&UIManager::MouseDownHandler, this, _2, _3));
+		main_wnd->OnMouseUp().connect(boost::bind(&UIManager::MouseUpHandler, this, _2, _3));
+		main_wnd->OnMouseWheel().connect(boost::bind(&UIManager::MouseWheelHandler, this, _2, _3, _4));
+		main_wnd->OnMouseOver().connect(boost::bind(&UIManager::MouseOverHandler, this, _2, _3));
 	}
 
 	void UIManager::Load(ResIdentifierPtr const & source)
@@ -350,7 +360,7 @@ namespace KlayGE
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->AddControl(UIControlPtr(new UIButton(dlg, id, wcaption,
-								x, y, width, height, hotkey, is_default)));
+								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
 						}
 						break;
 
@@ -364,7 +374,7 @@ namespace KlayGE
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->AddControl(UIControlPtr(new UICheckBox(dlg, id, wcaption,
-								x, y, width, height, checked, hotkey, is_default)));
+								x, y, width, height, checked, static_cast<uint8_t>(hotkey), is_default)));
 						}
 						break;
 
@@ -380,7 +390,7 @@ namespace KlayGE
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->AddControl(UIControlPtr(new UIRadioButton(dlg, id, button_group, wcaption,
-								x, y, width, height, checked, hotkey, is_default)));
+								x, y, width, height, checked, static_cast<uint8_t>(hotkey), is_default)));
 						}
 						break;
 
@@ -431,7 +441,7 @@ namespace KlayGE
 							uint32_t hotkey;
 							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
 							dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
-								x, y, width, height, hotkey, is_default)));
+								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
 
 							uint32_t num_items;
 							source->read(reinterpret_cast<char*>(&num_items), sizeof(num_items));
@@ -646,13 +656,68 @@ namespace KlayGE
 		sc.align = align;
 	}
 
-	void UIManager::HandleInput()
+	void UIManager::KeyDownHandler(wchar_t key)
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
-				dialog->HandleInput();
+				dialog->KeyDownHandler(key);
+			}
+		}
+	}
+
+	void UIManager::KeyUpHandler(wchar_t key)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->KeyUpHandler(key);
+			}
+		}
+	}
+
+	void UIManager::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->MouseDownHandler(buttons, pt);
+			}
+		}
+	}
+
+	void UIManager::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->MouseUpHandler(buttons, pt);
+			}
+		}
+	}
+
+	void UIManager::MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->MouseWheelHandler(buttons, pt, z_delta);
+			}
+		}
+	}
+
+	void UIManager::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		{
+			if (dialog->GetVisible())
+			{
+				dialog->MouseOverHandler(buttons, pt);
 			}
 		}
 	}
@@ -1308,200 +1373,185 @@ namespace KlayGE
 		}
 	}
 
-	void UIDialog::HandleInput()
+	void UIDialog::KeyDownHandler(wchar_t key)
 	{
-		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
-		for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled())
 		{
-			InputKeyboardPtr key_board = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
-			InputMousePtr mouse = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
-			if (key_board)
+			control_focus_.lock()->KeyDownHandler(*this, key);
+		}
+		else
+		{
+			bool handled = false;
+			if (!control_focus_.lock() || (control_focus_.lock()->GetType() != UICT_EditBox))
 			{
-				if (control_focus_.lock() && control_focus_.lock()->GetEnabled())
+				// See if this matches a control's hotkey
+				// Activate the hotkey if the focus doesn't belong to an
+				// edit box.
+				BOOST_FOREACH(BOOST_TYPEOF(controls_)::reference control, controls_)
 				{
-					UIControl::KeyEventArg arg;
-					arg.all_keys = key_board->Keys();
-					for (size_t j = 0; j < key_board->NumKeys(); ++ j)
+					if (control->GetHotkey() == static_cast<uint8_t>(key))
 					{
-						arg.key = static_cast<uint8_t>(j);
-						if (key_board->KeyDown(j))
-						{
-							control_focus_.lock()->GetKeyDownEvent()(*this, arg);
-						}
-						if (key_board->KeyUp(j))
-						{
-							control_focus_.lock()->GetKeyUpEvent()(*this, arg);
-						}
-					}
-				}
-				else
-				{
-					bool handled = false;
-					if (!control_focus_.lock() || (control_focus_.lock()->GetType() != UICT_EditBox))
-					{
-						for (size_t j = 0; j < key_board->NumKeys(); ++ j)
-						{
-							if (key_board->KeyDown(j))
-							{
-								// See if this matches a control's hotkey
-								// Activate the hotkey if the focus doesn't belong to an
-								// edit box.
-								BOOST_FOREACH(BOOST_TYPEOF(controls_)::reference control, controls_)
-								{
-									if (control->GetHotkey() == static_cast<uint8_t>(j))
-									{
-										control->OnHotkey();
-										handled = true;
-										break;
-									}
-								}
-							}
-						}
-					}
-
-					// Not yet handled, check for focus messages
-					if (!handled)
-					{
-						// If keyboard input is not enabled, this message should be ignored
-						if (keyboard_input_)
-						{
-							if (key_board->Key(KS_RightArrow) || key_board->Key(KS_DownArrow))
-							{
-								if (control_focus_.lock())
-								{
-									this->OnCycleFocus(true);
-								}
-							}
-
-							if (key_board->Key(KS_LeftArrow) || key_board->Key(KS_UpArrow))
-							{
-								if (control_focus_.lock())
-								{
-									this->OnCycleFocus(false);
-								}
-							}
-
-							if (key_board->Key(KS_Tab))
-							{
-								bool shift_down = key_board->Key(KS_LeftShift) | key_board->Key(KS_RightShift);
-								this->OnCycleFocus(!shift_down);
-							}
-						}
+						control->OnHotkey();
+						handled = true;
+						break;
 					}
 				}
 			}
-			if (mouse)
+
+			// Not yet handled, check for focus messages
+			if (!handled)
 			{
-				UIControl::MouseEventArg arg;
-				arg.buttons = UIControl::MB_None;
-				arg.flags = UIControl::MF_None;
-				if (mouse->LeftButton())
+				// If keyboard input is not enabled, this message should be ignored
+				if ((KS_RightArrow == key) || (KS_DownArrow == key))
 				{
-					arg.buttons |= UIControl::MB_Left;
-				}
-				if (mouse->RightButton())
-				{
-					arg.buttons |= UIControl::MB_Right;
-				}
-				if (mouse->MiddleButton())
-				{
-					arg.buttons |= UIControl::MB_Middle;
-				}
-				arg.location = Vector_T<int32_t, 2>(mouse->AbsX(), mouse->AbsY()) - this->GetLocation();
-				if (show_caption_)
-				{
-					arg.location.y() -= caption_height_;
-				}
-				arg.z_delta = mouse->Z();
-
-				for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
-				{
-					InputKeyboardPtr key_board = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
-					if (key_board)
+					if (control_focus_.lock())
 					{
-						if (key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))
-						{
-							arg.flags |= UIControl::MF_Shift;
-						}
-						if (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl))
-						{
-							arg.flags |= UIControl::MF_Ctrl;
-						}
-						if (key_board->Key(KS_LeftAlt) || key_board->Key(KS_RightAlt))
-						{
-							arg.flags |= UIControl::MF_Alt;
-						}
+						this->OnCycleFocus(true);
 					}
 				}
 
-				UIControlPtr control;
-				if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-					&& control_focus_.lock()->ContainsPoint(arg.location))
+				if ((KS_LeftArrow == key) || (KS_UpArrow == key))
 				{
-					control = control_focus_.lock();
-				}
-				else
-				{
-					// Figure out which control the mouse is over now
-					control = this->GetControlAtPoint(arg.location);
-
-					if (control_mouse_over_.lock() != control)
+					if (control_focus_.lock())
 					{
-						// Handle mouse leaving the old control
-						if (control_mouse_over_.lock())
-						{
-							control_mouse_over_.lock()->OnMouseLeave();
-						}
-
-						// Handle mouse entering the new control
-						control_mouse_over_ = control;
-						if (control)
-						{
-							control->OnMouseEnter();
-						}
+						this->OnCycleFocus(false);
 					}
 				}
 
+				if (KS_Tab == key)
+				{
+					bool shift_down = (KS_LeftShift == key) | (KS_RightShift == key);
+					this->OnCycleFocus(!shift_down);
+				}
+			}
+		}
+	}
+
+	void UIDialog::KeyUpHandler(wchar_t key)
+	{
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled())
+		{
+			control_focus_.lock()->KeyUpHandler(*this, key);
+		}
+	}
+
+	void UIDialog::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		UIControlPtr control;
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
+			&& control_focus_.lock()->ContainsPoint(pt))
+		{
+			control = control_focus_.lock();
+		}
+		else
+		{
+			// Figure out which control the mouse is over now
+			control = this->GetControlAtPoint(pt);
+		}
+
+		if (control)
+		{
+			control->MouseDownHandler(*this, buttons, pt);
+		}
+		else
+		{
+			if ((buttons | MB_Left) && control_focus_.lock())
+			{
+				control_focus_.lock()->OnFocusOut();
+				control_focus_.reset();
+			}
+		}
+	}
+
+	void UIDialog::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		UIControlPtr control;
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
+			&& control_focus_.lock()->ContainsPoint(pt))
+		{
+			control = control_focus_.lock();
+		}
+		else
+		{
+			// Figure out which control the mouse is over now
+			control = this->GetControlAtPoint(pt);
+		}
+
+		if (control)
+		{
+			control->MouseUpHandler(*this, buttons, pt);
+		}
+		else
+		{
+			if ((buttons | MB_Left) && control_focus_.lock())
+			{
+				control_focus_.lock()->OnFocusOut();
+				control_focus_.reset();
+			}
+		}
+	}
+
+	void UIDialog::MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
+	{
+		UIControlPtr control;
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
+			&& control_focus_.lock()->ContainsPoint(pt))
+		{
+			control = control_focus_.lock();
+		}
+		else
+		{
+			// Figure out which control the mouse is over now
+			control = this->GetControlAtPoint(pt);
+		}
+
+		if (control)
+		{
+			control->MouseWheelHandler(*this, buttons, pt, z_delta);
+		}
+		else
+		{
+			if ((buttons | MB_Left) && control_focus_.lock())
+			{
+				control_focus_.lock()->OnFocusOut();
+				control_focus_.reset();
+			}
+		}
+	}
+
+	void UIDialog::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
+	{
+		UIControlPtr control;
+		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
+			&& control_focus_.lock()->ContainsPoint(pt))
+		{
+			control = control_focus_.lock();
+		}
+		else
+		{
+			// Figure out which control the mouse is over now
+			control = this->GetControlAtPoint(pt);
+
+			if (control_mouse_over_.lock() != control)
+			{
+				// Handle mouse leaving the old control
+				if (control_mouse_over_.lock())
+				{
+					control_mouse_over_.lock()->OnMouseLeave();
+				}
+
+				// Handle mouse entering the new control
+				control_mouse_over_ = control;
 				if (control)
 				{
-					control->GetMouseOverEvent()(*this, arg);
-
-					if (mouse->ButtonDown(0) || mouse->ButtonDown(1) || mouse->ButtonDown(2))
-					{
-						control->GetMouseDownEvent()(*this, arg);
-					}
-					arg.buttons = UIControl::MB_None;
-					if (mouse->ButtonUp(0))
-					{
-						arg.buttons |= UIControl::MB_Left;
-					}
-					if (mouse->ButtonUp(1))
-					{
-						arg.buttons |= UIControl::MB_Right;
-					}
-					if (mouse->ButtonUp(2))
-					{
-						arg.buttons |= UIControl::MB_Middle;
-					}
-					if (arg.buttons != UIControl::MB_None)
-					{
-						control->GetMouseUpEvent()(*this, arg);
-					}
-
-					if (mouse->Z() != 0)
-					{
-						control->GetMouseWheelEvent()(*this, arg);
-					}
-				}
-				else
-				{
-					if ((mouse->ButtonDown(0) || mouse->ButtonUp(0)) && control_focus_.lock())
-					{
-						control_focus_.lock()->OnFocusOut();
-						control_focus_.reset();
-					}
+					control->OnMouseEnter();
 				}
 			}
+		}
+
+		if (control)
+		{
+			control->MouseOverHandler(*this, buttons, pt);
 		}
 	}
 }

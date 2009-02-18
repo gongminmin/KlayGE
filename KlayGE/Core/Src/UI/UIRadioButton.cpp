@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <boost/bind.hpp>
@@ -76,25 +77,19 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		key_down_event_.connect(boost::bind(&UIRadioButton::KeyDownHandler, this, _1, _2));
-		key_up_event_.connect(boost::bind(&UIRadioButton::KeyUpHandler, this, _1, _2));
-
-		mouse_down_event_.connect(boost::bind(&UIRadioButton::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIRadioButton::MouseUpHandler, this, _1, _2));
 	}
 
-	void UIRadioButton::KeyDownHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UIRadioButton::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		if (KS_Space == arg.key)
+		if (KS_Space == key)
 		{
 			pressed_ = true;
 		}
 	}
 
-	void UIRadioButton::KeyUpHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UIRadioButton::KeyUpHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		if (KS_Space == arg.key)
+		if (KS_Space == key)
 		{
 			if (pressed_)
 			{
@@ -108,9 +103,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIRadioButton::MouseDownHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIRadioButton::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			pressed_ = true;
 
@@ -121,13 +116,13 @@ namespace KlayGE
 		}
 	}
 
-	void UIRadioButton::MouseUpHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIRadioButton::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			pressed_ = false;
 
-			if (this->ContainsPoint(arg.location))
+			if (this->ContainsPoint(pt))
 			{
 				this->GetDialog()->ClearRadioButtonGroup(button_group_);
 				checked_ = !checked_;

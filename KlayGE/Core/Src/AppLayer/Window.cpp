@@ -17,6 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/Window.hpp>
@@ -233,6 +234,206 @@ namespace KlayGE
 
 		case WM_KEYUP:
 			this->OnKeyUp()(*this, static_cast<wchar_t>(wParam));
+			break;
+
+		case WM_LBUTTONDOWN:
+			{
+				uint32_t buttons = MB_Left;
+				if (wParam & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (wParam & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_RBUTTONDOWN:
+			{
+				uint32_t buttons = MB_Right;
+				if (wParam & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (wParam & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_MBUTTONDOWN:
+			{
+				uint32_t buttons = MB_Middle;
+				if (wParam & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (wParam & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseDown()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_LBUTTONUP:
+			{
+				uint32_t buttons = MB_Left;
+				if (wParam & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (wParam & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_RBUTTONUP:
+			{
+				uint32_t buttons = MB_Right;
+				if (wParam & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (wParam & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_MBUTTONUP:
+			{
+				uint32_t buttons = MB_Middle;
+				if (wParam & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (wParam & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (wParam & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (wParam & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseUp()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
+			break;
+
+		case WM_MOUSEWHEEL:
+			{
+				uint32_t buttons = MB_None;
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseWheel()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)), GET_WHEEL_DELTA_WPARAM(wParam));
+			}
+			break;
+
+		case WM_MOUSEMOVE:
+			{
+				uint32_t buttons = MB_None;
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_LBUTTON)
+				{
+					buttons |= MB_Left;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_RBUTTON)
+				{
+					buttons |= MB_Right;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON)
+				{
+					buttons |= MB_Middle;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL)
+				{
+					buttons |= MB_Ctrl;
+				}
+				if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT)
+				{
+					buttons |= MB_Shift;
+				}
+
+				this->OnMouseOver()(*this, buttons, Vector_T<int32_t, 2>(LOWORD(lParam), HIWORD(lParam)));
+			}
 			break;
 
 		case WM_CLOSE:

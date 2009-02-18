@@ -182,8 +182,6 @@ void SkinnedMeshApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
-	UIManager::Instance().HandleInput();
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);

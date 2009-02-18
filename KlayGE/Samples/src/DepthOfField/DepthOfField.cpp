@@ -389,8 +389,6 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		UIManager::Instance().HandleInput();
-
 		renderEngine.BindFrameBuffer(clr_depth_buffer_);
 		clear_float_->Apply();
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);

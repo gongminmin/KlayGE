@@ -19,7 +19,8 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
+	void BufferChangedHandler(KlayGE::UIComboBox const & sender);
+	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
@@ -30,6 +31,12 @@ private:
 	KlayGE::TexturePtr normal_depth_tex_;
 	KlayGE::TexturePtr diffuse_specular_tex_;
 	KlayGE::PostProcessPtr deferred_shading_;
+
+	KlayGE::UIDialogPtr dialog_;
+	int buffer_type_;
+
+	int id_buffer_combo_;
+	int id_ctrl_camera_;
 };
 
 #endif		// _CARTOON_HPP

@@ -340,11 +340,6 @@ void AsciiArtsApp::CheckBoxHandler(UICheckBox const & /*sender*/)
 
 uint32_t AsciiArtsApp::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		UIManager::Instance().HandleInput();
-	}
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 

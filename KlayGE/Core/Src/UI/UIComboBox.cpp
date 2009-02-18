@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <boost/bind.hpp>
@@ -108,14 +109,6 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		key_down_event_.connect(boost::bind(&UIComboBox::KeyDownHandler, this, _1, _2));
-		key_up_event_.connect(boost::bind(&UIComboBox::KeyUpHandler, this, _1, _2));
-
-		mouse_over_event_.connect(boost::bind(&UIComboBox::MouseOverHandler, this, _1, _2));
-		mouse_down_event_.connect(boost::bind(&UIComboBox::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIComboBox::MouseUpHandler, this, _1, _2));
-		mouse_wheel_event_.connect(boost::bind(&UIComboBox::MouseWheelHandler, this, _1, _2));
 	}
 
 	UIComboBox::~UIComboBox()
@@ -193,11 +186,11 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::KeyDownHandler(UIDialog const & sender, KeyEventArg const & arg)
+	void UIComboBox::KeyDownHandler(UIDialog const & sender, wchar_t key)
 	{
-		scroll_bar_.GetKeyDownEvent()(sender, arg);
+		scroll_bar_.KeyDownHandler(sender, key);
 
-		switch (arg.key)
+		switch (key)
 		{
 		case KS_Enter:
 			if (opened_)
@@ -263,22 +256,22 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::KeyUpHandler(UIDialog const & sender, KeyEventArg const & arg)
+	void UIComboBox::KeyUpHandler(UIDialog const & sender, wchar_t key)
 	{
-		scroll_bar_.GetKeyUpEvent()(sender, arg);
+		scroll_bar_.KeyUpHandler(sender, key);
 	}
 
-	void UIComboBox::MouseOverHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIComboBox::MouseOverHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		scroll_bar_.GetMouseOverEvent()(sender, arg);
+		scroll_bar_.MouseOverHandler(sender, buttons, pt);
 
-		if (opened_ && dropdown_rc_.PtInRect(arg.location))
+		if (opened_ && dropdown_rc_.PtInRect(pt))
 		{
 			// Determine which item has been selected
 			for (size_t i = 0; i < items_.size(); ++ i)
 			{
 				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
-				if (pItem->bVisible && pItem->rcActive.PtInRect(arg.location))
+				if (pItem->bVisible && pItem->rcActive.PtInRect(pt))
 				{
 					focused_ = static_cast<int>(i);
 				}
@@ -286,13 +279,13 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseDownHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIComboBox::MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		scroll_bar_.GetMouseDownEvent()(sender, arg);
+		scroll_bar_.MouseDownHandler(sender, buttons, pt);
 
-		if (arg.buttons & UIControl::MB_Left)
+		if (buttons & MB_Left)
 		{
-			if (show_rc_.PtInRect(arg.location))
+			if (show_rc_.PtInRect(pt))
 			{
 				// Pressed while inside the control
 				pressed_ = true;
@@ -321,13 +314,13 @@ namespace KlayGE
 			}
 
 			// Perhaps this click is within the dropdown
-			if (opened_ && dropdown_rc_.PtInRect(arg.location))
+			if (opened_ && dropdown_rc_.PtInRect(pt))
 			{
 				// Determine which item has been selected
 				for (size_t i = scroll_bar_.GetTrackPos(); i < items_.size(); ++ i)
 				{
 					boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
-					if (pItem -> bVisible && pItem->rcActive.PtInRect(arg.location))
+					if (pItem -> bVisible && pItem->rcActive.PtInRect(pt))
 					{
 						focused_ = static_cast<int>(i);
 						break;
@@ -347,14 +340,14 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseUpHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIComboBox::MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		scroll_bar_.GetMouseUpEvent()(sender, arg);
+		scroll_bar_.MouseUpHandler(sender, buttons, pt);
 
-		if (arg.buttons & UIControl::MB_Left)
+		if (buttons & MB_Left)
 		{
 			// Perhaps this click is within the dropdown
-			if (opened_ && dropdown_rc_.PtInRect(arg.location))
+			if (opened_ && dropdown_rc_.PtInRect(pt))
 			{
 				selected_ = focused_;
 
@@ -366,14 +359,14 @@ namespace KlayGE
 			}
 			else
 			{
-				if (opened_ && !this->ContainsPoint(arg.location))
+				if (opened_ && !this->ContainsPoint(pt))
 				{
 					opened_ = false;
 					this->UpdateRects();
 				}
 			}
 
-			if (pressed_ && this->ContainsPoint(arg.location))
+			if (pressed_ && this->ContainsPoint(pt))
 			{
 				// Button click
 				pressed_ = false;
@@ -381,18 +374,18 @@ namespace KlayGE
 		}
 	}
 
-	void UIComboBox::MouseWheelHandler(UIDialog const & sender, MouseEventArg const & arg)
+	void UIComboBox::MouseWheelHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
 	{
-		scroll_bar_.GetMouseWheelEvent()(sender, arg);
+		scroll_bar_.MouseWheelHandler(sender, buttons, pt, z_delta);
 
 		if (opened_)
 		{
 			int const WHEELSCROLLLINES = 3;
-			scroll_bar_.Scroll(-arg.z_delta / 120 * WHEELSCROLLLINES);
+			scroll_bar_.Scroll(static_cast<int>(-z_delta / 120.0f * WHEELSCROLLLINES));
 		}
 		else
 		{
-			if (arg.z_delta > 0)
+			if (z_delta > 0)
 			{
 				if (focused_ > 0)
 				{
@@ -407,7 +400,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (focused_ + 1 < (int)GetNumItems())
+				if (focused_ + 1 < static_cast<int>(this->GetNumItems()))
 				{
 					++ focused_;
 					selected_ = focused_;

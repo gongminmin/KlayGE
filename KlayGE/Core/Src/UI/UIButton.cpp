@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <boost/bind.hpp>
@@ -78,25 +79,19 @@ namespace KlayGE
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
-
-		key_down_event_.connect(boost::bind(&UIButton::KeyDownHandler, this, _1, _2));
-		key_up_event_.connect(boost::bind(&UIButton::KeyUpHandler, this, _1, _2));
-
-		mouse_down_event_.connect(boost::bind(&UIButton::MouseDownHandler, this, _1, _2));
-		mouse_up_event_.connect(boost::bind(&UIButton::MouseUpHandler, this, _1, _2));
 	}
 
-	void UIButton::KeyDownHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UIButton::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		if (KS_Space == arg.key)
+		if (KS_Space == key)
 		{
 			pressed_ = true;
 		}
 	}
 
-	void UIButton::KeyUpHandler(UIDialog const & /*sender*/, KeyEventArg const & arg)
+	void UIButton::KeyUpHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
-		if (KS_Space == arg.key)
+		if (KS_Space == key)
 		{
 			if (pressed_)
 			{
@@ -106,9 +101,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIButton::MouseDownHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIButton::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & /*pt*/)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			pressed_ = true;
 
@@ -119,9 +114,9 @@ namespace KlayGE
 		}
 	}
 
-	void UIButton::MouseUpHandler(UIDialog const & /*sender*/, MouseEventArg const & arg)
+	void UIButton::MouseUpHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		if (arg.buttons & MB_Left)
+		if (buttons & MB_Left)
 		{
 			pressed_ = false;
 
@@ -130,7 +125,7 @@ namespace KlayGE
 				this->GetDialog()->ClearFocus();
 			}
 
-			if (this->ContainsPoint(arg.location))
+			if (this->ContainsPoint(pt))
 			{
 				this->OnClickedEvent()(*this);
 			}

@@ -239,11 +239,6 @@ void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
 
 uint32_t Cartoon::DoUpdate(uint32_t pass)
 {
-	if (0 == pass)
-	{
-		UIManager::Instance().HandleInput();
-	}
-
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	if (cartoon_style_)

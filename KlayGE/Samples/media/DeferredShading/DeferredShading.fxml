@@ -149,6 +149,52 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	
 	return float4(0.15f + color.xyz * diffuse * 0.7f + color.w * specular * 0.3f, 1);
 }
+
+float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+	
+	return float4(ndc.xyz, 1);
+}
+
+float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+	
+	return float4(ndc.www, 1);
+}
+
+float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+	
+	float4 color = color_tex.Sample(point_sampler, tc0);
+	return float4(color.xyz, 1);
+}
+
+float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+	
+	float4 color = color_tex.Sample(point_sampler, tc0);
+	return float4(color.www, 1);
+}
 		]]>
 	</shader>
 
@@ -158,6 +204,42 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowNormal">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowNormalPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowDepth">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowDepthPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowDiffuse">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowDiffusePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowSpecular">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowSpecularPS()"/>
 		</pass>
 	</technique>
 </effect>
