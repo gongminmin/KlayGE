@@ -31,68 +31,45 @@ private:
 	class kd_node
 	{
 	public:
-		bool is_leaf;
-
 		union
 		{
 			struct
 			{
-				kd_node* children;
+				unsigned int leaf_children_dim;	// 1b for is_leaf, 27b for children offset, 4b for dim
 				typename T::value_type cut_val;
-				unsigned char dim;
 			} node_data;
 
 			struct
 			{
-				kdtree_point const * points;
+				unsigned int leaf_points;		// 1b for is_leaf, 31b for point index
 				unsigned int num_elements;
 			} leaf_data;
 		};
 
-		explicit kd_node(bool leaf)
+		void query_node(kd_node const * node_pool, kdtree_point const * points,
+			typename T::value_type rd, std::vector<neighbor_type>& neighbors, size_t num_neighbors, T const & query_position, T& query_offsets) const
 		{
-			is_leaf = leaf;
-			if (!is_leaf)
+			if (!(node_data.leaf_children_dim & 0x80000000UL))
 			{
-				node_data.children = NULL;
-			}
-		}
-
-		~kd_node()
-		{
-			if (!is_leaf)
-			{
-				kd_node* leaf0 = &node_data.children[0];
-				leaf0->~kd_node();
-				kd_node* leaf1 = &node_data.children[1];
-				leaf1->~kd_node();
-
-				kdtree_pool::free(node_data.children);
-			}
-		}
-
-		void query_node(typename T::value_type rd, std::vector<neighbor_type>& neighbors, size_t num_neighbors, T const & query_position, T& query_offsets) const
-		{
-			if (!is_leaf)
-			{
-				typename T::value_type const old_off = query_offsets[node_data.dim];
-				typename T::value_type const new_off = query_position[node_data.dim] - node_data.cut_val;
+				typename T::value_type const old_off = query_offsets[node_data.leaf_children_dim & 0xF];
+				typename T::value_type const new_off = query_position[node_data.leaf_children_dim & 0xF] - node_data.cut_val;
 				int const branch = new_off < 0 ? 0 : 1;
-				node_data.children[branch].query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
+				node_pool[(node_data.children_dim >> 4) + branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
 				rd += new_off * new_off - old_off * old_off;
 				if (rd < neighbors.back().second)
 				{
-		  			query_offsets[node_data.dim] = new_off;
-		  			node_data.children[!branch].query_node(rd, neighbors, num_neighbors, query_position, query_offsets);
-		  			query_offsets[node_data.dim] = old_off;
+		  			query_offsets[node_data.leaf_children_dim & 0xF] = new_off;
+		  			node_pool[(node_data.leaf_children_dim >> 4) + !branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
+		  			query_offsets[node_data.leaf_children_dim & 0xF] = old_off;
 				}
 			}
   			else
 			{
-				kdtree_point const * point_end = leaf_data.points + leaf_data.num_elements;
-				for (kdtree_point const * point = leaf_data.points; point < point_end; ++ point)
+				kdtree_point const * p = points + (leaf_data.leaf_points & 0x7FFFFFFFUL);
+				kdtree_point const * p_end = p + leaf_data.num_elements;
+				for (; p < p_end; ++ p)
 				{
-					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point->pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(p->pos - query_position);
 					if (sqr_dist < neighbors.back().second)
 					{
 						if (neighbors.size() >= num_neighbors)
@@ -100,7 +77,7 @@ private:
 							neighbors.pop_back();
 						}
 
-						neighbor_type new_neighbor(point->index, sqr_dist);
+						neighbor_type new_neighbor(p->index, sqr_dist);
 						typename std::vector<neighbor_type>::iterator iter = std::lower_bound(neighbors.begin(), neighbors.end(),
 							new_neighbor, less_neighbor_type());
 						neighbors.insert(iter, new_neighbor);
@@ -109,48 +86,44 @@ private:
 			}
 		}
 
-		void query_node(typename T::value_type rd, neighbor_type& neighbor, T const & query_position, T& query_offsets) const
+		void query_node(kd_node const * node_pool, kdtree_point const * points,
+			typename T::value_type rd, neighbor_type& neighbor, T const & query_position, T& query_offsets) const
 		{
-			if (!is_leaf)
+			if (!(node_data.leaf_children_dim & 0x80000000UL))
 			{
-				typename T::value_type const old_off = query_offsets[node_data.dim];
-				typename T::value_type const new_off = query_position[node_data.dim] - node_data.cut_val;
+				typename T::value_type const old_off = query_offsets[node_data.leaf_children_dim & 0xF];
+				typename T::value_type const new_off = query_position[node_data.leaf_children_dim & 0xF] - node_data.cut_val;
 				int const branch = new_off < 0 ? 0 : 1;
-				node_data.children[branch].query_node(rd, neighbor, query_position, query_offsets);
+				node_pool[(node_data.leaf_children_dim >> 4) + branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
 				rd += new_off * new_off - old_off * old_off;
 				if (rd < neighbor.second)
 				{
-		  			query_offsets[node_data.dim] = new_off;
-		  			node_data.children[!branch].query_node(rd, neighbor, query_position, query_offsets);
-		  			query_offsets[node_data.dim] = old_off;
+		  			query_offsets[node_data.leaf_children_dim & 0xF] = new_off;
+		  			node_pool[(node_data.leaf_children_dim >> 4) + !branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
+		  			query_offsets[node_data.leaf_children_dim & 0xF] = old_off;
 				}
 			}
   			else
 			{
-				kdtree_point const * point_end = leaf_data.points + leaf_data.num_elements;
-				for (kdtree_point const * point = leaf_data.points; point < point_end; ++ point)
+				kdtree_point const * p = points + (leaf_data.leaf_points & 0x7FFFFFFFUL);
+				kdtree_point const * p_end = p + leaf_data.num_elements;
+				for (; p < p_end; ++ p)
 				{
-					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(point->pos - query_position);
+					typename T::value_type sqr_dist = KlayGE::MathLib::length_sq(p->pos - query_position);
 					if (sqr_dist < neighbor.second)
 					{
-						neighbor = neighbor_type(point->index, sqr_dist);
+						neighbor = neighbor_type(p->index, sqr_dist);
 					}
 				}
 			}
 		}
 	};
 
-	struct kdtree_pool_tag
-	{
-	};
-
-	typedef boost::singleton_pool<kdtree_pool_tag, sizeof(kd_node) * 2> kdtree_pool;
-
 public:
 	kdtree(T const * positions, size_t num_positions, unsigned int max_bucket_size = 40)
 		: points_(num_positions),
 			bucket_size_(max_bucket_size),
-			root_(false)
+			node_pool_(1)
 	{
 		for (size_t i = 0; i < num_positions; ++ i)
 		{
@@ -160,7 +133,7 @@ public:
 		this->compute_enclosing_bounding_box(bbox_low_corner_, bbox_high_corner_);
 		T maximum = bbox_high_corner_;
 		T minimum = bbox_low_corner_;
-		this->create_tree(root_, 0, static_cast<int>(num_positions), maximum, minimum);
+		this->create_tree(0, 0, static_cast<int>(num_positions), maximum, minimum);
 	}
 
 	size_t query_position(T const & position, size_t num_neighbors)
@@ -174,7 +147,7 @@ public:
 		}
 		neighbors_.assign(1, std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
 		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
-		root_.query_node(sqr_dist, neighbors_, num_neighbors, position, query_offsets);
+		node_pool_[0].query_node(&node_pool_[0], &points_[0], sqr_dist, neighbors_, num_neighbors, position, query_offsets);
 
 		if (static_cast<size_t>(-1) == neighbors_.back().first)
 		{
@@ -193,7 +166,7 @@ public:
 		}
 		neighbors_.assign(1, std::make_pair(-1, std::numeric_limits<typename T::value_type>::max()));
 		typename T::value_type sqr_dist = this->compute_box_sqr_distance(position, bbox_low_corner_, bbox_high_corner_, query_offsets);
-		root_.query_node(sqr_dist, neighbors_[0], position, query_offsets);
+		node_pool_[0].query_node(&node_pool_[0], &points_[0], sqr_dist, neighbors_[0], position, query_offsets);
 
 		if (static_cast<size_t>(-1) == neighbors_.back().first)
 		{
@@ -262,7 +235,7 @@ private:
 		}
 	}
 
-	void create_tree(kd_node& node, int start, int end, T& maximum, T& minimum)
+	void create_tree(unsigned int node_offset, int start, int end, T& maximum, T& minimum)
 	{
 		int n = end - start;
 		T diff = maximum - minimum;
@@ -276,29 +249,32 @@ private:
 			}
 		}
 
-		node.node_data.dim = dim;
+		unsigned int const cur_children_offset = static_cast<unsigned int>(node_pool_.size());
+		node_pool_.resize(cur_children_offset + 2);
+		node_pool_[node_offset].node_data.leaf_children_dim |= (cur_children_offset << 4) | dim;
+
 		typename T::value_type best_cut = (maximum[dim] + minimum[dim]) / typename T::value_type(2);
 		typename T::value_type mmin, mmax;
 		this->get_min_max(&points_[start], n, dim, mmin, mmax);	// find min/max coordinates
 		if (best_cut < mmin)		// slide to min or max as needed
 		{
-			node.node_data.cut_val = mmin;
+			node_pool_[node_offset].node_data.cut_val = mmin;
 		}
 		else
 		{
 			if (best_cut > mmax)
 			{
-				node.node_data.cut_val = mmax;
+				node_pool_[node_offset].node_data.cut_val = mmax;
 			}
 			else
 			{
-				node.node_data.cut_val = best_cut;
+				node_pool_[node_offset].node_data.cut_val = best_cut;
 			}
 		}
 
 		int br1, br2;
 		// permute points accordingly
-		this->split_at_mid(&points_[start], n, dim, node.node_data.cut_val, br1, br2);
+		this->split_at_mid(&points_[start], n, dim, node_pool_[node_offset].node_data.cut_val, br1, br2);
 
 		int	mid;
 		if (best_cut < mmin)
@@ -331,42 +307,36 @@ private:
 			}
 		}
 
-		node.node_data.children = static_cast<kd_node*>(kdtree_pool::malloc());
-
 		if (mid - start <= bucket_size_)
 		{
 			// new leaf
-			kd_node* leaf = &node.node_data.children[0];
-			new (leaf) kd_node(true);
-			leaf->leaf_data.points = &points_[start];
-			leaf->leaf_data.num_elements = mid - start;
+			kd_node& leaf = node_pool_[cur_children_offset + 0];
+			leaf.leaf_data.leaf_points = 0x80000000UL | start;
+			leaf.leaf_data.num_elements = mid - start;
 		}
 		else
 		{
 			// new node
-			kd_node* child = &node.node_data.children[0];
-			new (child) kd_node(false);
+			node_pool_[cur_children_offset + 0].node_data.leaf_children_dim = 0;
 			typename T::value_type old_max = maximum[dim];
-			maximum[dim] = node.node_data.cut_val;
-			this->create_tree(*child, start, mid, maximum, minimum);
+			maximum[dim] = node_pool_[node_offset].node_data.cut_val;
+			this->create_tree(cur_children_offset + 0, start, mid, maximum, minimum);
 			maximum[dim] = old_max;
 		}
 
 		if (end - mid <= bucket_size_)
 		{
 			// new leaf
-			kd_node* leaf = &node.node_data.children[1];
-			new (leaf) kd_node(true);
-			leaf->leaf_data.points = &points_[mid];
-			leaf->leaf_data.num_elements = end - mid;
+			kd_node& leaf = node_pool_[cur_children_offset + 1];
+			leaf.leaf_data.leaf_points = 0x80000000UL | mid;
+			leaf.leaf_data.num_elements = end - mid;
 		}
 		else
 		{
 			// new node
-			minimum[dim] = node.node_data.cut_val;
-			kd_node* child = &node.node_data.children[1];
-			new (child) kd_node(false);
-			this->create_tree(*child, mid, end, maximum, minimum);
+			node_pool_[cur_children_offset + 1].node_data.leaf_children_dim = 0;
+			minimum[dim] = node_pool_[node_offset].node_data.cut_val;
+			this->create_tree(cur_children_offset + 1, mid, end, maximum, minimum);
 		}
 	}
 
@@ -446,9 +416,10 @@ private:
 	std::vector<kdtree_point>		points_;
 	std::vector<neighbor_type>  	neighbors_;
 	int								bucket_size_;
-	kd_node							root_;
 	T								bbox_low_corner_;
 	T								bbox_high_corner_;
+
+	std::vector<kd_node>			node_pool_;
 };
 
 #endif

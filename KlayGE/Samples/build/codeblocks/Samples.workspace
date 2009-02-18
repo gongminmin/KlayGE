@@ -3,6 +3,7 @@
 	<Workspace title="Samples workspace">
 		<Project filename="AsciiArts.cbp" active="1" />
 		<Project filename="Cartoon.cbp" />
+		<Project filename="DeferredShading.cbp" />
 		<Project filename="DepthOfField.cbp" />
 		<Project filename="DepthPeeling.cbp" />
 		<Project filename="DistanceMapping.cbp" />
