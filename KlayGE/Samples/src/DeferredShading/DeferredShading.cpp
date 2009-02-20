@@ -116,8 +116,7 @@ namespace
 			PostProcess::Source(tex, flipping);
 			if (tex)
 			{
-				*(technique_->Effect().ParameterByName("inv_width")) = 1.0f / tex->Width(0);
-				*(technique_->Effect().ParameterByName("inv_height")) = 1.0f / tex->Height(0);
+				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
 			}
 		}
 
@@ -150,6 +149,10 @@ namespace
 				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
 				break;
 
+			case 5:
+				technique_ = technique_->Effect().TechniqueByName("ShowEdge");
+				break;
+
 			default:
 				break;
 			}
@@ -173,6 +176,29 @@ namespace
 			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+		}
+	};
+
+	class AntiAliasPostProcess : public PostProcess
+	{
+	public:
+		AntiAliasPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("AntiAlias"))
+		{
+		}
+
+		void Source(TexturePtr const & tex, bool flipping)
+		{
+			PostProcess::Source(tex, flipping);
+			if (tex)
+			{
+				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
+			}
+		}
+
+		void ColorTex(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("color_tex")) = tex;
 		}
 	};
 
@@ -232,7 +258,8 @@ int main()
 }
 
 DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+			: App3DFramework(name, settings),
+				anti_alias_enabled_(true)
 {
 }
 
@@ -247,8 +274,12 @@ void DeferredShadingApp::InitObjects()
 	this->Proj(0.1f, 100.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	
 	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+
+	shaded_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	shaded_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -261,16 +292,19 @@ void DeferredShadingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	deferred_shading_.reset(new DeferredShadingPostProcess);
+	edge_anti_alias_.reset(new AntiAliasPostProcess);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.kui"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
+	id_anti_alias_ = dialog_->IDFromName("AntiAlias");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::BufferChangedHandler, this, _1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
+	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::AntiAliasHandler, this, _1));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
 }
 
@@ -285,9 +319,16 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
+	shaded_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0));
+
 	deferred_shading_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ColorTex(diffuse_specular_tex_);
-	deferred_shading_->Destinate(FrameBufferPtr());
+	deferred_shading_->Destinate(shaded_buffer_);
+
+	edge_anti_alias_->Source(normal_depth_tex_, shaded_buffer_->RequiresFlipping());
+	checked_pointer_cast<AntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
+	edge_anti_alias_->Destinate(FrameBufferPtr());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -306,6 +347,30 @@ void DeferredShadingApp::BufferChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->BufferType(buffer_type_);
+
+	if (buffer_type_ != 0)
+	{
+		dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(false);
+		anti_alias_enabled_ = false;
+		deferred_shading_->Destinate(FrameBufferPtr());
+	}
+}
+
+void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
+{
+	if (0 == buffer_type_)
+	{
+		anti_alias_enabled_ = sender.GetChecked();
+		if (anti_alias_enabled_)
+		{
+			deferred_shading_->Destinate(shaded_buffer_);
+			edge_anti_alias_->Destinate(FrameBufferPtr());
+		}
+		else
+		{
+			deferred_shading_->Destinate(FrameBufferPtr());
+		}
+	}
 }
 
 void DeferredShadingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -335,6 +400,10 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 		deferred_shading_->Apply();
+		if ((0 == buffer_type_) && anti_alias_enabled_)
+		{
+			edge_anti_alias_->Apply();
+		}
 
 		UIManager::Instance().Render();
 

@@ -20,6 +20,7 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void BufferChangedHandler(KlayGE::UIComboBox const & sender);
+	void AntiAliasHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -32,10 +33,16 @@ private:
 	KlayGE::TexturePtr diffuse_specular_tex_;
 	KlayGE::PostProcessPtr deferred_shading_;
 
+	KlayGE::FrameBufferPtr shaded_buffer_;
+	KlayGE::TexturePtr shaded_tex_;
+	KlayGE::PostProcessPtr edge_anti_alias_;
+
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
+	bool anti_alias_enabled_;
 
 	int id_buffer_combo_;
+	int id_anti_alias_;
 	int id_ctrl_camera_;
 };
 

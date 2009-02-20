@@ -87,8 +87,7 @@ namespace
 			PostProcess::Source(tex, flipping);
 			if (tex)
 			{
-				*(technique_->Effect().ParameterByName("inv_width")) = 1.0f / tex->Width(0);
-				*(technique_->Effect().ParameterByName("inv_height")) = 1.0f / tex->Height(0);
+				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
 			}
 		}
 

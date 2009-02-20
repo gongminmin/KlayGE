@@ -88,8 +88,7 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<parameter type="float" name="inv_width"/>
-	<parameter type="float" name="inv_height"/>
+	<parameter type="float2" name="inv_width_height"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -102,6 +101,69 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 
 	<shader>
 		<![CDATA[
+float GetEdgeWeight(float2 tc0)
+{
+	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
+	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, -1, +1);
+	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(-1, 0, +1, 0);
+	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(0, -1, 0, +1);
+	
+	float4 nd[9];  
+	// Retrieve normal and depth data for all neighbors.
+	nd[0] = src_tex.Sample(point_sampler, tc0);
+	nd[1] = src_tex.Sample(point_sampler, tc1.xy);
+	nd[2] = src_tex.Sample(point_sampler, tc1.zw);
+	nd[3] = src_tex.Sample(point_sampler, tc2.xy);
+	nd[4] = src_tex.Sample(point_sampler, tc2.zw);
+	nd[5] = src_tex.Sample(point_sampler, tc3.xy);
+	nd[6] = src_tex.Sample(point_sampler, tc3.zw);
+	nd[7] = src_tex.Sample(point_sampler, tc4.xy);
+	nd[8] = src_tex.Sample(point_sampler, tc4.zw);
+
+	// Compute Deltas in Depth.
+	float4 Deltas1;
+	float4 Deltas2;
+	Deltas1.x = nd[1].w;
+	Deltas1.y = nd[2].w;
+	Deltas1.z = nd[3].w;
+	Deltas1.w = nd[4].w;
+	Deltas2.x = nd[5].w;
+	Deltas2.y = nd[6].w;
+	Deltas2.z = nd[7].w;
+	Deltas2.w = nd[8].w;
+	// Compute andbsolute gradients from center.
+	Deltas1 = abs(Deltas1 - nd[0].w);
+	Deltas2 = abs(nd[0].w - Deltas2);
+	// Find min and max gradient, ensuring min != 0
+	float4 maxDeltas = max(Deltas1, Deltas2);
+	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
+	// Compare change in gradients, flagging ones that change
+	// significantly.
+	// How severe the change must be to get flagged is a function of the
+	// minimum gradient. It is not resolution dependent. The constant
+	// number here would change based on how the depth values are stored
+	// and how sensitive the edge detection should be.
+	float4 depthResults = step(minDeltas * 25.0, maxDeltas);
+	// Compute change in the cosine of the angle between normals.
+	Deltas1.x = dot(nd[1].xyz, nd[0].xyz);
+	Deltas1.y = dot(nd[2].xyz, nd[0].xyz);
+	Deltas1.z = dot(nd[3].xyz, nd[0].xyz);
+	Deltas1.w = dot(nd[4].xyz, nd[0].xyz);
+	Deltas2.x = dot(nd[5].xyz, nd[0].xyz);
+	Deltas2.y = dot(nd[6].xyz, nd[0].xyz);
+	Deltas2.z = dot(nd[7].xyz, nd[0].xyz);
+	Deltas2.w = dot(nd[8].xyz, nd[0].xyz);
+	Deltas1 = abs(Deltas1 - Deltas2);
+	// Compare change in the cosine of the angles, flagging changes
+	// above some constant threshold. The cosine of the angle is not a
+	// linear function of the angle, so to have the flagging be
+	// independent of the angles involved, an arccos function would be
+	// required.
+	float4 normalResults = step(0.4, Deltas1);
+	normalResults = max(normalResults, depthResults);
+	return (normalResults.x + normalResults.y + normalResults.z + normalResults.w) * 0.25;
+}  
+
 void DeferredShadingVS(float4 pos : POSITION,
 				out float2 oTc0 : TEXCOORD0,
 				out float3 view_dir : TEXCOORD1,
@@ -144,9 +206,8 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	{
 		diffuse = 0;
 	}
-	
-	float4 color = color_tex.Sample(point_sampler, tc0);
-	
+
+	float4 color = color_tex.Sample(point_sampler, tc0);	
 	return float4(0.15f + color.xyz * diffuse * 0.7f + color.w * specular * 0.3f, 1);
 }
 
@@ -195,6 +256,34 @@ float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	return float4(color.www, 1);
 }
+
+float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+
+	float4 color = GetEdgeWeight(tc0);
+	return float4(color.xyz, 1);
+}
+
+
+float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	if (1 == ndc.w)
+	{
+		clip(-1);
+	}
+
+	float edge = GetEdgeWeight(tc0);
+	return (color_tex.Sample(point_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(point_sampler, tc0 + edge * float2(inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(point_sampler, tc0 + edge * float2(-inv_width_height.x, inv_width_height.y))
+			+ color_tex.Sample(point_sampler, tc0 + edge * float2(inv_width_height.x, inv_width_height.y))) * 0.25f;
+}
 		]]>
 	</shader>
 
@@ -240,6 +329,24 @@ float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="ShowSpecularPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowEdge">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowEdgePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="AntiAlias">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="AntiAliasPS()"/>
 		</pass>
 	</technique>
 </effect>

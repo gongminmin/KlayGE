@@ -71,8 +71,7 @@ void NormalDepthPS(float4 normal : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<parameter type="float" name="inv_width"/>
-	<parameter type="float" name="inv_height"/>
+	<parameter type="float2" name="inv_width_height"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -102,10 +101,10 @@ void PostToonVS(float4 pos : POSITION,
 {
 	PostProcessVS(pos, oTc0, oPos);
 
-	oTc1 = oTc0.xyxy + float4(-inv_width, -inv_height, +inv_width, +inv_height);
-	oTc2 = oTc0.xyxy + float4(+inv_width, -inv_height, -inv_width, +inv_height);
-	oTc3 = oTc0.xyxy + float4(-inv_width, 0, +inv_width, 0);
-	oTc4 = oTc0.xyxy + float4(0, -inv_height, 0, +inv_height);
+	oTc1 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
+	oTc2 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, -1, -1, +1);
+	oTc3 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, 0, +1, 0);
+	oTc4 = oTc0.xyxy + inv_width_height.xyxy * float4(0, -1, 0, +1);
 }
 
 float4 PostToonPS(float2 tc0 : TEXCOORD0,
