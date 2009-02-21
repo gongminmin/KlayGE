@@ -616,7 +616,7 @@ namespace KlayGE
 					file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(image_size));
 					BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 
-					the_width /= 2;
+					the_width = std::max(the_width / 2, 1UL);
 				}
 			}
 			break;
@@ -669,8 +669,8 @@ namespace KlayGE
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch));
 					}
 
-					the_width /= 2;
-					the_height /= 2;
+					the_width = std::max(the_width / 2, 1UL);
+					the_height = std::max(the_height / 2, 1UL);
 				}
 			}
 			break;
@@ -725,9 +725,9 @@ namespace KlayGE
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch * the_depth));
 					}
 
-					the_width /= 2;
-					the_height /= 2;
-					the_depth /= 2;
+					the_width = std::max(the_width / 2, 1UL);
+					the_height = std::max(the_height / 2, 1UL);
+					the_depth = std::max(the_depth / 2, 1UL);
 				}
 			}
 			break;
@@ -782,6 +782,9 @@ namespace KlayGE
 							file->read(reinterpret_cast<char*>(&data_block[base[index]]), static_cast<std::streamsize>(init_data[index].slice_pitch));
 							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
+
+						the_width = std::max(the_width / 2, 1UL);
+						the_height = std::max(the_height / 2, 1UL);
 					}
 				}
 			}
@@ -1097,7 +1100,7 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			{
-				int the_width = width;
+				uint32_t the_width = width;
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
 					uint32_t image_size;
@@ -1122,15 +1125,15 @@ namespace KlayGE
 
 					file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(image_size));
 
-					the_width /= 2;
+					the_width = std::max(the_width / 2, 1UL);
 				}
 			}
 			break;
 
 		case Texture::TT_2D:
 			{
-				int the_width = width;
-				int the_height = height;
+				uint32_t the_width = width;
+				uint32_t the_height = height;
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
 					if (IsCompressedFormat(format))
@@ -1154,17 +1157,17 @@ namespace KlayGE
 						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * format_size));
 					}
 
-					the_width /= 2;
-					the_height /= 2;
+					the_width = std::max(the_width / 2, 1UL);
+					the_height = std::max(the_height / 2, 1UL);
 				}
 			}
 			break;
 
 		case Texture::TT_3D:
 			{
-				int the_width = width;
-				int the_height = height;
-				int the_depth = depth;
+				uint32_t the_width = width;
+				uint32_t the_height = height;
+				uint32_t the_depth = depth;
 				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 				{
 					if (IsCompressedFormat(format))
@@ -1188,9 +1191,9 @@ namespace KlayGE
 						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * the_depth * format_size));
 					}
 
-					the_width /= 2;
-					the_height /= 2;
-					the_depth /= 2;
+					the_width = std::max(the_width / 2, 1UL);
+					the_height = std::max(the_height / 2, 1UL);
+					the_depth = std::max(the_depth / 2, 1UL);
 				}
 			}
 			break;
@@ -1199,7 +1202,7 @@ namespace KlayGE
 			{
 				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 				{
-					int the_width = width;
+					uint32_t the_width = width;
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
 						size_t const index = (face - Texture::CF_Positive_X) * numMipMaps + level;
@@ -1224,7 +1227,7 @@ namespace KlayGE
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_width * format_size));
 						}
 
-						the_width /= 2;
+						the_width = std::max(the_width / 2, 1UL);
 					}
 				}
 			}
