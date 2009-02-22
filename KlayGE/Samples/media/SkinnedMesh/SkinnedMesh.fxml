@@ -27,8 +27,8 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
 				int4 blend_indices : BLENDINDICES,
+				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
-				float3 B	: BINORMAL,	// in object space
 				
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,	// in tangent space
@@ -47,11 +47,11 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 
 		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
 		obj2tan[0] += mul_quat(T, joint_rot) * weight;
-		obj2tan[1] += mul_quat(B, joint_rot) * weight;
+		obj2tan[2] += mul_quat(N, joint_rot) * weight;
 	}
 	obj2tan[0] = normalize(obj2tan[0]);
-	obj2tan[1] = normalize(obj2tan[1]);
-	obj2tan[2] = cross(obj2tan[0], obj2tan[1]);
+	obj2tan[2] = normalize(obj2tan[2]);
+	obj2tan[1] = cross(obj2tan[2], obj2tan[0]);
 
 	oPos = mul(float4(result_pos, 1), worldviewproj);
 

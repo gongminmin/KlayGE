@@ -5,7 +5,7 @@
 	<include name="../../../RenderFX/PostProcess.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="model_view_proj"/>
+		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float3" name="light_in_eye"/>
 
@@ -24,12 +24,6 @@
 		<state name="filtering" value="min_mag_mip_linear"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
-	</parameter>
-
-	<parameter type="sampler" name="bilinear_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
 	</parameter>
 	
 	<shader>
@@ -82,8 +76,8 @@ void GBufferVS(float4 pos : POSITION,
 			out float4 oNormal : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
-	oPos = mul(pos, model_view_proj);
 	float4 pos_es = mul(pos, model_view);
+	oPos = mul(pos_es, proj);
 	oNormal.xyz = normal;
 	oNormal.w = (pos_es.z - depth_min_invrange_range.x) * depth_min_invrange_range.y;
 	
@@ -126,17 +120,95 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 
 	<parameter type="float2" name="inv_width_height"/>
 
+	<parameter type="texture2D" name="rand_normal_tex">
+		<annotation type="string" name="SasResourceAddress" value="rand_normal.dds"/>
+	</parameter>
+	
+	<parameter type="float" name="sampleRadius"/>
+	<parameter type="float" name="distanceScale"/>
+
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
+	<parameter type="sampler" name="bilinear_clamp_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="bilinear_wrap_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="ssao_tex"/>
+
+	<parameter type="bool" name="ssao_enabled"/>
 
 	<shader>
 		<![CDATA[
+float4 SSAO(float2 tc0)
+{
+	float4 ndc = src_tex.Sample(point_sampler, tc0);
+	float depth = GetDepth(ndc);
+
+	const half fScale = 0.025f; 
+	float4 samples[16] =
+	{
+		float4(0.355512, 	-0.709318, 	-0.102371,	0.0),
+		float4(0.534186, 	0.71511, 	-0.115167,	0.0),
+		float4(-0.87866, 	0.157139, 	-0.115167,	0.0),
+		float4(0.140679, 	-0.475516, 	-0.0639818,	0.0),
+		float4(-0.0796121, 	0.158842, 	-0.677075,	0.0),
+		float4(-0.0759516, 	-0.101676, 	-0.483625,	0.0),
+		float4(0.12493, 	-0.0223423,	-0.483625,	0.0),
+		float4(-0.0720074, 	0.243395, 	-0.967251,	0.0),
+		float4(-0.207641, 	0.414286, 	0.187755,	0.0),
+		float4(-0.277332, 	-0.371262, 	0.187755,	0.0),
+		float4(0.63864, 	-0.114214, 	0.262857,	0.0),
+		float4(-0.184051, 	0.622119, 	0.262857,	0.0),
+		float4(0.110007, 	-0.219486, 	0.435574,	0.0),
+		float4(0.235085, 	0.314707, 	0.696918,	0.0),
+		float4(-0.290012, 	0.0518654, 	0.522688,	0.0),
+		float4(0.0975089, 	-0.329594, 	0.609803,	0.0)
+	};
+
+	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 400.0).rgb;
+
+	float4 sky_access = 0.0f;
+	float4 arr_scene_depth2;
+	float3 ray;
+
+	float def_val = 0.55f;
+	for (int i = 0; i < 4; ++ i)
+	{
+		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sampleRadius;
+		arr_scene_depth2.x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		ray = reflect(samples[i * 4 + 1].xyz, randNormal) * sampleRadius;
+		arr_scene_depth2.y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		
+		ray = reflect(samples[i * 4 + 2].xyz, randNormal) * sampleRadius;
+		arr_scene_depth2.z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		
+		ray = reflect(samples[i * 4 + 3].xyz, randNormal) * sampleRadius;
+		arr_scene_depth2.w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		float4 dist = arr_scene_depth2 - depth;
+		float4 occlusion = distanceScale * dist;
+		float4 range_is_invalid = (saturate(abs(occlusion)) + saturate(occlusion)) / 2;
+		sky_access += lerp(saturate(-dist * 0.2f), def_val, range_is_invalid);
+	}
+	
+	return dot(sky_access, 1 / 8.0f);
+}
+
 float GetEdgeWeight(float2 tc0)
 {
 	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
@@ -198,7 +270,7 @@ float GetEdgeWeight(float2 tc0)
 	// required.
 	float4 normalResults = step(0.4, Deltas1);
 	normalResults = max(normalResults, depthResults);
-	return (normalResults.x + normalResults.y + normalResults.z + normalResults.w) * 0.25;
+	return dot(normalResults, 0.25);
 }  
 
 void DeferredShadingVS(float4 pos : POSITION,
@@ -248,6 +320,10 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float3 diffuse_clr = GetDiffuse(color);
+	if (ssao_enabled)
+	{
+		diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
+	}
 	float3 specular_clr = GetSpecular(color);
 	return float4(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f, 1);
 }
@@ -334,6 +410,18 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	return color;
 }
 
+float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	float depth = GetDepth(ndc);
+	if (1 == depth)
+	{
+		clip(-1);
+	}
+
+	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
+	return color;
+}
 
 float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
@@ -345,10 +433,23 @@ float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 	}
 
 	float edge = GetEdgeWeight(tc0);
-	return (color_tex.Sample(bilinear_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(+inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(-inv_width_height.x, +inv_width_height.y))
-			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(+inv_width_height.x, +inv_width_height.y))) * 0.25f;
+	return (color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(+inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(-inv_width_height.x, +inv_width_height.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(+inv_width_height.x, +inv_width_height.y))) * 0.25f;
+}
+
+float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	float depth = GetDepth(ndc);
+	if (1 == depth)
+	{
+		clip(-1);
+	}
+
+	float4 color = SSAO(tc0);
+	return color;
 }
 		]]>
 	</shader>
@@ -416,12 +517,30 @@ float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
+	<technique name="ShowSSAO">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowSSAOPS()"/>
+		</pass>
+	</technique>
+
 	<technique name="AntiAlias">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="AntiAliasPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSAO">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SSAOPS()"/>
 		</pass>
 	</technique>
 </effect>

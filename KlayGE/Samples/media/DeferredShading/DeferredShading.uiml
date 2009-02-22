@@ -11,9 +11,11 @@
 			<item name="Diffuse"/>
 			<item name="Specular"/>
 			<item name="Edge"/>
+			<item name="SSAO"/>
 		</control>
 
 		<control type="check_box" id="AntiAlias" caption="Anti alias" x="-120" y="348" align_x="right" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="SSAO" caption="SSAO" x="-120" y="378" align_x="right" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="-120" y="428" align_x="right" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 </ui>

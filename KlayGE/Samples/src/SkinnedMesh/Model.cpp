@@ -32,6 +32,9 @@ void MD5SkinnedMesh::BuildMeshInfo()
 
 	std::vector<float3> positions(this->NumVertices());
 	std::vector<float2> texcoords(this->NumVertices());
+	std::vector<float3> normals;
+	std::vector<float3> tangents;
+	std::vector<float3> binormals;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
@@ -71,6 +74,79 @@ void MD5SkinnedMesh::BuildMeshInfo()
 			}
 			break;
 
+		case VEU_Normal:
+			normals.resize(this->NumVertices());
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
+
+					BOOST_FOREACH(BOOST_TYPEOF(normals)::reference normal, normals)
+					{
+						std::swap(normal.y(), normal.z());
+						normal.z() = -normal.z();
+					}
+
+					std::copy(normals.begin(), normals.end(), mapper.Pointer<float3>());
+				}
+
+				vb_cpu->CopyToBuffer(*vb);
+			}
+			break;
+
+		case VEU_Tangent:
+			tangents.resize(this->NumVertices());
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
+
+					
+					BOOST_FOREACH(BOOST_TYPEOF(tangents)::reference tangent, tangents)
+					{
+						std::swap(tangent.y(), tangent.z());
+						tangent.z() = -tangent.z();
+					}
+
+					std::copy(tangents.begin(), tangents.end(), mapper.Pointer<float3>());
+				}
+
+				vb_cpu->CopyToBuffer(*vb);
+			}
+			break;
+
+		case VEU_Binormal:
+			binormals.resize(this->NumVertices());
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
+
+					BOOST_FOREACH(BOOST_TYPEOF(binormals)::reference binormal, binormals)
+					{
+						std::swap(binormal.y(), binormal.z());
+						binormal.z() = -binormal.z();
+					}
+
+					std::copy(binormals.begin(), binormals.end(), mapper.Pointer<float3>());
+				}
+
+				vb_cpu->CopyToBuffer(*vb);
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -88,21 +164,41 @@ void MD5SkinnedMesh::BuildMeshInfo()
 		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
 	}
 
-	std::vector<float3> normals(this->NumVertices());
-	MathLib::compute_normal<float>(normals.begin(),
-		indices.begin(), indices.end(), positions.begin(), positions.end());
+	if (normals.empty())
+	{
+		normals.resize(this->NumVertices());
 
-	// 计算TBN
-	std::vector<float3> tangents(this->NumVertices());
-	std::vector<float3> binormals(this->NumVertices());
-	MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
-		indices.begin(), indices.end(),
-		positions.begin(), positions.end(),
-		texcoords.begin(), normals.begin());
-	this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
-			vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_GPU_Read);
-	this->AddVertexStream(&binormals[0], static_cast<uint32_t>(sizeof(binormals[0]) * binormals.size()),
-			vertex_element(VEU_Binormal, 0, EF_BGR32F), EAH_GPU_Read);
+		if (tangents.empty() && binormals.empty())
+		{
+			MathLib::compute_normal<float>(normals.begin(),
+				indices.begin(), indices.end(), positions.begin(), positions.end());
+		}
+		else
+		{
+			for (size_t i = 0; i < normals.size(); ++ i)
+			{
+				normals[i] = MathLib::cross(tangents[i], binormals[i]);
+			}
+		}
+	}
+	this->AddVertexStream(&normals[0], static_cast<uint32_t>(sizeof(normals[0]) * normals.size()),
+			vertex_element(VEU_Normal, 0, EF_BGR32F), EAH_GPU_Read);
+
+	if (tangents.empty())
+	{
+		tangents.resize(this->NumVertices());
+		binormals.resize(this->NumVertices());
+
+		// 计算TBN
+		MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
+			indices.begin(), indices.end(),
+			positions.begin(), positions.end(),
+			texcoords.begin(), normals.begin());
+		this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
+				vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_GPU_Read);
+	}
+
+	box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
 
 	// 建立纹理
 	bool has_normal_map = false;
