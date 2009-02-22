@@ -25,6 +25,12 @@
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
+
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 	
 	<shader>
 		<![CDATA[
@@ -33,6 +39,36 @@ float3 texcoord_to_view(float2 tex)
 	return lerp(lerp(upper_left, upper_right, tex.x),
 				lerp(lower_left, lower_right, tex.x),
 				tex.y);
+}
+
+float4 StoreNormalDepthMat(float3 normal, float depth, float mat_id)
+{
+	return float4(normal.xy, depth, mat_id);
+}
+
+float4 StoreDiffuseSpecular(float3 diffuse, float specular)
+{
+	return float4(diffuse, specular);
+}
+
+float3 GetNormal(float4 ndc)
+{
+	return float3(ndc.xy, -sqrt(1 - dot(ndc.xy, ndc.xy)));
+}
+
+float GetDepth(float4 ndc)
+{
+	return ndc.z;
+}
+
+float3 GetDiffuse(float4 clr)
+{
+	return clr.xyz;
+}
+
+float3 GetSpecular(float4 clr)
+{
+	return clr.www;
 }
 		]]>
 	</shader>
@@ -58,18 +94,18 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(mul(normal.xyz + 0.1f * bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
-	oNormalDepth = normal;
+	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
 
-	oClr = diffuse_tex.Sample(linear_sampler, texcoord);
+	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0);
 }
 
 void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
-	oNormalDepth = normal;
-	
-	oClr = diffuse_tex.Sample(linear_sampler, texcoord);
+	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
+
+	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0);
 }
 		]]>
 	</shader>
@@ -123,17 +159,17 @@ float GetEdgeWeight(float2 tc0)
 	// Compute Deltas in Depth.
 	float4 Deltas1;
 	float4 Deltas2;
-	Deltas1.x = nd[1].w;
-	Deltas1.y = nd[2].w;
-	Deltas1.z = nd[3].w;
-	Deltas1.w = nd[4].w;
-	Deltas2.x = nd[5].w;
-	Deltas2.y = nd[6].w;
-	Deltas2.z = nd[7].w;
-	Deltas2.w = nd[8].w;
+	Deltas1.x = GetDepth(nd[1]);
+	Deltas1.y = GetDepth(nd[2]);
+	Deltas1.z = GetDepth(nd[3]);
+	Deltas1.w = GetDepth(nd[4]);
+	Deltas2.x = GetDepth(nd[5]);
+	Deltas2.y = GetDepth(nd[6]);
+	Deltas2.z = GetDepth(nd[7]);
+	Deltas2.w = GetDepth(nd[8]);
 	// Compute andbsolute gradients from center.
-	Deltas1 = abs(Deltas1 - nd[0].w);
-	Deltas2 = abs(nd[0].w - Deltas2);
+	Deltas1 = abs(Deltas1 - GetDepth(nd[0]));
+	Deltas2 = abs(GetDepth(nd[0]) - Deltas2);
 	// Find min and max gradient, ensuring min != 0
 	float4 maxDeltas = max(Deltas1, Deltas2);
 	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
@@ -145,14 +181,15 @@ float GetEdgeWeight(float2 tc0)
 	// and how sensitive the edge detection should be.
 	float4 depthResults = step(minDeltas * 25.0, maxDeltas);
 	// Compute change in the cosine of the angle between normals.
-	Deltas1.x = dot(nd[1].xyz, nd[0].xyz);
-	Deltas1.y = dot(nd[2].xyz, nd[0].xyz);
-	Deltas1.z = dot(nd[3].xyz, nd[0].xyz);
-	Deltas1.w = dot(nd[4].xyz, nd[0].xyz);
-	Deltas2.x = dot(nd[5].xyz, nd[0].xyz);
-	Deltas2.y = dot(nd[6].xyz, nd[0].xyz);
-	Deltas2.z = dot(nd[7].xyz, nd[0].xyz);
-	Deltas2.w = dot(nd[8].xyz, nd[0].xyz);
+	float3 normal0 = GetNormal(nd[0]);
+	Deltas1.x = dot(GetNormal(nd[1]), normal0);
+	Deltas1.y = dot(GetNormal(nd[2]), normal0);
+	Deltas1.z = dot(GetNormal(nd[3]), normal0);
+	Deltas1.w = dot(GetNormal(nd[4]), normal0);
+	Deltas2.x = dot(GetNormal(nd[5]), normal0);
+	Deltas2.y = dot(GetNormal(nd[6]), normal0);
+	Deltas2.z = dot(GetNormal(nd[7]), normal0);
+	Deltas2.w = dot(GetNormal(nd[8]), normal0);
 	Deltas1 = abs(Deltas1 - Deltas2);
 	// Compare change in the cosine of the angles, flagging changes
 	// above some constant threshold. The cosine of the angle is not a
@@ -177,22 +214,24 @@ void DeferredShadingVS(float4 pos : POSITION,
 
 float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	view_dir = normalize(view_dir);
-	
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
+	float3 normal = GetNormal(ndc);
+	
+	view_dir = normalize(view_dir);
 
-	float3 pos_es = view_dir * (ndc.w * depth_min_invrange_range.z + depth_min_invrange_range.x);
+	float3 pos_es = view_dir * (depth * depth_min_invrange_range.z + depth_min_invrange_range.x);
 	float3 light_dir = normalize(light_in_eye - pos_es);
 	
-	float diffuse = diffuse_term(light_dir, ndc.xyz);
+	float diffuse = diffuse_term(light_dir, normal);
 	float specular = 0;
 	if (diffuse > 0)
 	{
-		specular = dot(normalize(light_dir - view_dir), ndc.xyz);
+		specular = dot(normalize(light_dir - view_dir), normal);
 		if (specular > 0)
 		{
 			specular = pow(specular, 8.0f);
@@ -207,82 +246,109 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		diffuse = 0;
 	}
 
-	float4 color = color_tex.Sample(point_sampler, tc0);	
-	return float4(0.15f + color.xyz * diffuse * 0.7f + color.w * specular * 0.3f, 1);
+	float4 color = color_tex.Sample(point_sampler, tc0);
+	float3 diffuse_clr = GetDiffuse(color);
+	float3 specular_clr = GetSpecular(color);
+	return float4(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f, 1);
+}
+
+float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	float depth = GetDepth(ndc);
+	if (1 == depth)
+	{
+		clip(-1);
+	}
+	
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (depth * depth_min_invrange_range.z + depth_min_invrange_range.x);
+	
+	return float4(pos_es, 1);
 }
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
+	float3 normal = GetNormal(ndc);
 	
-	return float4(ndc.xyz, 1);
+	return float4(normal / 2 + 0.5f, 1);
 }
 
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
+	float3 normal = GetNormal(ndc);
 	
-	return float4(ndc.www, 1);
+	return float4(depth.xxx, 1);
 }
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
-	
+
 	float4 color = color_tex.Sample(point_sampler, tc0);
-	return float4(color.xyz, 1);
+	float3 diffuse_clr = GetDiffuse(color);
+	return float4(diffuse_clr, 1);
 }
 
 float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
 	
 	float4 color = color_tex.Sample(point_sampler, tc0);
-	return float4(color.www, 1);
+	float3 specular_clr = GetSpecular(color);
+	return float4(specular_clr, 1);
 }
 
 float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
 
 	float4 color = GetEdgeWeight(tc0);
-	return float4(color.xyz, 1);
+	return color;
 }
 
 
 float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
 
 	float edge = GetEdgeWeight(tc0);
-	return (color_tex.Sample(point_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(point_sampler, tc0 + edge * float2(inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(point_sampler, tc0 + edge * float2(-inv_width_height.x, inv_width_height.y))
-			+ color_tex.Sample(point_sampler, tc0 + edge * float2(inv_width_height.x, inv_width_height.y))) * 0.25f;
+	return (color_tex.Sample(bilinear_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(+inv_width_height.x, -inv_width_height.y))
+			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(-inv_width_height.x, +inv_width_height.y))
+			+ color_tex.Sample(bilinear_sampler, tc0 + edge * float2(+inv_width_height.x, +inv_width_height.y))) * 0.25f;
 }
 		]]>
 	</shader>
@@ -293,6 +359,15 @@ float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 			
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowPosition">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="ShowPositionPS()"/>
 		</pass>
 	</technique>
 

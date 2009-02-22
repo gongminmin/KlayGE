@@ -134,22 +134,26 @@ namespace
 				break;
 
 			case 1:
-				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
+				technique_ = technique_->Effect().TechniqueByName("ShowPosition");
 				break;
 
 			case 2:
-				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
+				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
 				break;
 
 			case 3:
-				technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
+				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
 				break;
 
 			case 4:
-				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
+				technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
 				break;
 
 			case 5:
+				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
+				break;
+
+			case 6:
 				technique_ = technique_->Effect().TechniqueByName("ShowEdge");
 				break;
 
@@ -270,7 +274,7 @@ void DeferredShadingApp::InitObjects()
 	torus_.reset(new TorusObject);
 	torus_->AddToSceneManager();
 
-	this->LookAt(float3(0, 2, -2), float3(0, 2, 0));
+	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 100.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
