@@ -23,42 +23,42 @@ class vertex_element:
 		self.num_components = int(num_components)
 
 class model:
-	def __init__(self, dom):
-		self.dom = dom
+	def __init__(self, root):
+		self.root = root
 
-		self.version = int(dom.documentElement.getAttribute('version'))
+		self.version = int(root.attrib['version'])
 		if self.version != 3:
 			print("model version must be 3")
 			raise
 
 		self.num_joints = 0
-		if len(dom.documentElement.getElementsByTagName('bones_chunk')) > 0:
-			bones_chunk_tag = dom.documentElement.getElementsByTagName('bones_chunk')[0]
-			bone_tags = bones_chunk_tag.getElementsByTagName('bone')
+		if len(root.findall('bones_chunk')) > 0:
+			bones_chunk_tag = root.find('bones_chunk')
+			bone_tags = bones_chunk_tag.findall('bone')
 			self.num_joints = len(bone_tags)
 
-		meshes_chunk_tag = dom.documentElement.getElementsByTagName('meshes_chunk')[0]
-		mesh_tags = meshes_chunk_tag.getElementsByTagName('mesh')
+		meshes_chunk_tag = root.find('meshes_chunk')
+		mesh_tags = meshes_chunk_tag.findall('mesh')
 		self.num_meshes = len(mesh_tags)
 
 		self.start_frame = 0
 		self.end_frame = 0
 		self.frame_rate = 0
 		self.num_key_frames = 0
-		if len(dom.documentElement.getElementsByTagName('key_frames_chunk')) > 0:
-			key_frames_chunk_tag = dom.documentElement.getElementsByTagName('key_frames_chunk')[0]
-			self.start_frame = int(key_frames_chunk_tag.getAttribute('start_frame'))
-			self.end_frame = int(key_frames_chunk_tag.getAttribute('end_frame'))
-			self.frame_rate = int(key_frames_chunk_tag.getAttribute('frame_rate'))
+		if len(root.findall('key_frames_chunk')) > 0:
+			key_frames_chunk_tag = root.find('key_frames_chunk')
+			self.start_frame = int(key_frames_chunk_tag.attrib['start_frame'])
+			self.end_frame = int(key_frames_chunk_tag.attrib['end_frame'])
+			self.frame_rate = int(key_frames_chunk_tag.attrib['frame_rate'])
 
-			key_frame_tags = key_frames_chunk_tag.getElementsByTagName('key_frame')
+			key_frame_tags = key_frames_chunk_tag.getiterator('key_frame')
 			self.num_key_frames = len(key_frame_tags)
 
 	def compile_meshes(self, stream):
-		meshes_chunk_tag = self.dom.documentElement.getElementsByTagName('meshes_chunk')[0]
-		mesh_tags = meshes_chunk_tag.getElementsByTagName('mesh')
+		meshes_chunk_tag = self.root.find('meshes_chunk')
+		mesh_tags = meshes_chunk_tag.getiterator('mesh')
 		for mesh_tag in mesh_tags:
-			name = mesh_tag.getAttribute('name').encode(encoding)
+			name = mesh_tag.attrib['name'].encode(encoding)
 			
 			print("Compiling mesh:", name)
 
@@ -66,116 +66,116 @@ class model:
 			stream.write(name)
 
 			vertex_elems = []
-			vertex_elems_chunk_tag = mesh_tag.getElementsByTagName('vertex_elements_chunk')[0]
-			vertex_elem_tags = vertex_elems_chunk_tag.getElementsByTagName('vertex_element')
+			vertex_elems_chunk_tag = mesh_tag.find('vertex_elements_chunk')
+			vertex_elem_tags = vertex_elems_chunk_tag.getiterator('vertex_element')
 			stream.write(pack('B', len(vertex_elem_tags)))
 			for vertex_elem_tag in vertex_elem_tags:
-				ve = vertex_element(vertex_elem_tag.getAttribute('usage'), vertex_elem_tag.getAttribute('usage_index'), vertex_elem_tag.getAttribute('num_components'))
+				ve = vertex_element(vertex_elem_tag.attrib['usage'], vertex_elem_tag.attrib['usage_index'], vertex_elem_tag.attrib['num_components'])
 				vertex_elems.append(ve)
 				stream.write(pack('BBB', ve.usage, ve.usage_index, ve.num_components))
 
-			textures_chunk_tag = mesh_tag.getElementsByTagName('textures_chunk')[0]
-			texture_tags = textures_chunk_tag.getElementsByTagName('texture')
+			textures_chunk_tag = mesh_tag.find('textures_chunk')
+			texture_tags = textures_chunk_tag.getiterator('texture')
 			stream.write(pack('B', len(texture_tags)))
 			for texture_tag in texture_tags:
-				texture_type = texture_tag.getAttribute('type').encode(encoding)
-				texture_name = texture_tag.getAttribute('name').encode(encoding)
+				texture_type = texture_tag.attrib['type'].encode(encoding)
+				texture_name = texture_tag.attrib['name'].encode(encoding)
 				stream.write(pack('B', len(texture_type)))
 				stream.write(texture_type)
 				stream.write(pack('B', len(texture_name)))
 				stream.write(texture_name)
 
-			vertices_chunk_tag = mesh_tag.getElementsByTagName('vertices_chunk')[0]
-			vertex_tags = vertices_chunk_tag.getElementsByTagName('vertex')
+			vertices_chunk_tag = mesh_tag.find('vertices_chunk')
+			vertex_tags = vertices_chunk_tag.getiterator('vertex')
 			stream.write(pack('L', len(vertex_tags)))
 			for vertex_elem in vertex_elems:
 				if (VEU_Position == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						stream.write(pack('fff', float(vertex_tag.getAttribute('x')), float(vertex_tag.getAttribute('y')), float(vertex_tag.getAttribute('z'))))
+						stream.write(pack('fff', float(vertex_tag.attrib['x']), float(vertex_tag.attrib['y']), float(vertex_tag.attrib['z'])))
 				elif (VEU_Normal == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						normal_tag = vertex_tag.getElementsByTagName('normal')[0]
-						stream.write(pack('fff', float(normal_tag.getAttribute('x')), float(normal_tag.getAttribute('y')), float(normal_tag.getAttribute('z'))))
+						normal_tag = vertex_tag.find('normal')
+						stream.write(pack('fff', float(normal_tag.attrib['x']), float(normal_tag.attrib['y']), float(normal_tag.attrib['z'])))
 				elif (VEU_Diffuse == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						diffuse_tag = vertex_tag.getElementsByTagName('diffuse')[0]
-						stream.write(pack('ffff', float(diffuse_tag.getAttribute('r')), float(diffuse_tag.getAttribute('g')), float(diffuse_tag.getAttribute('b')), float(diffuse_tag.getAttribute('a'))))
+						diffuse_tag = vertex_tag.find('diffuse')
+						stream.write(pack('ffff', float(diffuse_tag.attrib['r']), float(diffuse_tag.attrib['g']), float(diffuse_tag.attrib['b']), float(diffuse_tag.attrib['a'])))
 				elif (VEU_Specular == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						specular_tag = vertex_tag.getElementsByTagName('specular')[0]
-						stream.write(pack('ffff', float(specular_tag.getAttribute('r')), float(specular_tag.getAttribute('g')), float(specular_tag.getAttribute('b')), float(specular_tag.getAttribute('a'))))
+						specular_tag = vertex_tag.find('specular')
+						stream.write(pack('ffff', float(specular_tag.attrib['r']), float(specular_tag.attrib['g']), float(specular_tag.attrib['b']), float(specular_tag.attrib['a'])))
 				elif (VEU_BlendIndex == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						weight_tags = vertex_tag.getElementsByTagName('weight')
+						weight_tags = vertex_tag.getiterator('weight')
 						for weight_tag in weight_tags:
-							stream.write(pack('B', int(weight_tag.getAttribute('bone_index'))))
+							stream.write(pack('B', int(weight_tag.attrib['bone_index'])))
 				elif (VEU_BlendWeight == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						weight_tags = vertex_tag.getElementsByTagName('weight')
+						weight_tags = vertex_tag.getiterator('weight')
 						for weight_tag in weight_tags:
-							stream.write(pack('f', float(weight_tag.getAttribute('weight'))))
+							stream.write(pack('f', float(weight_tag.attrib['weight'])))
 				elif VEU_TextureCoord == vertex_elem.usage:
 					for vertex_tag in vertex_tags:
-						tex_coord_tag = vertex_tag.getElementsByTagName('tex_coord')[vertex_elem.usage_index]
+						tex_coord_tag = vertex_tag.findall('tex_coord')[vertex_elem.usage_index]
 						if 1 == vertex_elem.num_components:
-							stream.write(pack('f', float(tex_coord_tag.getAttribute('u'))))
+							stream.write(pack('f', float(tex_coord_tag.attrib['u'])))
 						elif 2 == vertex_elem.num_components:
-							stream.write(pack('ff', float(tex_coord_tag.getAttribute('u')), float(tex_coord_tag.getAttribute('v'))))
+							stream.write(pack('ff', float(tex_coord_tag.attrib['u']), float(tex_coord_tag.attrib['v'])))
 						elif 3 == vertex_elem.num_components:
-							stream.write(pack('fff', float(tex_coord_tag.getAttribute('u')), float(tex_coord_tag.getAttribute('v')), float(tex_coord_tag.getAttribute('w'))))
+							stream.write(pack('fff', float(tex_coord_tag.attrib['u']), float(tex_coord_tag.attrib['v']), float(tex_coord_tag.attrib['w'])))
 				elif (VEU_Tangent == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						tangent_tag = vertex_tag.getElementsByTagName('tangent')[0]
-						stream.write(pack('fff', float(tangent_tag.getAttribute('x')), float(tangent_tag.getAttribute('y')), float(tangent_tag.getAttribute('z'))))
+						tangent_tag = vertex_tag.find('tangent')
+						stream.write(pack('fff', float(tangent_tag.attrib['x']), float(tangent_tag.attrib['y']), float(tangent_tag.attrib['z'])))
 				elif (VEU_Binormal == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						binormal_tag = vertex_tag.getElementsByTagName('binormal')[0]
-						stream.write(pack('fff', float(binormal_tag.getAttribute('x')), float(binormal_tag.getAttribute('y')), float(binormal_tag.getAttribute('z'))))
+						binormal_tag = vertex_tag.find('binormal')
+						stream.write(pack('fff', float(binormal_tag.attrib['x']), float(binormal_tag.attrib['y']), float(binormal_tag.attrib['z'])))
 
-			triangles_chunk_tag = mesh_tag.getElementsByTagName('triangles_chunk')[0]
-			triangle_tags = triangles_chunk_tag.getElementsByTagName('triangle')
+			triangles_chunk_tag = mesh_tag.find('triangles_chunk')
+			triangle_tags = triangles_chunk_tag.getiterator('triangle')
 			stream.write(pack('L', len(triangle_tags)))
 			for triangle_tag in triangle_tags:
-				stream.write(pack('HHH', int(triangle_tag.getAttribute('a')), int(triangle_tag.getAttribute('b')), int(triangle_tag.getAttribute('c'))))
+				stream.write(pack('HHH', int(triangle_tag.attrib['a']), int(triangle_tag.attrib['b']), int(triangle_tag.attrib['c'])))
 
 	def compile_joints(self, stream):
-		if len(self.dom.documentElement.getElementsByTagName('bones_chunk')) > 0:
-			bones_chunk_tag = self.dom.documentElement.getElementsByTagName('bones_chunk')[0]
-			bone_tags = bones_chunk_tag.getElementsByTagName('bone')
+		if len(self.root.findall('bones_chunk')) > 0:
+			bones_chunk_tag = self.root.find('bones_chunk')
+			bone_tags = bones_chunk_tag.getiterator('bone')
 			for bone_tag in bone_tags:
-				joint_name = bone_tag.getAttribute('name').encode(encoding)
+				joint_name = bone_tag.attrib['name'].encode(encoding)
 
 				print("Compiling joint:", joint_name)
 
 				stream.write(pack('B', len(joint_name)))
 				stream.write(joint_name)
 
-				stream.write(pack('h', int(bone_tag.getAttribute('parent'))))
-				bind_pos_tag = bone_tag.getElementsByTagName('bind_pos')[0]
-				stream.write(pack('fff', float(bind_pos_tag.getAttribute('x')), float(bind_pos_tag.getAttribute('y')), float(bind_pos_tag.getAttribute('z'))))
-				bind_quat_tag = bone_tag.getElementsByTagName('bind_quat')[0]
-				stream.write(pack('ffff', float(bind_quat_tag.getAttribute('x')), float(bind_quat_tag.getAttribute('y')), float(bind_quat_tag.getAttribute('z')), float(bind_quat_tag.getAttribute('w'))))
+				stream.write(pack('h', int(bone_tag.attrib['parent'])))
+				bind_pos_tag = bone_tag.find('bind_pos')
+				stream.write(pack('fff', float(bind_pos_tag.attrib['x']), float(bind_pos_tag.attrib['y']), float(bind_pos_tag.attrib['z'])))
+				bind_quat_tag = bone_tag.find('bind_quat')
+				stream.write(pack('ffff', float(bind_quat_tag.attrib['x']), float(bind_quat_tag.attrib['y']), float(bind_quat_tag.attrib['z']), float(bind_quat_tag.attrib['w'])))
 
 	def compile_key_frames(self, stream):
-		if len(self.dom.documentElement.getElementsByTagName('key_frames_chunk')) > 0:
-			key_frames_chunk_tag = self.dom.documentElement.getElementsByTagName('key_frames_chunk')[0]
+		if len(self.root.findall('key_frames_chunk')) > 0:
+			key_frames_chunk_tag = self.root.find('key_frames_chunk')
 
-			key_frame_tags = key_frames_chunk_tag.getElementsByTagName('key_frame')
+			key_frame_tags = key_frames_chunk_tag.getiterator('key_frame')
 			for key_frame_tag in key_frame_tags:
-				joint_name = key_frame_tag.getAttribute('joint').encode(encoding)
+				joint_name = key_frame_tag.attrib['joint'].encode(encoding)
 
 				print("Compiling key frame:", joint_name)
 
 				stream.write(pack('B', len(joint_name)))
 				stream.write(joint_name)
 
-				key_tags = key_frame_tag.getElementsByTagName('key')
+				key_tags = key_frame_tag.getiterator('key')
 				for key_tag in key_tags:
-					pos_tag = key_tag.getElementsByTagName('pos')[0]
-					stream.write(pack('fff', float(pos_tag.getAttribute('x')), float(pos_tag.getAttribute('y')), float(pos_tag.getAttribute('z'))))
+					pos_tag = key_tag.find('pos')
+					stream.write(pack('fff', float(pos_tag.attrib['x']), float(pos_tag.attrib['y']), float(pos_tag.attrib['z'])))
 				for key_tag in key_tags:
-					quat_tag = key_tag.getElementsByTagName('quat')[0]
-					stream.write(pack('ffff', float(quat_tag.getAttribute('x')), float(quat_tag.getAttribute('y')), float(quat_tag.getAttribute('z')), float(quat_tag.getAttribute('w'))))
+					quat_tag = key_tag.find('quat')
+					stream.write(pack('ffff', float(quat_tag.attrib['x']), float(quat_tag.attrib['y']), float(quat_tag.attrib['z']), float(quat_tag.attrib['w'])))
 
 	def compile(self, stream):
 		stream.write('MESH')
@@ -217,8 +217,8 @@ if __name__ == '__main__':
 
 	print("Parsing:", in_file_name)
 
-	from xml.dom.minidom import parse
-	kmodel = model(parse(in_file_name))
+	from xml.etree.ElementTree import ElementTree
+	kmodel = model(ElementTree().parse(in_file_name))
 
 	kmodel.compile(open(out_file_name, 'wb'))
 
