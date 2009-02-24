@@ -269,9 +269,13 @@ namespace KlayGE
 	{
 		assert(is_mesh(node));
 
-		object_info_t obj_info;
+		std::string		obj_name;
+		std::vector<texture_slots_t> obj_texture_slots;
+		vertices_t		obj_vertices;
+		triangles_t		obj_triangles;
+		vertex_elements_t obj_vertex_elements;
 
-		obj_info.name = tstr_to_str(node->GetName());
+		obj_name = tstr_to_str(node->GetName());
 
 		Matrix3 obj_matrix = node->GetObjTMAfterWSM(cur_time_);
 		bool flip_normals = obj_matrix.Parity() ? true : false;
@@ -280,13 +284,15 @@ namespace KlayGE
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
-		std::map<int, Matrix2> uv_transs;
+		std::vector<std::map<int, Matrix2> > uv_transs;
 
 		Mtl* mtl = node->GetMtl();
 		if (mtl != NULL)
 		{
 			if ((Class_ID(DMTL_CLASS_ID, 0) == mtl->ClassID()) && (0 == mtl->NumSubMtls()))
 			{
+				obj_texture_slots.resize(1);
+				uv_transs.resize(1);
 				for (int i = 0; i < mtl->NumSubTexmaps(); ++ i)
 				{
 					Texmap* tex_map = mtl->GetSubTexmap(i);
@@ -303,9 +309,43 @@ namespace KlayGE
 							uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
 							uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
 
-							obj_info.texture_slots.push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
+							obj_texture_slots[0].push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
 								tstr_to_str(bitmap_tex->GetMapName())));
-							uv_transs[i] = uv_trans;
+							uv_transs[0][i] = uv_trans;
+						}
+					}
+				}
+			}
+			else
+			{
+				if (Class_ID(MULTI_CLASS_ID, 0) == mtl->ClassID())
+				{
+					obj_texture_slots.resize(mtl->NumSubMtls());
+					uv_transs.resize(mtl->NumSubMtls());
+					for (int i = 0; i < mtl->NumSubMtls(); ++ i)
+					{
+						Mtl* sub_mtl = mtl->GetSubMtl(i);
+						for (int j = 0; j < sub_mtl->NumSubTexmaps(); ++ j)
+						{
+							Texmap* tex_map = sub_mtl->GetSubTexmap(j);
+							if (tex_map != NULL)
+							{
+								if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
+								{
+									BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
+
+									Matrix3 uv_mat;
+									tex_map->GetUVTransform(uv_mat);
+									Matrix2 uv_trans(TRUE);
+									uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
+									uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
+									uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
+
+									obj_texture_slots[i].push_back(texture_slot_t(tstr_to_str(sub_mtl->GetSubTexmapSlotName(j).data()),
+										tstr_to_str(bitmap_tex->GetMapName())));
+									uv_transs[i][j] = uv_trans;
+								}
+							}
 						}
 					}
 				}
@@ -313,6 +353,7 @@ namespace KlayGE
 		}
 
 		std::vector<unsigned int> face_sm_group;
+		std::vector<unsigned int> face_mtl_id;
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
@@ -328,7 +369,10 @@ namespace KlayGE
 
 			Mesh& mesh = tri->GetMesh();
 
-			obj_info.triangles.resize(mesh.getNumFaces());
+			face_sm_group.resize(mesh.getNumFaces());
+			face_mtl_id.resize(mesh.getNumFaces());
+
+			obj_triangles.resize(mesh.getNumFaces());
 
 			for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
 			{
@@ -345,14 +389,18 @@ namespace KlayGE
 							texs[channel][i].x = uv_verts[i].x;
 							texs[channel][i].y = uv_verts[i].y;
 
-							if (uv_transs.find(channel - 1) != uv_transs.end())
+							for (size_t j = 0; j < uv_transs.size(); ++ j)
 							{
-								texs[channel][i] = texs[channel][i] * uv_transs[channel - 1];
+								if (uv_transs[j].find(channel - 1) != uv_transs[j].end())
+								{
+									texs[channel][i] = texs[channel][i] * uv_transs[j][channel - 1];
+									break;
+								}
 							}
 						}
 
 						TVFace* tv_faces = mesh.mapFaces(channel);
-						for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
+						for (size_t i = 0; i < obj_triangles.size(); ++ i)
 						{
 							for (int j = 2; j >= 0; -- j)
 							{
@@ -365,6 +413,8 @@ namespace KlayGE
 
 			for (int i = 0; i < mesh.getNumFaces(); ++ i)
 			{
+				face_sm_group[i] = mesh.faces[i].getSmGroup();
+				face_mtl_id[i] = mesh.faces[i].getMatID() % obj_texture_slots.size();
 				for (int j = 2; j >= 0; -- j)
 				{
 					pos_indices.push_back(mesh.faces[i].v[j]);
@@ -388,7 +438,7 @@ namespace KlayGE
 		}
 
 		std::set<vertex_index_t> vertex_indices;
-		for (size_t i = 0; i < obj_info.triangles.size(); ++ i)
+		for (size_t i = 0; i < obj_triangles.size(); ++ i)
 		{
 			for (size_t j = 0; j < 3; ++ j)
 			{
@@ -508,8 +558,8 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<Point3> face_normals(obj_info.triangles.size());
-		std::vector<Point3> face_tangents(obj_info.triangles.size());
+		std::vector<Point3> face_normals(obj_triangles.size());
+		std::vector<Point3> face_tangents(obj_triangles.size());
 		for (size_t i = 0; i < face_normals.size(); ++ i)
 		{
 			face_normals[i] = compute_normal(positions[pos_indices[i * 3 + 2]].first,
@@ -521,11 +571,11 @@ namespace KlayGE
 				face_normals[i]);
 		}
 
-		obj_info.vertices.resize(vertex_indices.size());
+		obj_vertices.resize(vertex_indices.size());
 		int ver_index = 0;
 		BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::reference vertex_index, vertex_indices)
 		{
-			vertex_t& vertex = obj_info.vertices[ver_index];
+			vertex_t& vertex = obj_vertices[ver_index];
 
 			vertex.pos = positions[vertex_index.pos_index].first;
 			std::swap(vertex.pos.y, vertex.pos.z);
@@ -551,12 +601,12 @@ namespace KlayGE
 				uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
 			{
 				Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
-				obj_info.vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
+				obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 			}
 
 			for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
 			{
-				obj_info.triangles[vertex_index.ref_triangle[i] / 3].vertex_index[vertex_index.ref_triangle[i] % 3] = ver_index;
+				obj_triangles[vertex_index.ref_triangle[i] / 3].vertex_index[vertex_index.ref_triangle[i] % 3] = ver_index;
 			}
 
 			vertex.binds = positions[vertex_index.pos_index].second;
@@ -564,21 +614,69 @@ namespace KlayGE
 			++ ver_index;
 		}
 
-		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
-		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
-		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
-		obj_info.vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
-		for (size_t i = 0; i < obj_info.vertices[0].tex.size(); ++ i)
+		obj_vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
+		obj_vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
+		obj_vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
+		obj_vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
+		for (size_t i = 0; i < obj_vertices[0].tex.size(); ++ i)
 		{
-			obj_info.vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
 		}
-		if (!obj_info.vertices[0].binds.empty())
+		if (!obj_vertices[0].binds.empty())
 		{
-			obj_info.vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
-			obj_info.vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
 		}
 
-		objs_info_.push_back(obj_info);
+		object_info_t obj_info;
+		obj_info.vertex_elements = obj_vertex_elements;
+		for (size_t i = 0; i < obj_texture_slots.size(); ++ i)
+		{
+			obj_info.vertices.resize(0);
+			obj_info.triangles.resize(0);
+
+			std::set<int> index_set;
+			for (size_t j = 0; j < obj_triangles.size(); ++ j)
+			{
+				if (face_mtl_id[j] == i)
+				{
+					index_set.insert(obj_triangles[j].vertex_index[0]);
+					index_set.insert(obj_triangles[j].vertex_index[1]);
+					index_set.insert(obj_triangles[j].vertex_index[2]);
+
+					obj_info.triangles.push_back(obj_triangles[j]);
+				}
+			}
+			std::map<int, int> mapping;
+			int new_index = 0;
+			for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+			{
+				obj_info.vertices.push_back(obj_vertices[*iter]);
+				mapping.insert(std::make_pair(*iter, new_index));
+			}
+			for (size_t j = 0; j < obj_info.triangles.size(); ++ j)
+			{
+				obj_info.triangles[j].vertex_index[0] = mapping[obj_info.triangles[j].vertex_index[0]];
+				obj_info.triangles[j].vertex_index[1] = mapping[obj_info.triangles[j].vertex_index[1]];
+				obj_info.triangles[j].vertex_index[2] = mapping[obj_info.triangles[j].vertex_index[2]];
+			}
+
+			if (!obj_info.triangles.empty())
+			{
+				if (1 == obj_texture_slots.size())
+				{
+					obj_info.name = obj_name;
+				}
+				else
+				{
+					std::ostringstream oss;
+					oss << obj_name << "__mat_" << i;
+					obj_info.name = oss.str();
+				}
+				obj_info.texture_slots = obj_texture_slots[i];
+				objs_info_.push_back(obj_info);
+			}
+		}
 	}
 
 	void meshml_extractor::extract_bone(INode* node)
