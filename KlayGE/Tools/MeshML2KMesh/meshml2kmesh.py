@@ -178,7 +178,10 @@ class model:
 					stream.write(pack('ffff', float(quat_tag.attrib['x']), float(quat_tag.attrib['y']), float(quat_tag.attrib['z']), float(quat_tag.attrib['w'])))
 
 	def compile(self, stream):
-		stream.write('MESH')
+		if 3 == sys.version_info[0]:
+			stream.write(b'MESH')
+		else:
+			stream.write('MESH')
 
 		header_size = 4 + 1 + 1 + 1 + 4 + 4 + 4
 		stream.write(pack('L', header_size))
