@@ -33,12 +33,10 @@ class model:
 
 		self.num_joints = 0
 		if len(root.findall('bones_chunk')) > 0:
-			bones_chunk_tag = root.find('bones_chunk')
-			bone_tags = bones_chunk_tag.findall('bone')
+			bone_tags = root.findall('bones_chunk/bone')
 			self.num_joints = len(bone_tags)
 
-		meshes_chunk_tag = root.find('meshes_chunk')
-		mesh_tags = meshes_chunk_tag.findall('mesh')
+		mesh_tags = root.findall('meshes_chunk/mesh')
 		self.num_meshes = len(mesh_tags)
 
 		self.start_frame = 0
@@ -55,8 +53,7 @@ class model:
 			self.num_key_frames = len(key_frame_tags)
 
 	def compile_meshes(self, stream):
-		meshes_chunk_tag = self.root.find('meshes_chunk')
-		mesh_tags = meshes_chunk_tag.getiterator('mesh')
+		mesh_tags = self.root.findall('meshes_chunk/mesh')
 		for mesh_tag in mesh_tags:
 			name = mesh_tag.attrib['name'].encode(encoding)
 			
@@ -66,16 +63,14 @@ class model:
 			stream.write(name)
 
 			vertex_elems = []
-			vertex_elems_chunk_tag = mesh_tag.find('vertex_elements_chunk')
-			vertex_elem_tags = vertex_elems_chunk_tag.getiterator('vertex_element')
+			vertex_elem_tags = mesh_tag.findall('vertex_elements_chunk/vertex_element')
 			stream.write(pack('B', len(vertex_elem_tags)))
 			for vertex_elem_tag in vertex_elem_tags:
 				ve = vertex_element(vertex_elem_tag.attrib['usage'], vertex_elem_tag.attrib['usage_index'], vertex_elem_tag.attrib['num_components'])
 				vertex_elems.append(ve)
 				stream.write(pack('BBB', ve.usage, ve.usage_index, ve.num_components))
 
-			textures_chunk_tag = mesh_tag.find('textures_chunk')
-			texture_tags = textures_chunk_tag.getiterator('texture')
+			texture_tags = mesh_tag.findall('textures_chunk/texture')
 			stream.write(pack('B', len(texture_tags)))
 			for texture_tag in texture_tags:
 				texture_type = texture_tag.attrib['type'].encode(encoding)
@@ -85,8 +80,7 @@ class model:
 				stream.write(pack('B', len(texture_name)))
 				stream.write(texture_name)
 
-			vertices_chunk_tag = mesh_tag.find('vertices_chunk')
-			vertex_tags = vertices_chunk_tag.getiterator('vertex')
+			vertex_tags = mesh_tag.findall('vertices_chunk/vertex')
 			stream.write(pack('L', len(vertex_tags)))
 			for vertex_elem in vertex_elems:
 				if (VEU_Position == vertex_elem.usage):
@@ -132,16 +126,14 @@ class model:
 						binormal_tag = vertex_tag.find('binormal')
 						stream.write(pack('fff', float(binormal_tag.attrib['x']), float(binormal_tag.attrib['y']), float(binormal_tag.attrib['z'])))
 
-			triangles_chunk_tag = mesh_tag.find('triangles_chunk')
-			triangle_tags = triangles_chunk_tag.getiterator('triangle')
+			triangle_tags = mesh_tag.findall('triangles_chunk/triangle')
 			stream.write(pack('L', len(triangle_tags)))
 			for triangle_tag in triangle_tags:
 				stream.write(pack('HHH', int(triangle_tag.attrib['a']), int(triangle_tag.attrib['b']), int(triangle_tag.attrib['c'])))
 
 	def compile_joints(self, stream):
 		if len(self.root.findall('bones_chunk')) > 0:
-			bones_chunk_tag = self.root.find('bones_chunk')
-			bone_tags = bones_chunk_tag.getiterator('bone')
+			bone_tags = self.root.findall('bones_chunk/bone')
 			for bone_tag in bone_tags:
 				joint_name = bone_tag.attrib['name'].encode(encoding)
 
@@ -158,9 +150,7 @@ class model:
 
 	def compile_key_frames(self, stream):
 		if len(self.root.findall('key_frames_chunk')) > 0:
-			key_frames_chunk_tag = self.root.find('key_frames_chunk')
-
-			key_frame_tags = key_frames_chunk_tag.getiterator('key_frame')
+			key_frame_tags = self.root.findall('key_frames_chunk/key_frame')
 			for key_frame_tag in key_frame_tags:
 				joint_name = key_frame_tag.attrib['joint'].encode(encoding)
 
