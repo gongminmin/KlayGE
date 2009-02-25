@@ -123,13 +123,7 @@ namespace KlayGE
 		}
 		else
 		{
-			this->export_nodes_.clear();
-			INode* root_node = this->max_interface_->GetRootNode();
-			int const num_children = root_node->NumberOfChildren();
-			for (int i = 0; i < num_children; ++ i)
-			{
-				this->enum_node(root_node->GetChildNode(i));
-			}
+			this->enum_node(this->max_interface_->GetRootNode());
 		}
 
 		HWND max_wnd = max_interface->GetMAXHWnd();

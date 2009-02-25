@@ -146,7 +146,7 @@ namespace KlayGE
 		Quat quat_from_matrix(Matrix3 const & mat);
 
 		void find_joints(INode* node);
-		void extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin);
+		void extract_all_joint_tms();
 		void add_joint_weight(binds_t& binds, std::string const & joint_name, float weight);
 
 		void physique_modifier(Modifier* mod, INode* node,
@@ -170,6 +170,11 @@ namespace KlayGE
 		int end_frame_;
 		int frame_rate_;
 		key_frames_t kfs_;
+
+		std::vector<IPhysiqueExport*> physiques_;
+		std::vector<Modifier*> physique_mods_;
+		std::vector<ISkin*> skins_;
+		std::vector<Modifier*> skin_mods_;
 	};
 }
 

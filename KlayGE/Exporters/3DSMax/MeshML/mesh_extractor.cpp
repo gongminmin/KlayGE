@@ -184,44 +184,49 @@ namespace KlayGE
 			this->find_joints(root_node_);
 
 
+			physiques_.clear();
+			physique_mods_.clear();
+			skins_.clear();
+			skin_mods_.clear();
 			BOOST_FOREACH(BOOST_TYPEOF(nodes)::const_reference node, nodes)
 			{
-				if (is_mesh(node))
+				Object* obj_ref = node->GetObjectRef();
+				while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
 				{
-					Object* obj_ref = node->GetObjectRef();
-					while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
-					{
-						IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
+					IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
 
-						// Iterate over all entries of the modifier stack.
-						for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
+					// Iterate over all entries of the modifier stack.
+					for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
+					{
+						Modifier* mod = derived_obj->GetModifier(mod_stack_index);
+						if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
 						{
-							Modifier* mod = derived_obj->GetModifier(mod_stack_index);
-							if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+							IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
+							if (phy_exp != NULL)
 							{
-								IPhysiqueExport* phy_exp = static_cast<IPhysiqueExport*>(mod->GetInterface(I_PHYINTERFACE));
-								if (phy_exp != NULL)
-								{
-									this->extract_all_joint_tms(phy_exp, NULL);
-								}
+								physiques_.push_back(phy_exp);
+								physique_mods_.push_back(mod);
 							}
-							else
+						}
+						else
+						{
+							if (SKIN_CLASSID == mod->ClassID())
 							{
-								if (SKIN_CLASSID == mod->ClassID())
+								ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
+								if (skin != NULL)
 								{
-									ISkin* skin = static_cast<ISkin*>(mod->GetInterface(I_SKIN));
-									if (skin != NULL)
-									{
-										this->extract_all_joint_tms(NULL, skin);
-									}
+									skins_.push_back(skin);
+									skin_mods_.push_back(mod);
 								}
 							}
 						}
-
-						obj_ref = derived_obj->GetObjRef();
 					}
+
+					obj_ref = derived_obj->GetObjRef();
 				}
 			}
+
+			this->extract_all_joint_tms();
 		}
 
 		std::vector<INode*> jnodes;
@@ -518,7 +523,7 @@ namespace KlayGE
 				pos_binds.first = Point3(0, 0, 0);
 				for (size_t i = 0 ; i < pos_binds.second.size(); ++ i)
 				{
-					assert(joint_nodes_.find(pos_binds.second[i].first) != joint_nodes_.end());
+					assert(joints_.find(pos_binds.second[i].first) != joints_.end());
 
 					pos_binds.first += pos_binds.second[i].second
 						* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
@@ -724,7 +729,7 @@ namespace KlayGE
 		return quat;
 	}
 
-	void meshml_extractor::extract_all_joint_tms(IPhysiqueExport* phy_exp, ISkin* skin)
+	void meshml_extractor::extract_all_joint_tms()
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(joint_nodes_)::reference jn, joint_nodes_)
 		{
@@ -737,21 +742,35 @@ namespace KlayGE
 			}
 			joint.parent_name = tstr_to_str(parent_node->GetName());
 
+			Matrix3 tmp_tm;
 			Matrix3 skin_init_tm;
-			if (phy_exp != NULL)
+			skin_init_tm.IdentityMatrix();
+			bool found = false;
+			for (size_t i = 0; i < physiques_.size(); ++ i)
 			{
-				if (phy_exp->GetInitNodeTM(jn.second.joint_node, skin_init_tm) != MATRIX_RETURNED)
+				if (MATRIX_RETURNED == physiques_[i]->GetInitNodeTM(jn.second.joint_node, tmp_tm))
 				{
-					skin_init_tm.IdentityMatrix();
+					skin_init_tm = tmp_tm;
+					found = true;
+					break;
 				}
 			}
-			else
+			if (!found)
 			{
-				assert(skin != NULL);
-				if (skin->GetBoneInitTM(jn.second.joint_node, skin_init_tm, false) != MATRIX_RETURNED)
+				for (size_t i = 0; i < skins_.size(); ++ i)
 				{
-					skin_init_tm.IdentityMatrix();
+					if (SKIN_OK == skins_[i]->GetBoneInitTM(jn.second.joint_node, tmp_tm, false))
+					{
+						skin_init_tm = tmp_tm;
+						found = true;
+						break;
+					}
 				}
+			}
+			if (!found)
+			{
+				// fake bone
+				skin_init_tm = jn.second.joint_node->GetNodeTM(0);
 			}
 
 			jn.second.mesh_init_matrix = Inverse(jn.second.joint_node->GetNodeTM(0)) * skin_init_tm;
@@ -996,11 +1015,16 @@ namespace KlayGE
 			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
 			{
-				if ((VEU_Position == ve.usage)
-					|| ((VEU_Normal == ve.usage) && eva.normal)
-					|| ((VEU_Tangent == ve.usage) && eva.tangent)
-					|| ((VEU_Binormal == ve.usage) && eva.binormal)
-					|| ((VEU_TextureCoord == ve.usage) && eva.tex))
+				bool export_ve = true;
+				if (((VEU_Normal == ve.usage) && !eva.normal)
+					|| ((VEU_Tangent == ve.usage) && !eva.tangent)
+					|| ((VEU_Binormal == ve.usage) && !eva.binormal)
+					|| ((VEU_TextureCoord == ve.usage) && !eva.tex))
+				{
+					export_ve = false;
+				}
+
+				if (export_ve)
 				{
 					ofs << "\t\t\t\t<vertex_element usage=\'" << ve.usage
 						<< "\' usage_index=\'" << int(ve.usage_index)
