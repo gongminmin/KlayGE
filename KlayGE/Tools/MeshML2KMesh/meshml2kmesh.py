@@ -49,7 +49,7 @@ class model:
 			self.end_frame = int(key_frames_chunk_tag.attrib['end_frame'])
 			self.frame_rate = int(key_frames_chunk_tag.attrib['frame_rate'])
 
-			key_frame_tags = key_frames_chunk_tag.getiterator('key_frame')
+			key_frame_tags = key_frames_chunk_tag.findall('key_frame')
 			self.num_key_frames = len(key_frame_tags)
 
 	def compile_meshes(self, stream):
@@ -100,12 +100,12 @@ class model:
 						stream.write(pack('ffff', float(specular_tag.attrib['r']), float(specular_tag.attrib['g']), float(specular_tag.attrib['b']), float(specular_tag.attrib['a'])))
 				elif (VEU_BlendIndex == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						weight_tags = vertex_tag.getiterator('weight')
+						weight_tags = vertex_tag.findall('weight')
 						for weight_tag in weight_tags:
 							stream.write(pack('B', int(weight_tag.attrib['bone_index'])))
 				elif (VEU_BlendWeight == vertex_elem.usage):
 					for vertex_tag in vertex_tags:
-						weight_tags = vertex_tag.getiterator('weight')
+						weight_tags = vertex_tag.findall('weight')
 						for weight_tag in weight_tags:
 							stream.write(pack('f', float(weight_tag.attrib['weight'])))
 				elif VEU_TextureCoord == vertex_elem.usage:
@@ -159,7 +159,7 @@ class model:
 				stream.write(pack('B', len(joint_name)))
 				stream.write(joint_name)
 
-				key_tags = key_frame_tag.getiterator('key')
+				key_tags = key_frame_tag.findall('key')
 				for key_tag in key_tags:
 					pos_tag = key_tag.find('pos')
 					stream.write(pack('fff', float(pos_tag.attrib['x']), float(pos_tag.attrib['y']), float(pos_tag.attrib['z'])))
@@ -210,10 +210,15 @@ if __name__ == '__main__':
 
 	print("Parsing:", in_file_name)
 
-	from xml.etree.ElementTree import ElementTree
-	kmodel = model(ElementTree().parse(in_file_name))
+	from xml.etree.cElementTree import ElementTree
 
+	import time
+	start = time.time()
+
+	kmodel = model(ElementTree().parse(in_file_name))
 	kmodel.compile(open(out_file_name, 'wb'))
+
+	print("Timing: %.2fs" % (time.time() - start))
 
 	print("DONE!!")
 
