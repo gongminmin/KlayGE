@@ -906,7 +906,12 @@ namespace KlayGE
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
 			{
-				joints_used.insert(joint.second.parent_name);
+				joint_t const * j = &joint.second;
+				while (joints_.find(j->parent_name) != joints_.end())
+				{
+					joints_used.insert(j->parent_name);
+					j = &joints_[j->parent_name];
+				}
 			}
 		}
 
