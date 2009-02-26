@@ -8,7 +8,7 @@
 	<parameter type="float4" name="joint_poss" array_size="64"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
-	<parameter type="float3" name="light_pos" x="300" y="100" z="100"/>
+	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
 
 	<parameter type="sampler" name="linear_sampler">

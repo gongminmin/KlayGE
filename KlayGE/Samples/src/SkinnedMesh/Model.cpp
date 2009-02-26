@@ -19,14 +19,15 @@
 using namespace KlayGE;
 
 
-MD5SkinnedMesh::MD5SkinnedMesh(RenderModelPtr model, std::wstring const & /*name*/)
-	: SkinnedMesh(model, L"MD5SkinnedMesh"),
+DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr model, std::wstring const & /*name*/)
+	: SkinnedMesh(model, L"DetailedSkinnedMesh"),
 		world_(float4x4::Identity()),
 			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx"))
 {
+	inv_world_ = MathLib::inverse(world_);
 }
 
-void MD5SkinnedMesh::BuildMeshInfo()
+void DetailedSkinnedMesh::BuildMeshInfo()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -35,6 +36,7 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	std::vector<float3> normals;
 	std::vector<float3> tangents;
 	std::vector<float3> binormals;
+	std::vector<float4> blend_weights;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
@@ -42,7 +44,7 @@ void MD5SkinnedMesh::BuildMeshInfo()
 		{
 		case VEU_Position:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read | EAH_CPU_Write, NULL);
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
 				vb_cpu->Resize(vb->Size());
 				vb->CopyToBuffer(*vb_cpu);
 
@@ -50,16 +52,8 @@ void MD5SkinnedMesh::BuildMeshInfo()
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Write);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
 
-					BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos, positions)
-					{
-						std::swap(pos.y(), pos.z());
-						pos.z() = -pos.z();
-					}
-
 					std::copy(positions.begin(), positions.end(), mapper.Pointer<float3>());
 				}
-
-				vb_cpu->CopyToBuffer(*vb);
 			}
 			break;
 
@@ -85,16 +79,8 @@ void MD5SkinnedMesh::BuildMeshInfo()
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
 
-					BOOST_FOREACH(BOOST_TYPEOF(normals)::reference normal, normals)
-					{
-						std::swap(normal.y(), normal.z());
-						normal.z() = -normal.z();
-					}
-
 					std::copy(normals.begin(), normals.end(), mapper.Pointer<float3>());
 				}
-
-				vb_cpu->CopyToBuffer(*vb);
 			}
 			break;
 
@@ -109,17 +95,8 @@ void MD5SkinnedMesh::BuildMeshInfo()
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
 
-					
-					BOOST_FOREACH(BOOST_TYPEOF(tangents)::reference tangent, tangents)
-					{
-						std::swap(tangent.y(), tangent.z());
-						tangent.z() = -tangent.z();
-					}
-
 					std::copy(tangents.begin(), tangents.end(), mapper.Pointer<float3>());
 				}
-
-				vb_cpu->CopyToBuffer(*vb);
 			}
 			break;
 
@@ -134,16 +111,8 @@ void MD5SkinnedMesh::BuildMeshInfo()
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
 
-					BOOST_FOREACH(BOOST_TYPEOF(binormals)::reference binormal, binormals)
-					{
-						std::swap(binormal.y(), binormal.z());
-						binormal.z() = -binormal.z();
-					}
-
 					std::copy(binormals.begin(), binormals.end(), mapper.Pointer<float3>());
 				}
-
-				vb_cpu->CopyToBuffer(*vb);
 			}
 			break;
 
@@ -205,7 +174,7 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 		iter != texture_slots_.end(); ++ iter)
 	{
-		if ("DiffuseMap" == iter->first)
+		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first))
 		{
 			*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
@@ -218,7 +187,7 @@ void MD5SkinnedMesh::BuildMeshInfo()
 				has_normal_map = true;
 			}
 		}
-		if ("SpecularMap" == iter->first)
+		if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
 		{
 			*(effect_->ParameterByName("specular_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
 		}
@@ -232,46 +201,9 @@ void MD5SkinnedMesh::BuildMeshInfo()
 	{
 		technique_ = effect_->TechniqueByName("SkinnedMeshNoNormalMapTech");
 	}
-
-	boost::shared_ptr<RenderModel> model = model_.lock();
-	if (model)
-	{
-		if (!checked_pointer_cast<MD5SkinnedModel>(model)->reversed_)
-		{
-			SkinnedModel::JointsType& joints = checked_pointer_cast<MD5SkinnedModel>(model)->joints_;
-
-			for (size_t i = 0; i < joints.size(); ++ i)
-			{
-				std::swap(joints[i].bind_quat.y(), joints[i].bind_quat.z());
-				joints[i].bind_quat.z() = -joints[i].bind_quat.z();
-
-				std::swap(joints[i].bind_pos.y(), joints[i].bind_pos.z());
-				joints[i].bind_pos.z() = -joints[i].bind_pos.z();
-
-				joints[i].inverse_origin_quat = MathLib::inverse(joints[i].bind_quat);
-				joints[i].inverse_origin_pos = MathLib::transform_quat(-joints[i].bind_pos, joints[i].inverse_origin_quat);
-			}
-			checked_pointer_cast<MD5SkinnedModel>(model)->UpdateBinds();
-
-			KeyFramesType& key_frames = *checked_pointer_cast<MD5SkinnedModel>(model)->key_frames_;
-			BOOST_FOREACH(BOOST_TYPEOF(key_frames)::reference kf, key_frames)
-			{
-				for (size_t i = 0; i < kf.second.bind_pos.size(); ++ i)
-				{
-					std::swap(kf.second.bind_quat[i].y(), kf.second.bind_quat[i].z());
-					kf.second.bind_quat[i].z() = -kf.second.bind_quat[i].z();
-
-					std::swap(kf.second.bind_pos[i].y(), kf.second.bind_pos[i].z());
-					kf.second.bind_pos[i].z() = -kf.second.bind_pos[i].z();
-				}
-			}
-
-			checked_pointer_cast<MD5SkinnedModel>(model)->reversed_ = true;
-		}
-	}
 }
 
-void MD5SkinnedMesh::OnRenderBegin()
+void DetailedSkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
@@ -280,37 +212,51 @@ void MD5SkinnedMesh::OnRenderBegin()
 	boost::shared_ptr<RenderModel> model = model_.lock();
 	if (model)
 	{
-		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindRotations();
-		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<MD5SkinnedModel>(model)->GetBindPositions();
+		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRotations();
+		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindPositions();
 	}
 }
 
-void MD5SkinnedMesh::SetWorld(const float4x4& mat)
+void DetailedSkinnedMesh::SetWorld(const float4x4& mat)
 {
 	world_ = mat;
+	inv_world_ = MathLib::inverse(world_);
 }
 
-void MD5SkinnedMesh::SetEyePos(const KlayGE::float3& eye_pos)
+void DetailedSkinnedMesh::SetLightPos(KlayGE::float3 const & light_pos)
 {
-	*(effect_->ParameterByName("eye_pos")) = eye_pos;
+	*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_world_);
+}
+
+void DetailedSkinnedMesh::SetEyePos(KlayGE::float3 const & eye_pos)
+{
+	*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(eye_pos, inv_world_);
 }
 
 
-MD5SkinnedModel::MD5SkinnedModel()
-		: SkinnedModel(L"MD5SkinnedModel"),
+DetailedSkinnedModel::DetailedSkinnedModel()
+		: SkinnedModel(L"DetailedSkinnedModel"),
 			reversed_(false)
 {
 }
 
-void MD5SkinnedModel::SetEyePos(const KlayGE::float3& eye_pos)
+void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<MD5SkinnedMesh>(*iter)->SetEyePos(eye_pos);
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetLightPos(light_pos);
 	}
 }
 
-void MD5SkinnedModel::SetTime(float time)
+void DetailedSkinnedModel::SetEyePos(KlayGE::float3 const & eye_pos)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetEyePos(eye_pos);
+	}
+}
+
+void DetailedSkinnedModel::SetTime(float time)
 {
 	this->SetFrame(static_cast<int>(time * frame_rate_));
 }

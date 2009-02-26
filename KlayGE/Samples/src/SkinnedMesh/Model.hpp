@@ -5,35 +5,38 @@
 #include <string>
 #include <KlayGE/Mesh.hpp>
 
-class MD5SkinnedMesh;
+class DetailedSkinnedMesh;
 
-class MD5SkinnedModel : public KlayGE::SkinnedModel
+class DetailedSkinnedModel : public KlayGE::SkinnedModel
 {
-	friend class MD5SkinnedMesh;
+	friend class DetailedSkinnedMesh;
 
 public:
-	MD5SkinnedModel();
+	DetailedSkinnedModel();
 
 	void SetTime(float time);
+	void SetLightPos(KlayGE::float3 const & light_pos);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	bool reversed_;
 };
 
-class MD5SkinnedMesh : public KlayGE::SkinnedMesh
+class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	MD5SkinnedMesh(KlayGE::RenderModelPtr model, std::wstring const & name);
+	DetailedSkinnedMesh(KlayGE::RenderModelPtr model, std::wstring const & name);
 
 	void OnRenderBegin();
 
 	void SetWorld(KlayGE::float4x4 const & mat);
+	void SetLightPos(KlayGE::float3 const & light_pos);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void BuildMeshInfo();
 
 private:
 	KlayGE::float4x4 world_;
+	KlayGE::float4x4 inv_world_;
 	KlayGE::RenderEffectPtr effect_;
 };
 

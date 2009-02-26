@@ -47,11 +47,11 @@ namespace
 		return true;
 	}
 
-	struct CreateMD5ModelFactory
+	struct CreateDetailedModelFactory
 	{
 		RenderModelPtr operator()(std::wstring const & /*name*/)
 		{
-			return RenderModelPtr(new MD5SkinnedModel());
+			return RenderModelPtr(new DetailedSkinnedModel());
 		}
 	};
 }
@@ -82,13 +82,16 @@ void SkinnedMeshApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	this->LookAt(float3(250.0f, 48.0f, 0.0f), float3(0.0f, 48.0f, 0.0f), float3(0.0f, 1.0f, 0.0f));
-	this->Proj(10, 500);
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadKModel("felhound.kmodel", EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
+	model_->SetTime(0);
+
+	Box const & bb = model_->GetBound();
+	float3 center = bb.Center();
+	float3 half_size = bb.HalfSize();
+
+	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), center, float3(0.0f, 1.0f, 0.0f));
 
 	fpsController_.Scalers(0.1f, 10);
-
-	model_ = checked_pointer_cast<MD5SkinnedModel>(LoadKModel("pinky.kmodel", EAH_GPU_Read, CreateMD5ModelFactory(), CreateKMeshFactory<MD5SkinnedMesh>()));
-	model_->SetTime(0);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -182,6 +185,20 @@ void SkinnedMeshApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 
 uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
+	Box const & bb = model_->GetBound();
+	float near_plane = 1e10f;
+	float far_plane = 1e-10f;
+	for (int i = 0; i < 8; ++ i)
+	{
+		App3DFramework& app = Context::Instance().AppInstance();
+		float4x4 const & view = app.ActiveCamera().ViewMatrix();
+
+		float3 v = MathLib::transform_coord(bb[i], view);
+		near_plane = std::min(near_plane, v.z() * 0.8f);
+		far_plane = std::max(far_plane, v.z() * 1.2f);
+	}
+	this->Proj(std::max(0.01f, near_plane), far_plane);
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
@@ -206,6 +223,7 @@ uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
+	model_->SetLightPos(float3(20, 100, 100));
 	model_->SetEyePos(this->ActiveCamera().EyePos());
 
 	model_->AddToRenderQueue();

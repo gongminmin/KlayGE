@@ -40,7 +40,9 @@ Deferred shading渲染框架。
 
 技术点：
 1) Deferred Shading
-2) MRT
+2) SSAO
+3) Adaptive Anti-alias
+4) MRT
 
 需求：Geforce 6600以上或Radeon 9500以上。
 渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
@@ -192,7 +194,7 @@ Shadow cube map
 ====================================================================================
 Skinned mesh
 ====================================================================================
-演示了引擎中的骨骼动画特性。模型来自于id software的Doom3泄漏版。
+演示了引擎中的骨骼动画特性。模型来自于http://www.cgrealm.cn。
 
 技术点：
 1) GPU骨骼动画
