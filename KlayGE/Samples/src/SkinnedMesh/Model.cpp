@@ -31,6 +31,31 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	bool has_normal = false;
+	bool has_tangent = false;
+	bool has_binormal = false;
+	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+	{
+		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
+		switch (rl_->VertexStreamFormat(i)[0].usage)
+		{
+		case VEU_Normal:
+			has_normal = true;
+			break;
+
+		case VEU_Tangent:
+			has_tangent = true;
+			break;
+
+		case VEU_Binormal:
+			has_binormal = true;
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	std::vector<float3> positions(this->NumVertices());
 	std::vector<float2> texcoords(this->NumVertices());
 	std::vector<float3> normals;
@@ -49,7 +74,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				vb->CopyToBuffer(*vb_cpu);
 
 				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Write);
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
 
 					std::copy(positions.begin(), positions.end(), mapper.Pointer<float3>());
@@ -69,49 +94,58 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			break;
 
 		case VEU_Normal:
-			normals.resize(this->NumVertices());
+			if (!has_tangent)
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
+				normals.resize(this->NumVertices());
 				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					vb_cpu->Resize(vb->Size());
+					vb->CopyToBuffer(*vb_cpu);
 
-					std::copy(normals.begin(), normals.end(), mapper.Pointer<float3>());
+					{
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
+
+						std::copy(normals.begin(), normals.end(), mapper.Pointer<float3>());
+					}
 				}
 			}
 			break;
 
 		case VEU_Tangent:
-			tangents.resize(this->NumVertices());
+			if (!has_normal)
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
+				tangents.resize(this->NumVertices());
 				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					vb_cpu->Resize(vb->Size());
+					vb->CopyToBuffer(*vb_cpu);
 
-					std::copy(tangents.begin(), tangents.end(), mapper.Pointer<float3>());
+					{
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
+
+						std::copy(tangents.begin(), tangents.end(), mapper.Pointer<float3>());
+					}
 				}
 			}
 			break;
 
 		case VEU_Binormal:
-			binormals.resize(this->NumVertices());
+			if (!has_normal)
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
+				binormals.resize(this->NumVertices());
 				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					vb_cpu->Resize(vb->Size());
+					vb->CopyToBuffer(*vb_cpu);
 
-					std::copy(binormals.begin(), binormals.end(), mapper.Pointer<float3>());
+					{
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
+
+						std::copy(binormals.begin(), binormals.end(), mapper.Pointer<float3>());
+					}
 				}
 			}
 			break;
@@ -133,11 +167,11 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
 	}
 
-	if (normals.empty())
+	if (!has_normal)
 	{
 		normals.resize(this->NumVertices());
 
-		if (tangents.empty() && binormals.empty())
+		if (!has_tangent || !has_binormal)
 		{
 			MathLib::compute_normal<float>(normals.begin(),
 				indices.begin(), indices.end(), positions.begin(), positions.end());
@@ -149,11 +183,12 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				normals[i] = MathLib::cross(tangents[i], binormals[i]);
 			}
 		}
-	}
-	this->AddVertexStream(&normals[0], static_cast<uint32_t>(sizeof(normals[0]) * normals.size()),
-			vertex_element(VEU_Normal, 0, EF_BGR32F), EAH_GPU_Read);
 
-	if (tangents.empty())
+		this->AddVertexStream(&normals[0], static_cast<uint32_t>(sizeof(normals[0]) * normals.size()),
+			vertex_element(VEU_Normal, 0, EF_BGR32F), EAH_GPU_Read);
+	}
+
+	if (!has_tangent)
 	{
 		tangents.resize(this->NumVertices());
 		binormals.resize(this->NumVertices());
