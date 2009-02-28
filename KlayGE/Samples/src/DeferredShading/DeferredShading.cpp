@@ -475,7 +475,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-		if ((0 == buffer_type_) && ssao_enabled_)
+		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 			blur_pp_->Apply();

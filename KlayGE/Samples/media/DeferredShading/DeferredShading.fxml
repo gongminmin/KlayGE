@@ -158,7 +158,6 @@ float4 SSAO(float2 tc0)
 	float4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
 
-	const half fScale = 0.025f; 
 	float4 samples[16] =
 	{
 		float4(0.355512, 	-0.709318, 	-0.102371,	0.0),
@@ -179,13 +178,12 @@ float4 SSAO(float2 tc0)
 		float4(0.0975089, 	-0.329594, 	0.609803,	0.0)
 	};
 
-	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 400.0).rgb;
+	float3 randNormal = normalize(rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 100.0).rgb * 2 - 1);
 
 	float4 sky_access = 0.0f;
 	float4 arr_scene_depth2;
 	float3 ray;
 
-	float def_val = 0.55f;
 	for (int i = 0; i < 4; ++ i)
 	{
 		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sampleRadius;
@@ -203,10 +201,10 @@ float4 SSAO(float2 tc0)
 		float4 dist = arr_scene_depth2 - depth;
 		float4 occlusion = distanceScale * dist;
 		float4 range_is_invalid = (saturate(abs(occlusion)) + saturate(occlusion)) / 2;
-		sky_access += lerp(saturate(-dist * 0.2f), def_val, range_is_invalid);
+		sky_access += range_is_invalid * range_is_invalid;
 	}
 	
-	return dot(sky_access, 1 / 8.0f);
+	return saturate(dot(sky_access, 1 / 8.0f));
 }
 
 float GetEdgeWeight(float2 tc0)
