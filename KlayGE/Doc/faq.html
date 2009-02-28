@@ -6,6 +6,7 @@
 </head>
 
 <body>
+<img src="image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" />
 <h1>KlayGE常见问题的解答</h1>
 <hr />
 <h2><a name="content">目录</a></h2>
@@ -20,41 +21,39 @@
 	<li><a href="#q8">Boost编译的时候应该用什么参数？</a></li>
 </ol>
 <hr />
-<a name="q0"><h4>问：KlayGE是什么？</h4></a>
+<h4><a name="q0">问：KlayGE是什么？</a></h4>
 <p>答：KlayGE是一个开放源代码、跨平台的游戏引擎。它是用C++开发的，并使用Python作脚本语言。KlayGE在GPL协议下发行。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q1"><h4>问：KlayGE是你一个人开发的吗？</h4></a>
+<h4><a name="q1">问：KlayGE是你一个人开发的吗？</a></h4>
 <p>答：是的。几乎所有的开发都是我一个人完成的。但在这个过程中使用了一些第三方的代码，比如7zip的解码部分。不少朋友也在开发的过程中给予了不可或缺的帮助。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q2"><h4>问：哪里能找到KlayGE的文档？</h4></a>
+<h4><a name="q2">问：哪里能找到KlayGE的文档？</a></h4>
 <p>答：目前KlayGE的文档仅限于doc目录下的文件。文档缺乏的原因主要是我没有足够的时间去写，另外我更希望用代码本身来自我诠释。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q3"><h4>问：为什么选择了GPL？</h4></a>
+<h4><a name="q3">问：为什么选择了GPL？</a></h4>
 <p>答：在KlayGE 2.7之前使用的是LGPL协议，但后来为了保护它不被某些专有软件吞并，所以换成了GPL。 </p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q4"><h4>问：为什么用Python而不是LUA？</h4></a>
+<h4><a name="q4">问：为什么用Python而不是LUA？</a></h4>
 <p>答：KlayGE 2.0之前（当时还叫作Clay! Engine），LUA是首选的脚本语言。LUA的优点是速度快，缺点是在C++中的调用及其麻烦，而且语言本身能力较弱。Python速度不如LUA，但是语言能力强大得多，也不必写成栈式的调用方式，简洁得多。在KlayGE中，脚本不是为了效率而存在的，所以Python成了不二之选。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q5"><h4>问：为什么必须要有Shader Model 2.0及以上？</h4></a>
+<h4><a name="q5">问：为什么必须要有Shader Model 2.0及以上？</a></h4>
 <p>答：KlayGE是一款面向高端的引擎，所以在一定程度上要用较高的配置，以满足先进技术的需要。另一方面，Shader Model 2.0并不算一个很高的要求，市面上的新显卡几乎都是支持Shader Model 3.0的。对于游戏开发者来说，如果现在还在使用不支持Shader Model 2.0的硬件，那只能说实在落后得太多了。 </p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q6"><h4>问：KlayGE的网络部分如何？ </h4></a>
+<h4><a name="q6">问：KlayGE的网络部分如何？</a></h4>
 <p>答：KlayGE中的网络是弱项，甚至可以说几乎无法使用。所以需要重新开发，或者使用别的网络库。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q7"><h4>问：编译例子的时候出现像这样的连接错误信息：“libcmtd.lib(dbgheap.obj) : error LNK2005: __CrtSetDbgFlag 已经在MSVCRTD.lib(MSVCR80D.dll) 中定义”，请问如何解决？</h4></a>
+<h4><a name="q7">问：编译例子的时候出现像这样的连接错误信息：“libcmtd.lib(dbgheap.obj) : error LNK2005: __CrtSetDbgFlag 已经在MSVCRTD.lib(MSVCR80D.dll) 中定义”，请问如何解决？</a></h4>
 <p>答：由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code  Generation-&gt;RuntimeLibrary，选择Multi-threaded Debug DLL/Multi-threaded  DLL）。</p>
 <a href="#content">回到目录</a>
 <hr />
-<a name="q8">
-<h4>问：Boost编译的时候应该用什么参数？</h4>
-</a>
+<h4><a name="q8">问：Boost编译的时候应该用什么参数？</a></h4>
 <p>答：Boost 1.36的编译参数可以通过bjam的命令行参数来设置，可以写一个批处理文件，内容是：</p>
 <blockquote>
 	<pre>SET BZIP2_SOURCE=&quot;D:/bzip2-1.0.5&quot;<br />SET ZLIB_SOURCE=&quot;D:/zlib-1.2.3&quot;<br />SET ICU_PATH=&quot;D:/icu4c-3_6&quot;<br />bjam --toolset=msvc-9.0 --stagedir=./lib_vc9_x86 --builddir=./ address-model=32 link=shared runtime-link=shared threading=multi cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE define=_SECURE_SCL=0 stage debug release
