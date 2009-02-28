@@ -178,7 +178,7 @@ float4 SSAO(float2 tc0)
 		float4(0.0975089, 	-0.329594, 	0.609803,	0.0)
 	};
 
-	float3 randNormal = normalize(rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 100.0).rgb * 2 - 1);
+	float3 randNormal = normalize(GetNormal(ndc) + rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 100.0).rgb * 2 - 1);
 
 	float4 sky_access = 0.0f;
 	float4 arr_scene_depth2;
