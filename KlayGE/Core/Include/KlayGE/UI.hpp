@@ -1303,7 +1303,6 @@ namespace KlayGE
 		bool analyse_required_;			// True if the string has changed since last analysis.
 	};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 	// EditBox control
 	class KLAYGE_CORE_API UIEditBox : public UIControl
 	{
@@ -1395,7 +1394,6 @@ namespace KlayGE
 		static bool hide_caret_;   // If true, we don't render the caret.
 		static Timer timer_;
 	};
-#endif
 }
 
 #endif		// _UI_HPP

@@ -139,7 +139,11 @@ int main()
 #ifdef KLAYGE_DEBUG
 	dll_suffix += "_d";
 #endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
 	dll_suffix += ".dll";
+#else
+	dll_suffix += ".so";
+#endif
 
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
 

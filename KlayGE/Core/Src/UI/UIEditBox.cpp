@@ -2,6 +2,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Input.hpp>
+#include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
@@ -10,7 +11,6 @@
 
 #include <KlayGE/UI.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
 namespace KlayGE
 {
 	UniBuffer::UniBuffer(int nInitialSize)
@@ -175,7 +175,11 @@ namespace KlayGE
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
+#ifdef KLAYGE_PLATFORM_WINDOWS
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 						last_blink_time_(timer_.current_time()),
 						caret_on_(true),
 						caret_pos_(0),
@@ -197,7 +201,11 @@ namespace KlayGE
 					: UIControl(type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
+#ifdef KLAYGE_PLATFORM_WINDOWS
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 						last_blink_time_(timer_.current_time()),
 						caret_on_(true),
 						caret_pos_(0),
@@ -219,7 +227,11 @@ namespace KlayGE
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
+#ifdef KLAYGE_PLATFORM_WINDOWS
 						blink_time_(GetCaretBlinkTime() * 0.001f),
+#else
+						blink_time_(1),
+#endif
 						last_blink_time_(timer_.current_time()),
 						caret_on_(true),
 						caret_pos_(0),
@@ -458,6 +470,20 @@ namespace KlayGE
 
 	void UIEditBox::KeyDownHandler(UIDialog const & /*sender*/, wchar_t key)
 	{
+		InputKeyboardPtr key_board;
+		{
+			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
+			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+			{
+				InputKeyboardPtr k = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
+				if (k)
+				{
+					key_board = k;
+					break;
+				}
+			}
+		}
+
 		switch (key)
 		{
 		case KS_Tab:
@@ -467,7 +493,7 @@ namespace KlayGE
 
 		case KS_Home:
 			this->PlaceCaret(0);
-			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
+			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -478,7 +504,7 @@ namespace KlayGE
 
 		case KS_End:
 			this->PlaceCaret(buffer_.GetTextSize());
-			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
+			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -488,14 +514,14 @@ namespace KlayGE
 			break;
 
 		case KS_Insert:
-			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
+			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
 			{
 				// Control Insert. Copy to clipboard
 				this->CopyToClipboard();
 			}
 			else
 			{
-				if ((GetKeyState(VK_LSHIFT) & 0x8000) || (GetKeyState(VK_RSHIFT) & 0x8000))
+				if (key_board && (key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift)))
 				{
 					// Shift Insert. Paste from clipboard
 					this->PasteFromClipboard();
@@ -525,7 +551,7 @@ namespace KlayGE
 			break;
 
 		case KS_LeftArrow:
-			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
+			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -539,7 +565,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ - 1);
 				}
 			}
-			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
+			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -549,7 +575,7 @@ namespace KlayGE
 			break;
 
 		case KS_RightArrow:
-			if ((GetKeyState(VK_LCONTROL) & 0x8000) || (GetKeyState(VK_RCONTROL) & 0x8000))
+			if (key_board && (key_board->Key(KS_LeftCtrl) || key_board->Key(KS_RightCtrl)))
 			{
 				// Control is down. Move the caret to a new item
 				// instead of a character.
@@ -563,7 +589,7 @@ namespace KlayGE
 					this->PlaceCaret(caret_pos_ + 1);
 				}
 			}
-			if (!(GetKeyState(VK_LSHIFT) & 0x8000) && !(GetKeyState(VK_RSHIFT) & 0x8000))
+			if (key_board && (!(key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift))))
 			{
 				// Shift is not down. Update selection
 				// start along with the caret.
@@ -602,6 +628,7 @@ namespace KlayGE
 
 	void UIEditBox::CharHandler(Window const & /*win*/, wchar_t ch)
 	{
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		if (has_focus_)
 		{
 			switch (ch)
@@ -718,6 +745,7 @@ namespace KlayGE
 				break;
 			}
 		}
+#endif
 	}
 
 	void UIEditBox::MouseDownHandler(UIDialog const & /*sender*/, uint32_t buttons, Vector_T<int32_t, 2> const & pt)
@@ -880,4 +908,3 @@ namespace KlayGE
 		}
 	}
 }
-#endif

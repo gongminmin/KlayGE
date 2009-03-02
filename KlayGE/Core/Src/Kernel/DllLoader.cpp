@@ -43,7 +43,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		dll_handle_ = static_cast<void*>(::LoadLibraryA(name.c_str()));
 #else
-		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY);
 #endif
 	}
 

@@ -101,11 +101,11 @@ namespace KlayGE
 
 				if (!cur_desc.front_stencil_write_mask)
 				{
-					glStencilMaskSeparate(GL_FRONT, TRUE);
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
 				}
 				if (!cur_desc.back_stencil_write_mask)
 				{
-					glStencilMaskSeparate(GL_BACK, TRUE);
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
 				}
 			}
 
@@ -160,7 +160,7 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
@@ -186,7 +186,7 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}
@@ -196,7 +196,7 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
 	}

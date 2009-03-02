@@ -310,7 +310,7 @@ namespace KlayGE
 					Convert(wcaption, caption);
 					dlg->SetCaptionText(wcaption);
 				}
-				
+
 				uint32_t num_ids;
 				source->read(reinterpret_cast<char*>(&num_ids), sizeof(num_ids));
 				for (uint32_t j = 0; j < num_ids; ++ j)
@@ -1310,7 +1310,7 @@ namespace KlayGE
 	{
 		id_name_.insert(std::make_pair(name, id));
 	}
-	
+
 	int UIDialog::IDFromName(std::string const & name)
 	{
 		return id_name_[name];
@@ -1320,7 +1320,7 @@ namespace KlayGE
 	{
 		id_location_.insert(std::make_pair(id, loc));
 	}
-	
+
 	UIDialog::ControlLocation const & UIDialog::CtrlLocation(int id)
 	{
 		return id_location_[id];

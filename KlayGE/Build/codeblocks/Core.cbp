@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_Core_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\win\x86" />
-				<Option object_output="..\..\Debug\win\x86" />
+				<Option output="../../lib/win/x86/KlayGE_Core_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win/x86" />
+				<Option object_output="../../Debug/win/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -45,9 +45,9 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_Core_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\win\x86" />
-				<Option object_output="..\..\Release\win\x86" />
+				<Option output="../../lib/win/x86/KlayGE_Core_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win/x86" />
+				<Option object_output="../../Release/win/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -83,9 +83,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\KlayGE_Core_gcc42_x86_d.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x86" />
-				<Option object_output="..\..\Debug\linux\x86" />
+				<Option output="../../lib/linux/x86/libKlayGE_Core_gcc_x86_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x86" />
+				<Option object_output="../../Debug/linux/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -97,15 +97,26 @@
 					<Add option="-m32" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
+				<Linker>
+					<Add library="boost_filesystem-gcc43-mt-d" />
+					<Add library="boost_system-gcc43-mt-d" />
+					<Add library="boost_signals-gcc43-mt-d" />
+					<Add library="boost_program_options-gcc43-mt-d" />
+					<Add library="boost_thread-gcc43-mt-d" />
+					<Add library="python3.0_d" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
+				</ExtraCommands>
 				<Environment>
 					<Variable name="yasm_objfmt" value="elf32" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\KlayGE_Core_gcc42_x86.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x86" />
-				<Option object_output="..\..\Release\linux\x86" />
+				<Option output="../../lib/linux/x86/libKlayGE_Core_gcc_x86.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x86" />
+				<Option object_output="../../Release/linux/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -119,16 +130,25 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="boost_filesystem-gcc43-mt" />
+					<Add library="boost_system-gcc43-mt" />
+					<Add library="boost_signals-gcc43-mt" />
+					<Add library="boost_program_options-gcc43-mt" />
+					<Add library="boost_thread-gcc43-mt" />
+					<Add library="python3.0" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
+				</ExtraCommands>
 				<Environment>
 					<Variable name="yasm_objfmt" value="elf32" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\KlayGE_Core_gcc42_x64_d.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x64" />
-				<Option object_output="..\..\Debug\linux\x64" />
+				<Option output="../../lib/linux/x64/libKlayGE_Core_gcc_x64_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x64" />
+				<Option object_output="../../Debug/linux/x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -139,17 +159,29 @@
 					<Add option="-g" />
 					<Add option="-O0" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
+				<Linker>
+					<Add library="boost_filesystem-gcc43-mt-d" />
+					<Add library="boost_system-gcc43-mt-d" />
+					<Add library="boost_signals-gcc43-mt-d" />
+					<Add library="boost_program_options-gcc43-mt-d" />
+					<Add library="boost_thread-gcc43-mt-d" />
+					<Add library="python3.0" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
+				</ExtraCommands>
 				<Environment>
 					<Variable name="yasm_objfmt" value="elf64" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\KlayGE_Core_gcc42_x64.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x64" />
-				<Option object_output="..\..\Release\linux\x64" />
+				<Option output="../../lib/linux/x64/libKlayGE_Core_gcc_x64.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x64" />
+				<Option object_output="../../Release/linux/x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -160,11 +192,21 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="boost_filesystem-gcc43-mt" />
+					<Add library="boost_system-gcc43-mt" />
+					<Add library="boost_signals-gcc43-mt" />
+					<Add library="boost_program_options-gcc43-mt" />
+					<Add library="boost_thread-gcc43-mt" />
+					<Add library="python3.0" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
+				</ExtraCommands>
 				<Environment>
 					<Variable name="yasm_objfmt" value="elf64" />
 				</Environment>
@@ -174,240 +216,240 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="..\..\Core\Include\KlayGE\App3D.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Audio.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\AudioFactory.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\BlockCompression.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Bound.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Box.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\COMPtr.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Camera.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\CameraController.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ClosedHashMap.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ClosedHashSet.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ClosedHashTable.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Color.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Config.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Context.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\CpuInfo.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\DllLoader.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ElementFormat.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Extract7z.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Font.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\FrameBuffer.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\HDRPostProcess.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Input.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\InputFactory.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\KMesh.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\KlayGE.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Lobby.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\MapVector.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Math.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Matrix.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Mesh.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\NetMsg.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\PerlinNoise.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Plane.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Player.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\PostProcess.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\PreDeclare.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Quaternion.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Query.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Rect.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderDeviceCaps.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderEffect.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderEngine.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderFactory.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderLayout.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderSettings.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderStateObject.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderView.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Renderable.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\RenderableHelper.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ResLoader.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\SceneManager.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\SceneNode.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\SceneObject.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Script.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\SetVector.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ShaderObject.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Show.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ShowFactory.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Size.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Socket.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Sphere.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Texture.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\ThrowErr.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Timer.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Trace.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Types.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\UI.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Util.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Vector.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Viewport.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\aligned_allocator.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\atomic.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\config\auto_link.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\half.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\thread.hpp" />
-		<Unit filename="..\..\Core\Src\AppLayer\App3D.cpp" />
-		<Unit filename="..\..\Core\Src\AppLayer\Window.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\AudioBuffer.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\AudioDataSource.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\AudioEngine.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\AudioFactory.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\MusicBuffer.cpp" />
-		<Unit filename="..\..\Core\Src\Audio\SoundBuffer.cpp" />
-		<Unit filename="..\..\Core\Src\Input\InputActionMap.cpp" />
-		<Unit filename="..\..\Core\Src\Input\InputDevice.cpp" />
-		<Unit filename="..\..\Core\Src\Input\InputEngine.cpp" />
-		<Unit filename="..\..\Core\Src\Input\InputFactory.cpp" />
-		<Unit filename="..\..\Core\Src\Input\Joystick.cpp" />
-		<Unit filename="..\..\Core\Src\Input\Keyboard.cpp" />
-		<Unit filename="..\..\Core\Src\Input\Mouse.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\Context.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\CpuInfo.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\DllLoader.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\ResLoader.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\ThrowErr.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\Timer.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\Util.cpp" />
-		<Unit filename="..\..\Core\Src\Kernel\asm\CpuID.asm">
+		<Unit filename="../../Core/Include/KlayGE/App3D.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Audio.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/AudioDataSource.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/AudioFactory.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/BlockCompression.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Bound.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Box.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/COMPtr.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Camera.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/CameraController.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ClosedHashMap.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ClosedHashSet.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ClosedHashTable.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Color.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Config.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Context.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/CpuInfo.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Detail/MathHelper.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/DllLoader.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ElementFormat.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Extract7z.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Font.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/FrameBuffer.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/GraphicsBuffer.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/HDRPostProcess.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Input.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/InputFactory.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/KMesh.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/KlayGE.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Lobby.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/MapVector.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Math.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Matrix.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Mesh.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/NetMsg.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ParticleSystem.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/PerlinNoise.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Plane.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Player.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/PostProcess.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/PreDeclare.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Quaternion.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Query.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Rect.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderDeviceCaps.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderEffect.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderEngine.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderFactory.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderLayout.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderSettings.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderStateObject.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderView.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Renderable.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/RenderableHelper.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ResLoader.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/SceneManager.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/SceneNode.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/SceneObject.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/SceneObjectHelper.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Script.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/SetVector.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ShaderObject.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Show.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ShowFactory.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Size.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Socket.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Sphere.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Texture.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/ThrowErr.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Timer.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Trace.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Types.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/UI.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Util.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Vector.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Viewport.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/aligned_allocator.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/atomic.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/config/auto_link.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/half.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/thread.hpp" />
+		<Unit filename="../../Core/Src/AppLayer/App3D.cpp" />
+		<Unit filename="../../Core/Src/AppLayer/Window.cpp" />
+		<Unit filename="../../Core/Src/Audio/AudioBuffer.cpp" />
+		<Unit filename="../../Core/Src/Audio/AudioDataSource.cpp" />
+		<Unit filename="../../Core/Src/Audio/AudioEngine.cpp" />
+		<Unit filename="../../Core/Src/Audio/AudioFactory.cpp" />
+		<Unit filename="../../Core/Src/Audio/MusicBuffer.cpp" />
+		<Unit filename="../../Core/Src/Audio/SoundBuffer.cpp" />
+		<Unit filename="../../Core/Src/Input/InputActionMap.cpp" />
+		<Unit filename="../../Core/Src/Input/InputDevice.cpp" />
+		<Unit filename="../../Core/Src/Input/InputEngine.cpp" />
+		<Unit filename="../../Core/Src/Input/InputFactory.cpp" />
+		<Unit filename="../../Core/Src/Input/Joystick.cpp" />
+		<Unit filename="../../Core/Src/Input/Keyboard.cpp" />
+		<Unit filename="../../Core/Src/Input/Mouse.cpp" />
+		<Unit filename="../../Core/Src/Kernel/Context.cpp" />
+		<Unit filename="../../Core/Src/Kernel/CpuInfo.cpp" />
+		<Unit filename="../../Core/Src/Kernel/DllLoader.cpp" />
+		<Unit filename="../../Core/Src/Kernel/ResLoader.cpp" />
+		<Unit filename="../../Core/Src/Kernel/ThrowErr.cpp" />
+		<Unit filename="../../Core/Src/Kernel/Timer.cpp" />
+		<Unit filename="../../Core/Src/Kernel/Util.cpp" />
+		<Unit filename="../../Core/Src/Kernel/asm/CpuID.asm">
 			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -f$(yasm_objfmt) -o $object $file\n" />
 		</Unit>
-		<Unit filename="..\..\Core\Src\Net\Lobby.cpp" />
-		<Unit filename="..\..\Core\Src\Net\Player.cpp" />
-		<Unit filename="..\..\Core\Src\Net\Socket.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\ArchiveExtractCallback.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\ArchiveExtractCallback.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\BSTR.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\BSTR.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\BaseDefines.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\Extract7z.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\IArchive.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\IPassword.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\IProgress.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\IStream.hpp" />
-		<Unit filename="..\..\Core\Src\Pack\Streams.cpp" />
-		<Unit filename="..\..\Core\Src\Pack\Streams.hpp" />
-		<Unit filename="..\..\Core\Src\Render\BlockCompression.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Camera.cpp" />
-		<Unit filename="..\..\Core\Src\Render\CameraController.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Font.cpp" />
-		<Unit filename="..\..\Core\Src\Render\FrameBuffer.cpp" />
-		<Unit filename="..\..\Core\Src\Render\GraphicsBuffer.cpp" />
-		<Unit filename="..\..\Core\Src\Render\HDRPostProcess.cpp" />
-		<Unit filename="..\..\Core\Src\Render\KMesh.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Mesh.cpp" />
-		<Unit filename="..\..\Core\Src\Render\PostProcess.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Query.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderEffect.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderEngine.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderFactory.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderLayout.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderStateObject.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderView.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Renderable.cpp" />
-		<Unit filename="..\..\Core\Src\Render\RenderableHelper.cpp" />
-		<Unit filename="..\..\Core\Src\Render\SATPostProcess.cpp" />
-		<Unit filename="..\..\Core\Src\Render\ShaderObject.cpp" />
-		<Unit filename="..\..\Core\Src\Render\Texture.cpp" />
-		<Unit filename="..\..\Core\Src\Scene\SceneManager.cpp" />
-		<Unit filename="..\..\Core\Src\Scene\SceneObject.cpp" />
-		<Unit filename="..\..\Core\Src\Scene\SceneObjectHelper.cpp" />
-		<Unit filename="..\..\Core\Src\Script\Script.cpp" />
-		<Unit filename="..\..\Core\Src\Show\ShowEngine.cpp" />
-		<Unit filename="..\..\Core\Src\Show\ShowFactory.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UI.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIButton.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UICheckBox.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIComboBox.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIEditBox.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIListBox.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIRadioButton.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIScrollBar.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UISlider.cpp" />
-		<Unit filename="..\..\Core\Src\UI\UIStatic.cpp" />
-		<Unit filename="..\..\RenderFX\2D.fxml">
+		<Unit filename="../../Core/Src/Net/Lobby.cpp" />
+		<Unit filename="../../Core/Src/Net/Player.cpp" />
+		<Unit filename="../../Core/Src/Net/Socket.cpp" />
+		<Unit filename="../../Core/Src/Pack/ArchiveExtractCallback.cpp" />
+		<Unit filename="../../Core/Src/Pack/ArchiveExtractCallback.hpp" />
+		<Unit filename="../../Core/Src/Pack/ArchiveOpenCallback.cpp" />
+		<Unit filename="../../Core/Src/Pack/ArchiveOpenCallback.hpp" />
+		<Unit filename="../../Core/Src/Pack/BSTR.cpp" />
+		<Unit filename="../../Core/Src/Pack/BSTR.hpp" />
+		<Unit filename="../../Core/Src/Pack/BaseDefines.hpp" />
+		<Unit filename="../../Core/Src/Pack/Extract7z.cpp" />
+		<Unit filename="../../Core/Src/Pack/IArchive.hpp" />
+		<Unit filename="../../Core/Src/Pack/IPassword.hpp" />
+		<Unit filename="../../Core/Src/Pack/IProgress.hpp" />
+		<Unit filename="../../Core/Src/Pack/IStream.hpp" />
+		<Unit filename="../../Core/Src/Pack/Streams.cpp" />
+		<Unit filename="../../Core/Src/Pack/Streams.hpp" />
+		<Unit filename="../../Core/Src/Render/BlockCompression.cpp" />
+		<Unit filename="../../Core/Src/Render/Camera.cpp" />
+		<Unit filename="../../Core/Src/Render/CameraController.cpp" />
+		<Unit filename="../../Core/Src/Render/Font.cpp" />
+		<Unit filename="../../Core/Src/Render/FrameBuffer.cpp" />
+		<Unit filename="../../Core/Src/Render/GraphicsBuffer.cpp" />
+		<Unit filename="../../Core/Src/Render/HDRPostProcess.cpp" />
+		<Unit filename="../../Core/Src/Render/KMesh.cpp" />
+		<Unit filename="../../Core/Src/Render/Mesh.cpp" />
+		<Unit filename="../../Core/Src/Render/PostProcess.cpp" />
+		<Unit filename="../../Core/Src/Render/Query.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderEffect.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderEngine.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderFactory.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderLayout.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderStateObject.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderView.cpp" />
+		<Unit filename="../../Core/Src/Render/Renderable.cpp" />
+		<Unit filename="../../Core/Src/Render/RenderableHelper.cpp" />
+		<Unit filename="../../Core/Src/Render/SATPostProcess.cpp" />
+		<Unit filename="../../Core/Src/Render/ShaderObject.cpp" />
+		<Unit filename="../../Core/Src/Render/Texture.cpp" />
+		<Unit filename="../../Core/Src/Scene/SceneManager.cpp" />
+		<Unit filename="../../Core/Src/Scene/SceneObject.cpp" />
+		<Unit filename="../../Core/Src/Scene/SceneObjectHelper.cpp" />
+		<Unit filename="../../Core/Src/Script/Script.cpp" />
+		<Unit filename="../../Core/Src/Show/ShowEngine.cpp" />
+		<Unit filename="../../Core/Src/Show/ShowFactory.cpp" />
+		<Unit filename="../../Core/Src/UI/UI.cpp" />
+		<Unit filename="../../Core/Src/UI/UIButton.cpp" />
+		<Unit filename="../../Core/Src/UI/UICheckBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIComboBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIEditBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIListBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIRadioButton.cpp" />
+		<Unit filename="../../Core/Src/UI/UIScrollBar.cpp" />
+		<Unit filename="../../Core/Src/UI/UISlider.cpp" />
+		<Unit filename="../../Core/Src/UI/UIStatic.cpp" />
+		<Unit filename="../../RenderFX/2D.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Blur.fxml">
+		<Unit filename="../../RenderFX/Blur.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Bone.fxml">
+		<Unit filename="../../RenderFX/Bone.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\DownSample.fxml">
+		<Unit filename="../../RenderFX/DownSample.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Fog.fxml">
+		<Unit filename="../../RenderFX/Fog.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Font.fxml">
+		<Unit filename="../../RenderFX/Font.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\GammaCorrection.fxml">
+		<Unit filename="../../RenderFX/GammaCorrection.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\KMesh.fxml">
+		<Unit filename="../../RenderFX/KMesh.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Lighting.fxml">
+		<Unit filename="../../RenderFX/Lighting.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Noise.fxml">
+		<Unit filename="../../RenderFX/Noise.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\PointSprite.fxml">
+		<Unit filename="../../RenderFX/PointSprite.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\PostProcess.fxml">
+		<Unit filename="../../RenderFX/PostProcess.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\Quaternion.fxml">
+		<Unit filename="../../RenderFX/Quaternion.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\RenderableHelper.fxml">
+		<Unit filename="../../RenderFX/RenderableHelper.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\SumLum.fxml">
+		<Unit filename="../../RenderFX/SumLum.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\SummedAreaTable.fxml">
+		<Unit filename="../../RenderFX/SummedAreaTable.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\ToneMapping.fxml">
+		<Unit filename="../../RenderFX/ToneMapping.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\UI.fxml">
+		<Unit filename="../../RenderFX/UI.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\RenderFX\util.fxml">
+		<Unit filename="../../RenderFX/util.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
 		</Unit>

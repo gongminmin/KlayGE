@@ -446,7 +446,7 @@ namespace KlayGE
 	}
 #elif defined KLAYGE_PLATFORM_LINUX
 	Window::Window(std::string const & name, int32_t left, int32_t top,
-		uint32_t width, uint32_t height)
+		uint32_t width, uint32_t height, bool full_screen)
 	{
 		x_display_ = XOpenDisplay(NULL);
 

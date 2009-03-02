@@ -34,6 +34,9 @@
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_LINUX
 #include <glloader/glloader.h>
+#ifdef Bool
+#undef Bool		// for boost::foreach
+#endif
 #endif
 #include <string>
 

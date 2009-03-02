@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw_x86_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win/x86/libKlayGE_AudioDataSource_OggVorbis_mgw_x86_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\win\x86" />
+				<Option object_output="../../Debug/win/x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -27,9 +27,9 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_mgw_x86.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win/x86/libKlayGE_AudioDataSource_OggVorbis_mgw_x86.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\win\x86" />
+				<Option object_output="../../Release/win/x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -49,9 +49,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\libKlayGE_AudioDataSource_OggVorbis_gcc42_x86_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux/x86/libKlayGE_AudioDataSource_OggVorbis_gcc_x86_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\linux\x86" />
+				<Option object_output="../../Debug/linux/x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -66,9 +66,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\win\x86\libKlayGE_AudioDataSource_OggVorbis_gcc42_x86.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win/x86/libKlayGE_AudioDataSource_OggVorbis_gcc_x86.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\linux\x86" />
+				<Option object_output="../../Release/linux/x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -86,9 +86,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\libKlayGE_AudioDataSource_OggVorbis_gcc42_x64_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux/x64/libKlayGE_AudioDataSource_OggVorbis_gcc_x64_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\linux\x64" />
+				<Option object_output="../../Debug/linux/x64" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -99,14 +99,15 @@
 					<Add option="-g" />
 					<Add option="-O0" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\win\x64\libKlayGE_AudioDataSource_OggVorbis_gcc42_x64.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win/x64/libKlayGE_AudioDataSource_OggVorbis_gcc_x64.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\linux\x64" />
+				<Option object_output="../../Release/linux/x64" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -117,6 +118,7 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
@@ -128,8 +130,8 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp" />
-		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp" />
+		<Unit filename="../../Plugins/Include/KlayGE/OggVorbis/OggVorbisSource.hpp" />
+		<Unit filename="../../Plugins/Src/AudioDataSource/OggVorbis/OggVorbisSource.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

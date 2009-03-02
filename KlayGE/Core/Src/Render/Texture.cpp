@@ -616,7 +616,7 @@ namespace KlayGE
 					file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(image_size));
 					BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 
-					the_width = std::max(the_width / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
 				}
 			}
 			break;
@@ -669,8 +669,8 @@ namespace KlayGE
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch));
 					}
 
-					the_width = std::max(the_width / 2, 1UL);
-					the_height = std::max(the_height / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
+					the_height = std::max<uint32_t>(the_height / 2, 1);
 				}
 			}
 			break;
@@ -725,9 +725,9 @@ namespace KlayGE
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch * the_depth));
 					}
 
-					the_width = std::max(the_width / 2, 1UL);
-					the_height = std::max(the_height / 2, 1UL);
-					the_depth = std::max(the_depth / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
+					the_height = std::max<uint32_t>(the_height / 2, 1);
+					the_depth = std::max<uint32_t>(the_depth / 2, 1);
 				}
 			}
 			break;
@@ -783,8 +783,8 @@ namespace KlayGE
 							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
 
-						the_width = std::max(the_width / 2, 1UL);
-						the_height = std::max(the_height / 2, 1UL);
+						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_height = std::max<uint32_t>(the_height / 2, 1);
 					}
 				}
 			}
@@ -1125,7 +1125,7 @@ namespace KlayGE
 
 					file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(image_size));
 
-					the_width = std::max(the_width / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
 				}
 			}
 			break;
@@ -1157,8 +1157,8 @@ namespace KlayGE
 						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * format_size));
 					}
 
-					the_width = std::max(the_width / 2, 1UL);
-					the_height = std::max(the_height / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
+					the_height = std::max<uint32_t>(the_height / 2, 1);
 				}
 			}
 			break;
@@ -1191,9 +1191,9 @@ namespace KlayGE
 						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * the_depth * format_size));
 					}
 
-					the_width = std::max(the_width / 2, 1UL);
-					the_height = std::max(the_height / 2, 1UL);
-					the_depth = std::max(the_depth / 2, 1UL);
+					the_width = std::max<uint32_t>(the_width / 2, 1);
+					the_height = std::max<uint32_t>(the_height / 2, 1);
+					the_depth = std::max<uint32_t>(the_depth / 2, 1);
 				}
 			}
 			break;
@@ -1227,7 +1227,7 @@ namespace KlayGE
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_width * format_size));
 						}
 
-						the_width = std::max(the_width / 2, 1UL);
+						the_width = std::max<uint32_t>(the_width / 2, 1);
 					}
 				}
 			}
@@ -1626,7 +1626,7 @@ namespace KlayGE
 	{
 		return sample_count_;
 	}
-	
+
 	uint32_t Texture::SampleQuality() const
 	{
 		return sample_quality_;

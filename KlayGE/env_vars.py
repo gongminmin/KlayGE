@@ -10,7 +10,10 @@ if ('nt' == os.name):
 		from _winreg import *
 
 klayge_path = os.path.split(os.path.abspath(__file__))[0]
-klayge_bin_path = "%s\bin" % klayge_path
+if ('nt' == os.name):
+	klayge_bin_path = "%s\\bin" % klayge_path
+else:
+	klayge_bin_path = "%s/bin" % klayge_path
 
 klayge_home = 'KLAYGE_HOME'
 
@@ -37,11 +40,20 @@ if ('nt' == os.name):
 		CloseKey(k)
 
 else:
+	f = open('/etc/profile', 'a')
+	f.seek(0, os.SEEK_END)
+
 	if klayge_home not in env:
-		f = open('/etc/profile', 'a')
-		f.seek(0, os.SEEK_END)
+		f.write('\n')
 		f.write('export %s=%s' % (klayge_home, klayge_path))
-		f.close()
+	if klayge_bin_path.lower() not in env["PATH"].lower():
+		f.write('\n')
+		f.write('export PATH=$PATH:$%s/bin' % klayge_home)
+	if (os.getenv("LD_LIBRARY_PATH") == None) or (klayge_bin_path.lower() not in env["LD_LIBRARY_PATH"].lower()):
+		f.write('\n')
+		f.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$%s/bin' % klayge_home)
+
+	f.close()
 
 print('Set %%KLAYGE_HOME%% to %s' % klayge_path)
 print('Add %KLAYGE_HOME%\\bin to %PATH%')

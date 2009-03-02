@@ -202,7 +202,11 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		dll_suffix += "_d";
 #endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		dll_suffix += ".dll";
+#else
+		dll_suffix += ".so";
+#endif
 
 		{
 			std::string render_path = ResLoader::Instance().Locate("Render");

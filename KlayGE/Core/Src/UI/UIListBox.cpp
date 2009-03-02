@@ -13,8 +13,10 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Context.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <boost/bind.hpp>
 
@@ -272,6 +274,20 @@ namespace KlayGE
 
 	void UIListBox::KeyDownHandler(UIDialog const & sender, wchar_t key)
 	{
+		InputKeyboardPtr key_board;
+		{
+			InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
+			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+			{
+				InputKeyboardPtr k = boost::dynamic_pointer_cast<InputKeyboard>(ie.Device(i));
+				if (k)
+				{
+					key_board = k;
+					break;
+				}
+			}
+		}
+
 		scroll_bar_.KeyDownHandler(sender, key);
 
 		switch (key)
@@ -341,7 +357,7 @@ namespace KlayGE
 							items_[i]->bSelected = false;
 						}
 
-						if ((GetKeyState(VK_LSHIFT) & 0x8000) || (GetKeyState(VK_RSHIFT) & 0x8000))
+						if (key_board && (key_board->Key(KS_LeftShift) || key_board->Key(KS_RightShift)))
 						{
 							// Select all items from sel_start_ to
 							// selected_

@@ -219,7 +219,11 @@ namespace KlayGE
 
 		x_display_ = main_wnd->XDisplay();
 		x_window_ = main_wnd->XWindow();
-		XVisualInfo* visual_info = glXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
+
+		int num_elements;
+		GLXFBConfig* fbc = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
+
+		XVisualInfo* visual_info = glXGetVisualFromFBConfig(x_display_, fbc[0]);
 
 		// Create an OpenGL rendering context
 		x_context_ = glXCreateContext(x_display_, visual_info,
@@ -228,10 +232,12 @@ namespace KlayGE
 
 		glXMakeCurrent(x_display_, x_window_, x_context_);
 
+		uint32_t sample_count = settings.sample_count;
+
 		if (glloader_GLX_ARB_create_context())
 		{
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
-			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, visual_info, NULL, GL_TRUE, attribs);
+			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, *fbc, NULL, GL_TRUE, attribs);
 			if (x_context3 != NULL)
 			{
 				glXDestroyContext(x_display_, x_context_);
