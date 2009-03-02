@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_Win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win_x86\libglloader_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win_x86/libglloader_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\objs\win_x86" />
+				<Option object_output="../../Debug/objs/win_x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -21,9 +21,9 @@
 			</Target>
 			<Target title="Release_Win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win_x86\libglloader.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win_x86/libglloader.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\objs\win_x86" />
+				<Option object_output="../../Release/objs/win_x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -37,9 +37,9 @@
 			</Target>
 			<Target title="Debug_Win_x64">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win_x64\libglloader_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win_x64/libglloader_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\objs\win_x64" />
+				<Option object_output="../../Debug/objs/win_x64" />
 				<Option type="2" />
 				<Option compiler="gnu_gcc_compiler_64" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -51,9 +51,9 @@
 			</Target>
 			<Target title="Release_Win_x64">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win_x64\libglloader.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/win_x64/libglloader.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\objs\win_x64" />
+				<Option object_output="../../Release/objs/win_x64" />
 				<Option type="2" />
 				<Option compiler="gnu_gcc_compiler_64" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -68,9 +68,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux_x86\libglloader_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux_x86/libglloader_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\objs\linux_x86" />
+				<Option object_output="../../Debug/objs/linux_x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -82,9 +82,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux_x86\libglloader.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux_x86/libglloader.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\objs\linux_x86" />
+				<Option object_output="../../Release/objs/linux_x86" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -99,9 +99,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux_x64\libglloader_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux_x64/libglloader_d.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Debug\objs\linux_x64" />
+				<Option object_output="../../Debug/objs/linux_x64" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -113,9 +113,9 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux_x64\libglloader.a" prefix_auto="0" extension_auto="0" />
+				<Option output="../../lib/linux_x64/libglloader.a" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="" />
-				<Option object_output="..\..\Release\objs\linux_x64" />
+				<Option object_output="../../Release/objs/linux_x64" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option projectResourceIncludeDirsRelation="2" />
@@ -139,18 +139,18 @@
 			<Add option="-O1" />
 			<Add option="-O" />
 		</Compiler>
-		<Unit filename="..\..\include\glloader\gl10.h" />
-		<Unit filename="..\..\include\glloader\gl11.h" />
-		<Unit filename="..\..\include\glloader\glloader.h" />
-		<Unit filename="..\..\include\glloader\glloader_gl.h" />
-		<Unit filename="..\..\include\glloader\glloader_glx.h" />
-		<Unit filename="..\..\include\glloader\glloader_wgl.h" />
-		<Unit filename="..\..\include\glloader\glx11.h" />
-		<Unit filename="..\..\src\glloader_gl.cpp" />
-		<Unit filename="..\..\src\glloader_glx.cpp" />
-		<Unit filename="..\..\src\glloader_wgl.cpp" />
-		<Unit filename="..\..\src\utils.cpp" />
-		<Unit filename="..\..\src\utils.hpp" />
+		<Unit filename="../../include/glloader/gl10.h" />
+		<Unit filename="../../include/glloader/gl11.h" />
+		<Unit filename="../../include/glloader/glloader.h" />
+		<Unit filename="../../include/glloader/glloader_gl.h" />
+		<Unit filename="../../include/glloader/glloader_glx.h" />
+		<Unit filename="../../include/glloader/glloader_wgl.h" />
+		<Unit filename="../../include/glloader/glx11.h" />
+		<Unit filename="../../src/glloader_gl.cpp" />
+		<Unit filename="../../src/glloader_glx.cpp" />
+		<Unit filename="../../src/glloader_wgl.cpp" />
+		<Unit filename="../../src/utils.cpp" />
+		<Unit filename="../../src/utils.hpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

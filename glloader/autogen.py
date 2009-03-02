@@ -160,37 +160,60 @@ def create_header(prefix, extensions):
 	for extension in extensions:
 		headerFile.write("#ifndef %s\n" % extension.name)
 		headerFile.write("#define %s 1\n\n" % extension.name)
-		if extension.predefined != None:
-			headerFile.write("#ifdef %s\n\n" % extension.predefined)
+		headerFile.write("#endif\n\n")
 
-		if (extension.tokens):
+	for extension in extensions:
+		if extension.tokens:
+			headerFile.write("#ifdef %s\n" % extension.name)
+			if extension.predefined != None:
+				headerFile.write("#ifdef %s\n\n" % extension.predefined)
+
 			for token in extension.tokens:
 				headerFile.write("%s\n" % token)
 
 			headerFile.write("\n")
 
+			if extension.predefined != None:
+				headerFile.write("#endif\n\n")
+
+			headerFile.write("#endif\n\n")
+
+	for extension in extensions:
 		if (extension.typedefs):
+			headerFile.write("#ifdef %s\n" % extension.name)
+			if extension.predefined != None:
+				headerFile.write("#ifdef %s\n\n" % extension.predefined)
+
 			for typedef in extension.typedefs:
 				headerFile.write("%s\n" % typedef)
 
 			headerFile.write("\n")
 
+			if extension.predefined != None:
+				headerFile.write("#endif\n\n")
+
+			headerFile.write("#endif\n\n")
+
+	for extension in extensions:
 		if (extension.functions):
+			headerFile.write("#ifdef %s\n" % extension.name)
+			if extension.predefined != None:
+				headerFile.write("#ifdef %s\n\n" % extension.predefined)
+
 			for function in extension.functions:
 				headerFile.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
 
 			headerFile.write("\n")
 
-		if (extension.functions):
 			for function in extension.functions:
 				headerFile.write("extern %sFUNC %s;\n" % (function.name, function.name))
 
 			headerFile.write("\n")
 
-		if extension.predefined != None:
-			headerFile.write("#endif\n\n")
+			if extension.predefined != None:
+				headerFile.write("#endif\n\n")
 
-		headerFile.write("#endif\n\n")
+			headerFile.write("#endif\n\n")
 
 	for extension in extensions:
 		headerFile.write("typedef char (APIENTRY *glloader_%sFUNC)();\n" % extension.name)
@@ -259,7 +282,10 @@ def create_source(prefix, extensions):
 				sourceFile.write("\t%s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
 				sourceFile.write("\t{\n")
 				sourceFile.write("\t\tglloader_init();\n")
-				sourceFile.write("\t\treturn %s(%s);\n" % (function.name, function.param_names_str()))
+				sourceFile.write("\t\t")
+				if (function.return_type != "void"):
+					sourceFile.write("return ")
+				sourceFile.write("%s(%s);\n" % (function.name, function.param_names_str()))
 				sourceFile.write("\t}\n")
 			sourceFile.write("}\n\n")
 
