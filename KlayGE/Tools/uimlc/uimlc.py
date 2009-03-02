@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.0
 #-*- coding: ascii -*-
 
-from __future__ import print_function
+#from __future__ import print_function
 import struct
 import sys
 

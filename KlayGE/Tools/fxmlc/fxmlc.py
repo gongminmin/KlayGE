@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.0
 #-*- coding: ascii -*-
 
-from __future__ import print_function
+#from __future__ import print_function
 import struct
 import sys
 
@@ -844,7 +844,7 @@ class effect:
 
 	def write(self, stream):
 		if 3 == sys.version_info[0]:
-			stream.write(b'FXML')
+			stream.write(bytes('FXML', encoding = 'ascii'))
 		else:
 			stream.write('FXML')
 		stream.write(struct.pack('I', 3))  # version
