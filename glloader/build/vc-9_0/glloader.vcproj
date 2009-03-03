@@ -23,7 +23,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GLLOADER_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -62,11 +62,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName)_d.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib"
+				OutputFile="$(OutDir)/glloader_vc_x86_d.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -78,6 +84,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -85,7 +94,7 @@
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -108,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GLLOADER_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -125,11 +134,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName)_d.lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib"
+				OutputFile="$(OutDir)/glloader_vc_x64_d.dll"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -141,6 +156,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -148,7 +166,7 @@
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -174,7 +192,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0;GLLOADER_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
@@ -192,11 +210,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib"
+				OutputFile="$(OutDir)/glloader_vc_x86.dll"
+				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -208,6 +233,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -215,7 +243,7 @@
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -241,7 +269,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories=""
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0;GLLOADER_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
@@ -258,11 +286,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib"
+				OutputFile="$(OutDir)/glloader_vc_x64.dll"
+				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -272,6 +307,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

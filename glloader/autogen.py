@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 GPLNotice = """// glloader
-// Copyright (C) 2004-2005 Minmin Gong
+// Copyright (C) 2004-2009 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -206,7 +206,7 @@ def create_header(prefix, extensions):
 			headerFile.write("\n")
 
 			for function in extension.functions:
-				headerFile.write("extern %sFUNC %s;\n" % (function.name, function.name))
+				headerFile.write("extern \"C\" GLLOADER_API extern %sFUNC %s;\n" % (function.name, function.name))
 
 			headerFile.write("\n")
 
@@ -220,7 +220,7 @@ def create_header(prefix, extensions):
 	headerFile.write("\n")
 
 	for extension in extensions:
-		headerFile.write("extern glloader_%sFUNC glloader_%s;\n" % (extension.name, extension.name))
+		headerFile.write("extern \"C\" GLLOADER_API extern glloader_%sFUNC glloader_%s;\n" % (extension.name, extension.name))
 	headerFile.write("\n")
 
 	headerFile.write("#endif		/* _GLLOADER_%s_H */\n" % prefix.upper())
@@ -271,7 +271,7 @@ def create_source(prefix, extensions):
 		sourceFile.write("\t}\n")
 		sourceFile.write("}\n\n")
 
-		sourceFile.write("glloader_%sFUNC glloader_%s = self_init_glloader_%s;\n\n" % (extension.name, extension.name, extension.name))
+		sourceFile.write("extern \"C\" glloader_%sFUNC glloader_%s = self_init_glloader_%s;\n\n" % (extension.name, extension.name, extension.name))
 
 		if (len(extension.functions) != 0):
 			sourceFile.write("#ifdef %s\n\n" % extension.name)
@@ -290,7 +290,7 @@ def create_source(prefix, extensions):
 			sourceFile.write("}\n\n")
 
 			for function in extension.functions:
-				sourceFile.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
+				sourceFile.write("extern \"C\" %sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
 
 			sourceFile.write("\n#endif\n\n")
 

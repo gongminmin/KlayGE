@@ -1,6 +1,6 @@
 /*
 // glloader
-// Copyright (C) 2004-2005 Minmin Gong
+// Copyright (C) 2004-2009 Minmin Gong
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -105,6 +105,28 @@
 #endif
 #endif
 
+#if defined(_MSC_VER)
+	#define GLLOADER_HAS_DECLSPEC
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+	#if !defined(__GNUC__) && !defined(GLLOADER_HAS_DECLSPEC)
+		#define GLLOADER_HAS_DECLSPEC
+	#endif
+
+	#if defined(__MINGW32__)
+		#define GLLOADER_HAS_DECLSPEC
+	#endif
+#endif
+
+#ifdef GLLOADER_HAS_DECLSPEC
+	#ifdef GLLOADER_SOURCE				// Build dll
+		#define GLLOADER_API __declspec(dllexport)
+	#else								// Use dll
+		#define GLLOADER_API __declspec(dllimport)
+	#endif
+#else
+	#define GLLOADER_API
+#endif // GLLOADER_HAS_DECLSPEC
+
 #ifdef GLLOADER_GL
 #define __gl_h_
 #define __GL_H__
@@ -195,13 +217,13 @@ extern "C"
 #endif
 
 /* Initiate GLLoader */
-void glloader_init();
+GLLOADER_API void glloader_init();
 
 /* Check if a feature is supported, including the core and the extensions */
-int glloader_is_supported(const char* name);
+GLLOADER_API int glloader_is_supported(const char* name);
 
 /* Get the address of OpenGL extension functions, given the function name */
-void* glloader_get_gl_proc_address(const char* name);
+GLLOADER_API void* glloader_get_gl_proc_address(const char* name);
 
 #ifdef __cplusplus
 }
