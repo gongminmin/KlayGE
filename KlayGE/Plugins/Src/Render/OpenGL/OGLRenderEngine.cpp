@@ -73,10 +73,18 @@
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "glloader_d.lib")
-#else
-	#pragma comment(lib, "glloader.lib")
+#if defined(KLAYGE_CPU_X86)
+	#ifdef KLAYGE_DEBUG
+		#pragma comment(lib, "glloader_vc_x86_d.lib")
+	#else
+		#pragma comment(lib, "glloader_vc_x86.lib")
+	#endif
+#elif defined(KLAYGE_CPU_X64)
+	#ifdef KLAYGE_DEBUG
+		#pragma comment(lib, "glloader_vc_x64_d.lib")
+	#else
+		#pragma comment(lib, "glloader_vc_x64.lib")
+	#endif
 #endif
 #pragma comment(lib, "glu32.lib")
 #endif

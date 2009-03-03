@@ -1,12 +1,9 @@
-Will be added in KlayGE 3.8:
-Deferred shading
-D3D10 plug-in
-D3D11 plug-in
-SSAO
+Will be added in KlayGE 3.9:
+Stream output
+SSE
 
 TBD:
 Vector texture
 Show system's audio output
 Tessellator
-SSE
 GPU Sort
