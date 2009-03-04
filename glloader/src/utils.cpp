@@ -21,6 +21,9 @@
 	#include <Carbon/Carbon.h>
 #endif
 
+#include <string>
+#include <vector>
+
 #include <algorithm>
 #include <cassert>
 
@@ -28,7 +31,7 @@
 #include <iostream>
 #endif
 
-#include "utils.hpp"
+#include "utils.h"
 
 namespace
 {
@@ -59,200 +62,213 @@ namespace
 
 namespace glloader
 {
-	gl_features_extractor& gl_features_extractor::instance()
+	class gl_features_extractor
 	{
-		static gl_features_extractor inst;
-		return inst;
-	}
-
-	bool gl_features_extractor::is_supported(std::string const & name)
-	{
-		return std::binary_search(features_.begin(), features_.end(), name);
-	}
-
-	void gl_features_extractor::promote(std::string const & low_name, std::string const & high_name)
-	{
-		if (low_name != high_name)
+	public:
+		static gl_features_extractor& instance()
 		{
-			std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), low_name);
-			if (*iter == low_name)
-			{
-				features_.erase(iter);
+			static gl_features_extractor inst;
+			return inst;
+		}
 
-				iter = std::lower_bound(features_.begin(), features_.end(), high_name);
-				if (*iter != high_name)
+		bool is_supported(std::string const & name)
+		{
+			return std::binary_search(features_.begin(), features_.end(), name);
+		}
+		void promote(std::string const & low_name, std::string const & high_name)
+		{
+			if (low_name != high_name)
+			{
+				std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), low_name);
+				if (*iter == low_name)
 				{
-					features_.insert(iter, high_name);
+					features_.erase(iter);
+
+					iter = std::lower_bound(features_.begin(), features_.end(), high_name);
+					if (*iter != high_name)
+					{
+						features_.insert(iter, high_name);
+					}
 				}
 			}
 		}
-	}
-
-	void gl_features_extractor::promote(std::string const & high_name)
-	{
-		std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), high_name);
-		if (*iter != high_name)
+		void promote(std::string const & high_name)
 		{
-#ifdef GLLOADER_DEBUG
-			std::cerr << high_name << " is promoted" << std::endl;
-#endif
-			features_.insert(iter, high_name);
-		}
-	}
-
-	gl_features_extractor::gl_features_extractor()
-	{
-		gl_features();
-		wgl_features();
-		glx_features();
-
-		std::sort(features_.begin(), features_.end());
-	}
-
-	// Return the version of OpenGL in current system
-	void gl_features_extractor::gl_version(int& major, int& minor)
-	{
-		GLubyte const * str = ::glGetString(GL_VERSION);
-		assert(str != NULL);
-
-		std::string const ver(reinterpret_cast<char const *>(str));
-		std::string::size_type const pos(ver.find("."));
-
-		major = ver[pos - 1] - '0';
-		minor = ver[pos + 1] - '0';
-	}
-
-	void gl_features_extractor::gl_features()
-	{
-		GLubyte const * str = ::glGetString(GL_EXTENSIONS);
-		assert(str != NULL);
-
-		std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
-		gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
-		features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
-
-		int major, minor;
-		gl_version(major, minor);
-
-		int const ver_code = major * 10 + minor;
-		if (ver_code >= 10)
-		{
-			features_.push_back("GL_VERSION_1_0");
-		}
-		if (ver_code >= 11)
-		{
-			features_.push_back("GL_VERSION_1_1");
-		}
-		if (ver_code >= 12)
-		{
-			features_.push_back("GL_VERSION_1_2");
-		}
-		if (ver_code >= 13)
-		{
-			features_.push_back("GL_VERSION_1_3");
-		}
-		if (ver_code >= 14)
-		{
-			features_.push_back("GL_VERSION_1_4");
-		}
-		if (ver_code >= 15)
-		{
-			features_.push_back("GL_VERSION_1_5");
-		}
-		if (ver_code >= 20)
-		{
-			features_.push_back("GL_VERSION_2_0");
-		}
-		if (ver_code >= 21)
-		{
-			features_.push_back("GL_VERSION_2_1");
-		}
-		if (ver_code >= 30)
-		{
-			features_.push_back("GL_VERSION_3_0");
-		}
-	}
-
-	void gl_features_extractor::wgl_features()
-	{
-#ifdef GLLOADER_WGL
-		std::string exts_str;
-
-		::wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
-		if (::wglGetExtensionsStringARB != NULL)
-		{
-			exts_str = ::wglGetExtensionsStringARB(wglGetCurrentDC());
-		}
-		else
-		{
-			::wglGetExtensionsStringEXT = (wglGetExtensionsStringEXTFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
-			if (::wglGetExtensionsStringEXT != NULL)
+			std::vector<std::string>::iterator iter = std::lower_bound(features_.begin(), features_.end(), high_name);
+			if (*iter != high_name)
 			{
-				exts_str = ::wglGetExtensionsStringEXT();
+#ifdef GLLOADER_DEBUG
+				std::cerr << high_name << " is promoted" << std::endl;
+#endif
+				features_.insert(iter, high_name);
 			}
 		}
 
-		std::vector<std::string> wgl_exts = split(exts_str);
-		wgl_exts.erase(std::remove(wgl_exts.begin(), wgl_exts.end(), ""), wgl_exts.end());
-		features_.insert(features_.end(), wgl_exts.begin(), wgl_exts.end());
+	private:
+		gl_features_extractor()
+		{
+			gl_features();
+			wgl_features();
+			glx_features();
+
+			std::sort(features_.begin(), features_.end());
+		}
+
+		void gl_version(int& major, int& minor)
+		{
+			GLubyte const * str = ::glGetString(GL_VERSION);
+			assert(str != NULL);
+
+			std::string const ver(reinterpret_cast<char const *>(str));
+			std::string::size_type const pos(ver.find("."));
+
+			major = ver[pos - 1] - '0';
+			minor = ver[pos + 1] - '0';
+		}
+		void gl_features()
+		{
+			GLubyte const * str = ::glGetString(GL_EXTENSIONS);
+			assert(str != NULL);
+
+			std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
+			gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
+			features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
+
+			int major, minor;
+			gl_version(major, minor);
+
+			int const ver_code = major * 10 + minor;
+			if (ver_code >= 10)
+			{
+				features_.push_back("GL_VERSION_1_0");
+			}
+			if (ver_code >= 11)
+			{
+				features_.push_back("GL_VERSION_1_1");
+			}
+			if (ver_code >= 12)
+			{
+				features_.push_back("GL_VERSION_1_2");
+			}
+			if (ver_code >= 13)
+			{
+				features_.push_back("GL_VERSION_1_3");
+			}
+			if (ver_code >= 14)
+			{
+				features_.push_back("GL_VERSION_1_4");
+			}
+			if (ver_code >= 15)
+			{
+				features_.push_back("GL_VERSION_1_5");
+			}
+			if (ver_code >= 20)
+			{
+				features_.push_back("GL_VERSION_2_0");
+			}
+			if (ver_code >= 21)
+			{
+				features_.push_back("GL_VERSION_2_1");
+			}
+			if (ver_code >= 30)
+			{
+				features_.push_back("GL_VERSION_3_0");
+			}
+		}
+		void wgl_features()
+		{
+#ifdef GLLOADER_WGL
+			std::string exts_str;
+
+			wglGetExtensionsStringARBFUNC wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
+			if (wglGetExtensionsStringARB != NULL)
+			{
+				exts_str = wglGetExtensionsStringARB(wglGetCurrentDC());
+			}
+			else
+			{
+				wglGetExtensionsStringEXTFUNC wglGetExtensionsStringEXT = (wglGetExtensionsStringEXTFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
+				if (wglGetExtensionsStringEXT != NULL)
+				{
+					exts_str = wglGetExtensionsStringEXT();
+				}
+			}
+
+			std::vector<std::string> wgl_exts = split(exts_str);
+			wgl_exts.erase(std::remove(wgl_exts.begin(), wgl_exts.end(), ""), wgl_exts.end());
+			features_.insert(features_.end(), wgl_exts.begin(), wgl_exts.end());
 #endif		// GLLOADER_WGL
-	}
-
-	// Return the version of GLX in current system
-	void gl_features_extractor::glx_version(int& major, int& minor)
-	{
+		}
+		void glx_version(int& major, int& minor)
+		{
 #ifdef GLLOADER_GLX
-		::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
+			::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
 #else
-		major = minor = 0;
+			major = minor = 0;
 #endif		// GLLOADER_GLX
+		}
+		void glx_features()
+		{
+#ifdef GLLOADER_GLX
+			std::vector<std::string> glx_exts = split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
+			glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
+			features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
+
+			int major, minor;
+			glx_version(major, minor);
+
+			int const ver_code = major * 10 + minor;
+			if (ver_code >= 10)
+			{
+				features_.push_back("GLX_VERSION_1_0");
+			}
+			if (ver_code >= 11)
+			{
+				features_.push_back("GLX_VERSION_1_1");
+			}
+			if (ver_code >= 12)
+			{
+				features_.push_back("GLX_VERSION_1_2");
+			}
+			if (ver_code >= 13)
+			{
+				features_.push_back("GLX_VERSION_1_3");
+			}
+			if (ver_code >= 14)
+			{
+				features_.push_back("GLX_VERSION_1_4");
+			}
+#endif		// GLLOADER_GLX
+		}
+
+	private:
+		std::vector<std::string> features_;
+	};
+}
+
+extern "C"
+{
+	void promote_low_high(char const * low_name, char const * high_name)
+	{
+		glloader::gl_features_extractor::instance().promote(low_name, high_name);
 	}
 
-	void gl_features_extractor::glx_features()
+	void promote_high(char const * high_name)
 	{
-#ifdef GLLOADER_GLX
-		std::vector<std::string> glx_exts = split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
-		glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
-		features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
-
-		int major, minor;
-		glx_version(major, minor);
-
-		int const ver_code = major * 10 + minor;
-		if (ver_code >= 10)
-		{
-			features_.push_back("GLX_VERSION_1_0");
-		}
-		if (ver_code >= 11)
-		{
-			features_.push_back("GLX_VERSION_1_1");
-		}
-		if (ver_code >= 12)
-		{
-			features_.push_back("GLX_VERSION_1_2");
-		}
-		if (ver_code >= 13)
-		{
-			features_.push_back("GLX_VERSION_1_3");
-		}
-		if (ver_code >= 14)
-		{
-			features_.push_back("GLX_VERSION_1_4");
-		}
-#endif		// GLLOADER_GLX
+		glloader::gl_features_extractor::instance().promote(high_name);
 	}
 }
 
 void glloader_init()
 {
-	glloader::gl_init();
+	gl_init();
 
 #ifdef GLLOADER_WGL
-	glloader::wgl_init();
+	wgl_init();
 #endif
 
 #ifdef GLLOADER_GLX
-	glloader::glx_init();
+	glx_init();
 #endif
 }
 

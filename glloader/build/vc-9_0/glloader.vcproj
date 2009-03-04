@@ -51,6 +51,7 @@
 				RuntimeLibrary="3"
 				WarningLevel="4"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4055"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -64,7 +65,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib"
-				OutputFile="$(OutDir)/glloader_vc_x86_d.dll"
+				OutputFile="$(OutDir)/glloader_x86_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 			/>
@@ -123,6 +124,7 @@
 				RuntimeLibrary="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4055"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -136,7 +138,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib"
-				OutputFile="$(OutDir)/glloader_vc_x64_d.dll"
+				OutputFile="$(OutDir)/glloader_x64_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 			/>
@@ -199,6 +201,7 @@
 				FloatingPointModel="2"
 				WarningLevel="4"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4055"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -212,7 +215,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib"
-				OutputFile="$(OutDir)/glloader_vc_x86.dll"
+				OutputFile="$(OutDir)/glloader_x86.dll"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -275,6 +278,7 @@
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				WarningLevel="3"
+				DisableSpecificWarnings="4055"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -288,7 +292,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="opengl32.lib"
-				OutputFile="$(OutDir)/glloader_vc_x64.dll"
+				OutputFile="$(OutDir)/glloader_x64.dll"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -325,15 +329,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\glloader_gl.cpp"
+				RelativePath="..\..\src\glloader_gl.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\glloader_glx.cpp"
+				RelativePath="..\..\src\glloader_glx.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\glloader_wgl.cpp"
+				RelativePath="..\..\src\glloader_wgl.c"
 				>
 			</File>
 			<File
@@ -347,7 +351,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\utils.hpp"
+				RelativePath="..\..\src\utils.h"
 				>
 			</File>
 		</Filter>

@@ -127,6 +127,12 @@
 	#define GLLOADER_API
 #endif // GLLOADER_HAS_DECLSPEC
 
+#ifdef __cplusplus
+	#define EXTERN_C extern "C"
+#else
+	#define EXTERN_C extern
+#endif
+
 #ifdef GLLOADER_GL
 #define __gl_h_
 #define __GL_H__

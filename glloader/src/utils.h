@@ -18,39 +18,23 @@
 #ifndef _UTILS_HPP
 #define _UTILS_HPP
 
-#include <string>
-#include <vector>
+#define LOAD_FUNC1(f) f = (f##FUNC)(glloader_get_gl_proc_address(#f));
+#define LOAD_FUNC2(f, name) f = (f##FUNC)(glloader_get_gl_proc_address(#name));
 
-#define LOAD_FUNC1(f) f = (f##FUNC)(::glloader_get_gl_proc_address(#f));
-#define LOAD_FUNC2(f, name) f = (f##FUNC)(::glloader_get_gl_proc_address(#name));
-
-namespace glloader
+#ifdef __cplusplus
+extern "C"
 {
-	class gl_features_extractor
-	{
-	public:
-		static gl_features_extractor& instance();
+#endif
 
-		bool is_supported(std::string const & name);
-		void promote(std::string const & low_name, std::string const & high_name);
-		void promote(std::string const & high_name);
+void promote_low_high(char const * low_name, char const * high_name);
+void promote_high(char const * high_name);
 
-	private:
-		gl_features_extractor();
+void gl_init();
+void wgl_init();
+void glx_init();
 
-		void gl_version(int& major, int& minor);
-		void gl_features();
-		void wgl_features();
-		void glx_version(int& major, int& minor);
-		void glx_features();
-
-	private:
-		std::vector<std::string> features_;
-	};
-
-	void gl_init();
-	void wgl_init();
-	void glx_init();
+#ifdef __cplusplus
 }
+#endif
 
 #endif			// _UTILS_HPP
