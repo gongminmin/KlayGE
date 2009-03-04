@@ -180,17 +180,17 @@ namespace glloader
 #ifdef GLLOADER_WGL
 			std::string exts_str;
 
-			wglGetExtensionsStringARBFUNC wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
-			if (wglGetExtensionsStringARB != NULL)
+			::wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
+			if (::wglGetExtensionsStringARB != NULL)
 			{
-				exts_str = wglGetExtensionsStringARB(wglGetCurrentDC());
+				exts_str = ::wglGetExtensionsStringARB(wglGetCurrentDC());
 			}
 			else
 			{
-				wglGetExtensionsStringEXTFUNC wglGetExtensionsStringEXT = (wglGetExtensionsStringEXTFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
-				if (wglGetExtensionsStringEXT != NULL)
+				::wglGetExtensionsStringEXT = (wglGetExtensionsStringEXTFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
+				if (::wglGetExtensionsStringEXT != NULL)
 				{
-					exts_str = wglGetExtensionsStringEXT();
+					exts_str = ::wglGetExtensionsStringEXT();
 				}
 			}
 
