@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ATI_meminfo" reg_no="359">
+	<tokens>
+		<token name="GL_VBO_FREE_MEMORY_ATI" value="0x87FB"/>
+		<token name="GL_TEXTURE_FREE_MEMORY_ATI" value="0x87FC"/>
+		<token name="GL_RENDERBUFFER_FREE_MEMORY_ATI" value="0x87FD"/>
+	</tokens>
+</gl_extension>
