@@ -152,7 +152,7 @@ class Extension:
 def create_header(prefix, extensions):
 	headerFile = open("include/glloader/glloader_%s.h" % prefix.lower(), "w")
 
-	headerFile.write("/*\n" + GPLNotice + "*/\n\n");
+	headerFile.write("/*\n%s*/\n\n" % GPLNotice);
 
 	headerFile.write("#ifndef _GLLOADER_%s_H\n" % prefix.upper())
 	headerFile.write("#define _GLLOADER_%s_H\n\n" % prefix.upper())
@@ -230,7 +230,7 @@ def create_header(prefix, extensions):
 def create_source(prefix, extensions):
 	sourceFile = open("src/glloader_%s.c" % prefix.lower(), "w")
 
-	sourceFile.write(GPLNotice + "\n");
+	sourceFile.write("/*\n%s*/\n\n" % GPLNotice);
 
 	sourceFile.write("#include <glloader/glloader.h>\n")
 	sourceFile.write("#include \"utils.h\"\n\n")
@@ -291,27 +291,27 @@ def create_source(prefix, extensions):
 		if extension.predefined != None:
 			sourceFile.write("#ifdef %s\n" % extension.predefined)
 
-		sourceFile.write("\tvoid init_%s()\n" % extension.name)
-		sourceFile.write("\t{\n")
+		sourceFile.write("void init_%s()\n" % extension.name)
+		sourceFile.write("{\n")
 
-		sourceFile.write("\t\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
+		sourceFile.write("\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
 
 		if (len(extension.functions) != 0):
-			sourceFile.write("\t\t{\n")
+			sourceFile.write("\t{\n")
 
 			for function in extension.functions:
-				sourceFile.write("\t\t\t%s = NULL;\n" % function.name)
+				sourceFile.write("\t\t%s = NULL;\n" % function.name)
 
-			sourceFile.write("\t\t}\n\n")
+			sourceFile.write("\t}\n\n")
 
-		sourceFile.write("\t\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
-		sourceFile.write("\t\t{\n")
-		sourceFile.write("\t\t\t_%s = 1;\n" % extension.name)
+		sourceFile.write("\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
+		sourceFile.write("\t{\n")
+		sourceFile.write("\t\t_%s = 1;\n" % extension.name)
 		if len(extension.functions) > 0:
 			sourceFile.write("\n")
 		for i in range(0, len(extension.functions)):
-			sourceFile.write("\t\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
-		sourceFile.write("\t\t}\n")
+			sourceFile.write("\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
+		sourceFile.write("\t}\n")
 
 		backup = False
 		if extension.additionals:
@@ -344,24 +344,24 @@ def create_source(prefix, extensions):
 					all_covered = False
 					break
 
-			sourceFile.write("\t\telse\n")
-			sourceFile.write("\t\t{\n")
+			sourceFile.write("\telse\n")
+			sourceFile.write("\t{\n")
 			for plan in plans:
 				for i in range(0, len(plan[0])):
-					sourceFile.write("\t\t\t")
+					sourceFile.write("\t\t")
 					if i != 0:
 						sourceFile.write("else ")
 					sourceFile.write("if (glloader_is_supported(\"%s\"))\n" % plan[0][i])
-					sourceFile.write("\t\t\t{\n")
+					sourceFile.write("\t\t{\n")
 					for j in range(0, len(plan[1])):
 						function = extension.functions[plan[1][j]]
-						sourceFile.write("\t\t\t\tLOAD_FUNC2(%s, %s);\n" % (function.name, function.mappings[i].name))
+						sourceFile.write("\t\t\tLOAD_FUNC2(%s, %s);\n" % (function.name, function.mappings[i].name))
 
 					if all_covered and len(plans) == 1 and len(extension.additionals) == 0:
-						sourceFile.write("\n\t\t\t\t_%s = 1;\n" % extension.name)
-						sourceFile.write("\t\t\t\tpromote_high(\"%s\");\n" % extension.name)
+						sourceFile.write("\n\t\t\t_%s = 1;\n" % extension.name)
+						sourceFile.write("\t\t\tpromote_high(\"%s\");\n" % extension.name)
 
-					sourceFile.write("\t\t\t}\n")
+					sourceFile.write("\t\t}\n")
 
 			if all_covered and len(plans) != 1:
 				all_backup_exts = []
@@ -372,7 +372,7 @@ def create_source(prefix, extensions):
 
 				if len(plans) > 0:
 					sourceFile.write("\n")
-				sourceFile.write("\t\t\tif (")
+				sourceFile.write("\t\tif (")
 				for i in range(0, len(all_backup_exts)):
 					plan = all_backup_exts[i]
 
@@ -390,18 +390,18 @@ def create_source(prefix, extensions):
 						sourceFile.write("\n")
 
 					if len(all_backup_exts) > 1 and i != len(all_backup_exts) - 1:
-						sourceFile.write("\t\t\t\t&& ")
+						sourceFile.write("\t\t\t&& ")
 
 					if i == len(all_backup_exts) - 1:
 						sourceFile.write(")\n")
-				sourceFile.write("\t\t\t{\n")
-				sourceFile.write("\t\t\t\t_%s = 1;\n" % extension.name)
-				sourceFile.write("\t\t\t\tpromote_high(\"%s\");\n" % extension.name)
-				sourceFile.write("\t\t\t}\n")
+				sourceFile.write("\t\t{\n")
+				sourceFile.write("\t\t\t_%s = 1;\n" % extension.name)
+				sourceFile.write("\t\t\tpromote_high(\"%s\");\n" % extension.name)
+				sourceFile.write("\t\t}\n")
 
-			sourceFile.write("\t\t}\n")
+			sourceFile.write("\t}\n")
 
-		sourceFile.write("\t}\n")
+		sourceFile.write("}\n")
 
 		if extension.predefined != None:
 			sourceFile.write("#endif\n")
@@ -425,7 +425,7 @@ def create_source(prefix, extensions):
 
 	sourceFile.write("}\n\n")
 
-	sourceFile.write("#endif\t\t// GLLOADER_%s\n" % prefix.upper())
+	sourceFile.write("#endif\t\t/* GLLOADER_%s */\n" % prefix.upper())
 
 	sourceFile.close()
 
