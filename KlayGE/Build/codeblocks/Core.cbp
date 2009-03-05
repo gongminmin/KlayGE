@@ -104,6 +104,7 @@
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0_d" />
+					<Add library="glloader_x86_d" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -136,6 +137,7 @@
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
+					<Add library="glloader_x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -169,6 +171,7 @@
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0" />
+					<Add library="glloader_x64_d" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -203,6 +206,7 @@
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
+					<Add library="glloader_x64" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -292,6 +296,7 @@
 		<Unit filename="../../Core/Include/KlayGE/Util.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/Vector.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/Viewport.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Window.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/aligned_allocator.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/atomic.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/config/auto_link.hpp" />

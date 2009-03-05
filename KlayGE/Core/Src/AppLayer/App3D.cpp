@@ -55,7 +55,7 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance(*this);
 
-		main_wnd_ = this->MakeWindow(name_, settings_.left, settings_.top, settings_.width, settings_.height, settings_.full_screen);
+		main_wnd_ = this->MakeWindow(name_, settings_);
 		settings_.left = main_wnd_->Left();
 		settings_.top = main_wnd_->Top();
 		settings_.width = main_wnd_->Width();
@@ -89,10 +89,9 @@ namespace KlayGE
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
 	}
 
-	WindowPtr App3DFramework::MakeWindow(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height, bool full_screen)
+	WindowPtr App3DFramework::MakeWindow(std::string const & name, RenderSettings const & settings)
 	{
-		return MakeSharedPtr<Window>(name, left, top, width, height, full_screen);
+		return MakeSharedPtr<Window>(name, settings);
 	}
 
 	void App3DFramework::Run()

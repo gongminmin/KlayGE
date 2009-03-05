@@ -45,8 +45,7 @@ namespace KlayGE
 		}
 	}
 
-	Window::Window(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height, bool full_screen)
+	Window::Window(std::string const & name, RenderSettings const & settings)
 	{
 		HINSTANCE hInst = ::GetModuleHandle(NULL);
 
@@ -81,7 +80,7 @@ namespace KlayGE
 #endif
 
 		uint32_t style;
-		if (full_screen)
+		if (settings.full_screen)
 		{
 			style = WS_POPUP;
 		}
@@ -90,24 +89,24 @@ namespace KlayGE
 			style = WS_OVERLAPPEDWINDOW;
 		}
 
-		RECT rc = { 0, 0, width, height };
+		RECT rc = { 0, 0, settings.width, settings.height };
 		::AdjustWindowRect(&rc, style, false);
 
 		// Create our main window
 		// Pass pointer to self
 #ifdef KLAYGE_COMPILER_GCC
 		wnd_ = ::CreateWindowA(name_.c_str(), name_.c_str(),
-			style, left, top,
+			style, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #else
 		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
-			style, left, top,
+			style, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, NULL);
 #endif
 
 		::GetClientRect(wnd_, &rc);
-		left_ = left;
-		top_ = top;
+		left_ = settings.left;
+		top_ = settings.top;
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
@@ -445,13 +444,93 @@ namespace KlayGE
 		return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 #elif defined KLAYGE_PLATFORM_LINUX
-	Window::Window(std::string const & name, int32_t left, int32_t top,
-		uint32_t width, uint32_t height, bool full_screen)
+	Window::Window(std::string const & name, RenderSettings const & settings)
 	{
 		x_display_ = XOpenDisplay(NULL);
 
+		int r_size, g_size, b_size, a_size, d_size;
+		switch (settings.color_fmt)
+		{
+		case EF_ARGB8:
+		case EF_ABGR8:
+			r_size = 8;
+			g_size = 8;
+			b_size = 8;
+			a_size = 8;
+			break;
+
+		case EF_A2BGR10:
+			r_size = 10;
+			g_size = 10;
+			b_size = 10;
+			a_size = 2;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		switch (settings.depth_stencil_fmt)
+		{
+        case EF_D16:
+            d_size = 16;
+            break;
+
+        case EF_D24S8:
+            d_size = 24;
+            break;
+
+        case EF_D32F:
+            d_size = 32;
+            break;
+
+        default:
+            d_size = 0;
+            break;
+		}
+
+		std::vector<int> visual_attr;
+		visual_attr.push_back(GLX_RENDER_TYPE);
+		visual_attr.push_back(GLX_RGBA_BIT);
+		visual_attr.push_back(GLX_RED_SIZE);
+		visual_attr.push_back(r_size);
+		visual_attr.push_back(GLX_GREEN_SIZE);
+		visual_attr.push_back(g_size);
+		visual_attr.push_back(GLX_BLUE_SIZE);
+		visual_attr.push_back(b_size);
+		visual_attr.push_back(GLX_ALPHA_SIZE);
+		visual_attr.push_back(a_size);
+		visual_attr.push_back(GLX_DRAWABLE_TYPE);
+		visual_attr.push_back(GLX_WINDOW_BIT);
+		if (d_size > 0)
+		{
+			visual_attr.push_back(GLX_DEPTH_SIZE);
+			visual_attr.push_back(d_size);
+		}
+		visual_attr.push_back(GLX_DOUBLEBUFFER);
+		visual_attr.push_back(True);
+		if (settings.sample_count > 1)
+		{
+			visual_attr.push_back(GLX_SAMPLE_BUFFERS);
+			visual_attr.push_back(settings.sample_count);
+		}
+		visual_attr.push_back(None);				// end of list
+
+        glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
+        glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
+
+		int num_elements;
+		fbc_ = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
+
+		XVisualInfo* visual_info = glXGetVisualFromFBConfig(x_display_, fbc_[0]);
+
+		// Create an OpenGL rendering context
+		x_context_ = glXCreateContext(x_display_, visual_info,
+					NULL,		// No sharing of display lists
+					GL_TRUE);	// Direct rendering if possible
+
 		XSetWindowAttributes attr;
-		attr.colormap     = DefaultColormapOfScreen(DefaultScreenOfDisplay(x_display_));
+		attr.colormap     = XCreateColormap(x_display_, DefaultRootWindow(x_display_), visual_info->visual, AllocNone);
 		attr.border_pixel = 0;
 		attr.event_mask   = ExposureMask
 								| VisibilityChangeMask
@@ -464,13 +543,16 @@ namespace KlayGE
 								| SubstructureNotifyMask
 								| FocusChangeMask
 								| ResizeRedirectMask;
-		x_window_ = XCreateWindow(x_display_, XDefaultRootWindow(x_display_),
-					left, top, width, height, 0, XDefaultDepth(x_display_, 0),
-					InputOutput, CopyFromParent, CWBorderPixel | CWColormap | CWEventMask, &attr);
+		x_window_ = XCreateWindow(x_display_, RootWindow(x_display_, visual_info->screen),
+					settings.left, settings.top, settings.width, settings.height, 0, visual_info->depth,
+					InputOutput, visual_info->visual, CWBorderPixel | CWColormap | CWEventMask, &attr);
 		XStoreName(x_display_, x_window_, name.c_str());
 
+		glXMakeCurrent(x_display_, x_window_, x_context_);
+
+		glloader_init();
+
 		XMapWindow(x_display_, x_window_);
-		XFlush(x_display_);
 
 		XWindowAttributes win_attr;
 		XGetWindowAttributes(x_display_, x_window_, &win_attr);
@@ -534,7 +616,7 @@ namespace KlayGE
 			break;
 
 		case ClientMessage:
-			if (wm_delete_window_ == event.xclient.data.l[0])
+			if (wm_delete_window_ == static_cast<Atom>(event.xclient.data.l[0]))
 			{
 				this->OnClose()(*this);
 				XDestroyWindow(x_display_, x_window_);

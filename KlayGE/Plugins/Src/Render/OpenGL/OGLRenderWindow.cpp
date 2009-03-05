@@ -1,20 +1,20 @@
 // OGLRenderWindow.cpp
-// KlayGE OpenGLäÖÈ¾´°¿ÚÀà ÊµÏÖÎÄ¼ş
+// KlayGE OpenGLæ¸²æŸ“çª—å£ç±» å®ç°æ–‡ä»¶
 // Ver 3.7.0
-// °æÈ¨ËùÓĞ(C) ¹¨ÃôÃô, 2004-2008
+// ç‰ˆæƒæ‰€æœ‰(C) é¾šæ•æ•, 2004-2008
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.7.0
-// ÊµÑéĞÔµÄlinuxÖ§³Ö (2008.5.19)
+// å®éªŒæ€§çš„linuxæ”¯æŒ (2008.5.19)
 //
 // 3.6.0
-// ĞŞÕıÁËÔÚVistaÏÂ´ÓÈ«ÆÁÄ£Ê½ÍË³öÊ±crashµÄbug (2007.3.23)
-// Ö§³Ö¶¯Ì¬ÇĞ»»È«ÆÁ/´°¿ÚÄ£Ê½ (2007.3.24)
+// ä¿®æ­£äº†åœ¨Vistaä¸‹ä»å…¨å±æ¨¡å¼é€€å‡ºæ—¶crashçš„bug (2007.3.23)
+// æ”¯æŒåŠ¨æ€åˆ‡æ¢å…¨å±/çª—å£æ¨¡å¼ (2007.3.24)
 //
 // 2.8.0
-// Ö»Ö§³ÖOpenGL 1.5¼°ÒÔÉÏ (2005.8.12)
+// åªæ”¯æŒOpenGL 1.5åŠä»¥ä¸Š (2005.8.12)
 //
-// ĞŞ¸Ä¼ÇÂ¼
+// ä¿®æ”¹è®°å½•
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
@@ -207,37 +207,18 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
-		std::vector<int> visual_attr;
-		visual_attr.push_back(GLX_RGBA);			// Needs to support OpenGL
-		visual_attr.push_back(GLX_DOUBLEBUFFER);	// Needs to support double-buffering
-		if (isDepthBuffered_)
-		{
-			visual_attr.push_back(GLX_DEPTH_SIZE);	// Needs to support a depth buffer
-			visual_attr.push_back(depthBits_);
-		}
-		visual_attr.push_back(None);				// end of list
-
 		x_display_ = main_wnd->XDisplay();
 		x_window_ = main_wnd->XWindow();
-
-		int num_elements;
-		GLXFBConfig* fbc = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
-
-		XVisualInfo* visual_info = glXGetVisualFromFBConfig(x_display_, fbc[0]);
-
-		// Create an OpenGL rendering context
-		x_context_ = glXCreateContext(x_display_, visual_info,
-					NULL,		// No sharing of display lists
-					GL_TRUE);	// Direct rendering if possible
-
-		glXMakeCurrent(x_display_, x_window_, x_context_);
+		x_context_ = main_wnd->XContext();
 
 		uint32_t sample_count = settings.sample_count;
 
 		if (glloader_GLX_ARB_create_context())
 		{
+			GLXFBConfig* fbc = main_wnd->GetFBC();
+
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
-			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, *fbc, NULL, GL_TRUE, attribs);
+			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, fbc[0], NULL, GL_TRUE, attribs);
 			if (x_context3 != NULL)
 			{
 				glXDestroyContext(x_display_, x_context_);
@@ -336,7 +317,7 @@ namespace KlayGE
 		return description_;
 	}
 
-	// ¸Ä±ä´°¿Ú´óĞ¡
+	// æ”¹å˜çª—å£å¤§å°
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderWindow::Resize(uint32_t width, uint32_t height)
 	{
@@ -351,7 +332,7 @@ namespace KlayGE
 		app.OnResize(width, height);
 	}
 
-	// ¸Ä±ä´°¿ÚÎ»ÖÃ
+	// æ”¹å˜çª—å£ä½ç½®
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderWindow::Reposition(uint32_t left, uint32_t top)
 	{
@@ -359,14 +340,14 @@ namespace KlayGE
 		top_ = top;
 	}
 
-	// »ñÈ¡ÊÇ·ñÊÇÈ«ÆÁ×´Ì¬
+	// è·å–æ˜¯å¦æ˜¯å…¨å±çŠ¶æ€
 	/////////////////////////////////////////////////////////////////////////////////
 	bool OGLRenderWindow::FullScreen() const
 	{
 		return isFullScreen_;
 	}
 
-	// ÉèÖÃÊÇ·ñÊÇÈ«ÆÁ×´Ì¬
+	// è®¾ç½®æ˜¯å¦æ˜¯å…¨å±çŠ¶æ€
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderWindow::FullScreen(bool fs)
 	{

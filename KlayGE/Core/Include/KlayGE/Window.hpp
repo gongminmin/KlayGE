@@ -21,6 +21,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <KlayGE/RenderSettings.hpp>
+
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4103 4251 4275 4512)
@@ -56,8 +58,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API Window
 	{
 	public:
-		Window(std::string const & name, int32_t left, int32_t top,
-			uint32_t width, uint32_t height, bool full_screen);
+		Window(std::string const & name, RenderSettings const & settings);
 		~Window();
 
 		void Recreate();
@@ -76,6 +77,16 @@ namespace KlayGE
 		::Window XWindow() const
 		{
 			return x_window_;
+		}
+
+		::GLXContext XContext() const
+		{
+		    return x_context_;
+		}
+
+		::GLXFBConfig* GetFBC() const
+		{
+		    return fbc_;
 		}
 #endif
 
@@ -214,6 +225,8 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
 		::Window x_window_;
+		::GLXContext x_context_;
+		::GLXFBConfig* fbc_;
 		::Atom wm_delete_window_;
 #endif
 	};

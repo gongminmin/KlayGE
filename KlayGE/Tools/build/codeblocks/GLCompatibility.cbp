@@ -130,7 +130,9 @@
 					<Add library="boost_system-gcc43-mt-d" />
 					<Add library="boost_signals-gcc43-mt-d" />
 					<Add library="boost_thread-gcc43-mt-d" />
+					<Add library="glloader_x64_d" />
 					<Add library="GL" />
+					<Add library="X11" />
 					<Add library="python3.0" />
 				</Linker>
 			</Target>
