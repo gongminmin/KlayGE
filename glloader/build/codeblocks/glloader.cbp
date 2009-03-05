@@ -8,11 +8,12 @@
 		<Build>
 			<Target title="Debug_Win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../lib/win_x86/libglloader_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/win_x86/glloader_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win_x86" />
 				<Option object_output="../../Debug/objs/win_x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
@@ -21,11 +22,12 @@
 			</Target>
 			<Target title="Release_Win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../lib/win_x86/libglloader.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/win_x86/glloader_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win_x86" />
 				<Option object_output="../../Release/objs/win_x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
@@ -68,64 +70,86 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux_x86/libglloader_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/linux_x86/libglloader_x86_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux_x86" />
 				<Option object_output="../../Debug/objs/linux_x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-m32" />
+					<Add option="-fPIC" />
+					<Add option="-DDEBUG" />
 				</Compiler>
+				<Linker>
+					<Add library="GL" />
+					<Add library="X11" />
+				</Linker>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux_x86/libglloader.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/linux_x86/libglloader_x86.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux_x86" />
 				<Option object_output="../../Release/objs/linux_x86" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
+					<Add option="-fPIC" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux_x64/libglloader_d.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/linux_x64/libglloader_x64_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux_x64" />
 				<Option object_output="../../Debug/objs/linux_x64" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
+					<Add option="-DDEBUG" />
 				</Compiler>
+				<Linker>
+					<Add library="GL" />
+					<Add library="X11" />
+				</Linker>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux_x64/libglloader.a" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="" />
+				<Option output="../../lib/linux_x64/libglloader_x64.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux_x64" />
 				<Option object_output="../../Release/objs/linux_x64" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-fPIC" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 			</Target>
 		</Build>
@@ -146,9 +170,15 @@
 		<Unit filename="../../include/glloader/glloader_glx.h" />
 		<Unit filename="../../include/glloader/glloader_wgl.h" />
 		<Unit filename="../../include/glloader/glx11.h" />
-		<Unit filename="../../src/glloader_gl.cpp" />
-		<Unit filename="../../src/glloader_glx.cpp" />
-		<Unit filename="../../src/glloader_wgl.cpp" />
+		<Unit filename="../../src/glloader_gl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../src/glloader_glx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../src/glloader_wgl.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../src/utils.cpp" />
 		<Unit filename="../../src/utils.hpp" />
 		<Extensions>

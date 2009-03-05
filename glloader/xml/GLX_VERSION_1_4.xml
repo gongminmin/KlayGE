@@ -11,7 +11,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glXGetProcAddress" return="__GLXextFuncPtr">
+		<function name="glXGetProcAddress" return="__GLXextFuncPtr" link="static">
 			<params>
 				<param type="const GLubyte*" name="procName"/>
 			</params>

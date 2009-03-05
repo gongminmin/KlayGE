@@ -217,33 +217,39 @@ namespace glloader
 		void glx_features()
 		{
 #ifdef GLLOADER_GLX
-			std::vector<std::string> glx_exts = split(::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS));
-			glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
-			features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
+			::glXGetCurrentDisplay = (glXGetCurrentDisplayFUNC)(::glloader_get_gl_proc_address("glXGetCurrentDisplay"));
 
-			int major, minor;
-			glx_version(major, minor);
+			char const * str = ::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS);
+			if (str != NULL)
+			{
+				std::vector<std::string> glx_exts = split(str);
+				glx_exts.erase(std::remove(glx_exts.begin(), glx_exts.end(), ""), glx_exts.end());
+				features_.insert(features_.end(), glx_exts.begin(), glx_exts.end());
 
-			int const ver_code = major * 10 + minor;
-			if (ver_code >= 10)
-			{
-				features_.push_back("GLX_VERSION_1_0");
-			}
-			if (ver_code >= 11)
-			{
-				features_.push_back("GLX_VERSION_1_1");
-			}
-			if (ver_code >= 12)
-			{
-				features_.push_back("GLX_VERSION_1_2");
-			}
-			if (ver_code >= 13)
-			{
-				features_.push_back("GLX_VERSION_1_3");
-			}
-			if (ver_code >= 14)
-			{
-				features_.push_back("GLX_VERSION_1_4");
+				int major, minor;
+				glx_version(major, minor);
+
+				int const ver_code = major * 10 + minor;
+				if (ver_code >= 10)
+				{
+					features_.push_back("GLX_VERSION_1_0");
+				}
+				if (ver_code >= 11)
+				{
+					features_.push_back("GLX_VERSION_1_1");
+				}
+				if (ver_code >= 12)
+				{
+					features_.push_back("GLX_VERSION_1_2");
+				}
+				if (ver_code >= 13)
+				{
+					features_.push_back("GLX_VERSION_1_3");
+				}
+				if (ver_code >= 14)
+				{
+					features_.push_back("GLX_VERSION_1_4");
+				}
 			}
 #endif		// GLLOADER_GLX
 		}
@@ -302,7 +308,7 @@ void* glloader_get_gl_proc_address(const char* name)
 	CFRelease(bundle);
 #endif
 #ifdef GLLOADER_GLX
-	ret = (void*)(::glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+	ret = (void*)(glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
 #endif
 
 #ifdef GLLOADER_DEBUG

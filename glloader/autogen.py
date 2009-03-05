@@ -63,12 +63,13 @@ class Mapping:
 		self.name = name
 
 class Function:
-	def __init__(self, return_type, name, params, mappings):
+	def __init__(self, return_type, name, static_link, params, mappings):
 		assert len(return_type) > 0
 		assert len(name) > 0
 
 		self.return_type = return_type
 		self.name = name
+		self.static_link = static_link
 		self.params = params
 		self.mappings = mappings
 
@@ -133,8 +134,14 @@ class Extension:
 						mappings.append(Mapping(mapping.getAttribute("from"),
 								mapping.getAttribute("name")))
 
+				static_link = False
+				link_attr = function.getAttribute("link")
+				if (link_attr != None):
+					if "static" == str(link_attr):
+						static_link = True
 				self.functions.append(Function(function.getAttribute("return"),
 							function.getAttribute("name"),
+							static_link,
 							params, mappings))
 
 		self.additionals = []
@@ -201,12 +208,16 @@ def create_header(prefix, extensions):
 				headerFile.write("#ifdef %s\n\n" % extension.predefined)
 
 			for function in extension.functions:
-				headerFile.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
+				if not function.static_link:
+					headerFile.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
 
 			headerFile.write("\n")
 
 			for function in extension.functions:
-				headerFile.write("EXTERN_C GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
+				if function.static_link:
+					headerFile.write("EXTERN_C %s APIENTRY %s(%s);\n" % (function.return_type, function.name, function.params_str()))
+				else:
+					headerFile.write("EXTERN_C GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
 
 			headerFile.write("\n")
 
@@ -269,18 +280,20 @@ def create_source(prefix, extensions):
 			sourceFile.write("#ifdef %s\n\n" % extension.name)
 
 			for function in extension.functions:
-				sourceFile.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
-				sourceFile.write("{\n")
-				sourceFile.write("\tglloader_init();\n")
-				sourceFile.write("\t")
-				if (function.return_type != "void") and (function.return_type != "VOID"):
-					sourceFile.write("return ")
-				sourceFile.write("%s(%s);\n" % (function.name, function.param_names_str()))
-				sourceFile.write("}\n")
+				if not function.static_link:
+					sourceFile.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
+					sourceFile.write("{\n")
+					sourceFile.write("\tglloader_init();\n")
+					sourceFile.write("\t")
+					if (function.return_type != "void") and (function.return_type != "VOID"):
+						sourceFile.write("return ")
+					sourceFile.write("%s(%s);\n" % (function.name, function.param_names_str()))
+					sourceFile.write("}\n")
 			sourceFile.write("\n")
 
 			for function in extension.functions:
-				sourceFile.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
+				if not function.static_link:
+					sourceFile.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
 
 			sourceFile.write("\n#endif\n\n")
 
@@ -300,7 +313,8 @@ def create_source(prefix, extensions):
 			sourceFile.write("\t{\n")
 
 			for function in extension.functions:
-				sourceFile.write("\t\t%s = NULL;\n" % function.name)
+				if not function.static_link:
+					sourceFile.write("\t\t%s = NULL;\n" % function.name)
 
 			sourceFile.write("\t}\n\n")
 
@@ -310,7 +324,8 @@ def create_source(prefix, extensions):
 		if len(extension.functions) > 0:
 			sourceFile.write("\n")
 		for i in range(0, len(extension.functions)):
-			sourceFile.write("\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
+			if not function.static_link:
+				sourceFile.write("\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
 		sourceFile.write("\t}\n")
 
 		backup = False
@@ -318,9 +333,10 @@ def create_source(prefix, extensions):
 			backup = True
 		else:
 			for function in extension.functions:
-				if function.mappings:
-					backup = True
-					break
+				if not function.static_link:
+					if function.mappings:
+						backup = True
+						break
 
 		if backup:
 			plans = []
