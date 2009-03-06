@@ -1,0 +1,2319 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_1_0">
+	<tokens>
+		<token name="GL_ACCUM" value="0x0100"/>
+		<token name="GL_LOAD" value="0x0101"/>
+		<token name="GL_RETURN" value="0x0102"/>
+		<token name="GL_MULT" value="0x0103"/>
+		<token name="GL_ADD" value="0x0104"/>
+		<token name="GL_NEVER" value="0x0200"/>
+		<token name="GL_LESS" value="0x0201"/>
+		<token name="GL_EQUAL" value="0x0202"/>
+		<token name="GL_LEQUAL" value="0x0203"/>
+		<token name="GL_GREATER" value="0x0204"/>
+		<token name="GL_NOTEQUAL" value="0x0205"/>
+		<token name="GL_GEQUAL" value="0x0206"/>
+		<token name="GL_ALWAYS" value="0x0207"/>
+		<token name="GL_CURRENT_BIT" value="0x00000001"/>
+		<token name="GL_POINT_BIT" value="0x00000002"/>
+		<token name="GL_LINE_BIT" value="0x00000004"/>
+		<token name="GL_POLYGON_BIT" value="0x00000008"/>
+		<token name="GL_POLYGON_STIPPLE_BIT" value="0x00000010"/>
+		<token name="GL_PIXEL_MODE_BIT" value="0x00000020"/>
+		<token name="GL_LIGHTING_BIT" value="0x00000040"/>
+		<token name="GL_FOG_BIT" value="0x00000080"/>
+		<token name="GL_DEPTH_BUFFER_BIT" value="0x00000100"/>
+		<token name="GL_ACCUM_BUFFER_BIT" value="0x00000200"/>
+		<token name="GL_STENCIL_BUFFER_BIT" value="0x00000400"/>
+		<token name="GL_VIEWPORT_BIT" value="0x00000800"/>
+		<token name="GL_TRANSFORM_BIT" value="0x00001000"/>
+		<token name="GL_ENABLE_BIT" value="0x00002000"/>
+		<token name="GL_COLOR_BUFFER_BIT" value="0x00004000"/>
+		<token name="GL_HINT_BIT" value="0x00008000"/>
+		<token name="GL_EVAL_BIT" value="0x00010000"/>
+		<token name="GL_LIST_BIT" value="0x00020000"/>
+		<token name="GL_TEXTURE_BIT" value="0x00040000"/>
+		<token name="GL_SCISSOR_BIT" value="0x00080000"/>
+		<token name="GL_ALL_ATTRIB_BITS" value="0x000FFFFF"/>
+		<token name="GL_POINTS" value="0x0000"/>
+		<token name="GL_LINES" value="0x0001"/>
+		<token name="GL_LINE_LOOP" value="0x0002"/>
+		<token name="GL_LINE_STRIP" value="0x0003"/>
+		<token name="GL_TRIANGLES" value="0x0004"/>
+		<token name="GL_TRIANGLE_STRIP" value="0x0005"/>
+		<token name="GL_TRIANGLE_FAN" value="0x0006"/>
+		<token name="GL_QUADS" value="0x0007"/>
+		<token name="GL_QUAD_STRIP" value="0x0008"/>
+		<token name="GL_POLYGON" value="0x0009"/>
+		<token name="GL_ZERO" value="0"/>
+		<token name="GL_ONE" value="1"/>
+		<token name="GL_SRC_COLOR" value="0x0300"/>
+		<token name="GL_ONE_MINUS_SRC_COLOR" value="0x0301"/>
+		<token name="GL_SRC_ALPHA" value="0x0302"/>
+		<token name="GL_ONE_MINUS_SRC_ALPHA" value="0x0303"/>
+		<token name="GL_DST_ALPHA" value="0x0304"/>
+		<token name="GL_ONE_MINUS_DST_ALPHA" value="0x0305"/>
+		<token name="GL_DST_COLOR" value="0x0306"/>
+		<token name="GL_ONE_MINUS_DST_COLOR" value="0x0307"/>
+		<token name="GL_SRC_ALPHA_SATURATE" value="0x0308"/>
+		<token name="GL_TRUE" value="1"/>
+		<token name="GL_FALSE" value="0"/>
+		<token name="GL_CLIP_PLANE0" value="0x3000"/>
+		<token name="GL_CLIP_PLANE1" value="0x3001"/>
+		<token name="GL_CLIP_PLANE2" value="0x3002"/>
+		<token name="GL_CLIP_PLANE3" value="0x3003"/>
+		<token name="GL_CLIP_PLANE4" value="0x3004"/>
+		<token name="GL_CLIP_PLANE5" value="0x3005"/>
+		<token name="GL_BYTE" value="0x1400"/>
+		<token name="GL_UNSIGNED_BYTE" value="0x1401"/>
+		<token name="GL_SHORT" value="0x1402"/>
+		<token name="GL_UNSIGNED_SHORT" value="0x1403"/>
+		<token name="GL_INT" value="0x1404"/>
+		<token name="GL_UNSIGNED_INT" value="0x1405"/>
+		<token name="GL_FLOAT" value="0x1406"/>
+		<token name="GL_2_BYTES" value="0x1407"/>
+		<token name="GL_3_BYTES" value="0x1408"/>
+		<token name="GL_4_BYTES" value="0x1409"/>
+		<token name="GL_NONE" value="0"/>
+		<token name="GL_FRONT_LEFT" value="0x0400"/>
+		<token name="GL_FRONT_RIGHT" value="0x0401"/>
+		<token name="GL_BACK_LEFT" value="0x0402"/>
+		<token name="GL_BACK_RIGHT" value="0x0403"/>
+		<token name="GL_FRONT" value="0x0404"/>
+		<token name="GL_BACK" value="0x0405"/>
+		<token name="GL_LEFT" value="0x0406"/>
+		<token name="GL_RIGHT" value="0x0407"/>
+		<token name="GL_FRONT_AND_BACK" value="0x0408"/>
+		<token name="GL_AUX0" value="0x0409"/>
+		<token name="GL_AUX1" value="0x040A"/>
+		<token name="GL_AUX2" value="0x040B"/>
+		<token name="GL_AUX3" value="0x040C"/>
+		<token name="GL_NO_ERROR" value="0"/>
+		<token name="GL_INVALID_ENUM" value="0x0500"/>
+		<token name="GL_INVALID_VALUE" value="0x0501"/>
+		<token name="GL_INVALID_OPERATION" value="0x0502"/>
+		<token name="GL_STACK_OVERFLOW" value="0x0503"/>
+		<token name="GL_STACK_UNDERFLOW" value="0x0504"/>
+		<token name="GL_OUT_OF_MEMORY" value="0x0505"/>
+		<token name="GL_2D" value="0x0600"/>
+		<token name="GL_3D" value="0x0601"/>
+		<token name="GL_3D_COLOR" value="0x0602"/>
+		<token name="GL_3D_COLOR_TEXTURE" value="0x0603"/>
+		<token name="GL_4D_COLOR_TEXTURE" value="0x0604"/>
+		<token name="GL_PASS_THROUGH_TOKEN" value="0x0700"/>
+		<token name="GL_POINT_TOKEN" value="0x0701"/>
+		<token name="GL_LINE_TOKEN" value="0x0702"/>
+		<token name="GL_POLYGON_TOKEN" value="0x0703"/>
+		<token name="GL_BITMAP_TOKEN" value="0x0704"/>
+		<token name="GL_DRAW_PIXEL_TOKEN" value="0x0705"/>
+		<token name="GL_COPY_PIXEL_TOKEN" value="0x0706"/>
+		<token name="GL_LINE_RESET_TOKEN" value="0x0707"/>
+		<token name="GL_EXP" value="0x0800"/>
+		<token name="GL_EXP2" value="0x0801"/>
+		<token name="GL_CW" value="0x0900"/>
+		<token name="GL_CCW" value="0x0901"/>
+		<token name="GL_COEFF" value="0x0A00"/>
+		<token name="GL_ORDER" value="0x0A01"/>
+		<token name="GL_DOMAIN" value="0x0A02"/>
+		<token name="GL_CURRENT_COLOR" value="0x0B00"/>
+		<token name="GL_CURRENT_INDEX" value="0x0B01"/>
+		<token name="GL_CURRENT_NORMAL" value="0x0B02"/>
+		<token name="GL_CURRENT_TEXTURE_COORDS" value="0x0B03"/>
+		<token name="GL_CURRENT_RASTER_COLOR" value="0x0B04"/>
+		<token name="GL_CURRENT_RASTER_INDEX" value="0x0B05"/>
+		<token name="GL_CURRENT_RASTER_TEXTURE_COORDS" value="0x0B06"/>
+		<token name="GL_CURRENT_RASTER_POSITION" value="0x0B07"/>
+		<token name="GL_CURRENT_RASTER_POSITION_VALID" value="0x0B08"/>
+		<token name="GL_CURRENT_RASTER_DISTANCE" value="0x0B09"/>
+		<token name="GL_POINT_SMOOTH" value="0x0B10"/>
+		<token name="GL_POINT_SIZE" value="0x0B11"/>
+		<token name="GL_POINT_SIZE_RANGE" value="0x0B12"/>
+		<token name="GL_POINT_SIZE_GRANULARITY" value="0x0B13"/>
+		<token name="GL_LINE_SMOOTH" value="0x0B20"/>
+		<token name="GL_LINE_WIDTH" value="0x0B21"/>
+		<token name="GL_LINE_WIDTH_RANGE" value="0x0B22"/>
+		<token name="GL_LINE_WIDTH_GRANULARITY" value="0x0B23"/>
+		<token name="GL_LINE_STIPPLE" value="0x0B24"/>
+		<token name="GL_LINE_STIPPLE_PATTERN" value="0x0B25"/>
+		<token name="GL_LINE_STIPPLE_REPEAT" value="0x0B26"/>
+		<token name="GL_LIST_MODE" value="0x0B30"/>
+		<token name="GL_MAX_LIST_NESTING" value="0x0B31"/>
+		<token name="GL_LIST_BASE" value="0x0B32"/>
+		<token name="GL_LIST_INDEX" value="0x0B33"/>
+		<token name="GL_POLYGON_MODE" value="0x0B40"/>
+		<token name="GL_POLYGON_SMOOTH" value="0x0B41"/>
+		<token name="GL_POLYGON_STIPPLE" value="0x0B42"/>
+		<token name="GL_EDGE_FLAG" value="0x0B43"/>
+		<token name="GL_CULL_FACE" value="0x0B44"/>
+		<token name="GL_CULL_FACE_MODE" value="0x0B45"/>
+		<token name="GL_FRONT_FACE" value="0x0B46"/>
+		<token name="GL_LIGHTING" value="0x0B50"/>
+		<token name="GL_LIGHT_MODEL_LOCAL_VIEWER" value="0x0B51"/>
+		<token name="GL_LIGHT_MODEL_TWO_SIDE" value="0x0B52"/>
+		<token name="GL_LIGHT_MODEL_AMBIENT" value="0x0B53"/>
+		<token name="GL_SHADE_MODEL" value="0x0B54"/>
+		<token name="GL_COLOR_MATERIAL_FACE" value="0x0B55"/>
+		<token name="GL_COLOR_MATERIAL_PARAMETER" value="0x0B56"/>
+		<token name="GL_COLOR_MATERIAL" value="0x0B57"/>
+		<token name="GL_FOG" value="0x0B60"/>
+		<token name="GL_FOG_INDEX" value="0x0B61"/>
+		<token name="GL_FOG_DENSITY" value="0x0B62"/>
+		<token name="GL_FOG_START" value="0x0B63"/>
+		<token name="GL_FOG_END" value="0x0B64"/>
+		<token name="GL_FOG_MODE" value="0x0B65"/>
+		<token name="GL_FOG_COLOR" value="0x0B66"/>
+		<token name="GL_DEPTH_RANGE" value="0x0B70"/>
+		<token name="GL_DEPTH_TEST" value="0x0B71"/>
+		<token name="GL_DEPTH_WRITEMASK" value="0x0B72"/>
+		<token name="GL_DEPTH_CLEAR_VALUE" value="0x0B73"/>
+		<token name="GL_DEPTH_FUNC" value="0x0B74"/>
+		<token name="GL_ACCUM_CLEAR_VALUE" value="0x0B80"/>
+		<token name="GL_STENCIL_TEST" value="0x0B90"/>
+		<token name="GL_STENCIL_CLEAR_VALUE" value="0x0B91"/>
+		<token name="GL_STENCIL_FUNC" value="0x0B92"/>
+		<token name="GL_STENCIL_VALUE_MASK" value="0x0B93"/>
+		<token name="GL_STENCIL_FAIL" value="0x0B94"/>
+		<token name="GL_STENCIL_PASS_DEPTH_FAIL" value="0x0B95"/>
+		<token name="GL_STENCIL_PASS_DEPTH_PASS" value="0x0B96"/>
+		<token name="GL_STENCIL_REF" value="0x0B97"/>
+		<token name="GL_STENCIL_WRITEMASK" value="0x0B98"/>
+		<token name="GL_MATRIX_MODE" value="0x0BA0"/>
+		<token name="GL_NORMALIZE" value="0x0BA1"/>
+		<token name="GL_VIEWPORT" value="0x0BA2"/>
+		<token name="GL_MODELVIEW_STACK_DEPTH" value="0x0BA3"/>
+		<token name="GL_PROJECTION_STACK_DEPTH" value="0x0BA4"/>
+		<token name="GL_MODELVIEW_MATRIX" value="0x0BA6"/>
+		<token name="GL_TEXTURE_STACK_DEPTH" value="0x0BA5"/>
+		<token name="GL_PROJECTION_MATRIX" value="0x0BA7"/>
+		<token name="GL_TEXTURE_MATRIX" value="0x0BA8"/>
+		<token name="GL_ATTRIB_STACK_DEPTH" value="0x0BB0"/>
+		<token name="GL_CLIENT_ATTRIB_STACK_DEPTH" value="0x0BB1"/>
+		<token name="GL_ALPHA_TEST" value="0x0BC0"/>
+		<token name="GL_ALPHA_TEST_FUNC" value="0x0BC1"/>
+		<token name="GL_ALPHA_TEST_REF" value="0x0BC2"/>
+		<token name="GL_DITHER" value="0x0BD0"/>
+		<token name="GL_BLEND_DST" value="0x0BE0"/>
+		<token name="GL_BLEND_SRC" value="0x0BE1"/>
+		<token name="GL_BLEND" value="0x0BE2"/>
+		<token name="GL_LOGIC_OP_MODE" value="0x0BF0"/>
+		<token name="GL_INDEX_LOGIC_OP" value="0x0BF1"/>
+		<token name="GL_COLOR_LOGIC_OP" value="0x0BF2"/>
+		<token name="GL_AUX_BUFFERS" value="0x0C00"/>
+		<token name="GL_DRAW_BUFFER" value="0x0C01"/>
+		<token name="GL_READ_BUFFER" value="0x0C02"/>
+		<token name="GL_SCISSOR_BOX" value="0x0C10"/>
+		<token name="GL_SCISSOR_TEST" value="0x0C11"/>
+		<token name="GL_INDEX_CLEAR_VALUE" value="0x0C20"/>
+		<token name="GL_INDEX_WRITEMASK" value="0x0C21"/>
+		<token name="GL_COLOR_CLEAR_VALUE" value="0x0C22"/>
+		<token name="GL_COLOR_WRITEMASK" value="0x0C23"/>
+		<token name="GL_INDEX_MODE" value="0x0C30"/>
+		<token name="GL_RGBA_MODE" value="0x0C31"/>
+		<token name="GL_DOUBLEBUFFER" value="0x0C32"/>
+		<token name="GL_STEREO" value="0x0C33"/>
+		<token name="GL_RENDER_MODE" value="0x0C40"/>
+		<token name="GL_PERSPECTIVE_CORRECTION_HINT" value="0x0C50"/>
+		<token name="GL_POINT_SMOOTH_HINT" value="0x0C51"/>
+		<token name="GL_LINE_SMOOTH_HINT" value="0x0C52"/>
+		<token name="GL_POLYGON_SMOOTH_HINT" value="0x0C53"/>
+		<token name="GL_FOG_HINT" value="0x0C54"/>
+		<token name="GL_TEXTURE_GEN_S" value="0x0C60"/>
+		<token name="GL_TEXTURE_GEN_T" value="0x0C61"/>
+		<token name="GL_TEXTURE_GEN_R" value="0x0C62"/>
+		<token name="GL_TEXTURE_GEN_Q" value="0x0C63"/>
+		<token name="GL_PIXEL_MAP_I_TO_I" value="0x0C70"/>
+		<token name="GL_PIXEL_MAP_S_TO_S" value="0x0C71"/>
+		<token name="GL_PIXEL_MAP_I_TO_R" value="0x0C72"/>
+		<token name="GL_PIXEL_MAP_I_TO_G" value="0x0C73"/>
+		<token name="GL_PIXEL_MAP_I_TO_B" value="0x0C74"/>
+		<token name="GL_PIXEL_MAP_I_TO_A" value="0x0C75"/>
+		<token name="GL_PIXEL_MAP_R_TO_R" value="0x0C76"/>
+		<token name="GL_PIXEL_MAP_G_TO_G" value="0x0C77"/>
+		<token name="GL_PIXEL_MAP_B_TO_B" value="0x0C78"/>
+		<token name="GL_PIXEL_MAP_A_TO_A" value="0x0C79"/>
+		<token name="GL_PIXEL_MAP_I_TO_I_SIZE" value="0x0CB0"/>
+		<token name="GL_PIXEL_MAP_S_TO_S_SIZE" value="0x0CB1"/>
+		<token name="GL_PIXEL_MAP_I_TO_R_SIZE" value="0x0CB2"/>
+		<token name="GL_PIXEL_MAP_I_TO_G_SIZE" value="0x0CB3"/>
+		<token name="GL_PIXEL_MAP_I_TO_B_SIZE" value="0x0CB4"/>
+		<token name="GL_PIXEL_MAP_I_TO_A_SIZE" value="0x0CB5"/>
+		<token name="GL_PIXEL_MAP_R_TO_R_SIZE" value="0x0CB6"/>
+		<token name="GL_PIXEL_MAP_G_TO_G_SIZE" value="0x0CB7"/>
+		<token name="GL_PIXEL_MAP_B_TO_B_SIZE" value="0x0CB8"/>
+		<token name="GL_PIXEL_MAP_A_TO_A_SIZE" value="0x0CB9"/>
+		<token name="GL_UNPACK_SWAP_BYTES" value="0x0CF0"/>
+		<token name="GL_UNPACK_LSB_FIRST" value="0x0CF1"/>
+		<token name="GL_UNPACK_ROW_LENGTH" value="0x0CF2"/>
+		<token name="GL_UNPACK_SKIP_ROWS" value="0x0CF3"/>
+		<token name="GL_UNPACK_SKIP_PIXELS" value="0x0CF4"/>
+		<token name="GL_UNPACK_ALIGNMENT" value="0x0CF5"/>
+		<token name="GL_PACK_SWAP_BYTES" value="0x0D00"/>
+		<token name="GL_PACK_LSB_FIRST" value="0x0D01"/>
+		<token name="GL_PACK_ROW_LENGTH" value="0x0D02"/>
+		<token name="GL_PACK_SKIP_ROWS" value="0x0D03"/>
+		<token name="GL_PACK_SKIP_PIXELS" value="0x0D04"/>
+		<token name="GL_PACK_ALIGNMENT" value="0x0D05"/>
+		<token name="GL_MAP_COLOR" value="0x0D10"/>
+		<token name="GL_MAP_STENCIL" value="0x0D11"/>
+		<token name="GL_INDEX_SHIFT" value="0x0D12"/>
+		<token name="GL_INDEX_OFFSET" value="0x0D13"/>
+		<token name="GL_RED_SCALE" value="0x0D14"/>
+		<token name="GL_RED_BIAS" value="0x0D15"/>
+		<token name="GL_ZOOM_X" value="0x0D16"/>
+		<token name="GL_ZOOM_Y" value="0x0D17"/>
+		<token name="GL_GREEN_SCALE" value="0x0D18"/>
+		<token name="GL_GREEN_BIAS" value="0x0D19"/>
+		<token name="GL_BLUE_SCALE" value="0x0D1A"/>
+		<token name="GL_BLUE_BIAS" value="0x0D1B"/>
+		<token name="GL_ALPHA_SCALE" value="0x0D1C"/>
+		<token name="GL_ALPHA_BIAS" value="0x0D1D"/>
+		<token name="GL_DEPTH_SCALE" value="0x0D1E"/>
+		<token name="GL_DEPTH_BIAS" value="0x0D1F"/>
+		<token name="GL_MAX_EVAL_ORDER" value="0x0D30"/>
+		<token name="GL_MAX_LIGHTS" value="0x0D31"/>
+		<token name="GL_MAX_CLIP_PLANES" value="0x0D32"/>
+		<token name="GL_MAX_TEXTURE_SIZE" value="0x0D33"/>
+		<token name="GL_MAX_PIXEL_MAP_TABLE" value="0x0D34"/>
+		<token name="GL_MAX_ATTRIB_STACK_DEPTH" value="0x0D35"/>
+		<token name="GL_MAX_MODELVIEW_STACK_DEPTH" value="0x0D36"/>
+		<token name="GL_MAX_NAME_STACK_DEPTH" value="0x0D37"/>
+		<token name="GL_MAX_PROJECTION_STACK_DEPTH" value="0x0D38"/>
+		<token name="GL_MAX_TEXTURE_STACK_DEPTH" value="0x0D39"/>
+		<token name="GL_MAX_VIEWPORT_DIMS" value="0x0D3A"/>
+		<token name="GL_MAX_CLIENT_ATTRIB_STACK_DEPTH" value="0x0D3B"/>
+		<token name="GL_SUBPIXEL_BITS" value="0x0D50"/>
+		<token name="GL_INDEX_BITS" value="0x0D51"/>
+		<token name="GL_RED_BITS" value="0x0D52"/>
+		<token name="GL_GREEN_BITS" value="0x0D53"/>
+		<token name="GL_BLUE_BITS" value="0x0D54"/>
+		<token name="GL_ALPHA_BITS" value="0x0D55"/>
+		<token name="GL_DEPTH_BITS" value="0x0D56"/>
+		<token name="GL_STENCIL_BITS" value="0x0D57"/>
+		<token name="GL_ACCUM_RED_BITS" value="0x0D58"/>
+		<token name="GL_ACCUM_GREEN_BITS" value="0x0D59"/>
+		<token name="GL_ACCUM_BLUE_BITS" value="0x0D5A"/>
+		<token name="GL_ACCUM_ALPHA_BITS" value="0x0D5B"/>
+		<token name="GL_NAME_STACK_DEPTH" value="0x0D70"/>
+		<token name="GL_AUTO_NORMAL" value="0x0D80"/>
+		<token name="GL_MAP1_COLOR_4" value="0x0D90"/>
+		<token name="GL_MAP1_INDEX" value="0x0D91"/>
+		<token name="GL_MAP1_NORMAL" value="0x0D92"/>
+		<token name="GL_MAP1_TEXTURE_COORD_1" value="0x0D93"/>
+		<token name="GL_MAP1_TEXTURE_COORD_2" value="0x0D94"/>
+		<token name="GL_MAP1_TEXTURE_COORD_3" value="0x0D95"/>
+		<token name="GL_MAP1_TEXTURE_COORD_4" value="0x0D96"/>
+		<token name="GL_MAP1_VERTEX_3" value="0x0D97"/>
+		<token name="GL_MAP1_VERTEX_4" value="0x0D98"/>
+		<token name="GL_MAP2_COLOR_4" value="0x0DB0"/>
+		<token name="GL_MAP2_INDEX" value="0x0DB1"/>
+		<token name="GL_MAP2_NORMAL" value="0x0DB2"/>
+		<token name="GL_MAP2_TEXTURE_COORD_1" value="0x0DB3"/>
+		<token name="GL_MAP2_TEXTURE_COORD_2" value="0x0DB4"/>
+		<token name="GL_MAP2_TEXTURE_COORD_3" value="0x0DB5"/>
+		<token name="GL_MAP2_TEXTURE_COORD_4" value="0x0DB6"/>
+		<token name="GL_MAP2_VERTEX_3" value="0x0DB7"/>
+		<token name="GL_MAP2_VERTEX_4" value="0x0DB8"/>
+		<token name="GL_MAP1_GRID_DOMAIN" value="0x0DD0"/>
+		<token name="GL_MAP1_GRID_SEGMENTS" value="0x0DD1"/>
+		<token name="GL_MAP2_GRID_DOMAIN" value="0x0DD2"/>
+		<token name="GL_MAP2_GRID_SEGMENTS" value="0x0DD3"/>
+		<token name="GL_TEXTURE_1D" value="0x0DE0"/>
+		<token name="GL_TEXTURE_2D" value="0x0DE1"/>
+		<token name="GL_FEEDBACK_BUFFER_POINTER" value="0x0DF0"/>
+		<token name="GL_FEEDBACK_BUFFER_SIZE" value="0x0DF1"/>
+		<token name="GL_FEEDBACK_BUFFER_TYPE" value="0x0DF2"/>
+		<token name="GL_SELECTION_BUFFER_POINTER" value="0x0DF3"/>
+		<token name="GL_SELECTION_BUFFER_SIZE" value="0x0DF4"/>
+		<token name="GL_TEXTURE_WIDTH" value="0x1000"/>
+		<token name="GL_TEXTURE_HEIGHT" value="0x1001"/>
+		<token name="GL_TEXTURE_INTERNAL_FORMAT" value="0x1003"/>
+		<token name="GL_TEXTURE_BORDER_COLOR" value="0x1004"/>
+		<token name="GL_TEXTURE_BORDER" value="0x1005"/>
+		<token name="GL_DONT_CARE" value="0x1100"/>
+		<token name="GL_FASTEST" value="0x1101"/>
+		<token name="GL_NICEST" value="0x1102"/>
+		<token name="GL_LIGHT0" value="0x4000"/>
+		<token name="GL_LIGHT1" value="0x4001"/>
+		<token name="GL_LIGHT2" value="0x4002"/>
+		<token name="GL_LIGHT3" value="0x4003"/>
+		<token name="GL_LIGHT4" value="0x4004"/>
+		<token name="GL_LIGHT5" value="0x4005"/>
+		<token name="GL_LIGHT6" value="0x4006"/>
+		<token name="GL_LIGHT7" value="0x4007"/>
+		<token name="GL_AMBIENT" value="0x1200"/>
+		<token name="GL_DIFFUSE" value="0x1201"/>
+		<token name="GL_SPECULAR" value="0x1202"/>
+		<token name="GL_POSITION" value="0x1203"/>
+		<token name="GL_SPOT_DIRECTION" value="0x1204"/>
+		<token name="GL_SPOT_EXPONENT" value="0x1205"/>
+		<token name="GL_SPOT_CUTOFF" value="0x1206"/>
+		<token name="GL_CONSTANT_ATTENUATION" value="0x1207"/>
+		<token name="GL_LINEAR_ATTENUATION" value="0x1208"/>
+		<token name="GL_QUADRATIC_ATTENUATION" value="0x1209"/>
+		<token name="GL_COMPILE" value="0x1300"/>
+		<token name="GL_COMPILE_AND_EXECUTE" value="0x1301"/>
+		<token name="GL_CLEAR" value="0x1500"/>
+		<token name="GL_AND" value="0x1501"/>
+		<token name="GL_AND_REVERSE" value="0x1502"/>
+		<token name="GL_COPY" value="0x1503"/>
+		<token name="GL_AND_INVERTED" value="0x1504"/>
+		<token name="GL_NOOP" value="0x1505"/>
+		<token name="GL_XOR" value="0x1506"/>
+		<token name="GL_OR" value="0x1507"/>
+		<token name="GL_NOR" value="0x1508"/>
+		<token name="GL_EQUIV" value="0x1509"/>
+		<token name="GL_INVERT" value="0x150A"/>
+		<token name="GL_OR_REVERSE" value="0x150B"/>
+		<token name="GL_COPY_INVERTED" value="0x150C"/>
+		<token name="GL_OR_INVERTED" value="0x150D"/>
+		<token name="GL_NAND" value="0x150E"/>
+		<token name="GL_SET" value="0x150F"/>
+		<token name="GL_EMISSION" value="0x1600"/>
+		<token name="GL_SHININESS" value="0x1601"/>
+		<token name="GL_AMBIENT_AND_DIFFUSE" value="0x1602"/>
+		<token name="GL_COLOR_INDEXES" value="0x1603"/>
+		<token name="GL_MODELVIEW" value="0x1700"/>
+		<token name="GL_PROJECTION" value="0x1701"/>
+		<token name="GL_TEXTURE" value="0x1702"/>
+		<token name="GL_COLOR" value="0x1800"/>
+		<token name="GL_DEPTH" value="0x1801"/>
+		<token name="GL_STENCIL" value="0x1802"/>
+		<token name="GL_COLOR_INDEX" value="0x1900"/>
+		<token name="GL_STENCIL_INDEX" value="0x1901"/>
+		<token name="GL_DEPTH_COMPONENT" value="0x1902"/>
+		<token name="GL_RED" value="0x1903"/>
+		<token name="GL_GREEN" value="0x1904"/>
+		<token name="GL_BLUE" value="0x1905"/>
+		<token name="GL_ALPHA" value="0x1906"/>
+		<token name="GL_RGB" value="0x1907"/>
+		<token name="GL_RGBA" value="0x1908"/>
+		<token name="GL_LUMINANCE" value="0x1909"/>
+		<token name="GL_LUMINANCE_ALPHA" value="0x190A"/>
+		<token name="GL_BITMAP" value="0x1A00"/>
+		<token name="GL_POINT" value="0x1B00"/>
+		<token name="GL_LINE" value="0x1B01"/>
+		<token name="GL_FILL" value="0x1B02"/>
+		<token name="GL_RENDER" value="0x1C00"/>
+		<token name="GL_FEEDBACK" value="0x1C01"/>
+		<token name="GL_SELECT" value="0x1C02"/>
+		<token name="GL_FLAT" value="0x1D00"/>
+		<token name="GL_SMOOTH" value="0x1D01"/>
+		<token name="GL_KEEP" value="0x1E00"/>
+		<token name="GL_REPLACE" value="0x1E01"/>
+		<token name="GL_INCR" value="0x1E02"/>
+		<token name="GL_DECR" value="0x1E03"/>
+		<token name="GL_VENDOR" value="0x1F00"/>
+		<token name="GL_RENDERER" value="0x1F01"/>
+		<token name="GL_VERSION" value="0x1F02"/>
+		<token name="GL_EXTENSIONS" value="0x1F03"/>
+		<token name="GL_S" value="0x2000"/>
+		<token name="GL_T" value="0x2001"/>
+		<token name="GL_R" value="0x2002"/>
+		<token name="GL_Q" value="0x2003"/>
+		<token name="GL_MODULATE" value="0x2100"/>
+		<token name="GL_DECAL" value="0x2101"/>
+		<token name="GL_TEXTURE_ENV_MODE" value="0x2200"/>
+		<token name="GL_TEXTURE_ENV_COLOR" value="0x2201"/>
+		<token name="GL_TEXTURE_ENV" value="0x2300"/>
+		<token name="GL_EYE_LINEAR" value="0x2400"/>
+		<token name="GL_OBJECT_LINEAR" value="0x2401"/>
+		<token name="GL_SPHERE_MAP" value="0x2402"/>
+		<token name="GL_TEXTURE_GEN_MODE" value="0x2500"/>
+		<token name="GL_OBJECT_PLANE" value="0x2501"/>
+		<token name="GL_EYE_PLANE" value="0x2502"/>
+		<token name="GL_NEAREST" value="0x2600"/>
+		<token name="GL_LINEAR" value="0x2601"/>
+		<token name="GL_NEAREST_MIPMAP_NEAREST" value="0x2700"/>
+		<token name="GL_LINEAR_MIPMAP_NEAREST" value="0x2701"/>
+		<token name="GL_NEAREST_MIPMAP_LINEAR" value="0x2702"/>
+		<token name="GL_LINEAR_MIPMAP_LINEAR" value="0x2703"/>
+		<token name="GL_TEXTURE_MAG_FILTER" value="0x2800"/>
+		<token name="GL_TEXTURE_MIN_FILTER" value="0x2801"/>
+		<token name="GL_TEXTURE_WRAP_S" value="0x2802"/>
+		<token name="GL_TEXTURE_WRAP_T" value="0x2803"/>
+		<token name="GL_CLAMP" value="0x2900"/>
+		<token name="GL_REPEAT" value="0x2901"/>
+	</tokens>
+
+	<functions>
+		<function name="glAccum" return="void" link="static">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLfloat" name="value"/>
+			</params>
+		</function>
+		<function name="glAlphaFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="func"/>
+				<param type="GLclampf" name="ref"/>
+			</params>
+		</function>
+		<function name="glBegin" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glBitmap" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLfloat" name="xorig"/>
+				<param type="GLfloat" name="yorig"/>
+				<param type="GLfloat" name="xmove"/>
+				<param type="GLfloat" name="ymove"/>
+				<param type="const GLubyte*" name="bitmap"/>
+			</params>
+		</function>
+		<function name="glBlendFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="sfactor"/>
+				<param type="GLenum" name="dfactor"/>
+			</params>
+		</function>
+		<function name="glCallList" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+			</params>
+		</function>
+		<function name="glCallLists" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="lists"/>
+			</params>
+		</function>
+		<function name="glClear" return="void" link="static">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+		<function name="glClearAccum" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearColor" return="void" link="static">
+			<params>
+				<param type="GLclampf" name="red"/>
+				<param type="GLclampf" name="green"/>
+				<param type="GLclampf" name="blue"/>
+				<param type="GLclampf" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearDepth" return="void" link="static">
+			<params>
+				<param type="GLclampd" name="depth"/>
+			</params>
+		</function>
+		<function name="glClearIndex" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="c"/>
+			</params>
+		</function>
+		<function name="glClearStencil" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+			</params>
+		</function>
+		<function name="glClipPlane" return="void" link="static">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="const GLdouble*" name="equation"/>
+			</params>
+		</function>
+		<function name="glColor3b" return="void" link="static">
+			<params>
+				<param type="GLbyte" name="red"/>
+				<param type="GLbyte" name="green"/>
+				<param type="GLbyte" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3bv" return="void" link="static">
+			<params>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="red"/>
+				<param type="GLdouble" name="green"/>
+				<param type="GLdouble" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3i" return="void" link="static">
+			<params>
+				<param type="GLint" name="red"/>
+				<param type="GLint" name="green"/>
+				<param type="GLint" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="red"/>
+				<param type="GLshort" name="green"/>
+				<param type="GLshort" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3ub" return="void" link="static">
+			<params>
+				<param type="GLubyte" name="red"/>
+				<param type="GLubyte" name="green"/>
+				<param type="GLubyte" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3ubv" return="void" link="static">
+			<params>
+				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3ui" return="void" link="static">
+			<params>
+				<param type="GLuint" name="red"/>
+				<param type="GLuint" name="green"/>
+				<param type="GLuint" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3uiv" return="void" link="static">
+			<params>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3us" return="void" link="static">
+			<params>
+				<param type="GLushort" name="red"/>
+				<param type="GLushort" name="green"/>
+				<param type="GLushort" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor3usv" return="void" link="static">
+			<params>
+				<param type="const GLushort*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4b" return="void" link="static">
+			<params>
+				<param type="GLbyte" name="red"/>
+				<param type="GLbyte" name="green"/>
+				<param type="GLbyte" name="blue"/>
+				<param type="GLbyte" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4bv" return="void" link="static">
+			<params>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="red"/>
+				<param type="GLdouble" name="green"/>
+				<param type="GLdouble" name="blue"/>
+				<param type="GLdouble" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="red"/>
+				<param type="GLfloat" name="green"/>
+				<param type="GLfloat" name="blue"/>
+				<param type="GLfloat" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4i" return="void" link="static">
+			<params>
+				<param type="GLint" name="red"/>
+				<param type="GLint" name="green"/>
+				<param type="GLint" name="blue"/>
+				<param type="GLint" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="red"/>
+				<param type="GLshort" name="green"/>
+				<param type="GLshort" name="blue"/>
+				<param type="GLshort" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4ub" return="void" link="static">
+			<params>
+				<param type="GLubyte" name="red"/>
+				<param type="GLubyte" name="green"/>
+				<param type="GLubyte" name="blue"/>
+				<param type="GLubyte" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4ubv" return="void" link="static">
+			<params>
+				<param type="const GLubyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4ui" return="void" link="static">
+			<params>
+				<param type="GLuint" name="red"/>
+				<param type="GLuint" name="green"/>
+				<param type="GLuint" name="blue"/>
+				<param type="GLuint" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4uiv" return="void" link="static">
+			<params>
+				<param type="const GLuint*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4us" return="void" link="static">
+			<params>
+				<param type="GLushort" name="red"/>
+				<param type="GLushort" name="green"/>
+				<param type="GLushort" name="blue"/>
+				<param type="GLushort" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor4usv" return="void" link="static">
+			<params>
+				<param type="const GLushort*" name="v"/>
+			</params>
+		</function>
+		<function name="glColorMask" return="void" link="static">
+			<params>
+				<param type="GLboolean" name="red"/>
+				<param type="GLboolean" name="green"/>
+				<param type="GLboolean" name="blue"/>
+				<param type="GLboolean" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColorMaterial" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glCopyPixels" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="type"/>
+			</params>
+		</function>
+		<function name="glCullFace" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glDeleteLists" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glDepthFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="func"/>
+			</params>
+		</function>
+		<function name="glDepthMask" return="void" link="static">
+			<params>
+				<param type="GLboolean" name="flag"/>
+			</params>
+		</function>
+		<function name="glDepthRange" return="void" link="static">
+			<params>
+				<param type="GLclampd" name="zNear"/>
+				<param type="GLclampd" name="zFar"/>
+			</params>
+		</function>
+		<function name="glDisable" return="void" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glDrawBuffer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glDrawPixels" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glEdgeFlag" return="void" link="static">
+			<params>
+				<param type="GLboolean" name="flag"/>
+			</params>
+		</function>
+		<function name="glEdgeFlagv" return="void" link="static">
+			<params>
+				<param type="const GLboolean*" name="flag"/>
+			</params>
+		</function>
+		<function name="glEnable" return="void" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glEnd" return="void" link="static"/>
+		<function name="glEndList" return="void" link="static"/>
+		<function name="glEvalCoord1d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="u"/>
+				<param type="GLdouble" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="u"/>
+				<param type="GLfloat" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalMesh1" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="i1"/>
+				<param type="GLint" name="i2"/>
+			</params>
+		</function>
+		<function name="glEvalMesh2" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint" name="i1"/>
+				<param type="GLint" name="i2"/>
+				<param type="GLint" name="j1"/>
+				<param type="GLint" name="j2"/>
+			</params>
+		</function>
+		<function name="glEvalPoint1" return="void" link="static">
+			<params>
+				<param type="GLint" name="i"/>
+			</params>
+		</function>
+		<function name="glEvalPoint2" return="void" link="static">
+			<params>
+				<param type="GLint" name="i"/>
+				<param type="GLint" name="j"/>
+			</params>
+		</function>
+		<function name="glFeedbackBuffer" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLfloat*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glFinish" return="void" link="static"/>
+		<function name="glFlush" return="void" link="static"/>
+		<function name="glFogf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glFogfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glFogi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glFogiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glFrontFace" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glFrustum" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="left"/>
+				<param type="GLdouble" name="right"/>
+				<param type="GLdouble" name="bottom"/>
+				<param type="GLdouble" name="top"/>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
+			</params>
+		</function>
+		<function name="glGenLists" return="GLuint" link="static">
+			<params>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glGetBooleanv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLboolean*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetClipPlane" return="void" link="static">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="GLdouble*" name="equation"/>
+			</params>
+		</function>
+		<function name="glGetDoublev" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetError" return="GLenum" link="static"/>
+		<function name="glGetFloatv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetIntegerv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetLightfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetLightiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMapdv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMapiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetMaterialfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMaterialiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapusv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPolygonStipple" return="void" link="static">
+			<params>
+				<param type="GLubyte*" name="mask"/>
+			</params>
+		</function>
+		<function name="glGetString" return="const GLubyte*" link="static">
+			<params>
+				<param type="GLenum" name="name"/>
+			</params>
+		</function>
+		<function name="glGetTexEnvfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexEnviv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGendv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGenfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGeniv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexImage" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetTexLevelParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexLevelParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glHint" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glIndexMask" return="void" link="static">
+			<params>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glIndexd" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexdv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexf" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexfv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexi" return="void" link="static">
+			<params>
+				<param type="GLint" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexiv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexs" return="void" link="static">
+			<params>
+				<param type="GLshort" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexsv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="c"/>
+			</params>
+		</function>
+		<function name="glInitNames" return="void" link="static"/>
+		<function name="glIsEnabled" return="GLboolean" link="static">
+			<params>
+				<param type="GLenum" name="cap"/>
+			</params>
+		</function>
+		<function name="glIsList" return="GLboolean" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+			</params>
+		</function>
+		<function name="glLightModelf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glLightModelfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightModeli" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glLightModeliv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glLightfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glLighti" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glLightiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glLineStipple" return="void" link="static">
+			<params>
+				<param type="GLint" name="factor"/>
+				<param type="GLushort" name="pattern"/>
+			</params>
+		</function>
+		<function name="glLineWidth" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="width"/>
+			</params>
+		</function>
+		<function name="glListBase" return="void" link="static">
+			<params>
+				<param type="GLuint" name="base"/>
+			</params>
+		</function>
+		<function name="glLoadIdentity" return="void" link="static"/>
+		<function name="glLoadMatrixd" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glLoadMatrixf" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glLoadName" return="void" link="static">
+			<params>
+				<param type="GLuint" name="name"/>
+			</params>
+		</function>
+		<function name="glLogicOp" return="void" link="static">
+			<params>
+				<param type="GLenum" name="opcode"/>
+			</params>
+		</function>
+		<function name="glMap1d" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="const GLdouble*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap1f" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap2d" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="const GLdouble*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap2f" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="const GLfloat*" name="points"/>
+			</params>
+		</function>
+		<function name="glMapGrid1d" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+			</params>
+		</function>
+		<function name="glMapGrid1f" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+			</params>
+		</function>
+		<function name="glMapGrid2d" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="vn"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+			</params>
+		</function>
+		<function name="glMapGrid2f" return="void" link="static">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="vn"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+			</params>
+		</function>
+		<function name="glMaterialf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glMaterialfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glMateriali" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glMaterialiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glMatrixMode" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glMultMatrixd" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultMatrixf" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="m"/>
+			</params>
+		</function>
+		<function name="glNewList" return="void" link="static">
+			<params>
+				<param type="GLuint" name="list"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glNormal3b" return="void" link="static">
+			<params>
+				<param type="GLbyte" name="nx"/>
+				<param type="GLbyte" name="ny"/>
+				<param type="GLbyte" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3bv" return="void" link="static">
+			<params>
+				<param type="const GLbyte*" name="v"/>
+			</params>
+		</function>
+		<function name="glNormal3d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="nx"/>
+				<param type="GLdouble" name="ny"/>
+				<param type="GLdouble" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glNormal3f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="nx"/>
+				<param type="GLfloat" name="ny"/>
+				<param type="GLfloat" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glNormal3i" return="void" link="static">
+			<params>
+				<param type="GLint" name="nx"/>
+				<param type="GLint" name="ny"/>
+				<param type="GLint" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glNormal3s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="nx"/>
+				<param type="GLshort" name="ny"/>
+				<param type="GLshort" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glOrtho" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="left"/>
+				<param type="GLdouble" name="right"/>
+				<param type="GLdouble" name="bottom"/>
+				<param type="GLdouble" name="top"/>
+				<param type="GLdouble" name="zNear"/>
+				<param type="GLdouble" name="zFar"/>
+			</params>
+		</function>
+		<function name="glPassThrough" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="token"/>
+			</params>
+		</function>
+		<function name="glPixelMapfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="mapsize"/>
+				<param type="const GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glPixelMapuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="mapsize"/>
+				<param type="const GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glPixelMapusv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="mapsize"/>
+				<param type="const GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glPixelStoref" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelStorei" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelTransferf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelTransferi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelZoom" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="xfactor"/>
+				<param type="GLfloat" name="yfactor"/>
+			</params>
+		</function>
+		<function name="glPointSize" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="size"/>
+			</params>
+		</function>
+		<function name="glPolygonMode" return="void" link="static">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glPolygonStipple" return="void" link="static">
+			<params>
+				<param type="const GLubyte*" name="mask"/>
+			</params>
+		</function>
+		<function name="glPopAttrib" return="void" link="static"/>
+		<function name="glPopMatrix" return="void" link="static"/>
+		<function name="glPopName" return="void" link="static"/>
+		<function name="glPushAttrib" return="void" link="static">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+		<function name="glPushMatrix" return="void" link="static"/>
+		<function name="glPushName" return="void" link="static">
+			<params>
+				<param type="GLuint" name="name"/>
+			</params>
+		</function>
+		<function name="glRasterPos2d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+			</params>
+		</function>
+		<function name="glRasterPos2dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos2f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+			</params>
+		</function>
+		<function name="glRasterPos2fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos2i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+			</params>
+		</function>
+		<function name="glRasterPos2iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos2s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+			</params>
+		</function>
+		<function name="glRasterPos2sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos3d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glRasterPos3dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos3f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glRasterPos3fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos3i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+			</params>
+		</function>
+		<function name="glRasterPos3iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos3s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+			</params>
+		</function>
+		<function name="glRasterPos3sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos4d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glRasterPos4dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos4f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="w"/>
+			</params>
+		</function>
+		<function name="glRasterPos4fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos4i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+				<param type="GLint" name="w"/>
+			</params>
+		</function>
+		<function name="glRasterPos4iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos4s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+				<param type="GLshort" name="w"/>
+			</params>
+		</function>
+		<function name="glRasterPos4sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glReadBuffer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glReadPixels" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glRectd" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x1"/>
+				<param type="GLdouble" name="y1"/>
+				<param type="GLdouble" name="x2"/>
+				<param type="GLdouble" name="y2"/>
+			</params>
+		</function>
+		<function name="glRectdv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v1"/>
+				<param type="const GLdouble*" name="v2"/>
+			</params>
+		</function>
+		<function name="glRectf" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x1"/>
+				<param type="GLfloat" name="y1"/>
+				<param type="GLfloat" name="x2"/>
+				<param type="GLfloat" name="y2"/>
+			</params>
+		</function>
+		<function name="glRectfv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v1"/>
+				<param type="const GLfloat*" name="v2"/>
+			</params>
+		</function>
+		<function name="glRecti" return="void" link="static">
+			<params>
+				<param type="GLint" name="x1"/>
+				<param type="GLint" name="y1"/>
+				<param type="GLint" name="x2"/>
+				<param type="GLint" name="y2"/>
+			</params>
+		</function>
+		<function name="glRectiv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v1"/>
+				<param type="const GLint*" name="v2"/>
+			</params>
+		</function>
+		<function name="glRects" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x1"/>
+				<param type="GLshort" name="y1"/>
+				<param type="GLshort" name="x2"/>
+				<param type="GLshort" name="y2"/>
+			</params>
+		</function>
+		<function name="glRectsv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v1"/>
+				<param type="const GLshort*" name="v2"/>
+			</params>
+		</function>
+		<function name="glRenderMode" return="GLint" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glRotated" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="angle"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glRotatef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="angle"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glScaled" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glScalef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glScissor" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glSelectBuffer" return="void" link="static">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLuint*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glShadeModel" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glStencilFunc" return="void" link="static">
+			<params>
+				<param type="GLenum" name="func"/>
+				<param type="GLint" name="ref"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilMask" return="void" link="static">
+			<params>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilOp" return="void" link="static">
+			<params>
+				<param type="GLenum" name="fail"/>
+				<param type="GLenum" name="zfail"/>
+				<param type="GLenum" name="zpass"/>
+			</params>
+		</function>
+		<function name="glTexCoord1d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="s"/>
+			</params>
+		</function>
+		<function name="glTexCoord1dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord1f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="s"/>
+			</params>
+		</function>
+		<function name="glTexCoord1fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord1i" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+			</params>
+		</function>
+		<function name="glTexCoord1iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord1s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="s"/>
+			</params>
+		</function>
+		<function name="glTexCoord1sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord2d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="s"/>
+				<param type="GLdouble" name="t"/>
+			</params>
+		</function>
+		<function name="glTexCoord2dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord2f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="s"/>
+				<param type="GLfloat" name="t"/>
+			</params>
+		</function>
+		<function name="glTexCoord2fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord2i" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+				<param type="GLint" name="t"/>
+			</params>
+		</function>
+		<function name="glTexCoord2iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord2s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="s"/>
+				<param type="GLshort" name="t"/>
+			</params>
+		</function>
+		<function name="glTexCoord2sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord3d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="s"/>
+				<param type="GLdouble" name="t"/>
+				<param type="GLdouble" name="r"/>
+			</params>
+		</function>
+		<function name="glTexCoord3dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord3f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="s"/>
+				<param type="GLfloat" name="t"/>
+				<param type="GLfloat" name="r"/>
+			</params>
+		</function>
+		<function name="glTexCoord3fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord3i" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+				<param type="GLint" name="t"/>
+				<param type="GLint" name="r"/>
+			</params>
+		</function>
+		<function name="glTexCoord3iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord3s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="s"/>
+				<param type="GLshort" name="t"/>
+				<param type="GLshort" name="r"/>
+			</params>
+		</function>
+		<function name="glTexCoord3sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord4d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="s"/>
+				<param type="GLdouble" name="t"/>
+				<param type="GLdouble" name="r"/>
+				<param type="GLdouble" name="q"/>
+			</params>
+		</function>
+		<function name="glTexCoord4dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord4f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="s"/>
+				<param type="GLfloat" name="t"/>
+				<param type="GLfloat" name="r"/>
+				<param type="GLfloat" name="q"/>
+			</params>
+		</function>
+		<function name="glTexCoord4fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord4i" return="void" link="static">
+			<params>
+				<param type="GLint" name="s"/>
+				<param type="GLint" name="t"/>
+				<param type="GLint" name="r"/>
+				<param type="GLint" name="q"/>
+			</params>
+		</function>
+		<function name="glTexCoord4iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord4s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="s"/>
+				<param type="GLshort" name="t"/>
+				<param type="GLshort" name="r"/>
+				<param type="GLshort" name="q"/>
+			</params>
+		</function>
+		<function name="glTexCoord4sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexEnvf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexEnvfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexEnvi" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexEnviv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGend" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGendv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGenf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGenfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGeni" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGeniv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexImage1D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glTexImage2D" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLint" name="border"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glTexParameterf" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexParameterfv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexParameteri" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexParameteriv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTranslated" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glTranslatef" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex2d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex2dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex2f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex2fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex2i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex2iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex2s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex2sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex3dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex3fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex3iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex3sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4d" return="void" link="static">
+			<params>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex4dv" return="void" link="static">
+			<params>
+				<param type="const GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4f" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex4fv" return="void" link="static">
+			<params>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4i" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLint" name="z"/>
+				<param type="GLint" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex4iv" return="void" link="static">
+			<params>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4s" return="void" link="static">
+			<params>
+				<param type="GLshort" name="x"/>
+				<param type="GLshort" name="y"/>
+				<param type="GLshort" name="z"/>
+				<param type="GLshort" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex4sv" return="void" link="static">
+			<params>
+				<param type="const GLshort*" name="v"/>
+			</params>
+		</function>
+		<function name="glViewport" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

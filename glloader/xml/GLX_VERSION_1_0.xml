@@ -1,0 +1,134 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_VERSION_1_0">
+	<typedefs>
+		<typedef type="XID" synonym="GLXDrawable"/>
+		<typedef type="XID" synonym="GLXPixmap"/>
+		<typedef type="struct __GLXcontextRec*" synonym="GLXContext"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GLX_USE_GL" value="1"/>
+		<token name="GLX_BUFFER_SIZE" value="2"/>
+		<token name="GLX_LEVEL" value="3"/>
+		<token name="GLX_RGBA" value="4"/>
+		<token name="GLX_DOUBLEBUFFER" value="5"/>
+		<token name="GLX_STEREO" value="6"/>
+		<token name="GLX_AUX_BUFFERS" value="7"/>
+		<token name="GLX_RED_SIZE" value="8"/>
+		<token name="GLX_GREEN_SIZE" value="9"/>
+		<token name="GLX_BLUE_SIZE" value="10"/>
+		<token name="GLX_ALPHA_SIZE" value="11"/>
+		<token name="GLX_DEPTH_SIZE" value="12"/>
+		<token name="GLX_STENCIL_SIZE" value="13"/>
+		<token name="GLX_ACCUM_RED_SIZE" value="14"/>
+		<token name="GLX_ACCUM_GREEN_SIZE" value="15"/>
+		<token name="GLX_ACCUM_BLUE_SIZE" value="16"/>
+		<token name="GLX_ACCUM_ALPHA_SIZE" value="17"/>
+		<token name="GLX_BAD_SCREEN" value="1"/>
+		<token name="GLX_BAD_ATTRIBUTE" value="2"/>
+		<token name="GLX_NO_EXTENSION" value="3"/>
+		<token name="GLX_BAD_VISUAL" value="4"/>
+		<token name="GLX_BAD_CONTEXT" value="5"/>
+		<token name="GLX_BAD_VALUE" value="6"/>
+		<token name="GLX_BAD_ENUM" value="7"/>
+	</tokens>
+
+	<functions>
+		<function name="glXQueryExtension" return="Bool" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int*" name="errorBase"/>
+				<param type="int*" name="eventBase"/>
+			</params>
+		</function>
+		<function name="glXQueryVersion" return="Bool" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int*" name="major"/>
+				<param type="int*" name="minor"/>
+			</params>
+		</function>
+		<function name="glXGetConfig" return="int" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="XVisualInfo*" name="vis"/>
+				<param type="int" name="attrib"/>
+				<param type="int*" name="value"/>
+			</params>
+		</function>
+		<function name="glXChooseVisual" return="XVisualInfo*" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int*" name="attribList"/>
+			</params>
+		</function>
+		<function name="glXCreateGLXPixmap" return="GLXPixmap" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="XVisualInfo*" name="vis"/>
+				<param type="Pixmap" name="pixmap"/>
+			</params>
+		</function>
+		<function name="glXDestroyGLXPixmap" return="void" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXPixmap" name="pix"/>
+			</params>
+		</function>
+		<function name="glXCreateContext" return="GLXContext" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="XVisualInfo*" name="vis"/>
+				<param type="GLXContext" name="shareList"/>
+				<param type="Bool" name="direct"/>
+			</params>
+		</function>
+		<function name="glXDestroyContext" return="void" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="glXIsDirect" return="Bool" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="glXCopyContext" return="void" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXContext" name="src"/>
+				<param type="GLXContext" name="dst"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glXMakeCurrent" return="Bool" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+				<param type="GLXContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="glXGetCurrentContext" return="GLXContext" link="static"/>
+		<function name="glXGetCurrentDrawable" return="GLXDrawable" link="static"/>
+		<function name="glXWaitGL" return="void" link="static"/>
+		<function name="glXWaitX" return="void" link="static"/>
+		<function name="glXSwapBuffers" return="void" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXDrawable" name="drawable"/>
+			</params>
+		</function>
+		<function name="glXUseXFont" return="void" link="static">
+			<params>
+				<param type="Font" name="font"/>
+				<param type="int" name="first"/>
+				<param type="int" name="count"/>
+				<param type="int" name="listBase"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

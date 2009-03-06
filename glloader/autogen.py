@@ -207,11 +207,14 @@ def create_header(prefix, extensions):
 			if extension.predefined != None:
 				headerFile.write("#ifdef %s\n\n" % extension.predefined)
 
+			all_static = True
 			for function in extension.functions:
 				if not function.static_link:
 					headerFile.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
+					all_static = False
 
-			headerFile.write("\n")
+			if not all_static:
+				headerFile.write("\n")
 
 			for function in extension.functions:
 				if function.static_link:
@@ -262,6 +265,11 @@ def create_source(prefix, extensions):
 		if extension.predefined != None:
 			sourceFile.write("#ifdef %s\n\n" % extension.predefined)
 
+		all_static = True
+		for function in extension.functions:
+			if not function.static_link:
+				all_static = False
+
 		sourceFile.write("static char APIENTRY _glloader_%s()\n" % extension.name)
 		sourceFile.write("{\n")
 		sourceFile.write("\treturn _%s;\n" % extension.name)
@@ -277,7 +285,10 @@ def create_source(prefix, extensions):
 		sourceFile.write("glloader_%sFUNC glloader_%s = self_init_glloader_%s;\n\n" % (extension.name, extension.name, extension.name))
 
 		if (len(extension.functions) != 0):
-			sourceFile.write("#ifdef %s\n\n" % extension.name)
+			sourceFile.write("#ifdef %s\n" % extension.name)
+
+			if not all_static:
+				sourceFile.write("\n")
 
 			for function in extension.functions:
 				if not function.static_link:
@@ -289,13 +300,17 @@ def create_source(prefix, extensions):
 						sourceFile.write("return ")
 					sourceFile.write("%s(%s);\n" % (function.name, function.param_names_str()))
 					sourceFile.write("}\n")
-			sourceFile.write("\n")
+			if not all_static:
+				sourceFile.write("\n")
 
 			for function in extension.functions:
 				if not function.static_link:
 					sourceFile.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
 
-			sourceFile.write("\n#endif\n\n")
+			if not all_static:
+				sourceFile.write("\n")
+
+			sourceFile.write("#endif\n\n")
 
 		if extension.predefined != None:
 			sourceFile.write("#endif\n\n")
@@ -304,28 +319,35 @@ def create_source(prefix, extensions):
 		if extension.predefined != None:
 			sourceFile.write("#ifdef %s\n" % extension.predefined)
 
+		all_static = True
+		for function in extension.functions:
+			if not function.static_link:
+				all_static = False
+
 		sourceFile.write("void init_%s()\n" % extension.name)
 		sourceFile.write("{\n")
 
 		sourceFile.write("\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
 
-		if (len(extension.functions) != 0):
-			sourceFile.write("\t{\n")
+		if not all_static:
+			if (len(extension.functions) != 0):
+				sourceFile.write("\t{\n")
 
-			for function in extension.functions:
-				if not function.static_link:
-					sourceFile.write("\t\t%s = NULL;\n" % function.name)
+				for function in extension.functions:
+					if not function.static_link:
+						sourceFile.write("\t\t%s = NULL;\n" % function.name)
 
-			sourceFile.write("\t}\n\n")
+				sourceFile.write("\t}\n\n")
 
 		sourceFile.write("\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
 		sourceFile.write("\t{\n")
 		sourceFile.write("\t\t_%s = 1;\n" % extension.name)
-		if len(extension.functions) > 0:
-			sourceFile.write("\n")
-		for i in range(0, len(extension.functions)):
-			if not function.static_link:
-				sourceFile.write("\t\tLOAD_FUNC1(%s);\n" % extension.functions[i].name)
+		if not all_static:
+			if len(extension.functions) > 0:
+				sourceFile.write("\n")
+			for function in extension.functions:
+				if not function.static_link:
+					sourceFile.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
 		sourceFile.write("\t}\n")
 
 		backup = False

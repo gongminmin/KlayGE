@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_VERSION_1_1">
+	<tokens>
+		<token name="GLX_VENDOR" value="0x1"/>
+		<token name="GLX_VERSION" value="0x2"/>
+		<token name="GLX_EXTENSIONS" value="0x3"/>
+	</tokens>
+
+	<functions>
+		<function name="glXQueryExtensionsString" return="const char*" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+			</params>
+		</function>
+		<function name="glXGetClientString" return="const char*" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="name"/>
+			</params>
+		</function>
+		<function name="glXQueryServerString" return="const char*" link="static">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="int" name="screen"/>
+				<param type="int" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

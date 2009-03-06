@@ -359,14 +359,6 @@
 			Name="include"
 			>
 			<File
-				RelativePath="..\..\include\glloader\gl10.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\gl11.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\glloader\glloader.h"
 				>
 			</File>
@@ -380,10 +372,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\glloader_wgl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\glloader\glx11.h"
 				>
 			</File>
 		</Filter>
