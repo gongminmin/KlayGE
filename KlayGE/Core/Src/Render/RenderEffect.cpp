@@ -157,7 +157,7 @@ namespace
 			{
 				var = MakeSharedPtr<RenderVariableInt>();
 
-				int tmp;
+				int32_t tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 				*var = tmp;
 			}
@@ -618,7 +618,7 @@ namespace KlayGE
 
 				case REDT_int:
 					{
-						int tmp;
+						int32_t tmp;
 						var->Value(tmp);
 						state_val = tmp;
 					}
@@ -962,7 +962,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(int const & /*value*/)
+	RenderVariable& RenderVariable::operator=(int32_t const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -1028,7 +1028,7 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(std::vector<int> const & /*value*/)
+	RenderVariable& RenderVariable::operator=(std::vector<int32_t> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -1057,7 +1057,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(int& /*value*/) const
+	void RenderVariable::Value(int32_t& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
@@ -1112,7 +1112,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::Value(std::vector<int>& /*value*/) const
+	void RenderVariable::Value(std::vector<int32_t>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

@@ -25,12 +25,12 @@ namespace KlayGE
 		SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir);
 
 		void ChildBuffer(TexturePtr const & tex);
-		void Length(int length);
+		void Length(int32_t length);
 		void AddrOffset(float3 offset);
 		void Scale(float scale);
 
 	private:
-		int length_;
+		int32_t length_;
 		bool dir_;
 
 		RenderEffectParameterPtr child_tex_ep_;

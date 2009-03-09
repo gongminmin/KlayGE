@@ -48,7 +48,7 @@ namespace KlayGE
 		*addr_offset_ep_ = offset;
 	}
 
-	void SATSeparableScanSweepPostProcess::Length(int length)
+	void SATSeparableScanSweepPostProcess::Length(int32_t length)
 	{
 		length_ = length;
 		*length_ep_ = length;

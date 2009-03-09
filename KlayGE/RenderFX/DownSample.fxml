@@ -14,7 +14,7 @@
 		<![CDATA[
 half4 BrightPass(half4 c)
 {
-	const float BRIGHT_THRESHOLD = 0.5f;
+	const float BRIGHT_THRESHOLD = 1;
 	if (any(c.rgb > BRIGHT_THRESHOLD))
 	{
 		return c;

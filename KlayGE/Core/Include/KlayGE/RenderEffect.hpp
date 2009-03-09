@@ -103,7 +103,7 @@ namespace KlayGE
 		virtual RenderVariablePtr Clone() = 0;
 
 		virtual RenderVariable& operator=(bool const & value);
-		virtual RenderVariable& operator=(int const & value);
+		virtual RenderVariable& operator=(int32_t const & value);
 		virtual RenderVariable& operator=(float const & value);
 		virtual RenderVariable& operator=(float2 const & value);
 		virtual RenderVariable& operator=(float3 const & value);
@@ -114,13 +114,13 @@ namespace KlayGE
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(shader_desc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
-		virtual RenderVariable& operator=(std::vector<int> const & value);
+		virtual RenderVariable& operator=(std::vector<int32_t> const & value);
 		virtual RenderVariable& operator=(std::vector<float> const & value);
 		virtual RenderVariable& operator=(std::vector<float4> const & value);
 		virtual RenderVariable& operator=(std::vector<float4x4> const & value);
 
 		virtual void Value(bool& val) const;
-		virtual void Value(int& val) const;
+		virtual void Value(int32_t& val) const;
 		virtual void Value(float& val) const;
 		virtual void Value(float2& val) const;
 		virtual void Value(float3& val) const;
@@ -131,7 +131,7 @@ namespace KlayGE
 		virtual void Value(std::string& val) const;
 		virtual void Value(shader_desc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
-		virtual void Value(std::vector<int>& val) const;
+		virtual void Value(std::vector<int32_t>& val) const;
 		virtual void Value(std::vector<float>& val) const;
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
@@ -166,7 +166,7 @@ namespace KlayGE
 	};
 
 	typedef RenderVariableConcrete<bool> RenderVariableBool;
-	typedef RenderVariableConcrete<int> RenderVariableInt;
+	typedef RenderVariableConcrete<int32_t> RenderVariableInt;
 	typedef RenderVariableConcrete<float> RenderVariableFloat;
 	typedef RenderVariableConcrete<float2> RenderVariableFloat2;
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
@@ -177,7 +177,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
-	typedef RenderVariableConcrete<std::vector<int> > RenderVariableIntArray;
+	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
 	typedef RenderVariableConcrete<std::vector<float> >  RenderVariableFloatArray;
 	typedef RenderVariableConcrete<std::vector<float4> >  RenderVariableFloat4Array;
 	typedef RenderVariableConcrete<std::vector<float4x4> >  RenderVariableFloat4x4Array;

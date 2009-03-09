@@ -129,7 +129,7 @@ namespace
 	};
 
 	template <>
-	class SetOGLShaderParameter<int>
+	class SetOGLShaderParameter<int32_t>
 	{
 	public:
 		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
@@ -139,7 +139,7 @@ namespace
 
 		void operator()()
 		{
-			int v;
+			int32_t v;
 			param_->Value(v);
 
 			cgSetParameter1i(cg_param_, v);
@@ -287,7 +287,7 @@ namespace
 	};
 
 	template <>
-	class SetOGLShaderParameter<int*>
+	class SetOGLShaderParameter<int32_t*>
 	{
 	public:
 		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
@@ -297,12 +297,12 @@ namespace
 
 		void operator()()
 		{
-			std::vector<int> v;
+			std::vector<int32_t> v;
 			param_->Value(v);
 
 			if (!v.empty())
 			{
-				cgSetParameterValueir(cg_param_, static_cast<int>(v.size()), &v[0]);
+				cgSetParameterValueir(cg_param_, static_cast<int>(v.size()), reinterpret_cast<int*>(&v[0]));
 			}
 		}
 
@@ -942,11 +942,11 @@ namespace KlayGE
 		case REDT_int:
 			if (param->ArraySize() != 0)
 			{
-				ret.func = SetOGLShaderParameter<int*>(cg_param, param);
+				ret.func = SetOGLShaderParameter<int32_t*>(cg_param, param);
 			}
 			else
 			{
-				ret.func = SetOGLShaderParameter<int>(cg_param, param);
+				ret.func = SetOGLShaderParameter<int32_t>(cg_param, param);
 			}
 			break;
 

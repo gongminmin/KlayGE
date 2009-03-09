@@ -115,10 +115,10 @@ namespace
 	};
 
 	template <typename SrcType>
-	class SetD3D9ShaderParameter<SrcType, int>
+	class SetD3D9ShaderParameter<SrcType, int32_t>
 	{
 	public:
-		SetD3D9ShaderParameter(int& int_reg, RenderEffectParameterPtr const & param)
+		SetD3D9ShaderParameter(int32_t& int_reg, RenderEffectParameterPtr const & param)
 			: int_reg_(&int_reg), param_(param)
 		{
 		}
@@ -128,11 +128,11 @@ namespace
 			SrcType v;
 			param_->Value(v);
 
-			*int_reg_ = static_cast<int>(v);
+			*int_reg_ = static_cast<int32_t>(v);
 		}
 
 	private:
-		int* int_reg_;
+		int32_t* int_reg_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -274,7 +274,7 @@ namespace
 	};
 
 	template <typename SrcType>
-	class SetD3D9ShaderParameter<SrcType*, int>
+	class SetD3D9ShaderParameter<SrcType*, int32_t>
 	{
 	public:
 		SetD3D9ShaderParameter(int4* int_regs, RenderEffectParameterPtr const & param)
@@ -955,7 +955,7 @@ namespace KlayGE
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = SetD3D9ShaderParameter<bool*, int>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
+					ret.func = SetD3D9ShaderParameter<bool*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_FLOAT4:
@@ -976,7 +976,7 @@ namespace KlayGE
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = SetD3D9ShaderParameter<bool, int>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
+					ret.func = SetD3D9ShaderParameter<bool, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_FLOAT4:
@@ -997,15 +997,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = SetD3D9ShaderParameter<int*, bool>(&bool_registers_[p_handle.shader_type][p_handle.register_index], param);
+					ret.func = SetD3D9ShaderParameter<int32_t*, bool>(&bool_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = SetD3D9ShaderParameter<int*, int>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
+					ret.func = SetD3D9ShaderParameter<int32_t*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = SetD3D9ShaderParameter<int*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
+					ret.func = SetD3D9ShaderParameter<int32_t*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
 					break;
 
 				default:
@@ -1018,15 +1018,15 @@ namespace KlayGE
 				switch (p_handle.register_set)
 				{
 				case D3DXRS_BOOL:
-					ret.func = SetD3D9ShaderParameter<int, bool>(bool_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
+					ret.func = SetD3D9ShaderParameter<int32_t, bool>(bool_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_INT4:
-					ret.func = SetD3D9ShaderParameter<int, int>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
+					ret.func = SetD3D9ShaderParameter<int32_t, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				case D3DXRS_FLOAT4:
-					ret.func = SetD3D9ShaderParameter<int, float>(float_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
+					ret.func = SetD3D9ShaderParameter<int32_t, float>(float_registers_[p_handle.shader_type][p_handle.register_index].x(), param);
 					break;
 
 				default:
@@ -1119,12 +1119,12 @@ namespace KlayGE
 			{
 				if (ST_VertexShader == type)
 				{
-					re.SetVertexShaderConstantI(int_start_[type], &int_registers_[type][0].x(),
+					re.SetVertexShaderConstantI(int_start_[type], reinterpret_cast<int*>(&int_registers_[type][0].x()),
 						static_cast<uint32_t>(int_registers_[type].size()));
 				}
 				else
 				{
-					re.SetPixelShaderConstantI(int_start_[type], &int_registers_[type][0].x(),
+					re.SetPixelShaderConstantI(int_start_[type], reinterpret_cast<int*>(&int_registers_[type][0].x()),
 						static_cast<uint32_t>(int_registers_[type].size()));
 				}
 			}

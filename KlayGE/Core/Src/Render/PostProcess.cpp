@@ -102,7 +102,7 @@ namespace KlayGE
 		*texel_to_pixel_offset_ep_ = texel_to_pixel;
 
 		*src_tex_ep_ = src_texture_;
-		*flipping_ep_ = flipping_ ? -1 : +1;
+		*flipping_ep_ = static_cast<int32_t>(flipping_ ? -1 : +1);
 	}
 
 

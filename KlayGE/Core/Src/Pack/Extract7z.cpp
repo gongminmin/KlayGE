@@ -1,8 +1,11 @@
 // Extract7z.cpp
 // KlayGE 打包系统7z提取器 实现文件 来自7zip
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2007-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 改用7z.dll (2009.3.8)
 //
 // 3.6.0
 // 初次建立 (2007.5.24)
@@ -163,7 +166,7 @@ namespace
 		SevenZipLoader()
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("7za.dll");
+			dll_loader_.Load("7z.dll");
 #elif defined KLAYGE_PLATFORM_LINUX
 			dll_loader_.Load("7z.so");
 #endif
@@ -205,7 +208,7 @@ namespace
 
 		for (uint32_t i = 0; i < num_items; ++i)
 		{
-			bool is_folder;
+			bool is_folder = true;
 			TIF(IsArchiveItemFolder(archive, i, is_folder));
 			if (!is_folder)
 			{

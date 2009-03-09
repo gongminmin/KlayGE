@@ -655,7 +655,7 @@ namespace KlayGE
 					break;
 
 				case D3D10_SVT_INT:
-					ret.func = SetD3D10ShaderParameter<bool*, int>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<bool*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_FLOAT:
@@ -676,7 +676,7 @@ namespace KlayGE
 					break;
 
 				case D3D10_SVT_INT:
-					ret.func = SetD3D10ShaderParameter<bool, int>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<bool, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_FLOAT:
@@ -697,15 +697,15 @@ namespace KlayGE
 				switch (p_handle.param_type)
 				{
 				case D3D10_SVT_BOOL:
-					ret.func = SetD3D10ShaderParameter<int*, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t*, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_INT:
-					ret.func = SetD3D10ShaderParameter<int*, int>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_FLOAT:
-					ret.func = SetD3D10ShaderParameter<int*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				default:
@@ -718,15 +718,15 @@ namespace KlayGE
 				switch (p_handle.param_type)
 				{
 				case D3D10_SVT_BOOL:
-					ret.func = SetD3D10ShaderParameter<int, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_INT:
-					ret.func = SetD3D10ShaderParameter<int, int>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				case D3D10_SVT_FLOAT:
-					ret.func = SetD3D10ShaderParameter<int, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+					ret.func = SetD3D10ShaderParameter<int32_t, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
 				default:
