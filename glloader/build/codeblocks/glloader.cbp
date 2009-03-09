@@ -163,13 +163,10 @@
 			<Add option="-O1" />
 			<Add option="-O" />
 		</Compiler>
-		<Unit filename="../../include/glloader/gl10.h" />
-		<Unit filename="../../include/glloader/gl11.h" />
 		<Unit filename="../../include/glloader/glloader.h" />
 		<Unit filename="../../include/glloader/glloader_gl.h" />
 		<Unit filename="../../include/glloader/glloader_glx.h" />
 		<Unit filename="../../include/glloader/glloader_wgl.h" />
-		<Unit filename="../../include/glloader/glx11.h" />
 		<Unit filename="../../src/glloader_gl.c">
 			<Option compilerVar="CC" />
 		</Unit>

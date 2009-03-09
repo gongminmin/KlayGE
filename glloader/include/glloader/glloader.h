@@ -247,6 +247,7 @@ GLLOADER_API void* glloader_get_gl_proc_address(const char* name);
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+typedef XID GLXDrawable;
 typedef XID GLXContextID;
 
 #include <glloader/glloader_glx.h>

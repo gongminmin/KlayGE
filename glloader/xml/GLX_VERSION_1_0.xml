@@ -2,7 +2,6 @@
 
 <gl_extension name="GLX_VERSION_1_0">
 	<typedefs>
-		<typedef type="XID" synonym="GLXDrawable"/>
 		<typedef type="XID" synonym="GLXPixmap"/>
 		<typedef type="struct __GLXcontextRec*" synonym="GLXContext"/>
 	</typedefs>
