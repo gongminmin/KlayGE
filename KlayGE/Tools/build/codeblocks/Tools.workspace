@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Tools workspace">
-		<Project filename="7za.cbp" />
 		<Project filename="DistanceMapCreator.cbp" />
 		<Project filename="GLCompatibility.cbp" />
 		<Project filename="HDRCompressor.cbp" />
