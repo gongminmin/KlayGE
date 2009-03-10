@@ -109,7 +109,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Sleep(uint32_t ms)
 	{
-		boost::thread::sleep(boost::date_time::microsec_clock<boost::posix_time::ptime>::universal_time() + boost::posix_time::millisec(ms));
+		boost::this_thread::sleep(boost::posix_time::milliseconds(ms));
 	}
 
 	// EndianµÄÇÐ»»
