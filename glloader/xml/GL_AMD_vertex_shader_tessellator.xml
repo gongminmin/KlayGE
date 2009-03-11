@@ -1,0 +1,26 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_vertex_shader_tessellator" reg_no="363">
+	<tokens>
+		<token name="GL_SAMPLER_BUFFER_AMD" value="0x9001"/>
+		<token name="GL_INT_SAMPLER_BUFFER_AMD" value="0x9002"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_BUFFER_AMD" value="0x9003"/>
+		<token name="GL_TESSELLATION_MODE_AMD" value="0x9004"/>
+		<token name="GL_TESSELLATION_FACTOR_AMD" value="0x9005"/>
+		<token name="GL_DISCRETE_AMD" value="0x9006"/>
+		<token name="GL_CONTINUOUS_AMD" value="0x9007"/>
+	</tokens>
+
+	<functions>
+		<function name="glTessellationFactorAMD" return="void">
+			<params>
+				<param type="float" name="factor"/>
+			</params>
+		</function>
+		<function name="glTessellationModeAMD" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
