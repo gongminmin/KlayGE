@@ -14,7 +14,7 @@
 		<parameter type="float3" name="lower_left"/>
 		<parameter type="float3" name="lower_right"/>
 
-		<parameter type="float3" name="depth_min_invrange_range"/>
+		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
@@ -79,7 +79,7 @@ void GBufferVS(float4 pos : POSITION,
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos_es, proj);
 	oNormal.xyz = normal;
-	oNormal.w = (pos_es.z - depth_min_invrange_range.x) * depth_min_invrange_range.y;
+	oNormal.w = pos_es.z * depth_near_far_invfar.y;
 	
 	oTexCoord = texcoord;
 }
@@ -123,9 +123,6 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 	<parameter type="texture2D" name="rand_normal_tex">
 		<annotation type="string" name="SasResourceAddress" value="rand_normal.dds"/>
 	</parameter>
-	
-	<parameter type="float" name="sampleRadius"/>
-	<parameter type="float" name="distanceScale"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -151,60 +148,80 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 
 	<parameter type="bool" name="ssao_enabled"/>
 
+	<parameter type="float4" name="ssao_param"/>
+
 	<shader>
 		<![CDATA[
 float4 SSAO(float2 tc0)
 {
 	float4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
-
-	float4 samples[16] =
+	
+	const half fScale = 0.025f; 
+	const half3 samples[8] =
 	{
-		float4(0.355512, 	-0.709318, 	-0.102371,	0.0),
-		float4(0.534186, 	0.71511, 	-0.115167,	0.0),
-		float4(-0.87866, 	0.157139, 	-0.115167,	0.0),
-		float4(0.140679, 	-0.475516, 	-0.0639818,	0.0),
-		float4(-0.0796121, 	0.158842, 	-0.677075,	0.0),
-		float4(-0.0759516, 	-0.101676, 	-0.483625,	0.0),
-		float4(0.12493, 	-0.0223423,	-0.483625,	0.0),
-		float4(-0.0720074, 	0.243395, 	-0.967251,	0.0),
-		float4(-0.207641, 	0.414286, 	0.187755,	0.0),
-		float4(-0.277332, 	-0.371262, 	0.187755,	0.0),
-		float4(0.63864, 	-0.114214, 	0.262857,	0.0),
-		float4(-0.184051, 	0.622119, 	0.262857,	0.0),
-		float4(0.110007, 	-0.219486, 	0.435574,	0.0),
-		float4(0.235085, 	0.314707, 	0.696918,	0.0),
-		float4(-0.290012, 	0.0518654, 	0.522688,	0.0),
-		float4(0.0975089, 	-0.329594, 	0.609803,	0.0)
+		normalize(half3( 1, 1, 1)) * fScale * 1,
+		normalize(half3(-1,-1,-1)) * fScale * 2,
+		normalize(half3(-1,-1, 1)) * fScale * 3,
+		normalize(half3(-1, 1,-1)) * fScale * 4,
+		normalize(half3(-1, 1 ,1)) * fScale * 5,
+		normalize(half3( 1,-1,-1)) * fScale * 6,
+		normalize(half3( 1,-1, 1)) * fScale * 7,
+		normalize(half3( 1, 1,-1)) * fScale * 8,
 	};
 
-	float3 randNormal = normalize(GetNormal(ndc) + rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * 100.0).rgb * 2 - 1);
+	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * float2(1280 / 4, 800 / 4)).rgb * 2 - 1;
+	
+	float scene_depth_m = depth * depth_near_far_invfar.y;
+	
+	float3 sample_scale = ssao_param.zzw
+		* saturate(scene_depth_m / 5.3f) // make area smaller if distance less than 5 meters
+		* (1.f + scene_depth_m / 8.f ); // make area bigger if distance more than 32 meters
+
+	float depth_range_scale = depth_near_far_invfar.y / sample_scale.z * 0.85f;
+	
+	// convert from meters into SS units
+	sample_scale.xy *= 1.0f / scene_depth_m;
+	sample_scale.z *= 2.0f / depth_near_far_invfar.y;
+
+	float depth_test_softness = 64.f / sample_scale.z;
 
 	float4 sky_access = 0.0f;
-	float4 arr_scene_depth2;
+	float4 arr_scene_depth2[2];
 	float3 ray;
 
-	for (int i = 0; i < 4; ++ i)
+	for (int i = 0; i < 2; ++ i)
 	{
-		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sampleRadius;
-		arr_scene_depth2.x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
 
-		ray = reflect(samples[i * 4 + 1].xyz, randNormal) * sampleRadius;
-		arr_scene_depth2.y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		
-		ray = reflect(samples[i * 4 + 2].xyz, randNormal) * sampleRadius;
-		arr_scene_depth2.z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		
-		ray = reflect(samples[i * 4 + 3].xyz, randNormal) * sampleRadius;
-		arr_scene_depth2.w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray = reflect(samples[i * 4 + 1].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
 
-		float4 dist = arr_scene_depth2 - depth;
-		float4 occlusion = distanceScale * dist;
-		float4 range_is_invalid = (saturate(abs(occlusion)) + saturate(occlusion)) / 2;
-		sky_access += range_is_invalid * range_is_invalid;
+		ray = reflect(samples[i * 4 + 2].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		
+		ray = reflect(samples[i * 4 + 3].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		for (int j = 0; j < 2; ++ j)
+		{
+			float4 dist = depth - arr_scene_depth2[j];
+			float4 dist_scaled = dist * depth_range_scale;
+			float4 range_is_invalid = (saturate(abs(dist_scaled)) + saturate(dist_scaled)) / 2;
+			sky_access += lerp(saturate((-dist) * depth_test_softness), 0.55, range_is_invalid);
+		}
 	}
-	
-	return saturate(dot(sky_access, 1 / 8.0f));
+
+	return saturate(lerp(0.9, dot(sky_access, 1 / 8.0f) - ssao_param.y, ssao_param.x));
 }
 
 float GetEdgeWeight(float2 tc0)
@@ -294,7 +311,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	
 	view_dir = normalize(view_dir);
 
-	float3 pos_es = view_dir * (depth * depth_min_invrange_range.z + depth_min_invrange_range.x);
+	float3 pos_es = view_dir * (depth * depth_near_far_invfar.z);
 	float3 light_dir = normalize(light_in_eye - pos_es);
 	
 	float diffuse = diffuse_term(light_dir, normal);
@@ -336,7 +353,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	}
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth * depth_min_invrange_range.z + depth_min_invrange_range.x);
+	float3 pos_es = view_dir * (depth * depth_near_far_invfar.z);
 	
 	return float4(pos_es, 1);
 }

@@ -121,7 +121,7 @@ namespace
 		void BackFaceTexture(TexturePtr const & bf_tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("BackFace_tex")) = bf_tex;
-			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)

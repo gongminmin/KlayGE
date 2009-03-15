@@ -84,7 +84,7 @@ namespace
 		void SetTexture(TexturePtr texture, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
-			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 	};
 
@@ -137,7 +137,7 @@ namespace
 		void SetTexture(TexturePtr texture, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
-			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 	};
 

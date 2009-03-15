@@ -121,26 +121,10 @@ void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream
 	{
 		PS_IN gs_out;
 
-		for (int i = 0; i < 4; ++ i)
+		for (uint i = 0; i < 4; ++ i)
 		{
-			float2 tex;
-			if (0 == i)
-			{
-				tex = float2(-1, 1);
-			}
-			if (1 == i)
-			{
-				tex = float2(1, 1);
-			}
-			if (2 == i)
-			{
-				tex = float2(-1, -1);
-			}
-			if (3 == i)
-			{
-				tex = float2(1, -1);
-			}
-			
+			float2 tex = float2((i & 1) ? 1 : -1, (i & 2) ? -1 : 1);
+
 			float4 view_pos = float4(CenterView_Life.xyz, 1);
 			gs_out.CenterView = view_pos;
 			view_pos.xy += tex * point_radius;

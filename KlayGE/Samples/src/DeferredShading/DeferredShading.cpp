@@ -15,6 +15,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Util.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -83,8 +84,7 @@ namespace
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 			*(technique_->Effect().ParameterByName("model_view")) = view;
 
-			float const depth_range = camera.FarPlane() - camera.NearPlane();
-			*(technique_->Effect().ParameterByName("depth_min_invrange_range")) = float3(camera.NearPlane(), 1 / depth_range, depth_range);
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
 		}
 
@@ -188,17 +188,13 @@ namespace
 
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
-			float const depth_range = camera.FarPlane() - camera.NearPlane();
-			*(technique_->Effect().ParameterByName("depth_min_invrange_range")) = float3(camera.NearPlane(), 1 / depth_range, depth_range);
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 10, 0), view);
 
 			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-
-			*(technique_->Effect().ParameterByName("sampleRadius")) = 0.1f;
-			*(technique_->Effect().ParameterByName("distanceScale")) = 100.0f;
 		}
 	};
 
@@ -231,8 +227,15 @@ namespace
 		SSAOPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("SSAO"))
 		{
-			*(technique_->Effect().ParameterByName("sampleRadius")) = 0.1f;
-			*(technique_->Effect().ParameterByName("distanceScale")) = 100.0f;
+			*(technique_->Effect().ParameterByName("ssao_param")) = float4(0.6f, 0.075f, 0.3f, 0.03f);
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};
 
@@ -307,19 +310,23 @@ void DeferredShadingApp::InitObjects()
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 100.0f);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
 	
-	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	g_buffer_ = rf.MakeFrameBuffer();
+	g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-	shaded_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	shaded_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	shaded_buffer_ = rf.MakeFrameBuffer();
+	shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-	ssao_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	ssao_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	ssao_buffer_ = rf.MakeFrameBuffer();
+	ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-	blur_ssao_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	blur_ssao_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	blur_ssao_buffer_ = rf.MakeFrameBuffer();
+	blur_ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+
+	hdr_buffer_ = rf.MakeFrameBuffer();
+	hdr_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -335,6 +342,7 @@ void DeferredShadingApp::InitObjects()
 	edge_anti_alias_.reset(new AntiAliasPostProcess);
 	ssao_pp_.reset(new SSAOPostProcess);
 	blur_pp_.reset(new BlurPostProcess(8, 1));
+	hdr_pp_.reset(new HDRPostProcess);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.kui"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -382,6 +390,9 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	blur_ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_ssao_tex_, 0));
 
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+
 	deferred_shading_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ColorTex(diffuse_specular_tex_);
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SSAOTex(blur_ssao_tex_);
@@ -389,7 +400,11 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 
 	edge_anti_alias_->Source(normal_depth_tex_, shaded_buffer_->RequiresFlipping());
 	checked_pointer_cast<AntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
-	edge_anti_alias_->Destinate(FrameBufferPtr());
+	edge_anti_alias_->Destinate(hdr_buffer_);
+	//edge_anti_alias_->Destinate(FrameBufferPtr());
+
+	hdr_pp_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
+	hdr_pp_->Destinate(FrameBufferPtr());
 
 	ssao_pp_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
 	ssao_pp_->Destinate(ssao_buffer_);
@@ -431,11 +446,13 @@ void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
 		if (anti_alias_enabled_)
 		{
 			deferred_shading_->Destinate(shaded_buffer_);
-			edge_anti_alias_->Destinate(FrameBufferPtr());
+			edge_anti_alias_->Destinate(hdr_buffer_);
+			//edge_anti_alias_->Destinate(FrameBufferPtr());
 		}
 		else
 		{
-			deferred_shading_->Destinate(FrameBufferPtr());
+			deferred_shading_->Destinate(hdr_buffer_);
+			//deferred_shading_->Destinate(FrameBufferPtr());
 		}
 	}
 }
@@ -484,6 +501,10 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		if ((0 == buffer_type_) && anti_alias_enabled_)
 		{
 			edge_anti_alias_->Apply();
+		}
+		if (0 == buffer_type_)
+		{
+			hdr_pp_->Apply();
 		}
 
 		UIManager::Instance().Render();

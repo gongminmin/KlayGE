@@ -71,7 +71,7 @@ namespace
 		void LastDepth(TexturePtr depth_tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
-			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void OnRenderBegin()

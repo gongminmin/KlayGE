@@ -419,7 +419,11 @@ namespace KlayGE
 			for (int i = 0; i < mesh.getNumFaces(); ++ i)
 			{
 				face_sm_group[i] = mesh.faces[i].getSmGroup();
-				face_mtl_id[i] = mesh.faces[i].getMatID() % obj_texture_slots.size();
+				face_mtl_id[i] = mesh.faces[i].getMatID();
+				if (!obj_texture_slots.empty())
+				{
+					face_mtl_id[i] %= obj_texture_slots.size();
+				}
 				for (int j = 2; j >= 0; -- j)
 				{
 					pos_indices.push_back(mesh.faces[i].v[j]);
@@ -668,7 +672,7 @@ namespace KlayGE
 
 			if (!obj_info.triangles.empty())
 			{
-				if (1 == obj_texture_slots.size())
+				if (obj_texture_slots.size() <= 1)
 				{
 					obj_info.name = obj_name;
 				}

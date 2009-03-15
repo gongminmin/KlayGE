@@ -225,7 +225,7 @@ namespace
 		void SceneTexture(TexturePtr tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
-			*(technique_->Effect().ParameterByName("flip")) = flip ? -1 : 1;
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		void OnRenderBegin()

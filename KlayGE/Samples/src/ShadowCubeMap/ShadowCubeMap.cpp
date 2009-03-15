@@ -98,7 +98,7 @@ namespace
 
 				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
-				*(effect->ParameterByName("flip")) = flip_ ? -1 : 1;
+				*(effect->ParameterByName("flip")) = static_cast<int32_t>(flip_ ? -1 : 1);
 
 				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_map_x_pos_tex")) = sm_tex_[0];

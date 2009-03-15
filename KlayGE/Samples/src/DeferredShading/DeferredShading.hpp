@@ -46,6 +46,10 @@ private:
 	KlayGE::TexturePtr blur_ssao_tex_;
 	KlayGE::PostProcessPtr blur_pp_;
 
+	KlayGE::FrameBufferPtr hdr_buffer_;
+	KlayGE::TexturePtr hdr_tex_;
+	KlayGE::HDRPostProcessPtr hdr_pp_;
+
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
 	bool anti_alias_enabled_;
