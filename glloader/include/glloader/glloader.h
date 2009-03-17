@@ -51,7 +51,7 @@
 
 #include <stddef.h>
 
-#if defined(DEBUG) | defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
 #define GLLOADER_DEBUG
 #endif
 
@@ -127,12 +127,6 @@
 	#define GLLOADER_API
 #endif // GLLOADER_HAS_DECLSPEC
 
-#ifdef __cplusplus
-	#define EXTERN_C extern "C"
-#else
-	#define EXTERN_C extern
-#endif
-
 #ifdef GLLOADER_GL
 #define __gl_h_
 #define __GL_H__
@@ -172,8 +166,8 @@ typedef float			GLfloat;
 typedef float			GLclampf;
 typedef double			GLdouble;
 typedef double			GLclampd;
-typedef int             GLfixed;
-typedef int             GLclampx;
+typedef int				GLfixed;
+typedef int				GLclampx;
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 	#include <inttypes.h>
 	typedef int64_t		GLint64;
@@ -211,7 +205,7 @@ typedef int             GLclampx;
 	typedef __int64				GLint64;
 	typedef unsigned __int64	GLuint64;
 #else
-	#include <inttypes.h>     /* Fallback option */
+	#include <inttypes.h>	/* Fallback option */
 	typedef int64_t		GLint64;
 	typedef uint64_t	GLuint64;
 #endif

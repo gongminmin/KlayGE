@@ -164,6 +164,11 @@ def create_header(prefix, extensions):
 	headerFile.write("#ifndef _GLLOADER_%s_H\n" % prefix.upper())
 	headerFile.write("#define _GLLOADER_%s_H\n\n" % prefix.upper())
 
+	headerFile.write("#ifdef __cplusplus\n")
+	headerFile.write("extern \"C\"\n")
+	headerFile.write("{\n")
+	headerFile.write("#endif\n\n")
+
 	for extension in extensions:
 		headerFile.write("#ifndef %s\n" % extension.name)
 		headerFile.write("#define %s 1\n" % extension.name)
@@ -218,9 +223,9 @@ def create_header(prefix, extensions):
 
 			for function in extension.functions:
 				if function.static_link:
-					headerFile.write("EXTERN_C %s APIENTRY %s(%s);\n" % (function.return_type, function.name, function.params_str()))
+					headerFile.write("extern %s APIENTRY %s(%s);\n" % (function.return_type, function.name, function.params_str()))
 				else:
-					headerFile.write("EXTERN_C GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
+					headerFile.write("extern GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
 
 			headerFile.write("\n")
 
@@ -234,8 +239,12 @@ def create_header(prefix, extensions):
 	headerFile.write("\n")
 
 	for extension in extensions:
-		headerFile.write("EXTERN_C GLLOADER_API glloader_%sFUNC glloader_%s;\n" % (extension.name, extension.name))
+		headerFile.write("extern GLLOADER_API glloader_%sFUNC glloader_%s;\n" % (extension.name, extension.name))
 	headerFile.write("\n")
+
+	headerFile.write("#ifdef __cplusplus\n")
+	headerFile.write("}\n")
+	headerFile.write("#endif\n\n")
 
 	headerFile.write("#endif		/* _GLLOADER_%s_H */\n" % prefix.upper())
 
