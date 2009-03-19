@@ -1,10 +1,6 @@
 <?xml version='1.0'?>
 
 <gl_extension name="WGL_ARB_render_texture" reg_no="20">
-	<typedefs>
-		<typedef type="void*" synonym="HPBUFFERARB"/>
-	</typedefs>
-
 	<tokens>
 		<token name="WGL_BIND_TO_TEXTURE_RGB_ARB" value="0x2070"/>
 		<token name="WGL_BIND_TO_TEXTURE_RGBA_ARB" value="0x2071"/>

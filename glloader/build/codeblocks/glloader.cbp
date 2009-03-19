@@ -18,7 +18,11 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+				</Linker>
 			</Target>
 			<Target title="Release_Win_x86">
 				<Option platforms="Windows;" />
@@ -32,9 +36,11 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wall" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="opengl32" />
 				</Linker>
 			</Target>
 			<Target title="Debug_Win_x64">
@@ -49,7 +55,11 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-m64" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+				</Linker>
 			</Target>
 			<Target title="Release_Win_x64">
 				<Option platforms="Windows;" />
@@ -63,9 +73,11 @@
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="opengl32" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -83,6 +95,7 @@
 					<Add option="-m32" />
 					<Add option="-fPIC" />
 					<Add option="-DDEBUG" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add library="GL" />
@@ -103,6 +116,7 @@
 					<Add option="-Wall" />
 					<Add option="-m32" />
 					<Add option="-fPIC" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -125,6 +139,7 @@
 					<Add option="-m64" />
 					<Add option="-fPIC" />
 					<Add option="-DDEBUG" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add library="GL" />
@@ -145,6 +160,7 @@
 					<Add option="-Wall" />
 					<Add option="-m64" />
 					<Add option="-fPIC" />
+					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
