@@ -146,18 +146,18 @@ namespace KlayGE
 			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
 			boost::program_options::notify(vm);
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			if (vm.count("context.render_factory"))
 			{
 				rf_name = vm["context.render_factory"].as<std::string>();
 			}
 			else
 			{
-#ifdef KLAYGE_PLATFORM_WINDOWS
 				rf_name = "D3D9";
-#else
-				rf_name = "OpenGL";
-#endif
 			}
+#else
+			rf_name = "OpenGL";
+#endif
 
 			if (vm.count("context.audio_factory"))
 			{

@@ -276,7 +276,7 @@ class ui_cfg:
 
 	def write(self, stream):
 		if 3 == sys.version_info[0]:
-			stream.write(b'UIML')
+			stream.write(bytes('UIML', encoding = 'ascii'))
 		else:
 			stream.write('UIML')
 		stream.write(struct.pack('I', 1))
