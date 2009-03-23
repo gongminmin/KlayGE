@@ -27,6 +27,7 @@ private:
 	KlayGE::FontPtr font_;
 
 	boost::shared_ptr<DetailedSkinnedModel> model_;
+	KlayGE::SceneObjectPtr axis_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
 

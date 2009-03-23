@@ -119,4 +119,47 @@ float4 SkinnedMeshNoNormalMapPS(float2 uv : TEXCOORD0,
 			<state name="pixel_shader" value="SkinnedMeshNoNormalMapPS()"/>
 		</pass>
 	</technique>
+	
+	<parameter type="float2" name="axis_offset"/>
+	<parameter type="float3" name="axis_scale"/>
+
+	<shader>
+		<![CDATA[
+void AxisVS(float4 pos : POSITION,
+				out float4 oClr	: COLOR0,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(float4(pos.xyz * axis_scale, 1), worldviewproj);
+	oPos.xy += axis_offset * oPos.w;
+	
+	if (pos.w < 0.5f)
+	{
+		oClr = float4(1, 0, 0, 1);
+	}
+	else
+	{
+		if (pos.w < 1.5f)
+		{
+			oClr = float4(0, 1, 0, 1);
+		}
+		else
+		{
+			oClr = float4(0, 0, 1, 1);
+		}
+	}
+}
+
+float4 AxisPS(float4 clr : COLOR0) : SV_Target
+{
+	return clr;
+}
+		]]>
+	</shader>
+
+	<technique name="AxisTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="AxisVS()"/>
+			<state name="pixel_shader" value="AxisPS()"/>
+		</pass>
+	</technique>
 </effect>
