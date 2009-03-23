@@ -49,7 +49,7 @@ namespace KlayGE
 #else
 		if (bstr)
 		{
-			char* p = reinterpret_cast<char*>(bstr);
+			uint8_t* p = reinterpret_cast<uint8_t*>(bstr);
 			p -= sizeof(uint32_t);
 			delete[] p;
 		}

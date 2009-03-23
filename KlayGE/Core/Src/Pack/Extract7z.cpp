@@ -181,14 +181,13 @@ namespace
 	};
 
 
-	std::pair<boost::shared_ptr<IInArchive>, uint32_t> GetArchiveIndex(
+	void GetArchiveIndex(boost::shared_ptr<IInArchive>& archive, uint32_t& real_index,
 								ResIdentifierPtr const & archive_is,
 								std::string const & password,
 								std::string const & extract_file_path)
 	{
 		BOOST_ASSERT(archive_is);
 
-		boost::shared_ptr<IInArchive> archive;
 		{
 			IInArchive* tmp;
 			TIF(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
@@ -202,7 +201,7 @@ namespace
 		checked_pointer_cast<CArchiveOpenCallback>(ocb)->Init(password);
 		TIF(archive->Open(file.get(), 0, ocb.get()));
 
-		uint32_t real_index = 0xFFFFFFFF;
+		real_index = 0xFFFFFFFF;
 		uint32_t num_items;
 		TIF(archive->GetNumberOfItems(&num_items));
 
@@ -245,8 +244,6 @@ namespace
 				real_index = 0xFFFFFFFF;
 			}
 		}
-
-		return std::make_pair(archive, real_index);
 	}
 }
 
@@ -256,7 +253,10 @@ namespace KlayGE
 								std::string const & password,
 								std::string const & extract_file_path)
 	{
-		return GetArchiveIndex(archive_is, password, extract_file_path).second;
+		boost::shared_ptr<IInArchive> archive;
+		uint32_t real_index;
+		GetArchiveIndex(archive, real_index, archive_is, password, extract_file_path);
+		return real_index;
 	}
 
 	void Extract7z(ResIdentifierPtr const & archive_is,
@@ -266,11 +266,7 @@ namespace KlayGE
 	{
 		boost::shared_ptr<IInArchive> archive;
 		uint32_t real_index;
-		{
-			std::pair<boost::shared_ptr<IInArchive>, uint32_t> ret = GetArchiveIndex(archive_is, password, extract_file_path);
-			archive = ret.first;
-			real_index = ret.second;
-		}
+		GetArchiveIndex(archive, real_index, archive_is, password, extract_file_path);
 		if (real_index != 0xFFFFFFFF)
 		{
 			boost::shared_ptr<ISequentialOutStream> out_stream = MakeCOMPtr(new COutStream);
