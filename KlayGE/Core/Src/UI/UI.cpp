@@ -1455,7 +1455,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((buttons | MB_Left) && control_focus_.lock())
+			if ((buttons & MB_Left) && control_focus_.lock())
 			{
 				control_focus_.lock()->OnFocusOut();
 				control_focus_.reset();
@@ -1483,7 +1483,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((buttons | MB_Left) && control_focus_.lock())
+			if ((buttons & MB_Left) && control_focus_.lock())
 			{
 				control_focus_.lock()->OnFocusOut();
 				control_focus_.reset();
@@ -1511,7 +1511,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((buttons | MB_Left) && control_focus_.lock())
+			if ((buttons & MB_Left) && control_focus_.lock())
 			{
 				control_focus_.lock()->OnFocusOut();
 				control_focus_.reset();
@@ -1523,7 +1523,7 @@ namespace KlayGE
 	{
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
-			&& control_focus_.lock()->ContainsPoint(pt))
+			&& ((buttons & MB_Left) || control_focus_.lock()->ContainsPoint(pt)))
 		{
 			control = control_focus_.lock();
 		}
