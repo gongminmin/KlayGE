@@ -138,7 +138,11 @@ namespace KlayGE
 
 		this->UpdateThumbRect();
 
-		bounding_box_ = up_button_rc_ | down_button_rc_ | track_rc_ | thumb_rc_;
+		bounding_box_ = up_button_rc_ | down_button_rc_ | track_rc_;
+		if (end_ - start_ > page_size_)
+		{
+			bounding_box_ |= thumb_rc_;
+		}
 	}
 
 	// Compute the dimension of the scroll thumb
