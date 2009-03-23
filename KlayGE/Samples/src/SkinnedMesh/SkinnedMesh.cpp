@@ -109,6 +109,9 @@ void SkinnedMeshApp::InitObjects()
 	id_frame_slider_ = dialog_->IDFromName("FrameSlider");
 	id_play_ = dialog_->IDFromName("Play");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
+	id_mesh_ = dialog_->IDFromName("MeshCombo");
+	id_vertex_streams_ = dialog_->IDFromName("VertexStreamList");
+	id_textures_ = dialog_->IDFromName("TextureList");
 
 	dialog_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::SkinnedHandler, this, _1));
 
@@ -119,6 +122,13 @@ void SkinnedMeshApp::InitObjects()
 
 	dialog_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::PlayHandler, this, _1));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::CtrlCameraHandler, this, _1));
+
+	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
+	{
+		dialog_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
+	}
+	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::MeshChangedHandler, this, _1));
+	this->MeshChangedHandler(*dialog_->Control<UIComboBox>(id_mesh_));
 }
 
 void SkinnedMeshApp::OnResize(uint32_t width, uint32_t height)
@@ -180,6 +190,83 @@ void SkinnedMeshApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	else
 	{
 		fpsController_.DetachCamera();
+	}
+}
+
+void SkinnedMeshApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	uint32_t mi = sender.GetSelectedIndex();
+
+	dialog_->Control<UIListBox>(id_vertex_streams_)->RemoveAllItems();
+	RenderLayoutPtr rl = model_->Mesh(mi)->GetRenderLayout();
+	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+	{
+		std::wostringstream oss;
+		vertex_elements_type const & ves = rl->VertexStreamFormat(i);
+		for (size_t j = 0; j < ves.size(); ++ j)
+		{
+			if (j != 0)
+			{
+				oss << L"|";
+			}
+
+			switch (rl->VertexStreamFormat(i)[j].usage)
+			{
+			case VEU_Position:
+				oss << L"Position";
+				break;
+
+			case VEU_Normal:
+				oss << L"Normal";
+				break;
+
+			case VEU_Diffuse:
+				oss << L"Diffuse";
+				break;
+
+			case VEU_Specular:
+				oss << L"Specular";
+				break;
+
+			case VEU_BlendWeight:
+				oss << L"Blend weight";
+				break;
+
+			case VEU_BlendIndex:
+				oss << L"Blend index";
+				break;
+
+			case VEU_TextureCoord:
+				oss << L"Texcoord";
+				oss << rl->VertexStreamFormat(i)[j].usage_index;
+				break;
+
+			case VEU_Tangent:
+				oss << L"Tangent";
+				break;
+
+			case VEU_Binormal:
+				oss << L"Binormal";
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		dialog_->Control<UIListBox>(id_vertex_streams_)->AddItem(oss.str());
+	}
+
+	dialog_->Control<UIListBox>(id_textures_)->RemoveAllItems();
+	StaticMesh::TextureSlotsType const & texture_slots = model_->Mesh(mi)->TextureSlots();
+	for (size_t i = 0; i < texture_slots.size(); ++ i)
+	{
+		std::wostringstream oss;
+		std::wstring type, name;
+		Convert(type, texture_slots[i].first);
+		Convert(name, texture_slots[i].second);
+		oss << type << L": " << name;
+		dialog_->Control<UIListBox>(id_textures_)->AddItem(oss.str());
 	}
 }
 

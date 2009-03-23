@@ -19,8 +19,8 @@
 using namespace KlayGE;
 
 
-DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr model, std::wstring const & /*name*/)
-	: SkinnedMesh(model, L"DetailedSkinnedMesh"),
+DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr model, std::wstring const & name)
+	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
 			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx"))
 {

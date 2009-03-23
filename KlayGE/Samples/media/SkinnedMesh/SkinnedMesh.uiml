@@ -9,5 +9,14 @@
 
 		<control type="check_box" id="Play" caption="Play Animation" x="260" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="460" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+
+		<control type="static" id="MeshStatic" caption="Mesh:" x="-160" y="80" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="combo_box" id="MeshCombo" x="-160" y="100" align_x="right" width="100" height="24" hotkey="0" is_default="0"/>
+
+		<control type="static" id="VertexStreamStatic" caption="Vertex streams:" x="-160" y="160" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="list_box" id="VertexStreamList" x="-160" y="180" align_x="right" width="120" height="100" is_default="0"/>
+
+		<control type="static" id="TextureStatic" caption="Textures:" x="-260" y="300" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="list_box" id="TextureList" x="-260" y="320" align_x="right" width="240" height="60" is_default="0"/>
 	</dialog>
 </ui>

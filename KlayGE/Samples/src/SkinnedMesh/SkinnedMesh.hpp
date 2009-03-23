@@ -22,6 +22,7 @@ private:
 	void FrameChangedHandler(KlayGE::UISlider const & sender);
 	void PlayHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
+	void MeshChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
 
@@ -40,6 +41,9 @@ private:
 	int id_frame_slider_;
 	int id_play_;
 	int id_ctrl_camera_;
+	int id_mesh_;
+	int id_vertex_streams_;
+	int id_textures_;
 };
 
 #endif		// _SKINNEDMESH_HPP
