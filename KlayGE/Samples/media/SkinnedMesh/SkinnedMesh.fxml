@@ -119,9 +119,6 @@ float4 SkinnedMeshNoNormalMapPS(float2 uv : TEXCOORD0,
 			<state name="pixel_shader" value="SkinnedMeshNoNormalMapPS()"/>
 		</pass>
 	</technique>
-	
-	<parameter type="float2" name="axis_offset"/>
-	<parameter type="float3" name="axis_scale"/>
 
 	<shader>
 		<![CDATA[
@@ -129,9 +126,7 @@ void AxisVS(float4 pos : POSITION,
 				out float4 oClr	: COLOR0,
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(float4(pos.xyz * axis_scale, 1), worldviewproj);
-	oPos.xy += axis_offset * oPos.w;
-	
+	oPos = mul(float4(pos.xyz, 1), worldviewproj);
 	if (pos.w < 0.5f)
 	{
 		oClr = float4(1, 0, 0, 1);
