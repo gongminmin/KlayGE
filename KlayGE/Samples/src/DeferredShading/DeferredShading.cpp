@@ -24,6 +24,7 @@
 #include <sstream>
 #include <ctime>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "DeferredShading.hpp"
 
@@ -35,8 +36,8 @@ namespace
 	class RenderTorus : public KMesh
 	{
 	public:
-		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Torus")
+		RenderTorus(RenderModelPtr model, std::wstring const & name)
+			: KMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -45,19 +46,32 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			std::map<std::string, TexturePtr> tex_pool;
+
 			bool has_bump_map = false;
 			for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 				iter != texture_slots_.end(); ++ iter)
 			{
+				TexturePtr tex;
+				BOOST_AUTO(titer, tex_pool.find(iter->second));
+				if (titer != tex_pool.end())
+				{
+					tex = titer->second;
+				}
+				else
+				{
+					tex = LoadTexture(iter->second, EAH_GPU_Read)();
+					tex_pool.insert(std::make_pair(iter->second, tex));
+				}
+
 				if ("Diffuse Color" == iter->first)
 				{
-					*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+					*(effect_->ParameterByName("diffuse_tex")) = tex;
 				}
 				if ("Bump" == iter->first)
 				{
-					TexturePtr bump = LoadTexture(iter->second, EAH_GPU_Read)();
-					*(effect_->ParameterByName("bump_tex")) = bump;
-					if (bump)
+					*(effect_->ParameterByName("bump_tex")) = tex;
+					if (tex)
 					{
 						has_bump_map = true;
 					}

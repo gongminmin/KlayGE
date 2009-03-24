@@ -71,7 +71,8 @@ namespace
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			float4x4 mvp = model * view * proj;
+			float4x4 mv = model * view;
+			float4x4 mvp = mv * proj;
 			*(technique_->Effect().ParameterByName("worldviewproj")) = mvp;
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -79,9 +80,9 @@ namespace
 			float tar_x = (re.CurFrameBuffer()->Width() / 2 - 120.0f) / (re.CurFrameBuffer()->Width() / 2);
 			float tar_y = -(re.CurFrameBuffer()->Height() / 2 - 120.0f) / (re.CurFrameBuffer()->Height() / 2);
 
-			float3 scale = float3(1 / sqrt(mvp(0, 0) * mvp(0, 0) + mvp(0, 1) * mvp(0, 1) + mvp(0, 2) * mvp(0, 2)),
-				1 / sqrt(mvp(1, 0) * mvp(1, 0) + mvp(1, 1) * mvp(1, 1) + mvp(1, 2) * mvp(1, 2)),
-				1 / sqrt(mvp(2, 0) * mvp(2, 0) + mvp(2, 1) * mvp(2, 1) + mvp(2, 2) * mvp(2, 2))) * 0.2f;
+			float3 scale = float3(1 / sqrt(mv(0, 0) * mv(0, 0) + mv(0, 1) * mv(0, 1) + mv(0, 2) * mv(0, 2)),
+				1 / sqrt(mv(1, 0) * mv(1, 0) + mv(1, 1) * mv(1, 1) + mv(1, 2) * mv(1, 2)),
+				1 / sqrt(mv(2, 0) * mv(2, 0) + mv(2, 1) * mv(2, 1) + mv(2, 2) * mv(2, 2))) * 0.2f;
 
 			*(technique_->Effect().ParameterByName("axis_offset")) = float2(tar_x - zero.x(), tar_y - zero.y());
 			*(technique_->Effect().ParameterByName("axis_scale")) = scale;
