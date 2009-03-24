@@ -77,7 +77,27 @@ namespace KlayGE
 			Forward,
 			Backward,
 			MoveLeft,
-			MoveRight,
+			MoveRight
+		};
+
+	private:
+		void InputHandler(InputEngine const & sender, InputAction const & action);
+	};
+
+	class KLAYGE_CORE_API TrackballCameraController : public CameraController
+	{
+	public:
+		TrackballCameraController();
+
+		void AttachCamera(Camera& camera);
+
+	private:
+		float3 target_;
+		float3 right_;
+
+		enum
+		{
+			Turn
 		};
 
 	private:

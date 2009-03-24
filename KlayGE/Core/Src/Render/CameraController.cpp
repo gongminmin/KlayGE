@@ -223,4 +223,99 @@ namespace KlayGE
 
 		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
 	}
+
+
+	TrackballCameraController::TrackballCameraController()
+	{
+		using namespace boost::assign;
+
+		std::vector<InputActionDefine> actions;
+		actions += InputActionDefine(Turn, MS_X),
+					InputActionDefine(Turn, MS_Y);
+
+		InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
+		KlayGE::InputActionMap actionMap;
+		actionMap.AddActions(actions.begin(), actions.end());
+
+		action_handler_t input_handler = MakeSharedPtr<input_signal>();
+		input_handler->connect(boost::bind(&TrackballCameraController::InputHandler, this, _1, _2));
+		inputEngine.ActionMap(actionMap, input_handler, true);
+	}
+
+	void TrackballCameraController::InputHandler(InputEngine const & ie, InputAction const & /*action*/)
+	{
+		if (camera_)
+		{
+			InputMousePtr mouse;
+			{
+				for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+				{
+					InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
+					if (m)
+					{
+						mouse = m;
+						break;
+					}
+				}
+			}
+
+			if (mouse)
+			{
+				float xd = static_cast<float>(mouse->X());
+				float yd = static_cast<float>(mouse->Y());
+
+				if (mouse->LeftButton())
+				{
+					Quaternion q = MathLib::rotation_axis(right_, yd * rotationScaler_);
+					float4x4 mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+					float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
+
+					q = MathLib::rotation_axis(float3(0.0f, MathLib::dot(camera_->UpVec(), float3(0, 1, 0)) < 0 ? -1.0f : 1.0f, 0.0f), xd * rotationScaler_);
+					mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+					pos = MathLib::transform_coord(pos, mat);
+
+					right_ = MathLib::transform_quat(right_, q);
+
+					float3 dir = target_ - pos;
+					float3 up = MathLib::cross(dir, right_);
+
+					camera_->ViewParams(pos, target_, up);
+				}
+				else
+				{
+					if (mouse->MiddleButton())
+					{
+						float3 offset = right_ * (-xd * rotationScaler_ * 2);
+						float3 pos = camera_->EyePos() + offset;
+						target_ += offset;
+
+						offset = camera_->UpVec() * (yd * rotationScaler_ * 2);
+						pos += offset;
+						target_ += offset;
+
+						camera_->ViewParams(pos, target_, camera_->UpVec());
+
+					}
+					else
+					{
+						if (mouse->RightButton())
+						{
+							float3 offset = camera_->ViewVec() * ((xd + yd) * rotationScaler_ * 2);
+							float3 pos = camera_->EyePos() + offset;
+
+							camera_->ViewParams(pos, target_, camera_->UpVec());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void TrackballCameraController::AttachCamera(Camera& camera)
+	{
+		CameraController::AttachCamera(camera);
+
+		target_ = camera_->LookAt();
+		right_ = MathLib::normalize(MathLib::cross(float3(0, 1, 0), -camera_->EyePos()));
+	}
 }

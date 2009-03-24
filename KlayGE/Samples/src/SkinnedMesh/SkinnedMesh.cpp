@@ -60,14 +60,13 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[6]);
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 model = float4x4::Identity();
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 			float4x4 vp = view * proj;
@@ -83,6 +82,63 @@ namespace
 	public:
 		AxisObject()
 			: SceneObjectHelper(RenderablePtr(new RenderAxis), 0)
+		{
+		}
+	};
+
+
+	class RenderGrid : public RenderableHelper
+	{
+	public:
+		RenderGrid()
+			: RenderableHelper(L"Grid")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			RenderEffectPtr effect = rf.LoadEffect("SkinnedMesh.kfx");
+			technique_ = effect->TechniqueByName("GridTech");
+
+			float3 xyzs[(21 + 21) * 2];
+			for (int i = 0; i < 21; ++ i)
+			{
+				xyzs[i * 2 + 0] = float3(-10.0f + i, 0, -10);
+				xyzs[i * 2 + 1] = float3(-10.0f + i, 0, +10);
+
+				xyzs[(i + 21) * 2 + 0] = float3(-10, 0, -10.0f + i);
+				xyzs[(i + 21) * 2 + 1] = float3(+10, 0, -10.0f + i);
+			}
+
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_LineList);
+
+			ElementInitData init_data;
+			init_data.row_pitch = sizeof(xyzs);
+			init_data.slice_pitch = 0;
+			init_data.data = xyzs;
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 mvp = view * proj;
+
+			*(technique_->Effect().ParameterByName("worldviewproj")) = mvp;
+		}
+	};
+
+	class GridObject : public SceneObjectHelper
+	{
+	public:
+		GridObject()
+			: SceneObjectHelper(RenderablePtr(new RenderGrid), 0)
 		{
 		}
 	};
@@ -150,14 +206,19 @@ void SkinnedMeshApp::InitObjects()
 	axis_.reset(new AxisObject);
 	axis_->AddToSceneManager();
 
+	grid_.reset(new GridObject);
+	grid_->AddToSceneManager();
+
 	Box const & bb = model_->GetBound();
 	float3 center = bb.Center();
 	float3 half_size = bb.HalfSize();
 
-	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), center, float3(0.0f, 1.0f, 0.0f));
+	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, 0, 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 100.0f);
 
-	fpsController_.Scalers(0.1f, 0.5f);
+	tbController_.AttachCamera(this->ActiveCamera());
+	tbController_.Scalers(0.01f, 0.5f);
+	fpsController_.Scalers(0.01f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -251,11 +312,13 @@ void SkinnedMeshApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{
+		tbController_.DetachCamera();
 		fpsController_.AttachCamera(this->ActiveCamera());
 	}
 	else
 	{
 		fpsController_.DetachCamera();
+		tbController_.AttachCamera(this->ActiveCamera());
 	}
 }
 

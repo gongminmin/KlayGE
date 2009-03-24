@@ -28,8 +28,10 @@ private:
 
 	boost::shared_ptr<DetailedSkinnedModel> model_;
 	KlayGE::SceneObjectPtr axis_;
+	KlayGE::SceneObjectPtr grid_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
+	KlayGE::TrackballCameraController tbController_;
 
 	float last_time_;
 	int frame_;

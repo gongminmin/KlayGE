@@ -1039,6 +1039,70 @@ namespace KlayGE
 
 		template <typename T>
 		inline Matrix4_T<T>
+		transformation(Vector_T<T, 3> const * scaling_center, Quaternion_T<T> const * scaling_rotation, Vector_T<T, 3> const * scale,
+			Vector_T<T, 3> const * rotation_center, Quaternion_T<T> const * rotation, Vector_T<T, 3> const * trans)
+		{
+			Vector_T<T, 3> psc, prc, pt;
+			if (!scaling_center)
+			{
+				psc = Vector_T<T, 3>(T(0), T(0), T(0));
+			}
+			else
+			{
+				psc = *scaling_center;
+			}
+			if (!rotation_center)
+			{
+				prc = Vector_T<T, 3>(T(0), T(0), T(0));
+			}
+			else
+			{
+				prc = *rotation_center;
+			}
+			if (!trans)
+			{
+				pt = Vector_T<T, 3>(T(0), T(0), T(0));
+			}
+			else
+			{
+				pt = *trans;
+			}
+
+			Matrix4_T<T> m1, m2, m3, m4, m5, m6, m7;
+			m1 = translation(-psc);
+			if (!scaling_rotation)
+			{
+				m2 = m4 = Matrix4_T<T>::Identity();
+			}
+			else
+			{
+				m4 = to_matrix(*scaling_rotation);
+				m2 = inverse(m4);
+			}
+			if (!scale)
+			{
+				m3 = Matrix4_T<T>::Identity();
+			}
+			else
+			{
+				m3 = scaling(*scale);
+			}
+			if (!rotation)
+			{
+				m6 = Matrix4_T<T>::Identity();
+			}
+			else
+			{
+				m6 = to_matrix(*rotation);
+			}
+			m5 = translation(psc - prc);
+			m7 = translation(prc + pt);
+
+			return m1 * m2 * m3 * m4 * m5 * m6 * m7;
+		}
+
+		template <typename T>
+		inline Matrix4_T<T>
 		scaling(Vector_T<T, 3> const & vPos)
 		{
 			return scaling(vPos.x(), vPos.y(), vPos.z());

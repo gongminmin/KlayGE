@@ -157,4 +157,26 @@ float4 AxisPS(float4 clr : COLOR0) : SV_Target
 			<state name="pixel_shader" value="AxisPS()"/>
 		</pass>
 	</technique>
+
+	<shader>
+		<![CDATA[
+void GridVS(float4 pos : POSITION,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, worldviewproj);
+}
+
+float4 GridPS() : SV_Target
+{
+	return 0.5;
+}
+		]]>
+	</shader>
+
+	<technique name="GridTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GridVS()"/>
+			<state name="pixel_shader" value="GridPS()"/>
+		</pass>
+	</technique>
 </effect>
