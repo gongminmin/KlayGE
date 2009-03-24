@@ -70,22 +70,11 @@ namespace
 			float4x4 model = float4x4::Identity();
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 vp = view * proj;
 
-			float4x4 mv = model * view;
-			float4x4 mvp = mv * proj;
-			*(technique_->Effect().ParameterByName("worldviewproj")) = mvp;
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float3 zero = MathLib::transform_coord(float3(0, 0, 0), mvp);
-			float tar_x = (re.CurFrameBuffer()->Width() / 2 - 120.0f) / (re.CurFrameBuffer()->Width() / 2);
-			float tar_y = -(re.CurFrameBuffer()->Height() / 2 - 120.0f) / (re.CurFrameBuffer()->Height() / 2);
-
-			float3 scale = float3(1 / sqrt(mv(0, 0) * mv(0, 0) + mv(0, 1) * mv(0, 1) + mv(0, 2) * mv(0, 2)),
-				1 / sqrt(mv(1, 0) * mv(1, 0) + mv(1, 1) * mv(1, 1) + mv(1, 2) * mv(1, 2)),
-				1 / sqrt(mv(2, 0) * mv(2, 0) + mv(2, 1) * mv(2, 1) + mv(2, 2) * mv(2, 2))) * 0.2f;
-
-			*(technique_->Effect().ParameterByName("axis_offset")) = float2(tar_x - zero.x(), tar_y - zero.y());
-			*(technique_->Effect().ParameterByName("axis_scale")) = scale;
+			float4x4 scaling = MathLib::scaling(0.006f, 0.006f, 0.006f);
+			float4x4 trans = MathLib::translation(MathLib::transform_coord(float3(0.8f, -0.8f, 0.1f), MathLib::inverse(vp)));
+			*(technique_->Effect().ParameterByName("worldviewproj")) = scaling * trans * vp;
 		}
 	};
 
@@ -166,6 +155,7 @@ void SkinnedMeshApp::InitObjects()
 	float3 half_size = bb.HalfSize();
 
 	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), center, float3(0.0f, 1.0f, 0.0f));
+	this->Proj(0.1f, 100.0f);
 
 	fpsController_.Scalers(0.1f, 0.5f);
 
@@ -348,7 +338,7 @@ void SkinnedMeshApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 
 uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
-	Box const & bb = model_->GetBound();
+	/*Box const & bb = model_->GetBound();
 	float near_plane = 1e10f;
 	float far_plane = 1e-10f;
 	for (int i = 0; i < 8; ++ i)
@@ -361,7 +351,7 @@ uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 		near_plane = std::max(0.01f, near_plane);
 		far_plane = std::max(near_plane + 0.1f, std::max(far_plane, v.z() * 1.2f));
 	}
-	this->Proj(near_plane, far_plane);
+	this->Proj(near_plane, far_plane);*/
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
