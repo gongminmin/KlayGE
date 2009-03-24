@@ -1,6 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
-#include <KlayGE/atomic.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/thread.hpp>
@@ -92,8 +91,8 @@ int bsf(uint64_t v)
 class disp_thread
 {
 public:
-	disp_thread(atomic<int32_t>& cur_num_char, int32_t total_chars)
-		: cur_num_char_(&cur_num_char), total_chars_(total_chars)
+	disp_thread(std::vector<int32_t>& cur_num_chars, int32_t total_chars)
+		: cur_num_chars_(&cur_num_chars), total_chars_(total_chars)
 	{
 	}
 
@@ -102,7 +101,11 @@ public:
 		double last_disp_time = 0;
 		for (;;)
 		{
-			int32_t dist_cur_num_char = cur_num_char_->value();
+			int32_t dist_cur_num_char = 0;
+			for (size_t i = 0; i < cur_num_chars_->size(); ++ i)
+			{
+				dist_cur_num_char += (*cur_num_chars_)[i];
+			}
 
 			double this_disp_time = timer_.elapsed();
 			if ((dist_cur_num_char == total_chars_) || (this_disp_time - last_disp_time > 1))
@@ -130,7 +133,7 @@ public:
 
 private:
 	Timer timer_;
-	atomic<int32_t>* cur_num_char_;
+	std::vector<int32_t>* cur_num_chars_;
 	int32_t total_chars_;
 };
 
@@ -139,7 +142,7 @@ class ttf_to_dist
 public:
 	ttf_to_dist(FT_Face ft_face, uint32_t char_size, std::vector<uint32_t>& validate_chars, uint32_t start_code, uint32_t end_code,
 		std::vector<font_info>& char_info,
-		atomic<int32_t>& cur_num_char)
+		int32_t& cur_num_char)
 		: ft_face_(ft_face), char_size_(char_size), validate_chars_(&validate_chars), start_code_(start_code), end_code_(end_code),
 			char_info_(&char_info),
 			cur_num_char_(&cur_num_char)
@@ -423,7 +426,7 @@ private:
 	uint32_t start_code_;
 	uint32_t end_code_;
 	std::vector<font_info>* char_info_;
-	atomic<int32_t>* cur_num_char_;
+	int32_t* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
 	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
@@ -434,7 +437,7 @@ void compute_distance(std::vector<font_info>& char_info,
 {
 	thread_pool tp(1, num_threads + 1);
 
-	atomic<int32_t> cur_num_char(0);
+	std::vector<int32_t> cur_num_char(num_threads, 0);
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
@@ -466,7 +469,7 @@ void compute_distance(std::vector<font_info>& char_info,
 		uint32_t const sc = i * num_chars_per_package;
 		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
 
-		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char));
+		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char[i]));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
