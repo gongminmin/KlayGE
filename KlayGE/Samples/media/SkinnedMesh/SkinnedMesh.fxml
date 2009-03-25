@@ -63,6 +63,33 @@ void SkinnedMeshVS(float2 tex0 : TEXCOORD0,
 	oL = mul(obj2tan, L);
 }
 
+void NonSkinnedMeshVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float2 oTex0 : TEXCOORD0,
+				out float3 oL	: TEXCOORD1,	// in tangent space
+				out float3 oH	: TEXCOORD2,	// in tangent space
+				out float4 oPos : SV_Position)
+{
+	oTex0 = tex0;
+	
+	float3x3 obj2tan = 0;
+	obj2tan[0] = T;
+	obj2tan[2] = N;
+	obj2tan[1] = cross(obj2tan[2], obj2tan[0]);
+
+	oPos = mul(pos, worldviewproj);
+
+	float3 L = light_pos - pos;
+	float3 V = eye_pos - pos;
+	float3 H = L + V;
+
+	oH = mul(obj2tan, H);
+	oL = mul(obj2tan, L);
+}
+
 float4 PixelLighting(float3 normal, float2 uv, float3 L, float3 H)
 {
 	half4 diffuse = diffuse_tex.Sample(linear_sampler, uv);
@@ -91,7 +118,6 @@ float4 SkinnedMeshPS(float2 uv : TEXCOORD0,
 				float3 H	: TEXCOORD2) : SV_Target
 {
 	half4 clr = PixelLighting(decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb, uv, L, H);
-	clip(clr.a - 0.2f);
 	return clr;	
 }
 
@@ -100,7 +126,6 @@ float4 SkinnedMeshNoNormalMapPS(float2 uv : TEXCOORD0,
 				float3 H	: TEXCOORD2) : SV_Target
 {
 	half4 clr = PixelLighting(half3(0, 0, 1), uv, L, H);
-	clip(clr.a - 0.2f);
 	return clr;	
 }
 		]]>
@@ -116,6 +141,20 @@ float4 SkinnedMeshNoNormalMapPS(float2 uv : TEXCOORD0,
 	<technique name="SkinnedMeshNoNormalMapTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SkinnedMeshVS()"/>
+			<state name="pixel_shader" value="SkinnedMeshNoNormalMapPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="NonSkinnedMeshTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="NonSkinnedMeshVS()"/>
+			<state name="pixel_shader" value="SkinnedMeshPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="NonSkinnedMeshNoNormalMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="NonSkinnedMeshVS()"/>
 			<state name="pixel_shader" value="SkinnedMeshNoNormalMapPS()"/>
 		</pass>
 	</technique>

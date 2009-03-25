@@ -13,6 +13,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -199,15 +200,27 @@ SkinnedMeshApp::SkinnedMeshApp(std::string const & name, RenderSettings const & 
 void SkinnedMeshApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
-
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadKModel("felhound.kmodel", EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
-	model_->SetTime(0);
-
+	
 	axis_.reset(new AxisObject);
 	axis_->AddToSceneManager();
 
 	grid_.reset(new GridObject);
 	grid_->AddToSceneManager();
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("SkinnedMesh.kui"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	id_open_ = dialog_->IDFromName("Open");
+	id_skinned_ = dialog_->IDFromName("Skinned");
+	id_frame_static_ = dialog_->IDFromName("FrameStatic");
+	id_frame_slider_ = dialog_->IDFromName("FrameSlider");
+	id_play_ = dialog_->IDFromName("Play");
+	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
+	id_mesh_ = dialog_->IDFromName("MeshCombo");
+	id_vertex_streams_ = dialog_->IDFromName("VertexStreamList");
+	id_textures_ = dialog_->IDFromName("TextureList");
+
+	this->OpenModel("felhound.kmodel");
 
 	Box const & bb = model_->GetBound();
 	float3 center = bb.Center();
@@ -228,39 +241,39 @@ void SkinnedMeshApp::InitObjects()
 	input_handler->connect(boost::bind(&SkinnedMeshApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("SkinnedMesh.kui"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
-
-	id_skinned_ = dialog_->IDFromName("Skinned");
-	id_frame_static_ = dialog_->IDFromName("FrameStatic");
-	id_frame_slider_ = dialog_->IDFromName("FrameSlider");
-	id_play_ = dialog_->IDFromName("Play");
-	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
-	id_mesh_ = dialog_->IDFromName("MeshCombo");
-	id_vertex_streams_ = dialog_->IDFromName("VertexStreamList");
-	id_textures_ = dialog_->IDFromName("TextureList");
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&SkinnedMeshApp::OpenHandler, this, _1));
 
 	dialog_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::SkinnedHandler, this, _1));
 
-	dialog_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame(), model_->EndFrame() - 1);
-	dialog_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
 	dialog_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(boost::bind(&SkinnedMeshApp::FrameChangedHandler, this, _1));
 	this->FrameChangedHandler(*dialog_->Control<UISlider>(id_frame_slider_));
 
 	dialog_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::PlayHandler, this, _1));
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::CtrlCameraHandler, this, _1));
-
-	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
-	{
-		dialog_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
-	}
-	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::MeshChangedHandler, this, _1));
-	this->MeshChangedHandler(*dialog_->Control<UIComboBox>(id_mesh_));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::FPSCameraHandler, this, _1));
 }
 
 void SkinnedMeshApp::OnResize(uint32_t width, uint32_t height)
 {
 	UIManager::Instance().SettleCtrls(width, height);
+}
+
+void SkinnedMeshApp::OpenModel(std::string const & name)
+{
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadKModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
+	model_->SetTime(0);
+
+	frame_ = 0;
+	dialog_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame(), model_->EndFrame() - 1);
+	dialog_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
+
+	dialog_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
+	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
+	{
+		dialog_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
+	}
+
+	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::MeshChangedHandler, this, _1));
+	this->MeshChangedHandler(*dialog_->Control<UIComboBox>(id_mesh_));
 }
 
 void SkinnedMeshApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -271,6 +284,33 @@ void SkinnedMeshApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 		this->Quit();
 		break;
 	}
+}
+
+void SkinnedMeshApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
+{
+#if defined KLAYGE_PLATFORM_WINDOWS
+	OPENFILENAMEA ofn;
+	char szFile[260];
+	HWND hwnd = this->MainWnd()->HWnd();
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = szFile;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "KModel File\0*.kmodel\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileNameA(&ofn))
+	{
+		this->OpenModel(szFile);
+	}
+#endif
 }
 
 void SkinnedMeshApp::SkinnedHandler(UICheckBox const & /*sender*/)
@@ -308,7 +348,7 @@ void SkinnedMeshApp::PlayHandler(KlayGE::UICheckBox const & sender)
 	play_ = sender.GetChecked();
 }
 
-void SkinnedMeshApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+void SkinnedMeshApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{

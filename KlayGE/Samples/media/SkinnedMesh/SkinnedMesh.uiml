@@ -2,13 +2,15 @@
 
 <ui version='1'>
 	<dialog caption="Instancing">
+		<control type="button" id="Open" caption="Open" x="360" y="20" width="60" height="24" hotkey="0" is_default="0"/>
+		
 		<control type="check_box" id="Skinned" caption="Skinned" x="60" y="-100" align_y="bottom" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
 
 		<control type="slider" id="FrameSlider" x="140" y="-70" align_y="bottom" width="700" height="24" min="0" max="100" value="0" is_default="0"/>
 		<control type="static" id="FrameStatic" caption="0:" x="60" y="-70" align_y="bottom" width="80" height="24" is_default="0"/>
 
 		<control type="check_box" id="Play" caption="Play Animation" x="260" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
-		<control type="check_box" id="CtrlCamera" caption="Control camera" x="460" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="460" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 
 		<control type="static" id="MeshStatic" caption="Mesh:" x="-160" y="80" align_x="right" width="100" height="24" is_default="0"/>
 		<control type="combo_box" id="MeshCombo" x="-160" y="100" align_x="right" width="100" height="24" hotkey="0" is_default="0"/>

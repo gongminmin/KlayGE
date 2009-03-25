@@ -17,11 +17,14 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
+	void OpenModel(std::string const & name);
+
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
+	void OpenHandler(KlayGE::UIButton const & sender);
 	void SkinnedHandler(KlayGE::UICheckBox const & sender);
 	void FrameChangedHandler(KlayGE::UISlider const & sender);
 	void PlayHandler(KlayGE::UICheckBox const & sender);
-	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
+	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 	void MeshChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -39,11 +42,12 @@ private:
 	bool skinned_;
 	bool play_;
 	KlayGE::UIDialogPtr dialog_;
+	int id_open_;
 	int id_skinned_;
 	int id_frame_static_;
 	int id_frame_slider_;
 	int id_play_;
-	int id_ctrl_camera_;
+	int id_fps_camera_;
 	int id_mesh_;
 	int id_vertex_streams_;
 	int id_textures_;

@@ -61,7 +61,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	std::vector<float3> normals;
 	std::vector<float3> tangents;
 	std::vector<float3> binormals;
-	std::vector<float4> blend_weights;
+	bool has_skinned = false;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
@@ -150,6 +150,11 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			}
 			break;
 
+		case VEU_BlendIndex:
+		case VEU_BlendWeight:
+			has_skinned = true;
+			break;
+
 		default:
 			break;
 		}
@@ -202,7 +207,10 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_GPU_Read);
 	}
 
-	box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
+	if (!positions.empty())
+	{
+		box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
+	}
 
 	// ½¨Á¢ÎÆÀí
 	bool has_normal_map = false;
@@ -211,11 +219,18 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	{
 		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first))
 		{
-			*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			if (!ResLoader::Instance().Locate(iter->second).empty())
+			{
+				*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			}
 		}
 		if ("NormalMap" == iter->first)
 		{
-			TexturePtr nm = LoadTexture(iter->second, EAH_GPU_Read)();
+			TexturePtr nm;
+			if (!ResLoader::Instance().Locate(iter->second).empty())
+			{
+				nm = LoadTexture(iter->second, EAH_GPU_Read)();
+			}
 			*(effect_->ParameterByName("normal_tex")) = nm;
 			if (nm)
 			{
@@ -224,17 +239,34 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 		if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
 		{
-			*(effect_->ParameterByName("specular_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			if (!ResLoader::Instance().Locate(iter->second).empty())
+			{
+				*(effect_->ParameterByName("specular_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+			}
 		}
 	}
 
 	if (has_normal_map)
 	{
-		technique_ = effect_->TechniqueByName("SkinnedMeshTech");
+		if (has_skinned)
+		{
+			technique_ = effect_->TechniqueByName("SkinnedMeshTech");
+		}
+		else
+		{
+			technique_ = effect_->TechniqueByName("NonSkinnedMeshTech");
+		}
 	}
 	else
 	{
-		technique_ = effect_->TechniqueByName("SkinnedMeshNoNormalMapTech");
+		if (has_skinned)
+		{
+			technique_ = effect_->TechniqueByName("SkinnedMeshNoNormalMapTech");
+		}
+		else
+		{
+			technique_ = effect_->TechniqueByName("NonSkinnedMeshNoNormalMapTech");
+		}
 	}
 }
 

@@ -1,8 +1,11 @@
 // CameraController.cpp
 // KlayGE 摄像机控制器类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2005-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了TrackballCameraController (2009.3.25)
 //
 // 3.7.0
 // FirstPersonCameraController去掉了死角的限制 (2008.1.25)
