@@ -276,10 +276,19 @@ namespace KlayGE
 
 					right_ = MathLib::transform_quat(right_, q);
 
-					float3 dir = target_ - pos;
+					float3 dir;
+					if (reverse_target_)
+					{
+						dir = pos - target_;
+					}
+					else
+					{
+						dir = target_ - pos;
+					}
+					dir = MathLib::normalize(dir);
 					float3 up = MathLib::cross(dir, right_);
 
-					camera_->ViewParams(pos, target_, up);
+					camera_->ViewParams(pos, pos + dir, up);
 				}
 				else
 				{
@@ -303,7 +312,16 @@ namespace KlayGE
 							float3 offset = camera_->ViewVec() * ((xd + yd) * rotationScaler_ * 2);
 							float3 pos = camera_->EyePos() + offset;
 
-							camera_->ViewParams(pos, target_, camera_->UpVec());
+							if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
+							{
+								reverse_target_ = true;
+							}
+							else
+							{
+								reverse_target_ = false;
+							}
+
+							camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
 						}
 					}
 				}
@@ -315,6 +333,7 @@ namespace KlayGE
 	{
 		CameraController::AttachCamera(camera);
 
+		reverse_target_ = false;
 		target_ = camera_->LookAt();
 		right_ = MathLib::normalize(MathLib::cross(float3(0, 1, 0), -camera_->EyePos()));
 	}

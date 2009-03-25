@@ -92,6 +92,7 @@ namespace KlayGE
 		void AttachCamera(Camera& camera);
 
 	private:
+		bool reverse_target_;
 		float3 target_;
 		float3 right_;
 
