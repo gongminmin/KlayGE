@@ -408,21 +408,21 @@ namespace KlayGE
 		case ST_VertexShader:
 			if ("auto" == shader_profile)
 			{
-				shader_profile = "vs_4_0";
+				shader_profile = render_eng.VertexShaderProfile();
 			}
 			break;
 
 		case ST_PixelShader:
 			if ("auto" == shader_profile)
 			{
-				shader_profile = "ps_4_0";
+				shader_profile = render_eng.PixelShaderProfile();
 			}
 			break;
 
 		case ST_GeometryShader:
 			if ("auto" == shader_profile)
 			{
-				shader_profile = "gs_4_0";
+				shader_profile = render_eng.GeometryShaderProfile();
 			}
 			break;
 

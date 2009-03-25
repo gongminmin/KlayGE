@@ -80,6 +80,18 @@ namespace KlayGE
 			return DynamicD3D11CreateDeviceAndSwapChain_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 				pSwapChainDesc, ppSwapChain, ppDevice, pFeatureLevel, ppImmediateContext);
 		}
+		std::string const & VertexShaderProfile() const
+		{
+			return vs_profile_;
+		}
+		std::string const & PixelShaderProfile() const
+		{
+			return ps_profile_;
+		}
+		std::string const & GeometryShaderProfile() const
+		{
+			return gs_profile_;
+		}
 
 		void RSSetState(ID3D11RasterizerStatePtr const & ras);
 		void OMSetDepthStencilState(ID3D11DepthStencilStatePtr const & ds, uint16_t stencil_ref);
@@ -134,6 +146,8 @@ namespace KlayGE
 		ID3D11VertexShaderPtr vertex_shader_cache_;
 		ID3D11PixelShaderPtr pixel_shader_cache_;
 		ID3D11GeometryShaderPtr geometry_shader_cache_;
+
+		std::string vs_profile_, ps_profile_, gs_profile_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

@@ -117,6 +117,8 @@ namespace KlayGE
 	#pragma pack(pop)
 #endif
 
+		bool restart_;
+
 		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
 			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
 		std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > charLRU_;

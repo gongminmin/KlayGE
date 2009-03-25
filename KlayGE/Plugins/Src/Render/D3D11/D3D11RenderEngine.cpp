@@ -179,6 +179,27 @@ namespace KlayGE
 			name, settings);
 		default_frame_buffer_ = win;
 
+		switch (win->DeviceFeatureLevel())
+		{
+		case D3D_FEATURE_LEVEL_11_0:
+			vs_profile_ = "vs_5_0";
+			ps_profile_ = "ps_5_0";
+			gs_profile_ = "gs_5_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_10_1:
+			vs_profile_ = "vs_4_1";
+			ps_profile_ = "ps_4_1";
+			gs_profile_ = "gs_4_1";
+			break;
+
+		default:
+			vs_profile_ = "vs_4_0";
+			ps_profile_ = "ps_4_0";
+			gs_profile_ = "gs_4_0";
+			break;
+		}
+
 		this->BindFrameBuffer(win);
 	}
 

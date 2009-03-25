@@ -131,8 +131,17 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
+
 		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
+		if (restart_)
+		{
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+		}
+		else
+		{
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
+		}
 
 		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -351,6 +360,16 @@ namespace KlayGE
 			}
 		}
 
+		int index_per_char;
+		if (restart_)
+		{
+			index_per_char = 5;
+		}
+		else
+		{
+			index_per_char = 6;
+		}
+
 		uint32_t const clr32 = clr.ABGR();
 		for (size_t i = 0; i < sx.size(); ++ i)
 		{
@@ -358,7 +377,7 @@ namespace KlayGE
 			float x = sx[i], y = sy[i];
 
 			vertices_.reserve(vertices_.size() + maxSize * 4);
-			indices_.reserve(indices_.size() + maxSize * 6);
+			indices_.reserve(indices_.size() + maxSize * index_per_char);
 
 			uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 
@@ -394,12 +413,23 @@ namespace KlayGE
 												clr32,
 												float2(texRect.left(), texRect.bottom())));
 
-						indices_.push_back(lastIndex + 0);
-						indices_.push_back(lastIndex + 1);
-						indices_.push_back(lastIndex + 2);
-						indices_.push_back(lastIndex + 2);
-						indices_.push_back(lastIndex + 3);
-						indices_.push_back(lastIndex + 0);
+						if (restart_)
+						{
+							indices_.push_back(lastIndex + 0);
+							indices_.push_back(lastIndex + 1);
+							indices_.push_back(lastIndex + 3);
+							indices_.push_back(lastIndex + 2);
+							indices_.push_back(0xFFFF);
+						}
+						else
+						{
+							indices_.push_back(lastIndex + 0);
+							indices_.push_back(lastIndex + 1);
+							indices_.push_back(lastIndex + 2);
+							indices_.push_back(lastIndex + 2);
+							indices_.push_back(lastIndex + 3);
+							indices_.push_back(lastIndex + 0);
+						}
 						lastIndex += 4;
 					}
 				}
@@ -428,8 +458,18 @@ namespace KlayGE
 		float x = sx, y = sy;
 		float maxx = sx, maxy = sy;
 
+		int index_per_char;
+		if (restart_)
+		{
+			index_per_char = 5;
+		}
+		else
+		{
+			index_per_char = 6;
+		}
+
 		vertices_.reserve(vertices_.size() + maxSize * 4);
-		indices_.reserve(indices_.size() + maxSize * 6);
+		indices_.reserve(indices_.size() + maxSize * index_per_char);
 
 		uint16_t lastIndex(static_cast<uint16_t>(vertices_.size()));
 
@@ -464,12 +504,23 @@ namespace KlayGE
 											clr32,
 											float2(texRect.left(), texRect.bottom())));
 
-					indices_.push_back(lastIndex + 0);
-					indices_.push_back(lastIndex + 1);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 2);
-					indices_.push_back(lastIndex + 3);
-					indices_.push_back(lastIndex + 0);
+					if (restart_)
+					{
+						indices_.push_back(lastIndex + 0);
+						indices_.push_back(lastIndex + 1);
+						indices_.push_back(lastIndex + 3);
+						indices_.push_back(lastIndex + 2);
+						indices_.push_back(0xFFFF);
+					}
+					else
+					{
+						indices_.push_back(lastIndex + 0);
+						indices_.push_back(lastIndex + 1);
+						indices_.push_back(lastIndex + 2);
+						indices_.push_back(lastIndex + 2);
+						indices_.push_back(lastIndex + 3);
+						indices_.push_back(lastIndex + 0);
+					}
 					lastIndex += 4;
 				}
 

@@ -64,6 +64,11 @@ namespace KlayGE
 			return depth_stencil_;
 		}
 
+		D3D_FEATURE_LEVEL DeviceFeatureLevel() const
+		{
+			return dev_feature_level_;
+		}
+
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 
@@ -104,6 +109,7 @@ namespace KlayGE
 		DXGI_SWAP_CHAIN_DESC	sc_desc_;
 		IDXGISwapChainPtr		swap_chain_;
 		bool					main_wnd_;
+		D3D_FEATURE_LEVEL		dev_feature_level_;
 
 		ID3D11Texture2DPtr			back_buffer_;
 		ID3D11Texture2DPtr			depth_stencil_;

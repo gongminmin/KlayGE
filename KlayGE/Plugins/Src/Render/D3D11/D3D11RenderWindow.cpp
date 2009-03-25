@@ -153,8 +153,8 @@ namespace KlayGE
 			else
 			{
 				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
-				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
 				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
+				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_SOFTWARE, std::wstring(L"SW")));
 				dev_type_behaviors.push_back(boost::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
 			}
 
@@ -177,10 +177,9 @@ namespace KlayGE
 				{
 					dx_adapter = NULL;
 				}
-				D3D_FEATURE_LEVEL out_feature_level;
 				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
 					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &sc_desc_, &sc, &d3d_device,
-					&out_feature_level, &d3d_imm_ctx)))
+					&dev_feature_level_, &d3d_imm_ctx)))
 				{
 					swap_chain_ = MakeCOMPtr(sc);
 
@@ -212,7 +211,7 @@ namespace KlayGE
 
 						std::wostringstream oss;
 						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);
-						switch (out_feature_level)
+						switch (dev_feature_level_)
 						{
 						case D3D_FEATURE_LEVEL_11_0:
 							oss << " Full D3D11";
