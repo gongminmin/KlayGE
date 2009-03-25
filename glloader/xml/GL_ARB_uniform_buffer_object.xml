@@ -1,0 +1,98 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_uniform_buffer_object" reg_no="57">
+	<tokens>
+		<token name="GL_UNIFORM_BUFFER_ARB" value="0x8A11"/>
+		<token name="GL_UNIFORM_BUFFER_BINDING_ARB" value="0x8A23"/>
+		<token name="GL_UNIFORM_BUFFER_START_ARB" value="0x8A29"/>
+		<token name="GL_UNIFORM_BUFFER_SIZE_ARB" value="0x8A2A"/>
+		<token name="GL_MAX_VERTEX_UNIFORM_BLOCKS_ARB" value="0x8A2B"/>
+		<token name="GL_MAX_GEOMETRY_UNIFORM_BLOCKS_ARB" value="0x8A2C"/>
+		<token name="GL_MAX_FRAGMENT_UNIFORM_BLOCKS_ARB" value="0x8A2D"/>
+		<token name="GL_MAX_COMBINED_UNIFORM_BLOCKS_ARB" value="0x8A2E"/>
+		<token name="GL_MAX_UNIFORM_BUFFER_BINDINGS_ARB" value="0x8A2F"/>
+		<token name="GL_MAX_UNIFORM_BLOCK_SIZE_ARB" value="0x8A30"/>
+		<token name="GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS_ARB" value="0x8A31"/>
+		<token name="GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_ARB" value="0x8A32"/>
+		<token name="GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS_ARB" value="0x8A33"/>
+		<token name="GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT_ARB" value="0x8A34"/>
+		<token name="GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH_ARB" value="0x8A35"/>
+		<token name="GL_ACTIVE_UNIFORM_BLOCKS_ARB" value="0x8A36"/>
+		<token name="GL_UNIFORM_TYPE_ARB" value="0x8A37"/>
+		<token name="GL_UNIFORM_SIZE_ARB" value="0x8A38"/>
+		<token name="GL_UNIFORM_NAME_LENGTH_ARB" value="0x8A39"/>
+		<token name="GL_UNIFORM_BLOCK_INDEX_ARB" value="0x8A3A"/>
+		<token name="GL_UNIFORM_OFFSET_ARB" value="0x8A3B"/>
+		<token name="GL_UNIFORM_ARRAY_STRIDE_ARB" value="0x8A3C"/>
+		<token name="GL_UNIFORM_MATRIX_STRIDE_ARB" value="0x8A3D"/>
+		<token name="GL_UNIFORM_IS_ROW_MAJOR_ARB" value="0x8A3E"/>
+		<token name="GL_UNIFORM_BLOCK_BINDING_ARB" value="0x8A3F"/>
+		<token name="GL_UNIFORM_BLOCK_DATA_SIZE_ARB" value="0x8A40"/>
+		<token name="GL_UNIFORM_BLOCK_NAME_LENGTH_ARB" value="0x8A41"/>
+		<token name="GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS_ARB" value="0x8A42"/>
+		<token name="GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES_ARB" value="0x8A43"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER_ARB" value="0x8A44"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER_ARB" value="0x8A45"/>
+		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER_ARB" value="0x8A46"/>
+		<token name="GL_INVALID_INDEX_ARB" value="0xFFFFFFFF"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetUniformIndicesARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="uniformCount"/>
+				<param type="const GLchar**" name="uniformNames"/>
+				<param type="GLuint*" name="uniformIndices"/>
+			</params>
+		</function>
+		<function name="glGetActiveUniformsivARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="uniformCount"/>
+				<param type="const GLuint*" name="uniformIndices"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetActiveUniformNameARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="uniformIndex"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="uniformName"/>
+			</params>
+		</function>
+		<function name="glGetUniformBlockIndexARB" return="GLuint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="const GLchar*" name="uniformBlockName"/>
+			</params>
+		</function>
+		<function name="glGetActiveUniformBlockivARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="uniformBlockIndex"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetActiveUniformBlockNameARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="uniformBlockIndex"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="uniformBlockName"/>
+			</params>
+		</function>
+		<function name="glUniformBlockBindingARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="uniformBlockIndex"/>
+				<param type="GLuint" name="uniformBlockBinding"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -259,17 +259,14 @@ namespace glloader
 	};
 }
 
-extern "C"
+void promote_low_high(char const * low_name, char const * high_name)
 {
-	void promote_low_high(char const * low_name, char const * high_name)
-	{
-		glloader::gl_features_extractor::instance().promote(low_name, high_name);
-	}
+	glloader::gl_features_extractor::instance().promote(low_name, high_name);
+}
 
-	void promote_high(char const * high_name)
-	{
-		glloader::gl_features_extractor::instance().promote(high_name);
-	}
+void promote_high(char const * high_name)
+{
+	glloader::gl_features_extractor::instance().promote(high_name);
 }
 
 void glloader_init()
