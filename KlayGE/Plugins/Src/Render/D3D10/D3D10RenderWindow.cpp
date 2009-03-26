@@ -166,7 +166,12 @@ namespace KlayGE
 				{
 					dx_adapter = adapter_->Adapter().get();
 				}
-				if (SUCCEEDED(re.D3D10CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
+				HMODULE warp = NULL;
+				if (D3D10_DRIVER_TYPE_SOFTWARE == boost::get<0>(dev_type_beh))
+				{
+					warp = LoadLibrary(L"D3D10WARP_beta.dll");
+				}
+				if (SUCCEEDED(re.D3D10CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), warp, create_device_flags,
 					D3D10_SDK_VERSION, &sc_desc_, &sc, &d3d_device)))
 				{
 					swap_chain_ = MakeCOMPtr(sc);
