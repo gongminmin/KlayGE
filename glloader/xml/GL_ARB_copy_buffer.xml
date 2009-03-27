@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_copy_buffer" reg_no="59">
+	<tokens>
+		<token name="GL_COPY_READ_BUFFER" value="0x8F36"/>
+		<token name="GL_COPY_WRITE_BUFFER" value="0x8F37"/>
+	</tokens>
+
+	<functions>
+		<function name="glCopyBufferSubData" return="void*">
+			<params>
+				<param type="GLenum" name="readtarget"/>
+				<param type="GLenum" name="writetarget"/>
+				<param type="GLintptr" name="readoffset"/>
+				<param type="GLintptr" name="writeoffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
