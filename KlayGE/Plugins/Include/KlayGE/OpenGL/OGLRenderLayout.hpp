@@ -33,7 +33,7 @@ namespace KlayGE
 		mutable bool dirty_vao_;
 		GLuint vao_;
 
-		bool use_vao_;
+		bool use_vao_, use_nv_pri_restart_;
 	};
 }
 

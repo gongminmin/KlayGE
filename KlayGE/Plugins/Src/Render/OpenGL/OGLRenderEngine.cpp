@@ -223,6 +223,10 @@ namespace KlayGE
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_POINT);
 		glEnable(GL_POLYGON_OFFSET_LINE);
+		if (glloader_GL_VERSION_3_1())
+		{
+			glEnable(GL_PRIMITIVE_RESTART);
+		}
 	}
 
 	void OGLRenderEngine::TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param)
@@ -358,10 +362,20 @@ namespace KlayGE
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
+
+				if (glloader_GL_VERSION_3_1())
+				{
+					glPrimitiveRestartIndex(0xFFFF);
+				}
 			}
 			else
 			{
 				index_type = GL_UNSIGNED_INT;
+
+				if (glloader_GL_VERSION_3_1())
+				{
+					glPrimitiveRestartIndex(0xFFFFFFFF);
+				}
 			}
 		}
 
@@ -692,7 +706,7 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
-		if (glloader_GL_NV_primitive_restart())
+		if (glloader_GL_VERSION_3_1() || glloader_GL_NV_primitive_restart())
 		{
 			caps_.primitive_restart_support = true;
 		}

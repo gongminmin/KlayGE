@@ -40,6 +40,14 @@ namespace KlayGE
 		{
 			use_vao_ = false;
 		}
+		if ((!glloader_GL_VERSION_3_1()) && glloader_GL_NV_primitive_restart())
+		{
+			use_nv_pri_restart_ = true;
+		}
+		else
+		{
+			use_nv_pri_restart_ = false;
+		}
 	}
 
 	OGLRenderLayout::~OGLRenderLayout()
@@ -63,6 +71,19 @@ namespace KlayGE
 
 		if (dirty_vao_ || !use_vao_)
 		{
+			if (use_nv_pri_restart_)
+			{
+				if (EF_R16UI == this->IndexStreamFormat())
+				{
+					glPrimitiveRestartIndexNV(0xFFFF);
+				}
+				else
+				{
+					glPrimitiveRestartIndexNV(0xFFFFFFFF);
+				}
+				glEnableClientState(GL_PRIMITIVE_RESTART_NV);
+			}
+
 			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));

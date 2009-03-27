@@ -179,8 +179,13 @@ namespace KlayGE
 
 		if (glloader_WGL_ARB_create_context())
 		{
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 1, 0 };
 			HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
+			if (NULL == hRC3)
+			{
+				attribs[3] = 0;
+				hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
+			}
 			if (hRC3 != NULL)
 			{
 				::wglDeleteContext(hRC_);
@@ -217,8 +222,13 @@ namespace KlayGE
 		{
 			GLXFBConfig* fbc = main_wnd->GetFBC();
 
-			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 1, 0 };
 			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, fbc[0], NULL, GL_TRUE, attribs);
+			if (NULL == x_context3)
+			{
+				attribs[3] = 0;
+				x_context3 = glXCreateContextAttribsARB(x_display_, fbc[0], NULL, GL_TRUE, attribs);
+			}
 			if (x_context3 != NULL)
 			{
 				glXDestroyContext(x_display_, x_context_);
