@@ -2,8 +2,8 @@
 
 <gl_extension name="GL_VERSION_3_1">
 	<tokens>
-		<token name="GL_PRIMITIVE_RESTART" value="0x8558"/>
-		<token name="GL_PRIMITIVE_RESTART_INDEX" value="0x8559"/>
+		<token name="GL_PRIMITIVE_RESTART" value="0x8F9D"/>
+		<token name="GL_PRIMITIVE_RESTART_INDEX" value="0x8F9E"/>
 		<token name="GL_TEXTURE_BUFFER" value="0x8C2A"/>
 		<token name="GL_MAX_TEXTURE_BUFFER_SIZE" value="0x8C2B"/>
 		<token name="GL_TEXTURE_BINDING_BUFFER" value="0x8C2C"/>
@@ -46,6 +46,19 @@
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER" value="0x8A45"/>
 		<token name="GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER" value="0x8A46"/>
 		<token name="GL_INVALID_INDEX" value="0xFFFFFFFF"/>
+		<token name="GL_RED_SNORM" value="0x8F90"/>
+		<token name="GL_RG_SNORM" value="0x8F91"/>
+		<token name="GL_RGB_SNORM" value="0x8F92"/>
+		<token name="GL_RGBA_SNORM" value="0x8F93"/>
+		<token name="GL_R8_SNORM" value="0x8F94"/>
+		<token name="GL_RG8_SNORM" value="0x8F95"/>
+		<token name="GL_RGB8_SNORM" value="0x8F96"/>
+		<token name="GL_RGBA8_SNORM" value="0x8F97"/>
+		<token name="GL_R16_SNORM" value="0x8F98"/>
+		<token name="GL_RG16_SNORM" value="0x8F99"/>
+		<token name="GL_RGB16_SNORM" value="0x8F9A"/>
+		<token name="GL_RGBA16_SNORM" value="0x8F9B"/>
+		<token name="GL_SIGNED_NORMALIZED" value="0x8F9C"/>
 	</tokens>
 
 	<functions>
