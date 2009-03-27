@@ -508,28 +508,6 @@
 				<mapping from="GL_NV_conditional_render" name="glEndConditionalRenderNV"/>
 			</mappings>
 		</function>
-		<function name="glClearColorIi" return="void">
-			<params>
-				<param type="GLint" name="r"/>
-				<param type="GLint" name="g"/>
-				<param type="GLint" name="b"/>
-				<param type="GLint" name="a"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_texture_integer" name="glClearColorIiEXT"/>
-			</mappings>
-		</function>
-		<function name="glClearColorIui" return="void">
-			<params>
-				<param type="GLuint" name="r"/>
-				<param type="GLuint" name="g"/>
-				<param type="GLuint" name="b"/>
-				<param type="GLuint" name="a"/>
-			</params>
-			<mappings>
-				<mapping from="GL_EXT_texture_integer" name="glClearColorIuiEXT"/>
-			</mappings>
-		</function>
 		<function name="glTexParameterIiv" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
