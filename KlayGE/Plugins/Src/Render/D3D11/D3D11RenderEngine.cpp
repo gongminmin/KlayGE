@@ -210,10 +210,10 @@ namespace KlayGE
 		Verify(d3d_device_ != ID3D11DevicePtr());
 
 		this->FillRenderDeviceCaps();
-		this->InitRenderStates();
+		this->ResetRenderStates();
 	}
 
-	void D3D11RenderEngine::InitRenderStates()
+	void D3D11RenderEngine::ResetRenderStates()
 	{
 		RasterizerStateDesc default_rs_desc;
 		DepthStencilStateDesc default_dss_desc;

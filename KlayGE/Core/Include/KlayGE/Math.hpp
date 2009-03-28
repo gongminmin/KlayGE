@@ -937,6 +937,12 @@ namespace KlayGE
 				0,	0,	sz,	0,
 				0,	0,	0,	1);
 		}
+		template <typename T>
+		inline Matrix4_T<T>
+		scaling(Vector_T<T, 3> const & vPos)
+		{
+			return scaling(vPos.x(), vPos.y(), vPos.z());
+		}
 
 		template <typename T>
 		inline Matrix4_T<T>
@@ -982,6 +988,12 @@ namespace KlayGE
 				0,	1,	0,	0,
 				0,	0,	1,	0,
 				x,	y,	z,	1);
+		}
+		template <typename T>
+		inline Matrix4_T<T>
+		translation(Vector_T<T, 3> const & vPos)
+		{
+			return translation(vPos.x(), vPos.y(), vPos.z());
 		}
 
 		template <typename T>
@@ -1101,18 +1113,6 @@ namespace KlayGE
 			return m1 * m2 * m3 * m4 * m5 * m6 * m7;
 		}
 
-		template <typename T>
-		inline Matrix4_T<T>
-		scaling(Vector_T<T, 3> const & vPos)
-		{
-			return scaling(vPos.x(), vPos.y(), vPos.z());
-		}
-		template <typename T>
-		inline Matrix4_T<T>
-		translation(Vector_T<T, 3> const & vPos)
-		{
-			return translation(vPos.x(), vPos.y(), vPos.z());
-		}
 		template <typename T>
 		inline Matrix4_T<T>
 		ortho_rh(T const & width, T const & height, T const & nearPlane, T const & farPlane)

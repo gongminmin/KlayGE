@@ -99,13 +99,14 @@ namespace KlayGE
 		void VSSetShader(ID3D11VertexShaderPtr const & shader);
 		void PSSetShader(ID3D11PixelShaderPtr const & shader);
 		void GSSetShader(ID3D11GeometryShaderPtr const & shader);
+		
+		void ResetRenderStates();
 
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
-		void InitRenderStates();
 
 		void RenderRL(RenderTechnique const & tech, RenderLayout const & rl);
 

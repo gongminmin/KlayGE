@@ -339,6 +339,12 @@ namespace KlayGE
 			d3d_device_->ClearState();
 		}
 
+		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		{
+			clr_views_[i].reset();
+		}
+		rs_view_.reset();
+
 		render_target_view_.reset();
 		depth_stencil_view_.reset();
 		back_buffer_.reset();
@@ -350,12 +356,21 @@ namespace KlayGE
 			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		}
 
+		this->OnUnbind();
+
 		swap_chain_->ResizeBuffers(1, width, height, back_buffer_format_, flags);
 
 		this->UpdateSurfacesPtrs();
 
+		viewport_.width = width;
+		viewport_.height = height;
+
 		App3DFramework& app = Context::Instance().AppInstance();
 		app.OnResize(width, height);
+
+		checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->ResetRenderStates();
+
+		this->OnBind();
 	}
 
 	// 改变窗口位置
@@ -505,7 +520,7 @@ namespace KlayGE
 		// Create the depth stencil view
 		D3D10_DEPTH_STENCIL_VIEW_DESC dsv_desc;
 		dsv_desc.Format = depth_stencil_format_;
-		if (bb_desc.SampleDesc.Count > 0)
+		if (bb_desc.SampleDesc.Count > 1)
 		{
 			dsv_desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
 		}
