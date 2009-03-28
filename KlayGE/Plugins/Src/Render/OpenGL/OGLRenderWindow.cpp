@@ -1,8 +1,11 @@
 // OGLRenderWindow.cpp
 // KlayGE OpenGL渲染窗口类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2004-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2004-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持OpenGL 3.1 (2009.3.28)
 //
 // 3.7.0
 // 实验性的linux支持 (2008.5.19)
@@ -247,9 +250,12 @@ namespace KlayGE
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
+		if (glloader_GL_VERSION_3_1() && !glloader_GL_ARB_compatibility())
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		glEnable(GL_COLOR_MATERIAL);
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		if (glloader_GL_ARB_color_buffer_float())
 		{

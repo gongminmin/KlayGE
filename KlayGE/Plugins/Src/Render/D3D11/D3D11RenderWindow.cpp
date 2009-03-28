@@ -397,9 +397,6 @@ namespace KlayGE
 
 		this->UpdateSurfacesPtrs();
 
-		viewport_.width = width;
-		viewport_.height = height;
-
 		App3DFramework& app = Context::Instance().AppInstance();
 		app.OnResize(width, height);
 

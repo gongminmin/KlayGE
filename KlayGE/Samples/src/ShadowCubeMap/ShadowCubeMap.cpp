@@ -447,6 +447,8 @@ void ShadowCubeMap::InitObjects()
 
 void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
 {
+	App3DFramework::OnResize(width, height);
+
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
