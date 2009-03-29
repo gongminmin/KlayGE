@@ -63,8 +63,18 @@ namespace KlayGE
 			: RenderableHelper(L"UIRect")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
+
 			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			if (restart_)
+			{
+				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+			}
+			else
+			{
+				rl_->TopologyType(RenderLayout::TT_TriangleList);
+			}
 
 			vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
 			rl_->BindVertexStream(vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
@@ -109,6 +119,11 @@ namespace KlayGE
 			return indices_;
 		}
 
+		bool PriRestart() const
+		{
+			return restart_;
+		}
+
 		void OnRenderBegin()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -147,6 +162,8 @@ namespace KlayGE
 		}
 
 	private:
+		bool restart_;
+
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 
@@ -624,15 +641,27 @@ namespace KlayGE
 		std::vector<VertexFormat>& vertices = renderable->Vertices();
 		std::vector<uint16_t>& indices = renderable->Indices();
 		vertices.reserve(vertices.size() + 4);
-		indices.reserve(indices.size() + 6);
 
 		uint16_t const last_index = static_cast<uint16_t>(vertices.size());
-		indices.push_back(last_index + 0);
-		indices.push_back(last_index + 1);
-		indices.push_back(last_index + 2);
-		indices.push_back(last_index + 2);
-		indices.push_back(last_index + 3);
-		indices.push_back(last_index + 0);
+		if (renderable->PriRestart())
+		{
+			indices.reserve(indices.size() + 5);
+			indices.push_back(last_index + 0);
+			indices.push_back(last_index + 1);
+			indices.push_back(last_index + 3);
+			indices.push_back(last_index + 2);
+			indices.push_back(0xFFFF);
+		}
+		else
+		{
+			indices.reserve(indices.size() + 6);
+			indices.push_back(last_index + 0);
+			indices.push_back(last_index + 1);
+			indices.push_back(last_index + 2);
+			indices.push_back(last_index + 2);
+			indices.push_back(last_index + 3);
+			indices.push_back(last_index + 0);
+		}
 
 		vertices.push_back(VertexFormat(pos + float3(0, 0, 0),
 			clrs[0], float2(texcoord.left(), texcoord.top())));

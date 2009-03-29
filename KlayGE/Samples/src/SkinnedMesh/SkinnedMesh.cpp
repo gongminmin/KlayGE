@@ -211,6 +211,7 @@ void SkinnedMeshApp::InitObjects()
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
+	id_save_as_ = dialog_->IDFromName("SaveAs");
 	id_skinned_ = dialog_->IDFromName("Skinned");
 	id_frame_static_ = dialog_->IDFromName("FrameStatic");
 	id_frame_slider_ = dialog_->IDFromName("FrameSlider");
@@ -219,6 +220,8 @@ void SkinnedMeshApp::InitObjects()
 	id_mesh_ = dialog_->IDFromName("MeshCombo");
 	id_vertex_streams_ = dialog_->IDFromName("VertexStreamList");
 	id_textures_ = dialog_->IDFromName("TextureList");
+	id_visualize_ = dialog_->IDFromName("VisualizeCombo");
+	id_line_mode_ = dialog_->IDFromName("LineModeCheck");
 
 	this->OpenModel("felhound.kmodel");
 
@@ -242,6 +245,7 @@ void SkinnedMeshApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&SkinnedMeshApp::OpenHandler, this, _1));
+	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&SkinnedMeshApp::SaveAsHandler, this, _1));
 
 	dialog_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::SkinnedHandler, this, _1));
 
@@ -250,6 +254,10 @@ void SkinnedMeshApp::InitObjects()
 
 	dialog_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::PlayHandler, this, _1));
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::FPSCameraHandler, this, _1));
+
+	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::MeshChangedHandler, this, _1));
+	dialog_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::VisualizeChangedHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&SkinnedMeshApp::LineModeChangedHandler, this, _1));
 }
 
 void SkinnedMeshApp::OnResize(uint32_t width, uint32_t height)
@@ -274,7 +282,6 @@ void SkinnedMeshApp::OpenModel(std::string const & name)
 		dialog_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
 	}
 
-	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&SkinnedMeshApp::MeshChangedHandler, this, _1));
 	this->MeshChangedHandler(*dialog_->Control<UIComboBox>(id_mesh_));
 }
 
@@ -292,15 +299,15 @@ void SkinnedMeshApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 {
 #if defined KLAYGE_PLATFORM_WINDOWS
 	OPENFILENAMEA ofn;
-	char szFile[260];
+	char fn[260];
 	HWND hwnd = this->MainWnd()->HWnd();
 
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hwnd;
-	ofn.lpstrFile = szFile;
+	ofn.lpstrFile = fn;
 	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof(szFile);
+	ofn.nMaxFile = sizeof(fn);
 	ofn.lpstrFilter = "KModel File\0*.kmodel\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
@@ -310,7 +317,34 @@ void SkinnedMeshApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 
 	if (GetOpenFileNameA(&ofn))
 	{
-		this->OpenModel(szFile);
+		this->OpenModel(fn);
+	}
+#endif
+}
+
+void SkinnedMeshApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
+{
+#if defined KLAYGE_PLATFORM_WINDOWS
+	OPENFILENAMEA ofn;
+	char fn[260];
+	HWND hwnd = this->MainWnd()->HWnd();
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = fn;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = sizeof(fn);
+	ofn.lpstrFilter = "KModel File\0*.kmodel\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_OVERWRITEPROMPT;
+
+	if (GetSaveFileNameA(&ofn))
+	{
+		SaveKModel(model_, fn);
 	}
 #endif
 }
@@ -368,6 +402,9 @@ void SkinnedMeshApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	uint32_t mi = sender.GetSelectedIndex();
 
+	dialog_->Control<UIComboBox>(id_visualize_)->RemoveAllItems();
+	dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Lighting");
+
 	dialog_->Control<UIListBox>(id_vertex_streams_)->RemoveAllItems();
 	RenderLayoutPtr rl = model_->Mesh(mi)->GetRenderLayout();
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
@@ -381,48 +418,55 @@ void SkinnedMeshApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 				oss << L"|";
 			}
 
+			std::wostringstream oss_one;
+
+			std::wstring str;
 			switch (rl->VertexStreamFormat(i)[j].usage)
 			{
 			case VEU_Position:
-				oss << L"Position";
+				oss_one << L"Position";
 				break;
 
 			case VEU_Normal:
-				oss << L"Normal";
+				oss_one << L"Normal";
 				break;
 
 			case VEU_Diffuse:
-				oss << L"Diffuse";
+				oss_one << L"Diffuse";
 				break;
 
 			case VEU_Specular:
-				oss << L"Specular";
+				oss_one << L"Specular";
 				break;
 
 			case VEU_BlendWeight:
-				oss << L"Blend weight";
+				oss_one << L"Blend weight";
 				break;
 
 			case VEU_BlendIndex:
-				oss << L"Blend index";
+				oss_one << L"Blend index";
 				break;
 
 			case VEU_TextureCoord:
-				oss << L"Texcoord";
-				oss << rl->VertexStreamFormat(i)[j].usage_index;
+				oss_one << L"Texcoord";
+				oss_one << rl->VertexStreamFormat(i)[j].usage_index;
 				break;
 
 			case VEU_Tangent:
-				oss << L"Tangent";
+				oss_one << L"Tangent";
 				break;
 
 			case VEU_Binormal:
-				oss << L"Binormal";
+				oss_one << L"Binormal";
 				break;
 
 			default:
 				break;
 			}
+
+			oss << oss_one.str();
+
+			dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex " + oss_one.str(), rl->VertexStreamFormat(i)[j]);
 		}
 
 		dialog_->Control<UIListBox>(id_vertex_streams_)->AddItem(oss.str());
@@ -438,7 +482,36 @@ void SkinnedMeshApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 		Convert(name, texture_slots[i].second);
 		oss << type << L": " << name;
 		dialog_->Control<UIListBox>(id_textures_)->AddItem(oss.str());
+
+		dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture " + type, static_cast<int>(i));
 	}
+}
+
+void SkinnedMeshApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	if (0 == sender.GetSelectedIndex())
+	{
+		model_->VisualizeLighting();
+	}
+	else
+	{
+		boost::any data = sender.GetSelectedData();
+		try
+		{
+			int slot = boost::any_cast<int>(data);
+			model_->VisualizeTexture(slot);
+		}
+		catch (boost::bad_any_cast&)
+		{
+			vertex_element ve = boost::any_cast<vertex_element>(data);
+			model_->VisualizeVertex(ve.usage, ve.usage_index);
+		}
+	}
+}
+
+void SkinnedMeshApp::LineModeChangedHandler(KlayGE::UICheckBox const & sender)
+{
+	model_->LineMode(sender.GetChecked());
 }
 
 uint32_t SkinnedMeshApp::DoUpdate(KlayGE::uint32_t /*pass*/)

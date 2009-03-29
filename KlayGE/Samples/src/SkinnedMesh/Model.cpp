@@ -6,6 +6,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -22,9 +23,11 @@ using namespace KlayGE;
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr model, std::wstring const & name)
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
-			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx"))
+			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("SkinnedMesh.kfx")),
+			visualize_("Lighting"), line_mode_(false)
 {
 	inv_world_ = MathLib::inverse(world_);
+	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::BuildMeshInfo()
@@ -213,7 +216,9 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	}
 
 	// Ω®¡¢Œ∆¿Ì
-	bool has_normal_map = false;
+	TexturePtr dm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyDiffuseMap();
+	TexturePtr nm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
+	TexturePtr sm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptySpecularMap();
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 		iter != texture_slots_.end(); ++ iter)
 	{
@@ -221,53 +226,35 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				*(effect_->ParameterByName("diffuse_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+				dm = LoadTexture(iter->second, EAH_GPU_Read)();
 			}
 		}
-		if ("NormalMap" == iter->first)
+		else
 		{
-			TexturePtr nm;
-			if (!ResLoader::Instance().Locate(iter->second).empty())
+			if ("NormalMap" == iter->first)
 			{
-				nm = LoadTexture(iter->second, EAH_GPU_Read)();
+				if (!ResLoader::Instance().Locate(iter->second).empty())
+				{
+					nm = LoadTexture(iter->second, EAH_GPU_Read)();
+				}
 			}
-			*(effect_->ParameterByName("normal_tex")) = nm;
-			if (nm)
+			else
 			{
-				has_normal_map = true;
-			}
-		}
-		if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
-		{
-			if (!ResLoader::Instance().Locate(iter->second).empty())
-			{
-				*(effect_->ParameterByName("specular_tex")) = LoadTexture(iter->second, EAH_GPU_Read)();
+				if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
+				{
+					if (!ResLoader::Instance().Locate(iter->second).empty())
+					{
+						sm = LoadTexture(iter->second, EAH_GPU_Read)();
+					}
+				}
 			}
 		}
 	}
+	*(effect_->ParameterByName("diffuse_tex")) = dm;
+	*(effect_->ParameterByName("normal_tex")) = nm;
+	*(effect_->ParameterByName("specular_tex")) = sm;
 
-	if (has_normal_map)
-	{
-		if (has_skinned)
-		{
-			technique_ = effect_->TechniqueByName("SkinnedMeshTech");
-		}
-		else
-		{
-			technique_ = effect_->TechniqueByName("NonSkinnedMeshTech");
-		}
-	}
-	else
-	{
-		if (has_skinned)
-		{
-			technique_ = effect_->TechniqueByName("SkinnedMeshNoNormalMapTech");
-		}
-		else
-		{
-			technique_ = effect_->TechniqueByName("NonSkinnedMeshNoNormalMapTech");
-		}
-	}
+	*(effect_->ParameterByName("has_skinned")) = has_skinned;
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
@@ -276,7 +263,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
 	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
 
-	boost::shared_ptr<RenderModel> model = model_.lock();
+	RenderModelPtr model = model_.lock();
 	if (model)
 	{
 		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRotations();
@@ -300,11 +287,79 @@ void DetailedSkinnedMesh::SetEyePos(KlayGE::float3 const & eye_pos)
 	*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(eye_pos, inv_world_);
 }
 
+void DetailedSkinnedMesh::VisualizeLighting()
+{
+	visualize_ = "Lighting";
+	this->UpdateTech();
+}
+
+void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
+{
+	*(effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
+	*(effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
+	visualize_ = "VisualizeVertex";
+	this->UpdateTech();
+}
+
+void DetailedSkinnedMesh::VisualizeTexture(int slot)
+{
+	*(effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
+	visualize_ = "VisualizeTexture";
+	this->UpdateTech();
+}
+
+void DetailedSkinnedMesh::LineMode(bool line_mode)
+{
+	line_mode_ = line_mode;
+	this->UpdateTech();
+}
+
+void DetailedSkinnedMesh::UpdateTech()
+{
+	std::string tech = visualize_;
+	if (line_mode_)
+	{
+		tech += "Line";
+	}
+	else
+	{
+		tech += "Fill";
+	}
+	tech += "Tech";
+
+	technique_ = effect_->TechniqueByName(tech);
+}
+
 
 DetailedSkinnedModel::DetailedSkinnedModel()
-		: SkinnedModel(L"DetailedSkinnedModel"),
-			reversed_(false)
+		: SkinnedModel(L"DetailedSkinnedModel")
 {
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	uint32_t const empty_diff = 0xFFFFFFFF;
+	uint32_t const empty_nor = 0x80808080;
+	uint32_t const empty_spe = 0x00000000;
+
+	ElementInitData diff_init_data, nor_init_data, spe_init_data;
+	diff_init_data.data = &empty_diff;
+	diff_init_data.slice_pitch = diff_init_data.row_pitch = sizeof(empty_diff);
+	nor_init_data.data = &empty_nor;
+	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
+	spe_init_data.data = &empty_spe;
+	spe_init_data.slice_pitch = spe_init_data.row_pitch = sizeof(empty_spe);
+
+	ElementFormat format;
+	if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
+	{
+		format = EF_ARGB8;
+	}
+	else
+	{
+		format = EF_ABGR8;
+	}
+	empty_diffuse_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &diff_init_data);
+	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &nor_init_data);
+	empty_specular_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &spe_init_data);
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)
@@ -326,4 +381,36 @@ void DetailedSkinnedModel::SetEyePos(KlayGE::float3 const & eye_pos)
 void DetailedSkinnedModel::SetTime(float time)
 {
 	this->SetFrame(static_cast<int>(time * frame_rate_));
+}
+
+void DetailedSkinnedModel::VisualizeLighting()
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeLighting();
+	}
+}
+
+void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeVertex(usage, usage_index);
+	}
+}
+
+void DetailedSkinnedModel::VisualizeTexture(int slot)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->VisualizeTexture(slot);
+	}
+}
+
+void DetailedSkinnedModel::LineMode(bool line_mode)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->LineMode(line_mode);
+	}
 }
