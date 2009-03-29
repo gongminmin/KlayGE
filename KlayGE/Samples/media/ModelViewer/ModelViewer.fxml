@@ -1,0 +1,313 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="../../../RenderFX/util.fxml"/>
+	<include name="../../../RenderFX/Quaternion.fxml"/>
+
+	<parameter type="float4" name="joint_rots" array_size="64"/>
+	<parameter type="float4" name="joint_poss" array_size="64"/>
+
+	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="eye_pos"/>
+	<parameter type="bool" name="has_skinned"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture2D" name="specular_tex"/>
+
+	<parameter type="int" name="vertex_usage"/>
+	<parameter type="int" name="vertex_usage_index"/>
+	<parameter type="int" name="texture_slot"/>
+
+	<shader>
+		<![CDATA[
+void MeshVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float4 blend_weights : BLENDWEIGHT,
+				int4 blend_indices : BLENDINDICES,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float2 oTex0 : TEXCOORD0,
+				out float3 oL	: TEXCOORD1,	// in tangent space
+				out float3 oH	: TEXCOORD2,	// in tangent space
+				out float4 oPos : SV_Position)
+{
+	float4 result_pos;
+	float3x3 obj2tan;
+	if (has_skinned)
+	{
+		result_pos = float4(0, 0, 0, 1);
+		obj2tan = 0;
+		for (int i = 0; i < 4; ++ i)
+		{
+			float4 joint_rot = joint_rots[blend_indices[i]];
+			float4 joint_pos = joint_poss[blend_indices[i]];
+			float weight = blend_weights[i];
+
+			result_pos.xyz += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
+			obj2tan[0] += mul_quat(T, joint_rot) * weight;
+			obj2tan[2] += mul_quat(N, joint_rot) * weight;
+		}
+		obj2tan[0] = normalize(obj2tan[0]);
+		obj2tan[2] = normalize(obj2tan[2]);
+		obj2tan[1] = cross(obj2tan[2], obj2tan[0]);
+	}
+	else
+	{
+		result_pos = pos;
+		obj2tan[0] = T;
+		obj2tan[2] = N;
+		obj2tan[1] = cross(obj2tan[2], obj2tan[0]);
+	}
+
+	oTex0 = tex0;
+	
+	oPos = mul(result_pos, worldviewproj);
+
+	float3 L = light_pos - result_pos.xyz;
+	float3 V = eye_pos - result_pos.xyz;
+	float3 H = L + V;
+
+	oH = mul(obj2tan, H);
+	oL = mul(obj2tan, L);
+}
+
+float4 LightingPS(float2 uv : TEXCOORD0,
+				float3 L	: TEXCOORD1,
+				float3 H	: TEXCOORD2) : SV_Target
+{
+	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
+	
+	half4 diffuse = diffuse_tex.Sample(linear_sampler, uv);
+	half3 specular = specular_tex.Sample(linear_sampler, uv).rgb;
+	
+	half3 light_vec = normalize(L);
+	half diffuse_factor = dot(light_vec, normal);
+
+	half4 clr;
+	if (diffuse_factor > 0)
+	{
+		half3 half_way = normalize(H);
+		half specular_factor = pow(dot(half_way, normal), 8);
+		clr = half4(diffuse.rgb * diffuse_factor + specular * specular_factor, diffuse.a);
+	}
+	else
+	{
+		clr = half4(0, 0, 0, diffuse.a);
+	}
+	
+	return 0.2 * diffuse + clr;	
+}
+
+void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float4 blend_weights : BLENDWEIGHT,
+				int4 blend_indices : BLENDINDICES,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float4 oClr : COLOR,
+				out float4 oPos : SV_Position)
+{
+	float2 oTex0;
+	float3 oL, oH;
+	MeshVS(tex0, pos, blend_weights, blend_indices, N, T,
+				oTex0, oL, oH, oPos);
+
+	if (0 == vertex_usage)
+	{
+		oClr = pos;
+	}
+	else if (1 == vertex_usage)
+	{
+		oClr = float4(N / 2 + 0.5f, 1);
+	}
+	else if (4 == vertex_usage)
+	{
+		oClr = blend_weights;
+	}
+	else if (5 == vertex_usage)
+	{
+		oClr = blend_indices / 255.0f;
+	}
+	else if (6 == vertex_usage)
+	{
+		oClr = float4(tex0, 0, 1);
+	}
+	else if (7 == vertex_usage)
+	{
+		oClr = float4(T / 2 + 0.5f, 1);
+	}
+	else if (8 == vertex_usage)
+	{
+		oClr = float4(cross(N, T) / 2 + 0.5f, 1);
+	}
+}
+
+float4 VisualizeVertexPS(float4 clr : COLOR) : SV_Target
+{
+	return clr;
+}
+
+void VisualizeTextureVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float4 blend_weights : BLENDWEIGHT,
+				int4 blend_indices : BLENDINDICES,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float2 oTex0 : TEXCOORD0,
+				out float4 oPos : SV_Position)
+{
+	float3 oL, oH;
+	MeshVS(tex0, pos, blend_weights, blend_indices, N, T,
+				oTex0, oL, oH, oPos);
+}
+
+float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
+{
+	if (0 == texture_slot)
+	{
+		return diffuse_tex.Sample(linear_sampler, tex0);
+	}
+	else if (1 == texture_slot)
+	{
+		return normal_tex.Sample(linear_sampler, tex0);
+	}
+	else if (2 == texture_slot)
+	{
+		return specular_tex.Sample(linear_sampler, tex0);
+	}
+	return 0;
+}
+		]]>
+	</shader>
+
+	<technique name="LightingLineTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="pixel_shader" value="LightingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeVertexLineTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="VisualizeVertexVS()"/>
+			<state name="pixel_shader" value="VisualizeVertexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="VisualizeTextureVS()"/>
+			<state name="pixel_shader" value="VisualizeTexturePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="pixel_shader" value="LightingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeVertexFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="VisualizeVertexVS()"/>
+			<state name="pixel_shader" value="VisualizeVertexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="VisualizeTextureVS()"/>
+			<state name="pixel_shader" value="VisualizeTexturePS()"/>
+		</pass>
+	</technique>
+	
+	<shader>
+		<![CDATA[
+void AxisVS(float4 pos : POSITION,
+				out float4 oClr	: COLOR0,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(float4(pos.xyz, 1), worldviewproj);
+	if (pos.w < 0.5f)
+	{
+		oClr = float4(1, 0, 0, 1);
+	}
+	else
+	{
+		if (pos.w < 1.5f)
+		{
+			oClr = float4(0, 1, 0, 1);
+		}
+		else
+		{
+			oClr = float4(0, 0, 1, 1);
+		}
+	}
+}
+
+float4 AxisPS(float4 clr : COLOR0) : SV_Target
+{
+	return clr;
+}
+		]]>
+	</shader>
+
+	<technique name="AxisTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="AxisVS()"/>
+			<state name="pixel_shader" value="AxisPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void GridVS(float4 pos : POSITION,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, worldviewproj);
+}
+
+float4 GridPS() : SV_Target
+{
+	return 0.5;
+}
+		]]>
+	</shader>
+
+	<technique name="GridTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GridVS()"/>
+			<state name="pixel_shader" value="GridPS()"/>
+		</pass>
+	</technique>
+</effect>

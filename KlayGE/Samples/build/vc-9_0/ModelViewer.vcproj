@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SkinnedMesh"
+	Name="ModelViewer"
 	ProjectGUID="{6F6E43D9-6164-452A-8769-3B96F33469A9}"
-	RootNamespace="SkinnedMesh"
+	RootNamespace="ModelViewer"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -378,11 +378,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\Model.cpp"
+				RelativePath="..\..\src\ModelViewer\Model.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\SkinnedMesh.cpp"
+				RelativePath="..\..\src\ModelViewer\ModelViewer.cpp"
 				>
 			</File>
 		</Filter>
@@ -392,11 +392,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\Model.hpp"
+				RelativePath="..\..\src\ModelViewer\Model.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\SkinnedMesh\SkinnedMesh.hpp"
+				RelativePath="..\..\src\ModelViewer\ModelViewer.hpp"
 				>
 			</File>
 		</Filter>
@@ -404,7 +404,7 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\SkinnedMesh\SkinnedMesh.fxml"
+				RelativePath="..\..\media\ModelViewer\ModelViewer.fxml"
 				>
 			</File>
 		</Filter>
@@ -412,7 +412,7 @@
 			Name="UI"
 			>
 			<File
-				RelativePath="..\..\media\SkinnedMesh\SkinnedMesh.uiml"
+				RelativePath="..\..\media\ModelViewer\ModelViewer.uiml"
 				>
 			</File>
 		</Filter>

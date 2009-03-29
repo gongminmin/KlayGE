@@ -18,7 +18,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowCubemap", "ShadowCube
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Instancing", "Instancing.vcproj", "{FA98FBF0-62D4-449E-B81B-3C53FD9A6EF1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SkinnedMesh", "SkinnedMesh.vcproj", "{6F6E43D9-6164-452A-8769-3B96F33469A9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelViewer", "ModelViewer.vcproj", "{6F6E43D9-6164-452A-8769-3B96F33469A9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoTexture", "VideoTexture.vcproj", "{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
 EndProject

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui version='1'>
+	<dialog caption="ModelViewer">
+		<control type="check_box" id="Skinned" caption="Skinned" x="60" y="-100" align_y="bottom" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
+
+		<control type="slider" id="FrameSlider" x="140" y="-70" align_y="bottom" width="700" height="24" min="0" max="100" value="0" is_default="0"/>
+		<control type="static" id="FrameStatic" caption="0:" x="60" y="-70" align_y="bottom" width="80" height="24" is_default="0"/>
+
+		<control type="check_box" id="Play" caption="Play Animation" x="260" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="460" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+
+		<control type="button" id="Open" caption="Open" x="-140" y="40" align_x="right" width="60" height="24" hotkey="0" is_default="0"/>
+		<control type="button" id="SaveAs" caption="Save as" x="-80" y="40" align_x="right" width="60" height="24" hotkey="0" is_default="0"/>
+
+		<control type="static" id="MeshStatic" caption="Mesh:" x="-140" y="80" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="combo_box" id="MeshCombo" x="-140" y="100" align_x="right" width="120" height="24" hotkey="0" is_default="0"/>
+
+		<control type="static" id="VertexStreamStatic" caption="Vertex streams:" x="-140" y="160" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="list_box" id="VertexStreamList" x="-140" y="180" align_x="right" width="120" height="100" is_default="0"/>
+
+		<control type="static" id="TextureStatic" caption="Textures:" x="-200" y="300" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="list_box" id="TextureList" x="-200" y="320" align_x="right" width="180" height="60" is_default="0"/>
+
+		<control type="static" id="VisualizeStatic" caption="Visualize:" x="-200" y="420" align_x="right" width="100" height="24" is_default="0"/>
+		<control type="combo_box" id="VisualizeCombo" x="-200" y="440" align_x="right" width="180" height="24" hotkey="0" is_default="0"/>
+
+		<control type="check_box" id="LineModeCheck" caption="Line mode" x="-120" y="480" align_x="right" width="100" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+</ui>

@@ -10,12 +10,12 @@
 		<Project filename="Fractal.cbp" />
 		<Project filename="GPUParticleSystem.cbp" />
 		<Project filename="Instancing.cbp" />
+		<Project filename="ModelViewer.cbp" />
 		<Project filename="Parallax.cbp" />
 		<Project filename="ParticleSystem.cbp" />
 		<Project filename="ProceduralTex.cbp" />
 		<Project filename="Refract.cbp" />
 		<Project filename="ShadowCubeMap.cbp" />
-		<Project filename="SkinnedMesh.cbp" />
 		<Project filename="Text.cbp" />
 		<Project filename="VertexDisplacement.cbp" />
 		<Project filename="VideoTexture.cbp" />
