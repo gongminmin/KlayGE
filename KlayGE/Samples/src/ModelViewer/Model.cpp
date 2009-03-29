@@ -20,7 +20,7 @@
 using namespace KlayGE;
 
 
-DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr model, std::wstring const & name)
+DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
 			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.kfx")),
@@ -39,7 +39,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	bool has_binormal = false;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
-		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
 		switch (rl_->VertexStreamFormat(i)[0].usage)
 		{
 		case VEU_Normal:
@@ -67,7 +66,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	bool has_skinned = false;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
-		GraphicsBufferPtr vb = rl_->GetVertexStream(i);
+		GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
 		switch (rl_->VertexStreamFormat(i)[0].usage)
 		{
 		case VEU_Position:
@@ -164,8 +163,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	}
 	std::vector<uint16_t> indices(this->NumTriangles() * 3);
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 		GraphicsBufferPtr ib = rl_->GetIndexStream();
 		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
 		ib_cpu->Resize(ib->Size());
@@ -208,6 +205,16 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			texcoords.begin(), normals.begin());
 		this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
 				vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_GPU_Read);
+	}
+
+	if (!has_skinned)
+	{
+		std::vector<int> blend_indices(this->NumVertices(), 0);
+		this->AddVertexStream(&blend_indices[0], static_cast<uint32_t>(sizeof(blend_indices[0]) * blend_indices.size()),
+				vertex_element(VEU_BlendIndex, 0, EF_ABGR8), EAH_GPU_Read);
+		std::vector<float4> blend_weights(this->NumVertices(), float4(0, 0, 0, 0));
+		this->AddVertexStream(&blend_weights[0], static_cast<uint32_t>(sizeof(blend_weights[0]) * blend_weights.size()),
+				vertex_element(VEU_BlendWeight, 0, EF_ABGR32F), EAH_GPU_Read);
 	}
 
 	if (!positions.empty())
@@ -331,8 +338,8 @@ void DetailedSkinnedMesh::UpdateTech()
 }
 
 
-DetailedSkinnedModel::DetailedSkinnedModel()
-		: SkinnedModel(L"DetailedSkinnedModel")
+DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
+		: SkinnedModel(name)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -357,9 +364,9 @@ DetailedSkinnedModel::DetailedSkinnedModel()
 	{
 		format = EF_ABGR8;
 	}
-	empty_diffuse_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &diff_init_data);
-	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &nor_init_data);
-	empty_specular_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 1, EAH_GPU_Read, &spe_init_data);
+	empty_diffuse_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &diff_init_data);
+	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
+	empty_specular_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &spe_init_data);
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)

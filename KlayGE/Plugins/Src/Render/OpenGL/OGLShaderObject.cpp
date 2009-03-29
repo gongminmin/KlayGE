@@ -623,7 +623,7 @@ namespace KlayGE
 				ss << "CUBE";
 				break;
 			}
-			ss << " " << tex_sampler_binds_[i].first/* << ": TEXUNIT" << i*/ << ";" << std::endl;
+			ss << " " << tex_sampler_binds_[i].first << ": TEXUNIT" << i << ";" << std::endl;
 		}
 
 		ss << shader_ss.str();

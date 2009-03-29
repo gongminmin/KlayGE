@@ -12,7 +12,7 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 	friend class DetailedSkinnedMesh;
 
 public:
-	DetailedSkinnedModel();
+	DetailedSkinnedModel(std::wstring const & name);
 
 	void SetTime(float time);
 	void SetLightPos(KlayGE::float3 const & light_pos);
@@ -46,7 +46,7 @@ private:
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
-	DetailedSkinnedMesh(KlayGE::RenderModelPtr model, std::wstring const & name);
+	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
 
 	void OnRenderBegin();
 

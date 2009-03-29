@@ -10,6 +10,7 @@
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
+
 	<parameter type="bool" name="has_skinned"/>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -22,9 +23,11 @@
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
 
-	<parameter type="int" name="vertex_usage"/>
-	<parameter type="int" name="vertex_usage_index"/>
-	<parameter type="int" name="texture_slot"/>
+	<cbuffer name="less_freq">
+		<parameter type="int" name="vertex_usage"/>
+		<parameter type="int" name="vertex_usage_index"/>
+		<parameter type="int" name="texture_slot"/>
+	</cbuffer>
 
 	<shader>
 		<![CDATA[
@@ -146,7 +149,7 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 	{
 		oClr = float4(T / 2 + 0.5f, 1);
 	}
-	else if (8 == vertex_usage)
+	else// if (8 == vertex_usage)
 	{
 		oClr = float4(cross(N, T) / 2 + 0.5f, 1);
 	}
@@ -180,13 +183,12 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 	}
 	else if (1 == texture_slot)
 	{
-		return normal_tex.Sample(linear_sampler, tex0);
-	}
-	else if (2 == texture_slot)
-	{
 		return specular_tex.Sample(linear_sampler, tex0);
 	}
-	return 0;
+	else// if (2 == texture_slot)
+	{
+		return normal_tex.Sample(linear_sampler, tex0);
+	}
 }
 		]]>
 	</shader>

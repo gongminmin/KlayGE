@@ -58,7 +58,7 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 {
-	half lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f).r);
+	half lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
 	return ToneMapping(src_tex.Sample(linear_sampler, iTex), bloom_tex.Sample(linear_sampler, iTex), lum);
 }
 		]]>

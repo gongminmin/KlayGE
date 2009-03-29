@@ -121,7 +121,7 @@ void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream
 	{
 		PS_IN gs_out;
 
-		for (uint i = 0; i < 4; ++ i)
+		for (int i = 0; i < 4; ++ i)
 		{
 			float2 tex = float2((i & 1) ? 1 : -1, (i & 2) ? -1 : 1);
 
@@ -166,7 +166,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	else
 	{
 		float2 tex_coord = ps_in.PosSS.xy + offset;
-		tex_coord.y = -tex_coord.y;
+		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
 		float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;

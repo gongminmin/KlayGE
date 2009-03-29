@@ -168,9 +168,9 @@ namespace
 
 	struct CreateDetailedModelFactory
 	{
-		RenderModelPtr operator()(std::wstring const & /*name*/)
+		RenderModelPtr operator()(std::wstring const & name)
 		{
-			return RenderModelPtr(new DetailedSkinnedModel());
+			return RenderModelPtr(new DetailedSkinnedModel(name));
 		}
 	};
 }
