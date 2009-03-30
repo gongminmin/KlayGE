@@ -22,6 +22,7 @@
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="texture2D" name="emit_tex"/>
 
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
@@ -91,6 +92,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	
 	half4 diffuse = diffuse_tex.Sample(linear_sampler, uv);
 	half3 specular = specular_tex.Sample(linear_sampler, uv).rgb;
+	half4 emit = emit_tex.Sample(linear_sampler, uv);
 	
 	half3 light_vec = normalize(L);
 	half diffuse_factor = dot(light_vec, normal);
@@ -107,7 +109,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		clr = half4(0, 0, 0, diffuse.a);
 	}
 	
-	return 0.2 * diffuse + clr;	
+	return 0.2 * diffuse + clr + emit;
 }
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
@@ -185,9 +187,13 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 	{
 		return specular_tex.Sample(linear_sampler, tex0);
 	}
-	else// if (2 == texture_slot)
+	else if (2 == texture_slot)
 	{
 		return normal_tex.Sample(linear_sampler, tex0);
+	}
+	else// if (3 == texture_slot)
+	{
+		return emit_tex.Sample(linear_sampler, tex0);
 	}
 }
 		]]>

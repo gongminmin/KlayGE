@@ -226,6 +226,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	TexturePtr dm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyDiffuseMap();
 	TexturePtr nm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
 	TexturePtr sm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptySpecularMap();
+	TexturePtr em = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyEmitMap();
 	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
 		iter != texture_slots_.end(); ++ iter)
 	{
@@ -254,12 +255,23 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 						sm = LoadTexture(iter->second, EAH_GPU_Read)();
 					}
 				}
+				else
+				{
+					if (("EmitMap" == iter->first) || ("Self-Illumination" == iter->first))
+					{
+						if (!ResLoader::Instance().Locate(iter->second).empty())
+						{
+							em = LoadTexture(iter->second, EAH_GPU_Read)();
+						}
+					}
+				}
 			}
 		}
 	}
 	*(effect_->ParameterByName("diffuse_tex")) = dm;
 	*(effect_->ParameterByName("normal_tex")) = nm;
 	*(effect_->ParameterByName("specular_tex")) = sm;
+	*(effect_->ParameterByName("emit_tex")) = em;
 
 	*(effect_->ParameterByName("has_skinned")) = has_skinned;
 }
@@ -346,14 +358,17 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	uint32_t const empty_diff = 0xFFFFFFFF;
 	uint32_t const empty_nor = 0x80808080;
 	uint32_t const empty_spe = 0x00000000;
+	uint32_t const empty_emit = 0x00000000;
 
-	ElementInitData diff_init_data, nor_init_data, spe_init_data;
+	ElementInitData diff_init_data, nor_init_data, spe_init_data, emit_init_data;
 	diff_init_data.data = &empty_diff;
 	diff_init_data.slice_pitch = diff_init_data.row_pitch = sizeof(empty_diff);
 	nor_init_data.data = &empty_nor;
 	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
 	spe_init_data.data = &empty_spe;
 	spe_init_data.slice_pitch = spe_init_data.row_pitch = sizeof(empty_spe);
+	emit_init_data.data = &empty_emit;
+	emit_init_data.slice_pitch = emit_init_data.row_pitch = sizeof(empty_emit);
 
 	ElementFormat format;
 	if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
@@ -367,6 +382,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	empty_diffuse_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &diff_init_data);
 	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
 	empty_specular_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &spe_init_data);
+	empty_emit_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &emit_init_data);
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)

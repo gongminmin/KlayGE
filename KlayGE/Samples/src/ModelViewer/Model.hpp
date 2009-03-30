@@ -36,11 +36,16 @@ public:
 	{
 		return empty_specular_map_;
 	}
+	KlayGE::TexturePtr const & EmptyEmitMap() const
+	{
+		return empty_emit_map_;
+	}
 
 private:
 	KlayGE::TexturePtr empty_diffuse_map_;
 	KlayGE::TexturePtr empty_normal_map_;
 	KlayGE::TexturePtr empty_specular_map_;
+	KlayGE::TexturePtr empty_emit_map_;
 };
 
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
