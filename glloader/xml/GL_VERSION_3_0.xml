@@ -615,24 +615,28 @@
 		<function name="glClearBufferiv" return="void">
 			<params>
 				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
 				<param type="const GLint*" name="value"/>
 			</params>
 		</function>
 		<function name="glClearBufferfv" return="void">
 			<params>
 				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
 				<param type="const GLfloat*" name="value"/>
 			</params>
 		</function>
 		<function name="glClearBufferuiv" return="void">
 			<params>
 				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
 				<param type="const GLuint*" name="value"/>
 			</params>
 		</function>
 		<function name="glClearBufferfi" return="void">
 			<params>
 				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
 				<param type="GLfloat" name="depth"/>
 				<param type="GLint" name="stencil"/>
 			</params>
