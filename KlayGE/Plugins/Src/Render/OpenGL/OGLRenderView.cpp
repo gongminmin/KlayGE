@@ -69,18 +69,94 @@ namespace KlayGE
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
 
+		DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
+
 		if (glloader_GL_VERSION_3_0())
 		{
 			if (flags & GL_COLOR_BUFFER_BIT)
 			{
-				glClearBufferfv(GL_COLOR_BUFFER_BIT, &clr[0]);
-				flags &= ~GL_COLOR_BUFFER_BIT;
+				glClearBufferfv(GL_COLOR, index_, &clr[0]);
 			}
-			glClearBufferfi(flags, depth, stencil);
+
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_TRUE);
+				}
+			}
+			if (flags & GL_STENCIL_BUFFER_BIT)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				}
+			}
+
+			/*GLenum ogl_buff = 0;
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				if (flags & GL_STENCIL_BUFFER_BIT)
+				{
+					ogl_buff = GL_DEPTH_STENCIL;
+				}
+				else
+				{
+					ogl_buff = GL_DEPTH;
+				}
+			}
+			else
+			{
+				if (flags & GL_STENCIL_BUFFER_BIT)
+				{
+					ogl_buff = GL_STENCIL;
+				}
+			}
+			if (ogl_buff != 0)
+			{
+				glClearBufferfi(ogl_buff, 0, depth, stencil);
+			}*/
+
+			flags &= ~GL_COLOR_BUFFER_BIT;
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				re.ClearDepth(depth);
+			}
+			if (flags & GL_STENCIL_BUFFER_BIT)
+			{
+				re.ClearStencil(stencil);
+			}
+			if (flags != 0)
+			{
+				glClear(flags);
+			}
+
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_FALSE);
+				}
+			}
+			if (flags & GL_STENCIL_BUFFER_BIT)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_FALSE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_FALSE);
+				}
+			}
 		}
 		else
 		{
-			DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
+			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			if (flags & GL_COLOR_BUFFER_BIT)
 			{
@@ -145,11 +221,13 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLScreenColorRenderView::OnAttached(FrameBuffer& fb, uint32_t /*att*/)
+	void OGLScreenColorRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+
+		index_ = att - FrameBuffer::ATT_Color0;
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
@@ -186,6 +264,8 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+
+		index_ = 0;
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(0);
@@ -239,6 +319,8 @@ namespace KlayGE
 	void OGLTexture1DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+
+		index_ = att - FrameBuffer::ATT_Color0;
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
@@ -320,6 +402,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
+		index_ = att - FrameBuffer::ATT_Color0;
+
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
 		{
@@ -400,6 +484,8 @@ namespace KlayGE
 	void OGLTexture3DRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+
+		index_ = att - FrameBuffer::ATT_Color0;
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
@@ -608,6 +694,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
+		index_ = att - FrameBuffer::ATT_Color0;
+
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
 		{
@@ -700,6 +788,8 @@ namespace KlayGE
 	void OGLGraphicsBufferRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+
+		index_ = att - FrameBuffer::ATT_Color0;
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (glloader_GL_EXT_direct_state_access())
@@ -829,6 +919,8 @@ namespace KlayGE
 		UNREF_PARAM(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
+
+		index_ = 0;
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
 		if (level_ < 0)

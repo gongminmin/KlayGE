@@ -41,6 +41,7 @@ namespace KlayGE
 	protected:
 		GLuint tex_;
 		GLuint fbo_;
+		GLuint index_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderView> OGLRenderViewPtr;

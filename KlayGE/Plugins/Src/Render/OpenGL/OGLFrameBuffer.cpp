@@ -96,27 +96,108 @@ namespace KlayGE
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
 
+		DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
+
 		if (glloader_GL_VERSION_3_0())
 		{
 			if (flags & CBM_Color)
 			{
-				glClearBufferfv(GL_COLOR_BUFFER_BIT, &clr[0]);
+				if (fbo_ != 0)
+				{
+					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					{
+						if (clr_views_[i])
+						{
+							glClearBufferfv(GL_COLOR, i, &clr[0]);
+						}
+					}
+				}
+				else
+				{
+					glClearBufferfv(GL_COLOR, 0, &clr[0]);
+				}
 			}
+
+			if (flags & CBM_Depth)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_TRUE);
+				}
+			}
+			if (flags & CBM_Stencil)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				}
+			}
+
+			/*GLenum ogl_buff = 0;
+			if (flags & CBM_Depth)
+			{
+				if (flags & CBM_Stencil)
+				{
+					ogl_buff = GL_DEPTH_STENCIL;
+				}
+				else
+				{
+					ogl_buff = GL_DEPTH;
+				}
+			}
+			else
+			{
+				if (flags & CBM_Stencil)
+				{
+					ogl_buff = GL_STENCIL;
+				}
+			}
+			if (ogl_buff != 0)
+			{
+				glClearBufferfi(ogl_buff, 0, depth, stencil);
+			}*/
+
 			GLbitfield ogl_flags = 0;
 			if (flags & CBM_Depth)
 			{
 				ogl_flags |= GL_DEPTH_BUFFER_BIT;
+				re.ClearDepth(depth);
 			}
 			if (flags & CBM_Stencil)
 			{
 				ogl_flags |= GL_STENCIL_BUFFER_BIT;
+				re.ClearStencil(stencil);
 			}
-			glClearBufferfi(ogl_flags, depth, stencil);
+			if (ogl_flags != 0)
+			{
+				glClear(ogl_flags);
+			}
+
+			if (flags & CBM_Depth)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_FALSE);
+				}
+			}
+			if (flags & CBM_Stencil)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_FALSE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_FALSE);
+				}
+			}
 		}
 		else
 		{
-			DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
-
 			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			GLbitfield ogl_flags = 0;
