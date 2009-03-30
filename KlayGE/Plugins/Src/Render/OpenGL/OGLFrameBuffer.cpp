@@ -108,7 +108,7 @@ namespace KlayGE
 					{
 						if (clr_views_[i])
 						{
-							glClearBufferfv(GL_COLOR, i, &clr[0]);
+							glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
 						}
 					}
 				}
@@ -118,26 +118,7 @@ namespace KlayGE
 				}
 			}
 
-			if (flags & CBM_Depth)
-			{
-				if (!cur_desc.depth_write_mask)
-				{
-					glDepthMask(GL_TRUE);
-				}
-			}
-			if (flags & CBM_Stencil)
-			{
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_TRUE);
-				}
-			}
-
-			/*GLenum ogl_buff = 0;
+			GLenum ogl_buff = 0;
 			if (flags & CBM_Depth)
 			{
 				if (flags & CBM_Stencil)
@@ -159,9 +140,35 @@ namespace KlayGE
 			if (ogl_buff != 0)
 			{
 				glClearBufferfi(ogl_buff, 0, depth, stencil);
-			}*/
+			}
+		}
+		else
+		{
+			if (flags & CBM_Depth)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_TRUE);
+				}
+			}
+			if (flags & CBM_Stencil)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				}
+			}
 
 			GLbitfield ogl_flags = 0;
+			if (flags & CBM_Color)
+			{
+				ogl_flags |= GL_COLOR_BUFFER_BIT;
+				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			}
 			if (flags & CBM_Depth)
 			{
 				ogl_flags |= GL_DEPTH_BUFFER_BIT;
@@ -172,10 +179,8 @@ namespace KlayGE
 				ogl_flags |= GL_STENCIL_BUFFER_BIT;
 				re.ClearStencil(stencil);
 			}
-			if (ogl_flags != 0)
-			{
-				glClear(ogl_flags);
-			}
+
+			glClear(ogl_flags);
 
 			if (flags & CBM_Depth)
 			{
@@ -195,45 +200,6 @@ namespace KlayGE
 					glStencilMaskSeparate(GL_BACK, GL_FALSE);
 				}
 			}
-		}
-		else
-		{
-			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			GLbitfield ogl_flags = 0;
-			if (flags & CBM_Color)
-			{
-				ogl_flags |= GL_COLOR_BUFFER_BIT;
-				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-			}
-			if (flags & CBM_Depth)
-			{
-				ogl_flags |= GL_DEPTH_BUFFER_BIT;
-				re.ClearDepth(depth);
-
-				if (!cur_desc.depth_write_mask)
-				{
-					glDepthMask(GL_TRUE);
-				}
-			}
-			if (flags & CBM_Stencil)
-			{
-				ogl_flags |= GL_STENCIL_BUFFER_BIT;
-				re.ClearStencil(stencil);
-
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_TRUE);
-				}
-			}
-
-			glClear(ogl_flags);
-
-			glPopAttrib();
 		}
 
 		re.BindFramebuffer(old_fbo);

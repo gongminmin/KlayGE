@@ -78,26 +78,7 @@ namespace KlayGE
 				glClearBufferfv(GL_COLOR, index_, &clr[0]);
 			}
 
-			if (flags & GL_DEPTH_BUFFER_BIT)
-			{
-				if (!cur_desc.depth_write_mask)
-				{
-					glDepthMask(GL_TRUE);
-				}
-			}
-			if (flags & GL_STENCIL_BUFFER_BIT)
-			{
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_TRUE);
-				}
-			}
-
-			/*GLenum ogl_buff = 0;
+			GLenum ogl_buff = 0;
 			if (flags & GL_DEPTH_BUFFER_BIT)
 			{
 				if (flags & GL_STENCIL_BUFFER_BIT)
@@ -119,9 +100,33 @@ namespace KlayGE
 			if (ogl_buff != 0)
 			{
 				glClearBufferfi(ogl_buff, 0, depth, stencil);
-			}*/
+			}
+		}
+		else
+		{
+			if (flags & GL_DEPTH_BUFFER_BIT)
+			{
+				if (!cur_desc.depth_write_mask)
+				{
+					glDepthMask(GL_TRUE);
+				}
+			}
+			if (flags & GL_STENCIL_BUFFER_BIT)
+			{
+				if (!cur_desc.front_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				}
+				if (!cur_desc.back_stencil_write_mask)
+				{
+					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				}
+			}
 
-			flags &= ~GL_COLOR_BUFFER_BIT;
+			if (flags & GL_COLOR_BUFFER_BIT)
+			{
+				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
+			}
 			if (flags & GL_DEPTH_BUFFER_BIT)
 			{
 				re.ClearDepth(depth);
@@ -153,41 +158,6 @@ namespace KlayGE
 					glStencilMaskSeparate(GL_BACK, GL_FALSE);
 				}
 			}
-		}
-		else
-		{
-			glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			if (flags & GL_COLOR_BUFFER_BIT)
-			{
-				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-			}
-			if (flags & GL_DEPTH_BUFFER_BIT)
-			{
-				re.ClearDepth(depth);
-
-				if (!cur_desc.depth_write_mask)
-				{
-					glDepthMask(GL_TRUE);
-				}
-			}
-			if (flags & GL_STENCIL_BUFFER_BIT)
-			{
-				re.ClearStencil(stencil);
-
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_TRUE);
-				}
-			}
-
-			glClear(flags);
-
-			glPopAttrib();
 		}
 
 		re.BindFramebuffer(old_fbo);
