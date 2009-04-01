@@ -38,10 +38,13 @@ namespace
 	// Split a string with white space to a vector<string>
 	std::vector<std::string> split(std::string const & str)
 	{
+		std::string::const_iterator iter = str.begin();
+		std::string::const_iterator start_iter = iter;
+
 		std::vector<std::string> ret;
-		for (std::string::const_iterator iter = str.begin(); iter != str.end(); ++ iter)
+		while (start_iter != str.end())
 		{
-			std::string::const_iterator start_iter = iter;
+			start_iter = iter;
 			while ((start_iter != str.end()) && (' ' == *start_iter))
 			{
 				++ start_iter;
@@ -53,7 +56,10 @@ namespace
 				++ iter;
 			}
 
-			ret.push_back(std::string(start_iter, iter));
+			if (start_iter != iter)
+			{
+				ret.push_back(std::string(start_iter, iter));
+			}
 		}
 
 		return ret;
