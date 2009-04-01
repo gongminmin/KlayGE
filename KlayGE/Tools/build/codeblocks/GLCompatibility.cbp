@@ -74,10 +74,6 @@
 					<Add library="KlayGE_Core_gcc_x86_d" />
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_filesystem-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
-					<Add library="GL" />
 					<Add library="python3.0_d" />
 				</Linker>
 			</Target>
@@ -101,10 +97,6 @@
 					<Add library="KlayGE_Core_gcc_x86" />
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_filesystem-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
-					<Add library="GL" />
 					<Add library="python3.0" />
 				</Linker>
 			</Target>
@@ -127,12 +119,6 @@
 					<Add library="KlayGE_Core_gcc_x64_d" />
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_filesystem-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
-					<Add library="glloader_x64_d" />
-					<Add library="GL" />
-					<Add library="X11" />
 					<Add library="python3.0" />
 				</Linker>
 			</Target>
@@ -152,14 +138,9 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x64" />
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_filesystem-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
-					<Add library="GL" />
 					<Add library="python3.0" />
 				</Linker>
 			</Target>
