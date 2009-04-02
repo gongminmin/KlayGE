@@ -421,7 +421,6 @@ namespace KlayGE
 		boost::shared_ptr<std::string> name_;
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
-		boost::shared_ptr<std::string> shader_text_;
 
 		RasterizerStateObjectPtr rasterizer_state_obj_;
 		DepthStencilStateObjectPtr depth_stencil_state_obj_;

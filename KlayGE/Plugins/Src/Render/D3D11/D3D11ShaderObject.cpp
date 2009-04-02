@@ -394,225 +394,229 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D11ShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
-			boost::shared_ptr<std::string> const & shader_text)
+	void D3D11ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
 	{
-		is_shader_validate_[type] = true;
-
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 
-		std::string shader_profile = (*shader_descs)[type].profile;
-		switch (type)
+		std::string shader_text = this->GenShaderText(effect);
+
+		is_validate_ = true;
+		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-		case ST_VertexShader:
-			if ("auto" == shader_profile)
+			if (!(*shader_descs)[type].profile.empty())
 			{
-				shader_profile = render_eng.VertexShaderProfile();
-			}
-			break;
+				is_shader_validate_[type] = true;
 
-		case ST_PixelShader:
-			if ("auto" == shader_profile)
-			{
-				shader_profile = render_eng.PixelShaderProfile();
-			}
-			break;
+				std::string shader_profile = (*shader_descs)[type].profile;
+				switch (type)
+				{
+				case ST_VertexShader:
+					if ("auto" == shader_profile)
+					{
+						shader_profile = render_eng.VertexShaderProfile();
+					}
+					break;
 
-		case ST_GeometryShader:
-			if ("auto" == shader_profile)
-			{
-				shader_profile = render_eng.GeometryShaderProfile();
-			}
-			break;
+				case ST_PixelShader:
+					if ("auto" == shader_profile)
+					{
+						shader_profile = render_eng.PixelShaderProfile();
+					}
+					break;
 
-		default:
-			is_shader_validate_[type] = false;
-			break;
-		}
+				case ST_GeometryShader:
+					if ("auto" == shader_profile)
+					{
+						shader_profile = render_eng.GeometryShaderProfile();
+					}
+					break;
 
-		ID3D10Blob* code;
-		ID3D10Blob* err_msg;
-		D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D11", "1" }, { NULL, NULL } };
-		D3DX11CompileFromMemory(shader_text->c_str(), static_cast<UINT>(shader_text->size()), NULL, macros,
-			NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-			0, 0, NULL, &code, &err_msg, NULL);
-		if (err_msg != NULL)
-		{
+				default:
+					is_shader_validate_[type] = false;
+					break;
+				}
+
+				ID3D10Blob* code;
+				ID3D10Blob* err_msg;
+				D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D11", "1" }, { NULL, NULL } };
+				D3DX11CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
+					NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
+					0, 0, NULL, &code, &err_msg, NULL);
+				if (err_msg != NULL)
+				{
 #ifdef KLAYGE_DEBUG
-			std::istringstream iss(*shader_text);
-			std::string s;
-			int line = 1;
-			while (iss)
-			{
-				std::getline(iss, s);
-				std::cerr << line << " " << s << std::endl;
-				++ line;
-			}
-			std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+					std::istringstream iss(shader_text);
+					std::string s;
+					int line = 1;
+					while (iss)
+					{
+						std::getline(iss, s);
+						std::cerr << line << " " << s << std::endl;
+						++ line;
+					}
+					std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
 
-			err_msg->Release();
-		}
+					err_msg->Release();
+				}
 
-		ID3D10BlobPtr code_blob;
-		if (NULL == code)
-		{
-			is_shader_validate_[type] = false;
-		}
-		else
-		{
-			code_blob = MakeCOMPtr(code);
-			switch (type)
-			{
-			case ST_VertexShader:
-				ID3D11VertexShader* vs;
-				if (FAILED(d3d_device->CreateVertexShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &vs)))
+				ID3D10BlobPtr code_blob;
+				if (NULL == code)
 				{
 					is_shader_validate_[type] = false;
 				}
-				vertex_shader_ = MakeCOMPtr(vs);
-				vs_code_ = code_blob;
-				break;
-
-			case ST_PixelShader:
-				ID3D11PixelShader* ps;
-				if (FAILED(d3d_device->CreatePixelShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &ps)))
+				else
 				{
-					is_shader_validate_[type] = false;
-				}
-				pixel_shader_ = MakeCOMPtr(ps);
-				break;
-
-			case ST_GeometryShader:
-				ID3D11GeometryShader* gs;
-				if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &gs)))
-				{
-					is_shader_validate_[type] = false;
-				}
-				geometry_shader_ = MakeCOMPtr(gs);
-				break;
-
-			default:
-				is_shader_validate_[type] = false;
-				break;
-			}
-
-			ID3D11ShaderReflection* reflection;
-			D3DReflect(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&reflection));
-			if (reflection != NULL)
-			{
-				D3D11_SHADER_DESC desc;
-				reflection->GetDesc(&desc);
-
-				dirty_[type].resize(desc.ConstantBuffers);
-				d3d_cbufs_[type].resize(desc.ConstantBuffers);
-				cbufs_[type].resize(desc.ConstantBuffers);
-				for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
-				{
-					ID3D11ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
-
-					D3D11_SHADER_BUFFER_DESC cb_desc;
-					reflection_cb->GetDesc(&cb_desc);
-					cbufs_[type][c].resize(cb_desc.Size);
-
-					for (UINT v = 0; v < cb_desc.Variables; ++ v)
+					code_blob = MakeCOMPtr(code);
+					switch (type)
 					{
-						ID3D11ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
-
-						D3D11_SHADER_VARIABLE_DESC var_desc;
-						reflection_var->GetDesc(&var_desc);
-						if (var_desc.uFlags & D3D10_SVF_USED)
+					case ST_VertexShader:
+						ID3D11VertexShader* vs;
+						if (FAILED(d3d_device->CreateVertexShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &vs)))
 						{
-							RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
-							if (p)
-							{
-								D3D11_SHADER_TYPE_DESC type_desc;
-								reflection_var->GetType()->GetDesc(&type_desc);
-
-								D3D11ShaderParameterHandle p_handle;
-								p_handle.shader_type = static_cast<uint8_t>(type);
-								p_handle.param_class = type_desc.Class;
-								p_handle.param_type = type_desc.Type;
-								p_handle.cbuff = c;
-								p_handle.offset = var_desc.StartOffset;
-								p_handle.elements = type_desc.Elements;
-								p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
-								p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
-
-								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
-							}
+							is_shader_validate_[type] = false;
 						}
-					}
-
-					D3D11_BUFFER_DESC desc;
-					desc.ByteWidth = cb_desc.Size;
-					desc.Usage = D3D11_USAGE_DEFAULT;
-					desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-					desc.CPUAccessFlags = 0;
-					desc.MiscFlags = 0;
-					ID3D11Buffer* tmp_buf;
-					TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
-					d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
-				}
-
-				int num_textures = -1;
-				int num_samplers = -1;
-				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-				{
-					D3D11_SHADER_INPUT_BIND_DESC si_desc;
-					reflection->GetResourceBindingDesc(i, &si_desc);
-
-					switch (si_desc.Type)
-					{
-					case D3D10_SIT_TEXTURE:
-						num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+						vertex_shader_ = MakeCOMPtr(vs);
+						vs_code_ = code_blob;
 						break;
 
-					case D3D10_SIT_SAMPLER:
-						num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+					case ST_PixelShader:
+						ID3D11PixelShader* ps;
+						if (FAILED(d3d_device->CreatePixelShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &ps)))
+						{
+							is_shader_validate_[type] = false;
+						}
+						pixel_shader_ = MakeCOMPtr(ps);
+						break;
+
+					case ST_GeometryShader:
+						ID3D11GeometryShader* gs;
+						if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &gs)))
+						{
+							is_shader_validate_[type] = false;
+						}
+						geometry_shader_ = MakeCOMPtr(gs);
 						break;
 
 					default:
+						is_shader_validate_[type] = false;
 						break;
 					}
-				}
 
-				textures_[type].resize(num_textures + 1);
-				samplers_[type].resize(num_samplers + 1);
-
-				for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-				{
-					D3D11_SHADER_INPUT_BIND_DESC si_desc;
-					reflection->GetResourceBindingDesc(i, &si_desc);
-
-					if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
+					ID3D11ShaderReflection* reflection;
+					D3DReflect(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), IID_ID3D11ShaderReflection, reinterpret_cast<void**>(&reflection));
+					if (reflection != NULL)
 					{
-						RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-						if (p)
-						{
-							D3D11ShaderParameterHandle p_handle;
-							p_handle.shader_type = static_cast<uint8_t>(type);
-							p_handle.param_class = D3D10_SVC_OBJECT;
-							p_handle.param_type = (D3D10_SIT_TEXTURE == si_desc.Type) ? D3D10_SVT_TEXTURE : D3D10_SVT_SAMPLER;
-							p_handle.offset = si_desc.BindPoint;
-							p_handle.elements = 1;
-							p_handle.rows = 0;
-							p_handle.columns = 1;
+						D3D11_SHADER_DESC desc;
+						reflection->GetDesc(&desc);
 
-							param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+						dirty_[type].resize(desc.ConstantBuffers);
+						d3d_cbufs_[type].resize(desc.ConstantBuffers);
+						cbufs_[type].resize(desc.ConstantBuffers);
+						for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
+						{
+							ID3D11ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
+
+							D3D11_SHADER_BUFFER_DESC cb_desc;
+							reflection_cb->GetDesc(&cb_desc);
+							cbufs_[type][c].resize(cb_desc.Size);
+
+							for (UINT v = 0; v < cb_desc.Variables; ++ v)
+							{
+								ID3D11ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
+
+								D3D11_SHADER_VARIABLE_DESC var_desc;
+								reflection_var->GetDesc(&var_desc);
+								if (var_desc.uFlags & D3D10_SVF_USED)
+								{
+									RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
+									if (p)
+									{
+										D3D11_SHADER_TYPE_DESC type_desc;
+										reflection_var->GetType()->GetDesc(&type_desc);
+
+										D3D11ShaderParameterHandle p_handle;
+										p_handle.shader_type = static_cast<uint8_t>(type);
+										p_handle.param_class = type_desc.Class;
+										p_handle.param_type = type_desc.Type;
+										p_handle.cbuff = c;
+										p_handle.offset = var_desc.StartOffset;
+										p_handle.elements = type_desc.Elements;
+										p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
+										p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
+
+										param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+									}
+								}
+							}
+
+							D3D11_BUFFER_DESC desc;
+							desc.ByteWidth = cb_desc.Size;
+							desc.Usage = D3D11_USAGE_DEFAULT;
+							desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+							desc.CPUAccessFlags = 0;
+							desc.MiscFlags = 0;
+							ID3D11Buffer* tmp_buf;
+							TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+							d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 						}
+
+						int num_textures = -1;
+						int num_samplers = -1;
+						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
+						{
+							D3D11_SHADER_INPUT_BIND_DESC si_desc;
+							reflection->GetResourceBindingDesc(i, &si_desc);
+
+							switch (si_desc.Type)
+							{
+							case D3D10_SIT_TEXTURE:
+								num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+								break;
+
+							case D3D10_SIT_SAMPLER:
+								num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+								break;
+
+							default:
+								break;
+							}
+						}
+
+						textures_[type].resize(num_textures + 1);
+						samplers_[type].resize(num_samplers + 1);
+
+						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
+						{
+							D3D11_SHADER_INPUT_BIND_DESC si_desc;
+							reflection->GetResourceBindingDesc(i, &si_desc);
+
+							if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
+							{
+								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+								if (p)
+								{
+									D3D11ShaderParameterHandle p_handle;
+									p_handle.shader_type = static_cast<uint8_t>(type);
+									p_handle.param_class = D3D10_SVC_OBJECT;
+									p_handle.param_type = (D3D10_SIT_TEXTURE == si_desc.Type) ? D3D10_SVT_TEXTURE : D3D10_SVT_SAMPLER;
+									p_handle.offset = si_desc.BindPoint;
+									p_handle.elements = 1;
+									p_handle.rows = 0;
+									p_handle.columns = 1;
+
+									param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+								}
+							}
+						}
+
+						reflection->Release();
 					}
 				}
-
-				reflection->Release();
 			}
-		}
 
-		is_validate_ = true;
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			is_validate_ &= is_shader_validate_[i];
+			is_validate_ &= is_shader_validate_[type];
 		}
 	}
 

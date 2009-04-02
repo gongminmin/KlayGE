@@ -53,52 +53,54 @@
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
+#define USE_GLSL
+
 namespace
 {
 	using namespace KlayGE;
 
 
-	char const * predefined_funcs = "\n								\
-	float4 tex1DLevel(sampler1D s, float location, float lod)\n		\
-	{\n																\
-		return tex1Dlod(s, float4(location, 0, 0, lod));\n			\
-	}\n																\
-	\n																\
+	char const * predefined_funcs = "\n									\
+	float4 tex1DLevel(sampler1D s, float location, float lod)\n			\
+	{\n																	\
+		return tex1Dlod(s, float4(location, 0, 0, lod));\n				\
+	}\n																	\
+	\n																	\
 	float4 tex2DLevel(sampler2D s, float2 location, float lod)\n		\
-	{\n																\
-		return tex2Dlod(s, float4(location, 0, lod));\n				\
-	}\n																\
-	\n																\
+	{\n																	\
+		return tex2Dlod(s, float4(location, 0, lod));\n					\
+	}\n																	\
+	\n																	\
 	float4 tex3DLevel(sampler3D s, float3 location, float lod)\n		\
-	{\n																\
-		return tex3Dlod(s, float4(location, lod));\n				\
-	}\n																\
-	\n																\
+	{\n																	\
+		return tex3Dlod(s, float4(location, lod));\n					\
+	}\n																	\
+	\n																	\
 	float4 texCUBELevel(samplerCUBE s, float3 location, float lod)\n	\
-	{\n																\
-		return texCUBElod(s, float4(location, lod));\n				\
-	}\n																\
-	\n																\
-	\n																\
-	float4 tex1DBias(sampler1D s, float location, float lod)\n		\
-	{\n																\
-		return tex1Dbias(s, float4(location, 0, 0, lod));\n			\
-	}\n																\
-	\n																\
-	float4 tex2DBias(sampler2D s, float2 location, float lod)\n		\
-	{\n																\
+	{\n																	\
+		return texCUBElod(s, float4(location, lod));\n					\
+	}\n																	\
+	\n																	\
+	\n																	\
+	float4 tex1DBias(sampler1D s, float location, float lod)\n			\
+	{\n																	\
+		return tex1Dbias(s, float4(location, 0, 0, lod));\n				\
+	}\n																	\
+	\n																	\
+	float4 tex2DBias(sampler2D s, float2 location, float lod)\n			\
+	{\n																	\
 		return tex2Dbias(s, float4(location, 0, lod));\n				\
-	}\n																\
-	\n																\
-	float4 tex3DBias(sampler3D s, float3 location, float lod)\n		\
-	{\n																\
-		return tex3Dbias(s, float4(location, lod));\n				\
-	}\n																\
-	\n																\
-	float4 texCUBEBias(samplerCUBE s, float3 location, float lod)\n	\
-	{\n																\
-		return texCUBEbias(s, float4(location, lod));\n				\
-	}\n																\
+	}\n																	\
+	\n																	\
+	float4 tex3DBias(sampler3D s, float3 location, float lod)\n			\
+	{\n																	\
+		return tex3Dbias(s, float4(location, lod));\n					\
+	}\n																	\
+	\n																	\
+	float4 texCUBEBias(samplerCUBE s, float3 location, float lod)\n		\
+	{\n																	\
+		return texCUBEbias(s, float4(location, lod));\n					\
+	}\n																	\
 	";
 
 	template <typename SrcType>
@@ -390,29 +392,30 @@ namespace
 	class SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >
 	{
 	public:
-		SetOGLShaderParameter(std::pair<TexturePtr, SamplerStateObjectPtr>& sampler,
+		SetOGLShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >& samplers,
 					CGparameter cg_param, GLuint stage,
 					RenderEffectParameterPtr const & tex_param, RenderEffectParameterPtr const & sampler_param)
-			: sampler_(&sampler), cg_param_(cg_param), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
+			: samplers_(&samplers), cg_param_(cg_param), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
 		{
 		}
 
 		void operator()()
 		{
-			tex_param_->Value(sampler_->first);
-			sampler_param_->Value(sampler_->second);
+			tex_param_->Value((*samplers_)[stage_].first);
+			sampler_param_->Value((*samplers_)[stage_].second);
 
-			if (sampler_ && sampler_->first)
+			if ((*samplers_)[stage_].first)
 			{
-				GLuint const gl_tex = checked_pointer_cast<OGLTexture>(sampler_->first)->GLTexture();
-				checked_pointer_cast<OGLSamplerStateObject>(sampler_->second)->Active(stage_, sampler_->first);
+				GLuint const gl_tex = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLTexture();
+				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
 
 				cgGLSetTextureParameter(cg_param_, gl_tex);
+				cgGLEnableTextureParameter(cg_param_);
 			}
 		}
 
 	private:
-		std::pair<TexturePtr, SamplerStateObjectPtr>* sampler_;
+		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >* samplers_;
 		CGparameter cg_param_;
 		GLuint stage_;
 		RenderEffectParameterPtr tex_param_;
@@ -425,23 +428,17 @@ namespace KlayGE
 	OGLShaderObject::OGLShaderObject()
 	{
 		is_shader_validate_.assign(true);
-		shaders_.assign(0);
+		profiles_.assign(CG_PROFILE_UNKNOWN);
 	}
 
 	OGLShaderObject::~OGLShaderObject()
 	{
-		for (int i = 0; i < ST_NumShaderTypes; ++ i)
+		BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
 		{
-			if (shaders_[i])
-			{
-				BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
-				{
-					cgDestroyParameter(pb.cg_param);
-				}
-
-				cgDestroyProgram(shaders_[i]);
-			}
+			cgDestroyParameter(pb.cg_param);
 		}
+
+		cgDestroyProgram(combo_program_);
 	}
 
 	std::string OGLShaderObject::GenShaderText(RenderEffect const & effect) const
@@ -623,7 +620,11 @@ namespace KlayGE
 				ss << "CUBE";
 				break;
 			}
-			ss << " " << tex_sampler_binds_[i].first << ": TEXUNIT" << i << ";" << std::endl;
+			ss << " " << tex_sampler_binds_[i].first
+#ifdef USE_GLSL
+				<< ": TEXUNIT" << i
+#endif
+				<< ";" << std::endl;
 		}
 
 		ss << shader_ss.str();
@@ -631,17 +632,17 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void OGLShaderObject::SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
-			boost::shared_ptr<std::string> const & shader_text)
+	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
 	{
-		is_shader_validate_[type] = true;
+		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
+		RenderEngine& re = rf.RenderEngineInstance();		
 
 		shader_descs_ = shader_descs;
-		shader_text_ = shader_text;
+		shader_text_ = MakeSharedPtr<std::string>(this->GenShaderText(effect));
 
 		std::vector<char const *> args;
 		args.push_back("-DKLAYGE_OPENGL=1");
-		if (!Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().bc5_support)
+		if (!re.DeviceCaps().bc5_support)
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}
@@ -651,151 +652,171 @@ namespace KlayGE
 		}
 		args.push_back(NULL);
 
-		std::string profile = (*shader_descs_)[type].profile;
-		switch (type)
+		boost::array<CGprogram, ST_NumShaderTypes> shaders;
+
+		is_validate_ = true;
+		std::vector<CGprogram> program_list;
+		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-		case ST_VertexShader:
-			if ("auto" == profile)
+			if (!(*shader_descs_)[type].profile.empty())
 			{
-				profiles_[type] = cgGLGetLatestProfile(CG_GL_VERTEX);
-			}
-			else
-			{
-				profiles_[type] = cgGetProfile(profile.c_str());
-			}
-			break;
+				is_shader_validate_[type] = true;
 
-		case ST_PixelShader:
-			if ("auto" == profile)
-			{
-				profiles_[type] = cgGLGetLatestProfile(CG_GL_FRAGMENT);
-			}
-			else
-			{
-				profiles_[type] = cgGetProfile(profile.c_str());
-			}
-			break;
-
-		case ST_GeometryShader:
-			if ("auto" == profile)
-			{
-				profiles_[type] = cgGLGetLatestProfile(CG_GL_GEOMETRY);
-				if (CG_PROFILE_UNKNOWN == profiles_[type])
+				std::string profile = (*shader_descs_)[type].profile;
+				switch (type)
 				{
-					is_shader_validate_[type] = false;
-				}
-			}
-			else
-			{
-				profiles_[type] = cgGetProfile(profile.c_str());
-			}
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-
-		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
-
-		if (is_shader_validate_[type])
-		{
-			shaders_[type] = cgCreateProgram(render_factory.CGContext(),
-					CG_SOURCE, shader_text->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), &args[0]);
-			cgGLSetOptimalOptions(profiles_[type]);
-
-			CGerror error;
-			char const * err_string = cgGetLastErrorString(&error);
-			if (error != CG_NO_ERROR)
-			{
-#ifdef KLAYGE_DEBUG
-				std::istringstream iss(*shader_text);
-				std::string s;
-				int line = 1;
-				while (iss)
-				{
-					std::getline(iss, s);
-					std::cerr << line << " " << s << std::endl;
-					++ line;
-				}
-				std::cerr << err_string << std::endl;
-				if (CG_COMPILER_ERROR == error)
-				{
-					std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
-				}
-#else
-				UNREF_PARAM(err_string);
-#endif
-
-				is_shader_validate_[type] = false;
-			}
-
-			cgGLLoadProgram(shaders_[type]);
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			switch (type)
-			{
-			case ST_VertexShader:
-				samplers_[type].resize(re.DeviceCaps().max_vertex_texture_units);
-				break;
-
-			case ST_PixelShader:
-				samplers_[type].resize(re.DeviceCaps().max_texture_units);
-				break;
-
-			case ST_GeometryShader:
-				samplers_[type].resize(re.DeviceCaps().max_texture_units);
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-
-			CGparameter cg_param = cgGetFirstParameter(shaders_[type], CG_GLOBAL);
-			while (cg_param)
-			{
-				if (cgIsParameterUsed(cg_param, shaders_[type])
-					&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
-				{
-					char const * pname = cgGetParameterName(cg_param);
-
-					RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
-					if (p)
+				case ST_VertexShader:
+					if ("auto" == profile)
 					{
-						param_binds_[type].push_back(this->GetBindFunc(cg_param, p));
+#ifdef USE_GLSL
+						profiles_[type] = CG_PROFILE_GLSLV;
+#else
+						profiles_[type] = cgGLGetLatestProfile(CG_GL_VERTEX);
+#endif
 					}
 					else
 					{
-						for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+						profiles_[type] = cgGetProfile(profile.c_str());
+					}
+					break;
+
+				case ST_PixelShader:
+					if ("auto" == profile)
+					{
+#ifdef USE_GLSL
+						profiles_[type] = CG_PROFILE_GLSLF;
+#else
+						profiles_[type] = cgGLGetLatestProfile(CG_GL_FRAGMENT);
+#endif
+					}
+					else
+					{
+						profiles_[type] = cgGetProfile(profile.c_str());
+					}
+					break;
+
+				case ST_GeometryShader:
+					if ("auto" == profile)
+					{
+#ifdef USE_GLSL
+						profiles_[type] = CG_PROFILE_GLSLG;
+#else
+						profiles_[type] = cgGLGetLatestProfile(CG_GL_GEOMETRY);
+#endif
+						if (CG_PROFILE_UNKNOWN == profiles_[type])
 						{
-							if (tex_sampler_binds_[i].first == pname)
+							is_shader_validate_[type] = false;
+						}
+					}
+					else
+					{
+						profiles_[type] = cgGetProfile(profile.c_str());
+					}
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
+				if (is_shader_validate_[type])
+				{
+					shaders[type] = cgCreateProgram(rf.CGContext(),
+							CG_SOURCE, shader_text_->c_str(), profiles_[type], (*shader_descs_)[type].func_name.c_str(), &args[0]);
+					cgGLSetOptimalOptions(profiles_[type]);
+
+					CGerror error;
+					char const * err_string = cgGetLastErrorString(&error);
+					if (error != CG_NO_ERROR)
+					{
+#ifdef KLAYGE_DEBUG
+						std::istringstream iss(*shader_text_);
+						std::string s;
+						int line = 1;
+						while (iss)
+						{
+							std::getline(iss, s);
+							std::cerr << line << " " << s << std::endl;
+							++ line;
+						}
+						std::cerr << err_string << std::endl;
+						if (CG_COMPILER_ERROR == error)
+						{
+							std::cerr << cgGetLastListing(rf.CGContext()) << std::endl;
+						}
+#else
+						UNREF_PARAM(err_string);
+#endif
+
+						is_shader_validate_[type] = false;
+					}
+					else
+					{
+						program_list.push_back(shaders[type]);
+					}
+				}
+			}
+
+			is_validate_ &= is_shader_validate_[type];
+		}
+
+		combo_program_ = cgCombinePrograms(program_list.size(), &program_list[0]);
+		assert(static_cast<int>(program_list.size()) == cgGetNumProgramDomains(combo_program_));
+		cgGLLoadProgram(combo_program_);
+
+		for (size_t i = 0; i < program_list.size(); ++ i)
+		{
+			cgDestroyProgram(program_list[i]);
+		}
+
+		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		{
+			if (profiles_[type] != CG_PROFILE_UNKNOWN)
+			{
+				CGprogram sub_prog = cgGetProgramDomainProgram(combo_program_, type);
+				CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_GLOBAL);
+				while (cg_param)
+				{
+					if (cgIsParameterUsed(cg_param, sub_prog)
+						&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+					{
+						char const * pname = cgGetParameterName(cg_param);
+
+						RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
+						if (p)
+						{
+							param_binds_.push_back(this->GetBindFunc(cg_param, p));
+						}
+						else
+						{
+							for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 							{
-								parameter_bind_t pb;
-								pb.combined_sampler_name = tex_sampler_binds_[i].first;
-								pb.cg_param = cg_param;
+								if (tex_sampler_binds_[i].first == pname)
+								{
+									parameter_bind_t pb;
+									pb.combined_sampler_name = tex_sampler_binds_[i].first;
+									pb.cg_param = cg_param;
 
-								uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
-								BOOST_ASSERT(index < samplers_[type].size());
+#ifdef USE_GLSL
+									uint32_t index = samplers_[type].size();
+#else
+									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
+#endif
+									samplers_[type].resize(index + 1);
 
-								pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type][index], cg_param,
-									index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
-								
-								param_binds_[type].push_back(pb);
-								break;
+									pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], cg_param,
+										index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
+									
+									param_binds_.push_back(pb);
+									break;
+								}
 							}
 						}
 					}
+
+					cg_param = cgGetNextParameter(cg_param);
 				}
-
-				cg_param = cgGetNextParameter(cg_param);
 			}
-		}
-
-		is_validate_ = true;
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			is_validate_ &= is_shader_validate_[i];
 		}
 	}
 
@@ -827,17 +848,21 @@ namespace KlayGE
 		}
 		args.push_back(NULL);
 
-		OGLRenderFactory& render_factory(*checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance()));
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ret->is_shader_validate_[i] = true;
+		boost::array<CGprogram, ST_NumShaderTypes> shaders;
 
-			if (shaders_[i])
+		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
+		ret->is_validate_ = true;
+		std::vector<CGprogram> program_list;
+		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		{
+			ret->is_shader_validate_[type] = is_shader_validate_[type];
+
+			if (profiles_[type] != CG_PROFILE_UNKNOWN)
 			{
-				ret->shaders_[i] = cgCreateProgram(render_factory.CGContext(),
-						CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[i],
-						(*ret->shader_descs_)[i].func_name.c_str(), &args[0]);
-				cgGLSetOptimalOptions(ret->profiles_[i]);
+				shaders[type] = cgCreateProgram(rf.CGContext(),
+						CG_SOURCE, ret->shader_text_->c_str(), ret->profiles_[type],
+						(*ret->shader_descs_)[type].func_name.c_str(), &args[0]);
+				cgGLSetOptimalOptions(ret->profiles_[type]);
 
 				CGerror error;
 				char const * err_string = cgGetLastErrorString(&error);
@@ -856,23 +881,41 @@ namespace KlayGE
 					std::cerr << err_string << std::endl;
 					if (CG_COMPILER_ERROR == error)
 					{
-						std::cerr << cgGetLastListing(render_factory.CGContext()) << std::endl;
+						std::cerr << cgGetLastListing(rf.CGContext()) << std::endl;
 					}
 #else
 					UNREF_PARAM(err_string);
 #endif
 
-					ret->is_shader_validate_[i] = false;
+					ret->is_shader_validate_[type] = false;
 				}
+				else
+				{
+					program_list.push_back(shaders[type]);
+				}
+			}
 
-				cgGLLoadProgram(ret->shaders_[i]);
+			ret->is_validate_ &= ret->is_shader_validate_[type];
+		}
 
-				ret->samplers_[i].resize(samplers_[i].size());
+		ret->combo_program_ = cgCombinePrograms(program_list.size(), &program_list[0]);
+		assert(static_cast<int>(program_list.size()) == cgGetNumProgramDomains(ret->combo_program_));
+		cgGLLoadProgram(ret->combo_program_);
 
-				CGparameter cg_param = cgGetFirstParameter(ret->shaders_[i], CG_GLOBAL);
+		for (size_t i = 0; i < program_list.size(); ++ i)
+		{
+			cgDestroyProgram(program_list[i]);
+		}
+
+		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		{
+			if (profiles_[type] != CG_PROFILE_UNKNOWN)
+			{
+				CGprogram sub_prog = cgGetProgramDomainProgram(ret->combo_program_, type);
+				CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_GLOBAL);
 				while (cg_param)
 				{
-					if (cgIsParameterUsed(cg_param, ret->shaders_[i])
+					if (cgIsParameterUsed(cg_param, sub_prog)
 						&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 					{
 						char const * pname = cgGetParameterName(cg_param);
@@ -880,7 +923,7 @@ namespace KlayGE
 						RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
 						if (p)
 						{
-							ret->param_binds_[i].push_back(ret->GetBindFunc(cg_param, p));
+							ret->param_binds_.push_back(ret->GetBindFunc(cg_param, p));
 						}
 						else
 						{
@@ -892,13 +935,17 @@ namespace KlayGE
 									new_pb.combined_sampler_name = pname;
 									new_pb.cg_param = cg_param;
 
+#ifdef USE_GLSL
+									uint32_t index = ret->samplers_[type].size();
+#else
 									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
-									BOOST_ASSERT(index < ret->samplers_[i].size());
+#endif
+									ret->samplers_[type].resize(index + 1);
 
-									new_pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[i][index], cg_param,
+									new_pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[type], cg_param,
 										index, ret->tex_sampler_binds_[j].second.first, ret->tex_sampler_binds_[j].second.second);
 
-									ret->param_binds_[i].push_back(new_pb);
+									ret->param_binds_.push_back(new_pb);
 									break;
 								}
 							}
@@ -908,12 +955,6 @@ namespace KlayGE
 					cg_param = cgGetNextParameter(cg_param);
 				}
 			}
-		}
-
-		ret->is_validate_ = true;
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
-		{
-			ret->is_validate_ &= ret->is_shader_validate_[i];
 		}
 
 		return ret;
@@ -1001,44 +1042,38 @@ namespace KlayGE
 
 	void OGLShaderObject::Bind()
 	{
+		cgGLBindProgram(combo_program_);
+
+		BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
+		{
+			pb.func();
+		}
+
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			if (shaders_[i])
+			if (profiles_[i] != CG_PROFILE_UNKNOWN)
 			{
-				BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
-				{
-					pb.func();
-				}
-
-				cgGLBindProgram(shaders_[i]);
 				cgGLEnableProfile(profiles_[i]);
-
-				BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
-				{
-					if (!pb.param)
-					{
-						cgGLEnableTextureParameter(pb.cg_param);
-					}
-				}
 			}
 		}
+
+		cgUpdateProgramParameters(combo_program_);
 	}
 
 	void OGLShaderObject::Unbind()
 	{
+		BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
+		{
+			if (!pb.param)
+			{
+				cgGLDisableTextureParameter(pb.cg_param);
+			}
+		}
+
 		for (int i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			if (shaders_[i])
+			if (profiles_[i] != CG_PROFILE_UNKNOWN)
 			{
-				BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
-				{
-					if (!pb.param)
-					{
-						cgGLDisableTextureParameter(pb.cg_param);
-					}
-				}
-
-				cgGLUnbindProgram(profiles_[i]);
 				cgGLDisableProfile(profiles_[i]);
 			}
 		}

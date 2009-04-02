@@ -828,14 +828,7 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		shader_text_ = MakeSharedPtr<BOOST_TYPEOF(*shader_text_)>(shader_obj_->GenShaderText(effect_));
-		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
-		{
-			if (!(*shader_descs_)[i].profile.empty())
-			{
-				shader_obj_->SetShader(effect_, static_cast<ShaderObject::ShaderType>(i), shader_descs_, shader_text_);
-			}
-		}
+		shader_obj_->SetShader(effect_, shader_descs_);
 
 		is_validate_ = shader_obj_->Validate();
 	}
@@ -847,7 +840,6 @@ namespace KlayGE
 		ret->name_ = name_;
 		ret->annotations_ = annotations_;
 		ret->shader_descs_ = shader_descs_;
-		ret->shader_text_ = shader_text_;
 
 		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
 		ret->depth_stencil_state_obj_ = depth_stencil_state_obj_;

@@ -24,7 +24,7 @@ float3 decompress_normal(float4 comp_normal)
 {
 	float3 normal;
 	normal.xy = get_xy_channel(comp_normal) * 2 - 1;
-	normal.z = sqrt(1 - dot(normal.xy, normal.xy));
+	normal.z = sqrt(max(0.0f, 1 - dot(normal.xy, normal.xy)));
 	return normal;
 }
 

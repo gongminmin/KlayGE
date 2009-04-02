@@ -57,10 +57,7 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual std::string GenShaderText(RenderEffect const & effect) const = 0;
-
-		virtual void SetShader(RenderEffect& effect, ShaderType type, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs,
-			boost::shared_ptr<std::string> const & shader_text) = 0;
+		virtual void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect& effect) = 0;
 
 		virtual void Bind() = 0;
