@@ -48,9 +48,9 @@ namespace
 			while ((start_iter != str.end()) && (' ' == *start_iter))
 			{
 				++ start_iter;
-				++ iter;
 			}
 
+			iter = start_iter;
 			while ((iter != str.end()) && (*iter != ' '))
 			{
 				++ iter;
