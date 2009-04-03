@@ -85,6 +85,7 @@ namespace KlayGE
 			uint32_t s = size;
 			for (uint16_t level = 0; level < numMipMaps_; ++ level)
 			{
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				if (IsCompressedFormat(format_))
 				{
 					int block_size;
@@ -99,7 +100,6 @@ namespace KlayGE
 
 					GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
 
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 					if (NULL == init_data)
@@ -119,7 +119,6 @@ namespace KlayGE
 				{
 					GLsizei const image_size = s * s * bpp_ / 8;
 
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 					if (NULL == init_data)
@@ -256,8 +255,8 @@ namespace KlayGE
 			glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face - Texture::CF_Positive_X, checked_cast<OGLTexture*>(&target)->GLTexture(), level);
 
 			glBlitFramebufferEXT(src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
-                            dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
-                            GL_COLOR_BUFFER_BIT, GL_LINEAR);
+							dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
+							GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			re.BindFramebuffer(old_fbo, true);
 		}
@@ -394,9 +393,9 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
+				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 				if (IsCompressedFormat(format_))
@@ -416,8 +415,6 @@ namespace KlayGE
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
-				std::vector<uint8_t> zero(image_size);
-				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, image_size, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -430,10 +427,9 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-				glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
+				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 				if (IsCompressedFormat(format_))

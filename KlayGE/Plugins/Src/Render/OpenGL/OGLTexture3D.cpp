@@ -86,6 +86,7 @@ namespace KlayGE
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 			if (IsCompressedFormat(format_))
 			{
 				int block_size;
@@ -100,7 +101,6 @@ namespace KlayGE
 
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 				if (NULL == init_data)
@@ -120,7 +120,6 @@ namespace KlayGE
 			{
 				GLsizei const image_size = width * height * depth * bpp_ / 8;
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 				if (NULL == init_data)
@@ -348,10 +347,9 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				//glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_3D, texture_);
 				glGetTexImage(GL_TEXTURE_3D, level, gl_format, gl_type, NULL);
@@ -364,8 +362,6 @@ namespace KlayGE
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
-				std::vector<uint8_t> zero(width * height * depth * size_fmt);
-				glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, width * height * depth * size_fmt, &zero[0]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -378,10 +374,9 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-				glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				//glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
 
 				glBindTexture(GL_TEXTURE_3D, texture_);
 				glGetTexImage(GL_TEXTURE_3D, level, gl_format, gl_type, NULL);

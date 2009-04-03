@@ -621,7 +621,7 @@ namespace KlayGE
 				break;
 			}
 			ss << " " << tex_sampler_binds_[i].first
-#ifdef USE_GLSL
+#ifndef USE_GLSL
 				<< ": TEXUNIT" << i
 #endif
 				<< ";" << std::endl;
@@ -698,7 +698,7 @@ namespace KlayGE
 				case ST_GeometryShader:
 					if ("auto" == profile)
 					{
-#ifdef USE_GLSL
+#if (defined USE_GLSL) && (defined CG_PROFILE_GLSLG)
 						profiles_[type] = CG_PROFILE_GLSLG;
 #else
 						profiles_[type] = cgGLGetLatestProfile(CG_GL_GEOMETRY);
@@ -799,10 +799,14 @@ namespace KlayGE
 
 #ifdef USE_GLSL
 									uint32_t index = samplers_[type].size();
+									samplers_[type].resize(index + 1);
 #else
 									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
+									if (index >= samplers_[type].size())
+									{
+										samplers_[type].resize(index + 1);
+									}
 #endif
-									samplers_[type].resize(index + 1);
 
 									pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], cg_param,
 										index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
@@ -937,10 +941,14 @@ namespace KlayGE
 
 #ifdef USE_GLSL
 									uint32_t index = ret->samplers_[type].size();
+									ret->samplers_[type].resize(index + 1);
 #else
 									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
+									if (index >= ret->samplers_[type].size())
+									{
+										ret->samplers_[type].resize(index + 1);
+									}
 #endif
-									ret->samplers_[type].resize(index + 1);
 
 									new_pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[type], cg_param,
 										index, ret->tex_sampler_binds_[j].second.first, ret->tex_sampler_binds_[j].second.second);
