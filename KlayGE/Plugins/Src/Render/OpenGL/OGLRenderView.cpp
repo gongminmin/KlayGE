@@ -71,6 +71,25 @@ namespace KlayGE
 
 		DepthStencilStateDesc const & cur_desc = re.CurDSSObj()->GetDesc();
 
+		if (flags & GL_DEPTH_BUFFER_BIT)
+		{
+			if (!cur_desc.depth_write_mask)
+			{
+				glDepthMask(GL_TRUE);
+			}
+		}
+		if (flags & GL_STENCIL_BUFFER_BIT)
+		{
+			if (!cur_desc.front_stencil_write_mask)
+			{
+				glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+			}
+			if (!cur_desc.back_stencil_write_mask)
+			{
+				glStencilMaskSeparate(GL_BACK, GL_TRUE);
+			}
+		}
+
 		if (glloader_GL_VERSION_3_0())
 		{
 			if (flags & GL_COLOR_BUFFER_BIT)
@@ -78,51 +97,31 @@ namespace KlayGE
 				glClearBufferfv(GL_COLOR, index_, &clr[0]);
 			}
 
-			GLenum ogl_buff = 0;
-			if (flags & GL_DEPTH_BUFFER_BIT)
+			if ((flags & GL_DEPTH_BUFFER_BIT) && (flags & GL_STENCIL_BUFFER_BIT))
 			{
-				if (flags & GL_STENCIL_BUFFER_BIT)
-				{
-					ogl_buff = GL_DEPTH_STENCIL;
-				}
-				else
-				{
-					ogl_buff = GL_DEPTH;
-				}
+				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 			}
 			else
 			{
-				if (flags & GL_STENCIL_BUFFER_BIT)
+				if (flags & GL_DEPTH_BUFFER_BIT)
 				{
-					ogl_buff = GL_STENCIL;
+					glClearBufferfv(GL_DEPTH, 0, &depth);
 				}
-			}
-			if (ogl_buff != 0)
-			{
-				glClearBufferfi(ogl_buff, 0, depth, stencil);
-			}
-		}
-		else
-		{
-			if (flags & GL_DEPTH_BUFFER_BIT)
-			{
-				if (!cur_desc.depth_write_mask)
+				else
 				{
-					glDepthMask(GL_TRUE);
-				}
-			}
-			if (flags & GL_STENCIL_BUFFER_BIT)
-			{
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_TRUE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_TRUE);
+					if (flags & GL_STENCIL_BUFFER_BIT)
+					{
+						GLint s = stencil;
+						glClearBufferiv(GL_STENCIL, 0, &s);
+					}
 				}
 			}
 
+			// WORKAROUND: for Forceware 185.66
+			glGetError();
+		}
+		else
+		{
 			if (flags & GL_COLOR_BUFFER_BIT)
 			{
 				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
@@ -139,24 +138,24 @@ namespace KlayGE
 			{
 				glClear(flags);
 			}
+		}
 
-			if (flags & GL_DEPTH_BUFFER_BIT)
+		if (flags & GL_DEPTH_BUFFER_BIT)
+		{
+			if (!cur_desc.depth_write_mask)
 			{
-				if (!cur_desc.depth_write_mask)
-				{
-					glDepthMask(GL_FALSE);
-				}
+				glDepthMask(GL_FALSE);
 			}
-			if (flags & GL_STENCIL_BUFFER_BIT)
+		}
+		if (flags & GL_STENCIL_BUFFER_BIT)
+		{
+			if (!cur_desc.front_stencil_write_mask)
 			{
-				if (!cur_desc.front_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_FRONT, GL_FALSE);
-				}
-				if (!cur_desc.back_stencil_write_mask)
-				{
-					glStencilMaskSeparate(GL_BACK, GL_FALSE);
-				}
+				glStencilMaskSeparate(GL_FRONT, GL_FALSE);
+			}
+			if (!cur_desc.back_stencil_write_mask)
+			{
+				glStencilMaskSeparate(GL_BACK, GL_FALSE);
 			}
 		}
 
