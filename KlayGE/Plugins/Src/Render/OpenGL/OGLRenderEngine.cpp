@@ -728,5 +728,19 @@ namespace KlayGE
 
 		caps_.bc6_support = false;
 		caps_.bc7_support = false;
+
+		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
+			|| glloader_GL_NV_geometry_shader4())
+		{
+			caps_.gs_support = true;
+		}
+		else
+		{
+			caps_.gs_support = false;
+		}
+			
+		caps_.cs_support = false;
+		caps_.hs_support = false;
+		caps_.ds_support = false;
 	}
 }

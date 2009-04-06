@@ -179,7 +179,7 @@ namespace KlayGE
 			name, settings);
 		default_frame_buffer_ = win;
 
-		switch (win->DeviceFeatureLevel())
+		switch (d3d_device_->GetFeatureLevel())
 		{
 		case D3D_FEATURE_LEVEL_11_0:
 			vs_profile_ = "vs_5_0";
@@ -193,9 +193,15 @@ namespace KlayGE
 			gs_profile_ = "gs_4_1";
 			break;
 
-		default:
+		case D3D_FEATURE_LEVEL_10_0:
 			vs_profile_ = "vs_4_0";
 			ps_profile_ = "ps_4_0";
+			gs_profile_ = "gs_4_0";
+			break;
+
+		default:
+			vs_profile_ = "vs_4_0_level_9_3";
+			ps_profile_ = "ps_4_0_level_9_3";
 			gs_profile_ = "gs_4_0";
 			break;
 		}
@@ -451,11 +457,29 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
+		D3D_FEATURE_LEVEL feature = d3d_device_->GetFeatureLevel();
+
 		caps_.max_vertex_texture_units = 16;
-		caps_.max_shader_model = 4;
-		caps_.max_texture_height = caps_.max_texture_width = 8192;
-		caps_.max_texture_depth = 2048;
-		caps_.max_texture_cube_size = 8192;
+		if (D3D_FEATURE_LEVEL_11_0 == feature)
+		{
+			caps_.max_shader_model = 5;
+		}
+		else
+		{
+			caps_.max_shader_model = 4;
+		}
+		if (feature <= D3D_FEATURE_LEVEL_9_3)
+		{
+			caps_.max_texture_height = caps_.max_texture_width = 4096;
+			caps_.max_texture_depth = 511;
+			caps_.max_texture_cube_size = 4096;
+		}
+		else
+		{
+			caps_.max_texture_height = caps_.max_texture_width = 8192;
+			caps_.max_texture_depth = 2048;
+			caps_.max_texture_cube_size = 8192;
+		}
 		caps_.max_texture_array_length = 0;
 		caps_.max_texture_units = 16;
 		caps_.max_texture_anisotropy = 16;
@@ -471,12 +495,48 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
-		caps_.primitive_restart_support = true;
-		caps_.argb8_support = false;
-		caps_.bc4_support = true;
-		caps_.bc5_support = true;
-		caps_.bc6_support = true;
-		caps_.bc7_support = true;
+		switch (feature)
+		{
+		case D3D_FEATURE_LEVEL_11_0:
+			caps_.primitive_restart_support = true;
+			caps_.argb8_support = false;
+			caps_.bc4_support = true;
+			caps_.bc5_support = true;
+			caps_.bc6_support = true;
+			caps_.bc7_support = true;
+			caps_.gs_support = true;
+			caps_.cs_support = true;
+			caps_.hs_support = true;
+			caps_.ds_support = true;
+			break;
+
+		case D3D_FEATURE_LEVEL_10_1:
+		case D3D_FEATURE_LEVEL_10_0:
+			caps_.primitive_restart_support = true;
+			caps_.argb8_support = false;
+			caps_.bc4_support = true;
+			caps_.bc5_support = true;
+			caps_.bc6_support = false;
+			caps_.bc7_support = false;
+			caps_.gs_support = true;
+			caps_.cs_support = false;
+			caps_.hs_support = false;
+			caps_.ds_support = false;
+			break;
+
+		default:
+			caps_.primitive_restart_support = false;
+			caps_.argb8_support = true;
+			caps_.bc4_support = false;
+			caps_.bc5_support = false;
+			caps_.bc6_support = false;
+			caps_.bc7_support = false;
+			caps_.gs_support = false;
+			caps_.cs_support = false;
+			caps_.hs_support = false;
+			caps_.ds_support = false;
+			break;
+		}
 	}
 
 	void D3D11RenderEngine::RSSetState(ID3D11RasterizerStatePtr const & ras)

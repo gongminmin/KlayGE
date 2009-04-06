@@ -466,6 +466,7 @@ namespace KlayGE
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
+		D3D_FEATURE_LEVEL feature_level = d3d_device->GetFeatureLevel();
 
 		std::string shader_text = this->GenShaderText(effect);
 
@@ -507,8 +508,25 @@ namespace KlayGE
 
 				ID3D10Blob* code;
 				ID3D10Blob* err_msg;
-				D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D11", "1" }, { NULL, NULL } };
-				D3DX11CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
+				std::vector<D3D10_SHADER_MACRO> macros;
+				{
+					D3D10_SHADER_MACRO macro_cb = { "CONSTANT_BUFFER", "1" };
+					macros.push_back(macro_cb);
+				}
+				{
+					D3D10_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" };
+					macros.push_back(macro_d3d11);
+				}
+				if (feature_level <= D3D_FEATURE_LEVEL_9_3)
+				{
+					D3D10_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+					macros.push_back(macro_bc5_as_bc3);
+				}
+				{
+					D3D10_SHADER_MACRO macro_end = { NULL, NULL };
+					macros.push_back(macro_end);
+				}
+				D3DX11CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
 					NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 					0, 0, NULL, &code, &err_msg, NULL);
 				if (err_msg != NULL)
@@ -545,8 +563,11 @@ namespace KlayGE
 						{
 							is_shader_validate_[type] = false;
 						}
-						vertex_shader_ = MakeCOMPtr(vs);
-						vs_code_ = code_blob;
+						else
+						{
+							vertex_shader_ = MakeCOMPtr(vs);
+							vs_code_ = code_blob;
+						}
 						break;
 
 					case ST_PixelShader:
@@ -555,7 +576,10 @@ namespace KlayGE
 						{
 							is_shader_validate_[type] = false;
 						}
-						pixel_shader_ = MakeCOMPtr(ps);
+						else
+						{
+							pixel_shader_ = MakeCOMPtr(ps);
+						}
 						break;
 
 					case ST_GeometryShader:
@@ -564,7 +588,10 @@ namespace KlayGE
 						{
 							is_shader_validate_[type] = false;
 						}
-						geometry_shader_ = MakeCOMPtr(gs);
+						else
+						{
+							geometry_shader_ = MakeCOMPtr(gs);
+						}
 						break;
 
 					default:

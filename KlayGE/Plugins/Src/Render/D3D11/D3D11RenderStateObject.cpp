@@ -120,6 +120,8 @@ namespace KlayGE
 	D3D11SamplerStateObject::D3D11SamplerStateObject(SamplerStateDesc const & desc)
 		: SamplerStateObject(desc)
 	{
+		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
+
 		D3D11_SAMPLER_DESC d3d_desc;
 		d3d_desc.Filter = D3D11Mapping::Mapping(desc.filter);
 		d3d_desc.AddressU = D3D11Mapping::Mapping(desc.addr_mode_u);
@@ -133,9 +135,14 @@ namespace KlayGE
 		d3d_desc.BorderColor[2] = desc.border_clr.b();
 		d3d_desc.BorderColor[3] = desc.border_clr.a();
 		d3d_desc.MinLOD = -std::numeric_limits<float>::max();
-		d3d_desc.MaxLOD = desc.max_mip_level;
-
-		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
+		if (d3d_device->GetFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
+		{
+			d3d_desc.MaxLOD = std::numeric_limits<float>::max();
+		}
+		else
+		{
+			d3d_desc.MaxLOD = desc.max_mip_level;
+		}
 
 		ID3D11SamplerState* sampler_state;
 		TIF(d3d_device->CreateSamplerState(&d3d_desc, &sampler_state));

@@ -562,7 +562,7 @@ GPUParticleSystemApp::GPUParticleSystemApp(std::string const & name, RenderSetti
 
 void GPUParticleSystemApp::InitObjects()
 {
-	use_gs = (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_shader_model >= 4);
+	use_gs = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().gs_support;
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 

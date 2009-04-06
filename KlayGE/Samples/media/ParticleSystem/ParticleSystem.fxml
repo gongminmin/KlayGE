@@ -156,10 +156,10 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
+		float depth = scene_tex.Sample(scene_sampler, tex_coord).a;
 
 		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
-		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / point_radius / 2 + 0.5, 0);
+		clr *= particle_tex.Sample(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / point_radius / 2 + 0.5);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 	}

@@ -452,6 +452,10 @@ namespace KlayGE
 		caps_.bc5_support = true;
 		caps_.bc6_support = false;
 		caps_.bc7_support = false;
+		caps_.gs_support = true;
+		caps_.cs_support = false;
+		caps_.hs_support = false;
+		caps_.ds_support = false;
 	}
 
 	void D3D10RenderEngine::RSSetState(ID3D10RasterizerStatePtr const & ras)

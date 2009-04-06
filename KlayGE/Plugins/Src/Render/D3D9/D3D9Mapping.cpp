@@ -642,6 +642,11 @@ namespace KlayGE
 		ret.bc6_support = false;
 		ret.bc7_support = false;
 
+		ret.gs_support = false;
+		ret.cs_support = false;
+		ret.hs_support = false;
+		ret.ds_support = false;
+
 		return ret;
 	}
 

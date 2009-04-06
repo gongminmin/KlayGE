@@ -50,6 +50,11 @@ namespace KlayGE
 		bool bc5_support;
 		bool bc6_support;
 		bool bc7_support;
+
+		bool gs_support;
+		bool cs_support;
+		bool hs_support;
+		bool ds_support;
 	};
 }
 
