@@ -121,21 +121,18 @@ namespace
 	{
 		int const ASCII_IN_A_ROW = 16;
 
-		TexturePtr ascii_tex = LoadTexture(tex_name, EAH_CPU_Read)();
-		BOOST_ASSERT(EF_R8 == ascii_tex->Format());
+		Texture::TextureType type;
+		uint32_t width, height, depth;
+		uint16_t numMipMaps;
+		ElementFormat format;
+		std::vector<ElementInitData> init_data;
+		std::vector<uint8_t> data_block;
+		LoadTexture(tex_name, type, width, height, depth, numMipMaps,
+			format, init_data, data_block);
+
+		BOOST_ASSERT(EF_R8 == format);
 
 		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
-
-		std::vector<uint8_t> ascii_tex_data(INPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
-		{
-			Texture::Mapper mapper(*ascii_tex, 0, TMA_Read_Only, 0, 0, ASCII_IN_A_ROW * ASCII_WIDTH, INPUT_NUM_ASCII / ASCII_IN_A_ROW * ASCII_HEIGHT);
-			uint8_t* data = mapper.Pointer<uint8_t>();
-			for (uint32_t y = 0; y < INPUT_NUM_ASCII / ASCII_IN_A_ROW * ASCII_HEIGHT; ++ y)
-			{
-				memcpy(&ascii_tex_data[y * ASCII_IN_A_ROW * ASCII_WIDTH], data, ASCII_IN_A_ROW * ASCII_WIDTH);
-				data += mapper.RowPitch();
-			}
-		}
 
 		for (size_t i = 0; i < ret.size(); ++ i)
 		{
@@ -145,7 +142,7 @@ namespace
 				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
 				{
 					ret[i][y * ASCII_WIDTH + x]
-						= ascii_tex_data[((i / ASCII_IN_A_ROW) * ASCII_HEIGHT + y) * ASCII_IN_A_ROW * ASCII_WIDTH
+						= data_block[((i / ASCII_IN_A_ROW) * ASCII_HEIGHT + y) * ASCII_IN_A_ROW * ASCII_WIDTH
 							+ (i % ASCII_IN_A_ROW) * ASCII_WIDTH + x];
 				}
 			}
