@@ -207,6 +207,74 @@ namespace
 	};
 
 	template <>
+	class SetD3D10ShaderParameter<float2*, float>
+	{
+	public:
+		SetD3D10ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<float4*>(target)), size_(elements * sizeof(float4)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float2> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(v[i].x(), v[i].y(), 0, 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(float4)));
+			}
+			*dirty_ = true;
+		}
+
+	private:
+		float4* target_;
+		size_t size_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D10ShaderParameter<float3*, float>
+	{
+	public:
+		SetD3D10ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<float4*>(target)), size_(elements * sizeof(float4)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float3> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(v[i].x(), v[i].y(), v[i].z(), 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(float4)));
+			}
+			*dirty_ = true;
+		}
+
+	private:
+		float4* target_;
+		size_t size_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
 	class SetD3D10ShaderParameter<float4*, float>
 	{
 	public:
@@ -615,6 +683,8 @@ namespace KlayGE
 
 	ShaderObjectPtr D3D10ShaderObject::Clone(RenderEffect& effect)
 	{
+		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
+
 		D3D10ShaderObjectPtr ret = MakeSharedPtr<D3D10ShaderObject>();
 		ret->is_validate_ = is_validate_;
 		ret->is_shader_validate_ = is_shader_validate_;
@@ -629,7 +699,20 @@ namespace KlayGE
 
 			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
-			ret->d3d_cbufs_[i] = d3d_cbufs_[i];
+
+			ret->d3d_cbufs_[i].resize(d3d_cbufs_[i].size());
+			D3D10_BUFFER_DESC desc;
+			desc.Usage = D3D10_USAGE_DEFAULT;
+			desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
+			desc.CPUAccessFlags = 0;
+			desc.MiscFlags = 0;
+			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
+			{
+				desc.ByteWidth = cbufs_[i][j].size();
+				ID3D10Buffer* tmp_buf;
+				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+				ret->d3d_cbufs_[i][j] = MakeCOMPtr(tmp_buf);
+			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::const_reference pb, param_binds_[i])
@@ -752,11 +835,25 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			ret.func = SetD3D10ShaderParameter<float2, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetD3D10ShaderParameter<float2*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			else
+			{
+				ret.func = SetD3D10ShaderParameter<float2, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
 			break;
 
 		case REDT_float3:
-			ret.func = SetD3D10ShaderParameter<float3, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetD3D10ShaderParameter<float3*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			else
+			{
+				ret.func = SetD3D10ShaderParameter<float3, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
 			break;
 
 		case REDT_float4:
@@ -936,9 +1033,9 @@ namespace KlayGE
 				{
 					d3d_device->UpdateSubresource(d3d_cbufs_[i][j].get(), D3D10CalcSubresource(0, 0, 1), NULL, &cbufs_[i][j][0],
 						static_cast<UINT>(cbufs_[i][j].size()), static_cast<UINT>(cbufs_[i][j].size()));
-				}
 
-				dirty_[i][j] = false;
+					dirty_[i][j] = false;
+				}
 			}
 		}
 

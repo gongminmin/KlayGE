@@ -339,6 +339,56 @@ namespace
 	};
 
 	template <>
+	class SetOGLShaderParameter<float2*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float2> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgGLSetParameterArray2f(cg_param_, 0, static_cast<long>(v.size()), &v[0][0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<float3*>
+	{
+	public:
+		SetOGLShaderParameter(CGparameter cg_param, RenderEffectParameterPtr const & param)
+			: cg_param_(cg_param), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float3> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				cgGLSetParameterArray3f(cg_param_, 0, static_cast<long>(v.size()), &v[0][0]);
+			}
+		}
+
+	private:
+		CGparameter cg_param_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetOGLShaderParameter<float4*>
 	{
 	public:
@@ -1011,11 +1061,25 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			ret.func = SetOGLShaderParameter<float2>(cg_param, param);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetOGLShaderParameter<float2*>(cg_param, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<float2>(cg_param, param);
+			}
 			break;
 
 		case REDT_float3:
-			ret.func = SetOGLShaderParameter<float3>(cg_param, param);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetOGLShaderParameter<float3*>(cg_param, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<float3>(cg_param, param);
+			}
 			break;
 
 		case REDT_float4:

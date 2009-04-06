@@ -244,6 +244,7 @@ namespace
 			break;
 
 		case REDT_float2:
+			if (0 == array_size)
 			{
 				var = MakeSharedPtr<RenderVariableFloat2>();
 
@@ -251,15 +252,24 @@ namespace
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 				*var = tmp;
 			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat2Array>();
+			}
 			break;
 
 		case REDT_float3:
+			if (0 == array_size)
 			{
 				var = MakeSharedPtr<RenderVariableFloat3>();
 
 				float3 tmp;
 				source->read(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableFloat3Array>();
 			}
 			break;
 
@@ -1032,6 +1042,18 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(std::vector<float2> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<float3> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(std::vector<float4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -1110,6 +1132,16 @@ namespace KlayGE
 	}
 
 	void RenderVariable::Value(std::vector<float>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<float2>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<float3>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

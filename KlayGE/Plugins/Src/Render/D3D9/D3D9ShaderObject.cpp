@@ -324,6 +324,70 @@ namespace
 	};
 
 	template <>
+	class SetD3D9ShaderParameter<float2*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(float4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float2> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(v[i].x(), v[i].y(), 0, 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v4[0], std::min(reg_size_, v4.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<float3*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(float4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<float3> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(v[i].x(), v[i].y(), v[i].z(), 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v4[0], std::min(reg_size_, v4.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetD3D9ShaderParameter<float4*, float>
 	{
 	public:
@@ -1052,11 +1116,25 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			ret.func = SetD3D9ShaderParameter<float2, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetD3D9ShaderParameter<float2*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+			}
+			else
+			{
+				ret.func = SetD3D9ShaderParameter<float2, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+			}
 			break;
 
 		case REDT_float3:
-			ret.func = SetD3D9ShaderParameter<float3, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+			if (param->ArraySize() != 0)
+			{
+				ret.func = SetD3D9ShaderParameter<float3*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+			}
+			else
+			{
+				ret.func = SetD3D9ShaderParameter<float3, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+			}
 			break;
 
 		case REDT_float4:
