@@ -1270,7 +1270,7 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, 1, 0, format, EAH_CPU_Read, NULL);
+				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_2D:

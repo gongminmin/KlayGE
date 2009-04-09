@@ -77,6 +77,13 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 		default_frame_buffer_.reset();
 
+		rasterizer_state_cache_.reset();
+		depth_stencil_state_cache_.reset();
+		blend_state_cache_.reset();
+		vertex_shader_cache_.reset();
+		pixel_shader_cache_.reset();
+		geometry_shader_cache_.reset();
+
 		d3d_imm_ctx_->ClearState();
 		d3d_imm_ctx_.reset();
 		d3d_device_.reset();

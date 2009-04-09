@@ -103,8 +103,8 @@ namespace KlayGE
 		d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
 
 		D3D11_VIEWPORT d3d_viewport;
-		d3d_viewport.Width = viewport_.width;
-		d3d_viewport.Height = viewport_.height;
+		d3d_viewport.Width = static_cast<float>(viewport_.width);
+		d3d_viewport.Height = static_cast<float>(viewport_.height);
 		d3d_viewport.MinDepth = 0.0f;
 		d3d_viewport.MaxDepth = 1.0f;
 		d3d_viewport.TopLeftX = 0;

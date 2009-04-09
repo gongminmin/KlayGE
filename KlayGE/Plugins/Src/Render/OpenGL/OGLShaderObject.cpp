@@ -810,7 +810,7 @@ namespace KlayGE
 			is_validate_ &= is_shader_validate_[type];
 		}
 
-		combo_program_ = cgCombinePrograms(program_list.size(), &program_list[0]);
+		combo_program_ = cgCombinePrograms(static_cast<int>(program_list.size()), &program_list[0]);
 		assert(static_cast<int>(program_list.size()) == cgGetNumProgramDomains(combo_program_));
 		cgGLLoadProgram(combo_program_);
 
@@ -819,7 +819,7 @@ namespace KlayGE
 			cgDestroyProgram(program_list[i]);
 		}
 
-		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		for (int type = 0; type < ST_NumShaderTypes; ++ type)
 		{
 			if (profiles_[type] != CG_PROFILE_UNKNOWN)
 			{
@@ -848,7 +848,7 @@ namespace KlayGE
 									pb.cg_param = cg_param;
 
 #ifdef USE_GLSL
-									uint32_t index = samplers_[type].size();
+									uint32_t index = static_cast<uint32_t>(samplers_[type].size());
 									samplers_[type].resize(index + 1);
 #else
 									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;
@@ -952,7 +952,7 @@ namespace KlayGE
 			ret->is_validate_ &= ret->is_shader_validate_[type];
 		}
 
-		ret->combo_program_ = cgCombinePrograms(program_list.size(), &program_list[0]);
+		ret->combo_program_ = cgCombinePrograms(static_cast<int>(program_list.size()), &program_list[0]);
 		assert(static_cast<int>(program_list.size()) == cgGetNumProgramDomains(ret->combo_program_));
 		cgGLLoadProgram(ret->combo_program_);
 
@@ -961,7 +961,7 @@ namespace KlayGE
 			cgDestroyProgram(program_list[i]);
 		}
 
-		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		for (int type = 0; type < ST_NumShaderTypes; ++ type)
 		{
 			if (profiles_[type] != CG_PROFILE_UNKNOWN)
 			{
@@ -990,7 +990,7 @@ namespace KlayGE
 									new_pb.cg_param = cg_param;
 
 #ifdef USE_GLSL
-									uint32_t index = ret->samplers_[type].size();
+									uint32_t index = static_cast<uint32_t>(ret->samplers_[type].size());
 									ret->samplers_[type].resize(index + 1);
 #else
 									uint32_t index = cgGLGetTextureEnum(cg_param) - GL_TEXTURE0;

@@ -708,7 +708,7 @@ namespace KlayGE
 			desc.MiscFlags = 0;
 			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
 			{
-				desc.ByteWidth = cbufs_[i][j].size();
+				desc.ByteWidth = static_cast<UINT>(cbufs_[i][j].size());
 				ID3D10Buffer* tmp_buf;
 				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
 				ret->d3d_cbufs_[i][j] = MakeCOMPtr(tmp_buf);
