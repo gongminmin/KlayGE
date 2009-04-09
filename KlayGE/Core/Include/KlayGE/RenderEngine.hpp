@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了BeginPass/EndPass (2009.4.9)
 //
 // 3.6.0
 // 去掉了RenderTarget，直接使用FrameBuffer (2007.6.20)
@@ -81,7 +84,9 @@ namespace KlayGE
 		virtual void StartRendering() = 0;
 
 		virtual void BeginFrame() = 0;
+		virtual void BeginPass() = 0;
 		void Render(RenderTechnique const & tech, RenderLayout const & rl);
+		virtual void EndPass() = 0;
 		virtual void EndFrame() = 0;
 
 		size_t NumPrimitivesJustRendered();

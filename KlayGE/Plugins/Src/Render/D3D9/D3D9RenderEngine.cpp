@@ -431,6 +431,12 @@ namespace KlayGE
 		TIF(d3dDevice_->BeginScene());
 	}
 
+	// 开始一个Pass
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::BeginPass()
+	{
+	}
+
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
@@ -612,6 +618,12 @@ namespace KlayGE
 		BOOST_ASSERT(d3dDevice_);
 
 		TIF(d3dDevice_->EndScene());
+	}
+
+	// 结束一个Pass
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::EndPass()
+	{
 	}
 
 	// 获取模板位数

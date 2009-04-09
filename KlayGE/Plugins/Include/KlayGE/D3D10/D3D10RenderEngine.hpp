@@ -54,6 +54,8 @@ namespace KlayGE
 
 		void BeginFrame();
 		void EndFrame();
+		void BeginPass();
+		void EndPass();
 
 		uint16_t StencilBufferBitDepth();
 
@@ -110,8 +112,6 @@ namespace KlayGE
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();
-
-		void RenderRL(RenderTechnique const & tech, RenderLayout const & rl);
 
 	private:
 		D3D10AdapterList const & D3DAdapters() const;

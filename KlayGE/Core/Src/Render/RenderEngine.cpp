@@ -64,6 +64,13 @@ namespace KlayGE
 		{
 		}
 
+		void BeginPass()
+		{
+		}
+		void EndPass()
+		{
+		}
+
 		void CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
 		{
 		}

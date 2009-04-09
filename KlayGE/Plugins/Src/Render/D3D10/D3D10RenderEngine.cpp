@@ -231,6 +231,12 @@ namespace KlayGE
 	{
 	}
 
+	// 开始一个Pass
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D10RenderEngine::BeginPass()
+	{
+	}
+
 	// 渲染
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D10RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
@@ -262,11 +268,6 @@ namespace KlayGE
 
 		d3d_device_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
-		this->RenderRL(tech, rl);
-	}
-
-	void D3D10RenderEngine::RenderRL(RenderTechnique const & tech, RenderLayout const & rl)
-	{
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
 		d3d_device_->IASetPrimitiveTopology(D3D10Mapping::Mapping(rl.TopologyType()));
@@ -372,6 +373,12 @@ namespace KlayGE
 	// 结束一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D10RenderEngine::EndFrame()
+	{
+	}
+
+	// 结束一个Pass
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D10RenderEngine::EndPass()
 	{
 	}
 

@@ -168,6 +168,8 @@ namespace KlayGE
 		{
 			size_t num_objs = scene_objs_.size();
 
+			renderEngine.BeginPass();
+
 			uint32_t urt = app.Update(pass);
 			if (urt & App3DFramework::URV_Only_New_Objs)
 			{
@@ -181,6 +183,9 @@ namespace KlayGE
 			{
 				this->Flush();
 			}
+
+			renderEngine.EndPass();
+
 			if (urt & App3DFramework::URV_Finished)
 			{
 				break;
