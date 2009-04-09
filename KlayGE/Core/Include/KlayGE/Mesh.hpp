@@ -46,14 +46,14 @@ namespace KlayGE
 		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
 
 	public:
-		StaticMesh(RenderModelPtr model, std::wstring const & name);
+		StaticMesh(RenderModelPtr const & model, std::wstring const & name);
 		virtual ~StaticMesh();
 
 		virtual void BuildMeshInfo()
 		{
 		}
 
-		RenderTechniquePtr GetRenderTechnique() const
+		RenderTechniquePtr const & GetRenderTechnique() const
 		{
 			return technique_;
 		}
@@ -62,12 +62,12 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		RenderLayoutPtr GetRenderLayout() const
+		RenderLayoutPtr const & GetRenderLayout() const
 		{
 			return rl_;
 		}
 
-		virtual Box GetBound() const;
+		virtual Box const & GetBound() const;
 
 		virtual std::wstring const & Name() const;
 
@@ -127,10 +127,6 @@ namespace KlayGE
 			this->UpdateBoundBox();
 		}
 
-		StaticMeshPtr Mesh(size_t id)
-		{
-			return meshes_[id];
-		}
 		StaticMeshPtr const & Mesh(size_t id) const
 		{
 			return meshes_[id];
@@ -140,7 +136,7 @@ namespace KlayGE
 			return static_cast<uint32_t>(meshes_.size());
 		}
 
-		RenderTechniquePtr GetRenderTechnique() const
+		RenderTechniquePtr const & GetRenderTechnique() const
 		{
 			return technique_;
 		}
@@ -149,7 +145,7 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		RenderLayoutPtr GetRenderLayout() const
+		RenderLayoutPtr const & GetRenderLayout() const
 		{
 			return rl_;
 		}
@@ -157,7 +153,7 @@ namespace KlayGE
 		void OnRenderBegin();
 		void OnRenderEnd();
 
-		Box GetBound() const
+		Box const & GetBound() const
 		{
 			return box_;
 		}
@@ -318,7 +314,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SkinnedMesh : public StaticMesh
 	{
 	public:
-		SkinnedMesh(RenderModelPtr model, std::wstring const & name);
+		SkinnedMesh(RenderModelPtr const & model, std::wstring const & name);
 		virtual ~SkinnedMesh()
 		{
 		}

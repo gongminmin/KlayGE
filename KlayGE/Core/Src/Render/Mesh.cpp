@@ -64,7 +64,7 @@ namespace KlayGE
 	}
 
 
-	StaticMesh::StaticMesh(RenderModelPtr model, std::wstring const & name)
+	StaticMesh::StaticMesh(RenderModelPtr const & model, std::wstring const & name)
 		: name_(name), model_(model)
 	{
 		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout();
@@ -80,7 +80,7 @@ namespace KlayGE
 		return name_;
 	}
 
-	Box StaticMesh::GetBound() const
+	Box const & StaticMesh::GetBound() const
 	{
 		return box_;
 	}
@@ -215,7 +215,7 @@ namespace KlayGE
 	}
 
 
-	SkinnedMesh::SkinnedMesh(RenderModelPtr model, std::wstring const & name)
+	SkinnedMesh::SkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 		: StaticMesh(model, name)
 	{
 	}

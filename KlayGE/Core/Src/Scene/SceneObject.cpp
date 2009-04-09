@@ -31,20 +31,21 @@ namespace KlayGE
 	{
 	}
 
-	RenderablePtr SceneObject::GetRenderable() const
+	RenderablePtr const & SceneObject::GetRenderable() const
 	{
 		return renderable_;
 	}
 
-	Box SceneObject::GetBound() const
+	Box const & SceneObject::GetBound() const
 	{
 		BOOST_ASSERT(renderable_);
 		return renderable_->GetBound();
 	}
 
-	float4x4 SceneObject::GetModelMatrix() const
+	float4x4 const & SceneObject::GetModelMatrix() const
 	{
-		return float4x4::Identity();
+		static float4x4 iden = float4x4::Identity();
+		return iden;
 	}
 
 	void SceneObject::AddToSceneManager()

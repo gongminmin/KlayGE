@@ -168,7 +168,7 @@ namespace KlayGE
 		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
 	}
 
-	RenderTechniquePtr FontRenderable::GetRenderTechnique() const
+	RenderTechniquePtr const & FontRenderable::GetRenderTechnique() const
 	{
 		if (three_dim_)
 		{

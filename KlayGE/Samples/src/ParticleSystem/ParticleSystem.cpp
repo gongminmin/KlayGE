@@ -31,6 +31,7 @@
 #include <boost/random.hpp>
 #pragma warning(pop)
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "ParticleSystem.hpp"
 
@@ -95,7 +96,7 @@ namespace
 		TerrainRenderable(std::vector<float3> const & vertices, std::vector<uint16_t> const & indices)
 			: RenderableHelper(L"Terrain")
 		{
-			TextureLoader grass = LoadTexture("grass.dds", EAH_GPU_Read);
+			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -166,7 +167,7 @@ namespace
 		RenderParticles()
 			: RenderableHelper(L"Particles")
 		{
-			TextureLoader particle_tl = LoadTexture("particle.dds", EAH_GPU_Read);
+			BOOST_AUTO(particle_tl, LoadTexture("particle.dds", EAH_GPU_Read));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

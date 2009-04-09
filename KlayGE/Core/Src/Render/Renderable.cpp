@@ -99,7 +99,7 @@ namespace KlayGE
 	{
 		if (!instances_.empty() && !instances_[0].lock()->InstanceFormat().empty())
 		{
-			RenderLayoutPtr rl = this->GetRenderLayout();
+			RenderLayoutPtr const & rl = this->GetRenderLayout();
 
 			GraphicsBufferPtr inst_stream = rl->InstanceStream();
 			if (!inst_stream)

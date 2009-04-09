@@ -210,7 +210,7 @@ namespace KlayGE
 		{
 			if (visible_marks_[i])
 			{
-				SceneObjectPtr so = scene_objs_[i];
+				SceneObjectPtr const & so = scene_objs_[i];
 
 				RenderablePtr const & renderable = so->GetRenderable();
 

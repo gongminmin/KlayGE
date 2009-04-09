@@ -52,7 +52,7 @@ namespace KlayGE
 		return vertex_streams_.empty() ? 0 : (vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size);
 	}
 
-	void RenderLayout::BindVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
+	void RenderLayout::BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 		stream_type type, uint32_t freq)
 	{
 		BOOST_ASSERT(buffer);

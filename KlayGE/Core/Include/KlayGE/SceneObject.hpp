@@ -40,10 +40,10 @@ namespace KlayGE
 		explicit SceneObject(uint32_t attrib);
 		virtual ~SceneObject();
 
-		RenderablePtr GetRenderable() const;
+		RenderablePtr const & GetRenderable() const;
 
-		virtual float4x4 GetModelMatrix() const;
-		virtual Box GetBound() const;
+		virtual float4x4 const & GetModelMatrix() const;
+		virtual Box const & GetBound() const;
 
 		virtual void AddToSceneManager();
 

@@ -73,7 +73,7 @@ namespace
 			renderable_ = ra;
 		}
 
-		float4x4 GetModelMatrix() const
+		float4x4 const & GetModelMatrix() const
 		{
 			return mat_;
 		}

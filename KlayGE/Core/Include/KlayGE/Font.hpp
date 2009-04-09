@@ -61,7 +61,7 @@ namespace KlayGE
 	public:
 		explicit FontRenderable(std::string const & fontName);
 
-		RenderTechniquePtr GetRenderTechnique() const;
+		RenderTechniquePtr const & GetRenderTechnique() const;
 
 		void OnRenderBegin();
 		void OnRenderEnd();

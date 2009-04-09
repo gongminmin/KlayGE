@@ -345,7 +345,7 @@ namespace KlayGE
 			Convert(name, mesh.Name());
 			WriteShortString(file, name);
 
-			RenderLayoutPtr rl = mesh.GetRenderLayout();
+			RenderLayoutPtr const & rl = mesh.GetRenderLayout();
 			uint8_t const num_vertex_elems = static_cast<uint8_t const>(rl->NumVertexStreams());
 			file.write(reinterpret_cast<char const *>(&num_vertex_elems), sizeof(num_vertex_elems));
 

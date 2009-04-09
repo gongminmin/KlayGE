@@ -120,12 +120,12 @@ namespace KlayGE
 		uint32_t NumVertices() const;
 
 		template <typename tuple_type>
-		void BindVertexStream(GraphicsBufferPtr buffer, tuple_type const & vertex_elems,
+		void BindVertexStream(GraphicsBufferPtr const & buffer, tuple_type const & vertex_elems,
 			stream_type type = ST_Geometry, uint32_t freq = 1)
 		{
 			this->BindVertexStream(buffer, Tuple2Vector(vertex_elems), type, freq);
 		}
-		void BindVertexStream(GraphicsBufferPtr buffer, vertex_elements_type const & vet,
+		void BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
 
 		uint32_t NumVertexStreams() const

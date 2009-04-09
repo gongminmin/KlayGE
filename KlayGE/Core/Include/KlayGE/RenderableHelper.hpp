@@ -36,10 +36,10 @@ namespace KlayGE
 		{
 		}
 
-		virtual RenderTechniquePtr GetRenderTechnique() const;
-		virtual RenderLayoutPtr GetRenderLayout() const;
+		virtual RenderTechniquePtr const & GetRenderTechnique() const;
+		virtual RenderLayoutPtr const & GetRenderLayout() const;
 
-		virtual Box GetBound() const;
+		virtual Box const & GetBound() const;
 
 		virtual std::wstring const & Name() const;
 

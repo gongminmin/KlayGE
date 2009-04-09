@@ -35,8 +35,8 @@ namespace KlayGE
 	public:
 		virtual ~Renderable();
 
-		virtual RenderTechniquePtr GetRenderTechnique() const = 0;
-		virtual RenderLayoutPtr GetRenderLayout() const = 0;
+		virtual RenderTechniquePtr const & GetRenderTechnique() const = 0;
+		virtual RenderLayoutPtr const & GetRenderLayout() const = 0;
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void OnRenderBegin();
@@ -46,7 +46,7 @@ namespace KlayGE
 		virtual void OnInstanceBegin(uint32_t id);
 		virtual void OnInstanceEnd(uint32_t id);
 
-		virtual Box GetBound() const = 0;
+		virtual Box const & GetBound() const = 0;
 
 		virtual void AddToRenderQueue();
 

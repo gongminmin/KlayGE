@@ -42,17 +42,17 @@ namespace KlayGE
 	{
 	}
 
-	RenderTechniquePtr RenderableHelper::GetRenderTechnique() const
+	RenderTechniquePtr const & RenderableHelper::GetRenderTechnique() const
 	{
 		return technique_;
 	}
 
-	RenderLayoutPtr RenderableHelper::GetRenderLayout() const
+	RenderLayoutPtr const & RenderableHelper::GetRenderLayout() const
 	{
 		return rl_;
 	}
 
-	Box RenderableHelper::GetBound() const
+	Box const & RenderableHelper::GetBound() const
 	{
 		return box_;
 	}

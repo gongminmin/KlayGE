@@ -152,7 +152,7 @@ namespace KlayGE
 		active_ = state;
 	}
 
-	void FrameBuffer::Attach(uint32_t att, RenderViewPtr view)
+	void FrameBuffer::Attach(uint32_t att, RenderViewPtr const & view)
 	{
 		switch (att)
 		{
@@ -284,7 +284,7 @@ namespace KlayGE
 		}
 	}
 
-	RenderViewPtr FrameBuffer::Attached(uint32_t att)
+	RenderViewPtr FrameBuffer::Attached(uint32_t att) const
 	{
 		switch (att)
 		{

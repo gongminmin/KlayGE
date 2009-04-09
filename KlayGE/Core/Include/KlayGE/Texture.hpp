@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 头文件
-// Ver 3.8.0
+// Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 隐藏了TextureLoader (2009.4.9)
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
@@ -47,12 +50,12 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
-#include <KlayGE/thread.hpp>
 
 #include <string>
 #include <vector>
 #include <boost/assert.hpp>
 #include <boost/utility.hpp>
+#include <boost/function.hpp>
 
 namespace KlayGE
 {
@@ -271,36 +274,10 @@ namespace KlayGE
 		uint32_t		access_hint_;
 	};
 
-	class KLAYGE_CORE_API TextureLoader
-	{
-	private:
-		struct TexDesc
-		{
-			uint32_t access_hint;
-			Texture::TextureType type;
-			uint32_t width, height, depth;
-			uint16_t numMipMaps;
-			ElementFormat format;
-			std::vector<ElementInitData> tex_data;
-			std::vector<uint8_t> data_block;
-		};
-
-	public:
-		TextureLoader(std::string const & tex_name, uint32_t access_hint);
-		TexturePtr operator()();
-
-	private:
-		boost::shared_ptr<TexDesc> LoadDDS(std::string const & tex_name, uint32_t access_hint);
-
-	private:
-		joiner<boost::shared_ptr<TexDesc> > tl_thread_;
-		TexturePtr texture_;
-	};
-
 	KLAYGE_CORE_API void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
-	KLAYGE_CORE_API TextureLoader LoadTexture(std::string const & tex_name, uint32_t access_hint);
+	KLAYGE_CORE_API boost::function<TexturePtr()> LoadTexture(std::string const & tex_name, uint32_t access_hint);
 	
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,

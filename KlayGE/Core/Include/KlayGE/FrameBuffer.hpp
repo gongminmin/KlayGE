@@ -1,8 +1,11 @@
 // FrameBuffer.hpp
 // KlayGE 渲染到纹理类 头文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// Color buffer增加至8个 (2009.4.9)
 //
 // 3.7.0
 // 增加了Clear (2008.1.9)
@@ -45,7 +48,11 @@ namespace KlayGE
 			ATT_Color0,
 			ATT_Color1,
 			ATT_Color2,
-			ATT_Color3
+			ATT_Color3,
+			ATT_Color4,
+			ATT_Color5,
+			ATT_Color6,
+			ATT_Color7
 		};
 
 		enum ClearBufferMask
@@ -63,27 +70,27 @@ namespace KlayGE
 
 		virtual std::wstring const & Description() const = 0;
 
-		virtual uint32_t Left() const;
-		virtual uint32_t Top() const;
-		virtual uint32_t Width() const;
-		virtual uint32_t Height() const;
-		virtual uint32_t ColorDepth() const;
-		virtual uint32_t DepthBits() const;
-		virtual uint32_t StencilBits() const;
-		virtual ElementFormat Format() const;
+		uint32_t Left() const;
+		uint32_t Top() const;
+		uint32_t Width() const;
+		uint32_t Height() const;
+		uint32_t ColorDepth() const;
+		uint32_t DepthBits() const;
+		uint32_t StencilBits() const;
+		ElementFormat Format() const;
 
-		virtual Viewport const & GetViewport() const;
-		virtual Viewport& GetViewport();
-		virtual void SetViewport(Viewport const & viewport);
+		Viewport const & GetViewport() const;
+		Viewport& GetViewport();
+		void SetViewport(Viewport const & viewport);
 
-		virtual bool Active() const;
-		virtual void Active(bool state);
+		bool Active() const;
+		void Active(bool state);
 
 		virtual bool RequiresFlipping() const = 0;
 
-		void Attach(uint32_t att, RenderViewPtr view);
+		void Attach(uint32_t att, RenderViewPtr const & view);
 		void Detach(uint32_t att);
-		RenderViewPtr Attached(uint32_t att);
+		RenderViewPtr Attached(uint32_t att) const;
 
 		virtual void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) = 0;
 

@@ -29,6 +29,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <cstring>
 #include <fstream>
@@ -161,102 +162,123 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
+
+	class TextureLoader
+	{
+	private:
+		struct TexDesc
+		{
+			uint32_t access_hint;
+			Texture::TextureType type;
+			uint32_t width, height, depth;
+			uint16_t numMipMaps;
+			ElementFormat format;
+			std::vector<ElementInitData> tex_data;
+			std::vector<uint8_t> data_block;
+		};
+
+	public:
+		TextureLoader(std::string const & tex_name, uint32_t access_hint)
+		{
+			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, tex_name, access_hint));
+		}
+
+		TexturePtr operator()()
+		{
+			if (!texture_)
+			{
+				boost::shared_ptr<TexDesc> tex_desc = tl_thread_();
+
+				RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
+				switch (tex_desc->type)
+				{
+				case Texture::TT_1D:
+					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps,
+						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					break;
+
+				case Texture::TT_2D:
+					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps,
+						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					break;
+
+				case Texture::TT_3D:
+					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps,
+						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					break;
+
+				case Texture::TT_Cube:
+					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps,
+						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+			}
+
+			return texture_;
+		}
+
+	private:
+		boost::shared_ptr<TexDesc> LoadDDS(std::string const & tex_name, uint32_t access_hint)
+		{
+			boost::shared_ptr<TexDesc> tex_desc(new TexDesc);
+			tex_desc->access_hint = access_hint;
+
+			LoadTexture(tex_name, tex_desc->type, tex_desc->width, tex_desc->height, tex_desc->depth,
+				tex_desc->numMipMaps, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
+
+			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
+
+			if ((EF_BC5 == tex_desc->format) && !caps.bc5_support)
+			{
+				BC1_layout tmp;
+				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+				{
+					for (size_t j = 0; j < tex_desc->tex_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
+					{
+						char* p = static_cast<char*>(const_cast<void*>(tex_desc->tex_data[i].data)) + j;
+
+						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
+						memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
+					}
+				}
+
+				tex_desc->format = EF_BC3;
+			}
+
+			if ((EF_ARGB8 == tex_desc->format) && !caps.argb8_support)
+			{
+				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+				{
+					uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
+					for (size_t y = 0; y < tex_desc->height; ++ y)
+					{
+						for (size_t x = 0; x < tex_desc->width; ++ x)
+						{
+							std::swap(p[x * 4 + 0], p[x * 4 + 2]);
+						}
+						p += tex_desc->tex_data[i].row_pitch;
+					}
+				}
+
+				tex_desc->format = EF_ABGR8;
+			}
+
+			return tex_desc;
+		}
+
+	private:
+		joiner<boost::shared_ptr<TexDesc> > tl_thread_;
+		TexturePtr texture_;
+	};
 }
 
 namespace KlayGE
 {
-	TextureLoader::TextureLoader(std::string const & tex_name, uint32_t access_hint)
-	{
-		tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, tex_name, access_hint));
-	}
-
-	boost::shared_ptr<TextureLoader::TexDesc> TextureLoader::LoadDDS(std::string const & tex_name, uint32_t access_hint)
-	{
-		boost::shared_ptr<TexDesc> tex_desc(new TexDesc);
-		tex_desc->access_hint = access_hint;
-
-		LoadTexture(tex_name, tex_desc->type, tex_desc->width, tex_desc->height, tex_desc->depth,
-			tex_desc->numMipMaps, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
-
-		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
-
-		if ((EF_BC5 == tex_desc->format) && !caps.bc5_support)
-		{
-			BC1_layout tmp;
-			for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
-			{
-				for (size_t j = 0; j < tex_desc->tex_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
-				{
-					char* p = static_cast<char*>(const_cast<void*>(tex_desc->tex_data[i].data)) + j;
-
-					BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
-					memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
-				}
-			}
-
-			tex_desc->format = EF_BC3;
-		}
-
-		if ((EF_ARGB8 == tex_desc->format) && !caps.argb8_support)
-		{
-			for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
-			{
-				uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
-				for (size_t y = 0; y < tex_desc->height; ++ y)
-				{
-					for (size_t x = 0; x < tex_desc->width; ++ x)
-					{
-						std::swap(p[x * 4 + 0], p[x * 4 + 2]);
-					}
-					p += tex_desc->tex_data[i].row_pitch;
-				}
-			}
-
-			tex_desc->format = EF_ABGR8;
-		}
-
-		return tex_desc;
-	}
-
-	TexturePtr TextureLoader::operator()()
-	{
-		if (!texture_)
-		{
-			boost::shared_ptr<TexDesc> tex_desc = tl_thread_();
-
-			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-			switch (tex_desc->type)
-			{
-			case Texture::TT_1D:
-				texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-				break;
-
-			case Texture::TT_2D:
-				texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-				break;
-
-			case Texture::TT_3D:
-				texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-				break;
-
-			case Texture::TT_Cube:
-				texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
-		}
-
-		return texture_;
-	}
-
 	// 载入DDS格式文件
 	void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
@@ -797,7 +819,7 @@ namespace KlayGE
 		}
 	}
 
-	TextureLoader LoadTexture(std::string const & tex_name, uint32_t access_hint)
+	boost::function<TexturePtr()> LoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
 		return TextureLoader(tex_name, access_hint);
 	}

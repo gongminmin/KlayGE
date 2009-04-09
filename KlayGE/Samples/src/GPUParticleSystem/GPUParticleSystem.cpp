@@ -35,6 +35,7 @@
 #pragma warning(pop)
 #endif
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "GPUParticleSystem.hpp"
 
@@ -140,7 +141,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_(max_num_particles / 256)
 		{
-			TextureLoader pt = LoadTexture("particle.dds", EAH_GPU_Read);
+			BOOST_AUTO(pt, LoadTexture("particle.dds", EAH_GPU_Read));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -435,7 +436,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr height_map, TexturePtr normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			TextureLoader grass = LoadTexture("grass.dds", EAH_GPU_Read);
+			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -566,8 +567,8 @@ void GPUParticleSystemApp::InitObjects()
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	TextureLoader terrain_height = LoadTexture("terrain_height.dds", EAH_GPU_Read);
-	TextureLoader terrain_normal = LoadTexture("terrain_normal.dds", EAH_GPU_Read);
+	BOOST_AUTO(terrain_height, LoadTexture("terrain_height.dds", EAH_GPU_Read));
+	BOOST_AUTO(terrain_normal, LoadTexture("terrain_normal.dds", EAH_GPU_Read));
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);

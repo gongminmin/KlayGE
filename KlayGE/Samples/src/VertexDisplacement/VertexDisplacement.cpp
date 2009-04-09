@@ -20,6 +20,7 @@
 #include <sstream>
 #include <ctime>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "VertexDisplacement.hpp"
 
@@ -37,7 +38,7 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			TextureLoader flag_tl = LoadTexture("Flag.dds", EAH_GPU_Read);
+			BOOST_AUTO(flag_tl, LoadTexture("Flag.dds", EAH_GPU_Read));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
