@@ -13,6 +13,8 @@
 #ifndef _ATOMIC_HPP
 #define _ATOMIC_HPP
 
+#pragma KLAYGE_ONCE
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #endif

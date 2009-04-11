@@ -13,6 +13,8 @@
 #ifndef _D3D11RENDERSTATEOBJECT_HPP
 #define _D3D11RENDERSTATEOBJECT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 

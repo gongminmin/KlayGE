@@ -14,6 +14,8 @@
 #include <boost/cstdint.hpp>
 #include <limits>
 
+#pragma KLAYGE_ONCE
+
 #define HALF_MIN	5.96046448e-08f	// Smallest positive half
 
 #define HALF_NRM_MIN	6.10351562e-05f	// Smallest positive normalized half

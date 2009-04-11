@@ -1525,6 +1525,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\NetMsg.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\Player.hpp"
 					>
 				</File>

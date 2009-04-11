@@ -16,6 +16,8 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/function.hpp>
 
 #include <KlayGE/ElementFormat.hpp>

@@ -19,6 +19,8 @@
 #ifndef _COLOR_HPP
 #define _COLOR_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/operators.hpp>
 
 #include <KlayGE/Vector.hpp>

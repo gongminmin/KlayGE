@@ -17,6 +17,8 @@
 
 #include <KlayGE/Vector.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	// 4D æÿ’Û

@@ -22,6 +22,8 @@
 #ifndef _RENDERABLEHELPER_HPP
 #define _RENDERABLEHELPER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/Box.hpp>

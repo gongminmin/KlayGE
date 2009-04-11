@@ -13,6 +13,8 @@
 #ifndef _D3D9TYPEDEFS_HPP
 #define _D3D9TYPEDEFS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <d3d9.h>
 #include <d3dx9.h>
 

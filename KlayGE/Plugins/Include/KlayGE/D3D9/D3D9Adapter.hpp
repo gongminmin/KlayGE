@@ -1,6 +1,8 @@
 #ifndef _D3D9ADAPTERINFO_HPP
 #define _D3D9ADAPTERINFO_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <d3d9.h>
 #include <vector>
 #include <string>

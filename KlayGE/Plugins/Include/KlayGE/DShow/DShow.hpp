@@ -13,6 +13,8 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <windows.h>
 #include <control.h>
 #include <d3d9.h>

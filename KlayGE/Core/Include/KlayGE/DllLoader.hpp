@@ -16,6 +16,8 @@
 #ifndef _DLLLOADER_HPP
 #define _DLLLOADER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <string>
 
 namespace KlayGE

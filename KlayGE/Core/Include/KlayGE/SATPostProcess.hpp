@@ -13,6 +13,8 @@
 #ifndef _SATPOSTPROCESS_HPP
 #define _SATPOSTPROCESS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/PostProcess.hpp>

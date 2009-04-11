@@ -13,6 +13,8 @@
 #ifndef _D3D11TEXTURE_HPP
 #define _D3D11TEXTURE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/smart_ptr.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>

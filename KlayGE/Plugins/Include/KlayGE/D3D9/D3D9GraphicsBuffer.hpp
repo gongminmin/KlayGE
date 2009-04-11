@@ -13,6 +13,8 @@
 #ifndef _D3D9GRAPHICSBUFFER_HPP
 #define _D3D9GRAPHICSBUFFER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/smart_ptr.hpp>
 
 #include <d3d9.h>

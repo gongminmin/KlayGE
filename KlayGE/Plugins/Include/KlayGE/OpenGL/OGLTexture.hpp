@@ -20,6 +20,8 @@
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/Texture.hpp>
 
 #include <glloader/glloader.h>

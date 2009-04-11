@@ -16,6 +16,8 @@
 #ifndef _OGGVORBISSOURCE_HPP
 #define _OGGVORBISSOURCE_HPP
 
+#pragma KLAYGE_ONCE
+
 #define KLAYGE_LIB_NAME KlayGE_AudioDataSource_OggVorbis
 #include <KlayGE/config/auto_link.hpp>
 

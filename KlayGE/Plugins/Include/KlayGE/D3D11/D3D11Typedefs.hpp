@@ -13,6 +13,8 @@
 #ifndef _D3D11TYPEDEFS_HPP
 #define _D3D11TYPEDEFS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
 #include <d3dx11.h>

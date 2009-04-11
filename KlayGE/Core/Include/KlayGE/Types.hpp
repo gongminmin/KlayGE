@@ -16,6 +16,8 @@
 #ifndef _TYPES_HPP
 #define _TYPES_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/cstdint.hpp>
 
 namespace KlayGE

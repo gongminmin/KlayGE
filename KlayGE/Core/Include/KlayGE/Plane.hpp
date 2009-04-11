@@ -17,6 +17,8 @@
 
 #include <KlayGE/Vector.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	// 描述一个平面 ax + by + cz + d = 0

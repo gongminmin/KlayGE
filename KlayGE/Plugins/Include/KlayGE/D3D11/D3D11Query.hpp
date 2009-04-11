@@ -10,8 +10,10 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D11OCCLUSIONQUERY_HPP
-#define _D3D11OCCLUSIONQUERY_HPP
+#ifndef _D3D11QUERY_HPP
+#define _D3D11QUERY_HPP
+
+#pragma KLAYGE_ONCE
 
 #include <KlayGE/Query.hpp>
 

@@ -16,6 +16,8 @@
 #ifndef _OGLRENDERWINDOW_HPP
 #define _OGLRENDERWINDOW_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
 

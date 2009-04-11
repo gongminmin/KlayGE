@@ -13,6 +13,8 @@
 #ifndef _D3D9RESOURCE_HPP
 #define _D3D9RESOURCE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/smart_ptr.hpp>
 
 namespace KlayGE

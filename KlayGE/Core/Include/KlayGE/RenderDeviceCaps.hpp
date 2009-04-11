@@ -13,6 +13,8 @@
 #ifndef _RENDERDEVICECAPS_HPP
 #define _RENDERDEVICECAPS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE

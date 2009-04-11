@@ -16,6 +16,8 @@
 #ifndef _D3D9MAPPING_HPP
 #define _D3D9MAPPING_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderStateObject.hpp>

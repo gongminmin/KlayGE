@@ -30,6 +30,8 @@
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/Vector.hpp>
 
 #include <vector>

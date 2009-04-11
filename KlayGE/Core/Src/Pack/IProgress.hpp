@@ -13,6 +13,8 @@
 #ifndef _IPROGRESS_HPP
 #define _IPROGRESS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include "BaseDefines.hpp"
 
 // MIDL_INTERFACE("23170F69-40C1-278A-0000-000000050000")

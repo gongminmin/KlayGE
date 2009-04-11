@@ -13,6 +13,8 @@
 #ifndef _TIMER_HPP
 #define _TIMER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <limits>
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>

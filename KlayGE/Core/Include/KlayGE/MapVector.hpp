@@ -16,6 +16,8 @@
 #ifndef _MAPVECTOR_HPP
 #define _MAPVECTOR_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <algorithm>
 #include <functional>
 #include <utility>

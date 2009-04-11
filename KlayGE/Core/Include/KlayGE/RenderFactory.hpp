@@ -24,6 +24,8 @@
 #ifndef _RENDERFACTORY_HPP
 #define _RENDERFACTORY_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>

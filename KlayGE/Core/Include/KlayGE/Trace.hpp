@@ -13,6 +13,8 @@
 #ifndef _TRACE_HPP
 #define _TRACE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <iostream>
 
 namespace KlayGE

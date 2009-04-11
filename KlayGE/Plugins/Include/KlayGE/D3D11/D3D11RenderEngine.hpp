@@ -13,6 +13,8 @@
 #ifndef _D3D11RENDERENGINE_HPP
 #define _D3D11RENDERENGINE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Color.hpp>
 

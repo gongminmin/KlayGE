@@ -13,6 +13,8 @@
 #ifndef _DSHOWFACTORY_HPP
 #define _DSHOWFACTORY_HPP
 
+#pragma KLAYGE_ONCE
+
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4251 4275 4512 4702)

@@ -13,6 +13,8 @@
 #ifndef _BLOCKCOMPRESSION_HPP
 #define _BLOCKCOMPRESSION_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <vector>
 #include <boost/assert.hpp>
 

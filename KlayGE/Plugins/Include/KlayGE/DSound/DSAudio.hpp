@@ -13,6 +13,8 @@
 #ifndef _DSAUDIO_HPP
 #define _DSAUDIO_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/thread.hpp>
 

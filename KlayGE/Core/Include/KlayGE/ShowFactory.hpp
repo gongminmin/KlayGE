@@ -13,6 +13,8 @@
 #ifndef _SHOWFACTORY_HPP
 #define _SHOWFACTORY_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>

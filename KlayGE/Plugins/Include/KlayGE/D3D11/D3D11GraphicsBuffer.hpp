@@ -13,6 +13,8 @@
 #ifndef _D3D11GRAPHICSBUFFER_HPP
 #define _D3D11GRAPHICSBUFFER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/smart_ptr.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>

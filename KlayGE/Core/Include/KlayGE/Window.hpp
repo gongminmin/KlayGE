@@ -19,6 +19,8 @@
 #ifndef _WINDOW_HPP
 #define _WINDOW_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/RenderSettings.hpp>

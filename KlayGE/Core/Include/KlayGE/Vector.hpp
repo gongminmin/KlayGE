@@ -19,6 +19,8 @@
 
 #include <KlayGE/Detail/MathHelper.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	template <typename T, int N>

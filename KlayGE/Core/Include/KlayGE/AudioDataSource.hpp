@@ -16,6 +16,8 @@
 #ifndef _AUDIODATASOURCE_HPP
 #define _AUDIODATASOURCE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE

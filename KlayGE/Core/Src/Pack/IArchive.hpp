@@ -13,6 +13,8 @@
 #ifndef _IARCHIVE_HPP
 #define _IARCHIVE_HPP
 
+#pragma KLAYGE_ONCE
+
 #include "IStream.hpp"
 #include "IProgress.hpp"
 #include "BSTR.hpp"

@@ -25,6 +25,8 @@
 #ifndef _MESH_HPP
 #define _MESH_HPP
 
+#pragma KLAYGE_ONCE
+
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>

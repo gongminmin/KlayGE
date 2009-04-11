@@ -23,6 +23,8 @@
 #ifndef _ELEMENTFORMAT_HPP
 #define _ELEMENTFORMAT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <vector>
 #include <boost/assert.hpp>
 

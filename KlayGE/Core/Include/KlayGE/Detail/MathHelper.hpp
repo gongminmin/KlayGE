@@ -13,6 +13,8 @@
 #ifndef _MATHHELPER_HPP
 #define _MATHHELPER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <boost/static_assert.hpp>

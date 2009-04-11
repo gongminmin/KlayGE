@@ -16,6 +16,8 @@
 #ifndef _BOUND_HPP
 #define _BOUND_HPP
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	template <typename T>

@@ -13,6 +13,8 @@
 #ifndef _D3D11RENDERVIEW_HPP
 #define _D3D11RENDERVIEW_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>

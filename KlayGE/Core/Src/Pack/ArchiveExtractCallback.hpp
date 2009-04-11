@@ -13,6 +13,8 @@
 #ifndef _ARCHIVEEXTRACTCALLBACK_HPP
 #define _ARCHIVEEXTRACTCALLBACK_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/atomic.hpp>
 
 #include <string>

@@ -13,6 +13,8 @@
 #ifndef _D3D9RENDERLAYOUT_HPP
 #define _D3D9RENDERLAYOUT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <boost/smart_ptr.hpp>
 
 #include <vector>

@@ -13,6 +13,8 @@
 #ifndef _D3D11SHADEROBJECT_HPP
 #define _D3D11SHADEROBJECT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/MapVector.hpp>

@@ -13,6 +13,8 @@
 #ifndef _CLOSEDHASHSET_HPP
 #define _CLOSEDHASHSET_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <algorithm>
 #include <memory>
 #include <utility>

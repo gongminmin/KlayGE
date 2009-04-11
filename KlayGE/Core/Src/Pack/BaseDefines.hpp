@@ -13,6 +13,8 @@
 #ifndef _BASEDEFINES_HPP
 #define _BASEDEFINES_HPP
 
+#pragma KLAYGE_ONCE
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #else

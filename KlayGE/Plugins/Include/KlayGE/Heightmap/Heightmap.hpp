@@ -16,6 +16,8 @@
 #ifndef _HEIGHTMAP_HPP
 #define _HEIGHTMAP_HPP
 
+#pragma KLAYGE_ONCE
+
 #define KLAYGE_LIB_NAME KlayGE_Terrain_HeightMap
 #include <KlayGE/config/auto_link.hpp>
 

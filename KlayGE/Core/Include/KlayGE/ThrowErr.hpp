@@ -16,6 +16,8 @@
 #ifndef _THROWERR_HPP
 #define _THROWERR_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <string>
 #include <stdexcept>
 

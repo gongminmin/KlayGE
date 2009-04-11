@@ -13,6 +13,9 @@
 #ifndef _NETMSG_HPP
 #define _NETMSG_HPP
 
+#pragma KLAYGE_ONCE
+
+
 namespace KlayGE
 {
 	enum

@@ -20,6 +20,8 @@
 
 #include <KlayGE/Math.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	namespace MathLib

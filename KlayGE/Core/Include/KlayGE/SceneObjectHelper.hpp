@@ -13,6 +13,8 @@
 #ifndef _SCENEOBJECTHELPER_HPP
 #define _SCENEOBJECTHELPER_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/Box.hpp>

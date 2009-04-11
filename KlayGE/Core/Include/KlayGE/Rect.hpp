@@ -18,6 +18,8 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Size.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	template <typename T>

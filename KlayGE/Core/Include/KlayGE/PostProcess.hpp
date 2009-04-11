@@ -19,6 +19,8 @@
 #ifndef _POSTPROCESS_HPP
 #define _POSTPROCESS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 

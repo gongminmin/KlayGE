@@ -13,6 +13,8 @@
 #ifndef _BSTR_HPP
 #define _BSTR_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <string>
 
 typedef wchar_t* BSTR;

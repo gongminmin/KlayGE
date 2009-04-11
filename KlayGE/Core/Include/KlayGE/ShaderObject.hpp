@@ -19,6 +19,8 @@
 #ifndef _SHADEROBJECT_HPP
 #define _SHADEROBJECT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE

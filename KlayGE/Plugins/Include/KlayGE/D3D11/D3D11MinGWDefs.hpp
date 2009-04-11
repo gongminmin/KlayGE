@@ -13,6 +13,8 @@
 #ifndef _D3D11MINGWDEFS_HPP
 #define _D3D11MINGWDEFS_HPP
 
+#pragma KLAYGE_ONCE
+
 #ifdef KLAYGE_COMPILER_GCC
 	#define __bcount(size)
 	#define __in

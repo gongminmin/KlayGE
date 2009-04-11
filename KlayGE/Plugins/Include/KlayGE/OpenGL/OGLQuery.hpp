@@ -13,6 +13,8 @@
 #ifndef _OGLOCCLUSIONQUERY_HPP
 #define _OGLOCCLUSIONQUERY_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/Query.hpp>
 
 namespace KlayGE

@@ -13,6 +13,8 @@
 #ifndef _D3D10ADAPTERLIST_HPP
 #define _D3D10ADAPTERLIST_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <boost/smart_ptr.hpp>
 #include <KlayGE/D3D10/D3D10Adapter.hpp>

@@ -13,6 +13,8 @@
 #ifndef _DSHOWVMR9ALLOCATOR_HPP
 #define _DSHOWVMR9ALLOCATOR_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/atomic.hpp>
 

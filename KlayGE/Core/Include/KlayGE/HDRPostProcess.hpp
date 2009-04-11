@@ -13,6 +13,8 @@
 #ifndef _HDRPOSTPROCESS_HPP
 #define _HDRPOSTPROCESS_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>

@@ -16,6 +16,8 @@
 #ifndef _AUDIOFACTORY_HPP
 #define _AUDIOFACTORY_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>

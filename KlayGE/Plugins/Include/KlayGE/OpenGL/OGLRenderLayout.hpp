@@ -16,6 +16,8 @@
 #ifndef _OGLRENDERLAYOUT_HPP
 #define _OGLRENDERLAYOUT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE

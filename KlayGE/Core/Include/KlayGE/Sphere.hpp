@@ -20,6 +20,8 @@
 
 #include <KlayGE/Bound.hpp>
 
+#pragma KLAYGE_ONCE
+
 namespace KlayGE
 {
 	template <typename T>

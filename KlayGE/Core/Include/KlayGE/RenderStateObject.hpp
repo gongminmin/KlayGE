@@ -19,6 +19,8 @@
 #ifndef _RENDERSTATEOBJECT_HPP
 #define _RENDERSTATEOBJECT_HPP
 
+#pragma KLAYGE_ONCE
+
 #include <KlayGE/PreDeclare.hpp>
 
 #include <boost/array.hpp>
