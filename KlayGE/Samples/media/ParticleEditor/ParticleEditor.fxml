@@ -249,6 +249,9 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
 	<parameter type="texture2D" name="grass_tex"/>
+	<parameter type="texture2D" name="logo_tex">
+		<annotation type="string" name="SasResourceAddress" value="klayge_logo_sm.dds"/>
+	</parameter>
 	<parameter type="sampler" name="grass_sampler">
 		<state name="filtering" value="anisotropic"/>
 		<state name="address_u" value="wrap"/>
@@ -259,7 +262,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	<shader>
 		<![CDATA[
 void TerrainVS(float4 Position : POSITION,
-					out float2 oTex0 : TEXCOORD0,
+					out float4 oTex0 : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
 					out float3 oNormal : TEXCOORD2,
 					out float2 oDepth : TEXCOORD3,
@@ -270,16 +273,18 @@ void TerrainVS(float4 Position : POSITION,
 	oNormal = float3(0, 1, 0);
 	oPosOS = Position.xyz;
 	oDepth = pos_es.zw;
-	oTex0 = Position.xz;
+	oTex0 = Position.xzxz * float4(1, 1, 0.5, -0.8f);
 }
 
-float4 TerrainPS(float2 tex0 : TEXCOORD0,
+float4 TerrainPS(float4 tex0 : TEXCOORD0,
 					float3 pos_os : TEXCOORD1,
 					float3 normal : TEXCOORD2,
 					float2 depth : TEXCOORD3) : SV_Target 
 {
-	return float4(grass_tex.Sample(grass_sampler, tex0).rgb * dot(normalize(LightPos - pos_os), normal),
+	float4 logo = logo_tex.Sample(grass_sampler, tex0.zw);
+	float4 clr = float4(grass_tex.Sample(grass_sampler, tex0.xy).rgb * dot(normalize(LightPos - pos_os), normal),
 				(depth.x / depth.y - depth_min) * inv_depth_range);
+	return float4(lerp(clr.rgb, logo.rgb, 0.3f), 1);
 }
 		]]>
 	</shader>
