@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="D:/KlayGE/RenderFX/PostProcess.fxml"/>
-	<include name="D:/KlayGE/RenderFX/2D.fxml"/>
+	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="../../../RenderFX/2D.fxml"/>
 
 	<parameter type="float" name="point_radius"/>
 	<parameter type="float" name="init_life"/>
@@ -208,7 +208,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
 		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;
-		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / ps_in.view_dir.w / 2 + 0.5, 0);
+		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) * float2(1, -1) / ps_in.view_dir.w / 2 + 0.5, 0);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 	}

@@ -113,7 +113,7 @@ namespace
 		}
 	};
 
-	int const NUM_PARTICLE = 8192;
+	int const NUM_PARTICLE = 16384;
 
 	class RenderParticles : public RenderableHelper
 	{
@@ -171,7 +171,7 @@ namespace
 				technique_ = rf.LoadEffect("ParticleEditor.kfx")->TechniqueByName("Particle");
 			}
 
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.04f;
+			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f;
 		}
 
 		void SceneTexture(TexturePtr const tex, bool flip)
@@ -870,7 +870,7 @@ namespace
 			par.pos = MathLib::transform_coord(float3(0, 0, 0), mat);
 			float theta = random_gen_() * PI;
 			float phi = abs(random_gen_()) * angle_ / 2;
-			float velocity = (random_gen_() + 1.2f) * velocity_;
+			float velocity = (random_gen_() + 1) * velocity_;
 			float x = cos(theta) * sin(phi);
 			float z = sin(theta) * sin(phi);
 			float y = cos(phi);
@@ -1034,7 +1034,7 @@ void ParticleEditorApp::InitObjects()
 	ps_.reset(new ParticleSystem<Particle>(NUM_PARTICLE, boost::bind(&GenParticle<Particle>::operator(), &gen_particle, _1, _2),
 		boost::bind(&UpdateParticle<Particle>::operator(), &update_particle, _1, _2)));
 
-	ps_->AutoEmit(128);
+	ps_->AutoEmit(256);
 
 	size_over_life_obj.reset(new PolylineObject);
 	size_over_life_obj->AddToSceneManager();
@@ -1093,6 +1093,8 @@ void ParticleEditorApp::InitObjects()
 	main_wnd->OnMouseDown().connect(boost::bind(&ParticleEditorApp::MouseDownHandler, this, _2, _3));
 	main_wnd->OnMouseUp().connect(boost::bind(&ParticleEditorApp::MouseUpHandler, this, _2, _3));
 	main_wnd->OnMouseOver().connect(boost::bind(&ParticleEditorApp::MouseOverHandler, this, _2, _3));
+
+	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 }
 
 void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
@@ -1108,8 +1110,6 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, scene_buffer_->RequiresFlipping());
-	particle_tex_ = "particle.dds";
-	this->LoadParticleTex(particle_tex_);
 
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 	copy_pp_->Destinate(FrameBufferPtr());
@@ -1117,20 +1117,20 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	size_over_life_obj->SetLoc(width - 240, 280);
 	size_over_life_obj->SetSize(200, 120);
 	size_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	size_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
-	size_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
+	//size_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
+	//size_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
 
 	weight_over_life_obj->SetLoc(width - 240, 440);
 	weight_over_life_obj->SetSize(200, 120);
 	weight_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	weight_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
-	weight_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
+	//weight_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
+	//weight_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
 
 	transparency_over_life_obj->SetLoc(width - 240, 600);
 	transparency_over_life_obj->SetSize(200, 120);
 	transparency_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	transparency_over_life_obj->AddCtrlPoint(0.0f, 0.0f);
-	transparency_over_life_obj->AddCtrlPoint(1.0f, 1.0f);
+	//transparency_over_life_obj->AddCtrlPoint(0.0f, 0.0f);
+	//transparency_over_life_obj->AddCtrlPoint(1.0f, 1.0f);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -1319,6 +1319,8 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	using boost::lexical_cast;
 
 	std::ifstream ifs(name.c_str());
+	BOOST_ASSERT(ifs);
+
 	ifs.seekg(0, std::ios_base::end);
 	int len = ifs.tellg();
 	ifs.seekg(0, std::ios_base::beg);
@@ -1333,19 +1335,23 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	xml_attribute<>* attr = root->first_attribute("particle_tex");
 	particle_tex_ = attr->value();
-	this->LoadParticleTex(attr->value());
+	this->LoadParticleTex(ResLoader::Instance().Locate(attr->value()));
 
 	attr = root->first_attribute("emit_angle");
 	dialog_->Control<UISlider>(id_angle_slider_)->SetValue(lexical_cast<int>(attr->value()));
+	this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
 
 	attr = root->first_attribute("life");
 	dialog_->Control<UISlider>(id_life_slider_)->SetValue(lexical_cast<int>(attr->value()));
+	this->LifeChangedHandler(*dialog_->Control<UISlider>(id_life_slider_));
 
 	attr = root->first_attribute("media_density");
 	dialog_->Control<UISlider>(id_density_slider_)->SetValue(static_cast<int>(lexical_cast<float>(attr->value()) * 100.0f));
+	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
 
 	attr = root->first_attribute("velocity");
 	dialog_->Control<UISlider>(id_velocity_slider_)->SetValue(static_cast<int>(lexical_cast<float>(attr->value()) * 100.0f));
+	this->VelocityChangedHandler(*dialog_->Control<UISlider>(id_velocity_slider_));
 
 	for (xml_node<>* node = root->first_node("curve"); node; node = node->next_sibling())
 	{

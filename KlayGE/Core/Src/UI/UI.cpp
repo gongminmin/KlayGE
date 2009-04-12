@@ -1290,7 +1290,7 @@ namespace KlayGE
 
 		// Element for the caption
 		cap_element_.SetFont(0);
-		cap_element_.SetTexture(tex_index_, Rect_T<int32_t>(17, 269, 241, 287));
+		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(17, 269, 241, 287));
 		cap_element_.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);

@@ -1,0 +1,19 @@
+<particle_system particle_tex="fire.dds" emit_angle="194" life="5" media_density="0.25" velocity="0.0799999982">
+	<curve name="size_over_life">
+		<ctrl_point x="0" y="0.441666663"/>
+		<ctrl_point x="0.150000006" y="0.24166666"/>
+		<ctrl_point x="0.289999992" y="0.150000006"/>
+		<ctrl_point x="0.779999971" y="0.800000012"/>
+		<ctrl_point x="1" y="0.800000012"/>
+	</curve>
+	<curve name="weight_over_life">
+		<ctrl_point x="0" y="0.5"/>
+		<ctrl_point x="1" y="0.508333325"/>
+	</curve>
+	<curve name="transparency_over_life">
+		<ctrl_point x="0" y="0.783333361"/>
+		<ctrl_point x="0.485000014" y="0.725000024"/>
+		<ctrl_point x="1" y="1"/>
+	</curve>
+</particle_system>
+
