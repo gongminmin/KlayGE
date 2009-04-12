@@ -1,8 +1,11 @@
 // UI.hpp
 // KlayGE 图形用户界面 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2007-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了TexButton (2009.4.12)
 //
 // 3.6.0
 // 初次建立 (2007.6.27)
@@ -59,6 +62,7 @@ namespace KlayGE
 		UICT_ListBox,
 		UICT_ComboBox,
 		UICT_EditBox,
+		UICT_TexButton,
 
 		UICT_Num_Control_Types
 	};
@@ -493,12 +497,9 @@ namespace KlayGE
 
 		// Shared resource access. Indexed fonts and textures are shared among
 		// all the controls.
-		void SetFont(size_t index, FontPtr font, uint32_t font_size);
-		FontPtr GetFont(size_t index) const;
+		void SetFont(size_t index, FontPtr const & font, uint32_t font_size);
+		FontPtr const & GetFont(size_t index) const;
 		uint32_t GetFontSize(size_t index) const;
-
-		void SetTexture(size_t index, TexturePtr texture);
-		TexturePtr GetTexture(size_t index) const;
 
 		void FocusDefaultControl();
 
@@ -546,8 +547,8 @@ namespace KlayGE
 		Color bottom_left_clr_;
 		Color bottom_right_clr_;
 
-		std::vector<int> textures_;   // Index into m_TextureCache;
-		std::vector<int> fonts_;      // Index into m_FontCache;
+		std::vector<int> fonts_;		// Index into font_cache_;
+		size_t tex_index_;				// Index into texture_cache_;
 
 		std::vector<UIControlPtr> controls_;
 
@@ -584,24 +585,32 @@ namespace KlayGE
 
 		void Load(ResIdentifierPtr const & source);
 
-		UIDialogPtr MakeDialog(TexturePtr control_tex = TexturePtr());
+		UIDialogPtr MakeDialog(TexturePtr const & control_tex = TexturePtr());
 
-		size_t AddTexture(TexturePtr texture)
+		size_t AddTexture(TexturePtr const & texture)
 		{
 			texture_cache_.push_back(texture);
 			return texture_cache_.size() - 1;
 		}
-		size_t AddFont(FontPtr font, uint32_t font_size)
+		size_t AddFont(FontPtr const & font, uint32_t font_size)
 		{
 			font_cache_.push_back(std::make_pair(font, font_size));
 			return font_cache_.size() - 1;
 		}
 
-		TexturePtr GetTexture(size_t index) const
+		TexturePtr const & GetTexture(size_t index) const
 		{
-			return texture_cache_[index];
+			if (index < texture_cache_.size())
+			{
+				return texture_cache_[index];
+			}
+			else
+			{
+				static TexturePtr empty = TexturePtr();
+				return empty;
+			}
 		}
-		FontPtr GetFont(size_t index) const
+		FontPtr const & GetFont(size_t index) const
 		{
 			if (index < font_cache_.size())
 			{
@@ -609,7 +618,8 @@ namespace KlayGE
 			}
 			else
 			{
-				return FontPtr();
+				static FontPtr empty = FontPtr();
+				return empty;
 			}
 		}
 		uint32_t GetFontSize(size_t index) const
@@ -644,7 +654,7 @@ namespace KlayGE
 		void Render();
 
 		void DrawRect(float3 const & pos, float width, float height, Color const * clrs,
-			Rect_T<int32_t> const & rcTexture, TexturePtr texture);
+			Rect_T<int32_t> const & rcTexture, TexturePtr const & texture);
 		void DrawText(std::wstring const & strText, uint32_t font_index,
 			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
 
@@ -764,6 +774,59 @@ namespace KlayGE
 		bool pressed_;
 
 		std::wstring text_;			// Window text
+	};
+
+	class KLAYGE_CORE_API UITexButton : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_TexButton
+		};
+
+	public:
+		explicit UITexButton(UIDialogPtr dialog);
+		UITexButton(uint32_t type, UIDialogPtr dialog);
+		UITexButton(UIDialogPtr dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		virtual ~UITexButton() {}
+
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			pressed_ = false;
+		}
+		virtual void OnHotkey();
+
+		virtual void Render();
+
+		TexturePtr const & GetTexture() const;
+		void SetTexture(TexturePtr const & tex);
+
+	public:
+		typedef boost::signal<void(UITexButton const &)> ClickedEvent;
+		ClickedEvent& OnClickedEvent()
+		{
+			return clicked_event_;
+		}
+
+		void KeyDownHandler(UIDialog const & sender, wchar_t key);
+		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+
+	protected:
+		ClickedEvent clicked_event_;
+
+	protected:
+		virtual void InitDefaultElements();
+
+		bool pressed_;
+
+		size_t tex_index_;
 	};
 
 	class KLAYGE_CORE_API UICheckBox : public UIControl

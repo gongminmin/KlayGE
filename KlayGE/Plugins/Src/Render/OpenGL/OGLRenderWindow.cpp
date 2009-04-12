@@ -182,7 +182,11 @@ namespace KlayGE
 
 		if (glloader_WGL_ARB_create_context())
 		{
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 1, 0 };
+			int flags = 0;//WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
+#ifdef KLAYGE_DEBUG
+			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+#endif
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 1, WGL_CONTEXT_FLAGS_ARB, flags, 0 };
 			HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
 			if (NULL == hRC3)
 			{

@@ -1800,6 +1800,10 @@
 					RelativePath="..\..\Core\Src\UI\UIStatic.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\Core\Src\UI\UITexButton.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Effect Files"

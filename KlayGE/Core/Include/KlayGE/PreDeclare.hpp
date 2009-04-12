@@ -180,6 +180,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<UIDialog> UIDialogPtr;
 	class UIStatic;
 	class UIButton;
+	class UITexButton;
 	class UICheckBox;
 	class UIRadioButton;
 	class UISlider;

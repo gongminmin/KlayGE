@@ -59,8 +59,9 @@ namespace KlayGE
 	class UIRectRenderable : public RenderableHelper
 	{
 	public:
-		UIRectRenderable(TexturePtr texture, RenderEffectPtr effect)
-			: RenderableHelper(L"UIRect")
+		UIRectRenderable(TexturePtr const & texture, RenderEffectPtr const & effect)
+			: RenderableHelper(L"UIRect"),
+				texture_(texture)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -87,7 +88,6 @@ namespace KlayGE
 			if (texture)
 			{
 				technique_ = effect->TechniqueByName("UITec");
-				*(technique_->Effect().ParameterByName("ui_tex")) = texture;
 			}
 			else
 			{
@@ -140,6 +140,8 @@ namespace KlayGE
 				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_->Size());
 			}
 
+			*(technique_->Effect().ParameterByName("ui_tex")) = texture_;
+
 			RenderEngine& re = rf.RenderEngineInstance();
 			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
@@ -166,6 +168,8 @@ namespace KlayGE
 
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
+
+		TexturePtr texture_;
 
 		std::vector<UIManager::VertexFormat> vertices_;
 		std::vector<uint16_t> indices_;
@@ -381,6 +385,17 @@ namespace KlayGE
 						}
 						break;
 
+					case UICT_TexButton:
+						{
+							std::string tex_name = read_short_string(source);
+							uint32_t hotkey;
+							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
+							TexturePtr tex = LoadTexture(tex_name, EAH_GPU_Read)();
+							dlg->AddControl(UIControlPtr(new UITexButton(dlg, id, tex,
+								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
+						}
+						break;
+
 					case UICT_CheckBox:
 						{
 							std::string caption = read_short_string(source);
@@ -491,7 +506,7 @@ namespace KlayGE
 		}
 	}
 
-	UIDialogPtr UIManager::MakeDialog(TexturePtr control_tex)
+	UIDialogPtr UIManager::MakeDialog(TexturePtr const & control_tex)
 	{
 		UIDialogPtr ret = MakeSharedPtr<UIDialog>(control_tex);
 		this->RegisterDialog(ret);
@@ -611,7 +626,7 @@ namespace KlayGE
 	}
 
 	void UIManager::DrawRect(float3 const & pos, float width, float height, Color const * clrs,
-				Rect_T<int32_t> const & rcTexture, TexturePtr texture)
+				Rect_T<int32_t> const & rcTexture, TexturePtr const & texture)
 	{
 		Rect texcoord;
 		if (texture)
@@ -791,7 +806,7 @@ namespace KlayGE
 			control_tex = LoadTexture("ui.dds", EAH_GPU_Read)();
 		}
 
-		this->SetTexture(0, control_tex);
+		tex_index_ = UIManager::Instance().AddTexture(control_tex);
 		this->InitDefaultElements();
 	}
 
@@ -1159,7 +1174,7 @@ namespace KlayGE
 
 	// Shared resource access. Indexed fonts and textures are shared among
 	// all the controls.
-	void UIDialog::SetFont(size_t index, FontPtr font, uint32_t font_size)
+	void UIDialog::SetFont(size_t index, FontPtr const & font, uint32_t font_size)
 	{
 		// Make sure the list is at least as large as the index being set
 		if (index + 1 > fonts_.size())
@@ -1169,7 +1184,7 @@ namespace KlayGE
 		fonts_[index] = static_cast<int>(UIManager::Instance().AddFont(font, font_size));
 	}
 
-	FontPtr UIDialog::GetFont(size_t index) const
+	FontPtr const & UIDialog::GetFont(size_t index) const
 	{
 		return UIManager::Instance().GetFont(fonts_[index]);
 	}
@@ -1177,21 +1192,6 @@ namespace KlayGE
 	uint32_t UIDialog::GetFontSize(size_t index) const
 	{
 		return UIManager::Instance().GetFontSize(fonts_[index]);
-	}
-
-	void UIDialog::SetTexture(size_t index, TexturePtr texture)
-	{
-		// Make sure the list is at least as large as the index being set
-		if (index + 1 > textures_.size())
-		{
-			textures_.resize(index + 1, -1);
-		}
-		textures_[index] = static_cast<int>(UIManager::Instance().AddTexture(texture));
-	}
-
-	TexturePtr UIDialog::GetTexture(size_t index) const
-	{
-		return UIManager::Instance().GetTexture(textures_[index]);
 	}
 
 	void UIDialog::FocusDefaultControl()
@@ -1238,7 +1238,7 @@ namespace KlayGE
 
 		Rect_T<int32_t> rcTexture = element.TexRect();
 		Rect_T<int32_t> rcScreen = rcDest + this->GetLocation();
-		TexturePtr tex = this->GetTexture(element.TextureIndex());
+		TexturePtr tex = UIManager::Instance().GetTexture(element.TextureIndex());
 
 		// If caption is enabled, offset the Y position by its height.
 		if (this->IsCaptionEnabled())
@@ -1290,7 +1290,7 @@ namespace KlayGE
 
 		// Element for the caption
 		cap_element_.SetFont(0);
-		cap_element_.SetTexture(0, Rect_T<int32_t>(17, 269, 241, 287));
+		cap_element_.SetTexture(tex_index_, Rect_T<int32_t>(17, 269, 241, 287));
 		cap_element_.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);

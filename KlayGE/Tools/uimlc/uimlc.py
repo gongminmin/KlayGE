@@ -14,7 +14,8 @@ control_type_enum = {
 	"scroll_bar" : 5,
 	"list_box" : 6,
 	"combo_box" : 7,
-	"edit_box" : 8
+	"edit_box" : 8,
+	"tex_button" : 9
 }
 
 align_enum = {
@@ -100,6 +101,20 @@ class ui_button(ui_control):
 	def write(self, stream):
 		ui_control.write(self, stream)
 		write_short_string(stream, self.caption)
+		stream.write(struct.pack('I', self.hotkey))
+
+class ui_tex_button(ui_control):
+	def __init__(self, tag):
+		ui_control.__init__(self, tag)
+		self.texture = tag.getAttribute('texture')
+		try:
+			self.hotkey = int(tag.getAttribute('hotkey'))
+		except:
+			self.hotkey = 0
+
+	def write(self, stream):
+		ui_control.write(self, stream)
+		write_short_string(stream, self.texture)
 		stream.write(struct.pack('I', self.hotkey))
 
 class ui_check_box(ui_control):
