@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="ParticleSystem" />
+		<Option title="ParticleEditor" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="..\..\..\bin\ParticleSystem_d" prefix_auto="1" extension_auto="1" />
+				<Option output="..\..\..\bin\ParticleEditor_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="..\..\..\bin\" />
 				<Option object_output="..\..\Debug\Win32" />
 				<Option type="1" />
@@ -28,7 +28,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="..\..\..\bin\ParticleSystem" prefix_auto="1" extension_auto="1" />
+				<Option output="..\..\..\bin\ParticleEditor" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="..\..\..\bin\" />
 				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
@@ -53,12 +53,16 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug;Release;" />
 		</VirtualTargets>
-		<Unit filename="..\..\media\ParticleSystem\ParticleSystem.fxml">
+		<Unit filename="..\..\media\ParticleEditor\ParticleEditor.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%\Tools\fxmlc\fxmlc.py $file $file_dir\$file_name.kfx" />
 		</Unit>
-		<Unit filename="..\..\src\ParticleSystem\ParticleSystem.cpp" />
-		<Unit filename="..\..\src\ParticleSystem\ParticleSystem.hpp" />
+                <Unit filename="..\..\media\ParticleEditor\ParticleEditor.uiml">
+			<Option compile="1" />
+			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%\Tools\uimlc\uimlc.py $file $file_dir\$file_name.kui" />
+		</Unit>
+		<Unit filename="..\..\src\ParticleEditor\ParticleEditor.cpp" />
+		<Unit filename="..\..\src\ParticleEditor\ParticleEditor.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="ParticleSystem"
-	ProjectGUID="{56B6DAC5-8984-41D1-BEB8-2DE731807932}"
+	Name="ParticleEditor"
+	ProjectGUID="{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}"
 	RootNamespace="ParticleSystem"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -378,7 +378,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\ParticleSystem\ParticleSystem.cpp"
+				RelativePath="..\..\src\ParticleEditor\ParticleEditor.cpp"
 				>
 			</File>
 		</Filter>
@@ -388,7 +388,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\ParticleSystem\ParticleSystem.hpp"
+				RelativePath="..\..\src\ParticleEditor\ParticleEditor.hpp"
 				>
 			</File>
 		</Filter>
@@ -396,7 +396,15 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\ParticleSystem\ParticleSystem.fxml"
+				RelativePath="..\..\media\ParticleEditor\ParticleEditor.fxml"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\ParticleEditor\ParticleEditor.uiml"
 				>
 			</File>
 		</Filter>

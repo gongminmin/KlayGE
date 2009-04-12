@@ -105,6 +105,7 @@
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0_d" />
 					<Add library="glloader_x86_d" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -138,6 +139,7 @@
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
 					<Add library="glloader_x86" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -172,6 +174,7 @@
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0" />
 					<Add library="glloader_x64_d" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -207,6 +210,7 @@
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
 					<Add library="glloader_x64" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -382,6 +386,7 @@
 		<Unit filename="../../Core/Src/UI/UIScrollBar.cpp" />
 		<Unit filename="../../Core/Src/UI/UISlider.cpp" />
 		<Unit filename="../../Core/Src/UI/UIStatic.cpp" />
+		<Unit filename="../../Core/Src/UI/UITexButton.cpp" />
 		<Unit filename="../../RenderFX/2D.fxml">
 			<Option compile="1" />
 			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />

@@ -12,7 +12,7 @@
 		<Project filename="Instancing.cbp" />
 		<Project filename="ModelViewer.cbp" />
 		<Project filename="Parallax.cbp" />
-		<Project filename="ParticleSystem.cbp" />
+		<Project filename="ParticleEditor.cbp" />
 		<Project filename="ProceduralTex.cbp" />
 		<Project filename="Refract.cbp" />
 		<Project filename="ShadowCubeMap.cbp" />

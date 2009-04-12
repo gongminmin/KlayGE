@@ -22,8 +22,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModelViewer", "ModelViewer.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoTexture", "VideoTexture.vcproj", "{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleSystem", "ParticleSystem.vcproj", "{56B6DAC5-8984-41D1-BEB8-2DE731807932}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPUParticleSystem", "GPUParticleSystem.vcproj", "{C4FBBFE5-4E09-47B6-AD2A-F88A0E24F9B9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DepthOfField", "DepthOfField.vcproj", "{EBF7230D-F4AA-4FB4-A105-3B49DA53EB5C}"
@@ -35,6 +33,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProceduralTex", "ProceduralTex.vcproj", "{127F4D49-C643-4F02-B743-89051E027652}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredShading", "DeferredShading.vcproj", "{0724FDC0-38E1-4976-8177-6E4DF22D5C89}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor.vcproj", "{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -132,14 +132,6 @@ Global
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|Win32.Build.0 = Release|Win32
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|x64.ActiveCfg = Release|x64
 		{1B7FBD4B-6805-40C5-B6AF-0BF156B87957}.Release|x64.Build.0 = Release|x64
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.ActiveCfg = Debug|Win32
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|Win32.Build.0 = Debug|Win32
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|x64.ActiveCfg = Debug|x64
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Debug|x64.Build.0 = Debug|x64
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.ActiveCfg = Release|Win32
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|Win32.Build.0 = Release|Win32
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|x64.ActiveCfg = Release|x64
-		{56B6DAC5-8984-41D1-BEB8-2DE731807932}.Release|x64.Build.0 = Release|x64
 		{C4FBBFE5-4E09-47B6-AD2A-F88A0E24F9B9}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C4FBBFE5-4E09-47B6-AD2A-F88A0E24F9B9}.Debug|Win32.Build.0 = Debug|Win32
 		{C4FBBFE5-4E09-47B6-AD2A-F88A0E24F9B9}.Debug|x64.ActiveCfg = Debug|x64
@@ -188,6 +180,14 @@ Global
 		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|Win32.Build.0 = Release|Win32
 		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|x64.ActiveCfg = Release|x64
 		{0724FDC0-38E1-4976-8177-6E4DF22D5C89}.Release|x64.Build.0 = Release|x64
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Debug|Win32.Build.0 = Debug|Win32
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Debug|x64.ActiveCfg = Debug|x64
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Debug|x64.Build.0 = Debug|x64
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Release|Win32.ActiveCfg = Release|Win32
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Release|Win32.Build.0 = Release|Win32
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Release|x64.ActiveCfg = Release|x64
+		{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

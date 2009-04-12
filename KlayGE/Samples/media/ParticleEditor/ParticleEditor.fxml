@@ -1,9 +1,20 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="D:/KlayGE/RenderFX/PostProcess.fxml"/>
+	<include name="D:/KlayGE/RenderFX/2D.fxml"/>
 
 	<parameter type="float" name="point_radius"/>
+	<parameter type="float" name="init_life"/>
+
+	<parameter type="float2" name="size_over_life" array_size="8"/>
+	<parameter type="int" name="num_size_over_life"/>
+
+	<parameter type="float2" name="weight_over_life" array_size="8"/>
+	<parameter type="int" name="num_weight_over_life"/>
+
+	<parameter type="float2" name="transparency_over_life" array_size="8"/>
+	<parameter type="int" name="num_transparency_over_life"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="View"/>
@@ -41,14 +52,43 @@ float3 texcoord_to_view(float2 tex)
 				lerp(lower_left, lower_right, tex.x),
 				tex.y);
 }
+
+float GetSizeOverLife(float p)
+{
+	p /= init_life;
+	for (int i = 0; (i < 7) && (i < num_size_over_life - 1); ++ i)
+	{
+		if (size_over_life[i + 1].x >= p)
+		{
+			float s = (p - size_over_life[i].x) / (size_over_life[i + 1].x - size_over_life[i].x);
+			return 1 - (size_over_life[i].y + (size_over_life[i + 1].y - size_over_life[i].y) * s);
+		}
+	}
+	return 0;
+}
+
+float GetTransparencyOverLife(float p)
+{
+	p /= init_life;
+	for (int i = 0; (i < 7) && (i < num_transparency_over_life - 1); ++ i)
+	{
+		if (transparency_over_life[i + 1].x >= p)
+		{
+			float s = (p - transparency_over_life[i].x) / (transparency_over_life[i + 1].x - transparency_over_life[i].x);
+			return 1 - (transparency_over_life[i].y + (transparency_over_life[i + 1].y - transparency_over_life[i].y) * s);
+		}
+	}
+	return 0;
+}
 		]]>
 	</shader>
-	
+
 	<shader>
 		<![CDATA[
 struct VS_TO_GS
 {
 	float4 CenterView_Life : TEXCOORD0;
+	float radius : TEXCOORD1;
 };
 
 struct PS_IN
@@ -57,39 +97,47 @@ struct PS_IN
 	float4 clr : COLOR0;
 	float4 PosSS : TEXCOORD0;
 	float4 CenterView : TEXCOORD1;
-	float3 view_dir : TEXCOORD2;
+	float4 view_dir : TEXCOORD2;
 };
 
 void ParticleVS(float4 pos : TEXCOORD0,
 					float2 tex : POSITION,
 					out PS_IN vs_out)
 {
+	float radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
+			
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
-	view_pos.xy += tex * point_radius;
+	view_pos.xy += tex * radius;
 	vs_out.pos = mul(view_pos, Proj);
-	vs_out.clr = float4(1, 1, 1, pos.w);
+	vs_out.clr = float4(1, 1, 1, GetTransparencyOverLife(init_life - pos.w) * 2);
 	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
-	vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+	vs_out.view_dir.xyz = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+	vs_out.view_dir.w = radius;
 }
 
 void ParticleVS2(float4 pos : POSITION,
 					out VS_TO_GS vs_out)
 {
 	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+	vs_out.radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
 }
 
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input : TEXCOORD0)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : TEXCOORD0, AttribArray<float> input1 : TEXCOORD0)
 {
 	float4 CenterView_Life;
-	CenterView_Life = input[0];
+	CenterView_Life = input0[0];
+	float radius;
+	radius = input1[0];
 #else
 [maxvertexcount(4)]
 void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 {
 	float4 CenterView_Life;
 	CenterView_Life = input[0].CenterView_Life;
+	float radius;
+	radius = input[0].radius;
 #endif
 	PS_IN gs_out;
 
@@ -115,11 +163,12 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		
 		float4 view_pos = float4(CenterView_Life.xyz, 1);
 		gs_out.CenterView = view_pos;
-		view_pos.xy += tex * point_radius;
+		view_pos.xy += tex * radius;
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr = float4(1, 1, 1, CenterView_Life.w);
+		gs_out.clr = float4(1, 1, 1, GetTransparencyOverLife(init_life - CenterView_Life.w) * 2);
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
-		gs_out.view_dir = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
+		gs_out.view_dir.xyz = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
+		gs_out.view_dir.w = radius;
 
 #ifdef KLAYGE_OPENGL
 		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
@@ -140,12 +189,12 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 {
 	ps_in.CenterView /= ps_in.CenterView.w;
 	float dir = ps_in.view_dir.z;
-	ps_in.view_dir = normalize(ps_in.view_dir);
+	ps_in.view_dir.xyz = normalize(ps_in.view_dir.xyz);
 	
 	float4 clr = ps_in.clr;
 	
-	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir);
-	float disc = point_radius * point_radius - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
+	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir.xyz);
+	float disc = ps_in.view_dir.w * ps_in.view_dir.w - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
 	if (disc < 0)
 	{
 		clip(-1);
@@ -156,10 +205,10 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 
-		float depth = scene_tex.Sample(scene_sampler, tex_coord).a;
+		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
-		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
-		clr *= particle_tex.Sample(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / point_radius / 2 + 0.5);
+		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;
+		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) / ps_in.view_dir.w / 2 + 0.5, 0);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 	}
@@ -168,16 +217,16 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 }
 		]]>
 	</shader>
-	
+
 	<technique name="Particle">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
-			
+
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
-			
+
 			<state name="vertex_shader" value="ParticleVS()"/>
 			<state name="pixel_shader" value="ParticlePS()"/>
 		</pass>
@@ -201,15 +250,15 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
 	<parameter type="texture2D" name="grass_tex"/>
 	<parameter type="sampler" name="grass_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="filtering" value="anisotropic"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
+		<state name="anisotropy" value="16"/>
 	</parameter>
 
 	<shader>
 		<![CDATA[
 void TerrainVS(float4 Position : POSITION,
-					float3 Normal : NORMAL,
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oPosOS : TEXCOORD1,
 					out float3 oNormal : TEXCOORD2,
@@ -218,7 +267,7 @@ void TerrainVS(float4 Position : POSITION,
 {
 	float4 pos_es = mul(Position, View);
 	oPos = mul(pos_es, Proj);
-	oNormal = Normal;
+	oNormal = float3(0, 1, 0);
 	oPosOS = Position.xyz;
 	oDepth = pos_es.zw;
 	oTex0 = Position.xz;
@@ -234,7 +283,7 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 }
 		]]>
 	</shader>
-	
+
 	<technique name="Terrain">
 		<pass name="p0">
 			<state name="vertex_shader" value="TerrainVS()"/>
@@ -248,7 +297,7 @@ float4 TerrainPS(float2 tex0 : TEXCOORD0,
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	
+
 	<shader>
 		<![CDATA[
 float4 CopyPS(float2 tex : TEXCOORD0) : SV_Target
@@ -258,13 +307,151 @@ float4 CopyPS(float2 tex : TEXCOORD0) : SV_Target
 }
 		]]>
 	</shader>
-	
+
 	<technique name="Copy">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
+		</pass>
+	</technique>
+
+
+	<cbuffer name="per_frame_polyline">
+		<parameter type="float2" name="half_width_height"/>
+		<parameter type="int" name="active_pt"/>
+	</cbuffer>
+	<parameter type="float4" name="loc_size"/>
+	<parameter type="float4" name="polyline_clr"/>
+
+	<shader>
+		<![CDATA[
+void PolylineVS(float4 position : POSITION,
+					out float4 oPosition : SV_Position)
+{
+	oPosition = Transform2D(float4(position.xy * loc_size.zw + loc_size.xy + position.zw, 0, 1), half_width_height);
+	oPosition += texel_to_pixel_offset;
+}
+
+float4 PolylinePS() : SV_Target
+{
+	return polyline_clr;
+}
+		]]>
+	</shader>
+
+	<technique name="PolylineTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PolylineVS()"/>
+			<state name="pixel_shader" value="PolylinePS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void ControlPointVS(float4 position : POSITION,
+					out int oPtIndex : TEXCOORD0,
+					out float4 oPosition : SV_Position)
+{
+	oPtIndex = int(floor(position.z / 4));
+	position.xy = position.xy * loc_size.zw + loc_size.xy;
+	int offset = int(position.z - oPtIndex * 4 + 0.1f);
+	if (0 == offset)
+	{
+		position.xy += float2(-2, -2);
+	}
+	else if (1 == offset)
+	{
+		position.xy += float2(+2, -2);
+	}
+	else if (2 == offset)
+	{
+		position.xy += float2(+2, +2);
+	}
+	else if (3 == offset)
+	{
+		position.xy += float2(-2, +2);
+	}
+	
+	oPosition = Transform2D(float4(position.xy, 0.1f, 1), half_width_height);
+	oPosition += texel_to_pixel_offset;
+}
+
+float4 ControlPointPS(int pt_index : TEXCOORD0) : SV_Target
+{
+	if (active_pt == pt_index)
+	{
+		return float4(1, 0, 0, 1);
+	}
+	else
+	{
+		return float4(1, 1, 1, 1);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="ControlPointTech">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ControlPointVS()"/>
+			<state name="pixel_shader" value="ControlPointPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void BackgroundVS(float4 position : POSITION,
+					out float4 oPosition : SV_Position)
+{
+	oPosition = Transform2D(float4(position.xy * loc_size.zw + loc_size.xy, position.zw), half_width_height);
+	oPosition += texel_to_pixel_offset;
+}
+
+float4 BackgroundPS() : SV_Target
+{
+	return float4(0.7.xxx, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="BackgroundTech">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="BackgroundVS()"/>
+			<state name="pixel_shader" value="BackgroundPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void CoordLineVS(float4 position : POSITION,
+					out float4 oPosition : SV_Position)
+{
+	oPosition = Transform2D(float4(position.xy * loc_size.zw + loc_size.xy + position.zw, 0, 1), half_width_height);
+	oPosition += texel_to_pixel_offset;
+}
+
+float4 CoordLinePS() : SV_Target
+{
+	return float4(0.6f.xxx, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="CoordLineTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="CoordLineVS()"/>
+			<state name="pixel_shader" value="CoordLinePS()"/>
 		</pass>
 	</technique>
 </effect>
