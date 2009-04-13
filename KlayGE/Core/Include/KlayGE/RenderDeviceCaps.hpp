@@ -28,18 +28,15 @@ namespace KlayGE
 		uint32_t max_texture_depth;
 		uint32_t max_texture_cube_size;
 		uint32_t max_texture_array_length;
-		uint8_t max_texture_units;
 		uint8_t max_vertex_texture_units;
+		uint8_t max_pixel_texture_units;
+		uint8_t max_geometry_texture_units;
 
 		uint8_t max_simultaneous_rts;
 
 		uint32_t max_vertices;
 		uint32_t max_indices;
 
-		uint8_t texture_1d_filter_caps;
-		uint8_t texture_2d_filter_caps;
-		uint8_t texture_3d_filter_caps;
-		uint8_t texture_cube_filter_caps;
 		uint8_t max_texture_anisotropy;
 
 		bool hw_instancing_support;

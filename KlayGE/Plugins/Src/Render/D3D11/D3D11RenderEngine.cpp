@@ -495,16 +495,10 @@ namespace KlayGE
 			caps_.max_texture_cube_size = 8192;
 		}
 		caps_.max_texture_array_length = 0;
-		caps_.max_texture_units = 16;
 		caps_.max_texture_anisotropy = 16;
 		caps_.max_simultaneous_rts = 8;
 		caps_.max_vertices = 8388607;
 		caps_.max_indices = 16777215;
-		caps_.texture_2d_filter_caps = TFOE_Min_Point | TFOE_Min_Linear
-			| TFOE_Mag_Point | TFOE_Mag_Linear | TFOE_Mip_Point | TFOE_Mip_Linear | TFO_Anisotropic;
-		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
-		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
-		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
@@ -512,6 +506,8 @@ namespace KlayGE
 		switch (feature)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
+			caps_.max_pixel_texture_units = 32;
+			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
 			caps_.argb8_support = false;
 			caps_.bc4_support = true;
@@ -526,6 +522,8 @@ namespace KlayGE
 
 		case D3D_FEATURE_LEVEL_10_1:
 		case D3D_FEATURE_LEVEL_10_0:
+			caps_.max_pixel_texture_units = 32;
+			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
 			caps_.argb8_support = false;
 			caps_.bc4_support = true;
@@ -539,6 +537,8 @@ namespace KlayGE
 			break;
 
 		default:
+			caps_.max_pixel_texture_units = 16;
+			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
 			caps_.argb8_support = true;
 			caps_.bc4_support = false;

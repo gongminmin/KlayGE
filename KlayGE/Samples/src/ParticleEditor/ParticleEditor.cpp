@@ -1007,7 +1007,7 @@ ParticleEditorApp::ParticleEditorApp(std::string const & name, RenderSettings co
 
 void ParticleEditorApp::InitObjects()
 {
-	use_gs = (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_shader_model >= 4);
+	use_gs = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().gs_support;
 
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");

@@ -32,7 +32,8 @@ namespace KlayGE
 	};
 
 	RenderLayout::RenderLayout()
-			: topo_type_(TT_PointList)
+			: topo_type_(TT_PointList),
+				index_format_(EF_Unknown)
 	{
 		vertex_streams_.reserve(4);
 	}

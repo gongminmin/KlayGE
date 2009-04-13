@@ -334,7 +334,7 @@ namespace KlayGE
 		render_states_cache_[D3DRS_COLORWRITEENABLE3] = D3D9Mapping::MappingColorMask(default_bs_desc.color_write_mask[3]);
 
 		samplers_cache_[0].resize(this->DeviceCaps().max_vertex_texture_units);
-		samplers_cache_[1].resize(this->DeviceCaps().max_texture_units);
+		samplers_cache_[1].resize(this->DeviceCaps().max_pixel_texture_units);
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			for (uint32_t i = 0, i_end = static_cast<uint32_t>(samplers_cache_[type].size()); i < i_end; ++ i)

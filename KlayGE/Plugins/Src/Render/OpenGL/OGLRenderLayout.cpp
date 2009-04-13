@@ -76,15 +76,19 @@ namespace KlayGE
 		{
 			if (use_nv_pri_restart_)
 			{
-				if (EF_R16UI == this->IndexStreamFormat())
+				if (this->IndexStreamFormat() != EF_Unknown)
 				{
-					glPrimitiveRestartIndexNV(0xFFFF);
+					if (EF_R16UI == this->IndexStreamFormat())
+					{
+						glPrimitiveRestartIndexNV(0xFFFF);
+					}
+					else
+					{
+						BOOST_ASSERT(EF_R32UI == this->IndexStreamFormat());
+						glPrimitiveRestartIndexNV(0xFFFFFFFF);
+					}
+					glEnableClientState(GL_PRIMITIVE_RESTART_NV);
 				}
-				else
-				{
-					glPrimitiveRestartIndexNV(0xFFFFFFFF);
-				}
-				glEnableClientState(GL_PRIMITIVE_RESTART_NV);
 			}
 
 			// From http://www.gamedev.net/community/forums/topic.asp?topic_id=501785

@@ -681,7 +681,17 @@ namespace KlayGE
 		caps_.max_texture_array_length = 0;
 
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &temp);
-		caps_.max_texture_units = static_cast<uint8_t>(temp);
+		caps_.max_pixel_texture_units = static_cast<uint8_t>(temp);
+
+		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
+		{
+			glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_ARB, &temp);
+			caps_.max_geometry_texture_units = static_cast<uint8_t>(temp);
+		}
+		else
+		{
+			caps_.max_geometry_texture_units = 0;
+		}
 
 		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
@@ -707,12 +717,6 @@ namespace KlayGE
 		caps_.max_vertices = temp;
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
 		caps_.max_indices = temp;
-
-		caps_.texture_2d_filter_caps = TFOE_Min_Point | TFOE_Min_Linear
-			| TFOE_Mag_Point | TFOE_Mag_Linear | TFOE_Mip_Point | TFOE_Mip_Linear | TFO_Anisotropic;
-		caps_.texture_1d_filter_caps = caps_.texture_2d_filter_caps;
-		caps_.texture_3d_filter_caps = caps_.texture_2d_filter_caps;
-		caps_.texture_cube_filter_caps = caps_.texture_2d_filter_caps;
 
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;
