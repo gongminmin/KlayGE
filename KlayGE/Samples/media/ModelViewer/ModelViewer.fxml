@@ -35,7 +35,7 @@
 void MeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-				int4 blend_indices : BLENDINDICES,
+				uint4 blend_indices : BLENDINDICES,
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
 				

@@ -615,7 +615,39 @@ namespace KlayGE
 							}
 							else
 							{
+#ifdef USE_GLSL
+								if ("BLENDWEIGHT" == this_token)
+								{
+									shader_ss << "ATTR1";
+								}
+								else
+								{
+									if ("BLENDINDICES" == this_token)
+									{
+										shader_ss << "ATTR7";
+									}
+									else
+									{
+										if ("TANGENT" == this_token)
+										{
+											shader_ss << "ATTR14";
+										}
+										else
+										{
+											if ("BINORMAL" == this_token)
+											{
+												shader_ss << "ATTR15";
+											}
+											else
+											{
+												shader_ss << this_token;
+											}
+										}
+									}
+								}
+#else
 								shader_ss << this_token;
+#endif
 							}
 						}
 					}

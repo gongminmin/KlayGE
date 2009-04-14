@@ -72,25 +72,26 @@ namespace KlayGE
 			glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
 		}
 
+		if (use_nv_pri_restart_)
+		{
+			ElementFormat format = this->IndexStreamFormat();
+			if (format != EF_Unknown)
+			{
+				if (EF_R16UI == format)
+				{
+					glPrimitiveRestartIndexNV(0xFFFF);
+				}
+				else
+				{
+					BOOST_ASSERT(EF_R32UI == format);
+					glPrimitiveRestartIndexNV(0xFFFFFFFF);
+				}
+				glEnableClientState(GL_PRIMITIVE_RESTART_NV);
+			}
+		}
+
 		if (dirty_vao_ || !use_vao_)
 		{
-			if (use_nv_pri_restart_)
-			{
-				if (this->IndexStreamFormat() != EF_Unknown)
-				{
-					if (EF_R16UI == this->IndexStreamFormat())
-					{
-						glPrimitiveRestartIndexNV(0xFFFF);
-					}
-					else
-					{
-						BOOST_ASSERT(EF_R32UI == this->IndexStreamFormat());
-						glPrimitiveRestartIndexNV(0xFFFFFFFF);
-					}
-					glEnableClientState(GL_PRIMITIVE_RESTART_NV);
-				}
-			}
-
 			// From http://www.gamedev.net/community/forums/topic.asp?topic_id=501785
 			// POSITION, ATTR0				Input Vertex, Generic Attribute 0
 			// BLENDWEIGHT, ATTR1			Input vertex weight, Generic Attribute 1
