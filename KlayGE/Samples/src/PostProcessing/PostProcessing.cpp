@@ -24,7 +24,9 @@
 #include <ctime>
 #include <boost/bind.hpp>
 
-#include "Cartoon.hpp"
+#include "AsciiArtsPP.hpp"
+#include "CartoonPP.hpp"
+#include "PostProcessing.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -39,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Cartoon.kfx")->TechniqueByName("NormalDepth");
+			technique_ = rf.LoadEffect("PostProcessing.kfx")->TechniqueByName("GBufferTech");
 		}
 
 		void BuildMeshInfo()
@@ -53,12 +55,11 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("model_view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("model_view")) = view;
+			*(technique_->Effect().ParameterByName("proj")) = proj;
 
-			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};
 
@@ -71,42 +72,6 @@ namespace
 			renderable_ = LoadKModel("dino50.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())->Mesh(0);
 		}
 	};
-
-
-	class CartoonPostProcess : public PostProcess
-	{
-	public:
-		CartoonPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Cartoon.kfx")->TechniqueByName("Cartoon"))
-		{
-			*(technique_->Effect().ParameterByName("toonmap_tex")) = LoadTexture("toon.dds", EAH_GPU_Read)();
-		}
-
-		void Source(TexturePtr const & tex, bool flipping)
-		{
-			PostProcess::Source(tex, flipping);
-			if (tex)
-			{
-				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
-			}
-		}
-
-		void ColorTex(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("color_tex")) = tex;
-		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float depth_range = camera.FarPlane() - camera.NearPlane();
-			*(technique_->Effect().ParameterByName("e_barrier")) = float2(0.8f, 0.1f / depth_range);
-		}
-	};
-
 
 	enum
 	{
@@ -150,25 +115,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Cartoon");
+	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
 
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Cartoon app("¿¨Í¨äÖÈ¾", settings);
+	PostProcessingApp app("Post Processing", settings);
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Cartoon::Cartoon(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
-				cartoon_style_(true)
+PostProcessingApp::PostProcessingApp(std::string const & name, RenderSettings const & settings)
+			: App3DFramework(name, settings)
 {
 }
 
-void Cartoon::InitObjects()
+void PostProcessingApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -176,13 +140,12 @@ void Cartoon::InitObjects()
 	torus_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
-	this->Proj(0.1f, 10.0f);
+	this->Proj(0.1f, 100.0f);
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
 	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -190,20 +153,26 @@ void Cartoon::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler(new input_signal);
-	input_handler->connect(boost::bind(&Cartoon::InputHandler, this, _1, _2));
+	input_handler->connect(boost::bind(&PostProcessingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
+	ascii_arts_.reset(new AsciiArtsPostProcess);
 	cartoon_.reset(new CartoonPostProcess);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Cartoon.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.kui"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
-	id_switch_cartoon_ = dialog_->IDFromName("Switch_Cartoon");
+	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
+	id_ascii_arts_ = dialog_->IDFromName("AsciiArtsPP");
+	id_cartoon_ = dialog_->IDFromName("CartoonPP");
 
-	dialog_->Control<UICheckBox>(id_switch_cartoon_)->OnChangedEvent().connect(boost::bind(&Cartoon::CheckBoxHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::FPSCameraHandler, this, _1));
+	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::AsciiArtsHandler, this, _1));
+	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CartoonHandler, this, _1));
+	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 }
 
-void Cartoon::OnResize(uint32_t width, uint32_t height)
+void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
@@ -214,6 +183,9 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
+	ascii_arts_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	ascii_arts_->Destinate(FrameBufferPtr());
+
 	cartoon_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
 	checked_pointer_cast<CartoonPostProcess>(cartoon_)->ColorTex(color_tex_);
 	cartoon_->Destinate(FrameBufferPtr());
@@ -221,7 +193,7 @@ void Cartoon::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void PostProcessingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -231,59 +203,68 @@ void Cartoon::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
-void Cartoon::CheckBoxHandler(UICheckBox const & /*sender*/)
+void PostProcessingApp::FPSCameraHandler(UICheckBox const & sender)
 {
-	cartoon_style_ = dialog_->Control<UICheckBox>(id_switch_cartoon_)->GetChecked();
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
+	}
 }
 
-uint32_t Cartoon::DoUpdate(uint32_t pass)
+void PostProcessingApp::AsciiArtsHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = ascii_arts_;
+	}
+}
+
+void PostProcessingApp::CartoonHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = cartoon_;
+	}
+}
+
+uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if (cartoon_style_)
+	switch (pass)
 	{
-		switch (pass)
-		{
-		case 0:
-			renderEngine.BindFrameBuffer(g_buffer_);
-			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-			return App3DFramework::URV_Need_Flush;
+	case 0:
+		renderEngine.BindFrameBuffer(g_buffer_);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 1), 1.0f, 0);
+		return App3DFramework::URV_Need_Flush;
 
-		case 1:
-			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-			cartoon_->Apply();
-			break;
-		}
-	}
-	else
-	{
+	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-	}
+		active_pp_->Apply();
+		
+		{
+			UIManager::Instance().Render();
 
-	UIManager::Instance().Render();
+			FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
 
-	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
+			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Post Processing", 16);
+			font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Cartoon Rendering", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+			std::wostringstream stream;
+			stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
+			font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	std::wostringstream stream;
-	stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+			stream.str(L"");
+			stream.precision(2);
+			stream << fixed << this->FPS() << " FPS";
+			font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
+		}
 
-	stream.str(L"");
-	stream.precision(2);
-	stream << fixed << this->FPS() << " FPS";
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
-
-	if (!cartoon_style_ && (0 == pass))
-	{
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
-	}
-	else
-	{
 		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

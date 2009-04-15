@@ -6,10 +6,11 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug">
-				<Option output="..\..\..\bin\Text_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Debug\Win32" />
+			<Target title="Debug_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="../../../bin/Text_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -26,10 +27,11 @@
 					<Add library="boost_system-mgw43-mt-d" />
 				</Linker>
 			</Target>
-			<Target title="Release">
-				<Option output="..\..\..\bin\Text" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Release\Win32" />
+			<Target title="Release_win_x86">
+				<Option platforms="Windows;" />
+				<Option output="../../../bin/Text" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -47,15 +49,106 @@
 					<Add library="boost_system-mgw43-mt" />
 				</Linker>
 			</Target>
+			<Target title="Debug_linux_x86">
+				<Option platforms="Unix;" />
+				<Option output="../../../bin/Text_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-m32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add library="KlayGE_Core_gcc_x86_d" />
+					<Add library="boost_signals-gcc43-mt-d" />
+					<Add library="boost_system-gcc43-mt-d" />
+				</Linker>
+			</Target>
+			<Target title="Release_linux_x86">
+				<Option platforms="Unix;" />
+				<Option output="../../../bin/Text" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-m32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="KlayGE_Core_gcc_x86" />
+					<Add library="boost_signals-gcc43-mt" />
+					<Add library="boost_system-gcc43-mt" />
+				</Linker>
+			</Target>
+			<Target title="Debug_linux_x64">
+				<Option platforms="Unix;" />
+				<Option output="../../../bin/Text_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=nocona" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-m64" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add library="KlayGE_Core_gcc_x64_d" />
+					<Add library="boost_signals-gcc43-mt-d" />
+					<Add library="boost_system-gcc43-mt-d" />
+					<Add library="GL" />
+					<Add library="X11" />
+				</Linker>
+			</Target>
+			<Target title="Release_linux_x64">
+				<Option platforms="Unix;" />
+				<Option output="../../../bin/Text" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/Win32" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=nocona" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-m64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="KlayGE_Core_gcc_x64" />
+					<Add library="boost_signals-gcc43-mt" />
+					<Add library="boost_system-gcc43-mt" />
+				</Linker>
+			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="Debug;Release;" />
+			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="..\..\src\Text\Text.cpp" />
-		<Unit filename="..\..\src\Text\Text.hpp" />
+		<Unit filename="../../src/Text/Text.cpp" />
+		<Unit filename="../../src/Text/Text.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

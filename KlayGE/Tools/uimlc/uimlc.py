@@ -139,7 +139,7 @@ class ui_check_box(ui_control):
 class ui_radio_button(ui_control):
 	def __init__(self, tag):
 		ui_control.__init__(self, tag)
-		self.button_group = tag.getAttribute('button_group')
+		self.button_group = int(tag.getAttribute('button_group'))
 		self.caption = tag.getAttribute('caption')
 		try:
 			self.checked = bool(int(tag.getAttribute('checked')))

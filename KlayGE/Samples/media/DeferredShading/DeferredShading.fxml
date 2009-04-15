@@ -79,7 +79,7 @@ void GBufferVS(float4 pos : POSITION,
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos_es, proj);
 	oNormal.xyz = normal;
-	oNormal.w = pos_es.z * depth_near_far_invfar.y;
+	oNormal.w = pos_es.z * depth_near_far_invfar.z;
 	
 	oTexCoord = texcoord;
 }
@@ -311,7 +311,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	
 	view_dir = normalize(view_dir);
 
-	float3 pos_es = view_dir * (depth * depth_near_far_invfar.z);
+	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
 	float3 light_dir = normalize(light_in_eye - pos_es);
 	
 	float diffuse = diffuse_term(light_dir, normal);
@@ -353,7 +353,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	}
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth * depth_near_far_invfar.z);
+	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
 	
 	return float4(pos_es, 1);
 }

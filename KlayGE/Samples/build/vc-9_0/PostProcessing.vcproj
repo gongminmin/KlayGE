@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Cartoon"
-	ProjectGUID="{DA5E7FC0-CC85-45A7-8D1E-E80A813F2705}"
-	RootNamespace="Cartoon"
+	Name="PostProcessing"
+	ProjectGUID="{60D5A106-9996-4992-BA33-882B9AFC2D8F}"
+	RootNamespace="PostProcessing"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -378,7 +378,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\Cartoon\Cartoon.cpp"
+				RelativePath="..\..\src\PostProcessing\AsciiArtsPP.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\CartoonPP.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\PostProcessing.cpp"
 				>
 			</File>
 		</Filter>
@@ -388,7 +396,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\Cartoon\Cartoon.hpp"
+				RelativePath="..\..\src\PostProcessing\AsciiArtsPP.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\CartoonPP.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\PostProcessing.hpp"
 				>
 			</File>
 		</Filter>
@@ -396,7 +412,15 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\Cartoon\Cartoon.fxml"
+				RelativePath="..\..\media\PostProcessing\AsciiArtsPP.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\CartoonPP.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\PostProcessing.fxml"
 				>
 			</File>
 		</Filter>
@@ -404,7 +428,7 @@
 			Name="UI"
 			>
 			<File
-				RelativePath="..\..\media\Cartoon\Cartoon.uiml"
+				RelativePath="..\..\media\PostProcessing\PostProcessing.uiml"
 				>
 			</File>
 		</Filter>

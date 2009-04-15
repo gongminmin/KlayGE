@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui version='1'>
+	<dialog caption="Cartoon">
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="460" y="-100" align_y="bottom" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+
+		<control type="radio_button" id="AsciiArtsPP" caption="Ascii Arts" x="-120" y="60" align_x="right" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
+		<control type="radio_button" id="CartoonPP" caption="Cartoon" x="-120" y="90" align_x="right" width="100" height="24" button_group="0" checked="1" hotkey="0" is_default="0"/>
+	</dialog>
+</ui>

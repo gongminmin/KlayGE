@@ -1,15 +1,15 @@
-#ifndef _CARTOON_HPP
-#define _CARTOON_HPP
+#ifndef _POSTPROCESSING_HPP
+#define _POSTPROCESSING_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
-class Cartoon : public KlayGE::App3DFramework
+class PostProcessingApp : public KlayGE::App3DFramework
 {
 public:
-	Cartoon(std::string const & name, KlayGE::RenderSettings const & settings);
+	PostProcessingApp(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();
@@ -19,7 +19,9 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
+	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
+	void AsciiArtsHandler(KlayGE::UIRadioButton const & sender);
+	void CartoonHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
@@ -29,12 +31,14 @@ private:
 	KlayGE::FrameBufferPtr g_buffer_;
 	KlayGE::TexturePtr normal_depth_tex_;
 	KlayGE::TexturePtr color_tex_;
+	KlayGE::PostProcessPtr active_pp_;
+	KlayGE::PostProcessPtr ascii_arts_;
 	KlayGE::PostProcessPtr cartoon_;
 
-	bool cartoon_style_;
-
 	KlayGE::UIDialogPtr dialog_;
-	int id_switch_cartoon_;
+	int id_fps_camera_;
+	int id_ascii_arts_;
+	int id_cartoon_;
 };
 
-#endif		// _CARTOON_HPP
+#endif		// _POSTPROCESSING_HPP

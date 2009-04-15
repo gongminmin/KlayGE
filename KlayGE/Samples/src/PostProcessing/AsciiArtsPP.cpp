@@ -1,0 +1,308 @@
+#include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/MapVector.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderFactory.hpp>
+
+#include <numeric>
+#include <boost/assert.hpp>
+
+#include "AsciiArtsPP.hpp"
+
+using namespace KlayGE;
+
+int const CELL_WIDTH = 8;
+int const CELL_HEIGHT = 8;
+int const INPUT_NUM_ASCII = 128;
+size_t const ASCII_WIDTH = 16;
+size_t const ASCII_HEIGHT = 16;
+
+size_t const OUTPUT_NUM_ASCII = 32;
+
+namespace
+{
+	typedef std::vector<uint8_t> ascii_tile_type;
+	typedef std::vector<ascii_tile_type> ascii_tiles_type;
+
+	std::vector<ascii_tile_type> LoadFromTexture(std::string const & tex_name)
+	{
+		int const ASCII_IN_A_ROW = 16;
+
+		Texture::TextureType type;
+		uint32_t width, height, depth;
+		uint16_t numMipMaps;
+		ElementFormat format;
+		std::vector<ElementInitData> init_data;
+		std::vector<uint8_t> data_block;
+		LoadTexture(tex_name, type, width, height, depth, numMipMaps,
+			format, init_data, data_block);
+
+		BOOST_ASSERT(EF_R8 == format);
+
+		std::vector<ascii_tile_type> ret(INPUT_NUM_ASCII);
+
+		for (size_t i = 0; i < ret.size(); ++ i)
+		{
+			ret[i].resize(ASCII_WIDTH * ASCII_HEIGHT);
+			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
+			{
+				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
+				{
+					ret[i][y * ASCII_WIDTH + x]
+						= data_block[((i / ASCII_IN_A_ROW) * ASCII_HEIGHT + y) * ASCII_IN_A_ROW * ASCII_WIDTH
+							+ (i % ASCII_IN_A_ROW) * ASCII_WIDTH + x];
+				}
+			}
+		}
+
+		return ret;
+	}
+
+	TexturePtr FillTexture(ascii_tiles_type const & ascii_lums)
+	{
+		BOOST_ASSERT(OUTPUT_NUM_ASCII == ascii_lums.size());
+
+		std::vector<uint8_t> data_v(OUTPUT_NUM_ASCII * ASCII_WIDTH * ASCII_HEIGHT);
+		for (size_t i = 0; i < OUTPUT_NUM_ASCII; ++ i)
+		{
+			for (size_t y = 0; y < ASCII_HEIGHT; ++ y)
+			{
+				for (size_t x = 0; x < ASCII_WIDTH; ++ x)
+				{
+					data_v[y * OUTPUT_NUM_ASCII * ASCII_WIDTH + i * ASCII_WIDTH + x]
+						= ascii_lums[i][y * ASCII_WIDTH + x];
+				}
+			}
+		}
+
+		ElementInitData init_data;
+		init_data.data = &data_v[0];
+		init_data.row_pitch = OUTPUT_NUM_ASCII * ASCII_WIDTH;
+		init_data.slice_pitch = 0;
+
+		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
+			ASCII_HEIGHT, 1, EF_R8, 1, 0, EAH_GPU_Read, &init_data);
+	}
+
+	class ascii_lums_builder
+	{
+	private:
+		typedef MapVector<float, uint8_t> lum_to_char_type;
+		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator> > diff_lum_to_iter_type;
+
+	public:
+		ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii,
+				size_t ascii_width, size_t ascii_height)
+			: input_num_ascii_(input_num_ascii),
+						output_num_ascii_(output_num_ascii),
+						ascii_width_(ascii_width), ascii_height_(ascii_height)
+		{
+		}
+
+		ascii_tiles_type build(ascii_tiles_type const & ascii_data)
+		{
+			BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
+
+			lum_to_char_type lum_to_char = this->cal_lum_to_char_map(ascii_data);
+			std::vector<uint8_t> final_chars = get_final_asciis(lum_to_char);
+
+			ascii_tiles_type ret(output_num_ascii_);
+			for (size_t i = 0; i < output_num_ascii_; ++ i)
+			{
+				BOOST_ASSERT(ascii_data[final_chars[i]].size() == ascii_width_ * ascii_height_);
+
+				ret[i] = ascii_data[final_chars[i]];
+			}
+
+			return ret;
+		}
+
+	private:
+		std::vector<float> cal_lums(ascii_tiles_type const & ascii_data)
+		{
+			BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
+
+			std::vector<float> ret(input_num_ascii_);
+			for (size_t i = 0; i < ret.size(); ++ i)
+			{
+				BOOST_ASSERT(ascii_data[i].size() == ascii_width_ * ascii_height_);
+
+				ret[i] = std::accumulate(ascii_data[i].begin(), ascii_data[i].end(), 0) / 256.0f;
+			}
+
+			return ret;
+		}
+		lum_to_char_type cal_lum_to_char_map(ascii_tiles_type const & ascii_data)
+		{
+			BOOST_ASSERT(ascii_data.size() == input_num_ascii_);
+			BOOST_ASSERT(ascii_data.size() >= output_num_ascii_);
+
+			lum_to_char_type ret;
+
+			std::vector<float> lums = cal_lums(ascii_data);
+
+			float max_lum = *std::max_element(lums.begin(), lums.end());
+			for (std::vector<float>::const_iterator iter = lums.begin();
+				iter != lums.end(); ++ iter)
+			{
+				float char_lum = *iter / max_lum * output_num_ascii_;
+				if (ret.find(char_lum) == ret.end())
+				{
+					ret.insert(std::make_pair(char_lum, static_cast<uint8_t>(iter - lums.begin())));
+				}
+			}
+			BOOST_ASSERT(ret.size() >= output_num_ascii_);
+
+			return ret;
+		}
+
+		std::vector<uint8_t> get_final_asciis(lum_to_char_type const & lum_to_char)
+		{
+			BOOST_ASSERT(lum_to_char.size() >= output_num_ascii_);
+
+			diff_lum_to_iter_type diff_lum_to_iter;
+
+			for (lum_to_char_type::const_iterator iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
+			{
+				float diff_lum;
+
+				if (iter != lum_to_char.begin())
+				{
+					lum_to_char_type::const_iterator prev_iter = iter;
+					-- prev_iter;
+					diff_lum = iter->first - prev_iter->first;
+				}
+				else
+				{
+					diff_lum = iter->first;
+				}
+
+				diff_lum_to_iter.push_back(std::make_pair(diff_lum, iter));
+			}
+			BOOST_ASSERT(diff_lum_to_iter.size() >= output_num_ascii_);
+
+			std::partial_sort(diff_lum_to_iter.begin(), diff_lum_to_iter.begin() + output_num_ascii_,
+				diff_lum_to_iter.end(), cmp_diff_lum_to_iter);
+			diff_lum_to_iter.resize(output_num_ascii_);
+
+			lum_to_char_type final_lum_to_char;
+			for (size_t i = 0; i < diff_lum_to_iter.size(); ++ i)
+			{
+				final_lum_to_char.insert(*diff_lum_to_iter[i].second);
+			}
+
+			std::vector<uint8_t> ret;
+			for (lum_to_char_type::iterator iter = final_lum_to_char.begin();
+				iter != final_lum_to_char.end(); ++ iter)
+			{
+				ret.push_back(iter->second);
+			}
+
+			return ret;
+		}
+
+	private:
+		static bool cmp_diff_lum_to_iter(diff_lum_to_iter_type::value_type const & lhs,
+								diff_lum_to_iter_type::value_type const & rhs)
+		{
+			return lhs.first > rhs.first;
+		}
+
+	private:
+		size_t input_num_ascii_;
+		size_t output_num_ascii_;
+		size_t ascii_width_, ascii_height_;
+	};
+
+	class Downsampler8x8 : public PostProcess
+	{
+	public:
+		Downsampler8x8()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.kfx")->TechniqueByName("Downsample8x8"))
+		{
+			tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
+		}
+
+		void Source(TexturePtr const & src_tex, bool flipping)
+		{
+			PostProcess::Source(src_tex, flipping);
+
+			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
+		}
+
+	private:
+		void GetSampleOffsets8x8(uint32_t width, uint32_t height)
+		{
+			std::vector<float4> tex_coord_offset(8);
+
+			float const tu = 1.0f / width;
+			float const tv = 1.0f / height;
+
+			// Sample from the 64 surrounding points.
+			int index = 0;
+			for (int y = -4; y <= 3; y += 2)
+			{
+				for (int x = -4; x <= 3; x += 4)
+				{
+					tex_coord_offset[index].x() = (x + 0.5f) * tu;
+					tex_coord_offset[index].y() = (y + 0.5f) * tv;
+					tex_coord_offset[index].z() = (x + 2.5f) * tu;
+					tex_coord_offset[index].w() = (y + 0.5f) * tv;
+
+					++ index;
+				}
+			}
+
+			*tex_coord_offset_ep_ = tex_coord_offset;
+		}
+
+	private:
+		RenderEffectParameterPtr tex_coord_offset_ep_;
+	};
+}
+
+AsciiArtsPostProcess::AsciiArtsPostProcess()
+	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.kfx")->TechniqueByName("AsciiArts"))
+{
+	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
+
+	downsampler_.reset(new Downsampler8x8);
+
+	cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
+	*(technique_->Effect().ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromTexture("font.dds")));
+}
+
+void AsciiArtsPostProcess::Source(TexturePtr const & tex, bool flipping)
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / CELL_WIDTH, tex->Height(0) / CELL_HEIGHT,
+		1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+	downsample_fb_ = rf.MakeFrameBuffer();
+	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
+	downsampler_->Source(tex, flipping);
+	downsampler_->Destinate(downsample_fb_);
+
+	PostProcess::Source(downsample_tex_, downsample_fb_->RequiresFlipping());
+}
+
+void AsciiArtsPostProcess::Apply()
+{
+	downsampler_->Apply();
+	PostProcess::Apply();
+}
+
+void AsciiArtsPostProcess::OnRenderBegin()
+{
+	PostProcess::OnRenderBegin();
+
+	RenderEngine const & re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	FrameBuffer const & fb(*re.CurFrameBuffer());
+
+	*cell_per_row_line_ep_ = float2(static_cast<float>(CELL_WIDTH) / fb.Width(), static_cast<float>(CELL_HEIGHT) / fb.Height());
+}

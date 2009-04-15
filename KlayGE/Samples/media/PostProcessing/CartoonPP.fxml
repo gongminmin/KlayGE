@@ -1,76 +1,22 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/Lighting.fxml"/>
 	<include name="../../../RenderFX/PostProcess.fxml"/>
-
-	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="model_view_proj"/>
-		<parameter type="float4x4" name="model_view"/>
-		<parameter type="float3" name="light_in_eye"/>
-
-		<parameter type="float" name="depth_min"/>
-		<parameter type="float" name="inv_depth_range"/>
-	</cbuffer>
 
 	<shader>
 		<![CDATA[
-void NormalDepthVS(float4 pos : POSITION,
-			float3 normal : NORMAL,
-			out float4 oNormal : TEXCOORD0,
-			out float3 oLightVec : TEXCOORD1,
-			out float3 oViewVec : TEXCOORD2,
-			out float4 oPos : SV_Position)
+float3 GetNormal(float4 ndc)
 {
-	oPos = mul(pos, model_view_proj);
-	float4 pos_es = mul(pos, model_view);
-	oNormal.xyz = mul(normal, (float3x3)model_view);
-	oNormal.w = (pos_es.z - depth_min) * inv_depth_range;
-	
-	oLightVec = light_in_eye - pos_es.xyz;
-	oViewVec = -pos_es.xyz;
+	return float3(ndc.xy, -sqrt(1 - dot(ndc.xy, ndc.xy)));
 }
 
-void NormalDepthPS(float4 normal : TEXCOORD0,
-			float3 light_vec : TEXCOORD1, float3 view_vec : TEXCOORD2,
-			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+float GetDepth(float4 ndc)
 {
-	normal.xyz = normalize(normal.xyz);
-	oNormalDepth = normal;
-	
-	light_vec = normalize(light_vec);
-	view_vec = normalize(view_vec);
-	
-	float diffuse = diffuse_term(light_vec, normal);
-	float specular = 0;
-	if (diffuse > 0)
-	{
-		specular = dot(normalize(light_vec + view_vec), normal);
-		if (specular > 0)
-		{
-			specular = pow(specular, 8.0f);
-		}
-		else
-		{
-			specular = 0;
-		}
-	}
-	else
-	{
-		diffuse = 0;
-	}
-	oClr = diffuse * 0.7f + specular * 0.3f;
+	return ndc.z;
 }
 		]]>
 	</shader>
-
-	<technique name="NormalDepth">
-		<pass name="p0">
-			<state name="vertex_shader" value="NormalDepthVS()"/>
-			<state name="pixel_shader" value="NormalDepthPS()"/>
-		</pass>
-	</technique>
-
+	
 	<parameter type="float2" name="inv_width_height"/>
 
 	<parameter type="sampler" name="point_sampler">
@@ -79,7 +25,6 @@ void NormalDepthPS(float4 normal : TEXCOORD0,
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="toonmap_tex"/>
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 
@@ -114,10 +59,12 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc4 : TEXCOORD4) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	if (1 == ndc.w)
+	float depth = GetDepth(ndc);
+	if (1 == depth)
 	{
 		clip(-1);
 	}
+	float3 normal = GetNormal(ndc);
 	
 	half4 color = color_tex.Sample(point_sampler, tc0);
 	half toon = dot(color.rgb, half3(0.299f, 0.587f, 0.114f));
@@ -132,19 +79,20 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	half4 s8 = src_tex.Sample(point_sampler, tc4.zw);
 
 	// Normal discontinuity filter
-	half4 nd = half4(dot(ndc.xyz, s1.xyz),
-				dot(ndc.xyz, s2.xyz),
-				dot(ndc.xyz, s3.xyz),
-				dot(ndc.xyz, s4.xyz));
+	half4 nd = half4(dot(normal, GetNormal(s1)),
+				dot(normal, GetNormal(s2)),
+				dot(normal, GetNormal(s3)),
+				dot(normal, GetNormal(s4)));
 	nd = step(e_barrier.x, nd);
 	half ne = (dot(nd, e_weights.x).x < 1) ? 0 : 1;
 
 	// Depth filter : compute gradiental difference:
-	half4 dd = half4(s1.w + s2.w, s3.w + s4.w, s5.w + s6.w, s7.w + s8.w);
-	dd = step(e_barrier.y, abs(2 * ndc.w - dd));
+	half4 dd = half4(GetDepth(s1) + GetDepth(s2), GetDepth(s3) + GetDepth(s4), GetDepth(s5) + GetDepth(s6), GetDepth(s7) + GetDepth(s8));
+	dd = step(e_barrier.y, abs(2 * depth - dd));
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
-	return toonmap_tex.Sample(point_sampler, float2(toon, 0.5f)).r * de * ne;
+	const float toon_clr[3] = { 0.47f, 0.63f, 1 };
+	return toon_clr[int(toon * 3)] * de * ne;
 }
 		]]>
 	</shader>
