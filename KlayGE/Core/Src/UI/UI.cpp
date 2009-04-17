@@ -313,30 +313,46 @@ namespace KlayGE
 			uiml_header header;
 			source->read(reinterpret_cast<char*>(&header), sizeof(header));
 			BOOST_ASSERT((MakeFourCC<'U', 'I', 'M', 'L'>::value == header.fourcc));
-			BOOST_ASSERT(1 == header.ver);
+			BOOST_ASSERT(2 == header.ver);
 
 			for (uint32_t i = 0; i < header.num_dlgs; ++ i)
 			{
 				UIDialogPtr dlg;
 				{
+					int32_t x, y;
+					uint32_t width, height;
+					uint8_t align_x, align_y;
+					std::string id = read_short_string(source);
 					std::string caption = read_short_string(source);
 					std::string skin = read_short_string(source);
+					source->read(reinterpret_cast<char*>(&x), sizeof(x));
+					source->read(reinterpret_cast<char*>(&y), sizeof(y));
+					source->read(reinterpret_cast<char*>(&width), sizeof(width));
+					source->read(reinterpret_cast<char*>(&height), sizeof(height));
+					source->read(reinterpret_cast<char*>(&align_x), sizeof(align_x));
+					source->read(reinterpret_cast<char*>(&align_y), sizeof(align_y));
 					TexturePtr tex;
 					if (!skin.empty())
 					{
 						tex = LoadTexture(skin, EAH_GPU_Read)();
 					}
 					dlg = this->MakeDialog(tex);
+					dlg->SetID(id);
 					std::wstring wcaption;
 					Convert(wcaption, caption);
 					dlg->SetCaptionText(wcaption);
+
+					UIDialog::ControlLocation loc = { x, y,
+						static_cast<UIDialog::ControlAlignment>(align_x), static_cast<UIDialog::ControlAlignment>(align_y) };
+					dlg->CtrlLocation(-1, loc);
+					dlg->SetSize(width, height);
 				}
 
 				uint32_t num_ids;
 				source->read(reinterpret_cast<char*>(&num_ids), sizeof(num_ids));
 				for (uint32_t j = 0; j < num_ids; ++ j)
 				{
-					dlg->AddIdName(read_short_string(source), j);
+					dlg->AddIDName(read_short_string(source), j);
 				}
 
 				uint32_t num_ctrls;
@@ -346,7 +362,8 @@ namespace KlayGE
 					uint32_t type, id;
 					int32_t x, y;
 					uint32_t width, height;
-					bool is_default, align_x, align_y;
+					bool is_default;
+					uint8_t align_x, align_y;
 					source->read(reinterpret_cast<char*>(&type), sizeof(type));
 					source->read(reinterpret_cast<char*>(&id), sizeof(id));
 					source->read(reinterpret_cast<char*>(&x), sizeof(x));
@@ -550,12 +567,28 @@ namespace KlayGE
 			dialogs_[i]->EnableKeyboardInput(true);
 		}
 	}
-
-	UIDialogPtr UIManager::GetNextDialog(UIDialogPtr dialog) const
+	
+	UIDialogPtr const & UIManager::GetDialog(std::string const & id) const
 	{
+		for (size_t i = 0; i < dialogs_.size(); ++ i)
+		{
+			if (dialogs_[i]->GetID() == id)
+			{
+				return dialogs_[i];
+			}
+		}
+
+		static UIDialogPtr empty;
+		return empty;
+	}
+
+	UIDialogPtr const & UIManager::GetNextDialog(UIDialogPtr const & dialog) const
+	{
+		static UIDialogPtr empty;
+
 		if (dialog == dialogs_.back())
 		{
-			return UIDialogPtr();
+			return empty;
 		}
 		else
 		{
@@ -567,15 +600,17 @@ namespace KlayGE
 				}
 			}
 
-			return UIDialogPtr();
+			return empty;
 		}
 	}
 
-	UIDialogPtr UIManager::GetPrevDialog(UIDialogPtr dialog) const
+	UIDialogPtr const & UIManager::GetPrevDialog(UIDialogPtr const & dialog) const
 	{
+		static UIDialogPtr empty;
+
 		if (dialog == dialogs_.front())
 		{
-			return UIDialogPtr();
+			return empty;
 		}
 		else
 		{
@@ -587,7 +622,7 @@ namespace KlayGE
 				}
 			}
 
-			return UIDialogPtr();
+			return empty;
 		}
 	}
 
@@ -688,6 +723,55 @@ namespace KlayGE
 			clrs[3], float2(texcoord.left(), texcoord.bottom())));
 	}
 
+	void UIManager::DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture)
+	{
+		boost::shared_ptr<UIRectRenderable> renderable;
+		if (rects_.find(texture) == rects_.end())
+		{
+			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);
+			rects_[texture] = renderable;
+		}
+		else
+		{
+			renderable = checked_pointer_cast<UIRectRenderable>(rects_[texture]);
+		}
+		BOOST_ASSERT(renderable);
+
+		std::vector<VertexFormat>& verts = renderable->Vertices();
+		std::vector<uint16_t>& indices = renderable->Indices();
+		verts.reserve(verts.size() + 4);
+
+		uint16_t const last_index = static_cast<uint16_t>(verts.size());
+		if (renderable->PriRestart())
+		{
+			indices.reserve(indices.size() + 5);
+			indices.push_back(last_index + 0);
+			indices.push_back(last_index + 1);
+			indices.push_back(last_index + 3);
+			indices.push_back(last_index + 2);
+			indices.push_back(0xFFFF);
+		}
+		else
+		{
+			indices.reserve(indices.size() + 6);
+			indices.push_back(last_index + 0);
+			indices.push_back(last_index + 1);
+			indices.push_back(last_index + 2);
+			indices.push_back(last_index + 2);
+			indices.push_back(last_index + 3);
+			indices.push_back(last_index + 0);
+		}
+
+		verts.push_back(VertexFormat(offset + vertices[0].pos,
+			vertices[0].clr, vertices[0].tex));
+		verts.push_back(VertexFormat(offset + vertices[1].pos,
+			vertices[1].clr, vertices[1].tex));
+		verts.push_back(VertexFormat(offset + vertices[2].pos,
+			vertices[2].clr, vertices[2].tex));
+		verts.push_back(VertexFormat(offset + vertices[3].pos,
+			vertices[3].clr, vertices[3].tex));
+	}
+
 	void UIManager::DrawText(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align)
 	{
@@ -728,7 +812,7 @@ namespace KlayGE
 		{
 			if (dialog->GetVisible())
 			{
-				dialog->MouseDownHandler(buttons, pt);
+				dialog->MouseDownHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
 	}
@@ -739,7 +823,7 @@ namespace KlayGE
 		{
 			if (dialog->GetVisible())
 			{
-				dialog->MouseUpHandler(buttons, pt);
+				dialog->MouseUpHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
 	}
@@ -750,7 +834,7 @@ namespace KlayGE
 		{
 			if (dialog->GetVisible())
 			{
-				dialog->MouseWheelHandler(buttons, pt, z_delta);
+				dialog->MouseWheelHandler(buttons, dialog->ToLocal(pt), z_delta);
 			}
 		}
 	}
@@ -761,7 +845,7 @@ namespace KlayGE
 		{
 			if (dialog->GetVisible())
 			{
-				dialog->MouseOverHandler(buttons, pt);
+				dialog->MouseOverHandler(buttons, dialog->ToLocal(pt));
 			}
 		}
 	}
@@ -792,21 +876,26 @@ namespace KlayGE
 	}
 
 
-	UIDialog::UIDialog(TexturePtr control_tex)
+	UIDialog::UIDialog(TexturePtr const & control_tex)
 			: keyboard_input_(false), mouse_input_(true), default_control_id_(0xFFFF),
-					visible_(true), show_caption_(false),
+					visible_(true), show_caption_(true),
 					minimized_(false), drag_(false),
-					x_(0), y_(0), width_(0), height_(0),
+					bounding_box_(0, 0, 0, 0),
 					caption_height_(18),
 					top_left_clr_(0, 0, 0, 0), top_right_clr_(0, 0, 0, 0),
 					bottom_left_clr_(0, 0, 0, 0), bottom_right_clr_(0, 0, 0, 0)
 	{
+		TexturePtr ct;
 		if (!control_tex)
 		{
-			control_tex = LoadTexture("ui.dds", EAH_GPU_Read)();
+			ct = LoadTexture("ui.dds", EAH_GPU_Read)();
+		}
+		else
+		{
+			ct = control_tex;
 		}
 
-		tex_index_ = UIManager::Instance().AddTexture(control_tex);
+		tex_index_ = UIManager::Instance().AddTexture(ct);
 		this->InitDefaultElements();
 	}
 
@@ -915,6 +1004,8 @@ namespace KlayGE
 			return;
 		}
 
+		depth_base_ = 0.5f;
+
 		bool bBackgroundIsVisible = (top_left_clr_.a() != 0) || (top_right_clr_.a() != 0)
 			|| (bottom_right_clr_.a() != 0) || (bottom_left_clr_.a() != 0);
 		if (!minimized_ && bBackgroundIsVisible)
@@ -925,20 +1016,29 @@ namespace KlayGE
 			clrs[2] = bottom_right_clr_;
 			clrs[3] = bottom_left_clr_;
 
-			float3 pos(static_cast<float>(x_), static_cast<float>(y_), 0.5f);
-			Rect_T<int32_t> rc(0, 0, width_, height_);
-			UIManager::Instance().DrawRect(pos, static_cast<float>(width_),
-				static_cast<float>(height_), &clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
+			float3 pos(static_cast<float>(bounding_box_.left()), static_cast<float>(bounding_box_.top()), 0.5f);
+			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
+			UIManager::Instance().DrawRect(pos, static_cast<float>(this->GetWidth()),
+				static_cast<float>(this->GetHeight()), &clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
 		}
 
 		// Render the caption if it's enabled.
-		if (show_caption_)
+		if (this->IsCaptionEnabled())
 		{
 			// DrawSprite will offset the rect down by
 			// caption_height_, so adjust the rect higher
 			// here to negate the effect.
-			Rect_T<int32_t> rc(0, -caption_height_, width_, 0);
-			this->DrawSprite(cap_element_, rc);
+			int32_t const w = std::min(120, this->GetWidth() / 3);
+			Rect_T<int32_t> rc(0, -caption_height_, w, 0);
+			Color const & clr = cap_element_.TextureColor().Current;
+			UIManager::VertexFormat vertices[] = 
+			{
+				UIManager::VertexFormat(float3(0, static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
+				UIManager::VertexFormat(float3(static_cast<float>(w), static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
+				UIManager::VertexFormat(float3(static_cast<float>(w + caption_height_), 0, 0), clr, float2(0, 0)),
+				UIManager::VertexFormat(float3(0, 0, 0), clr, float2(0, 0))
+			};
+			this->DrawQuad(&vertices[0], 0, TexturePtr());
 			rc.left() += 5; // Make a left margin
 			std::wstring wstrOutput = caption_;
 			if (minimized_)
@@ -946,6 +1046,12 @@ namespace KlayGE
 				wstrOutput += L" (Minimized)";
 			}
 			this->DrawText(wstrOutput, cap_element_, rc, true);
+		}
+
+		if (bg_element_.TextureColor().Current.a() != 0)
+		{
+			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
+			this->DrawRect(rc, 0, bg_element_.TextureColor().Current);
 		}
 
 		// If the dialog is minimized, skip rendering
@@ -992,7 +1098,6 @@ namespace KlayGE
 			}
 			std::sort(intersected_controls.begin(), intersected_controls.end());
 
-			depth_base_ = 0.5f;
 			for (size_t i = 0; i < controls_.size(); ++ i)
 			{
 				BOOST_TYPEOF(intersected_controls)::iterator iter
@@ -1043,6 +1148,16 @@ namespace KlayGE
 		bottom_right_clr_ = colorBottomRight;
 	}
 
+	Vector_T<int32_t, 2> UIDialog::ToLocal(Vector_T<int32_t, 2> const & pt) const
+	{
+		Vector_T<int32_t, 2> ret = pt - this->GetLocation();
+		if (this->IsCaptionEnabled())
+		{
+			ret.y() -= caption_height_;
+		}
+		return ret;
+	}
+
 	void UIDialog::ClearFocus()
 	{
 		if (control_focus_.lock())
@@ -1052,7 +1167,7 @@ namespace KlayGE
 		}
 	}
 
-	UIControlPtr UIDialog::GetNextControl(UIControlPtr control) const
+	UIControlPtr const & UIDialog::GetNextControl(UIControlPtr const & control) const
 	{
 		int index = control->GetIndex() + 1;
 
@@ -1070,7 +1185,7 @@ namespace KlayGE
 		return dialog->controls_[index];
 	}
 
-	UIControlPtr UIDialog::GetPrevControl(UIControlPtr control) const
+	UIControlPtr const & UIDialog::GetPrevControl(UIControlPtr const & control) const
 	{
 		int index = control->GetIndex() - 1;
 
@@ -1228,6 +1343,17 @@ namespace KlayGE
 			&clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
 	}
 
+	void UIDialog::DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture)
+	{
+		float3 offset = float3(static_cast<float>(bounding_box_.left()), static_cast<float>(bounding_box_.top()), depth_base_ + depth);
+		if (this->IsCaptionEnabled())
+		{
+			offset.y() += this->GetCaptionHeight();
+		}
+
+		UIManager::Instance().DrawQuad(offset, vertices, texture);
+	}
+
 	void UIDialog::DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest)
 	{
 		// No need to draw fully transparent layers
@@ -1238,7 +1364,7 @@ namespace KlayGE
 
 		Rect_T<int32_t> rcTexture = element.TexRect();
 		Rect_T<int32_t> rcScreen = rcDest + this->GetLocation();
-		TexturePtr tex = UIManager::Instance().GetTexture(element.TextureIndex());
+		TexturePtr const & tex = UIManager::Instance().GetTexture(element.TextureIndex());
 
 		// If caption is enabled, offset the Y position by its height.
 		if (this->IsCaptionEnabled())
@@ -1286,17 +1412,21 @@ namespace KlayGE
 	{
 		this->SetFont(0, Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont"), 12);
 
-		UIElement Element;
-
 		// Element for the caption
 		cap_element_.SetFont(0);
 		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(17, 269, 241, 287));
-		cap_element_.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
+		cap_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.4f, 1);
 		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);
 		// Pre-blend as we don't need to transition the state
 		cap_element_.TextureColor().SetState(UICS_Normal);
 		cap_element_.FontColor().SetState(UICS_Normal);
+
+		// Element for the background
+		bg_element_.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(17, 269, 241, 287));
+		bg_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.8f, 1);
+		// Pre-blend as we don't need to transition the state
+		bg_element_.TextureColor().SetState(UICS_Normal);
 	}
 
 	bool UIDialog::OnCycleFocus(bool bForward)
@@ -1335,7 +1465,7 @@ namespace KlayGE
 		return false;
 	}
 
-	void UIDialog::AddIdName(std::string const & name, int id)
+	void UIDialog::AddIDName(std::string const & name, int id)
 	{
 		id_name_.insert(std::make_pair(name, id));
 	}
@@ -1362,17 +1492,20 @@ namespace KlayGE
 			int x = id_loc.second.x;
 			int y = id_loc.second.y;
 
+			uint32_t w = id_loc.first < 0 ? width : this->GetWidth();
+			uint32_t h = id_loc.first < 0 ? height : this->GetHeight();
+
 			switch (id_loc.second.align_x)
 			{
 			case CA_Left:
 				break;
 
 			case CA_Right:
-				x = width + x;
+				x = w + x;
 				break;
 
 			case CA_Center:
-				x = width / 2 + x;
+				x = w / 2 + x;
 				break;
 
 			default:
@@ -1386,11 +1519,11 @@ namespace KlayGE
 				break;
 
 			case CA_Bottom:
-				y = height + y;
+				y = h + y;
 				break;
 
 			case CA_Middle:
-				y = height / 2 + y;
+				y = h / 2 + y;
 				break;
 
 			default:
@@ -1398,7 +1531,14 @@ namespace KlayGE
 				break;
 			}
 
-			this->GetControl(id_loc.first)->SetLocation(x, y);
+			if (id_loc.first < 0)
+			{
+				this->SetLocation(x, y);
+			}
+			else
+			{
+				this->GetControl(id_loc.first)->SetLocation(x, y);
+			}
 		}
 	}
 
@@ -1466,6 +1606,9 @@ namespace KlayGE
 
 	void UIDialog::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
+		Vector_T<int32_t, 2> pt_local = pt;
+		pt_local -= this->GetLocation();
+
 		UIControlPtr control;
 		if (control_focus_.lock() && control_focus_.lock()->GetEnabled()
 			&& control_focus_.lock()->ContainsPoint(pt))

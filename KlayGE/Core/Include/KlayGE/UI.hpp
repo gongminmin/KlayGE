@@ -355,211 +355,6 @@ namespace KlayGE
 		Rect_T<int32_t> bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class KLAYGE_CORE_API UIDialog
-	{
-		friend class UIManager;
-
-	public:
-		enum ControlAlignment
-		{
-			CA_Left,
-			CA_Right,
-			CA_Center,
-			CA_Top,
-			CA_Bottom,
-			CA_Middle
-		};
-
-		struct ControlLocation
-		{
-			int x, y;
-			ControlAlignment align_x, align_y;
-		};
-
-	public:
-		explicit UIDialog(TexturePtr control_tex = TexturePtr());
-		~UIDialog();
-
-		void AddIdName(std::string const & name, int id);
-		int IDFromName(std::string const & name);
-
-		void CtrlLocation(int id, ControlLocation const & loc);
-		ControlLocation const & CtrlLocation(int id);
-
-		void SettleCtrls(uint32_t width, uint32_t height);
-
-		void AddControl(UIControlPtr control);
-		void InitControl(UIControl& control);
-
-		// Control retrieval
-		template <typename T>
-		boost::shared_ptr<T> Control(int ID) const
-		{
-			return checked_pointer_cast<T>(this->GetControl(ID, T::Type));
-		}
-
-		UIControlPtr GetControl(int ID) const;
-		UIControlPtr GetControl(int ID, uint32_t type) const;
-		UIControlPtr GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const;
-
-		bool GetControlEnabled(int ID) const;
-		void SetControlEnabled(int ID, bool enabled);
-
-		void ClearRadioButtonGroup(uint32_t nGroup);
-
-		void Render();
-
-		void RequestFocus(UIControl& control);
-		void ClearFocus();
-
-		// Attributes
-		bool GetVisible() const
-		{
-			return visible_;
-		}
-		void SetVisible(bool bVisible)
-		{
-			visible_ = bVisible;
-		}
-		bool GetMinimized() const
-		{
-			return minimized_;
-		}
-		void SetMinimized(bool bMinimized)
-		{
-			minimized_ = bMinimized;
-		}
-		void SetBackgroundColors(Color const & colorAllCorners);
-		void SetBackgroundColors(Color const & colorTopLeft, Color const & colorTopRight,
-			Color const & colorBottomLeft, Color const & colorBottomRight);
-		void EnableCaption(bool bEnable)
-		{
-			show_caption_ = bEnable;
-		}
-		bool IsCaptionEnabled() const
-		{
-			return show_caption_;
-		}
-		int GetCaptionHeight() const
-		{
-			return caption_height_;
-		}
-		void SetCaptionHeight(int nHeight)
-		{
-			caption_height_ = nHeight;
-		}
-		void SetCaptionText(std::wstring const & strText)
-		{
-			caption_ = strText;
-		}
-		Vector_T<int32_t, 2> GetLocation() const
-		{
-			return Vector_T<int32_t, 2>(x_, y_);
-		}
-		void SetLocation(int x, int y)
-		{
-			x_ = x; y_ = y;
-		}
-		void SetSize(int width, int height)
-		{
-			width_ = width; height_ = height;
-		}
-		int GetWidth() const
-		{
-			return width_;
-		}
-		int GetHeight() const
-		{
-			return height_;
-		}
-
-		UIControlPtr GetNextControl(UIControlPtr control) const;
-		UIControlPtr GetPrevControl(UIControlPtr control) const;
-
-		void RemoveControl(int ID);
-		void RemoveAllControls();
-
-		void EnableKeyboardInput(bool bEnable)
-		{
-			keyboard_input_ = bEnable;
-		}
-		void EnableMouseInput(bool bEnable)
-		{
-			mouse_input_ = bEnable;
-		}
-		bool IsKeyboardInputEnabled() const
-		{
-			return keyboard_input_;
-		}
-
-		// Device state notification
-		void Refresh();
-
-		// Shared resource access. Indexed fonts and textures are shared among
-		// all the controls.
-		void SetFont(size_t index, FontPtr const & font, uint32_t font_size);
-		FontPtr const & GetFont(size_t index) const;
-		uint32_t GetFontSize(size_t index) const;
-
-		void FocusDefaultControl();
-
-		void DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr);
-		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest);
-		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
-
-	private:
-		void KeyDownHandler(wchar_t key);
-		void KeyUpHandler(wchar_t key);
-		void MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
-		void MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
-		void MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta);
-		void MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
-
-	private:
-		bool keyboard_input_;
-		bool mouse_input_;
-
-		int default_control_id_;
-
-		// Initialize default Elements
-		void InitDefaultElements();
-
-		// Control events
-		bool OnCycleFocus(bool bForward);
-
-		boost::weak_ptr<UIControl> control_focus_;				// The control which has focus
-		boost::weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
-
-		bool visible_;
-		bool show_caption_;
-		bool minimized_;
-		bool drag_;
-		std::wstring caption_;
-
-		int x_;
-		int y_;
-		int width_;
-		int height_;
-		int caption_height_;
-
-		Color top_left_clr_;
-		Color top_right_clr_;
-		Color bottom_left_clr_;
-		Color bottom_right_clr_;
-
-		std::vector<int> fonts_;		// Index into font_cache_;
-		size_t tex_index_;				// Index into texture_cache_;
-
-		std::vector<UIControlPtr> controls_;
-
-		UIElement cap_element_;  // Element for the caption
-
-		float depth_base_;
-
-		std::map<std::string, int> id_name_;
-		std::map<int, ControlLocation> id_location_;
-	};
-
 	class KLAYGE_CORE_API UIManager : public boost::enable_shared_from_this<UIManager>
 	{
 	public:
@@ -647,14 +442,16 @@ namespace KlayGE
 		{
 			return dialogs_;
 		}
+		UIDialogPtr const & GetDialog(std::string const & id) const;
 
-		UIDialogPtr GetNextDialog(UIDialogPtr dialog) const;
-		UIDialogPtr GetPrevDialog(UIDialogPtr dialog) const;
+		UIDialogPtr const & GetNextDialog(UIDialogPtr const & dialog) const;
+		UIDialogPtr const & GetPrevDialog(UIDialogPtr const & dialog) const;
 
 		void Render();
 
 		void DrawRect(float3 const & pos, float width, float height, Color const * clrs,
 			Rect_T<int32_t> const & rcTexture, TexturePtr const & texture);
+		void DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture);
 		void DrawText(std::wstring const & strText, uint32_t font_index,
 			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
 
@@ -695,6 +492,231 @@ namespace KlayGE
 			uint32_t align;
 		};
 		std::map<size_t, std::vector<string_cache> > strings_;
+	};
+
+	class KLAYGE_CORE_API UIDialog
+	{
+		friend class UIManager;
+
+	public:
+		enum ControlAlignment
+		{
+			CA_Left,
+			CA_Right,
+			CA_Center,
+			CA_Top,
+			CA_Bottom,
+			CA_Middle
+		};
+
+		struct ControlLocation
+		{
+			int x, y;
+			ControlAlignment align_x, align_y;
+		};
+
+	public:
+		explicit UIDialog(TexturePtr const & control_tex);
+		~UIDialog();
+
+		void AddIDName(std::string const & name, int id);
+		int IDFromName(std::string const & name);
+
+		void CtrlLocation(int id, ControlLocation const & loc);
+		ControlLocation const & CtrlLocation(int id);
+
+		void SettleCtrls(uint32_t width, uint32_t height);
+
+		void AddControl(UIControlPtr control);
+		void InitControl(UIControl& control);
+
+		// Control retrieval
+		template <typename T>
+		boost::shared_ptr<T> Control(int ID) const
+		{
+			return checked_pointer_cast<T>(this->GetControl(ID, T::Type));
+		}
+
+		UIControlPtr GetControl(int ID) const;
+		UIControlPtr GetControl(int ID, uint32_t type) const;
+		UIControlPtr GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const;
+
+		bool GetControlEnabled(int ID) const;
+		void SetControlEnabled(int ID, bool enabled);
+
+		void ClearRadioButtonGroup(uint32_t nGroup);
+
+		void Render();
+
+		void RequestFocus(UIControl& control);
+		void ClearFocus();
+
+		// Attributes
+		bool GetVisible() const
+		{
+			return visible_;
+		}
+		void SetVisible(bool bVisible)
+		{
+			visible_ = bVisible;
+		}
+		bool GetMinimized() const
+		{
+			return minimized_;
+		}
+		void SetMinimized(bool bMinimized)
+		{
+			minimized_ = bMinimized;
+		}
+		void SetBackgroundColors(Color const & colorAllCorners);
+		void SetBackgroundColors(Color const & colorTopLeft, Color const & colorTopRight,
+			Color const & colorBottomLeft, Color const & colorBottomRight);
+		void EnableCaption(bool bEnable)
+		{
+			show_caption_ = bEnable;
+		}
+		bool IsCaptionEnabled() const
+		{
+			return show_caption_;
+		}
+		int GetCaptionHeight() const
+		{
+			return caption_height_;
+		}
+		void SetCaptionHeight(int nHeight)
+		{
+			caption_height_ = nHeight;
+		}
+		void SetID(std::string const & id)
+		{
+			id_ = id;
+		}
+		std::string const & GetID() const
+		{
+			return id_;
+		}
+		void SetCaptionText(std::wstring const & strText)
+		{
+			caption_ = strText;
+		}
+		Vector_T<int32_t, 2> GetLocation() const
+		{
+			return Vector_T<int32_t, 2>(bounding_box_.left(), bounding_box_.top());
+		}
+		void SetLocation(int x, int y)
+		{
+			int const w = this->GetWidth();
+			int const h = this->GetHeight();
+			bounding_box_.left() = x;
+			bounding_box_.top() = y;
+			bounding_box_.right() = x + w;
+			bounding_box_.bottom() = y + h;
+		}
+		void SetSize(int width, int height)
+		{
+			bounding_box_.right() = bounding_box_.left() + width;
+			bounding_box_.bottom() = bounding_box_.top() + height;
+		}
+		int GetWidth() const
+		{
+			return bounding_box_.Width();
+		}
+		int GetHeight() const
+		{
+			return bounding_box_.Height();
+		}
+
+		UIControlPtr const & GetNextControl(UIControlPtr const & control) const;
+		UIControlPtr const & GetPrevControl(UIControlPtr const & control) const;
+
+		void RemoveControl(int ID);
+		void RemoveAllControls();
+
+		void EnableKeyboardInput(bool bEnable)
+		{
+			keyboard_input_ = bEnable;
+		}
+		void EnableMouseInput(bool bEnable)
+		{
+			mouse_input_ = bEnable;
+		}
+		bool IsKeyboardInputEnabled() const
+		{
+			return keyboard_input_;
+		}
+
+		bool ContainsPoint(Vector_T<int32_t, 2> const & pt) const
+		{
+			return bounding_box_.PtInRect(pt);
+		}
+		Vector_T<int32_t, 2> ToLocal(Vector_T<int32_t, 2> const & pt) const;
+
+		// Device state notification
+		void Refresh();
+
+		// Shared resource access. Indexed fonts and textures are shared among
+		// all the controls.
+		void SetFont(size_t index, FontPtr const & font, uint32_t font_size);
+		FontPtr const & GetFont(size_t index) const;
+		uint32_t GetFontSize(size_t index) const;
+
+		void FocusDefaultControl();
+
+		void DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr);
+		void DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture);
+		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest);
+		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
+
+	private:
+		void KeyDownHandler(wchar_t key);
+		void KeyUpHandler(wchar_t key);
+		void MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+		void MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+		void MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta);
+		void MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+
+	private:
+		bool keyboard_input_;
+		bool mouse_input_;
+
+		int default_control_id_;
+
+		// Initialize default Elements
+		void InitDefaultElements();
+
+		// Control events
+		bool OnCycleFocus(bool bForward);
+
+		boost::weak_ptr<UIControl> control_focus_;				// The control which has focus
+		boost::weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
+
+		bool visible_;
+		bool show_caption_;
+		bool minimized_;
+		bool drag_;
+		std::string id_;
+		std::wstring caption_;
+
+		Rect_T<int32_t> bounding_box_;
+		int caption_height_;
+
+		Color top_left_clr_;
+		Color top_right_clr_;
+		Color bottom_left_clr_;
+		Color bottom_right_clr_;
+
+		std::vector<int> fonts_;		// Index into font_cache_;
+		size_t tex_index_;				// Index into texture_cache_;
+
+		std::vector<UIControlPtr> controls_;
+
+		UIElement cap_element_;  // Element for the caption
+		UIElement bg_element_;  // Element for the background
+
+		float depth_base_;
+
+		std::map<std::string, int> id_name_;
+		std::map<int, ControlLocation> id_location_;
 	};
 
 	class KLAYGE_CORE_API UIStatic : public UIControl

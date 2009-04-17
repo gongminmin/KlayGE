@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui version='1'>
-	<dialog caption="Shadow Cubemap">
-		<control type="static" id="MinVarianceStatic" caption="Min Variance:" x="-120" y="200" align_x="right" width="100" height="24" is_default="0"/>
-		<control type="slider" id="MinVarianceSlider" x="-120" y="220" align_x="right" width="100" height="24" min="0" max="100" value="50" is_default="0"/>
+	<dialog id="ShadowCubemap" caption="Shadow Cubemap" x="-140" y="200" align_x="right" width="140" height="200">
+		<control type="static" id="MinVarianceStatic" caption="Min Variance:" x="20" y="20" width="100" height="24" is_default="0"/>
+		<control type="slider" id="MinVarianceSlider" x="20" y="40" width="100" height="24" min="0" max="100" value="50" is_default="0"/>
 
-		<control type="static" id="BleedingReduceStatic" caption="Bleeding Reduce:" x="-120" y="268" align_x="right" width="100" height="24" is_default="0"/>
-		<control type="slider" id="BleedingReduceSlider" x="-120" y="288" align_x="right" width="100" height="24" min="0" max="100" value="50" is_default="0"/>
+		<control type="static" id="BleedingReduceStatic" caption="Bleeding Reduce:" x="20" y="88" width="100" height="24" is_default="0"/>
+		<control type="slider" id="BleedingReduceSlider" x="20" y="108" width="100" height="24" min="0" max="100" value="50" is_default="0"/>
 
-		<control type="check_box" id="CtrlCamera" caption="Control camera" x="-120" y="356" align_x="right" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="156" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 </ui>

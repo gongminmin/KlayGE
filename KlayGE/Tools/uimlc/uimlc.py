@@ -258,6 +258,10 @@ class ui_edit_box(ui_control):
 class dialog:
 	def __init__(self, tag):
 		try:
+			self.id = tag.getAttribute('id')
+		except:
+			self.id = ''
+		try:
 			self.caption = tag.getAttribute('caption')
 		except:
 			self.caption = ''
@@ -265,6 +269,18 @@ class dialog:
 			self.skin = tag.getAttribute('skin')
 		except:
 			self.skin = ''
+		self.x = int(tag.getAttribute('x'))
+		self.y = int(tag.getAttribute('y'))
+		self.width = int(tag.getAttribute('width'))
+		self.height = int(tag.getAttribute('height'))
+		try:
+			self.align_x = align_enum[tag.getAttribute('align_x')]
+		except:
+			self.align_x = align_enum["left"]
+		try:
+			self.align_y = align_enum[tag.getAttribute('align_y')]
+		except:
+			self.align_y = align_enum["top"]
 
 		self.controls = []
 		control_tags = tag.getElementsByTagName('control')
@@ -273,8 +289,15 @@ class dialog:
 			eval("self.controls.append(ui_%s(control_tag))" % t)
 
 	def write(self, stream):
+		write_short_string(stream, self.id)
 		write_short_string(stream, self.caption)
 		write_short_string(stream, self.skin)
+		stream.write(struct.pack('i', self.x))
+		stream.write(struct.pack('i', self.y))
+		stream.write(struct.pack('I', self.width))
+		stream.write(struct.pack('I', self.height))
+		stream.write(struct.pack('B', self.align_x))
+		stream.write(struct.pack('B', self.align_y))
 		stream.write(struct.pack('I', len(ctrl_id_list)))
 		for id in ctrl_id_list:
 			write_short_string(stream, id)
@@ -294,7 +317,7 @@ class ui_cfg:
 			stream.write(bytes('UIML', encoding = 'ascii'))
 		else:
 			stream.write('UIML')
-		stream.write(struct.pack('I', 1))
+		stream.write(struct.pack('I', 2))
 		stream.write(struct.pack('I', len(self.dialogs)))
 
 		for dlg in self.dialogs:

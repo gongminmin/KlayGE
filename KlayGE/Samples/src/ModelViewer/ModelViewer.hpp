@@ -44,7 +44,8 @@ private:
 
 	bool skinned_;
 	bool play_;
-	KlayGE::UIDialogPtr dialog_;
+	KlayGE::UIDialogPtr dialog_animation_;
+	KlayGE::UIDialogPtr dialog_model_;
 	int id_open_;
 	int id_save_as_;
 	int id_skinned_;

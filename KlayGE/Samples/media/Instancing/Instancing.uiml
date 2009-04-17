@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui version='1'>
-	<dialog caption="Instancing">
-		<control type="check_box" id="UseInstancing" caption="Use instancing" x="60" y="-50" align_y="bottom" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+	<dialog id="Instancing" caption="Instancing" x="40" y="-70" align_y="bottom" width="160" height="70">
+		<control type="check_box" id="UseInstancing" caption="Use instancing" x="20" y="20" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
 	</dialog>
 </ui>

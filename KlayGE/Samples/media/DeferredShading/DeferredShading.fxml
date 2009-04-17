@@ -340,7 +340,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
 	}
 	float3 specular_clr = GetSpecular(color);
-	return float4(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f, 1);
+	return float4(diffuse_clr * (0.15f + diffuse) * 0.7f + specular_clr * specular * 0.3f, 1);
 }
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

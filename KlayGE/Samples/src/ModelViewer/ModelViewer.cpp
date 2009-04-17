@@ -208,20 +208,21 @@ void ModelViewerApp::InitObjects()
 	grid_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("ModelViewer.kui"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	dialog_animation_ = UIManager::Instance().GetDialog("Animation");
+	dialog_model_ = UIManager::Instance().GetDialog("Model");
 
-	id_open_ = dialog_->IDFromName("Open");
-	id_save_as_ = dialog_->IDFromName("SaveAs");
-	id_skinned_ = dialog_->IDFromName("Skinned");
-	id_frame_static_ = dialog_->IDFromName("FrameStatic");
-	id_frame_slider_ = dialog_->IDFromName("FrameSlider");
-	id_play_ = dialog_->IDFromName("Play");
-	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
-	id_mesh_ = dialog_->IDFromName("MeshCombo");
-	id_vertex_streams_ = dialog_->IDFromName("VertexStreamList");
-	id_textures_ = dialog_->IDFromName("TextureList");
-	id_visualize_ = dialog_->IDFromName("VisualizeCombo");
-	id_line_mode_ = dialog_->IDFromName("LineModeCheck");
+	id_skinned_ = dialog_animation_->IDFromName("Skinned");
+	id_frame_static_ = dialog_animation_->IDFromName("FrameStatic");
+	id_frame_slider_ = dialog_animation_->IDFromName("FrameSlider");
+	id_play_ = dialog_animation_->IDFromName("Play");
+	id_fps_camera_ = dialog_animation_->IDFromName("FPSCamera");
+	id_open_ = dialog_model_->IDFromName("Open");
+	id_save_as_ = dialog_model_->IDFromName("SaveAs");
+	id_mesh_ = dialog_model_->IDFromName("MeshCombo");
+	id_vertex_streams_ = dialog_model_->IDFromName("VertexStreamList");
+	id_textures_ = dialog_model_->IDFromName("TextureList");
+	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
+	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
 
 	this->OpenModel("felhound.kmodel");
 
@@ -230,7 +231,7 @@ void ModelViewerApp::InitObjects()
 	float3 half_size = bb.HalfSize();
 
 	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, 0, 0), float3(0.0f, 1.0f, 0.0f));
-	this->Proj(0.1f, 100.0f);
+	this->Proj(0.1f, 200.0f);
 
 	tbController_.AttachCamera(this->ActiveCamera());
 	tbController_.Scalers(0.01f, 0.5f);
@@ -244,20 +245,20 @@ void ModelViewerApp::InitObjects()
 	input_handler->connect(boost::bind(&ModelViewerApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::OpenHandler, this, _1));
-	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::SaveAsHandler, this, _1));
+	dialog_animation_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SkinnedHandler, this, _1));
 
-	dialog_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SkinnedHandler, this, _1));
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(boost::bind(&ModelViewerApp::FrameChangedHandler, this, _1));
+	this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 
-	dialog_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(boost::bind(&ModelViewerApp::FrameChangedHandler, this, _1));
-	this->FrameChangedHandler(*dialog_->Control<UISlider>(id_frame_slider_));
+	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
+	dialog_animation_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::FPSCameraHandler, this, _1));
 
-	dialog_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::FPSCameraHandler, this, _1));
+	dialog_model_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::OpenHandler, this, _1));
+	dialog_model_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::SaveAsHandler, this, _1));
 
-	dialog_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::MeshChangedHandler, this, _1));
-	dialog_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::VisualizeChangedHandler, this, _1));
-	dialog_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::LineModeChangedHandler, this, _1));
+	dialog_model_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::MeshChangedHandler, this, _1));
+	dialog_model_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::VisualizeChangedHandler, this, _1));
+	dialog_model_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::LineModeChangedHandler, this, _1));
 }
 
 void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
@@ -273,16 +274,16 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	model_->SetTime(0);
 
 	frame_ = 0;
-	dialog_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame(), model_->EndFrame() - 1);
-	dialog_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame(), model_->EndFrame() - 1);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
 
-	dialog_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
+	dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
 	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
 	{
-		dialog_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
+		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
 	}
 
-	this->MeshChangedHandler(*dialog_->Control<UIComboBox>(id_mesh_));
+	this->MeshChangedHandler(*dialog_model_->Control<UIComboBox>(id_mesh_));
 }
 
 void ModelViewerApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -317,7 +318,12 @@ void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 
 	if (GetOpenFileNameA(&ofn))
 	{
+		HCURSOR cur = GetCursor();
+		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		
 		this->OpenModel(fn);
+		
+		SetCursor(cur);
 	}
 #endif
 }
@@ -344,25 +350,30 @@ void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 
 	if (GetSaveFileNameA(&ofn))
 	{
+		HCURSOR cur = GetCursor();
+		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		
 		SaveKModel(model_, fn);
+
+		SetCursor(cur);
 	}
 #endif
 }
 
 void ModelViewerApp::SkinnedHandler(UICheckBox const & /*sender*/)
 {
-	skinned_ = dialog_->Control<UICheckBox>(id_skinned_)->GetChecked();
+	skinned_ = dialog_animation_->Control<UICheckBox>(id_skinned_)->GetChecked();
 	if (skinned_)
 	{
-		dialog_->Control<UICheckBox>(id_play_)->SetEnabled(true);
+		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(true);
 		model_->RebindJoints();
-		this->FrameChangedHandler(*dialog_->Control<UISlider>(id_frame_slider_));
+		this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 	}
 	else
 	{
 		model_->UnbindJoints();
-		dialog_->Control<UICheckBox>(id_play_)->SetChecked(false);
-		dialog_->Control<UICheckBox>(id_play_)->SetEnabled(false);
+		dialog_animation_->Control<UICheckBox>(id_play_)->SetChecked(false);
+		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(false);
 	}
 }
 
@@ -376,7 +387,7 @@ void ModelViewerApp::FrameChangedHandler(KlayGE::UISlider const & sender)
 
 	std::wostringstream stream;
 	stream << frame_ << L":";
-	dialog_->Control<UIStatic>(id_frame_static_)->SetText(stream.str());
+	dialog_animation_->Control<UIStatic>(id_frame_static_)->SetText(stream.str());
 }
 
 void ModelViewerApp::PlayHandler(KlayGE::UICheckBox const & sender)
@@ -402,11 +413,11 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	uint32_t mi = sender.GetSelectedIndex();
 
-	dialog_->Control<UIComboBox>(id_visualize_)->RemoveAllItems();
-	dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Lighting");
+	dialog_model_->Control<UIComboBox>(id_visualize_)->RemoveAllItems();
+	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Lighting");
 
-	dialog_->Control<UIListBox>(id_vertex_streams_)->RemoveAllItems();
-	RenderLayoutPtr rl = model_->Mesh(mi)->GetRenderLayout();
+	dialog_model_->Control<UIListBox>(id_vertex_streams_)->RemoveAllItems();
+	RenderLayoutPtr const & rl = model_->Mesh(mi)->GetRenderLayout();
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 	{
 		std::wostringstream oss;
@@ -466,13 +477,13 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 
 			oss << oss_one.str();
 
-			dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex " + oss_one.str(), rl->VertexStreamFormat(i)[j]);
+			dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Vertex " + oss_one.str(), rl->VertexStreamFormat(i)[j]);
 		}
 
-		dialog_->Control<UIListBox>(id_vertex_streams_)->AddItem(oss.str());
+		dialog_model_->Control<UIListBox>(id_vertex_streams_)->AddItem(oss.str());
 	}
 
-	dialog_->Control<UIListBox>(id_textures_)->RemoveAllItems();
+	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
 	StaticMesh::TextureSlotsType const & texture_slots = model_->Mesh(mi)->TextureSlots();
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
@@ -481,9 +492,9 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 		Convert(type, texture_slots[i].first);
 		Convert(name, texture_slots[i].second);
 		oss << type << L": " << name;
-		dialog_->Control<UIListBox>(id_textures_)->AddItem(oss.str());
+		dialog_model_->Control<UIListBox>(id_textures_)->AddItem(oss.str());
 
-		dialog_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture " + type, static_cast<int>(i));
+		dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Texture " + type, static_cast<int>(i));
 	}
 }
 
@@ -546,8 +557,8 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 			last_time_ = this_time;
 		}
 
-		dialog_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
-		this->FrameChangedHandler(*dialog_->Control<UISlider>(id_frame_slider_));
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
+		this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 	}
 
 	UIManager::Instance().Render();
