@@ -75,8 +75,8 @@ namespace KlayGE
 			desc_.Format = D3D11Mapping::MappingFormat(format_);
 			break;
 		}
-		desc_.SampleDesc.Count = 1;
-		desc_.SampleDesc.Quality = 0;
+		desc_.SampleDesc.Count = sample_count;
+		desc_.SampleDesc.Quality = sample_quality;
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
@@ -117,7 +117,14 @@ namespace KlayGE
 				break;
 			}
 
-			sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			if (sample_count > 1)
+			{
+				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+			}
+			else
+			{
+				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			}
 			sr_desc.Texture2D.MostDetailedMip = 0;
 			sr_desc.Texture2D.MipLevels = numMipMaps_;
 
@@ -160,7 +167,18 @@ namespace KlayGE
 		if ((this->Width(0) == target.Width(0)) && (this->Height(0) == target.Height(0)) && (this->Format() == target.Format())
 			&& (this->NumMipMaps() == target.NumMipMaps()))
 		{
-			d3d_imm_ctx_->CopyResource(other.D3DTexture().get(), d3dTexture2D_.get());
+			if ((this->SampleCount() > 1) && target.SampleCount() == 1)
+			{
+				for (uint16_t l = 0; l < this->NumMipMaps(); ++ l)
+				{
+					d3d_imm_ctx_->ResolveSubresource(other.D3DTexture().get(), D3D11CalcSubresource(l, 0, 1),
+						d3dTexture2D_.get(), D3D11CalcSubresource(l, 0, 1), D3D11Mapping::MappingFormat(target.Format()));
+				}
+			}
+			else
+			{
+				d3d_imm_ctx_->CopyResource(other.D3DTexture().get(), d3dTexture2D_.get());
+			}
 		}
 		else
 		{
