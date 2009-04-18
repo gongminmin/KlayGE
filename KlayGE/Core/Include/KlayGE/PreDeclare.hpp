@@ -188,6 +188,7 @@ namespace KlayGE
 	class UIListBox;
 	class UIComboBox;
 	class UIEditBox;
+	class UIPolylineEditBox;
 
 	class Socket;
 	class Lobby;

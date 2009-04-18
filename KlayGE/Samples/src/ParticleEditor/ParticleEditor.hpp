@@ -30,10 +30,6 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
-	void MouseDownHandler(KlayGE::uint32_t buttons, KlayGE::Vector_T<KlayGE::int32_t, 2> const & pt);
-	void MouseUpHandler(KlayGE::uint32_t buttons, KlayGE::Vector_T<KlayGE::int32_t, 2> const & pt);
-	void MouseOverHandler(KlayGE::uint32_t buttons, KlayGE::Vector_T<KlayGE::int32_t, 2> const & pt);
-
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void OpenHandler(KlayGE::UIButton const & sender);
 	void SaveAsHandler(KlayGE::UIButton const & sender);
@@ -81,6 +77,9 @@ private:
 	int id_velocity_slider_;
 	int id_fps_camera_;
 	int id_particle_tex_button_;
+	int id_size_over_life_;
+	int id_weight_over_life_;
+	int id_transparency_over_life_;
 };
 
 #endif		// _PARTICLESYSTEMAPP_HPP

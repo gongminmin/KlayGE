@@ -270,567 +270,6 @@ namespace
 		}
 	};
 
-	class RenderPolyline : public Renderable
-	{
-	public:
-		RenderPolyline()
-			: name_(L"Polyline")
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			effect_ = rf.LoadEffect("ParticleEditor.kfx");
-
-			*(effect_->ParameterByName("active_pt")) = static_cast<int32_t>(-1);
-
-			// background
-			techniques_[BACKGROUND_INDEX] = effect_->TechniqueByName("BackgroundTech");
-			rls_[BACKGROUND_INDEX] = rf.MakeRenderLayout();
-			rls_[BACKGROUND_INDEX]->TopologyType(RenderLayout::TT_TriangleStrip);
-			{
-				float2 xy[] = 
-				{
-					float2(0, 0),
-					float2(1, 0),
-					float2(0, 1),
-					float2(1, 1)
-				};
-				ElementInitData init_data;
-				init_data.data = &xy[0];
-				init_data.slice_pitch = init_data.row_pitch = sizeof(xy);
-				pos_vbs_[BACKGROUND_INDEX] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, &init_data);
-			}
-			rls_[BACKGROUND_INDEX]->BindVertexStream(pos_vbs_[BACKGROUND_INDEX], boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-			// coord line
-			techniques_[COORDLINE_INDEX] = effect_->TechniqueByName("CoordLineTech");
-			rls_[COORDLINE_INDEX] = rf.MakeRenderLayout();
-			rls_[COORDLINE_INDEX]->TopologyType(RenderLayout::TT_TriangleList);
-			{
-				ElementInitData init_data;
-				
-				std::vector<float4> vdata(4 * (21 + 11));
-				for (size_t i = 0; i < 21; ++ i)
-				{
-					vdata[i * 4 + 0] = float4(i / 20.0f, 0, -0.5f, 0);
-					vdata[i * 4 + 1] = float4(i / 20.0f, 0, +0.5f, 0);
-					vdata[i * 4 + 2] = float4(i / 20.0f, 1, +0.5f, 0);
-					vdata[i * 4 + 3] = float4(i / 20.0f, 1, -0.5f, 0);
-				}
-				vdata[10 * 4 + 0].z() = -1;
-				vdata[10 * 4 + 1].z() = +1;
-				vdata[10 * 4 + 2].z() = +1;
-				vdata[10 * 4 + 3].z() = -1;
-				for (size_t i = 0; i < 11; ++ i)
-				{
-					vdata[(i + 21) * 4 + 0] = float4(0, i / 10.0f, 0, -0.5f);
-					vdata[(i + 21) * 4 + 1] = float4(1, i / 10.0f, 0, -0.5f);
-					vdata[(i + 21) * 4 + 2] = float4(1, i / 10.0f, 0, +0.5f);
-					vdata[(i + 21) * 4 + 3] = float4(0, i / 10.0f, 0, +0.5f);
-				}
-				vdata[26 * 4 + 0].w() = -1;
-				vdata[26 * 4 + 1].w() = -1;
-				vdata[26 * 4 + 2].w() = +1;
-				vdata[26 * 4 + 3].w() = +1;
-				init_data.data = &vdata[0];
-				init_data.slice_pitch = init_data.row_pitch = vdata.size() * sizeof(vdata[0]);
-				pos_vbs_[COORDLINE_INDEX] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, &init_data);
-				rls_[COORDLINE_INDEX]->BindVertexStream(pos_vbs_[COORDLINE_INDEX], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-
-				std::vector<uint16_t> idata(6 * (21 + 11));
-				for (size_t i = 0; i < 21 + 11; ++ i)
-				{
-					idata[i * 6 + 0] = static_cast<uint16_t>(i * 4 + 0);
-					idata[i * 6 + 1] = static_cast<uint16_t>(i * 4 + 1);
-					idata[i * 6 + 2] = static_cast<uint16_t>(i * 4 + 2);
-					idata[i * 6 + 3] = static_cast<uint16_t>(i * 4 + 2);
-					idata[i * 6 + 4] = static_cast<uint16_t>(i * 4 + 3);
-					idata[i * 6 + 5] = static_cast<uint16_t>(i * 4 + 0);
-				}
-				init_data.data = &idata[0];
-				init_data.slice_pitch = init_data.row_pitch = idata.size() * sizeof(idata[0]);
-				ibs_[COORDLINE_INDEX] = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read, &init_data);
-				rls_[COORDLINE_INDEX]->BindIndexStream(ibs_[COORDLINE_INDEX], EF_R16UI);
-			}
-			
-			// polyline
-			techniques_[POLYLINE_INDEX] = effect_->TechniqueByName("PolylineTech");
-			rls_[POLYLINE_INDEX] = rf.MakeRenderLayout();
-			rls_[POLYLINE_INDEX]->TopologyType(RenderLayout::TT_TriangleList);
-			pos_vbs_[POLYLINE_INDEX] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-			rls_[POLYLINE_INDEX]->BindVertexStream(pos_vbs_[POLYLINE_INDEX], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-			ibs_[POLYLINE_INDEX] = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-			rls_[POLYLINE_INDEX]->BindIndexStream(ibs_[POLYLINE_INDEX], EF_R16UI);
-
-			// control points
-			techniques_[CTRLPOINTS_INDEX] = effect_->TechniqueByName("ControlPointTech");
-			rls_[CTRLPOINTS_INDEX] = rf.MakeRenderLayout();
-			rls_[CTRLPOINTS_INDEX]->TopologyType(RenderLayout::TT_TriangleList);
-			pos_vbs_[CTRLPOINTS_INDEX] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-			rls_[CTRLPOINTS_INDEX]->BindVertexStream(pos_vbs_[CTRLPOINTS_INDEX], boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			ibs_[CTRLPOINTS_INDEX] = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
-			rls_[CTRLPOINTS_INDEX]->BindIndexStream(ibs_[CTRLPOINTS_INDEX], EF_R16UI);
-		}
-
-		RenderTechniquePtr const & GetRenderTechnique() const
-		{
-			return techniques_[0];
-		}
-
-		RenderLayoutPtr const & GetRenderLayout() const
-		{
-			return rls_[0];
-		}
-
-		Box const & GetBound() const
-		{
-			return box_;
-		}
-
-		std::wstring const & Name() const
-		{
-			return name_;
-		}
-
-		void OnRenderBegin()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float const half_width = re.CurFrameBuffer()->Width() / 2.0f;
-			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
-
-			*(effect_->ParameterByName("half_width_height")) = float2(half_width, half_height);
-
-			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= half_width;
-			texel_to_pixel.y() /= half_height;
-			*(effect_->ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
-		}
-
-		void SetCtrlPoints(std::vector<float2> const & ctrl_points)
-		{
-			if (!ctrl_points.empty())
-			{
-				pos_vbs_[POLYLINE_INDEX]->Resize((ctrl_points.size() - 1) * 4 * sizeof(float4));
-				{
-					GraphicsBuffer::Mapper mapper(*pos_vbs_[POLYLINE_INDEX], BA_Write_Only);
-					float4* p = mapper.Pointer<float4>();
-					for (size_t i = 0; i < ctrl_points.size() - 1; ++ i)
-					{
-						float2 dir = ctrl_points[i + 1] - ctrl_points[i + 0];
-						dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2;
-						p[i * 4 + 0] = float4(ctrl_points[i + 0].x(), ctrl_points[i + 0].y(), -dir.x(), -dir.y());
-						p[i * 4 + 1] = float4(ctrl_points[i + 1].x(), ctrl_points[i + 1].y(), -dir.x(), -dir.y());
-						p[i * 4 + 2] = float4(ctrl_points[i + 1].x(), ctrl_points[i + 1].y(), dir.x(), dir.y());
-						p[i * 4 + 3] = float4(ctrl_points[i + 0].x(), ctrl_points[i + 0].y(), dir.x(), dir.y());
-					}
-				}
-				ibs_[POLYLINE_INDEX]->Resize((ctrl_points.size() - 1) * 6 * sizeof(uint16_t));
-				{
-					GraphicsBuffer::Mapper mapper(*ibs_[POLYLINE_INDEX], BA_Write_Only);
-					uint16_t* p = mapper.Pointer<uint16_t>();
-					for (size_t i = 0; i < ctrl_points.size() - 1; ++ i)
-					{
-						p[i * 6 + 0] = static_cast<uint16_t>(i * 4 + 0);
-						p[i * 6 + 1] = static_cast<uint16_t>(i * 4 + 1);
-						p[i * 6 + 2] = static_cast<uint16_t>(i * 4 + 2);
-						p[i * 6 + 3] = static_cast<uint16_t>(i * 4 + 2);
-						p[i * 6 + 4] = static_cast<uint16_t>(i * 4 + 3);
-						p[i * 6 + 5] = static_cast<uint16_t>(i * 4 + 0);
-					}
-				}
-
-				pos_vbs_[CTRLPOINTS_INDEX]->Resize(4 * ctrl_points.size() * sizeof(float3));
-				{
-					GraphicsBuffer::Mapper mapper(*pos_vbs_[CTRLPOINTS_INDEX], BA_Write_Only);
-					float3* p = mapper.Pointer<float3>();
-					for (size_t i = 0; i < ctrl_points.size(); ++ i)
-					{
-						p[i * 4 + 0] = float3(ctrl_points[i].x(), ctrl_points[i].y(), i * 4 + 0.0f);
-						p[i * 4 + 1] = float3(ctrl_points[i].x(), ctrl_points[i].y(), i * 4 + 1.0f);
-						p[i * 4 + 2] = float3(ctrl_points[i].x(), ctrl_points[i].y(), i * 4 + 2.0f);
-						p[i * 4 + 3] = float3(ctrl_points[i].x(), ctrl_points[i].y(), i * 4 + 3.0f);
-					}
-				}
-				ibs_[CTRLPOINTS_INDEX]->Resize(6 * ctrl_points.size() * sizeof(uint16_t));
-				{
-					GraphicsBuffer::Mapper mapper(*ibs_[CTRLPOINTS_INDEX], BA_Write_Only);
-					uint16_t* p = mapper.Pointer<uint16_t>();
-					for (size_t i = 0; i < ctrl_points.size(); ++ i)
-					{
-						p[i * 6 + 0] = static_cast<uint16_t>(i * 4 + 0);
-						p[i * 6 + 1] = static_cast<uint16_t>(i * 4 + 1);
-						p[i * 6 + 2] = static_cast<uint16_t>(i * 4 + 2);
-						p[i * 6 + 3] = static_cast<uint16_t>(i * 4 + 2);
-						p[i * 6 + 4] = static_cast<uint16_t>(i * 4 + 3);
-						p[i * 6 + 5] = static_cast<uint16_t>(i * 4 + 0);
-					}
-				}
-			}
-		}
-
-		void SetLocSize(float4 const & loc_size)
-		{
-			loc_size_ = loc_size;
-			*(effect_->ParameterByName("loc_size")) = loc_size;
-		}
-
-		void SetColor(Color const & clr)
-		{
-			*(effect_->ParameterByName("polyline_clr")) = float4(&clr.r());
-		}
-
-		void ActivePoint(int32_t point_index)
-		{
-			*(effect_->ParameterByName("active_pt")) = point_index;
-		}
-
-		void Render()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-			this->OnRenderBegin();
-			for (int i = 0; i < 4; ++ i)
-			{
-				re.Render(*techniques_[i], *rls_[i]);
-			}
-			this->OnRenderEnd();
-		}
-
-	private:
-		static const int BACKGROUND_INDEX = 0;
-		static const int COORDLINE_INDEX = 1;
-		static const int POLYLINE_INDEX = 2;
-		static const int CTRLPOINTS_INDEX = 3;
-
-	private:
-		GraphicsBufferPtr pos_vbs_[4];
-		GraphicsBufferPtr ibs_[4];
-
-		float4 loc_size_;
-
-		std::wstring name_;
-		Box box_;
-
-		RenderEffectPtr effect_;
-		RenderLayoutPtr rls_[4];
-		RenderTechniquePtr techniques_[4];
-	};
-
-	class PolylineObject : public SceneObjectHelper
-	{
-	public:
-		PolylineObject()
-			: SceneObjectHelper(RenderablePtr(new RenderPolyline), 0),
-				move_point_(false)
-		{
-			active_pt_ = -1;
-		}
-
-		void ActivePoint(int index)
-		{
-			BOOST_ASSERT(index < static_cast<int>(ctrl_points_.size()));
-			active_pt_ = index;
-			checked_pointer_cast<RenderPolyline>(renderable_)->ActivePoint(index);
-		}
-		int ActivePoint() const
-		{
-			return active_pt_;
-		}
-
-		void ClearCtrlPoints()
-		{
-			active_pt_ = -1;
-			ctrl_points_.clear();
-			move_point_ = false;
-		}
-
-		int AddCtrlPoint(float pos, float value)
-		{
-			pos = std::max(std::min(pos, 1.0f), 0.0f);
-			value = std::max(std::min(value, 1.0f), 0.0f);
-
-			int index;
-			if (ctrl_points_.size() >= 1)
-			{
-				std::vector<float2>::iterator iter = ctrl_points_.begin();
-				while ((iter != ctrl_points_.end() - 1) && ((iter + 1)->x() < pos))
-				{
-					++ iter;
-				}
-				index = iter + 1 - ctrl_points_.begin();
-				if ((iter + 1 == ctrl_points_.end()) || (abs((iter + 1)->x() - pos) > 0.05f))
-				{
-					ctrl_points_.insert(iter + 1, float2(pos, value));
-					checked_pointer_cast<RenderPolyline>(renderable_)->SetCtrlPoints(ctrl_points_);
-				}
-			}
-			else
-			{
-				index = 0;
-				ctrl_points_.push_back(float2(pos, value));
-			}
-			this->ActivePoint(index);
-
-			return index;
-		}
-		int AddCtrlPoint(float pos)
-		{
-			pos = std::max(std::min(pos, 1.0f), 0.0f);
-			float value = this->GetValue(pos);
-
-			return this->AddCtrlPoint(pos, value);
-		}
-
-		void DelCtrlPoint(int index)
-		{
-			if (active_pt_ == index)
-			{
-				active_pt_ = -1;
-				checked_pointer_cast<RenderPolyline>(renderable_)->ActivePoint(active_pt_);
-			}
-
-			ctrl_points_.erase(ctrl_points_.begin() + index);
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetCtrlPoints(ctrl_points_);
-		}
-
-		void SetCtrlPoint(int index, float pos, float value)
-		{
-			ctrl_points_[index] = float2(pos, value);
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetCtrlPoints(ctrl_points_);
-		}
-
-		void SetCtrlPoints(std::vector<float2> const & ctrl_points)
-		{
-			ctrl_points_ = ctrl_points;
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetCtrlPoints(ctrl_points_);
-		}
-
-		void SetLoc(int x, int y)
-		{
-			loc_size_.x() = static_cast<float>(x);
-			loc_size_.y() = static_cast<float>(y);
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetLocSize(loc_size_);
-		}
-		int GetX() const
-		{
-			return static_cast<int>(loc_size_.x());
-		}
-		int GetY() const
-		{
-			return static_cast<int>(loc_size_.y());
-		}
-
-		void SetSize(int width, int height)
-		{
-			loc_size_.z() = static_cast<float>(width);
-			loc_size_.w() = static_cast<float>(height);
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetLocSize(loc_size_);
-		}
-		int GetWidth() const
-		{
-			return static_cast<int>(loc_size_.z());
-		}
-		int GetHeight() const
-		{
-			return static_cast<int>(loc_size_.w());
-		}
-
-		void SetColor(Color const & clr)
-		{
-			clr_ = clr;
-			checked_pointer_cast<RenderPolyline>(renderable_)->SetColor(clr);
-		}
-
-		size_t NumCtrlPoints() const
-		{
-			return ctrl_points_.size();
-		}
-		float2 const & GetCtrlPoint(size_t i) const
-		{
-			return *(ctrl_points_.begin() + i);
-		}
-		std::vector<float2> const & GetCtrlPoints() const
-		{
-			return ctrl_points_;
-		}
-
-		float2 PtFromCoord(int x, int y) const
-		{
-			return float2(static_cast<float>(x - loc_size_.x()) / loc_size_.z(),
-				static_cast<float>(y - loc_size_.y()) / loc_size_.w());
-		}
-
-		int SelectCtrlPoint(int x, int y)
-		{
-			active_pt_ = -1;
-			float2 const fxy = this->PtFromCoord(x, y);
-			for (std::vector<float2>::const_iterator iter = ctrl_points_.begin(); iter != ctrl_points_.end(); ++ iter)
-			{
-				float2 const dxy = *iter - fxy;
-				if (MathLib::dot(dxy, dxy) < 0.01f)
-				{
-					active_pt_ = iter - ctrl_points_.begin();
-					break;
-				}
-			}
-			return active_pt_;
-		}
-
-		int ActivePointIndex() const
-		{
-			return active_pt_;
-		}
-
-		float GetValue(float pos) const
-		{
-			for (std::vector<float2>::const_iterator iter = ctrl_points_.begin(); iter != ctrl_points_.end() - 1; ++ iter)
-			{
-				if ((iter + 1)->x() >= pos)
-				{
-					float const s = (pos - iter->x()) / ((iter + 1)->x() - iter->x());
-					return iter->y() + ((iter + 1)->y() - iter->y()) * s;
-				}
-			}
-			return -1;
-		}
-
-		void LineSelected(bool sel)
-		{
-			if (sel)
-			{
-				checked_pointer_cast<RenderPolyline>(renderable_)->SetColor(Color(1, 0, 0, 1));
-			}
-			else
-			{
-				checked_pointer_cast<RenderPolyline>(renderable_)->SetColor(clr_);
-			}
-		}
-
-		void MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-		{
-			if ((pt.x() >= this->GetX()) && (pt.y() >= this->GetY())
-				&& (pt.x() < this->GetX() + this->GetWidth())
-				&& (pt.y() < this->GetY() + this->GetHeight()))
-			{
-				if (MB_Left == buttons)
-				{
-					float2 p = this->PtFromCoord(pt.x(), pt.y());
-					if (abs(this->GetValue(p.x()) - p.y()) < 0.1f)
-					{
-						bool found = false;
-						for (size_t i = 0; i < this->NumCtrlPoints(); ++ i)
-						{
-							float2 cp = this->GetCtrlPoint(i);
-							cp = p - cp;
-							if (MathLib::dot(cp, cp) < 0.01f)
-							{
-								this->ActivePoint(i);
-								move_point_ = true;
-								found = true;
-								break;
-							}
-						}
-
-						if (!found)
-						{
-							this->AddCtrlPoint(p.x());
-							move_point_ = true;
-						}
-					}
-				}
-			}
-		}
-
-		void MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-		{
-			if (move_point_ || ((pt.x() >= this->GetX()) && (pt.y() >= this->GetY())
-				&& (pt.x() < this->GetX() + this->GetWidth())
-				&& (pt.y() < this->GetY() + this->GetHeight())))
-			{
-				if (MB_Left == buttons)
-				{
-					if (move_point_)
-					{
-						if ((this->ActivePoint() != 0) && (this->ActivePoint() != static_cast<int>(this->NumCtrlPoints() - 1)))
-						{
-							float2 p = this->PtFromCoord(pt.x(), pt.y());
-							if ((p.x() < 0) || (p.x() > 1) || (p.y() < 0) || (p.y() > 1))
-							{
-								this->DelCtrlPoint(this->ActivePoint());
-							}
-						}
-
-						move_point_ = false;
-					}
-				}
-			}
-		}
-
-		void MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-		{
-			if (move_point_ || ((pt.x() >= this->GetX()) && (pt.y() >= this->GetY())
-				&& (pt.x() < this->GetX() + this->GetWidth())
-				&& (pt.y() < this->GetY() + this->GetHeight())))
-			{
-				if (0 == buttons)
-				{
-					float2 p = this->PtFromCoord(pt.x(), pt.y());
-					if (abs(this->GetValue(p.x()) - p.y()) < 0.1f)
-					{
-						this->LineSelected(true);
-					}
-					else
-					{
-						this->LineSelected(false);
-					}
-				}
-				else
-				{
-					if (MB_Left == buttons)
-					{
-						if (move_point_)
-						{
-							float2 p = this->PtFromCoord(pt.x(), pt.y());
-							if (0 == this->ActivePoint())
-							{
-								p.x() = 0;
-								p.y() = std::min(std::max(p.y(), 0.0f), 1.0f);
-							}
-							else
-							{
-								if (static_cast<int>(this->NumCtrlPoints() - 1) == this->ActivePoint())
-								{
-									p.x() = 1;
-									p.y() = std::min(std::max(p.y(), 0.0f), 1.0f);
-								}
-							}
-							if (this->ActivePoint() < static_cast<int>(this->NumCtrlPoints() - 1))
-							{
-								float2 next_p = this->GetCtrlPoint(this->ActivePoint() + 1);
-								if (next_p.x() <= p.x())
-								{
-									p.x() = next_p.x();
-								}
-							}
-							this->SetCtrlPoint(this->ActivePoint(), p.x(), p.y());
-						}
-					}
-				}
-			}
-		}
-
-	private:
-		std::vector<float2> ctrl_points_;
-		int active_pt_;
-		float4 loc_size_;
-		Color clr_;
-
-		bool move_point_;
-	};
-
-	boost::shared_ptr<PolylineObject> size_over_life_obj;
-	boost::shared_ptr<PolylineObject> weight_over_life_obj;
-	boost::shared_ptr<PolylineObject> transparency_over_life_obj;
-
 
 	template <typename ParticleType>
 	class GenParticle
@@ -914,9 +353,14 @@ namespace
 			media_density_ = density;
 		}
 
+		void SizeOverLifeCtrl(UIPolylineEditBox* size_over_life)
+		{
+			size_over_life_ = size_over_life;
+		}
+
 		void operator()(ParticleType& par, float elapse_time)
 		{
-			buoyancy_ = media_density_ * (size_over_life_obj->GetValue((init_life_ - par.life) / init_life_) * 2);
+			buoyancy_ = media_density_ * (size_over_life_->GetValue((init_life_ - par.life) / init_life_) * 2);
 			par.vel += (force_ + float3(0, buoyancy_ - gravity_, 0)) * elapse_time;
 			par.pos += par.vel * elapse_time;
 			par.life -= elapse_time;
@@ -934,6 +378,8 @@ namespace
 		float buoyancy_;
 		float3 force_;
 		float media_density_;
+
+		UIPolylineEditBox* size_over_life_;
 	};
 
 	UpdateParticle<Particle> update_particle;
@@ -1036,18 +482,6 @@ void ParticleEditorApp::InitObjects()
 
 	ps_->AutoEmit(256);
 
-	size_over_life_obj.reset(new PolylineObject);
-	size_over_life_obj->AddToSceneManager();
-	checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(size_over_life_obj->GetCtrlPoints());
-
-	weight_over_life_obj.reset(new PolylineObject);
-	weight_over_life_obj->AddToSceneManager();
-	checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(weight_over_life_obj->GetCtrlPoints());
-
-	transparency_over_life_obj.reset(new PolylineObject);
-	transparency_over_life_obj->AddToSceneManager();
-	checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(transparency_over_life_obj->GetCtrlPoints());
-
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
@@ -1072,6 +506,9 @@ void ParticleEditorApp::InitObjects()
 	id_velocity_slider_ = dialog_->IDFromName("VelocitySlider");
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
 	id_particle_tex_button_ = dialog_->IDFromName("ParticleTexButton");
+	id_size_over_life_ = dialog_->IDFromName("SizeOverLifePolyline");
+	id_weight_over_life_ = dialog_->IDFromName("WeightOverLifePolyline");
+	id_transparency_over_life_ = dialog_->IDFromName("TransparencyOverLifePolyline");
 
 	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::OpenHandler, this, _1));
 	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::SaveAsHandler, this, _1));
@@ -1089,12 +526,9 @@ void ParticleEditorApp::InitObjects()
 
 	dialog_->Control<UITexButton>(id_particle_tex_button_)->OnClickedEvent().connect(boost::bind(&ParticleEditorApp::ChangeParticleTexHandler, this, _1));
 
-	WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
-	main_wnd->OnMouseDown().connect(boost::bind(&ParticleEditorApp::MouseDownHandler, this, _2, _3));
-	main_wnd->OnMouseUp().connect(boost::bind(&ParticleEditorApp::MouseUpHandler, this, _2, _3));
-	main_wnd->OnMouseOver().connect(boost::bind(&ParticleEditorApp::MouseOverHandler, this, _2, _3));
-
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
+
+	update_particle.SizeOverLifeCtrl(dialog_->Control<UIPolylineEditBox>(id_size_over_life_).get());
 }
 
 void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
@@ -1114,46 +548,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 	copy_pp_->Destinate(FrameBufferPtr());
 
-	size_over_life_obj->SetLoc(width - 240, 280);
-	size_over_life_obj->SetSize(200, 120);
-	size_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	//size_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
-	//size_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
-
-	weight_over_life_obj->SetLoc(width - 240, 440);
-	weight_over_life_obj->SetSize(200, 120);
-	weight_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	//weight_over_life_obj->AddCtrlPoint(0.0f, 0.5f);
-	//weight_over_life_obj->AddCtrlPoint(1.0f, 0.5f);
-
-	transparency_over_life_obj->SetLoc(width - 240, 600);
-	transparency_over_life_obj->SetSize(200, 120);
-	transparency_over_life_obj->SetColor(Color(0, 1, 0, 1));
-	//transparency_over_life_obj->AddCtrlPoint(0.0f, 0.0f);
-	//transparency_over_life_obj->AddCtrlPoint(1.0f, 1.0f);
-
 	UIManager::Instance().SettleCtrls(width, height);
-}
-
-void ParticleEditorApp::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-{
-	size_over_life_obj->MouseDownHandler(buttons, pt);
-	weight_over_life_obj->MouseDownHandler(buttons, pt);
-	transparency_over_life_obj->MouseDownHandler(buttons, pt);
-}
-
-void ParticleEditorApp::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-{
-	size_over_life_obj->MouseUpHandler(buttons, pt);
-	weight_over_life_obj->MouseUpHandler(buttons, pt);
-	transparency_over_life_obj->MouseUpHandler(buttons, pt);
-}
-
-void ParticleEditorApp::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
-{
-	size_over_life_obj->MouseOverHandler(buttons, pt);
-	weight_over_life_obj->MouseOverHandler(buttons, pt);
-	transparency_over_life_obj->MouseOverHandler(buttons, pt);
 }
 
 void ParticleEditorApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -1312,9 +707,9 @@ void ParticleEditorApp::LoadParticleTex(std::string const & name)
 
 void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 {
-	size_over_life_obj->ClearCtrlPoints();
-	weight_over_life_obj->ClearCtrlPoints();
-	transparency_over_life_obj->ClearCtrlPoints();
+	dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->ClearCtrlPoints();
+	dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->ClearCtrlPoints();
+	dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->ClearCtrlPoints();
 
 	using boost::lexical_cast;
 
@@ -1367,15 +762,15 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 		attr = node->first_attribute("name");
 		if (std::string("size_over_life") == attr->value())
 		{
-			size_over_life_obj->SetCtrlPoints(xys);
+			dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->SetCtrlPoints(xys);
 		}
 		if (std::string("weight_over_life") == attr->value())
 		{
-			weight_over_life_obj->SetCtrlPoints(xys);
+			dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->SetCtrlPoints(xys);
 		}
 		if (std::string("transparency_over_life") == attr->value())
 		{
-			transparency_over_life_obj->SetCtrlPoints(xys);
+			dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->SetCtrlPoints(xys);
 		}
 	}
 }
@@ -1416,11 +811,11 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	xml_node<>* size_over_life_node = doc.allocate_node(node_element, "curve");
 	attr = doc.allocate_attribute("name", "size_over_life");
 	size_over_life_node->append_attribute(attr);
-	std::vector<std::string> size_over_life_xs(size_over_life_obj->NumCtrlPoints());
-	std::vector<std::string> size_over_life_ys(size_over_life_obj->NumCtrlPoints());
-	for (size_t i = 0; i < size_over_life_obj->NumCtrlPoints(); ++ i)
+	std::vector<std::string> size_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints());
+	std::vector<std::string> size_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints());
+	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints(); ++ i)
 	{
-		float2 const & pt = size_over_life_obj->GetCtrlPoint(i);
+		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoint(i);
 		size_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		size_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 		
@@ -1437,11 +832,11 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	xml_node<>* weight_over_life_node = doc.allocate_node(node_element, "curve");
 	attr = doc.allocate_attribute("name", "weight_over_life");
 	weight_over_life_node->append_attribute(attr);
-	std::vector<std::string> weight_over_life_xs(weight_over_life_obj->NumCtrlPoints());
-	std::vector<std::string> weight_over_life_ys(weight_over_life_obj->NumCtrlPoints());
-	for (size_t i = 0; i < weight_over_life_obj->NumCtrlPoints(); ++ i)
+	std::vector<std::string> weight_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints());
+	std::vector<std::string> weight_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints());
+	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints(); ++ i)
 	{
-		float2 const & pt = weight_over_life_obj->GetCtrlPoint(i);
+		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoint(i);
 		weight_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		weight_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 		
@@ -1458,11 +853,11 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	xml_node<>* transparency_over_life_node = doc.allocate_node(node_element, "curve");
 	attr = doc.allocate_attribute("name", "transparency_over_life");
 	transparency_over_life_node->append_attribute(attr);
-	std::vector<std::string> transparency_over_life_xs(transparency_over_life_obj->NumCtrlPoints());
-	std::vector<std::string> transparency_over_life_ys(transparency_over_life_obj->NumCtrlPoints());
-	for (size_t i = 0; i < transparency_over_life_obj->NumCtrlPoints(); ++ i)
+	std::vector<std::string> transparency_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints());
+	std::vector<std::string> transparency_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints());
+	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints(); ++ i)
 	{
-		float2 const & pt = transparency_over_life_obj->GetCtrlPoint(i);
+		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoint(i);
 		transparency_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		transparency_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 		
@@ -1500,9 +895,9 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(scene_buffer_);
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-		checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(size_over_life_obj->GetCtrlPoints());
-		checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(weight_over_life_obj->GetCtrlPoints());
-		checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(transparency_over_life_obj->GetCtrlPoints());
+		checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+		checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
+		checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
 
 		terrain_->Visible(true);
 		particles_->Visible(false);

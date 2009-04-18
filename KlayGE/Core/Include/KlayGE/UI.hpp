@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 增加了TexButton (2009.4.12)
+// 增加了PolylineEditBox (2009.4.18)
 //
 // 3.6.0
 // 初次建立 (2007.6.27)
@@ -63,6 +64,7 @@ namespace KlayGE
 		UICT_ComboBox,
 		UICT_EditBox,
 		UICT_TexButton,
+		UICT_PolylineEditBox,
 
 		UICT_Num_Control_Types
 	};
@@ -1479,6 +1481,69 @@ namespace KlayGE
 		// Static
 		static bool hide_caret_;   // If true, we don't render the caret.
 		static Timer timer_;
+	};
+
+	class KLAYGE_CORE_API UIPolylineEditBox : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_PolylineEditBox
+		};
+
+	public:
+		explicit UIPolylineEditBox(UIDialogPtr dialog);
+		UIPolylineEditBox(uint32_t type, UIDialogPtr dialog);
+		UIPolylineEditBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		virtual ~UIPolylineEditBox() {}
+
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
+		virtual void OnFocusOut()
+		{
+			UIControl::OnFocusOut();
+			move_point_ = false;
+		}
+
+		virtual void Render();
+
+		void ActivePoint(int index);
+		int ActivePoint() const;
+		void ClearCtrlPoints();
+		int AddCtrlPoint(float pos, float value);
+		int AddCtrlPoint(float pos);
+		void DelCtrlPoint(int index);
+		void SetCtrlPoint(int index, float pos, float value);
+		void SetCtrlPoints(std::vector<float2> const & ctrl_points);
+		void SetColor(Color const & clr);
+		size_t NumCtrlPoints() const;
+		float2 const & GetCtrlPoint(size_t i) const;
+		std::vector<float2> const & GetCtrlPoints() const;
+		float2 PtFromCoord(int x, int y) const;
+		float GetValue(float pos) const;
+
+	public:
+		void KeyDownHandler(UIDialog const & sender, wchar_t key);
+		void KeyUpHandler(UIDialog const & sender, wchar_t key);
+		void MouseDownHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, Vector_T<int32_t, 2> const & pt);
+
+	protected:
+		virtual void InitDefaultElements();
+		static const int BACKGROUND_INDEX = 0;
+		static const int COORDLINE_INDEX = 1;
+		static const int POLYLINE_INDEX = 2;
+		static const int CTRLPOINTS_INDEX = 3;
+
+	protected:
+		std::vector<float2> ctrl_points_;
+		int active_pt_;
+		int move_over_pt_;
+
+		bool move_point_;
 	};
 }
 

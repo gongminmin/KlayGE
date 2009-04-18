@@ -1785,6 +1785,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\UI\UIPolylineEditBox.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\UI\UIRadioButton.cpp"
 					>
 				</File>

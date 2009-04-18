@@ -15,7 +15,8 @@ control_type_enum = {
 	"list_box" : 6,
 	"combo_box" : 7,
 	"edit_box" : 8,
-	"tex_button" : 9
+	"tex_button" : 9,
+	"polyline_edit_box" : 10
 }
 
 align_enum = {
@@ -254,6 +255,18 @@ class ui_edit_box(ui_control):
 	def write(self, stream):
 		ui_control.write(self, stream)
 		write_short_string(stream, self.caption)
+
+class ui_polyline_edit_box(ui_control):
+	def __init__(self, tag):
+		ui_control.__init__(self, tag)
+		self.line_r = float(tag.getAttribute('line_r'))
+		self.line_g = float(tag.getAttribute('line_g'))
+		self.line_b = float(tag.getAttribute('line_b'))
+		self.line_a = float(tag.getAttribute('line_a'))
+
+	def write(self, stream):
+		ui_control.write(self, stream)
+		stream.write(struct.pack('ffff', self.line_r, self.line_g, self.line_b, self.line_a))
 
 class dialog:
 	def __init__(self, tag):

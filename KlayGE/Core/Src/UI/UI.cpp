@@ -514,6 +514,16 @@ namespace KlayGE
 						}
 						break;
 
+					case UICT_PolylineEditBox:
+						{
+							Color line_clr;
+							source->read(reinterpret_cast<char*>(&line_clr), sizeof(line_clr));
+							dlg->AddControl(UIControlPtr(new UIPolylineEditBox(dlg, id,
+								x, y, width, height, is_default)));
+							dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
+						}
+						break;
+
 					default:
 						BOOST_ASSERT(false);
 						break;
