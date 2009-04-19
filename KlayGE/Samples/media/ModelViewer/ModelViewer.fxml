@@ -19,6 +19,15 @@
 		<state name="address_v" value="wrap"/>
 	</parameter>
 
+	<parameter type="float4" name="ambient_clr"/>
+	<parameter type="float4" name="diffuse_clr"/>
+	<parameter type="float4" name="specular_clr"/>
+	<parameter type="float4" name="emit_clr"/>
+
+	<parameter type="float" name="opacity"/>
+	<parameter type="float" name="specular_level"/>
+	<parameter type="float" name="shininess"/>
+	
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
@@ -89,27 +98,49 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 				float3 H	: TEXCOORD2) : SV_Target
 {
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
-	
-	half4 diffuse = diffuse_tex.Sample(linear_sampler, uv);
-	half3 specular = specular_tex.Sample(linear_sampler, uv).rgb;
-	half4 emit = emit_tex.Sample(linear_sampler, uv);
+
+	half3 diffuse, specular, emit;
+	if (diffuse_clr.a > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	if (specular_clr.a > 0.5f)
+	{
+		specular = specular_tex.Sample(linear_sampler, uv).rgb;
+	}
+	else
+	{
+		specular = specular_clr.rgb;
+	}
+	if (emit_clr.a > 0.5f)
+	{
+		emit = emit_tex.Sample(linear_sampler, uv);
+	}
+	else
+	{
+		emit = emit_clr.rgb;
+	}
 	
 	half3 light_vec = normalize(L);
 	half diffuse_factor = dot(light_vec, normal);
 
-	half4 clr;
+	half3 clr;
 	if (diffuse_factor > 0)
 	{
 		half3 half_way = normalize(H);
-		half specular_factor = pow(dot(half_way, normal), 8);
-		clr = half4(diffuse.rgb * diffuse_factor + specular * specular_factor, diffuse.a);
+		half specular_factor = pow(dot(half_way, normal), shininess);
+		clr = diffuse.rgb * diffuse_factor + specular_level / 5 * specular * specular_factor;
 	}
 	else
 	{
-		clr = half4(0, 0, 0, diffuse.a);
+		clr = 0;
 	}
-	
-	return 0.2 * diffuse + clr + emit;
+
+	return float4(clr + emit * diffuse, opacity);
 }
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
@@ -233,6 +264,20 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
 			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="pixel_shader" value="LightingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingFillBlendTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="back"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="LightingPS()"/>

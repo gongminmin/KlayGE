@@ -48,9 +48,13 @@ namespace
 		{
 			std::map<std::string, TexturePtr> tex_pool;
 
+			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+
+			bool has_diffuse_map = false;
 			bool has_bump_map = false;
-			for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
-				iter != texture_slots_.end(); ++ iter)
+			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
+			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
+				iter != texture_slots.end(); ++ iter)
 			{
 				TexturePtr tex;
 				BOOST_AUTO(titer, tex_pool.find(iter->second));
@@ -63,6 +67,7 @@ namespace
 					tex = LoadTexture(iter->second, EAH_GPU_Read)();
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
+				has_diffuse_map = tex;
 
 				if ("Diffuse Color" == iter->first)
 				{
@@ -77,6 +82,8 @@ namespace
 					}
 				}
 			}
+
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), has_diffuse_map);
 
 			if (has_bump_map)
 			{

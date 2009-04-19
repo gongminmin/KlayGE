@@ -27,14 +27,17 @@ class model:
 		self.root = root
 
 		self.version = int(root.attrib['version'])
-		if self.version != 3:
-			print("model version must be 3")
+		if self.version != 4:
+			print("model version must be 4")
 			raise
 
 		self.num_joints = 0
 		if len(root.findall('bones_chunk')) > 0:
 			bone_tags = root.findall('bones_chunk/bone')
 			self.num_joints = len(bone_tags)
+
+		material_tags = root.findall('materials_chunk/material')
+		self.num_materials = len(material_tags)
 
 		mesh_tags = root.findall('meshes_chunk/mesh')
 		self.num_meshes = len(mesh_tags)
@@ -52,25 +55,16 @@ class model:
 			key_frame_tags = key_frames_chunk_tag.findall('key_frame')
 			self.num_key_frames = len(key_frame_tags)
 
-	def compile_meshes(self, stream):
-		mesh_tags = self.root.findall('meshes_chunk/mesh')
-		for mesh_tag in mesh_tags:
-			name = mesh_tag.attrib['name'].encode(encoding)
-			
-			print("Compiling mesh:", name)
+	def compile_materials(self, stream):
+		material_tags = self.root.findall('materials_chunk/material')
+		for material_tag in material_tags:
+			stream.write(pack('fff', float(material_tag.attrib['ambient_r']), float(material_tag.attrib['ambient_g']), float(material_tag.attrib['ambient_b'])))
+			stream.write(pack('fff', float(material_tag.attrib['diffuse_r']), float(material_tag.attrib['diffuse_g']), float(material_tag.attrib['diffuse_b'])))
+			stream.write(pack('fff', float(material_tag.attrib['specular_r']), float(material_tag.attrib['specular_g']), float(material_tag.attrib['specular_b'])))
+			stream.write(pack('fff', float(material_tag.attrib['emit_r']), float(material_tag.attrib['emit_g']), float(material_tag.attrib['emit_b'])))
+			stream.write(pack('fff', float(material_tag.attrib['opacity']), float(material_tag.attrib['specular_level']), float(material_tag.attrib['shininess'])))
 
-			stream.write(pack('B', len(name)))
-			stream.write(name)
-
-			vertex_elems = []
-			vertex_elem_tags = mesh_tag.findall('vertex_elements_chunk/vertex_element')
-			stream.write(pack('B', len(vertex_elem_tags)))
-			for vertex_elem_tag in vertex_elem_tags:
-				ve = vertex_element(vertex_elem_tag.attrib['usage'], vertex_elem_tag.attrib['usage_index'], vertex_elem_tag.attrib['num_components'])
-				vertex_elems.append(ve)
-				stream.write(pack('BBB', ve.usage, ve.usage_index, ve.num_components))
-
-			texture_tags = mesh_tag.findall('textures_chunk/texture')
+			texture_tags = material_tag.findall('textures_chunk/texture')
 			stream.write(pack('B', len(texture_tags)))
 			for texture_tag in texture_tags:
 				texture_type = texture_tag.attrib['type'].encode(encoding)
@@ -79,6 +73,26 @@ class model:
 				stream.write(texture_type)
 				stream.write(pack('B', len(texture_name)))
 				stream.write(texture_name)
+
+	def compile_meshes(self, stream):
+		mesh_tags = self.root.findall('meshes_chunk/mesh')
+		for mesh_tag in mesh_tags:
+			name = mesh_tag.attrib['name'].encode(encoding)
+
+			print("Compiling mesh:", name)
+
+			stream.write(pack('B', len(name)))
+			stream.write(name)
+
+			stream.write(pack('L', int(mesh_tag.attrib['mtl_id'])))
+
+			vertex_elems = []
+			vertex_elem_tags = mesh_tag.findall('vertex_elements_chunk/vertex_element')
+			stream.write(pack('B', len(vertex_elem_tags)))
+			for vertex_elem_tag in vertex_elem_tags:
+				ve = vertex_element(vertex_elem_tag.attrib['usage'], vertex_elem_tag.attrib['usage_index'], vertex_elem_tag.attrib['num_components'])
+				vertex_elems.append(ve)
+				stream.write(pack('BBB', ve.usage, ve.usage_index, ve.num_components))
 
 			vertex_tags = mesh_tag.findall('vertices_chunk/vertex')
 			stream.write(pack('L', len(vertex_tags)))
@@ -180,6 +194,7 @@ class model:
 
 		print("Model version:", self.version)
 
+		stream.write(pack('B', self.num_materials))
 		stream.write(pack('B', self.num_meshes))
 		stream.write(pack('B', self.num_joints))
 		stream.write(pack('B', self.num_key_frames))
@@ -187,6 +202,7 @@ class model:
 		stream.write(pack('L', self.end_frame))
 		stream.write(pack('L', self.frame_rate))
 
+		self.compile_materials(stream)
 		self.compile_meshes(stream)
 		self.compile_joints(stream)
 		self.compile_key_frames(stream)

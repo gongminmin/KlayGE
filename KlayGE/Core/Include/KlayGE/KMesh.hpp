@@ -45,7 +45,7 @@ namespace KlayGE
 		void SetModelMatrix(float4x4 const & model);
 
 	private:
-		float4x4 model_;
+		float4x4 model_matrix_;
 
 		RenderEffectParameterPtr texSampler_ep_;
 		RenderEffectParameterPtr modelviewproj_ep_;
@@ -76,6 +76,7 @@ namespace KlayGE
 	struct KModelHeader
 	{
 		uint32_t version;
+		uint8_t num_materials;
 		uint8_t num_meshes;
 		uint8_t num_joints;
 		uint8_t num_key_frames;

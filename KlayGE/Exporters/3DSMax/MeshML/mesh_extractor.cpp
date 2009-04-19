@@ -275,7 +275,6 @@ namespace KlayGE
 		assert(is_mesh(node));
 
 		std::string		obj_name;
-		std::vector<texture_slots_t> obj_texture_slots;
 		vertices_t		obj_vertices;
 		triangles_t		obj_triangles;
 		vertex_elements_t obj_vertex_elements;
@@ -291,13 +290,30 @@ namespace KlayGE
 		std::map<int, std::vector<int> > tex_indices;
 		std::vector<std::map<int, Matrix2> > uv_transs;
 
+		size_t mtl_base_index = objs_mtl_.size();
 		Mtl* mtl = node->GetMtl();
 		if (mtl != NULL)
 		{
 			if ((Class_ID(DMTL_CLASS_ID, 0) == mtl->ClassID()) && (0 == mtl->NumSubMtls()))
 			{
-				obj_texture_slots.resize(1);
+				objs_mtl_.resize(mtl_base_index + 1);
 				uv_transs.resize(1);
+
+				objs_mtl_[mtl_base_index].ambient = mtl->GetAmbient();
+				objs_mtl_[mtl_base_index].diffuse = mtl->GetDiffuse();
+				objs_mtl_[mtl_base_index].specular = mtl->GetSpecular();
+				if (mtl->GetSelfIllumColorOn())
+				{
+					objs_mtl_[mtl_base_index].emit = mtl->GetSelfIllumColor();
+				}
+				else
+				{
+					objs_mtl_[mtl_base_index].emit = mtl->GetDiffuse() * mtl->GetSelfIllum();
+				}
+				objs_mtl_[mtl_base_index].opacity = 1 - mtl->GetXParency();
+				objs_mtl_[mtl_base_index].specular_level = mtl->GetShinStr();
+				objs_mtl_[mtl_base_index].shininess = mtl->GetShininess();
+
 				for (int i = 0; i < mtl->NumSubTexmaps(); ++ i)
 				{
 					Texmap* tex_map = mtl->GetSubTexmap(i);
@@ -314,7 +330,7 @@ namespace KlayGE
 							uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
 							uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
 
-							obj_texture_slots[0].push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
+							objs_mtl_[mtl_base_index].texture_slots.push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
 								tstr_to_str(bitmap_tex->GetMapName())));
 							uv_transs[0][i] = uv_trans;
 						}
@@ -325,11 +341,27 @@ namespace KlayGE
 			{
 				if (Class_ID(MULTI_CLASS_ID, 0) == mtl->ClassID())
 				{
-					obj_texture_slots.resize(mtl->NumSubMtls());
+					objs_mtl_.resize(mtl_base_index + mtl->NumSubMtls());
 					uv_transs.resize(mtl->NumSubMtls());
 					for (int i = 0; i < mtl->NumSubMtls(); ++ i)
 					{
 						Mtl* sub_mtl = mtl->GetSubMtl(i);
+
+						objs_mtl_[mtl_base_index + i].ambient = sub_mtl->GetAmbient();
+						objs_mtl_[mtl_base_index + i].diffuse = sub_mtl->GetDiffuse();
+						objs_mtl_[mtl_base_index + i].specular = sub_mtl->GetSpecular();
+						if (sub_mtl->GetSelfIllumColorOn())
+						{
+							objs_mtl_[mtl_base_index + i].emit = sub_mtl->GetSelfIllumColor();
+						}
+						else
+						{
+							objs_mtl_[mtl_base_index + i].emit = sub_mtl->GetDiffuse() * sub_mtl->GetSelfIllum();
+						}
+						objs_mtl_[mtl_base_index + i].opacity = 1 - sub_mtl->GetXParency();
+						objs_mtl_[mtl_base_index + i].specular_level = sub_mtl->GetShinStr();
+						objs_mtl_[mtl_base_index + i].shininess = sub_mtl->GetShininess();
+
 						for (int j = 0; j < sub_mtl->NumSubTexmaps(); ++ j)
 						{
 							Texmap* tex_map = sub_mtl->GetSubTexmap(j);
@@ -346,7 +378,7 @@ namespace KlayGE
 									uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
 									uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
 
-									obj_texture_slots[i].push_back(texture_slot_t(tstr_to_str(sub_mtl->GetSubTexmapSlotName(j).data()),
+									objs_mtl_[mtl_base_index + i].texture_slots.push_back(texture_slot_t(tstr_to_str(sub_mtl->GetSubTexmapSlotName(j).data()),
 										tstr_to_str(bitmap_tex->GetMapName())));
 									uv_transs[i][j] = uv_trans;
 								}
@@ -420,9 +452,9 @@ namespace KlayGE
 			{
 				face_sm_group[i] = mesh.faces[i].getSmGroup();
 				face_mtl_id[i] = mesh.faces[i].getMatID();
-				if (!obj_texture_slots.empty())
+				if (objs_mtl_.size() != mtl_base_index)
 				{
-					face_mtl_id[i] %= obj_texture_slots.size();
+					face_mtl_id[i] = static_cast<unsigned int>(mtl_base_index + face_mtl_id[i] % (objs_mtl_.size() - mtl_base_index));
 				}
 				for (int j = 2; j >= 0; -- j)
 				{
@@ -639,7 +671,7 @@ namespace KlayGE
 
 		object_info_t obj_info;
 		obj_info.vertex_elements = obj_vertex_elements;
-		for (size_t i = 0; i < obj_texture_slots.size(); ++ i)
+		for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
 		{
 			obj_info.vertices.resize(0);
 			obj_info.triangles.resize(0);
@@ -672,17 +704,17 @@ namespace KlayGE
 
 			if (!obj_info.triangles.empty())
 			{
-				if (obj_texture_slots.size() <= 1)
+				if (objs_mtl_.size() - mtl_base_index <= 1)
 				{
 					obj_info.name = obj_name;
 				}
 				else
 				{
 					std::ostringstream oss;
-					oss << obj_name << "__mat_" << i;
+					oss << obj_name << "__mat_" << (i - mtl_base_index);
 					obj_info.name = oss.str();
 				}
-				obj_info.texture_slots = obj_texture_slots[i];
+				obj_info.mtl_id = i;
 				objs_info_.push_back(obj_info);
 			}
 		}
@@ -932,6 +964,45 @@ namespace KlayGE
 		}
 	}
 
+	void meshml_extractor::remove_redundant_mtls()
+	{
+		std::vector<size_t> mtl_mapping(objs_mtl_.size());
+		materials_t mtls_used;
+		for (size_t i = 0; i < objs_mtl_.size(); ++ i)
+		{
+			bool found = false;
+			for (size_t j = 0; j < mtls_used.size(); ++ j)
+			{
+				if ((mtls_used[j].ambient == objs_mtl_[i].ambient)
+					&& (mtls_used[j].diffuse == objs_mtl_[i].diffuse)
+					&& (mtls_used[j].specular == objs_mtl_[i].specular)
+					&& (mtls_used[j].emit == objs_mtl_[i].emit)
+					&& (mtls_used[j].opacity == objs_mtl_[i].opacity)
+					&& (mtls_used[j].specular_level == objs_mtl_[i].specular_level)
+					&& (mtls_used[j].shininess == objs_mtl_[i].shininess)
+					&& (mtls_used[j].texture_slots == objs_mtl_[i].texture_slots))
+				{
+					mtl_mapping[i] = j;
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				mtl_mapping[i] = mtls_used.size();
+				mtls_used.push_back(objs_mtl_[i]);
+			}
+		}
+
+		objs_mtl_ = mtls_used;
+
+		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::reference obj_info, objs_info_)
+		{
+			obj_info.mtl_id = mtl_mapping[obj_info.mtl_id];
+		}
+	}
+
 	void meshml_extractor::write_xml(std::string const & file_name, export_vertex_attrs const & eva)
 	{
 		std::ofstream ofs(file_name.c_str());
@@ -941,6 +1012,7 @@ namespace KlayGE
 		}
 
 		this->remove_redundant_joints();
+		this->remove_redundant_mtls();
 
 		std::map<std::string, int> joints_name_to_id;
 		std::vector<std::string> joints_id_to_name;
@@ -984,42 +1056,84 @@ namespace KlayGE
 
 		ofs << "<?xml version=\'1.0\' encoding=\'utf-8\' standalone=\'no\'?>" << endl;
 		ofs << "<!DOCTYPE Model SYSTEM \'model.dtd\'>" << endl << endl;
-		ofs << "<model version=\'3\'>" << endl;
+		ofs << "<model version=\'4\'>";
 
-		ofs << "\t<bones_chunk>" << endl;
-		BOOST_FOREACH(BOOST_TYPEOF(joints_id_to_name)::const_reference joint_name, joints_id_to_name)
+		if (joints_per_ver_ > 0)
 		{
-			int parent_id = -1;
-			if (!joints_[joint_name].parent_name.empty())
+			ofs << endl;
+			ofs << "\t<bones_chunk>" << endl;
+			BOOST_FOREACH(BOOST_TYPEOF(joints_id_to_name)::const_reference joint_name, joints_id_to_name)
 			{
-				assert(joints_name_to_id.find(joints_[joint_name].parent_name) != joints_name_to_id.end());
-				parent_id = joints_name_to_id[joints_[joint_name].parent_name];
-				assert(parent_id < joints_name_to_id[joint_name]);
+				int parent_id = -1;
+				if (!joints_[joint_name].parent_name.empty())
+				{
+					assert(joints_name_to_id.find(joints_[joint_name].parent_name) != joints_name_to_id.end());
+					parent_id = joints_name_to_id[joints_[joint_name].parent_name];
+					assert(parent_id < joints_name_to_id[joint_name]);
+				}
+
+				ofs << "\t\t<bone name=\'" << joint_name
+					<< "\' parent=\'" << parent_id
+					<< "\'>" << endl;
+
+				joint_t const & joint = joints_[joint_name];
+
+				ofs << "\t\t\t<bind_pos x=\'" << joint.pos.x
+					<< "\' y=\'" << joint.pos.y
+					<< "\' z=\'" << joint.pos.z << "\'/>" << endl;
+
+				ofs << "\t\t\t<bind_quat x=\'" << joint.quat.x
+					<< "\' y=\'" << joint.quat.y
+					<< "\' z=\'" << joint.quat.z
+					<< "\' w=\'" << joint.quat.w << "\'/>" << endl;
+
+				ofs << "\t\t</bone>" << endl;
 			}
-
-			ofs << "\t\t<bone name=\'" << joint_name
-				<< "\' parent=\'" << parent_id
-				<< "\'>" << endl;
-
-			joint_t const & joint = joints_[joint_name];
-
-			ofs << "\t\t\t<bind_pos x=\'" << joint.pos.x
-				<< "\' y=\'" << joint.pos.y
-				<< "\' z=\'" << joint.pos.z << "\'/>" << endl;
-
-			ofs << "\t\t\t<bind_quat x=\'" << joint.quat.x
-				<< "\' y=\'" << joint.quat.y
-				<< "\' z=\'" << joint.quat.z
-				<< "\' w=\'" << joint.quat.w << "\'/>" << endl;
-
-			ofs << "\t\t</bone>" << endl;
+			ofs << "\t</bones_chunk>" << endl;
 		}
-		ofs << "\t</bones_chunk>" << endl << endl;
 
+		if (objs_mtl_.size() > 0)
+		{
+			ofs << endl;
+			ofs << "\t<materials_chunk>" << endl;
+			for (size_t i = 0; i < objs_mtl_.size(); ++ i)
+			{
+				ofs << "\t\t<material ambient_r=\'" << objs_mtl_[i].ambient.r
+					<< "\' ambient_g=\'" << objs_mtl_[i].ambient.g
+					<< "\' ambient_b=\'" << objs_mtl_[i].ambient.b
+					<< "\' diffuse_r=\'" << objs_mtl_[i].diffuse.r
+					<< "\' diffuse_g=\'" << objs_mtl_[i].diffuse.g
+					<< "\' diffuse_b=\'" << objs_mtl_[i].diffuse.b
+					<< "\' specular_r=\'" << objs_mtl_[i].specular.r
+					<< "\' specular_g=\'" << objs_mtl_[i].specular.g
+					<< "\' specular_b=\'" << objs_mtl_[i].specular.b
+					<< "\' emit_r=\'" << objs_mtl_[i].emit.r
+					<< "\' emit_g=\'" << objs_mtl_[i].emit.g
+					<< "\' emit_b=\'" << objs_mtl_[i].emit.b
+					<< "\' opacity=\'" << objs_mtl_[i].opacity
+					<< "\' specular_level=\'" << objs_mtl_[i].specular_level
+					<< "\' shininess=\'" << objs_mtl_[i].shininess
+					<< "\'>" << endl;
+				if (objs_mtl_[i].texture_slots.size() > 0)
+				{
+					ofs << "\t\t\t<textures_chunk>" << endl;
+					BOOST_FOREACH(BOOST_TYPEOF(objs_mtl_[i].texture_slots)::const_reference ts, objs_mtl_[i].texture_slots)
+					{
+						ofs << "\t\t\t\t<texture type=\'" << ts.first
+							<< "\' name=\'" << ts.second << "\'/>" << endl;
+					}
+					ofs << "\t\t\t</textures_chunk>" << endl;
+				}
+				ofs << "\t\t</material>" << endl;
+			}
+			ofs << "\t</materials_chunk>" << endl;
+		}
+
+		ofs << endl;
 		ofs << "\t<meshes_chunk>" << endl;
 		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
 		{
-			ofs << "\t\t<mesh name=\'" + obj_info.name + "\'>" << endl;
+			ofs << "\t\t<mesh name=\'" << obj_info.name << "\' mtl_id=\'" << obj_info.mtl_id << "\'>" << endl;
 
 			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
@@ -1041,14 +1155,6 @@ namespace KlayGE
 				}
 			}
 			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
-
-			ofs << "\t\t\t<textures_chunk>" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(obj_info.texture_slots)::const_reference ts, obj_info.texture_slots)
-			{
-				ofs << "\t\t\t\t<texture type=\'" << ts.first
-					<< "\' name=\'" << ts.second << "\'/>" << endl;
-			}
-			ofs << "\t\t\t</textures_chunk>" << endl << endl;
 
 			ofs << "\t\t\t<vertices_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
@@ -1107,36 +1213,41 @@ namespace KlayGE
 
 			ofs << "\t\t</mesh>" << endl;
 		}
-		ofs << "\t</meshes_chunk>" << endl << endl;
+		ofs << "\t</meshes_chunk>" << endl;
 
-		ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
-			<< "\' end_frame=\'" << end_frame_
-			<< "\' frame_rate=\'" << frame_rate_ << "\'>" << endl;
-		BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
+		if (joints_per_ver_ > 0)
 		{
-			assert(kf.positions.size() == kf.quaternions.size());
+			ofs << endl;
 
-			ofs << "\t\t<key_frame joint=\'" << kf.joint << "\'>" << endl;
-
-			for (size_t i = 0; i < kf.positions.size(); ++ i)
+			ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
+				<< "\' end_frame=\'" << end_frame_
+				<< "\' frame_rate=\'" << frame_rate_ << "\'>" << endl;
+			BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
 			{
-				ofs << "\t\t\t<key>" << endl;
+				assert(kf.positions.size() == kf.quaternions.size());
 
-				ofs << "\t\t\t\t<pos x=\'" << kf.positions[i].x
-					<< "\' y=\'" << kf.positions[i].y
-					<< "\' z=\'" << kf.positions[i].z << "\'/>" << endl;
+				ofs << "\t\t<key_frame joint=\'" << kf.joint << "\'>" << endl;
 
-				ofs << "\t\t\t\t<quat x=\'" << kf.quaternions[i].x
-					<< "\' y=\'" << kf.quaternions[i].y
-					<< "\' z=\'" << kf.quaternions[i].z
-					<< "\' w=\'" << kf.quaternions[i].w << "\'/>" << endl;
+				for (size_t i = 0; i < kf.positions.size(); ++ i)
+				{
+					ofs << "\t\t\t<key>" << endl;
 
-				ofs << "\t\t\t</key>" << endl;
+					ofs << "\t\t\t\t<pos x=\'" << kf.positions[i].x
+						<< "\' y=\'" << kf.positions[i].y
+						<< "\' z=\'" << kf.positions[i].z << "\'/>" << endl;
+
+					ofs << "\t\t\t\t<quat x=\'" << kf.quaternions[i].x
+						<< "\' y=\'" << kf.quaternions[i].y
+						<< "\' z=\'" << kf.quaternions[i].z
+						<< "\' w=\'" << kf.quaternions[i].w << "\'/>" << endl;
+
+					ofs << "\t\t\t</key>" << endl;
+				}
+
+				ofs << "\t\t</key_frame>" << endl;
 			}
-
-			ofs << "\t\t</key_frame>" << endl;
+			ofs << "\t</key_frames_chunk>" << endl;
 		}
-		ofs << "\t</key_frames_chunk>" << endl << endl;
 
 		ofs << "</model>" << endl;
 	}

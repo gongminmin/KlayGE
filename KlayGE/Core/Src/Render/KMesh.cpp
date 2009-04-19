@@ -58,7 +58,7 @@ namespace KlayGE
 {
 	KMesh::KMesh(RenderModelPtr model, std::wstring const & name)
 						: StaticMesh(model, name),
-							model_(float4x4::Identity())
+							model_matrix_(float4x4::Identity())
 	{
 		// ÔØÈëfx
 		RenderEffectPtr effect;
@@ -84,10 +84,12 @@ namespace KlayGE
 
 	void KMesh::BuildMeshInfo()
 	{
+		RenderModel::Material const & mtl = model_.lock()->GetMaterial(mtl_id_);
+
 		TexturePtr tex;
-		if (!texture_slots_.empty())
+		if (!mtl.texture_slots.empty())
 		{
-			tex = LoadTexture(texture_slots_[0].second, EAH_GPU_Read)();
+			tex = LoadTexture(mtl.texture_slots[0].second, EAH_GPU_Read)();
 		}
 
 		if (tex)
@@ -106,13 +108,13 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		*modelviewproj_ep_ = model_ * camera.ViewMatrix() * camera.ProjMatrix();
+		*modelviewproj_ep_ = model_matrix_ * camera.ViewMatrix() * camera.ProjMatrix();
 	}
 
 	void KMesh::SetModelMatrix(float4x4 const & model)
 	{
-		model_ = model;
-		*modelIT_ep_ = MathLib::transpose(MathLib::inverse(model_));
+		model_matrix_ = model;
+		*modelIT_ep_ = MathLib::transpose(MathLib::inverse(model_matrix_));
 	}
 
 
@@ -136,7 +138,7 @@ namespace KlayGE
 
 		KModelHeader header;
 		file->read(reinterpret_cast<char*>(&header), sizeof(header));
-		BOOST_ASSERT(3 == header.version);
+		BOOST_ASSERT(4 == header.version);
 
 		RenderModelPtr ret;
 		if ((header.num_joints > 0) && (header.num_key_frames > 0))
@@ -148,11 +150,37 @@ namespace KlayGE
 			ret = CreateModelFactoryFunc(L"KMesh");
 		}
 
+		ret->NumMaterials(header.num_materials);
+		for (uint8_t i = 0; i < header.num_materials; ++ i)
+		{
+			RenderModel::Material& mtl = ret->GetMaterial(i);
+			file->read(reinterpret_cast<char*>(&mtl.ambient.x()), sizeof(mtl.ambient));
+			file->read(reinterpret_cast<char*>(&mtl.diffuse.x()), sizeof(mtl.diffuse));
+			file->read(reinterpret_cast<char*>(&mtl.specular.x()), sizeof(mtl.specular));
+			file->read(reinterpret_cast<char*>(&mtl.emit.x()), sizeof(mtl.emit));
+			file->read(reinterpret_cast<char*>(&mtl.opacity), sizeof(mtl.opacity));
+			file->read(reinterpret_cast<char*>(&mtl.specular_level), sizeof(mtl.specular_level));
+			file->read(reinterpret_cast<char*>(&mtl.shininess), sizeof(mtl.shininess));
+
+			uint8_t num_textures;
+			file->read(reinterpret_cast<char*>(&num_textures), sizeof(num_textures));
+			mtl.texture_slots.resize(num_textures);
+			for (uint8_t j = 0; j < num_textures; ++ j)
+			{
+				mtl.texture_slots[j].first = ReadShortString(*file);
+				mtl.texture_slots[j].second = ReadShortString(*file);
+			}
+		}
+
 		for (uint8_t i = 0; i < header.num_meshes; ++ i)
 		{
 			std::wstring wname;
 			Convert(wname, ReadShortString(*file));
 			StaticMeshPtr mesh = CreateMeshFactoryFunc(ret, wname);
+
+			int32_t mtl_id;
+			file->read(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+			mesh->MaterialID(mtl_id);
 
 			uint8_t num_vertex_elems;
 			file->read(reinterpret_cast<char*>(&num_vertex_elems), sizeof(num_vertex_elems));
@@ -214,18 +242,6 @@ namespace KlayGE
 
 				vertex_elements.push_back(ve);
 			}
-
-			uint8_t num_textures;
-			file->read(reinterpret_cast<char*>(&num_textures), sizeof(num_textures));
-
-			StaticMesh::TextureSlotsType texture_slots(num_textures);
-			for (uint8_t j = 0; j < num_textures; ++ j)
-			{
-				texture_slots[j].first = ReadShortString(*file);
-				texture_slots[j].second = ReadShortString(*file);
-			}
-
-			mesh->TextureSlots(texture_slots);
 
 			uint32_t num_vertices;
 			file->read(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
@@ -312,7 +328,8 @@ namespace KlayGE
 		file.write(fourcc, sizeof(fourcc));
 
 		KModelHeader header;
-		header.version = 3;
+		header.version = 4;
+		header.num_materials = static_cast<uint8_t const>(model->NumMaterials());
 		header.num_meshes = static_cast<uint8_t const>(model->NumMeshes());
 		if (model->IsSkinned())
 		{
@@ -337,6 +354,28 @@ namespace KlayGE
 		file.write(reinterpret_cast<char*>(&header_size), sizeof(header_size));
 		file.write(reinterpret_cast<char*>(&header), sizeof(header));
 
+		for (uint8_t i = 0; i < header.num_materials; ++ i)
+		{
+			RenderModel::Material const & mtl = model->GetMaterial(i);
+
+			file.write(reinterpret_cast<char const *>(&mtl.ambient.x()), sizeof(mtl.ambient));
+			file.write(reinterpret_cast<char const *>(&mtl.diffuse.x()), sizeof(mtl.diffuse));
+			file.write(reinterpret_cast<char const *>(&mtl.specular.x()), sizeof(mtl.specular));
+			file.write(reinterpret_cast<char const *>(&mtl.emit.x()), sizeof(mtl.emit));
+			file.write(reinterpret_cast<char const *>(&mtl.opacity), sizeof(mtl.opacity));
+			file.write(reinterpret_cast<char const *>(&mtl.specular_level), sizeof(mtl.specular_level));
+			file.write(reinterpret_cast<char const *>(&mtl.shininess), sizeof(mtl.shininess));
+
+			uint8_t const num_textures = static_cast<uint8_t const>(mtl.texture_slots.size());
+			file.write(reinterpret_cast<char const *>(&num_textures), sizeof(num_textures));
+
+			for (uint8_t j = 0; j < num_textures; ++ j)
+			{
+				WriteShortString(file, mtl.texture_slots[j].first);
+				WriteShortString(file, mtl.texture_slots[j].second);
+			}
+		}
+		
 		for (uint8_t i = 0; i < header.num_meshes; ++ i)
 		{
 			StaticMesh const & mesh = *model->Mesh(i);
@@ -358,16 +397,6 @@ namespace KlayGE
 				file.write(reinterpret_cast<char const *>(&ve.usage_index), sizeof(ve.usage_index));
 				uint8_t const num_components = static_cast<uint8_t const>(NumComponents(ve.format));
 				file.write(reinterpret_cast<char const *>(&num_components), sizeof(num_components));
-			}
-
-			uint8_t const num_textures = static_cast<uint8_t const>(mesh.TextureSlots().size());
-			file.write(reinterpret_cast<char const *>(&num_textures), sizeof(num_textures));
-
-			StaticMesh::TextureSlotsType const & texture_slots = mesh.TextureSlots();
-			for (uint8_t j = 0; j < num_textures; ++ j)
-			{
-				WriteShortString(file, texture_slots[j].first);
-				WriteShortString(file, texture_slots[j].second);
 			}
 
 			uint32_t const num_vertices = static_cast<uint32_t const>(mesh.NumVertices());

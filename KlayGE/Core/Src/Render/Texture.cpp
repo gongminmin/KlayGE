@@ -430,6 +430,10 @@ namespace KlayGE
 						}
 					}
 					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 			}
 			else

@@ -45,9 +45,6 @@ namespace KlayGE
 	class KLAYGE_CORE_API StaticMesh : public Renderable
 	{
 	public:
-		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
-
-	public:
 		StaticMesh(RenderModelPtr const & model, std::wstring const & name);
 		virtual ~StaticMesh();
 
@@ -86,13 +83,13 @@ namespace KlayGE
 		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint);
 		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
 
-		void TextureSlots(TextureSlotsType const & ts)
+		int32_t MaterialID() const
 		{
-			texture_slots_ = ts;
+			return mtl_id_;
 		}
-		TextureSlotsType const & TextureSlots() const
+		void MaterialID(int32_t mid)
 		{
-			return texture_slots_;
+			mtl_id_ = mid;
 		}
 
 	protected:
@@ -103,13 +100,28 @@ namespace KlayGE
 
 		Box box_;
 
-		TextureSlotsType texture_slots_;
+		int32_t mtl_id_;
 
 		boost::weak_ptr<RenderModel> model_;
 	};
 
 	class KLAYGE_CORE_API RenderModel : public Renderable
 	{
+	public:
+		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
+		struct Material
+		{
+			float3 ambient;
+			float3 diffuse;
+			float3 specular;
+			float3 emit;
+			float opacity;
+			float specular_level;
+			float shininess;
+
+			TextureSlotsType texture_slots;
+		};
+
 	public:
 		explicit RenderModel(std::wstring const & name);
 		virtual ~RenderModel()
@@ -164,6 +176,23 @@ namespace KlayGE
 			return name_;
 		}
 
+		size_t NumMaterials() const
+		{
+			return materials_.size();
+		}
+		void NumMaterials(size_t i)
+		{
+			materials_.resize(i);
+		}
+		RenderModel::Material& GetMaterial(int32_t i)
+		{
+			return materials_[i];
+		}
+		RenderModel::Material const & GetMaterial(int32_t i) const
+		{
+			return materials_[i];
+		}
+
 		void AddToRenderQueue();
 
 	protected:
@@ -176,6 +205,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_;
 
 		Box box_;
+
+		std::vector<Material> materials_;
 
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;

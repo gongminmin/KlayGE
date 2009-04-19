@@ -81,6 +81,20 @@ namespace KlayGE
 	typedef std::pair<std::string, std::string> texture_slot_t;
 	typedef std::vector<texture_slot_t> texture_slots_t;
 
+	struct material_t
+	{
+		Color ambient;
+		Color diffuse;
+		Color specular;
+		Color emit;
+		float opacity;
+		float specular_level;
+		float shininess;
+
+		texture_slots_t texture_slots;
+	};
+	typedef std::vector<material_t> materials_t;
+
 	typedef std::vector<vertex_element_t> vertex_elements_t;
 
 	struct joint_t
@@ -107,7 +121,7 @@ namespace KlayGE
 	{
 		std::string		name;
 
-		texture_slots_t texture_slots;
+		size_t			mtl_id;
 
 		vertices_t		vertices;
 		triangles_t		triangles;
@@ -141,6 +155,7 @@ namespace KlayGE
 		void extract_object(INode* node);
 		void extract_bone(INode* node);
 		void remove_redundant_joints();
+		void remove_redundant_mtls();
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
@@ -157,6 +172,7 @@ namespace KlayGE
 	private:
 		typedef std::vector<object_info_t> objects_info_t;
 		objects_info_t objs_info_;
+		materials_t objs_mtl_;
 
 		INode* root_node_;
 

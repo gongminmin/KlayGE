@@ -27,7 +27,6 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 			visualize_("Lighting"), line_mode_(false)
 {
 	inv_world_ = MathLib::inverse(world_);
-	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::BuildMeshInfo()
@@ -222,13 +221,14 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
 	}
 
+	RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+
 	// Ω®¡¢Œ∆¿Ì
-	TexturePtr dm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyDiffuseMap();
+	TexturePtr dm, sm, em;
 	TexturePtr nm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
-	TexturePtr sm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptySpecularMap();
-	TexturePtr em = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyEmitMap();
-	for (StaticMesh::TextureSlotsType::iterator iter = texture_slots_.begin();
-		iter != texture_slots_.end(); ++ iter)
+	RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
+	for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
+		iter != texture_slots.end(); ++ iter)
 	{
 		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first))
 		{
@@ -274,6 +274,17 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	*(effect_->ParameterByName("emit_tex")) = em;
 
 	*(effect_->ParameterByName("has_skinned")) = has_skinned;
+
+	*(effect_->ParameterByName("ambient_clr")) = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
+	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));
+	*(effect_->ParameterByName("specular_clr")) = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(sm));
+	*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(em));
+
+	*(effect_->ParameterByName("opacity")) = mtl.opacity;
+	*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
+	*(effect_->ParameterByName("shininess")) = mtl.shininess;
+
+	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
@@ -343,6 +354,11 @@ void DetailedSkinnedMesh::UpdateTech()
 	else
 	{
 		tech += "Fill";
+
+		if (("Lighting" == visualize_) && (model_.lock()->GetMaterial(this->MaterialID()).opacity < 0.99f))
+		{
+			tech += "Blend";
+		}
 	}
 	tech += "Tech";
 

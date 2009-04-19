@@ -17,6 +17,7 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
+	<parameter type="float4" name="diffuse_clr"/>
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="bump_tex"/>
 
@@ -98,8 +99,18 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 {
 	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
+	
+	float3 diffuse;
+	if (diffuse_clr.a > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(linear_sampler, texcoord).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
 
-	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0);
+	oClr = StoreDiffuseSpecular(diffuse, 0);
 }
 		]]>
 	</shader>
