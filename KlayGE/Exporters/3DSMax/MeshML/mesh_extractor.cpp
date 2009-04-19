@@ -270,6 +270,47 @@ namespace KlayGE
 		}
 	}
 
+	void meshml_extractor::get_material(material_t& mtl, std::map<int, Matrix2>& uv_transs, Mtl* max_mtl)
+	{
+		mtl.ambient = max_mtl->GetAmbient();
+		mtl.diffuse = max_mtl->GetDiffuse();
+		mtl.specular = max_mtl->GetSpecular();
+		if (max_mtl->GetSelfIllumColorOn())
+		{
+			mtl.emit = max_mtl->GetSelfIllumColor();
+		}
+		else
+		{
+			mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
+		}
+		mtl.opacity = 1 - max_mtl->GetXParency();
+		mtl.specular_level = max_mtl->GetShinStr();
+		mtl.shininess = max_mtl->GetShininess();
+
+		for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
+		{
+			Texmap* tex_map = max_mtl->GetSubTexmap(j);
+			if (tex_map != NULL)
+			{
+				if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
+				{
+					BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
+
+					Matrix3 uv_mat;
+					tex_map->GetUVTransform(uv_mat);
+					Matrix2 uv_trans(TRUE);
+					uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
+					uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
+					uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
+
+					mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()),
+						tstr_to_str(bitmap_tex->GetMapName())));
+					uv_transs[j] = uv_trans;
+				}
+			}
+		}
+	}
+
 	void meshml_extractor::extract_object(INode* node)
 	{
 		assert(is_mesh(node));
@@ -299,43 +340,7 @@ namespace KlayGE
 				objs_mtl_.resize(mtl_base_index + 1);
 				uv_transs.resize(1);
 
-				objs_mtl_[mtl_base_index].ambient = mtl->GetAmbient();
-				objs_mtl_[mtl_base_index].diffuse = mtl->GetDiffuse();
-				objs_mtl_[mtl_base_index].specular = mtl->GetSpecular();
-				if (mtl->GetSelfIllumColorOn())
-				{
-					objs_mtl_[mtl_base_index].emit = mtl->GetSelfIllumColor();
-				}
-				else
-				{
-					objs_mtl_[mtl_base_index].emit = mtl->GetDiffuse() * mtl->GetSelfIllum();
-				}
-				objs_mtl_[mtl_base_index].opacity = 1 - mtl->GetXParency();
-				objs_mtl_[mtl_base_index].specular_level = mtl->GetShinStr();
-				objs_mtl_[mtl_base_index].shininess = mtl->GetShininess();
-
-				for (int i = 0; i < mtl->NumSubTexmaps(); ++ i)
-				{
-					Texmap* tex_map = mtl->GetSubTexmap(i);
-					if (tex_map != NULL)
-					{
-						if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
-						{
-							BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
-
-							Matrix3 uv_mat;
-							tex_map->GetUVTransform(uv_mat);
-							Matrix2 uv_trans(TRUE);
-							uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
-							uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
-							uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
-
-							objs_mtl_[mtl_base_index].texture_slots.push_back(texture_slot_t(tstr_to_str(mtl->GetSubTexmapSlotName(i).data()),
-								tstr_to_str(bitmap_tex->GetMapName())));
-							uv_transs[0][i] = uv_trans;
-						}
-					}
-				}
+				this->get_material(objs_mtl_[mtl_base_index], uv_transs[0], mtl);
 			}
 			else
 			{
@@ -345,45 +350,7 @@ namespace KlayGE
 					uv_transs.resize(mtl->NumSubMtls());
 					for (int i = 0; i < mtl->NumSubMtls(); ++ i)
 					{
-						Mtl* sub_mtl = mtl->GetSubMtl(i);
-
-						objs_mtl_[mtl_base_index + i].ambient = sub_mtl->GetAmbient();
-						objs_mtl_[mtl_base_index + i].diffuse = sub_mtl->GetDiffuse();
-						objs_mtl_[mtl_base_index + i].specular = sub_mtl->GetSpecular();
-						if (sub_mtl->GetSelfIllumColorOn())
-						{
-							objs_mtl_[mtl_base_index + i].emit = sub_mtl->GetSelfIllumColor();
-						}
-						else
-						{
-							objs_mtl_[mtl_base_index + i].emit = sub_mtl->GetDiffuse() * sub_mtl->GetSelfIllum();
-						}
-						objs_mtl_[mtl_base_index + i].opacity = 1 - sub_mtl->GetXParency();
-						objs_mtl_[mtl_base_index + i].specular_level = sub_mtl->GetShinStr();
-						objs_mtl_[mtl_base_index + i].shininess = sub_mtl->GetShininess();
-
-						for (int j = 0; j < sub_mtl->NumSubTexmaps(); ++ j)
-						{
-							Texmap* tex_map = sub_mtl->GetSubTexmap(j);
-							if (tex_map != NULL)
-							{
-								if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
-								{
-									BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
-
-									Matrix3 uv_mat;
-									tex_map->GetUVTransform(uv_mat);
-									Matrix2 uv_trans(TRUE);
-									uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
-									uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
-									uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
-
-									objs_mtl_[mtl_base_index + i].texture_slots.push_back(texture_slot_t(tstr_to_str(sub_mtl->GetSubTexmapSlotName(j).data()),
-										tstr_to_str(bitmap_tex->GetMapName())));
-									uv_transs[i][j] = uv_trans;
-								}
-							}
-						}
+						this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
 					}
 				}
 			}
