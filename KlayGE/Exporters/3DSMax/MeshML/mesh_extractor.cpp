@@ -353,6 +353,18 @@ namespace KlayGE
 						this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
 					}
 				}
+				else
+				{
+					if (Class_ID(CMTL_CLASS_ID, 0) == mtl->ClassID())
+					{
+						objs_mtl_.resize(mtl_base_index + mtl->NumSubMtls());
+						uv_transs.resize(mtl->NumSubMtls());
+						for (int i = 0; i < mtl->NumSubMtls(); ++ i)
+						{
+							this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
+						}
+					}
+				}
 			}
 		}
 
