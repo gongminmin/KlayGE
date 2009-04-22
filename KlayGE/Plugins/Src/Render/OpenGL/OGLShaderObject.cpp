@@ -856,6 +856,7 @@ namespace KlayGE
 			if (profiles_[type] != CG_PROFILE_UNKNOWN)
 			{
 				CGprogram sub_prog = cgGetProgramDomainProgram(combo_program_, type);
+				//printf("%s\n", cgGetProgramString(sub_prog, CG_COMPILED_PROGRAM));
 				CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_GLOBAL);
 				while (cg_param)
 				{

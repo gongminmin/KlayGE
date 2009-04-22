@@ -919,6 +919,9 @@ namespace KlayGE
 			{
 				xml_node<>* node = parameter_nodes[param_index];
 
+				uint32_t type = type_define::instance().type_code(node->first_attribute("type")->value());
+				if ((type != REDT_sampler)
+					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE))
 				{
 					xml_node<>* parent_node = node->parent();
 					std::string cbuff_name;

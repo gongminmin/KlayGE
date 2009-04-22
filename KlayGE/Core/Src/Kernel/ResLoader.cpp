@@ -32,13 +32,13 @@ namespace KlayGE
 
 	ResLoader::ResLoader()
 	{
-		pathes_.push_back("");
-		pathes_.push_back("../media/RenderFX/");
+		this->AddPath("");
+		this->AddPath("../media/RenderFX/");
 	}
 
 	void ResLoader::AddPath(std::string const & path)
 	{
-		if (path[path.length() - 1] != '/')
+		if (!path.empty() && (path[path.length() - 1] != '/'))
 		{
 			pathes_.push_back(path + '/');
 		}
