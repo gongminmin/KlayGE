@@ -38,7 +38,7 @@ namespace
 		HDRSkyBox()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("HDRSkyBox.kfx")->TechniqueByName("HDRSkyBoxTec");
+			technique_ = rf.LoadEffect("HDRSkyBox.fxml")->TechniqueByName("HDRSkyBoxTec");
 
 			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_cube_tex");
 			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_Ccube_tex");
@@ -88,7 +88,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("Refract.kfx");
+			RenderEffectPtr effect = rf.LoadEffect("Refract.fxml");
 			front_face_tech_ = effect->TechniqueByName("Refract");
 			back_face_tech_ = effect->TechniqueByName("RefractBackFace");
 

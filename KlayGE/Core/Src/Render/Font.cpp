@@ -149,7 +149,7 @@ namespace KlayGE
 			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, EF_R8, 1, 0, EAH_GPU_Read, NULL);
 		a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, EF_R8, 1, 0, EAH_CPU_Write, NULL);
 
-		effect_ = rf.LoadEffect("Font.kfx");
+		effect_ = rf.LoadEffect("Font.fxml");
 		*(effect_->ParameterByName("distance_tex")) = dist_texture_;
 		*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f * 32 + 1, (dist_scale_ / 32768.0f + 1.0f) * 32);
 

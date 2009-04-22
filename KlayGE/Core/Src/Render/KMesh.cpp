@@ -62,9 +62,9 @@ namespace KlayGE
 	{
 		// ‘ÿ»Îfx
 		RenderEffectPtr effect;
-		if (!ResLoader::Instance().Locate("KMesh.kfx").empty())
+		if (!ResLoader::Instance().Locate("KMesh.fxml").empty())
 		{
-			effect = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.kfx");
+			effect = Context::Instance().RenderFactoryInstance().LoadEffect("KMesh.fxml");
 		}
 		else
 		{

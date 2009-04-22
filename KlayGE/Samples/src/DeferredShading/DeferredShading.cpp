@@ -41,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("DeferredShading.kfx");
+			effect_ = rf.LoadEffect("DeferredShading.fxml");
 		}
 
 		void BuildMeshInfo()
@@ -128,7 +128,7 @@ namespace
 	{
 	public:
 		DeferredShadingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("DeferredShading"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading"))
 		{
 		}
 
@@ -223,7 +223,7 @@ namespace
 	{
 	public:
 		AntiAliasPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("AntiAlias"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("AntiAlias"))
 		{
 		}
 
@@ -246,7 +246,7 @@ namespace
 	{
 	public:
 		SSAOPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.kfx")->TechniqueByName("SSAO"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("SSAO"))
 		{
 			*(technique_->Effect().ParameterByName("ssao_param")) = float4(0.6f, 0.075f, 0.3f, 0.03f);
 		}
@@ -365,7 +365,7 @@ void DeferredShadingApp::InitObjects()
 	blur_pp_.reset(new BlurPostProcess(8, 1));
 	hdr_pp_.reset(new HDRPostProcess);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");

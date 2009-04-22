@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<shader>
 		<![CDATA[

@@ -38,7 +38,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.kfx");
+			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.fxml");
 
 			technique_ = effect->TechniqueByName("DistanceMapping2a");
 			if (!technique_->Validate())

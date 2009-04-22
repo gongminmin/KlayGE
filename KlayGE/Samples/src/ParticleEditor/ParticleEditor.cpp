@@ -63,7 +63,7 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("ParticleEditor.kfx")->TechniqueByName("Terrain");
+			technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Terrain");
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -144,7 +144,7 @@ namespace
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
 				rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-				technique_ = rf.LoadEffect("ParticleEditor.kfx")->TechniqueByName("ParticleWithGS");
+				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("ParticleWithGS");
 			}
 			else
 			{
@@ -168,7 +168,7 @@ namespace
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = rf.LoadEffect("ParticleEditor.kfx")->TechniqueByName("Particle");
+				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Particle");
 			}
 
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f;
@@ -389,7 +389,7 @@ namespace
 	{
 	public:
 		CopyPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleEditor.kfx")->TechniqueByName("Copy"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleEditor.fxml")->TechniqueByName("Copy"))
 		{
 		}
 	};
@@ -491,7 +491,7 @@ void ParticleEditorApp::InitObjects()
 
 	copy_pp_.reset(new CopyPostProcess);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ParticleEditor.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");

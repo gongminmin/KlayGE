@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
-	<include name="../../../RenderFX/2D.fxml"/>
+	<include name="PostProcess.fxml"/>
+	<include name="2D.fxml"/>
 
 	<parameter type="float" name="point_radius"/>
 	<parameter type="float" name="init_life"/>

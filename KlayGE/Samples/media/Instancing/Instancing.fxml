@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/Lighting.fxml"/>
+	<include name="Lighting.fxml"/>
 	
 	<parameter type="float4x4" name="ViewProj" semantic="VIEWPROJECTION"/>
 	<parameter type="float3" name="light_in_world"/>

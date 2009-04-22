@@ -68,7 +68,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("PointTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("PointTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
 		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
@@ -102,7 +102,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("LineTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("LineTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
 		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
@@ -141,7 +141,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("TriangleTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("TriangleTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
 		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
@@ -182,7 +182,7 @@ namespace KlayGE
 
 		box_ = box;
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("BoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("BoxTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
 		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
@@ -238,7 +238,7 @@ namespace KlayGE
 
 		box_ = box;
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("BoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("BoxTec");
 		color_ep_ = technique_->Effect().ParameterByName("color");
 		matViewProj_ep_ = technique_->Effect().ParameterByName("matViewProj");
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
@@ -289,7 +289,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.kfx")->TechniqueByName("SkyBoxTec");
+		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("SkyBoxTec");
 
 		float3 xyzs[] =
 		{

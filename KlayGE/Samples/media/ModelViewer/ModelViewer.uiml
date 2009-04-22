@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
-<ui version='1'>
+<ui>
 	<dialog id="Animation" caption="Animation" x="0" y="-120" align_y="bottom" width="820" height="120">
 		<control type="check_box" id="Skinned" caption="Skinned" x="20" y="20" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
 

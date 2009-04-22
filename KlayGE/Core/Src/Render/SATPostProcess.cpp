@@ -62,10 +62,10 @@ namespace KlayGE
 
 	SummedAreaTablePostProcess::SummedAreaTablePostProcess()
 		: PostProcess(RenderTechniquePtr()),
-			scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanXUpSweep"), true),
-			scan_x_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanXDownSweep"), false),
-			scan_y_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanYUpSweep"), true),
-			scan_y_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.kfx")->TechniqueByName("SATScanYDownSweep"), false)
+			scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXUpSweep"), true),
+			scan_x_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXDownSweep"), false),
+			scan_y_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYUpSweep"), true),
+			scan_y_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYDownSweep"), false)
 	{
 	}
 

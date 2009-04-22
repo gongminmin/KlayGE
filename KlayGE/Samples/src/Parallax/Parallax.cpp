@@ -39,7 +39,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("parallax.kfx")->TechniqueByName("Parallax");
+			technique_ = rf.LoadEffect("parallax.fxml")->TechniqueByName("Parallax");
 
 			*(technique_->Effect().ParameterByName("diffuse_tex")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
 			*(technique_->Effect().ParameterByName("normal_tex")) = LoadTexture("normal.dds", EAH_GPU_Read)();
@@ -181,7 +181,7 @@ void Parallax::InitObjects()
 	input_handler->connect(boost::bind(&Parallax::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Parallax.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("Parallax.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_scale_static_ = dialog_->IDFromName("ScaleStatic");

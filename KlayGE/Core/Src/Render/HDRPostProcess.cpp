@@ -27,7 +27,7 @@
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName(tech))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName(tech))
 	{
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
@@ -81,7 +81,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.kfx")->TechniqueByName("AdaptedLum")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -140,7 +140,7 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.kfx")->TechniqueByName("ToneMapping20"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml")->TechniqueByName("ToneMapping20"))
 	{
 		RenderEffect const & effect = technique_->Effect();
 		if (effect.TechniqueByName("ToneMapping30")->Validate())

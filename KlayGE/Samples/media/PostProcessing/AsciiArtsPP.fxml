@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="sampler" name="src_sampler">

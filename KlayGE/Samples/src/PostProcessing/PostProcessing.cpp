@@ -41,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("PostProcessing.kfx")->TechniqueByName("GBufferTech");
+			technique_ = rf.LoadEffect("PostProcessing.fxml")->TechniqueByName("GBufferTech");
 		}
 
 		void BuildMeshInfo()
@@ -159,7 +159,7 @@ void PostProcessingApp::InitObjects()
 	ascii_arts_.reset(new AsciiArtsPostProcess);
 	cartoon_.reset(new CartoonPostProcess);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");

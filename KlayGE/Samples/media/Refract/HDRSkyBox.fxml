@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/util.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="float4x4" name="inv_mvp"/>
 	<parameter type="textureCUBE" name="skybox_cube_tex"/>

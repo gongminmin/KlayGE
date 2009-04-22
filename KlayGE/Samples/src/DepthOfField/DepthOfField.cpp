@@ -85,7 +85,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("DepthOfField.kfx")->TechniqueByName("ColorDepth");
+			technique_ = rf.LoadEffect("DepthOfField.fxml")->TechniqueByName("ColorDepth");
 		}
 
 		void BuildMeshInfo()
@@ -113,7 +113,7 @@ namespace
 	{
 	public:
 		ClearFloatPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("ClearFloat"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.fxml")->TechniqueByName("ClearFloat"))
 		{
 		}
 
@@ -131,7 +131,7 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.kfx")->TechniqueByName("DepthOfField"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfField.fxml")->TechniqueByName("DepthOfField"))
 		{
 		}
 
@@ -309,7 +309,7 @@ void DepthOfFieldApp::InitObjects()
 	clear_float_.reset(new ClearFloatPostProcess);
 	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f - 0.5f, 0.4f - 0.5f, 0.6f - 0.5f, 1 - 0.5f));
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DepthOfField.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DepthOfField.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_focus_plane_static_ = dialog_->IDFromName("FocusPlaneStatic");

@@ -222,7 +222,7 @@ namespace
 	{
 	public:
 		Downsampler8x8()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.kfx")->TechniqueByName("Downsample8x8"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
 		{
 			tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 		}
@@ -266,7 +266,7 @@ namespace
 }
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
-	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.kfx")->TechniqueByName("AsciiArts"))
+	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 

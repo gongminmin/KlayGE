@@ -91,7 +91,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Instancing.kfx")->TechniqueByName("Instance");
+			technique_ = rf.LoadEffect("Instancing.fxml")->TechniqueByName("Instance");
 		}
 
 		void BuildMeshInfo()
@@ -125,7 +125,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Instancing.kfx")->TechniqueByName("NormalMesh");
+			technique_ = rf.LoadEffect("Instancing.fxml")->TechniqueByName("NormalMesh");
 		}
 
 		void BuildMeshInfo()
@@ -260,7 +260,7 @@ void Instancing::InitObjects()
 	input_handler->connect(boost::bind(&Instancing::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Instancing.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("Instancing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 	id_use_instancing_ = dialog_->IDFromName("UseInstancing");
 	dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(boost::bind(&Instancing::CheckBoxHandler, this, _1));

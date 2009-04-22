@@ -1,8 +1,11 @@
 // UI.cpp
 // KlayGE 图形用户界面 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2007-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 直接从uiml文件读取ui布局 (2009.4.20)
 //
 // 3.6.0
 // 初次建立 (2007.6.27)
@@ -33,23 +36,13 @@
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#pragma warning(disable: 4702)
+#include <boost/lexical_cast.hpp>
+#pragma warning(pop)
+
+#include <rapidxml/rapidxml.hpp>
 
 #include <KlayGE/UI.hpp>
-
-namespace
-{
-	using namespace KlayGE;
-
-	std::string read_short_string(ResIdentifierPtr const & source)
-	{
-		uint8_t len;
-		source->read(reinterpret_cast<char*>(&len), sizeof(len));
-		std::string ret(len, '\0');
-		source->read(&ret[0], len);
-
-		return ret;
-	}
-}
 
 namespace KlayGE
 {
@@ -251,7 +244,7 @@ namespace KlayGE
 	UIManager::UIManager()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		effect_ = rf.LoadEffect("UI.kfx");
+		effect_ = rf.LoadEffect("UI.fxml");
 
 		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(0, 0, 136, 54));
 		elem_texture_rcs_[UICT_Button].push_back(Rect_T<int32_t>(136, 0, 252, 54));
@@ -310,27 +303,91 @@ namespace KlayGE
 
 		if (source)
 		{
-			uiml_header header;
-			source->read(reinterpret_cast<char*>(&header), sizeof(header));
-			BOOST_ASSERT((MakeFourCC<'U', 'I', 'M', 'L'>::value == header.fourcc));
-			BOOST_ASSERT(2 == header.ver);
+			using boost::lexical_cast;
 
-			for (uint32_t i = 0; i < header.num_dlgs; ++ i)
+			source->seekg(0, std::ios_base::end);
+			int len = static_cast<int>(source->tellg());
+			source->seekg(0, std::ios_base::beg);
+			std::vector<char> str(len + 1, 0);
+			source->read(&str[0], len);
+
+			using namespace rapidxml;
+			xml_document<> doc;
+			doc.parse<0>(&str[0]);
+			
+			xml_node<>* root = doc.first_node("ui");
+			xml_attribute<>* attr;
+
+			for (xml_node<>* node = root->first_node("dialog"); node; node = node->next_sibling())
 			{
 				UIDialogPtr dlg;
 				{
 					int32_t x, y;
 					uint32_t width, height;
-					uint8_t align_x, align_y;
-					std::string id = read_short_string(source);
-					std::string caption = read_short_string(source);
-					std::string skin = read_short_string(source);
-					source->read(reinterpret_cast<char*>(&x), sizeof(x));
-					source->read(reinterpret_cast<char*>(&y), sizeof(y));
-					source->read(reinterpret_cast<char*>(&width), sizeof(width));
-					source->read(reinterpret_cast<char*>(&height), sizeof(height));
-					source->read(reinterpret_cast<char*>(&align_x), sizeof(align_x));
-					source->read(reinterpret_cast<char*>(&align_y), sizeof(align_y));
+					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
+					std::string id, caption, skin;
+					attr = node->first_attribute("id");
+					if (attr != NULL)
+					{
+						id = attr->value();
+					}
+					attr = node->first_attribute("caption");
+					if (attr != NULL)
+					{
+						caption = attr->value();
+					}
+					attr = node->first_attribute("skin");
+					if (attr != NULL)
+					{
+						skin = attr->value();
+					}
+					x = lexical_cast<int>(node->first_attribute("x")->value());
+					y = lexical_cast<int>(node->first_attribute("y")->value());
+					width = lexical_cast<int>(node->first_attribute("width")->value());
+					height = lexical_cast<int>(node->first_attribute("height")->value());
+					attr = node->first_attribute("align_x");
+					if (attr != NULL)
+					{
+						std::string align_x_str = attr->value();
+						if ("left" == align_x_str)
+						{
+							align_x = UIDialog::CA_Left;
+						}
+						else
+						{
+							if ("right" == align_x_str)
+							{
+								align_x = UIDialog::CA_Right;
+							}
+							else
+							{
+								BOOST_ASSERT("center" == align_x_str);
+								align_x = UIDialog::CA_Center;
+							}
+						}
+					}
+					attr = node->first_attribute("align_y");
+					if (attr != NULL)
+					{
+						std::string align_y_str = attr->value();
+						if ("top" == align_y_str)
+						{
+							align_y = UIDialog::CA_Top;
+						}
+						else
+						{
+							if ("bottom" == align_y_str)
+							{
+								align_y = UIDialog::CA_Bottom;
+							}
+							else
+							{
+								BOOST_ASSERT("middle" == align_y_str);
+								align_y = UIDialog::CA_Middle;
+							}
+						}
+					}
+
 					TexturePtr tex;
 					if (!skin.empty())
 					{
@@ -342,191 +399,329 @@ namespace KlayGE
 					Convert(wcaption, caption);
 					dlg->SetCaptionText(wcaption);
 
-					UIDialog::ControlLocation loc = { x, y,
-						static_cast<UIDialog::ControlAlignment>(align_x), static_cast<UIDialog::ControlAlignment>(align_y) };
+					UIDialog::ControlLocation loc = { x, y, align_x, align_y };
 					dlg->CtrlLocation(-1, loc);
 					dlg->SetSize(width, height);
 				}
 
-				uint32_t num_ids;
-				source->read(reinterpret_cast<char*>(&num_ids), sizeof(num_ids));
-				for (uint32_t j = 0; j < num_ids; ++ j)
+				std::vector<std::string> ctrl_ids;
+				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling())
 				{
-					dlg->AddIDName(read_short_string(source), j);
+					ctrl_ids.push_back(ctrl_node->first_attribute("id")->value());
 				}
+				std::sort(ctrl_ids.begin(), ctrl_ids.end());
+				ctrl_ids.erase(std::unique(ctrl_ids.begin(), ctrl_ids.end()), ctrl_ids.end());
 
-				uint32_t num_ctrls;
-				source->read(reinterpret_cast<char*>(&num_ctrls), sizeof(num_ctrls));
-				for (uint32_t j = 0; j < num_ctrls; ++ j)
+				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling())
 				{
-					uint32_t type, id;
 					int32_t x, y;
 					uint32_t width, height;
-					bool is_default;
-					uint8_t align_x, align_y;
-					source->read(reinterpret_cast<char*>(&type), sizeof(type));
-					source->read(reinterpret_cast<char*>(&id), sizeof(id));
-					source->read(reinterpret_cast<char*>(&x), sizeof(x));
-					source->read(reinterpret_cast<char*>(&y), sizeof(y));
-					source->read(reinterpret_cast<char*>(&width), sizeof(width));
-					source->read(reinterpret_cast<char*>(&height), sizeof(height));
-					source->read(reinterpret_cast<char*>(&is_default), sizeof(is_default));
-					source->read(reinterpret_cast<char*>(&align_x), sizeof(align_x));
-					source->read(reinterpret_cast<char*>(&align_y), sizeof(align_y));
+					bool is_default = false;
+					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
 
-					UIDialog::ControlLocation loc = { x, y,
-						static_cast<UIDialog::ControlAlignment>(align_x), static_cast<UIDialog::ControlAlignment>(align_y) };
+					std::string id_str = ctrl_node->first_attribute("id")->value();
+					uint32_t id = static_cast<uint32_t>(std::find(ctrl_ids.begin(), ctrl_ids.end(), id_str) - ctrl_ids.begin());
+					dlg->AddIDName(id_str, id);
+
+					x = lexical_cast<int>(ctrl_node->first_attribute("x")->value());
+					y = lexical_cast<int>(ctrl_node->first_attribute("y")->value());
+					width = lexical_cast<int>(ctrl_node->first_attribute("width")->value());
+					height = lexical_cast<int>(ctrl_node->first_attribute("height")->value());
+					attr = ctrl_node->first_attribute("is_default");
+					if (attr != NULL)
+					{
+						std::string is_default_str = attr->value();
+						if (("true" == is_default_str) || ("1" == is_default_str))
+						{
+							is_default = true;
+						}
+						else
+						{
+							BOOST_ASSERT(("false" == is_default_str) || ("0" == is_default_str));
+							is_default = false;
+						}
+					}
+					attr = ctrl_node->first_attribute("align_x");
+					if (attr != NULL)
+					{
+						std::string align_x_str = attr->value();
+						if ("left" == align_x_str)
+						{
+							align_x = UIDialog::CA_Left;
+						}
+						else
+						{
+							if ("right" == align_x_str)
+							{
+								align_x = UIDialog::CA_Right;
+							}
+							else
+							{
+								BOOST_ASSERT("center" == align_x_str);
+								align_x = UIDialog::CA_Center;
+							}
+						}
+					}
+					attr = ctrl_node->first_attribute("align_y");
+					if (attr != NULL)
+					{
+						std::string align_y_str = attr->value();
+						if ("top" == align_y_str)
+						{
+							align_y = UIDialog::CA_Top;
+						}
+						else
+						{
+							if ("bottom" == align_y_str)
+							{
+								align_y = UIDialog::CA_Bottom;
+							}
+							else
+							{
+								BOOST_ASSERT("middle" == align_y_str);
+								align_y = UIDialog::CA_Middle;
+							}
+						}
+					}
+
+					UIDialog::ControlLocation loc = { x, y, align_x, align_y };
 					dlg->CtrlLocation(id, loc);
 
-					switch (type)
+					std::string type_str = ctrl_node->first_attribute("type")->value();
+					if ("static" == type_str)
 					{
-					case UICT_Static:
+						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::wstring wcaption;
+						Convert(wcaption, caption);
+						dlg->AddControl(UIControlPtr(new UIStatic(dlg, id, wcaption,
+							x, y, width, height, is_default)));
+					}
+					if ("button" == type_str)
+					{
+						std::string caption = ctrl_node->first_attribute("caption")->value();
+						uint8_t hotkey;
+						attr = ctrl_node->first_attribute("hotkey");
+						if (attr != NULL)
 						{
-							std::string caption = read_short_string(source);
-							std::wstring wcaption;
-							Convert(wcaption, caption);
-							dlg->AddControl(UIControlPtr(new UIStatic(dlg, id, wcaption,
-								x, y, width, height, is_default)));
+							hotkey = lexical_cast<uint8_t>(attr->value());
 						}
-						break;
-
-					case UICT_Button:
+						else
 						{
-							std::string caption = read_short_string(source);
-							uint32_t hotkey;
-							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
-							std::wstring wcaption;
-							Convert(wcaption, caption);
-							dlg->AddControl(UIControlPtr(new UIButton(dlg, id, wcaption,
-								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
+							hotkey = 0;
 						}
-						break;
-
-					case UICT_TexButton:
+						std::wstring wcaption;
+						Convert(wcaption, caption);
+						dlg->AddControl(UIControlPtr(new UIButton(dlg, id, wcaption,
+							x, y, width, height, hotkey, is_default)));
+					}
+					if ("tex_button" == type_str)
+					{
+						std::string tex_name = ctrl_node->first_attribute("texture")->value();
+						uint8_t hotkey;
+						attr = ctrl_node->first_attribute("hotkey");
+						if (attr != NULL)
 						{
-							std::string tex_name = read_short_string(source);
-							uint32_t hotkey;
-							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
-							TexturePtr tex = LoadTexture(tex_name, EAH_GPU_Read)();
-							dlg->AddControl(UIControlPtr(new UITexButton(dlg, id, tex,
-								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
+							hotkey = lexical_cast<uint8_t>(attr->value());
 						}
-						break;
-
-					case UICT_CheckBox:
+						else
 						{
-							std::string caption = read_short_string(source);
-							bool checked;
-							uint32_t hotkey;
-							source->read(reinterpret_cast<char*>(&checked), sizeof(checked));
-							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
-							std::wstring wcaption;
-							Convert(wcaption, caption);
-							dlg->AddControl(UIControlPtr(new UICheckBox(dlg, id, wcaption,
-								x, y, width, height, checked, static_cast<uint8_t>(hotkey), is_default)));
+							hotkey = 0;
 						}
-						break;
-
-					case UICT_RadioButton:
+						TexturePtr tex = LoadTexture(tex_name, EAH_GPU_Read)();
+						dlg->AddControl(UIControlPtr(new UITexButton(dlg, id, tex,
+							x, y, width, height, hotkey, is_default)));
+					}
+					if ("check_box" == type_str)
+					{
+						std::string caption = ctrl_node->first_attribute("caption")->value();
+						bool checked;
+						std::string checked_str = ctrl_node->first_attribute("checked")->value();
+						if (("true" == checked_str) || ("1" == checked_str))
 						{
-							std::string caption = read_short_string(source);
-							int32_t button_group;
-							bool checked;
-							uint32_t hotkey;
-							source->read(reinterpret_cast<char*>(&button_group), sizeof(button_group));
-							source->read(reinterpret_cast<char*>(&checked), sizeof(checked));
-							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
-							std::wstring wcaption;
-							Convert(wcaption, caption);
-							dlg->AddControl(UIControlPtr(new UIRadioButton(dlg, id, button_group, wcaption,
-								x, y, width, height, checked, static_cast<uint8_t>(hotkey), is_default)));
+							checked = true;
 						}
-						break;
-
-					case UICT_Slider:
+						else
 						{
-							int32_t min_v, max_v, value;
-							source->read(reinterpret_cast<char*>(&min_v), sizeof(min_v));
-							source->read(reinterpret_cast<char*>(&max_v), sizeof(max_v));
-							source->read(reinterpret_cast<char*>(&value), sizeof(value));
-							dlg->AddControl(UIControlPtr(new UISlider(dlg, id,
-								x, y, width, height, min_v, max_v, value, is_default)));
+							BOOST_ASSERT(("false" == checked_str) || ("0" == checked_str));
+							checked = false;
 						}
-						break;
-
-					case UICT_ScrollBar:
+						uint8_t hotkey;
+						attr = ctrl_node->first_attribute("hotkey");
+						if (attr != NULL)
 						{
-							int32_t track_start, track_end, track_pos, page_size;
-							source->read(reinterpret_cast<char*>(&track_start), sizeof(track_start));
-							source->read(reinterpret_cast<char*>(&track_end), sizeof(track_end));
-							source->read(reinterpret_cast<char*>(&track_pos), sizeof(track_pos));
-							source->read(reinterpret_cast<char*>(&page_size), sizeof(page_size));
-							dlg->AddControl(UIControlPtr(new UIScrollBar(dlg, id,
-								x, y, width, height, track_start, track_end, track_pos, page_size)));
+							hotkey = lexical_cast<uint8_t>(attr->value());
 						}
-						break;
-
-					case UICT_ListBox:
+						else
 						{
-							bool style;
-							source->read(reinterpret_cast<char*>(&style), sizeof(style));
-							dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
-								x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
-
-							uint32_t num_items;
-							source->read(reinterpret_cast<char*>(&num_items), sizeof(num_items));
-							for (uint32_t j = 0; j < num_items; ++ j)
+							hotkey = 0;
+						}
+						std::wstring wcaption;
+						Convert(wcaption, caption);
+						dlg->AddControl(UIControlPtr(new UICheckBox(dlg, id, wcaption,
+							x, y, width, height, checked, hotkey, is_default)));
+					}
+					if ("radio_button" == type_str)
+					{
+						std::string caption = ctrl_node->first_attribute("caption")->value();
+						int32_t button_group = lexical_cast<int32_t>(ctrl_node->first_attribute("button_group")->value());
+						bool checked;
+						std::string checked_str = ctrl_node->first_attribute("checked")->value();
+						if (("true" == checked_str) || ("1" == checked_str))
+						{
+							checked = true;
+						}
+						else
+						{
+							BOOST_ASSERT(("false" == checked_str) || ("0" == checked_str));
+							checked = false;
+						}
+						uint8_t hotkey;
+						attr = ctrl_node->first_attribute("hotkey");
+						if (attr != NULL)
+						{
+							hotkey = lexical_cast<uint8_t>(attr->value());
+						}
+						else
+						{
+							hotkey = 0;
+						}
+						std::wstring wcaption;
+						Convert(wcaption, caption);
+						dlg->AddControl(UIControlPtr(new UIRadioButton(dlg, id, button_group, wcaption,
+							x, y, width, height, checked, hotkey, is_default)));
+					}
+					if ("slider" == type_str)
+					{
+						int32_t min_v = 0, max_v = 100, value = 50;
+						attr = ctrl_node->first_attribute("min");
+						if (attr != NULL)
+						{
+							min_v = lexical_cast<int32_t>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("max");
+						if (attr != NULL)
+						{
+							max_v = lexical_cast<int32_t>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("value");
+						if (attr != NULL)
+						{
+							value = lexical_cast<int32_t>(attr->value());
+						}
+						dlg->AddControl(UIControlPtr(new UISlider(dlg, id,
+							x, y, width, height, min_v, max_v, value, is_default)));
+					}
+					if ("scroll_bar" == type_str)
+					{
+						int32_t track_start = 0, track_end = 1, track_pos = 1, page_size = 1;
+						attr = ctrl_node->first_attribute("track_start");
+						if (attr != NULL)
+						{
+							track_start = lexical_cast<int32_t>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("track_end");
+						if (attr != NULL)
+						{
+							track_end = lexical_cast<int32_t>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("track_pos");
+						if (attr != NULL)
+						{
+							track_pos = lexical_cast<int32_t>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("page_size");
+						if (attr != NULL)
+						{
+							page_size = lexical_cast<int32_t>(attr->value());
+						}
+						dlg->AddControl(UIControlPtr(new UIScrollBar(dlg, id,
+							x, y, width, height, track_start, track_end, track_pos, page_size)));
+					}
+					if ("list_box" == type_str)
+					{
+						UIListBox::STYLE style = UIListBox::SINGLE_SELECTION;
+						attr = ctrl_node->first_attribute("style");
+						if (attr != NULL)
+						{
+							std::string style_str = attr->value();
+							if ("single" == style_str)
 							{
-								std::string caption = read_short_string(source);
-								std::wstring wcaption;
-								Convert(wcaption, caption);
-								dlg->Control<UIListBox>(id)->AddItem(wcaption);
+								style = UIListBox::SINGLE_SELECTION;
+							}
+							else
+							{
+								BOOST_ASSERT("multi" == style_str);
+								style = UIListBox::MULTI_SELECTION;
 							}
 						}
-						break;
+						dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
+							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
 
-					case UICT_ComboBox:
+						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling())
 						{
-							uint32_t hotkey;
-							source->read(reinterpret_cast<char*>(&hotkey), sizeof(hotkey));
-							dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
-								x, y, width, height, static_cast<uint8_t>(hotkey), is_default)));
-
-							uint32_t num_items;
-							source->read(reinterpret_cast<char*>(&num_items), sizeof(num_items));
-							for (uint32_t j = 0; j < num_items; ++ j)
-							{
-								std::string caption = read_short_string(source);
-								std::wstring wcaption;
-								Convert(wcaption, caption);
-								dlg->Control<UIComboBox>(id)->AddItem(wcaption);
-							}
-						}
-						break;
-
-					case UICT_EditBox:
-						{
-							std::string caption = read_short_string(source);
+							std::string caption = item_node->first_attribute("name")->value();
 							std::wstring wcaption;
 							Convert(wcaption, caption);
-							dlg->AddControl(UIControlPtr(new UIEditBox(dlg, id, wcaption,
-								x, y, width, height, is_default)));
+							dlg->Control<UIListBox>(id)->AddItem(wcaption);
 						}
-						break;
-
-					case UICT_PolylineEditBox:
+					}
+					if ("combo_box" == type_str)
+					{
+						uint8_t hotkey;
+						attr = ctrl_node->first_attribute("hotkey");
+						if (attr != NULL)
 						{
-							Color line_clr;
-							source->read(reinterpret_cast<char*>(&line_clr), sizeof(line_clr));
-							dlg->AddControl(UIControlPtr(new UIPolylineEditBox(dlg, id,
-								x, y, width, height, is_default)));
-							dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
+							hotkey = lexical_cast<uint8_t>(attr->value());
 						}
-						break;
+						else
+						{
+							hotkey = 0;
+						}
+						dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
+							x, y, width, height, hotkey, is_default)));
 
-					default:
-						BOOST_ASSERT(false);
-						break;
+						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling())
+						{
+							std::string caption = item_node->first_attribute("name")->value();
+							std::wstring wcaption;
+							Convert(wcaption, caption);
+							dlg->Control<UIComboBox>(id)->AddItem(wcaption);
+						}
+					}
+					if ("edit_box" == type_str)
+					{
+						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::wstring wcaption;
+						Convert(wcaption, caption);
+						dlg->AddControl(UIControlPtr(new UIEditBox(dlg, id, wcaption,
+							x, y, width, height, is_default)));
+					}
+					if ("polyline_edit_box" == type_str)
+					{
+						Color line_clr(0, 1, 0, 1);
+						attr = ctrl_node->first_attribute("line_r");
+						if (attr != NULL)
+						{
+							line_clr.r() = lexical_cast<float>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("line_g");
+						if (attr != NULL)
+						{
+							line_clr.g() = lexical_cast<float>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("line_b");
+						if (attr != NULL)
+						{
+							line_clr.b() = lexical_cast<float>(attr->value());
+						}
+						attr = ctrl_node->first_attribute("line_a");
+						if (attr != NULL)
+						{
+							line_clr.a() = lexical_cast<float>(attr->value());
+						}
+						dlg->AddControl(UIControlPtr(new UIPolylineEditBox(dlg, id,
+							x, y, width, height, is_default)));
+						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
 				}
 			}

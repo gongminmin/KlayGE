@@ -41,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("DepthPeeling.kfx")->TechniqueByName("DepthPeeling1st");
+			technique_ = rf.LoadEffect("DepthPeeling.fxml")->TechniqueByName("DepthPeeling1st");
 		}
 
 		void BuildMeshInfo()
@@ -152,7 +152,7 @@ namespace
 	{
 	public:
 		BlendPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthPeeling.kfx")->TechniqueByName("Blend"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthPeeling.fxml")->TechniqueByName("Blend"))
 		{
 		}
 	};
@@ -259,7 +259,7 @@ void DepthPeelingApp::InitObjects()
 
 	blend_pp_.reset(new BlendPostProcess);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_use_depth_peeling_ = dialog_->IDFromName("UseDepthPeeling");

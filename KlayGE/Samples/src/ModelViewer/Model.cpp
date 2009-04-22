@@ -23,7 +23,7 @@ using namespace KlayGE;
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
-			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.kfx")),
+			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.fxml")),
 			visualize_("Lighting"), line_mode_(false)
 {
 	inv_world_ = MathLib::inverse(world_);

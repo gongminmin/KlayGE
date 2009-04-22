@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/util.fxml"/>
+	<include name="util.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model"/>

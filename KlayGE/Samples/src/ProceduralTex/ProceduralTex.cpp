@@ -37,7 +37,7 @@ namespace
 		RenderPolygon(RenderModelPtr model, std::wstring const & name)
 			: KMesh(model, name)
 		{
-			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ProceduralTex.kfx")->TechniqueByName("ProceduralMarbleTex");
+			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
 		}
 
 		void BuildMeshInfo()
@@ -176,7 +176,7 @@ void ProceduralTexApp::InitObjects()
 	input_handler->connect(boost::bind(&ProceduralTexApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ProceduralTex.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("ProceduralTex.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_type_static_ = dialog_->IDFromName("TypeStatic");

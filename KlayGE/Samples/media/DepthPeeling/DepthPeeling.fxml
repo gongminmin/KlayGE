@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/Lighting.fxml"/>
-	<include name="../../../RenderFX/PostProcess.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<parameter type="float3" name="light_pos"/>
 

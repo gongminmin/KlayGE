@@ -42,7 +42,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("VideoTexture.kfx")->TechniqueByName("Object");
+			technique_ = rf.LoadEffect("VideoTexture.fxml")->TechniqueByName("Object");
 		}
 
 		void BuildMeshInfo()

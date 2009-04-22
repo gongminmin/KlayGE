@@ -10,7 +10,7 @@
 using namespace KlayGE;
 
 CartoonPostProcess::CartoonPostProcess()
-	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("CartoonPP.kfx")->TechniqueByName("Cartoon"))
+	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("CartoonPP.fxml")->TechniqueByName("Cartoon"))
 {
 }
 

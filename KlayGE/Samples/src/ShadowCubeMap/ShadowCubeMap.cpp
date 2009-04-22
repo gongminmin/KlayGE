@@ -134,7 +134,7 @@ namespace
 			: KMesh(model, L"Occluder"),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
-			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.kfx");
+			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml");
 		}
 
 		void MinVariance(float min_variance)
@@ -204,7 +204,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("ShadowCubeMap.kfx");
+			effect_ = rf.LoadEffect("ShadowCubeMap.fxml");
 			technique_ = effect_->TechniqueByName("RenderScene");
 
 			float3 xyzs[] =
@@ -428,7 +428,7 @@ void ShadowCubeMap::InitObjects()
 	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ShadowCubemap.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("ShadowCubemap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_min_variance_static_ = dialog_->IDFromName("MinVarianceStatic");

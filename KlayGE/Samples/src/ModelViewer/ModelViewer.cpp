@@ -37,7 +37,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.kfx");
+			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.fxml");
 			technique_ = effect->TechniqueByName("AxisTech");
 
 			float4 xyzs[] =
@@ -96,7 +96,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.kfx");
+			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.fxml");
 			technique_ = effect->TechniqueByName("GridTech");
 
 			float3 xyzs[(21 + 21) * 2];
@@ -207,7 +207,7 @@ void ModelViewerApp::InitObjects()
 	grid_.reset(new GridObject);
 	grid_->AddToSceneManager();
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ModelViewer.kui"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("ModelViewer.uiml"));
 	dialog_animation_ = UIManager::Instance().GetDialog("Animation");
 	dialog_model_ = UIManager::Instance().GetDialog("Model");
 

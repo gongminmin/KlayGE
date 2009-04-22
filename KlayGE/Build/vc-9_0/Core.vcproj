@@ -17,9 +17,6 @@
 		/>
 	</Platforms>
 	<ToolFiles>
-		<ToolFile
-			RelativePath="..\..\Tools\Rules\fxml.rules"
-		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -34,9 +31,6 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -112,9 +106,6 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="FXML"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -188,9 +179,6 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -269,9 +257,6 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -559,32 +544,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -595,32 +584,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -631,32 +624,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -667,32 +664,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -703,32 +704,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -739,32 +744,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -775,32 +784,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -811,32 +824,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -847,32 +864,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -883,32 +904,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -919,32 +944,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -955,32 +984,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -991,32 +1024,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1027,32 +1064,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1063,32 +1104,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1099,32 +1144,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1135,32 +1184,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1171,32 +1224,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>
@@ -1819,32 +1876,36 @@
 						Name="Debug|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|x64"
 						>
 						<Tool
-							Name="FXML"
-							OutputDir="$(KLAYGE_HOME)\Samples\media\Common"
+							Name="VCCustomBuildTool"
+							CommandLine=""
+							Outputs=""
 						/>
 					</FileConfiguration>
 				</File>

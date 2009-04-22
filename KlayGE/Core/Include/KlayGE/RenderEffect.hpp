@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2003-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 直接从fxml文件读取特效脚本 (2009.4.21)
 //
 // 3.8.0
 // 支持CBuffer (2008.10.6)
@@ -59,6 +62,8 @@
 #include <algorithm>
 
 #include <boost/utility.hpp>
+
+#include <rapidxml/rapidxml.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -194,7 +199,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectAnnotation
 	{
 	public:
-		void Load(ResIdentifierPtr const & source);
+		void Load(rapidxml::xml_node<>* node);
 
 		uint32_t Type() const
 		{
@@ -221,7 +226,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderShaderFunc
 	{
 	public:
-		void Load(ResIdentifierPtr const & source);
+		void Load(rapidxml::xml_node<>* node);
 
 		std::string const & str() const
 		{
@@ -311,7 +316,7 @@ namespace KlayGE
 		{
 		}
 
-		void Load(ResIdentifierPtr const & source);
+		void Load(rapidxml::xml_node<>* node);
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
 		static RenderTechniquePtr const & NullObject();
@@ -380,7 +385,7 @@ namespace KlayGE
 
 		static RenderPassPtr const & NullObject();
 
-		void Load(ResIdentifierPtr const & source);
+		void Load(rapidxml::xml_node<>* node);
 		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
@@ -447,7 +452,7 @@ namespace KlayGE
 		explicit RenderEffectParameter(RenderEffect& effect);
 		~RenderEffectParameter();
 
-		void Load(ResIdentifierPtr const & source);
+		void Load(rapidxml::xml_node<>* node);
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
 
 		uint32_t type() const

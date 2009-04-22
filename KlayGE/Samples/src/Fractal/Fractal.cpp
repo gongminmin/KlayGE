@@ -41,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Mandelbrot");
+			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
 
 			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset() * 2;
 
@@ -96,7 +96,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Fractal.kfx")->TechniqueByName("Show");
+			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Show");
 
 			float3 xyzs[] =
 			{

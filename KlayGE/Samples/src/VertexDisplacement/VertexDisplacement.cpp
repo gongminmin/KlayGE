@@ -42,7 +42,7 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("VertexDisplacement.kfx")->TechniqueByName("VertexDisplacement");
+			technique_ = rf.LoadEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
 
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;

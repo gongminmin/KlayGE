@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/util.fxml"/>
-	<include name="../../../RenderFX/Quaternion.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<parameter type="float4" name="joint_rots" array_size="64"/>
 	<parameter type="float4" name="joint_poss" array_size="64"/>

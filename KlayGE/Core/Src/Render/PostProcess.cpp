@@ -107,7 +107,7 @@ namespace KlayGE
 
 
 	GammaCorrectionProcess::GammaCorrectionProcess()
-		: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.kfx")->TechniqueByName("GammaCorrection"))
+		: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.fxml")->TechniqueByName("GammaCorrection"))
 	{
 		inv_gamma_ep_ = technique_->Effect().ParameterByName("inv_gamma");
 	}
@@ -119,19 +119,19 @@ namespace KlayGE
 
 
 	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("Downsample"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fxml")->TechniqueByName("Downsample"))
 	{
 	}
 
 
 	BrightPassDownsampler2x2PostProcess::BrightPassDownsampler2x2PostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.kfx")->TechniqueByName("BrightPassDownsample"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fxml")->TechniqueByName("BrightPassDownsample"))
 	{
 	}
 
 
 	SeparableBlurPostProcess::SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.kfx")->TechniqueByName(tech)),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));

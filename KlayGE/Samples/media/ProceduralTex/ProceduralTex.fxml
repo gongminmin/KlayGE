@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="../../../RenderFX/Lighting.fxml"/>
-	<include name="../../../RenderFX/Noise.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="Noise.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>

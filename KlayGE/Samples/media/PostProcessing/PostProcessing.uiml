@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
-<ui version='1'>
+<ui>
 	<dialog id="PostProcessing" caption="Post Processing" x="-140" y="0" align_x="right" width="140" height="600">
 		<control type="radio_button" id="AsciiArtsPP" caption="Ascii Arts" x="20" y="20" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="CartoonPP" caption="Cartoon" x="20" y="45" width="100" height="24" button_group="0" checked="1" hotkey="0" is_default="0"/>

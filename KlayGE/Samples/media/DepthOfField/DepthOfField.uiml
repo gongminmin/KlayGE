@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
-<ui version='1'>
+<ui>
 	<dialog id="DoF" caption="Depth of field" x="-140" y="200" align_x="right" width="140" height="270">
 		<control type="static" id="FocusPlaneStatic" caption="Focus plane:" x="20" y="20" width="100" height="24" is_default="0"/>
 		<control type="slider" id="FocusPlaneSlider" x="20" y="40" width="100" height="24" min="0" max="200" value="100" is_default="0"/>

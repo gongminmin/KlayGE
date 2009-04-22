@@ -17,12 +17,6 @@
 		/>
 	</Platforms>
 	<ToolFiles>
-		<ToolFile
-			RelativePath="..\..\..\Tools\Rules\uiml.rules"
-		/>
-		<ToolFile
-			RelativePath="..\..\..\Tools\Rules\fxml.rules"
-		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -36,13 +30,7 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
-				Name="UIML"
-			/>
-			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -118,13 +106,7 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
-				Name="UIML"
-			/>
-			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -202,13 +184,7 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
-				Name="UIML"
-			/>
-			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -291,13 +267,7 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
-				Name="UIML"
-			/>
-			<Tool
 				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="FXML"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
