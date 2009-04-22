@@ -49,6 +49,7 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <sstream>
+#include <fstream>
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -889,8 +890,7 @@ namespace KlayGE
 				{
 					if (node_element == child_node->type())
 					{
-						xml_node<>* cloned_node = doc.clone_node(child_node);
-						root->insert_node(node, cloned_node);
+						root->insert_node(node, doc.clone_node(child_node));
 					}
 				}
 
@@ -1080,8 +1080,6 @@ namespace KlayGE
 		using namespace rapidxml;
 
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->first_attribute("name")->value()));
-		// TODO
-		weight_ = 0;
 
 		{
 			xml_node<>* anno_node = node->first_node("annotation");
@@ -1100,6 +1098,8 @@ namespace KlayGE
 
 		is_validate_ = true;
 
+		bool blend = false;
+		weight_ = 1;
 		for (xml_node<>* pass_node = node->first_node("pass"); pass_node; pass_node = pass_node->next_sibling("pass"))
 		{
 			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
@@ -1108,6 +1108,25 @@ namespace KlayGE
 			pass->Load(pass_node);
 
 			is_validate_ &= pass->Validate();
+
+			for (xml_node<>* state_node = pass_node->first_node("state"); state_node; state_node = state_node->next_sibling("state"))
+			{
+				++ weight_;
+
+				std::string state_name = state_node->first_attribute("name")->value();
+				if ("blend_enable" == state_name)
+				{
+					std::string value_str = state_node->first_attribute("value")->value();
+					if (bool_from_str(value_str))
+					{
+						blend = true;
+					}
+				}
+			}
+		}
+		if (blend)
+		{
+			weight_ += 10000;
 		}
 	}
 

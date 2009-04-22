@@ -33,6 +33,7 @@
 #include <KlayGE/Input.hpp>
 
 #include <cstring>
+#include <fstream>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -318,7 +319,36 @@ namespace KlayGE
 			xml_node<>* root = doc.first_node("ui");
 			xml_attribute<>* attr;
 
-			for (xml_node<>* node = root->first_node("dialog"); node; node = node->next_sibling())
+			std::vector<std::vector<char> > include_strs;
+			for (xml_node<>* node = root->first_node("include"); node;)
+			{
+				attr = node->first_attribute("name");
+				std::ifstream include_file(ResLoader::Instance().Locate(attr->value()).c_str());
+				include_file.seekg(0, std::ios_base::end);
+				int len = static_cast<int>(include_file.tellg());
+				include_file.seekg(0, std::ios_base::beg);
+				include_strs.push_back(std::vector<char>(len + 1, 0));
+				std::vector<char>& str = include_strs.back();
+				include_file.read(&str[0], len);
+
+				xml_document<> include_doc;
+				include_doc.parse<0>(&str[0]);
+
+				xml_node<>* include_root = include_doc.first_node("ui");
+				for (xml_node<>* child_node = include_root->first_node(); child_node; child_node = child_node->next_sibling())
+				{
+					if (node_element == child_node->type())
+					{
+						root->insert_node(node, doc.clone_node(child_node));
+					}
+				}
+
+				xml_node<>* node_next = node->next_sibling("include");
+				root->remove_node(node);
+				node = node_next;
+			}
+
+			for (xml_node<>* node = root->first_node("dialog"); node; node = node->next_sibling("dialog"))
 			{
 				UIDialogPtr dlg;
 				{
@@ -405,14 +435,14 @@ namespace KlayGE
 				}
 
 				std::vector<std::string> ctrl_ids;
-				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling())
+				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling("control"))
 				{
 					ctrl_ids.push_back(ctrl_node->first_attribute("id")->value());
 				}
 				std::sort(ctrl_ids.begin(), ctrl_ids.end());
 				ctrl_ids.erase(std::unique(ctrl_ids.begin(), ctrl_ids.end()), ctrl_ids.end());
 
-				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling())
+				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling("control"))
 				{
 					int32_t x, y;
 					uint32_t width, height;
@@ -657,7 +687,7 @@ namespace KlayGE
 						dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
 							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
 
-						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling())
+						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling("item"))
 						{
 							std::string caption = item_node->first_attribute("name")->value();
 							std::wstring wcaption;
@@ -680,7 +710,7 @@ namespace KlayGE
 						dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
 							x, y, width, height, hotkey, is_default)));
 
-						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling())
+						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling("item"))
 						{
 							std::string caption = item_node->first_attribute("name")->value();
 							std::wstring wcaption;
