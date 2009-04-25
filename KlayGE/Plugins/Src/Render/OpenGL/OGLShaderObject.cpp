@@ -780,7 +780,7 @@ namespace KlayGE
 				case ST_GeometryShader:
 					if ("auto" == profile)
 					{
-#if (defined USE_GLSL) && (defined CG_PROFILE_GLSLG)
+#ifdef USE_GLSL
 						profiles_[type] = CG_PROFILE_GLSLG;
 #else
 						profiles_[type] = cgGLGetLatestProfile(CG_GL_GEOMETRY);
