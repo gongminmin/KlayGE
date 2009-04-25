@@ -13,7 +13,7 @@
 #ifndef _D3D10SHADEROBJECT_HPP
 #define _D3D10SHADEROBJECT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>

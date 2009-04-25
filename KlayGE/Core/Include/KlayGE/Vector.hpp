@@ -19,7 +19,7 @@
 
 #include <KlayGE/Detail/MathHelper.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {

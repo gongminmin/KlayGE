@@ -16,7 +16,7 @@
 #ifndef _BOUND_HPP
 #define _BOUND_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {

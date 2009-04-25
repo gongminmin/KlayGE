@@ -16,7 +16,7 @@
 #ifndef _TYPES_HPP
 #define _TYPES_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/cstdint.hpp>
 

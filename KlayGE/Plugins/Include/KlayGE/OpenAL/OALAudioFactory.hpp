@@ -16,7 +16,7 @@
 #ifndef _OALAUDIOFACTORY_HPP
 #define _OALAUDIOFACTORY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

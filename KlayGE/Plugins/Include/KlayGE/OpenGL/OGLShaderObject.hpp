@@ -16,7 +16,7 @@
 #ifndef _OGLSHADEROBJECT_HPP
 #define _OGLSHADEROBJECT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/MapVector.hpp>

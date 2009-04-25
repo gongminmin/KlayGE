@@ -22,7 +22,7 @@
 #ifndef _RENDERABLEHELPER_HPP
 #define _RENDERABLEHELPER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>

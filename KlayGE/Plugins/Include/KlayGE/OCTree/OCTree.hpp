@@ -22,7 +22,7 @@
 #ifndef _OCTREE_HPP
 #define _OCTREE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneNode.hpp>

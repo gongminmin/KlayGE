@@ -13,7 +13,7 @@
 #ifndef _PARTICLESYSTEM_HPP
 #define _PARTICLESYSTEM_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>

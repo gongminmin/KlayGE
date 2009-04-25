@@ -13,7 +13,7 @@
 #ifndef _OGLRENDERVIEW_HPP
 #define _OGLRENDERVIEW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>

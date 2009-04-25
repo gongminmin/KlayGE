@@ -16,7 +16,7 @@
 #ifndef _OGLRENDERWINDOW_HPP
 #define _OGLRENDERWINDOW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/OpenGL/OGLFrameBuffer.hpp>
@@ -75,6 +75,7 @@ namespace KlayGE
 		::Display* x_display_;
 		::Window x_window_;
 		::GLXContext x_context_;
+		::GLXFBConfig* fbc_;
 #endif
 
 		bool	ready_;				// Is ready i.e. available for update

@@ -31,7 +31,7 @@
 #ifndef _APP3D_HPP
 #define _APP3D_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Timer.hpp>

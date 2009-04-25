@@ -53,7 +53,7 @@
 				<Option platforms="Unix;" />
 				<Option output="../../../bin/Text_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Debug/Win32" />
+				<Option object_output="../../Debug/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -74,7 +74,7 @@
 				<Option platforms="Unix;" />
 				<Option output="../../../bin/Text" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Release/Win32" />
+				<Option object_output="../../Release/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -96,7 +96,7 @@
 				<Option platforms="Unix;" />
 				<Option output="../../../bin/Text_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Debug/Win32" />
+				<Option object_output="../../Debug/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -112,15 +112,13 @@
 					<Add library="KlayGE_Core_gcc_x64_d" />
 					<Add library="boost_signals-gcc43-mt-d" />
 					<Add library="boost_system-gcc43-mt-d" />
-					<Add library="GL" />
-					<Add library="X11" />
 				</Linker>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
 				<Option output="../../../bin/Text" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Release/Win32" />
+				<Option object_output="../../Release/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>

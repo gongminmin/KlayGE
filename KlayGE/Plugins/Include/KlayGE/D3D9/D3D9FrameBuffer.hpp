@@ -19,7 +19,7 @@
 #ifndef _D3D9FRAMEBUFFER_HPP
 #define _D3D9FRAMEBUFFER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/D3D9/D3D9Typedefs.hpp>

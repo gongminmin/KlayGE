@@ -13,7 +13,7 @@
 #ifndef _OGLRENDERFACTORY_HPP
 #define _OGLRENDERFACTORY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

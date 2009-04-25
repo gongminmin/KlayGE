@@ -16,7 +16,7 @@
 #ifndef _FRUSTUM_HPP
 #define _FRUSTUM_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Math.hpp>
 #include <boost/array.hpp>

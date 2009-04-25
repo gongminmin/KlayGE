@@ -19,7 +19,7 @@
 #ifndef _WINDOW_HPP
 #define _WINDOW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -37,10 +37,10 @@
 #if defined KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_LINUX
-#include <glloader/glloader.h>
-#ifdef Bool
-#undef Bool		// for boost::foreach
-#endif
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
 #endif
 #include <string>
 
@@ -63,7 +63,9 @@ namespace KlayGE
 		Window(std::string const & name, RenderSettings const & settings);
 		~Window();
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 		void Recreate();
+#endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		HWND HWnd() const
@@ -79,16 +81,6 @@ namespace KlayGE
 		::Window XWindow() const
 		{
 			return x_window_;
-		}
-
-		::GLXContext XContext() const
-		{
-		    return x_context_;
-		}
-
-		::GLXFBConfig* GetFBC() const
-		{
-		    return fbc_;
 		}
 #endif
 
@@ -227,8 +219,6 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
 		::Window x_window_;
-		::GLXContext x_context_;
-		::GLXFBConfig* fbc_;
 		::Atom wm_delete_window_;
 #endif
 	};

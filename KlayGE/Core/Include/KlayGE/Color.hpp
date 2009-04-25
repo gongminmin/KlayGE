@@ -19,7 +19,7 @@
 #ifndef _COLOR_HPP
 #define _COLOR_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/operators.hpp>
 

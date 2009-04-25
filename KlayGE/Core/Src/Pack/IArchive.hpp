@@ -13,7 +13,7 @@
 #ifndef _IARCHIVE_HPP
 #define _IARCHIVE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include "IStream.hpp"
 #include "IProgress.hpp"
@@ -36,7 +36,7 @@ ARCHIVE_INTERFACE(IArchiveOpenCallback, 0x10)
 
 ARCHIVE_INTERFACE_SUB(IArchiveExtractCallback, IProgress, 0x20)
 {
-	STDMETHOD(GetStream)(KlayGE::uint32_t index, ISequentialOutStream** outStream, 
+	STDMETHOD(GetStream)(KlayGE::uint32_t index, ISequentialOutStream** outStream,
 		KlayGE::int32_t askExtractMode) PURE;
 	// GetStream OUT: S_OK - OK, S_FALSE - skeep this file
 	STDMETHOD(PrepareOperation)(KlayGE::int32_t askExtractMode) PURE;
@@ -47,24 +47,24 @@ ARCHIVE_INTERFACE_SUB(IArchiveExtractCallback, IProgress, 0x20)
 ARCHIVE_INTERFACE(IInArchive, 0x60)
 {
 	STDMETHOD(Open)(IInStream* stream, const KlayGE::uint64_t* maxCheckStartPosition,
-		IArchiveOpenCallback* openArchiveCallback) PURE;  
-	STDMETHOD(Close)() PURE;  
-	STDMETHOD(GetNumberOfItems)(KlayGE::uint32_t* numItems) PURE;  
+		IArchiveOpenCallback* openArchiveCallback) PURE;
+	STDMETHOD(Close)() PURE;
+	STDMETHOD(GetNumberOfItems)(KlayGE::uint32_t* numItems) PURE;
 	STDMETHOD(GetProperty)(KlayGE::uint32_t index, PROPID propID, PROPVARIANT* value) PURE;
-	STDMETHOD(Extract)(const KlayGE::uint32_t* indices, KlayGE::uint32_t numItems, 
+	STDMETHOD(Extract)(const KlayGE::uint32_t* indices, KlayGE::uint32_t numItems,
 		KlayGE::int32_t testMode, IArchiveExtractCallback* extractCallback) PURE;
-	// indices must be sorted 
+	// indices must be sorted
 	// numItems = 0xFFFFFFFF means all files
 	// testMode != 0 means "test files operation"
 
 	STDMETHOD(GetArchiveProperty)(PROPID propID, PROPVARIANT* value) PURE;
 
-	STDMETHOD(GetNumberOfProperties)(KlayGE::uint32_t* numProperties) PURE;  
-	STDMETHOD(GetPropertyInfo)(KlayGE::uint32_t index,     
+	STDMETHOD(GetNumberOfProperties)(KlayGE::uint32_t* numProperties) PURE;
+	STDMETHOD(GetPropertyInfo)(KlayGE::uint32_t index,
 		BSTR* name, PROPID* propID, VARTYPE* varType) PURE;
 
-	STDMETHOD(GetNumberOfArchiveProperties)(KlayGE::uint32_t* numProperties) PURE;  
-	STDMETHOD(GetArchivePropertyInfo)(KlayGE::uint32_t index,     
+	STDMETHOD(GetNumberOfArchiveProperties)(KlayGE::uint32_t* numProperties) PURE;
+	STDMETHOD(GetArchivePropertyInfo)(KlayGE::uint32_t index,
 		BSTR* name, PROPID* propID, VARTYPE* varType) PURE;
 };
 

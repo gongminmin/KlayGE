@@ -23,7 +23,7 @@
 #ifndef _ELEMENTFORMAT_HPP
 #define _ELEMENTFORMAT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <vector>
 #include <boost/assert.hpp>
@@ -101,7 +101,7 @@ namespace KlayGE
 
 	// 16-bit element format, 4 bits for alpha, red, green and blue.
 	ElementFormat const EF_ARGB4 = MakeElementFormat4<EC_A, EC_R, EC_G, EC_B, 4, 4, 4, 4, ECT_UNorm, ECT_UNorm, ECT_UNorm, ECT_UNorm>::value;
-	
+
 	// 8-bit element format, 8 bits for red.
 	ElementFormat const EF_R8 = MakeElementFormat1<EC_R, 8, ECT_UNorm>::value;
 	// 8-bit element format, 8 bits for signed red.
@@ -145,7 +145,7 @@ namespace KlayGE
 	ElementFormat const EF_A2BGR10UI = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_UInt, ECT_UInt, ECT_UInt, ECT_UInt>::value;
 	// 32-bit element format, 2 bits for alpha, 10 bits for red, green and blue.
 	ElementFormat const EF_A2BGR10I = MakeElementFormat4<EC_A, EC_B, EC_G, EC_R, 2, 10, 10, 10, ECT_SInt, ECT_SInt, ECT_SInt, ECT_SInt>::value;
-	
+
 	// 16-bit element format, 16 bits for red.
 	ElementFormat const EF_R16 = MakeElementFormat1<EC_R, 16, ECT_UNorm>::value;
 	// 16-bit element format, 16 bits for signed red.

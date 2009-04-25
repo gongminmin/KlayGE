@@ -13,7 +13,7 @@
 #ifndef _NETMSG_HPP
 #define _NETMSG_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 
 namespace KlayGE

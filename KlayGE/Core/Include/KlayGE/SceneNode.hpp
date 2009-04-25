@@ -1,7 +1,7 @@
 #ifndef _SCENENODE_HPP
 #define _SCENENODE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>

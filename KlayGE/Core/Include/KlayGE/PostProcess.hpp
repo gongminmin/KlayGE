@@ -19,7 +19,7 @@
 #ifndef _POSTPROCESS_HPP
 #define _POSTPROCESS_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -64,7 +64,7 @@ namespace KlayGE
 	private:
 		RenderEffectParameterPtr inv_gamma_ep_;
 	};
-	
+
 	class KLAYGE_CORE_API SeparableBlurPostProcess : public PostProcess
 	{
 	public:

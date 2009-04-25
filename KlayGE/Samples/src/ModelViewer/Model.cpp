@@ -24,7 +24,7 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
 			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.fxml")),
-			visualize_("Lighting"), line_mode_(false)
+			line_mode_(false), visualize_("Lighting")
 {
 	inv_world_ = MathLib::inverse(world_);
 }

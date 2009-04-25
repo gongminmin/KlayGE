@@ -16,7 +16,7 @@
 #ifndef _OGLFRAMEBUFFER_HPP
 #define _OGLFRAMEBUFFER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderView.hpp>

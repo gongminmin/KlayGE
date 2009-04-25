@@ -43,7 +43,7 @@
 #ifndef _TEXTURE_HPP
 #define _TEXTURE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
@@ -272,7 +272,7 @@ namespace KlayGE
 
 		ElementFormat	format_;
 		TextureType		type_;
-		uint32_t		sample_count_, sample_quality_; 
+		uint32_t		sample_count_, sample_quality_;
 		uint32_t		access_hint_;
 	};
 
@@ -280,7 +280,7 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
 	KLAYGE_CORE_API boost::function<TexturePtr()> LoadTexture(std::string const & tex_name, uint32_t access_hint);
-	
+
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
 		ElementFormat format, std::vector<ElementInitData> const & init_data);

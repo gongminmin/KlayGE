@@ -16,7 +16,7 @@
 #ifndef _INPUTFACTORY_HPP
 #define _INPUTFACTORY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

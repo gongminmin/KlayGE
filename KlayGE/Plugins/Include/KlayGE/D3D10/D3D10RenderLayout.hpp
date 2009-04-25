@@ -13,7 +13,7 @@
 #ifndef _D3D10RENDERLAYOUT_HPP
 #define _D3D10RENDERLAYOUT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/smart_ptr.hpp>
 

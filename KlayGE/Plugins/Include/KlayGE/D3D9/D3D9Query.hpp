@@ -16,7 +16,7 @@
 #ifndef _D3D9OCCLUSIONQUERY_HPP
 #define _D3D9OCCLUSIONQUERY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Query.hpp>
 #include <KlayGE/D3D9/D3D9Resource.hpp>

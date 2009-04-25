@@ -16,7 +16,7 @@
 #ifndef _OGLRENDERLAYOUT_HPP
 #define _OGLRENDERLAYOUT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/RenderLayout.hpp>
 

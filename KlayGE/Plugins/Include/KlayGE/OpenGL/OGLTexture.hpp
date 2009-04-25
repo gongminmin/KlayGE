@@ -20,7 +20,7 @@
 #ifndef _OGLTEXTURE_HPP
 #define _OGLTEXTURE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Texture.hpp>
 

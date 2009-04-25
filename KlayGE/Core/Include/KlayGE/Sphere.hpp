@@ -20,7 +20,7 @@
 
 #include <KlayGE/Bound.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {

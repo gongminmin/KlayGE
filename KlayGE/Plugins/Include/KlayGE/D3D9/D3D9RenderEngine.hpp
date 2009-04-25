@@ -27,7 +27,7 @@
 #ifndef _D3D9RENDERENGINE_HPP
 #define _D3D9RENDERENGINE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Vector.hpp>
 

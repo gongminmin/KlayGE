@@ -13,7 +13,7 @@
 #ifndef _BSTR_HPP
 #define _BSTR_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <string>
 

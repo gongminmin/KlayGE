@@ -13,7 +13,7 @@
 #ifndef _STREAMS_HPP
 #define _STREAMS_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/atomic.hpp>

@@ -23,7 +23,7 @@
 #ifndef _OGLGRAPHICSBUFFERHPP
 #define _OGLGRAPHICSBUFFERHPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <vector>
 #include <glloader/glloader.h>

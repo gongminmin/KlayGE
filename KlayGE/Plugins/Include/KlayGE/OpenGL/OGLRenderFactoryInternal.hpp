@@ -13,7 +13,7 @@
 #ifndef _OGLRENDERFACTORYINTERNAL_HPP
 #define _OGLRENDERFACTORYINTERNAL_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>

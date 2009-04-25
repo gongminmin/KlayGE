@@ -13,7 +13,7 @@
 #ifndef _SCENEOBJECTHELPER_HPP
 #define _SCENEOBJECTHELPER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneObject.hpp>

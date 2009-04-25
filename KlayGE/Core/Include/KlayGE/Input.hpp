@@ -19,7 +19,7 @@
 #ifndef _INPUT_HPP
 #define _INPUT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
@@ -408,10 +408,10 @@ namespace KlayGE
 		long XRot() const;
 		long YRot() const;
 		long ZRot() const;
-		
+
 		size_t NumSliders() const;
 		long Slider(size_t index) const;
-		
+
 		size_t NumButtons() const;
 		bool Button(size_t n) const;
 

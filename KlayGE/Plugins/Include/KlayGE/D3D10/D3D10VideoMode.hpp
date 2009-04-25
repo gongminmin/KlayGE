@@ -13,7 +13,7 @@
 #ifndef _D3D10VIDEOMODE_HPP
 #define _D3D10VIDEOMODE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>

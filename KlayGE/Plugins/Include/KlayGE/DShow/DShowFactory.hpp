@@ -13,7 +13,7 @@
 #ifndef _DSHOWFACTORY_HPP
 #define _DSHOWFACTORY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

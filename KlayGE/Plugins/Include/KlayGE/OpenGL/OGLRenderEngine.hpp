@@ -30,7 +30,7 @@
 #ifndef _OGLRENDERENGINE_HPP
 #define _OGLRENDERENGINE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Vector.hpp>
 
@@ -54,7 +54,7 @@ namespace KlayGE
 		std::wstring const & Name() const;
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-		
+
 		void StartRendering();
 
 		void BeginFrame();

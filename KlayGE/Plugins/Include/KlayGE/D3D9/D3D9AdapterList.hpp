@@ -1,7 +1,7 @@
 #ifndef _D3D9ADAPTERLIST_HPP
 #define _D3D9ADAPTERLIST_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <boost/smart_ptr.hpp>

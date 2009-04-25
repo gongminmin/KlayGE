@@ -24,7 +24,7 @@
 
 #include <KlayGE/Config.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Types.hpp>
 

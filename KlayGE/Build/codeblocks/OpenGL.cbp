@@ -95,6 +95,7 @@
 					<Add library="glloader_x86_d" />
 					<Add library="Cg" />
 					<Add library="CgGL" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Render/&quot;' />
@@ -121,6 +122,7 @@
 					<Add library="glloader_x86" />
 					<Add library="Cg" />
 					<Add library="CgGL" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Render/&quot;' />
@@ -146,9 +148,9 @@
 				</Compiler>
 				<Linker>
 					<Add library="glloader_x64_d" />
-					<Add library="GL" />
 					<Add library="Cg" />
 					<Add library="CgGL" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Render/&quot;' />
@@ -175,9 +177,9 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="glloader_x64" />
-					<Add library="GL" />
 					<Add library="Cg" />
 					<Add library="CgGL" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Render/&quot;' />

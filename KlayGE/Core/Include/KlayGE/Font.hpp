@@ -18,7 +18,7 @@
 //
 // 2.3.0
 // 使用FreeType实现字体读取 (2004.12.26)
-// 
+//
 // 2.0.0
 // 初次建立 (2003.8.18)
 //
@@ -28,7 +28,7 @@
 #ifndef _FONT_HPP
 #define _FONT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
@@ -183,9 +183,9 @@ namespace KlayGE
 		Size_T<uint32_t> CalcSize(std::wstring const & text, uint32_t font_size);
 		void RenderText(float x, float y, Color const & clr,
 			std::wstring const & text, uint32_t font_size);
-		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr, 
+		void RenderText(float x, float y, float z, float xScale, float yScale, Color const & clr,
 			std::wstring const & text, uint32_t font_size);
-		void RenderText(Rect const & rc, float z, float xScale, float yScale, Color const & clr, 
+		void RenderText(Rect const & rc, float z, float xScale, float yScale, Color const & clr,
 			std::wstring const & text, uint32_t font_size, uint32_t align);
 		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, uint32_t font_size);
 

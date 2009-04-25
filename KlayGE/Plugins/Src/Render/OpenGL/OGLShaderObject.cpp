@@ -717,7 +717,7 @@ namespace KlayGE
 	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
-		RenderEngine& re = rf.RenderEngineInstance();		
+		RenderEngine& re = rf.RenderEngineInstance();
 
 		shader_descs_ = shader_descs;
 		shader_text_ = MakeSharedPtr<std::string>(this->GenShaderText(effect));
@@ -893,7 +893,7 @@ namespace KlayGE
 
 									pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], cg_param,
 										index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
-									
+
 									param_binds_.push_back(pb);
 									break;
 								}

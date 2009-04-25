@@ -13,7 +13,7 @@
 #ifndef _CLOSEDHASHMAP_HPP
 #define _CLOSEDHASHMAP_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <algorithm>
 #include <memory>

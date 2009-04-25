@@ -16,7 +16,7 @@
 #ifndef _DLLLOADER_HPP
 #define _DLLLOADER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <string>
 

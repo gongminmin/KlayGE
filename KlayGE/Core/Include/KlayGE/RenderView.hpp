@@ -16,7 +16,7 @@
 #ifndef _RENDERVIEW_HPP
 #define _RENDERVIEW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
@@ -27,7 +27,7 @@
 #include <KlayGE/ElementFormat.hpp>
 
 namespace KlayGE
-{	
+{
 	class KLAYGE_CORE_API RenderView
 	{
 	public:

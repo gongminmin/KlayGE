@@ -16,7 +16,7 @@
 #ifndef _RENDERSETTINGS_HPP
 #define _RENDERSETTINGS_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/function.hpp>
 

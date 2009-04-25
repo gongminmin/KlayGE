@@ -13,7 +13,7 @@
 #ifndef _ALIGNED_ALLOCATOR_HPP
 #define _ALIGNED_ALLOCATOR_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <limits>
 #include <boost/static_assert.hpp>

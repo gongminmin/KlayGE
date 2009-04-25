@@ -19,7 +19,7 @@
 #ifndef _SHADEROBJECT_HPP
 #define _SHADEROBJECT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

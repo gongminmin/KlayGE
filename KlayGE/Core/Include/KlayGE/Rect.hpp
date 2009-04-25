@@ -18,13 +18,13 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Size.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {
 	template <typename T>
 	class Rect_T : boost::addable<Rect_T<T>,
-						boost::addable2<Rect_T<T>, Vector_T<T, 2>, 
+						boost::addable2<Rect_T<T>, Vector_T<T, 2>,
 						boost::subtractable<Rect_T<T>,
 						boost::subtractable2<Rect_T<T>, Vector_T<T, 2>,
 						boost::andable<Rect_T<T>,

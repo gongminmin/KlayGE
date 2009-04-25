@@ -2,13 +2,13 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="AsciiArts" />
+		<Option title="PostProcessing" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../../bin/AsciiArts_d" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
 				<Option object_output="../../Debug/Win32" />
 				<Option type="1" />
@@ -29,7 +29,7 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../../bin/AsciiArts" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
 				<Option object_output="../../Release/Win32" />
 				<Option type="1" />
@@ -51,9 +51,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../../bin/AsciiArts_d" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Debug/Linux_x86" />
+				<Option object_output="../../Debug/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -72,9 +72,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../../bin/AsciiArts" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Release/Linux_x86" />
+				<Option object_output="../../Release/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -94,13 +94,12 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../../bin/AsciiArts_d" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing_d" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Debug/Linux_x86" />
+				<Option object_output="../../Debug/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=nocona" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-O0" />
@@ -116,13 +115,12 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../../bin/AsciiArts" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../bin/PostProcessing" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../../../bin/" />
-				<Option object_output="../../Release/Linux_x86" />
+				<Option object_output="../../Release/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=nocona" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
@@ -141,22 +139,14 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="../../media/AsciiArts/AsciiArts.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file $file_dir/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../media/AsciiArts/AsciiArts.uiml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/uimlc/uimlc.py $file $file_dir/$file_name.kui" />
-		</Unit>
-		<Unit filename="../../media/AsciiArts/Downsample8x8.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file $file_dir/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../src/AsciiArts/AsciiArts.cpp" />
-		<Unit filename="../../src/AsciiArts/AsciiArts.hpp" />
-		<Unit filename="../../src/AsciiArts/ascii_lums_builder.cpp" />
-		<Unit filename="../../src/AsciiArts/ascii_lums_builder.hpp" />
+		<Unit filename="../../media/PostProcessing/PostProcessing.fxml" />
+		<Unit filename="../../media/PostProcessing/PostProcessing.uiml" />
+		<Unit filename="../../src/PostProcessing/AsciiArtsPP.cpp" />
+		<Unit filename="../../src/PostProcessing/AsciiArtsPP.hpp" />
+		<Unit filename="../../src/PostProcessing/CartoonPP.cpp" />
+		<Unit filename="../../src/PostProcessing/CartoonPP.hpp" />
+		<Unit filename="../../src/PostProcessing/PostProcessing.cpp" />
+		<Unit filename="../../src/PostProcessing/PostProcessing.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

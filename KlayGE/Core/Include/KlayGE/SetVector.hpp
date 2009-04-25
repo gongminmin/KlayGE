@@ -16,7 +16,7 @@
 #ifndef _SETVECTOR_HPP
 #define _SETVECTOR_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <algorithm>
 #include <functional>

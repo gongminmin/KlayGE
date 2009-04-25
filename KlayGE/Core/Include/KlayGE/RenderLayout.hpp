@@ -16,7 +16,7 @@
 #ifndef _RENDERLAYOUT_HPP
 #define _RENDERLAYOUT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core

@@ -20,7 +20,7 @@
 
 #include <KlayGE/Math.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {
@@ -48,7 +48,7 @@ namespace KlayGE
 				T u = this->fade(r.x());
 
 				int A  = p_[bx];
-				int AA = p_[A];    
+				int AA = p_[A];
 				int B  = p_[bx + 1];
 				int BA = p_[B];
 

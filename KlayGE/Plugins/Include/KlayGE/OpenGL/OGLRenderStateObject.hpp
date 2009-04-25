@@ -13,7 +13,7 @@
 #ifndef _OGLRENDERSTATEOBJECT_HPP
 #define _OGLRENDERSTATEOBJECT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>

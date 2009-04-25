@@ -60,7 +60,7 @@
 #ifndef _RENDERENGINE_HPP
 #define _RENDERENGINE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
@@ -119,7 +119,7 @@ namespace KlayGE
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
-		
+
 		RasterizerStateObjectPtr const & CurRSObj() const
 		{
 			return cur_rs_obj_;

@@ -19,7 +19,7 @@
 #ifndef _BOX_HPP
 #define _BOX_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Bound.hpp>

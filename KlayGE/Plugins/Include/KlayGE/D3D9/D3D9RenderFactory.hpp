@@ -22,7 +22,7 @@
 #ifndef _D3D9RENDERFACTORY_HPP
 #define _D3D9RENDERFACTORY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

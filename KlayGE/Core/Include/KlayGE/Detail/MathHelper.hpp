@@ -13,7 +13,7 @@
 #ifndef _MATHHELPER_HPP
 #define _MATHHELPER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

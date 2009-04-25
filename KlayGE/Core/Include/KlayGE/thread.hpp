@@ -16,7 +16,7 @@
 #ifndef _THREAD_HPP
 #define _THREAD_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

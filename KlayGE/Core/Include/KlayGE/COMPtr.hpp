@@ -13,7 +13,7 @@
 #ifndef _COMPTR_HPP
 #define _COMPTR_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/smart_ptr.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

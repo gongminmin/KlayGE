@@ -13,7 +13,7 @@
 #ifndef _TRACE_HPP
 #define _TRACE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <iostream>
 

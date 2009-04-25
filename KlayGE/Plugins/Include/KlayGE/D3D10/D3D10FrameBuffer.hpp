@@ -13,7 +13,7 @@
 #ifndef _D3D10FRAMEBUFFER_HPP
 #define _D3D10FRAMEBUFFER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/D3D10/D3D10Typedefs.hpp>

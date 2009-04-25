@@ -13,7 +13,7 @@
 #ifndef _CLOSEDHASHTABLE_HPP
 #define _CLOSEDHASHTABLE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <algorithm>
 #include <memory>

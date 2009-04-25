@@ -13,7 +13,7 @@
 #ifndef _OGLMAPPING_HPP
 #define _OGLMAPPING_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderStateObject.hpp>

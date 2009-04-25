@@ -13,7 +13,7 @@
 #ifndef _DSHOW_HPP
 #define _DSHOW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <windows.h>
 #include <control.h>

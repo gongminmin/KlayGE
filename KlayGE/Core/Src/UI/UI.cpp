@@ -32,14 +32,23 @@
 
 #include <KlayGE/Input.hpp>
 
+#ifdef Bool
+#undef Bool		// for boost::foreach
+#endif
+
 #include <cstring>
 #include <fstream>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
 #pragma warning(disable: 4702)
+#endif
 #include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <rapidxml/rapidxml.hpp>
 
@@ -315,7 +324,7 @@ namespace KlayGE
 			using namespace rapidxml;
 			xml_document<> doc;
 			doc.parse<0>(&str[0]);
-			
+
 			xml_node<>* root = doc.first_node("ui");
 			xml_attribute<>* attr;
 
@@ -802,7 +811,7 @@ namespace KlayGE
 			dialogs_[i]->EnableKeyboardInput(true);
 		}
 	}
-	
+
 	UIDialogPtr const & UIManager::GetDialog(std::string const & id) const
 	{
 		for (size_t i = 0; i < dialogs_.size(); ++ i)
@@ -1266,7 +1275,7 @@ namespace KlayGE
 			int32_t const w = std::min(120, this->GetWidth() / 3);
 			Rect_T<int32_t> rc(0, -caption_height_, w, 0);
 			Color const & clr = cap_element_.TextureColor().Current;
-			UIManager::VertexFormat vertices[] = 
+			UIManager::VertexFormat vertices[] =
 			{
 				UIManager::VertexFormat(float3(0, static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
 				UIManager::VertexFormat(float3(static_cast<float>(w), static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),

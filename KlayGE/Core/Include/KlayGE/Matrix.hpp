@@ -17,7 +17,7 @@
 
 #include <KlayGE/Vector.hpp>
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 namespace KlayGE
 {

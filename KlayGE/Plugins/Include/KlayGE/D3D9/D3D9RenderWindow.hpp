@@ -16,7 +16,7 @@
 #ifndef _D3D9RENDERWINDOW_HPP
 #define _D3D9RENDERWINDOW_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <d3d9.h>
 #include <boost/smart_ptr.hpp>

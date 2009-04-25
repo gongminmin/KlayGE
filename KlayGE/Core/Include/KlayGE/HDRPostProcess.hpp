@@ -13,7 +13,7 @@
 #ifndef _HDRPOSTPROCESS_HPP
 #define _HDRPOSTPROCESS_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

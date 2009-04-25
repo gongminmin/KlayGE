@@ -13,7 +13,7 @@
 #ifndef _IPASSWORD_HPP
 #define _IPASSWORD_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include "BaseDefines.hpp"
 

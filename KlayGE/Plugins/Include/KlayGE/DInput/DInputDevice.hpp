@@ -16,7 +16,7 @@
 #ifndef _DINPUTDEVICE_HPP
 #define _DINPUTDEVICE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800

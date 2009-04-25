@@ -16,7 +16,7 @@
 #ifndef _PLAYER_HPP
 #define _PLAYER_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core

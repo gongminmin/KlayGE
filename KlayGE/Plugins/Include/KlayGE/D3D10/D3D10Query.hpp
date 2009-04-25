@@ -13,7 +13,7 @@
 #ifndef _D3D10QUERY_HPP
 #define _D3D10QUERY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/Query.hpp>
 

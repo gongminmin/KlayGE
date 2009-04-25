@@ -13,7 +13,7 @@
 #ifndef _RENDERDEVICECAPS_HPP
 #define _RENDERDEVICECAPS_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

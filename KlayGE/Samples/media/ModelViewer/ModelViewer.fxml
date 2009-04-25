@@ -44,7 +44,7 @@
 void MeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
-				uint4 blend_indices : BLENDINDICES,
+				float4 blend_indices_f : BLENDINDICES,
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
 				
@@ -53,6 +53,8 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 				out float3 oH	: TEXCOORD2,	// in tangent space
 				out float4 oPos : SV_Position)
 {
+	int4 blend_indices = (int4)blend_indices_f;
+	
 	float4 result_pos;
 	float3x3 obj2tan;
 	if (has_skinned)

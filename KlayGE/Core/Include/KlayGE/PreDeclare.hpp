@@ -1,7 +1,7 @@
 #ifndef _PREDECLARE_HPP
 #define _PREDECLARE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/smart_ptr.hpp>
 

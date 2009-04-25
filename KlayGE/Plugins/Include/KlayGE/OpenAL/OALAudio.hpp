@@ -16,7 +16,7 @@
 #ifndef _OALAUDIO_HPP
 #define _OALAUDIO_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/thread.hpp>

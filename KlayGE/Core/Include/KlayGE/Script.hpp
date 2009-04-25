@@ -13,7 +13,7 @@
 #ifndef _SCRIPT_HPP
 #define _SCRIPT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core

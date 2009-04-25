@@ -104,8 +104,7 @@
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0_d" />
-					<Add library="glloader_x86_d" />
-					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -138,8 +137,7 @@
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
-					<Add library="glloader_x86" />
-					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -173,8 +171,7 @@
 					<Add library="boost_program_options-gcc43-mt-d" />
 					<Add library="boost_thread-gcc43-mt-d" />
 					<Add library="python3.0" />
-					<Add library="glloader_x64_d" />
-					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -209,8 +206,7 @@
 					<Add library="boost_program_options-gcc43-mt" />
 					<Add library="boost_thread-gcc43-mt" />
 					<Add library="python3.0" />
-					<Add library="glloader_x64" />
-					<Add library="GL" />
+					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
@@ -382,87 +378,31 @@
 		<Unit filename="../../Core/Src/UI/UIComboBox.cpp" />
 		<Unit filename="../../Core/Src/UI/UIEditBox.cpp" />
 		<Unit filename="../../Core/Src/UI/UIListBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIPolylineEditBox.cpp" />
 		<Unit filename="../../Core/Src/UI/UIRadioButton.cpp" />
 		<Unit filename="../../Core/Src/UI/UIScrollBar.cpp" />
 		<Unit filename="../../Core/Src/UI/UISlider.cpp" />
 		<Unit filename="../../Core/Src/UI/UIStatic.cpp" />
 		<Unit filename="../../Core/Src/UI/UITexButton.cpp" />
-		<Unit filename="../../RenderFX/2D.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Blur.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Bone.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/DownSample.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Fog.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Font.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/GammaCorrection.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/KMesh.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Lighting.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Noise.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/PointSprite.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/PostProcess.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/Quaternion.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/RenderableHelper.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/SumLum.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/SummedAreaTable.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/ToneMapping.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/UI.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
-		<Unit filename="../../RenderFX/util.fxml">
-			<Option compile="1" />
-			<Option compiler="gcc" use="1" buildCommand="python %KLAYGE_HOME%/Tools/fxmlc/fxmlc.py $file %KLAYGE_HOME%/Samples/media/Common/$file_name.kfx" />
-		</Unit>
+		<Unit filename="../../media/RenderFX/2D.fxml" />
+		<Unit filename="../../media/RenderFX/Blur.fxml" />
+		<Unit filename="../../media/RenderFX/Bone.fxml" />
+		<Unit filename="../../media/RenderFX/DownSample.fxml" />
+		<Unit filename="../../media/RenderFX/Fog.fxml" />
+		<Unit filename="../../media/RenderFX/Font.fxml" />
+		<Unit filename="../../media/RenderFX/GammaCorrection.fxml" />
+		<Unit filename="../../media/RenderFX/KMesh.fxml" />
+		<Unit filename="../../media/RenderFX/Lighting.fxml" />
+		<Unit filename="../../media/RenderFX/Noise.fxml" />
+		<Unit filename="../../media/RenderFX/PointSprite.fxml" />
+		<Unit filename="../../media/RenderFX/PostProcess.fxml" />
+		<Unit filename="../../media/RenderFX/Quaternion.fxml" />
+		<Unit filename="../../media/RenderFX/RenderableHelper.fxml" />
+		<Unit filename="../../media/RenderFX/SumLum.fxml" />
+		<Unit filename="../../media/RenderFX/SummedAreaTable.fxml" />
+		<Unit filename="../../media/RenderFX/ToneMapping.fxml" />
+		<Unit filename="../../media/RenderFX/UI.fxml" />
+		<Unit filename="../../media/RenderFX/util.fxml" />
 		<Extensions>
 			<code_completion />
 			<envvars />

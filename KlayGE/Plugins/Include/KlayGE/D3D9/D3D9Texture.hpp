@@ -26,7 +26,7 @@
 #ifndef _D3D9TEXTURE_HPP
 #define _D3D9TEXTURE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <boost/smart_ptr.hpp>
 

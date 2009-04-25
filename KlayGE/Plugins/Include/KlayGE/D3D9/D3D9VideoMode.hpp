@@ -1,7 +1,7 @@
 #ifndef _D3D9VIDEOMODE_HPP
 #define _D3D9VIDEOMODE_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <d3d9.h>
 #include <vector>

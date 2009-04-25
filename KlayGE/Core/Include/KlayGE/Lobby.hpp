@@ -16,7 +16,7 @@
 #ifndef _LOBBY_HPP
 #define _LOBBY_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core

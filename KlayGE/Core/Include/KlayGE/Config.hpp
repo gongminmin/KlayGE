@@ -201,13 +201,4 @@
 	#define KLAYGE_CORE_API
 #endif // KLAYGE_HAS_DECLSPEC
 
-// VC > 4.0
-// GCC >= 4.30
-#if (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION > 40)) || \
-		(defined(KLAYGE_COMPILER_GCC) && (KLAYGE_COMPILER_VERSION >= 43))
-	#define KLAYGE_ONCE once
-#else
-	#define KLAYGE_ONCE message("")
-#endif
-
 #endif		// _CONFIG_HPP

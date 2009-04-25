@@ -19,7 +19,7 @@
 #ifndef _RENDERSTATEOBJECT_HPP
 #define _RENDERSTATEOBJECT_HPP
 
-#pragma KLAYGE_ONCE
+#pragma once
 
 #include <KlayGE/PreDeclare.hpp>
 

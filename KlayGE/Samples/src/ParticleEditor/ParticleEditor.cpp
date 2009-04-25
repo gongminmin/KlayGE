@@ -22,27 +22,43 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
+#ifdef Bool
+#undef Bool		// foreach
+#endif
+
 #include <vector>
 #include <sstream>
 #include <fstream>
 #include <ctime>
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4127 4512)
+#endif
 #include <boost/random.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #include <boost/typeof/typeof.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
+#endif
 #include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include <rapidxml/rapidxml.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100)
+#endif
 #include <rapidxml/rapidxml_print.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 #include "ParticleEditor.hpp"
 
@@ -725,7 +741,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	using namespace rapidxml;
 	xml_document<> doc;
 	doc.parse<0>(&str[0]);
-	
+
 	xml_node<>* root = doc.first_node("particle_system");
 
 	xml_attribute<>* attr = root->first_attribute("particle_tex");
@@ -818,7 +834,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoint(i);
 		size_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		size_over_life_ys[i] = lexical_cast<std::string>(pt.y());
-		
+
 		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
 		attr = doc.allocate_attribute("x", size_over_life_xs[i].c_str());
 		ctrl_point_node->append_attribute(attr);
@@ -839,7 +855,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoint(i);
 		weight_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		weight_over_life_ys[i] = lexical_cast<std::string>(pt.y());
-		
+
 		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
 		attr = doc.allocate_attribute("x", weight_over_life_xs[i].c_str());
 		ctrl_point_node->append_attribute(attr);
@@ -860,7 +876,7 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoint(i);
 		transparency_over_life_xs[i] = lexical_cast<std::string>(pt.x());
 		transparency_over_life_ys[i] = lexical_cast<std::string>(pt.y());
-		
+
 		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
 		attr = doc.allocate_attribute("x", transparency_over_life_xs[i].c_str());
 		ctrl_point_node->append_attribute(attr);
