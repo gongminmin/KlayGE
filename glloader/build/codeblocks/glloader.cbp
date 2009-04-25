@@ -141,10 +141,6 @@
 					<Add option="-DDEBUG" />
 					<Add option="-DGLLOADER_SOURCE" />
 				</Compiler>
-				<Linker>
-					<Add library="GL" />
-					<Add library="X11" />
-				</Linker>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
@@ -173,12 +169,6 @@
 			<Add alias="All_Win" targets="Debug_Win_x86;Release_Win_x86;Debug_Win_x64;Release_Win_x64;" />
 			<Add alias="All_linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 		</VirtualTargets>
-		<Compiler>
-			<Add option="-O3" />
-			<Add option="-O2" />
-			<Add option="-O1" />
-			<Add option="-O" />
-		</Compiler>
 		<Unit filename="../../include/glloader/glloader.h" />
 		<Unit filename="../../include/glloader/glloader_gl.h" />
 		<Unit filename="../../include/glloader/glloader_glx.h" />
@@ -193,7 +183,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../src/utils.cpp" />
-		<Unit filename="../../src/utils.hpp" />
+		<Unit filename="../../src/utils.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
