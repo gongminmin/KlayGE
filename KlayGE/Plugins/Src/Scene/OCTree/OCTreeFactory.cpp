@@ -17,10 +17,31 @@
 #include <KlayGE/OCTree/OCTree.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 
-extern "C"
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+
+#include <rapidxml/rapidxml.hpp>
+
+void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, void* extra_param)
 {
-	void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, boost::program_options::variables_map const & vm)
+	using namespace rapidxml;
+
+	xml_node<>* node = static_cast<xml_node<>*>(extra_param);
+	int octree_depth = 3;
+	if (node != NULL)
 	{
-		ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>(vm["octree.depth"].as<int>());
+		xml_attribute<>* attr = node->first_attribute("depth");
+		if (attr != NULL)
+		{
+			octree_depth = boost::lexical_cast<int>(attr->value());
+		}
 	}
+
+	ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>(octree_depth);
 }

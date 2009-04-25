@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-  <shader>
-    <![CDATA[
+	<shader>
+		<![CDATA[
 float4 Transform2D(float4 position, float2 half_width_height)
 {
 	float4 ret;
@@ -10,6 +10,6 @@ float4 Transform2D(float4 position, float2 half_width_height)
 	ret.zw = position.zw;
 	return ret;
 }
-    ]]>
-  </shader>
+		]]>
+	</shader>
 </effect>

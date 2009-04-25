@@ -17,10 +17,7 @@
 #include <KlayGE/DShow/DShow.hpp>
 #include <KlayGE/DShow/DShowFactory.hpp>
 
-extern "C"
+void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, void* /*extra_param*/)
 {
-	void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
-	{
-		ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
-	}
+	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
 }

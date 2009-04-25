@@ -175,10 +175,7 @@ namespace KlayGE
 	}
 }
 
-extern "C"
+void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, void* /*extra_param*/)
 {
-	void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, boost::program_options::variables_map const & /*vm*/)
-	{
-		ptr = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
-	}
+	ptr = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
 }

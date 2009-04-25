@@ -1,8 +1,11 @@
 // Context.cpp
 // KlayGE 引擎场景类 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2007-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2007-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// XML格式的配置文件 (2009.4.26)
 //
 // 3.8.0
 // 增加了LoadCfg (2008.10.12)
@@ -25,25 +28,27 @@
 #include <KlayGE/RenderSettings.hpp>
 
 #include <fstream>
+#include <boost/filesystem.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4251 4275 4512 4702)
+#pragma warning(disable: 4702)
 #endif
-#include <boost/program_options.hpp>
+#include <boost/lexical_cast.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#include <boost/filesystem.hpp>
+
+#include <rapidxml/rapidxml.hpp>
 
 #include <KlayGE/Context.hpp>
 
 namespace KlayGE
 {
-	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, boost::program_options::variables_map const & vm);
-	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, boost::program_options::variables_map const & vm);
+	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, void* extra_param);
+	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, void* extra_param);
+	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, void* extra_param);
+	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, void* extra_param);
+	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, void* extra_param);
 
 	Context::Context()
 	{
@@ -79,120 +84,164 @@ namespace KlayGE
 
 	RenderSettings Context::LoadCfg(std::string const & cfg_file)
 	{
-		int octree_depth = 3;
+		using boost::lexical_cast;
+		using namespace rapidxml;
+
 		int width = 800;
 		int height = 600;
-		std::string color_fmt_str = "ARGB8";
-		std::string depth_stencil_fmt_str = "D16";
+		ElementFormat color_fmt = EF_ARGB8;
+		ElementFormat depth_stencil_fmt = EF_D16;
 		int sample_count = 1;
 		int sample_quality = 0;
 		bool full_screen = false;
 
-		boost::program_options::options_description desc("Configuration");
-		desc.add_options()
-			("context.render_factory", boost::program_options::value<std::string>(), "Render Factory")
-			("context.audio_factory", boost::program_options::value<std::string>(), "Audio Factory")
-			("context.input_factory", boost::program_options::value<std::string>(), "Input Factory")
-			("context.show_factory", boost::program_options::value<std::string>(), "Show Factory")
-			("context.scene_manager", boost::program_options::value<std::string>(), "Scene Manager")
-			("octree.depth", boost::program_options::value<int>(&octree_depth)->default_value(3), "Octree depth")
-			("screen.width", boost::program_options::value<int>(&width)->default_value(800), "Screen Width")
-			("screen.height", boost::program_options::value<int>(&height)->default_value(600), "Screen Height")
-			("screen.color_fmt", boost::program_options::value<std::string>(&color_fmt_str)->default_value("ARGB8"), "Screen Color Format")
-			("screen.depth_stencil_fmt", boost::program_options::value<std::string>(&depth_stencil_fmt_str)->default_value("D16"), "Screen Depth Stencil Format")
-			("screen.sample_count", boost::program_options::value<int>(&sample_count)->default_value(0), "Screen Sample Count")
-			("screen.sample_quality", boost::program_options::value<int>(&sample_quality)->default_value(0), "Screen Sample Quality")
-			("screen.fullscreen", boost::program_options::value<bool>(&full_screen)->default_value(false), "Full Screen");
-
-		ElementFormat color_fmt = EF_ARGB8;
-		if ("ARGB8" == color_fmt_str)
-		{
-			color_fmt = EF_ARGB8;
-		}
-		if ("ABGR8" == color_fmt_str)
-		{
-			color_fmt = EF_ABGR8;
-		}
-		if ("A2BGR10" == color_fmt_str)
-		{
-			color_fmt = EF_A2BGR10;
-		}
-
-		ElementFormat depth_stencil_fmt = EF_D16;
-		if ("D16" == depth_stencil_fmt_str)
-		{
-			depth_stencil_fmt = EF_D16;
-		}
-		if ("D24S8" == depth_stencil_fmt_str)
-		{
-			depth_stencil_fmt = EF_D24S8;
-		}
-		if ("D32F" == depth_stencil_fmt_str)
-		{
-			depth_stencil_fmt = EF_D32F;
-		}
-
-		std::string rf_name;
-		std::string af_name;
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		std::string rf_name = "D3D9";
+#else
+		std::string rf_name = "OpenGL";
+#endif
+		std::string af_name = "OpenAL";
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		std::string if_name = "DInput";
+#else
 		std::string if_name;
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		std::string sf_name = "DShow";
+#else
 		std::string sf_name;
+#endif
 		std::string sm_name;
 
-		boost::program_options::variables_map vm;
+		xml_node<>* rf_node = NULL;
+		xml_node<>* af_node = NULL;
+		xml_node<>* if_node = NULL;
+		xml_node<>* sf_node = NULL;
+		xml_node<>* sm_node = NULL;
 
-		std::ifstream cfg_fs(ResLoader::Instance().Locate(cfg_file).c_str());
-		if (cfg_fs)
+		std::ifstream file(ResLoader::Instance().Locate(cfg_file).c_str());
+		if (file)
 		{
-			boost::program_options::store(boost::program_options::parse_config_file(cfg_fs, desc), vm);
-			boost::program_options::notify(vm);
+			file.seekg(0, std::ios_base::end);
+			int len = static_cast<int>(file.tellg());
+			file.seekg(0, std::ios_base::beg);
+			std::vector<char> str(len + 1, 0);
+			file.read(&str[0], len);
+
+			xml_document<> cfg_doc;
+			cfg_doc.parse<0>(&str[0]);
+
+			xml_node<>* cfg_root = cfg_doc.first_node("configure");
+
+			xml_node<>* context_node = cfg_root->first_node("context");
+			xml_node<>* screen_node = cfg_root->first_node("screen");
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			if (vm.count("context.render_factory"))
+			xml_node<>* rf_node = context_node->first_node("render_factory");
+			if (rf_node != NULL)
 			{
-				rf_name = vm["context.render_factory"].as<std::string>();
+				rf_name = rf_node->first_attribute("name")->value();
 			}
-			else
-			{
-				rf_name = "D3D9";
-			}
-#else
-			rf_name = "OpenGL";
 #endif
 
-			if (vm.count("context.audio_factory"))
+			xml_node<>* af_node = context_node->first_node("audio_factory");
+			if (af_node != NULL)
 			{
-				af_name = vm["context.audio_factory"].as<std::string>();
-			}
-			else
-			{
-				af_name = "OpenAL";
+				af_name = af_node->first_attribute("name")->value();
 			}
 
-			if (vm.count("context.input_factory"))
+			xml_node<>* if_node = context_node->first_node("input_factory");
+			if (if_node != NULL)
 			{
-				if_name = vm["context.input_factory"].as<std::string>();
-			}
-			else
-			{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-				if_name = "DInput";
-#endif
+				if_name = if_node->first_attribute("name")->value();
 			}
 
-			if (vm.count("context.show_factory"))
+			xml_node<>* sf_node = context_node->first_node("show_factory");
+			if (sf_node != NULL)
 			{
-				sf_name = vm["context.show_factory"].as<std::string>();
-			}
-			else
-			{
-#ifdef KLAYGE_PLATFORM_WINDOWS
-				sf_name = "DShow";
-#endif
+				sf_name = sf_node->first_attribute("name")->value();
 			}
 
-			if (vm.count("context.scene_manager"))
+			xml_node<>* sm_node = context_node->first_node("scene_manager");
+			if (sm_node != NULL)
 			{
-				sm_name = vm["context.scene_manager"].as<std::string>();
+				sm_name = sm_node->first_attribute("name")->value();
+			}
+
+			xml_node<>* frame_node = screen_node->first_node("frame");
+			xml_attribute<>* attr;
+			attr = frame_node->first_attribute("width");
+			if (attr != NULL)
+			{
+				width = lexical_cast<int>(attr->value());
+			}
+			attr = frame_node->first_attribute("height");
+			if (attr != NULL)
+			{
+				height = lexical_cast<int>(attr->value());
+			}
+			std::string color_fmt_str = "ARGB8";
+			attr = frame_node->first_attribute("color_fmt");
+			if (attr != NULL)
+			{
+				color_fmt_str = attr->value();
+			}
+			std::string depth_stencil_fmt_str = "D16";
+			attr = frame_node->first_attribute("depth_stencil_fmt");
+			if (attr != NULL)
+			{
+				depth_stencil_fmt_str = attr->value();
+			}
+			attr = frame_node->first_attribute("fullscreen");
+			if (attr != NULL)
+			{
+				std::string fs_str = attr->value();
+				if (("1" == fs_str) || ("true" == fs_str))
+				{
+					full_screen = true;
+				}
+				else
+				{
+					full_screen = false;
+				}
+			}
+
+			if ("ARGB8" == color_fmt_str)
+			{
+				color_fmt = EF_ARGB8;
+			}
+			else if ("ABGR8" == color_fmt_str)
+			{
+				color_fmt = EF_ABGR8;
+			}
+			else if ("A2BGR10" == color_fmt_str)
+			{
+				color_fmt = EF_A2BGR10;
+			}
+
+			if ("D16" == depth_stencil_fmt_str)
+			{
+				depth_stencil_fmt = EF_D16;
+			}
+			else if ("D24S8" == depth_stencil_fmt_str)
+			{
+				depth_stencil_fmt = EF_D24S8;
+			}
+			else if ("D32F" == depth_stencil_fmt_str)
+			{
+				depth_stencil_fmt = EF_D32F;
+			}
+
+			xml_node<>* sample_node = frame_node->first_node("sample");
+			attr = sample_node->first_attribute("count");
+			if (attr != NULL)
+			{
+				sample_count = lexical_cast<int>(attr->value());
+			}
+			attr = sample_node->first_attribute("quality");
+			if (attr != NULL)
+			{
+				sample_quality = lexical_cast<int>(attr->value());
 			}
 		}
 
@@ -222,7 +271,7 @@ namespace KlayGE
 					MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 					if (mrf != NULL)
 					{
-						mrf(renderFactory_, vm);
+						mrf(renderFactory_, rf_node);
 						break;
 					}
 					else
@@ -247,7 +296,7 @@ namespace KlayGE
 					MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 					if (maf != NULL)
 					{
-						maf(audioFactory_, vm);
+						maf(audioFactory_, af_node);
 						break;
 					}
 					else
@@ -272,7 +321,7 @@ namespace KlayGE
 					MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 					if (mif != NULL)
 					{
-						mif(inputFactory_, vm);
+						mif(inputFactory_, if_node);
 						break;
 					}
 					else
@@ -297,7 +346,7 @@ namespace KlayGE
 					MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 					if (msf != NULL)
 					{
-						msf(showFactory_, vm);
+						msf(showFactory_, sf_node);
 						break;
 					}
 					else
@@ -322,7 +371,7 @@ namespace KlayGE
 					MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 					if (msm != NULL)
 					{
-						msm(sceneMgr_, vm);
+						msm(sceneMgr_, sm_node);
 						break;
 					}
 					else
