@@ -256,7 +256,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		<state name="filtering" value="anisotropic"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
-		<state name="anisotropy" value="16"/>
+		<state name="max_anisotropy" value="8"/>
 	</parameter>
 
 	<shader>

@@ -530,8 +530,18 @@ namespace KlayGE
 		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_min_filter_);
 		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_mag_filter_);
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.anisotropy);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_LEVEL, desc_.max_mip_level);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MIN_LOD, desc_.min_lod);
+		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MAX_LOD, desc_.max_lod);
+		if (desc_.cmp_func != CF_AlwaysFail)
+		{
+			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		}
+		else
+		{
+			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+		}
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
 		re.TexEnv(GL_TEXTURE0 + stage, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
 	}
 }

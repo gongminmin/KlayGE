@@ -256,9 +256,12 @@ namespace KlayGE
 
 		TexFilterOp filter;
 
-		uint8_t anisotropy;
-		uint8_t max_mip_level;
+		uint8_t max_anisotropy;
+		float min_lod;
+		float max_lod;
 		float mip_map_lod_bias;
+
+		CompareFunction cmp_func;
 
 		SamplerStateDesc();
 

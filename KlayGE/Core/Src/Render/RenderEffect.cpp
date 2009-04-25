@@ -595,7 +595,7 @@ namespace
 						desc.filter = texture_filter_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.filter)
 						{
-							cerr << "Wrong filtering name: " << value_str << endl;
+							cerr << "Wrong " << name << " name: " << value_str << endl;
 						}
 					}
 					else if ("address_u" == name)
@@ -604,7 +604,7 @@ namespace
 						desc.addr_mode_u = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_u)
 						{
-							cerr << "Wrong address u name: " << value_str << endl;
+							cerr << "Wrong " << name << " name: " << value_str << endl;
 						}
 					}
 					else if ("address_v" == name)
@@ -613,7 +613,7 @@ namespace
 						desc.addr_mode_v = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_v)
 						{
-							cerr << "Wrong address u name: " << value_str << endl;
+							cerr << "Wrong " << name << " name: " << value_str << endl;
 						}
 					}
 					else if ("address_w" == name)
@@ -622,23 +622,37 @@ namespace
 						desc.addr_mode_w = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_w)
 						{
-							cerr << "Wrong address u name: " << value_str << endl;
+							cerr << "Wrong " << name << " name: " << value_str << endl;
 						}
 					}
-					else if ("anisotropy" == name)
+					else if ("max_anisotropy" == name)
 					{
 						std::string value_str = state_node->first_attribute("value")->value();
-						desc.anisotropy = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+						desc.max_anisotropy = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
 					}
-					else if ("max_mip_level" == name)
+					else if ("min_lod" == name)
 					{
 						std::string value_str = state_node->first_attribute("value")->value();
-						desc.max_mip_level = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+						desc.min_lod = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+					}
+					else if ("max_lod" == name)
+					{
+						std::string value_str = state_node->first_attribute("value")->value();
+						desc.max_lod = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
 					}
 					else if ("mip_map_lod_bias" == name)
 					{
 						std::string value_str = state_node->first_attribute("value")->value();
 						desc.mip_map_lod_bias = lexical_cast<float>(value_str);
+					}
+					else if ("cmp_func" == name)
+					{
+						std::string value_str = state_node->first_attribute("value")->value();
+						desc.cmp_func = compare_function_define::instance().from_str(value_str);
+						if (0xFFFFFFFF == desc.cmp_func)
+						{
+							cerr << "Wrong " << name << " name: " << value_str << endl;
+						}
 					}
 					else if ("border_clr" == name)
 					{

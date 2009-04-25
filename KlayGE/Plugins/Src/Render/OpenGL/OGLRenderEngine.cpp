@@ -251,6 +251,28 @@ namespace KlayGE
 		}
 	}
 
+	void OGLRenderEngine::TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param)
+	{
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			GLfloat tmp;
+			glGetTextureParameterfvEXT(tex, target, pname, &tmp);
+			if (tmp != param)
+			{
+				glTextureParameterfEXT(tex, target, pname, param);
+			}
+		}
+		else
+		{
+			GLfloat tmp;
+			glGetTexParameterfv(target, pname, &tmp);
+			if (tmp != param)
+			{
+				glTexParameterf(target, pname, param);
+			}
+		}
+	}
+
 	void OGLRenderEngine::TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param)
 	{
 		if (glloader_GL_EXT_direct_state_access())

@@ -76,6 +76,7 @@ namespace KlayGE
 		void FullScreen(bool fs);
 
 		void TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param);
+		void TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param);
 		void TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param);
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);

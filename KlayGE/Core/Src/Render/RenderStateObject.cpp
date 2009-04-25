@@ -22,6 +22,7 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <cstring>
+#include <limits>
 #include <boost/assert.hpp>
 
 #include <KlayGE/RenderStateObject.hpp>
@@ -94,9 +95,10 @@ namespace KlayGE
 		: border_clr(0, 0, 0, 0),
 			addr_mode_u(TAM_Wrap), addr_mode_v(TAM_Wrap), addr_mode_w(TAM_Wrap),
 			filter(TFO_Min_Mag_Mip_Point),
-			anisotropy(1),
-			max_mip_level(0),
-			mip_map_lod_bias(0)
+			max_anisotropy(16),
+			min_lod(0), max_lod(std::numeric_limits<float>::max()),
+			mip_map_lod_bias(0),
+			cmp_func(CF_AlwaysFail)
 	{
 	}
 

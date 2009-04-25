@@ -208,8 +208,8 @@ namespace KlayGE
 		re.SetSamplerState(stage, D3DSAMP_MAGFILTER, d3d9_mag_filter_);
 		re.SetSamplerState(stage, D3DSAMP_MIPFILTER, d3d9_mip_filter_);
 
-		re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, desc_.anisotropy);
-		re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, desc_.max_mip_level);
+		re.SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, desc_.max_anisotropy);
+		re.SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, static_cast<DWORD>(desc_.max_lod));
 		re.SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(desc_.mip_map_lod_bias));
 	}
 }

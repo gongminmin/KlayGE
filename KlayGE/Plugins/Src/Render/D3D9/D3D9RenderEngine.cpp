@@ -394,11 +394,11 @@ namespace KlayGE
 				samplers_cache_[type][i].second[D3DSAMP_MAGFILTER] = mag_filter;
 				samplers_cache_[type][i].second[D3DSAMP_MIPFILTER] = mip_filter;
 
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_ss_desc.anisotropy);
-				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, default_ss_desc.max_mip_level);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXANISOTROPY, default_ss_desc.max_anisotropy);
+				d3dDevice_->SetSamplerState(stage, D3DSAMP_MAXMIPLEVEL, static_cast<DWORD>(default_ss_desc.max_lod));
 				d3dDevice_->SetSamplerState(stage, D3DSAMP_MIPMAPLODBIAS, float_to_uint32(default_ss_desc.mip_map_lod_bias));
-				samplers_cache_[type][i].second[D3DSAMP_MAXANISOTROPY] = default_ss_desc.anisotropy;
-				samplers_cache_[type][i].second[D3DSAMP_MAXMIPLEVEL] = default_ss_desc.max_mip_level;
+				samplers_cache_[type][i].second[D3DSAMP_MAXANISOTROPY] = default_ss_desc.max_anisotropy;
+				samplers_cache_[type][i].second[D3DSAMP_MAXMIPLEVEL] = static_cast<DWORD>(default_ss_desc.max_lod);
 				samplers_cache_[type][i].second[D3DSAMP_MIPMAPLODBIAS] = float_to_uint32(default_ss_desc.mip_map_lod_bias);
 			}
 		}

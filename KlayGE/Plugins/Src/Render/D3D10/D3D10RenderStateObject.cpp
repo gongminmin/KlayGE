@@ -18,7 +18,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <numeric>
+#include <limits>
 
 #include <KlayGE/D3D10/D3D10RenderEngine.hpp>
 #include <KlayGE/D3D10/D3D10Mapping.hpp>
@@ -125,14 +125,14 @@ namespace KlayGE
 		d3d_desc.AddressV = D3D10Mapping::Mapping(desc.addr_mode_v);
 		d3d_desc.AddressW = D3D10Mapping::Mapping(desc.addr_mode_w);
 		d3d_desc.MipLODBias = desc.mip_map_lod_bias;
-		d3d_desc.MaxAnisotropy = desc.anisotropy;
-		d3d_desc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+		d3d_desc.MaxAnisotropy = desc.max_anisotropy;
+		d3d_desc.ComparisonFunc = D3D10Mapping::Mapping(desc.cmp_func);
 		d3d_desc.BorderColor[0] = desc.border_clr.r();
 		d3d_desc.BorderColor[1] = desc.border_clr.g();
 		d3d_desc.BorderColor[2] = desc.border_clr.b();
 		d3d_desc.BorderColor[3] = desc.border_clr.a();
-		d3d_desc.MinLOD = -std::numeric_limits<float>::max();
-		d3d_desc.MaxLOD = desc.max_mip_level;
+		d3d_desc.MinLOD = desc.min_lod;
+		d3d_desc.MaxLOD = desc.max_lod;
 
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
