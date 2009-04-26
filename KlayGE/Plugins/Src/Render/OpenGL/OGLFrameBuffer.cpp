@@ -156,9 +156,6 @@ namespace KlayGE
 					}
 				}
 			}
-
-			// WORKAROUND: for Forceware 185.66
-			glGetError();
 		}
 		else
 		{

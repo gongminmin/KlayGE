@@ -1304,6 +1304,6 @@ namespace KlayGE
 
 	void OGLShaderObject::Unbind()
 	{
-		glUseProgram(0);
+		//glUseProgram(0);
 	}
 }
