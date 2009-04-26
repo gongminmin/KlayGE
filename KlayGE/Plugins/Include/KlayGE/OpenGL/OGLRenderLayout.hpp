@@ -28,7 +28,7 @@ namespace KlayGE
 		OGLRenderLayout();
 		~OGLRenderLayout();
 
-		void Active() const;
+		void Active(ShaderObjectPtr const & so) const;
 		void Deactive() const;
 
 	private:

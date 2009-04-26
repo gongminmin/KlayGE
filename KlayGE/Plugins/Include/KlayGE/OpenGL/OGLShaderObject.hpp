@@ -1,8 +1,11 @@
 // OGLShaderObject.hpp
 // KlayGE OpenGL shader对象类 头文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// Cg载入后编译成GLSL使用 (2009.4.26)
 //
 // 3.7.0
 // 改为直接传入RenderEffect (2008.7.4)
@@ -20,12 +23,10 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/MapVector.hpp>
+#include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
 #include <boost/function.hpp>
-
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
 
 namespace KlayGE
 {
@@ -35,7 +36,7 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject();
 
-		std::string GenShaderText(RenderEffect const & effect) const;
+		std::string GenShaderText(RenderEffect const & effect);
 
 		void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs);
 		ShaderObjectPtr Clone(RenderEffect& effect);
@@ -43,31 +44,37 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
+		GLint GetAttribLocation(VertexElementUsage usage, uint8_t usage_index);
+
 	private:
 		struct parameter_bind_t
 		{
 			std::string combined_sampler_name;
 			RenderEffectParameterPtr param;
-			CGparameter cg_param;
+			int location;
+			int shader_type;
+			int tex_sampler_bind_index;
 			boost::function<void()> func;
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		parameter_bind_t GetBindFunc(CGparameter cg_param, RenderEffectParameterPtr const & param);
+		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 
 	private:
 		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
 		boost::shared_ptr<std::string> shader_text_;
 
-		CGprogram combo_program_;
-		boost::array<CGprofile, ST_NumShaderTypes> profiles_;
+		GLuint glsl_program_;
+		boost::shared_ptr<std::vector<std::string> > glsl_srcs_;
 
 		parameter_binds_t param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
 
-		mutable std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
+		std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
+
+		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 	};
 
 	typedef boost::shared_ptr<OGLShaderObject> OGLShaderObjectPtr;

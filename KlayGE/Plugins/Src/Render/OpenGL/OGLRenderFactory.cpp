@@ -27,26 +27,10 @@
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "Cg.lib")
-#pragma comment(lib, "CgGL.lib")
-#endif
-
 namespace KlayGE
 {
 	OGLRenderFactory::OGLRenderFactory()
 	{
-		context_ = cgCreateContext();
-		cgSetParameterSettingMode(context_, CG_DEFERRED_PARAMETER_SETTING);
-
-#ifndef KLAYGE_DEBUG
-		cgGLSetDebugMode(CG_FALSE);
-#endif
-	}
-
-	CGcontext OGLRenderFactory::CGContext() const
-	{
-		return context_;
 	}
 
 	std::wstring const & OGLRenderFactory::Name() const

@@ -27,6 +27,7 @@
 #include <glloader/glloader.h>
 
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
+#include <KlayGE/OpenGL/OGLShaderObject.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
 
 namespace KlayGE
@@ -61,7 +62,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderLayout::Active() const
+	void OGLRenderLayout::Active(ShaderObjectPtr const & so) const
 	{
 		if (use_vao_)
 		{
@@ -92,19 +93,8 @@ namespace KlayGE
 
 		if (dirty_vao_ || !use_vao_)
 		{
-			// From http://www.gamedev.net/community/forums/topic.asp?topic_id=501785
-			// POSITION, ATTR0				Input Vertex, Generic Attribute 0
-			// BLENDWEIGHT, ATTR1			Input vertex weight, Generic Attribute 1
-			// NORMAL, ATTR2				Input normal, Generic Attribute 2
-			// COLOR0, DIFFUSE, ATTR3		Input primary color, Generic Attribute 3
-			// COLOR1, SPECULAR, ATTR4		Input secondary color, Generic Attribute 4
-			// TESSFACTOR, FOGCOORD,ATTR5	Input fog coordinate, Generic Attribute 5
-			// PSIZE, ATTR6					Input point size, Generic Attribute 6
-			// BLENDINDICES, ATTR7			Generic Attribute 7
-			// TEXCOORD0-TEXCOORD7,
-			// 		ATTR8-ATTR15			Input texture coordinates (texcoord0-texcoord7), Generic Attributes 8-15
-			// TANGENT, ATTR14				Generic Attribute 14
-			// BINORMAL, ATTR15				Generic Attribute 15
+			OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
+
 			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
@@ -114,58 +104,17 @@ namespace KlayGE
 				uint8_t* elem_offset = NULL;
 				BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
 				{
-					uint32_t attr;
-					switch (vs_elem.usage)
+					GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+					if (attr != -1)
 					{
-					case VEU_Position:
-						attr = 0;
-						break;
+						GLvoid* offset = static_cast<GLvoid*>(elem_offset);
+						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+						GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
-					case VEU_Normal:
-						attr = 2;
-						break;
-
-					case VEU_Diffuse:
-						attr = 3;
-						break;
-
-					case VEU_Specular:
-						attr = 4;
-						break;
-
-					case VEU_BlendWeight:
-						attr = 1;
-						break;
-
-					case VEU_BlendIndex:
-						attr = 7;
-						break;
-
-					case VEU_TextureCoord:
-						attr = 8 + vs_elem.usage_index;
-						break;
-
-					case VEU_Tangent:
-						attr = 14;
-						break;
-
-					case VEU_Binormal:
-						attr = 15;
-						break;
-
-					default:
-						attr = 0;
-						BOOST_ASSERT(false);
-						break;
+						glEnableVertexAttribArray(attr);
+						stream.Active();
+						glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
 					}
-
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
-					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-
-					glEnableVertexAttribArray(attr);
-					stream.Active();
-					glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
 
 					elem_offset += vs_elem.element_size();
 				}

@@ -371,7 +371,7 @@ namespace KlayGE
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
-		checked_cast<OGLRenderLayout const *>(&rl)->Active();
+		checked_cast<OGLRenderLayout const *>(&rl)->Active(tech.Pass(0)->GetShaderObject());
 
 		size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;

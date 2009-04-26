@@ -18,17 +18,12 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
-
 namespace KlayGE
 {
 	class OGLRenderFactory : public RenderFactory
 	{
 	public:
 		OGLRenderFactory();
-
-		CGcontext CGContext() const;
 
 		std::wstring const & Name() const;
 
@@ -67,9 +62,6 @@ namespace KlayGE
 		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
-
-	private:
-		CGcontext context_;
 
 	private:
 		OGLRenderFactory(OGLRenderFactory const &);
