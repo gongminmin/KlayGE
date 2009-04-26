@@ -317,8 +317,7 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	</technique>
 
 	<cbuffer name="per_frame3">
-		<parameter type="float" name="depth_min"/>
-		<parameter type="float" name="inv_depth_range"/>
+		<parameter type="float" name="inv_far"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="grass_tex"/>
@@ -333,7 +332,7 @@ void TerrainVS(float4 pos			: POSITION,
 					out float4 oPos		: SV_Position)
 {
 	oTex.xy = float2(tex.x, 1 - tex.y);
-	oTex.zw = oTex.xy * 4;
+	oTex.zw = oTex.xy * 8;
 
 	pos = pos.xzyw;
 	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
@@ -349,7 +348,7 @@ float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth
 {
 	float3 normal = decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy;
 	return float4(grass_tex.Sample(bilinear_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
-		(depth.x / depth.y - depth_min) * inv_depth_range);
+		depth.x / depth.y * inv_far);
 }
 		]]>
 	</shader>

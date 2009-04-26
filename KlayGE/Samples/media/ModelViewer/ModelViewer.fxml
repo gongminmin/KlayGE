@@ -44,7 +44,11 @@
 void MeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
 				float4 blend_indices_f : BLENDINDICES,
+#else
+				int4 blend_indices : BLENDINDICES,
+#endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
 				
@@ -53,7 +57,9 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 				out float3 oH	: TEXCOORD2,	// in tangent space
 				out float4 oPos : SV_Position)
 {
+#ifdef KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
+#endif
 	
 	float4 result_pos;
 	float3x3 obj2tan;
@@ -148,7 +154,11 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+				float4 blend_indices : BLENDINDICES,
+#else
 				int4 blend_indices : BLENDINDICES,
+#endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
 				
@@ -198,7 +208,11 @@ float4 VisualizeVertexPS(float4 clr : COLOR) : SV_Target
 void VisualizeTextureVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+				float4 blend_indices : BLENDINDICES,
+#else
 				int4 blend_indices : BLENDINDICES,
+#endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
 				

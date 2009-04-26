@@ -462,8 +462,7 @@ namespace
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 
 			Camera const & camera = app.ActiveCamera();
-			*(technique_->Effect().ParameterByName("depth_min")) = camera.NearPlane();
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (camera.FarPlane() - camera.NearPlane());
+			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();
 		}
 
 	private:
