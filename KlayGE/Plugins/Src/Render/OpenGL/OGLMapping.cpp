@@ -1,8 +1,11 @@
-// OGLMapping.hpp
+// OGLMapping.cpp
 // KlayGE RenderEngine和OpenGL本地之间的映射 实现文件
-// Ver 3.0.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持EF_B10G11R11F (2009.4.28)
 //
 // 3.0.0
 // 增加了TAM_Border (2005.8.30)
@@ -818,6 +821,19 @@ namespace KlayGE
 				internalFormat = GL_LUMINANCE_ALPHA16F_ARB;
 				glformat = GL_LUMINANCE_ALPHA;
 				gltype = GL_FLOAT;
+			}
+			break;
+
+		case EF_B10G11R11F:
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
+			{
+				internalFormat = GL_R11F_G11F_B10F;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_INT_10F_11F_11F_REV;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
 			}
 			break;
 

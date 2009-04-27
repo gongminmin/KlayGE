@@ -22,10 +22,10 @@
 float4 SATScanXUpSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_x = tex_coord0.x * scale;
-	return src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x - addr_offset.x, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.x, tex_coord0.y))
-				+ src_tex.Sample(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y));
+	return src_tex.SampleLevel(tex_sampler, float2(tar_x - addr_offset.y, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x - addr_offset.x, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x + addr_offset.x, tex_coord0.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tar_x + addr_offset.y, tex_coord0.y), 0);
 }
 
 float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
@@ -35,22 +35,22 @@ float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	int r = fmod(x, 4);
 	if (3 == r)
 	{
-		clr = src_tex.Sample(tex_sampler, float2(tex_coord0.x * scale, tex_coord0.y));
+		clr = src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x * scale, tex_coord0.y), 0);
 	}
 	else
 	{
-		clr = child_tex.Sample(tex_sampler, tex_coord0);
+		clr = child_tex.SampleLevel(tex_sampler, tex_coord0, 0);
 		if (x > 3)
 		{
-			clr += src_tex.Sample(tex_sampler, float2(tex_coord0.x * scale - addr_offset.x, tex_coord0.y));
+			clr += src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x * scale - addr_offset.x, tex_coord0.y), 0);
 		}
 		if (r >= 1)
 		{
-			clr += child_tex.Sample(tex_sampler, tex_coord0 - float2(addr_offset.y, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(addr_offset.y, 0), 0);
 		}
 		if (r >= 2)
 		{
-			clr += child_tex.Sample(tex_sampler, tex_coord0 - float2(addr_offset.z, 0));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(addr_offset.z, 0), 0);
 		}
 	}
 	return clr;
@@ -59,10 +59,10 @@ float4 SATScanXDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 float4 SATScanYUpSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float tar_y = tex_coord0.y * scale;
-	return src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.x))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.x))
-				+ src_tex.Sample(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y));
+	return src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.y), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y - addr_offset.x), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.x), 0)
+				+ src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tar_y + addr_offset.y), 0);
 }
 
 float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
@@ -72,22 +72,22 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	int r = fmod(y, 4);
 	if (3 == r)
 	{
-		clr = src_tex.Sample(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale));
+		clr = src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale), 0);
 	}
 	else
 	{
-		clr = child_tex.Sample(tex_sampler, tex_coord0);
+		clr = child_tex.SampleLevel(tex_sampler, tex_coord0, 0);
 		if (y > 3)
 		{
-			clr += src_tex.Sample(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale - addr_offset.x));
+			clr += src_tex.SampleLevel(tex_sampler, float2(tex_coord0.x, tex_coord0.y * scale - addr_offset.x), 0);
 		}
 		if (r >= 1)
 		{
-			clr += child_tex.Sample(tex_sampler, tex_coord0 - float2(0, addr_offset.y));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(0, addr_offset.y), 0);
 		}
 		if (r >= 2)
 		{
-			clr += child_tex.Sample(tex_sampler, tex_coord0 - float2(0, addr_offset.z));
+			clr += child_tex.SampleLevel(tex_sampler, tex_coord0 - float2(0, addr_offset.z), 0);
 		}
 	}
 	return clr;

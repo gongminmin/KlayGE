@@ -81,6 +81,7 @@ namespace KlayGE
 		glBindTexture(GL_TEXTURE_1D, texture_);
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, 0);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
