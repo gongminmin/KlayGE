@@ -61,9 +61,9 @@ namespace KlayGE
 			{
 				++ numMipMaps_;
 
-				w /= 2;
-				h /= 2;
-				d /= 2;
+				w = std::max(static_cast<uint32_t>(1), w / 2);
+				h = std::max(static_cast<uint32_t>(1), h / 2);
+				d = std::max(static_cast<uint32_t>(1), d / 2);
 			}
 		}
 		else
@@ -83,6 +83,8 @@ namespace KlayGE
 
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_3D, texture_);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
@@ -139,16 +141,12 @@ namespace KlayGE
 				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-				glTexImage3D(GL_TEXTURE_3D, level, glinternalFormat,
-					width, height, depth, 0, glformat, gltype, NULL);
+				glTexImage3D(GL_TEXTURE_3D, level, glinternalFormat, width, height, depth, 0, glformat, gltype, NULL);
 			}
 
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-			width /= 2;
-			height /= 2;
-			depth /= 2;
+			width = std::max(static_cast<uint32_t>(1), width / 2);
+			height = std::max(static_cast<uint32_t>(1), height / 2);
+			depth = std::max(static_cast<uint32_t>(1), depth / 2);
 		}
 
 		this->UpdateParams();

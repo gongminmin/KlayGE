@@ -839,11 +839,11 @@ namespace KlayGE
 		if (!linked)
 		{
 			GLint len = 0;
-			glGetShaderiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
 				std::vector<char> info(len + 1, 0);
-				glGetShaderInfoLog(glsl_program_, len, &len, &info[0]);
+				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
 				std::cerr << &info[0] << std::endl;
 			}
 		}
@@ -858,11 +858,11 @@ namespace KlayGE
 		if (!validated)
 		{
 			GLint len = 0;
-			glGetShaderiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
 				std::vector<char> info(len + 1, 0);
-				glGetShaderInfoLog(glsl_program_, len, &len, &info[0]);
+				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
 				std::cerr << &info[0] << std::endl;
 			}
 		}
@@ -935,7 +935,8 @@ namespace KlayGE
 					while (cg_param)
 					{
 						if (cgIsParameterUsed(cg_param, sub_prog)
-							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
+							&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
 						{
 							std::string semantic = cgGetParameterSemantic(cg_param);
 							char const * glsl_param_name = semantic.c_str();//cgGetParameterResourceName(cg_param);
@@ -1115,11 +1116,11 @@ namespace KlayGE
 		if (!linked)
 		{
 			GLint len = 0;
-			glGetShaderiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
 				std::vector<char> info(len + 1, 0);
-				glGetShaderInfoLog(ret->glsl_program_, len, &len, &info[0]);
+				glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
 				std::cerr << &info[0] << std::endl;
 			}
 		}
@@ -1134,11 +1135,11 @@ namespace KlayGE
 		if (!validated)
 		{
 			GLint len = 0;
-			glGetShaderiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
 				std::vector<char> info(len + 1, 0);
-				glGetShaderInfoLog(ret->glsl_program_, len, &len, &info[0]);
+				glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
 				std::cerr << &info[0] << std::endl;
 			}
 		}

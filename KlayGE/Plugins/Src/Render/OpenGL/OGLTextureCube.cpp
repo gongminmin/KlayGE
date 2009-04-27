@@ -79,6 +79,8 @@ namespace KlayGE
 
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		for (int face = 0; face < 6; ++ face)
 		{

@@ -533,7 +533,6 @@ namespace KlayGE
 		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
 		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MIN_LOD, desc_.min_lod);
 		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MAX_LOD, desc_.max_lod);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_LEVEL, 0);
 		if (desc_.cmp_func != CF_AlwaysFail)
 		{
 			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);

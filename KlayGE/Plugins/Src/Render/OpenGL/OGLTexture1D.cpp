@@ -79,6 +79,8 @@ namespace KlayGE
 
 		glGenTextures(1, &texture_);
 		glBindTexture(GL_TEXTURE_1D, texture_);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
@@ -128,12 +130,8 @@ namespace KlayGE
 				}
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-				glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat,
-					width, 0, glformat, gltype, NULL);
+				glTexImage1D(GL_TEXTURE_1D, level, glinternalFormat, width, 0, glformat, gltype, NULL);
 			}
-
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 			width /= 2;
 		}

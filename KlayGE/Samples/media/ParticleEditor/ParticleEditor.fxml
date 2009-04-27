@@ -87,8 +87,8 @@ float GetTransparencyOverLife(float p)
 		<![CDATA[
 struct VS_TO_GS
 {
-	float4 CenterView_Life : TEXCOORD0;
-	float radius : TEXCOORD1;
+	float4 CenterView_Life : SV_Position;
+	float radius : TEXCOORD0;
 };
 
 struct PS_IN
@@ -124,20 +124,16 @@ void ParticleVS2(float4 pos : POSITION,
 }
 
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : TEXCOORD0, AttribArray<float> input1 : TEXCOORD0)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : SV_Position, AttribArray<float> input1 : TEXCOORD0)
 {
-	float4 CenterView_Life;
-	CenterView_Life = input0[0];
-	float radius;
-	radius = input1[0];
+	float4 CenterView_Life = input0[0];
+	float radius = input1[0];
 #else
 [maxvertexcount(4)]
 void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 {
-	float4 CenterView_Life;
-	CenterView_Life = input[0].CenterView_Life;
-	float radius;
-	radius = input[0].radius;
+	float4 CenterView_Life = input[0].CenterView_Life;
+	float radius = input[0].radius;
 #endif
 	PS_IN gs_out;
 
