@@ -74,6 +74,7 @@ private:
 	KlayGE::float4x4 world_;
 	KlayGE::float4x4 inv_world_;
 	KlayGE::RenderEffectPtr effect_;
+	KlayGE::float3 light_pos_;
 
 	bool line_mode_;
 	std::string visualize_;

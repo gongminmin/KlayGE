@@ -24,6 +24,7 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
 			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.fxml")),
+			light_pos_(1, 1, -1),
 			line_mode_(false), visualize_("Lighting")
 {
 	inv_world_ = MathLib::inverse(world_);
@@ -290,8 +291,11 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 void DetailedSkinnedMesh::OnRenderBegin()
 {
 	App3DFramework& app = Context::Instance().AppInstance();
-	float4x4 worldview(world_ * app.ActiveCamera().ViewMatrix());
+	float4x4 const & view = app.ActiveCamera().ViewMatrix();
+	float4x4 worldview = world_ * view;
 	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
+
+	*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(MathLib::transform_coord(light_pos_, MathLib::inverse(view)), inv_world_);
 
 	RenderModelPtr model = model_.lock();
 	if (model)
@@ -309,7 +313,7 @@ void DetailedSkinnedMesh::SetWorld(const float4x4& mat)
 
 void DetailedSkinnedMesh::SetLightPos(KlayGE::float3 const & light_pos)
 {
-	*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_world_);
+	light_pos_ = light_pos;
 }
 
 void DetailedSkinnedMesh::SetEyePos(KlayGE::float3 const & eye_pos)

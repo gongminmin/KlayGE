@@ -566,7 +566,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	std::wostringstream stream;
 	stream << this->FPS();
 
-	model_->SetLightPos(float3(20, 100, 100));
+	model_->SetLightPos(float3(20, 20, -20));
 	model_->SetEyePos(this->ActiveCamera().EyePos());
 
 	model_->AddToRenderQueue();

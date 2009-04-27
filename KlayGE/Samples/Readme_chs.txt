@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 3.8.0 Demo
+粘土游戏引擎(KlayGE) 3.9.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
@@ -125,13 +125,13 @@ Parallax mapping，扩展了normal map技术。
 渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
 
 ====================================================================================
-Particle system
+Particle Editor
 ====================================================================================
-粒子系统演示，并呈现了height map地形的生成。
+粒子系统编辑器
 
 技术点：
 1) 粒子系统
-2) Height map生成和渲染
+2) 复杂的UI
 3) Soft particle
 4) Geometry shader
 
