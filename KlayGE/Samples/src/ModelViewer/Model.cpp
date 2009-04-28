@@ -240,7 +240,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 		else
 		{
-			if ("NormalMap" == iter->first)
+			if (("NormalMap" == iter->first) || ("Bump" == iter->first))
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
