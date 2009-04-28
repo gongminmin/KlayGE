@@ -35,6 +35,7 @@
 #include <set>
 #include <vector>
 #include <limits>
+#include <functional>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -72,11 +73,54 @@ namespace
 				}
 				else
 				{
-					return false;
+					if (lhs.tex_indices > rhs.tex_indices)
+					{
+						return false;
+					}
+					else
+					{
+						if (lhs.ref_triangle < rhs.ref_triangle)
+						{
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
 				}
 			}
 		}
 	}
+
+	struct less_first_2 : public std::binary_function<vertex_index_t, vertex_index_t, bool> 
+	{
+		bool operator()(vertex_index_t const & lhs, vertex_index_t const & rhs) const
+		{
+			if (lhs.pos_index < rhs.pos_index)
+			{
+				return true;
+			}
+			else
+			{
+				if (lhs.pos_index > rhs.pos_index)
+				{
+					return false;
+				}
+				else
+				{
+					if (lhs.tex_indices < rhs.tex_indices)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
+	};
 
 	bool bind_cmp(std::pair<std::string, float> const& lhs,
 		std::pair<std::string, float> const& rhs)
@@ -285,7 +329,7 @@ namespace KlayGE
 		}
 		mtl.opacity = 1 - max_mtl->GetXParency();
 		mtl.specular_level = max_mtl->GetShinStr();
-		mtl.shininess = max_mtl->GetShininess();
+		mtl.shininess = max_mtl->GetShininess() * 100;
 
 		for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
 		{
@@ -344,25 +388,13 @@ namespace KlayGE
 			}
 			else
 			{
-				if (Class_ID(MULTI_CLASS_ID, 0) == mtl->ClassID())
+				if ((Class_ID(MULTI_CLASS_ID, 0) == mtl->ClassID()) || (Class_ID(CMTL_CLASS_ID, 0) == mtl->ClassID()))
 				{
 					objs_mtl_.resize(mtl_base_index + mtl->NumSubMtls());
 					uv_transs.resize(mtl->NumSubMtls());
 					for (int i = 0; i < mtl->NumSubMtls(); ++ i)
 					{
 						this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
-					}
-				}
-				else
-				{
-					if (Class_ID(CMTL_CLASS_ID, 0) == mtl->ClassID())
-					{
-						objs_mtl_.resize(mtl_base_index + mtl->NumSubMtls());
-						uv_transs.resize(mtl->NumSubMtls());
-						for (int i = 0; i < mtl->NumSubMtls(); ++ i)
-						{
-							this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
-						}
 					}
 				}
 			}
@@ -480,12 +512,25 @@ namespace KlayGE
 					vertex_index.tex_indices.push_back(tex_index.second[offset]);
 				}
 
-				std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
-				if (v_iter != vertex_indices.end())
+				bool new_vertex = true;
+				std::set<vertex_index_t>::iterator v_iter_l = std::lower_bound(vertex_indices.begin(), vertex_indices.end(), vertex_index, less_first_2());
+				std::set<vertex_index_t>::iterator v_iter_u = std::upper_bound(vertex_indices.begin(), vertex_indices.end(), vertex_index, less_first_2());
+				if (v_iter_l != v_iter_u)
 				{
-					v_iter->ref_triangle.push_back(i * 3 + j);
+					for (std::set<vertex_index_t>::iterator v_iter = v_iter_l; (v_iter != v_iter_u) && new_vertex; ++ v_iter)
+					{
+						for (size_t k = 0; k < v_iter->ref_triangle.size(); ++ k)
+						{
+							if (face_sm_group[v_iter->ref_triangle[k] / 3] & face_sm_group[i])
+							{
+								v_iter->ref_triangle.push_back(i * 3 + j);
+								new_vertex = false;
+								break;
+							}
+						}
+					}
 				}
-				else
+				if (new_vertex)
 				{
 					vertex_index.ref_triangle.resize(1, i * 3 + j);
 					vertex_indices.insert(vertex_index);
