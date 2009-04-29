@@ -7,7 +7,10 @@
 		<parameter type="float4x4" name="model"/>
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="mv"/>
+		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="modelit"/>
+		<parameter type="float4x4" name="modelviewit"/>
+		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_vp"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="int" name="flip"/>
@@ -71,15 +74,15 @@ void RefractVS(float4 pos			: POSITION,
 	oPos = mul(pos, mvp);
 	pos_ss = oPos;
 
-	out_normal = mul(normal, (float3x3)modelit);
-	incident.xyz = mul(pos, model).xyz - eye_pos;
-	incident.w = length(incident.xyz);
+	out_normal = mul(normal, (float3x3)modelviewit);
+	incident.xyz = mul(pos, mv).xyz;
+	incident.w = incident.z;
 	
 	float3 n_incident = normalize(incident.xyz);
-	float3 n_normal = normalize(normal);
+	float3 n_normal = normalize(out_normal);
 	refract_vec.xyz = refract(n_incident, n_normal, eta_ratio.g);
 	refract_vec.w = fast_fresnel(-n_incident, n_normal, 0.0977f);
-	dir_ss = mul(half4(refract_vec.xyz, 0), mvp);
+	dir_ss = mul(half4(refract_vec.xyz, 0), proj);
 }
 
 float4 RefractPS(float3 normal			: TEXCOORD0,
@@ -96,12 +99,22 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	tex = tex / 2 + 0.5f;
 	float4 backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 	
-	pos_ss += dir_ss * (backface.w - incident.w);
+	pos_ss += dir_ss * (backface.z - incident.w);
+	
+	tex = pos_ss.xy / pos_ss.w;
+	tex.y *= flip;
+	tex = tex / 2 + 0.5f;
+	backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 
-	half3 back_face_normal = backface.xyz;
+	half3 back_face_normal = -restore_normal(backface.xy);
 
 	half3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
 	half3 reflect_vec = reflect(incident.xyz, normal);
+	
+	refract_rgb[0] = mul(float4(refract_rgb[0], 0), inv_view).xyz;
+	refract_rgb[1] = mul(float4(refract_rgb[1], 0), inv_view).xyz;
+	refract_rgb[2] = mul(float4(refract_rgb[2], 0), inv_view).xyz;
+	reflect_vec = mul(float4(reflect_vec, 0), inv_view).xyz;
 
 	half4 y = half4(skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[0]).r,
 									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[1]).r,
@@ -142,14 +155,14 @@ void RefractBackFaceVS(float4 pos : POSITION,
 							out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	out_normal = mul(normal, (float3x3)modelit);
-	pos_es = mul(pos, model).xyz - eye_pos;
+	out_normal = mul(normal, (float3x3)modelviewit);
+	pos_es = mul(pos, mv).xyz;
 }
 
 float4 RefractBackFacePS(float3 normal : TEXCOORD0,
 							float3 pos_es : TEXCOORD1) : SV_Target
 {
-	return float4(-normalize(normal), length(pos_es));
+	return float4(normalize(normal).xy, pos_es.z, 1);
 }
 		]]>
 	</shader>

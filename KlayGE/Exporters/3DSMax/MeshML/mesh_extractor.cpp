@@ -459,6 +459,24 @@ namespace KlayGE
 				}
 			}
 
+			// Combine texture coordinates
+			BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
+			{
+				for (int i = 0; i < tex_index.second.size(); ++ i)
+				{
+					Point2 tex = texs[tex_index.first][tex_index.second[i]];
+					for (int j = 0; j < i - 1; ++ j)
+					{
+						Point2 dt = texs[tex_index.first][tex_index.second[j]] - tex;
+						if ((abs(dt.x) < 1e-5f) && (abs(dt.y) < 1e-5f))
+						{
+							tex_index.second[i] = tex_index.second[j];
+							break;
+						}
+					}
+				}
+			}
+
 			for (int i = 0; i < mesh.getNumFaces(); ++ i)
 			{
 				face_sm_group[i] = mesh.faces[i].getSmGroup();

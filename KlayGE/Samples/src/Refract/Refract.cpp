@@ -143,10 +143,13 @@ namespace
 
 			*(technique_->Effect().ParameterByName("model")) = model;
 			*(technique_->Effect().ParameterByName("modelit")) = MathLib::transpose(MathLib::inverse(model));
+			*(technique_->Effect().ParameterByName("modelviewit")) = MathLib::transpose(MathLib::inverse(mv));
 			*(technique_->Effect().ParameterByName("mvp")) = mvp;
 			*(technique_->Effect().ParameterByName("mv")) = mv;
+			*(technique_->Effect().ParameterByName("proj")) = proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
+			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
 			*(technique_->Effect().ParameterByName("inv_vp")) = MathLib::inverse(view * proj);
 		}
 

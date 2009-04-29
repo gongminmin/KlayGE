@@ -20,12 +20,17 @@ float2 get_xy_channel(float4 v)
 #endif
 }
 
-float3 decompress_normal(float4 comp_normal)
+float3 restore_normal(float2 normal_xy)
 {
 	float3 normal;
-	normal.xy = get_xy_channel(comp_normal) * 2 - 1;
+	normal.xy = normal_xy;
 	normal.z = sqrt(max(0.0f, 1 - dot(normal.xy, normal.xy)));
 	return normal;
+}
+
+float3 decompress_normal(float4 comp_normal)
+{
+	return restore_normal(get_xy_channel(comp_normal) * 2 - 1);
 }
 
 float4 decode_hdr_yc(float y, float4 c)

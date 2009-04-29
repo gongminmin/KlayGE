@@ -108,9 +108,11 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
 
 	half3 diffuse, specular, emit;
+	half alpha = opacity;
 	if (diffuse_clr.a > 0.5f)
 	{
 		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
+		alpha *= diffuse_tex.Sample(linear_sampler, uv).a;
 	}
 	else
 	{
@@ -144,7 +146,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		clr += diffuse.rgb * diffuse_factor + specular_level * specular * specular_factor;
 	}
 
-	return float4(clr, opacity);
+	return float4(clr, alpha);
 }
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
@@ -245,7 +247,7 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 	<technique name="LightingLineTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
+			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="LightingPS()"/>
