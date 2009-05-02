@@ -18,6 +18,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -46,16 +47,6 @@
 #pragma warning(disable: 4702)
 #endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#include <rapidxml/rapidxml.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100)
-#endif
-#include <rapidxml/rapidxml_print.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -729,62 +720,52 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	using boost::lexical_cast;
 
-	std::ifstream ifs(name.c_str());
-	BOOST_ASSERT(ifs);
+	ResIdentifierPtr ifs = MakeSharedPtr<std::ifstream>(name.c_str());
 
-	ifs.seekg(0, std::ios_base::end);
-	int len = ifs.tellg();
-	ifs.seekg(0, std::ios_base::beg);
-	std::vector<char> str(len + 1, 0);
-	ifs.read(&str[0], len);
+	KlayGE::XMLDocument doc;
+	XMLNodePtr root = doc.Parse(ifs);
 
-	using namespace rapidxml;
-	xml_document<> doc;
-	doc.parse<0>(&str[0]);
+	XMLAttributePtr attr = root->Attrib("particle_tex");
+	particle_tex_ = attr->ValueString();
+	this->LoadParticleTex(ResLoader::Instance().Locate(particle_tex_));
 
-	xml_node<>* root = doc.first_node("particle_system");
-
-	xml_attribute<>* attr = root->first_attribute("particle_tex");
-	particle_tex_ = attr->value();
-	this->LoadParticleTex(ResLoader::Instance().Locate(attr->value()));
-
-	attr = root->first_attribute("emit_angle");
-	dialog_->Control<UISlider>(id_angle_slider_)->SetValue(lexical_cast<int>(attr->value()));
+	attr = root->Attrib("emit_angle");
+	dialog_->Control<UISlider>(id_angle_slider_)->SetValue(attr->ValueInt());
 	this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
 
-	attr = root->first_attribute("life");
-	dialog_->Control<UISlider>(id_life_slider_)->SetValue(lexical_cast<int>(attr->value()));
+	attr = root->Attrib("life");
+	dialog_->Control<UISlider>(id_life_slider_)->SetValue(attr->ValueInt());
 	this->LifeChangedHandler(*dialog_->Control<UISlider>(id_life_slider_));
 
-	attr = root->first_attribute("media_density");
-	dialog_->Control<UISlider>(id_density_slider_)->SetValue(static_cast<int>(lexical_cast<float>(attr->value()) * 100.0f));
+	attr = root->Attrib("media_density");
+	dialog_->Control<UISlider>(id_density_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
 
-	attr = root->first_attribute("velocity");
-	dialog_->Control<UISlider>(id_velocity_slider_)->SetValue(static_cast<int>(lexical_cast<float>(attr->value()) * 100.0f));
+	attr = root->Attrib("velocity");
+	dialog_->Control<UISlider>(id_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
 	this->VelocityChangedHandler(*dialog_->Control<UISlider>(id_velocity_slider_));
 
-	for (xml_node<>* node = root->first_node("curve"); node; node = node->next_sibling())
+	for (XMLNodePtr node = root->FirstNode("curve"); node; node = node->NextSibling("curve"))
 	{
 		std::vector<float2> xys;
-		for (xml_node<>* ctrl_point_node = node->first_node("ctrl_point"); ctrl_point_node; ctrl_point_node = ctrl_point_node->next_sibling())
+		for (XMLNodePtr ctrl_point_node = node->FirstNode("ctrl_point"); ctrl_point_node; ctrl_point_node = ctrl_point_node->NextSibling("ctrl_point"))
 		{
-			xml_attribute<>* attr_x = ctrl_point_node->first_attribute("x");
-			xml_attribute<>* attr_y = ctrl_point_node->first_attribute("y");
+			XMLAttributePtr attr_x = ctrl_point_node->Attrib("x");
+			XMLAttributePtr attr_y = ctrl_point_node->Attrib("y");
 
-			xys.push_back(float2(lexical_cast<float>(attr_x->value()), lexical_cast<float>(attr_y->value())));
+			xys.push_back(float2(attr_x->ValueFloat(), attr_y->ValueFloat()));
 		}
 
-		attr = node->first_attribute("name");
-		if (std::string("size_over_life") == attr->value())
+		attr = node->Attrib("name");
+		if ("size_over_life" == attr->ValueString())
 		{
 			dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->SetCtrlPoints(xys);
 		}
-		if (std::string("weight_over_life") == attr->value())
+		if ("weight_over_life" == attr->ValueString())
 		{
 			dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->SetCtrlPoints(xys);
 		}
-		if (std::string("transparency_over_life") == attr->value())
+		if ("transparency_over_life" == attr->ValueString())
 		{
 			dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->SetCtrlPoints(xys);
 		}
@@ -795,100 +776,83 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 {
 	using boost::lexical_cast;
 
-	using namespace rapidxml;
-	xml_document<> doc;
+	KlayGE::XMLDocument doc;
 
-	xml_node<>* root = doc.allocate_node(node_element, "particle_system");
-	doc.append_node(root);
+	XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
+	doc.RootNode(root);
 
-	xml_attribute<>* attr = doc.allocate_attribute("particle_tex", particle_tex_.c_str());
-	root->append_attribute(attr);
+	XMLAttributePtr attr = doc.AllocAttribString("particle_tex", particle_tex_);
+	root->AppendAttrib(attr);
 
 	float angle = static_cast<float>(dialog_->Control<UISlider>(id_angle_slider_)->GetValue());
-	std::string emit_angle_str = lexical_cast<std::string>(angle);
-	attr = doc.allocate_attribute("emit_angle", emit_angle_str.c_str());
-	root->append_attribute(attr);
+	attr = doc.AllocAttribFloat("emit_angle", angle);
+	root->AppendAttrib(attr);
 
 	float life = static_cast<float>(dialog_->Control<UISlider>(id_life_slider_)->GetValue());
-	std::string life_str = lexical_cast<std::string>(life);
-	attr = doc.allocate_attribute("life", life_str.c_str());
-	root->append_attribute(attr);
+	attr = doc.AllocAttribFloat("life", life);
+	root->AppendAttrib(attr);
 
 	float density = dialog_->Control<UISlider>(id_density_slider_)->GetValue() / 100.0f;
-	std::string density_str = lexical_cast<std::string>(density);
-	attr = doc.allocate_attribute("media_density", density_str.c_str());
-	root->append_attribute(attr);
+	attr = doc.AllocAttribFloat("media_density", density);
+	root->AppendAttrib(attr);
 
 	float velocity = dialog_->Control<UISlider>(id_velocity_slider_)->GetValue() / 100.0f;
-	std::string velocity_str = lexical_cast<std::string>(velocity);
-	attr = doc.allocate_attribute("velocity", velocity_str.c_str());
-	root->append_attribute(attr);
+	attr = doc.AllocAttribFloat("velocity", velocity);
+	root->AppendAttrib(attr);
 
-	xml_node<>* size_over_life_node = doc.allocate_node(node_element, "curve");
-	attr = doc.allocate_attribute("name", "size_over_life");
-	size_over_life_node->append_attribute(attr);
-	std::vector<std::string> size_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints());
-	std::vector<std::string> size_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints());
+	XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
+	attr = doc.AllocAttribString("name", "size_over_life");
+	size_over_life_node->AppendAttrib(attr);
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoint(i);
-		size_over_life_xs[i] = lexical_cast<std::string>(pt.x());
-		size_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 
-		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
-		attr = doc.allocate_attribute("x", size_over_life_xs[i].c_str());
-		ctrl_point_node->append_attribute(attr);
-		attr = doc.allocate_attribute("y", size_over_life_ys[i].c_str());
-		ctrl_point_node->append_attribute(attr);
+		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+		attr = doc.AllocAttribFloat("x", pt.x());
+		ctrl_point_node->AppendAttrib(attr);
+		attr = doc.AllocAttribFloat("y", pt.y());
+		ctrl_point_node->AppendAttrib(attr);
 
-		size_over_life_node->append_node(ctrl_point_node);
+		size_over_life_node->AppendNode(ctrl_point_node);
 	}
-	root->append_node(size_over_life_node);
+	root->AppendNode(size_over_life_node);
 
-	xml_node<>* weight_over_life_node = doc.allocate_node(node_element, "curve");
-	attr = doc.allocate_attribute("name", "weight_over_life");
-	weight_over_life_node->append_attribute(attr);
-	std::vector<std::string> weight_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints());
-	std::vector<std::string> weight_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints());
+	XMLNodePtr weight_over_life_node = doc.AllocNode(XNT_Element, "curve");
+	attr = doc.AllocAttribString("name", "weight_over_life");
+	weight_over_life_node->AppendAttrib(attr);
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoint(i);
-		weight_over_life_xs[i] = lexical_cast<std::string>(pt.x());
-		weight_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 
-		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
-		attr = doc.allocate_attribute("x", weight_over_life_xs[i].c_str());
-		ctrl_point_node->append_attribute(attr);
-		attr = doc.allocate_attribute("y", weight_over_life_ys[i].c_str());
-		ctrl_point_node->append_attribute(attr);
+		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+		attr = doc.AllocAttribFloat("x", pt.x());
+		ctrl_point_node->AppendAttrib(attr);
+		attr = doc.AllocAttribFloat("y", pt.y());
+		ctrl_point_node->AppendAttrib(attr);
 
-		weight_over_life_node->append_node(ctrl_point_node);
+		weight_over_life_node->AppendNode(ctrl_point_node);
 	}
-	root->append_node(weight_over_life_node);
+	root->AppendNode(weight_over_life_node);
 
-	xml_node<>* transparency_over_life_node = doc.allocate_node(node_element, "curve");
-	attr = doc.allocate_attribute("name", "transparency_over_life");
-	transparency_over_life_node->append_attribute(attr);
-	std::vector<std::string> transparency_over_life_xs(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints());
-	std::vector<std::string> transparency_over_life_ys(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints());
+	XMLNodePtr transparency_over_life_node = doc.AllocNode(XNT_Element, "curve");
+	attr = doc.AllocAttribString("name", "transparency_over_life");
+	transparency_over_life_node->AppendAttrib(attr);
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoint(i);
-		transparency_over_life_xs[i] = lexical_cast<std::string>(pt.x());
-		transparency_over_life_ys[i] = lexical_cast<std::string>(pt.y());
 
-		xml_node<>* ctrl_point_node = doc.allocate_node(node_element, "ctrl_point");
-		attr = doc.allocate_attribute("x", transparency_over_life_xs[i].c_str());
-		ctrl_point_node->append_attribute(attr);
-		attr = doc.allocate_attribute("y", transparency_over_life_ys[i].c_str());
-		ctrl_point_node->append_attribute(attr);
+		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
+		attr = doc.AllocAttribFloat("x", pt.x());
+		ctrl_point_node->AppendAttrib(attr);
+		attr = doc.AllocAttribFloat("y", pt.y());
+		ctrl_point_node->AppendAttrib(attr);
 
-		transparency_over_life_node->append_node(ctrl_point_node);
+		transparency_over_life_node->AppendNode(ctrl_point_node);
 	}
-	root->append_node(transparency_over_life_node);
+	root->AppendNode(transparency_over_life_node);
 
 	std::ofstream ofs(name.c_str());
-	ofs << doc;
+	doc.Print(ofs);
 }
 
 class particle_cmp

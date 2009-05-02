@@ -47,20 +47,13 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/filesystem.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
@@ -488,23 +481,23 @@ namespace
 		}
 	}
 
-	int get_index(rapidxml::xml_node<>* node)
+	int get_index(XMLNodePtr const & node)
 	{
 		int index = 0;
-		rapidxml::xml_attribute<>* attr = node->first_attribute("index");
-		if (attr != NULL)
+		XMLAttributePtr attr = node->Attrib("index");
+		if (attr)
 		{
-			index = boost::lexical_cast<int>(attr->value());
+			index = attr->ValueInt();
 		}
 		return index;
 	}
 
-	std::string get_profile(rapidxml::xml_node<>* node)
+	std::string get_profile(XMLNodePtr const & node)
 	{
-		rapidxml::xml_attribute<>* attr = node->first_attribute("profile");
-		if (attr != NULL)
+		XMLAttributePtr attr = node->Attrib("profile");
+		if (attr)
 		{
-			return attr->value();
+			return attr->ValueString();
 		}
 		else
 		{
@@ -512,30 +505,28 @@ namespace
 		}
 	}
 
-	std::string get_func_name(rapidxml::xml_node<>* node)
+	std::string get_func_name(XMLNodePtr const & node)
 	{
-		std::string value = node->first_attribute("value")->value();
+		std::string value = node->Attrib("value")->ValueString();
 		return value.substr(0, value.find("("));
 	}
 
 
-	RenderVariablePtr read_var(rapidxml::xml_node<>* node, uint32_t type, uint32_t array_size)
+	RenderVariablePtr read_var(XMLNodePtr const & node, uint32_t type, uint32_t array_size)
 	{
-		using boost::lexical_cast;
-
 		RenderVariablePtr var;
-		rapidxml::xml_attribute<>* attr;
+		XMLAttributePtr attr;
 
 		switch (type)
 		{
 		case REDT_bool:
 			if (0 == array_size)
 			{
-				attr = node->first_attribute("value");
+				attr = node->Attrib("value");
 				bool tmp = false;
-				if (attr != NULL)
+				if (attr)
 				{
-					std::string value_str = attr->value();
+					std::string value_str = attr->ValueString();
 					tmp = bool_from_str(value_str);
 				}
 
@@ -548,11 +539,11 @@ namespace
 		case REDT_int:
 			if (0 == array_size)
 			{
-				attr = node->first_attribute("value");
+				attr = node->Attrib("value");
 				int32_t tmp = 0;
-				if (attr != NULL)
+				if (attr)
 				{
-					tmp = lexical_cast<int32_t>(attr->value());
+					tmp = attr->ValueInt();
 				}
 
 				var = MakeSharedPtr<RenderVariableInt>();
@@ -562,11 +553,11 @@ namespace
 
 		case REDT_string:
 			{
-				attr = node->first_attribute("value");
+				attr = node->Attrib("value");
 				std::string tmp;
-				if (attr != NULL)
+				if (attr)
 				{
-					tmp = attr->value();
+					tmp = attr->ValueString();
 				}
 
 				var = MakeSharedPtr<RenderVariableString>();
@@ -586,12 +577,12 @@ namespace
 			{
 				SamplerStateDesc desc;
 
-				for (rapidxml::xml_node<>* state_node = node->first_node("state"); state_node; state_node = state_node->next_sibling("state"))
+				for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 				{
-					std::string name = state_node->first_attribute("name")->value();
+					std::string name = state_node->Attrib("name")->ValueString();
 					if ("filtering" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
+						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.filter = texture_filter_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.filter)
 						{
@@ -600,7 +591,7 @@ namespace
 					}
 					else if ("address_u" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
+						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_u = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_u)
 						{
@@ -609,7 +600,7 @@ namespace
 					}
 					else if ("address_v" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
+						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_v = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_v)
 						{
@@ -618,7 +609,7 @@ namespace
 					}
 					else if ("address_w" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
+						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_w = texture_addr_mode_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.addr_mode_w)
 						{
@@ -627,27 +618,23 @@ namespace
 					}
 					else if ("max_anisotropy" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
-						desc.max_anisotropy = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+						desc.max_anisotropy = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
 					}
 					else if ("min_lod" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
-						desc.min_lod = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+						desc.min_lod = state_node->Attrib("value")->ValueFloat();
 					}
 					else if ("max_lod" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
-						desc.max_lod = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+						desc.max_lod = state_node->Attrib("value")->ValueFloat();
 					}
 					else if ("mip_map_lod_bias" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
-						desc.mip_map_lod_bias = lexical_cast<float>(value_str);
+						desc.mip_map_lod_bias = state_node->Attrib("value")->ValueFloat();
 					}
 					else if ("cmp_func" == name)
 					{
-						std::string value_str = state_node->first_attribute("value")->value();
+						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.cmp_func = compare_function_define::instance().from_str(value_str);
 						if (0xFFFFFFFF == desc.cmp_func)
 						{
@@ -656,25 +643,25 @@ namespace
 					}
 					else if ("border_clr" == name)
 					{
-						attr = state_node->first_attribute("r");
-						if (attr != NULL)
+						attr = state_node->Attrib("r");
+						if (attr)
 						{
-							desc.border_clr.r() = lexical_cast<float>(attr->value());
+							desc.border_clr.r() = attr->ValueFloat();
 						}
-						attr = state_node->first_attribute("g");
-						if (attr != NULL)
+						attr = state_node->Attrib("g");
+						if (attr)
 						{
-							desc.border_clr.g() = lexical_cast<float>(attr->value());
+							desc.border_clr.g() = attr->ValueFloat();
 						}
-						attr = state_node->first_attribute("b");
-						if (attr != NULL)
+						attr = state_node->Attrib("b");
+						if (attr)
 						{
-							desc.border_clr.b() = lexical_cast<float>(attr->value());
+							desc.border_clr.b() = attr->ValueFloat();
 						}
-						attr = state_node->first_attribute("a");
-						if (attr != NULL)
+						attr = state_node->Attrib("a");
+						if (attr)
 						{
-							desc.border_clr.a() = lexical_cast<float>(attr->value());
+							desc.border_clr.a() = attr->ValueFloat();
 						}
 					}
 					else
@@ -703,10 +690,10 @@ namespace
 			if (0 == array_size)
 			{
 				float tmp = 0;
-				attr = node->first_attribute("value");
-				if (attr != NULL)
+				attr = node->Attrib("value");
+				if (attr)
 				{
-					tmp = lexical_cast<float>(attr->value());
+					tmp = attr->ValueFloat();
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat>();
@@ -722,15 +709,15 @@ namespace
 			if (0 == array_size)
 			{
 				float2 tmp(0, 0);
-				attr = node->first_attribute("x");
-				if (attr != NULL)
+				attr = node->Attrib("x");
+				if (attr)
 				{
-					tmp.x() = lexical_cast<float>(attr->value());
+					tmp.x() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("y");
-				if (attr != NULL)
+				attr = node->Attrib("y");
+				if (attr)
 				{
-					tmp.y() = lexical_cast<float>(attr->value());
+					tmp.y() = attr->ValueFloat();
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat2>();
@@ -746,20 +733,20 @@ namespace
 			if (0 == array_size)
 			{
 				float3 tmp(0, 0, 0);
-				attr = node->first_attribute("x");
-				if (attr != NULL)
+				attr = node->Attrib("x");
+				if (attr)
 				{
-					tmp.x() = lexical_cast<float>(attr->value());
+					tmp.x() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("y");
-				if (attr != NULL)
+				attr = node->Attrib("y");
+				if (attr)
 				{
-					tmp.y() = lexical_cast<float>(attr->value());
+					tmp.y() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("z");
-				if (attr != NULL)
+				attr = node->Attrib("z");
+				if (attr)
 				{
-					tmp.z() = lexical_cast<float>(attr->value());
+					tmp.z() = attr->ValueFloat();
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat3>();
@@ -775,25 +762,25 @@ namespace
 			if (0 == array_size)
 			{
 				float4 tmp(0, 0, 0, 0);
-				attr = node->first_attribute("x");
-				if (attr != NULL)
+				attr = node->Attrib("x");
+				if (attr)
 				{
-					tmp.x() = lexical_cast<float>(attr->value());
+					tmp.x() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("y");
-				if (attr != NULL)
+				attr = node->Attrib("y");
+				if (attr)
 				{
-					tmp.y() = lexical_cast<float>(attr->value());
+					tmp.y() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("z");
-				if (attr != NULL)
+				attr = node->Attrib("z");
+				if (attr)
 				{
-					tmp.z() = lexical_cast<float>(attr->value());
+					tmp.z() = attr->ValueFloat();
 				}
-				attr = node->first_attribute("w");
-				if (attr != NULL)
+				attr = node->Attrib("w");
+				if (attr)
 				{
-					tmp.w() = lexical_cast<float>(attr->value());
+					tmp.w() = attr->ValueFloat();
 				}
 
 				var = MakeSharedPtr<RenderVariableFloat4>();
@@ -815,10 +802,10 @@ namespace
 					{
 						std::stringstream oss;
 						oss << "_" << static_cast<char>('0' + y) << static_cast<char>('0' + x);
-						attr = node->first_attribute(oss.str().c_str());
-						if (attr != NULL)
+						attr = node->Attrib(oss.str().c_str());
+						if (attr)
 						{
-							tmp[y * 4 + x] = lexical_cast<float>(attr->value());
+							tmp[y * 4 + x] = attr->ValueFloat();
 						}
 					}
 				}
@@ -843,10 +830,10 @@ namespace
 
 namespace KlayGE
 {
-	void RenderEffectAnnotation::Load(rapidxml::xml_node<>* node)
+	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
-		type_ = type_define::instance().type_code(node->first_attribute("type")->value());
-		name_ = node->first_attribute("name")->value();
+		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
+		name_ = node->Attrib("name")->ValueString();
 		var_ = read_var(node, type_, 0);
 	}
 
@@ -872,62 +859,43 @@ namespace KlayGE
 	{
 		if (source)
 		{
-			using boost::lexical_cast;
-
-			source->seekg(0, std::ios_base::end);
-			int len = static_cast<int>(source->tellg());
-			source->seekg(0, std::ios_base::beg);
-			std::vector<char> str(len + 1, 0);
-			source->read(&str[0], len);
-
-			using namespace rapidxml;
-			xml_document<> doc;
-			doc.parse<0>(&str[0]);
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(source);
 
 			cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
+			
+			XMLAttributePtr attr;
 
-			xml_node<>* root = doc.first_node("effect");
-			xml_attribute<>* attr;
-
-			std::vector<std::vector<char> > include_strs;
-			for (xml_node<>* node = root->first_node("include"); node;)
+			std::vector<XMLDocumentPtr> include_docs;
+			for (XMLNodePtr node = root->FirstNode("include"); node;)
 			{
-				attr = node->first_attribute("name");
-				std::ifstream include_file(ResLoader::Instance().Locate(attr->value()).c_str());
-				include_file.seekg(0, std::ios_base::end);
-				int len = static_cast<int>(include_file.tellg());
-				include_file.seekg(0, std::ios_base::beg);
-				include_strs.push_back(std::vector<char>(len + 1, 0));
-				std::vector<char>& str = include_strs.back();
-				include_file.read(&str[0], len);
+				attr = node->Attrib("name");
+				include_docs.push_back(MakeSharedPtr<XMLDocument>());
+				XMLNodePtr include_root = include_docs.back()->Parse(MakeSharedPtr<std::ifstream>(ResLoader::Instance().Locate(attr->ValueString()).c_str()));
 
-				xml_document<> include_doc;
-				include_doc.parse<0>(&str[0]);
-
-				xml_node<>* include_root = include_doc.first_node("effect");
-				for (xml_node<>* child_node = include_root->first_node(); child_node; child_node = child_node->next_sibling())
+				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
-					if (node_element == child_node->type())
+					if (XNT_Element == child_node->Type())
 					{
-						root->insert_node(node, doc.clone_node(child_node));
+						root->InsertNode(node, doc.CloneNode(child_node));
 					}
 				}
 
-				xml_node<>* node_next = node->next_sibling("include");
-				root->remove_node(node);
+				XMLNodePtr node_next = node->NextSibling("include");
+				root->RemoveNode(node);
 				node = node_next;
 			}
 
-			std::vector<xml_node<>*> parameter_nodes;
-			for (xml_node<>* node = root->first_node(); node; node = node->next_sibling())
+			std::vector<XMLNodePtr> parameter_nodes;
+			for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
 			{
-				if (std::string("parameter") == node->name())
+				if ("parameter" == node->Name())
 				{
 					parameter_nodes.push_back(node);
 				}
-				else if (std::string("cbuffer") == node->name())
+				else if ("cbuffer" == node->Name())
 				{
-					for (xml_node<>* sub_node = node->first_node("parameter"); sub_node; sub_node = sub_node->next_sibling("parameter"))
+					for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
 					{
 						parameter_nodes.push_back(sub_node);
 					}
@@ -936,18 +904,18 @@ namespace KlayGE
 
 			for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
 			{
-				xml_node<>* node = parameter_nodes[param_index];
+				XMLNodePtr const & node = parameter_nodes[param_index];
 
-				uint32_t type = type_define::instance().type_code(node->first_attribute("type")->value());
+				uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
 				if ((type != REDT_sampler)
 					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE))
 				{
-					xml_node<>* parent_node = node->parent();
+					XMLNodePtr parent_node = node->Parent();
 					std::string cbuff_name;
-					attr = parent_node->first_attribute("name");
-					if (attr != NULL)
+					attr = parent_node->Attrib("name");
+					if (attr)
 					{
-						cbuff_name = attr->value();
+						cbuff_name = attr->ValueString();
 					}
 					else
 					{
@@ -977,16 +945,16 @@ namespace KlayGE
 			}
 
 			{
-				xml_node<>* shader_node = root->first_node("shader");
+				XMLNodePtr shader_node = root->FirstNode("shader");
 				shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
-				for (; shader_node; shader_node = shader_node->next_sibling("shader"))
+				for (; shader_node; shader_node = shader_node->NextSibling("shader"))
 				{
 					shaders_->push_back(RenderShaderFunc());
 					shaders_->back().Load(shader_node);
 				}
 			}
 
-			for (xml_node<>* node = root->first_node("technique"); node; node = node->next_sibling("technique"))
+			for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"))
 			{
 				RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
 				techniques_.push_back(technique);
@@ -1097,18 +1065,16 @@ namespace KlayGE
 		return obj;
 	}
 
-	void RenderTechnique::Load(rapidxml::xml_node<>* node)
+	void RenderTechnique::Load(XMLNodePtr const & node)
 	{
-		using namespace rapidxml;
-
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->first_attribute("name")->value()));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(node->Attrib("name")->ValueString());
 
 		{
-			xml_node<>* anno_node = node->first_node("annotation");
-			if (anno_node != NULL)
+			XMLNodePtr anno_node = node->FirstNode("annotation");
+			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
-				for (; anno_node; anno_node = anno_node->next_sibling("annotation"))
+				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
@@ -1122,7 +1088,7 @@ namespace KlayGE
 
 		bool blend = false;
 		weight_ = 1;
-		for (xml_node<>* pass_node = node->first_node("pass"); pass_node; pass_node = pass_node->next_sibling("pass"))
+		for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"))
 		{
 			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
 			passes_.push_back(pass);
@@ -1131,14 +1097,14 @@ namespace KlayGE
 
 			is_validate_ &= pass->Validate();
 
-			for (xml_node<>* state_node = pass_node->first_node("state"); state_node; state_node = state_node->next_sibling("state"))
+			for (XMLNodePtr state_node = pass_node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 			{
 				++ weight_;
 
-				std::string state_name = state_node->first_attribute("name")->value();
+				std::string state_name = state_node->Attrib("name")->ValueString();
 				if ("blend_enable" == state_name)
 				{
-					std::string value_str = state_node->first_attribute("value")->value();
+					std::string value_str = state_node->Attrib("value")->ValueString();
 					if (bool_from_str(value_str))
 					{
 						blend = true;
@@ -1188,21 +1154,18 @@ namespace KlayGE
 		return obj;
 	}
 
-	void RenderPass::Load(rapidxml::xml_node<>* node)
+	void RenderPass::Load(XMLNodePtr const & node)
 	{
-		using boost::lexical_cast;
-		using namespace rapidxml;
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->first_attribute("name")->value()));
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->Attrib("name")->ValueString()));
 
 		{
-			xml_node<>* anno_node = node->first_node("annotation");
-			if (anno_node != NULL)
+			XMLNodePtr anno_node = node->FirstNode("annotation");
+			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
-				for (; anno_node; anno_node = anno_node->next_sibling("annotation"))
+				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
@@ -1220,13 +1183,13 @@ namespace KlayGE
 		shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>();
 		shader_descs_->resize(ShaderObject::ST_NumShaderTypes);
 
-		for (xml_node<>* state_node = node->first_node("state"); state_node; state_node = state_node->next_sibling("state"))
+		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
-			std::string state_name = state_node->first_attribute("name")->value();
+			std::string state_name = state_node->Attrib("name")->ValueString();
 
 			if ("polygon_mode" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.polygon_mode = polygon_mode_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == rs_desc.polygon_mode)
 				{
@@ -1235,7 +1198,7 @@ namespace KlayGE
 			}
 			else if ("shade_mode" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.shade_mode = shade_mode_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == rs_desc.shade_mode)
 				{
@@ -1244,7 +1207,7 @@ namespace KlayGE
 			}
 			else if ("cull_mode" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.cull_mode = cull_mode_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == rs_desc.cull_mode)
 				{
@@ -1253,49 +1216,47 @@ namespace KlayGE
 			}
 			else if ("front_face_ccw" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.front_face_ccw = bool_from_str(value_str);
 			}
 			else if ("polygon_offset_factor" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				rs_desc.polygon_offset_factor = lexical_cast<float>(value_str);
+				rs_desc.polygon_offset_factor = state_node->Attrib("value")->ValueFloat();
 			}
 			else if ("polygon_offset_units" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				rs_desc.polygon_offset_units = lexical_cast<float>(value_str);
+				rs_desc.polygon_offset_units = state_node->Attrib("value")->ValueFloat();
 			}
 			else if ("scissor_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.scissor_enable = bool_from_str(value_str);
 			}
 			else if ("multisample_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.multisample_enable = bool_from_str(value_str);
 			}
 			else if ("alpha_to_coverage_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.alpha_to_coverage_enable = bool_from_str(value_str);
 			}
 			else if ("independent_blend_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.independent_blend_enable = bool_from_str(value_str);
 			}
 			else if ("blend_enable" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_enable[index] = bool_from_str(value_str);
 			}
 			else if ("blend_op" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op[index] = blend_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.blend_op[index])
 				{
@@ -1305,7 +1266,7 @@ namespace KlayGE
 			else if ("src_blend" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.src_blend[index])
 				{
@@ -1315,7 +1276,7 @@ namespace KlayGE
 			else if ("dest_blend" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.dest_blend[index])
 				{
@@ -1325,7 +1286,7 @@ namespace KlayGE
 			else if ("blend_op_alpha" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op_alpha[index] = blend_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.blend_op_alpha[index])
 				{
@@ -1335,7 +1296,7 @@ namespace KlayGE
 			else if ("src_blend_alpha" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.src_blend_alpha[index])
 				{
@@ -1345,7 +1306,7 @@ namespace KlayGE
 			else if ("dest_blend_alpha" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == bs_desc.dest_blend_alpha[index])
 				{
@@ -1355,50 +1316,46 @@ namespace KlayGE
 			else if ("color_write_mask" == state_name)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->first_attribute("value")->value();
-				bs_desc.color_write_mask[index] = static_cast<uint8_t>(lexical_cast<uint32_t>(value_str));
+				bs_desc.color_write_mask[index] = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("blend_factor" == state_name)
 			{
-				xml_attribute<>* attr = state_node->first_attribute("r");
-				if (attr != NULL)
+				XMLAttributePtr attr = state_node->Attrib("r");
+				if (attr)
 				{
-					blend_factor_.r() = lexical_cast<float>(attr->value());
+					blend_factor_.r() = attr->ValueFloat();
 				}
-				attr = state_node->first_attribute("g");
-				if (attr != NULL)
+				attr = state_node->Attrib("g");
+				if (attr)
 				{
-					blend_factor_.g() = lexical_cast<float>(attr->value());
+					blend_factor_.g() = attr->ValueFloat();
 				}
-				attr = state_node->first_attribute("b");
-				if (attr != NULL)
+				attr = state_node->Attrib("b");
+				if (attr)
 				{
-					blend_factor_.b() = lexical_cast<float>(attr->value());
+					blend_factor_.b() = attr->ValueFloat();
 				}
-				attr = state_node->first_attribute("a");
-				if (attr != NULL)
+				attr = state_node->Attrib("a");
+				if (attr)
 				{
-					blend_factor_.a() = lexical_cast<float>(attr->value());
+					blend_factor_.a() = attr->ValueFloat();
 				}
 			}
 			else if ("sample_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				sample_mask_ = lexical_cast<uint32_t>(value_str);
+				sample_mask_ = state_node->Attrib("value")->ValueUInt();
 			}
 			else if ("depth_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.depth_enable = bool_from_str(value_str);
+				dss_desc.depth_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
 			else if ("depth_write_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.depth_write_mask = bool_from_str(value_str);
+				dss_desc.depth_write_mask = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
 			else if ("depth_func" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.depth_func = compare_function_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.depth_func)
 				{
@@ -1407,12 +1364,11 @@ namespace KlayGE
 			}
 			else if ("front_stencil_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.front_stencil_enable = bool_from_str(value_str);
+				dss_desc.front_stencil_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
 			else if ("front_stencil_func" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_func = compare_function_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.front_stencil_func)
 				{
@@ -1421,22 +1377,19 @@ namespace KlayGE
 			}
 			else if ("front_stencil_ref" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				front_stencil_ref_ = lexical_cast<uint16_t>(value_str);
+				front_stencil_ref_ = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("front_stencil_read_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.front_stencil_read_mask = lexical_cast<uint16_t>(value_str);
+				dss_desc.front_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("front_stencil_write_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.front_stencil_write_mask = lexical_cast<uint16_t>(value_str);
+				dss_desc.front_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("front_stencil_fail" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_fail = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.front_stencil_fail)
 				{
@@ -1445,7 +1398,7 @@ namespace KlayGE
 			}
 			else if ("front_stencil_depth_fail" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.front_stencil_depth_fail)
 				{
@@ -1454,7 +1407,7 @@ namespace KlayGE
 			}
 			else if ("front_stencil_pass" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.front_stencil_pass)
 				{
@@ -1463,12 +1416,11 @@ namespace KlayGE
 			}
 			else if ("back_stencil_enable" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.back_stencil_enable = bool_from_str(value_str);
+				dss_desc.back_stencil_enable = bool_from_str(state_node->Attrib("value")->ValueString());
 			}
 			else if ("back_stencil_func" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_func = compare_function_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.back_stencil_func)
 				{
@@ -1477,22 +1429,19 @@ namespace KlayGE
 			}
 			else if ("back_stencil_ref" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				back_stencil_ref_ = lexical_cast<uint16_t>(value_str);
+				back_stencil_ref_ = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("back_stencil_read_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.back_stencil_read_mask = lexical_cast<uint16_t>(value_str);
+				dss_desc.back_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("back_stencil_write_mask" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
-				dss_desc.back_stencil_write_mask = lexical_cast<uint16_t>(value_str);
+				dss_desc.back_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
 			}
 			else if ("back_stencil_fail" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_fail = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.back_stencil_fail)
 				{
@@ -1501,7 +1450,7 @@ namespace KlayGE
 			}
 			else if ("back_stencil_depth_fail" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.back_stencil_depth_fail)
 				{
@@ -1510,7 +1459,7 @@ namespace KlayGE
 			}
 			else if ("back_stencil_pass" == state_name)
 			{
-				std::string value_str = state_node->first_attribute("value")->value();
+				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 				if (0xFFFFFFFF == dss_desc.back_stencil_pass)
 				{
@@ -1592,24 +1541,21 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEffectParameter::Load(rapidxml::xml_node<>* node)
+	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
-		using boost::lexical_cast;
-		using namespace rapidxml;
+		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
+		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->Attrib("name")->ValueString()));
 
-		type_ = type_define::instance().type_code(node->first_attribute("type")->value());
-		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->first_attribute("name")->value()));
-
-		xml_attribute<>* attr = node->first_attribute("semantic");
-		if (attr != NULL)
+		XMLAttributePtr attr = node->Attrib("semantic");
+		if (attr)
 		{
-			semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(std::string(attr->value()));
+			semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(attr->ValueString());
 		}
 
-		attr = node->first_attribute("array_size");
-		if (attr != NULL)
+		attr = node->Attrib("array_size");
+		if (attr)
 		{
-			array_size_ = lexical_cast<uint32_t>(attr->value());
+			array_size_ = attr->ValueUInt();
 		}
 		else
 		{
@@ -1618,11 +1564,11 @@ namespace KlayGE
 		var_ = read_var(node, type_, array_size_);
 
 		{
-			xml_node<>* anno_node = node->first_node("annotation");
-			if (anno_node != NULL)
+			XMLNodePtr anno_node = node->FirstNode("annotation");
+			if (anno_node)
 			{
 				annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
-				for (; anno_node; anno_node = anno_node->next_sibling("annotation"))
+				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
 					annotations_->push_back(annotation);
@@ -1667,14 +1613,13 @@ namespace KlayGE
 	}
 
 
-	void RenderShaderFunc::Load(rapidxml::xml_node<>* node)
+	void RenderShaderFunc::Load(XMLNodePtr const & node)
 	{
-		using namespace rapidxml;
-		for (xml_node<>* shader_text_node = node->first_node(); shader_text_node; shader_text_node = shader_text_node->next_sibling())
+		for (XMLNodePtr shader_text_node = node->FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
 		{
-			if ((node_comment == shader_text_node->type()) || (node_cdata == shader_text_node->type()))
+			if ((XNT_Comment == shader_text_node->Type()) || (XNT_CData == shader_text_node->Type()))
 			{
-				str_ += std::string(shader_text_node->value(), shader_text_node->value_size());
+				str_ += shader_text_node->ValueString();
 			}
 		}
 	}

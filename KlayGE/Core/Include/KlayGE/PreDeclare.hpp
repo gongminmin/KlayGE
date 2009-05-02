@@ -18,6 +18,13 @@ namespace KlayGE
 	template <typename Sender, typename EventArg>
 	class Event;
 
+	class XMLDocument;
+	typedef boost::shared_ptr<XMLDocument> XMLDocumentPtr;
+	class XMLNode;
+	typedef boost::shared_ptr<XMLNode> XMLNodePtr;
+	class XMLAttribute;
+	typedef boost::shared_ptr<XMLAttribute> XMLAttributePtr;
+
 	class half;
 	template <typename T, int N>
 	class Vector_T;

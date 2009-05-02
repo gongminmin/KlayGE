@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DINPUT_IE_SOURCE			// Build dll
 		#define KLAYGE_DINPUT_IE_API __declspec(dllexport)
@@ -30,7 +32,7 @@
 
 extern "C"
 {
-	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, void* extra_param);
+	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
 }
 
 #endif			// _DINPUTFACTORY_HPP

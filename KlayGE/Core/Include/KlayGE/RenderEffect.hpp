@@ -63,8 +63,6 @@
 
 #include <boost/utility.hpp>
 
-#include <rapidxml/rapidxml.hpp>
-
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/Math.hpp>
@@ -199,7 +197,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectAnnotation
 	{
 	public:
-		void Load(rapidxml::xml_node<>* node);
+		void Load(XMLNodePtr const & node);
 
 		uint32_t Type() const
 		{
@@ -226,7 +224,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderShaderFunc
 	{
 	public:
-		void Load(rapidxml::xml_node<>* node);
+		void Load(XMLNodePtr const & node);
 
 		std::string const & str() const
 		{
@@ -316,7 +314,7 @@ namespace KlayGE
 		{
 		}
 
-		void Load(rapidxml::xml_node<>* node);
+		void Load(XMLNodePtr const & node);
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
 		static RenderTechniquePtr const & NullObject();
@@ -385,7 +383,7 @@ namespace KlayGE
 
 		static RenderPassPtr const & NullObject();
 
-		void Load(rapidxml::xml_node<>* node);
+		void Load(XMLNodePtr const & node);
 		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
@@ -452,7 +450,7 @@ namespace KlayGE
 		explicit RenderEffectParameter(RenderEffect& effect);
 		~RenderEffectParameter();
 
-		void Load(rapidxml::xml_node<>* node);
+		void Load(XMLNodePtr const & node);
 		RenderEffectParameterPtr Clone(RenderEffect& effect);
 
 		uint32_t type() const

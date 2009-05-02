@@ -29,6 +29,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -41,16 +42,6 @@
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#include <rapidxml/rapidxml.hpp>
 
 #include <KlayGE/UI.hpp>
 
@@ -302,62 +293,34 @@ namespace KlayGE
 
 	void UIManager::Load(ResIdentifierPtr const & source)
 	{
-	#pragma pack(push, 1)
-		struct uiml_header
-		{
-			uint32_t fourcc;
-			uint32_t ver;
-			uint32_t num_dlgs;
-		};
-	#pragma pack(pop)
-
 		if (source)
 		{
-			using boost::lexical_cast;
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(source);
 
-			source->seekg(0, std::ios_base::end);
-			int len = static_cast<int>(source->tellg());
-			source->seekg(0, std::ios_base::beg);
-			std::vector<char> str(len + 1, 0);
-			source->read(&str[0], len);
+			XMLAttributePtr attr;
 
-			using namespace rapidxml;
-			xml_document<> doc;
-			doc.parse<0>(&str[0]);
-
-			xml_node<>* root = doc.first_node("ui");
-			xml_attribute<>* attr;
-
-			std::vector<std::vector<char> > include_strs;
-			for (xml_node<>* node = root->first_node("include"); node;)
+			std::vector<XMLDocumentPtr> include_docs;
+			for (XMLNodePtr node = root->FirstNode("include"); node;)
 			{
-				attr = node->first_attribute("name");
-				std::ifstream include_file(ResLoader::Instance().Locate(attr->value()).c_str());
-				include_file.seekg(0, std::ios_base::end);
-				int len = static_cast<int>(include_file.tellg());
-				include_file.seekg(0, std::ios_base::beg);
-				include_strs.push_back(std::vector<char>(len + 1, 0));
-				std::vector<char>& str = include_strs.back();
-				include_file.read(&str[0], len);
+				attr = node->Attrib("name");
+				include_docs.push_back(MakeSharedPtr<XMLDocument>());
+				XMLNodePtr include_root = include_docs.back()->Parse(MakeSharedPtr<std::ifstream>(ResLoader::Instance().Locate(attr->ValueString()).c_str()));
 
-				xml_document<> include_doc;
-				include_doc.parse<0>(&str[0]);
-
-				xml_node<>* include_root = include_doc.first_node("ui");
-				for (xml_node<>* child_node = include_root->first_node(); child_node; child_node = child_node->next_sibling())
+				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
-					if (node_element == child_node->type())
+					if (XNT_Element == child_node->Type())
 					{
-						root->insert_node(node, doc.clone_node(child_node));
+						root->InsertNode(node, doc.CloneNode(child_node));
 					}
 				}
 
-				xml_node<>* node_next = node->next_sibling("include");
-				root->remove_node(node);
+				XMLNodePtr node_next = node->NextSibling("include");
+				root->RemoveNode(node);
 				node = node_next;
 			}
 
-			for (xml_node<>* node = root->first_node("dialog"); node; node = node->next_sibling("dialog"))
+			for (XMLNodePtr node = root->FirstNode("dialog"); node; node = node->NextSibling("dialog"))
 			{
 				UIDialogPtr dlg;
 				{
@@ -365,29 +328,29 @@ namespace KlayGE
 					uint32_t width, height;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
 					std::string id, caption, skin;
-					attr = node->first_attribute("id");
-					if (attr != NULL)
+					attr = node->Attrib("id");
+					if (attr)
 					{
-						id = attr->value();
+						id = attr->ValueString();
 					}
-					attr = node->first_attribute("caption");
-					if (attr != NULL)
+					attr = node->Attrib("caption");
+					if (attr)
 					{
-						caption = attr->value();
+						caption = attr->ValueString();
 					}
-					attr = node->first_attribute("skin");
-					if (attr != NULL)
+					attr = node->Attrib("skin");
+					if (attr)
 					{
-						skin = attr->value();
+						skin = attr->ValueString();
 					}
-					x = lexical_cast<int>(node->first_attribute("x")->value());
-					y = lexical_cast<int>(node->first_attribute("y")->value());
-					width = lexical_cast<int>(node->first_attribute("width")->value());
-					height = lexical_cast<int>(node->first_attribute("height")->value());
-					attr = node->first_attribute("align_x");
-					if (attr != NULL)
+					x = node->Attrib("x")->ValueInt();
+					y = node->Attrib("y")->ValueInt();
+					width = node->Attrib("width")->ValueInt();
+					height = node->Attrib("height")->ValueInt();
+					attr = node->Attrib("align_x");
+					if (attr)
 					{
-						std::string align_x_str = attr->value();
+						std::string align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
@@ -405,10 +368,10 @@ namespace KlayGE
 							}
 						}
 					}
-					attr = node->first_attribute("align_y");
-					if (attr != NULL)
+					attr = node->Attrib("align_y");
+					if (attr)
 					{
-						std::string align_y_str = attr->value();
+						std::string align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
@@ -444,32 +407,32 @@ namespace KlayGE
 				}
 
 				std::vector<std::string> ctrl_ids;
-				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling("control"))
+				for (XMLNodePtr ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
 				{
-					ctrl_ids.push_back(ctrl_node->first_attribute("id")->value());
+					ctrl_ids.push_back(ctrl_node->Attrib("id")->ValueString());
 				}
 				std::sort(ctrl_ids.begin(), ctrl_ids.end());
 				ctrl_ids.erase(std::unique(ctrl_ids.begin(), ctrl_ids.end()), ctrl_ids.end());
 
-				for (xml_node<>* ctrl_node = node->first_node("control"); ctrl_node; ctrl_node = ctrl_node->next_sibling("control"))
+				for (XMLNodePtr ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
 				{
 					int32_t x, y;
 					uint32_t width, height;
 					bool is_default = false;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
 
-					std::string id_str = ctrl_node->first_attribute("id")->value();
+					std::string id_str = ctrl_node->Attrib("id")->ValueString();
 					uint32_t id = static_cast<uint32_t>(std::find(ctrl_ids.begin(), ctrl_ids.end(), id_str) - ctrl_ids.begin());
 					dlg->AddIDName(id_str, id);
 
-					x = lexical_cast<int>(ctrl_node->first_attribute("x")->value());
-					y = lexical_cast<int>(ctrl_node->first_attribute("y")->value());
-					width = lexical_cast<int>(ctrl_node->first_attribute("width")->value());
-					height = lexical_cast<int>(ctrl_node->first_attribute("height")->value());
-					attr = ctrl_node->first_attribute("is_default");
-					if (attr != NULL)
+					x = ctrl_node->Attrib("x")->ValueInt();
+					y = ctrl_node->Attrib("y")->ValueInt();
+					width = ctrl_node->Attrib("width")->ValueInt();
+					height = ctrl_node->Attrib("height")->ValueInt();
+					attr = ctrl_node->Attrib("is_default");
+					if (attr)
 					{
-						std::string is_default_str = attr->value();
+						std::string is_default_str = attr->ValueString();
 						if (("true" == is_default_str) || ("1" == is_default_str))
 						{
 							is_default = true;
@@ -480,10 +443,10 @@ namespace KlayGE
 							is_default = false;
 						}
 					}
-					attr = ctrl_node->first_attribute("align_x");
-					if (attr != NULL)
+					attr = ctrl_node->Attrib("align_x");
+					if (attr)
 					{
-						std::string align_x_str = attr->value();
+						std::string align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
@@ -501,10 +464,10 @@ namespace KlayGE
 							}
 						}
 					}
-					attr = ctrl_node->first_attribute("align_y");
-					if (attr != NULL)
+					attr = ctrl_node->Attrib("align_y");
+					if (attr)
 					{
-						std::string align_y_str = attr->value();
+						std::string align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
@@ -526,10 +489,10 @@ namespace KlayGE
 					UIDialog::ControlLocation loc = { x, y, align_x, align_y };
 					dlg->CtrlLocation(id, loc);
 
-					std::string type_str = ctrl_node->first_attribute("type")->value();
+					std::string type_str = ctrl_node->Attrib("type")->ValueString();
 					if ("static" == type_str)
 					{
-						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(UIControlPtr(new UIStatic(dlg, id, wcaption,
@@ -537,12 +500,12 @@ namespace KlayGE
 					}
 					if ("button" == type_str)
 					{
-						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						uint8_t hotkey;
-						attr = ctrl_node->first_attribute("hotkey");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("hotkey");
+						if (attr)
 						{
-							hotkey = lexical_cast<uint8_t>(attr->value());
+							hotkey = static_cast<uint8_t>(attr->ValueInt());
 						}
 						else
 						{
@@ -555,12 +518,12 @@ namespace KlayGE
 					}
 					if ("tex_button" == type_str)
 					{
-						std::string tex_name = ctrl_node->first_attribute("texture")->value();
+						std::string tex_name = ctrl_node->Attrib("texture")->ValueString();
 						uint8_t hotkey;
-						attr = ctrl_node->first_attribute("hotkey");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("hotkey");
+						if (attr)
 						{
-							hotkey = lexical_cast<uint8_t>(attr->value());
+							hotkey = static_cast<uint8_t>(attr->ValueInt());
 						}
 						else
 						{
@@ -572,9 +535,9 @@ namespace KlayGE
 					}
 					if ("check_box" == type_str)
 					{
-						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						bool checked;
-						std::string checked_str = ctrl_node->first_attribute("checked")->value();
+						std::string checked_str = ctrl_node->Attrib("checked")->ValueString();
 						if (("true" == checked_str) || ("1" == checked_str))
 						{
 							checked = true;
@@ -585,10 +548,10 @@ namespace KlayGE
 							checked = false;
 						}
 						uint8_t hotkey;
-						attr = ctrl_node->first_attribute("hotkey");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("hotkey");
+						if (attr)
 						{
-							hotkey = lexical_cast<uint8_t>(attr->value());
+							hotkey = static_cast<uint8_t>(attr->ValueInt());
 						}
 						else
 						{
@@ -601,10 +564,10 @@ namespace KlayGE
 					}
 					if ("radio_button" == type_str)
 					{
-						std::string caption = ctrl_node->first_attribute("caption")->value();
-						int32_t button_group = lexical_cast<int32_t>(ctrl_node->first_attribute("button_group")->value());
+						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						int32_t button_group = ctrl_node->Attrib("button_group")->ValueInt();
 						bool checked;
-						std::string checked_str = ctrl_node->first_attribute("checked")->value();
+						std::string checked_str = ctrl_node->Attrib("checked")->ValueString();
 						if (("true" == checked_str) || ("1" == checked_str))
 						{
 							checked = true;
@@ -615,10 +578,10 @@ namespace KlayGE
 							checked = false;
 						}
 						uint8_t hotkey;
-						attr = ctrl_node->first_attribute("hotkey");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("hotkey");
+						if (attr)
 						{
-							hotkey = lexical_cast<uint8_t>(attr->value());
+							hotkey = static_cast<uint8_t>(attr->ValueInt());
 						}
 						else
 						{
@@ -632,20 +595,20 @@ namespace KlayGE
 					if ("slider" == type_str)
 					{
 						int32_t min_v = 0, max_v = 100, value = 50;
-						attr = ctrl_node->first_attribute("min");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("min");
+						if (attr)
 						{
-							min_v = lexical_cast<int32_t>(attr->value());
+							min_v = attr->ValueInt();
 						}
-						attr = ctrl_node->first_attribute("max");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("max");
+						if (attr)
 						{
-							max_v = lexical_cast<int32_t>(attr->value());
+							max_v = attr->ValueInt();
 						}
-						attr = ctrl_node->first_attribute("value");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("value");
+						if (attr)
 						{
-							value = lexical_cast<int32_t>(attr->value());
+							value = attr->ValueInt();
 						}
 						dlg->AddControl(UIControlPtr(new UISlider(dlg, id,
 							x, y, width, height, min_v, max_v, value, is_default)));
@@ -653,25 +616,25 @@ namespace KlayGE
 					if ("scroll_bar" == type_str)
 					{
 						int32_t track_start = 0, track_end = 1, track_pos = 1, page_size = 1;
-						attr = ctrl_node->first_attribute("track_start");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("track_start");
+						if (attr)
 						{
-							track_start = lexical_cast<int32_t>(attr->value());
+							track_start = attr->ValueInt();
 						}
-						attr = ctrl_node->first_attribute("track_end");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("track_end");
+						if (attr)
 						{
-							track_end = lexical_cast<int32_t>(attr->value());
+							track_end = attr->ValueInt();
 						}
-						attr = ctrl_node->first_attribute("track_pos");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("track_pos");
+						if (attr)
 						{
-							track_pos = lexical_cast<int32_t>(attr->value());
+							track_pos = attr->ValueInt();
 						}
-						attr = ctrl_node->first_attribute("page_size");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("page_size");
+						if (attr)
 						{
-							page_size = lexical_cast<int32_t>(attr->value());
+							page_size = attr->ValueInt();
 						}
 						dlg->AddControl(UIControlPtr(new UIScrollBar(dlg, id,
 							x, y, width, height, track_start, track_end, track_pos, page_size)));
@@ -679,10 +642,10 @@ namespace KlayGE
 					if ("list_box" == type_str)
 					{
 						UIListBox::STYLE style = UIListBox::SINGLE_SELECTION;
-						attr = ctrl_node->first_attribute("style");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("style");
+						if (attr)
 						{
-							std::string style_str = attr->value();
+							std::string style_str = attr->ValueString();
 							if ("single" == style_str)
 							{
 								style = UIListBox::SINGLE_SELECTION;
@@ -696,9 +659,9 @@ namespace KlayGE
 						dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
 							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
 
-						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling("item"))
+						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
-							std::string caption = item_node->first_attribute("name")->value();
+							std::string caption = item_node->Attrib("name")->ValueString();
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->Control<UIListBox>(id)->AddItem(wcaption);
@@ -707,10 +670,10 @@ namespace KlayGE
 					if ("combo_box" == type_str)
 					{
 						uint8_t hotkey;
-						attr = ctrl_node->first_attribute("hotkey");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("hotkey");
+						if (attr)
 						{
-							hotkey = lexical_cast<uint8_t>(attr->value());
+							hotkey = static_cast<uint8_t>(attr->ValueInt());
 						}
 						else
 						{
@@ -719,9 +682,9 @@ namespace KlayGE
 						dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
 							x, y, width, height, hotkey, is_default)));
 
-						for (xml_node<>* item_node = ctrl_node->first_node("item"); item_node; item_node = item_node->next_sibling("item"))
+						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
-							std::string caption = item_node->first_attribute("name")->value();
+							std::string caption = item_node->Attrib("name")->ValueString();
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->Control<UIComboBox>(id)->AddItem(wcaption);
@@ -729,7 +692,7 @@ namespace KlayGE
 					}
 					if ("edit_box" == type_str)
 					{
-						std::string caption = ctrl_node->first_attribute("caption")->value();
+						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(UIControlPtr(new UIEditBox(dlg, id, wcaption,
@@ -738,25 +701,25 @@ namespace KlayGE
 					if ("polyline_edit_box" == type_str)
 					{
 						Color line_clr(0, 1, 0, 1);
-						attr = ctrl_node->first_attribute("line_r");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("line_r");
+						if (attr)
 						{
-							line_clr.r() = lexical_cast<float>(attr->value());
+							line_clr.r() = attr->ValueFloat();
 						}
-						attr = ctrl_node->first_attribute("line_g");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("line_g");
+						if (attr)
 						{
-							line_clr.g() = lexical_cast<float>(attr->value());
+							line_clr.g() = attr->ValueFloat();
 						}
-						attr = ctrl_node->first_attribute("line_b");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("line_b");
+						if (attr)
 						{
-							line_clr.b() = lexical_cast<float>(attr->value());
+							line_clr.b() = attr->ValueFloat();
 						}
-						attr = ctrl_node->first_attribute("line_a");
-						if (attr != NULL)
+						attr = ctrl_node->Attrib("line_a");
+						if (attr)
 						{
-							line_clr.a() = lexical_cast<float>(attr->value());
+							line_clr.a() = attr->ValueFloat();
 						}
 						dlg->AddControl(UIControlPtr(new UIPolylineEditBox(dlg, id,
 							x, y, width, height, is_default)));

@@ -13,33 +13,20 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#include <rapidxml/rapidxml.hpp>
-
-void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, void* extra_param)
+void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, KlayGE::XMLNodePtr const & extra_param)
 {
-	using namespace rapidxml;
-
-	xml_node<>* node = static_cast<xml_node<>*>(extra_param);
 	int octree_depth = 3;
-	if (node != NULL)
+	if (extra_param)
 	{
-		xml_attribute<>* attr = node->first_attribute("depth");
-		if (attr != NULL)
+		KlayGE::XMLAttributePtr attr = extra_param->Attrib("depth");
+		if (attr)
 		{
-			octree_depth = boost::lexical_cast<int>(attr->value());
+			octree_depth = attr->ValueInt();
 		}
 	}
 

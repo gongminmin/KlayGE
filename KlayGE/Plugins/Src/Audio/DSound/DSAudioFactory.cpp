@@ -17,7 +17,7 @@
 #include <KlayGE/DSound/DSAudio.hpp>
 #include <KlayGE/DSound/DSAudioFactory.hpp>
 
-void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, void* /*extra_param*/)
+void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, KlayGE::XMLNodePtr const & /*extra_param*/)
 {
 	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
 		KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");

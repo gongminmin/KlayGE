@@ -645,6 +645,10 @@
 					RelativePath="..\..\Core\Src\Kernel\Util.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\Core\Src\Kernel\XMLDom.cpp"
+					>
+				</File>
 				<Filter
 					Name="asm"
 					>
@@ -783,6 +787,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\Util.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\XMLDom.hpp"
 					>
 				</File>
 			</Filter>

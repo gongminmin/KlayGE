@@ -20,7 +20,7 @@
 #include <KlayGE/DInput/DInput.hpp>
 #include <KlayGE/DInput/DInputFactory.hpp>
 
-void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, void* /*extra_param*/)
+void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, KlayGE::XMLNodePtr const & /*extra_param*/)
 {
 	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::DInputEngine> >(L"DirectInput Input Factory");
 }

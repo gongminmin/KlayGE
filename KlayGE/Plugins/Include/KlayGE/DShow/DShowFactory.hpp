@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DSHOW_SE_SOURCE				// Build dll
 		#define KLAYGE_DSHOW_SE_API __declspec(dllexport)
@@ -27,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, void* extra_param);
+	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
 }
 
 #endif			// _DSHOWFACTORY_HPP

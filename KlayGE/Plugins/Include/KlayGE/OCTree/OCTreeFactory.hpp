@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_OCTREE_SM_SOURCE				// Build dll
 		#define KLAYGE_OCTREE_SM_API __declspec(dllexport)
@@ -27,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_OCTREE_SM_API void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, void* extra_param);
+	KLAYGE_OCTREE_SM_API void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
 }
 
 #endif			// _OCTREEFACTORY_HPP

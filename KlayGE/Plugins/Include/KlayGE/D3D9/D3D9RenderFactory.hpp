@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_D3D9_RE_SOURCE				// Build dll
 		#define KLAYGE_D3D9_RE_API __declspec(dllexport)
@@ -36,7 +38,7 @@
 
 extern "C"
 {
-	KLAYGE_D3D9_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, void* extra_param);
+	KLAYGE_D3D9_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
 }
 
 #endif			// _D3D9RENDERFACTORY_HPP

@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
 #ifdef KLAYGE_HAS_DECLSPEC
 	#ifdef KLAYGE_DSOUND_AE_SOURCE				// Build dll
 		#define KLAYGE_DSOUND_AE_API __declspec(dllexport)
@@ -30,7 +32,7 @@
 
 extern "C"
 {
-	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, void* extra_param);
+	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

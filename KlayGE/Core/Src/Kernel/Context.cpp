@@ -26,29 +26,20 @@
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <fstream>
 #include <boost/filesystem.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#include <rapidxml/rapidxml.hpp>
 
 #include <KlayGE/Context.hpp>
 
 namespace KlayGE
 {
-	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, void* extra_param);
-	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, void* extra_param);
-	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, void* extra_param);
-	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, void* extra_param);
-	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, void* extra_param);
+	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, XMLNodePtr const & extra_param);
+	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, XMLNodePtr const & extra_param);
+	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, XMLNodePtr const & extra_param);
+	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, XMLNodePtr const & extra_param);
+	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, XMLNodePtr const & extra_param);
 
 	Context::Context()
 	{
@@ -84,9 +75,6 @@ namespace KlayGE
 
 	RenderSettings Context::LoadCfg(std::string const & cfg_file)
 	{
-		using boost::lexical_cast;
-		using namespace rapidxml;
-
 		int width = 800;
 		int height = 600;
 		ElementFormat color_fmt = EF_ARGB8;
@@ -113,89 +101,81 @@ namespace KlayGE
 #endif
 		std::string sm_name;
 
-		xml_node<>* rf_node = NULL;
-		xml_node<>* af_node = NULL;
-		xml_node<>* if_node = NULL;
-		xml_node<>* sf_node = NULL;
-		xml_node<>* sm_node = NULL;
+		XMLNodePtr rf_node;
+		XMLNodePtr af_node;
+		XMLNodePtr if_node;
+		XMLNodePtr sf_node;
+		XMLNodePtr sm_node;
 
-		std::ifstream file(ResLoader::Instance().Locate(cfg_file).c_str());
+		ResIdentifierPtr file = MakeSharedPtr<std::ifstream>(ResLoader::Instance().Locate(cfg_file).c_str());
 		if (file)
 		{
-			file.seekg(0, std::ios_base::end);
-			int len = static_cast<int>(file.tellg());
-			file.seekg(0, std::ios_base::beg);
-			std::vector<char> str(len + 1, 0);
-			file.read(&str[0], len);
+			XMLDocument cfg_doc;
+			XMLNodePtr cfg_root = cfg_doc.Parse(file);
 
-			xml_document<> cfg_doc;
-			cfg_doc.parse<0>(&str[0]);
-
-			xml_node<>* cfg_root = cfg_doc.first_node("configure");
-
-			xml_node<>* context_node = cfg_root->first_node("context");
-			xml_node<>* screen_node = cfg_root->first_node("screen");
+			XMLNodePtr context_node = cfg_root->FirstNode("context");
+			XMLNodePtr screen_node = cfg_root->FirstNode("screen");
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			xml_node<>* rf_node = context_node->first_node("render_factory");
-			if (rf_node != NULL)
+			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
+			if (rf_node)
 			{
-				rf_name = rf_node->first_attribute("name")->value();
+				rf_name = rf_node->Attrib("name")->ValueString();
 			}
 #endif
 
-			xml_node<>* af_node = context_node->first_node("audio_factory");
-			if (af_node != NULL)
+			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
+			if (af_node)
 			{
-				af_name = af_node->first_attribute("name")->value();
+				af_name = af_node->Attrib("name")->ValueString();
 			}
 
-			xml_node<>* if_node = context_node->first_node("input_factory");
-			if (if_node != NULL)
+			XMLNodePtr if_node = context_node->FirstNode("input_factory");
+			if (if_node)
 			{
-				if_name = if_node->first_attribute("name")->value();
+				if_name = if_node->Attrib("name")->ValueString();
 			}
 
-			xml_node<>* sf_node = context_node->first_node("show_factory");
-			if (sf_node != NULL)
+			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
+			if (sf_node)
 			{
-				sf_name = sf_node->first_attribute("name")->value();
+				sf_name = sf_node->Attrib("name")->ValueString();
 			}
 
-			xml_node<>* sm_node = context_node->first_node("scene_manager");
-			if (sm_node != NULL)
+			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
+			if (sm_node)
 			{
-				sm_name = sm_node->first_attribute("name")->value();
+				sm_name = sm_node->Attrib("name")->ValueString();
 			}
 
-			xml_node<>* frame_node = screen_node->first_node("frame");
-			xml_attribute<>* attr;
-			attr = frame_node->first_attribute("width");
-			if (attr != NULL)
+			XMLNodePtr frame_node = screen_node->FirstNode("frame");
+			XMLAttributePtr attr;
+			attr = frame_node->Attrib("width");
+			if (attr)
 			{
-				width = lexical_cast<int>(attr->value());
+				width = attr->ValueInt();
 			}
-			attr = frame_node->first_attribute("height");
-			if (attr != NULL)
+			attr = frame_node->Attrib("height");
+			if (attr)
 			{
-				height = lexical_cast<int>(attr->value());
+				height = attr->ValueInt();
 			}
 			std::string color_fmt_str = "ARGB8";
-			attr = frame_node->first_attribute("color_fmt");
-			if (attr != NULL)
+			attr = frame_node->Attrib("color_fmt");
+			if (attr)
 			{
-				color_fmt_str = attr->value();
+				color_fmt_str = attr->ValueString();
 			}
 			std::string depth_stencil_fmt_str = "D16";
-			attr = frame_node->first_attribute("depth_stencil_fmt");
-			if (attr != NULL)
+			attr = frame_node->Attrib("depth_stencil_fmt");
+			if (attr)
 			{
-				depth_stencil_fmt_str = attr->value();
+				depth_stencil_fmt_str = attr->ValueString();
 			}
-			attr = frame_node->first_attribute("fullscreen");
-			if (attr != NULL)
+			attr = frame_node->Attrib("fullscreen");
+			if (attr)
 			{
-				std::string fs_str = attr->value();
+				std::string fs_str = attr->ValueString();
 				if (("1" == fs_str) || ("true" == fs_str))
 				{
 					full_screen = true;
@@ -232,16 +212,16 @@ namespace KlayGE
 				depth_stencil_fmt = EF_D32F;
 			}
 
-			xml_node<>* sample_node = frame_node->first_node("sample");
-			attr = sample_node->first_attribute("count");
-			if (attr != NULL)
+			XMLNodePtr sample_node = frame_node->FirstNode("sample");
+			attr = sample_node->Attrib("count");
+			if (attr)
 			{
-				sample_count = lexical_cast<int>(attr->value());
+				sample_count = attr->ValueInt();
 			}
-			attr = sample_node->first_attribute("quality");
-			if (attr != NULL)
+			attr = sample_node->Attrib("quality");
+			if (attr)
 			{
-				sample_quality = lexical_cast<int>(attr->value());
+				sample_quality = attr->ValueInt();
 			}
 		}
 
