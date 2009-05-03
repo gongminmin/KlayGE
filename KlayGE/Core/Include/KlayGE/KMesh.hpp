@@ -70,28 +70,10 @@ namespace KlayGE
 		}
 	};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(push, 1)
-#endif
-	struct KModelHeader
-	{
-		uint32_t version;
-		uint8_t num_materials;
-		uint8_t num_meshes;
-		uint8_t num_joints;
-		uint8_t num_key_frames;
-		uint32_t start_frame;
-		uint32_t end_frame;
-		uint32_t frame_rate;
-	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(pop)
-#endif
-
-	KLAYGE_CORE_API RenderModelPtr LoadKModel(std::string const & kmodel_name, uint32_t access_hint,
+	KLAYGE_CORE_API RenderModelPtr LoadModel(std::string const & meshml_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateKModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateKMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API void SaveKModel(RenderModelPtr model, std::string const & kmodel_name);
+	KLAYGE_CORE_API void SaveModel(RenderModelPtr model, std::string const & meshml_name);
 }
 
 #endif			// _KMESH_HPP

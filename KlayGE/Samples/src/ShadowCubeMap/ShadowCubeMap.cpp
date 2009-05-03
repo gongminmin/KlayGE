@@ -187,7 +187,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
-			renderable_ = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 

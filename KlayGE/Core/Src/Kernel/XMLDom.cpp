@@ -54,6 +54,7 @@ namespace KlayGE
 
 	void XMLDocument::Print(std::ostream& os)
 	{
+		os << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
 		os << doc_;
 	}
 

@@ -49,6 +49,7 @@ namespace
 	{
 		int pos_index;
 		std::vector<int> tex_indices;
+		int sm_index;
 
 		std::vector<size_t> ref_triangle;
 	};
@@ -79,7 +80,7 @@ namespace
 					}
 					else
 					{
-						if (lhs.ref_triangle < rhs.ref_triangle)
+						if (lhs.sm_index < rhs.sm_index)
 						{
 							return true;
 						}
@@ -92,35 +93,6 @@ namespace
 			}
 		}
 	}
-
-	struct less_first_2 : public std::binary_function<vertex_index_t, vertex_index_t, bool> 
-	{
-		bool operator()(vertex_index_t const & lhs, vertex_index_t const & rhs) const
-		{
-			if (lhs.pos_index < rhs.pos_index)
-			{
-				return true;
-			}
-			else
-			{
-				if (lhs.pos_index > rhs.pos_index)
-				{
-					return false;
-				}
-				else
-				{
-					if (lhs.tex_indices < rhs.tex_indices)
-					{
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-			}
-		}
-	};
 
 	bool bind_cmp(std::pair<std::string, float> const& lhs,
 		std::pair<std::string, float> const& rhs)
@@ -402,6 +374,7 @@ namespace KlayGE
 
 		std::vector<unsigned int> face_sm_group;
 		std::vector<unsigned int> face_mtl_id;
+		std::vector<std::vector<std::vector<unsigned int> > > vertex_sm_group;
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
@@ -490,9 +463,38 @@ namespace KlayGE
 					pos_indices.push_back(mesh.faces[i].v[j]);
 				}
 			}
+
+			positions.resize(mesh.getNumVerts());
+			vertex_sm_group.resize(mesh.getNumVerts());
 			for (int i = 0; i < mesh.getNumVerts(); ++ i)
 			{
-				positions.push_back(std::make_pair(mesh.getVert(i), binds_t()));
+				positions[i] = std::make_pair(mesh.getVert(i), binds_t());
+			}
+			for (int i = 0; i < mesh.getNumFaces(); ++ i)
+			{
+				unsigned int sm = face_sm_group[i];
+				for (int j = 2; j >= 0; -- j)
+				{
+					int index = mesh.faces[i].v[j];
+					bool found = false;
+					for (size_t k = 0; k < vertex_sm_group[index].size() && !found; ++ k)
+					{
+						for (size_t l = 0; l < vertex_sm_group[index][k].size(); ++ l)
+						{
+							if (face_sm_group[vertex_sm_group[index][k][l]] & sm)
+							{
+								vertex_sm_group[index][k].push_back(i);
+								found = true;
+								break;
+							}
+						}
+					}
+
+					if (!found)
+					{
+						vertex_sm_group[index].push_back(std::vector<unsigned int>(1, i));
+					}
+				}
 			}
 
 			if (need_delete)
@@ -530,25 +532,24 @@ namespace KlayGE
 					vertex_index.tex_indices.push_back(tex_index.second[offset]);
 				}
 
-				bool new_vertex = true;
-				std::set<vertex_index_t>::iterator v_iter_l = std::lower_bound(vertex_indices.begin(), vertex_indices.end(), vertex_index, less_first_2());
-				std::set<vertex_index_t>::iterator v_iter_u = std::upper_bound(vertex_indices.begin(), vertex_indices.end(), vertex_index, less_first_2());
-				if (v_iter_l != v_iter_u)
+				for (size_t k = 0; k < vertex_sm_group[vertex_index.pos_index].size(); ++ k)
 				{
-					for (std::set<vertex_index_t>::iterator v_iter = v_iter_l; (v_iter != v_iter_u) && new_vertex; ++ v_iter)
+					for (size_t l = 0; l < vertex_sm_group[vertex_index.pos_index][k].size(); ++ l)
 					{
-						for (size_t k = 0; k < v_iter->ref_triangle.size(); ++ k)
+						if (vertex_sm_group[vertex_index.pos_index][k][l] == static_cast<unsigned int>(i))
 						{
-							if (face_sm_group[v_iter->ref_triangle[k] / 3] & face_sm_group[i])
-							{
-								v_iter->ref_triangle.push_back(i * 3 + j);
-								new_vertex = false;
-								break;
-							}
+							vertex_index.sm_index = static_cast<int>(k);
+							break;
 						}
 					}
 				}
-				if (new_vertex)
+
+				std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
+				if (v_iter != vertex_indices.end())
+				{
+					v_iter->ref_triangle.push_back(i * 3 + j);
+				}
+				else
 				{
 					vertex_index.ref_triangle.resize(1, i * 3 + j);
 					vertex_indices.insert(vertex_index);
@@ -665,10 +666,11 @@ namespace KlayGE
 
 			Point3 normal(0, 0, 0);
 			Point3 tangent(0, 0, 0);
-			for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
+			for (size_t i = 0; i < vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index].size(); ++ i)
 			{
-				normal += face_normals[vertex_index.ref_triangle[i] / 3];
-				tangent += face_tangents[vertex_index.ref_triangle[i] / 3];
+				unsigned int tri_id = vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index][i];
+				normal += face_normals[tri_id];
+				tangent += face_tangents[tri_id];
 			}
 			if (flip_normals)
 			{
@@ -1096,13 +1098,11 @@ namespace KlayGE
 
 		using std::endl;
 
-		ofs << "<?xml version=\'1.0\' encoding=\'utf-8\' standalone=\'no\'?>" << endl;
-		ofs << "<!DOCTYPE Model SYSTEM \'model.dtd\'>" << endl << endl;
-		ofs << "<model version=\'4\'>";
+		ofs << "<?xml version=\"1.0\"?>" << endl << endl;
+		ofs << "<model version=\"4\">" << endl;
 
 		if (joints_per_ver_ > 0)
 		{
-			ofs << endl;
 			ofs << "\t<bones_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(joints_id_to_name)::const_reference joint_name, joints_id_to_name)
 			{
@@ -1114,20 +1114,20 @@ namespace KlayGE
 					assert(parent_id < joints_name_to_id[joint_name]);
 				}
 
-				ofs << "\t\t<bone name=\'" << joint_name
-					<< "\' parent=\'" << parent_id
-					<< "\'>" << endl;
+				ofs << "\t\t<bone name=\"" << joint_name
+					<< "\" parent=\"" << parent_id
+					<< "\">" << endl;
 
 				joint_t const & joint = joints_[joint_name];
 
-				ofs << "\t\t\t<bind_pos x=\'" << joint.pos.x
-					<< "\' y=\'" << joint.pos.y
-					<< "\' z=\'" << joint.pos.z << "\'/>" << endl;
+				ofs << "\t\t\t<bind_pos x=\"" << joint.pos.x
+					<< "\" y=\"" << joint.pos.y
+					<< "\" z=\"" << joint.pos.z << "\"/>" << endl;
 
-				ofs << "\t\t\t<bind_quat x=\'" << joint.quat.x
-					<< "\' y=\'" << joint.quat.y
-					<< "\' z=\'" << joint.quat.z
-					<< "\' w=\'" << joint.quat.w << "\'/>" << endl;
+				ofs << "\t\t\t<bind_quat x=\"" << joint.quat.x
+					<< "\" y=\"" << joint.quat.y
+					<< "\" z=\"" << joint.quat.z
+					<< "\" w=\"" << joint.quat.w << "\"/>" << endl;
 
 				ofs << "\t\t</bone>" << endl;
 			}
@@ -1136,33 +1136,32 @@ namespace KlayGE
 
 		if (objs_mtl_.size() > 0)
 		{
-			ofs << endl;
 			ofs << "\t<materials_chunk>" << endl;
 			for (size_t i = 0; i < objs_mtl_.size(); ++ i)
 			{
-				ofs << "\t\t<material ambient_r=\'" << objs_mtl_[i].ambient.r
-					<< "\' ambient_g=\'" << objs_mtl_[i].ambient.g
-					<< "\' ambient_b=\'" << objs_mtl_[i].ambient.b
-					<< "\' diffuse_r=\'" << objs_mtl_[i].diffuse.r
-					<< "\' diffuse_g=\'" << objs_mtl_[i].diffuse.g
-					<< "\' diffuse_b=\'" << objs_mtl_[i].diffuse.b
-					<< "\' specular_r=\'" << objs_mtl_[i].specular.r
-					<< "\' specular_g=\'" << objs_mtl_[i].specular.g
-					<< "\' specular_b=\'" << objs_mtl_[i].specular.b
-					<< "\' emit_r=\'" << objs_mtl_[i].emit.r
-					<< "\' emit_g=\'" << objs_mtl_[i].emit.g
-					<< "\' emit_b=\'" << objs_mtl_[i].emit.b
-					<< "\' opacity=\'" << objs_mtl_[i].opacity
-					<< "\' specular_level=\'" << objs_mtl_[i].specular_level
-					<< "\' shininess=\'" << objs_mtl_[i].shininess
-					<< "\'>" << endl;
+				ofs << "\t\t<material ambient_r=\"" << objs_mtl_[i].ambient.r
+					<< "\" ambient_g=\"" << objs_mtl_[i].ambient.g
+					<< "\" ambient_b=\"" << objs_mtl_[i].ambient.b
+					<< "\" diffuse_r=\"" << objs_mtl_[i].diffuse.r
+					<< "\" diffuse_g=\"" << objs_mtl_[i].diffuse.g
+					<< "\" diffuse_b=\"" << objs_mtl_[i].diffuse.b
+					<< "\" specular_r=\"" << objs_mtl_[i].specular.r
+					<< "\" specular_g=\"" << objs_mtl_[i].specular.g
+					<< "\" specular_b=\"" << objs_mtl_[i].specular.b
+					<< "\" emit_r=\"" << objs_mtl_[i].emit.r
+					<< "\" emit_g=\"" << objs_mtl_[i].emit.g
+					<< "\" emit_b=\"" << objs_mtl_[i].emit.b
+					<< "\" opacity=\"" << objs_mtl_[i].opacity
+					<< "\" specular_level=\"" << objs_mtl_[i].specular_level
+					<< "\" shininess=\"" << objs_mtl_[i].shininess
+					<< "\">" << endl;
 				if (objs_mtl_[i].texture_slots.size() > 0)
 				{
 					ofs << "\t\t\t<textures_chunk>" << endl;
 					BOOST_FOREACH(BOOST_TYPEOF(objs_mtl_[i].texture_slots)::const_reference ts, objs_mtl_[i].texture_slots)
 					{
-						ofs << "\t\t\t\t<texture type=\'" << ts.first
-							<< "\' name=\'" << ts.second << "\'/>" << endl;
+						ofs << "\t\t\t\t<texture type=\"" << ts.first
+							<< "\" name=\"" << ts.second << "\"/>" << endl;
 					}
 					ofs << "\t\t\t</textures_chunk>" << endl;
 				}
@@ -1171,11 +1170,10 @@ namespace KlayGE
 			ofs << "\t</materials_chunk>" << endl;
 		}
 
-		ofs << endl;
 		ofs << "\t<meshes_chunk>" << endl;
 		BOOST_FOREACH(BOOST_TYPEOF(objs_info_)::const_reference obj_info, objs_info_)
 		{
-			ofs << "\t\t<mesh name=\'" << obj_info.name << "\' mtl_id=\'" << obj_info.mtl_id << "\'>" << endl;
+			ofs << "\t\t<mesh name=\"" << obj_info.name << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
 
 			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
@@ -1191,9 +1189,9 @@ namespace KlayGE
 
 				if (export_ve)
 				{
-					ofs << "\t\t\t\t<vertex_element usage=\'" << ve.usage
-						<< "\' usage_index=\'" << int(ve.usage_index)
-						<< "\' num_components=\'" << int(ve.num_components) << "\'/>" << endl;
+					ofs << "\t\t\t\t<vertex_element usage=\"" << ve.usage
+						<< "\" usage_index=\"" << int(ve.usage_index)
+						<< "\" num_components=\"" << int(ve.num_components) << "\"/>" << endl;
 				}
 			}
 			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
@@ -1201,55 +1199,55 @@ namespace KlayGE
 			ofs << "\t\t\t<vertices_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
 			{
-				ofs << "\t\t\t\t<vertex x=\'" << vertex.pos.x
-					<< "\' y=\'" << vertex.pos.y
-					<< "\' z=\'" << vertex.pos.z << "\'>" << endl;
+				ofs << "\t\t\t\t<vertex x=\"" << vertex.pos.x
+					<< "\" y=\"" << vertex.pos.y
+					<< "\" z=\"" << vertex.pos.z << "\">" << endl;
 
 				if (eva.normal)
 				{
-					ofs << "\t\t\t\t\t<normal x=\'" << vertex.normal.x
-						<< "\' y=\'" << vertex.normal.y
-						<< "\' z=\'" << vertex.normal.z << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<normal x=\"" << vertex.normal.x
+						<< "\" y=\"" << vertex.normal.y
+						<< "\" z=\"" << vertex.normal.z << "\"/>" << endl;
 				}
 				if (eva.tangent)
 				{
-					ofs << "\t\t\t\t\t<tangent x=\'" << vertex.tangent.x
-						<< "\' y=\'" << vertex.tangent.y
-						<< "\' z=\'" << vertex.tangent.z << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<tangent x=\"" << vertex.tangent.x
+						<< "\" y=\"" << vertex.tangent.y
+						<< "\" z=\"" << vertex.tangent.z << "\"/>" << endl;
 				}
 				if (eva.binormal)
 				{
-					ofs << "\t\t\t\t\t<binormal x=\'" << vertex.binormal.x
-						<< "\' y=\'" << vertex.binormal.y
-						<< "\' z=\'" << vertex.binormal.z << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<binormal x=\"" << vertex.binormal.x
+						<< "\" y=\"" << vertex.binormal.y
+						<< "\" z=\"" << vertex.binormal.z << "\"/>" << endl;
 				}
 
 				if (eva.tex)
 				{
 					BOOST_FOREACH(BOOST_TYPEOF(vertex.tex)::const_reference tex, vertex.tex)
 					{
-						ofs << "\t\t\t\t\t<tex_coord u=\'" << tex.x
-							<< "\' v=\'" << tex.y << "\'/>" << endl;
+						ofs << "\t\t\t\t\t<tex_coord u=\"" << tex.x
+							<< "\" v=\"" << tex.y << "\"/>" << endl;
 					}
 				}
 
 				BOOST_FOREACH(BOOST_TYPEOF(vertex.binds)::const_reference bind, vertex.binds)
 				{
 					assert(joints_name_to_id.find(bind.first) != joints_name_to_id.end());
-					ofs << "\t\t\t\t\t<weight bone_index=\'" << joints_name_to_id[bind.first]
-						<< "\' weight=\'" << bind.second << "\'/>" << endl;
+					ofs << "\t\t\t\t\t<weight bone_index=\"" << joints_name_to_id[bind.first]
+						<< "\" weight=\"" << bind.second << "\"/>" << endl;
 				}
 
 				ofs << "\t\t\t\t</vertex>" << endl;
 			}
-			ofs << "\t\t\t</vertices_chunk>" << endl << endl;
+			ofs << "\t\t\t</vertices_chunk>" << endl;
 
 			ofs << "\t\t\t<triangles_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.triangles)::const_reference tri, obj_info.triangles)
 			{
-				ofs << "\t\t\t\t<triangle a=\'" << tri.vertex_index[0]
-					<< "\' b=\'" << tri.vertex_index[1]
-					<< "\' c=\'" << tri.vertex_index[2] << "\'/>" << endl;
+				ofs << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
+					<< "\" b=\"" << tri.vertex_index[1]
+					<< "\" c=\"" << tri.vertex_index[2] << "\"/>" << endl;
 			}
 			ofs << "\t\t\t</triangles_chunk>" << endl;
 
@@ -1259,29 +1257,27 @@ namespace KlayGE
 
 		if (joints_per_ver_ > 0)
 		{
-			ofs << endl;
-
-			ofs << "\t<key_frames_chunk start_frame=\'" << start_frame_
-				<< "\' end_frame=\'" << end_frame_
-				<< "\' frame_rate=\'" << frame_rate_ << "\'>" << endl;
+			ofs << "\t<key_frames_chunk start_frame=\"" << start_frame_
+				<< "\" end_frame=\"" << end_frame_
+				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
 			{
 				assert(kf.positions.size() == kf.quaternions.size());
 
-				ofs << "\t\t<key_frame joint=\'" << kf.joint << "\'>" << endl;
+				ofs << "\t\t<key_frame joint=\"" << kf.joint << "\">" << endl;
 
 				for (size_t i = 0; i < kf.positions.size(); ++ i)
 				{
 					ofs << "\t\t\t<key>" << endl;
 
-					ofs << "\t\t\t\t<pos x=\'" << kf.positions[i].x
-						<< "\' y=\'" << kf.positions[i].y
-						<< "\' z=\'" << kf.positions[i].z << "\'/>" << endl;
+					ofs << "\t\t\t\t<pos x=\"" << kf.positions[i].x
+						<< "\" y=\"" << kf.positions[i].y
+						<< "\" z=\"" << kf.positions[i].z << "\"/>" << endl;
 
-					ofs << "\t\t\t\t<quat x=\'" << kf.quaternions[i].x
-						<< "\' y=\'" << kf.quaternions[i].y
-						<< "\' z=\'" << kf.quaternions[i].z
-						<< "\' w=\'" << kf.quaternions[i].w << "\'/>" << endl;
+					ofs << "\t\t\t\t<quat x=\"" << kf.quaternions[i].x
+						<< "\" y=\"" << kf.quaternions[i].y
+						<< "\" z=\"" << kf.quaternions[i].z
+						<< "\" w=\"" << kf.quaternions[i].w << "\"/>" << endl;
 
 					ofs << "\t\t\t</key>" << endl;
 				}

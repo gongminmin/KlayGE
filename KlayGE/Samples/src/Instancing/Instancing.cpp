@@ -214,7 +214,7 @@ void Instancing::InitObjects()
 	ScriptEngine scriptEng;
 	ScriptModule module("Instancing_init");
 
-	renderInstance_ = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
+	renderInstance_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
 	for (int32_t i = 0; i < 10; ++ i)
 	{
 		for (int32_t j = 0; j < NUM_INSTANCE / 10; ++ j)
@@ -244,7 +244,7 @@ void Instancing::InitObjects()
 	}
 	use_instance_ = true;
 
-	renderMesh_ = LoadKModel("teapot.kmodel", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
+	renderMesh_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);

@@ -224,7 +224,7 @@ void ModelViewerApp::InitObjects()
 	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
 	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
 
-	this->OpenModel("felhound.kmodel");
+	this->OpenModel("felhound.meshml");
 
 	Box const & bb = model_->GetBound();
 	float3 center = bb.Center();
@@ -270,7 +270,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadKModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
 	model_->SetTime(0);
 
 	frame_ = 0;
@@ -309,7 +309,7 @@ void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.lpstrFile = fn;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = sizeof(fn);
-	ofn.lpstrFilter = "KModel File\0*.kmodel\0All\0*.*\0";
+	ofn.lpstrFilter = "MeshML File\0*.meshml\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -341,7 +341,7 @@ void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.lpstrFile = fn;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = sizeof(fn);
-	ofn.lpstrFilter = "KModel File\0*.kmodel\0All\0*.*\0";
+	ofn.lpstrFilter = "MeshML File\0*.meshml\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -353,7 +353,7 @@ void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(NULL, IDC_WAIT));
 		
-		SaveKModel(model_, fn);
+		SaveModel(model_, fn);
 
 		SetCursor(cur);
 	}

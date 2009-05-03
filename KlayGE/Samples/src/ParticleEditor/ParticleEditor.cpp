@@ -781,71 +781,57 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	XMLNodePtr root = doc.AllocNode(XNT_Element, "particle_system");
 	doc.RootNode(root);
 
-	XMLAttributePtr attr = doc.AllocAttribString("particle_tex", particle_tex_);
-	root->AppendAttrib(attr);
+	root->AppendAttrib(doc.AllocAttribString("particle_tex", particle_tex_));
 
 	float angle = static_cast<float>(dialog_->Control<UISlider>(id_angle_slider_)->GetValue());
-	attr = doc.AllocAttribFloat("emit_angle", angle);
-	root->AppendAttrib(attr);
+	root->AppendAttrib(doc.AllocAttribFloat("emit_angle", angle));
 
 	float life = static_cast<float>(dialog_->Control<UISlider>(id_life_slider_)->GetValue());
-	attr = doc.AllocAttribFloat("life", life);
-	root->AppendAttrib(attr);
+	root->AppendAttrib(doc.AllocAttribFloat("life", life));
 
 	float density = dialog_->Control<UISlider>(id_density_slider_)->GetValue() / 100.0f;
-	attr = doc.AllocAttribFloat("media_density", density);
-	root->AppendAttrib(attr);
+	root->AppendAttrib(doc.AllocAttribFloat("media_density", density));
 
 	float velocity = dialog_->Control<UISlider>(id_velocity_slider_)->GetValue() / 100.0f;
-	attr = doc.AllocAttribFloat("velocity", velocity);
-	root->AppendAttrib(attr);
+	root->AppendAttrib(doc.AllocAttribFloat("velocity", velocity));
 
 	XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
-	attr = doc.AllocAttribString("name", "size_over_life");
-	size_over_life_node->AppendAttrib(attr);
+	size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoint(i);
 
 		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-		attr = doc.AllocAttribFloat("x", pt.x());
-		ctrl_point_node->AppendAttrib(attr);
-		attr = doc.AllocAttribFloat("y", pt.y());
-		ctrl_point_node->AppendAttrib(attr);
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
 		size_over_life_node->AppendNode(ctrl_point_node);
 	}
 	root->AppendNode(size_over_life_node);
 
 	XMLNodePtr weight_over_life_node = doc.AllocNode(XNT_Element, "curve");
-	attr = doc.AllocAttribString("name", "weight_over_life");
-	weight_over_life_node->AppendAttrib(attr);
+	weight_over_life_node->AppendAttrib(doc.AllocAttribString("name", "weight_over_life"));
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoint(i);
 
 		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-		attr = doc.AllocAttribFloat("x", pt.x());
-		ctrl_point_node->AppendAttrib(attr);
-		attr = doc.AllocAttribFloat("y", pt.y());
-		ctrl_point_node->AppendAttrib(attr);
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
 		weight_over_life_node->AppendNode(ctrl_point_node);
 	}
 	root->AppendNode(weight_over_life_node);
 
 	XMLNodePtr transparency_over_life_node = doc.AllocNode(XNT_Element, "curve");
-	attr = doc.AllocAttribString("name", "transparency_over_life");
-	transparency_over_life_node->AppendAttrib(attr);
+	transparency_over_life_node->AppendAttrib(doc.AllocAttribString("name", "transparency_over_life"));
 	for (size_t i = 0; i < dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->NumCtrlPoints(); ++ i)
 	{
 		float2 const & pt = dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoint(i);
 
 		XMLNodePtr ctrl_point_node = doc.AllocNode(XNT_Element, "ctrl_point");
-		attr = doc.AllocAttribFloat("x", pt.x());
-		ctrl_point_node->AppendAttrib(attr);
-		attr = doc.AllocAttribFloat("y", pt.y());
-		ctrl_point_node->AppendAttrib(attr);
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("x", pt.x()));
+		ctrl_point_node->AppendAttrib(doc.AllocAttribFloat("y", pt.y()));
 
 		transparency_over_life_node->AppendNode(ctrl_point_node);
 	}
