@@ -19,6 +19,8 @@
 	<parameter type="texture2D" name="lum_tex"/>
 	<parameter type="texture2D" name="bloom_tex"/>
 
+	<parameter type="bool" name="blue_shift"/>
+
 	<shader>
 		<![CDATA[
 float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
@@ -29,10 +31,12 @@ float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 
 	color += blur * 0.25f;
 
-	// Blue shift
-	half blue_shift_coef = 1.0f - (adapted_lum + 1.5f) / 4.1f;
-	half3 rod_clr = dot(color, RGB_TO_LUM) * BLUE_SHIFT;
-	color = lerp(color, rod_clr, saturate(blue_shift_coef));
+	if (blue_shift)
+	{
+		half blue_shift_coef = 1.0f - (adapted_lum + 1.5f) / 4.1f;
+		half3 rod_clr = dot(color, RGB_TO_LUM) * BLUE_SHIFT;
+		color = lerp(color, rod_clr, saturate(blue_shift_coef));
+	}
 
 	// Tone mapping
 	color *= MIDDLE_GREY / adapted_lum;

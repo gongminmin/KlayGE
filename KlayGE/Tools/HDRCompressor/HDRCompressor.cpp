@@ -198,7 +198,7 @@ namespace
 				tran_data[i].slice_pitch = in_data[i].slice_pitch * 2;
 				base[i] = tran_data_block.size();
 				tran_data_block.resize(tran_data_block.size() + tran_data[i].slice_pitch);
-				for (size_t j = 0; j < tran_data[i].slice_pitch; j += 8)
+				for (size_t j = 0; j < in_data[i].slice_pitch; j += 8)
 				{
 					float* f32 = reinterpret_cast<float*>(&tran_data_block[base[i]] + j * 2);
 					half const * f16 = static_cast<half const *>(in_data[i].data) + j / sizeof(half);
@@ -228,11 +228,11 @@ namespace
 
 		std::vector<ElementInitData> y_data(in_data.size());
 		std::vector<ElementInitData> c_data(in_data.size());
-		std::vector<uint8_t> y_data_block;
-		std::vector<uint8_t> c_data_block;
+		std::vector<std::vector<uint8_t> > y_data_block(in_data.size());
+		std::vector<std::vector<uint8_t> > c_data_block(in_data.size());
 		for (size_t i = 0; i < in_data.size(); ++ i)
 		{
-			CompressHDRSubresource(y_data[i], c_data[i], y_data_block, c_data_block, in_data[i]);
+			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i]);
 		}
 
 		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_R16, y_data);

@@ -77,7 +77,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:
-		ToneMappingPostProcess();
+		explicit ToneMappingPostProcess(bool blue_shift);
 
 		void SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex);
 
@@ -95,7 +95,7 @@ namespace KlayGE
 		};
 
 	public:
-		HDRPostProcess();
+		explicit HDRPostProcess(bool blur_shift);
 
 		void Source(TexturePtr const & tex, bool flipping);
 		void Destinate(FrameBufferPtr const & fb);

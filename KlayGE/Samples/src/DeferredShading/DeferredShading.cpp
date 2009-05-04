@@ -334,8 +334,8 @@ void DeferredShadingApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 
-	TexturePtr y_cube_map = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
-	TexturePtr c_cube_map = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
+	TexturePtr y_cube_map = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read)();
+	TexturePtr c_cube_map = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read)();
 	sky_box_.reset(new SceneObjectHDRSkyBox);
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
@@ -369,7 +369,7 @@ void DeferredShadingApp::InitObjects()
 	edge_anti_alias_.reset(new AntiAliasPostProcess);
 	ssao_pp_.reset(new SSAOPostProcess);
 	blur_pp_.reset(new BlurPostProcess(8, 1));
-	hdr_pp_.reset(new HDRPostProcess);
+	hdr_pp_.reset(new HDRPostProcess(false));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

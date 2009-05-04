@@ -139,7 +139,7 @@ namespace KlayGE
 	}
 
 
-	ToneMappingPostProcess::ToneMappingPostProcess()
+	ToneMappingPostProcess::ToneMappingPostProcess(bool blue_shift)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml")->TechniqueByName("ToneMapping20"))
 	{
 		RenderEffect const & effect = technique_->Effect();
@@ -150,6 +150,7 @@ namespace KlayGE
 
 		lum_tex_ep_ = technique_->Effect().ParameterByName("lum_tex");
 		bloom_tex_ep_ = technique_->Effect().ParameterByName("bloom_tex");
+		*(technique_->Effect().ParameterByName("blue_shift")) = blue_shift;
 	}
 
 	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
@@ -159,9 +160,10 @@ namespace KlayGE
 	}
 
 
-	HDRPostProcess::HDRPostProcess()
+	HDRPostProcess::HDRPostProcess(bool blue_shift)
 		: PostProcess(RenderTechniquePtr()),
-			blur_(8, 2)
+			blur_(8, 2),
+			tone_mapping_(blue_shift)
 	{
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
 	}
