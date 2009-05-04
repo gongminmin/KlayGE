@@ -55,6 +55,18 @@ namespace KlayGE
 		audioFactory_ = AudioFactory::NullObject();
 		inputFactory_ = InputFactory::NullObject();
 		showFactory_ = ShowFactory::NullObject();
+
+		dll_suffix_ = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
+		dll_suffix_ += "_";
+		dll_suffix_ += KLAYGE_STRINGIZE(KLAYGE_COMPILER_TARGET);
+#ifdef KLAYGE_DEBUG
+		dll_suffix_ += "_d";
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		dll_suffix_ += ".dll";
+#else
+		dll_suffix_ += ".so";
+#endif
 	}
 
 	Context::~Context()
@@ -117,32 +129,32 @@ namespace KlayGE
 			XMLNodePtr screen_node = cfg_root->FirstNode("screen");
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
+			rf_node = context_node->FirstNode("render_factory");
 			if (rf_node)
 			{
 				rf_name = rf_node->Attrib("name")->ValueString();
 			}
 #endif
 
-			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
+			af_node = context_node->FirstNode("audio_factory");
 			if (af_node)
 			{
 				af_name = af_node->Attrib("name")->ValueString();
 			}
 
-			XMLNodePtr if_node = context_node->FirstNode("input_factory");
+			if_node = context_node->FirstNode("input_factory");
 			if (if_node)
 			{
 				if_name = if_node->Attrib("name")->ValueString();
 			}
 
-			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
+			sf_node = context_node->FirstNode("show_factory");
 			if (sf_node)
 			{
 				sf_name = sf_node->Attrib("name")->ValueString();
 			}
 
-			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
+			sm_node = context_node->FirstNode("scene_manager");
 			if (sm_node)
 			{
 				sm_name = sm_node->Attrib("name")->ValueString();
@@ -225,142 +237,11 @@ namespace KlayGE
 			}
 		}
 
-		std::string dll_suffix = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
-		dll_suffix += "_";
-		dll_suffix += KLAYGE_STRINGIZE(KLAYGE_COMPILER_TARGET);
-#ifdef KLAYGE_DEBUG
-		dll_suffix += "_d";
-#endif
-#ifdef KLAYGE_PLATFORM_WINDOWS
-		dll_suffix += ".dll";
-#else
-		dll_suffix += ".so";
-#endif
-
-		{
-			std::string render_path = ResLoader::Instance().Locate("Render");
-			for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-			{
-				std::string fn = iter->path().filename();
-				std::string suffix = rf_name + "_" + dll_suffix;
-				std::string::size_type n = fn.rfind(suffix);
-				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-				{
-					render_loader_.Load(render_path + "/" + fn);
-
-					MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
-					if (mrf != NULL)
-					{
-						mrf(renderFactory_, rf_node);
-						break;
-					}
-					else
-					{
-						render_loader_.Free();
-					}
-				}
-			}
-		}
-
-		{
-			std::string audio_path = ResLoader::Instance().Locate("Audio");
-			for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-			{
-				std::string fn = iter->path().filename();
-				std::string suffix = af_name + "_" + dll_suffix;
-				std::string::size_type n = fn.rfind(suffix);
-				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-				{
-					audio_loader_.Load(audio_path + "/" + fn);
-
-					MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
-					if (maf != NULL)
-					{
-						maf(audioFactory_, af_node);
-						break;
-					}
-					else
-					{
-						audio_loader_.Free();
-					}
-				}
-			}
-		}
-
-		{
-			std::string input_path = ResLoader::Instance().Locate("Input");
-			for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-			{
-				std::string fn = iter->path().filename();
-				std::string suffix = if_name + "_" + dll_suffix;
-				std::string::size_type n = fn.rfind(suffix);
-				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-				{
-					input_loader_.Load(input_path + "/" + fn);
-
-					MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
-					if (mif != NULL)
-					{
-						mif(inputFactory_, if_node);
-						break;
-					}
-					else
-					{
-						input_loader_.Free();
-					}
-				}
-			}
-		}
-
-		{
-			std::string show_path = ResLoader::Instance().Locate("Show");
-			for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-			{
-				std::string fn = iter->path().filename();
-				std::string suffix = sf_name + "_" + dll_suffix;
-				std::string::size_type n = fn.rfind(suffix);
-				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-				{
-					show_loader_.Load(show_path + "/" + fn);
-
-					MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
-					if (msf != NULL)
-					{
-						msf(showFactory_, sf_node);
-						break;
-					}
-					else
-					{
-						show_loader_.Free();
-					}
-				}
-			}
-		}
-
-		{
-			std::string sm_path = ResLoader::Instance().Locate("Scene");
-			for (boost::filesystem::directory_iterator iter(sm_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-			{
-				std::string fn = iter->path().filename();
-				std::string suffix = sm_name + "_" + dll_suffix;
-				std::string::size_type n = fn.rfind(suffix);
-				if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-				{
-					sm_loader_.Load(sm_path + "/" + fn);
-
-					MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
-					if (msm != NULL)
-					{
-						msm(sceneMgr_, sm_node);
-						break;
-					}
-					else
-					{
-						sm_loader_.Free();
-					}
-				}
-			}
-		}
+		this->LoadRenderFactory(rf_name, rf_node);
+		this->LoadAudioFactory(af_name, af_node);
+		this->LoadInputFactory(if_name, if_node);
+		this->LoadShowFactory(sf_name, sf_node);
+		this->LoadSceneManager(sm_name, sm_node);
 
 		RenderSettings settings;
 		settings.width = width;
@@ -372,5 +253,150 @@ namespace KlayGE
 		settings.full_screen = full_screen;
 
 		return settings;
+	}
+
+	void Context::LoadRenderFactory(std::string const & rf_name, XMLNodePtr const & rf_node)
+	{
+		renderFactory_.reset();
+		render_loader_.Free();
+
+		std::string render_path = ResLoader::Instance().Locate("Render");
+		for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = iter->path().filename();
+			std::string suffix = rf_name + "_" + dll_suffix_;
+			std::string::size_type n = fn.rfind(suffix);
+			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
+			{
+				render_loader_.Load(render_path + "/" + fn);
+
+				MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
+				if (mrf != NULL)
+				{
+					mrf(renderFactory_, rf_node);
+					break;
+				}
+				else
+				{
+					render_loader_.Free();
+				}
+			}
+		}
+	}
+
+	void Context::LoadAudioFactory(std::string const & af_name, XMLNodePtr const & af_node)
+	{
+		audioFactory_.reset();
+		audio_loader_.Free();
+
+		std::string audio_path = ResLoader::Instance().Locate("Audio");
+		for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = iter->path().filename();
+			std::string suffix = af_name + "_" + dll_suffix_;
+			std::string::size_type n = fn.rfind(suffix);
+			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
+			{
+				audio_loader_.Load(audio_path + "/" + fn);
+
+				MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
+				if (maf != NULL)
+				{
+					maf(audioFactory_, af_node);
+					break;
+				}
+				else
+				{
+					audio_loader_.Free();
+				}
+			}
+		}
+	}
+
+	void Context::LoadInputFactory(std::string const & if_name, XMLNodePtr const & if_node)
+	{
+		inputFactory_.reset();
+		input_loader_.Free();
+
+		std::string input_path = ResLoader::Instance().Locate("Input");
+		for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = iter->path().filename();
+			std::string suffix = if_name + "_" + dll_suffix_;
+			std::string::size_type n = fn.rfind(suffix);
+			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
+			{
+				input_loader_.Load(input_path + "/" + fn);
+
+				MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
+				if (mif != NULL)
+				{
+					mif(inputFactory_, if_node);
+					break;
+				}
+				else
+				{
+					input_loader_.Free();
+				}
+			}
+		}
+	}
+
+	void Context::LoadShowFactory(std::string const & sf_name, XMLNodePtr const & sf_node)
+	{
+		showFactory_.reset();
+		show_loader_.Free();
+
+		std::string show_path = ResLoader::Instance().Locate("Show");
+		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = iter->path().filename();
+			std::string suffix = sf_name + "_" + dll_suffix_;
+			std::string::size_type n = fn.rfind(suffix);
+			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
+			{
+				show_loader_.Load(show_path + "/" + fn);
+
+				MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
+				if (msf != NULL)
+				{
+					msf(showFactory_, sf_node);
+					break;
+				}
+				else
+				{
+					show_loader_.Free();
+				}
+			}
+		}
+	}
+
+	void Context::LoadSceneManager(std::string const & sm_name, XMLNodePtr const & sm_node)
+	{
+		sceneMgr_.reset();
+		sm_loader_.Free();
+
+		std::string sm_path = ResLoader::Instance().Locate("Scene");
+		for (boost::filesystem::directory_iterator iter(sm_path); iter != boost::filesystem::directory_iterator(); ++ iter)
+		{
+			std::string fn = iter->path().filename();
+			std::string suffix = sm_name + "_" + dll_suffix_;
+			std::string::size_type n = fn.rfind(suffix);
+			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
+			{
+				sm_loader_.Load(sm_path + "/" + fn);
+
+				MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
+				if (msm != NULL)
+				{
+					msm(sceneMgr_, sm_node);
+					break;
+				}
+				else
+				{
+					sm_loader_.Free();
+				}
+			}
+		}
 	}
 }

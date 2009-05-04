@@ -32,20 +32,29 @@ namespace KlayGE
 
 	ResLoader::ResLoader()
 	{
+		pathes_.push_back("");
+
 		this->AddPath("");
 		this->AddPath("../media/RenderFX/");
+		this->AddPath("../media/Models/");
+		this->AddPath("../media/Textures/2D/");
+		this->AddPath("../media/Textures/3D/");
+		this->AddPath("../media/Textures/Cube/");
 	}
 
 	void ResLoader::AddPath(std::string const & path)
 	{
-		if (!path.empty() && (path[path.length() - 1] != '/'))
+		boost::filesystem::path new_path(path);
+		if (!new_path.is_complete())
 		{
-			pathes_.push_back(path + '/');
+			new_path = boost::filesystem::current_path() / new_path;
 		}
-		else
+		std::string path_str = new_path.string();
+		if (path_str[path_str.length() - 1] != '/')
 		{
-			pathes_.push_back(path);
+			path_str.push_back('/');
 		}
+		pathes_.push_back(path_str);
 	}
 
 	std::string ResLoader::Locate(std::string const & name)

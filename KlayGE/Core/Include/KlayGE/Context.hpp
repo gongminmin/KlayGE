@@ -47,6 +47,12 @@ namespace KlayGE
 
 		RenderSettings LoadCfg(std::string const & cfg_file);
 
+		void LoadRenderFactory(std::string const & rf_name, XMLNodePtr const & rf_node);
+		void LoadAudioFactory(std::string const & af_name, XMLNodePtr const & af_node);
+		void LoadInputFactory(std::string const & if_name, XMLNodePtr const & if_node);
+		void LoadShowFactory(std::string const & sf_name, XMLNodePtr const & sf_node);
+		void LoadSceneManager(std::string const & sm_name, XMLNodePtr const & sm_node);
+
 		void AppInstance(App3DFramework& app)
 		{
 			app_ = &app;
@@ -124,6 +130,8 @@ namespace KlayGE
 		DllLoader input_loader_;
 		DllLoader show_loader_;
 		DllLoader sm_loader_;
+
+		std::string dll_suffix_;
 	};
 }
 
