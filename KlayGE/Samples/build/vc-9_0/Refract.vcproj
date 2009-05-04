@@ -366,10 +366,6 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\Refract\HDRSkyBox.fxml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\Refract\Refract.fxml"
 				>
 			</File>

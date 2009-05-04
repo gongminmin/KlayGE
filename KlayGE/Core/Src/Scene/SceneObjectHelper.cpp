@@ -1,8 +1,11 @@
 // SceneObjectHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 2.7.1
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了SceneObjectHDRSkyBox (2009.5.4)
 //
 // 2.7.1
 // 增加了RenderableHelper基类 (2005.7.10)
@@ -49,5 +52,15 @@ namespace KlayGE
 	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
+	}
+
+	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox()
+	{
+		renderable_ = MakeSharedPtr<RenderableHDRSkyBox>();
+	}
+
+	void SceneObjectHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
+	{
+		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 	}
 }

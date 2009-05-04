@@ -1,8 +1,11 @@
 // SceneObjectHelper.hpp
 // KlayGE 一些常用的场景对象 头文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了SceneObjectHDRSkyBox (2009.5.4)
 //
 // 3.1.0
 // 初次建立 (2005.10.31)
@@ -40,6 +43,17 @@ namespace KlayGE
 		}
 
 		void CubeMap(TexturePtr const & cube);
+	};
+
+	class KLAYGE_CORE_API SceneObjectHDRSkyBox : public SceneObjectSkyBox
+	{
+	public:
+		SceneObjectHDRSkyBox();
+		virtual ~SceneObjectHDRSkyBox()
+		{
+		}
+
+		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
 	};
 }
 

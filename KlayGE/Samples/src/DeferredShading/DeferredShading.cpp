@@ -333,6 +333,12 @@ void DeferredShadingApp::InitObjects()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
+
+	TexturePtr y_cube_map = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
+	TexturePtr c_cube_map = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
+	sky_box_.reset(new SceneObjectHDRSkyBox);
+	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_->AddToSceneManager();
 	
 	g_buffer_ = rf.MakeFrameBuffer();
 	g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
@@ -507,7 +513,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		renderEngine.BindFrameBuffer(g_buffer_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 1), 1.0f, 0);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 
 	default:

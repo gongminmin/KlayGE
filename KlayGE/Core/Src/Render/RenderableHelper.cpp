@@ -1,8 +1,11 @@
 // RenderableHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 2.7.1
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了RenderableHDRSkyBox (2009.5.4)
 //
 // 2.7.1
 // 增加了RenderableHelper基类 (2005.7.10)
@@ -312,7 +315,7 @@ namespace KlayGE
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 
-		skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_cube_tex");
+		skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
 		inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 	}
 
@@ -331,6 +334,19 @@ namespace KlayGE
 		rot_view(3, 1) = 0;
 		rot_view(3, 2) = 0;
 		*inv_mvp_ep_ = MathLib::inverse(rot_view * camera.ProjMatrix());
+	}
+
+	RenderableHDRSkyBox::RenderableHDRSkyBox()
+	{
+		technique_ = technique_->Effect().TechniqueByName("HDRSkyBoxTec");
+
+		skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
+	}
+
+	void RenderableHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
+	{
+		*skybox_cube_tex_ep_ = y_cube;
+		*skybox_Ccube_tex_ep_ = c_cube;
 	}
 
 	RenderablePlane::RenderablePlane(float length, float width,

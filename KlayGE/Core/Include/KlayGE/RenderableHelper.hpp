@@ -1,8 +1,11 @@
 // RenderableHelper.hpp
 // KlayGE 一些常用的可渲染对象 头文件
-// Ver 2.7.1
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了RenderableHDRSkyBox (2009.5.4)
 //
 // 2.7.1
 // 增加了RenderableHelper基类 (2005.7.10)
@@ -127,6 +130,20 @@ namespace KlayGE
 	protected:
 		RenderEffectParameterPtr inv_mvp_ep_;
 		RenderEffectParameterPtr skybox_cube_tex_ep_;
+	};
+
+	class KLAYGE_CORE_API RenderableHDRSkyBox : public RenderableSkyBox
+	{
+	public:
+		RenderableHDRSkyBox();
+		virtual ~RenderableHDRSkyBox()
+		{
+		}
+
+		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
+
+	protected:
+		RenderEffectParameterPtr skybox_Ccube_tex_ep_;
 	};
 
 	class KLAYGE_CORE_API RenderablePlane : public RenderableHelper

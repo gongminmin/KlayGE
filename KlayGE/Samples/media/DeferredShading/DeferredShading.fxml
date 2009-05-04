@@ -36,9 +36,9 @@ float3 texcoord_to_view(float2 tex)
 				tex.y);
 }
 
-float4 StoreNormalDepthMat(float3 normal, float depth, float mat_id)
+float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id)
 {
-	return float4(normal.xy, depth, mat_id);
+	return float4(normal.xy, depth, mtl_id);
 }
 
 float4 StoreDiffuseSpecular(float3 diffuse, float specular)
@@ -54,6 +54,11 @@ float3 GetNormal(float4 ndc)
 float GetDepth(float4 ndc)
 {
 	return ndc.z;
+}
+
+int GetMtlID(float4 ndc)
+{
+	return int(ndc.w + 0.1f);
 }
 
 float3 GetDiffuse(float4 clr)
@@ -89,7 +94,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(mul(normal.xyz + 0.1f * bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
-	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
+	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 
 	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0);
 }
@@ -98,7 +103,7 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
-	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
+	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
 	float3 diffuse;
 	if (diffuse_clr.a > 0.5f)
@@ -313,55 +318,58 @@ void DeferredShadingVS(float4 pos : POSITION,
 float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	float4 color = color_tex.Sample(point_sampler, tc0);
+	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
-	float3 normal = GetNormal(ndc);
 	
-	view_dir = normalize(view_dir);
-
-	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
-	float3 light_dir = normalize(light_in_eye - pos_es);
-	
-	float diffuse = diffuse_term(light_dir, normal);
-	float specular = 0;
-	if (diffuse > 0)
+	float4 final_clr;
+	if (0 == GetMtlID(ndc))
 	{
-		specular = dot(normalize(light_dir - view_dir), normal);
-		if (specular > 0)
-		{
-			specular = pow(specular, 8.0f);
-		}
-		else
-		{
-			specular = 0;
-		}
+		final_clr = float4(diffuse_clr, 1);
 	}
 	else
 	{
-		diffuse = 0;
-	}
+		float3 normal = GetNormal(ndc);
+		
+		view_dir = normalize(view_dir);
 
-	float4 color = color_tex.Sample(point_sampler, tc0);
-	float3 diffuse_clr = GetDiffuse(color);
-	if (ssao_enabled)
-	{
-		diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
+		float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
+		float3 light_dir = normalize(light_in_eye - pos_es);
+		
+		float diffuse = diffuse_term(light_dir, normal);
+		float specular = 0;
+		if (diffuse > 0)
+		{
+			specular = dot(normalize(light_dir - view_dir), normal);
+			if (specular > 0)
+			{
+				specular = pow(specular, 8.0f);
+			}
+			else
+			{
+				specular = 0;
+			}
+		}
+		else
+		{
+			diffuse = 0;
+		}
+
+		if (ssao_enabled)
+		{
+			diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
+		}
+		float3 specular_clr = GetSpecular(color);
+		final_clr = float4(diffuse_clr * (0.15f + diffuse) * 0.7f + specular_clr * specular * 0.3f, 1);
 	}
-	float3 specular_clr = GetSpecular(color);
-	return float4(diffuse_clr * (0.15f + diffuse) * 0.7f + specular_clr * specular * 0.3f, 1);
+	
+	return final_clr;
 }
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
@@ -372,11 +380,6 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 	float3 normal = GetNormal(ndc);
 	
 	return float4(normal / 2 + 0.5f, 1);
@@ -386,24 +389,11 @@ float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
-	float3 normal = GetNormal(ndc);
-	
 	return float4(depth.xxx, 1);
 }
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
-
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float3 diffuse_clr = GetDiffuse(color);
 	return float4(diffuse_clr, 1);
@@ -411,13 +401,6 @@ float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 
 float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
-	
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float3 specular_clr = GetSpecular(color);
 	return float4(specular_clr, 1);
@@ -426,11 +409,6 @@ float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 
 	float4 color = GetEdgeWeight(tc0);
 	return color;
@@ -439,11 +417,6 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 
 	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
 	return color;
@@ -453,10 +426,6 @@ float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 
 	float edge = GetEdgeWeight(tc0);
 	return (color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
@@ -468,11 +437,6 @@ float4 AntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 
 	float4 color = SSAO(tc0);
 	return color;

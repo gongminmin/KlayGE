@@ -32,54 +32,6 @@ using namespace KlayGE;
 
 namespace
 {
-	class HDRSkyBox : public RenderableSkyBox
-	{
-	public:
-		HDRSkyBox()
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("HDRSkyBox.fxml")->TechniqueByName("HDRSkyBoxTec");
-
-			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_cube_tex");
-			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_Ccube_tex");
-			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
-		}
-
-		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
-		{
-			y_tex_ = y_cube;
-			c_tex_ = c_cube;
-		}
-
-		void OnRenderBegin()
-		{
-			RenderableSkyBox::OnRenderBegin();
-
-			*skybox_cube_tex_ep_ = y_tex_;
-			*skybox_Ccube_tex_ep_ = c_tex_;
-		}
-
-	private:
-		TexturePtr y_tex_;
-		TexturePtr c_tex_;
-
-		RenderEffectParameterPtr skybox_Ccube_tex_ep_;
-	};
-
-	class HDRSceneObjectSkyBox : public SceneObjectSkyBox
-	{
-	public:
-		HDRSceneObjectSkyBox()
-		{
-			renderable_.reset(new HDRSkyBox);
-		}
-
-		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
-		{
-			checked_pointer_cast<HDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
-		}
-	};
-
 	class RefractorRenderable : public KMesh
 	{
 	public:
@@ -245,8 +197,8 @@ void Refract::InitObjects()
 	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
 	refractor_->AddToSceneManager();
 
-	sky_box_.reset(new HDRSceneObjectSkyBox);
-	checked_pointer_cast<HDRSceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
+	sky_box_.reset(new SceneObjectHDRSkyBox);
+	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
