@@ -169,7 +169,7 @@ namespace KlayGE
 		void skin_modifier(Modifier* mod, INode* node,
 			std::vector<std::pair<Point3, binds_t> >& positions);
 
-		void get_material(material_t& mtl, std::map<int, Matrix2>& uv_transs, Mtl* max_mtl);
+		void get_material(materials_t& mtls, std::vector<std::map<int, Matrix2> >& uv_transss, Mtl* max_mtl);
 
 	private:
 		typedef std::vector<object_info_t> objects_info_t;

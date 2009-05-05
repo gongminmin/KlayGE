@@ -94,6 +94,35 @@ namespace
 		}
 	}
 
+	struct less_Point2 : public std::binary_function<Point2, Point2, bool>
+	{
+		bool operator()(Point2 const & lhs, Point2 const & rhs) const
+		{
+			if (lhs.x < rhs.x)
+			{
+				return true;
+			}
+			else
+			{
+				if (lhs.x > rhs.x)
+				{
+					return false;
+				}
+				else
+				{
+					if (lhs.y < rhs.y)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
+	};
+
 	bool bind_cmp(std::pair<std::string, float> const& lhs,
 		std::pair<std::string, float> const& rhs)
 	{
@@ -286,43 +315,58 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::get_material(material_t& mtl, std::map<int, Matrix2>& uv_transs, Mtl* max_mtl)
+	void meshml_extractor::get_material(materials_t& mtls, std::vector<std::map<int, Matrix2> >& uv_transss, Mtl* max_mtl)
 	{
-		mtl.ambient = max_mtl->GetAmbient();
-		mtl.diffuse = max_mtl->GetDiffuse();
-		mtl.specular = max_mtl->GetSpecular();
-		if (max_mtl->GetSelfIllumColorOn())
+		if (0 == max_mtl->NumSubMtls())
 		{
-			mtl.emit = max_mtl->GetSelfIllumColor();
+			mtls.push_back(material_t());
+			material_t& mtl = mtls.back();
+			uv_transss.push_back(std::map<int, Matrix2>());
+			std::map<int, Matrix2>& uv_transs = uv_transss.back();
+
+			mtl.ambient = max_mtl->GetAmbient();
+			mtl.diffuse = max_mtl->GetDiffuse();
+			mtl.specular = max_mtl->GetSpecular();
+			if (max_mtl->GetSelfIllumColorOn())
+			{
+				mtl.emit = max_mtl->GetSelfIllumColor();
+			}
+			else
+			{
+				mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
+			}
+			mtl.opacity = 1 - max_mtl->GetXParency();
+			mtl.specular_level = max_mtl->GetShinStr();
+			mtl.shininess = max_mtl->GetShininess() * 100;
+
+			for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
+			{
+				Texmap* tex_map = max_mtl->GetSubTexmap(j);
+				if (tex_map != NULL)
+				{
+					if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
+					{
+						BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
+
+						Matrix3 uv_mat;
+						tex_map->GetUVTransform(uv_mat);
+						Matrix2 uv_trans(TRUE);
+						uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
+						uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
+						uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
+
+						mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()),
+							tstr_to_str(bitmap_tex->GetMapName())));
+						uv_transs[j] = uv_trans;
+					}
+				}
+			}
 		}
 		else
 		{
-			mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
-		}
-		mtl.opacity = 1 - max_mtl->GetXParency();
-		mtl.specular_level = max_mtl->GetShinStr();
-		mtl.shininess = max_mtl->GetShininess() * 100;
-
-		for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
-		{
-			Texmap* tex_map = max_mtl->GetSubTexmap(j);
-			if (tex_map != NULL)
+			for (int i = 0; i < max_mtl->NumSubMtls(); ++ i)
 			{
-				if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
-				{
-					BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
-
-					Matrix3 uv_mat;
-					tex_map->GetUVTransform(uv_mat);
-					Matrix2 uv_trans(TRUE);
-					uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
-					uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
-					uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
-
-					mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()),
-						tstr_to_str(bitmap_tex->GetMapName())));
-					uv_transs[j] = uv_trans;
-				}
+				this->get_material(mtls, uv_transss, max_mtl->GetSubMtl(i));
 			}
 		}
 	}
@@ -351,25 +395,7 @@ namespace KlayGE
 		Mtl* mtl = node->GetMtl();
 		if (mtl != NULL)
 		{
-			if ((Class_ID(DMTL_CLASS_ID, 0) == mtl->ClassID()) && (0 == mtl->NumSubMtls()))
-			{
-				objs_mtl_.resize(mtl_base_index + 1);
-				uv_transs.resize(1);
-
-				this->get_material(objs_mtl_[mtl_base_index], uv_transs[0], mtl);
-			}
-			else
-			{
-				if ((Class_ID(MULTI_CLASS_ID, 0) == mtl->ClassID()) || (Class_ID(CMTL_CLASS_ID, 0) == mtl->ClassID()))
-				{
-					objs_mtl_.resize(mtl_base_index + mtl->NumSubMtls());
-					uv_transs.resize(mtl->NumSubMtls());
-					for (int i = 0; i < mtl->NumSubMtls(); ++ i)
-					{
-						this->get_material(objs_mtl_[mtl_base_index + i], uv_transs[i], mtl->GetSubMtl(i));
-					}
-				}
-			}
+			this->get_material(objs_mtl_, uv_transs, mtl);
 		}
 
 		std::vector<unsigned int> face_sm_group;
@@ -435,17 +461,18 @@ namespace KlayGE
 			// Combine texture coordinates
 			BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
 			{
+				std::map<Point2, int, less_Point2> tex_index_set;
 				for (int i = 0; i < tex_index.second.size(); ++ i)
 				{
 					Point2 tex = texs[tex_index.first][tex_index.second[i]];
-					for (int j = 0; j < i - 1; ++ j)
+					BOOST_AUTO(iter, tex_index_set.find(tex));
+					if (iter != tex_index_set.end())
 					{
-						Point2 dt = texs[tex_index.first][tex_index.second[j]] - tex;
-						if ((abs(dt.x) < 1e-5f) && (abs(dt.y) < 1e-5f))
-						{
-							tex_index.second[i] = tex_index.second[j];
-							break;
-						}
+						tex_index.second[i] = iter->second;
+					}
+					else
+					{
+						tex_index_set.insert(std::make_pair(tex, tex_index.second[i]));
 					}
 				}
 			}

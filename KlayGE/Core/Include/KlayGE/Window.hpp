@@ -27,7 +27,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4103 4251 4275 4512)
+#pragma warning(disable: 4100 4103 4251 4275 4512)
 #endif
 #include <boost/signals2.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
