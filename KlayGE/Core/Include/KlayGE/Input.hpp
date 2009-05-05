@@ -35,7 +35,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4103 4251 4275 4512)
 #endif
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -287,7 +287,7 @@ namespace KlayGE
 		MapVector<uint16_t, uint16_t> actionMap_;
 	};
 
-	typedef boost::signal<void(InputEngine const &, InputAction const &)> input_signal;
+	typedef boost::signals2::signal<void(InputEngine const &, InputAction const &)> input_signal;
 	typedef boost::shared_ptr<input_signal> action_handler_t;
 	typedef MapVector<uint32_t, InputActionMap> action_maps_t;
 

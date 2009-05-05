@@ -748,7 +748,7 @@ namespace KlayGE
 		void set_value(value_type* dst, value_type const & src)
 		{
 			dst->~value_type();
-			new (dst) value_type(src);
+			::new (dst) value_type(src);
 		}
 
 		void destroy_buckets(size_type first, size_type last)

@@ -56,7 +56,7 @@
 #include <string>
 #include <vector>
 #include <boost/assert.hpp>
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
 namespace KlayGE

@@ -33,8 +33,6 @@
 
 #include <string>
 #include <map>
-#include <boost/smart_ptr.hpp>
-#include <boost/utility.hpp>
 
 namespace KlayGE
 {

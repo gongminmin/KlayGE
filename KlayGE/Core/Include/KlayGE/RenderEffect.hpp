@@ -61,7 +61,7 @@
 #include <string>
 #include <algorithm>
 
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>

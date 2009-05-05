@@ -19,7 +19,7 @@
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <KlayGE/D3D10/D3D10Typedefs.hpp>
 

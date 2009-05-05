@@ -224,7 +224,7 @@ namespace
 	private:
 		boost::shared_ptr<TexDesc> LoadDDS(std::string const & tex_name, uint32_t access_hint)
 		{
-			boost::shared_ptr<TexDesc> tex_desc(new TexDesc);
+			boost::shared_ptr<TexDesc> tex_desc = MakeSharedPtr<TexDesc>();
 			tex_desc->access_hint = access_hint;
 
 			LoadTexture(tex_name, tex_desc->type, tex_desc->width, tex_desc->height, tex_desc->depth,

@@ -26,7 +26,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
-#include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/GraphicsBuffer.hpp>

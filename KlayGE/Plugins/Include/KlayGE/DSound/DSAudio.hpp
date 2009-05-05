@@ -22,9 +22,8 @@
 #include <windows.h>
 #include <dsound.h>
 
-#include <boost/utility.hpp>
+#include <boost/noncopyable.hpp>
 
-#include <boost/smart_ptr.hpp>
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE

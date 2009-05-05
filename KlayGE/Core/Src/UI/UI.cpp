@@ -495,8 +495,8 @@ namespace KlayGE
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
-						dlg->AddControl(UIControlPtr(new UIStatic(dlg, id, wcaption,
-							x, y, width, height, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIStatic>(dlg, id, wcaption,
+							x, y, width, height, is_default));
 					}
 					if ("button" == type_str)
 					{
@@ -513,8 +513,8 @@ namespace KlayGE
 						}
 						std::wstring wcaption;
 						Convert(wcaption, caption);
-						dlg->AddControl(UIControlPtr(new UIButton(dlg, id, wcaption,
-							x, y, width, height, hotkey, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIButton>(dlg, id, wcaption,
+							x, y, width, height, hotkey, is_default));
 					}
 					if ("tex_button" == type_str)
 					{
@@ -530,8 +530,8 @@ namespace KlayGE
 							hotkey = 0;
 						}
 						TexturePtr tex = LoadTexture(tex_name, EAH_GPU_Read)();
-						dlg->AddControl(UIControlPtr(new UITexButton(dlg, id, tex,
-							x, y, width, height, hotkey, is_default)));
+						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
+							x, y, width, height, hotkey, is_default));
 					}
 					if ("check_box" == type_str)
 					{
@@ -559,8 +559,8 @@ namespace KlayGE
 						}
 						std::wstring wcaption;
 						Convert(wcaption, caption);
-						dlg->AddControl(UIControlPtr(new UICheckBox(dlg, id, wcaption,
-							x, y, width, height, checked, hotkey, is_default)));
+						dlg->AddControl(MakeSharedPtr<UICheckBox>(dlg, id, wcaption,
+							x, y, width, height, checked, hotkey, is_default));
 					}
 					if ("radio_button" == type_str)
 					{
@@ -589,8 +589,8 @@ namespace KlayGE
 						}
 						std::wstring wcaption;
 						Convert(wcaption, caption);
-						dlg->AddControl(UIControlPtr(new UIRadioButton(dlg, id, button_group, wcaption,
-							x, y, width, height, checked, hotkey, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIRadioButton>(dlg, id, button_group, wcaption,
+							x, y, width, height, checked, hotkey, is_default));
 					}
 					if ("slider" == type_str)
 					{
@@ -610,8 +610,8 @@ namespace KlayGE
 						{
 							value = attr->ValueInt();
 						}
-						dlg->AddControl(UIControlPtr(new UISlider(dlg, id,
-							x, y, width, height, min_v, max_v, value, is_default)));
+						dlg->AddControl(MakeSharedPtr<UISlider>(dlg, id,
+							x, y, width, height, min_v, max_v, value, is_default));
 					}
 					if ("scroll_bar" == type_str)
 					{
@@ -636,8 +636,8 @@ namespace KlayGE
 						{
 							page_size = attr->ValueInt();
 						}
-						dlg->AddControl(UIControlPtr(new UIScrollBar(dlg, id,
-							x, y, width, height, track_start, track_end, track_pos, page_size)));
+						dlg->AddControl(MakeSharedPtr<UIScrollBar>(dlg, id,
+							x, y, width, height, track_start, track_end, track_pos, page_size));
 					}
 					if ("list_box" == type_str)
 					{
@@ -656,8 +656,8 @@ namespace KlayGE
 								style = UIListBox::MULTI_SELECTION;
 							}
 						}
-						dlg->AddControl(UIControlPtr(new UIListBox(dlg, id,
-							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION)));
+						dlg->AddControl(MakeSharedPtr<UIListBox>(dlg, id,
+							x, y, width, height, style ? UIListBox::SINGLE_SELECTION : UIListBox::MULTI_SELECTION));
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
@@ -679,8 +679,8 @@ namespace KlayGE
 						{
 							hotkey = 0;
 						}
-						dlg->AddControl(UIControlPtr(new UIComboBox(dlg, id,
-							x, y, width, height, hotkey, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIComboBox>(dlg, id,
+							x, y, width, height, hotkey, is_default));
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
@@ -695,8 +695,8 @@ namespace KlayGE
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
-						dlg->AddControl(UIControlPtr(new UIEditBox(dlg, id, wcaption,
-							x, y, width, height, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIEditBox>(dlg, id, wcaption,
+							x, y, width, height, is_default));
 					}
 					if ("polyline_edit_box" == type_str)
 					{
@@ -721,8 +721,8 @@ namespace KlayGE
 						{
 							line_clr.a() = attr->ValueFloat();
 						}
-						dlg->AddControl(UIControlPtr(new UIPolylineEditBox(dlg, id,
-							x, y, width, height, is_default)));
+						dlg->AddControl(MakeSharedPtr<UIPolylineEditBox>(dlg, id,
+							x, y, width, height, is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
 				}

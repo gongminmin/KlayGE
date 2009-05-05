@@ -26,8 +26,7 @@
 
 #include <vector>
 
-#include <boost/utility.hpp>
-#include <boost/smart_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <KlayGE/Audio.hpp>
 

@@ -32,7 +32,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4103 4251 4275 4512)
 #endif
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -778,7 +778,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signal<void(UIButton const &)> ClickedEvent;
+		typedef boost::signals2::signal<void(UIButton const &)> ClickedEvent;
 		ClickedEvent& OnClickedEvent()
 		{
 			return clicked_event_;
@@ -831,7 +831,7 @@ namespace KlayGE
 		void SetTexture(TexturePtr const & tex);
 
 	public:
-		typedef boost::signal<void(UITexButton const &)> ClickedEvent;
+		typedef boost::signals2::signal<void(UITexButton const &)> ClickedEvent;
 		ClickedEvent& OnClickedEvent()
 		{
 			return clicked_event_;
@@ -888,7 +888,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signal<void(UICheckBox const &)> ChangedEvent;
+		typedef boost::signals2::signal<void(UICheckBox const &)> ChangedEvent;
 		ChangedEvent& OnChangedEvent()
 		{
 			return changed_event_;
@@ -953,7 +953,7 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	public:
-		typedef boost::signal<void(UIRadioButton const &)> ChangedEvent;
+		typedef boost::signals2::signal<void(UIRadioButton const &)> ChangedEvent;
 		ChangedEvent& OnChangedEvent()
 		{
 			return changed_event_;
@@ -1017,7 +1017,7 @@ namespace KlayGE
 		void SetRange(int nMin, int nMax);
 
 	public:
-		typedef boost::signal<void(UISlider const &)> ValueChangedEvent;
+		typedef boost::signals2::signal<void(UISlider const &)> ValueChangedEvent;
 		ValueChangedEvent& OnValueChangedEvent()
 		{
 			return value_changed_event_;
@@ -1184,7 +1184,7 @@ namespace KlayGE
 		void SelectItem(int nNewIndex);
 
 	public:
-		typedef boost::signal<void(UIListBox const &)> SelectionEvent;
+		typedef boost::signals2::signal<void(UIListBox const &)> SelectionEvent;
 		SelectionEvent& OnSelectionEvent()
 		{
 			return selection_event_;
@@ -1296,7 +1296,7 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signal<void(UIComboBox const &)> SelectionChangedEvent;
+		typedef boost::signals2::signal<void(UIComboBox const &)> SelectionChangedEvent;
 		SelectionChangedEvent& OnSelectionChangedEvent()
 		{
 			return selection_changed_event_;
@@ -1428,7 +1428,7 @@ namespace KlayGE
 		void SetSpacing(int nSpacing) { spacing_ = nSpacing; UpdateRects(); }
 
 	public:
-		typedef boost::signal<void(UIEditBox const &)> EditBoxEvent;
+		typedef boost::signals2::signal<void(UIEditBox const &)> EditBoxEvent;
 		EditBoxEvent& OnChangedEvent()
 		{
 			return changed_event_;

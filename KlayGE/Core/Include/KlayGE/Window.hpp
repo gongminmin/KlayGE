@@ -29,7 +29,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4103 4251 4275 4512)
 #endif
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -103,20 +103,20 @@ namespace KlayGE
 		}
 
 	public:
-		typedef boost::signal<void(Window const &, bool)> ActiveEvent;
-		typedef boost::signal<void(Window const &)> PaintEvent;
-		typedef boost::signal<void(Window const &)> EnterSizeMoveEvent;
-		typedef boost::signal<void(Window const &)> ExitSizeMoveEvent;
-		typedef boost::signal<void(Window const &, bool)> SizeEvent;
-		typedef boost::signal<void(Window const &)> SetCursorEvent;
-		typedef boost::signal<void(Window const &, wchar_t)> CharEvent;
-		typedef boost::signal<void(Window const &, wchar_t)> KeyDownEvent;
-		typedef boost::signal<void(Window const &, wchar_t)> KeyUpEvent;
-		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseDownEvent;
-		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseUpEvent;
-		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &, int32_t)> MouseWheelEvent;
-		typedef boost::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseOverEvent;
-		typedef boost::signal<void(Window const &)> CloseEvent;
+		typedef boost::signals2::signal<void(Window const &, bool)> ActiveEvent;
+		typedef boost::signals2::signal<void(Window const &)> PaintEvent;
+		typedef boost::signals2::signal<void(Window const &)> EnterSizeMoveEvent;
+		typedef boost::signals2::signal<void(Window const &)> ExitSizeMoveEvent;
+		typedef boost::signals2::signal<void(Window const &, bool)> SizeEvent;
+		typedef boost::signals2::signal<void(Window const &)> SetCursorEvent;
+		typedef boost::signals2::signal<void(Window const &, wchar_t)> CharEvent;
+		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyDownEvent;
+		typedef boost::signals2::signal<void(Window const &, wchar_t)> KeyUpEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseDownEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseUpEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &, int32_t)> MouseWheelEvent;
+		typedef boost::signals2::signal<void(Window const &, uint32_t, Vector_T<int32_t, 2> const &)> MouseOverEvent;
+		typedef boost::signals2::signal<void(Window const &)> CloseEvent;
 
 		ActiveEvent& OnActive()
 		{
