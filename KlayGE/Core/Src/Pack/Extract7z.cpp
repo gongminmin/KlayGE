@@ -28,14 +28,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/filesystem/operations.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4512)
-#endif
 #include <boost/algorithm/string.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "IArchive.hpp"
 

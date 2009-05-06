@@ -32,14 +32,7 @@
 #include <iostream>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4512)
-#endif
 #include <boost/assign.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 #include <boost/assign/std/vector.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
