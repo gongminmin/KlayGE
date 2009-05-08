@@ -67,7 +67,7 @@ float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
 				+ src_tex.Sample(src_sampler, oTex7.xy)
 				+ src_tex.Sample(src_sampler, oTex7.zw);
 
-	return dot(s.rgb / 16, rgb_to_lum);
+	return dot(saturate(s.rgb / 16), rgb_to_lum);
 }
 		]]>
 	</shader>

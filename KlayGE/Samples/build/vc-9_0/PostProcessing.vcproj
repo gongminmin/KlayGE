@@ -359,6 +359,10 @@
 				RelativePath="..\..\src\PostProcessing\PostProcessing.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\TilingPP.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -377,6 +381,10 @@
 				RelativePath="..\..\src\PostProcessing\PostProcessing.hpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\PostProcessing\TilingPP.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Effects"
@@ -391,6 +399,10 @@
 			</File>
 			<File
 				RelativePath="..\..\media\PostProcessing\PostProcessing.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\TilingPP.fxml"
 				>
 			</File>
 		</Filter>

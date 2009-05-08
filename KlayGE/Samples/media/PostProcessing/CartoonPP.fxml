@@ -60,14 +60,10 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
-	if (1 == depth)
-	{
-		clip(-1);
-	}
 	float3 normal = GetNormal(ndc);
 	
 	half4 color = color_tex.Sample(point_sampler, tc0);
-	half toon = dot(color.rgb, half3(0.299f, 0.587f, 0.114f));
+	half toon = dot(saturate(color.rgb), half3(0.299f, 0.587f, 0.114f));
 
 	half4 s1 = src_tex.Sample(point_sampler, tc1.xy);
 	half4 s2 = src_tex.Sample(point_sampler, tc1.zw);
@@ -92,7 +88,7 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
 
 	const float toon_clr[3] = { 0.47f, 0.63f, 1 };
-	return toon_clr[int(toon * 3)] * de * ne;
+	return toon_clr[int(toon * 3)] * de * ne * color;
 }
 		]]>
 	</shader>

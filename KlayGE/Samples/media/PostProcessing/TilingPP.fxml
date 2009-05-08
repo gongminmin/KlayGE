@@ -1,0 +1,51 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="sampler" name="src_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4" name="tile_per_row_line"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+float4 TilingPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	float factor = 1;
+	float2 t = frac(tex_coord0 / tile_per_row_line.xy);
+	if ((t.x > 1 - 2 * tile_per_row_line.w) || (t.y > 1 - 2 * tile_per_row_line.w))
+	{
+		if ((t.x > 1 - tile_per_row_line.w) || (t.y > 1 - tile_per_row_line.w))
+		{
+			factor *= 0.25f;
+		}
+		else
+		{
+			factor *= 0.5f;
+		}
+	}
+	if ((t.x < tile_per_row_line.w) || (t.y < tile_per_row_line.w))
+	{
+		factor *= 2;
+	}
+	return src_tex.Sample(src_sampler, tex_coord0) * factor;
+}
+		]]>
+	</shader>
+
+	<technique name="Tiling">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="TilingPS()"/>
+		</pass>
+	</technique>
+</effect>

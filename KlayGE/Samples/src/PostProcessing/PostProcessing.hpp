@@ -22,9 +22,12 @@ private:
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 	void AsciiArtsHandler(KlayGE::UIRadioButton const & sender);
 	void CartoonHandler(KlayGE::UIRadioButton const & sender);
+	void TilingHandler(KlayGE::UIRadioButton const & sender);
+	void HDRHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
+	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -34,11 +37,15 @@ private:
 	KlayGE::PostProcessPtr active_pp_;
 	KlayGE::PostProcessPtr ascii_arts_;
 	KlayGE::PostProcessPtr cartoon_;
+	KlayGE::PostProcessPtr tiling_;
+	KlayGE::PostProcessPtr hdr_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_fps_camera_;
 	int id_ascii_arts_;
 	int id_cartoon_;
+	int id_tiling_;
+	int id_hdr_;
 };
 
 #endif		// _POSTPROCESSING_HPP
