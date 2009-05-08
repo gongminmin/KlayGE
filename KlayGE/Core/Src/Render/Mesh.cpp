@@ -132,7 +132,8 @@ namespace KlayGE
 
 	SkinnedModel::SkinnedModel(std::wstring const & name)
 		: RenderModel(name),
-			last_frame_(0xFFFFFFFF)
+			last_frame_(0xFFFFFFFF),
+			start_frame_(0), end_frame_(1), frame_rate_(0)
 	{
 	}
 	
