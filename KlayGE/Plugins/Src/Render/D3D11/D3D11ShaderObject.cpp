@@ -466,7 +466,7 @@ namespace KlayGE
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
-		D3D_FEATURE_LEVEL feature_level = d3d_device->GetFeatureLevel();
+		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 
 		std::string shader_text = this->GenShaderText(effect);
 

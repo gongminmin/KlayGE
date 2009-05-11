@@ -120,7 +120,9 @@ namespace KlayGE
 	D3D11SamplerStateObject::D3D11SamplerStateObject(SamplerStateDesc const & desc)
 		: SamplerStateObject(desc)
 	{
-		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
+		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
+		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 
 		D3D11_SAMPLER_DESC d3d_desc;
 		d3d_desc.Filter = D3D11Mapping::Mapping(desc.filter);
@@ -134,7 +136,7 @@ namespace KlayGE
 		d3d_desc.BorderColor[1] = desc.border_clr.g();
 		d3d_desc.BorderColor[2] = desc.border_clr.b();
 		d3d_desc.BorderColor[3] = desc.border_clr.a();
-		if (d3d_device->GetFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
+		if (feature_level <= D3D_FEATURE_LEVEL_9_3)
 		{
 			d3d_desc.MinLOD = floor(desc.min_lod);
 			d3d_desc.MaxLOD = std::numeric_limits<float>::max();

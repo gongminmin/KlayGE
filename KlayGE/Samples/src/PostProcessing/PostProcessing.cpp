@@ -274,8 +274,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		renderEngine.BindFrameBuffer(g_buffer_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color1)->Clear(Color(0, 0, 1, 1));
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 1), 1.0f, 0);
 		return App3DFramework::URV_Need_Flush;
 
 	default:

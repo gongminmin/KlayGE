@@ -49,7 +49,8 @@ namespace KlayGE
 		IDXGIFactoryPtr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
-		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
+		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
+		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
 		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
@@ -135,6 +136,7 @@ namespace KlayGE
 		IDXGIFactoryPtr		gi_factory_;
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		D3D_FEATURE_LEVEL d3d_feature_level_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself

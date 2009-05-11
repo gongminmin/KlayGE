@@ -123,6 +123,11 @@ namespace KlayGE
 		return d3d_imm_ctx_;
 	}
 
+	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
+	{
+		return d3d_feature_level_;
+	}
+
 	// 获取D3D适配器列表
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11AdapterList const & D3D11RenderEngine::D3DAdapters() const
@@ -186,7 +191,7 @@ namespace KlayGE
 			name, settings);
 		default_frame_buffer_ = win;
 
-		switch (d3d_device_->GetFeatureLevel())
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
 			vs_profile_ = "vs_5_0";
@@ -216,10 +221,11 @@ namespace KlayGE
 		this->BindFrameBuffer(win);
 	}
 
-	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
+		d3d_feature_level_ = feature_level;
 		Verify(d3d_device_ != ID3D11DevicePtr());
 
 		this->FillRenderDeviceCaps();
@@ -471,10 +477,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
-		D3D_FEATURE_LEVEL feature = d3d_device_->GetFeatureLevel();
-
 		caps_.max_vertex_texture_units = 16;
-		if (D3D_FEATURE_LEVEL_11_0 == feature)
+		if (D3D_FEATURE_LEVEL_11_0 == d3d_feature_level_)
 		{
 			caps_.max_shader_model = 5;
 		}
@@ -482,7 +486,7 @@ namespace KlayGE
 		{
 			caps_.max_shader_model = 4;
 		}
-		if (feature <= D3D_FEATURE_LEVEL_9_3)
+		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_3)
 		{
 			caps_.max_texture_height = caps_.max_texture_width = 4096;
 			caps_.max_texture_depth = 511;
@@ -503,7 +507,7 @@ namespace KlayGE
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
-		switch (feature)
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_pixel_texture_units = 32;

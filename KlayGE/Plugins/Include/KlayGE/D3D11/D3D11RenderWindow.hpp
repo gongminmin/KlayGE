@@ -95,8 +95,6 @@ namespace KlayGE
 		bool	closed_;
 		bool	isFullScreen_;
 
-		//D3DMULTISAMPLE_TYPE multiSample_;
-
 		D3D11AdapterPtr			adapter_;
 
 		// Pointer to the 3D device specific for this window

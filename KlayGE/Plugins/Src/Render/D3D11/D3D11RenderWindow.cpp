@@ -138,7 +138,7 @@ namespace KlayGE
 		}
 		else
 		{
-			UINT create_device_flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
+			UINT create_device_flags = 0;
 #ifdef _DEBUG
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -186,7 +186,7 @@ namespace KlayGE
 
 					d3d_device_ = MakeCOMPtr(d3d_device);
 					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx);
-					re.D3DDevice(d3d_device_, d3d_imm_ctx_);
+					re.D3DDevice(d3d_device_, d3d_imm_ctx_, out_feature_level);
 
 					if (settings.ConfirmDevice && !settings.ConfirmDevice())
 					{
