@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../bin/Win32/DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/Win32" />
-				<Option object_output="../../Debug/Win32" />
+				<Option output="..\..\bin\Win32\DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\Win32" />
+				<Option object_output="..\..\Debug\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -22,14 +22,14 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
-					<Add library="libKlayGE_Core_mgw_x86_d.a" />
+					<Add library="KlayGE_Core_mgw_x86_d" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../bin/Win32/DistanceMapCreator" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/Win32" />
-				<Option object_output="../../Release/Win32" />
+				<Option output="..\..\bin\Win32\DistanceMapCreator" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\Win32" />
+				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -42,14 +42,14 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="libKlayGE_Core_mgw_x86.a" />
+					<Add library="KlayGE_Core_mgw_x86" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../bin/linux_x86/DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/linux_x86" />
-				<Option object_output="../../Debug/linux_x86" />
+				<Option output="..\..\bin\linux_x86\DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x86" />
+				<Option object_output="..\..\Debug\linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -66,9 +66,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../bin/linux_x86/DistanceMapCreator" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/linux_x86" />
-				<Option object_output="../../Release/linux_x86" />
+				<Option output="..\..\bin\linux_x86\DistanceMapCreator" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x86" />
+				<Option object_output="..\..\Release\linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -86,9 +86,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../bin/linux_x64/DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/linux_x64" />
-				<Option object_output="../../Debug/linux_x64" />
+				<Option output="..\..\bin\linux_x64\DistanceMapCreator_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x64" />
+				<Option object_output="..\..\Debug\linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -105,9 +105,9 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../bin/linux_x64/DistanceMapCreator" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../../bin/linux_x64" />
-				<Option object_output="../../Release/linux_x64" />
+				<Option output="..\..\bin\linux_x64\DistanceMapCreator" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x64" />
+				<Option object_output="..\..\Release\linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -127,7 +127,7 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="../../DistanceMapCreator/DistanceMapCreator.cpp" />
+		<Unit filename="..\..\DistanceMapCreator\DistanceMapCreator.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
