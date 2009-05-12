@@ -81,4 +81,10 @@
 			</mappings>
 		</function>
 	</functions>
+
+	<additionals>
+		<ext name="GL_ARB_copy_buffer"/>
+		<ext name="GL_ARB_texture_rectangle"/>
+		<ext name="GL_ARB_uniform_buffer_object"/>
+	</additionals>
 </gl_extension>
