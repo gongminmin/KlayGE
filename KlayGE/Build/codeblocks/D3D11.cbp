@@ -28,12 +28,11 @@
 				</Compiler>
 				<Linker>
 					<Add library="boost_system-mgw43-mt-d" />
-					<Add library="boost_signals-mgw43-mt-d" />
-					<Add library="libKlayGE_Core_mgw_x86_d.a" />
-					<Add library="libd3d11_beta.a" />
-					<Add library="libd3dx11.a" />
-					<Add library="libd3dcompiler.a" />
-					<Add library="libgdi32.a" />
+					<Add library="KlayGE_Core_mgw_x86_d" />
+					<Add library="d3d11_beta" />
+					<Add library="d3dx11" />
+					<Add library="d3dcompiler" />
+					<Add library="gdi32" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -61,12 +60,11 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="boost_system-mgw43-mt" />
-					<Add library="boost_signals-mgw43-mt" />
-					<Add library="libKlayGE_Core_mgw_x86.a" />
-					<Add library="libd3d11_beta.a" />
-					<Add library="libd3dx11.a" />
-					<Add library="libd3dcompiler.a" />
-					<Add library="libgdi32.a" />
+					<Add library="KlayGE_Core_mgw_x86" />
+					<Add library="d3d11_beta" />
+					<Add library="d3dx11" />
+					<Add library="d3dcompiler" />
+					<Add library="gdi32" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />

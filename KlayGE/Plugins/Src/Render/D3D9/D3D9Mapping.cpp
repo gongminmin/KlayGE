@@ -28,6 +28,8 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 
+#include <KlayGE/D3D9/D3D9MinGWDefs.hpp>
+
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <dxerr9.h>

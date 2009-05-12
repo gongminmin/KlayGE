@@ -151,6 +151,7 @@ namespace
 					return static_cast<ShadeMode>(i);
 				}
 			}
+			cerr << "Wrong ShadeMode name: " << name << endl;
 			return static_cast<ShadeMode>(0xFFFFFFFF);
 		}
 
@@ -183,6 +184,7 @@ namespace
 					return static_cast<CompareFunction>(i);
 				}
 			}
+			cerr << "Wrong CompareFunction name: " << name << endl;
 			return static_cast<CompareFunction>(0xFFFFFFFF);
 		}
 
@@ -221,6 +223,7 @@ namespace
 					return static_cast<CullMode>(i);
 				}
 			}
+			cerr << "Wrong CullMode name: " << name << endl;
 			return static_cast<CullMode>(0xFFFFFFFF);
 		}
 
@@ -254,6 +257,7 @@ namespace
 					return static_cast<PolygonMode>(i);
 				}
 			}
+			cerr << "Wrong PolygonMode name: " << name << endl;
 			return static_cast<PolygonMode>(0xFFFFFFFF);
 		}
 
@@ -287,6 +291,7 @@ namespace
 					return static_cast<AlphaBlendFactor>(i);
 				}
 			}
+			cerr << "Wrong AlphaBlendFactor name: " << name << endl;
 			return static_cast<AlphaBlendFactor>(0xFFFFFFFF);
 		}
 
@@ -328,6 +333,7 @@ namespace
 					return static_cast<BlendOperation>(i + 1);
 				}
 			}
+			cerr << "Wrong BlendOperation name: " << name << endl;
 			return static_cast<BlendOperation>(0xFFFFFFFF);
 		}
 
@@ -363,6 +369,7 @@ namespace
 					return static_cast<StencilOperation>(i);
 				}
 			}
+			cerr << "Wrong StencilOperation name: " << name << endl;
 			return static_cast<StencilOperation>(0xFFFFFFFF);
 		}
 
@@ -415,6 +422,7 @@ namespace
 			{
 				return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 			}
+			cerr << "Wrong TexFilterOp name: " << name << endl;
 			return static_cast<TexFilterOp>(0xFFFFFFFF);
 		}
 
@@ -453,6 +461,7 @@ namespace
 					return static_cast<TexAddressingMode>(i);
 				}
 			}
+			cerr << "Wrong TexAddressingMode name: " << name << endl;
 			return static_cast<TexAddressingMode>(0xFFFFFFFF);
 		}
 
@@ -584,37 +593,21 @@ namespace
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.filter = texture_filter_mode_define::instance().from_str(value_str);
-						if (0xFFFFFFFF == desc.filter)
-						{
-							cerr << "Wrong " << name << " name: " << value_str << endl;
-						}
 					}
 					else if ("address_u" == name)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_u = texture_addr_mode_define::instance().from_str(value_str);
-						if (0xFFFFFFFF == desc.addr_mode_u)
-						{
-							cerr << "Wrong " << name << " name: " << value_str << endl;
-						}
 					}
 					else if ("address_v" == name)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_v = texture_addr_mode_define::instance().from_str(value_str);
-						if (0xFFFFFFFF == desc.addr_mode_v)
-						{
-							cerr << "Wrong " << name << " name: " << value_str << endl;
-						}
 					}
 					else if ("address_w" == name)
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.addr_mode_w = texture_addr_mode_define::instance().from_str(value_str);
-						if (0xFFFFFFFF == desc.addr_mode_w)
-						{
-							cerr << "Wrong " << name << " name: " << value_str << endl;
-						}
 					}
 					else if ("max_anisotropy" == name)
 					{
@@ -636,10 +629,6 @@ namespace
 					{
 						std::string value_str = state_node->Attrib("value")->ValueString();
 						desc.cmp_func = compare_function_define::instance().from_str(value_str);
-						if (0xFFFFFFFF == desc.cmp_func)
-						{
-							cerr << "Wrong " << name << " name: " << value_str << endl;
-						}
 					}
 					else if ("border_clr" == name)
 					{
@@ -863,7 +852,7 @@ namespace KlayGE
 			XMLNodePtr root = doc.Parse(source);
 
 			cbuffers_ = MakeSharedPtr<BOOST_TYPEOF(*cbuffers_)>();
-			
+
 			XMLAttributePtr attr;
 
 			std::vector<XMLDocumentPtr> include_docs;
@@ -1191,28 +1180,16 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.polygon_mode = polygon_mode_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == rs_desc.polygon_mode)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("shade_mode" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.shade_mode = shade_mode_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == rs_desc.shade_mode)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("cull_mode" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				rs_desc.cull_mode = cull_mode_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == rs_desc.cull_mode)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("front_face_ccw" == state_name)
 			{
@@ -1258,60 +1235,36 @@ namespace KlayGE
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op[index] = blend_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.blend_op[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("src_blend" == state_name)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.src_blend[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("dest_blend" == state_name)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend[index] = alpha_blend_factor_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.dest_blend[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("blend_op_alpha" == state_name)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.blend_op_alpha[index] = blend_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.blend_op_alpha[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("src_blend_alpha" == state_name)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.src_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.src_blend_alpha[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("dest_blend_alpha" == state_name)
 			{
 				int index = get_index(state_node);
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == bs_desc.dest_blend_alpha[index])
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("color_write_mask" == state_name)
 			{
@@ -1357,10 +1310,6 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.depth_func = compare_function_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.depth_func)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("front_stencil_enable" == state_name)
 			{
@@ -1370,10 +1319,6 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_func = compare_function_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.front_stencil_func)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("front_stencil_ref" == state_name)
 			{
@@ -1391,28 +1336,16 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_fail = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.front_stencil_fail)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("front_stencil_depth_fail" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.front_stencil_depth_fail)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("front_stencil_pass" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.front_stencil_pass = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.front_stencil_pass)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("back_stencil_enable" == state_name)
 			{
@@ -1422,10 +1355,6 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_func = compare_function_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.back_stencil_func)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("back_stencil_ref" == state_name)
 			{
@@ -1443,28 +1372,16 @@ namespace KlayGE
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_fail = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.back_stencil_fail)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("back_stencil_depth_fail" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_depth_fail = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.back_stencil_depth_fail)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("back_stencil_pass" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_pass = stencil_operation_define::instance().from_str(value_str);
-				if (0xFFFFFFFF == dss_desc.back_stencil_pass)
-				{
-					cerr << "Wrong " << state_name <<  " state: " << value_str << endl;
-				}
 			}
 			else if ("vertex_shader" == state_name)
 			{

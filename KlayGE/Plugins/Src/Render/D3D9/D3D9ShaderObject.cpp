@@ -32,6 +32,10 @@
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
+#include <KlayGE/D3D9/D3D9MinGWDefs.hpp>
+
+#include <d3dx9.h>
+
 #include <KlayGE/D3D9/D3D9RenderEngine.hpp>
 #include <KlayGE/D3D9/D3D9Mapping.hpp>
 #include <KlayGE/D3D9/D3D9Texture.hpp>

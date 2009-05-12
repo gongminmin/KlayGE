@@ -436,7 +436,7 @@ namespace KlayGE
 			for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 			{
 				Joint joint;
-				
+
 				joint.name = bone_node->Attrib("name")->ValueString();
 				joint.parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
 
@@ -729,6 +729,9 @@ namespace KlayGE
 									}
 								}
 							}
+							break;
+
+						case VEU_BlendWeight:
 							break;
 
 						case VEU_TextureCoord:

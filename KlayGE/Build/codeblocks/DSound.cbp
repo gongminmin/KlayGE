@@ -29,7 +29,7 @@
 				<Linker>
 					<Add library="boost_system-mgw43-mt-d" />
 					<Add library="boost_thread-mgw43-mt-d" />
-					<Add library="libKlayGE_Core_mgw_x86_d.a" />
+					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="dsound" />
 				</Linker>
 				<ExtraCommands>
@@ -59,7 +59,7 @@
 					<Add option="-s" />
 					<Add library="boost_system-mgw43-mt" />
 					<Add library="boost_thread-mgw43-mt" />
-					<Add library="libKlayGE_Core_mgw_x86.a" />
+					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="dsound" />
 				</Linker>
 				<ExtraCommands>

@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../lib/win/x86/KlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/win/x86" />
-				<Option object_output="../../Debug/win/x86" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
+				<Option object_output="..\..\Debug\win\x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -27,14 +27,12 @@
 				</Compiler>
 				<Linker>
 					<Add library="boost_system-mgw43-mt-d" />
-					<Add library="boost_signals-mgw43-mt-d" />
-					<Add library="libKlayGE_Core_mgw_x86_d.a" />
-					<Add library="libglloader_d.a" />
-					<Add library="libopengl32.a" />
-					<Add library="libglu32.a" />
-					<Add library="libgdi32.a" />
+					<Add library="KlayGE_Core_mgw_x86_d" />
+					<Add library="glloader_x86_d" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="gdi32" />
 					<Add library="cg" />
-					<Add library="cgGL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -42,9 +40,9 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="../../lib/win/x86/KlayGE_RenderEngine_OpenGL_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/win/x86" />
-				<Option object_output="../../Release/win/x86" />
+				<Option output="..\..\lib\win\x86\KlayGE_RenderEngine_OpenGL_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win\x86" />
+				<Option object_output="..\..\Release\win\x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -62,14 +60,12 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="boost_system-mgw43-mt" />
-					<Add library="boost_signals-mgw43-mt" />
-					<Add library="libKlayGE_Core_mgw_x86.a" />
-					<Add library="libglloader.a" />
-					<Add library="libopengl32.a" />
-					<Add library="libglu32.a" />
-					<Add library="libgdi32.a" />
+					<Add library="KlayGE_Core_mgw_x86" />
+					<Add library="glloader_x86" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="gdi32" />
 					<Add library="cg" />
-					<Add library="cgGL" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -77,9 +73,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux/x86/libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/linux/x86" />
-				<Option object_output="../../Debug/linux/x86" />
+				<Option output="..\..\lib\linux\x86\libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x86" />
+				<Option object_output="..\..\Debug\linux\x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -94,7 +90,6 @@
 				<Linker>
 					<Add library="glloader_x86_d" />
 					<Add library="Cg" />
-					<Add library="CgGL" />
 					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
@@ -103,9 +98,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux/x86/libKlayGE_RenderEngine_OpenGL_gcc_x86.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/linux/x86" />
-				<Option object_output="../../Release/linux/x86" />
+				<Option output="..\..\lib\linux\x86\libKlayGE_RenderEngine_OpenGL_gcc_x86.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x86" />
+				<Option object_output="..\..\Release\linux\x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -121,7 +116,6 @@
 					<Add option="-s" />
 					<Add library="glloader_x86" />
 					<Add library="Cg" />
-					<Add library="CgGL" />
 					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
@@ -130,9 +124,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux/x64/libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/linux/x64" />
-				<Option object_output="../../Debug/linux/x64" />
+				<Option output="..\..\lib\linux\x64\libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x64" />
+				<Option object_output="..\..\Debug\linux\x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -149,7 +143,6 @@
 				<Linker>
 					<Add library="glloader_x64_d" />
 					<Add library="Cg" />
-					<Add library="CgGL" />
 					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
@@ -158,9 +151,9 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="../../lib/linux/x64/libKlayGE_RenderEngine_OpenGL_gcc_x64.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../lib/linux/x64" />
-				<Option object_output="../../Release/linux/x64" />
+				<Option output="..\..\lib\linux\x64\libKlayGE_RenderEngine_OpenGL_gcc_x64.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\linux\x64" />
+				<Option object_output="..\..\Release\linux\x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -178,7 +171,6 @@
 					<Add option="-s" />
 					<Add library="glloader_x64" />
 					<Add library="Cg" />
-					<Add library="CgGL" />
 					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
@@ -190,36 +182,36 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLFrameBuffer.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLGraphicsBuffer.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLMapping.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLOcclusionQuery.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLQuery.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderEngine.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderFactory.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderFactoryInternal.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderLayout.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderStateObject.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderView.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLRenderWindow.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLShaderObject.hpp" />
-		<Unit filename="../../Plugins/Include/KlayGE/OpenGL/OGLTexture.hpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLFrameBuffer.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLGraphicsBuffer.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLMapping.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLQuery.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderEngine.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderFactory.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderLayout.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderStateObject.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderView.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLRenderWindow.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLShaderObject.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLTexture.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLTexture1D.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLTexture2D.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLTexture3D.cpp" />
-		<Unit filename="../../Plugins/Src/Render/OpenGL/OGLTextureCube.cpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLFrameBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLOcclusionQuery.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLQuery.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderEngine.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactory.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderFactoryInternal.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderLayout.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderStateObject.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderView.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLRenderWindow.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLShaderObject.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLTexture.hpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLFrameBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLGraphicsBuffer.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLMapping.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLQuery.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderEngine.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderFactory.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderLayout.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderStateObject.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderView.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLRenderWindow.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLShaderObject.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLTexture.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLTexture1D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLTexture2D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLTexture3D.cpp" />
+		<Unit filename="..\..\Plugins\Src\Render\OpenGL\OGLTextureCube.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

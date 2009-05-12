@@ -22,6 +22,10 @@
 
 #include <KlayGE/Window.hpp>
 
+#ifndef GET_KEYSTATE_WPARAM
+#define GET_KEYSTATE_WPARAM(wParam) (LOWORD(wParam))
+#endif
+
 namespace KlayGE
 {
 #ifdef KLAYGE_PLATFORM_WINDOWS
