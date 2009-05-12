@@ -257,7 +257,7 @@ namespace KlayGE
 
 	void Context::LoadRenderFactory(std::string const & rf_name, XMLNodePtr const & rf_node)
 	{
-		renderFactory_.reset();
+		renderFactory_ = RenderFactory::NullObject();
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
@@ -286,7 +286,7 @@ namespace KlayGE
 
 	void Context::LoadAudioFactory(std::string const & af_name, XMLNodePtr const & af_node)
 	{
-		audioFactory_.reset();
+		audioFactory_ = AudioFactory::NullObject();
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
@@ -315,7 +315,7 @@ namespace KlayGE
 
 	void Context::LoadInputFactory(std::string const & if_name, XMLNodePtr const & if_node)
 	{
-		inputFactory_.reset();
+		inputFactory_ = InputFactory::NullObject();
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
@@ -344,7 +344,7 @@ namespace KlayGE
 
 	void Context::LoadShowFactory(std::string const & sf_name, XMLNodePtr const & sf_node)
 	{
-		showFactory_.reset();
+		showFactory_ = ShowFactory::NullObject();
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
@@ -373,7 +373,7 @@ namespace KlayGE
 
 	void Context::LoadSceneManager(std::string const & sm_name, XMLNodePtr const & sm_node)
 	{
-		sceneMgr_.reset();
+		sceneMgr_ = SceneManager::NullObject();
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");

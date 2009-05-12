@@ -725,14 +725,14 @@ namespace KlayGE
 			st = ShaderObject::ST_VertexShader;
 			stage = sampler - D3DVERTEXTEXTURESAMPLER0;
 		}
-		
+
 		if (samplers_cache_[st][stage].first != texture)
 		{
 			d3dDevice_->SetTexture(sampler, texture);
 			samplers_cache_[st][stage].first = texture;
 		}
 	}
-	
+
 	void D3D9RenderEngine::SetSamplerState(uint32_t sampler, D3DSAMPLERSTATETYPE type, uint32_t value)
 	{
 		ShaderObject::ShaderType st;
@@ -777,17 +777,17 @@ namespace KlayGE
 	{
 		d3dDevice_->SetVertexShaderConstantB(start_reg, constant_data, reg_count);
 	}
-	
+
 	void D3D9RenderEngine::SetPixelShaderConstantB(uint32_t start_reg, BOOL const * constant_data, uint32_t reg_count)
 	{
 		d3dDevice_->SetPixelShaderConstantB(start_reg, constant_data, reg_count);
 	}
-	
+
 	void D3D9RenderEngine::SetVertexShaderConstantI(uint32_t start_reg, int const * constant_data, uint32_t reg_count)
 	{
 		d3dDevice_->SetVertexShaderConstantI(start_reg, constant_data, reg_count);
 	}
-	
+
 	void D3D9RenderEngine::SetPixelShaderConstantI(uint32_t start_reg, int const * constant_data, uint32_t reg_count)
 	{
 		d3dDevice_->SetPixelShaderConstantI(start_reg, constant_data, reg_count);
@@ -797,7 +797,7 @@ namespace KlayGE
 	{
 		d3dDevice_->SetVertexShaderConstantF(start_reg, constant_data, reg_count);
 	}
-	
+
 	void D3D9RenderEngine::SetPixelShaderConstantF(uint32_t start_reg, float const * constant_data, uint32_t reg_count)
 	{
 		d3dDevice_->SetPixelShaderConstantF(start_reg, constant_data, reg_count);

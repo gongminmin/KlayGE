@@ -158,8 +158,10 @@
 		</VirtualTargets>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\Frustum.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp" />
+		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTreeFactory.hpp" />
 		<Unit filename="..\..\Plugins\Src\Scene\OCTree\Frustum.cpp" />
 		<Unit filename="..\..\Plugins\Src\Scene\OCTree\OCTree.cpp" />
+		<Unit filename="..\..\Plugins\Src\Scene\OCTree\OCTreeFactory.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
