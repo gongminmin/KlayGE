@@ -74,7 +74,7 @@ namespace
 		FlagObject(int length_segs, int width_segs)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_.reset(new FlagRenderable(length_segs, width_segs));
+			renderable_ = MakeSharedPtr<FlagRenderable>(length_segs, width_segs);
 		}
 	};
 
@@ -125,7 +125,7 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	flag_.reset(new FlagObject(8 * 2, 6 * 2));
+	flag_ = MakeSharedPtr<FlagObject>(8 * 2, 6 * 2);
 	flag_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));
@@ -138,7 +138,7 @@ void VertexDisplacement::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&VertexDisplacement::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }

@@ -260,7 +260,7 @@ namespace
 	{
 	public:
 		explicit ParticlesObject(int max_num_particles)
-			: SceneObjectHelper(RenderablePtr(new RenderParticles(max_num_particles)), SOA_Cullable)
+			: SceneObjectHelper(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Cullable)
 		{
 		}
 
@@ -433,7 +433,7 @@ namespace
 	class TerrainRenderable : public RenderablePlane
 	{
 	public:
-		explicit TerrainRenderable(TexturePtr height_map, TexturePtr normal_map)
+		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
 			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read));
@@ -472,8 +472,8 @@ namespace
 	class TerrainObject : public SceneObjectHelper
 	{
 	public:
-		TerrainObject(TexturePtr height_map, TexturePtr normal_map)
-			: SceneObjectHelper(RenderablePtr(new TerrainRenderable(height_map, normal_map)), SOA_Cullable)
+		TerrainObject(TexturePtr const & height_map, TexturePtr const & normal_map)
+			: SceneObjectHelper(MakeSharedPtr<TerrainRenderable>(height_map, normal_map), SOA_Cullable)
 		{
 		}
 	};
@@ -579,17 +579,17 @@ void GPUParticleSystemApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&GPUParticleSystemApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	particles_.reset(new ParticlesObject(NUM_PARTICLE));
+	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);
 	particles_->AddToSceneManager();
 
-	gpu_ps.reset(new GPUParticleSystem(NUM_PARTICLE, terrain_height(), terrain_normal()));
+	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height(), terrain_normal());
 	gpu_ps->AutoEmit(500);
 
-	terrain_.reset(new TerrainObject(terrain_height(), terrain_normal()));
+	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height(), terrain_normal());
 	terrain_->AddToSceneManager();
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -602,7 +602,7 @@ void GPUParticleSystemApp::InitObjects()
 	fog_buffer_ = rf.MakeFrameBuffer();
 	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	blend_pp_.reset(new BlendPostProcess);
+	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)

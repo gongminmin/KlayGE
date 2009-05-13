@@ -138,11 +138,11 @@ void VideoTextureApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&VideoTextureApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	ground_.reset(new TeapotObject);
+	ground_ = MakeSharedPtr<TeapotObject>();
 	ground_->AddToSceneManager();
 
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();

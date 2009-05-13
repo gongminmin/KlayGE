@@ -165,7 +165,7 @@ void Parallax::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	polygon_.reset(new PolygonObject);
+	polygon_ = MakeSharedPtr<PolygonObject>();
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
@@ -177,7 +177,7 @@ void Parallax::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&Parallax::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 

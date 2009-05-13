@@ -294,7 +294,7 @@ namespace
 	{
 	public:
 		GroundObject()
-			: SceneObjectHelper(RenderablePtr(new GroundRenderable), SOA_Cullable)
+			: SceneObjectHelper(MakeSharedPtr<GroundRenderable>(), SOA_Cullable)
 		{
 			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
 
@@ -383,10 +383,10 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	ground_.reset(new GroundObject);
+	ground_ = MakeSharedPtr<GroundObject>();
 	ground_->AddToSceneManager();
 
-	mesh_.reset(new OccluderObject);
+	mesh_ = MakeSharedPtr<OccluderObject>();
 	mesh_->AddToSceneManager();
 
 	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
@@ -424,7 +424,7 @@ void ShadowCubeMap::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 

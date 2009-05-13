@@ -271,7 +271,7 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 
-	downsampler_.reset(new Downsampler8x8);
+	downsampler_ = MakeSharedPtr<Downsampler8x8>();
 
 	cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
 	*(technique_->Effect().ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromTexture("font.dds")));

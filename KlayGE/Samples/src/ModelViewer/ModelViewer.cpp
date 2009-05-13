@@ -82,7 +82,7 @@ namespace
 	{
 	public:
 		AxisObject()
-			: SceneObjectHelper(RenderablePtr(new RenderAxis), 0)
+			: SceneObjectHelper(MakeSharedPtr<RenderAxis>(), 0)
 		{
 		}
 	};
@@ -139,7 +139,7 @@ namespace
 	{
 	public:
 		GridObject()
-			: SceneObjectHelper(RenderablePtr(new RenderGrid), 0)
+			: SceneObjectHelper(MakeSharedPtr<RenderGrid>(), 0)
 		{
 		}
 	};
@@ -170,7 +170,7 @@ namespace
 	{
 		RenderModelPtr operator()(std::wstring const & name)
 		{
-			return RenderModelPtr(new DetailedSkinnedModel(name));
+			return MakeSharedPtr<DetailedSkinnedModel>(name);
 		}
 	};
 }
@@ -201,10 +201,10 @@ void ModelViewerApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 	
-	axis_.reset(new AxisObject);
+	axis_ = MakeSharedPtr<AxisObject>();
 	axis_->AddToSceneManager();
 
-	grid_.reset(new GridObject);
+	grid_ = MakeSharedPtr<GridObject>();
 	grid_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("ModelViewer.uiml"));
@@ -241,7 +241,7 @@ void ModelViewerApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&ModelViewerApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 

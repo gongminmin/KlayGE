@@ -277,7 +277,7 @@ void DepthOfFieldApp::InitObjects()
 			float const s = sin(2 * PI * j / (NUM_INSTANCE / 10));
 			float const c = cos(2 * PI * j / (NUM_INSTANCE / 10));
 
-			SceneObjectPtr so(new Teapot);
+			SceneObjectPtr so = MakeSharedPtr<Teapot>();
 			checked_pointer_cast<Teapot>(so)->Instance(
 				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
 
@@ -299,14 +299,14 @@ void DepthOfFieldApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&DepthOfFieldApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	depth_of_field_.reset(new DepthOfField);
+	depth_of_field_ = MakeSharedPtr<DepthOfField>();
 	depth_of_field_->Destinate(FrameBufferPtr());
 
-	clear_float_.reset(new ClearFloatPostProcess);
+	clear_float_ = MakeSharedPtr<ClearFloatPostProcess>();
 	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f - 0.5f, 0.4f - 0.5f, 0.6f - 0.5f, 1 - 0.5f));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DepthOfField.uiml"));

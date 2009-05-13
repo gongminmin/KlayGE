@@ -142,7 +142,7 @@ namespace
 	{
 	public:
 		PolygonObject()
-			: SceneObjectHelper(RenderablePtr(new RenderPolygon), SOA_Cullable)
+			: SceneObjectHelper(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
 		{
 		}
 	};
@@ -197,7 +197,7 @@ void DistanceMapping::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	polygon_.reset(new PolygonObject);
+	polygon_ = MakeSharedPtr<PolygonObject>();
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));
@@ -210,7 +210,7 @@ void DistanceMapping::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&DistanceMapping::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }

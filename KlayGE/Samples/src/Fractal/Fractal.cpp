@@ -208,14 +208,14 @@ void Fractal::InitObjects()
 	render_buffer_[0]->GetViewport().camera
 		= render_buffer_[1]->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
 
-	renderFractal_.reset(new RenderFractal);
-	renderPlane_.reset(new RenderPlane);
+	renderFractal_ = MakeSharedPtr<RenderFractal>();
+	renderPlane_ = MakeSharedPtr<RenderPlane>();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&Fractal::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 }

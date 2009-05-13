@@ -115,7 +115,7 @@ namespace
 	{
 	public:
 		TerrainObject()
-			: SceneObjectHelper(RenderablePtr(new TerrainRenderable), SOA_Cullable)
+			: SceneObjectHelper(MakeSharedPtr<TerrainRenderable>(), SOA_Cullable)
 		{
 		}
 	};
@@ -248,7 +248,7 @@ namespace
 		ParticlesObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_.reset(new RenderParticles);
+			renderable_ = MakeSharedPtr<RenderParticles>();
 		}
 
 		void ParticleTexture(TexturePtr const & tex)
@@ -474,18 +474,18 @@ void ParticleEditorApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&ParticleEditorApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	particles_.reset(new ParticlesObject);
+	particles_ = MakeSharedPtr<ParticlesObject>();
 	particles_->AddToSceneManager();
 
-	terrain_.reset(new TerrainObject);
+	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
 
-	ps_.reset(new ParticleSystem<Particle>(NUM_PARTICLE, boost::bind(&GenParticle<Particle>::operator(), &gen_particle, _1, _2),
-		boost::bind(&UpdateParticle<Particle>::operator(), &update_particle, _1, _2)));
+	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, boost::bind(&GenParticle<Particle>::operator(), &gen_particle, _1, _2),
+		boost::bind(&UpdateParticle<Particle>::operator(), &update_particle, _1, _2));
 
 	ps_->AutoEmit(256);
 
@@ -496,7 +496,7 @@ void ParticleEditorApp::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	copy_pp_.reset(new CopyPostProcess);
+	copy_pp_ = MakeSharedPtr<CopyPostProcess>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

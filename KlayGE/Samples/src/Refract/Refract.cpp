@@ -194,10 +194,10 @@ void Refract::InitObjects()
 	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
 	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
 
-	refractor_.reset(new RefractorObject(y_cube_map_, c_cube_map_));
+	refractor_ = MakeSharedPtr<RefractorObject>(y_cube_map_, c_cube_map_);
 	refractor_->AddToSceneManager();
 
-	sky_box_.reset(new SceneObjectHDRSkyBox);
+	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
@@ -214,7 +214,7 @@ void Refract::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&Refract::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
@@ -223,7 +223,7 @@ void Refract::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	hdr_.reset(new HDRPostProcess(true));
+	hdr_ = MakeSharedPtr<HDRPostProcess>(true);
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)

@@ -137,7 +137,7 @@ void PostProcessingApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	torus_.reset(new TorusObject);
+	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
@@ -145,7 +145,7 @@ void PostProcessingApp::InitObjects()
 
 	TexturePtr y_cube_map = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
 	TexturePtr c_cube_map = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
-	sky_box_.reset(new SceneObjectHDRSkyBox);
+	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
@@ -159,14 +159,14 @@ void PostProcessingApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&PostProcessingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	ascii_arts_.reset(new AsciiArtsPostProcess);
-	cartoon_.reset(new CartoonPostProcess);
-	tiling_.reset(new TilingPostProcess);
-	hdr_.reset(new HDRPostProcess(false));
+	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
+	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
+	tiling_ = MakeSharedPtr<TilingPostProcess>();
+	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

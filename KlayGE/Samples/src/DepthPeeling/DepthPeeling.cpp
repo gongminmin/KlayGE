@@ -222,7 +222,7 @@ void DepthPeelingApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	polygon_.reset(new PolygonObject);
+	polygon_ = MakeSharedPtr<PolygonObject>();
 	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(float3(0, 2, -1));
 	polygon_->AddToSceneManager();
 
@@ -253,11 +253,11 @@ void DepthPeelingApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&DepthPeelingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	blend_pp_.reset(new BlendPostProcess);
+	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

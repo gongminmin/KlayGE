@@ -234,7 +234,7 @@ void Instancing::InitObjects()
 			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
 			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
 
-			SceneObjectPtr so(new Teapot);
+			SceneObjectPtr so = MakeSharedPtr<Teapot>();
 			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
 			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
@@ -256,7 +256,7 @@ void Instancing::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&Instancing::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
