@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 3.5.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 处理Overlay物体 (2009.5.13)
 //
 // 3.5.0
 // 增加了根据technique权重的排序 (2007.1.14)
@@ -84,7 +87,14 @@ namespace KlayGE
 			visible_marks_.resize(scene_objs_.size());
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
-				visible_marks_[i] = scene_objs_[i]->Visible();
+				if (!scene_objs_[i]->Overlay())
+				{
+					visible_marks_[i] = scene_objs_[i]->Visible();
+				}
+				else
+				{
+					visible_marks_[i] = false;
+				}
 			}
 		}
 
@@ -166,29 +176,31 @@ namespace KlayGE
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)
 		{
-			size_t num_objs = scene_objs_.size();
-
 			renderEngine.BeginPass();
 
-			uint32_t urt = app.Update(pass);
-			if (urt & App3DFramework::URV_Only_New_Objs)
-			{
-				start_index_ = num_objs;
-			}
-			else
-			{
-				start_index_ = 0;
-			}
-			if (urt & App3DFramework::URV_Need_Flush)
+			urt_ = app.Update(pass);
+			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
 			{
 				this->Flush();
 			}
 
 			renderEngine.EndPass();
 
-			if (urt & App3DFramework::URV_Finished)
+			if (urt_ & App3DFramework::URV_Finished)
 			{
 				break;
+			}
+		}
+
+		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
+		{
+			if ((*iter)->Overlay())
+			{
+				iter = this->DoDelSceneObject(iter);
+			}
+			else
+			{
+				++ iter;
 			}
 		}
 
@@ -207,11 +219,32 @@ namespace KlayGE
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		App3DFramework& app = Context::Instance().AppInstance();
 
-		this->ClipScene(app.ActiveCamera());
+		if (urt_ & App3DFramework::URV_Need_Flush)
+		{
+			this->ClipScene(app.ActiveCamera());
+		}
+		else
+		{
+			visible_marks_.resize(scene_objs_.size());
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				visible_marks_[i] = false;
+			}
+		}
+		if (urt_ & App3DFramework::URV_Finished)
+		{
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				if (scene_objs_[i]->Overlay())
+				{
+					visible_marks_[i] = scene_objs_[i]->Visible();
+				}
+			}
+		}
 
 		numObjectsRendered_ = 0;
 		std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables;
-		for (size_t i = start_index_; i < visible_marks_.size(); ++ i)
+		for (size_t i = 0; i < visible_marks_.size(); ++ i)
 		{
 			if (visible_marks_[i])
 			{
@@ -258,18 +291,6 @@ namespace KlayGE
 			}
 		}
 		render_queue_.resize(0);
-
-		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
-		{
-			if ((*iter)->ShortAge())
-			{
-				iter = this->DoDelSceneObject(iter);
-			}
-			else
-			{
-				++ iter;
-			}
-		}
 
 		app.RenderOver();
 	}

@@ -55,8 +55,7 @@ namespace KlayGE
 		{
 			URV_Need_Flush = 1UL << 0,
 			URV_Flushed = 1UL << 1,
-			URV_Finished = 1UL << 2,
-			URV_Only_New_Objs = 1UL << 3
+			URV_Finished = 1UL << 2
 		};
 
 	public:
@@ -93,6 +92,7 @@ namespace KlayGE
 		}
 
 		uint32_t Update(uint32_t pass);
+		virtual void DoUpdateOverlay() = 0;
 		virtual uint32_t DoUpdate(uint32_t pass) = 0;
 		void UpdateStats();
 

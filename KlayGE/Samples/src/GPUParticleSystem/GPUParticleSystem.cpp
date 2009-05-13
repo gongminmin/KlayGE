@@ -637,6 +637,15 @@ void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAct
 	}
 }
 
+void GPUParticleSystemApp::DoUpdateOverlay()
+{
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str(), 16);
+}
+
 uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -682,12 +691,6 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 			blend_pp_->Apply();
-
-			std::wostringstream stream;
-			stream << this->FPS();
-
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System", 16);
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str(), 16);
 
 			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 		}

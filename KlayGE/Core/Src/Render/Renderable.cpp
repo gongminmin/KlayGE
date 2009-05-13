@@ -90,7 +90,7 @@ namespace KlayGE
 		}
 	}
 
-	void Renderable::AddInstance(SceneObjectPtr obj)
+	void Renderable::AddInstance(SceneObjectPtr const & obj)
 	{
 		instances_.push_back(boost::weak_ptr<SceneObject>(obj));
 	}

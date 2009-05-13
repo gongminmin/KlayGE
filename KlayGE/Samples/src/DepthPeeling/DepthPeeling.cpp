@@ -329,6 +329,25 @@ void DepthPeelingApp::CheckBoxHandler(UICheckBox const & /*sender*/)
 	use_depth_peeling_ = dialog_->Control<UICheckBox>(id_use_depth_peeling_)->GetChecked();
 }
 
+void DepthPeelingApp::DoUpdateOverlay()
+{
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+
+	UIManager::Instance().Render();
+
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth Peeling", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	stream.str(L"");
+	stream << sceneMgr.NumRenderablesRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+}
+
 uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
@@ -412,21 +431,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				peeling_fbs_[num_layers_ - 1 - i]->RequiresFlipping());
 			blend_pp_->Apply();
 		}
-
-		UIManager::Instance().Render();
-
-		std::wostringstream stream;
-		stream << this->FPS();
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth Peeling", 16);
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
-
-		stream.str(L"");
-		stream << sceneMgr.NumRenderablesRendered() << " Renderables "
-			<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-			<< sceneMgr.NumVerticesRendered() << " Vertices";
-		font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Finished;
 	}
 }

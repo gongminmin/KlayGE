@@ -505,6 +505,23 @@ void DeferredShadingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
+void DeferredShadingApp::DoUpdateOverlay()
+{
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+	UIManager::Instance().Render();
+
+	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Shading", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+
+	std::wostringstream stream;
+	stream.precision(2);
+	stream << fixed << this->FPS() << " FPS";
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -534,20 +551,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 			hdr_pp_->Apply();
 		}
 
-		UIManager::Instance().Render();
-
-		{
-			FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
-
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Shading", 16);
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
-
-			std::wostringstream stream;
-			stream.precision(2);
-			stream << fixed << this->FPS() << " FPS";
-			font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
-		}
-	
-		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Finished;
 	}
 }

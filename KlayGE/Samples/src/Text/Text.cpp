@@ -127,10 +127,9 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
-uint32_t TextApp::DoUpdate(uint32_t /*pass*/)
+void TextApp::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	std::wostringstream stream;
 	stream.precision(2);
@@ -144,6 +143,12 @@ uint32_t TextApp::DoUpdate(uint32_t /*pass*/)
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
+}
+
+uint32_t TextApp::DoUpdate(uint32_t /*pass*/)
+{
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

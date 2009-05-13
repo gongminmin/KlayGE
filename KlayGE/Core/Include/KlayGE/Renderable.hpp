@@ -63,7 +63,7 @@ namespace KlayGE
 				this->AddInstance(*iter);
 			}
 		}
-		void AddInstance(SceneObjectPtr obj);
+		void AddInstance(SceneObjectPtr const & obj);
 
 	protected:
 		virtual void UpdateInstanceStream();

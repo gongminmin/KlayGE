@@ -850,6 +850,17 @@ public:
 	}
 };
 
+void ParticleEditorApp::DoUpdateOverlay()
+{
+	UIManager::Instance().Render();
+
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Particle System", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -931,14 +942,6 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 			particles_->Visible(true);
 		}
 		terrain_->Visible(false);
-
-		UIManager::Instance().Render();
-
-		std::wostringstream stream;
-		stream << this->FPS();
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Particle System", 16);
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

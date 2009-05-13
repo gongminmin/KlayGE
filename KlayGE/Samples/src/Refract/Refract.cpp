@@ -275,6 +275,15 @@ void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
+void Refract::DoUpdateOverlay()
+{
+	std::wostringstream stream;
+	stream << this->FPS() << " FPS";
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t Refract::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -319,12 +328,6 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
-		std::wostringstream stream;
-		stream << this->FPS() << " FPS";
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract", 16);
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
-
-		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Finished;
 	}
 }

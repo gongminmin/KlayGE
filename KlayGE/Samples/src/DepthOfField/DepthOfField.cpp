@@ -16,7 +16,6 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
-#include <KlayGE/Util.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -32,7 +31,7 @@ using namespace KlayGE;
 
 namespace
 {
-	int const NUM_INSTANCE = 400;
+	int32_t const NUM_INSTANCE = 400;
 
 	class Teapot : public SceneObjectHelper
 	{
@@ -55,6 +54,7 @@ namespace
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
+			mat_ = mat;
 			float4x4 matT = MathLib::transpose(mat);
 
 			inst_.col[0] = matT.Row(0);
@@ -73,8 +73,14 @@ namespace
 			renderable_ = ra;
 		}
 
+		float4x4 const & GetModelMatrix() const
+		{
+			return mat_;
+		}
+
 	private:
 		InstData inst_;
+		float4x4 mat_;
 	};
 
 	class RenderInstance : public KMesh
@@ -384,6 +390,30 @@ void DepthOfFieldApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
+void DepthOfFieldApp::DoUpdateOverlay()
+{
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+	UIManager::Instance().Render();
+
+	FrameBuffer& rw = *renderEngine.CurFrameBuffer();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth of field", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+
+	std::wostringstream stream;
+	stream << this->FPS() << " FPS";
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
+	stream.str(L"");
+	stream << sceneMgr.NumObjectsRendered() << " Scene objects "
+		<< sceneMgr.NumRenderablesRendered() << " Renderables "
+		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
+		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+}
+
 uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -401,17 +431,6 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-		UIManager::Instance().Render();
-
-		FrameBuffer& rw = *renderEngine.CurFrameBuffer();
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth of field", 16);
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
-
-		std::wostringstream stream;
-		stream << this->FPS() << " FPS";
-		font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
-		return App3DFramework::URV_Only_New_Objs | App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Finished;
 	}
 }

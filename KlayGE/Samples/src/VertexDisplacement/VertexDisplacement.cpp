@@ -153,10 +153,9 @@ void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputActio
 	}
 }
 
-uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
+void VertexDisplacement::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	std::wostringstream stream;
 	stream << this->FPS();
@@ -171,6 +170,12 @@ uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name(), 16);
+}
+
+uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)
+{
+	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

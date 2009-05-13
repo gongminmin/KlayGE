@@ -182,16 +182,19 @@ namespace KlayGE
 
 	void FontRenderable::OnRenderBegin()
 	{
-		vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+		if (!vertices_.empty() && !indices_.empty())
 		{
-			GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
-			std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
-		}
+			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+			{
+				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
+			}
 
-		ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-		{
-			GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
-			std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
+			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+			{
+				GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
+				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
+			}
 		}
 
 		if (!three_dim_)
@@ -653,7 +656,7 @@ namespace KlayGE
 	Font::Font(RenderablePtr const & font_renderable, uint32_t flags)
 			: font_renderable_(font_renderable)
 	{
-		fso_attrib_ = SceneObject::SOA_ShortAge;
+		fso_attrib_ = SceneObject::SOA_Overlay;
 		if (flags & Font::FS_Cullable)
 		{
 			fso_attrib_ |= SceneObject::SOA_Cullable;

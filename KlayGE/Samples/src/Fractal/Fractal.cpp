@@ -271,6 +271,15 @@ void Fractal::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	}
 }
 
+void Fractal::DoUpdateOverlay()
+{
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Fractal", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t Fractal::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -296,11 +305,6 @@ uint32_t Fractal::DoUpdate(uint32_t pass)
 
 		odd = !odd;
 
-		std::wostringstream stream;
-		stream << this->FPS();
-
-		font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Fractal", 16);
-		font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

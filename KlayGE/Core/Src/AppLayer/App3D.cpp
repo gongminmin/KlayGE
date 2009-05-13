@@ -170,6 +170,8 @@ namespace KlayGE
 
 			InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
 			inputEngine.Update();
+
+			this->DoUpdateOverlay();
 		}
 
 		return this->DoUpdate(pass);

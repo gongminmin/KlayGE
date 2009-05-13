@@ -66,7 +66,7 @@ namespace KlayGE
 	protected:
 		SceneObjectsType scene_objs_;
 		std::vector<char> visible_marks_;
-		size_t start_index_;
+		uint32_t urt_;
 
 	private:
 		RenderQueueType render_queue_;

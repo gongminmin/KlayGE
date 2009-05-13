@@ -1,8 +1,11 @@
 // SceneObject.cpp
 // KlayGE 场景对象类 实现文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了Overlay标志 (2009.5.13)
 //
 // 3.1.0
 // 初次建立 (2005.10.31)
@@ -58,9 +61,9 @@ namespace KlayGE
 		return ((attrib_ & SOA_Cullable) != 0);
 	}
 
-	bool SceneObject::ShortAge() const
+	bool SceneObject::Overlay() const
 	{
-		return ((attrib_ & SOA_ShortAge) != 0);
+		return ((attrib_ & SOA_Overlay) != 0);
 	}
 
 	bool SceneObject::Moveable() const

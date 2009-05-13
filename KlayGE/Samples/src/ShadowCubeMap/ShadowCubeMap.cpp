@@ -486,6 +486,17 @@ void ShadowCubeMap::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
+void ShadowCubeMap::DoUpdateOverlay()
+{
+	UIManager::Instance().Render();
+
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -542,14 +553,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);
-
-			UIManager::Instance().Render();
-
-			std::wostringstream stream;
-			stream << this->FPS();
-
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap", 16);
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 		}
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

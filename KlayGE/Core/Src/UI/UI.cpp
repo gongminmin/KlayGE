@@ -853,7 +853,7 @@ namespace KlayGE
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
-				boost::shared_ptr<UIRectObject> ui_rect_obj = MakeSharedPtr<UIRectObject>(rect.second, SceneObject::SOA_ShortAge);
+				boost::shared_ptr<UIRectObject> ui_rect_obj = MakeSharedPtr<UIRectObject>(rect.second, SceneObject::SOA_Overlay);
 				ui_rect_obj->AddToSceneManager();
 			}
 		}

@@ -1,8 +1,11 @@
 // SceneObject.hpp
 // KlayGE 场景对象类 头文件
-// Ver 3.1.0
-// 版权所有(C) 龚敏敏, 2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了Overlay标志 (2009.5.13)
 //
 // 3.1.0
 // 初次建立 (2005.10.31)
@@ -33,7 +36,7 @@ namespace KlayGE
 		enum SOAttrib
 		{
 			SOA_Cullable = 1UL << 0,
-			SOA_ShortAge = 1UL << 1,
+			SOA_Overlay = 1UL << 1,
 			SOA_Moveable = 1UL << 2,
 			SOA_Unvisible = 1UL << 3
 		};
@@ -50,7 +53,7 @@ namespace KlayGE
 		virtual void AddToSceneManager();
 
 		bool Cullable() const;
-		bool ShortAge() const;
+		bool Overlay() const;
 		bool Moveable() const;
 		bool Visible() const;
 		void Visible(bool vis);

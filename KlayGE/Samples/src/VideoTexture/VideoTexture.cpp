@@ -160,6 +160,15 @@ void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
+void VideoTextureApp::DoUpdateOverlay()
+{
+	std::wostringstream stream;
+	stream << this->FPS();
+
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture", 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+}
+
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -168,12 +177,6 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
-
-	std::wostringstream stream;
-	stream << this->FPS();
-
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

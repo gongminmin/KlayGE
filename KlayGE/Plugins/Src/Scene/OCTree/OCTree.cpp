@@ -121,7 +121,7 @@ namespace KlayGE
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
-				if (obj->Cullable() && !obj->ShortAge() && !obj->Moveable())
+				if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 				{
 					Box const & box = obj->GetBound();
 					float4x4 const & mat = obj->GetModelMatrix();
@@ -235,12 +235,12 @@ namespace KlayGE
 		}
 
 		visible_marks_.resize(scene_objs_.size());
-		for (size_t i = start_index_; i < scene_objs_.size(); ++ i)
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			SceneObjectPtr const & obj = scene_objs_[i];
-			if (obj->Visible())
+			if (!obj->Overlay() && obj->Visible())
 			{
-				if (obj->Cullable() && !obj->ShortAge())
+				if (obj->Cullable())
 				{
 					Box const & box = obj->GetBound();
 					float4x4 const & mat = obj->GetModelMatrix();
@@ -278,7 +278,7 @@ namespace KlayGE
 	void OCTree::DoAddSceneObject(SceneObjectPtr const & obj)
 	{
 		scene_objs_.push_back(obj);
-		if (obj->Cullable() && !obj->ShortAge() && !obj->Moveable())
+		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
@@ -286,7 +286,7 @@ namespace KlayGE
 
 	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		if ((*iter)->Cullable() && !(*iter)->ShortAge() && !(*iter)->Moveable())
+		if ((*iter)->Cullable() && !(*iter)->Overlay() && !(*iter)->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
