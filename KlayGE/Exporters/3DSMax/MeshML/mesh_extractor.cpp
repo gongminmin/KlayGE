@@ -16,7 +16,6 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#pragma conform(forScope, push, i, off)
 #include <max.h>
 #include <modstack.h>
 #include <stdmat.h>
@@ -27,7 +26,6 @@
 #include <phyexp.h>
 #endif
 #include <iskin.h>
-#pragma conform(forScope, pop, i)
 
 #include <fstream>
 #include <sstream>
@@ -622,7 +620,7 @@ namespace KlayGE
 						parent_node = parent_node->GetParentNode();
 					}
 
-					pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1));
+					pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1.0f));
 				}
 
 				Point3 v0 = pos_binds.first * tm;
@@ -656,7 +654,7 @@ namespace KlayGE
 				{
 					for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
 					{
-						pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0));
+						pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0.0f));
 					}
 				}
 			}
@@ -1105,7 +1103,7 @@ namespace KlayGE
 						std::vector<std::string>::iterator par_iter = std::find(joints_id_to_name.begin(), joints_id_to_name.end(),
 							joints_[joints_id_to_name[i]].parent_name);
 						assert(par_iter != joints_id_to_name.end());
-						par_index = par_iter - joints_id_to_name.begin();
+						par_index = static_cast<int>(par_iter - joints_id_to_name.begin());
 					}
 
 					if (par_index > i)

@@ -10,14 +10,12 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#pragma conform(forScope, push, i, off)
 #include <max.h>
 #if VERSION_3DSMAX >= 7 << 16
 #include <CS/bipexp.h>
 #else
 #include <bipexp.h>
 #endif
-#pragma conform(forScope, pop, i)
 
 #include "util.hpp"
 

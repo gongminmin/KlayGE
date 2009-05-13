@@ -13,10 +13,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#pragma conform(forScope, push, i, off)
 #include <max.h>
 #include <Interval.h>
-#pragma conform(forScope, pop, i)
 
 #include <vector>
 #include <sstream>
@@ -159,11 +157,11 @@ namespace KlayGE
 
 			::SetWindowLongPtr(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
 
-			int const normal_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal")));
-			int const tangent_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent")));
-			int const texcoord_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Texture coordinate")));
+			int const normal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Normal"))));
+			int const tangent_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Tangent"))));
+			int const texcoord_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Texture coordinate"))));
 
-			int const binormal_index = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Binormal")));
+			int const binormal_index = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Binormal"))));
 
 			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, normal_index, static_cast<LPARAM>(VEU_Normal));
 			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, tangent_index, static_cast<LPARAM>(VEU_Tangent));
@@ -182,7 +180,7 @@ namespace KlayGE
 				{
 				case IDC_BUTTON_ADD:
 					{
-						int const count = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0);
+						int const count = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0));
 						if (count > 0)
 						{
 							std::vector<int> sel_items(count);
@@ -190,12 +188,12 @@ namespace KlayGE
 
 							for (size_t i = 0; i < sel_items.size(); ++ i)
 							{
-								int len = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL);
+								int len = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL));
 								std::vector<TCHAR> text(len + 1);
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
-								int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL);
+								int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL));
 
-								int const ind = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0]));
+								int const ind = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0])));
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
 
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
@@ -206,7 +204,7 @@ namespace KlayGE
 
 				case IDC_BUTTON_DEL:
 					{
-						int const count = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0);
+						int const count = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETSELCOUNT, 0, 0));
 						if (count > 0)
 						{
 							std::vector<int> sel_items(count);
@@ -214,12 +212,12 @@ namespace KlayGE
 
 							for (size_t i = 0; i < sel_items.size(); ++ i)
 							{
-								int len = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL);
+								int len = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXTLEN, sel_items[i], NULL));
 								std::vector<TCHAR> text(len + 1);
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETTEXT, sel_items[i], reinterpret_cast<LPARAM>(&text[0]));
-								int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL);
+								int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, sel_items[i], NULL));
 
-								int const ind = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0]));
+								int const ind = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(&text[0])));
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, ind, static_cast<LPARAM>(data));
 
 								::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_DELETESTRING, sel_items[i], 0);
@@ -232,7 +230,7 @@ namespace KlayGE
 					{
 						assert(instance != NULL);
 
-						int const joint_per_ver = ::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL);
+						int const joint_per_ver = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL));
 						Interval const se_ticks = instance->max_interface_->GetAnimRange();
 						meshml_extractor extractor(instance->max_interface_->GetRootNode(), joint_per_ver,
 							instance->max_interface_->GetTime(),
@@ -245,7 +243,7 @@ namespace KlayGE
 						eva.tex = false;
 						for (int index = 0;; ++ index)
 						{
-							int data = ::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, index, NULL);
+							int data = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_GETITEMDATA, index, NULL));
 							if (data == LB_ERR)
 							{
 								break;
