@@ -351,6 +351,50 @@
 				RelativePath="..\..\src\DepthOfField\DepthOfField.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\media\DepthOfField\DepthOfField_init.py"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Copying $(InputFileName)"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						Outputs="$(OutDir)/$(InputFileName)"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

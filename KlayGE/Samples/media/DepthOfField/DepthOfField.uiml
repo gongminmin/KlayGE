@@ -9,6 +9,7 @@
 		<control type="slider" id="FocusRangeSlider" x="20" y="108" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
 
 		<control type="check_box" id="BlurFactor" caption="Blur factor" x="20" y="176" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="UseInstancing" caption="Use instincing" x="20" y="196" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="224" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 </ui>

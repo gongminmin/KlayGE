@@ -22,9 +22,16 @@ private:
 	void FocusPlaneChangedHandler(KlayGE::UISlider const & sender);
 	void FocusRangeChangedHandler(KlayGE::UISlider const & sender);
 	void BlurFactorHandler(KlayGE::UICheckBox const & sender);
+	void UseInstancingHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
+	boost::shared_ptr<KlayGE::Renderable> renderInstance_;
+	boost::shared_ptr<KlayGE::Renderable> renderMesh_;
+
+	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
+
+	bool use_instance_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -40,7 +47,13 @@ private:
 	int id_focus_range_static_;
 	int id_focus_range_slider_;
 	int id_blur_factor_;
+	int id_use_instancing_;
 	int id_ctrl_camera_;
+
+	size_t num_objs_rendered_;
+	size_t num_renderable_rendered_;
+	size_t num_primitives_rendered_;
+	size_t num_vertices_rendered_;
 };
 
 #endif		// _INFTERRAIN_HPP

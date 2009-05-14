@@ -25,13 +25,15 @@ Deferred shading渲染框架。
 ====================================================================================
 Depth of field
 ====================================================================================
-景深post process。可以调节焦平面和焦距范围。
+景深post process。可以调节焦平面和焦距范围。并演示了引擎中的instancing实现。在硬件
+支持instancing的时候会自动切换到硬件实现，否则使用CPU解开instance数据。
 
 技术点：
 1) Depth of field
 2) Summed-Area Table
-3) Instancing
-4) UI
+3) 软件/硬件instancing
+4) Script engine
+5) UI
 
 需求：Geforce 6600以上或Radeon 9500以上。
 渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
@@ -84,19 +86,6 @@ GPU Particle System
 
 需求：Geforce 6以上或Radeon HD 2400以上。
 渲染引擎支持：D3D11/D3D10/D3D9。
-
-====================================================================================
-Instancing
-====================================================================================
-演示了引擎中的instancing实现。在硬件支持instancing的时候会自动切换到硬件实现，
-否则使用CPU解开instance数据。
-
-技术点：
-1) 软件/硬件instancing
-2) Script engine
-
-需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
 
 ====================================================================================
 Model viewer

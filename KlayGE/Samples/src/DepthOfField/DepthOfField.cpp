@@ -16,6 +16,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
+#include <KlayGE/Script.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -107,11 +108,67 @@ namespace
 
 			*(technique_->Effect().ParameterByName("view")) = view;
 			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
-
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 
 			*(technique_->Effect().ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
+		}
+	};
+
+	class RenderNormalMesh : public KMesh
+	{
+	private:
+		struct InstData
+		{
+			float4 col[3];
+			Color clr;
+		};
+
+	public:
+		RenderNormalMesh(RenderModelPtr model, std::wstring const & /*name*/)
+			: KMesh(model, L"NormalMesh")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			technique_ = rf.LoadEffect("DepthOfField.fxml")->TechniqueByName("NormalMesh");
+		}
+
+		void BuildMeshInfo()
+		{
+		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+
+			float4x4 const & view = app.ActiveCamera().ViewMatrix();
+			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+
+			*(technique_->Effect().ParameterByName("view")) = view;
+			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
+			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
+
+			*(technique_->Effect().ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
+		}
+
+		void OnInstanceBegin(uint32_t id)
+		{
+			InstData const * data = static_cast<InstData const *>(instances_[id].lock()->InstanceData());
+
+			float4x4 model;
+			model.Col(0, data->col[0]);
+			model.Col(1, data->col[1]);
+			model.Col(2, data->col[2]);
+			model.Col(3, float4(0, 0, 0, 1));
+
+			*(technique_->Effect().ParameterByName("modelmat")) = model;
+			*(technique_->Effect().ParameterByName("color")) = float4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
+		}
+
+	private:
+		void UpdateInstanceStream()
+		{
 		}
 	};
 
@@ -267,7 +324,8 @@ int main()
 }
 
 DepthOfFieldApp::DepthOfFieldApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+					: App3DFramework(name, settings),
+						num_objs_rendered_(0), num_renderable_rendered_(0), num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
 }
 
@@ -275,22 +333,40 @@ void DepthOfFieldApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	RenderablePtr renderInstance = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
-	for (int i = 0; i < 10; ++ i)
+	ScriptEngine scriptEng;
+	ScriptModule module("DepthOfField_init");
+
+	renderInstance_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
+	for (int32_t i = 0; i < 10; ++ i)
 	{
-		for (int j = 0; j < NUM_INSTANCE / 10; ++ j)
+		for (int32_t j = 0; j < NUM_INSTANCE / 10; ++ j)
 		{
-			float const s = sin(2 * PI * j / (NUM_INSTANCE / 10));
-			float const c = cos(2 * PI * j / (NUM_INSTANCE / 10));
+			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE));
+
+			float3 pos;
+			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
+			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
+			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
+
+			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE));
+
+			Color clr;
+			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
+			clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
+			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
+			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
 
 			SceneObjectPtr so = MakeSharedPtr<Teapot>();
-			checked_pointer_cast<Teapot>(so)->Instance(
-				MathLib::translation(s, i / 10.0f, c), Color(s, c, 0, 1));
+			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
-			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance);
+			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
 			so->AddToSceneManager();
+			scene_objs_.push_back(so);
 		}
 	}
+	use_instance_ = true;
+
+	renderMesh_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -323,6 +399,7 @@ void DepthOfFieldApp::InitObjects()
 	id_focus_range_static_ = dialog_->IDFromName("FocusRangeStatic");
 	id_focus_range_slider_ = dialog_->IDFromName("FocusRangeSlider");
 	id_blur_factor_ = dialog_->IDFromName("BlurFactor");
+	id_use_instancing_ = dialog_->IDFromName("UseInstancing");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(boost::bind(&DepthOfFieldApp::FocusPlaneChangedHandler, this, _1));
@@ -334,6 +411,8 @@ void DepthOfFieldApp::InitObjects()
 	this->FocusPlaneChangedHandler(*dialog_->Control<UISlider>(id_focus_plane_slider_));
 	this->FocusRangeChangedHandler(*dialog_->Control<UISlider>(id_focus_range_slider_));
 	this->BlurFactorHandler(*dialog_->Control<UICheckBox>(id_blur_factor_));
+
+	dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(boost::bind(&DepthOfFieldApp::UseInstancingHandler, this, _1));
 }
 
 void DepthOfFieldApp::OnResize(uint32_t width, uint32_t height)
@@ -378,6 +457,26 @@ void DepthOfFieldApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->ShowBlurFactor(sender.GetChecked());
 }
 
+void DepthOfFieldApp::UseInstancingHandler(UICheckBox const & /*sender*/)
+{
+	use_instance_ = dialog_->Control<UICheckBox>(id_use_instancing_)->GetChecked();
+
+	if (use_instance_)
+	{
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderInstance_);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->SetRenderable(renderMesh_);
+		}
+	}
+}
+
 void DepthOfFieldApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
@@ -405,17 +504,26 @@ void DepthOfFieldApp::DoUpdateOverlay()
 	stream << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	stream.str(L"");
-	stream << sceneMgr.NumObjectsRendered() << " Scene objects "
-		<< sceneMgr.NumRenderablesRendered() << " Renderables "
-		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-		<< sceneMgr.NumVerticesRendered() << " Vertices";
+	stream << num_objs_rendered_ << " Scene objects "
+		<< num_renderable_rendered_ << " Renderables "
+		<< num_primitives_rendered_ << " Primitives "
+		<< num_vertices_rendered_ << " Vertices";
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+
+	if (use_instance_)
+	{
+		font_->RenderText(0, 72, Color(1, 1, 1, 1), L"Instancing is enabled", 16);
+	}
+	else
+	{
+		font_->RenderText(0, 72, Color(1, 1, 1, 1), L"Instancing is disabled", 16);
+	}
 }
 
 uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 {
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	switch (pass)
@@ -427,6 +535,11 @@ uint32_t DepthOfFieldApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
+		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
+		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
+		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
+		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
+
 		depth_of_field_->Apply();
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());

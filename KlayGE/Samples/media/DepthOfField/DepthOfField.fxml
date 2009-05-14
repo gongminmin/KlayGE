@@ -121,4 +121,33 @@ float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="ClearFloatPS()"/>
 		</pass>
 	</technique>
+	
+	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
+	<parameter type="float4" name="color"/>
+	
+	<shader>
+		<![CDATA[
+void NormalMeshVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					out float3 oClr		: COLOR,
+					out float2 oDepth	: TEXCOORD0,
+					out float4 oPos		: SV_Position)
+{
+	float4 pos_ws = mul(pos, modelmat);
+	oPos = mul(pos_ws, view_proj);
+	oDepth = mul(pos_ws, view).zw;
+
+	normal = mul(normal, (float3x3)modelmat);
+	oClr = saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
+}
+		]]>
+	</shader>
+
+	<technique name="NormalMesh">
+		<pass name="p0">
+			<state name="vertex_shader" value="NormalMeshVS()"/>
+			<state name="pixel_shader" value="ColorDepthPS()"/>
+		</pass>
+	</technique>
 </effect>
