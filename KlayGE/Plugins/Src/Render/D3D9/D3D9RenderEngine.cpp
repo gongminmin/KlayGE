@@ -422,6 +422,12 @@ namespace KlayGE
 		BOOST_ASSERT(fb);
 	}
 
+	// 设置当前Stream output目标
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::DoBindSOBuffers(size_t /*num_buffs*/, GraphicsBufferPtr* /*buffs*/, size_t* /*offsets*/)
+	{
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::BeginFrame()

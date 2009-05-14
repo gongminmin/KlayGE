@@ -86,6 +86,7 @@ namespace KlayGE
 
 		boost::array<std::vector<TexturePtr>, ST_NumShaderTypes> textures_;
 		boost::array<std::vector<SamplerStateObjectPtr>, ST_NumShaderTypes> samplers_;
+		boost::array<std::vector<GraphicsBufferPtr>, ST_NumShaderTypes> buffers_;
 
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
 		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;

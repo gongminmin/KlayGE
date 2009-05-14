@@ -96,7 +96,8 @@ namespace KlayGE
 		REDT_float4,
 		REDT_float4x2,
 		REDT_float4x3,
-		REDT_float4x4
+		REDT_float4x4,
+		REDT_buffer
 	};
 
 	class KLAYGE_CORE_API RenderVariable
@@ -116,6 +117,7 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float4x4 const & value);
 		virtual RenderVariable& operator=(TexturePtr const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
+		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(shader_desc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
@@ -135,6 +137,7 @@ namespace KlayGE
 		virtual void Value(float4x4& val) const;
 		virtual void Value(TexturePtr& val) const;
 		virtual void Value(SamplerStateObjectPtr& val) const;
+		virtual void Value(GraphicsBufferPtr& value) const;
 		virtual void Value(std::string& val) const;
 		virtual void Value(shader_desc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
@@ -159,7 +162,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		RenderVariableConcrete& operator=(T const & value)
+		RenderVariable& operator=(T const & value)
 		{
 			val_ = value;
 			return *this;
@@ -174,6 +177,90 @@ namespace KlayGE
 		T val_;
 	};
 
+	class RenderVariableTexture : public RenderVariable
+	{
+	public:
+		RenderVariablePtr Clone()
+		{
+			RenderVariablePtr ret = MakeSharedPtr<RenderVariableTexture>();
+			TexturePtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+		RenderVariable& operator=(TexturePtr const & value)
+		{
+			val_ = value;
+			return *this;
+		}
+
+		void Value(TexturePtr& val) const
+		{
+			val = val_;
+		}
+
+		RenderVariable& operator=(std::string const & value)
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(std::string& val) const
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		TexturePtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableBuffer : public RenderVariable
+	{
+	public:
+		RenderVariablePtr Clone()
+		{
+			RenderVariablePtr ret = MakeSharedPtr<RenderVariableBuffer>();
+			GraphicsBufferPtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+		RenderVariable& operator=(GraphicsBufferPtr const & value)
+		{
+			val_ = value;
+			return *this;
+		}
+
+		void Value(GraphicsBufferPtr& val) const
+		{
+			val = val_;
+		}
+
+		RenderVariable& operator=(std::string const & value)
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(std::string& val) const
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		GraphicsBufferPtr val_;
+		std::string elem_type_;
+	};
+
 	typedef RenderVariableConcrete<bool> RenderVariableBool;
 	typedef RenderVariableConcrete<int32_t> RenderVariableInt;
 	typedef RenderVariableConcrete<float> RenderVariableFloat;
@@ -181,7 +268,6 @@ namespace KlayGE
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
 	typedef RenderVariableConcrete<float4x4> RenderVariableFloat4x4;
-	typedef RenderVariableConcrete<TexturePtr> RenderVariableTexture;
 	typedef RenderVariableConcrete<SamplerStateObjectPtr> RenderVariableSampler;
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;

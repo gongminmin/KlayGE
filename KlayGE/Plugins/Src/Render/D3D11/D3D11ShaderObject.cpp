@@ -378,6 +378,25 @@ namespace
 		SamplerStateObjectPtr* sampler_;
 		RenderEffectParameterPtr param_;
 	};
+
+	template <>
+	class SetD3D11ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>
+	{
+	public:
+		SetD3D11ShaderParameter(GraphicsBufferPtr& buffer, RenderEffectParameterPtr const & param)
+			: buffer_(&buffer), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			param_->Value(*buffer_);
+		}
+
+	private:
+		GraphicsBufferPtr* buffer_;
+		RenderEffectParameterPtr param_;
+	};
 }
 
 namespace KlayGE
@@ -407,6 +426,7 @@ namespace KlayGE
 				case REDT_texture3D:
 				case REDT_textureCUBE:
 				case REDT_sampler:
+				case REDT_buffer:
 					break;
 
 				default:
@@ -430,19 +450,43 @@ namespace KlayGE
 			switch (param.type())
 			{
 			case REDT_texture1D:
-				ss << "Texture1D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture2D:
-				ss << "Texture2D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture3D:
-				ss << "Texture3D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_textureCUBE:
-				ss << "TextureCube " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_buffer:
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_sampler:
@@ -659,6 +703,7 @@ namespace KlayGE
 
 						int num_textures = -1;
 						int num_samplers = -1;
+						int num_buffers = -1;
 						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 						{
 							D3D11_SHADER_INPUT_BIND_DESC si_desc;
@@ -667,7 +712,14 @@ namespace KlayGE
 							switch (si_desc.Type)
 							{
 							case D3D10_SIT_TEXTURE:
-								num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+								if (si_desc.Dimension != D3D10_SRV_DIMENSION_BUFFER)
+								{
+									num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+								}
+								else
+								{
+									num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
+								}
 								break;
 
 							case D3D10_SIT_SAMPLER:
@@ -681,6 +733,7 @@ namespace KlayGE
 
 						textures_[type].resize(num_textures + 1);
 						samplers_[type].resize(num_samplers + 1);
+						buffers_[type].resize(num_buffers + 1);
 
 						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 						{
@@ -695,7 +748,21 @@ namespace KlayGE
 									D3D11ShaderParameterHandle p_handle;
 									p_handle.shader_type = static_cast<uint8_t>(type);
 									p_handle.param_class = D3D10_SVC_OBJECT;
-									p_handle.param_type = (D3D10_SIT_TEXTURE == si_desc.Type) ? D3D10_SVT_TEXTURE : D3D10_SVT_SAMPLER;
+									if (D3D10_SIT_TEXTURE == si_desc.Type)
+									{
+										if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
+										{
+											p_handle.param_type = D3D10_SVT_BUFFER;
+										}
+										else
+										{
+											p_handle.param_type = D3D10_SVT_TEXTURE;
+										}
+									}
+									else
+									{
+										p_handle.param_type = D3D10_SVT_SAMPLER;
+									}
 									p_handle.offset = si_desc.BindPoint;
 									p_handle.elements = 1;
 									p_handle.rows = 0;
@@ -730,6 +797,7 @@ namespace KlayGE
 		{
 			ret->textures_[i].resize(textures_[i].size());
 			ret->samplers_[i].resize(samplers_[i].size());
+			ret->buffers_[i].resize(buffers_[i].size());
 
 			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
@@ -923,6 +991,10 @@ namespace KlayGE
 			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
+		case REDT_buffer:
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>(buffers_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -952,7 +1024,8 @@ namespace KlayGE
 		std::vector<ID3D11ShaderResourceView*> srs;
 
 		BOOST_TYPEOF(textures_)::const_reference vs_textures = textures_[ST_VertexShader];
-		srs.resize(vs_textures.size());
+		BOOST_TYPEOF(buffers_)::const_reference vs_buffers = buffers_[ST_VertexShader];
+		srs.resize(std::max(vs_textures.size(), vs_buffers.size()));
 		for (size_t i = 0; i < vs_textures.size(); ++ i)
 		{
 			if (vs_textures[i])
@@ -961,7 +1034,14 @@ namespace KlayGE
 			}
 			else
 			{
-				srs[i] = NULL;
+				if (vs_buffers[i])
+				{
+					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(vs_buffers[i])->D3DShaderResourceView().get();
+				}
+				else
+				{
+					srs[i] = NULL;
+				}
 			}
 		}
 		if (!srs.empty())
@@ -988,7 +1068,8 @@ namespace KlayGE
 		}
 
 		BOOST_TYPEOF(textures_)::const_reference ps_textures = textures_[ST_PixelShader];
-		srs.resize(ps_textures.size());
+		BOOST_TYPEOF(buffers_)::const_reference ps_buffers = buffers_[ST_PixelShader];
+		srs.resize(std::max(ps_textures.size(), ps_buffers.size()));
 		for (size_t i = 0; i < ps_textures.size(); ++ i)
 		{
 			if (ps_textures[i])
@@ -997,7 +1078,14 @@ namespace KlayGE
 			}
 			else
 			{
-				srs[i] = NULL;
+				if (ps_buffers[i])
+				{
+					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(ps_buffers[i])->D3DShaderResourceView().get();
+				}
+				else
+				{
+					srs[i] = NULL;
+				}
 			}
 		}
 		if (!srs.empty())
@@ -1024,7 +1112,8 @@ namespace KlayGE
 		}
 
 		BOOST_TYPEOF(textures_)::const_reference gs_textures = textures_[ST_GeometryShader];
-		srs.resize(gs_textures.size());
+		BOOST_TYPEOF(buffers_)::const_reference gs_buffers = buffers_[ST_GeometryShader];
+		srs.resize(std::max(gs_textures.size(), gs_buffers.size()));
 		for (size_t i = 0; i < gs_textures.size(); ++ i)
 		{
 			if (gs_textures[i])
@@ -1033,7 +1122,14 @@ namespace KlayGE
 			}
 			else
 			{
-				srs[i] = NULL;
+				if (gs_buffers[i])
+				{
+					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(gs_buffers[i])->D3DShaderResourceView().get();
+				}
+				else
+				{
+					srs[i] = NULL;
+				}
 			}
 		}
 		if (!srs.empty())

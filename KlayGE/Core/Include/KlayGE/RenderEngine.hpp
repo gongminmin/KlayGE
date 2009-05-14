@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 增加了BeginPass/EndPass (2009.4.9)
+// 支持Stream Output (2009.5.14)
 //
 // 3.6.0
 // 去掉了RenderTarget，直接使用FrameBuffer (2007.6.20)
@@ -71,6 +72,8 @@
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/Color.hpp>
 
+#include <vector>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API RenderEngine
@@ -103,6 +106,8 @@ namespace KlayGE
 		void BindFrameBuffer(FrameBufferPtr const & fb);
 		FrameBufferPtr const & CurFrameBuffer() const;
 		FrameBufferPtr const & DefaultFrameBuffer() const;
+
+		void BindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets);
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
@@ -151,11 +156,15 @@ namespace KlayGE
 
 	protected:
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
+		virtual void DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 
 	protected:
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr default_frame_buffer_;
+
+		std::vector<GraphicsBufferPtr> so_buffers_;
+		std::vector<size_t> so_buffer_offsets_;
 
 		size_t numPrimitivesJustRendered_;
 		size_t numVerticesJustRendered_;

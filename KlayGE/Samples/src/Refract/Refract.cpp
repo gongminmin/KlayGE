@@ -94,7 +94,6 @@ namespace
 			float4x4 const mvp = mv * proj;
 
 			*(technique_->Effect().ParameterByName("model")) = model;
-			*(technique_->Effect().ParameterByName("modelit")) = MathLib::transpose(MathLib::inverse(model));
 			*(technique_->Effect().ParameterByName("modelviewit")) = MathLib::transpose(MathLib::inverse(mv));
 			*(technique_->Effect().ParameterByName("mvp")) = mvp;
 			*(technique_->Effect().ParameterByName("mv")) = mv;

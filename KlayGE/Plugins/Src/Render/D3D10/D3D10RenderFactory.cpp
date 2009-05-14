@@ -70,14 +70,14 @@ namespace KlayGE
 		return MakeSharedPtr<D3D10RenderLayout>();
 	}
 
-	GraphicsBufferPtr D3D10RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
+	GraphicsBufferPtr D3D10RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt)
 	{
-		return MakeSharedPtr<D3D10GraphicsBuffer>(usage, access_hint, D3D10_BIND_VERTEX_BUFFER, init_data);
+		return MakeSharedPtr<D3D10GraphicsBuffer>(usage, access_hint, D3D10_BIND_VERTEX_BUFFER, init_data, fmt);
 	}
 
-	GraphicsBufferPtr D3D10RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
+	GraphicsBufferPtr D3D10RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt)
 	{
-		return MakeSharedPtr<D3D10GraphicsBuffer>(usage, access_hint, D3D10_BIND_INDEX_BUFFER, init_data);
+		return MakeSharedPtr<D3D10GraphicsBuffer>(usage, access_hint, D3D10_BIND_INDEX_BUFFER, init_data, fmt);
 	}
 
 	QueryPtr D3D10RenderFactory::MakeOcclusionQuery()

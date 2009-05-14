@@ -233,6 +233,21 @@ namespace KlayGE
 		BOOST_ASSERT(fb);
 	}
 
+	// 设置当前Stream output目标
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D10RenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	{
+		std::vector<ID3D10Buffer*> d3d10_buffs(num_buffs);
+		std::vector<UINT> d3d10_buff_offsets(num_buffs);
+		for (size_t i = 0; i < num_buffs; ++ i)
+		{
+			d3d10_buffs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(buffs[i])->D3DBuffer().get();
+			d3d10_buff_offsets[i] = static_cast<UINT>(offsets[i]);
+		}
+
+		d3d_device_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d10_buffs[0], &d3d10_buff_offsets[0]);
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D10RenderEngine::BeginFrame()

@@ -39,8 +39,8 @@ namespace KlayGE
 		FrameBufferPtr MakeFrameBuffer();
 
 		RenderLayoutPtr MakeRenderLayout();
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data);
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data);
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt = EF_Unknown);
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt = EF_Unknown);
 
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();

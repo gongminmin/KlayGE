@@ -29,17 +29,22 @@ namespace KlayGE
 	class D3D11GraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data);
+		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data, ElementFormat fmt);
 
 		ID3D11BufferPtr const & D3DBuffer() const
 		{
 			return buffer_;
 		}
 
+		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
+		{
+			return d3d_sr_view_;
+		}
+
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
 	protected:
-		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags);
+		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags);
 
 	private:
 		void DoResize();
@@ -51,9 +56,11 @@ namespace KlayGE
 		ID3D11DevicePtr d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 		ID3D11BufferPtr buffer_;
+		ID3D11ShaderResourceViewPtr d3d_sr_view_;
 
 		uint32_t bind_flags_;
 		uint32_t hw_buf_size_;
+		ElementFormat fmt_as_shader_res_;
 	};
 	typedef boost::shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
 }

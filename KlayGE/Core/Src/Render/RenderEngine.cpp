@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2003-2007
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Stream Output (2009.5.14)
 //
 // 3.6.0
 // 去掉了RenderTarget，直接使用FrameBuffer (2007.6.20)
@@ -107,6 +110,10 @@ namespace KlayGE
 		{
 		}
 
+		void DoBindSOBuffers(size_t /*num_buffs*/, GraphicsBufferPtr* /*buffs*/, size_t* /*offsets*/)
+		{
+		}
+
 		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
 		{
 		}
@@ -202,6 +209,14 @@ namespace KlayGE
 	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
 		return default_frame_buffer_;
+	}
+
+	void RenderEngine::BindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	{
+		so_buffers_.assign(buffs, buffs + num_buffs);
+		so_buffer_offsets_.assign(offsets, offsets + num_buffs);
+
+		this->DoBindSOBuffers(num_buffs, buffs, offsets);
 	}
 
 	// 渲染一个vb

@@ -241,6 +241,8 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 
 	<parameter type="texture2D" name="particle_init_vel_tex"/>
 	<parameter type="texture2D" name="particle_birth_time_tex"/>
+	<parameter type="buffer" elem_type="float4" name="particle_init_vel_buff"/>
+	<parameter type="buffer" elem_type="float" name="particle_birth_time_buff"/>
 
 	<parameter type="texture2D" name="height_map_tex"/>
 	<parameter type="texture2D" name="normal_map_tex"/>
@@ -306,6 +308,61 @@ void UpdatePS(float2 tex : TEXCOORD0,
 		}
 	}
 }
+
+void UpdateSOVS(float4 pos			: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float2 oTex		: TEXCOORD0,
+					out float4 oPos		: SV_Position)
+{
+	oPos = pos;
+	oTex = float2(tex.x, 1 - tex.y);
+}
+
+void UpdateSOPS(float2 tex : TEXCOORD0,
+				out float4 out_pos : SV_Target0,
+				out float4 out_vel : SV_Target1)
+{
+	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
+	if (cur_pos.w > 0)
+	{
+		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0);
+
+		cur_vel += float3(0, -0.1f, 0) * elapse_time;
+		cur_pos.xyz += cur_vel * elapse_time;
+		cur_pos.w -= elapse_time;
+		
+		float2 tex_pos = cur_pos.xz / 4 + 0.5;
+		tex_pos.y = 1 - tex_pos.y;
+		float height = height_map_tex.SampleLevel(point_sampler, tex_pos, 0).r;
+		if (cur_pos.y < height)
+		{
+			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.SampleLevel(normal_map_sampler, tex_pos, 0)).xzy) * 0.99f;
+		}
+		
+		out_pos = cur_pos;
+		out_vel = float4(cur_vel, 1);
+	}
+	else
+	{
+		float t = accumulate_time - particle_birth_time_buff.Load(int(tex.y * 256 * 256 + tex.x * 256) % 65536).r;
+		if ((t > 0) && (t < elapse_time))
+		{
+			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
+			pos /= pos.w;
+
+			float3 vel = particle_init_vel_buff.Load(int((tex.y + cur_pos.z) * 256 * 256 + (tex.x + cur_pos.x) * 256) % 65536).xyz;
+			vel = mul(vel, (float3x3)ps_model_mat);
+
+			out_pos = float4(pos.xyz, init_pos_life.w);
+			out_vel = float4(vel, 1);
+		}
+		else
+		{
+			out_pos = float4(0, 0, 0, -1);
+			out_vel = 0;
+		}
+	}
+}
 		]]>
 	</shader>
 
@@ -313,6 +370,12 @@ void UpdatePS(float2 tex : TEXCOORD0,
 		<pass name="p0">
 			<state name="vertex_shader" value="UpdateVS()"/>
 			<state name="pixel_shader" value="UpdatePS()"/>
+		</pass>
+	</technique>
+	<technique name="UpdateSO">
+		<pass name="p0">
+			<state name="vertex_shader" value="UpdateSOVS()"/>
+			<state name="pixel_shader" value="UpdateSOPS()"/>
 		</pass>
 	</technique>
 

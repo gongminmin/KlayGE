@@ -269,6 +269,21 @@ namespace KlayGE
 		BOOST_ASSERT(fb);
 	}
 
+	// 设置当前Stream output目标
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D11RenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	{
+		std::vector<ID3D11Buffer*> d3d11_buffs(num_buffs);
+		std::vector<UINT> d3d11_buff_offsets(num_buffs);
+		for (size_t i = 0; i < num_buffs; ++ i)
+		{
+			d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(buffs[i])->D3DBuffer().get();
+			d3d11_buff_offsets[i] = static_cast<UINT>(offsets[i]);
+		}
+
+		d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::BeginFrame()

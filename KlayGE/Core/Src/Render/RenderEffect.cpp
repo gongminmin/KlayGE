@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 直接从fxml文件读取特效脚本 (2009.4.21)
+// 支持Buffer类型 (2009.5.14)
 //
 // 3.8.0
 // 支持CBuffer (2008.10.6)
@@ -127,6 +128,7 @@ namespace
 			types_.push_back("float4x2");
 			types_.push_back("float4x3");
 			types_.push_back("float4x4");
+			types_.push_back("buffer");
 		}
 
 	private:
@@ -580,6 +582,15 @@ namespace
 		case REDT_textureCUBE:
 			var = MakeSharedPtr<RenderVariableTexture>();
 			*var = TexturePtr();
+			attr = node->Attrib("elem_type");
+			if (attr)
+			{
+				*var = attr->ValueString();
+			}
+			else
+			{
+				*var = std::string("float4");
+			}
 			break;
 
 		case REDT_sampler:
@@ -805,6 +816,20 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloat4x4Array>();
+			}
+			break;
+			
+		case REDT_buffer:
+			var = MakeSharedPtr<RenderVariableBuffer>();
+			*var = GraphicsBufferPtr();
+			attr = node->Attrib("elem_type");
+			if (attr)
+			{
+				*var = attr->ValueString();
+			}
+			else
+			{
+				*var = std::string("float4");
 			}
 			break;
 
@@ -1604,6 +1629,12 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(GraphicsBufferPtr const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(std::string const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -1699,6 +1730,11 @@ namespace KlayGE
 	}
 
 	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(GraphicsBufferPtr& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

@@ -63,8 +63,8 @@ namespace KlayGE
 
 		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 
-		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data) = 0;
-		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data) = 0;
+		virtual GraphicsBufferPtr MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt = EF_Unknown) = 0;
+		virtual GraphicsBufferPtr MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat fmt = EF_Unknown) = 0;
 
 		virtual QueryPtr MakeOcclusionQuery() = 0;
 		virtual QueryPtr MakeConditionalRender() = 0;

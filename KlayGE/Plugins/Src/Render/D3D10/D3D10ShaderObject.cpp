@@ -400,6 +400,7 @@ namespace KlayGE
 				case REDT_texture3D:
 				case REDT_textureCUBE:
 				case REDT_sampler:
+				case REDT_buffer:
 					break;
 
 				default:
@@ -423,19 +424,43 @@ namespace KlayGE
 			switch (param.type())
 			{
 			case REDT_texture1D:
-				ss << "Texture1D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture2D:
-				ss << "Texture2D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_texture3D:
-				ss << "Texture3D " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_textureCUBE:
-				ss << "TextureCube " << *param.Name() << ";" << std::endl;
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_buffer:
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
 				break;
 
 			case REDT_sampler:

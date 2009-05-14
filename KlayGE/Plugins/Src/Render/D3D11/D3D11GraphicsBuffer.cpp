@@ -23,13 +23,14 @@
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
+#include <KlayGE/D3D11/D3D11Mapping.hpp>
 #include <KlayGE/D3D11/D3D11GraphicsBuffer.hpp>
 
 namespace KlayGE
 {
-	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data)
+	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint),
-							bind_flags_(bind_flags), hw_buf_size_(0)
+							bind_flags_(bind_flags), hw_buf_size_(0), fmt_as_shader_res_(fmt)
 	{
 		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
@@ -39,9 +40,8 @@ namespace KlayGE
 		if (init_data != NULL)
 		{
 			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags);
+			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags);
 			desc.ByteWidth = init_data->row_pitch;
-			desc.BindFlags = (D3D11_USAGE_STAGING == desc.Usage) ? 0 : bind_flags_;
 			desc.MiscFlags = 0;
 
 			size_in_byte_ = init_data->row_pitch;
@@ -55,10 +55,23 @@ namespace KlayGE
 			TIF(d3d_device_->CreateBuffer(&desc, &subres_init, &buffer));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
+
+			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
+			{
+				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+				sr_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+				sr_desc.Buffer.ElementOffset = 0;
+				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
+
+				ID3D11ShaderResourceView* d3d_sr_view;
+				TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
+				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
+			}
 		}
 	}
 
-	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags)
+	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags)
 	{
 		if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
@@ -85,6 +98,23 @@ namespace KlayGE
 		{
 			cpu_access_flags |= D3D11_CPU_ACCESS_WRITE;
 		}
+
+		if (D3D10_USAGE_STAGING == usage)
+		{
+			bind_flags = 0;
+		}
+		else
+		{
+			bind_flags = bind_flags_;
+		}
+		if (access_hint_ & EAH_GPU_Read)
+		{
+			bind_flags |= D3D11_BIND_SHADER_RESOURCE;
+		}
+		if (access_hint_ & EAH_GPU_Write)
+		{
+			bind_flags |= D3D10_BIND_STREAM_OUTPUT;
+		}
 	}
 
 	void D3D11GraphicsBuffer::DoResize()
@@ -94,15 +124,27 @@ namespace KlayGE
 		if (this->Size() > hw_buf_size_)
 		{
 			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags);
+			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags);
 			desc.ByteWidth = size_in_byte_;
-			desc.BindFlags = (D3D11_USAGE_STAGING == desc.Usage) ? 0 : bind_flags_;
 			desc.MiscFlags = 0;
 
 			ID3D11Buffer* buffer;
 			TIF(d3d_device_->CreateBuffer(&desc, NULL, &buffer));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = this->Size();
+
+			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
+			{
+				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+				sr_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+				sr_desc.Buffer.ElementOffset = 0;
+				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
+
+				ID3D11ShaderResourceView* d3d_sr_view;
+				TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
+				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
+			}
 		}
 	}
 

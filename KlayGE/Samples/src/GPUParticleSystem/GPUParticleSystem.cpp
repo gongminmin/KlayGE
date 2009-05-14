@@ -45,6 +45,7 @@ using namespace KlayGE;
 namespace
 {
 	bool use_gs = false;
+	bool use_so = true;
 
 	int const NUM_PARTICLE = 65536;
 
@@ -139,7 +140,7 @@ namespace
 	public:
 		explicit RenderParticles(int max_num_particles)
 			: RenderableHelper(L"RenderParticles"),
-				tex_width_(256), tex_height_(max_num_particles / 256)
+				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
 			BOOST_AUTO(pt, LoadTexture("particle.dds", EAH_GPU_Read));
 
@@ -162,6 +163,7 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 
+			GraphicsBufferPtr pos;
 			std::vector<float2> p_in_tex(max_num_particles);
 			for (int i = 0; i < max_num_particles; ++ i)
 			{
@@ -171,7 +173,7 @@ namespace
 			init_data.row_pitch = max_num_particles * sizeof(float2);
 			init_data.slice_pitch = 0;
 			init_data.data = &p_in_tex[0];
-			GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
 			if (use_gs)
 			{
@@ -243,9 +245,24 @@ namespace
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 
-		void PosTexture(TexturePtr particle_pos_tex)
+		void PosTexture(TexturePtr const & particle_pos_tex)
 		{
 			particle_pos_tex_ = particle_pos_tex;
+		}
+
+		void PosTexture(GraphicsBufferPtr const & particle_pos_vb)
+		{
+			if (use_so)
+			{
+				if (use_gs)
+				{
+					rl_->BindVertexStream(particle_pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				}
+				else
+				{
+					rl_->BindVertexStream(particle_pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)), RenderLayout::ST_Instance, 1);
+				}
+			}
 		}
 
 	private:
@@ -264,7 +281,7 @@ namespace
 		{
 		}
 
-		void PosTexture(TexturePtr particle_pos_tex)
+		void PosTexture(TexturePtr const & particle_pos_tex)
 		{
 			checked_pointer_cast<RenderParticles>(renderable_)->PosTexture(particle_pos_tex);
 		}
@@ -273,7 +290,7 @@ namespace
 	class GPUParticleSystem : public RenderablePlane
 	{
 	public:
-		GPUParticleSystem(int max_num_particles, TexturePtr terrain_height_map, TexturePtr terrain_normal_map)
+		GPUParticleSystem(int max_num_particles, TexturePtr const & terrain_height_map, TexturePtr const & terrain_normal_map)
 			: RenderablePlane(2, 2, 1, 1, true),
 				max_num_particles_(max_num_particles),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
@@ -284,7 +301,14 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
 
-			technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
+			if (use_so)
+			{
+				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
+			}
+			else
+			{
+				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
+			}
 
 			std::vector<float4> p(tex_width_ * tex_height_);
 			for (size_t i = 0; i < p.size(); ++ i)
@@ -313,20 +337,40 @@ namespace
 			pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
 				= screen_buffer->GetViewport().camera;
 
-			for (int i = 0; i < tex_width_ * tex_height_; ++ i)
+			if (use_so)
 			{
-				float const angel = random_gen_() / 0.05f * PI;
-				float const r = random_gen_() * 3;
+				for (int i = 0; i < max_num_particles_; ++ i)
+				{
+					float const angel = random_gen_() / 0.05f * PI;
+					float const r = random_gen_() * 3;
 
-				p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
+					p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
+				}
+				ElementInitData vel_init;
+				vel_init.data = &p[0];
+				vel_init.row_pitch = max_num_particles_ * sizeof(float4);
+				vel_init.slice_pitch = 0;
+
+				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &vel_init, EF_ABGR32F);
+				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
 			}
-			ElementInitData vel_init;
-			vel_init.data = &p[0];
-			vel_init.row_pitch = tex_width_ * sizeof(float4);
-			vel_init.slice_pitch = 0;
+			else
+			{
+				for (int i = 0; i < tex_width_ * tex_height_; ++ i)
+				{
+					float const angel = random_gen_() / 0.05f * PI;
+					float const r = random_gen_() * 3;
 
-			TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
-			*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
+					p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
+				}
+				ElementInitData vel_init;
+				vel_init.data = &p[0];
+				vel_init.row_pitch = tex_width_ * sizeof(float4);
+				vel_init.slice_pitch = 0;
+
+				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
+				*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
+			}
 
 			particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
 			particle_vel_tex_param_ = technique_->Effect().ParameterByName("particle_vel_tex");
@@ -355,20 +399,40 @@ namespace
 
 			float time = 0;
 
-			std::vector<float> time_v(tex_width_ * tex_height_);
-			for (size_t i = 0; i < time_v.size(); ++ i)
+			if (use_so)
 			{
-				time_v[i] = time;
-				time += inv_emit_freq_;
-			}
-			ElementInitData init_data;
-			init_data.data = &time_v[0];
-			init_data.row_pitch = tex_width_ * sizeof(float);
-			init_data.slice_pitch = 0;
+				std::vector<float> time_v(max_num_particles_);
+				for (size_t i = 0; i < time_v.size(); ++ i)
+				{
+					time_v[i] = time;
+					time += inv_emit_freq_;
+				}
+				ElementInitData init_data;
+				init_data.data = &time_v[0];
+				init_data.row_pitch = max_num_particles_ * sizeof(float);
+				init_data.slice_pitch = 0;
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			particle_birth_time_ = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
-			*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_;
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, EF_R32F);
+				*(technique_->Effect().ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
+			}
+			else
+			{
+				std::vector<float> time_v(tex_width_ * tex_height_);
+				for (size_t i = 0; i < time_v.size(); ++ i)
+				{
+					time_v[i] = time;
+					time += inv_emit_freq_;
+				}
+				ElementInitData init_data;
+				init_data.data = &time_v[0];
+				init_data.row_pitch = tex_width_ * sizeof(float);
+				init_data.slice_pitch = 0;
+
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
+				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
+			}
 		}
 
 		void Update(float elapse_time)
@@ -412,11 +476,12 @@ namespace
 		TexturePtr particle_pos_texture_[2];
 		TexturePtr particle_vel_texture_[2];
 
+		GraphicsBufferPtr particle_pos_vb_[2];
+		GraphicsBufferPtr particle_vel_vb_[2];
+
 		FrameBufferPtr pos_vel_rt_buffer_[2];
 
 		bool rt_index_;
-
-		TexturePtr particle_birth_time_;
 
 		float accumulate_time_;
 		float inv_emit_freq_;

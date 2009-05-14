@@ -86,14 +86,14 @@ namespace KlayGE
 		return MakeSharedPtr<D3D9RenderLayout>();
 	}
 
-	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
+	GraphicsBufferPtr D3D9RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat /*fmt*/)
 	{
 		D3D9VertexBufferPtr ret = MakeSharedPtr<D3D9VertexBuffer>(usage, access_hint, init_data);
 		resource_pool_.push_back(ret);
 		return ret;
 	}
 
-	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data)
+	GraphicsBufferPtr D3D9RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat /*fmt*/)
 	{
 		D3D9IndexBufferPtr ret = MakeSharedPtr<D3D9IndexBuffer>(usage, access_hint, init_data);
 		resource_pool_.push_back(ret);

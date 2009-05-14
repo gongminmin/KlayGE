@@ -625,12 +625,19 @@ namespace KlayGE
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
-				ss << effect.TypeName(param.type()) << " " << *param.Name();
-				if (param.ArraySize() != 0)
+				if (param.type() != REDT_buffer)
 				{
-					ss << "[" << param.ArraySize() << "]";
+					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					if (param.ArraySize() != 0)
+					{
+						ss << "[" << param.ArraySize() << "]";
+					}
+					ss << ";" << std::endl;
 				}
-				ss << ";" << std::endl;
+				else
+				{
+					ss << std::endl;
+				}
 			}
 		}
 

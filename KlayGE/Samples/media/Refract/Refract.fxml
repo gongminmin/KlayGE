@@ -8,7 +8,6 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="mv"/>
 		<parameter type="float4x4" name="proj"/>
-		<parameter type="float4x4" name="modelit"/>
 		<parameter type="float4x4" name="modelviewit"/>
 		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_vp"/>
