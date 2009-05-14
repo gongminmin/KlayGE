@@ -106,6 +106,10 @@ namespace KlayGE
 		{
 			bind_flags = bind_flags_;
 		}
+		if (access_hint_ & EAH_GPU_Read)
+		{
+			bind_flags |= D3D10_BIND_SHADER_RESOURCE;
+		}
 		if (access_hint_ & EAH_GPU_Write)
 		{
 			bind_flags |= D3D10_BIND_STREAM_OUTPUT;

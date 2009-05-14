@@ -36,6 +36,11 @@ namespace KlayGE
 			return buffer_;
 		}
 
+		ID3D10ShaderResourceViewPtr const & D3DShaderResourceView() const
+		{
+			return d3d_sr_view_;
+		}
+
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
 	protected:

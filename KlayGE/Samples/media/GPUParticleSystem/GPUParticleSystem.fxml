@@ -18,6 +18,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="particle_pos_tex"/>
+	<parameter type="buffer" elem_type="float4" name="particle_pos_buff"/>
 	<parameter type="texture3D" name="noise_vol_tex"/>
 
 	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
@@ -101,6 +102,14 @@ void ParticlesVS2(float2 tex_pos : POSITION,
 {
 	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
 
+	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+}
+
+void ParticlesVS3(uint vid : SV_VertexID,
+					out VS_TO_GS vs_out)
+{
+	float4 pos = particle_pos_buff.Load(vid);
+	
 	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
 
@@ -231,7 +240,27 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 		</pass>
 	</technique>
 
+	<technique name="ParticlesWithGSSO">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="ParticlesVS3()"/>
+			<state name="geometry_shader" value="ParticlesGS()"/>
+			<state name="pixel_shader" value="ParticlesPS()"/>
+		</pass>
+	</technique>
+
 	<parameter type="texture2D" name="particle_vel_tex"/>
+	<parameter type="buffer" elem_type="float4" name="particle_vel_buff"/>
 
 	<cbuffer name="per_frame2">
 		<parameter type="float4x4" name="ps_model_mat"/>
@@ -309,24 +338,14 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	}
 }
 
-void UpdateSOVS(float4 pos			: POSITION,
-					float2 tex			: TEXCOORD0,
-					out float2 oTex		: TEXCOORD0,
-					out float4 oPos		: SV_Position)
+void UpdateSOVS(uint vid			: SV_VertexID,
+					out float4 out_pos	: SV_Position,
+					out float4 out_vel	: TEXCOORD0)
 {
-	oPos = pos;
-	oTex = float2(tex.x, 1 - tex.y);
-}
-
-void UpdateSOPS(float2 tex : TEXCOORD0,
-				out float4 out_pos : SV_Target0,
-				out float4 out_vel : SV_Target1)
-{
-	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
+	float4 cur_pos = particle_pos_buff.Load(vid);
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0);
-
+		float3 cur_vel = particle_vel_buff.Load(vid);
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
 		cur_pos.w -= elapse_time;
@@ -344,13 +363,13 @@ void UpdateSOPS(float2 tex : TEXCOORD0,
 	}
 	else
 	{
-		float t = accumulate_time - particle_birth_time_buff.Load(int(tex.y * 256 * 256 + tex.x * 256) % 65536).r;
+		float t = accumulate_time - particle_birth_time_buff.Load(vid).r;
 		if ((t > 0) && (t < elapse_time))
 		{
 			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
 			pos /= pos.w;
 
-			float3 vel = particle_init_vel_buff.Load(int((tex.y + cur_pos.z) * 256 * 256 + (tex.x + cur_pos.x) * 256) % 65536).xyz;
+			float3 vel = particle_init_vel_buff.Load((vid + uint(cur_pos.z * 256 * 256 + cur_pos.x * 256)) % 65536).xyz;
 			vel = mul(vel, (float3x3)ps_model_mat);
 
 			out_pos = float4(pos.xyz, init_pos_life.w);
@@ -374,8 +393,12 @@ void UpdateSOPS(float2 tex : TEXCOORD0,
 	</technique>
 	<technique name="UpdateSO">
 		<pass name="p0">
-			<state name="vertex_shader" value="UpdateSOVS()"/>
-			<state name="pixel_shader" value="UpdateSOPS()"/>
+			<state name="vertex_shader" value="UpdateSOVS()">
+				<stream_output>
+					<slot usage="SV_Position" component="xyzw"/>
+					<slot usage="TEXCOORD" usage_index="0" component="xyzw"/>
+				</stream_output>
+			</state>
 		</pass>
 	</technique>
 

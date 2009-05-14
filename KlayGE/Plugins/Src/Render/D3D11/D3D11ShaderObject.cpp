@@ -517,11 +517,12 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			if (!(*shader_descs)[type].profile.empty())
+			shader_desc& sd = (*shader_descs)[type];
+			if (!sd.profile.empty())
 			{
 				is_shader_validate_[type] = true;
 
-				std::string shader_profile = (*shader_descs)[type].profile;
+				std::string shader_profile = sd.profile;
 				switch (type)
 				{
 				case ST_VertexShader:
@@ -571,7 +572,7 @@ namespace KlayGE
 					macros.push_back(macro_end);
 				}
 				D3DX11CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
-					NULL, (*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
+					NULL, sd.func_name.c_str(), shader_profile.c_str(),
 					0, 0, NULL, &code, &err_msg, NULL);
 				if (err_msg != NULL)
 				{
@@ -610,8 +611,25 @@ namespace KlayGE
 						else
 						{
 							vertex_shader_ = MakeCOMPtr(vs);
-							vs_code_ = code_blob;
+
+							if (!sd.so_decl.empty())
+							{
+								std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
+								for (size_t i = 0; i < sd.so_decl.size(); ++ i)
+								{
+									d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+								}
+
+								ID3D11GeometryShader* gs;
+								if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
+									&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, 0, NULL, &gs)))
+								{
+									is_shader_validate_[type] = false;
+								}
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
+						vs_code_ = code_blob;
 						break;
 
 					case ST_PixelShader:
@@ -627,14 +645,36 @@ namespace KlayGE
 						break;
 
 					case ST_GeometryShader:
-						ID3D11GeometryShader* gs;
-						if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &gs)))
+						if (!sd.so_decl.empty())
 						{
-							is_shader_validate_[type] = false;
+							std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
+							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
+							{
+								d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+							}
+
+							ID3D11GeometryShader* gs;
+							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(vs_code_->GetBufferPointer(), code_blob->GetBufferSize(),
+								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, 0, NULL, &gs)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
 						else
 						{
-							geometry_shader_ = MakeCOMPtr(gs);
+							ID3D11GeometryShader* gs;
+							if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), NULL, &gs)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
 						break;
 
@@ -1026,7 +1066,7 @@ namespace KlayGE
 		BOOST_TYPEOF(textures_)::const_reference vs_textures = textures_[ST_VertexShader];
 		BOOST_TYPEOF(buffers_)::const_reference vs_buffers = buffers_[ST_VertexShader];
 		srs.resize(std::max(vs_textures.size(), vs_buffers.size()));
-		for (size_t i = 0; i < vs_textures.size(); ++ i)
+		for (size_t i = 0; i < srs.size(); ++ i)
 		{
 			if (vs_textures[i])
 			{
@@ -1070,7 +1110,7 @@ namespace KlayGE
 		BOOST_TYPEOF(textures_)::const_reference ps_textures = textures_[ST_PixelShader];
 		BOOST_TYPEOF(buffers_)::const_reference ps_buffers = buffers_[ST_PixelShader];
 		srs.resize(std::max(ps_textures.size(), ps_buffers.size()));
-		for (size_t i = 0; i < ps_textures.size(); ++ i)
+		for (size_t i = 0; i < srs.size(); ++ i)
 		{
 			if (ps_textures[i])
 			{
@@ -1114,7 +1154,7 @@ namespace KlayGE
 		BOOST_TYPEOF(textures_)::const_reference gs_textures = textures_[ST_GeometryShader];
 		BOOST_TYPEOF(buffers_)::const_reference gs_buffers = buffers_[ST_GeometryShader];
 		srs.resize(std::max(gs_textures.size(), gs_buffers.size()));
-		for (size_t i = 0; i < gs_textures.size(); ++ i)
+		for (size_t i = 0; i < srs.size(); ++ i)
 		{
 			if (gs_textures[i])
 			{

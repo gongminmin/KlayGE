@@ -237,15 +237,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D10RenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
 	{
-		std::vector<ID3D10Buffer*> d3d10_buffs(num_buffs);
-		std::vector<UINT> d3d10_buff_offsets(num_buffs);
-		for (size_t i = 0; i < num_buffs; ++ i)
+		if (num_buffs > 0)
 		{
-			d3d10_buffs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(buffs[i])->D3DBuffer().get();
-			d3d10_buff_offsets[i] = static_cast<UINT>(offsets[i]);
-		}
+			std::vector<ID3D10Buffer*> d3d10_buffs(num_buffs);
+			std::vector<UINT> d3d10_buff_offsets(num_buffs);
+			for (size_t i = 0; i < num_buffs; ++ i)
+			{
+				d3d10_buffs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(buffs[i])->D3DBuffer().get();
+				d3d10_buff_offsets[i] = static_cast<UINT>(offsets[i]);
+			}
 
-		d3d_device_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d10_buffs[0], &d3d10_buff_offsets[0]);
+			d3d_device_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d10_buffs[0], &d3d10_buff_offsets[0]);
+		}
+		else
+		{
+			d3d_device_->SOSetTargets(0, NULL, NULL);
+		}
 	}
 
 	// ¿ªÊ¼Ò»Ö¡
@@ -469,7 +476,7 @@ namespace KlayGE
 		caps_.max_vertices = 8388607;
 		caps_.max_indices = 16777215;
 		caps_.hw_instancing_support = true;
-		caps_.stream_output_support = false;
+		caps_.stream_output_support = true;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
 		caps_.primitive_restart_support = true;

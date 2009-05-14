@@ -22,6 +22,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
 {
@@ -29,6 +30,15 @@ namespace KlayGE
 	{
 		std::string profile;
 		std::string func_name;
+
+		struct stream_output_decl
+		{
+			VertexElementUsage usage;
+			uint8_t usage_index;
+			uint8_t start_component;
+			uint8_t component_count;
+		};
+		std::vector<stream_output_decl> so_decl;
 
 		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
 		{

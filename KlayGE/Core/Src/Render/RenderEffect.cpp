@@ -1408,23 +1408,103 @@ namespace KlayGE
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if ("vertex_shader" == state_name)
+			else if (("vertex_shader" == state_name) || ("pixel_shader" == state_name) || ("geometry_shader" == state_name))
 			{
-				shader_desc& sd = (*shader_descs_)[ShaderObject::ST_VertexShader];
+				ShaderObject::ShaderType type;
+				if ("vertex_shader" == state_name)
+				{
+					type = ShaderObject::ST_VertexShader;
+				}
+				else if ("pixel_shader" == state_name)
+				{
+					type = ShaderObject::ST_PixelShader;
+				}
+				else
+				{
+					type = ShaderObject::ST_GeometryShader;
+				}
+
+				shader_desc& sd = (*shader_descs_)[type];
 				sd.profile = get_profile(state_node);
 				sd.func_name = get_func_name(state_node);
-			}
-			else if ("pixel_shader" == state_name)
-			{
-				shader_desc& sd = (*shader_descs_)[ShaderObject::ST_PixelShader];
-				sd.profile = get_profile(state_node);
-				sd.func_name = get_func_name(state_node);
-			}
-			else if ("geometry_shader" == state_name)
-			{
-				shader_desc& sd = (*shader_descs_)[ShaderObject::ST_GeometryShader];
-				sd.profile = get_profile(state_node);
-				sd.func_name = get_func_name(state_node);
+
+				if ((ShaderObject::ST_VertexShader == type) || (ShaderObject::ST_GeometryShader == type))
+				{
+					XMLNodePtr so_node = state_node->FirstNode("stream_output");
+					if (so_node)
+					{
+						for (XMLNodePtr slot_node = so_node->FirstNode("slot"); slot_node; slot_node = slot_node->NextSibling("slot"))
+						{
+							shader_desc::stream_output_decl decl;
+
+							std::string usage_str = slot_node->Attrib("usage")->ValueString();
+							XMLAttributePtr attr = slot_node->Attrib("usage_index");
+							if (attr)
+							{
+								decl.usage_index = static_cast<uint8_t>(attr->ValueInt());
+							}
+							else
+							{
+								decl.usage_index = 0;
+							}
+
+							if (("POSITION" == usage_str) || ("SV_Position" == usage_str))
+							{
+								decl.usage = VEU_Position;
+							}
+							else if ("NORMAL" == usage_str)
+							{
+								decl.usage = VEU_Normal;
+							}
+							else if ("COLOR" == usage_str)
+							{
+								if (0 == decl.usage_index)
+								{
+									decl.usage = VEU_Diffuse;
+								}
+								else
+								{
+									decl.usage = VEU_Specular;
+								}
+							}
+							else if ("BLENDWEIGHT" == usage_str)
+							{
+								decl.usage = VEU_BlendWeight;
+							}
+							else if ("BLENDINDICES" == usage_str)
+							{
+								decl.usage = VEU_BlendIndex;
+							}
+							else if ("TEXCOORD" == usage_str)
+							{
+								decl.usage = VEU_TextureCoord;
+							}
+							else if ("TANGENT" == usage_str)
+							{
+								decl.usage = VEU_Tangent;
+							}
+							else if ("BINORMAL" == usage_str)
+							{
+								decl.usage = VEU_Binormal;
+							}
+
+							attr = slot_node->Attrib("component");
+							std::string component_str;
+							if (attr)
+							{
+								component_str = slot_node->Attrib("component")->ValueString();
+							}
+							else
+							{
+								component_str = "xyzw";
+							}
+							decl.start_component = static_cast<uint8_t>(component_str[0] - 'x');
+							decl.component_count = static_cast<uint8_t>(std::min(static_cast<size_t>(4), component_str.size()));
+
+							sd.so_decl.push_back(decl);
+						}
+					}
+				}
 			}
 			else
 			{

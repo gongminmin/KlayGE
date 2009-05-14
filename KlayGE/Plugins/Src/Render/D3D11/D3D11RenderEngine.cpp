@@ -273,15 +273,22 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
 	{
-		std::vector<ID3D11Buffer*> d3d11_buffs(num_buffs);
-		std::vector<UINT> d3d11_buff_offsets(num_buffs);
-		for (size_t i = 0; i < num_buffs; ++ i)
+		if (num_buffs > 0)
 		{
-			d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(buffs[i])->D3DBuffer().get();
-			d3d11_buff_offsets[i] = static_cast<UINT>(offsets[i]);
-		}
+			std::vector<ID3D11Buffer*> d3d11_buffs(num_buffs);
+			std::vector<UINT> d3d11_buff_offsets(num_buffs);
+			for (size_t i = 0; i < num_buffs; ++ i)
+			{
+				d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(buffs[i])->D3DBuffer().get();
+				d3d11_buff_offsets[i] = static_cast<UINT>(offsets[i]);
+			}
 
-		d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+		}
+		else
+		{
+			d3d_imm_ctx_->SOSetTargets(0, NULL, NULL);
+		}
 	}
 
 	// ¿ªÊ¼Ò»Ö¡
@@ -519,12 +526,12 @@ namespace KlayGE
 		caps_.max_vertices = 8388607;
 		caps_.max_indices = 16777215;
 		caps_.hw_instancing_support = true;
-		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
+			caps_.stream_output_support = true;
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
@@ -541,6 +548,7 @@ namespace KlayGE
 
 		case D3D_FEATURE_LEVEL_10_1:
 		case D3D_FEATURE_LEVEL_10_0:
+			caps_.stream_output_support = true;
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
@@ -556,6 +564,7 @@ namespace KlayGE
 			break;
 
 		default:
+			caps_.stream_output_support = false;
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
