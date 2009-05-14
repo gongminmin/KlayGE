@@ -92,8 +92,6 @@ namespace KlayGE
 		}
 
 		uint32_t Update(uint32_t pass);
-		virtual void DoUpdateOverlay() = 0;
-		virtual uint32_t DoUpdate(uint32_t pass) = 0;
 		void UpdateStats();
 
 		virtual void RenderOver()
@@ -103,6 +101,10 @@ namespace KlayGE
 		virtual void DelObjects()
 		{
 		}
+
+	private:
+		virtual void DoUpdateOverlay() = 0;
+		virtual uint32_t DoUpdate(uint32_t pass) = 0;
 
 	protected:
 		std::string name_;

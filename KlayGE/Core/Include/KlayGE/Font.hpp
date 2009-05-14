@@ -65,6 +65,7 @@ namespace KlayGE
 
 		RenderTechniquePtr const & GetRenderTechnique() const;
 
+		void UpdateBuffers();
 		void OnRenderBegin();
 		void OnRenderEnd();
 
@@ -120,6 +121,7 @@ namespace KlayGE
 #endif
 
 		bool restart_;
+		bool dirty_;
 
 		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
 			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;

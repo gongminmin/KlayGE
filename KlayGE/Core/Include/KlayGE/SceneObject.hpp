@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 增加了Overlay标志 (2009.5.13)
+// 增加了Update (2009.5.14)
 //
 // 3.1.0
 // 初次建立 (2005.10.31)
@@ -51,6 +52,8 @@ namespace KlayGE
 		virtual Box const & GetBound() const;
 
 		virtual void AddToSceneManager();
+
+		virtual void Update();
 
 		bool Cullable() const;
 		bool Overlay() const;

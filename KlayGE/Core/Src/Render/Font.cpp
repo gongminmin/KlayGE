@@ -95,7 +95,7 @@ namespace KlayGE
 	FontRenderable::FontRenderable(std::string const & fontName)
 			: RenderableHelper(L"Font"),
 				curX_(0), curY_(0),
-				three_dim_(false)
+				three_dim_(false), dirty_(false)
 	{
 		std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
 		BOOST_ASSERT(kfont_input);
@@ -180,23 +180,31 @@ namespace KlayGE
 		}
 	}
 
+	void FontRenderable::UpdateBuffers()
+	{
+		if (dirty_)
+		{
+			if (!vertices_.empty() && !indices_.empty())
+			{
+				vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+				{
+					GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+					std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
+				}
+
+				ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+				{
+					GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
+					std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
+				}
+			}
+
+			dirty_ = false;
+		}
+	}
+
 	void FontRenderable::OnRenderBegin()
 	{
-		if (!vertices_.empty() && !indices_.empty())
-		{
-			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
-				std::copy(vertices_.begin(), vertices_.end(), mapper.Pointer<FontVert>());
-			}
-
-			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
-				std::copy(indices_.begin(), indices_.end(), mapper.Pointer<uint16_t>());
-			}
-		}
-
 		if (!three_dim_)
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -373,6 +381,8 @@ namespace KlayGE
 			index_per_char = 6;
 		}
 
+		dirty_ = true;
+
 		uint32_t const clr32 = clr.ABGR();
 		for (size_t i = 0; i < sx.size(); ++ i)
 		{
@@ -470,6 +480,8 @@ namespace KlayGE
 		{
 			index_per_char = 6;
 		}
+
+		dirty_ = true;
 
 		vertices_.reserve(vertices_.size() + maxSize * 4);
 		indices_.reserve(indices_.size() + maxSize * index_per_char);
@@ -644,9 +656,14 @@ namespace KlayGE
 	class FontObject : public SceneObjectHelper
 	{
 	public:
-		FontObject(RenderablePtr renderable, uint32_t attrib)
+		FontObject(RenderablePtr const & renderable, uint32_t attrib)
 			: SceneObjectHelper(renderable, attrib)
 		{
+		}
+
+		void Update()
+		{
+			checked_pointer_cast<FontRenderable>(renderable_)->UpdateBuffers();
 		}
 	};
 

@@ -234,7 +234,6 @@ namespace KlayGE
 			this->NodeVisible(0, frustum);
 		}
 
-		visible_marks_.resize(scene_objs_.size());
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			SceneObjectPtr const & obj = scene_objs_[i];

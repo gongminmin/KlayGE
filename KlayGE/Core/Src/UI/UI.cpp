@@ -55,7 +55,7 @@ namespace KlayGE
 	public:
 		UIRectRenderable(TexturePtr const & texture, RenderEffectPtr const & effect)
 			: RenderableHelper(L"UIRect"),
-				texture_(texture)
+				texture_(texture), dirty_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -105,11 +105,13 @@ namespace KlayGE
 
 		std::vector<UIManager::VertexFormat>& Vertices()
 		{
+			dirty_ = true;
 			return vertices_;
 		}
 
 		std::vector<uint16_t>& Indices()
 		{
+			dirty_ = true;
 			return indices_;
 		}
 
@@ -118,21 +120,32 @@ namespace KlayGE
 			return restart_;
 		}
 
+		void UpdateBuffers()
+		{
+			if (dirty_)
+			{
+				if (!vertices_.empty() || !indices_.empty())
+				{
+					vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
+						std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_->Size());
+					}
+
+					ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
+					{
+						GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
+						std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_->Size());
+					}
+				}
+
+				dirty_ = false;
+			}
+		}
+
 		void OnRenderBegin()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			vb_->Resize(static_cast<uint32_t>(vertices_.size() * sizeof(vertices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*vb_, BA_Write_Only);
-				std::memcpy(mapper.Pointer<uint8_t>(), &vertices_[0], vb_->Size());
-			}
-
-			ib_->Resize(static_cast<uint32_t>(indices_.size() * sizeof(indices_[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*ib_, BA_Write_Only);
-				std::memcpy(mapper.Pointer<uint8_t>(), &indices_[0], ib_->Size());
-			}
 
 			*(technique_->Effect().ParameterByName("ui_tex")) = texture_;
 
@@ -159,6 +172,7 @@ namespace KlayGE
 
 	private:
 		bool restart_;
+		bool dirty_;
 
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
@@ -175,9 +189,14 @@ namespace KlayGE
 	class UIRectObject : public SceneObjectHelper
 	{
 	public:
-		UIRectObject(RenderablePtr renderable, uint32_t attrib)
+		UIRectObject(RenderablePtr const & renderable, uint32_t attrib)
 			: SceneObjectHelper(renderable, attrib)
 		{
+		}
+
+		void Update()
+		{
+			checked_pointer_cast<UIRectRenderable>(renderable_)->UpdateBuffers();
 		}
 	};
 

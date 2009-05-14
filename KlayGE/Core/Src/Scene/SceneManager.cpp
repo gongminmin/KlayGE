@@ -43,6 +43,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneObject.hpp>
 
+#include <map>
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -84,7 +85,6 @@ namespace KlayGE
 
 		void ClipScene(Camera const & /*camera*/)
 		{
-			visible_marks_.resize(scene_objs_.size());
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				if (!scene_objs_[i]->Overlay())
@@ -179,6 +179,11 @@ namespace KlayGE
 			renderEngine.BeginPass();
 
 			urt_ = app.Update(pass);
+			BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
+			{
+				scene_obj->Update();
+			}
+
 			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
 			{
 				this->Flush();
@@ -219,17 +224,14 @@ namespace KlayGE
 		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		App3DFramework& app = Context::Instance().AppInstance();
 
+		visible_marks_.resize(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
 		{
 			this->ClipScene(app.ActiveCamera());
 		}
 		else
 		{
-			visible_marks_.resize(scene_objs_.size());
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
-			{
-				visible_marks_[i] = false;
-			}
+			std::fill(visible_marks_.begin(), visible_marks_.end(), false);
 		}
 		if (urt_ & App3DFramework::URV_Finished)
 		{
@@ -244,32 +246,29 @@ namespace KlayGE
 
 		numObjectsRendered_ = 0;
 		std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables;
+		std::map<RenderablePtr, size_t> renderables_map;
 		for (size_t i = 0; i < visible_marks_.size(); ++ i)
 		{
 			if (visible_marks_[i])
 			{
 				SceneObjectPtr const & so = scene_objs_[i];
-
 				RenderablePtr const & renderable = so->GetRenderable();
 
-				size_t j = 0;
-				while ((j < renderables.size()) && (renderables[j].first != renderable))
+				BOOST_AUTO(iter, renderables_map.lower_bound(renderable));
+				if ((iter != renderables_map.end()) && (iter->first == renderable))
 				{
-					++ j;
-				}
-
-				if (j < renderables.size())
-				{
-					renderables[j].second.push_back(so);
+					renderables[iter->second].second.push_back(so);
 				}
 				else
 				{
+					renderables_map.insert(std::make_pair(renderable, renderables.size()));
 					renderables.push_back(std::make_pair(renderable, SceneObjectsType(1, so)));
 				}
 
 				++ numObjectsRendered_;
 			}
 		}
+		renderables_map.clear();
 		BOOST_FOREACH(BOOST_TYPEOF(renderables)::const_reference renderable, renderables)
 		{
 			Renderable& ra(*renderable.first);
@@ -285,10 +284,10 @@ namespace KlayGE
 			{
 				item->Render();
 
-				++ numRenderablesRendered_;
 				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
 				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
 			}
+			numRenderablesRendered_ += items.second.size();
 		}
 		render_queue_.resize(0);
 
