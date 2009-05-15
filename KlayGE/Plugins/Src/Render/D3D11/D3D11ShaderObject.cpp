@@ -1068,13 +1068,13 @@ namespace KlayGE
 		srs.resize(std::max(vs_textures.size(), vs_buffers.size()));
 		for (size_t i = 0; i < srs.size(); ++ i)
 		{
-			if (vs_textures[i])
+			if ((i < vs_textures.size()) && vs_textures[i])
 			{
 				srs[i] = checked_pointer_cast<D3D11Texture>(vs_textures[i])->D3DShaderResourceView().get();
 			}
 			else
 			{
-				if (vs_buffers[i])
+				if ((i < vs_buffers.size()) && vs_buffers[i])
 				{
 					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(vs_buffers[i])->D3DShaderResourceView().get();
 				}
@@ -1112,13 +1112,13 @@ namespace KlayGE
 		srs.resize(std::max(ps_textures.size(), ps_buffers.size()));
 		for (size_t i = 0; i < srs.size(); ++ i)
 		{
-			if (ps_textures[i])
+			if ((i < ps_textures.size()) && ps_textures[i])
 			{
 				srs[i] = checked_pointer_cast<D3D11Texture>(ps_textures[i])->D3DShaderResourceView().get();
 			}
 			else
 			{
-				if (ps_buffers[i])
+				if ((i < ps_buffers.size()) && ps_buffers[i])
 				{
 					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(ps_buffers[i])->D3DShaderResourceView().get();
 				}
@@ -1156,13 +1156,13 @@ namespace KlayGE
 		srs.resize(std::max(gs_textures.size(), gs_buffers.size()));
 		for (size_t i = 0; i < srs.size(); ++ i)
 		{
-			if (gs_textures[i])
+			if ((i < gs_textures.size()) && gs_textures[i])
 			{
 				srs[i] = checked_pointer_cast<D3D11Texture>(gs_textures[i])->D3DShaderResourceView().get();
 			}
 			else
 			{
-				if (gs_buffers[i])
+				if ((i < gs_buffers.size()) && gs_buffers[i])
 				{
 					srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(gs_buffers[i])->D3DShaderResourceView().get();
 				}

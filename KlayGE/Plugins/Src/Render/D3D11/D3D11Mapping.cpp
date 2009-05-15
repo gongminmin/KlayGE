@@ -449,6 +449,7 @@ namespace KlayGE
 	{
 		D3D11_SO_DECLARATION_ENTRY ret;
 
+		ret.Stream = 0;
 		ret.SemanticIndex = decl.usage_index;
 		ret.StartComponent = decl.start_component;
 		ret.ComponentCount = decl.component_count;
