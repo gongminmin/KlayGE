@@ -170,18 +170,7 @@ namespace
 				if (use_so)
 				{
 					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGSSO");
-
-					std::vector<float> dummy(max_num_particles);
-					for (int i = 0; i < max_num_particles; ++ i)
-					{
-						dummy[i] = static_cast<float>(i);
-					}
-					init_data.row_pitch = max_num_particles * sizeof(float);
-					init_data.slice_pitch = 0;
-					init_data.data = &dummy[0];
-					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+					rl_->BindDummyVertexStream(max_num_particles);
 				}
 				else
 				{
@@ -308,11 +297,11 @@ namespace
 		}
 	};
 
-	class GPUParticleSystem : public RenderablePlane
+	class GPUParticleSystem : public RenderableHelper
 	{
 	public:
 		GPUParticleSystem(int max_num_particles, TexturePtr const & terrain_height_map, TexturePtr const & terrain_normal_map)
-			: RenderablePlane(2, 2, 1, 1, true),
+			: RenderableHelper(L"GPUParticleSystem"),
 				max_num_particles_(max_num_particles),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256),
 				model_mat_(float4x4::Identity()),
@@ -324,7 +313,9 @@ namespace
 
 			if (use_so)
 			{
+				rl_ = rf.MakeRenderLayout();
 				rl_->TopologyType(RenderLayout::TT_PointList);
+				rl_->BindDummyVertexStream(max_num_particles);
 
 				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
 
@@ -338,12 +329,20 @@ namespace
 				pos_init.row_pitch = max_num_particles_ * sizeof(float4);
 				pos_init.slice_pitch = 0;
 
+				particle_rl_[0] = rf.MakeRenderLayout();
+				particle_rl_[1] = rf.MakeRenderLayout();
+
 				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, &pos_init, EF_ABGR32F);
 				particle_pos_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, &pos_init, EF_ABGR32F);
 				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
 				particle_vel_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
 				particle_vel_vb_[0]->Resize(max_num_particles_ * sizeof(float4));
 				particle_vel_vb_[1]->Resize(max_num_particles_ * sizeof(float4));
+
+				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
 				for (int i = 0; i < max_num_particles_; ++ i)
 				{
@@ -365,6 +364,43 @@ namespace
 			}
 			else
 			{
+				rl_ = rf.MakeRenderLayout();
+				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				{
+					float3 xyzs[] = 
+					{
+						float3(-1, +1, 0),
+						float3(+1, +1, 0),
+						float3(-1, -1, 0),
+						float3(+1, -1, 0)
+					};
+					ElementInitData init_data;
+					init_data.row_pitch = sizeof(xyzs);
+					init_data.slice_pitch = 0;
+					init_data.data = &xyzs[0];
+
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+					box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+				}
+				{
+					float2 texs[] = 
+					{
+						float2(0, 0),
+						float2(1, 0),
+						float2(0, 1),
+						float2(1, 1)
+					};
+					ElementInitData init_data;
+					init_data.row_pitch = sizeof(texs);
+					init_data.slice_pitch = 0;
+					init_data.data = &texs[0];
+
+					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+				}
+
 				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
 
 				std::vector<float4> p(tex_width_ * tex_height_);
@@ -438,7 +474,7 @@ namespace
 
 			float time = 0;
 
-			std::vector<float> time_v(max_num_particles_);
+			std::vector<float> time_v(tex_width_ * tex_height_);
 			for (size_t i = 0; i < time_v.size(); ++ i)
 			{
 				time_v[i] = time;
@@ -480,9 +516,7 @@ namespace
 
 			if (use_so)
 			{
-				GraphicsBufferPtr so_buffs[] = { particle_pos_vb_[rt_index_], particle_vel_vb_[rt_index_] };
-				size_t so_offsets[] = { 0, 0 };
-				re.BindSOBuffers(2, so_buffs, so_offsets);
+				re.BindSOBuffers(particle_rl_[rt_index_]);
 				*particle_pos_buff_param_ = this->PosVB();
 				*particle_vel_buff_param_ = this->VelVB();
 			}
@@ -497,7 +531,7 @@ namespace
 
 			if (use_so)
 			{
-				re.BindSOBuffers(0, NULL, NULL);
+				re.BindSOBuffers(RenderLayoutPtr());
 			}
 
 			rt_index_ = !rt_index_;
@@ -534,6 +568,7 @@ namespace
 
 		GraphicsBufferPtr particle_pos_vb_[2];
 		GraphicsBufferPtr particle_vel_vb_[2];
+		RenderLayoutPtr particle_rl_[2];
 
 		FrameBufferPtr pos_vel_rt_buffer_[2];
 
@@ -768,6 +803,11 @@ void GPUParticleSystemApp::DoUpdateOverlay()
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Particle System", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str().c_str(), 16);
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(re.CurFrameBuffer()));
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), rw.Description(), 16);
 }
 
 uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)

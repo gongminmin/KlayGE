@@ -393,6 +393,9 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 	</technique>
 	<technique name="UpdateSO">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+			
 			<state name="vertex_shader" value="UpdateSOVS()">
 				<stream_output>
 					<slot usage="SV_Position" component="xyzw"/>

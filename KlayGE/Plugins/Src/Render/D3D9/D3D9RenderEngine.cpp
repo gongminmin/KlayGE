@@ -424,7 +424,7 @@ namespace KlayGE
 
 	// 设置当前Stream output目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D9RenderEngine::DoBindSOBuffers(size_t /*num_buffs*/, GraphicsBufferPtr* /*buffs*/, size_t* /*offsets*/)
+	void D3D9RenderEngine::DoBindSOBuffers(RenderLayoutPtr const & /*rl*/)
 	{
 	}
 

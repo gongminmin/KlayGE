@@ -354,7 +354,7 @@ namespace KlayGE
 
 	// 设置当前Stream output目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	void OGLRenderEngine::DoBindSOBuffers(RenderLayoutPtr const & rl)
 	{
 	}
 

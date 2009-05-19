@@ -271,16 +271,16 @@ namespace KlayGE
 
 	// 设置当前Stream output目标
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11RenderEngine::DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	void D3D11RenderEngine::DoBindSOBuffers(RenderLayoutPtr const & rl)
 	{
+		uint32_t num_buffs = rl ? rl->NumVertexStreams() : 0;
 		if (num_buffs > 0)
 		{
 			std::vector<ID3D11Buffer*> d3d11_buffs(num_buffs);
-			std::vector<UINT> d3d11_buff_offsets(num_buffs);
-			for (size_t i = 0; i < num_buffs; ++ i)
+			std::vector<UINT> d3d11_buff_offsets(num_buffs, 0);
+			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(buffs[i])->D3DBuffer().get();
-				d3d11_buff_offsets[i] = static_cast<UINT>(offsets[i]);
+				d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(rl->GetVertexStream(i))->D3DBuffer().get();
 			}
 
 			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
@@ -332,7 +332,18 @@ namespace KlayGE
 			offsets[number] = 0;
 		}
 
-		d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+		if (this_num_vertex_stream != 0)
+		{
+			d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+
+			D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
+			d3d_imm_ctx_->IASetInputLayout(d3d_rl.InputLayout(checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode()).get());
+		}
+		else
+		{
+			d3d_imm_ctx_->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+			d3d_imm_ctx_->IASetInputLayout(NULL);
+		}
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
@@ -369,9 +380,6 @@ namespace KlayGE
 
 		numPrimitivesJustRendered_ += primCount;
 		numVerticesJustRendered_ += vertex_count;
-
-		D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
-		d3d_imm_ctx_->IASetInputLayout(d3d_rl.InputLayout(checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode()).get());
 
 		uint32_t const num_passes = tech.NumPasses();
 		if (rl.InstanceStream())

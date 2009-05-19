@@ -128,6 +128,7 @@ namespace KlayGE
 		}
 		void BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
+		void BindDummyVertexStream(uint32_t num_vertices);
 
 		uint32_t NumVertexStreams() const
 		{
@@ -213,6 +214,8 @@ namespace KlayGE
 
 		GraphicsBufferPtr index_stream_;
 		ElementFormat index_format_;
+
+		uint32_t dummy_num_vertices_;
 	};
 
 	template <>

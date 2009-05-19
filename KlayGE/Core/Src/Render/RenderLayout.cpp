@@ -33,7 +33,8 @@ namespace KlayGE
 
 	RenderLayout::RenderLayout()
 			: topo_type_(TT_PointList),
-				index_format_(EF_Unknown)
+				index_format_(EF_Unknown),
+				dummy_num_vertices_(0)
 	{
 		vertex_streams_.reserve(4);
 	}
@@ -50,7 +51,14 @@ namespace KlayGE
 
 	uint32_t RenderLayout::NumVertices() const
 	{
-		return vertex_streams_.empty() ? 0 : (vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size);
+		if (vertex_streams_.empty())
+		{
+			return dummy_num_vertices_;
+		}
+		else
+		{
+			return vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size;
+		}
 	}
 
 	void RenderLayout::BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
@@ -94,6 +102,11 @@ namespace KlayGE
 			instance_stream_.type = type;
 			instance_stream_.freq = freq;
 		}
+	}
+
+	void RenderLayout::BindDummyVertexStream(uint32_t num_vertices)
+	{
+		dummy_num_vertices_ = num_vertices;
 	}
 
 	bool RenderLayout::UseIndices() const

@@ -96,7 +96,7 @@ namespace KlayGE
 
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
-		void DoBindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets);
+		void DoBindSOBuffers(RenderLayoutPtr const & rl);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 
 		void FillRenderDeviceCaps();

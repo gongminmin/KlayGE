@@ -110,7 +110,7 @@ namespace KlayGE
 		{
 		}
 
-		void DoBindSOBuffers(size_t /*num_buffs*/, GraphicsBufferPtr* /*buffs*/, size_t* /*offsets*/)
+		void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/)
 		{
 		}
 
@@ -211,12 +211,10 @@ namespace KlayGE
 		return default_frame_buffer_;
 	}
 
-	void RenderEngine::BindSOBuffers(size_t num_buffs, GraphicsBufferPtr* buffs, size_t* offsets)
+	void RenderEngine::BindSOBuffers(RenderLayoutPtr const & rl)
 	{
-		so_buffers_.assign(buffs, buffs + num_buffs);
-		so_buffer_offsets_.assign(offsets, offsets + num_buffs);
-
-		this->DoBindSOBuffers(num_buffs, buffs, offsets);
+		so_buffers_ = rl;
+		this->DoBindSOBuffers(rl);
 	}
 
 	// äÖÈ¾Ò»¸övb

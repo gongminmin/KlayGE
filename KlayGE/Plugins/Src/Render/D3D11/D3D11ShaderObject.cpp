@@ -626,7 +626,10 @@ namespace KlayGE
 								{
 									is_shader_validate_[type] = false;
 								}
-								geometry_shader_ = MakeCOMPtr(gs);
+								else
+								{
+									geometry_shader_ = MakeCOMPtr(gs);
+								}
 							}
 						}
 						vs_code_ = code_blob;

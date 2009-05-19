@@ -584,7 +584,10 @@ namespace KlayGE
 							{
 								is_shader_validate_[type] = false;
 							}
-							vertex_shader_ = MakeCOMPtr(vs);
+							else
+							{
+								vertex_shader_ = MakeCOMPtr(vs);
+							}
 						}
 						vs_code_ = code_blob;
 
@@ -602,7 +605,10 @@ namespace KlayGE
 							{
 								is_shader_validate_[type] = false;
 							}
-							geometry_shader_ = MakeCOMPtr(gs);
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
 						break;
 
@@ -613,7 +619,10 @@ namespace KlayGE
 							{
 								is_shader_validate_[type] = false;
 							}
-							pixel_shader_ = MakeCOMPtr(ps);
+							else
+							{
+								pixel_shader_ = MakeCOMPtr(ps);
+							}
 						}
 						break;
 
@@ -632,7 +641,10 @@ namespace KlayGE
 							{
 								is_shader_validate_[type] = false;
 							}
-							geometry_shader_ = MakeCOMPtr(gs);
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
 						else
 						{
@@ -641,7 +653,10 @@ namespace KlayGE
 							{
 								is_shader_validate_[type] = false;
 							}
-							geometry_shader_ = MakeCOMPtr(gs);
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+							}
 						}
 						break;
 
