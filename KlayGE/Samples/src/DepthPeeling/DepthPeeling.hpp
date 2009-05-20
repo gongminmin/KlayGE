@@ -20,7 +20,9 @@ private:
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void CheckBoxHandler(KlayGE::UICheckBox const & sender);
+	void UsePeelingHandler(KlayGE::UICheckBox const & sender);
+	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
+	void LayerChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
@@ -42,8 +44,12 @@ private:
 	KlayGE::uint32_t num_layers_;
 
 	bool use_depth_peeling_;
-	KlayGE::UIDialogPtr dialog_;
+	KlayGE::UIDialogPtr dialog_peeling_;
+	KlayGE::UIDialogPtr dialog_layer_;
 	int id_use_depth_peeling_;
+	int id_ctrl_camera_;
+	int id_layer_combo_;
+	int id_layer_tex_;
 };
 
 #endif		// _DEPTHPEELING_HPP

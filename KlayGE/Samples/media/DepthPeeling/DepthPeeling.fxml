@@ -114,7 +114,7 @@ float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
 
 	<shader>
 		<![CDATA[
-float4 NoDepthPeelingPS(float4 clr : COLOR0) : SV_Target
+float4 NoDepthPeelingPS(float4 pos_ss : TEXCOORD0, float4 clr : COLOR0) : SV_Target
 {
 	return clr;
 }

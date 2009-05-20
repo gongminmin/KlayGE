@@ -65,7 +65,14 @@ namespace KlayGE
 		{
 			TexturePtr const & tex = UIManager::Instance().GetTexture(tex_index_);
 
-			Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+			if (tex)
+			{
+				Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+			}
+			else
+			{
+				Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+			}
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 200.0f / 255);
@@ -203,7 +210,14 @@ namespace KlayGE
 	void UITexButton::SetTexture(TexturePtr const & tex)
 	{
 		tex_index_ = UIManager::Instance().AddTexture(tex);
-		elements_[0]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+		if (tex)
+		{
+			elements_[0]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+		}
+		else
+		{
+			elements_[0]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+		}
 	}
 
 	void UITexButton::OnHotkey()

@@ -537,7 +537,13 @@ namespace KlayGE
 					}
 					if ("tex_button" == type_str)
 					{
-						std::string tex_name = ctrl_node->Attrib("texture")->ValueString();
+						TexturePtr tex;
+						attr = ctrl_node->Attrib("texture");
+						if (attr)
+						{
+							std::string tex_name = attr->ValueString();
+							tex = LoadTexture(tex_name, EAH_GPU_Read)();
+						}
 						uint8_t hotkey;
 						attr = ctrl_node->Attrib("hotkey");
 						if (attr)
@@ -548,7 +554,6 @@ namespace KlayGE
 						{
 							hotkey = 0;
 						}
-						TexturePtr tex = LoadTexture(tex_name, EAH_GPU_Read)();
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
 							x, y, width, height, hotkey, is_default));
 					}

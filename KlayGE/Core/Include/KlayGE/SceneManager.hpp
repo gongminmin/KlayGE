@@ -52,7 +52,6 @@ namespace KlayGE
 		virtual void Clear() = 0;
 
 		void Update();
-		void Flush();
 
 		size_t NumObjectsRendered() const;
 		size_t NumRenderablesRendered() const;
@@ -60,6 +59,8 @@ namespace KlayGE
 		size_t NumVerticesRendered() const;
 
 	protected:
+		void Flush();
+
 		virtual void DoAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter) = 0;
 

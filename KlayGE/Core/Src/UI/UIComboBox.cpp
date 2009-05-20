@@ -694,7 +694,7 @@ namespace KlayGE
 		return items_[selected_];
 	}
 
-	uint32_t UIComboBox::GetSelectedIndex() const
+	int UIComboBox::GetSelectedIndex() const
 	{
 		return selected_;
 	}

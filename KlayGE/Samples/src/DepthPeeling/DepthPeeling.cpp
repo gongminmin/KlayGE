@@ -213,7 +213,8 @@ int main()
 }
 
 DepthPeelingApp::DepthPeelingApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+			: App3DFramework(name, settings),
+				num_layers_(0)
 {
 }
 
@@ -246,7 +247,6 @@ void DepthPeelingApp::InitObjects()
 		oc_queries_[i] = rf.MakeOcclusionQuery();
 	}
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.01f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -260,11 +260,28 @@ void DepthPeelingApp::InitObjects()
 	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	dialog_peeling_ = UIManager::Instance().GetDialogs()[0];
+	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
-	id_use_depth_peeling_ = dialog_->IDFromName("UseDepthPeeling");
+	id_use_depth_peeling_ = dialog_peeling_->IDFromName("UseDepthPeeling");
+	id_ctrl_camera_ = dialog_peeling_->IDFromName("CtrlCamera");
+	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
+	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	dialog_->Control<UICheckBox>(id_use_depth_peeling_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CheckBoxHandler, this, _1));
+	dialog_peeling_->Control<UICheckBox>(id_use_depth_peeling_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::UsePeelingHandler, this, _1));
+	this->UsePeelingHandler(*dialog_peeling_->Control<UICheckBox>(id_use_depth_peeling_));
+	dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DepthPeelingApp::CtrlCameraHandler, this, _1));
+	this->CtrlCameraHandler(*dialog_peeling_->Control<UICheckBox>(id_ctrl_camera_));
+
+	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DepthPeelingApp::LayerChangedHandler, this, _1));
+	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
+
+	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)
+	{
+		std::wostringstream stream;
+		stream << i << " Layer";
+		dialog_layer_->Control<UIComboBox>(id_layer_combo_)->AddItem(stream.str());
+	}
 }
 
 void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
@@ -278,7 +295,14 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	{
 		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0);
-		peel_format = EF_ARGB8;
+		if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
+		{
+			peel_format = EF_ARGB8;
+		}
+		else
+		{
+			peel_format = EF_ABGR8;
+		}
 	}
 	catch (...)
 	{
@@ -293,15 +317,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		try
-		{
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
-		catch (...)
-		{
-			peel_format = EF_ABGR8;
-			peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);
@@ -324,9 +340,29 @@ void DepthPeelingApp::InputHandler(InputEngine const & /*sender*/, InputAction c
 	}
 }
 
-void DepthPeelingApp::CheckBoxHandler(UICheckBox const & /*sender*/)
+void DepthPeelingApp::UsePeelingHandler(UICheckBox const & sender)
 {
-	use_depth_peeling_ = dialog_->Control<UICheckBox>(id_use_depth_peeling_)->GetChecked();
+	use_depth_peeling_ = sender.GetChecked();
+}
+
+void DepthPeelingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+{
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
+	}
+}
+
+void DepthPeelingApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	if (sender.GetSelectedIndex() >= 0)
+	{
+		dialog_layer_->Control<UITexButton>(id_layer_tex_)->SetTexture(peeled_texs_[sender.GetSelectedIndex()]);
+	}
 }
 
 void DepthPeelingApp::DoUpdateOverlay()
@@ -346,19 +382,21 @@ void DepthPeelingApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
+
+	stream.str(L"");
+	stream << num_layers_ << " Layers";
+	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
 uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 {
-	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
-
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	switch (pass)
+	if (use_depth_peeling_)
 	{
-	case 0:
-		if (use_depth_peeling_)
+		switch (pass)
 		{
+		case 0:
 			num_layers_ = 1;
 
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
@@ -366,71 +404,82 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 			depth_view_[0]->Clear(Color(1, 0, 0, 0));
 			return App3DFramework::URV_Need_Flush;
-		}
-		else
-		{
-			checked_pointer_cast<PolygonObject>(polygon_)->DepthPeelingEnabled(false);
-
-			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
-
-			UIManager::Instance().Render();
-
-			std::wostringstream stream;
-			stream << this->FPS();
-
-			font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Depth Peeling", 16);
-			font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
-
-			stream.str(L"");
-			stream << sceneMgr.NumRenderablesRendered() << " Renderables "
-				<< sceneMgr.NumPrimitivesRendered() << " Primitives "
-				<< sceneMgr.NumVerticesRendered() << " Vertices";
-			font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
-		}
-
-	case 1:
-		checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
-		for (size_t i = 1; i < peeled_texs_.size(); i += oc_queries_.size())
-		{
-			for (size_t j = 0; j < oc_queries_.size(); ++ j)
+	
+		default:
+			if (1 == pass)
 			{
-				checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(i + j - 1) % 2], peeling_fbs_[i + j - 1]->RequiresFlipping());
-
-				re.BindFrameBuffer(peeling_fbs_[i + j]);
-				peeling_fbs_[i + j]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-				depth_view_[(i + j) % 2]->Clear(Color(1, 0, 0, 0));
-
-				oc_queries_[j]->Begin();
-				sceneMgr.Flush();
-				oc_queries_[j]->End();
+				checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
 			}
 
-			for (size_t j = 0; j < oc_queries_.size(); ++ j)
 			{
-				if (checked_pointer_cast<OcclusionQuery>(oc_queries_[j])->SamplesPassed() < 1)
+				bool finished = false;
+
+				size_t layer_batch = (pass - 1) / oc_queries_.size() * oc_queries_.size() + 1;
+				size_t oc_index = (pass - 1) % oc_queries_.size();
+				size_t layer = layer_batch + oc_index;
+				if (oc_index > 0)
 				{
-					return App3DFramework::URV_Flushed;
+					oc_queries_[oc_index - 1]->End();
+				}
+				if ((oc_index == 0) && (layer_batch > 1))
+				{
+					oc_queries_.back()->End();
+					for (size_t j = 0; j < oc_queries_.size(); ++ j)
+					{
+						if (checked_pointer_cast<OcclusionQuery>(oc_queries_[j])->SamplesPassed() < 1)
+						{
+							finished = true;
+						}
+						else
+						{
+							++ num_layers_;
+						}
+					}
+				}
+				if (layer_batch < peeled_texs_.size())
+				{
+					if (!finished)
+					{
+						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2], peeling_fbs_[layer - 1]->RequiresFlipping());
+
+						re.BindFrameBuffer(peeling_fbs_[layer]);
+						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
+						depth_view_[layer % 2]->Clear(Color(1, 0, 0, 0));
+
+						oc_queries_[oc_index]->Begin();
+					}
 				}
 				else
 				{
-					++ num_layers_;
+					finished = true;
+				}
+				
+				if (finished)
+				{
+					re.BindFrameBuffer(FrameBufferPtr());
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
+					for (size_t i = 0; i < num_layers_; ++ i)
+					{
+						blend_pp_->Source(peeled_texs_[num_layers_ - 1 - i],
+							peeling_fbs_[num_layers_ - 1 - i]->RequiresFlipping());
+						blend_pp_->Apply();
+					}
+
+					return App3DFramework::URV_Finished;
+				}
+				else
+				{
+					return App3DFramework::URV_Need_Flush;
 				}
 			}
 		}
-		return App3DFramework::URV_Flushed;
+	}
+	else
+	{
+		checked_pointer_cast<PolygonObject>(polygon_)->DepthPeelingEnabled(false);
 
-	default:
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
-		for (size_t i = 0; i < num_layers_; ++ i)
-		{
-			blend_pp_->Source(peeled_texs_[num_layers_ - 1 - i],
-				peeling_fbs_[num_layers_ - 1 - i]->RequiresFlipping());
-			blend_pp_->Apply();
-		}
-		return App3DFramework::URV_Finished;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }
