@@ -19,6 +19,7 @@
 
 	<cbuffer name="spot_light_source">
 		<parameter type="int" name="num_spot_lights"/>
+		<parameter type="float3" name="spot_light_clr" array_size="16"/>
 		<parameter type="float3" name="spot_light_pos" array_size="16"/>
 		<parameter type="float3" name="spot_light_dir" array_size="16"/>
 		<parameter type="float2" name="spot_light_cos_cone" array_size="16"/>
@@ -380,8 +381,12 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		
 		for (int i = 0; (i < 16) && (i < num_spot_lights); ++ i)
 		{
-			float d = spot_lighting(spot_light_pos[i], spot_light_dir[i], spot_light_cos_cone[i], pos_es);
-			diffuse += d * float3(1, 0, 0);
+			float d = diffuse_term(-spot_light_dir[i], normal);
+			if (d > 0)
+			{
+				d *= spot_lighting(spot_light_pos[i], spot_light_dir[i], spot_light_cos_cone[i], pos_es);
+				diffuse += d * attenuation_term(spot_light_pos[i], pos_es, float3(0, 0.5f, 0)) * spot_light_clr[i];
+			}
 		}
 
 		if (ssao_enabled)
@@ -389,7 +394,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
 		}
 		float3 specular_clr = GetSpecular(color);
-		final_clr = float4(diffuse_clr * (0.15f + diffuse) * 0.7f + specular_clr * specular * 0.3f, 1);
+		final_clr = float4(diffuse_clr * (0.15f + diffuse) + specular_clr * specular, 1);
 	}
 	
 	return final_clr;

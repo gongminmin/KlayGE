@@ -163,15 +163,16 @@ namespace
 	class ConeObject : public SceneObjectHelper
 	{
 	public:
-		ConeObject()
+		ConeObject(std::string const & model_name, float org_angle)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("cone_90.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderCone>())->Mesh(0);
+			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderCone>())->Mesh(0);
+			model_org_ = MathLib::rotation_x(org_angle);
 		}
 
 		void Update()
 		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::rotation_x(PI / 2) * MathLib::rotation_y(std::clock() / 1400.0f) * MathLib::translation(0.0f, 2.0f, 0.0f);
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() / 700.0f) * MathLib::translation(0.0f, 2.0f, 0.0f);
 			checked_pointer_cast<RenderCone>(renderable_)->ModelMatrix(model_);
 		}
 
@@ -182,6 +183,7 @@ namespace
 
 	private:
 		float4x4 model_;
+		float4x4 model_org_;
 	};
 
 
@@ -190,16 +192,17 @@ namespace
 	public:
 		DeferredShadingPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading")),
-				spot_light_pos_(16), spot_light_dir_(16), spot_light_cos_cone_(16), num_spot_lights_(0)
+				spot_light_clr_(16), spot_light_pos_(16), spot_light_dir_(16), spot_light_cos_cone_(16), num_spot_lights_(0)
 		{
 		}
 
-		void SetSpotLight(int32_t index, float4x4 const & model_mat, float cos_outer, float cos_inner)
+		void SetSpotLight(int32_t index, float4x4 const & model_mat, float cos_outer, float cos_inner, float3 const & clr)
 		{
 			num_spot_lights_ = std::max(num_spot_lights_, index + 1);
 
+			spot_light_clr_[index] = clr;
 			spot_light_pos_[index] = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			spot_light_dir_[index] = MathLib::transform_normal(float3(0, -1, 0), model_mat);
+			spot_light_dir_[index] = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
 			spot_light_cos_cone_[index] = float2(cos_outer, cos_inner);
 		}
 
@@ -296,6 +299,7 @@ namespace
 				spot_light_dir_eye[i] = MathLib::transform_normal(spot_light_dir_[i], view);
 			}
 			*(technique_->Effect().ParameterByName("num_spot_lights")) = num_spot_lights_;
+			*(technique_->Effect().ParameterByName("spot_light_clr")) = spot_light_clr_;
 			*(technique_->Effect().ParameterByName("spot_light_pos")) = spot_light_pos_eye;
 			*(technique_->Effect().ParameterByName("spot_light_dir")) = spot_light_dir_eye;
 			*(technique_->Effect().ParameterByName("spot_light_cos_cone")) = spot_light_cos_cone_;
@@ -303,6 +307,7 @@ namespace
 
 	private:
 		int32_t num_spot_lights_;
+		std::vector<float3> spot_light_clr_;
 		std::vector<float3> spot_light_pos_;
 		std::vector<float3> spot_light_dir_;
 		std::vector<float2> spot_light_cos_cone_;
@@ -417,10 +422,10 @@ void DeferredShadingApp::InitObjects()
 	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
 
-	light_src_[0] = MakeSharedPtr<ConeObject>();
-	light_src_[1] = MakeSharedPtr<ConeObject>();
+	light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2);
+	light_src_[1] = MakeSharedPtr<ConeObject>("cone_90.meshml", -PI / 2);
 	light_src_[0]->AddToSceneManager();
-	//light_src_[1]->AddToSceneManager();
+	light_src_[1]->AddToSceneManager();
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 100.0f);
@@ -463,7 +468,7 @@ void DeferredShadingApp::InitObjects()
 	edge_anti_alias_ = MakeSharedPtr<AntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false);
+	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false, false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -628,7 +633,10 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(0, checked_pointer_cast<ConeObject>(light_src_[0])->ModelMatrix(), cos(PI / 3), cos(PI / 4));
+		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(0,
+			checked_pointer_cast<ConeObject>(light_src_[0])->ModelMatrix(), cos(PI / 6), cos(PI / 8), float3(1, 0, 0));
+		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(1,
+			checked_pointer_cast<ConeObject>(light_src_[1])->ModelMatrix(), cos(PI / 4), cos(PI / 6), float3(0, 1, 0));
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);

@@ -166,7 +166,7 @@ void PostProcessingApp::InitObjects()
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
-	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
+	hdr_ = MakeSharedPtr<HDRPostProcess>(false, false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

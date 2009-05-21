@@ -222,7 +222,7 @@ void Refract::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	hdr_ = MakeSharedPtr<HDRPostProcess>(true);
+	hdr_ = MakeSharedPtr<HDRPostProcess>(true, true);
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)

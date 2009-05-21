@@ -160,12 +160,27 @@ namespace KlayGE
 	}
 
 
-	HDRPostProcess::HDRPostProcess(bool blue_shift)
-		: PostProcess(RenderTechniquePtr()),
-			blur_(8, 2),
-			tone_mapping_(blue_shift)
+	HDRPostProcess::HDRPostProcess(bool bright_pass, bool blue_shift)
+		: PostProcess(RenderTechniquePtr())
 	{
+		if (bright_pass)
+		{
+			downsampler_ = MakeSharedPtr<BrightPassDownsampler2x2PostProcess>();
+		}
+		else
+		{
+			downsampler_ = MakeSharedPtr<Downsampler2x2PostProcess>();
+		}
+
+		blur_ = MakeSharedPtr<BlurPostProcess>(8, 2.0f);
+		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
+		for (size_t i = 0; i < sum_lums_.size(); ++ i)
+		{
+			sum_lums_[i] = MakeSharedPtr<SumLumIterativePostProcess>();
+		}
+		adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
+		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>(blue_shift);
 	}
 
 	void HDRPostProcess::Source(TexturePtr const & tex, bool flipping)
@@ -183,8 +198,8 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
-			downsampler_.Source(src_texture_, flipping);
-			downsampler_.Destinate(fb);
+			downsampler_->Source(src_texture_, flipping);
+			downsampler_->Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
@@ -193,8 +208,8 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0));
-			blur_.Source(downsample_tex_, tmp_flipping);
-			blur_.Destinate(fb);
+			blur_->Source(downsample_tex_, tmp_flipping);
+			blur_->Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
@@ -212,16 +227,16 @@ namespace KlayGE
 			{
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-				sum_lums_1st_.Source(src_texture_, tmp_flipping);
-				sum_lums_1st_.Destinate(fb);
+				sum_lums_1st_->Source(src_texture_, tmp_flipping);
+				sum_lums_1st_->Destinate(fb);
 				tmp_flipping = fb->RequiresFlipping();
 			}
 			for (size_t i = 0; i < sum_lums_.size(); ++ i)
 			{
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
-				sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
-				sum_lums_[i].Destinate(fb);
+				sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+				sum_lums_[i]->Destinate(fb);
 				tmp_flipping = fb->RequiresFlipping();
 			}
 		}
@@ -238,55 +253,56 @@ namespace KlayGE
 			{
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0));
-				sum_lums_1st_.Source(src_texture_, tmp_flipping);
-				sum_lums_1st_.Destinate(fb);
+				sum_lums_1st_->Source(src_texture_, tmp_flipping);
+				sum_lums_1st_->Destinate(fb);
 				tmp_flipping = fb->RequiresFlipping();
 			}
 			for (size_t i = 0; i < sum_lums_.size(); ++ i)
 			{
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0));
-				sum_lums_[i].Source(lum_texs_[i], tmp_flipping);
-				sum_lums_[i].Destinate(fb);
+				sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+				sum_lums_[i]->Destinate(fb);
 				tmp_flipping = fb->RequiresFlipping();
 			}
 		}
 
 		{
-			adapted_lum_.Source(lum_texs_[sum_lums_.size()], tmp_flipping);
+			adapted_lum_->Source(lum_texs_[sum_lums_.size()], tmp_flipping);
 		}
 
 		{
-			tone_mapping_.Source(src_texture_, flipping);
+			tone_mapping_->Source(src_texture_, flipping);
 		}
 	}
 
 	void HDRPostProcess::Destinate(FrameBufferPtr const & fb)
 	{
-		tone_mapping_.Destinate(fb);
+		tone_mapping_->Destinate(fb);
 	}
 
 	void HDRPostProcess::Apply()
 	{
 		// 降采样
-		downsampler_.Apply();
+		downsampler_->Apply();
 		// Blur
-		blur_.Apply();
+		blur_->Apply();
 
 		// 降采样4x4 log
-		sum_lums_1st_.Apply();
+		sum_lums_1st_->Apply();
 		for (size_t i = 0; i < sum_lums_.size(); ++ i)
 		{
 			// 降采样4x4
-			sum_lums_[i].Apply();
+			sum_lums_[i]->Apply();
 		}
 
-		adapted_lum_.Apply();
+		adapted_lum_->Apply();
 
 		{
 			// Tone mapping
-			tone_mapping_.SetTexture(adapted_lum_.AdaptedLum(), blur_tex_);
-			tone_mapping_.Apply();
+			checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetTexture(
+				checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum(), blur_tex_);
+			tone_mapping_->Apply();
 		}
 	}
 }

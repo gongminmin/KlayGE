@@ -95,7 +95,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit HDRPostProcess(bool blur_shift);
+		HDRPostProcess(bool bright_pass, bool blur_shift);
 
 		void Source(TexturePtr const & tex, bool flipping);
 		void Destinate(FrameBufferPtr const & fb);
@@ -106,12 +106,12 @@ namespace KlayGE
 		TexturePtr blur_tex_;
 		std::vector<TexturePtr> lum_texs_;
 
-		BrightPassDownsampler2x2PostProcess downsampler_;
-		BlurPostProcess blur_;
-		SumLumLogPostProcess sum_lums_1st_;
-		std::vector<SumLumIterativePostProcess> sum_lums_;
-		AdaptedLumPostProcess adapted_lum_;
-		ToneMappingPostProcess tone_mapping_;
+		PostProcessPtr downsampler_;
+		PostProcessPtr blur_;
+		PostProcessPtr sum_lums_1st_;
+		std::vector<PostProcessPtr> sum_lums_;
+		PostProcessPtr adapted_lum_;
+		PostProcessPtr tone_mapping_;
 	};
 }
 
