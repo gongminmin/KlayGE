@@ -27,6 +27,7 @@ private:
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
+	KlayGE::SceneObjectPtr light_src_[2];
 
 	KlayGE::SceneObjectPtr sky_box_;
 

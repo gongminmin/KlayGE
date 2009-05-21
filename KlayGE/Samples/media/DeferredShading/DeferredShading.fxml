@@ -17,6 +17,13 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
+	<cbuffer name="spot_light_source">
+		<parameter type="int" name="num_spot_lights"/>
+		<parameter type="float3" name="spot_light_pos" array_size="16"/>
+		<parameter type="float3" name="spot_light_dir" array_size="16"/>
+		<parameter type="float2" name="spot_light_cos_cone" array_size="16"/>
+	</cbuffer>
+
 	<parameter type="float4" name="diffuse_clr"/>
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="bump_tex"/>
@@ -117,6 +124,15 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 
 	oClr = StoreDiffuseSpecular(diffuse, 0);
 }
+
+void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+{
+	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
+	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
+	
+	oClr = StoreDiffuseSpecular(1, 0);
+}
 		]]>
 	</shader>
 
@@ -131,6 +147,13 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferNoBumpPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferNoTexTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferNoTexPS()"/>
 		</pass>
 	</technique>
 
@@ -336,9 +359,9 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
 		float3 light_dir = normalize(light_in_eye - pos_es);
 		
-		float diffuse = diffuse_term(light_dir, normal);
+		float3 diffuse = diffuse_term(light_dir, normal);
 		float specular = 0;
-		if (diffuse > 0)
+		if (diffuse.x > 0)
 		{
 			specular = dot(normalize(light_dir - view_dir), normal);
 			if (specular > 0)
@@ -353,6 +376,12 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		else
 		{
 			diffuse = 0;
+		}
+		
+		for (int i = 0; (i < 16) && (i < num_spot_lights); ++ i)
+		{
+			float d = spot_lighting(spot_light_pos[i], spot_light_dir[i], spot_light_cos_cone[i], pos_es);
+			diffuse += d * float3(1, 0, 0);
 		}
 
 		if (ssao_enabled)

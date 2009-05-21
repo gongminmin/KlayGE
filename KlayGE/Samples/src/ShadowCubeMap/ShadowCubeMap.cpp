@@ -168,8 +168,6 @@ namespace
 
 		void OnRenderBegin()
 		{
-			model_ = MathLib::translation(0.2f, 0.1f, 0.0f)
-				* MathLib::rotation_y(-std::clock() / 1500.0f);
 			ShadowMapped::OnRenderBegin(model_, effect_);
 		}
 
@@ -188,6 +186,12 @@ namespace
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
 			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())->Mesh(0);
+			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
+		}
+
+		void Update()
+		{
+			model_ = MathLib::translation(0.2f, 0.1f, 0.0f) * MathLib::rotation_y(-std::clock() / 1500.0f);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -297,7 +301,6 @@ namespace
 			: SceneObjectHelper(MakeSharedPtr<GroundRenderable>(), SOA_Cullable)
 		{
 			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
-
 			checked_pointer_cast<GroundRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 

@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -50,11 +51,13 @@ namespace
 			*(technique_->Effect().ParameterByName("lightDir")) = float3(0, 0, -1);
 		}
 
+		void SetAngle(float angle)
+		{
+			*(technique_->Effect().ParameterByName("currentAngle")) = angle;
+		}
+
 		void OnRenderBegin()
 		{
-			float currentAngle(clock() / 400.0f);
-			*(technique_->Effect().ParameterByName("currentAngle")) = currentAngle;
-
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 view = app.ActiveCamera().ViewMatrix();
@@ -75,6 +78,11 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = MakeSharedPtr<FlagRenderable>(length_segs, width_segs);
+		}
+
+		void Update()
+		{
+			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(clock() / 400.0f);
 		}
 	};
 

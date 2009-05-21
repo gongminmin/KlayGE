@@ -36,7 +36,7 @@ namespace
 	class RenderTorus : public KMesh
 	{
 	public:
-		RenderTorus(RenderModelPtr model, std::wstring const & name)
+		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -106,7 +106,6 @@ namespace
 			*(technique_->Effect().ParameterByName("model_view")) = view;
 
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
 		}
 
 	private:
@@ -124,12 +123,84 @@ namespace
 	};
 
 
+	class RenderCone : public KMesh
+	{
+	public:
+		RenderCone(RenderModelPtr const & model, std::wstring const & name)
+			: KMesh(model, name)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			technique_ = rf.LoadEffect("DeferredShading.fxml")->TechniqueByName("GBufferNoTexTech");
+		}
+
+		void BuildMeshInfo()
+		{
+		}
+
+		void ModelMatrix(float4x4 const & mat)
+		{
+			model_ = mat;
+		}
+
+		void OnRenderBegin()
+		{
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+
+			*(technique_->Effect().ParameterByName("proj")) = proj;
+			*(technique_->Effect().ParameterByName("model_view")) = model_ * view;
+
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+		}
+
+	private:
+		float4x4 model_;
+	};
+
+	class ConeObject : public SceneObjectHelper
+	{
+	public:
+		ConeObject()
+			: SceneObjectHelper(SOA_Cullable)
+		{
+			renderable_ = LoadModel("cone_90.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderCone>())->Mesh(0);
+		}
+
+		void Update()
+		{
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::rotation_x(PI / 2) * MathLib::rotation_y(std::clock() / 1400.0f) * MathLib::translation(0.0f, 2.0f, 0.0f);
+			checked_pointer_cast<RenderCone>(renderable_)->ModelMatrix(model_);
+		}
+
+		float4x4 const & ModelMatrix() const
+		{
+			return model_;
+		}
+
+	private:
+		float4x4 model_;
+	};
+
+
 	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
 		DeferredShadingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading")),
+				spot_light_pos_(16), spot_light_dir_(16), spot_light_cos_cone_(16), num_spot_lights_(0)
 		{
+		}
+
+		void SetSpotLight(int32_t index, float4x4 const & model_mat, float cos_outer, float cos_inner)
+		{
+			num_spot_lights_ = std::max(num_spot_lights_, index + 1);
+
+			spot_light_pos_[index] = MathLib::transform_coord(float3(0, 0, 0), model_mat);
+			spot_light_dir_[index] = MathLib::transform_normal(float3(0, -1, 0), model_mat);
+			spot_light_cos_cone_[index] = float2(cos_outer, cos_inner);
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -216,7 +287,25 @@ namespace
 			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+
+			std::vector<float3> spot_light_pos_eye(spot_light_pos_.size());
+			std::vector<float3> spot_light_dir_eye(spot_light_dir_.size());
+			for (int32_t i = 0; i < num_spot_lights_; ++ i)
+			{
+				spot_light_pos_eye[i] = MathLib::transform_coord(spot_light_pos_[i], view);
+				spot_light_dir_eye[i] = MathLib::transform_normal(spot_light_dir_[i], view);
+			}
+			*(technique_->Effect().ParameterByName("num_spot_lights")) = num_spot_lights_;
+			*(technique_->Effect().ParameterByName("spot_light_pos")) = spot_light_pos_eye;
+			*(technique_->Effect().ParameterByName("spot_light_dir")) = spot_light_dir_eye;
+			*(technique_->Effect().ParameterByName("spot_light_cos_cone")) = spot_light_cos_cone_;
 		}
+
+	private:
+		int32_t num_spot_lights_;
+		std::vector<float3> spot_light_pos_;
+		std::vector<float3> spot_light_dir_;
+		std::vector<float2> spot_light_cos_cone_;
 	};
 
 	class AntiAliasPostProcess : public PostProcess
@@ -327,6 +416,11 @@ void DeferredShadingApp::InitObjects()
 
 	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
+
+	light_src_[0] = MakeSharedPtr<ConeObject>();
+	light_src_[1] = MakeSharedPtr<ConeObject>();
+	light_src_[0]->AddToSceneManager();
+	//light_src_[1]->AddToSceneManager();
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 100.0f);
@@ -534,6 +628,8 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
+		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(0, checked_pointer_cast<ConeObject>(light_src_[0])->ModelMatrix(), cos(PI / 3), cos(PI / 4));
+
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))

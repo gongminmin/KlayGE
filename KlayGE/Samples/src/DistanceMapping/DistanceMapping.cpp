@@ -119,6 +119,11 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 		}
 
+		void SetLightPos(float3 const & light_pos)
+		{
+			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;			
+		}
+
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
@@ -129,12 +134,6 @@ namespace
 
 			*(technique_->Effect().ParameterByName("worldviewproj")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
-
-			float degree(std::clock() / 700.0f);
-			float3 lightPos(2, 0, -2);
-			float4x4 matRot(MathLib::rotation_z(degree));
-			lightPos = MathLib::transform_coord(lightPos, matRot);
-			*(technique_->Effect().ParameterByName("light_pos")) = lightPos;
 		}
 	};
 
@@ -144,6 +143,17 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(MakeSharedPtr<RenderPolygon>(), SOA_Cullable)
 		{
+		}
+
+		void Update()
+		{
+			float degree(std::clock() / 700.0f);
+			float4x4 matRot(MathLib::rotation_z(degree));
+
+			float3 light_pos(2, 0, -2);
+			light_pos = MathLib::transform_coord(light_pos, matRot);
+
+			checked_pointer_cast<RenderPolygon>(renderable_)->SetLightPos(light_pos);
 		}
 	};
 
