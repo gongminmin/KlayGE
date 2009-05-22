@@ -480,6 +480,7 @@ namespace KlayGE
 	std::string D3D9ShaderObject::GenShaderText(RenderEffect const & effect) const
 	{
 		std::stringstream shader_ss;
+
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
@@ -618,6 +619,13 @@ namespace KlayGE
 			ss << predefined_funcs << std::endl;
 		}
 
+		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
 		BOOST_AUTO(cbuffers, effect.CBuffers());
 		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
 		{
@@ -628,9 +636,9 @@ namespace KlayGE
 				if (param.type() != REDT_buffer)
 				{
 					ss << effect.TypeName(param.type()) << " " << *param.Name();
-					if (param.ArraySize() != 0)
+					if (param.ArraySize())
 					{
-						ss << "[" << param.ArraySize() << "]";
+						ss << "[" << *param.ArraySize() << "]";
 					}
 					ss << ";" << std::endl;
 				}
@@ -1025,7 +1033,7 @@ namespace KlayGE
 		switch (param->type())
 		{
 		case REDT_bool:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				switch (p_handle.register_set)
 				{
@@ -1071,7 +1079,7 @@ namespace KlayGE
 
 		case REDT_dword:
 		case REDT_int:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				switch (p_handle.register_set)
 				{
@@ -1116,7 +1124,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D9ShaderParameter<float*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], param);
 			}
@@ -1127,7 +1135,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D9ShaderParameter<float2*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
@@ -1138,7 +1146,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float3:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D9ShaderParameter<float3*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
@@ -1149,7 +1157,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D9ShaderParameter<float4*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
 			}
@@ -1160,7 +1168,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4x4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D9ShaderParameter<float4x4*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.rows, param);
 			}

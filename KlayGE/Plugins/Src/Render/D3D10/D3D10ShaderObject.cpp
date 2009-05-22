@@ -403,6 +403,13 @@ namespace KlayGE
 	{
 		std::stringstream ss;
 
+		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
 		BOOST_AUTO(cbuffers, effect.CBuffers());
 		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
 		{
@@ -424,9 +431,9 @@ namespace KlayGE
 
 				default:
 					ss << effect.TypeName(param.type()) << " " << *param.Name();
-					if (param.ArraySize() != 0)
+					if (param.ArraySize())
 					{
-						ss << "[" << param.ArraySize() << "]";
+						ss << "[" << *param.ArraySize() << "]";
 					}
 					ss << ";" << std::endl;
 					break;
@@ -857,7 +864,7 @@ namespace KlayGE
 		switch (param->type())
 		{
 		case REDT_bool:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				switch (p_handle.param_type)
 				{
@@ -903,7 +910,7 @@ namespace KlayGE
 
 		case REDT_dword:
 		case REDT_int:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				switch (p_handle.param_type)
 				{
@@ -948,7 +955,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D10ShaderParameter<float*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
@@ -959,7 +966,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D10ShaderParameter<float2*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
@@ -970,7 +977,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float3:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D10ShaderParameter<float3*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
@@ -981,7 +988,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D10ShaderParameter<float4*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
@@ -992,7 +999,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4x4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetD3D10ShaderParameter<float4x4*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.rows, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}

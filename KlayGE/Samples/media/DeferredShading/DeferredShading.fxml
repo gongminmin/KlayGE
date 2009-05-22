@@ -4,6 +4,8 @@
 	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
 
+	<macro name="MAX_NUM_SPOT_LIGHT" value="8"/>
+
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="model_view"/>
@@ -19,10 +21,9 @@
 
 	<cbuffer name="spot_light_source">
 		<parameter type="int" name="num_spot_lights"/>
-		<parameter type="float3" name="spot_light_clr" array_size="16"/>
-		<parameter type="float3" name="spot_light_pos" array_size="16"/>
-		<parameter type="float3" name="spot_light_dir" array_size="16"/>
-		<parameter type="float2" name="spot_light_cos_cone" array_size="16"/>
+		<parameter type="float4" name="spot_light_pos_cos_outer" array_size="MAX_NUM_SPOT_LIGHT"/>
+		<parameter type="float4" name="spot_light_dir_cos_inner" array_size="MAX_NUM_SPOT_LIGHT"/>
+		<parameter type="float3" name="spot_light_clr" array_size="MAX_NUM_SPOT_LIGHT"/>
 	</cbuffer>
 
 	<parameter type="float4" name="diffuse_clr"/>
@@ -123,7 +124,7 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		diffuse = diffuse_clr.rgb;
 	}
 
-	oClr = StoreDiffuseSpecular(diffuse, 0);
+	oClr = StoreDiffuseSpecular(diffuse, 0.1f);
 }
 
 void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
@@ -132,7 +133,7 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
-	oClr = StoreDiffuseSpecular(1, 0);
+	oClr = StoreDiffuseSpecular(1, 0.1f);
 }
 		]]>
 	</shader>
@@ -359,33 +360,46 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 
 		float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
 		float3 light_dir = normalize(light_in_eye - pos_es);
+
+		float3 diffuse = 0, specular = 0;
 		
-		float3 diffuse = diffuse_term(light_dir, normal);
-		float specular = 0;
-		if (diffuse.x > 0)
+		float d = diffuse_term(light_dir, normal);
+		if (d > 0)
 		{
-			specular = dot(normalize(light_dir - view_dir), normal);
-			if (specular > 0)
+			float s = dot(normalize(light_dir - view_dir), normal);
+			if (s > 0)
 			{
-				specular = pow(specular, 8.0f);
+				s = pow(s, 8.0f);
 			}
 			else
 			{
-				specular = 0;
+				s = 0;
 			}
+			
+			diffuse += d;
+			specular += s;
 		}
-		else
+				
+		for (int i = 0; (i < MAX_NUM_SPOT_LIGHT) && (i < num_spot_lights); ++ i)
 		{
-			diffuse = 0;
-		}
-		
-		for (int i = 0; (i < 16) && (i < num_spot_lights); ++ i)
-		{
-			float d = diffuse_term(-spot_light_dir[i], normal);
+			float d = diffuse_term(-spot_light_dir_cos_inner[i].xyz, normal);
 			if (d > 0)
 			{
-				d *= spot_lighting(spot_light_pos[i], spot_light_dir[i], spot_light_cos_cone[i], pos_es);
-				diffuse += d * attenuation_term(spot_light_pos[i], pos_es, float3(0, 0.5f, 0)) * spot_light_clr[i];
+				float3 atten_clr = attenuation_term(spot_light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * spot_light_clr[i];
+				
+				d *= spot_lighting(spot_light_pos_cos_outer[i].xyz, spot_light_dir_cos_inner[i].xyz, float2(spot_light_pos_cos_outer[i].w, spot_light_dir_cos_inner[i].w), pos_es);
+				float s = dot(normalize(-spot_light_dir_cos_inner[i].xyz - view_dir), normal);
+				if (s > 0)
+				{
+					s = pow(s, 8.0f);
+				}
+				else
+				{
+					s = 0;
+				}
+
+				diffuse += d * atten_clr;				
+				specular += s * atten_clr;
 			}
 		}
 

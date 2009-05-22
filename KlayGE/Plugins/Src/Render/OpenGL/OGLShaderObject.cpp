@@ -513,6 +513,7 @@ namespace KlayGE
 	std::string OGLShaderObject::GenShaderText(RenderEffect const & effect)
 	{
 		std::stringstream shader_ss;
+		
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
@@ -651,6 +652,13 @@ namespace KlayGE
 			ss << predefined_funcs << std::endl;
 		}
 
+		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
 		BOOST_AUTO(cbuffers, effect.CBuffers());
 		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
 		{
@@ -659,9 +667,9 @@ namespace KlayGE
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
 				ss << effect.TypeName(param.type()) << " " << *param.Name();
-				if (param.ArraySize() != 0)
+				if (param.ArraySize())
 				{
-					ss << "[" << param.ArraySize() << "]";
+					ss << "[" << *param.ArraySize() << "]";
 				}
 				ss << ";" << std::endl;
 			}
@@ -1201,7 +1209,7 @@ namespace KlayGE
 		switch (param->type())
 		{
 		case REDT_bool:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<bool*>(location, param);
 			}
@@ -1213,7 +1221,7 @@ namespace KlayGE
 
 		case REDT_dword:
 		case REDT_int:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<int32_t*>(location, param);
 			}
@@ -1224,7 +1232,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<float*>(location, param);
 			}
@@ -1235,7 +1243,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float2:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<float2*>(location, param);
 			}
@@ -1246,7 +1254,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float3:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<float3*>(location, param);
 			}
@@ -1257,7 +1265,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<float4*>(location, param);
 			}
@@ -1268,7 +1276,7 @@ namespace KlayGE
 			break;
 
 		case REDT_float4x4:
-			if (param->ArraySize() != 0)
+			if (param->ArraySize())
 			{
 				ret.func = SetOGLShaderParameter<float4x4*>(location, param);
 			}

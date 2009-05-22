@@ -33,6 +33,8 @@ using namespace KlayGE;
 
 namespace
 {
+	int32_t const MAX_NUM_SPOT_LIGHT = 8;
+
 	class RenderTorus : public KMesh
 	{
 	public:
@@ -192,7 +194,8 @@ namespace
 	public:
 		DeferredShadingPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading")),
-				spot_light_clr_(16), spot_light_pos_(16), spot_light_dir_(16), spot_light_cos_cone_(16), num_spot_lights_(0)
+				spot_light_clr_(MAX_NUM_SPOT_LIGHT), spot_light_pos_(MAX_NUM_SPOT_LIGHT),
+				spot_light_dir_(MAX_NUM_SPOT_LIGHT), spot_light_cos_cone_(MAX_NUM_SPOT_LIGHT), num_spot_lights_(0)
 		{
 		}
 
@@ -291,18 +294,19 @@ namespace
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
-			std::vector<float3> spot_light_pos_eye(spot_light_pos_.size());
-			std::vector<float3> spot_light_dir_eye(spot_light_dir_.size());
+			std::vector<float4> spot_light_pos_cos_outer(spot_light_pos_.size());
+			std::vector<float4> spot_light_dir_cos_inner(spot_light_dir_.size());
 			for (int32_t i = 0; i < num_spot_lights_; ++ i)
 			{
-				spot_light_pos_eye[i] = MathLib::transform_coord(spot_light_pos_[i], view);
-				spot_light_dir_eye[i] = MathLib::transform_normal(spot_light_dir_[i], view);
+				float3 p = MathLib::transform_coord(spot_light_pos_[i], view);
+				float3 d = MathLib::transform_normal(spot_light_dir_[i], view);
+				spot_light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), spot_light_cos_cone_[i].x());
+				spot_light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), spot_light_cos_cone_[i].y());
 			}
 			*(technique_->Effect().ParameterByName("num_spot_lights")) = num_spot_lights_;
+			*(technique_->Effect().ParameterByName("spot_light_pos_cos_outer")) = spot_light_pos_cos_outer;
+			*(technique_->Effect().ParameterByName("spot_light_dir_cos_inner")) = spot_light_dir_cos_inner;
 			*(technique_->Effect().ParameterByName("spot_light_clr")) = spot_light_clr_;
-			*(technique_->Effect().ParameterByName("spot_light_pos")) = spot_light_pos_eye;
-			*(technique_->Effect().ParameterByName("spot_light_dir")) = spot_light_dir_eye;
-			*(technique_->Effect().ParameterByName("spot_light_cos_cone")) = spot_light_cos_cone_;
 		}
 
 	private:

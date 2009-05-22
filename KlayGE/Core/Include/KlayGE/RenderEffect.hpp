@@ -380,6 +380,16 @@ namespace KlayGE
 			return (*shaders_)[n];
 		}
 
+		uint32_t NumMacros() const
+		{
+			return macros_ ? static_cast<uint32_t>(macros_->size()) : 0;
+		}
+		std::pair<std::string, std::string> const & MacroByIndex(uint32_t n) const
+		{
+			BOOST_ASSERT(n < this->NumMacros());
+			return (*macros_)[n];
+		}
+
 		std::string const & TypeName(uint32_t code) const;
 
 	protected:
@@ -387,6 +397,7 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
 
+		boost::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
 		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 
 		RenderEffectPtr prototype_effect_;
@@ -549,7 +560,7 @@ namespace KlayGE
 			return var_;
 		}
 
-		uint32_t ArraySize() const
+		boost::shared_ptr<std::string> const & ArraySize() const
 		{
 			return array_size_;
 		}
@@ -594,7 +605,7 @@ namespace KlayGE
 
 		uint32_t type_;
 		boost::shared_ptr<RenderVariable> var_;
-		uint32_t array_size_;
+		boost::shared_ptr<std::string> array_size_;
 
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 	};

@@ -7,6 +7,7 @@
 // 3.9.0
 // 直接从fxml文件读取特效脚本 (2009.4.21)
 // 支持Buffer类型 (2009.5.14)
+// 支持macro标签 (2009.5.22)
 //
 // 3.8.0
 // 支持CBuffer (2008.10.6)
@@ -900,6 +901,15 @@ namespace KlayGE
 				node = node_next;
 			}
 
+			{
+				XMLNodePtr macro_node = root->FirstNode("macro");
+				macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
+				{
+					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
+				}
+			}
+
 			std::vector<XMLNodePtr> parameter_nodes;
 			for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
 			{
@@ -983,6 +993,7 @@ namespace KlayGE
 		RenderEffectPtr ret = MakeSharedPtr<RenderEffect>();
 
 		ret->prototype_effect_ = prototype_effect_;
+		ret->macros_ = macros_;
 		ret->shaders_ = shaders_;
 
 		ret->params_.resize(params_.size());
@@ -1574,16 +1585,26 @@ namespace KlayGE
 			semantic_ = MakeSharedPtr<BOOST_TYPEOF(*semantic_)>(attr->ValueString());
 		}
 
+		uint32_t as;
 		attr = node->Attrib("array_size");
 		if (attr)
 		{
-			array_size_ = attr->ValueUInt();
+			array_size_ = MakeSharedPtr<std::string>(attr->ValueString());
+
+			try
+			{
+				as = attr->ValueUInt();
+			}
+			catch (...)
+			{
+				as = 1;  // dummy array size
+			}
 		}
 		else
 		{
-			array_size_ = 0;
+			as = 0;
 		}
-		var_ = read_var(node, type_, array_size_);
+		var_ = read_var(node, type_, as);
 
 		{
 			XMLNodePtr anno_node = node->FirstNode("annotation");
