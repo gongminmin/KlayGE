@@ -1,0 +1,126 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="depth_near_far_invfar"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="rand_normal_tex">
+		<annotation type="string" name="SasResourceAddress" value="rand_normal.dds"/>
+	</parameter>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="bilinear_wrap_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="float4" name="ssao_param"/>
+
+	<shader>
+		<![CDATA[
+float GetDepth(float4 ndc)
+{
+	return ndc.z;
+}
+
+float4 SSAO(float2 tc0)
+{
+	float4 ndc = src_tex.Sample(point_sampler, tc0);
+	float depth = GetDepth(ndc);
+	
+	const half fScale = 0.025f; 
+	const half3 samples[8] =
+	{
+		normalize(half3( 1, 1, 1)) * fScale * 1,
+		normalize(half3(-1,-1,-1)) * fScale * 2,
+		normalize(half3(-1,-1, 1)) * fScale * 3,
+		normalize(half3(-1, 1,-1)) * fScale * 4,
+		normalize(half3(-1, 1 ,1)) * fScale * 5,
+		normalize(half3( 1,-1,-1)) * fScale * 6,
+		normalize(half3( 1,-1, 1)) * fScale * 7,
+		normalize(half3( 1, 1,-1)) * fScale * 8,
+	};
+
+	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * float2(1280 / 4, 800 / 4)).rgb * 2 - 1;
+	
+	float scene_depth_m = depth * depth_near_far_invfar.y;
+	
+	float3 sample_scale = ssao_param.zzw
+		* saturate(scene_depth_m / 5.3f) // make area smaller if distance less than 5 meters
+		* (1.f + scene_depth_m / 8.f ); // make area bigger if distance more than 32 meters
+
+	float depth_range_scale = depth_near_far_invfar.y / sample_scale.z * 0.85f;
+	
+	// convert from meters into SS units
+	sample_scale.xy *= 1.0f / scene_depth_m;
+	sample_scale.z *= 2.0f / depth_near_far_invfar.y;
+
+	float depth_test_softness = 64.f / sample_scale.z;
+
+	float4 sky_access = 0.0f;
+	float4 arr_scene_depth2[2];
+	float3 ray;
+
+	for (int i = 0; i < 2; ++ i)
+	{
+		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		ray = reflect(samples[i * 4 + 1].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		ray = reflect(samples[i * 4 + 2].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		
+		ray = reflect(samples[i * 4 + 3].xyz, randNormal) * sample_scale;
+		arr_scene_depth2[0].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		ray *= 0.5;
+		arr_scene_depth2[1].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+
+		for (int j = 0; j < 2; ++ j)
+		{
+			float4 dist = depth - arr_scene_depth2[j];
+			float4 dist_scaled = dist * depth_range_scale;
+			float4 range_is_invalid = (saturate(abs(dist_scaled)) + saturate(dist_scaled)) / 2;
+			sky_access += lerp(saturate((-dist) * depth_test_softness), 0.55, range_is_invalid);
+		}
+	}
+
+	return saturate(lerp(0.9, dot(sky_access, 1 / 8.0f) - ssao_param.y, ssao_param.x));
+}
+
+float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	half4 ndc = src_tex.Sample(point_sampler, tc0);
+
+	float4 color = SSAO(tc0);
+	return color;
+}
+		]]>
+	</shader>
+
+	<technique name="SSAO">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SSAOPS()"/>
+		</pass>
+	</technique>
+</effect>

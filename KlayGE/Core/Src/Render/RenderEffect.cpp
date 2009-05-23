@@ -870,7 +870,7 @@ namespace KlayGE
 	{
 	}
 
-	void RenderEffect::Load(ResIdentifierPtr const & source)
+	void RenderEffect::Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* predefined_macros)
 	{
 		if (source)
 		{
@@ -903,7 +903,19 @@ namespace KlayGE
 
 			{
 				XMLNodePtr macro_node = root->FirstNode("macro");
-				macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+				if (macro_node || predefined_macros)
+				{
+					macros_ = MakeSharedPtr<BOOST_TYPEOF(*macros_)>();
+				}
+				if (predefined_macros)
+				{
+					size_t m = 0;
+					while (!predefined_macros[m].first.empty())
+					{
+						macros_->push_back(std::make_pair(predefined_macros[m].first, predefined_macros[m].second));
+						++ m;
+					}
+				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
 					macros_->push_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()));
@@ -970,11 +982,14 @@ namespace KlayGE
 
 			{
 				XMLNodePtr shader_node = root->FirstNode("shader");
-				shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
-				for (; shader_node; shader_node = shader_node->NextSibling("shader"))
+				if (shader_node)
 				{
-					shaders_->push_back(RenderShaderFunc());
-					shaders_->back().Load(shader_node);
+					shaders_ = MakeSharedPtr<BOOST_TYPEOF(*shaders_)>();
+					for (; shader_node; shader_node = shader_node->NextSibling("shader"))
+					{
+						shaders_->push_back(RenderShaderFunc());
+						shaders_->back().Load(shader_node);
+					}
 				}
 			}
 

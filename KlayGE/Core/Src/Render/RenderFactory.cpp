@@ -230,16 +230,17 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName)
+	RenderEffectPtr RenderFactory::LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros)
 	{
 		RenderEffectPtr prototype;
 
-		BOOST_AUTO(iter, effect_pool_.find(effectName));
+		BOOST_AUTO(entry, std::make_pair(effectName, macros));
+		BOOST_AUTO(iter, effect_pool_.find(entry));
 		if (iter == effect_pool_.end())
 		{
 			prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(ResLoader::Instance().Load(effectName));
-			effect_pool_[effectName].push_back(prototype);
+			prototype->Load(ResLoader::Instance().Load(effectName), macros);
+			effect_pool_[entry].push_back(prototype);
 		}
 		else
 		{
@@ -249,7 +250,7 @@ namespace KlayGE
 
 		RenderEffectPtr ret = prototype->Clone();
 		ret->PrototypeEffect(prototype);
-		effect_pool_[effectName].push_back(ret);
+		effect_pool_[entry].push_back(ret);
 
 		return ret;
 	}

@@ -328,10 +328,10 @@ namespace KlayGE
 	public:
 		RenderEffect();
 
-		void Load(ResIdentifierPtr const & source);
+		void Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* macros);
 		RenderEffectPtr Clone();
 
-		void PrototypeEffect(RenderEffectPtr prototype_effect)
+		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
 		{
 			prototype_effect_ = prototype_effect;
 		}

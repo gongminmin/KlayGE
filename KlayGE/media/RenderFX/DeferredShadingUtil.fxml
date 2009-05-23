@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id)
+{
+	return float4(normal.xy, depth, mtl_id);
+}
+
+float4 StoreDiffuseSpecular(float3 diffuse, float specular)
+{
+	return float4(diffuse, specular);
+}
+
+float3 GetNormal(float4 ndc)
+{
+	return float3(ndc.xy, -sqrt(1 - dot(ndc.xy, ndc.xy)));
+}
+
+float GetDepth(float4 ndc)
+{
+	return ndc.z;
+}
+
+int GetMtlID(float4 ndc)
+{
+	return int(ndc.w + 0.1f);
+}
+
+float3 GetDiffuse(float4 clr)
+{
+	return clr.xyz;
+}
+
+float3 GetSpecular(float4 clr)
+{
+	return clr.www;
+}
+		]]>
+	</shader>
+</effect>

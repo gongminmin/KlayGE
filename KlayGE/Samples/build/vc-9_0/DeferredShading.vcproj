@@ -366,7 +366,19 @@
 			Name="Effects"
 			>
 			<File
+				RelativePath="..\..\media\DeferredShading\AdaptiveAntiAliasPP.fxml"
+				>
+			</File>
+			<File
 				RelativePath="..\..\media\DeferredShading\DeferredShading.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\DeferredShading\GBuffer.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\DeferredShading\SSAOPP.fxml"
 				>
 			</File>
 		</Filter>

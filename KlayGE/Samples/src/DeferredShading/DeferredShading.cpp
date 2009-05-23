@@ -43,7 +43,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("DeferredShading.fxml");
+			effect_ = rf.LoadEffect("GBuffer.fxml");
 		}
 
 		void BuildMeshInfo()
@@ -133,7 +133,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("DeferredShading.fxml")->TechniqueByName("GBufferNoTexTech");
+			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
 		}
 
 		void BuildMeshInfo()
@@ -189,11 +189,12 @@ namespace
 	};
 
 
+	std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_SPOT_LIGHT", "8"), std::make_pair("", "") };
 	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
 		DeferredShadingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShading")),
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading")),
 				spot_light_clr_(MAX_NUM_SPOT_LIGHT), spot_light_pos_(MAX_NUM_SPOT_LIGHT),
 				spot_light_dir_(MAX_NUM_SPOT_LIGHT), spot_light_cos_cone_(MAX_NUM_SPOT_LIGHT), num_spot_lights_(0)
 		{
@@ -284,8 +285,6 @@ namespace
 			float4x4 const & proj = camera.ProjMatrix();
 			float4x4 const inv_proj = MathLib::inverse(proj);
 
-			*(technique_->Effect().ParameterByName("proj")) = proj;
-
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 10, 0), view);
 
@@ -317,11 +316,11 @@ namespace
 		std::vector<float2> spot_light_cos_cone_;
 	};
 
-	class AntiAliasPostProcess : public PostProcess
+	class AdaptiveAntiAliasPostProcess : public PostProcess
 	{
 	public:
-		AntiAliasPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("AntiAlias"))
+		AdaptiveAntiAliasPostProcess()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AdaptiveAntiAliasPP.fxml")->TechniqueByName("AdaptiveAntiAlias"))
 		{
 		}
 
@@ -344,7 +343,7 @@ namespace
 	{
 	public:
 		SSAOPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml")->TechniqueByName("SSAO"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO"))
 		{
 			*(technique_->Effect().ParameterByName("ssao_param")) = float4(0.6f, 0.075f, 0.3f, 0.03f);
 		}
@@ -469,7 +468,7 @@ void DeferredShadingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	deferred_shading_ = MakeSharedPtr<DeferredShadingPostProcess>();
-	edge_anti_alias_ = MakeSharedPtr<AntiAliasPostProcess>();
+	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false, false);
@@ -529,7 +528,7 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	deferred_shading_->Destinate(shaded_buffer_);
 
 	edge_anti_alias_->Source(normal_depth_tex_, shaded_buffer_->RequiresFlipping());
-	checked_pointer_cast<AntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
+	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
 	edge_anti_alias_->Destinate(hdr_buffer_);
 	//edge_anti_alias_->Destinate(FrameBufferPtr());
 

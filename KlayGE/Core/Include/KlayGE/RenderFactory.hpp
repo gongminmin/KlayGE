@@ -59,7 +59,7 @@ namespace KlayGE
 
 		FontPtr MakeFont(std::string const & fontName, uint32_t flags = 0);
 
-		RenderEffectPtr LoadEffect(std::string const & effectName);
+		RenderEffectPtr LoadEffect(std::string const & effectName, std::pair<std::string, std::string>* macros = NULL);
 
 		virtual RenderLayoutPtr MakeRenderLayout() = 0;
 
@@ -95,7 +95,7 @@ namespace KlayGE
 	protected:
 		RenderEnginePtr re_;
 
-		std::map<std::string, std::vector<RenderEffectPtr> > effect_pool_;
+		std::map<std::pair<std::string, std::pair<std::string, std::string>* >, std::vector<RenderEffectPtr> > effect_pool_;
 		std::map<std::string, std::pair<RenderablePtr, FontPtr> > font_pool_;
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;

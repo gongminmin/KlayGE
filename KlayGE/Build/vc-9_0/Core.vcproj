@@ -550,6 +550,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\DeferredShadingUtil.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\DownSample.fxml"
 					>
 				</File>
