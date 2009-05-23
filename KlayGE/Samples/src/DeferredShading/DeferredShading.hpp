@@ -63,6 +63,9 @@ private:
 	int id_anti_alias_;
 	int id_ssao_;
 	int id_ctrl_camera_;
+
+	int point_light_id_;
+	int spot_light_id_[2];
 };
 
 #endif		// _CARTOON_HPP

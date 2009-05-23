@@ -6,8 +6,6 @@
 	<include name="PostProcess.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="light_in_eye"/>
-
 		<parameter type="float3" name="upper_left"/>
 		<parameter type="float3" name="upper_right"/>
 		<parameter type="float3" name="lower_left"/>
@@ -16,11 +14,11 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
-	<cbuffer name="spot_light_source">
-		<parameter type="int" name="num_spot_lights"/>
-		<parameter type="float4" name="spot_light_pos_cos_outer" array_size="MAX_NUM_SPOT_LIGHT"/>
-		<parameter type="float4" name="spot_light_dir_cos_inner" array_size="MAX_NUM_SPOT_LIGHT"/>
-		<parameter type="float3" name="spot_light_clr" array_size="MAX_NUM_SPOT_LIGHT"/>
+	<cbuffer name="light_sources">
+		<parameter type="int" name="num_lights"/>
+		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_pos_cos_outer" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_dir_cos_inner" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -155,52 +153,71 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	else
 	{
 		float3 normal = GetNormal(ndc);
-		
 		view_dir = normalize(view_dir);
 
 		float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
-		float3 light_dir = normalize(light_in_eye - pos_es);
+		view_dir = -view_dir;
 
 		float3 diffuse = 0, specular = 0;
-		
-		float d = diffuse_term(light_dir, normal);
-		if (d > 0)
+		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
 		{
-			float s = dot(normalize(light_dir - view_dir), normal);
-			if (s > 0)
-			{
-				s = pow(s, 8.0f);
-			}
-			else
-			{
-				s = 0;
-			}
+			float d = 0, s = 0;
+			float3 atten_clr = 0;
 			
-			diffuse += d;
-			specular += s;
-		}
-				
-		for (int i = 0; (i < MAX_NUM_SPOT_LIGHT) && (i < num_spot_lights); ++ i)
-		{
-			float d = diffuse_term(-spot_light_dir_cos_inner[i].xyz, normal);
-			if (d > 0)
+			int type = (int)(light_clr_type[i].w + 0.1f);
+			if (0 == type)
 			{
-				float3 atten_clr = attenuation_term(spot_light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * spot_light_clr[i];
-				
-				d *= spot_lighting(spot_light_pos_cos_outer[i].xyz, spot_light_dir_cos_inner[i].xyz, float2(spot_light_pos_cos_outer[i].w, spot_light_dir_cos_inner[i].w), pos_es);
-				float s = dot(normalize(-spot_light_dir_cos_inner[i].xyz - view_dir), normal);
-				if (s > 0)
+				// point
+
+				float3 dir = normalize(light_pos_cos_outer[i].xyz - pos_es);
+				d = diffuse_term(dir, normal);
+				if (d > 0)
 				{
-					s = pow(s, 8.0f);
+					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
+					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * light_clr_type[i].xyz;
 				}
 				else
 				{
-					s = 0;
+					d = 0;
 				}
-
-				diffuse += d * atten_clr;				
-				specular += s * atten_clr;
 			}
+			else if (1 == type)
+			{
+				// directional
+
+				float3 dir = -light_dir_cos_inner[i].xyz;
+				d = diffuse_term(dir, normal);
+				if (d > 0)
+				{
+					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
+					atten_clr = light_clr_type[i].xyz;
+				}
+				else
+				{
+					d = 0;
+				}
+			}
+			else if (2 == type)
+			{
+				float3 dir = normalize(light_pos_cos_outer[i].xyz - pos_es);
+				d = diffuse_term(dir, normal);
+				if (d > 0)
+				{
+					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
+					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * light_clr_type[i].xyz;
+
+					float spot = spot_lighting(light_pos_cos_outer[i].xyz, light_dir_cos_inner[i].xyz, float2(light_pos_cos_outer[i].w, light_dir_cos_inner[i].w), pos_es);
+					d *= spot;
+					s *= spot;
+				}
+				else
+				{
+					d = 0;
+				}
+			}
+			
+			diffuse += d * atten_clr;
+			specular += s * atten_clr;
 		}
 
 		if (ssao_enabled)

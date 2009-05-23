@@ -41,8 +41,7 @@ float specular_term(float3 light_vec, float3 eye_vec, float3 normal, float power
 
 float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 {
-	float3 v = light_pos - pos;
-	float d = length(v);
+	float d = distance(light_pos, pos);
 	return 1 / (atten.x + d * atten.y + d * d * atten.z);
 }
     ]]>

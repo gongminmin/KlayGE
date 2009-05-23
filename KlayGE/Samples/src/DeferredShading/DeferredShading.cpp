@@ -33,7 +33,7 @@ using namespace KlayGE;
 
 namespace
 {
-	int32_t const MAX_NUM_SPOT_LIGHT = 8;
+	int32_t const MAX_NUM_LIGHTS = 8;
 
 	class RenderTorus : public KMesh
 	{
@@ -189,25 +189,64 @@ namespace
 	};
 
 
-	std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_SPOT_LIGHT", "8"), std::make_pair("", "") };
+	std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", "8"), std::make_pair("", "") };
 	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
 		DeferredShadingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading")),
-				spot_light_clr_(MAX_NUM_SPOT_LIGHT), spot_light_pos_(MAX_NUM_SPOT_LIGHT),
-				spot_light_dir_(MAX_NUM_SPOT_LIGHT), spot_light_cos_cone_(MAX_NUM_SPOT_LIGHT), num_spot_lights_(0)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading"))
 		{
 		}
 
-		void SetSpotLight(int32_t index, float4x4 const & model_mat, float cos_outer, float cos_inner, float3 const & clr)
+		int AddPointLight(float3 const & pos, float3 const & clr)
 		{
-			num_spot_lights_ = std::max(num_spot_lights_, index + 1);
+			int id = static_cast<int>(light_clr_type_.size());
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 0.0f));
+			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
+			light_dir_cos_inner_.push_back(float4(0, 0, 0, 0));
+			return id;
+		}
+		int AddDirectionalLight(float3 const & dir, float3 const & clr)
+		{
+			int id = static_cast<int>(light_clr_type_.size());
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 1.0f));
+			light_pos_cos_outer_.push_back(float4(0, 0, 0, 0));
+			light_dir_cos_inner_.push_back(float4(dir.x(), dir.y(), dir.z(), 0));
+			return id;
+		}
+		int AddSpotLight(float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr)
+		{
+			int id = static_cast<int>(light_clr_type_.size());
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 2.0f));
+			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), cos_outer));
+			light_dir_cos_inner_.push_back(float4(dir.x(), dir.y(), dir.z(), cos_inner));
+			return id;
+		}
 
-			spot_light_clr_[index] = clr;
-			spot_light_pos_[index] = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			spot_light_dir_[index] = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
-			spot_light_cos_cone_[index] = float2(cos_outer, cos_inner);
+		void SetLightColor(int index, float3 const & clr)
+		{
+			light_clr_type_[index] = float4(clr.x(), clr.y(), clr.z(), light_clr_type_[index].w());
+		}
+		void SetPointLightPos(int index, float3 const & pos)
+		{
+			light_pos_cos_outer_[index] = float4(pos.x(), pos.y(), pos.z(), 0);
+		}
+		void SetDirectionalLightDir(int index, float3 const & dir)
+		{
+			light_dir_cos_inner_[index] = float4(dir.x(), dir.y(), dir.z(), 0);
+		}
+		void SetSpotLightPos(int index, float3 const & pos)
+		{
+			light_pos_cos_outer_[index] = float4(pos.x(), pos.y(), pos.z(), light_pos_cos_outer_[index].w());
+		}
+		void SetSpotLightDir(int index, float3 const & dir)
+		{
+			light_dir_cos_inner_[index] = float4(dir.x(), dir.y(), dir.z(), light_dir_cos_inner_[index].w());
+		}
+		void SetSpotLightAngle(int index, float cos_outer, float cos_inner)
+		{
+			light_pos_cos_outer_[index].w() = cos_outer;
+			light_dir_cos_inner_[index].w() = cos_inner;
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -286,34 +325,49 @@ namespace
 			float4x4 const inv_proj = MathLib::inverse(proj);
 
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 10, 0), view);
 
 			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
-			std::vector<float4> spot_light_pos_cos_outer(spot_light_pos_.size());
-			std::vector<float4> spot_light_dir_cos_inner(spot_light_dir_.size());
-			for (int32_t i = 0; i < num_spot_lights_; ++ i)
+			std::vector<float4> light_pos_cos_outer = light_pos_cos_outer_;
+			std::vector<float4> light_dir_cos_inner = light_dir_cos_inner_;
+			for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 			{
-				float3 p = MathLib::transform_coord(spot_light_pos_[i], view);
-				float3 d = MathLib::transform_normal(spot_light_dir_[i], view);
-				spot_light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), spot_light_cos_cone_[i].x());
-				spot_light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), spot_light_cos_cone_[i].y());
+				int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
+
+				float3 p, d;
+				switch (type)
+				{
+				case 0:
+					p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer[i]), view);
+					light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), 0.0f);
+					break;
+
+				case 1:
+					d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
+					light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), 0.0f);
+					break;
+
+				case 2:
+					p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
+					d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
+					light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), light_pos_cos_outer_[i].w());
+					light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[i].w());
+					break;
+				}
 			}
-			*(technique_->Effect().ParameterByName("num_spot_lights")) = num_spot_lights_;
-			*(technique_->Effect().ParameterByName("spot_light_pos_cos_outer")) = spot_light_pos_cos_outer;
-			*(technique_->Effect().ParameterByName("spot_light_dir_cos_inner")) = spot_light_dir_cos_inner;
-			*(technique_->Effect().ParameterByName("spot_light_clr")) = spot_light_clr_;
+			*(technique_->Effect().ParameterByName("num_lights")) = static_cast<int32_t>(light_clr_type_.size());
+			*(technique_->Effect().ParameterByName("light_clr_type")) = light_clr_type_;
+			*(technique_->Effect().ParameterByName("light_pos_cos_outer")) = light_pos_cos_outer;
+			*(technique_->Effect().ParameterByName("light_dir_cos_inner")) = light_dir_cos_inner;
 		}
 
 	private:
-		int32_t num_spot_lights_;
-		std::vector<float3> spot_light_clr_;
-		std::vector<float3> spot_light_pos_;
-		std::vector<float3> spot_light_dir_;
-		std::vector<float2> spot_light_cos_cone_;
+		std::vector<float4> light_clr_type_;
+		std::vector<float4> light_pos_cos_outer_;
+		std::vector<float4> light_dir_cos_inner_;
 	};
 
 	class AdaptiveAntiAliasPostProcess : public PostProcess
@@ -472,6 +526,10 @@ void DeferredShadingApp::InitObjects()
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false, false);
+
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(1, 1, 1));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -636,10 +694,16 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(0,
-			checked_pointer_cast<ConeObject>(light_src_[0])->ModelMatrix(), cos(PI / 6), cos(PI / 8), float3(1, 0, 0));
-		checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLight(1,
-			checked_pointer_cast<ConeObject>(light_src_[1])->ModelMatrix(), cos(PI / 4), cos(PI / 6), float3(0, 1, 0));
+		{
+			for (int i = 0; i < 2; ++ i)
+			{
+				float4x4 model_mat = checked_pointer_cast<ConeObject>(light_src_[i])->ModelMatrix();
+				float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
+				float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
+				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLightPos(spot_light_id_[i], p);
+				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLightDir(spot_light_id_[i], d);
+			}
+		}
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
