@@ -11,8 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ResLoader.hpp>
 
-#include <ios>
 #include <boost/assert.hpp>
 
 #include "BaseDefines.hpp"
@@ -33,7 +33,7 @@ namespace KlayGE
 
 	STDMETHODIMP CInStream::Read(void *data, uint32_t size, uint32_t* processedSize)
 	{
-		is_->read(static_cast<char*>(data), size);
+		is_->read(data, size);
 		if (processedSize)
 		{
 			*processedSize = static_cast<uint32_t>(is_->gcount());

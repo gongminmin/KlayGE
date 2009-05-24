@@ -886,7 +886,7 @@ namespace KlayGE
 			{
 				attr = node->Attrib("name");
 				include_docs.push_back(MakeSharedPtr<XMLDocument>());
-				XMLNodePtr include_root = include_docs.back()->Parse(MakeSharedPtr<std::ifstream>(ResLoader::Instance().Locate(attr->ValueString()).c_str()));
+				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Load(attr->ValueString()));
 
 				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{

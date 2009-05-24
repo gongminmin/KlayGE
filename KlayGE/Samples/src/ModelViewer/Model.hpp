@@ -24,28 +24,13 @@ public:
 
 	void LineMode(bool line_mode);
 
-	KlayGE::TexturePtr const & EmptyDiffuseMap() const
-	{
-		return empty_diffuse_map_;
-	}
 	KlayGE::TexturePtr const & EmptyNormalMap() const
 	{
 		return empty_normal_map_;
 	}
-	KlayGE::TexturePtr const & EmptySpecularMap() const
-	{
-		return empty_specular_map_;
-	}
-	KlayGE::TexturePtr const & EmptyEmitMap() const
-	{
-		return empty_emit_map_;
-	}
 
 private:
-	KlayGE::TexturePtr empty_diffuse_map_;
 	KlayGE::TexturePtr empty_normal_map_;
-	KlayGE::TexturePtr empty_specular_map_;
-	KlayGE::TexturePtr empty_emit_map_;
 };
 
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
@@ -67,6 +52,11 @@ public:
 
 	void LineMode(bool line_mode);
 
+	bool HasOpacityMap() const
+	{
+		return has_opacity_map_;
+	}
+
 private:
 	void UpdateTech();
 
@@ -78,6 +68,7 @@ private:
 
 	bool line_mode_;
 	std::string visualize_;
+	bool has_opacity_map_;
 };
 
 #endif		// _MODEL_HPP

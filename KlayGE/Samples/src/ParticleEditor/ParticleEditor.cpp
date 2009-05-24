@@ -720,7 +720,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	using boost::lexical_cast;
 
-	ResIdentifierPtr ifs = MakeSharedPtr<std::ifstream>(name.c_str());
+	ResIdentifierPtr ifs = ResLoader::Instance().Load(name.c_str());
 
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(ifs);

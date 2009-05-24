@@ -38,26 +38,6 @@
 
 #include <KlayGE/KMesh.hpp>
 
-namespace
-{
-	std::string ReadShortString(std::istream& is)
-	{
-		KlayGE::uint8_t len;
-		is.read(reinterpret_cast<char*>(&len), sizeof(len));
-		std::vector<char> str(len, 0);
-		is.read(&str[0], static_cast<std::streamsize>(str.size()));
-
-		return std::string(str.begin(), str.end());
-	}
-
-	void WriteShortString(std::ostream& os, std::string const & str)
-	{
-		KlayGE::uint8_t const len = static_cast<KlayGE::uint8_t const>(str.size());
-		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
-		os.write(&str[0], static_cast<std::streamsize>(str.size()));
-	}
-}
-
 namespace KlayGE
 {
 	KMesh::KMesh(RenderModelPtr model, std::wstring const & name)
@@ -211,7 +191,7 @@ namespace KlayGE
 				mesh->MaterialID(mtl_id);
 
 				uint8_t num_vertex_elems;
-				file->read(reinterpret_cast<char*>(&num_vertex_elems), sizeof(num_vertex_elems));
+				file->read(&num_vertex_elems, sizeof(num_vertex_elems));
 
 				XMLNodePtr vertex_elements_chunk = mesh_node->FirstNode("vertex_elements_chunk");
 

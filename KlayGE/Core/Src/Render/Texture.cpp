@@ -287,11 +287,11 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Load(tex_name);
 
 		uint32_t magic;
-		file->read(reinterpret_cast<char*>(&magic), sizeof(magic));
+		file->read(&magic, sizeof(magic));
 		BOOST_ASSERT((MakeFourCC<'D', 'D', 'S', ' '>::value) == magic);
 
 		DDSSURFACEDESC2 desc;
-		file->read(reinterpret_cast<char*>(&desc), sizeof(desc));
+		file->read(&desc, sizeof(desc));
 
 		BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
 		BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
@@ -639,7 +639,7 @@ namespace KlayGE
 					init_data[level].row_pitch = image_size;
 					init_data[level].slice_pitch = image_size;
 
-					file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(image_size));
+					file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
 					BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 
 					the_width = std::max<uint32_t>(the_width / 2, 1);
@@ -674,7 +674,7 @@ namespace KlayGE
 						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
 						init_data[level].slice_pitch = image_size;
 
-						file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(image_size));
+						file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 					}
 					else
@@ -691,7 +691,7 @@ namespace KlayGE
 						base[level] = data_block.size();
 						data_block.resize(base[level] + init_data[level].slice_pitch);
 
-						file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(init_data[level].slice_pitch));
+						file->read(&data_block[base[level]], static_cast<std::streamsize>(init_data[level].slice_pitch));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch));
 					}
 
@@ -729,7 +729,7 @@ namespace KlayGE
 						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
 						init_data[level].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
-						file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(image_size));
+						file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 					}
 					else
@@ -747,7 +747,7 @@ namespace KlayGE
 						base[level] = data_block.size();
 						data_block.resize(base[level] + init_data[level].slice_pitch * the_depth);
 
-						file->read(reinterpret_cast<char*>(&data_block[base[level]]), static_cast<std::streamsize>(init_data[level].slice_pitch * the_depth));
+						file->read(&data_block[base[level]], static_cast<std::streamsize>(init_data[level].slice_pitch * the_depth));
 						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch * the_depth));
 					}
 
@@ -788,7 +788,7 @@ namespace KlayGE
 							init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
 							init_data[index].slice_pitch = image_size;
 
-							file->read(reinterpret_cast<char*>(&data_block[base[index]]), static_cast<std::streamsize>(image_size));
+							file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
 							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
 						}
 						else
@@ -805,7 +805,7 @@ namespace KlayGE
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch);
 
-							file->read(reinterpret_cast<char*>(&data_block[base[index]]), static_cast<std::streamsize>(init_data[index].slice_pitch));
+							file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
 							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
 

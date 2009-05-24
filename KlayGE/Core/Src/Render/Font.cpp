@@ -97,11 +97,11 @@ namespace KlayGE
 				curX_(0), curY_(0),
 				three_dim_(false), dirty_(false)
 	{
-		std::ifstream kfont_input(ResLoader::Instance().Locate(fontName).c_str(), std::ios_base::binary);
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(fontName);
 		BOOST_ASSERT(kfont_input);
 
 		kfont_header header;
-		kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+		kfont_input->read(&header, sizeof(header));
 		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
 		BOOST_ASSERT((1 == header.version));
 
@@ -109,25 +109,21 @@ namespace KlayGE
 		dist_base_ = header.base;
 		dist_scale_ = header.scale;
 
-		kfont_input.seekg(header.start_ptr, std::ios_base::beg);
+		kfont_input->seekg(header.start_ptr, std::ios_base::beg);
 
 		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
-		kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]),
-			static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+		kfont_input->read(&temp_char_index[0], static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
 		char_index_.insert(temp_char_index.begin(), temp_char_index.end());
 
 		std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
-		kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]),
-			static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+		kfont_input->read(&temp_char_advance[0], static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
 		char_advance_.insert(temp_char_advance.begin(), temp_char_advance.end());
 
 		char_info_.resize(header.non_empty_chars);
-		kfont_input.read(reinterpret_cast<char*>(&char_info_[0]),
-			static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
+		kfont_input->read(&char_info_[0], static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
 
 		distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
-		kfont_input.read(reinterpret_cast<char*>(&distances_[0]),
-			static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
+		kfont_input->read(&distances_[0], static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

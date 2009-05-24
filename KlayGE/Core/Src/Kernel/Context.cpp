@@ -119,7 +119,7 @@ namespace KlayGE
 		XMLNodePtr sf_node;
 		XMLNodePtr sm_node;
 
-		ResIdentifierPtr file = MakeSharedPtr<std::ifstream>(ResLoader::Instance().Locate(cfg_file).c_str());
+		ResIdentifierPtr file = ResLoader::Instance().Load(cfg_file);
 		if (file)
 		{
 			XMLDocument cfg_doc;

@@ -225,7 +225,8 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
 	// Ω®¡¢Œ∆¿Ì
-	TexturePtr dm, sm, em;
+	has_opacity_map_ = false;
+	TexturePtr dm, sm, em, om;
 	TexturePtr nm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
 	RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
 	for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
@@ -265,6 +266,21 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 							em = LoadTexture(iter->second, EAH_GPU_Read)();
 						}
 					}
+					else
+					{
+						if (("OpacityMap" == iter->first) || ("Opacity" == iter->first))
+						{
+							if (!ResLoader::Instance().Locate(iter->second).empty())
+							{
+								om = LoadTexture(iter->second, EAH_GPU_Read)();
+
+								if (om)
+								{
+									has_opacity_map_ = true;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -273,6 +289,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	*(effect_->ParameterByName("normal_tex")) = nm;
 	*(effect_->ParameterByName("specular_tex")) = sm;
 	*(effect_->ParameterByName("emit_tex")) = em;
+	*(effect_->ParameterByName("opacity_tex")) = om;
 
 	*(effect_->ParameterByName("has_skinned")) = has_skinned;
 
@@ -280,8 +297,8 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));
 	*(effect_->ParameterByName("specular_clr")) = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(sm));
 	*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(em));
+	*(effect_->ParameterByName("opacity_clr")) = float4(mtl.opacity, mtl.opacity, mtl.opacity, bool(om));
 
-	*(effect_->ParameterByName("opacity")) = mtl.opacity;
 	*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
 	*(effect_->ParameterByName("shininess")) = mtl.shininess;
 
@@ -359,7 +376,8 @@ void DetailedSkinnedMesh::UpdateTech()
 	{
 		tech += "Fill";
 
-		if (("Lighting" == visualize_) && (model_.lock()->GetMaterial(this->MaterialID()).opacity < 0.99f))
+		if (("Lighting" == visualize_)
+			&& ((model_.lock()->GetMaterial(this->MaterialID()).opacity < 0.99f) || this->HasOpacityMap()))
 		{
 			tech += "Blend";
 		}
@@ -375,20 +393,11 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	uint32_t const empty_diff = 0xFFFFFFFF;
 	uint32_t const empty_nor = 0x80808080;
-	uint32_t const empty_spe = 0x00000000;
-	uint32_t const empty_emit = 0x00000000;
 
-	ElementInitData diff_init_data, nor_init_data, spe_init_data, emit_init_data;
-	diff_init_data.data = &empty_diff;
-	diff_init_data.slice_pitch = diff_init_data.row_pitch = sizeof(empty_diff);
+	ElementInitData nor_init_data;
 	nor_init_data.data = &empty_nor;
 	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
-	spe_init_data.data = &empty_spe;
-	spe_init_data.slice_pitch = spe_init_data.row_pitch = sizeof(empty_spe);
-	emit_init_data.data = &empty_emit;
-	emit_init_data.slice_pitch = emit_init_data.row_pitch = sizeof(empty_emit);
 
 	ElementFormat format;
 	if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
@@ -399,10 +408,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	{
 		format = EF_ABGR8;
 	}
-	empty_diffuse_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &diff_init_data);
 	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
-	empty_specular_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &spe_init_data);
-	empty_emit_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &emit_init_data);
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)

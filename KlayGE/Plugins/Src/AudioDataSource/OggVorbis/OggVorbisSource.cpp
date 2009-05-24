@@ -15,9 +15,9 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
-#include <ios>
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
@@ -135,7 +135,7 @@ namespace KlayGE
 		// A simple copy of the data from memory to the datastruct that the vorbis libs will use
 		if (actual_size_to_read > 0)
 		{
-			vorbis_data->oggFile_->read(static_cast<char*>(ptr), static_cast<std::streamsize>(actual_size_to_read));
+			vorbis_data->oggFile_->read(ptr, static_cast<std::streamsize>(actual_size_to_read));
 		}
 
 		// Return how much we read (in the same way fread would)
