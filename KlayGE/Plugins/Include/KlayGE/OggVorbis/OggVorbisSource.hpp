@@ -56,8 +56,8 @@ namespace KlayGE
 		static long VorbisTell(void* datasource);
 
 	private:
-		ResIdentifierPtr		oggFile_;
-		std::istream::pos_type	length_;
+		ResIdentifierPtr oggFile_;
+		int64_t length_;
 
 		OggVorbis_File vf_;
 	};

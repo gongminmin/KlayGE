@@ -1599,7 +1599,7 @@ namespace KlayGE
 		UIManager::Instance().DrawQuad(offset, vertices, texture);
 	}
 
-	void UIDialog::DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest)
+	void UIDialog::DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest, float depth_bias)
 	{
 		// No need to draw fully transparent layers
 		if (0 == element.TextureColor().Current.a())
@@ -1617,13 +1617,13 @@ namespace KlayGE
 			rcScreen += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
 		}
 
-		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_);
+		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth_bias);
 		std::vector<Color> clrs(4, element.TextureColor().Current);
 		UIManager::Instance().DrawRect(pos, static_cast<float>(rcScreen.Width()),
 			static_cast<float>(rcScreen.Height()), &clrs[0], rcTexture, tex);
 	}
 
-	void UIDialog::DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow)
+	void UIDialog::DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow, float depth_bias)
 	{
 		if (bShadow)
 		{
@@ -1637,7 +1637,7 @@ namespace KlayGE
 				r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
 			}
 
-			UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ - 0.01f,
+			UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
 				Color(0, 0, 0, uie.FontColor().Current.a()), uie.TextAlign());
 		}
 
@@ -1648,7 +1648,7 @@ namespace KlayGE
 			r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
 		}
 
-		UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ - 0.01f,
+		UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ + depth_bias - 0.01f,
 			uie.FontColor().Current, uie.TextAlign());
 	}
 

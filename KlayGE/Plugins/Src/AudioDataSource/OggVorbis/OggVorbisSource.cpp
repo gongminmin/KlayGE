@@ -122,7 +122,7 @@ namespace KlayGE
 
 		size_t actual_size_to_read;	// How much data we are actually going to read from memory
 		// Calculate how much we need to read.  This can be sizeToRead*byteSize or less depending on how near the EOF marker we are
-		size_t space_to_eof = vorbis_data->length_ - vorbis_data->oggFile_->tellg();
+		size_t space_to_eof = static_cast<size_t>(vorbis_data->length_ - vorbis_data->oggFile_->tellg());
 		if (size_to_read * byte_size < space_to_eof)
 		{
 			actual_size_to_read = size_to_read * byte_size;

@@ -668,8 +668,8 @@ namespace KlayGE
 
 		void DrawRect(Rect_T<int32_t> const & rc, float depth, Color const & clr);
 		void DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture);
-		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest);
-		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
+		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest, float depth_bias = 0.0f);
+		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false, float depth_bias = 0.0f);
 		Size_T<uint32_t> CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
 
 	private:

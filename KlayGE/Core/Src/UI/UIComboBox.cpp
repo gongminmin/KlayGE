@@ -453,7 +453,13 @@ namespace KlayGE
 		pElement->TextureColor().SetState(iState);
 		pElement->FontColor().SetState(iState);
 
-		this->GetDialog()->DrawSprite(*pElement, dropdown_rc_);
+		float depth_bias = 0.0f;
+		if (opened_)
+		{
+			depth_bias = -0.1f;
+		}
+
+		this->GetDialog()->DrawSprite(*pElement, dropdown_rc_, depth_bias);
 
 		// Selection outline
 		UIElementPtr pSelectionElement = elements_[3];
@@ -493,12 +499,12 @@ namespace KlayGE
 					if (static_cast<int>(i) == focused_)
 					{
 						Rect_T<int32_t> rc(dropdown_rc_.left(), pItem->rcActive.top() - 2, dropdown_rc_.right(), pItem->rcActive.bottom() + 2);
-						this->GetDialog()->DrawSprite(*pSelectionElement, rc);
-						this->GetDialog()->DrawText(pItem->strText, *pSelectionElement, pItem->rcActive);
+						this->GetDialog()->DrawSprite(*pSelectionElement, rc, depth_bias);
+						this->GetDialog()->DrawText(pItem->strText, *pSelectionElement, pItem->rcActive, false, depth_bias);
 					}
 					else
 					{
-						this->GetDialog()->DrawText(pItem->strText, *pElement, pItem->rcActive);
+						this->GetDialog()->DrawText(pItem->strText, *pElement, pItem->rcActive, false, depth_bias);
 					}
 				}
 			}
@@ -546,7 +552,7 @@ namespace KlayGE
 		pElement->TextureColor().SetState(iState);
 
 		Rect_T<int32_t> rcWindow = button_rc_;
-		this->GetDialog()->DrawSprite(*pElement, rcWindow);
+		this->GetDialog()->DrawSprite(*pElement, rcWindow, depth_bias);
 
 		if (opened_)
 		{
@@ -560,14 +566,14 @@ namespace KlayGE
 		pElement->TextureColor().SetState(iState);
 		pElement->FontColor().SetState(iState);
 
-		this->GetDialog()->DrawSprite(*pElement, text_rc_);
+		this->GetDialog()->DrawSprite(*pElement, text_rc_, depth_bias);
 
 		if ((selected_ >= 0) && (selected_ < static_cast<int>(items_.size())))
 		{
 			boost::shared_ptr<UIComboBoxItem> pItem = items_[selected_];
 			if (pItem != NULL)
 			{
-				this->GetDialog()->DrawText(pItem->strText, *pElement, text_rc_);
+				this->GetDialog()->DrawText(pItem->strText, *pElement, text_rc_, false, depth_bias);
 			}
 		}
 	}
