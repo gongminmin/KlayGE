@@ -456,6 +456,8 @@ namespace KlayGE
 		void DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture);
 		void DrawText(std::wstring const & strText, uint32_t font_index,
 			Rect_T<int32_t> const & rc, float depth, Color const & clr, uint32_t align);
+		Size_T<uint32_t> CalcSize(std::wstring const & strText, uint32_t font_index,
+			Rect_T<int32_t> const & rc, uint32_t align);
 
 		Rect_T<int32_t> const & ElementTextureRect(uint32_t ctrl, uint32_t elem_index);
 		size_t NumElementTextureRect(uint32_t ctrl) const;
@@ -668,6 +670,7 @@ namespace KlayGE
 		void DrawQuad(UIManager::VertexFormat const * vertices, float depth, TexturePtr const & texture);
 		void DrawSprite(UIElement const & element, Rect_T<int32_t> const & rcDest);
 		void DrawText(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
+		Size_T<uint32_t> CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow = false);
 
 	private:
 		void KeyDownHandler(wchar_t key);

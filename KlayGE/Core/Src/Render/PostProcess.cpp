@@ -33,7 +33,7 @@
 
 namespace KlayGE
 {
-	PostProcess::PostProcess(KlayGE::RenderTechniquePtr tech)
+	PostProcess::PostProcess(KlayGE::RenderTechniquePtr const & tech)
 			: RenderableHelper(L"PostProcess")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -55,6 +55,11 @@ namespace KlayGE
 		pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
+		this->Technique(tech);
+	}
+
+	void PostProcess::Technique(RenderTechniquePtr const & tech)
+	{
 		technique_ = tech;
 
 		if (technique_)

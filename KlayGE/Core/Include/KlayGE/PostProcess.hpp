@@ -29,13 +29,19 @@ namespace KlayGE
 	class KLAYGE_CORE_API PostProcess : public RenderableHelper
 	{
 	public:
-		explicit PostProcess(RenderTechniquePtr tech);
+		explicit PostProcess(RenderTechniquePtr const & tech);
 		virtual ~PostProcess()
 		{
 		}
 
+		void Technique(RenderTechniquePtr const & tech);
+
 		virtual void Source(TexturePtr const & tex, bool flipping);
 		virtual void Destinate(FrameBufferPtr const & fb);
+		FrameBufferPtr const & Destinate()
+		{
+			return frame_buffer_;
+		}
 
 		virtual void Apply();
 

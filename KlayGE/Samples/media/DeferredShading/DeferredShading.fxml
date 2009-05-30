@@ -19,6 +19,7 @@
 		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_pos_cos_outer" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_dir_cos_inner" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_falloff" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -174,7 +175,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 				if (d > 0)
 				{
 					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
-					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * light_clr_type[i].xyz;
+					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, light_falloff[i].xyz) * light_clr_type[i].xyz;
 				}
 				else
 				{
@@ -204,7 +205,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 				if (d > 0)
 				{
 					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
-					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, float3(0, 0.2f, 0)) * light_clr_type[i].xyz;
+					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, light_falloff[i].xyz) * light_clr_type[i].xyz;
 
 					float spot = spot_lighting(light_pos_cos_outer[i].xyz, light_dir_cos_inner[i].xyz, float2(light_pos_cos_outer[i].w, light_dir_cos_inner[i].w), pos_es);
 					d *= spot;
@@ -293,6 +294,19 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 			
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadingPS()"/>
+		</pass>
+	</technique>
+	<technique name="DeferredShadingBlend">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingPS()"/>
 		</pass>

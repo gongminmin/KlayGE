@@ -25,6 +25,14 @@
 #include <ctime>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include "DeferredShading.hpp"
 
@@ -33,8 +41,6 @@ using namespace KlayGE;
 
 namespace
 {
-	int32_t const MAX_NUM_LIGHTS = 8;
-
 	class RenderTorus : public KMesh
 	{
 	public:
@@ -165,8 +171,8 @@ namespace
 	class ConeObject : public SceneObjectHelper
 	{
 	public:
-		ConeObject(std::string const & model_name, float org_angle)
-			: SceneObjectHelper(SOA_Cullable)
+		ConeObject(std::string const & model_name, float org_angle, float rot_speed, float height)
+			: SceneObjectHelper(SOA_Cullable), rot_speed_(rot_speed), height_(height)
 		{
 			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderCone>())->Mesh(0);
 			model_org_ = MathLib::rotation_x(org_angle);
@@ -174,7 +180,7 @@ namespace
 
 		void Update()
 		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() / 700.0f) * MathLib::translation(0.0f, 2.0f, 0.0f);
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() * rot_speed_) * MathLib::translation(0.0f, height_, 0.0f);
 			checked_pointer_cast<RenderCone>(renderable_)->ModelMatrix(model_);
 		}
 
@@ -186,40 +192,61 @@ namespace
 	private:
 		float4x4 model_;
 		float4x4 model_org_;
+		float rot_speed_, height_;
 	};
 
 
-	std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", "8"), std::make_pair("", "") };
 	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
 		DeferredShadingPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading"))
+			: PostProcess(RenderTechniquePtr()),
+				buffer_type_(0)
 		{
+			if (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_shader_model < 4)
+			{
+				max_num_lights_a_batch_ = 1;
+			}
+			else
+			{
+				max_num_lights_a_batch_ = 8;
+			}
+
+			std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", ""), std::make_pair("", "") };
+			macros[0].second = boost::lexical_cast<std::string>(max_num_lights_a_batch_);
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading"));
+
+			technique_wo_blend_ = technique_->Effect().TechniqueByName("DeferredShading");
+			technique_w_blend_ = technique_->Effect().TechniqueByName("DeferredShadingBlend");
 		}
 
-		int AddPointLight(float3 const & pos, float3 const & clr)
+		int AddPointLight(float3 const & pos, float3 const & clr, float3 const & falloff)
 		{
 			int id = static_cast<int>(light_clr_type_.size());
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 0.0f));
 			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
 			light_dir_cos_inner_.push_back(float4(0, 0, 0, 0));
+			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			return id;
 		}
-		int AddDirectionalLight(float3 const & dir, float3 const & clr)
+		int AddDirectionalLight(float3 const & dir, float3 const & clr, float3 const & falloff)
 		{
+			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 1.0f));
 			light_pos_cos_outer_.push_back(float4(0, 0, 0, 0));
-			light_dir_cos_inner_.push_back(float4(dir.x(), dir.y(), dir.z(), 0));
+			light_dir_cos_inner_.push_back(float4(d.x(), d.y(), d.z(), 0));
+			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			return id;
 		}
-		int AddSpotLight(float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr)
+		int AddSpotLight(float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr, float3 const & falloff)
 		{
+			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 2.0f));
 			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), cos_outer));
-			light_dir_cos_inner_.push_back(float4(dir.x(), dir.y(), dir.z(), cos_inner));
+			light_dir_cos_inner_.push_back(float4(d.x(), d.y(), d.z(), cos_inner));
+			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			return id;
 		}
 
@@ -227,21 +254,18 @@ namespace
 		{
 			light_clr_type_[index] = float4(clr.x(), clr.y(), clr.z(), light_clr_type_[index].w());
 		}
-		void SetPointLightPos(int index, float3 const & pos)
+		void SetLightDir(int index, float3 const & dir)
 		{
-			light_pos_cos_outer_[index] = float4(pos.x(), pos.y(), pos.z(), 0);
+			float3 d = MathLib::normalize(dir);
+			light_dir_cos_inner_[index] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[index].w());
 		}
-		void SetDirectionalLightDir(int index, float3 const & dir)
-		{
-			light_dir_cos_inner_[index] = float4(dir.x(), dir.y(), dir.z(), 0);
-		}
-		void SetSpotLightPos(int index, float3 const & pos)
+		void SetLightPos(int index, float3 const & pos)
 		{
 			light_pos_cos_outer_[index] = float4(pos.x(), pos.y(), pos.z(), light_pos_cos_outer_[index].w());
 		}
-		void SetSpotLightDir(int index, float3 const & dir)
+		void SetLightFalloff(int index, float3 const & falloff)
 		{
-			light_dir_cos_inner_[index] = float4(dir.x(), dir.y(), dir.z(), light_dir_cos_inner_[index].w());
+			light_falloff_[index] = float4(falloff.x(), falloff.y(), falloff.z(), 0);
 		}
 		void SetSpotLightAngle(int index, float cos_outer, float cos_inner)
 		{
@@ -275,10 +299,12 @@ namespace
 
 		void BufferType(int buffer_type)
 		{
-			switch (buffer_type)
+			buffer_type_ = buffer_type;
+			switch (buffer_type_)
 			{
 			case 0:
-				technique_ = technique_->Effect().TechniqueByName("DeferredShading");
+				technique_wo_blend_ = technique_->Effect().TechniqueByName("DeferredShading");
+				technique_w_blend_ = technique_->Effect().TechniqueByName("DeferredShadingBlend");
 				break;
 
 			case 1:
@@ -314,15 +340,12 @@ namespace
 			}
 		}
 
-		void OnRenderBegin()
+		void Render()
 		{
-			PostProcess::OnRenderBegin();
-
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
+			float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
 
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
@@ -331,43 +354,84 @@ namespace
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
-			std::vector<float4> light_pos_cos_outer = light_pos_cos_outer_;
-			std::vector<float4> light_dir_cos_inner = light_dir_cos_inner_;
-			for (size_t i = 0; i < light_clr_type_.size(); ++ i)
+			if (0 == buffer_type_)
 			{
-				int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
-
-				float3 p, d;
-				switch (type)
+				light_pos_cos_outer_view_.resize(light_pos_cos_outer_.size());
+				light_dir_cos_inner_view_.resize(light_dir_cos_inner_.size());
+				for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 				{
-				case 0:
-					p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer[i]), view);
-					light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), 0.0f);
-					break;
+					int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
 
-				case 1:
-					d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
-					light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), 0.0f);
-					break;
+					float3 p, d;
+					switch (type)
+					{
+					case 0:
+						p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
+						light_pos_cos_outer_view_[i] = float4(p.x(), p.y(), p.z(), 0.0f);
+						light_dir_cos_inner_view_[i] = light_dir_cos_inner_[i];
+						break;
 
-				case 2:
-					p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
-					d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
-					light_pos_cos_outer[i] = float4(p.x(), p.y(), p.z(), light_pos_cos_outer_[i].w());
-					light_dir_cos_inner[i] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[i].w());
-					break;
+					case 1:
+						d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
+						light_pos_cos_outer_view_[i] = light_pos_cos_outer_[i];
+						light_dir_cos_inner_view_[i] = float4(d.x(), d.y(), d.z(), 0.0f);
+						break;
+
+					case 2:
+						p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
+						d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
+						light_pos_cos_outer_view_[i] = float4(p.x(), p.y(), p.z(), light_pos_cos_outer_[i].w());
+						light_dir_cos_inner_view_[i] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[i].w());
+						break;
+					}
+				}
+
+				int32_t num_lights = static_cast<int32_t>(light_clr_type_.size());
+				int32_t start = 0;
+				while (num_lights > 0)
+				{
+					int32_t n = std::min(num_lights, max_num_lights_a_batch_);
+
+					*(technique_->Effect().ParameterByName("num_lights")) = n;
+					*(technique_->Effect().ParameterByName("light_clr_type")) = std::vector<float4>(&light_clr_type_[start], &light_clr_type_[start] + n);
+					*(technique_->Effect().ParameterByName("light_pos_cos_outer")) = std::vector<float4>(&light_pos_cos_outer_view_[start], &light_pos_cos_outer_view_[start] + n);
+					*(technique_->Effect().ParameterByName("light_dir_cos_inner")) = std::vector<float4>(&light_dir_cos_inner_view_[start], &light_dir_cos_inner_view_[start] + n);
+					*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_[start], &light_falloff_[start] + n);
+
+					if (0 == start)
+					{
+						technique_ = technique_wo_blend_;
+					}
+					else
+					{
+						technique_ = technique_w_blend_;
+					}
+
+					PostProcess::Render();
+
+					num_lights -= n;
+					start += n;
 				}
 			}
-			*(technique_->Effect().ParameterByName("num_lights")) = static_cast<int32_t>(light_clr_type_.size());
-			*(technique_->Effect().ParameterByName("light_clr_type")) = light_clr_type_;
-			*(technique_->Effect().ParameterByName("light_pos_cos_outer")) = light_pos_cos_outer;
-			*(technique_->Effect().ParameterByName("light_dir_cos_inner")) = light_dir_cos_inner;
+			else
+			{
+				PostProcess::Render();
+			}
 		}
 
 	private:
 		std::vector<float4> light_clr_type_;
 		std::vector<float4> light_pos_cos_outer_;
 		std::vector<float4> light_dir_cos_inner_;
+		std::vector<float4> light_falloff_;
+		std::vector<float4> light_pos_cos_outer_view_;
+		std::vector<float4> light_dir_cos_inner_view_;
+
+		RenderTechniquePtr technique_wo_blend_;
+		RenderTechniquePtr technique_w_blend_;
+
+		int32_t max_num_lights_a_batch_;
+		int32_t buffer_type_;
 	};
 
 	class AdaptiveAntiAliasPostProcess : public PostProcess
@@ -479,8 +543,8 @@ void DeferredShadingApp::InitObjects()
 	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
 
-	light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2);
-	light_src_[1] = MakeSharedPtr<ConeObject>("cone_90.meshml", -PI / 2);
+	light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2, 1 / 700.0f, 2.0f);
+	light_src_[1] = MakeSharedPtr<ConeObject>("cone_90.meshml", -PI / 2, -1 / 350.0f, 1.7f);
 	light_src_[0]->AddToSceneManager();
 	light_src_[1]->AddToSceneManager();
 
@@ -527,9 +591,9 @@ void DeferredShadingApp::InitObjects()
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false, false);
 
-	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(1, 1, 1));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0));
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(1, 1, 1), float3(0, 0.2f, 0));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.2f, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.2f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -700,13 +764,13 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 				float4x4 model_mat = checked_pointer_cast<ConeObject>(light_src_[i])->ModelMatrix();
 				float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
 				float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
-				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLightPos(spot_light_id_[i], p);
-				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetSpotLightDir(spot_light_id_[i], d);
+				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetLightPos(spot_light_id_[i], p);
+				checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->SetLightDir(spot_light_id_[i], d);
 			}
 		}
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);
 		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();

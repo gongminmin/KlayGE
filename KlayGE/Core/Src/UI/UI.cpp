@@ -1014,6 +1014,12 @@ namespace KlayGE
 		sc.text = strText;
 		sc.align = align;
 	}
+	Size_T<uint32_t> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
+		Rect_T<int32_t> const & /*rc*/, uint32_t /*align*/)
+	{
+		BOOST_TYPEOF(font_cache_)::reference font = font_cache_[font_index];
+		return font.first->CalcSize(strText, font.second);
+	}
 
 	void UIManager::KeyDownHandler(wchar_t key)
 	{
@@ -1256,11 +1262,23 @@ namespace KlayGE
 		// Render the caption if it's enabled.
 		if (this->IsCaptionEnabled())
 		{
+			std::wstring wstrOutput = caption_;
+			if (minimized_)
+			{
+				wstrOutput += L" (Minimized)";
+			}
+
 			// DrawSprite will offset the rect down by
 			// caption_height_, so adjust the rect higher
 			// here to negate the effect.
-			int32_t const w = std::min(120, this->GetWidth() / 3);
+			int32_t w = this->GetWidth();
 			Rect_T<int32_t> rc(0, -caption_height_, w, 0);
+
+			Size_T<uint32_t> size = this->CalcSize(wstrOutput, cap_element_, rc, true);
+
+			w = std::min(w, static_cast<int32_t>(size.cx() * 1.2f));
+			rc.right() = w;
+
 			Color const & clr = cap_element_.TextureColor().Current;
 			UIManager::VertexFormat vertices[] =
 			{
@@ -1271,11 +1289,7 @@ namespace KlayGE
 			};
 			this->DrawQuad(&vertices[0], 0, TexturePtr());
 			rc.left() += 5; // Make a left margin
-			std::wstring wstrOutput = caption_;
-			if (minimized_)
-			{
-				wstrOutput += L" (Minimized)";
-			}
+
 			this->DrawText(wstrOutput, cap_element_, rc, true);
 		}
 
@@ -1636,6 +1650,24 @@ namespace KlayGE
 
 		UIManager::Instance().DrawText(strText, uie.FontIndex(), r, depth_base_ - 0.01f,
 			uie.FontColor().Current, uie.TextAlign());
+	}
+
+	Size_T<uint32_t> UIDialog::CalcSize(std::wstring const & strText, UIElement const & uie, Rect_T<int32_t> const & rc, bool bShadow)
+	{
+		Rect_T<int32_t> r = rc;
+		r += this->GetLocation();
+		if (this->IsCaptionEnabled())
+		{
+			r += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+		}
+
+		Size_T<uint32_t> size = UIManager::Instance().CalcSize(strText, uie.FontIndex(), r, uie.TextAlign());
+		if (bShadow)
+		{
+			size.cx() += 1;
+			size.cy() += 1;
+		}
+		return size;
 	}
 
 	// Initialize default Elements
