@@ -29,7 +29,6 @@
 #include <KlayGE/XMLDom.hpp>
 
 #include <fstream>
-#include <boost/filesystem.hpp>
 
 #include <KlayGE/Context.hpp>
 
@@ -261,26 +260,17 @@ namespace KlayGE
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
-		for (boost::filesystem::directory_iterator iter(render_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-		{
-			std::string fn = iter->path().filename();
-			std::string suffix = rf_name + "_" + dll_suffix_;
-			std::string::size_type n = fn.rfind(suffix);
-			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-			{
-				render_loader_.Load(render_path + "/" + fn);
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
+		render_loader_.Load(render_path + "/" + fn);
 
-				MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
-				if (mrf != NULL)
-				{
-					mrf(renderFactory_, rf_node);
-					break;
-				}
-				else
-				{
-					render_loader_.Free();
-				}
-			}
+		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
+		if (mrf != NULL)
+		{
+			mrf(renderFactory_, rf_node);
+		}
+		else
+		{
+			render_loader_.Free();
 		}
 	}
 
@@ -290,26 +280,17 @@ namespace KlayGE
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
-		for (boost::filesystem::directory_iterator iter(audio_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-		{
-			std::string fn = iter->path().filename();
-			std::string suffix = af_name + "_" + dll_suffix_;
-			std::string::size_type n = fn.rfind(suffix);
-			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-			{
-				audio_loader_.Load(audio_path + "/" + fn);
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
+		audio_loader_.Load(audio_path + "/" + fn);
 
-				MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
-				if (maf != NULL)
-				{
-					maf(audioFactory_, af_node);
-					break;
-				}
-				else
-				{
-					audio_loader_.Free();
-				}
-			}
+		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
+		if (maf != NULL)
+		{
+			maf(audioFactory_, af_node);
+		}
+		else
+		{
+			audio_loader_.Free();
 		}
 	}
 
@@ -319,26 +300,17 @@ namespace KlayGE
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
-		for (boost::filesystem::directory_iterator iter(input_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-		{
-			std::string fn = iter->path().filename();
-			std::string suffix = if_name + "_" + dll_suffix_;
-			std::string::size_type n = fn.rfind(suffix);
-			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-			{
-				input_loader_.Load(input_path + "/" + fn);
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
+		input_loader_.Load(input_path + "/" + fn);
 
-				MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
-				if (mif != NULL)
-				{
-					mif(inputFactory_, if_node);
-					break;
-				}
-				else
-				{
-					input_loader_.Free();
-				}
-			}
+		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
+		if (mif != NULL)
+		{
+			mif(inputFactory_, if_node);
+		}
+		else
+		{
+			input_loader_.Free();
 		}
 	}
 
@@ -348,26 +320,17 @@ namespace KlayGE
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
-		for (boost::filesystem::directory_iterator iter(show_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-		{
-			std::string fn = iter->path().filename();
-			std::string suffix = sf_name + "_" + dll_suffix_;
-			std::string::size_type n = fn.rfind(suffix);
-			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-			{
-				show_loader_.Load(show_path + "/" + fn);
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
+		show_loader_.Load(show_path + "/" + fn);
 
-				MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
-				if (msf != NULL)
-				{
-					msf(showFactory_, sf_node);
-					break;
-				}
-				else
-				{
-					show_loader_.Free();
-				}
-			}
+		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
+		if (msf != NULL)
+		{
+			msf(showFactory_, sf_node);
+		}
+		else
+		{
+			show_loader_.Free();
 		}
 	}
 
@@ -377,26 +340,17 @@ namespace KlayGE
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
-		for (boost::filesystem::directory_iterator iter(sm_path); iter != boost::filesystem::directory_iterator(); ++ iter)
-		{
-			std::string fn = iter->path().filename();
-			std::string suffix = sm_name + "_" + dll_suffix_;
-			std::string::size_type n = fn.rfind(suffix);
-			if ((n != std::string::npos) && (n + suffix.length() == fn.length()))
-			{
-				sm_loader_.Load(sm_path + "/" + fn);
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
+		sm_loader_.Load(sm_path + "/" + fn);
 
-				MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
-				if (msm != NULL)
-				{
-					msm(sceneMgr_, sm_node);
-					break;
-				}
-				else
-				{
-					sm_loader_.Free();
-				}
-			}
+		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
+		if (msm != NULL)
+		{
+			msm(sceneMgr_, sm_node);
+		}
+		else
+		{
+			sm_loader_.Free();
 		}
 	}
 }

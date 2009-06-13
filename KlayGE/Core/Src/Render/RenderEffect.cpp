@@ -56,7 +56,6 @@
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#include <boost/filesystem.hpp>
 
 #include <KlayGE/RenderEffect.hpp>
 
