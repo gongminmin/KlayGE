@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Quaternion.fxml"/>
 	<include name="DeferredShadingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
@@ -17,9 +18,10 @@
 	<cbuffer name="light_sources">
 		<parameter type="int" name="num_lights"/>
 		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4" name="light_pos_cos_outer" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4" name="light_dir_cos_inner" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_pos" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_falloff" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_rotation" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -158,7 +160,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 
 		float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
 		view_dir = -view_dir;
-
+		
 		float3 diffuse = 0, specular = 0;
 		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
 		{
@@ -170,12 +172,13 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			{
 				// point
 
-				float3 dir = normalize(light_pos_cos_outer[i].xyz - pos_es);
+				float3 pos_ls = pos_es + light_pos[i].xyz;
+				float3 dir = -normalize(pos_ls);
 				d = diffuse_term(dir, normal);
 				if (d > 0)
 				{
 					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
-					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, light_falloff[i].xyz) * light_clr_type[i].xyz;
+					atten_clr = attenuation_term(0, pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
 				}
 				else
 				{
@@ -186,11 +189,13 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			{
 				// directional
 
-				float3 dir = -light_dir_cos_inner[i].xyz;
-				d = diffuse_term(dir, normal);
+				float3 normal_ls = mul_quat(normal, light_rotation[i]);
+				float3 dir = -mul_quat(float3(0, 0, 1), light_rotation[i]);
+				d = diffuse_term(dir, normal_ls);
 				if (d > 0)
 				{
-					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
+					float3 view_dir_ld = mul_quat(view_dir, light_rotation[i]);
+					s = specular_term(normalize(dir + view_dir_ld), normal_ls, 8.0f);
 					atten_clr = light_clr_type[i].xyz;
 				}
 				else
@@ -200,14 +205,17 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			}
 			else if (2 == type)
 			{
-				float3 dir = normalize(light_pos_cos_outer[i].xyz - pos_es);
-				d = diffuse_term(dir, normal);
+				float3 pos_ls = mul_quat(pos_es, light_rotation[i]) + light_pos[i].xyz;
+				float3 normal_ls = mul_quat(normal, light_rotation[i]);
+				float3 dir = -normalize(pos_ls.xyz);
+				d = diffuse_term(dir, normal_ls);
 				if (d > 0)
 				{
-					s = specular_term(normalize(dir + view_dir), normal, 8.0f);
-					atten_clr = attenuation_term(light_pos_cos_outer[i].xyz, pos_es, light_falloff[i].xyz) * light_clr_type[i].xyz;
+					float3 view_dir_ld = mul_quat(view_dir, light_rotation[i]);
+					s = specular_term(normalize(dir + view_dir_ld), normal_ls, 8.0f);
+					atten_clr = attenuation_term(0, pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
 
-					float spot = spot_lighting(light_pos_cos_outer[i].xyz, light_dir_cos_inner[i].xyz, float2(light_pos_cos_outer[i].w, light_dir_cos_inner[i].w), pos_es);
+					float spot = spot_lighting(0, float3(0, 0, 1), light_cos_outer_inner[i], pos_ls.xyz);
 					d *= spot;
 					s *= spot;
 				}
@@ -226,7 +234,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			diffuse_clr *= ssao_tex.Sample(point_sampler, tc0).xxx;
 		}
 		float3 specular_clr = GetSpecular(color);
-		final_clr = float4(diffuse_clr * (0.15f + diffuse) + specular_clr * specular, 1);
+		final_clr = float4(0.65f * diffuse_clr * (0.15f + diffuse) + 0.3f * specular_clr * specular, 1);
 	}
 	
 	return final_clr;

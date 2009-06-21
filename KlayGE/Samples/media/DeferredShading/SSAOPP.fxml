@@ -10,6 +10,7 @@
 	<parameter type="texture2D" name="rand_normal_tex">
 		<annotation type="string" name="SasResourceAddress" value="rand_normal.dds"/>
 	</parameter>
+	<parameter type="float2" name="tex_width_height"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -41,18 +42,18 @@ float4 SSAO(float2 tc0)
 	const half fScale = 0.025f; 
 	const half3 samples[8] =
 	{
-		normalize(half3( 1, 1, 1)) * fScale * 1,
-		normalize(half3(-1,-1,-1)) * fScale * 2,
-		normalize(half3(-1,-1, 1)) * fScale * 3,
-		normalize(half3(-1, 1,-1)) * fScale * 4,
-		normalize(half3(-1, 1 ,1)) * fScale * 5,
-		normalize(half3( 1,-1,-1)) * fScale * 6,
-		normalize(half3( 1,-1, 1)) * fScale * 7,
-		normalize(half3( 1, 1,-1)) * fScale * 8,
+		normalize(half3( 1,  1,  1)) * fScale * 1,
+		normalize(half3(-1, -1, -1)) * fScale * 2,
+		normalize(half3(-1, -1,  1)) * fScale * 3,
+		normalize(half3(-1,  1, -1)) * fScale * 4,
+		normalize(half3(-1,  1,  1)) * fScale * 5,
+		normalize(half3( 1, -1, -1)) * fScale * 6,
+		normalize(half3( 1, -1,  1)) * fScale * 7,
+		normalize(half3( 1,  1, -1)) * fScale * 8,
 	};
 
-	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * float2(1280 / 4, 800 / 4)).rgb * 2 - 1;
-	
+	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * tex_width_height / 8.0f).rgb * 2 - 1;
+
 	float scene_depth_m = depth * depth_near_far_invfar.y;
 	
 	float3 sample_scale = ssao_param.zzw
@@ -73,25 +74,13 @@ float4 SSAO(float2 tc0)
 
 	for (int i = 0; i < 2; ++ i)
 	{
-		ray = reflect(samples[i * 4 + 0].xyz, randNormal) * sample_scale;
-		arr_scene_depth2[0].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		ray *= 0.5;
-		arr_scene_depth2[1].x = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-
-		ray = reflect(samples[i * 4 + 1].xyz, randNormal) * sample_scale;
-		arr_scene_depth2[0].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		ray *= 0.5;
-		arr_scene_depth2[1].y = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-
-		ray = reflect(samples[i * 4 + 2].xyz, randNormal) * sample_scale;
-		arr_scene_depth2[0].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		ray *= 0.5;
-		arr_scene_depth2[1].z = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		
-		ray = reflect(samples[i * 4 + 3].xyz, randNormal) * sample_scale;
-		arr_scene_depth2[0].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
-		ray *= 0.5;
-		arr_scene_depth2[1].w = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		for (int j = 0; j < 4; ++ j)
+		{
+			ray = reflect(samples[i * 4 + j].xyz, randNormal) * sample_scale;
+			arr_scene_depth2[0][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+			ray *= 0.5;
+			arr_scene_depth2[1][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
+		}
 
 		for (int j = 0; j < 2; ++ j)
 		{

@@ -223,30 +223,36 @@ namespace
 		int AddPointLight(float3 const & pos, float3 const & clr, float3 const & falloff)
 		{
 			int id = static_cast<int>(light_clr_type_.size());
+			light_enabled_.push_back(1);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 0.0f));
-			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
-			light_dir_cos_inner_.push_back(float4(0, 0, 0, 0));
+			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
+			light_dir_.push_back(float4(0, 0, 0, 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
+			light_cos_outer_inner_.push_back(float2(0, 0));
 			return id;
 		}
 		int AddDirectionalLight(float3 const & dir, float3 const & clr, float3 const & falloff)
 		{
 			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
+			light_enabled_.push_back(1);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 1.0f));
-			light_pos_cos_outer_.push_back(float4(0, 0, 0, 0));
-			light_dir_cos_inner_.push_back(float4(d.x(), d.y(), d.z(), 0));
+			light_pos_.push_back(float4(0, 0, 0, 0));
+			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
+			light_cos_outer_inner_.push_back(float2(0, 0));
 			return id;
 		}
 		int AddSpotLight(float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr, float3 const & falloff)
 		{
 			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
+			light_enabled_.push_back(1);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 2.0f));
-			light_pos_cos_outer_.push_back(float4(pos.x(), pos.y(), pos.z(), cos_outer));
-			light_dir_cos_inner_.push_back(float4(d.x(), d.y(), d.z(), cos_inner));
+			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
+			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
+			light_cos_outer_inner_.push_back(float2(cos_outer, cos_inner));
 			return id;
 		}
 
@@ -257,11 +263,11 @@ namespace
 		void SetLightDir(int index, float3 const & dir)
 		{
 			float3 d = MathLib::normalize(dir);
-			light_dir_cos_inner_[index] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[index].w());
+			light_dir_[index] = float4(d.x(), d.y(), d.z(), 0);
 		}
 		void SetLightPos(int index, float3 const & pos)
 		{
-			light_pos_cos_outer_[index] = float4(pos.x(), pos.y(), pos.z(), light_pos_cos_outer_[index].w());
+			light_pos_[index] = float4(pos.x(), pos.y(), pos.z(), 0);
 		}
 		void SetLightFalloff(int index, float3 const & falloff)
 		{
@@ -269,8 +275,16 @@ namespace
 		}
 		void SetSpotLightAngle(int index, float cos_outer, float cos_inner)
 		{
-			light_pos_cos_outer_[index].w() = cos_outer;
-			light_dir_cos_inner_[index].w() = cos_inner;
+			light_cos_outer_inner_[index] = float2(cos_outer, cos_inner);
+		}
+
+		void LightEnabled(int index, bool enable)
+		{
+			light_enabled_[index] = enable;
+		}
+		bool LightEnabled(int index) const
+		{
+			return light_enabled_[index] != 0;
 		}
 
 		void Source(TexturePtr const & tex, bool flipping)
@@ -346,6 +360,7 @@ namespace
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
+			float4x4 const inv_view = MathLib::inverse(view);
 
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
@@ -356,47 +371,77 @@ namespace
 
 			if (0 == buffer_type_)
 			{
-				light_pos_cos_outer_view_.resize(light_pos_cos_outer_.size());
-				light_dir_cos_inner_view_.resize(light_dir_cos_inner_.size());
+				int32_t num_lights = 0;
+				light_clr_type_enabled_.resize(0);
+				light_cos_outer_inner_enabled_.resize(0);
+				light_falloff_enabled_.resize(0);
+				light_pos_enabled_.resize(0);
+				light_rotation_enabled_.resize(0);
 				for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 				{
-					int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
-
-					float3 p, d;
-					switch (type)
+					if (light_enabled_[i])
 					{
-					case 0:
-						p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
-						light_pos_cos_outer_view_[i] = float4(p.x(), p.y(), p.z(), 0.0f);
-						light_dir_cos_inner_view_[i] = light_dir_cos_inner_[i];
-						break;
+						light_clr_type_enabled_.push_back(light_clr_type_[i]);
+						light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+						light_falloff_enabled_.push_back(light_falloff_[i]);
 
-					case 1:
-						d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
-						light_pos_cos_outer_view_[i] = light_pos_cos_outer_[i];
-						light_dir_cos_inner_view_[i] = float4(d.x(), d.y(), d.z(), 0.0f);
-						break;
+						int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
 
-					case 2:
-						p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_cos_outer_[i]), view);
-						d = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_cos_inner_[i]), view);
-						light_pos_cos_outer_view_[i] = float4(p.x(), p.y(), p.z(), light_pos_cos_outer_[i].w());
-						light_dir_cos_inner_view_[i] = float4(d.x(), d.y(), d.z(), light_dir_cos_inner_[i].w());
-						break;
+						float3 p;
+						switch (type)
+						{
+						case 0:
+							{
+								p = MathLib::transform_coord(*reinterpret_cast<float3*>(&light_pos_[i]), view);
+								light_pos_enabled_.push_back(float4(-p.x(), -p.y(), -p.z(), 0.0f));
+								light_rotation_enabled_.push_back(float4(0, 0, 0, 0));
+							}
+							break;
+
+						case 1:
+							{
+								float3 eye(0, 0, 0);
+								float3 at = *reinterpret_cast<float3*>(&light_dir_[i]);
+								float4x4 light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+								float4x4 mat = inv_view * light_model;
+								float3 scale, trans;
+								Quaternion rot;
+								MathLib::decompose(scale, rot, trans, mat);
+								light_pos_enabled_.push_back(float4(0, 0, 0, 0));
+								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+							}
+							break;
+
+						case 2:
+							{
+								float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
+								float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + *reinterpret_cast<float3*>(&light_dir_[i]);
+								float4x4 light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+								float4x4 mat = inv_view * light_model;
+								float3 scale, trans;
+								Quaternion rot;
+								MathLib::decompose(scale, rot, trans, mat);
+								light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), 0));
+								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+							}
+							break;
+						}
+
+						++ num_lights;
 					}
 				}
 
-				int32_t num_lights = static_cast<int32_t>(light_clr_type_.size());
 				int32_t start = 0;
 				while (num_lights > 0)
 				{
 					int32_t n = std::min(num_lights, max_num_lights_a_batch_);
 
 					*(technique_->Effect().ParameterByName("num_lights")) = n;
-					*(technique_->Effect().ParameterByName("light_clr_type")) = std::vector<float4>(&light_clr_type_[start], &light_clr_type_[start] + n);
-					*(technique_->Effect().ParameterByName("light_pos_cos_outer")) = std::vector<float4>(&light_pos_cos_outer_view_[start], &light_pos_cos_outer_view_[start] + n);
-					*(technique_->Effect().ParameterByName("light_dir_cos_inner")) = std::vector<float4>(&light_dir_cos_inner_view_[start], &light_dir_cos_inner_view_[start] + n);
-					*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_[start], &light_falloff_[start] + n);
+					*(technique_->Effect().ParameterByName("light_clr_type")) = std::vector<float4>(&light_clr_type_enabled_[start], &light_clr_type_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_cos_outer_inner")) = std::vector<float2>(&light_cos_outer_inner_enabled_[start], &light_cos_outer_inner_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_enabled_[start], &light_falloff_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_pos")) = std::vector<float4>(&light_pos_enabled_[start], &light_pos_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_rotation")) = std::vector<float4>(&light_rotation_enabled_[start], &light_rotation_enabled_[start] + n);
 
 					if (0 == start)
 					{
@@ -420,12 +465,18 @@ namespace
 		}
 
 	private:
+		std::vector<char> light_enabled_;
 		std::vector<float4> light_clr_type_;
-		std::vector<float4> light_pos_cos_outer_;
-		std::vector<float4> light_dir_cos_inner_;
+		std::vector<float4> light_pos_;
+		std::vector<float4> light_dir_;
+		std::vector<float2> light_cos_outer_inner_;
 		std::vector<float4> light_falloff_;
-		std::vector<float4> light_pos_cos_outer_view_;
-		std::vector<float4> light_dir_cos_inner_view_;
+
+		std::vector<float4> light_clr_type_enabled_;
+		std::vector<float2> light_cos_outer_inner_enabled_;
+		std::vector<float4> light_falloff_enabled_;
+		std::vector<float4> light_pos_enabled_;
+		std::vector<float4> light_rotation_enabled_;
 
 		RenderTechniquePtr technique_wo_blend_;
 		RenderTechniquePtr technique_w_blend_;
@@ -470,8 +521,10 @@ namespace
 		{
 			PostProcess::OnRenderBegin();
 
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+			*(technique_->Effect().ParameterByName("tex_width_height")) = float2(static_cast<float>(re.CurFrameBuffer()->Width()), static_cast<float>(re.CurFrameBuffer()->Height()));
 		}
 	};
 
@@ -589,11 +642,11 @@ void DeferredShadingApp::InitObjects()
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(false, false);
+	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
-	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(1, 1, 1), float3(0, 0.2f, 0));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.2f, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.2f, 0));
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(1, 1, 1), float3(0, 0.3f, 0));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.3f, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.3f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

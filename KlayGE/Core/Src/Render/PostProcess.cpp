@@ -169,7 +169,7 @@ namespace KlayGE
 		float sum_weight = 0;
 		for (int i = 0; i < 2 * kernel_radius_; ++ i)
 		{
-			float weight = this->GaussianDistribution(i - kernel_radius_ + 0.5f, 0, kernel_radius_ / deviation);
+			float weight = this->GaussianDistribution(static_cast<float>(i - kernel_radius_), 0, kernel_radius_ / deviation);
 			tmp_weights[i] = weight;
 			sum_weight += weight;
 		}
