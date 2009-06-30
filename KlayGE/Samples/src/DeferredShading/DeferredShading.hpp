@@ -66,6 +66,9 @@ private:
 
 	int point_light_id_;
 	int spot_light_id_[2];
+
+	KlayGE::FrameBufferPtr sm_buffer_[2];
+	KlayGE::TexturePtr sm_tex_[2];
 };
 
 #endif		// _CARTOON_HPP

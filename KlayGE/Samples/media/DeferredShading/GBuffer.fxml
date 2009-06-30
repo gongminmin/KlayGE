@@ -42,8 +42,18 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 {
 	normal.xyz = normalize(mul(normal.xyz + 0.1f * bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
+	
+	float3 diffuse;
+	if (diffuse_clr.a > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(linear_sampler, texcoord).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
 
-	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0);
+	oClr = StoreDiffuseSpecular(diffuse, 0.1f);
 }
 
 void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
@@ -94,6 +104,43 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferNoTexPS()"/>
+		</pass>
+	</technique>
+
+	<cbuffer name="per_frame2">
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="obj_to_light_model"/>
+	</cbuffer>
+	
+	<shader>
+		<![CDATA[
+void GenShadowMapVS(float4 Position : POSITION,
+						float3 Normal   : NORMAL,
+						out float4 oLightWorldPos : TEXCOORD0,
+						out float4 oPos : SV_Position)
+{
+	oPos = mul(Position, mvp);
+    oLightWorldPos = mul(Position, obj_to_light_model);
+}
+
+float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
+{
+	LightWorldPos /= LightWorldPos.w;
+	float dist = length(LightWorldPos.xyz);
+	
+	float2 dxdy = float2(ddx(dist), ddy(dist));
+
+	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="GenShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenShadowMapVS()"/>
+			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>
 	</technique>
 </effect>

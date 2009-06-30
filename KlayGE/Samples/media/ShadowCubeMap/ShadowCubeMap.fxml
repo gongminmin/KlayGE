@@ -121,7 +121,7 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 	{
 		if (LightProjPos[j].z > 0)
 		{
-			float3 color = ori_color / (0.01f + 0.5f * dist * dist);
+			float f = 1 / (0.01f + 0.5f * dist * dist);
 			
 			float p = (dist <= moments[j].x);
 			// Variance shadow mapping
@@ -131,9 +131,9 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 			float p_max = variance / (variance + m_d * m_d);
 			p_max = linstep(bleeding_reduce, 1, p_max);
 
-			color *= max(p, p_max);
+			f *= max(p, p_max);
 			
-			final_color += color;
+			final_color += ori_color * f;
 		}
 	}
 
