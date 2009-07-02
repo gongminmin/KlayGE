@@ -69,7 +69,7 @@ namespace KlayGE
 	class D3D9Texture1DRenderView : public D3D9RenderView, boost::noncopyable
 	{
 	public:
-		D3D9Texture1DRenderView(Texture& texture_1d, int level);
+		D3D9Texture1DRenderView(Texture& texture_1d, int array_index, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -87,7 +87,7 @@ namespace KlayGE
 	class D3D9Texture2DRenderView : public D3D9RenderView, boost::noncopyable
 	{
 	public:
-		D3D9Texture2DRenderView(Texture& texture_2d, int level);
+		D3D9Texture2DRenderView(Texture& texture_2d, int array_index, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -105,7 +105,7 @@ namespace KlayGE
 	class D3D9Texture3DRenderView : public D3D9RenderView, boost::noncopyable
 	{
 	public:
-		D3D9Texture3DRenderView(Texture& texture_3d, uint32_t slice, int level);
+		D3D9Texture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -129,7 +129,7 @@ namespace KlayGE
 	class D3D9TextureCubeRenderView : public D3D9RenderView, boost::noncopyable
 	{
 	public:
-		D3D9TextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
+		D3D9TextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -174,7 +174,7 @@ namespace KlayGE
 	public:
 		D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
 			ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		D3D9DepthStencilRenderView(Texture& texture, int level);
+		D3D9DepthStencilRenderView(Texture& texture, int array_index, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

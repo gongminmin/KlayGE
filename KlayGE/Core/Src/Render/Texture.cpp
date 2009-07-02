@@ -193,22 +193,22 @@ namespace
 				switch (tex_desc->type)
 				{
 				case Texture::TT_1D:
-					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps,
+					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps, 1,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_2D:
-					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps,
+					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps, 1,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_3D:
-					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps,
+					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps, 1,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_Cube:
-					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps,
+					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps, 1,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
@@ -1274,22 +1274,22 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_2D:
 			texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
-				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_3D:
 			texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
-				texture->Depth(0), numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
+				texture->Depth(0), numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_Cube:
 			texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
-				numMipMaps, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		default:
@@ -1631,6 +1631,11 @@ namespace KlayGE
 	uint16_t Texture::NumMipMaps() const
 	{
 		return numMipMaps_;
+	}
+
+	uint16_t Texture::ArraySize() const
+	{
+		return array_size_;
 	}
 
 	uint32_t Texture::Bpp() const

@@ -66,6 +66,7 @@ namespace KlayGE
 		{
 			numMipMaps_ = numMipMaps;
 		}
+		array_size_ = 1;
 
 		bpp_ = NumFormatBits(format_);
 

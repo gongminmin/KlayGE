@@ -42,11 +42,12 @@
 
 namespace KlayGE
 {
-	D3D11Texture2D::D3D11Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, ElementFormat format,
+	D3D11Texture2D::D3D11Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D11Texture(TT_2D, sample_count, sample_quality, access_hint)
 	{
 		numMipMaps_ = numMipMaps;
+		array_size_ = array_size;
 		format_		= format;
 		widthes_.assign(1, width);
 		heights_.assign(1, height);
@@ -56,7 +57,7 @@ namespace KlayGE
 		desc_.Width = width;
 		desc_.Height = height;
 		desc_.MipLevels = numMipMaps_;
-		desc_.ArraySize = 1;
+		desc_.ArraySize = array_size_;
 		switch (format_)
 		{
 		case EF_D16:
@@ -278,7 +279,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTexture2D_.get(), D3D11CalcSubresource(level, 0, 1), D3D11Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
+		TIF(d3d_imm_ctx_->Map(d3dTexture2D_.get(), D3D11CalcSubresource(level, 0, numMipMaps_), D3D11Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + (y_offset * mapped.RowPitch + x_offset) * NumFormatBytes(format_);
 		row_pitch = mapped.RowPitch;
@@ -322,6 +323,7 @@ namespace KlayGE
 		d3dTexture2D_->GetDesc(&desc_);
 
 		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
+		array_size_ = static_cast<uint16_t>(desc_.ArraySize);
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);

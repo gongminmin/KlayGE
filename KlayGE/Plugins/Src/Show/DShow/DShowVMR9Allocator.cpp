@@ -144,11 +144,11 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		try
 		{
-			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ARGB8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
 		}
 		catch (...)
 		{
-			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, EF_ABGR8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
 		}
 
 		IDirect3DSurface9* surf;

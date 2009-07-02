@@ -340,13 +340,13 @@ namespace
 
 		try
 		{
-			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		catch (...)
 		{
 			try
 			{
-				rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			}
 			catch (...)
 			{
@@ -406,13 +406,13 @@ void ShadowCubeMap::InitObjects()
 		shadow_buffers_[i] = rf.MakeFrameBuffer();
 		try
 		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
+			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0, 0));
 		}
 		catch (...)
 		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0));
+			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0, 0));
 		}
 
 		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);

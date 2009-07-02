@@ -41,10 +41,10 @@ namespace
 			uint32_t h = src_tex->Height(0);
 			for (size_t i = 0; i < ds_tex_.size(); ++ i)
 			{
-				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, src_tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, src_tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 				ds_fb_[i] = rf.MakeFrameBuffer();
-				ds_fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ds_tex_[i], 0));
+				ds_fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ds_tex_[i], 0, 0));
 				if (0 == i)
 				{
 					ds_2x2_[i].Source(src_tex, flipping);
@@ -94,10 +94,10 @@ void TilingPostProcess::Source(TexturePtr const & tex, bool flipping)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / TILE_SIZE, tex->Height(0) / TILE_SIZE,
-		1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	downsample_fb_ = rf.MakeFrameBuffer();
-	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
+	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
 	downsampler_->Source(tex, flipping);
 	downsampler_->Destinate(downsample_fb_);
 

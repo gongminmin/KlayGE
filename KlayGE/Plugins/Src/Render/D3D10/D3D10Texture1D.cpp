@@ -42,11 +42,12 @@
 
 namespace KlayGE
 {
-	D3D10Texture1D::D3D10Texture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format,
+	D3D10Texture1D::D3D10Texture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D10Texture(TT_1D, sample_count, sample_quality, access_hint)
 	{
 		numMipMaps_ = numMipMaps;
+		array_size_ = array_size;
 		format_		= format;
 		widthes_.assign(1, width);
 
@@ -54,7 +55,7 @@ namespace KlayGE
 
 		desc_.Width = width;
 		desc_.MipLevels = numMipMaps_;
-		desc_.ArraySize = 1;
+		desc_.ArraySize = array_size_;
 		desc_.Format = D3D10Mapping::MappingFormat(format_);
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
@@ -122,8 +123,8 @@ namespace KlayGE
 			D3DX10_TEXTURE_LOAD_INFO info;
 			info.pSrcBox = NULL;
 			info.pDstBox = NULL;
-			info.SrcFirstMip = D3D10CalcSubresource(0, 0, 1);
-			info.DstFirstMip = D3D10CalcSubresource(0, 0, 1);
+			info.SrcFirstMip = D3D10CalcSubresource(0, 0, this->NumMipMaps());
+			info.DstFirstMip = D3D10CalcSubresource(0, 0, target.NumMipMaps());
 			info.NumMips = std::min(this->NumMipMaps(), target.NumMipMaps());
 			info.SrcFirstElement = 0;
 			info.DstFirstElement = 0;
@@ -162,8 +163,8 @@ namespace KlayGE
 			src_box.bottom = 1;
 			src_box.back = 1;
 
-			d3d_device_->CopySubresourceRegion(other.D3DTexture().get(), D3D10CalcSubresource(level, 0, 1),
-				dst_xOffset, 0, 0, d3dTexture1D_.get(), D3D10CalcSubresource(level, 0, 1), &src_box);
+			d3d_device_->CopySubresourceRegion(other.D3DTexture().get(), D3D10CalcSubresource(level, 0, other.NumMipMaps()),
+				dst_xOffset, 0, 0, d3dTexture1D_.get(), D3D10CalcSubresource(level, 0, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -186,8 +187,8 @@ namespace KlayGE
 			D3DX10_TEXTURE_LOAD_INFO info;
 			info.pSrcBox = &src_box;
 			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D10CalcSubresource(level, 0, 1);
-			info.DstFirstMip = D3D10CalcSubresource(level, 0, 1);
+			info.SrcFirstMip = D3D10CalcSubresource(level, 0, this->NumMipMaps());
+			info.DstFirstMip = D3D10CalcSubresource(level, 0, other.NumMipMaps());
 			info.NumMips = 1;
 			info.SrcFirstElement = 0;
 			info.DstFirstElement = 0;
@@ -214,13 +215,13 @@ namespace KlayGE
 			void*& data)
 	{
 		uint8_t* p;
-		TIF(d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, 1), D3D10Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, reinterpret_cast<void**>(&p)));
+		TIF(d3dTexture1D_->Map(D3D10CalcSubresource(level, 0, numMipMaps_), D3D10Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, reinterpret_cast<void**>(&p)));
 		data = p + x_offset * NumFormatBytes(format_);
 	}
 
 	void D3D10Texture1D::Unmap1D(int level)
 	{
-		d3dTexture1D_->Unmap(D3D10CalcSubresource(level, 0, 1));
+		d3dTexture1D_->Unmap(D3D10CalcSubresource(level, 0, numMipMaps_));
 	}
 
 	void D3D10Texture1D::BuildMipSubLevels()
@@ -256,6 +257,7 @@ namespace KlayGE
 		d3dTexture1D_->GetDesc(&desc_);
 
 		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
+		array_size_ = static_cast<uint16_t>(desc_.ArraySize);
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);

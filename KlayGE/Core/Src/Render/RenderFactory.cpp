@@ -42,25 +42,25 @@ namespace KlayGE
 			return name;
 		}
 
-		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/,
+		TexturePtr MakeTexture1D(uint32_t /*width*/, uint16_t /*numMipMaps*/, uint16_t /*array_size*/,
 			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
 			ElementInitData* /*init_data*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint16_t /*numMipMaps*/,
+		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint16_t /*numMipMaps*/, uint16_t /*array_size*/,
 			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
 			ElementInitData* /*init_data*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint16_t /*numMipMaps*/,
+		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint16_t /*numMipMaps*/, uint16_t /*array_size*/,
 			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
 			ElementInitData* /*init_data*/)
 		{
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTextureCube(uint32_t /*size*/, uint16_t /*numMipMaps*/,
+		TexturePtr MakeTextureCube(uint32_t /*size*/, uint16_t /*numMipMaps*/, uint16_t /*array_size*/,
 			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
 			ElementInitData* /*init_data*/)
 		{
@@ -95,22 +95,22 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
-		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*level*/)
+		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*level*/)
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, Texture::CubeFaces /*face*/, int /*level*/)
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make3DRenderView(Texture& /*texture*/, uint32_t /*slice*/, int /*level*/)
+		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
@@ -126,7 +126,7 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeDepthStencilRenderView(Texture& /*texture*/, int /*level*/)
+		RenderViewPtr MakeDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}

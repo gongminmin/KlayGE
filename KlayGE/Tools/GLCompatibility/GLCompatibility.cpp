@@ -114,6 +114,10 @@ public:
 	{
 	}
 
+	void DoUpdateOverlay()
+	{
+	}
+
 	uint32_t DoUpdate(uint32_t /*pass*/)
 	{
 		return URV_Finished;

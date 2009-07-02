@@ -173,12 +173,14 @@ namespace KlayGE
 	}
 
 
-	D3D9Texture1DRenderView::D3D9Texture1DRenderView(Texture& texture_1d, int level)
+	D3D9Texture1DRenderView::D3D9Texture1DRenderView(Texture& texture_1d, int array_index, int level)
 		: texture_1d_(*checked_cast<D3D9Texture1D*>(&texture_1d)),
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 		BOOST_ASSERT(texture_1d_.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		IDirect3DSurface9* surface;
 		texture_1d_.D3DTexture1D()->GetSurfaceLevel(level_, &surface);
@@ -210,12 +212,14 @@ namespace KlayGE
 	}
 
 
-	D3D9Texture2DRenderView::D3D9Texture2DRenderView(Texture& texture_2d, int level)
+	D3D9Texture2DRenderView::D3D9Texture2DRenderView(Texture& texture_2d, int array_index, int level)
 		: texture_2d_(*checked_cast<D3D9Texture2D*>(&texture_2d)),
 			level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
 		BOOST_ASSERT(texture_2d_.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		IDirect3DSurface9* surface;
 		texture_2d_.D3DTexture2D()->GetSurfaceLevel(level_, &surface);
@@ -247,12 +251,14 @@ namespace KlayGE
 	}
 
 
-	D3D9Texture3DRenderView::D3D9Texture3DRenderView(Texture& texture_3d, uint32_t slice, int level)
+	D3D9Texture3DRenderView::D3D9Texture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level)
 		: texture_3d_(*checked_cast<D3D9Texture3D*>(&texture_3d)),
 			slice_(slice), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		width_ = texture_3d_.Width(level);
 		height_ = texture_3d_.Height(level);
@@ -330,12 +336,14 @@ namespace KlayGE
 	}
 
 
-	D3D9TextureCubeRenderView::D3D9TextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
+	D3D9TextureCubeRenderView::D3D9TextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: texture_cube_(*checked_cast<D3D9TextureCube*>(&texture_cube)),
 			face_(face), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(texture_cube_.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		IDirect3DSurface9* surface;
 		texture_cube_.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face_), level_, &surface);
@@ -470,12 +478,14 @@ namespace KlayGE
 		surface_ = this->CreateSurface();
 	}
 
-	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(Texture& texture_1d_2d, int level)
+	D3D9DepthStencilRenderView::D3D9DepthStencilRenderView(Texture& texture_1d_2d, int array_index, int level)
 	{
 		BOOST_ASSERT(IsDepthFormat(texture_1d_2d.Format()));
 
 		BOOST_ASSERT((Texture::TT_2D == texture_1d_2d.Type()) || (Texture::TT_1D == texture_1d_2d.Type()));
 		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
 
 		IDirect3DSurface9* surface;
 		checked_cast<D3D9Texture2D*>(&texture_1d_2d)->D3DTexture2D()->GetSurfaceLevel(level, &surface);

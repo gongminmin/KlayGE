@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 隐藏了TextureLoader (2009.4.9)
+// 支持Texture Array (2009.7.2)
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
@@ -207,6 +208,8 @@ namespace KlayGE
 
 		// Gets the number of mipmaps to be used for this texture.
 		uint16_t NumMipMaps() const;
+		// Gets the size of texture array
+		uint16_t ArraySize() const;
 
 		// Returns the width of the texture.
 		virtual uint32_t Width(int level) const = 0;
@@ -269,6 +272,7 @@ namespace KlayGE
 		uint32_t		bpp_;
 
 		uint16_t		numMipMaps_;
+		uint16_t		array_size_;
 
 		ElementFormat	format_;
 		TextureType		type_;

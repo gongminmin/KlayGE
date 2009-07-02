@@ -165,8 +165,8 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.Make2DRenderView(*temp_tex, 0, 0);
 		}
 		catch (...)
 		{
@@ -236,8 +236,8 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 	{
 		for (int i = 0; i < 2; ++ i)
 		{
-			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0, 0));
 		}
 	}
 	catch (...)
@@ -245,8 +245,8 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 		init_data.row_pitch = width * NumFormatBytes(EF_ABGR16F);
 		for (int i = 0; i < 2; ++ i)
 		{
-			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0));
+			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0, 0));
 		}
 	}
 }

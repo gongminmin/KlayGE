@@ -247,6 +247,13 @@ namespace
 	};
 
 
+	enum LightSrcAttrib
+	{
+		LSA_NoShadow = 1UL << 0,
+		LSA_NoDiffuse = 1UL << 1,
+		LSA_NoSpecular = 1UL << 2
+	};
+
 	class DeferredShadingPostProcess : public PostProcess
 	{
 	public:
@@ -271,10 +278,11 @@ namespace
 			technique_w_blend_ = technique_->Effect().TechniqueByName("DeferredShadingBlend");
 		}
 
-		int AddPointLight(float3 const & pos, float3 const & clr, float3 const & falloff)
+		int AddPointLight(uint32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
 		{
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
+			light_attrib_.push_back(attr);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 0.0f));
 			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
 			light_dir_.push_back(float4(0, 0, 0, 0));
@@ -283,11 +291,12 @@ namespace
 			sm_tex_.push_back(TexturePtr());
 			return id;
 		}
-		int AddDirectionalLight(float3 const & dir, float3 const & clr, float3 const & falloff)
+		int AddDirectionalLight(uint32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
 		{
 			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
+			light_attrib_.push_back(attr);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 1.0f));
 			light_pos_.push_back(float4(0, 0, 0, 0));
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
@@ -296,11 +305,12 @@ namespace
 			sm_tex_.push_back(TexturePtr());
 			return id;
 		}
-		int AddSpotLight(float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr, float3 const & falloff)
+		int AddSpotLight(uint32_t attr, float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr, float3 const & falloff)
 		{
 			float3 d = MathLib::normalize(dir);
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
+			light_attrib_.push_back(attr);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), 2.0f));
 			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
@@ -308,6 +318,11 @@ namespace
 			light_cos_outer_inner_.push_back(float2(cos_outer, cos_inner));
 			sm_tex_.push_back(TexturePtr());
 			return id;
+		}
+
+		void LightAttrib(int index, uint32_t attr)
+		{
+			light_attrib_[index] = attr;
 		}
 
 		void LightColor(int index, float3 const & clr)
@@ -559,6 +574,7 @@ namespace
 
 	private:
 		std::vector<char> light_enabled_;
+		std::vector<uint32_t> light_attrib_;
 		std::vector<float4> light_clr_type_;
 		std::vector<float4> light_pos_;
 		std::vector<float4> light_dir_;
@@ -651,8 +667,8 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.Make2DRenderView(*temp_tex, 0, 0);
 			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
@@ -743,18 +759,18 @@ void DeferredShadingApp::InitObjects()
 	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(512, 512, EF_D16, 1, 0);
 	for (int i = 0; i < 2; ++ i)
 	{
-		sm_tex_[i] = rf.MakeTexture2D(512, 512, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_tex_[i] = rf.MakeTexture2D(512, 512, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		sm_buffer_[i] = rf.MakeFrameBuffer();
-		sm_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_[i], 0));
+		sm_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_[i], 0, 0));
 		sm_buffer_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	}
 	sm_buffer_[0]->GetViewport().camera->ProjParams(PI / 6 * 2, 1, 0.1f, 100.0f);
 	sm_buffer_[1]->GetViewport().camera->ProjParams(PI / 4 * 2, 1, 0.1f, 100.0f);
 
-	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(float3(2, 10, 0), float3(0.2f, 0.2f, 0.2f), float3(0, 0.3f, 0));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(2, 0, 0), float3(0, 0.3f, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 2, 0), float3(0, 0.3f, 0));
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(LSA_NoShadow, float3(2, 10, 0), float3(0.2f, 0.2f, 0.2f), float3(0, 0.3f, 0));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(2, 0, 0), float3(0, 0.3f, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 2, 0), float3(0, 0.3f, 0));
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ShadowMapTex(spot_light_id_[0], sm_tex_[0], sm_buffer_[0]->RequiresFlipping());
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ShadowMapTex(spot_light_id_[1], sm_tex_[1], sm_buffer_[1]->RequiresFlipping());
 
@@ -782,38 +798,38 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0));
+	diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
 	try
 	{
-		ssao_tex_ = rf.MakeTexture2D(width, height, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 	catch (...)
 	{
-		ssao_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
-	ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssao_tex_, 0));
+	ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssao_tex_, 0, 0));
 
-	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	blur_ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_ssao_tex_, 0));
+	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	blur_ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_ssao_tex_, 0, 0));
 
 	try
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 	catch (...)
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 
-	shaded_tex_ = rf.MakeTexture2D(width, height, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0));
+	shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
 
 	deferred_shading_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
 	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ColorTex(diffuse_specular_tex_);

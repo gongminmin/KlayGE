@@ -113,7 +113,7 @@ namespace
 		TexturePtr ret;
 		if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
 		{
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
 		}
 		else
 		{
@@ -122,7 +122,7 @@ namespace
 				std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 			}
 
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
 		}
 
 		return ret;
@@ -413,18 +413,18 @@ namespace
 				pos_init.row_pitch = tex_width_ * sizeof(float4);
 				pos_init.slice_pitch = 0;
 
-				particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+				particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+				particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 				pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
-				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0));
-				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[0], 0));
+				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 0));
+				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 0));
 
 				pos_vel_rt_buffer_[1] = rf.MakeFrameBuffer();
-				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0));
-				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0));
+				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 0));
+				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 0));
 
 				FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 				pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
@@ -442,7 +442,7 @@ namespace
 				vel_init.row_pitch = tex_width_ * sizeof(float4);
 				vel_init.slice_pitch = 0;
 
-				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
+				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
 				*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
 				particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
@@ -496,7 +496,7 @@ namespace
 			{
 				init_data.row_pitch = tex_width_ * sizeof(float);
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
 				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -600,7 +600,7 @@ namespace
 
 			technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Terrain");
 
-			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
+			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
 			height_map->CopyToTexture(*height_32f);
 
 			*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
@@ -680,11 +680,11 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(256, 256, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0);
+			TexturePtr temp_tex = rf.MakeTexture2D(256, 256, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.Make2DRenderView(*temp_tex, 0, 0);
 
-			temp_tex = rf.MakeTexture2D(256, 256, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0);
+			temp_tex = rf.MakeTexture2D(256, 256, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.Make2DRenderView(*temp_tex, 0, 0);
 		}
 		catch (...)
 		{
@@ -772,12 +772,12 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0));
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	fog_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0));
+	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, scene_buffer_->RequiresFlipping());

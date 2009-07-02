@@ -44,15 +44,21 @@
 
 namespace KlayGE
 {
-	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D9Texture(TT_Cube, sample_count, sample_quality, access_hint),
 						auto_gen_mipmaps_(false)
 	{
+		if (array_size > 1)
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
 		D3D9RenderEngine& renderEngine(*checked_cast<D3D9RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3dDevice_ = renderEngine.D3DDevice();
 
 		numMipMaps_ = numMipMaps;
+		array_size_ = 1;
 		format_		= format;
 		widths_.assign(1, size);
 
@@ -80,7 +86,7 @@ namespace KlayGE
 			if (access_hint & EAH_GPU_Write)
 			{
 				TexturePtr sys_mem = Context::Instance().RenderFactoryInstance().MakeTextureCube(widths_[0],
-					numMipMaps_, format_, sample_count, sample_quality, EAH_CPU_Write, init_data);
+					numMipMaps_, array_size_, format_, sample_count, sample_quality, EAH_CPU_Write, init_data);
 				sys_mem->CopyToTexture(*this);
 			}
 			else

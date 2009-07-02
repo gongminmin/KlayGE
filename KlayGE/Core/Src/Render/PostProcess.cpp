@@ -238,11 +238,11 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, frame_buffer_->Format(),
+		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, 1, frame_buffer_->Format(),
 			1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
-		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0));
+		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0, 0));
 		blur_x_.Source(src_texture_, flipping_);
 		blur_x_.Destinate(blur_x_fb);
 		blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());

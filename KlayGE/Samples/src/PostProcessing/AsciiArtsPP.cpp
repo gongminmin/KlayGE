@@ -86,7 +86,7 @@ namespace
 		init_data.slice_pitch = 0;
 
 		return Context::Instance().RenderFactoryInstance().MakeTexture2D(OUTPUT_NUM_ASCII * ASCII_WIDTH,
-			ASCII_HEIGHT, 1, EF_R8, 1, 0, EAH_GPU_Read, &init_data);
+			ASCII_HEIGHT, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, &init_data);
 	}
 
 	class ascii_lums_builder
@@ -282,10 +282,10 @@ void AsciiArtsPostProcess::Source(TexturePtr const & tex, bool flipping)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / CELL_WIDTH, tex->Height(0) / CELL_HEIGHT,
-		1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	downsample_fb_ = rf.MakeFrameBuffer();
-	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0));
+	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
 	downsampler_->Source(tex, flipping);
 	downsampler_->Destinate(downsample_fb_);
 

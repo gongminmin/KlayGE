@@ -408,7 +408,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	{
 		format = EF_ABGR8;
 	}
-	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
+	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)

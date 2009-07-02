@@ -39,25 +39,25 @@ namespace KlayGE
 		return name;
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, ElementFormat format,
-				uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size,
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<OGLTexture1D>(width, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps,
+	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<OGLTexture2D>(width, height, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
+	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, uint16_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<OGLTexture3D>(width, height, depth, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps,
+	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<OGLTextureCube>(size, numMipMaps, format, sample_count, sample_quality, access_hint, init_data);
@@ -93,22 +93,22 @@ namespace KlayGE
 		return MakeSharedPtr<OGLConditionalRender>();
 	}
 
-	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int level)
+	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int array_index, int level)
 	{
 		return MakeSharedPtr<OGLTexture1DRenderView>(texture, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int level)
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int array_index, int level)
 	{
 		return MakeSharedPtr<OGLTexture2DRenderView>(texture, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, Texture::CubeFaces face, int level)
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
 	{
 		return MakeSharedPtr<OGLTextureCubeRenderView>(texture, face, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, uint32_t slice, int level)
+	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
 	{
 		return MakeSharedPtr<OGLTexture3DRenderView>(texture, slice, level);
 	}
@@ -123,7 +123,7 @@ namespace KlayGE
 		return MakeSharedPtr<OGLDepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(Texture& texture, int level)
+	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(Texture& texture, int array_index, int level)
 	{
 		return MakeSharedPtr<OGLDepthStencilRenderView>(texture, level);
 	}

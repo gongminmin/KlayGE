@@ -152,8 +152,8 @@ namespace
 
 		try
 		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0);
+			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rf.Make2DRenderView(*temp_tex, 0, 0);
 			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
@@ -233,26 +233,26 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, settings_.sample_count, settings_.sample_quality);
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0));
+	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	try
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_B10G11R11F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 	catch (...)
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0));
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	if (settings_.sample_count > 1)
 	{
-		render_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, render_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		render_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, render_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 	else
 	{
