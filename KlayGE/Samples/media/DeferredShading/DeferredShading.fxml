@@ -202,18 +202,38 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 				// point
 
 				float3 pos_ls = mul_quat(pos_es * light_pos[i].w, light_rotation[i]) + light_pos[i].xyz;
-				float3 dir = -normalize(pos_ls);
-				d = diffuse_term(dir, normal_ls);
-				if (d > 0)
+				float4 light_proj_pos = mul(pos_ls, light_proj[i]);
+				if (((light_proj_pos.x < light_proj_pos.w) && (light_proj_pos.x > -light_proj_pos.w))
+					&& ((light_proj_pos.y < light_proj_pos.w) && (light_proj_pos.y > -light_proj_pos.w)))
 				{
-					float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
-					s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-					atten_clr = attenuation_term(float3(0, 0, 0), pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
+					light_proj_pos /= light_proj_pos.w;
+					light_proj_pos.y *= flip;
+					light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
+					
+					if (light_proj_pos.z > 0)
+					{
+						float3 dir = -normalize(pos_ls);
+						d = diffuse_term(dir, normal_ls);
+						if (d > 0)
+						{
+							float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
+							s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
+							atten_clr = attenuation_term(float3(0, 0, 0), pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
+						}
+						else
+						{
+							d = 0;
+						}
+					}
+					else
+					{
+						d = 0;
+					}
 				}
 				else
 				{
 					d = 0;
-				}
+				}	
 			}
 			else if (1 == type)
 			{
@@ -312,6 +332,10 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 						{
 							d = 0;
 						}
+					}
+					else
+					{
+						d = 0;
 					}
 				}
 				else

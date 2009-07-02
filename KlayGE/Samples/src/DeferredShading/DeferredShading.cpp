@@ -477,11 +477,6 @@ namespace
 				{
 					if (light_enabled_[i])
 					{
-						light_clr_type_enabled_.push_back(light_clr_type_[i]);
-						light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
-						light_falloff_enabled_.push_back(light_falloff_[i]);
-						sm_tex_enabled_.push_back(sm_tex_[i]);
-
 						int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
 
 						float4x4 light_model;
@@ -489,47 +484,85 @@ namespace
 						{
 						case 0:
 							{
+								float fov = PI / 2;
+								float4x4 mat_proj = MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f);
+
 								float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
-								light_model = MathLib::translation(-eye);
+								for (int j = 0; j < 6; ++ j)
+								{
+									light_clr_type_enabled_.push_back(light_clr_type_[i]);
+									light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+									light_falloff_enabled_.push_back(light_falloff_[i]);
+									sm_tex_enabled_.push_back(sm_tex_[i]);
+
+									std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+
+									float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + ad.first;
+									light_model = MathLib::look_at_lh(eye, at, ad.second);
+
+									//light_model = MathLib::translation(-eye);
+
+									float4x4 mat = inv_view * light_model;
+									float3 scale, trans;
+									Quaternion rot;
+									MathLib::decompose(scale, rot, trans, mat);
+									light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
+									light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+
+									light_proj_.push_back(mat_proj);
+								}
 							}
 							break;
 
 						case 1:
 							{
+								light_clr_type_enabled_.push_back(light_clr_type_[i]);
+								light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+								light_falloff_enabled_.push_back(light_falloff_[i]);
+								sm_tex_enabled_.push_back(sm_tex_[i]);
+
 								float3 eye(0, 0, 0);
 								float3 at = *reinterpret_cast<float3*>(&light_dir_[i]);
 								light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+
+								float4x4 mat = inv_view * light_model;
+								float3 scale, trans;
+								Quaternion rot;
+								MathLib::decompose(scale, rot, trans, mat);
+								light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
+								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+
+								light_proj_.push_back(float4x4());
 							}
 							break;
 
 						case 2:
 							{
+								light_clr_type_enabled_.push_back(light_clr_type_[i]);
+								light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+								light_falloff_enabled_.push_back(light_falloff_[i]);
+								sm_tex_enabled_.push_back(sm_tex_[i]);
+
 								float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
 								float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + *reinterpret_cast<float3*>(&light_dir_[i]);
 								light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+
+								float4x4 mat = inv_view * light_model;
+								float3 scale, trans;
+								Quaternion rot;
+								MathLib::decompose(scale, rot, trans, mat);
+								light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
+								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+
+								float fov = acos(light_cos_outer_inner_[i].x()) * 2;
+								light_proj_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
 							}
 							break;
 						}
-
-						float4x4 mat = inv_view * light_model;
-						float3 scale, trans;
-						Quaternion rot;
-						MathLib::decompose(scale, rot, trans, mat);
-						light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
-						light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
-						if (2 == type)
-						{
-							float fov = acos(light_cos_outer_inner_[i].x()) * 2;
-							light_proj_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
-						}
-						else
-						{
-							light_proj_.push_back(float4x4());
-						}
-
-						++ num_lights;
 					}
 				}
+
+				num_lights = static_cast<int32_t>(light_clr_type_enabled_.size());
 
 				int32_t start = 0;
 				while (num_lights > 0)
