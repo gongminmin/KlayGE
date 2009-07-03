@@ -432,6 +432,10 @@ namespace KlayGE
 				case REDT_texture2D:
 				case REDT_texture3D:
 				case REDT_textureCUBE:
+				case REDT_texture1DArray:
+				case REDT_texture2DArray:
+				case REDT_texture3DArray:
+				case REDT_textureCUBEArray:
 				case REDT_sampler:
 				case REDT_buffer:
 					break;
@@ -485,6 +489,30 @@ namespace KlayGE
 					std::string elem_type;
 					param.var()->Value(elem_type);
 					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture1DArray:
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture2DArray:
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_textureCUBEArray:
+				{
+					std::string elem_type;
+					param.var()->Value(elem_type);
+					ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
 				}
 				break;
 
@@ -1034,6 +1062,10 @@ namespace KlayGE
 		case REDT_texture2D:
 		case REDT_texture3D:
 		case REDT_textureCUBE:
+		case REDT_texture1DArray:
+		case REDT_texture2DArray:
+		case REDT_texture3DArray:
+		case REDT_textureCUBEArray:
 			ret.func = SetD3D11ShaderParameter<TexturePtr, TexturePtr>(textures_[p_handle.shader_type][p_handle.offset], param);
 			break;
 

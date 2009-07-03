@@ -63,11 +63,14 @@ namespace KlayGE
 		std::vector<D3D10_SUBRESOURCE_DATA> subres_data(numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int i = 0; i < numMipMaps_; ++ i)
+			for (int j = 0; j < array_size_; ++ j)
 			{
-				subres_data[i].pSysMem = init_data[i].data;
-				subres_data[i].SysMemPitch = init_data[i].row_pitch;
-				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
+				for (int i = 0; i < numMipMaps_; ++ i)
+				{
+					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
+					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
+					subres_data[j * numMipMaps_ + i].SysMemSlicePitch = init_data[j * numMipMaps_ + i].slice_pitch;
+				}
 			}
 		}
 

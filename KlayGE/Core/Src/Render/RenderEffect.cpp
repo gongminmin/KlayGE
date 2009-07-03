@@ -109,6 +109,10 @@ namespace
 			types_.push_back("texture2D");
 			types_.push_back("texture3D");
 			types_.push_back("textureCUBE");
+			types_.push_back("texture1DArray");
+			types_.push_back("texture2DArray");
+			types_.push_back("texture3DArray");
+			types_.push_back("textureCUBEArray");
 			types_.push_back("sampler");
 			types_.push_back("shader");
 			types_.push_back("int");
@@ -580,6 +584,10 @@ namespace
 		case REDT_texture2D:
 		case REDT_texture3D:
 		case REDT_textureCUBE:
+		case REDT_texture1DArray:
+		case REDT_texture2DArray:
+		case REDT_texture3DArray:
+		case REDT_textureCUBEArray:
 			var = MakeSharedPtr<RenderVariableTexture>();
 			*var = TexturePtr();
 			attr = node->Attrib("elem_type");
@@ -943,7 +951,8 @@ namespace KlayGE
 
 				uint32_t type = type_define::instance().type_code(node->Attrib("type")->ValueString());
 				if ((type != REDT_sampler)
-					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE))
+					&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D) && (type != REDT_textureCUBE)
+					&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
 				{
 					XMLNodePtr parent_node = node->Parent();
 					std::string cbuff_name;
@@ -1635,7 +1644,8 @@ namespace KlayGE
 			}
 		}
 
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)))
+		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_))
+			&& ((REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
 		{
 			for (size_t i = 0; i < annotations_->size(); ++ i)
 			{

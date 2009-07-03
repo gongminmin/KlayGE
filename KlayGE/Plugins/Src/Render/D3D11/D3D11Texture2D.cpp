@@ -81,14 +81,17 @@ namespace KlayGE
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
-		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(numMipMaps_);
+		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int i = 0; i < numMipMaps_; ++ i)
+			for (int j = 0; j < array_size_; ++ j)
 			{
-				subres_data[i].pSysMem = init_data[i].data;
-				subres_data[i].SysMemPitch = init_data[i].row_pitch;
-				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
+				for (int i = 0; i < numMipMaps_; ++ i)
+				{
+					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
+					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
+					subres_data[j * numMipMaps_ + i].SysMemSlicePitch = init_data[j * numMipMaps_ + i].slice_pitch;
+				}
 			}
 		}
 
@@ -118,16 +121,34 @@ namespace KlayGE
 				break;
 			}
 
-			if (sample_count > 1)
+			if (array_size_ > 1)
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+				if (sample_count > 1)
+				{
+					sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+				}
+				else
+				{
+					sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				}
+				sr_desc.Texture2DArray.MostDetailedMip = 0;
+				sr_desc.Texture2DArray.MipLevels = numMipMaps_;
+				sr_desc.Texture2DArray.ArraySize = array_size_;
+				sr_desc.Texture2DArray.FirstArraySlice = 0;
 			}
 			else
 			{
-				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				if (sample_count > 1)
+				{
+					sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+				}
+				else
+				{
+					sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				}
+				sr_desc.Texture2D.MostDetailedMip = 0;
+				sr_desc.Texture2D.MipLevels = numMipMaps_;
 			}
-			sr_desc.Texture2D.MostDetailedMip = 0;
-			sr_desc.Texture2D.MipLevels = numMipMaps_;
 
 			ID3D11ShaderResourceView* d3d_sr_view;
 			d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), &sr_desc, &d3d_sr_view);

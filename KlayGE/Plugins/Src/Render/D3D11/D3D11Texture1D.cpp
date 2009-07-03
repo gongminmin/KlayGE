@@ -60,14 +60,17 @@ namespace KlayGE
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 
-		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(numMipMaps_);
+		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int i = 0; i < numMipMaps_; ++ i)
+			for (int j = 0; j < array_size_; ++ j)
 			{
-				subres_data[i].pSysMem = init_data[i].data;
-				subres_data[i].SysMemPitch = init_data[i].row_pitch;
-				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
+				for (int i = 0; i < numMipMaps_; ++ i)
+				{
+					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
+					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
+					subres_data[j * numMipMaps_ + i].SysMemSlicePitch = init_data[j * numMipMaps_ + i].slice_pitch;
+				}
 			}
 		}
 

@@ -51,7 +51,7 @@ namespace KlayGE
 			{
 				desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE1DARRAY;
 				desc.Texture1DArray.MipSlice = level;
-				desc.Texture1DArray.ArraySize = texture_1d_2d.ArraySize();
+				desc.Texture1DArray.ArraySize = 1;
 				desc.Texture1DArray.FirstArraySlice = array_index;
 			}
 			else
@@ -91,7 +91,7 @@ namespace KlayGE
 			if (texture_1d_2d.ArraySize() > 1)
 			{
 				desc.Texture2DArray.MipSlice = level;
-				desc.Texture2DArray.ArraySize = texture_1d_2d.ArraySize();
+				desc.Texture2DArray.ArraySize = 1;
 				desc.Texture2DArray.FirstArraySlice = array_index;
 			}
 			else
@@ -149,7 +149,7 @@ namespace KlayGE
 		}
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - Texture::CF_Positive_X;
-		desc.Texture2DArray.ArraySize = texture_cube.ArraySize() * 6;
+		desc.Texture2DArray.ArraySize = 1;
 
 		ID3D10RenderTargetView* rt_view;
 		TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10TextureCube*>(&texture_cube)->D3DTexture().get(), &desc, &rt_view));
@@ -229,7 +229,7 @@ namespace KlayGE
 			{
 				desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE1DARRAY;
 				desc.Texture1DArray.MipSlice = level;
-				desc.Texture1DArray.ArraySize = texture_1d_2d.ArraySize();
+				desc.Texture1DArray.ArraySize = 1;
 				desc.Texture1DArray.FirstArraySlice = array_index;
 			}
 			else
@@ -269,7 +269,7 @@ namespace KlayGE
 			if (texture_1d_2d.ArraySize() > 1)
 			{
 				desc.Texture2DArray.MipSlice = level;
-				desc.Texture2DArray.ArraySize = texture_1d_2d.ArraySize();
+				desc.Texture2DArray.ArraySize = 1;
 				desc.Texture2DArray.FirstArraySlice = array_index;
 			}
 			else
@@ -304,7 +304,7 @@ namespace KlayGE
 		}
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - Texture::CF_Positive_X;
-		desc.Texture2DArray.ArraySize = texture_cube.ArraySize() * 6;
+		desc.Texture2DArray.ArraySize = 1;
 
 		ID3D10DepthStencilView* ds_view;
 		TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10TextureCube*>(&texture_cube)->D3DTexture().get(), &desc, &ds_view));
