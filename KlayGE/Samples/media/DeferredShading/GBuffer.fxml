@@ -106,28 +106,22 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			<state name="pixel_shader" value="GBufferNoTexPS()"/>
 		</pass>
 	</technique>
-
-	<cbuffer name="per_frame2">
-		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4x4" name="obj_to_light_model"/>
-	</cbuffer>
 	
 	<shader>
 		<![CDATA[
 void GenShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
-						out float4 oLightWorldPos : TEXCOORD0,
+						out float2 oLightWorldPos : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-	oPos = mul(Position, mvp);
-    oLightWorldPos = mul(Position, obj_to_light_model);
+	float4 pos_es = mul(Position, model_view);
+	oPos = mul(pos_es, proj);
+	oLightWorldPos = pos_es.zw;
 }
 
-float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float2 LightWorldPos : TEXCOORD0) : SV_Target
 {
-	LightWorldPos /= LightWorldPos.w;
-	float dist = length(LightWorldPos.xyz);
-	
+	float dist = LightWorldPos.x / LightWorldPos.y;
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);

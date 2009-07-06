@@ -119,11 +119,6 @@ namespace
 			}
 		}
 
-		void LightPosDir(float3 const & pos, float3 const & dir)
-		{
-			obj_to_light_model_ = MathLib::look_at_lh(pos, pos + dir, float3(0, 1, 0));
-		}
-
 		void OnRenderBegin()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
@@ -131,18 +126,10 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			if (gen_sm_pass_)
-			{
-				*(effect_->ParameterByName("mvp")) = view * proj;
-				*(effect_->ParameterByName("obj_to_light_model")) = obj_to_light_model_;
-			}
-			else
-			{
-				*(effect_->ParameterByName("proj")) = proj;
-				*(effect_->ParameterByName("model_view")) = view;
+			*(effect_->ParameterByName("proj")) = proj;
+			*(effect_->ParameterByName("model_view")) = view;
 
-				*(effect_->ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-			}
+			*(effect_->ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 
 	private:
@@ -150,7 +137,6 @@ namespace
 		bool gen_sm_pass_;
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr gbuffer_technique_;
-		float4x4 obj_to_light_model_;
 	};
 
 	class TorusObject : public SceneObjectHelper
@@ -168,15 +154,6 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderTorus>(model->Mesh(i))->GenShadowMapPass(sm_pass);
-			}
-		}
-
-		void LightPosDir(float3 const & pos, float3 const & dir)
-		{
-			RenderModelPtr const & model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderTorus>(model->Mesh(i))->LightPosDir(pos, dir);
 			}
 		}
 	};
@@ -261,7 +238,8 @@ namespace
 			: PostProcess(RenderTechniquePtr()),
 				buffer_type_(0)
 		{
-			if (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_shader_model < 4)
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			if (rf.RenderEngineInstance().DeviceCaps().max_shader_model < 4)
 			{
 				max_num_lights_a_batch_ = 1;
 			}
@@ -276,6 +254,18 @@ namespace
 
 			technique_wo_blend_ = technique_->Effect().TechniqueByName("DeferredShading");
 			technique_w_blend_ = technique_->Effect().TechniqueByName("DeferredShadingBlend");
+
+			RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(512, 512, EF_D16, 1, 0);
+			sm_tex_ = rf.MakeTexture2D(512, 512, 1, static_cast<uint16_t>(max_num_lights_a_batch_), EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			sm_buffer_.resize(max_num_lights_a_batch_);
+			for (int i = 0; i < max_num_lights_a_batch_; ++ i)
+			{
+				sm_buffer_[i] = rf.MakeFrameBuffer();
+				sm_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, i, 0));
+				sm_buffer_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
+
+			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(sm_buffer_[0]->RequiresFlipping() ? -1 : 1);
 		}
 
 		int AddPointLight(uint32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
@@ -288,7 +278,6 @@ namespace
 			light_dir_.push_back(float4(0, 0, 0, 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			light_cos_outer_inner_.push_back(float2(0, 0));
-			sm_tex_.push_back(TexturePtr());
 			return id;
 		}
 		int AddDirectionalLight(uint32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
@@ -302,7 +291,6 @@ namespace
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			light_cos_outer_inner_.push_back(float2(0, 0));
-			sm_tex_.push_back(TexturePtr());
 			return id;
 		}
 		int AddSpotLight(uint32_t attr, float3 const & pos, float3 const & dir, float cos_outer, float cos_inner, float3 const & clr, float3 const & falloff)
@@ -316,7 +304,6 @@ namespace
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			light_cos_outer_inner_.push_back(float2(cos_outer, cos_inner));
-			sm_tex_.push_back(TexturePtr());
 			return id;
 		}
 
@@ -345,11 +332,6 @@ namespace
 		void SpotLightAngle(int index, float cos_outer, float cos_inner)
 		{
 			light_cos_outer_inner_[index] = float2(cos_outer, cos_inner);
-		}
-		void ShadowMapTex(int index, TexturePtr const & tex, bool flip)
-		{
-			sm_tex_[index] = tex;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
 		float3 LightColor(int index) const
@@ -449,81 +431,47 @@ namespace
 			}
 		}
 
-		void Render()
+		void UpdateLightSrc(float4x4 const & inv_view)
 		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
-			float4x4 const inv_view = MathLib::inverse(view);
-
-			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-
-			if (0 == buffer_type_)
+			light_clr_type_enabled_.resize(0);
+			light_cos_outer_inner_enabled_.resize(0);
+			light_falloff_enabled_.resize(0);
+			light_pos_enabled_.resize(0);
+			light_rotation_enabled_.resize(0);
+			light_pos_world_enabled_.resize(0);
+			light_dir_world_enabled_.resize(0);
+			light_up_world_enabled_.resize(0);
+			light_fov_enabled_.resize(0);
+			for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 			{
-				int32_t num_lights = 0;
-				light_clr_type_enabled_.resize(0);
-				light_cos_outer_inner_enabled_.resize(0);
-				light_falloff_enabled_.resize(0);
-				light_pos_enabled_.resize(0);
-				light_rotation_enabled_.resize(0);
-				sm_tex_enabled_.resize(0);
-				for (size_t i = 0; i < light_clr_type_.size(); ++ i)
+				if (light_enabled_[i])
 				{
-					if (light_enabled_[i])
-					{
-						int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
+					int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
 
-						float4x4 light_model;
-						switch (type)
+					float4x4 light_model;
+					switch (type)
+					{
+					case 0:
 						{
-						case 0:
-							{
-								float fov = PI / 2;
-								float4x4 mat_proj = MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f);
+							float fov = PI / 2;
+							float4x4 mat_proj = MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f);
 
-								float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
-								for (int j = 0; j < 6; ++ j)
-								{
-									light_clr_type_enabled_.push_back(light_clr_type_[i]);
-									light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
-									light_falloff_enabled_.push_back(light_falloff_[i]);
-									sm_tex_enabled_.push_back(sm_tex_[i]);
-
-									std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
-
-									float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + ad.first;
-									light_model = MathLib::look_at_lh(eye, at, ad.second);
-
-									//light_model = MathLib::translation(-eye);
-
-									float4x4 mat = inv_view * light_model;
-									float3 scale, trans;
-									Quaternion rot;
-									MathLib::decompose(scale, rot, trans, mat);
-									light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
-									light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
-
-									light_proj_.push_back(mat_proj);
-								}
-							}
-							break;
-
-						case 1:
+							float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
+							for (int j = 0; j < 6; ++ j)
 							{
 								light_clr_type_enabled_.push_back(light_clr_type_[i]);
 								light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
 								light_falloff_enabled_.push_back(light_falloff_[i]);
-								sm_tex_enabled_.push_back(sm_tex_[i]);
 
-								float3 eye(0, 0, 0);
-								float3 at = *reinterpret_cast<float3*>(&light_dir_[i]);
-								light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+
+								light_pos_world_enabled_.push_back(eye);
+								light_dir_world_enabled_.push_back(ad.first);
+								light_up_world_enabled_.push_back(ad.second);
+								light_fov_enabled_.push_back(fov);
+
+								float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + ad.first;
+								light_model = MathLib::look_at_lh(eye, at, ad.second);
 
 								float4x4 mat = inv_view * light_model;
 								float3 scale, trans;
@@ -532,78 +480,148 @@ namespace
 								light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
 								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
 
-								light_proj_.push_back(float4x4());
+								light_proj_.push_back(mat_proj);
 							}
-							break;
-
-						case 2:
-							{
-								light_clr_type_enabled_.push_back(light_clr_type_[i]);
-								light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
-								light_falloff_enabled_.push_back(light_falloff_[i]);
-								sm_tex_enabled_.push_back(sm_tex_[i]);
-
-								float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
-								float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + *reinterpret_cast<float3*>(&light_dir_[i]);
-								light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
-
-								float4x4 mat = inv_view * light_model;
-								float3 scale, trans;
-								Quaternion rot;
-								MathLib::decompose(scale, rot, trans, mat);
-								light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
-								light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
-
-								float fov = acos(light_cos_outer_inner_[i].x()) * 2;
-								light_proj_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
-							}
-							break;
 						}
+						break;
+
+					case 1:
+						{
+							light_clr_type_enabled_.push_back(light_clr_type_[i]);
+							light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+							light_falloff_enabled_.push_back(light_falloff_[i]);
+
+							float3 eye(0, 0, 0);
+							float3 at = *reinterpret_cast<float3*>(&light_dir_[i]);
+							light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+
+							light_pos_world_enabled_.push_back(eye);
+							light_dir_world_enabled_.push_back(at);
+							light_up_world_enabled_.push_back(float3(0, 1, 0));
+							light_fov_enabled_.push_back(0);
+
+							float4x4 mat = inv_view * light_model;
+							float3 scale, trans;
+							Quaternion rot;
+							MathLib::decompose(scale, rot, trans, mat);
+							light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
+							light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+
+							light_proj_.push_back(float4x4());
+						}
+						break;
+
+					case 2:
+						{
+							light_clr_type_enabled_.push_back(light_clr_type_[i]);
+							light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
+							light_falloff_enabled_.push_back(light_falloff_[i]);
+
+							float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
+							float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + *reinterpret_cast<float3*>(&light_dir_[i]);
+							light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+
+							float4x4 mat = inv_view * light_model;
+							float3 scale, trans;
+							Quaternion rot;
+							MathLib::decompose(scale, rot, trans, mat);
+							light_pos_enabled_.push_back(float4(trans.x(), trans.y(), trans.z(), scale.x()));
+							light_rotation_enabled_.push_back(float4(rot.x(), rot.y(), rot.z(), rot.w()));
+
+							float fov = acos(light_cos_outer_inner_[i].x()) * 2;
+							light_proj_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
+
+							light_pos_world_enabled_.push_back(eye);
+							light_dir_world_enabled_.push_back(*reinterpret_cast<float3*>(&light_dir_[i]));
+							light_up_world_enabled_.push_back(float3(0, 1, 0));
+							light_fov_enabled_.push_back(fov);
+						}
+						break;
 					}
 				}
+			}
+		}
 
-				num_lights = static_cast<int32_t>(light_clr_type_enabled_.size());
+		uint32_t Update(uint32_t pass)
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-				int32_t start = 0;
-				while (num_lights > 0)
-				{
-					int32_t n = std::min(num_lights, max_num_lights_a_batch_);
+			if (0 == pass)
+			{
+				Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-					*(technique_->Effect().ParameterByName("num_lights")) = n;
-					*(technique_->Effect().ParameterByName("light_clr_type")) = std::vector<float4>(&light_clr_type_enabled_[start], &light_clr_type_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_cos_outer_inner")) = std::vector<float2>(&light_cos_outer_inner_enabled_[start], &light_cos_outer_inner_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_enabled_[start], &light_falloff_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_pos")) = std::vector<float4>(&light_pos_enabled_[start], &light_pos_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_rotation")) = std::vector<float4>(&light_rotation_enabled_[start], &light_rotation_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_proj")) = std::vector<float4x4>(&light_proj_[start], &light_proj_[start] + n);
+				float4x4 const & view = camera.ViewMatrix();
+				float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
+				float4x4 const inv_view = MathLib::inverse(view);
 
-					for (int i = 0; i < n; ++ i)
-					{
-						std::stringstream ss;
-						ss << "shadow_map_" << i << "_tex";
-						*(technique_->Effect().ParameterByName(ss.str())) = sm_tex_enabled_[i];
-					}
+				*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
-					if (0 == start)
-					{
-						technique_ = technique_wo_blend_;
-					}
-					else
-					{
-						technique_ = technique_w_blend_;
-					}
+				*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+				*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+				*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+				*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
-					PostProcess::Render();
+				*(technique_->Effect().ParameterByName("shadow_map_tex_array")) = sm_tex_;
 
-					num_lights -= n;
-					start += n;
-				}
+				this->UpdateLightSrc(inv_view);
+			}
+
+			int32_t batch = pass / (max_num_lights_a_batch_ + 1);
+			int32_t pass_in_batch = pass - batch * (max_num_lights_a_batch_ + 1);
+
+			int32_t num_lights = static_cast<int32_t>(light_clr_type_enabled_.size());
+			int32_t start = batch * max_num_lights_a_batch_;
+			int32_t n = std::min(num_lights - start, max_num_lights_a_batch_);
+
+			if (pass_in_batch < n)
+			{
+				int32_t light_index = batch * max_num_lights_a_batch_ + pass_in_batch;
+
+				float3 p = light_pos_world_enabled_[light_index];
+				float3 d = light_dir_world_enabled_[light_index];
+				float3 u = light_up_world_enabled_[light_index];
+				sm_buffer_[pass_in_batch]->GetViewport().camera->ViewParams(p, p + d, u);
+				sm_buffer_[pass_in_batch]->GetViewport().camera->ProjParams(light_fov_enabled_[light_index], 1, 0.1f, 100.0f);
+
+				re.BindFrameBuffer(sm_buffer_[pass_in_batch]);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+				return App3DFramework::URV_Need_Flush;
 			}
 			else
 			{
+				re.BindFrameBuffer(frame_buffer_);
+
+				*(technique_->Effect().ParameterByName("num_lights")) = n;
+				*(technique_->Effect().ParameterByName("light_clr_type")) = std::vector<float4>(&light_clr_type_enabled_[start], &light_clr_type_enabled_[start] + n);
+				*(technique_->Effect().ParameterByName("light_cos_outer_inner")) = std::vector<float2>(&light_cos_outer_inner_enabled_[start], &light_cos_outer_inner_enabled_[start] + n);
+				*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_enabled_[start], &light_falloff_enabled_[start] + n);
+				*(technique_->Effect().ParameterByName("light_pos")) = std::vector<float4>(&light_pos_enabled_[start], &light_pos_enabled_[start] + n);
+				*(technique_->Effect().ParameterByName("light_rotation")) = std::vector<float4>(&light_rotation_enabled_[start], &light_rotation_enabled_[start] + n);
+				*(technique_->Effect().ParameterByName("light_proj")) = std::vector<float4x4>(&light_proj_[start], &light_proj_[start] + n);
+
+				if (0 == start)
+				{
+					technique_ = technique_wo_blend_;
+				}
+				else
+				{
+					technique_ = technique_w_blend_;
+				}
+
 				PostProcess::Render();
+
+				if (start + n >= num_lights)
+				{
+					return App3DFramework::URV_Finished;
+				}
+				else
+				{
+					return App3DFramework::URV_Flushed;
+				}
 			}
 		}
+
 
 	private:
 		std::vector<char> light_enabled_;
@@ -614,20 +632,26 @@ namespace
 		std::vector<float2> light_cos_outer_inner_;
 		std::vector<float4> light_falloff_;
 		std::vector<float4x4> light_proj_;
-		std::vector<TexturePtr> sm_tex_;
 
 		std::vector<float4> light_clr_type_enabled_;
 		std::vector<float2> light_cos_outer_inner_enabled_;
 		std::vector<float4> light_falloff_enabled_;
 		std::vector<float4> light_pos_enabled_;
 		std::vector<float4> light_rotation_enabled_;
-		std::vector<TexturePtr> sm_tex_enabled_;
+
+		std::vector<float3> light_pos_world_enabled_;
+		std::vector<float3> light_dir_world_enabled_;
+		std::vector<float3> light_up_world_enabled_;
+		std::vector<float> light_fov_enabled_;
 
 		RenderTechniquePtr technique_wo_blend_;
 		RenderTechniquePtr technique_w_blend_;
 
 		int32_t max_num_lights_a_batch_;
 		int32_t buffer_type_;
+
+		std::vector<FrameBufferPtr> sm_buffer_;
+		TexturePtr sm_tex_;
 	};
 
 	class AdaptiveAntiAliasPostProcess : public PostProcess
@@ -789,23 +813,9 @@ void DeferredShadingApp::InitObjects()
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
-	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(512, 512, EF_D16, 1, 0);
-	for (int i = 0; i < 2; ++ i)
-	{
-		sm_tex_[i] = rf.MakeTexture2D(512, 512, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-		sm_buffer_[i] = rf.MakeFrameBuffer();
-		sm_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_[i], 0, 0));
-		sm_buffer_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-	}
-	sm_buffer_[0]->GetViewport().camera->ProjParams(PI / 6 * 2, 1, 0.1f, 100.0f);
-	sm_buffer_[1]->GetViewport().camera->ProjParams(PI / 4 * 2, 1, 0.1f, 100.0f);
-
-	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(LSA_NoShadow, float3(2, 10, 0), float3(0.2f, 0.2f, 0.2f), float3(0, 0.3f, 0));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(2, 0, 0), float3(0, 0.3f, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 2, 0), float3(0, 0.3f, 0));
-	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ShadowMapTex(spot_light_id_[0], sm_tex_[0], sm_buffer_[0]->RequiresFlipping());
-	checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->ShadowMapTex(spot_light_id_[1], sm_tex_[1], sm_buffer_[1]->RequiresFlipping());
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(0, float3(2, 5, 0), float3(1, 1, 1), float3(0, 0.1f, 0));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.02f, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.02f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -975,6 +985,15 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
+		for (int i = 0; i < 2; ++ i)
+		{
+			float4x4 model_mat = checked_pointer_cast<ConeObject>(light_src_[i])->ModelMatrix();
+			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
+			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
+			ds->LightPos(spot_light_id_[i], p);
+			ds->LightDir(spot_light_id_[i], d);
+		}
+
 		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(false);
 
 		light_src_[0]->Visible(true);
@@ -985,45 +1004,34 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	case 1:
-	case 2:
-		{
-			float4x4 model_mat = checked_pointer_cast<ConeObject>(light_src_[pass - 1])->ModelMatrix();
-			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
-			ds->LightPos(spot_light_id_[pass - 1], p);
-			ds->LightDir(spot_light_id_[pass - 1], d);
-
-			sm_buffer_[pass - 1]->GetViewport().camera->ViewParams(p, p + d, float3(0, 1, 0));
-		}
-
 		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(true);
-		checked_pointer_cast<TorusObject>(torus_)->LightPosDir(ds->LightPos(spot_light_id_[pass - 1]), ds->LightDir(spot_light_id_[pass - 1]));
-
 		light_src_[0]->Visible(false);
 		light_src_[1]->Visible(false);
 
-		renderEngine.BindFrameBuffer(sm_buffer_[pass - 1]);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
-		return App3DFramework::URV_Need_Flush;
-
-	default:
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 			blur_pp_->Apply();
 		}
-		deferred_shading_->Apply();
-		if ((0 == buffer_type_) && anti_alias_enabled_)
-		{
-			edge_anti_alias_->Apply();
-		}
-		if (0 == buffer_type_)
-		{
-			hdr_pp_->Apply();
-		}
 
-		return App3DFramework::URV_Finished;
+	default:
+		{
+			uint32_t ret = ds->Update(pass - 1);
+			if (App3DFramework::URV_Finished == ret)
+			{
+				renderEngine.BindFrameBuffer(FrameBufferPtr());
+				renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+				if ((0 == buffer_type_) && anti_alias_enabled_)
+				{
+					edge_anti_alias_->Apply();
+				}
+				if (0 == buffer_type_)
+				{
+					hdr_pp_->Apply();
+				}
+			}
+
+			return ret;
+		}
 	}
 }

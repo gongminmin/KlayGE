@@ -36,19 +36,13 @@
 		<state name="address_v" value="wrap"/>
 	</parameter>
 
-	<parameter type="texture2D" name="shadow_map_0_tex"/>
-	<parameter type="texture2D" name="shadow_map_1_tex"/>
-	<parameter type="texture2D" name="shadow_map_2_tex"/>
-	<parameter type="texture2D" name="shadow_map_3_tex"/>
-	<parameter type="texture2D" name="shadow_map_4_tex"/>
-	<parameter type="texture2D" name="shadow_map_5_tex"/>
-	<parameter type="texture2D" name="shadow_map_6_tex"/>
-	<parameter type="texture2D" name="shadow_map_7_tex"/>
+	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
 	
 	<parameter type="sampler" name="linear_border_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
 		<state name="address_v" value="border"/>
+		<state name="address_w" value="wrap"/>
 		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	
@@ -192,17 +186,32 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
 		{
 			float d = 0, s = 0;
-			float3 atten_clr = 0;
+			float atten = 0;
 			
 			float3 normal_ls = mul_quat(normal, light_rotation[i]);
 			
 			int type = (int)(light_clr_type[i].w + 0.1f);
-			if (0 == type)
+			if (1 == type)
 			{
-				// point
+				// directional
 
+				float3 dir = -mul_quat(float3(0, 0, 1), light_rotation[i]);
+				d = diffuse_term(dir, normal_ls);
+				if (d > 0)
+				{
+					float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
+					s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
+					atten = 1;
+				}
+				else
+				{
+					d = 0;
+				}
+			}
+			else
+			{
 				float3 pos_ls = mul_quat(pos_es * light_pos[i].w, light_rotation[i]) + light_pos[i].xyz;
-				float4 light_proj_pos = mul(pos_ls, light_proj[i]);
+				float4 light_proj_pos = mul(float4(pos_ls, 1), light_proj[i]);
 				if (((light_proj_pos.x < light_proj_pos.w) && (light_proj_pos.x > -light_proj_pos.w))
 					&& ((light_proj_pos.y < light_proj_pos.w) && (light_proj_pos.y > -light_proj_pos.w)))
 				{
@@ -216,117 +225,32 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 						d = diffuse_term(dir, normal_ls);
 						if (d > 0)
 						{
-							float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
-							s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-							atten_clr = attenuation_term(float3(0, 0, 0), pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
-						}
-						else
-						{
-							d = 0;
-						}
-					}
-					else
-					{
-						d = 0;
-					}
-				}
-				else
-				{
-					d = 0;
-				}	
-			}
-			else if (1 == type)
-			{
-				// directional
-
-				float3 dir = -mul_quat(float3(0, 0, 1), light_rotation[i]);
-				d = diffuse_term(dir, normal_ls);
-				if (d > 0)
-				{
-					float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
-					s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-					atten_clr = light_clr_type[i].xyz;
-				}
-				else
-				{
-					d = 0;
-				}
-			}
-			else if (2 == type)
-			{
-				float3 pos_ls = mul_quat(pos_es * light_pos[i].w, light_rotation[i]) + light_pos[i].xyz;
-				float4 light_proj_pos = mul(pos_ls, light_proj[i]);
-				if (((light_proj_pos.x < light_proj_pos.w) && (light_proj_pos.x > -light_proj_pos.w))
-					&& ((light_proj_pos.y < light_proj_pos.w) && (light_proj_pos.y > -light_proj_pos.w)))
-				{
-					light_proj_pos /= light_proj_pos.w;
-					light_proj_pos.y *= flip;
-					light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-
-					if (light_proj_pos.z > 0)
-					{
-						float2 moments;
-						if (0 == i)
-						{
-							moments = shadow_map_0_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (1 == i)
-						{
-							moments = shadow_map_1_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (2 == i)
-						{
-							moments = shadow_map_2_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (3 == i)
-						{
-							moments = shadow_map_3_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (4 == i)
-						{
-							moments = shadow_map_4_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (5 == i)
-						{
-							moments = shadow_map_5_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (6 == i)
-						{
-							moments = shadow_map_6_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						else if (7 == i)
-						{
-							moments = shadow_map_7_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-						}
-						
-						float3 dir = -normalize(pos_ls.xyz);
-						d = diffuse_term(dir, normal_ls);
-						if (d > 0)
-						{
-							float dist_sq = dot(pos_ls, pos_ls);
-							float dist = sqrt(dist_sq);
+							float2 moments = shadow_map_tex_array.SampleLevel(linear_border_sampler, float3(light_proj_pos.xy, i), 0);
 						
 							float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
 							s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-							atten_clr = attenuation_term(0, pos_ls, light_falloff[i].xyz) * light_clr_type[i].xyz;
-
-							float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_outer_inner[i], pos_ls.xyz);
+							atten = attenuation_term(float3(0, 0, 0), pos_ls, light_falloff[i].xyz);
 							
-							float shadow = 1.0f / (0.001f + 0.5f * dist_sq);
+							float shadow = 1.0f / (0.1f + 0.5f * pos_ls.z * pos_ls.z);
 
-							float p = (dist <= moments.x);
+							float p = (pos_ls.z <= moments.x);
 							// Variance shadow mapping
 							float variance = moments.y - moments.x * moments.x;
 							variance = max(variance, min_variance);
-							float m_d = moments.x - dist;
+							float m_d = moments.x - pos_ls.z;
 							float p_max = variance / (variance + m_d * m_d);
 							p_max = linstep(bleeding_reduce, 1, p_max);
 
 							shadow *= max(p, p_max);
-							spot *= shadow;
+							
+							if (2 == type)
+							{
+								float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_outer_inner[i], pos_ls.xyz);
+								shadow *= spot;
+							}
 
-							d *= spot;
-							s *= spot;
+							d *= shadow;
+							s *= shadow;
 						}
 						else
 						{
@@ -344,8 +268,8 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 				}
 			}
 			
-			diffuse += d * atten_clr;
-			specular += s * atten_clr;
+			diffuse += d * atten * light_clr_type[i].xyz;
+			specular += s * atten  * light_clr_type[i].xyz;
 		}
 
 		float ssao = 1;
@@ -354,7 +278,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			ssao = ssao_tex.Sample(point_sampler, tc0).x;
 		}
 		float3 specular_clr = GetSpecular(color);
-		final_clr = float4(0.65f * diffuse_clr * (0.05f * ssao + diffuse) + 0.3f * specular_clr * specular, 1);
+		final_clr = float4(0.65f * diffuse_clr * (0.1f * ssao + diffuse) + 0.3f * specular_clr * specular, 1);
 	}
 	
 	return final_clr;
