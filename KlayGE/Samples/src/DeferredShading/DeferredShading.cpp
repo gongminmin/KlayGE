@@ -176,7 +176,7 @@ namespace
 		{
 		}
 
-		void ModelMatrix(float4x4 const & mat)
+		void GetModelMatrix(float4x4 const & mat)
 		{
 			model_ = mat;
 		}
@@ -211,10 +211,10 @@ namespace
 		void Update()
 		{
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() * rot_speed_) * MathLib::translation(0.0f, height_, 0.0f);
-			checked_pointer_cast<RenderCone>(renderable_)->ModelMatrix(model_);
+			checked_pointer_cast<RenderCone>(renderable_)->GetModelMatrix(model_);
 		}
 
-		float4x4 const & ModelMatrix() const
+		float4x4 const & GetModelMatrix() const
 		{
 			return model_;
 		}
@@ -225,6 +225,31 @@ namespace
 		float rot_speed_, height_;
 	};
 
+	class SphereObject : public SceneObjectHelper
+	{
+	public:
+		SphereObject(std::string const & model_name, float move_speed, float3 const & pos)
+			: SceneObjectHelper(SOA_Cullable), move_speed_(move_speed), pos_(pos)
+		{
+			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderCone>())->Mesh(0);
+		}
+
+		void Update()
+		{
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::translation(sin(std::clock() * move_speed_), 0.0f, 0.0f) * MathLib::translation(pos_);
+			checked_pointer_cast<RenderCone>(renderable_)->GetModelMatrix(model_);
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
+
+	private:
+		float4x4 model_;
+		float move_speed_;
+		float3 pos_;
+	};
 
 	enum LightType
 	{
@@ -838,10 +863,12 @@ void DeferredShadingApp::InitObjects()
 	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
 
-	light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2, 1 / 1400.0f, 2.0f);
-	light_src_[1] = MakeSharedPtr<ConeObject>("cone_90.meshml", -PI / 2, -1 / 700.0f, 1.7f);
-	light_src_[0]->AddToSceneManager();
-	light_src_[1]->AddToSceneManager();
+	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0));
+	spot_light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2, 1 / 1400.0f, 2.0f);
+	spot_light_src_[1] = MakeSharedPtr<ConeObject>("cone_90.meshml", -PI / 2, -1 / 700.0f, 1.7f);
+	point_light_src_->AddToSceneManager();
+	spot_light_src_[0]->AddToSceneManager();
+	spot_light_src_[1]->AddToSceneManager();
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 100.0f);
@@ -887,9 +914,9 @@ void DeferredShadingApp::InitObjects()
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
 	ambient_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddAmbientLight(0, float3(1, 1, 1));
-	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(0, float3(2, 5, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.5f, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.5f, 0));
+	point_light_id_ = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
+	spot_light_id_[0] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 6), cos(PI / 8), float3(1, 0, 0), float3(0, 0.2f, 0));
+	spot_light_id_[1] = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), cos(PI / 4), cos(PI / 6), float3(0, 1, 0), float3(0, 0.2f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -1059,9 +1086,14 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
+		{
+			float4x4 model_mat = checked_pointer_cast<ConeObject>(point_light_src_)->GetModelMatrix();
+			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
+			ds->LightPos(point_light_id_, p);
+		}
 		for (int i = 0; i < 2; ++ i)
 		{
-			float4x4 model_mat = checked_pointer_cast<ConeObject>(light_src_[i])->ModelMatrix();
+			float4x4 model_mat = checked_pointer_cast<ConeObject>(spot_light_src_[i])->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
 			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
 			ds->LightPos(spot_light_id_[i], p);
@@ -1070,8 +1102,9 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 
 		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(false);
 
-		light_src_[0]->Visible(true);
-		light_src_[1]->Visible(true);
+		point_light_src_->Visible(true);
+		spot_light_src_[0]->Visible(true);
+		spot_light_src_[1]->Visible(true);
 
 		renderEngine.BindFrameBuffer(g_buffer_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
@@ -1079,8 +1112,9 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 
 	case 1:
 		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(true);
-		light_src_[0]->Visible(false);
-		light_src_[1]->Visible(false);
+		point_light_src_->Visible(false);
+		spot_light_src_[0]->Visible(false);
+		spot_light_src_[1]->Visible(false);
 
 		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
 		{
