@@ -1,11 +1,19 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="Quaternion.fxml"/>
 	<include name="DeferredShadingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
 
+	<macro name="LT_Ambient" value="0"/>
+	<macro name="LT_Point" value="1"/>
+	<macro name="LT_Directional" value="2"/>
+	<macro name="LT_Spot" value="3"/>
+
+	<macro name="LSA_NoShadow" value="1"/>
+	<macro name="LSA_NoDiffuse" value="2"/>
+	<macro name="LSA_NoSpecular" value="4"/>
+	
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="upper_left"/>
 		<parameter type="float3" name="upper_right"/>
@@ -22,12 +30,12 @@
 
 	<cbuffer name="light_sources">
 		<parameter type="int" name="num_lights"/>
+		<parameter type="int" name="light_attrib" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4" name="light_pos" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_falloff" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4" name="light_rotation" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4x4" name="light_view" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4x4" name="light_proj" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -73,7 +81,7 @@ float linstep(float min, float max, float v)
 	</parameter>
 
 	<parameter type="sampler" name="bilinear_wrap_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="filtering" value="min_mag_mip_linear"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
@@ -185,33 +193,42 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		float3 diffuse = 0, specular = 0;
 		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
 		{
-			float d = 0, s = 0;
-			float atten = 0;
+			float2 ds = 0;
 			
-			float3 normal_ls = mul_quat(normal, light_rotation[i]);
+			float3 normal_ls = mul(normal, (float3x3)light_view[i]);
 			
 			int type = (int)(light_clr_type[i].w + 0.1f);
-			if (1 == type)
+			if (LT_Ambient == type)
+			{
+				float ssao = 1;
+				if (ssao_enabled)
+				{
+					ssao = ssao_tex.Sample(point_sampler, tc0).x;
+				}
+
+				ds = float2(0.1f * ssao, 0);
+			}
+			else if (LT_Directional == type)
 			{
 				// directional
 
-				float3 dir = -mul_quat(float3(0, 0, 1), light_rotation[i]);
-				d = diffuse_term(dir, normal_ls);
-				if (d > 0)
+				float3 dir = -mul(float3(0, 0, 1), (float3x3)light_view[i]);
+				ds.x = diffuse_term(dir, normal_ls);
+				if (ds.x > 0)
 				{
-					float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
-					s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-					atten = 1;
+					float3 view_dir_ls = mul(view_dir, (float3x3)light_view[i]);
+					ds.y = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
 				}
 				else
 				{
-					d = 0;
+					ds.x = 0;
 				}
 			}
 			else
 			{
-				float3 pos_ls = mul_quat(pos_es * light_pos[i].w, light_rotation[i]) + light_pos[i].xyz;
-				float4 light_proj_pos = mul(float4(pos_ls, 1), light_proj[i]);
+				float4 pos_ls = mul(float4(pos_es, 1), light_view[i]);
+				float4 light_proj_pos = mul(pos_ls, light_proj[i]);
+				pos_ls = pos_ls / pos_ls.w;
 				if (((light_proj_pos.x < light_proj_pos.w) && (light_proj_pos.x > -light_proj_pos.w))
 					&& ((light_proj_pos.y < light_proj_pos.w) && (light_proj_pos.y > -light_proj_pos.w)))
 				{
@@ -221,64 +238,58 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 					
 					if (light_proj_pos.z > 0)
 					{
-						float3 dir = -normalize(pos_ls);
-						d = diffuse_term(dir, normal_ls);
-						if (d > 0)
+						float3 dir = -normalize(pos_ls.xyz);
+						ds.x = diffuse_term(dir, normal_ls);
+						if (ds.x > 0)
 						{
 							float2 moments = shadow_map_tex_array.SampleLevel(linear_border_sampler, float3(light_proj_pos.xy, i), 0);
 						
-							float3 view_dir_ls = mul_quat(view_dir, light_rotation[i]);
-							s = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-							atten = attenuation_term(float3(0, 0, 0), pos_ls, light_falloff[i].xyz);
-							
-							float shadow = 1.0f / (0.1f + 0.5f * pos_ls.z * pos_ls.z);
+							float3 view_dir_ls = mul(view_dir, (float3x3)light_view[i]);
+							ds.y = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
+							float atten = attenuation_term(float3(0, 0, 0), pos_ls.xyz, light_falloff[i].xyz);
 
-							float p = (pos_ls.z <= moments.x);
-							// Variance shadow mapping
-							float variance = moments.y - moments.x * moments.x;
-							variance = max(variance, min_variance);
-							float m_d = moments.x - pos_ls.z;
-							float p_max = variance / (variance + m_d * m_d);
-							p_max = linstep(bleeding_reduce, 1, p_max);
+							float shadow = 1;
+							if (0 == (light_attrib[i] & LSA_NoShadow))
+							{
+								float p = (pos_ls.z < moments.x);
+								// Variance shadow mapping
+								float variance = moments.y - moments.x * moments.x;
+								variance = max(variance, min_variance);
+								float m_d = moments.x - pos_ls.z;
+								float p_max = variance / (variance + m_d * m_d);
+								p_max = linstep(bleeding_reduce, 1, p_max);
 
-							shadow *= max(p, p_max);
+								shadow = max(p, p_max);
+							}
 							
-							if (2 == type)
+							if (LT_Spot == type)
 							{
 								float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_outer_inner[i], pos_ls.xyz);
 								shadow *= spot;
 							}
 
-							d *= shadow;
-							s *= shadow;
+							ds *= shadow * atten;
 						}
 						else
 						{
-							d = 0;
+							ds.x = 0;
 						}
 					}
-					else
-					{
-						d = 0;
-					}
-				}
-				else
-				{
-					d = 0;
 				}
 			}
-			
-			diffuse += d * atten * light_clr_type[i].xyz;
-			specular += s * atten  * light_clr_type[i].xyz;
+
+			if (0 == (light_attrib[i] & LSA_NoDiffuse))
+			{
+				diffuse += ds.x * light_clr_type[i].xyz;
+			}
+			if (0 == (light_attrib[i] & LSA_NoSpecular))
+			{
+				specular += ds.y * light_clr_type[i].xyz;
+			}
 		}
 
-		float ssao = 1;
-		if (ssao_enabled)
-		{
-			ssao = ssao_tex.Sample(point_sampler, tc0).x;
-		}
 		float3 specular_clr = GetSpecular(color);
-		final_clr = float4(0.65f * diffuse_clr * (0.1f * ssao + diffuse) + 0.3f * specular_clr * specular, 1);
+		final_clr = float4(0.65f * diffuse_clr * diffuse + 0.3f * specular_clr * specular, 1);
 	}
 	
 	return final_clr;

@@ -326,8 +326,57 @@ namespace KlayGE
 
 				d3dTexture2D_ = MakeCOMPtr(d3d_tex);
 
+				D3D10_SHADER_RESOURCE_VIEW_DESC sr_desc;
+				switch (format_)
+				{
+				case EF_D16:
+					sr_desc.Format = DXGI_FORMAT_R16_FLOAT;
+					break;
+
+				case EF_D24S8:
+					sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+					break;
+
+				case EF_D32F:
+					sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+					break;
+
+				default:
+					sr_desc.Format = desc_.Format;
+					break;
+				}
+
+				if (array_size_ > 1)
+				{
+					if (desc_.SampleDesc.Count > 1)
+					{
+						sr_desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2DMSARRAY;
+					}
+					else
+					{
+						sr_desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2DARRAY;
+					}
+					sr_desc.Texture2DArray.MostDetailedMip = 0;
+					sr_desc.Texture2DArray.MipLevels = numMipMaps_;
+					sr_desc.Texture2DArray.ArraySize = array_size_;
+					sr_desc.Texture2DArray.FirstArraySlice = 0;
+				}
+				else
+				{
+					if (desc_.SampleDesc.Count > 1)
+					{
+						sr_desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2DMS;
+					}
+					else
+					{
+						sr_desc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+					}
+					sr_desc.Texture2D.MostDetailedMip = 0;
+					sr_desc.Texture2D.MipLevels = numMipMaps_;
+				}
+
 				ID3D10ShaderResourceView* d3d_sr_view;
-				d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), NULL, &d3d_sr_view);
+				d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), &sr_desc, &d3d_sr_view);
 				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
 			}
 

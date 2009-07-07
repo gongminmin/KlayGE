@@ -64,6 +64,7 @@ private:
 	int id_ssao_;
 	int id_ctrl_camera_;
 
+	int ambient_light_id_;
 	int point_light_id_;
 	int spot_light_id_[2];;
 };

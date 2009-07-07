@@ -564,6 +564,10 @@ namespace
 				var = MakeSharedPtr<RenderVariableInt>();
 				*var = tmp;
 			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableIntArray>();
+			}
 			break;
 
 		case REDT_string:
