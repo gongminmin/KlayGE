@@ -33,16 +33,12 @@
 		<parameter type="int" name="light_attrib" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_falloff" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_pos_es" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4" name="light_dir_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4x4" name="light_view" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4x4" name="light_proj" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
-
-	<parameter type="sampler" name="linear_sampler">
-		<state name="filtering" value="min_mag_mip_linear"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
 
 	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
 	<parameter type="texture2D" name="shadow_map_tex"/>
@@ -196,8 +192,6 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		{
 			float2 ds = 0;
 			
-			float3 normal_ls = mul(normal, (float3x3)light_view[i]);
-			
 			int type = (int)(light_clr_type[i].w + 0.1f);
 			if (LT_Ambient == type)
 			{
@@ -213,12 +207,11 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			{
 				// directional
 
-				float3 dir = -mul(float3(0, 0, 1), (float3x3)light_view[i]);
-				ds.x = diffuse_term(dir, normal_ls);
+				float3 dir = light_dir_es[i].xyz;
+				ds.x = diffuse_term(dir, normal);
 				if (ds.x > 0)
 				{
-					float3 view_dir_ls = mul(view_dir, (float3x3)light_view[i]);
-					ds.y = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
+					ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
 				}
 				else
 				{
@@ -239,8 +232,8 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 					
 					if (light_proj_pos.z > 0)
 					{
-						float3 dir = -normalize(pos_ls.xyz);
-						ds.x = diffuse_term(dir, normal_ls);
+						float3 dir = normalize(light_pos_es[i].xyz - pos_es);
+						ds.x = diffuse_term(dir, normal);
 						if (ds.x > 0)
 						{
 #ifdef KLAYGE_D3D9
@@ -249,9 +242,8 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 							float2 moments = shadow_map_tex_array.SampleLevel(linear_border_sampler, float3(light_proj_pos.xy, i), 0);
 #endif
 						
-							float3 view_dir_ls = mul(view_dir, (float3x3)light_view[i]);
-							ds.y = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
-							float atten = attenuation_term(float3(0, 0, 0), pos_ls.xyz, light_falloff[i].xyz);
+							ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+							float atten = attenuation_term(light_pos_es[i].xyz, pos_es.xyz, light_falloff[i].xyz);
 
 							float shadow = 1;
 #ifdef KLAYGE_D3D9
@@ -273,7 +265,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 							
 							if (LT_Spot == type)
 							{
-								float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_outer_inner[i], pos_ls.xyz);
+								float spot = spot_lighting(light_pos_es[i].xyz, light_dir_es[i].xyz, light_cos_outer_inner[i], pos_es.xyz);
 								shadow *= spot;
 							}
 

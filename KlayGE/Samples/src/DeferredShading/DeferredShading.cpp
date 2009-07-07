@@ -304,7 +304,7 @@ namespace
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Point));
-			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
+			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 			light_dir_.push_back(float4(0, 0, 0, 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			light_cos_outer_inner_.push_back(float2(0, 0));
@@ -330,7 +330,7 @@ namespace
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr);
 			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Spot));
-			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 0));
+			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 			light_cos_outer_inner_.push_back(float2(cos_outer, cos_inner));
@@ -353,7 +353,7 @@ namespace
 		}
 		void LightPos(int index, float3 const & pos)
 		{
-			light_pos_[index] = float4(pos.x(), pos.y(), pos.z(), 0);
+			light_pos_[index] = float4(pos.x(), pos.y(), pos.z(), 1);
 		}
 		void LightFalloff(int index, float3 const & falloff)
 		{
@@ -461,16 +461,18 @@ namespace
 			}
 		}
 
-		void UpdateLightSrc(float4x4 const & inv_view)
+		void UpdateLightSrc(float4x4 const & view, float4x4 const & inv_view)
 		{
 			light_attrib_enabled_.resize(0);
 			light_clr_type_enabled_.resize(0);
 			light_cos_outer_inner_enabled_.resize(0);
 			light_falloff_enabled_.resize(0);
 			light_view_enabled_.resize(0);
-			light_pos_world_enabled_.resize(0);
-			light_dir_world_enabled_.resize(0);
-			light_up_world_enabled_.resize(0);
+			light_pos_es_enabled_.resize(0);
+			light_dir_es_enabled_.resize(0);
+			light_pos_ws_enabled_.resize(0);
+			light_dir_ws_enabled_.resize(0);
+			light_up_ws_enabled_.resize(0);
 			light_fov_enabled_.resize(0);
 			for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 			{
@@ -487,14 +489,16 @@ namespace
 							light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
 							light_falloff_enabled_.push_back(light_falloff_[i]);
 
-							light_pos_world_enabled_.push_back(float3(0, 0, 0));
-							light_dir_world_enabled_.push_back(float3(0, 0, 1));
-							light_up_world_enabled_.push_back(float3(0, 1, 0));
+							light_pos_es_enabled_.push_back(float4(0, 0, 0, 1));
+							light_dir_es_enabled_.push_back(float4(0, 0, 1, 0));
+
+							light_pos_ws_enabled_.push_back(float3(0, 0, 0));
+							light_dir_ws_enabled_.push_back(float3(0, 0, 1));
+							light_up_ws_enabled_.push_back(float3(0, 1, 0));
 							light_fov_enabled_.push_back(0);
 
-							light_view_enabled_.push_back(float4x4::Identity());
-
-							light_proj_.push_back(float4x4());
+							light_view_enabled_.push_back(float4x4());
+							light_proj_enabled_.push_back(float4x4());
 						}
 						break;
 
@@ -503,7 +507,9 @@ namespace
 							float fov = PI / 2;
 							float4x4 mat_proj = MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f);
 
-							float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
+							float3 loc = *reinterpret_cast<float3*>(&light_pos_[i]);
+							float4 loc_es = MathLib::transform(light_pos_[i], view);
+							loc_es /= loc_es.w();
 							for (int j = 0; j < 6; ++ j)
 							{
 								light_attrib_enabled_.push_back(light_attrib_[i]);
@@ -513,16 +519,19 @@ namespace
 
 								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
 
-								light_pos_world_enabled_.push_back(eye);
-								light_dir_world_enabled_.push_back(ad.first);
-								light_up_world_enabled_.push_back(ad.second);
+								float3 dir_es = MathLib::transform_normal(ad.first, view);
+								light_pos_es_enabled_.push_back(loc_es);
+								light_dir_es_enabled_.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+								light_pos_ws_enabled_.push_back(loc);
+								light_dir_ws_enabled_.push_back(ad.first);
+								light_up_ws_enabled_.push_back(ad.second);
 								light_fov_enabled_.push_back(fov);
 
 								float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + ad.first;
-								float4x4 light_model = MathLib::look_at_lh(eye, at, ad.second);
+								float4x4 light_model = MathLib::look_at_lh(loc, at, ad.second);
 								light_view_enabled_.push_back(inv_view * light_model);
-
-								light_proj_.push_back(mat_proj);
+								light_proj_enabled_.push_back(mat_proj);
 							}
 						}
 						break;
@@ -534,18 +543,21 @@ namespace
 							light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
 							light_falloff_enabled_.push_back(light_falloff_[i]);
 
-							float3 eye(0, 0, 0);
+							float3 loc(0, 0, 0);
 							float3 at = *reinterpret_cast<float3*>(&light_dir_[i]);
-							float4x4 light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+							float4x4 light_model = MathLib::look_at_lh(loc, at, float3(0, 1, 0));
 
-							light_pos_world_enabled_.push_back(eye);
-							light_dir_world_enabled_.push_back(at);
-							light_up_world_enabled_.push_back(float3(0, 1, 0));
+							float3 dir_es = MathLib::transform_normal(at, view);
+							light_pos_es_enabled_.push_back(float4(0, 0, 0, 0));
+							light_dir_es_enabled_.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+							light_pos_ws_enabled_.push_back(loc);
+							light_dir_ws_enabled_.push_back(at);
+							light_up_ws_enabled_.push_back(float3(0, 1, 0));
 							light_fov_enabled_.push_back(0);
 
 							light_view_enabled_.push_back(inv_view * light_model);
-
-							light_proj_.push_back(float4x4());
+							light_proj_enabled_.push_back(float4x4());
 						}
 						break;
 
@@ -556,18 +568,24 @@ namespace
 							light_cos_outer_inner_enabled_.push_back(light_cos_outer_inner_[i]);
 							light_falloff_enabled_.push_back(light_falloff_[i]);
 
-							float3 eye = *reinterpret_cast<float3*>(&light_pos_[i]);
+							float3 loc = *reinterpret_cast<float3*>(&light_pos_[i]);
 							float3 at = *reinterpret_cast<float3*>(&light_pos_[i]) + *reinterpret_cast<float3*>(&light_dir_[i]);
-							float4x4 light_model = MathLib::look_at_lh(eye, at, float3(0, 1, 0));
+							float4x4 light_model = MathLib::look_at_lh(loc, at, float3(0, 1, 0));
 
 							light_view_enabled_.push_back(inv_view * light_model);
 
 							float fov = acos(light_cos_outer_inner_[i].x()) * 2;
-							light_proj_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
+							light_proj_enabled_.push_back(MathLib::perspective_fov_lh(fov, 1.0f, 0.1f, 100.0f));
 
-							light_pos_world_enabled_.push_back(eye);
-							light_dir_world_enabled_.push_back(*reinterpret_cast<float3*>(&light_dir_[i]));
-							light_up_world_enabled_.push_back(float3(0, 1, 0));
+							float4 loc_es = MathLib::transform(light_pos_[i], view);
+							loc_es /= loc_es.w();
+							float3 dir_es = MathLib::transform_normal(*reinterpret_cast<float3*>(&light_dir_[i]), view);
+							light_pos_es_enabled_.push_back(loc_es);
+							light_dir_es_enabled_.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
+
+							light_pos_ws_enabled_.push_back(loc);
+							light_dir_ws_enabled_.push_back(*reinterpret_cast<float3*>(&light_dir_[i]));
+							light_up_ws_enabled_.push_back(float3(0, 1, 0));
 							light_fov_enabled_.push_back(fov);
 						}
 						break;
@@ -595,7 +613,7 @@ namespace
 				*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 				*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
-				this->UpdateLightSrc(inv_view);
+				this->UpdateLightSrc(view, inv_view);
 			}
 
 			if (0 == buffer_type_)
@@ -613,9 +631,9 @@ namespace
 
 					if (0 == (light_attrib_enabled_[light_index] & LSA_NoShadow))
 					{
-						float3 p = light_pos_world_enabled_[light_index];
-						float3 d = light_dir_world_enabled_[light_index];
-						float3 u = light_up_world_enabled_[light_index];
+						float3 p = light_pos_ws_enabled_[light_index];
+						float3 d = light_dir_ws_enabled_[light_index];
+						float3 u = light_up_ws_enabled_[light_index];
 						sm_buffer_[pass_in_batch]->GetViewport().camera->ViewParams(p, p + d, u);
 						sm_buffer_[pass_in_batch]->GetViewport().camera->ProjParams(light_fov_enabled_[light_index], 1, 0.1f, 100.0f);
 
@@ -639,7 +657,9 @@ namespace
 					*(technique_->Effect().ParameterByName("light_cos_outer_inner")) = std::vector<float2>(&light_cos_outer_inner_enabled_[start], &light_cos_outer_inner_enabled_[start] + n);
 					*(technique_->Effect().ParameterByName("light_falloff")) = std::vector<float4>(&light_falloff_enabled_[start], &light_falloff_enabled_[start] + n);
 					*(technique_->Effect().ParameterByName("light_view")) = std::vector<float4x4>(&light_view_enabled_[start], &light_view_enabled_[start] + n);
-					*(technique_->Effect().ParameterByName("light_proj")) = std::vector<float4x4>(&light_proj_[start], &light_proj_[start] + n);
+					*(technique_->Effect().ParameterByName("light_proj")) = std::vector<float4x4>(&light_proj_enabled_[start], &light_proj_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_pos_es")) = std::vector<float4>(&light_pos_es_enabled_[start], &light_pos_es_enabled_[start] + n);
+					*(technique_->Effect().ParameterByName("light_dir_es")) = std::vector<float4>(&light_dir_es_enabled_[start], &light_dir_es_enabled_[start] + n);
 
 					if (0 == start)
 					{
@@ -681,17 +701,20 @@ namespace
 		std::vector<float4> light_dir_;
 		std::vector<float2> light_cos_outer_inner_;
 		std::vector<float4> light_falloff_;
-		std::vector<float4x4> light_proj_;
 
 		std::vector<int32_t> light_attrib_enabled_;
 		std::vector<float4> light_clr_type_enabled_;
 		std::vector<float2> light_cos_outer_inner_enabled_;
 		std::vector<float4> light_falloff_enabled_;
 		std::vector<float4x4> light_view_enabled_;
+		std::vector<float4x4> light_proj_enabled_;
 
-		std::vector<float3> light_pos_world_enabled_;
-		std::vector<float3> light_dir_world_enabled_;
-		std::vector<float3> light_up_world_enabled_;
+		std::vector<float4> light_pos_es_enabled_;
+		std::vector<float4> light_dir_es_enabled_;
+
+		std::vector<float3> light_pos_ws_enabled_;
+		std::vector<float3> light_dir_ws_enabled_;
+		std::vector<float3> light_up_ws_enabled_;
 		std::vector<float> light_fov_enabled_;
 
 		RenderTechniquePtr technique_wo_blend_;
