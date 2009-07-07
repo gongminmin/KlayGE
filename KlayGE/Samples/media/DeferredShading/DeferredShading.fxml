@@ -45,7 +45,8 @@
 	</parameter>
 
 	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
-	
+	<parameter type="texture2D" name="shadow_map_tex"/>
+
 	<parameter type="sampler" name="linear_border_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="border"/>
@@ -242,14 +243,22 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 						ds.x = diffuse_term(dir, normal_ls);
 						if (ds.x > 0)
 						{
+#ifdef KLAYGE_D3D9
+							float2 moments = shadow_map_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
+#else
 							float2 moments = shadow_map_tex_array.SampleLevel(linear_border_sampler, float3(light_proj_pos.xy, i), 0);
+#endif
 						
 							float3 view_dir_ls = mul(view_dir, (float3x3)light_view[i]);
 							ds.y = specular_term(normalize(dir + view_dir_ls), normal_ls, 8.0f);
 							float atten = attenuation_term(float3(0, 0, 0), pos_ls.xyz, light_falloff[i].xyz);
 
 							float shadow = 1;
+#ifdef KLAYGE_D3D9
+							if (0 == ((light_attrib[i] / LSA_NoShadow) % 2))
+#else
 							if (0 == (light_attrib[i] & LSA_NoShadow))
+#endif
 							{
 								float p = (pos_ls.z < moments.x);
 								// Variance shadow mapping
@@ -278,11 +287,19 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 				}
 			}
 
+#ifdef KLAYGE_D3D9
+			if (0 == ((light_attrib[i] / LSA_NoDiffuse) % 2))
+#else
 			if (0 == (light_attrib[i] & LSA_NoDiffuse))
+#endif
 			{
 				diffuse += ds.x * light_clr_type[i].xyz;
 			}
+#ifdef KLAYGE_D3D9
+			if (0 == ((light_attrib[i] / LSA_NoSpecular) % 2))
+#else
 			if (0 == (light_attrib[i] & LSA_NoSpecular))
+#endif
 			{
 				specular += ds.y * light_clr_type[i].xyz;
 			}

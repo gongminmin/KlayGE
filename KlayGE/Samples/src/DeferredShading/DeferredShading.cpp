@@ -276,7 +276,14 @@ namespace
 			}
 
 			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(sm_buffer_[0]->RequiresFlipping() ? -1 : 1);
-			*(technique_->Effect().ParameterByName("shadow_map_tex_array")) = sm_tex_;
+			if (rf.RenderEngineInstance().DeviceCaps().max_shader_model < 4)
+			{
+				*(technique_->Effect().ParameterByName("shadow_map_tex")) = sm_tex_;
+			}
+			else
+			{
+				*(technique_->Effect().ParameterByName("shadow_map_tex_array")) = sm_tex_;
+			}			
 		}
 
 		int AddAmbientLight(int32_t attr, float3 const & clr)

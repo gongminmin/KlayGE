@@ -730,7 +730,7 @@ namespace KlayGE
 						ID3DXConstantTable* constant_table_legacy;
 						ID3DXBuffer* code_legacy;
 						ID3DXBuffer* err_msg_legacy;
-						D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, NULL,
+						D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), &macros[0], NULL,
 							(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
 							D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
 						if (err_msg_legacy != NULL)
