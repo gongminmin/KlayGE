@@ -144,19 +144,14 @@ namespace
 	class TorusObject : public SceneObjectHelper
 	{
 	public:
-		TorusObject()
-			: SceneObjectHelper(SOA_Cullable)
+		TorusObject(RenderablePtr const & mesh)
+			: SceneObjectHelper(mesh, SOA_Cullable)
 		{
-			renderable_ = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
 		}
 
 		void GenShadowMapPass(bool sm_pass)
 		{
-			RenderModelPtr const & model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderTorus>(model->Mesh(i))->GenShadowMapPass(sm_pass);
-			}
+			checked_pointer_cast<RenderTorus>(renderable_)->GenShadowMapPass(sm_pass);
 		}
 	};
 
@@ -860,8 +855,13 @@ void DeferredShadingApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	torus_ = MakeSharedPtr<TorusObject>();
-	torus_->AddToSceneManager();
+	RenderModelPtr model = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
+	scene_objs_.resize(model->NumMeshes());
+	for (size_t i = 0; i < model->NumMeshes(); ++ i)
+	{
+		scene_objs_[i] = MakeSharedPtr<TorusObject>(model->Mesh(i));
+		scene_objs_[i]->AddToSceneManager();
+	}
 
 	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0));
 	spot_light_src_[0] = MakeSharedPtr<ConeObject>("cone_60.meshml", PI / 2, 1 / 1400.0f, 2.0f);
@@ -1075,10 +1075,18 @@ void DeferredShadingApp::DoUpdateOverlay()
 	stream.precision(2);
 	stream << fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
+
+	stream.str(L"");
+	stream << num_objs_rendered_ << " Scene objects "
+		<< num_renderable_rendered_ << " Renderables "
+		<< num_primitives_rendered_ << " Primitives "
+		<< num_vertices_rendered_ << " Vertices";
+	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
 uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 {
+	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	boost::shared_ptr<DeferredShadingPostProcess> const & ds = checked_pointer_cast<DeferredShadingPostProcess>(deferred_shading_);
@@ -1087,7 +1095,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		{
-			float4x4 model_mat = checked_pointer_cast<ConeObject>(point_light_src_)->GetModelMatrix();
+			float4x4 model_mat = checked_pointer_cast<SphereObject>(point_light_src_)->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
 			ds->LightPos(point_light_id_, p);
 		}
@@ -1100,7 +1108,10 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 			ds->LightDir(spot_light_id_[i], d);
 		}
 
-		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(false);
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		{
+			checked_pointer_cast<TorusObject>(scene_objs_[i])->GenShadowMapPass(false);
+		}
 
 		point_light_src_->Visible(true);
 		spot_light_src_[0]->Visible(true);
@@ -1111,7 +1122,16 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	case 1:
-		checked_pointer_cast<TorusObject>(torus_)->GenShadowMapPass(true);
+		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
+		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
+		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
+		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
+
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		{
+			checked_pointer_cast<TorusObject>(scene_objs_[i])->GenShadowMapPass(true);
+		}
+
 		point_light_src_->Visible(false);
 		spot_light_src_[0]->Visible(false);
 		spot_light_src_[1]->Visible(false);

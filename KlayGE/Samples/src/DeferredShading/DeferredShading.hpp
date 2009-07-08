@@ -26,7 +26,7 @@ private:
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr torus_;
+	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 	KlayGE::SceneObjectPtr point_light_src_;
 	KlayGE::SceneObjectPtr spot_light_src_[2];
 
@@ -67,7 +67,12 @@ private:
 
 	int ambient_light_id_;
 	int point_light_id_;
-	int spot_light_id_[2];;
+	int spot_light_id_[2];
+
+	size_t num_objs_rendered_;
+	size_t num_renderable_rendered_;
+	size_t num_primitives_rendered_;
+	size_t num_vertices_rendered_;
 };
 
 #endif		// _CARTOON_HPP

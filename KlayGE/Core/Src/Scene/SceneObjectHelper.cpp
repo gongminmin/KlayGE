@@ -38,7 +38,7 @@ namespace KlayGE
 	{
 	}
 
-	SceneObjectHelper::SceneObjectHelper(RenderablePtr renderable, uint32_t attrib)
+	SceneObjectHelper::SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib)
 		: SceneObject(attrib)
 	{
 		renderable_ = renderable;

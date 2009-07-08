@@ -28,7 +28,7 @@ namespace KlayGE
 	{
 	public:
 		SceneObjectHelper(uint32_t attrib);
-		SceneObjectHelper(RenderablePtr renderable, uint32_t attrib);
+		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
 		virtual ~SceneObjectHelper()
 		{
 		}
