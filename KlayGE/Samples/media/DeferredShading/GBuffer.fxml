@@ -111,17 +111,17 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		<![CDATA[
 void GenShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
-						out float2 oLightWorldPos : TEXCOORD0,
+						out float4 oLightWorldPos : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(Position, model_view);
 	oPos = mul(pos_es, proj);
-	oLightWorldPos = pos_es.zw;
+	oLightWorldPos = pos_es;
 }
 
-float4 GenShadowMapPS(float2 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
 {
-	float dist = LightWorldPos.x / LightWorldPos.y;
+	float dist = length(LightWorldPos.xyz / LightWorldPos.w);
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);

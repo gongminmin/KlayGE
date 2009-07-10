@@ -326,13 +326,13 @@ namespace
 			upper_right_param_ = technique_->Effect().ParameterByName("upper_right");
 			lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
 			lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
+			inv_view_param_ = technique_->Effect().ParameterByName("inv_view");
 			num_lights_param_ = technique_->Effect().ParameterByName("num_lights");
 			light_attrib_param_ = technique_->Effect().ParameterByName("light_attrib");
 			light_clr_type_param_ = technique_->Effect().ParameterByName("light_clr_type");
 			light_cos_outer_inner_param_ = technique_->Effect().ParameterByName("light_cos_outer_inner");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
-			light_view_param_ = technique_->Effect().ParameterByName("light_view");
-			light_proj_param_ = technique_->Effect().ParameterByName("light_proj");
+			light_view_proj_param_ = technique_->Effect().ParameterByName("light_view_proj");
 			light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
 			light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
 
@@ -340,8 +340,7 @@ namespace
 			light_clr_type_enabled_.resize(max_num_lights_a_batch_);
 			light_cos_outer_inner_enabled_.resize(max_num_lights_a_batch_);
 			light_falloff_enabled_.resize(max_num_lights_a_batch_);
-			light_view_enabled_.resize(max_num_lights_a_batch_);
-			light_proj_enabled_.resize(max_num_lights_a_batch_);
+			light_view_proj_enabled_.resize(max_num_lights_a_batch_);
 			light_pos_es_enabled_.resize(max_num_lights_a_batch_);
 			light_dir_es_enabled_.resize(max_num_lights_a_batch_);
 		}
@@ -563,6 +562,8 @@ namespace
 				*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
 				*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
+				*inv_view_param_ = inv_view_;
+
 				this->ScanLightSrc();
 			}
 
@@ -615,17 +616,16 @@ namespace
 						sm_buffer_[pass_in_batch]->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 						float3 dir_es = MathLib::transform_normal(d, view_);
-						light_dir_es_enabled_[pass_in_batch] = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+						light_dir_es_enabled_[pass_in_batch] = float4(dir_es.x(), dir_es.y(), dir_es.z(), static_cast<float>(offset));
 
-						light_view_enabled_[pass_in_batch] = inv_view_ * sm_buffer_[pass_in_batch]->GetViewport().camera->ViewMatrix();
+						light_view_proj_enabled_[pass_in_batch] = inv_view_ * sm_buffer_[pass_in_batch]->GetViewport().camera->ViewMatrix()
+							* sm_buffer_[pass_in_batch]->GetViewport().camera->ProjMatrix();
 						if (type != LT_Directional)
 						{
 							light_falloff_enabled_[pass_in_batch] = light_falloff_[org_no];
 
 							float3 loc_es = MathLib::transform_coord(p, view_);
 							light_pos_es_enabled_[pass_in_batch] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-							light_proj_enabled_[pass_in_batch] = sm_buffer_[pass_in_batch]->GetViewport().camera->ProjMatrix();
 
 							if (LT_Spot == type)
 							{
@@ -655,8 +655,7 @@ namespace
 					*light_clr_type_param_ = light_clr_type_enabled_;
 					*light_cos_outer_inner_param_ = light_cos_outer_inner_enabled_;
 					*light_falloff_param_ = light_falloff_enabled_;
-					*light_view_param_ = light_view_enabled_;
-					*light_proj_param_ = light_proj_enabled_;
+					*light_view_proj_param_ = light_view_proj_enabled_;
 					*light_pos_es_param_ = light_pos_es_enabled_;
 					*light_dir_es_param_ = light_dir_es_enabled_;
 
@@ -707,8 +706,7 @@ namespace
 		std::vector<float4> light_clr_type_enabled_;
 		std::vector<float2> light_cos_outer_inner_enabled_;
 		std::vector<float4> light_falloff_enabled_;
-		std::vector<float4x4> light_view_enabled_;
-		std::vector<float4x4> light_proj_enabled_;
+		std::vector<float4x4> light_view_proj_enabled_;
 		std::vector<float4> light_pos_es_enabled_;
 		std::vector<float4> light_dir_es_enabled_;
 
@@ -729,13 +727,13 @@ namespace
 		RenderEffectParameterPtr upper_right_param_;
 		RenderEffectParameterPtr lower_left_param_;
 		RenderEffectParameterPtr lower_right_param_;
+		RenderEffectParameterPtr inv_view_param_;
 		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_attrib_param_;
 		RenderEffectParameterPtr light_clr_type_param_;
 		RenderEffectParameterPtr light_cos_outer_inner_param_;
 		RenderEffectParameterPtr light_falloff_param_;
-		RenderEffectParameterPtr light_view_param_;
-		RenderEffectParameterPtr light_proj_param_;
+		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
 	};

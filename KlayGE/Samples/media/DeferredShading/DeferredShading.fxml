@@ -21,6 +21,8 @@
 		<parameter type="float3" name="lower_right"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
+
+		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
 	<parameter type="int" name="flip"/>
@@ -35,20 +37,18 @@
 		<parameter type="float4" name="light_falloff" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_pos_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_dir_es" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4x4" name="light_view" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float4x4" name="light_proj" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4x4" name="light_view_proj" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
 	<parameter type="texture2D" name="shadow_map_tex"/>
 
-	<parameter type="sampler" name="linear_border_sampler">
+	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="border"/>
-		<state name="address_v" value="border"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="wrap"/>
-		<state name="border_clr" r="0" g="0" b="0" a="0"/>
 	</parameter>
 	
 	<shader>
@@ -220,61 +220,101 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 			}
 			else
 			{
-				float4 pos_ls = mul(float4(pos_es, 1), light_view[i]);
-				float4 light_proj_pos = mul(pos_ls, light_proj[i]);
-				pos_ls = pos_ls / pos_ls.w;
-				if (((light_proj_pos.x < light_proj_pos.w) && (light_proj_pos.x > -light_proj_pos.w))
-					&& ((light_proj_pos.y < light_proj_pos.w) && (light_proj_pos.y > -light_proj_pos.w)))
+				float3 dir = pos_es - light_pos_es[i].xyz;
+				float len = length(dir);
+				dir = normalize(dir);
+
+				bool in_bound = false;
+				if (LT_Point == type)
 				{
-					light_proj_pos /= light_proj_pos.w;
-					light_proj_pos.y *= flip;
-					light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-					
-					if (light_proj_pos.z > 0)
+					float3 dir_ws = mul(dir, (float3x3)inv_view);
+					float3 abs_dir = abs(dir_ws);
+					int face;
+					if (abs_dir.x > abs_dir.y)
 					{
-						float3 dir = normalize(light_pos_es[i].xyz - pos_es);
-						ds.x = diffuse_term(dir, normal);
-						if (ds.x > 0)
+						if (abs_dir.x > abs_dir.z)
 						{
-#ifdef KLAYGE_D3D9
-							float2 moments = shadow_map_tex.SampleLevel(linear_border_sampler, light_proj_pos.xy, 0);
-#else
-							float2 moments = shadow_map_tex_array.SampleLevel(linear_border_sampler, float3(light_proj_pos.xy, i), 0);
-#endif
-						
-							ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
-							float atten = attenuation_term(light_pos_es[i].xyz, pos_es.xyz, light_falloff[i].xyz);
-
-							float shadow = 1;
-#ifdef KLAYGE_D3D9
-							if (0 == ((light_attrib[i] / LSA_NoShadow) % 2))
-#else
-							if (0 == (light_attrib[i] & LSA_NoShadow))
-#endif
-							{
-								float p = (pos_ls.z < moments.x);
-								// Variance shadow mapping
-								float variance = moments.y - moments.x * moments.x;
-								variance = max(variance, min_variance);
-								float m_d = moments.x - pos_ls.z;
-								float p_max = variance / (variance + m_d * m_d);
-								p_max = linstep(bleeding_reduce, 1, p_max);
-
-								shadow = max(p, p_max);
-							}
-							
-							if (LT_Spot == type)
-							{
-								float spot = spot_lighting(light_pos_es[i].xyz, light_dir_es[i].xyz, light_cos_outer_inner[i], pos_es.xyz);
-								shadow *= spot;
-							}
-
-							ds *= shadow * atten;
+							face = (dir_ws.x > 0) ? 0 : 1;
 						}
 						else
 						{
-							ds.x = 0;
+							face = (dir_ws.z > 0) ? 4 : 5;
 						}
+					}
+					else
+					{
+						if (abs_dir.y > abs_dir.z)
+						{
+							face = (dir_ws.y > 0) ? 2 : 3;
+						}
+						else
+						{
+							face = (dir_ws.z > 0) ? 4 : 5;
+						}
+					}
+					
+					if (face == (int)(light_dir_es[i].w + 0.1f))
+					{
+						in_bound = true;
+					}
+				}
+				else //if (LT_Spot == type)
+				{
+					if (dot(dir, light_dir_es[i].xyz) > light_cos_outer_inner[i].x)
+					{
+						in_bound = true;
+					}
+				}
+				
+				if (in_bound)
+				{
+					dir = -dir;
+					ds.x = diffuse_term(dir, normal);
+					if (ds.x > 0)
+					{
+						float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj[i]);
+						light_proj_pos /= light_proj_pos.w;
+						light_proj_pos.y *= flip;
+						light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
+				
+#ifdef KLAYGE_D3D9
+						float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
+#else
+						float2 moments = shadow_map_tex_array.SampleLevel(linear_sampler, float3(light_proj_pos.xy, i), 0);
+#endif
+
+						ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+						float atten = attenuation_term(light_pos_es[i].xyz, pos_es.xyz, light_falloff[i].xyz);
+
+						float shadow = 1;
+#ifdef KLAYGE_D3D9
+						if (0 == ((light_attrib[i] / LSA_NoShadow) % 2))
+#else
+						if (0 == (light_attrib[i] & LSA_NoShadow))
+#endif
+						{
+							float p = (len < moments.x);
+							// Variance shadow mapping
+							float variance = moments.y - moments.x * moments.x;
+							variance = max(variance, min_variance);
+							float m_d = moments.x - len;
+							float p_max = variance / (variance + m_d * m_d);
+							p_max = linstep(bleeding_reduce, 1, p_max);
+
+							shadow = max(p, p_max);
+						}
+						
+						if (LT_Spot == type)
+						{
+							float spot = spot_lighting(light_pos_es[i].xyz, light_dir_es[i].xyz, light_cos_outer_inner[i], pos_es.xyz);
+							shadow *= spot;
+						}
+
+						ds *= shadow * atten;
+					}
+					else
+					{
+						ds.x = 0;
 					}
 				}
 			}
