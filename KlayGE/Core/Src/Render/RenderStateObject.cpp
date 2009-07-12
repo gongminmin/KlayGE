@@ -36,6 +36,7 @@ namespace KlayGE
 			front_face_ccw(false),
 			polygon_offset_factor(0),
 			polygon_offset_units(0),
+			depth_clip_enable(true),
 			scissor_enable(false),
 			multisample_enable(true)
 	{

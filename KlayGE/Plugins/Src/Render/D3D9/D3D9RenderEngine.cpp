@@ -222,6 +222,7 @@ namespace KlayGE
 		d3dDevice_->SetRenderState(D3DRS_CULLMODE, D3D9Mapping::Mapping(default_rs_desc.cull_mode, default_rs_desc.front_face_ccw));
 		d3dDevice_->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, float_to_uint32(default_rs_desc.polygon_offset_factor));
 		d3dDevice_->SetRenderState(D3DRS_DEPTHBIAS, float_to_uint32(default_rs_desc.polygon_offset_units));
+		d3dDevice_->SetRenderState(D3DRS_CLIPPING, default_rs_desc.depth_clip_enable);
 		d3dDevice_->SetRenderState(D3DRS_SCISSORTESTENABLE, default_rs_desc.scissor_enable);
 		d3dDevice_->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, default_rs_desc.multisample_enable);
 		render_states_cache_[D3DRS_FILLMODE] = D3D9Mapping::Mapping(default_rs_desc.polygon_mode);
@@ -229,6 +230,7 @@ namespace KlayGE
 		render_states_cache_[D3DRS_CULLMODE] = D3D9Mapping::Mapping(default_rs_desc.cull_mode, default_rs_desc.front_face_ccw);
 		render_states_cache_[D3DRS_SLOPESCALEDEPTHBIAS] = float_to_uint32(default_rs_desc.polygon_offset_factor);
 		render_states_cache_[D3DRS_DEPTHBIAS] = float_to_uint32(default_rs_desc.polygon_offset_units);
+		render_states_cache_[D3DRS_CLIPPING] = default_rs_desc.depth_clip_enable;
 		render_states_cache_[D3DRS_SCISSORTESTENABLE] = default_rs_desc.scissor_enable;
 		render_states_cache_[D3DRS_MULTISAMPLEANTIALIAS] = default_rs_desc.multisample_enable;
 

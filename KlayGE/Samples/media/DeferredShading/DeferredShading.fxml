@@ -186,13 +186,13 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 
 		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
 		view_dir = -view_dir;
-		
+
 		float3 diffuse = 0, specular = 0;
 		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
 		{
 			float2 ds = 0;
-			
-			int type = (int)(light_clr_type[i].w + 0.1f);
+
+			int type = (int)(light_clr_type[i].w);
 			if (LT_Ambient == type)
 			{
 				float ssao = 1;
@@ -253,7 +253,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 						}
 					}
 					
-					if (face == (int)(light_dir_es[i].w + 0.1f))
+					if (face == (int)light_dir_es[i].w)
 					{
 						in_bound = true;
 					}
@@ -340,7 +340,7 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		float3 specular_clr = GetSpecular(color);
 		final_clr = float4(0.65f * diffuse_clr * diffuse + 0.3f * specular_clr * specular, 1);
 	}
-	
+
 	return final_clr;
 }
 

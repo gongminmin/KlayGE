@@ -192,6 +192,7 @@ namespace KlayGE
 		bool				front_face_ccw;
 		float				polygon_offset_factor;
 		float				polygon_offset_units;
+		bool				depth_clip_enable;
 		bool				scissor_enable;
 		bool				multisample_enable;
 

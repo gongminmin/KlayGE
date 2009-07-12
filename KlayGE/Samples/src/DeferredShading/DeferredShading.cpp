@@ -350,7 +350,7 @@ namespace
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr | LSA_NoShadow);
-			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Ambient));
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Ambient + 0.1f));
 			light_pos_.push_back(float4(0, 0, 0, 0));
 			light_dir_.push_back(float4(0, 0, 0, 0));
 			light_falloff_.push_back(float4(0, 0, 0, 0));
@@ -362,7 +362,7 @@ namespace
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr);
-			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Point));
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Point + 0.1f));
 			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 			light_dir_.push_back(float4(0, 0, 0, 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
@@ -375,7 +375,7 @@ namespace
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr);
-			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Directional));
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Directional + 0.1f));
 			light_pos_.push_back(float4(0, 0, 0, 0));
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
@@ -388,7 +388,7 @@ namespace
 			int id = static_cast<int>(light_clr_type_.size());
 			light_enabled_.push_back(1);
 			light_attrib_.push_back(attr);
-			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Spot));
+			light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Spot + 0.1f));
 			light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 			light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 			light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
@@ -527,7 +527,7 @@ namespace
 			{
 				if (light_enabled_[i])
 				{
-					int type = static_cast<int>(light_clr_type_[i].w() + 0.1f);
+					int type = static_cast<int>(light_clr_type_[i].w());
 					if (LT_Point == type)
 					{
 						for (int j = 0; j < 6; ++ j)
@@ -585,7 +585,7 @@ namespace
 					light_attrib_enabled_[pass_in_batch] = light_attrib_[org_no];
 					light_clr_type_enabled_[pass_in_batch] = light_clr_type_[org_no];
 
-					int type = static_cast<int>(light_clr_type_enabled_[pass_in_batch].w() + 0.1f);
+					int type = static_cast<int>(light_clr_type_enabled_[pass_in_batch].w());
 					if (type != LT_Ambient)
 					{
 						float3 d, u;
@@ -616,7 +616,7 @@ namespace
 						sm_buffer_[pass_in_batch]->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 						float3 dir_es = MathLib::transform_normal(d, view_);
-						light_dir_es_enabled_[pass_in_batch] = float4(dir_es.x(), dir_es.y(), dir_es.z(), static_cast<float>(offset));
+						light_dir_es_enabled_[pass_in_batch] = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
 
 						light_view_proj_enabled_[pass_in_batch] = inv_view_ * sm_buffer_[pass_in_batch]->GetViewport().camera->ViewMatrix()
 							* sm_buffer_[pass_in_batch]->GetViewport().camera->ProjMatrix();

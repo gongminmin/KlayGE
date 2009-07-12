@@ -42,6 +42,7 @@ namespace KlayGE
 		re.SetRenderState(D3DRS_CULLMODE, d3d9_cull_mode_);
 		re.SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, d3d9_polygon_offset_factor_);
 		re.SetRenderState(D3DRS_DEPTHBIAS, d3d9_polygon_offset_units_);
+		re.SetRenderState(D3DRS_CLIPPING, desc_.depth_clip_enable);
 		re.SetRenderState(D3DRS_SCISSORTESTENABLE, desc_.scissor_enable);
 		re.SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, desc_.multisample_enable);
 	}

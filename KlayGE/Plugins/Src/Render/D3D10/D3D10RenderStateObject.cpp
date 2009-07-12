@@ -36,7 +36,7 @@ namespace KlayGE
 		d3d_desc.DepthBias = static_cast<int>(desc.polygon_offset_units);
 		d3d_desc.DepthBiasClamp = desc.polygon_offset_units;
 		d3d_desc.SlopeScaledDepthBias = desc.polygon_offset_factor;
-		d3d_desc.DepthClipEnable = true;
+		d3d_desc.DepthClipEnable = desc.depth_clip_enable;
 		d3d_desc.ScissorEnable = desc.scissor_enable;
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
 		d3d_desc.AntialiasedLineEnable = desc.multisample_enable;

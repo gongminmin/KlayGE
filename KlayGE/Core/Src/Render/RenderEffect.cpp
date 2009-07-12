@@ -1267,6 +1267,11 @@ namespace KlayGE
 			{
 				rs_desc.polygon_offset_units = state_node->Attrib("value")->ValueFloat();
 			}
+			else if ("depth_clip_enable" == state_name)
+			{
+				std::string value_str = state_node->Attrib("value")->ValueString();
+				rs_desc.depth_clip_enable = bool_from_str(value_str);
+			}
 			else if ("scissor_enable" == state_name)
 			{
 				std::string value_str = state_node->Attrib("value")->ValueString();
