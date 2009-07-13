@@ -3,7 +3,6 @@
 <effect>
 	<include name="DeferredShadingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
-	<include name="PostProcess.fxml"/>
 
 	<macro name="LT_Ambient" value="0"/>
 	<macro name="LT_Point" value="1"/>
@@ -25,12 +24,15 @@
 		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
-	<parameter type="int" name="flip"/>
+	<parameter type='float4' name='texel_to_pixel_offset'/>
+	<parameter type='int' name='flipping'/>
+	<parameter type="int" name="sm_flipping"/>
 
 	<parameter type="float" name="min_variance" value="0.026"/>
 	<parameter type="float" name="bleeding_reduce" value="0.55"/>
 
 	<cbuffer name="light_sources">
+		<parameter type="bool" name="show_skybox"/>
 		<parameter type="int" name="num_lights"/>
 		<parameter type="int" name="light_attrib" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_clr_type" array_size="MAX_NUM_LIGHTS"/>
@@ -38,7 +40,6 @@
 		<parameter type="float4" name="light_pos_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_dir_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4x4" name="light_view_proj" array_size="MAX_NUM_LIGHTS"/>
-		<parameter type="float2" name="light_cos_outer_inner" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
@@ -84,7 +85,7 @@ float linstep(float min, float max, float v)
 	</parameter>
 
 	<parameter type="float2" name="inv_width_height"/>
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="nd_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="ssao_tex"/>
 
@@ -101,15 +102,15 @@ float GetEdgeWeight(float2 tc0)
 	
 	float4 nd[9];  
 	// Retrieve normal and depth data for all neighbors.
-	nd[0] = src_tex.Sample(point_sampler, tc0);
-	nd[1] = src_tex.Sample(point_sampler, tc1.xy);
-	nd[2] = src_tex.Sample(point_sampler, tc1.zw);
-	nd[3] = src_tex.Sample(point_sampler, tc2.xy);
-	nd[4] = src_tex.Sample(point_sampler, tc2.zw);
-	nd[5] = src_tex.Sample(point_sampler, tc3.xy);
-	nd[6] = src_tex.Sample(point_sampler, tc3.zw);
-	nd[7] = src_tex.Sample(point_sampler, tc4.xy);
-	nd[8] = src_tex.Sample(point_sampler, tc4.zw);
+	nd[0] = nd_tex.Sample(point_sampler, tc0);
+	nd[1] = nd_tex.Sample(point_sampler, tc1.xy);
+	nd[2] = nd_tex.Sample(point_sampler, tc1.zw);
+	nd[3] = nd_tex.Sample(point_sampler, tc2.xy);
+	nd[4] = nd_tex.Sample(point_sampler, tc2.zw);
+	nd[5] = nd_tex.Sample(point_sampler, tc3.xy);
+	nd[6] = nd_tex.Sample(point_sampler, tc3.zw);
+	nd[7] = nd_tex.Sample(point_sampler, tc4.xy);
+	nd[8] = nd_tex.Sample(point_sampler, tc4.zw);
 
 	// Compute Deltas in Depth.
 	float4 Deltas1;
@@ -157,19 +158,27 @@ float GetEdgeWeight(float2 tc0)
 }
 
 void DeferredShadingVS(float4 pos : POSITION,
-				out float2 oTc0 : TEXCOORD0,
-				out float3 view_dir : TEXCOORD1,
+						float light_id : TEXCOORD0,
+				out float4 oPosSS : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
-	PostProcessVS(pos, oTc0, oPos);
-	
-	float4 PosSS = oPos / oPos.w;
-	view_dir = texcoord_to_view(float2(PosSS.x, -PosSS.y) / 2 + 0.5f);
+	oPos = pos + texel_to_pixel_offset;
+	oPosSS = float4(oPos.xyw, light_id);
+	oPos.z = 0;
 }
 
-float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	pos_ss.xy /= pos_ss.z;
+
+	float2 tc0 = pos_ss.xy / 2;
+	tc0.y *= flipping;
+	tc0 += 0.5;
+	
+	float3 view_dir = texcoord_to_view(float2(pos_ss.x, -pos_ss.y) / 2 + 0.5f);
+	int lid = (int)(pos_ss.w);
+	
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
@@ -177,7 +186,14 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 	float4 final_clr;
 	if (0 == GetMtlID(ndc))
 	{
-		final_clr = float4(diffuse_clr, 1);
+		if (show_skybox && (0 == lid))
+		{
+			final_clr = float4(diffuse_clr, 1);
+		}
+		else
+		{
+			final_clr = 0;
+		}
 	}
 	else
 	{
@@ -187,154 +203,152 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
 		view_dir = -view_dir;
 
-		float3 diffuse = 0, specular = 0;
-		for (int i = 0; (i < MAX_NUM_LIGHTS) && (i < num_lights); ++ i)
+		float2 ds = 0;
+
+		int type = (int)(light_clr_type[lid].w);
+		if (LT_Ambient == type)
 		{
-			float2 ds = 0;
-
-			int type = (int)(light_clr_type[i].w);
-			if (LT_Ambient == type)
+			float ssao = 1;
+			if (ssao_enabled)
 			{
-				float ssao = 1;
-				if (ssao_enabled)
-				{
-					ssao = ssao_tex.Sample(point_sampler, tc0).x;
-				}
-
-				ds = float2(0.1f * ssao, 0);
+				ssao = ssao_tex.Sample(point_sampler, tc0).x;
 			}
-			else if (LT_Directional == type)
-			{
-				// directional
 
-				float3 dir = light_dir_es[i].xyz;
+			ds = float2(0.1f * ssao, 0);
+		}
+		else if (LT_Directional == type)
+		{
+			// directional
+
+			float3 dir = light_dir_es[lid].xyz;
+			ds.x = diffuse_term(dir, normal);
+			if (ds.x > 0)
+			{
+				ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+			}
+			else
+			{
+				ds.x = 0;
+			}
+		}
+		else
+		{
+			float3 dir = pos_es - light_pos_es[lid].xyz;
+			float len = length(dir);
+			dir = normalize(dir);
+
+			bool in_bound = false;
+			if (LT_Point == type)
+			{
+				float3 dir_ws = mul(dir, (float3x3)inv_view);
+				float3 abs_dir = abs(dir_ws);
+				int face;
+				if (abs_dir.x > abs_dir.y)
+				{
+					if (abs_dir.x > abs_dir.z)
+					{
+						face = (dir_ws.x > 0) ? 0 : 1;
+					}
+					else
+					{
+						face = (dir_ws.z > 0) ? 4 : 5;
+					}
+				}
+				else
+				{
+					if (abs_dir.y > abs_dir.z)
+					{
+						face = (dir_ws.y > 0) ? 2 : 3;
+					}
+					else
+					{
+						face = (dir_ws.z > 0) ? 4 : 5;
+					}
+				}
+				
+				if (face == (int)light_dir_es[lid].w)
+				{
+					in_bound = true;
+				}
+			}
+			else //if (LT_Spot == type)
+			{
+				if (dot(dir, light_dir_es[lid].xyz) > light_pos_es[lid].w)
+				{
+					in_bound = true;
+				}
+			}
+			
+			if (in_bound)
+			{
+				dir = -dir;
 				ds.x = diffuse_term(dir, normal);
 				if (ds.x > 0)
 				{
+					float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj[lid]);
+					light_proj_pos /= light_proj_pos.w;
+					light_proj_pos.y *= sm_flipping;
+					light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
+			
+#ifdef KLAYGE_D3D9
+					float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
+#else
+					float2 moments = shadow_map_tex_array.SampleLevel(linear_sampler, float3(light_proj_pos.xy, lid), 0);
+#endif
+
 					ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+					float atten = attenuation_term(light_pos_es[lid].xyz, pos_es.xyz, light_falloff[lid].xyz);
+
+					float shadow = 1;
+#ifdef KLAYGE_D3D9
+					if (0 == ((light_attrib[lid] / LSA_NoShadow) % 2))
+#else
+					if (0 == (light_attrib[lid] & LSA_NoShadow))
+#endif
+					{
+						float p = (len < moments.x);
+						// Variance shadow mapping
+						float variance = moments.y - moments.x * moments.x;
+						variance = max(variance, min_variance);
+						float m_d = moments.x - len;
+						float p_max = variance / (variance + m_d * m_d);
+						p_max = linstep(bleeding_reduce, 1, p_max);
+
+						shadow = max(p, p_max);
+					}
+					
+					if (LT_Spot == type)
+					{
+						float spot = spot_lighting(light_pos_es[lid].xyz, light_dir_es[lid].xyz, float2(light_pos_es[lid].w, light_dir_es[lid].w), pos_es.xyz);
+						shadow *= spot;
+					}
+
+					ds *= shadow * atten;
 				}
 				else
 				{
 					ds.x = 0;
 				}
 			}
-			else
-			{
-				float3 dir = pos_es - light_pos_es[i].xyz;
-				float len = length(dir);
-				dir = normalize(dir);
-
-				bool in_bound = false;
-				if (LT_Point == type)
-				{
-					float3 dir_ws = mul(dir, (float3x3)inv_view);
-					float3 abs_dir = abs(dir_ws);
-					int face;
-					if (abs_dir.x > abs_dir.y)
-					{
-						if (abs_dir.x > abs_dir.z)
-						{
-							face = (dir_ws.x > 0) ? 0 : 1;
-						}
-						else
-						{
-							face = (dir_ws.z > 0) ? 4 : 5;
-						}
-					}
-					else
-					{
-						if (abs_dir.y > abs_dir.z)
-						{
-							face = (dir_ws.y > 0) ? 2 : 3;
-						}
-						else
-						{
-							face = (dir_ws.z > 0) ? 4 : 5;
-						}
-					}
-					
-					if (face == (int)light_dir_es[i].w)
-					{
-						in_bound = true;
-					}
-				}
-				else //if (LT_Spot == type)
-				{
-					if (dot(dir, light_dir_es[i].xyz) > light_cos_outer_inner[i].x)
-					{
-						in_bound = true;
-					}
-				}
-				
-				if (in_bound)
-				{
-					dir = -dir;
-					ds.x = diffuse_term(dir, normal);
-					if (ds.x > 0)
-					{
-						float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj[i]);
-						light_proj_pos /= light_proj_pos.w;
-						light_proj_pos.y *= flip;
-						light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-				
-#ifdef KLAYGE_D3D9
-						float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
-#else
-						float2 moments = shadow_map_tex_array.SampleLevel(linear_sampler, float3(light_proj_pos.xy, i), 0);
-#endif
-
-						ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
-						float atten = attenuation_term(light_pos_es[i].xyz, pos_es.xyz, light_falloff[i].xyz);
-
-						float shadow = 1;
-#ifdef KLAYGE_D3D9
-						if (0 == ((light_attrib[i] / LSA_NoShadow) % 2))
-#else
-						if (0 == (light_attrib[i] & LSA_NoShadow))
-#endif
-						{
-							float p = (len < moments.x);
-							// Variance shadow mapping
-							float variance = moments.y - moments.x * moments.x;
-							variance = max(variance, min_variance);
-							float m_d = moments.x - len;
-							float p_max = variance / (variance + m_d * m_d);
-							p_max = linstep(bleeding_reduce, 1, p_max);
-
-							shadow = max(p, p_max);
-						}
-						
-						if (LT_Spot == type)
-						{
-							float spot = spot_lighting(light_pos_es[i].xyz, light_dir_es[i].xyz, light_cos_outer_inner[i], pos_es.xyz);
-							shadow *= spot;
-						}
-
-						ds *= shadow * atten;
-					}
-					else
-					{
-						ds.x = 0;
-					}
-				}
-			}
+		}
+		
+		float3 diffuse = 0, specular = 0;
 
 #ifdef KLAYGE_D3D9
-			if (0 == ((light_attrib[i] / LSA_NoDiffuse) % 2))
+		if (0 == ((light_attrib[lid] / LSA_NoDiffuse) % 2))
 #else
-			if (0 == (light_attrib[i] & LSA_NoDiffuse))
+		if (0 == (light_attrib[lid] & LSA_NoDiffuse))
 #endif
-			{
-				diffuse += ds.x * light_clr_type[i].xyz;
-			}
+		{
+			diffuse = ds.x * light_clr_type[lid].xyz;
+		}
 #ifdef KLAYGE_D3D9
-			if (0 == ((light_attrib[i] / LSA_NoSpecular) % 2))
+		if (0 == ((light_attrib[lid] / LSA_NoSpecular) % 2))
 #else
-			if (0 == (light_attrib[i] & LSA_NoSpecular))
+		if (0 == (light_attrib[lid] & LSA_NoSpecular))
 #endif
-			{
-				specular += ds.y * light_clr_type[i].xyz;
-			}
+		{
+			specular = ds.y * light_clr_type[lid].xyz;
 		}
 
 		float3 specular_clr = GetSpecular(color);
@@ -346,18 +360,18 @@ float4 DeferredShadingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : 
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
-	
+
 	return float4(pos_es, 1);
 }
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float3 normal = GetNormal(ndc);
 	
 	return float4(normal / 2 + 0.5f, 1);
@@ -365,7 +379,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
 	return float4(depth.xxx, 1);
 }
@@ -386,7 +400,7 @@ float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 
 	float4 color = GetEdgeWeight(tc0);
 	return color;
@@ -394,7 +408,7 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
+	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 
 	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
 	return color;
@@ -404,16 +418,9 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 	<technique name="DeferredShading">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 			
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingPS()"/>
-		</pass>
-	</technique>
-	<technique name="DeferredShadingBlend">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>

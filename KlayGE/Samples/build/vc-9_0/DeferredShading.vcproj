@@ -351,6 +351,10 @@
 				RelativePath="..\..\src\DeferredShading\DeferredShading.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\DeferredShading\DeferredShadingLayer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -359,6 +363,10 @@
 			>
 			<File
 				RelativePath="..\..\src\DeferredShading\DeferredShading.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\DeferredShading\DeferredShadingLayer.hpp"
 				>
 			</File>
 		</Filter>
