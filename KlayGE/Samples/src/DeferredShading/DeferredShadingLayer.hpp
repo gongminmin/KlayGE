@@ -29,7 +29,7 @@ namespace KlayGE
 		for (int i = 0; i < n; ++ i)
 		{
 			vb.push_back(T());
-			vb.back() = vb[n + i];
+			vb.back() = vb[vertex_base + n + i];
 		}
 
 		for (uint16_t i = 0; i < n - 1; ++ i)
@@ -51,6 +51,70 @@ namespace KlayGE
 		ib.push_back(vertex_base + 2 * n);
 		ib.push_back(vertex_base + 2 * n + 1 + n - 1);
 		ib.push_back(vertex_base + 2 * n + 1);
+	}
+
+	template <typename T>
+	void CreatePyramidMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height)
+	{
+		for (int i = 0; i < 4; ++ i)
+		{
+			vb.push_back(T());
+			vb.back().x() = vb.back().y() = vb.back().z() = 0;
+		}
+
+		float outer_radius = radius * sqrt(2.0f);
+		vb.push_back(T());
+		vb.back().x() = -outer_radius;
+		vb.back().z() = -outer_radius;
+		vb.back().y() = -height;
+		vb.push_back(T());
+		vb.back().x() = +outer_radius;
+		vb.back().z() = -outer_radius;
+		vb.back().y() = -height;
+		vb.push_back(T());
+		vb.back().x() = +outer_radius;
+		vb.back().z() = +outer_radius;
+		vb.back().y() = -height;
+		vb.push_back(T());
+		vb.back().x() = -outer_radius;
+		vb.back().z() = +outer_radius;
+		vb.back().y() = -height;
+
+		vb.push_back(T());
+		vb.back().x() = vb.back().z() = 0;
+		vb.back().y() = -height;
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			vb.push_back(T());
+			vb.back() = vb[vertex_base + 4 + i];
+		}
+
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 7);
+
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 9);
+		ib.push_back(vertex_base + 10);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 10);
+		ib.push_back(vertex_base + 11);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 11);
+		ib.push_back(vertex_base + 12);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 12);
+		ib.push_back(vertex_base + 9);
 	}
 
 	enum LightType

@@ -458,12 +458,19 @@ namespace KlayGE
 					uint16_t vertex_base = static_cast<uint16_t>(pos.size());
 
 					int type = static_cast<int>(light_clr_type_enabled_[i].w());
-					if (LT_Spot == type)
+					if ((LT_Spot == type) || (LT_Point == type))
 					{
-						int32_t light_index = batch * max_num_lights_a_batch_ + i;
-						int32_t org_no = light_scaned_[light_index] >> 16;
+						if (LT_Spot == type)
+						{
+							int32_t light_index = batch * max_num_lights_a_batch_ + i;
+							int32_t org_no = light_scaned_[light_index] >> 16;
 
-						CreateConeMesh(pos, index, vertex_base, 100 * tan(light_cos_outer_inner_[org_no].z() / 2), 100.0f, 12);
+							CreateConeMesh(pos, index, vertex_base, 100.0f * tan(light_cos_outer_inner_[org_no].z() / 2), 100.0f, 12);
+						}
+						else //if (LT_Point == type)
+						{
+							CreatePyramidMesh(pos, index, vertex_base, 100.0f, 100.0f);
+						}
 
 						lid.resize(pos.size());
 
