@@ -221,6 +221,11 @@ namespace KlayGE
 		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
+
+		std::vector<float4> cone_pos_;
+		std::vector<uint16_t> cone_index_;
+		std::vector<float4> pyramid_pos_;
+		std::vector<uint16_t> pyramid_index_;
 	};
 
 	typedef boost::shared_ptr<DeferredShadingLayer> DeferredShadingLayerPtr;

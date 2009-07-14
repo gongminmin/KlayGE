@@ -11,6 +11,8 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -56,8 +58,8 @@ namespace KlayGE
 		light_mask_ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
 		rl_->BindIndexStream(light_mask_ib_, EF_R16UI);
 
-		std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", ""), std::make_pair("", "") };
-		macros[0].second = boost::lexical_cast<std::string>(max_num_lights_a_batch_);
+		std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", boost::lexical_cast<std::string>(max_num_lights_a_batch_)),
+			std::make_pair("", "") };
 		technique_ = rf.LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading");
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
@@ -102,6 +104,17 @@ namespace KlayGE
 		light_view_proj_enabled_.resize(max_num_lights_a_batch_);
 		light_pos_es_enabled_.resize(max_num_lights_a_batch_);
 		light_dir_es_enabled_.resize(max_num_lights_a_batch_);
+
+		CreatePyramidMesh(pyramid_pos_, pyramid_index_, 0, 20.0f, 20.0f);
+		BOOST_FOREACH(BOOST_TYPEOF(pyramid_pos_)::reference p, pyramid_pos_)
+		{
+			p.w() = 1;
+		}
+		CreateConeMesh(cone_pos_, cone_index_, 0, 20.0f, 20.0f, 12);
+		BOOST_FOREACH(BOOST_TYPEOF(cone_pos_)::reference p, cone_pos_)
+		{
+			p.w() = 1;
+		}
 	}
 
 	int DeferredShadingLayer::AddAmbientLight(int32_t attr, float3 const & clr)
@@ -455,7 +468,7 @@ namespace KlayGE
 				std::vector<uint16_t> index;
 				for (uint16_t i = 0; i < n; ++ i)
 				{
-					uint16_t vertex_base = static_cast<uint16_t>(pos.size());
+					uint16_t const vertex_base = static_cast<uint16_t>(pos.size());
 
 					int type = static_cast<int>(light_clr_type_enabled_[i].w());
 					if ((LT_Spot == type) || (LT_Point == type))
@@ -465,11 +478,37 @@ namespace KlayGE
 							int32_t light_index = batch * max_num_lights_a_batch_ + i;
 							int32_t org_no = light_scaned_[light_index] >> 16;
 
-							CreateConeMesh(pos, index, vertex_base, 100.0f * tan(light_cos_outer_inner_[org_no].z() / 2), 100.0f, 12);
+							float scale = tan(light_cos_outer_inner_[org_no].z() / 2);
+
+							pos.resize(pos.size() + cone_pos_.size());
+							for (size_t i = 0; i < cone_pos_.size(); ++ i)
+							{
+								pos[vertex_base + i] = cone_pos_[i];
+								pos[vertex_base + i].x() *= scale;
+								pos[vertex_base + i].z() *= scale;
+							}
+
+							size_t const index_base = index.size();
+							index.resize(index.size() + cone_index_.size());
+							for (size_t i = 0; i < cone_index_.size(); ++ i)
+							{
+								index[index_base + i] = vertex_base + cone_index_[i];
+							}
 						}
 						else //if (LT_Point == type)
 						{
-							CreatePyramidMesh(pos, index, vertex_base, 100.0f, 100.0f);
+							pos.resize(pos.size() + pyramid_pos_.size());
+							for (size_t i = 0; i < pyramid_pos_.size(); ++ i)
+							{
+								pos[vertex_base + i] = pyramid_pos_[i];
+							}
+
+							size_t const index_base = index.size();
+							index.resize(index.size() + pyramid_index_.size());
+							for (size_t i = 0; i < pyramid_index_.size(); ++ i)
+							{
+								index[index_base + i] = vertex_base + pyramid_index_[i];
+							}
 						}
 
 						lid.resize(pos.size());
@@ -477,7 +516,6 @@ namespace KlayGE
 						float4x4 mat = MathLib::rotation_x(-PI / 2) * MathLib::inverse(sm_buffer_[i]->GetViewport().camera->ViewMatrix()) * view_ * proj_;
 						for (size_t j = vertex_base; j < pos.size(); ++ j)
 						{
-							pos[j].w() = 1;
 							pos[j] = MathLib::transform(pos[j], mat);
 							lid[j] = i + 0.1f;
 						}
@@ -494,12 +532,12 @@ namespace KlayGE
 						lid.push_back(i + 0.1f);
 						lid.push_back(i + 0.1f);
 
-						index.push_back(vertex_base + 0);
 						index.push_back(vertex_base + 1);
-						index.push_back(vertex_base + 3);
-						index.push_back(vertex_base + 3);
-						index.push_back(vertex_base + 2);
 						index.push_back(vertex_base + 0);
+						index.push_back(vertex_base + 2);
+						index.push_back(vertex_base + 2);
+						index.push_back(vertex_base + 3);
+						index.push_back(vertex_base + 1);
 					}
 				};
 				light_mask_vb_->Resize(static_cast<uint32_t>(pos.size() * sizeof(pos[0])));

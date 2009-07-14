@@ -164,7 +164,6 @@ void DeferredShadingVS(float4 pos : POSITION,
 {
 	oPos = pos + texel_to_pixel_offset;
 	oPosSS = float4(oPos.xyw, light_id);
-	//oPos.z = 0;
 }
 
 float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
@@ -418,11 +417,12 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 	<technique name="DeferredShading">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
 			<state name="depth_write_mask" value="false"/>
-			
-			<state name="depth_clip_enable" value="false"/>
-			
+
+			<state name="depth_func" value="greater"/>
+			<state name="cull_mode" value="front"/>
+
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
