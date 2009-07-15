@@ -554,8 +554,35 @@ namespace KlayGE
 		else
 		{
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::CBM_Depth)->Clear(1.0f);
-			RenderableHelper::Render();
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+
+			std::vector<float4> pos;
+			std::vector<uint16_t> index;
+
+			pos.push_back(float4(-1, +1, 0, 1));
+			pos.push_back(float4(+1, +1, 0, 1));
+			pos.push_back(float4(-1, -1, 0, 1));
+			pos.push_back(float4(+1, -1, 0, 1));
+
+			index.push_back(0);
+			index.push_back(1);
+			index.push_back(3);
+			index.push_back(3);
+			index.push_back(2);
+			index.push_back(0);
+			
+			light_mask_vb_->Resize(static_cast<uint32_t>(pos.size() * sizeof(pos[0])));
+			{
+				GraphicsBuffer::Mapper mapper(*light_mask_vb_, BA_Write_Only);
+				std::copy(pos.begin(), pos.end(), mapper.Pointer<float4>());
+			}
+			light_mask_ib_->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
+			{
+				GraphicsBuffer::Mapper mapper(*light_mask_ib_, BA_Write_Only);
+				std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
+			}
+
+			re.Render(*technique_, *rl_);
 
 			return App3DFramework::URV_Finished;
 		}
