@@ -199,6 +199,8 @@ namespace
 			init_data.data = &normal[0];
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
 				boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+				boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(float2));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
 				boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
