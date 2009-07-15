@@ -43,17 +43,13 @@ namespace KlayGE
 		}
 		else
 		{
-			max_num_lights_a_batch_ = 1;
+			max_num_lights_a_batch_ = 8;
 		}
 
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
 		light_mask_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
-		rl_->BindVertexStream(light_mask_vb_,
-			boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-		light_id_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
-		rl_->BindVertexStream(light_id_vb_,
-			boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_R32F)));
+		rl_->BindVertexStream(light_mask_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
 		light_mask_ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
 		rl_->BindIndexStream(light_mask_ib_, EF_R16UI);
@@ -95,6 +91,7 @@ namespace KlayGE
 		light_clr_type_param_ = technique_->Effect().ParameterByName("light_clr_type");
 		light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 		light_view_proj_param_ = technique_->Effect().ParameterByName("light_view_proj");
+		light_volume_mvp_param_ = technique_->Effect().ParameterByName("light_volume_mvp");
 		light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
 		light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
 
@@ -102,19 +99,12 @@ namespace KlayGE
 		light_clr_type_enabled_.resize(max_num_lights_a_batch_);
 		light_falloff_enabled_.resize(max_num_lights_a_batch_);
 		light_view_proj_enabled_.resize(max_num_lights_a_batch_);
+		light_volume_mvp_enabled_.resize(max_num_lights_a_batch_);
 		light_pos_es_enabled_.resize(max_num_lights_a_batch_);
 		light_dir_es_enabled_.resize(max_num_lights_a_batch_);
 
-		CreatePyramidMesh(pyramid_pos_, pyramid_index_, 0, 20.0f, 20.0f);
-		BOOST_FOREACH(BOOST_TYPEOF(pyramid_pos_)::reference p, pyramid_pos_)
-		{
-			p.w() = 1;
-		}
-		CreateConeMesh(cone_pos_, cone_index_, 0, 20.0f, 20.0f, 12);
-		BOOST_FOREACH(BOOST_TYPEOF(cone_pos_)::reference p, cone_pos_)
-		{
-			p.w() = 1;
-		}
+		CreatePyramidMesh(pyramid_pos_, pyramid_index_, 0, 100.0f, 100.0f);
+		CreateConeMesh(cone_pos_, cone_index_, 0, 100.0f, 100.0f, 12);
 	}
 
 	int DeferredShadingLayer::AddAmbientLight(int32_t attr, float3 const & clr)
@@ -126,7 +116,7 @@ namespace KlayGE
 		light_pos_.push_back(float4(0, 0, 0, 0));
 		light_dir_.push_back(float4(0, 0, 0, 0));
 		light_falloff_.push_back(float4(0, 0, 0, 0));
-		light_cos_outer_inner_.push_back(float3(0, 0, 0));
+		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
 		return id;
 	}
 
@@ -139,7 +129,7 @@ namespace KlayGE
 		light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 		light_dir_.push_back(float4(0, 0, 0, 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
-		light_cos_outer_inner_.push_back(float3(0, 0, 0));
+		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
 		return id;
 	}
 
@@ -153,7 +143,7 @@ namespace KlayGE
 		light_pos_.push_back(float4(0, 0, 0, 0));
 		light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
-		light_cos_outer_inner_.push_back(float3(0, 0, 0));
+		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
 		return id;
 	}
 
@@ -167,7 +157,7 @@ namespace KlayGE
 		light_pos_.push_back(float4(pos.x(), pos.y(), pos.z(), 1));
 		light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
-		light_cos_outer_inner_.push_back(float3(cos(outer), cos(inner), outer * 2));
+		light_cos_outer_inner_.push_back(float4(cos(outer), cos(inner), outer * 2, tan(outer)));
 		return id;
 	}
 
@@ -199,7 +189,7 @@ namespace KlayGE
 
 	void DeferredShadingLayer::SpotLightAngle(int index, float outer, float inner)
 	{
-		light_cos_outer_inner_[index] = float3(cos(outer), cos(inner), outer * 2);
+		light_cos_outer_inner_[index] = float4(cos(outer), cos(inner), outer * 2, tan(outer));
 	}
 
 	float3 DeferredShadingLayer::LightColor(int index) const
@@ -464,7 +454,6 @@ namespace KlayGE
 				}
 
 				std::vector<float4> pos;
-				std::vector<float> lid;
 				std::vector<uint16_t> index;
 				for (uint16_t i = 0; i < n; ++ i)
 				{
@@ -473,64 +462,52 @@ namespace KlayGE
 					int type = static_cast<int>(light_clr_type_enabled_[i].w());
 					if ((LT_Spot == type) || (LT_Point == type))
 					{
+						float4x4 mat;
 						if (LT_Spot == type)
 						{
-							int32_t light_index = batch * max_num_lights_a_batch_ + i;
-							int32_t org_no = light_scaned_[light_index] >> 16;
-
-							float scale = tan(light_cos_outer_inner_[org_no].z() / 2);
-
-							pos.resize(pos.size() + cone_pos_.size());
-							for (size_t i = 0; i < cone_pos_.size(); ++ i)
-							{
-								pos[vertex_base + i] = cone_pos_[i];
-								pos[vertex_base + i].x() *= scale;
-								pos[vertex_base + i].z() *= scale;
-							}
+							pos.insert(pos.end(), cone_pos_.begin(), cone_pos_.end());
 
 							size_t const index_base = index.size();
 							index.resize(index.size() + cone_index_.size());
-							for (size_t i = 0; i < cone_index_.size(); ++ i)
+							for (size_t j = 0; j < cone_index_.size(); ++ j)
 							{
-								index[index_base + i] = vertex_base + cone_index_[i];
+								index[index_base + j] = vertex_base + cone_index_[j];
 							}
+
+							int32_t light_index = batch * max_num_lights_a_batch_ + i;
+							int32_t org_no = light_scaned_[light_index] >> 16;
+							float scale = light_cos_outer_inner_[org_no].w();
+							mat = MathLib::scaling(scale, 1.0f, scale);
 						}
 						else //if (LT_Point == type)
 						{
-							pos.resize(pos.size() + pyramid_pos_.size());
-							for (size_t i = 0; i < pyramid_pos_.size(); ++ i)
-							{
-								pos[vertex_base + i] = pyramid_pos_[i];
-							}
+							pos.insert(pos.end(), pyramid_pos_.begin(), pyramid_pos_.end());
 
 							size_t const index_base = index.size();
 							index.resize(index.size() + pyramid_index_.size());
-							for (size_t i = 0; i < pyramid_index_.size(); ++ i)
+							for (size_t j = 0; j < pyramid_index_.size(); ++ j)
 							{
-								index[index_base + i] = vertex_base + pyramid_index_[i];
+								index[index_base + j] = vertex_base + pyramid_index_[j];
 							}
+
+							mat = float4x4::Identity();
 						}
 
-						lid.resize(pos.size());
-
-						float4x4 mat = MathLib::rotation_x(-PI / 2) * MathLib::inverse(sm_buffer_[i]->GetViewport().camera->ViewMatrix()) * view_ * proj_;
+						light_volume_mvp_enabled_[i] = mat * MathLib::rotation_x(-PI / 2)
+							* MathLib::inverse(sm_buffer_[i]->GetViewport().camera->ViewMatrix())
+							* view_ * proj_;
+						
 						for (size_t j = vertex_base; j < pos.size(); ++ j)
 						{
-							pos[j] = MathLib::transform(pos[j], mat);
-							lid[j] = i + 0.1f;
+							pos[j].w() = i + 0.1f;
 						}
 					}
 					else
 					{
-						pos.push_back(float4(-1, +1, 0, 1));
-						pos.push_back(float4(+1, +1, 0, 1));
-						pos.push_back(float4(-1, -1, 0, 1));
-						pos.push_back(float4(+1, -1, 0, 1));
-
-						lid.push_back(i + 0.1f);
-						lid.push_back(i + 0.1f);
-						lid.push_back(i + 0.1f);
-						lid.push_back(i + 0.1f);
+						pos.push_back(float4(-1, +1, 0, i + 0.1f));
+						pos.push_back(float4(+1, +1, 0, i + 0.1f));
+						pos.push_back(float4(-1, -1, 0, i + 0.1f));
+						pos.push_back(float4(+1, -1, 0, i + 0.1f));
 
 						index.push_back(vertex_base + 1);
 						index.push_back(vertex_base + 0);
@@ -538,17 +515,14 @@ namespace KlayGE
 						index.push_back(vertex_base + 2);
 						index.push_back(vertex_base + 3);
 						index.push_back(vertex_base + 1);
+
+						light_volume_mvp_enabled_[i] = float4x4::Identity();
 					}
 				};
 				light_mask_vb_->Resize(static_cast<uint32_t>(pos.size() * sizeof(pos[0])));
 				{
 					GraphicsBuffer::Mapper mapper(*light_mask_vb_, BA_Write_Only);
 					std::copy(pos.begin(), pos.end(), mapper.Pointer<float4>());
-				}
-				light_id_vb_->Resize(static_cast<uint32_t>(lid.size() * sizeof(lid[0])));
-				{
-					GraphicsBuffer::Mapper mapper(*light_id_vb_, BA_Write_Only);
-					std::copy(lid.begin(), lid.end(), mapper.Pointer<float>());
 				}
 				light_mask_ib_->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
 				{
@@ -561,10 +535,11 @@ namespace KlayGE
 				*light_clr_type_param_ = light_clr_type_enabled_;
 				*light_falloff_param_ = light_falloff_enabled_;
 				*light_view_proj_param_ = light_view_proj_enabled_;
+				*light_volume_mvp_param_ = light_volume_mvp_enabled_;
 				*light_pos_es_param_ = light_pos_es_enabled_;
 				*light_dir_es_param_ = light_dir_es_enabled_;
 
-				RenderableHelper::Render();
+				re.Render(*technique_, *rl_);
 
 				if (start + n >= num_lights)
 				{

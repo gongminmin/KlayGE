@@ -174,7 +174,6 @@ namespace KlayGE
 		FrameBufferPtr frame_buffer_;
 
 		GraphicsBufferPtr light_mask_vb_;
-		GraphicsBufferPtr light_id_vb_;
 		GraphicsBufferPtr light_mask_ib_;
 
 		std::vector<char> light_enabled_;
@@ -182,7 +181,7 @@ namespace KlayGE
 		std::vector<float4> light_clr_type_;
 		std::vector<float4> light_pos_;
 		std::vector<float4> light_dir_;
-		std::vector<float3> light_cos_outer_inner_;
+		std::vector<float4> light_cos_outer_inner_;
 		std::vector<float4> light_falloff_;
 
 		std::vector<uint32_t> light_scaned_;
@@ -191,6 +190,7 @@ namespace KlayGE
 		std::vector<float4> light_clr_type_enabled_;
 		std::vector<float4> light_falloff_enabled_;
 		std::vector<float4x4> light_view_proj_enabled_;
+		std::vector<float4x4> light_volume_mvp_enabled_;
 		std::vector<float4> light_pos_es_enabled_;
 		std::vector<float4> light_dir_es_enabled_;
 
@@ -219,6 +219,7 @@ namespace KlayGE
 		RenderEffectParameterPtr light_clr_type_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_view_proj_param_;
+		RenderEffectParameterPtr light_volume_mvp_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
 

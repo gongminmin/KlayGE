@@ -48,6 +48,14 @@
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
+#include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -245,8 +253,10 @@ namespace KlayGE
 		}
 
 		numObjectsRendered_ = 0;
-		std::vector<std::pair<RenderablePtr, SceneObjectsType> > renderables;
-		std::map<RenderablePtr, size_t> renderables_map;
+		std::vector<std::pair<RenderablePtr, SceneObjectsType>,
+			boost::pool_allocator<std::pair<RenderablePtr, SceneObjectsType> > > renderables;
+		std::map<RenderablePtr, size_t, std::less<RenderablePtr>,
+			boost::fast_pool_allocator<std::pair<RenderablePtr const, size_t> > > renderables_map;
 		for (size_t i = 0; i < visible_marks_.size(); ++ i)
 		{
 			if (visible_marks_[i])

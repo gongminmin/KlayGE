@@ -40,6 +40,7 @@
 		<parameter type="float4" name="light_pos_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4" name="light_dir_es" array_size="MAX_NUM_LIGHTS"/>
 		<parameter type="float4x4" name="light_view_proj" array_size="MAX_NUM_LIGHTS"/>
+		<parameter type="float4x4" name="light_volume_mvp" array_size="MAX_NUM_LIGHTS"/>
 	</cbuffer>
 
 	<parameter type="texture2DArray" name="shadow_map_tex_array"/>
@@ -158,12 +159,13 @@ float GetEdgeWeight(float2 tc0)
 }
 
 void DeferredShadingVS(float4 pos : POSITION,
-						float light_id : TEXCOORD0,
 				out float4 oPosSS : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
-	oPos = pos + texel_to_pixel_offset;
-	oPosSS = float4(oPos.xyw, light_id);
+	oPos = mul(float4(pos.xyz, 1), light_volume_mvp[(int)pos.w]);
+	oPosSS = float4(oPos.xyw, pos.w);
+	oPos += texel_to_pixel_offset;
+	oPos.z = min(oPos.z, oPos.w);
 }
 
 float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
@@ -175,13 +177,13 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 	tc0 += 0.5;
 	
 	float3 view_dir = texcoord_to_view(tc0);
-	int lid = (int)(pos_ss.w);
+	int lid = (int)pos_ss.w;
 	
 	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
-	
+
 	float4 final_clr;
 	if (0 == GetMtlID(ndc))
 	{
@@ -204,7 +206,7 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 
 		float2 ds = 0;
 
-		int type = (int)(light_clr_type[lid].w);
+		int type = (int)light_clr_type[lid].w;
 		if (LT_Ambient == type)
 		{
 			float ssao = 1;
@@ -318,7 +320,8 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 					
 					if (LT_Spot == type)
 					{
-						float spot = spot_lighting(light_pos_es[lid].xyz, light_dir_es[lid].xyz, float2(light_pos_es[lid].w, light_dir_es[lid].w), pos_es.xyz);
+						float spot = spot_lighting(light_pos_es[lid].xyz, light_dir_es[lid].xyz,
+							float2(light_pos_es[lid].w, light_dir_es[lid].w), pos_es.xyz);
 						shadow *= spot;
 					}
 
@@ -330,28 +333,26 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 				}
 			}
 		}
-		
-		float3 diffuse = 0, specular = 0;
 
 #ifdef KLAYGE_D3D9
-		if (0 == ((light_attrib[lid] / LSA_NoDiffuse) % 2))
+		if (((light_attrib[lid] / LSA_NoDiffuse) % 2) != 0)
 #else
-		if (0 == (light_attrib[lid] & LSA_NoDiffuse))
+		if ((light_attrib[lid] & LSA_NoDiffuse) != 0)
 #endif
 		{
-			diffuse = ds.x * light_clr_type[lid].xyz;
+			ds.x = 0;
 		}
 #ifdef KLAYGE_D3D9
-		if (0 == ((light_attrib[lid] / LSA_NoSpecular) % 2))
+		if (((light_attrib[lid] / LSA_NoSpecular) % 2) != 0)
 #else
-		if (0 == (light_attrib[lid] & LSA_NoSpecular))
+		if ((light_attrib[lid] & LSA_NoSpecular) != 0)
 #endif
 		{
-			specular = ds.y * light_clr_type[lid].xyz;
+			ds.y = 0;
 		}
 
 		float3 specular_clr = GetSpecular(color);
-		final_clr = float4(0.65f * diffuse_clr * diffuse + 0.3f * specular_clr * specular, 1);
+		final_clr = float4((0.7f * ds.x * diffuse_clr + 0.3f * ds.y * specular_clr) * light_clr_type[lid].xyz, 1);
 	}
 
 	return final_clr;
@@ -417,10 +418,9 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 	<technique name="DeferredShading">
 		<pass name="p0">
-			<state name="depth_enable" value="true"/>
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="depth_func" value="greater"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="blend_enable" value="true"/>
