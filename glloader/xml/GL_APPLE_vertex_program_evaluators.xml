@@ -1,0 +1,89 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_APPLE_vertex_program_evaluators" reg_no="369">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_MAP1_APPLE" value="0x8A00"/>
+		<token name="GL_VERTEX_ATTRIB_MAP2_APPLE" value="0x8A01"/>
+		<token name="GL_VERTEX_ATTRIB_MAP1_SIZE_APPLE" value="0x8A02"/>
+		<token name="GL_VERTEX_ATTRIB_MAP1_COEFF_APPLE" value="0x8A03"/>
+		<token name="GL_VERTEX_ATTRIB_MAP1_ORDER_APPLE" value="0x8A04"/>
+		<token name="GL_VERTEX_ATTRIB_MAP1_DOMAIN_APPLE" value="0x8A05"/>
+		<token name="GL_VERTEX_ATTRIB_MAP2_SIZE_APPLE" value="0x8A06"/>
+		<token name="GL_VERTEX_ATTRIB_MAP2_COEFF_APPLE" value="0x8A07"/>
+		<token name="GL_VERTEX_ATTRIB_MAP2_ORDER_APPLE" value="0x8A08"/>
+		<token name="GL_VERTEX_ATTRIB_MAP2_DOMAIN_APPLE" value="0x8A09"/>
+	</tokens>
+
+	<functions>
+		<function name="glEnableVertexAttribAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+			</params>
+		</function>
+		<function name="glDisableVertexAttribAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+			</params>
+		</function>
+		<function name="glIsVertexAttribEnabledAPPLE" return="GLboolean">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+			</params>
+		</function>
+		<function name="glMapVertexAttrib1dAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="size"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="GLdouble const *" name="points"/>
+			</params>
+		</function>
+		<function name="glMapVertexAttrib1fAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="size"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="GLfloat const *" name="points"/>
+			</params>
+		</function>
+		<function name="glMapVertexAttrib2dAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="size"/>
+				<param type="GLdouble" name="u1"/>
+				<param type="GLdouble" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLdouble" name="v1"/>
+				<param type="GLdouble" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="GLdouble const *" name="points"/>
+			</params>
+		</function>
+		<function name="glMapVertexAttrib2fAPPLE" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="size"/>
+				<param type="GLfloat" name="u1"/>
+				<param type="GLfloat" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLfloat" name="v1"/>
+				<param type="GLfloat" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="GLfloat const *" name="points"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_APPLE_row_bytes" reg_no="372">
+	<tokens>
+		<token name="GL_PACK_ROW_BYTES_APPLE" value="0x8A15"/>
+		<token name="GL_UNPACK_ROW_BYTES_APPLE" value="0x8A16"/>
+	</tokens>
+</gl_extension>

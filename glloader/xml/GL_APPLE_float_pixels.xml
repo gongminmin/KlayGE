@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_APPLE_float_pixels" reg_no="368">
+	<tokens>
+		<token name="GL_HALF_APPLE" value="0x140B"/>
+		<token name="GL_COLOR_FLOAT_APPLE" value="0x8A0F"/>
+		<token name="GL_RGBA_FLOAT32_APPLE" value="0x8814"/>
+		<token name="GL_RGB_FLOAT32_APPLE" value="0x8815"/>
+		<token name="GL_ALPHA_FLOAT32_APPLE" value="0x8816"/>
+		<token name="GL_INTENSITY_FLOAT32_APPLE" value="0x8817"/>
+		<token name="GL_LUMINANCE_FLOAT32_APPLE" value="0x8818"/>
+		<token name="GL_LUMINANCE_ALPHA_FLOAT32_APPLE" value="0x8819"/>
+		<token name="GL_RGBA_FLOAT16_APPLE" value="0x881A"/>
+		<token name="GL_RGB_FLOAT16_APPLE" value="0x881B"/>
+		<token name="GL_ALPHA_FLOAT16_APPLE" value="0x881C"/>
+		<token name="GL_INTENSITY_FLOAT16_APPLE" value="0x881D"/>
+		<token name="GL_LUMINANCE_FLOAT16_APPLE" value="0x881E"/>
+		<token name="GL_LUMINANCE_ALPHA_FLOAT16_APPLE" value="0x881F"/>
+	</tokens>
+</gl_extension>

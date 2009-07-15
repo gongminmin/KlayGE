@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_draw_buffers_blend" reg_no="366">
+	<functions>
+		<function name="glBlendFuncIndexedAMD" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="src"/>
+				<param type="GLenum" name="dst"/>
+			</params>
+		</function>
+		<function name="glBlendFuncSeparateIndexedAMD" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="srcRGB"/>
+				<param type="GLenum" name="dstRGB"/>
+				<param type="GLenum" name="srcAlpha"/>
+				<param type="GLenum" name="dstAlpha"/>
+			</params>
+		</function>
+		<function name="glBlendEquationIndexedAMD" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glBlendEquationSeparateIndexedAMD" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

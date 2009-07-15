@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_snorm" reg_no="365">
+	<tokens>
+		<token name="GL_RED_SNORM" value="0x8F90"/>
+		<token name="GL_RG_SNORM" value="0x8F91"/>
+		<token name="GL_RGB_SNORM" value="0x8F92"/>
+		<token name="GL_RGBA_SNORM" value="0x8F93"/>
+		<token name="GL_ALPHA_SNORM" value="0x9010"/>
+		<token name="GL_LUMINANCE_SNORM" value="0x9011"/>
+		<token name="GL_LUMINANCE_ALPHA_SNORM" value="0x9012"/>
+		<token name="GL_INTENSITY_SNORM" value="0x9013"/>
+		<token name="GL_R8_SNORM" value="0x8F94"/>
+		<token name="GL_RG8_SNORM" value="0x8F95"/>
+		<token name="GL_RGB8_SNORM" value="0x8F96"/>
+		<token name="GL_RGBA8_SNORM" value="0x8F97"/>
+		<token name="GL_ALPHA8_SNORM" value="0x9014"/>
+		<token name="GL_LUMINANCE8_SNORM" value="0x9015"/>
+		<token name="GL_LUMINANCE8_ALPHA8_SNORM" value="0x9016"/>
+		<token name="GL_INTENSITY8_SNORM" value="0x9017"/>
+		<token name="GL_R16_SNORM" value="0x8F98"/>
+		<token name="GL_RG16_SNORM" value="0x8F99"/>
+		<token name="GL_RGB16_SNORM" value="0x8F9A"/>
+		<token name="GL_RGBA16_SNORM" value="0x8F9B"/>
+		<token name="GL_ALPHA16_SNORM" value="0x9018"/>
+		<token name="GL_LUMINANCE16_SNORM" value="0x9019"/>
+		<token name="GL_LUMINANCE16_ALPHA16_SNORM" value="0x901A"/>
+		<token name="GL_INTENSITY16_SNORM" value="0x901B"/>
+		<token name="GL_SIGNED_NORMALIZED" value="0x8F9C"/>
+	</tokens>
+</gl_extension>

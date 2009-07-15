@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_APPLE_aux_depth_stencil" reg_no="370">
+	<tokens>
+		<token name="GL_AUX_DEPTH_STENCIL_APPLE" value="0x8A14"/>
+	</tokens>
+</gl_extension>
