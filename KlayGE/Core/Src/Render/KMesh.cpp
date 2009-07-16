@@ -337,6 +337,18 @@ namespace KlayGE
 				}
 				ofs.write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
 
+				uint32_t max_num_blend = 0;
+				for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+				{
+					uint32_t num_blend = 0;
+					for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+					{
+						++ num_blend;
+					}
+					max_num_blend = std::max(max_num_blend, num_blend);
+				}
+				ofs.write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
+
 				BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
 				{
 					switch (ve.usage)
@@ -401,9 +413,15 @@ namespace KlayGE
 							std::vector<uint8_t> buf;
 							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 							{
+								uint32_t num_blend = 0;
 								for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
 								{
 									buf.push_back(static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt()));
+									++ num_blend;
+								}
+								for (uint32_t i = num_blend; i < max_num_blend; ++ i)
+								{
+									buf.push_back(0);
 								}
 							}
 
@@ -416,9 +434,15 @@ namespace KlayGE
 							std::vector<float> buf;
 							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 							{
+								uint32_t num_blend = 0;
 								for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
 								{
 									buf.push_back(weight_node->Attrib("weight")->ValueFloat());
+									++ num_blend;
+								}
+								for (uint32_t i = num_blend; i < max_num_blend; ++ i)
+								{
+									buf.push_back(0);
 								}
 							}
 
@@ -545,7 +569,6 @@ namespace KlayGE
 				}
 				ofs.write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
 
-				KeyFrames kf;
 				for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 				{
 					XMLNodePtr pos_node = key_node->FirstNode("pos");
@@ -660,6 +683,9 @@ namespace KlayGE
 			uint32_t num_vertices;
 			file->read(&num_vertices, sizeof(num_vertices));
 
+			uint32_t max_num_blend;
+			file->read(&max_num_blend, sizeof(max_num_blend));
+
 			BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
 			{
 				switch (ve.usage)
@@ -698,7 +724,7 @@ namespace KlayGE
 
 				case VEU_BlendIndex:
 					{
-						std::vector<uint8_t> buf(num_vertices);
+						std::vector<uint8_t> buf(num_vertices * max_num_blend);
 						file->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
@@ -706,7 +732,7 @@ namespace KlayGE
 
 				case VEU_BlendWeight:
 					{
-						std::vector<float> buf(num_vertices);
+						std::vector<float> buf(num_vertices * max_num_blend);
 						file->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
@@ -780,10 +806,12 @@ namespace KlayGE
 				file->read(&num_kf, sizeof(num_kf));
 
 				KeyFrames kf;
+				kf.bind_pos.resize(num_kf);
+				kf.bind_quat.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
-					file->read(&kf.bind_pos, sizeof(kf.bind_pos));
-					file->read(&kf.bind_quat, sizeof(kf.bind_quat));
+					file->read(&kf.bind_pos[k_index], sizeof(kf.bind_pos[k_index]));
+					file->read(&kf.bind_quat[k_index], sizeof(kf.bind_quat[k_index]));
 				}
 
 				kfs->insert(std::make_pair(name, kf));
