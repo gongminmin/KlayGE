@@ -162,7 +162,7 @@ namespace KlayGE
 				IDXGISwapChain* sc = NULL;
 				ID3D10Device* d3d_device = NULL;
 				IDXGIAdapter* dx_adapter = NULL;
-				if (D3D10_DRIVER_TYPE_HARDWARE == boost::get<0>(dev_type_beh))
+				if ((D3D10_DRIVER_TYPE_HARDWARE == boost::get<0>(dev_type_beh)) || use_nvperfhud)
 				{
 					dx_adapter = adapter_->Adapter().get();
 				}

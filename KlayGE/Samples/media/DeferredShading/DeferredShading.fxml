@@ -165,7 +165,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp[(int)pos.w]);
 	oPosSS = float4(oPos.xyw, pos.w);
 	oPos += texel_to_pixel_offset;
-	oPos.z = min(oPos.z, oPos.w);
+	oPos.z = 0;
 }
 
 float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
