@@ -34,51 +34,81 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-		if (rf.RenderEngineInstance().DeviceCaps().max_shader_model < 4)
-		{
-			max_num_lights_a_batch_ = 1;
-		}
-		else
-		{
-			max_num_lights_a_batch_ = 8;
-		}
-
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
-		light_mask_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
-		rl_->BindVertexStream(light_mask_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+		{
+			rl_cone_ = rf.MakeRenderLayout();
+			rl_cone_->TopologyType(RenderLayout::TT_TriangleList);
 
-		light_mask_ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
-		rl_->BindIndexStream(light_mask_ib_, EF_R16UI);
+			std::vector<float3> pos;
+			std::vector<uint16_t> index;
+			CreateConeMesh(pos, index, 0, 100.0f, 100.0f, 12);
 
-		std::pair<std::string, std::string> macros[] = {
-			std::make_pair("MAX_NUM_LIGHTS", boost::lexical_cast<std::string>(max_num_lights_a_batch_)),
-			std::make_pair("", "") };
-		technique_ = rf.LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading");
+			ElementInitData init_data;
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.slice_pitch = 0;
+			init_data.data = &pos[0];
+			rl_cone_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+			init_data.data = &index[0];
+			rl_cone_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+		}
+		{
+			rl_pyramid_ = rf.MakeRenderLayout();
+			rl_pyramid_->TopologyType(RenderLayout::TT_TriangleList);
+
+			std::vector<float3> pos;
+			std::vector<uint16_t> index;
+			CreatePyramidMesh(pos, index, 0, 100.0f, 100.0f);
+
+			ElementInitData init_data;
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.slice_pitch = 0;
+			init_data.data = &pos[0];
+			rl_pyramid_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+			init_data.data = &index[0];
+			rl_pyramid_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+		}
+		{
+			rl_quad_ = rf.MakeRenderLayout();
+			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+			std::vector<float3> pos;
+			std::vector<uint16_t> index;
+
+			pos.push_back(float3(+1, +1, 0));
+			pos.push_back(float3(-1, +1, 0));
+			pos.push_back(float3(+1, -1, 0));
+			pos.push_back(float3(-1, -1, 0));
+
+			ElementInitData init_data;
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.slice_pitch = 0;
+			init_data.data = &pos[0];
+			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		}
+
+		technique_ = rf.LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShadingPoint");
+
+		technique_ambient_ = technique_->Effect().TechniqueByName("DeferredShadingAmbient");
+		technique_directional_ = technique_->Effect().TechniqueByName("DeferredShadingDirectional");
+		technique_point_ = technique_->Effect().TechniqueByName("DeferredShadingPoint");
+		technique_spot_ = technique_->Effect().TechniqueByName("DeferredShadingSpot");
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
-		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint16_t>(max_num_lights_a_batch_), EF_GR16F,
-			1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		sm_buffer_.resize(max_num_lights_a_batch_);
-		for (int i = 0; i < max_num_lights_a_batch_; ++ i)
-		{
-			sm_buffer_[i] = rf.MakeFrameBuffer();
-			sm_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, i, 0));
-			sm_buffer_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-		}
+		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_buffer_ = rf.MakeFrameBuffer();
+		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		*(technique_->Effect().ParameterByName("sm_flipping")) = static_cast<int32_t>(sm_buffer_[0]->RequiresFlipping() ? -1 : 1);
-		if (rf.RenderEngineInstance().DeviceCaps().max_shader_model < 4)
-		{
-			*(technique_->Effect().ParameterByName("shadow_map_tex")) = sm_tex_;
-		}
-		else
-		{
-			*(technique_->Effect().ParameterByName("shadow_map_tex_array")) = sm_tex_;
-		}
+		*(technique_->Effect().ParameterByName("sm_flipping")) = static_cast<int32_t>(sm_buffer_->RequiresFlipping() ? -1 : 1);
+		*(technique_->Effect().ParameterByName("shadow_map_tex")) = sm_tex_;
 
 		texel_to_pixel_offset_param_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
@@ -88,7 +118,6 @@ namespace KlayGE
 		lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
 		inv_view_param_ = technique_->Effect().ParameterByName("inv_view");
 		show_skybox_param_ = technique_->Effect().ParameterByName("show_skybox");
-		num_lights_param_ = technique_->Effect().ParameterByName("num_lights");
 		light_attrib_param_ = technique_->Effect().ParameterByName("light_attrib");
 		light_clr_type_param_ = technique_->Effect().ParameterByName("light_clr_type");
 		light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
@@ -96,17 +125,6 @@ namespace KlayGE
 		light_volume_mvp_param_ = technique_->Effect().ParameterByName("light_volume_mvp");
 		light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
 		light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
-
-		light_attrib_enabled_.resize(max_num_lights_a_batch_);
-		light_clr_type_enabled_.resize(max_num_lights_a_batch_);
-		light_falloff_enabled_.resize(max_num_lights_a_batch_);
-		light_view_proj_enabled_.resize(max_num_lights_a_batch_);
-		light_volume_mvp_enabled_.resize(max_num_lights_a_batch_);
-		light_pos_es_enabled_.resize(max_num_lights_a_batch_);
-		light_dir_es_enabled_.resize(max_num_lights_a_batch_);
-
-		CreatePyramidMesh(pyramid_pos_, pyramid_index_, 0, 100.0f, 100.0f);
-		CreateConeMesh(cone_pos_, cone_index_, 0, 100.0f, 100.0f, 12);
 	}
 
 	int DeferredShadingLayer::AddAmbientLight(int32_t attr, float3 const & clr)
@@ -271,7 +289,6 @@ namespace KlayGE
 		switch (buffer_type_)
 		{
 		case 0:
-			technique_ = technique_->Effect().TechniqueByName("DeferredShading");
 			break;
 
 		case 1:
@@ -363,23 +380,22 @@ namespace KlayGE
 
 		if (0 == buffer_type_)
 		{
-			int32_t batch = pass / (max_num_lights_a_batch_ + 1);
-			int32_t pass_in_batch = pass - batch * (max_num_lights_a_batch_ + 1);
+			int32_t batch = pass / 2;
+			int32_t pass_in_batch = pass - batch * 2;
 
 			int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
-			int32_t start = batch * max_num_lights_a_batch_;
-			int32_t n = std::min(num_lights - start, max_num_lights_a_batch_);
+			int32_t start = batch;
 
-			if (pass_in_batch < n)
+			int32_t light_index = batch;
+			int32_t org_no = light_scaned_[light_index] >> 16;
+			int32_t offset = light_scaned_[light_index] & 0xFFFF;
+
+			int type = static_cast<int>(light_clr_type_[org_no].w());
+
+			if (0 == pass_in_batch)
 			{
-				int32_t light_index = batch * max_num_lights_a_batch_ + pass_in_batch;
+				// Shadow map generation
 
-				int32_t org_no = light_scaned_[light_index] >> 16;
-				int32_t offset = light_scaned_[light_index] & 0xFFFF;
-				light_attrib_enabled_[pass_in_batch] = light_attrib_[org_no];
-				light_clr_type_enabled_[pass_in_batch] = light_clr_type_[org_no];
-
-				int type = static_cast<int>(light_clr_type_enabled_[pass_in_batch].w());
 				if (type != LT_Ambient)
 				{
 					float3 d, u;
@@ -406,32 +422,35 @@ namespace KlayGE
 					}
 
 					float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-					sm_buffer_[pass_in_batch]->GetViewport().camera->ViewParams(p, p + d, u);
-					sm_buffer_[pass_in_batch]->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+					sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+					sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 					float3 dir_es = MathLib::transform_normal(d, view_);
-					light_dir_es_enabled_[pass_in_batch] = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
+					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
 
-					light_view_proj_enabled_[pass_in_batch] = inv_view_ * sm_buffer_[pass_in_batch]->GetViewport().camera->ViewMatrix()
-						* sm_buffer_[pass_in_batch]->GetViewport().camera->ProjMatrix();
+					*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+						* sm_buffer_->GetViewport().camera->ProjMatrix();
 					if (type != LT_Directional)
 					{
-						light_falloff_enabled_[pass_in_batch] = light_falloff_[org_no];
-
 						float3 loc_es = MathLib::transform_coord(p, view_);
-						light_pos_es_enabled_[pass_in_batch] = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+						float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
 						if (LT_Spot == type)
 						{
-							light_pos_es_enabled_[pass_in_batch].w() = light_cos_outer_inner_[org_no].x();
-							light_dir_es_enabled_[pass_in_batch].w() = light_cos_outer_inner_[org_no].y();
+							light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+							light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
 						}
+
+						*light_pos_es_param_ = light_pos_es_actived;
+					
 					}
+
+					*light_dir_es_param_ = light_dir_es_actived;
 				}
 
-				if (0 == (light_attrib_enabled_[pass_in_batch] & LSA_NoShadow))
+				if (0 == (light_attrib_[org_no] & LSA_NoShadow))
 				{
-					re.BindFrameBuffer(sm_buffer_[pass_in_batch]);
+					re.BindFrameBuffer(sm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
 
 					return App3DFramework::URV_Need_Flush;
@@ -443,6 +462,8 @@ namespace KlayGE
 			}
 			else
 			{
+				// Lighting
+
 				re.BindFrameBuffer(frame_buffer_);
 
 				if (0 == batch)
@@ -455,95 +476,53 @@ namespace KlayGE
 					*show_skybox_param_ = false;
 				}
 
-				std::vector<float4> pos;
-				std::vector<uint16_t> index;
-				for (uint16_t i = 0; i < n; ++ i)
+				float4x4 light_volume_mvp_actived;
+				if ((LT_Spot == type) || (LT_Point == type))
 				{
-					uint16_t const vertex_base = static_cast<uint16_t>(pos.size());
-
-					int type = static_cast<int>(light_clr_type_enabled_[i].w());
-					if ((LT_Spot == type) || (LT_Point == type))
+					float4x4 mat;
+					if (LT_Spot == type)
 					{
-						float4x4 mat;
-						if (LT_Spot == type)
-						{
-							pos.insert(pos.end(), cone_pos_.begin(), cone_pos_.end());
+						technique_ = technique_spot_;
 
-							size_t const index_base = index.size();
-							index.resize(index.size() + cone_index_.size());
-							for (size_t j = 0; j < cone_index_.size(); ++ j)
-							{
-								index[index_base + j] = vertex_base + cone_index_[j];
-							}
+						float scale = light_cos_outer_inner_[org_no].w();
+						mat = MathLib::scaling(scale, 1.0f, scale);
 
-							int32_t light_index = batch * max_num_lights_a_batch_ + i;
-							int32_t org_no = light_scaned_[light_index] >> 16;
-							float scale = light_cos_outer_inner_[org_no].w();
-							mat = MathLib::scaling(scale, 1.0f, scale);
-						}
-						else //if (LT_Point == type)
-						{
-							pos.insert(pos.end(), pyramid_pos_.begin(), pyramid_pos_.end());
+						rl_ = rl_cone_;
+					}
+					else //if (LT_Point == type)
+					{
+						technique_ = technique_point_;
+						mat = float4x4::Identity();
+						rl_ = rl_pyramid_;
+					}
 
-							size_t const index_base = index.size();
-							index.resize(index.size() + pyramid_index_.size());
-							for (size_t j = 0; j < pyramid_index_.size(); ++ j)
-							{
-								index[index_base + j] = vertex_base + pyramid_index_[j];
-							}
-
-							mat = float4x4::Identity();
-						}
-
-						light_volume_mvp_enabled_[i] = mat * MathLib::rotation_x(-PI / 2)
-							* MathLib::inverse(sm_buffer_[i]->GetViewport().camera->ViewMatrix())
-							* view_ * proj_;
-						
-						for (size_t j = vertex_base; j < pos.size(); ++ j)
-						{
-							pos[j].w() = i + 0.1f;
-						}
+					light_volume_mvp_actived = mat * MathLib::rotation_x(-PI / 2)
+						* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+						* view_ * proj_;
+				}
+				else
+				{
+					if (LT_Directional == type)
+					{
+						technique_ = technique_directional_;
 					}
 					else
 					{
-						pos.push_back(float4(-1, +1, 0, i + 0.1f));
-						pos.push_back(float4(+1, +1, 0, i + 0.1f));
-						pos.push_back(float4(-1, -1, 0, i + 0.1f));
-						pos.push_back(float4(+1, -1, 0, i + 0.1f));
-
-						index.push_back(vertex_base + 1);
-						index.push_back(vertex_base + 0);
-						index.push_back(vertex_base + 2);
-						index.push_back(vertex_base + 2);
-						index.push_back(vertex_base + 3);
-						index.push_back(vertex_base + 1);
-
-						light_volume_mvp_enabled_[i] = float4x4::Identity();
+						technique_ = technique_ambient_;
 					}
-				};
-				light_mask_vb_->Resize(static_cast<uint32_t>(pos.size() * sizeof(pos[0])));
-				{
-					GraphicsBuffer::Mapper mapper(*light_mask_vb_, BA_Write_Only);
-					std::copy(pos.begin(), pos.end(), mapper.Pointer<float4>());
-				}
-				light_mask_ib_->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
-				{
-					GraphicsBuffer::Mapper mapper(*light_mask_ib_, BA_Write_Only);
-					std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
+
+					rl_ = rl_quad_;
+					light_volume_mvp_actived = float4x4::Identity();
 				}
 
-				*num_lights_param_ = n;
-				*light_attrib_param_ = light_attrib_enabled_;
-				*light_clr_type_param_ = light_clr_type_enabled_;
-				*light_falloff_param_ = light_falloff_enabled_;
-				*light_view_proj_param_ = light_view_proj_enabled_;
-				*light_volume_mvp_param_ = light_volume_mvp_enabled_;
-				*light_pos_es_param_ = light_pos_es_enabled_;
-				*light_dir_es_param_ = light_dir_es_enabled_;
+				*light_attrib_param_ = light_attrib_[org_no];
+				*light_clr_type_param_ = light_clr_type_[org_no];
+				*light_falloff_param_ = light_falloff_[org_no];
+				*light_volume_mvp_param_ = light_volume_mvp_actived;
 
 				re.Render(*technique_, *rl_);
 
-				if (start + n >= num_lights)
+				if (start + 1 >= num_lights)
 				{
 					return App3DFramework::URV_Finished;
 				}
@@ -556,35 +535,7 @@ namespace KlayGE
 		else
 		{
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-
-			std::vector<float4> pos;
-			std::vector<uint16_t> index;
-
-			pos.push_back(float4(-1, +1, 0, 1));
-			pos.push_back(float4(+1, +1, 0, 1));
-			pos.push_back(float4(-1, -1, 0, 1));
-			pos.push_back(float4(+1, -1, 0, 1));
-
-			index.push_back(0);
-			index.push_back(1);
-			index.push_back(3);
-			index.push_back(3);
-			index.push_back(2);
-			index.push_back(0);
-			
-			light_mask_vb_->Resize(static_cast<uint32_t>(pos.size() * sizeof(pos[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*light_mask_vb_, BA_Write_Only);
-				std::copy(pos.begin(), pos.end(), mapper.Pointer<float4>());
-			}
-			light_mask_ib_->Resize(static_cast<uint32_t>(index.size() * sizeof(index[0])));
-			{
-				GraphicsBuffer::Mapper mapper(*light_mask_ib_, BA_Write_Only);
-				std::copy(index.begin(), index.end(), mapper.Pointer<uint16_t>());
-			}
-
-			re.Render(*technique_, *rl_);
+			re.Render(*technique_, *rl_quad_);
 
 			return App3DFramework::URV_Finished;
 		}

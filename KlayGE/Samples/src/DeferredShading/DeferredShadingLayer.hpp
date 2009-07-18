@@ -173,8 +173,9 @@ namespace KlayGE
 	private:
 		FrameBufferPtr frame_buffer_;
 
-		GraphicsBufferPtr light_mask_vb_;
-		GraphicsBufferPtr light_mask_ib_;
+		RenderLayoutPtr rl_cone_;
+		RenderLayoutPtr rl_pyramid_;
+		RenderLayoutPtr rl_quad_;
 
 		std::vector<char> light_enabled_;
 		std::vector<int32_t> light_attrib_;
@@ -186,21 +187,14 @@ namespace KlayGE
 
 		std::vector<uint32_t> light_scaned_;
 
-		std::vector<int32_t> light_attrib_enabled_;
-		std::vector<float4> light_clr_type_enabled_;
-		std::vector<float4> light_falloff_enabled_;
-		std::vector<float4x4> light_view_proj_enabled_;
-		std::vector<float4x4> light_volume_mvp_enabled_;
-		std::vector<float4> light_pos_es_enabled_;
-		std::vector<float4> light_dir_es_enabled_;
+		RenderTechniquePtr technique_ambient_;
+		RenderTechniquePtr technique_directional_;
+		RenderTechniquePtr technique_point_;
+		RenderTechniquePtr technique_spot_;
 
-		RenderTechniquePtr technique_wo_blend_;
-		RenderTechniquePtr technique_w_blend_;
-
-		int32_t max_num_lights_a_batch_;
 		int32_t buffer_type_;
 
-		std::vector<FrameBufferPtr> sm_buffer_;
+		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 
 		float4x4 view_, proj_;
@@ -214,7 +208,6 @@ namespace KlayGE
 		RenderEffectParameterPtr lower_right_param_;
 		RenderEffectParameterPtr inv_view_param_;
 		RenderEffectParameterPtr show_skybox_param_;
-		RenderEffectParameterPtr num_lights_param_;
 		RenderEffectParameterPtr light_attrib_param_;
 		RenderEffectParameterPtr light_clr_type_param_;
 		RenderEffectParameterPtr light_falloff_param_;
@@ -222,11 +215,6 @@ namespace KlayGE
 		RenderEffectParameterPtr light_volume_mvp_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
-
-		std::vector<float4> cone_pos_;
-		std::vector<uint16_t> cone_index_;
-		std::vector<float4> pyramid_pos_;
-		std::vector<uint16_t> pyramid_index_;
 	};
 
 	typedef boost::shared_ptr<DeferredShadingLayer> DeferredShadingLayerPtr;
