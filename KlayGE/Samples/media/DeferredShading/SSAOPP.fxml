@@ -64,7 +64,7 @@ float4 SSAO(float2 tc0)
 	
 	// convert from meters into SS units
 	sample_scale.xy *= 1.0f / scene_depth_m;
-	sample_scale.z *= 2.0f / depth_near_far_invfar.y;
+	sample_scale.z *= 2.0f * depth_near_far_invfar.z;
 
 	float depth_test_softness = 64.f / sample_scale.z;
 

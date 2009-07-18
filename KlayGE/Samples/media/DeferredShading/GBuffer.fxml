@@ -32,16 +32,16 @@ void GBufferVS(float4 pos : POSITION,
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos_es, proj);
-	oNormal.xyz = normal;
+	oNormal.xyz = mul(normal, (float3x3)model_view);
 	oNormal.w = pos_es.z * depth_near_far_invfar.z;
-	
+
 	oTexCoord = texcoord;
 }
 
 void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
-	normal.xyz = normalize(mul(normal.xyz + 0.1f * bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
+	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
 	float3 diffuse;
@@ -60,7 +60,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
-	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
+	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
 	float3 diffuse;
@@ -79,7 +79,7 @@ void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
-	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
+	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
 	oClr = StoreDiffuseSpecular(1, 0.1f);
@@ -135,7 +135,7 @@ float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
 	<technique name="GenShadowMap">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
-
+			
 			<state name="vertex_shader" value="GenShadowMapVS()"/>
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>

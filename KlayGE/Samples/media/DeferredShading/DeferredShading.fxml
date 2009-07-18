@@ -64,7 +64,7 @@ float3 texcoord_to_view(float2 tex)
 
 float linstep(float min, float max, float v)
 {
-	return clamp((v - min) / (max - min), 0, 1);
+	return saturate((v - min) / (max - min));
 }
 		]]>
 	</shader>
@@ -162,7 +162,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 				out float4 oPosSS : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(float4(pos.xyz, 1), light_volume_mvp[(int)pos.w]);
+	oPos = mul(float4(pos.xyz, 1), light_volume_mvp[(uint)pos.w]);
 	oPosSS = float4(oPos.xyw, pos.w);
 	oPos += texel_to_pixel_offset;
 	oPos.z = 0;
@@ -172,12 +172,12 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 {
 	pos_ss.xy /= pos_ss.z;
 
-	float2 tc0 = pos_ss.xy / 2;
+	float2 tc0 = pos_ss.xy * 0.5f;
 	tc0.y *= flipping;
 	tc0 += 0.5;
 	
 	float3 view_dir = texcoord_to_view(tc0);
-	int lid = (int)pos_ss.w;
+	uint lid = (uint)pos_ss.w;
 	
 	half4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float4 color = color_tex.Sample(point_sampler, tc0);
@@ -206,7 +206,7 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 
 		float2 ds = 0;
 
-		int type = (int)light_clr_type[lid].w;
+		uint type = (uint)light_clr_type[lid].w;
 		if (LT_Ambient == type)
 		{
 			float ssao = 1;
@@ -243,7 +243,7 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 			{
 				float3 dir_ws = mul(dir, (float3x3)inv_view);
 				float3 abs_dir = abs(dir_ws);
-				int face;
+				uint face;
 				if (abs_dir.x > abs_dir.y)
 				{
 					if (abs_dir.x > abs_dir.z)
@@ -267,7 +267,7 @@ float4 DeferredShadingPS(float4 pos_ss : TEXCOORD0) : SV_Target
 					}
 				}
 				
-				if (face == (int)light_dir_es[lid].w)
+				if (face == (uint)light_dir_es[lid].w)
 				{
 					in_bound = true;
 				}
@@ -367,7 +367,7 @@ void ShowQuadVS(float4 pos : POSITION,
 	oPos = pos;
 	oPos += texel_to_pixel_offset;
 	
-	oTc0 = oPos.xy / oPos.w / 2;
+	oTc0 = oPos.xy / oPos.w * 0.5f;
 	oTc0.y *= flipping;
 	oTc0 += 0.5;
 	

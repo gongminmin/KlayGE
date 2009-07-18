@@ -54,12 +54,14 @@ namespace KlayGE
 		light_mask_ib_ = rf.MakeIndexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
 		rl_->BindIndexStream(light_mask_ib_, EF_R16UI);
 
-		std::pair<std::string, std::string> macros[] = { std::make_pair("MAX_NUM_LIGHTS", boost::lexical_cast<std::string>(max_num_lights_a_batch_)),
+		std::pair<std::string, std::string> macros[] = {
+			std::make_pair("MAX_NUM_LIGHTS", boost::lexical_cast<std::string>(max_num_lights_a_batch_)),
 			std::make_pair("", "") };
 		technique_ = rf.LoadEffect("DeferredShading.fxml", macros)->TechniqueByName("DeferredShading");
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
-		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint16_t>(max_num_lights_a_batch_), EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint16_t>(max_num_lights_a_batch_), EF_GR16F,
+			1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_.resize(max_num_lights_a_batch_);
 		for (int i = 0; i < max_num_lights_a_batch_; ++ i)
 		{

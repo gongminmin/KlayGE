@@ -231,7 +231,7 @@ namespace KlayGE
 							break;
 
 						case D3D_FEATURE_LEVEL_9_2:
-							oss << "  D3D11 Level 9.2";
+							oss << " D3D11 Level 9.2";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_1:
