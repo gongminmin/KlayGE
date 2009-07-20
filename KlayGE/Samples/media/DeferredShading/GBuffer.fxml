@@ -38,42 +38,31 @@ void GBufferVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 }
 
-void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+void GBufferDiffBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord), (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
-	float3 diffuse;
-	if (diffuse_clr.a > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(linear_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-
-	oClr = StoreDiffuseSpecular(diffuse, 0.1f);
+	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0.1f);
 }
 
-void GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+void GBufferDiffPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
-	float3 diffuse;
-	if (diffuse_clr.a > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(linear_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
+	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, 0.1f);
+}
 
-	oClr = StoreDiffuseSpecular(diffuse, 0.1f);
+void GBufferBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+{
+	normal.xyz = normalize(normal.xyz);
+	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
+
+	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, 0.1f);
 }
 
 void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
@@ -82,22 +71,29 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1);
 	
-	oClr = StoreDiffuseSpecular(1, 0.1f);
+	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, 0.1f);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferTech">
+	<technique name="GBufferDiffBumpTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferPS()"/>
+			<state name="pixel_shader" value="GBufferDiffBumpPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferNoBumpTech">
+	<technique name="GBufferDiffTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferNoBumpPS()"/>
+			<state name="pixel_shader" value="GBufferDiffPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferBumpTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferBumpPS()"/>
 		</pass>
 	</technique>
 

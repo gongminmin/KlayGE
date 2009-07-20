@@ -96,15 +96,29 @@ namespace
 				}
 			}
 
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), has_diffuse_map);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 
-			if (has_bump_map)
+			if (has_diffuse_map)
 			{
-				gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
+				if (has_bump_map)
+				{
+					gbuffer_technique_ = effect_->TechniqueByName("GBufferDiffBumpTech");
+				}
+				else
+				{
+					gbuffer_technique_ = effect_->TechniqueByName("GBufferDiffTech");
+				}
 			}
 			else
 			{
-				gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
+				if (has_bump_map)
+				{
+					gbuffer_technique_ = effect_->TechniqueByName("GBufferBumpTech");
+				}
+				else
+				{
+					gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
+				}
 			}
 
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
@@ -171,6 +185,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
+			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 
 			proj_param_ = technique_->Effect().ParameterByName("proj");
 			model_view_param_ = technique_->Effect().ParameterByName("model_view");
@@ -277,6 +292,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
+			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 
 			proj_param_ = technique_->Effect().ParameterByName("proj");
 			model_view_param_ = technique_->Effect().ParameterByName("model_view");

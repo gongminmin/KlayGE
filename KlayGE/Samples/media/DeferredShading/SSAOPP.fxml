@@ -96,10 +96,7 @@ float4 SSAO(float2 tc0)
 
 float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
-
-	float4 color = SSAO(tc0);
-	return color;
+	return SSAO(tc0);
 }
 		]]>
 	</shader>
