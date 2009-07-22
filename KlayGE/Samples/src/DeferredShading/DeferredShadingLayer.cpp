@@ -34,6 +34,8 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		g_buffer_ = rf.MakeFrameBuffer();
+
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
 		{
@@ -261,18 +263,6 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredShadingLayer::GBufferTexs(TexturePtr const & nd_tex, TexturePtr const & clr_tex, bool flipping)
-	{
-		if (nd_tex)
-		{
-			*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / nd_tex->Width(0), 1.0f / nd_tex->Height(0));
-		}
-
-		*(technique_->Effect().ParameterByName("nd_tex")) = nd_tex;
-		*(technique_->Effect().ParameterByName("color_tex")) = clr_tex;
-		*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(flipping ? -1 : +1);
-	}
-
 	void DeferredShadingLayer::SSAOTex(TexturePtr const & tex)
 	{
 		*(technique_->Effect().ParameterByName("ssao_tex")) = tex;
@@ -347,6 +337,29 @@ namespace KlayGE
 		}
 	}
 
+	void DeferredShadingLayer::OnResize(uint32_t width, uint32_t height)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		RenderEngine& re = rf.RenderEngineInstance();
+		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+
+		diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
+		g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
+		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
+
+		if (normal_depth_tex_)
+		{
+			*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
+		}
+
+		*(technique_->Effect().ParameterByName("nd_tex")) = normal_depth_tex_;
+		*(technique_->Effect().ParameterByName("color_tex")) = diffuse_specular_tex_;
+		*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+	}
+
 	uint32_t DeferredShadingLayer::Update(uint32_t pass)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -376,168 +389,174 @@ namespace KlayGE
 			*texel_to_pixel_offset_param_ = texel_to_pixel;
 
 			this->ScanLightSrc();
+
+			re.BindFrameBuffer(g_buffer_);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
+			return App3DFramework::URV_Need_Flush;
 		}
-
-		if (0 == buffer_type_)
+		else
 		{
-			int32_t batch = pass / 2;
-			int32_t pass_in_batch = pass - batch * 2;
-
-			int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
-			int32_t start = batch;
-
-			int32_t light_index = batch;
-			int32_t org_no = light_scaned_[light_index] >> 16;
-			int32_t offset = light_scaned_[light_index] & 0xFFFF;
-
-			int type = static_cast<int>(light_clr_type_[org_no].w());
-
-			if (0 == pass_in_batch)
+			if (0 == buffer_type_)
 			{
-				// Shadow map generation
+				int32_t batch = (pass - 1) / 2;
+				int32_t pass_in_batch = (pass - 1) - batch * 2;
 
-				if (type != LT_Ambient)
+				int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
+				int32_t start = batch;
+
+				int32_t light_index = batch;
+				int32_t org_no = light_scaned_[light_index] >> 16;
+				int32_t offset = light_scaned_[light_index] & 0xFFFF;
+
+				int type = static_cast<int>(light_clr_type_[org_no].w());
+
+				if (0 == pass_in_batch)
 				{
-					float3 d, u;
-					if (type != LT_Point)
-					{
-						d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
-						u = float3(0, 1, 0);
-					}
-					else
-					{
-						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
-						d = ad.first;
-						u = ad.second;
-					}
+					// Shadow map generation
 
-					float fov;
-					if (type != LT_Spot)
+					if (type != LT_Ambient)
 					{
-						fov = PI / 2;
-					}
-					else
-					{
-						fov = light_cos_outer_inner_[org_no].z();
-					}
-
-					float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-					sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-					sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-					float3 dir_es = MathLib::transform_normal(d, view_);
-					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
-
-					*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-						* sm_buffer_->GetViewport().camera->ProjMatrix();
-					if (type != LT_Directional)
-					{
-						float3 loc_es = MathLib::transform_coord(p, view_);
-						float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-						if (LT_Spot == type)
+						float3 d, u;
+						if (type != LT_Point)
 						{
-							light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-							light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+							d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
+							u = float3(0, 1, 0);
+						}
+						else
+						{
+							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
+							d = ad.first;
+							u = ad.second;
 						}
 
-						*light_pos_es_param_ = light_pos_es_actived;
-					
+						float fov;
+						if (type != LT_Spot)
+						{
+							fov = PI / 2;
+						}
+						else
+						{
+							fov = light_cos_outer_inner_[org_no].z();
+						}
+
+						float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
+						sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+						sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+						float3 dir_es = MathLib::transform_normal(d, view_);
+						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
+
+						*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+							* sm_buffer_->GetViewport().camera->ProjMatrix();
+						if (type != LT_Directional)
+						{
+							float3 loc_es = MathLib::transform_coord(p, view_);
+							float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+							if (LT_Spot == type)
+							{
+								light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+								light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+							}
+
+							*light_pos_es_param_ = light_pos_es_actived;
+						
+						}
+
+						*light_dir_es_param_ = light_dir_es_actived;
 					}
 
-					*light_dir_es_param_ = light_dir_es_actived;
-				}
+					if (0 == (light_attrib_[org_no] & LSA_NoShadow))
+					{
+						re.BindFrameBuffer(sm_buffer_);
+						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
 
-				if (0 == (light_attrib_[org_no] & LSA_NoShadow))
-				{
-					re.BindFrameBuffer(sm_buffer_);
-					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
-
-					return App3DFramework::URV_Need_Flush;
+						return App3DFramework::URV_Need_Flush;
+					}
+					else
+					{
+						return App3DFramework::URV_Flushed;
+					}
 				}
 				else
 				{
-					return App3DFramework::URV_Flushed;
+					// Lighting
+
+					re.BindFrameBuffer(frame_buffer_);
+
+					if (0 == batch)
+					{
+						re.CurFrameBuffer()->Attached(FrameBuffer::CBM_Color)->Clear(Color(0, 0, 0, 0));
+						*show_skybox_param_ = true;
+					}
+					else
+					{
+						*show_skybox_param_ = false;
+					}
+
+					float4x4 light_volume_mvp_actived;
+					if ((LT_Spot == type) || (LT_Point == type))
+					{
+						float4x4 mat;
+						if (LT_Spot == type)
+						{
+							technique_ = technique_spot_;
+
+							float scale = light_cos_outer_inner_[org_no].w();
+							mat = MathLib::scaling(scale, 1.0f, scale);
+
+							rl_ = rl_cone_;
+						}
+						else //if (LT_Point == type)
+						{
+							technique_ = technique_point_;
+							mat = float4x4::Identity();
+							rl_ = rl_pyramid_;
+						}
+
+						light_volume_mvp_actived = mat * MathLib::rotation_x(-PI / 2)
+							* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+							* view_ * proj_;
+					}
+					else
+					{
+						if (LT_Directional == type)
+						{
+							technique_ = technique_directional_;
+						}
+						else
+						{
+							technique_ = technique_ambient_;
+						}
+
+						rl_ = rl_quad_;
+						light_volume_mvp_actived = float4x4::Identity();
+					}
+
+					*light_attrib_param_ = light_attrib_[org_no];
+					*light_clr_type_param_ = light_clr_type_[org_no];
+					*light_falloff_param_ = light_falloff_[org_no];
+					*light_volume_mvp_param_ = light_volume_mvp_actived;
+
+					re.Render(*technique_, *rl_);
+
+					if (start + 1 >= num_lights)
+					{
+						return App3DFramework::URV_Finished;
+					}
+					else
+					{
+						return App3DFramework::URV_Flushed;
+					}
 				}
 			}
 			else
 			{
-				// Lighting
+				re.BindFrameBuffer(FrameBufferPtr());
+				re.Render(*technique_, *rl_quad_);
 
-				re.BindFrameBuffer(frame_buffer_);
-
-				if (0 == batch)
-				{
-					re.CurFrameBuffer()->Attached(FrameBuffer::CBM_Color)->Clear(Color(0, 0, 0, 0));
-					*show_skybox_param_ = true;
-				}
-				else
-				{
-					*show_skybox_param_ = false;
-				}
-
-				float4x4 light_volume_mvp_actived;
-				if ((LT_Spot == type) || (LT_Point == type))
-				{
-					float4x4 mat;
-					if (LT_Spot == type)
-					{
-						technique_ = technique_spot_;
-
-						float scale = light_cos_outer_inner_[org_no].w();
-						mat = MathLib::scaling(scale, 1.0f, scale);
-
-						rl_ = rl_cone_;
-					}
-					else //if (LT_Point == type)
-					{
-						technique_ = technique_point_;
-						mat = float4x4::Identity();
-						rl_ = rl_pyramid_;
-					}
-
-					light_volume_mvp_actived = mat * MathLib::rotation_x(-PI / 2)
-						* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-						* view_ * proj_;
-				}
-				else
-				{
-					if (LT_Directional == type)
-					{
-						technique_ = technique_directional_;
-					}
-					else
-					{
-						technique_ = technique_ambient_;
-					}
-
-					rl_ = rl_quad_;
-					light_volume_mvp_actived = float4x4::Identity();
-				}
-
-				*light_attrib_param_ = light_attrib_[org_no];
-				*light_clr_type_param_ = light_clr_type_[org_no];
-				*light_falloff_param_ = light_falloff_[org_no];
-				*light_volume_mvp_param_ = light_volume_mvp_actived;
-
-				re.Render(*technique_, *rl_);
-
-				if (start + 1 >= num_lights)
-				{
-					return App3DFramework::URV_Finished;
-				}
-				else
-				{
-					return App3DFramework::URV_Flushed;
-				}
+				return App3DFramework::URV_Finished;
 			}
-		}
-		else
-		{
-			re.BindFrameBuffer(FrameBufferPtr());
-			re.Render(*technique_, *rl_quad_);
-
-			return App3DFramework::URV_Finished;
 		}
 	}
 }

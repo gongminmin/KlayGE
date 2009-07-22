@@ -34,9 +34,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::FrameBufferPtr g_buffer_;
-	KlayGE::TexturePtr normal_depth_tex_;
-	KlayGE::TexturePtr diffuse_specular_tex_;
 	KlayGE::DeferredShadingLayerPtr deferred_shading_;
 
 	KlayGE::FrameBufferPtr shaded_buffer_;

@@ -497,9 +497,6 @@ void DeferredShadingApp::InitObjects()
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 	
-	g_buffer_ = rf.MakeFrameBuffer();
-	g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-
 	shaded_buffer_ = rf.MakeFrameBuffer();
 	shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
@@ -555,13 +552,9 @@ void DeferredShadingApp::InitObjects()
 void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
+	deferred_shading_->OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
 	try
 	{
@@ -590,11 +583,10 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
 
-	deferred_shading_->GBufferTexs(normal_depth_tex_, diffuse_specular_tex_, g_buffer_->RequiresFlipping());
-	checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->SSAOTex(blur_ssao_tex_);
+	deferred_shading_->SSAOTex(blur_ssao_tex_);
 	deferred_shading_->Destinate(shaded_buffer_);
 
-	edge_anti_alias_->Source(normal_depth_tex_, shaded_buffer_->RequiresFlipping());
+	edge_anti_alias_->Source(deferred_shading_->NormalDepthTex(), shaded_buffer_->RequiresFlipping());
 	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
 	edge_anti_alias_->Destinate(hdr_buffer_);
 	//edge_anti_alias_->Destinate(FrameBufferPtr());
@@ -602,7 +594,7 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	hdr_pp_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
 	hdr_pp_->Destinate(FrameBufferPtr());
 
-	ssao_pp_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
+	ssao_pp_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->GBufferFB()->RequiresFlipping());
 	ssao_pp_->Destinate(ssao_buffer_);
 
 	blur_pp_->Source(ssao_tex_, ssao_buffer_->RequiresFlipping());
@@ -703,23 +695,21 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	boost::shared_ptr<DeferredShadingLayer> const & ds = checked_pointer_cast<DeferredShadingLayer>(deferred_shading_);
-
 	switch (pass)
 	{
 	case 0:
 		{
 			float4x4 model_mat = checked_pointer_cast<SphereObject>(point_light_src_)->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			ds->LightPos(point_light_id_, p);
+			deferred_shading_->LightPos(point_light_id_, p);
 		}
 		for (int i = 0; i < 2; ++ i)
 		{
 			float4x4 model_mat = checked_pointer_cast<ConeObject>(spot_light_src_[i])->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
 			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
-			ds->LightPos(spot_light_id_[i], p);
-			ds->LightDir(spot_light_id_[i], d);
+			deferred_shading_->LightPos(spot_light_id_[i], p);
+			deferred_shading_->LightDir(spot_light_id_[i], d);
 		}
 
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
@@ -731,9 +721,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		spot_light_src_[0]->Visible(true);
 		spot_light_src_[1]->Visible(true);
 
-		renderEngine.BindFrameBuffer(g_buffer_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
-		return App3DFramework::URV_Need_Flush;
+		break;
 
 	case 1:
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
@@ -756,24 +744,23 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 			blur_pp_->Apply();
 		}
 
-	default:
-		{
-			uint32_t ret = ds->Update(pass - 1);
-			if (App3DFramework::URV_Finished == ret)
-			{
-				renderEngine.BindFrameBuffer(FrameBufferPtr());
-				renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-				if ((0 == buffer_type_) && anti_alias_enabled_)
-				{
-					edge_anti_alias_->Apply();
-				}
-				if (0 == buffer_type_)
-				{
-					hdr_pp_->Apply();
-				}
-			}
+		break;
+	}
 
-			return ret;
+	uint32_t ret = deferred_shading_->Update(pass);
+	if (App3DFramework::URV_Finished == ret)
+	{
+		renderEngine.BindFrameBuffer(FrameBufferPtr());
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		if ((0 == buffer_type_) && anti_alias_enabled_)
+		{
+			edge_anti_alias_->Apply();
+		}
+		if (0 == buffer_type_)
+		{
+			hdr_pp_->Apply();
 		}
 	}
+
+	return ret;
 }

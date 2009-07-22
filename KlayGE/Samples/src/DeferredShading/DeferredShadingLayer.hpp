@@ -160,17 +160,34 @@ namespace KlayGE
 
 		void Destinate(FrameBufferPtr const & fb);
 
-		void GBufferTexs(TexturePtr const & nd_tex, TexturePtr const & clr_tex, bool flipping);
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
 		void BufferType(int buffer_type);
 
+		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
+
+		FrameBufferPtr const & GBufferFB() const
+		{
+			return g_buffer_;
+		}
+		TexturePtr const & NormalDepthTex() const
+		{
+			return normal_depth_tex_;
+		}
+		TexturePtr const & DiffuseSpecularTex() const
+		{
+			return diffuse_specular_tex_;
+		}
 
 	private:
 		void ScanLightSrc();
 
 	private:
+		FrameBufferPtr g_buffer_;
+		TexturePtr normal_depth_tex_;
+		TexturePtr diffuse_specular_tex_;
+
 		FrameBufferPtr frame_buffer_;
 
 		RenderLayoutPtr rl_cone_;
