@@ -158,8 +158,6 @@ namespace KlayGE
 		void LightEnabled(int index, bool enable);
 		bool LightEnabled(int index) const;
 
-		void Destinate(FrameBufferPtr const & fb);
-
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
 		void BufferType(int buffer_type);
@@ -179,6 +177,14 @@ namespace KlayGE
 		{
 			return diffuse_specular_tex_;
 		}
+		FrameBufferPtr const & ShadedFB() const
+		{
+			return shaded_buffer_;
+		}
+		TexturePtr const & ShadedTex() const
+		{
+			return shaded_tex_;
+		}
 
 	private:
 		void ScanLightSrc();
@@ -188,7 +194,8 @@ namespace KlayGE
 		TexturePtr normal_depth_tex_;
 		TexturePtr diffuse_specular_tex_;
 
-		FrameBufferPtr frame_buffer_;
+		FrameBufferPtr shaded_buffer_;
+		TexturePtr shaded_tex_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;

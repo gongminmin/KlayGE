@@ -52,7 +52,7 @@ float4 SSAO(float2 tc0)
 		normalize(half3( 1,  1, -1)) * fScale * 8,
 	};
 
-	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * tex_width_height / 8.0f).rgb * 2 - 1;
+	float3 randNormal = rand_normal_tex.Sample(bilinear_wrap_sampler, tc0 * tex_width_height / 32.0f).rgb * 2 - 1;
 
 	float scene_depth_m = depth * depth_near_far_invfar.y;
 	

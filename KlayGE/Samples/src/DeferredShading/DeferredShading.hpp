@@ -36,8 +36,6 @@ private:
 
 	KlayGE::DeferredShadingLayerPtr deferred_shading_;
 
-	KlayGE::FrameBufferPtr shaded_buffer_;
-	KlayGE::TexturePtr shaded_tex_;
 	KlayGE::PostProcessPtr edge_anti_alias_;
 
 	KlayGE::FrameBufferPtr ssao_buffer_;

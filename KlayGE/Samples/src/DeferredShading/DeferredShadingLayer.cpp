@@ -35,6 +35,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		g_buffer_ = rf.MakeFrameBuffer();
+		shaded_buffer_ = rf.MakeFrameBuffer();
 
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
@@ -249,20 +250,6 @@ namespace KlayGE
 		return light_enabled_[index] != 0;
 	}
 
-	void DeferredShadingLayer::Destinate(FrameBufferPtr const & fb)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		if (fb)
-		{
-			frame_buffer_ = fb;
-		}
-		else
-		{
-			frame_buffer_ = re.DefaultFrameBuffer();
-		}
-	}
-
 	void DeferredShadingLayer::SSAOTex(TexturePtr const & tex)
 	{
 		*(technique_->Effect().ParameterByName("ssao_tex")) = tex;
@@ -343,12 +330,24 @@ namespace KlayGE
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 		diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
+
+		try
+		{
+			shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
+		}
+		catch (...)
+		{
+			shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
+		}
 
 		if (normal_depth_tex_)
 		{
@@ -384,8 +383,8 @@ namespace KlayGE
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= frame_buffer_->Width() / 2.0f;
-			texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
+			texel_to_pixel.x() /= shaded_buffer_->Width() / 2.0f;
+			texel_to_pixel.y() /= shaded_buffer_->Height() / 2.0f;
 			*texel_to_pixel_offset_param_ = texel_to_pixel;
 
 			this->ScanLightSrc();
@@ -482,11 +481,11 @@ namespace KlayGE
 				{
 					// Lighting
 
-					re.BindFrameBuffer(frame_buffer_);
+					re.BindFrameBuffer(shaded_buffer_);
 
 					if (0 == batch)
 					{
-						re.CurFrameBuffer()->Attached(FrameBuffer::CBM_Color)->Clear(Color(0, 0, 0, 0));
+						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0, 0, 0, 0));
 						*show_skybox_param_ = true;
 					}
 					else

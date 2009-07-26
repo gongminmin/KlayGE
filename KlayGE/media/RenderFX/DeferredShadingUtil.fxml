@@ -3,9 +3,9 @@
 <effect>
 	<shader>
 		<![CDATA[
-float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id)
+float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id, float shininess)
 {
-	return float4(normal.xy, depth, mtl_id);
+	return float4(normal.xy, depth, mtl_id + shininess);
 }
 
 float4 StoreDiffuseSpecular(float3 diffuse, float specular)
@@ -28,14 +28,19 @@ int GetMtlID(float4 ndc)
 	return int(ndc.w + 0.1f);
 }
 
+float GetShininess(float4 ndc)
+{
+	return max(1.0f, frac(ndc.w) * 256);
+}
+
 float3 GetDiffuse(float4 clr)
 {
 	return clr.xyz;
 }
 
-float3 GetSpecular(float4 clr)
+float GetSpecular(float4 clr)
 {
-	return clr.www;
+	return clr.w;
 }
 		]]>
 	</shader>

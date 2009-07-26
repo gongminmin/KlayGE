@@ -165,7 +165,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 	oPos.z = 0;
 }
 
-float4 CalcColor(float2 kdks, float2 ds, float3 diffuse_clr, float3 specular_clr)
+float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 {
 #ifdef KLAYGE_D3D9
 	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
@@ -184,7 +184,7 @@ float4 CalcColor(float2 kdks, float2 ds, float3 diffuse_clr, float3 specular_clr
 		ds.y = 0;
 	}
 
-	return float4((kdks.x * ds.x * diffuse_clr + kdks.y * ds.y * specular_clr) * light_clr_type.xyz, 1);
+	return float4((ds.x * diffuse_clr + ds.y * specular_clr) * light_clr_type.xyz, 1);
 }
 
 float VSM(float3 pos_es, float len)
@@ -241,7 +241,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		}
 		else
 		{
-			final_clr = 0;
+			clip(-1);
 		}
 	}
 	else
@@ -289,18 +289,22 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
 			ds.x = diffuse_term(dir, normal);
 			if (ds.x > 0)
 			{
-				ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 
 				ds *= VSM(pos_es, len) * atten;
 			}
 			else
 			{
-				ds.x = 0;
+				clip(-1);
 			}
 		}
+		else
+		{
+			clip(-1);
+		}
 
-		final_clr = CalcColor(float2(0.7, 0.3), ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
 	}
 
 	return final_clr;
@@ -330,7 +334,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		}
 		else
 		{
-			final_clr = 0;
+			clip(-1);
 		}
 	}
 	else
@@ -353,18 +357,22 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0) : SV_Target
 			ds.x = diffuse_term(dir, normal);
 			if (ds.x > 0)
 			{
-				ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 				
 				ds *= VSM(pos_es, len) * spot * atten;
 			}
 			else
 			{
-				ds.x = 0;
+				clip(-1);
 			}
 		}
+		else
+		{
+			clip(-1);
+		}
 
-		final_clr = CalcColor(float2(0.7, 0.3), ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
 	}
 
 	return final_clr;
@@ -394,7 +402,7 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		}
 		else
 		{
-			final_clr = 0;
+			clip(-1);
 		}
 	}
 	else
@@ -411,14 +419,14 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		ds.x = diffuse_term(dir, normal);
 		if (ds.x > 0)
 		{
-			ds.y = specular_term(normalize(dir + view_dir), normal, 8.0f);
+			ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 		}
 		else
 		{
-			ds.x = 0;
+			clip(-1);
 		}
 
-		final_clr = CalcColor(float2(0.7, 0.3), ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
 	}
 
 	return final_clr;
@@ -448,7 +456,7 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		}
 		else
 		{
-			final_clr = 0;
+			clip(-1);
 		}
 	}
 	else
@@ -467,7 +475,7 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0) : SV_Target
 			ssao = ssao_tex.Sample(point_sampler, tc0).x;
 		}
 
-		final_clr = CalcColor(float2(0.7, 0.3), float2(0.1f * ssao, 0), diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(float2(0.1f * ssao, 0), diffuse_clr, GetSpecular(color));
 	}
 
 	return final_clr;
@@ -525,8 +533,8 @@ float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 color = color_tex.Sample(point_sampler, tc0);
-	float3 specular_clr = GetSpecular(color);
-	return float4(specular_clr, 1);
+	float specular_clr = GetSpecular(color);
+	return float4(specular_clr.xxx, 1);
 }
 
 float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

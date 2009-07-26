@@ -97,6 +97,8 @@ namespace
 			}
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
+			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
+			*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
 
 			if (has_diffuse_map)
 			{
@@ -497,9 +499,6 @@ void DeferredShadingApp::InitObjects()
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 	
-	shaded_buffer_ = rf.MakeFrameBuffer();
-	shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-
 	ssao_buffer_ = rf.MakeFrameBuffer();
 	ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
@@ -569,25 +568,13 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	blur_ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_ssao_tex_, 0, 0));
 
-	try
-	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
-	}
-	catch (...)
-	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
-	}
-
-	shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadedTex()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 
 	deferred_shading_->SSAOTex(blur_ssao_tex_);
-	deferred_shading_->Destinate(shaded_buffer_);
 
-	edge_anti_alias_->Source(deferred_shading_->NormalDepthTex(), shaded_buffer_->RequiresFlipping());
-	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(shaded_tex_);
+	edge_anti_alias_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
+	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(deferred_shading_->ShadedTex());
 	edge_anti_alias_->Destinate(hdr_buffer_);
 	//edge_anti_alias_->Destinate(FrameBufferPtr());
 
@@ -622,7 +609,6 @@ void DeferredShadingApp::BufferChangedHandler(KlayGE::UIComboBox const & sender)
 	{
 		dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(false);
 		anti_alias_enabled_ = false;
-		deferred_shading_->Destinate(FrameBufferPtr());
 	}
 }
 
@@ -633,14 +619,8 @@ void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
 		anti_alias_enabled_ = sender.GetChecked();
 		if (anti_alias_enabled_)
 		{
-			deferred_shading_->Destinate(shaded_buffer_);
 			edge_anti_alias_->Destinate(hdr_buffer_);
 			//edge_anti_alias_->Destinate(FrameBufferPtr());
-		}
-		else
-		{
-			deferred_shading_->Destinate(hdr_buffer_);
-			//deferred_shading_->Destinate(FrameBufferPtr());
 		}
 	}
 }
