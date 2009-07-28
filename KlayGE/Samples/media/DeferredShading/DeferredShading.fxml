@@ -91,6 +91,16 @@ float linstep(float min, float max, float v)
 
 	<shader>
 		<![CDATA[
+
+#ifdef KLAYGE_D3D10
+#define NOPERSPECTIVE_SUPPORT
+#define INTEGER_SUPPORT
+#endif
+#ifdef KLAYGE_D3D11
+#define NOPERSPECTIVE_SUPPORT
+#define INTEGER_SUPPORT
+#endif
+
 float GetEdgeWeight(float2 tc0)
 {
 	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
@@ -157,7 +167,7 @@ float GetEdgeWeight(float2 tc0)
 
 float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 {
-#ifdef KLAYGE_D3D9
+#ifndef INTEGER_SUPPORT
 	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
 #else
 	if ((light_attrib & LSA_NoDiffuse) != 0)
@@ -165,7 +175,7 @@ float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 	{
 		ds.x = 0;
 	}
-#ifdef KLAYGE_D3D9
+#ifndef INTEGER_SUPPORT
 	if (((light_attrib / LSA_NoSpecular) % 2) != 0)
 #else
 	if ((light_attrib & LSA_NoSpecular) != 0)
@@ -187,7 +197,7 @@ float VSM(float3 pos_es, float len)
 	float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
 	
 	float shadow = 1;
-#ifdef KLAYGE_D3D9
+#ifndef INTEGER_SUPPORT
 	if (0 == ((light_attrib / LSA_NoShadow) % 2))
 #else
 	if (0 == (light_attrib & LSA_NoShadow))
@@ -209,7 +219,7 @@ float VSM(float3 pos_es, float len)
 
 void DeferredShadingVS(float4 pos : POSITION,
 				out float4 oPosSS : TEXCOORD0,
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD1,
 				out noperspective float3 oViewDir : TEXCOORD2,
 #endif
@@ -220,7 +230,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 	oPos += texel_to_pixel_offset;
 	oPos.z = 0;
 
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPosSS.xy / oPosSS.w * 0.5f;
 	oTc.y *= flipping;
 	oTc += 0.5;
@@ -230,12 +240,12 @@ void DeferredShadingVS(float4 pos : POSITION,
 }
 
 float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
 #endif
 	) : SV_Target
 {
-#ifdef KLAYGE_D3D9
+#ifndef NOPERSPECTIVE_SUPPORT
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
@@ -329,12 +339,12 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 }
 
 float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
 #endif
 	) : SV_Target
 {
-#ifdef KLAYGE_D3D9
+#ifndef NOPERSPECTIVE_SUPPORT
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
@@ -403,12 +413,12 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 }
 
 float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
 #endif
 	) : SV_Target
 {
-#ifdef KLAYGE_D3D9
+#ifndef NOPERSPECTIVE_SUPPORT
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
@@ -463,12 +473,12 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 }
 
 float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
-#ifndef KLAYGE_D3D9
+#ifdef NOPERSPECTIVE_SUPPORT
 	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
 #endif
 	) : SV_Target
 {
-#ifdef KLAYGE_D3D9
+#ifndef NOPERSPECTIVE_SUPPORT
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
