@@ -4,7 +4,7 @@
 	<include name="DeferredShadingUtil.fxml"/>
 	
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
@@ -32,10 +32,9 @@ void GBufferVS(float4 pos : POSITION,
 			out float4 oNormal : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
-	float4 pos_es = mul(pos, model_view);
-	oPos = mul(pos_es, proj);
+	oPos = mul(pos, mvp);
 	oNormal.xyz = mul(normal, (float3x3)model_view);
-	oNormal.w = pos_es.z * depth_near_far_invfar.z;
+	oNormal.w = oPos.w * depth_near_far_invfar.z;
 
 	oTexCoord = texcoord;
 }
@@ -116,7 +115,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
-	oPos = mul(pos_es, proj);
+	oPos = mul(pos, mvp);
 	oLightWorldPos = pos_es;
 }
 

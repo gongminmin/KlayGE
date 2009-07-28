@@ -155,16 +155,6 @@ float GetEdgeWeight(float2 tc0)
 	return dot(normalResults, 0.25);
 }
 
-void DeferredShadingVS(float4 pos : POSITION,
-				out float4 oPosSS : TEXCOORD0,
-				out float4 oPos : SV_Position)
-{
-	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
-	oPosSS = oPos;
-	oPos += texel_to_pixel_offset;
-	oPos.z = 0;
-}
-
 float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 {
 #ifdef KLAYGE_D3D9
@@ -217,18 +207,46 @@ float VSM(float3 pos_es, float len)
 	return shadow;
 }
 
-float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
+void DeferredShadingVS(float4 pos : POSITION,
+				out float4 oPosSS : TEXCOORD0,
+#ifndef KLAYGE_D3D9
+				out noperspective float2 oTc : TEXCOORD1,
+				out noperspective float3 oViewDir : TEXCOORD2,
+#endif
+				out float4 oPos : SV_Position)
 {
+	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
+	oPosSS = oPos;
+	oPos += texel_to_pixel_offset;
+	oPos.z = 0;
+
+#ifndef KLAYGE_D3D9
+	oTc = oPosSS.xy / oPosSS.w * 0.5f;
+	oTc.y *= flipping;
+	oTc += 0.5;
+	
+	oViewDir = texcoord_to_view(oTc);
+#endif
+}
+
+float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
+#ifndef KLAYGE_D3D9
+	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
+#endif
+	) : SV_Target
+{
+#ifdef KLAYGE_D3D9
 	pos_ss.xy /= pos_ss.w;
 
-	float2 tc0 = pos_ss.xy * 0.5f;
-	tc0.y *= flipping;
-	tc0 += 0.5;
+	float2 tc = pos_ss.xy * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
 	
-	float3 view_dir = texcoord_to_view(tc0);
-	
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float4 color = color_tex.Sample(point_sampler, tc0);
+	float3 view_dir = texcoord_to_view(tc);
+#endif
+
+	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 color = color_tex.Sample(point_sampler, tc);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
 
@@ -260,7 +278,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
 
 		float3 dir_ws = mul(-dir, (float3x3)inv_view);
 		float3 abs_dir = abs(dir_ws);
-		uint face;
+		int face;
 		if (abs_dir.x > abs_dir.y)
 		{
 			if (abs_dir.x > abs_dir.z)
@@ -284,7 +302,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
 			}
 		}
 		
-		if (face == (uint)light_dir_es.w)
+		if (face == (int)light_dir_es.w)
 		{
 			ds.x = diffuse_term(dir, normal);
 			if (ds.x > 0)
@@ -310,18 +328,24 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0) : SV_Target
 	return final_clr;
 }
 
-float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0) : SV_Target
+float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
+#ifndef KLAYGE_D3D9
+	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
+#endif
+	) : SV_Target
 {
+#ifdef KLAYGE_D3D9
 	pos_ss.xy /= pos_ss.w;
 
-	float2 tc0 = pos_ss.xy * 0.5f;
-	tc0.y *= flipping;
-	tc0 += 0.5;
+	float2 tc = pos_ss.xy * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
 	
-	float3 view_dir = texcoord_to_view(tc0);
-	
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float4 color = color_tex.Sample(point_sampler, tc0);
+	float3 view_dir = texcoord_to_view(tc);
+#endif
+
+	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 color = color_tex.Sample(point_sampler, tc);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
 
@@ -378,18 +402,24 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0) : SV_Target
 	return final_clr;
 }
 
-float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0) : SV_Target
+float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
+#ifndef KLAYGE_D3D9
+	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
+#endif
+	) : SV_Target
 {
+#ifdef KLAYGE_D3D9
 	pos_ss.xy /= pos_ss.w;
 
-	float2 tc0 = pos_ss.xy * 0.5f;
-	tc0.y *= flipping;
-	tc0 += 0.5;
+	float2 tc = pos_ss.xy * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
 	
-	float3 view_dir = texcoord_to_view(tc0);
+	float3 view_dir = texcoord_to_view(tc);
+#endif
 	
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float4 color = color_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 color = color_tex.Sample(point_sampler, tc);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
 
@@ -432,18 +462,24 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0) : SV_Target
 	return final_clr;
 }
 
-float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0) : SV_Target
+float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
+#ifndef KLAYGE_D3D9
+	, noperspective float2 tc : TEXCOORD1, noperspective float3 view_dir : TEXCOORD2
+#endif
+	) : SV_Target
 {
+#ifdef KLAYGE_D3D9
 	pos_ss.xy /= pos_ss.w;
 
-	float2 tc0 = pos_ss.xy * 0.5f;
-	tc0.y *= flipping;
-	tc0 += 0.5;
+	float2 tc = pos_ss.xy * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
 	
-	float3 view_dir = texcoord_to_view(tc0);
+	float3 view_dir = texcoord_to_view(tc);
+#endif
 	
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float4 color = color_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 color = color_tex.Sample(point_sampler, tc);
 	float3 diffuse_clr = GetDiffuse(color);
 	float depth = GetDepth(ndc);
 
@@ -472,7 +508,7 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0) : SV_Target
 		float ssao = 1;
 		if (ssao_enabled)
 		{
-			ssao = ssao_tex.Sample(point_sampler, tc0).x;
+			ssao = ssao_tex.Sample(point_sampler, tc).x;
 		}
 
 		final_clr = CalcColor(float2(0.1f * ssao, 0), diffuse_clr, GetSpecular(color));
@@ -499,7 +535,7 @@ void ShowQuadVS(float4 pos : POSITION,
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
 	
 	view_dir = normalize(view_dir);
@@ -510,7 +546,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float3 normal = GetNormal(ndc);
 	
 	return float4(normal / 2 + 0.5f, 1);
@@ -518,7 +554,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 	float depth = GetDepth(ndc);
 	return float4(depth.xxx, 1);
 }
@@ -539,7 +575,7 @@ float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 
 	float4 color = GetEdgeWeight(tc0);
 	return color;
@@ -547,7 +583,7 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	half4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 
 	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
 	return color;

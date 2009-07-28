@@ -52,7 +52,7 @@ namespace
 
 			effect_ = rf.LoadEffect("GBuffer.fxml");
 
-			proj_param_ = effect_->ParameterByName("proj");
+			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
 		}
@@ -146,7 +146,7 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*proj_param_ = proj;
+			*mvp_param_ = view * proj;
 			*model_view_param_ = view;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
@@ -158,7 +158,7 @@ namespace
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr gbuffer_technique_;
 
-		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
@@ -189,7 +189,7 @@ namespace
 			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
 			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 
-			proj_param_ = technique_->Effect().ParameterByName("proj");
+			mvp_param_ = technique_->Effect().ParameterByName("mvp");
 			model_view_param_ = technique_->Effect().ParameterByName("model_view");
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 
@@ -244,7 +244,7 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*proj_param_ = proj;
+			*mvp_param_ = model_ * view * proj;
 			*model_view_param_ = model_ * view;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
@@ -253,7 +253,7 @@ namespace
 	private:
 		float4x4 model_;
 
-		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
@@ -296,7 +296,7 @@ namespace
 			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
 			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 
-			proj_param_ = technique_->Effect().ParameterByName("proj");
+			mvp_param_ = technique_->Effect().ParameterByName("mvp");
 			model_view_param_ = technique_->Effect().ParameterByName("model_view");
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 		}
@@ -317,7 +317,7 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*proj_param_ = proj;
+			*mvp_param_ = model_ * view * proj;
 			*model_view_param_ = model_ * view;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
@@ -326,7 +326,7 @@ namespace
 	private:
 		float4x4 model_;
 
-		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
