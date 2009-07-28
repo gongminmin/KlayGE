@@ -137,7 +137,7 @@ namespace KlayGE
 	public:
 		DeferredShadingLayer();
 
-		int AddAmbientLight(int32_t attr, float3 const & clr);
+		int AddAmbientLight(float3 const & clr);
 		int AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
 		int AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
 		int AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
@@ -231,7 +231,6 @@ namespace KlayGE
 		RenderEffectParameterPtr lower_left_param_;
 		RenderEffectParameterPtr lower_right_param_;
 		RenderEffectParameterPtr inv_view_param_;
-		RenderEffectParameterPtr show_skybox_param_;
 		RenderEffectParameterPtr light_attrib_param_;
 		RenderEffectParameterPtr light_clr_type_param_;
 		RenderEffectParameterPtr light_falloff_param_;

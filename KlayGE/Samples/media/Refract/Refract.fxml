@@ -149,19 +149,17 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 		<![CDATA[
 void RefractBackFaceVS(float4 pos : POSITION,
 							float3 normal : NORMAL,
-							out float3 out_normal : TEXCOORD0,
-							out float3 pos_es : TEXCOORD1,
+							out float4 normal_depth : TEXCOORD0,
 							out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	out_normal = mul(normal, (float3x3)modelviewit);
-	pos_es = mul(pos, mv).xyz;
+	normal_depth.xyz = mul(normal, (float3x3)modelviewit);
+	normal_depth.w = oPos.w;
 }
 
-float4 RefractBackFacePS(float3 normal : TEXCOORD0,
-							float3 pos_es : TEXCOORD1) : SV_Target
+float4 RefractBackFacePS(float4 normal_depth : TEXCOORD0) : SV_Target
 {
-	return float4(normalize(normal).xy, pos_es.z, 1);
+	return float4(normalize(normal_depth.xyz).xy, normal_depth.w, 1);
 }
 		]]>
 	</shader>

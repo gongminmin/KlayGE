@@ -8,7 +8,6 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
 
 		<parameter type="float2" name="offset"/>
@@ -42,7 +41,7 @@ void DepthPeeling1stPS(float4 pos_ss : TEXCOORD0,
 					out float4 oDepth : SV_Target1)
 {
 	oClr = clr;
-	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
+	oDepth = pos_ss.w * inv_depth_range;
 }
 
 void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
@@ -50,7 +49,7 @@ void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
 					out float4 oClr : SV_Target0,
 					out float4 oDepth : SV_Target1)
 {
-	oDepth = (pos_ss.w - depth_min) * inv_depth_range;
+	oDepth = pos_ss.w * inv_depth_range;
   
 	float2 tex_coord = pos_ss.xy / pos_ss.w - offset;
 	tex_coord.y *= flip;

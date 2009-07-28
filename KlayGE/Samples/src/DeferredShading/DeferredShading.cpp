@@ -524,10 +524,10 @@ void DeferredShadingApp::InitObjects()
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
-	ambient_light_id_ = checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->AddAmbientLight(0, float3(1, 1, 1));
-	point_light_id_ = checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_id_[0] = checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
-	spot_light_id_[1] = checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
+	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
+	point_light_id_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
+	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
+	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -603,7 +603,7 @@ void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputActio
 void DeferredShadingApp::BufferChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
-	checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->BufferType(buffer_type_);
+	deferred_shading_->BufferType(buffer_type_);
 
 	if (buffer_type_ != 0)
 	{
@@ -621,6 +621,15 @@ void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
 		{
 			edge_anti_alias_->Destinate(hdr_buffer_);
 			//edge_anti_alias_->Destinate(FrameBufferPtr());
+
+			if (hdr_tex_)
+			{
+				hdr_pp_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
+			}
+		}
+		else
+		{
+			hdr_pp_->Source(deferred_shading_->ShadedTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
 		}
 	}
 }
@@ -630,7 +639,7 @@ void DeferredShadingApp::SSAOHandler(KlayGE::UICheckBox const & sender)
 	if (0 == buffer_type_)
 	{
 		ssao_enabled_ = sender.GetChecked();
-		checked_pointer_cast<DeferredShadingLayer>(deferred_shading_)->SSAOEnabled(ssao_enabled_);
+		deferred_shading_->SSAOEnabled(ssao_enabled_);
 	}
 }
 

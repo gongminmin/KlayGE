@@ -8,7 +8,6 @@
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="view_proj"/>
 		<parameter type="float3" name="light_in_world"/>
-		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
 	</cbuffer>
 
@@ -23,7 +22,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 					float3 clr			: COLOR0,
 
 					out float3 oClr		: COLOR,
-					out float2 oDepth : TEXCOORD0,
+					out float oDepth : TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
@@ -31,15 +30,15 @@ void ColorDepthVS(float4 pos			: POSITION,
 
 	float4 pos_ws = mul(pos, model);
 	oPos = mul(pos_ws, view_proj);
-	oDepth = mul(pos_ws, view).zw;
+	oDepth = oPos.w;
 
 	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
 }
 
 float4 ColorDepthPS(float3 clr : COLOR,
-				float2 depth : TEXCOORD0) : SV_Target
+				float depth : TEXCOORD0) : SV_Target
 {
-	return float4(clr, (depth.x / depth.y - depth_min) * inv_depth_range);
+	return float4(clr, depth * inv_depth_range);
 }
 		]]>
 	</shader>

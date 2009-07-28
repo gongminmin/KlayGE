@@ -21,7 +21,7 @@ Deferred shading渲染框架。
 5) MRT
 
 需求：Geforce 6600以上或Radeon 9500以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9。
 
 ====================================================================================
 Depth of field
@@ -126,7 +126,7 @@ Particle Editor
 4) Geometry shader
 
 需求：Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9。
 
 ====================================================================================
 PostProcessing

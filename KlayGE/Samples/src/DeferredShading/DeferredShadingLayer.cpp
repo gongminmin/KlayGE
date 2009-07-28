@@ -34,6 +34,14 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+		light_enabled_.push_back(1);
+		light_attrib_.push_back(LSA_NoShadow);
+		light_clr_type_.push_back(float4(0, 0, 0, LT_Ambient + 0.1f));
+		light_pos_.push_back(float4(0, 0, 0, 0));
+		light_dir_.push_back(float4(0, 0, 0, 0));
+		light_falloff_.push_back(float4(0, 0, 0, 0));
+		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
+
 		g_buffer_ = rf.MakeFrameBuffer();
 		shaded_buffer_ = rf.MakeFrameBuffer();
 
@@ -84,10 +92,10 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 
-			pos.push_back(float3(+1, +1, 0));
-			pos.push_back(float3(-1, +1, 0));
-			pos.push_back(float3(+1, -1, 0));
-			pos.push_back(float3(-1, -1, 0));
+			pos.push_back(float3(+1, +1, 1));
+			pos.push_back(float3(-1, +1, 1));
+			pos.push_back(float3(+1, -1, 1));
+			pos.push_back(float3(-1, -1, 1));
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -110,7 +118,6 @@ namespace KlayGE
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		*(technique_->Effect().ParameterByName("sm_flipping")) = static_cast<int32_t>(sm_buffer_->RequiresFlipping() ? -1 : 1);
 		*(technique_->Effect().ParameterByName("shadow_map_tex")) = sm_tex_;
 
 		texel_to_pixel_offset_param_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
@@ -120,7 +127,6 @@ namespace KlayGE
 		lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
 		lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
 		inv_view_param_ = technique_->Effect().ParameterByName("inv_view");
-		show_skybox_param_ = technique_->Effect().ParameterByName("show_skybox");
 		light_attrib_param_ = technique_->Effect().ParameterByName("light_attrib");
 		light_clr_type_param_ = technique_->Effect().ParameterByName("light_clr_type");
 		light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
@@ -130,17 +136,10 @@ namespace KlayGE
 		light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
 	}
 
-	int DeferredShadingLayer::AddAmbientLight(int32_t attr, float3 const & clr)
+	int DeferredShadingLayer::AddAmbientLight(float3 const & clr)
 	{
-		int id = static_cast<int>(light_clr_type_.size());
-		light_enabled_.push_back(1);
-		light_attrib_.push_back(attr | LSA_NoShadow);
-		light_clr_type_.push_back(float4(clr.x(), clr.y(), clr.z(), LT_Ambient + 0.1f));
-		light_pos_.push_back(float4(0, 0, 0, 0));
-		light_dir_.push_back(float4(0, 0, 0, 0));
-		light_falloff_.push_back(float4(0, 0, 0, 0));
-		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
-		return id;
+		light_clr_type_[0] += float4(clr.x(), clr.y(), clr.z(), 0);
+		return 0;
 	}
 
 	int DeferredShadingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
@@ -332,11 +331,13 @@ namespace KlayGE
 		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
+		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
+
 		diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
-		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
+		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		try
 		{
@@ -348,6 +349,7 @@ namespace KlayGE
 			shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
 		}
+		shaded_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		if (normal_depth_tex_)
 		{
@@ -482,16 +484,6 @@ namespace KlayGE
 					// Lighting
 
 					re.BindFrameBuffer(shaded_buffer_);
-
-					if (0 == batch)
-					{
-						re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Clear(Color(0, 0, 0, 0));
-						*show_skybox_param_ = true;
-					}
-					else
-					{
-						*show_skybox_param_ = false;
-					}
 
 					float4x4 light_volume_mvp_actived;
 					if ((LT_Spot == type) || (LT_Point == type))

@@ -26,13 +26,11 @@
 
 	<parameter type='float4' name='texel_to_pixel_offset'/>
 	<parameter type='int' name='flipping'/>
-	<parameter type="int" name="sm_flipping"/>
 
 	<parameter type="float" name="min_variance" value="0.026"/>
 	<parameter type="float" name="bleeding_reduce" value="0.55"/>
 
 	<cbuffer name="light_sources">
-		<parameter type="bool" name="show_skybox"/>
 		<parameter type="int" name="light_attrib"/>
 		<parameter type="float4" name="light_clr_type"/>
 		<parameter type="float4" name="light_falloff"/>
@@ -191,7 +189,7 @@ float VSM(float3 pos_es, float len)
 {
 	float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
 	light_proj_pos /= light_proj_pos.w;
-	light_proj_pos.y *= sm_flipping;
+	light_proj_pos.y *= flipping;
 	light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
 	
 	float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
@@ -228,7 +226,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
 	oPosSS = oPos;
 	oPos += texel_to_pixel_offset;
-	oPos.z = 0;
+	oPos.z = min(oPos.z, oPos.w);
 
 #ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPosSS.xy / oPosSS.w * 0.5f;
@@ -261,24 +259,10 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 	float depth = GetDepth(ndc);
 
 	float4 final_clr;
-	if (0 == GetMtlID(ndc))
+	if (GetMtlID(ndc) != 0)
 	{
-		if (show_skybox)
-		{
-			final_clr = float4(diffuse_clr, 1);
-		}
-		else
-		{
-			clip(-1);
-		}
-	}
-	else
-	{
-		float3 normal = GetNormal(ndc);
-		view_dir = normalize(view_dir);
-
+		view_dir = normalize(-view_dir);
 		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-		view_dir = -view_dir;
 
 		float2 ds = 0;
 
@@ -293,27 +277,28 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 		{
 			if (abs_dir.x > abs_dir.z)
 			{
-				face = (dir_ws.x > 0) ? 0 : 1;
+				face = 0 + step(dir_ws.x, 0);
 			}
 			else
 			{
-				face = (dir_ws.z > 0) ? 4 : 5;
+				face = 4 + step(dir_ws.z, 0);
 			}
 		}
 		else
 		{
 			if (abs_dir.y > abs_dir.z)
 			{
-				face = (dir_ws.y > 0) ? 2 : 3;
+				face = 2 + step(dir_ws.y, 0);
 			}
 			else
 			{
-				face = (dir_ws.z > 0) ? 4 : 5;
+				face = 4 + step(dir_ws.z, 0);
 			}
 		}
 		
 		if (face == (int)light_dir_es.w)
 		{
+			float3 normal = GetNormal(ndc);
 			ds.x = diffuse_term(dir, normal);
 			if (ds.x > 0)
 			{
@@ -333,6 +318,10 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 		}
 
 		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+	}
+	else
+	{
+		clip(-1);
 	}
 
 	return final_clr;
@@ -360,24 +349,10 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 	float depth = GetDepth(ndc);
 
 	float4 final_clr;
-	if (0 == GetMtlID(ndc))
+	if (GetMtlID(ndc) != 0)
 	{
-		if (show_skybox)
-		{
-			final_clr = float4(diffuse_clr, 1);
-		}
-		else
-		{
-			clip(-1);
-		}
-	}
-	else
-	{
-		float3 normal = GetNormal(ndc);
-		view_dir = normalize(view_dir);
-
+		view_dir = normalize(-view_dir);
 		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-		view_dir = -view_dir;
 
 		float2 ds = 0;
 
@@ -388,6 +363,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 			float3 dir = light_pos_es.xyz - pos_es;
 			float len = length(dir);
 			dir = normalize(dir);
+			float3 normal = GetNormal(ndc);
 			ds.x = diffuse_term(dir, normal);
 			if (ds.x > 0)
 			{
@@ -407,6 +383,10 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 		}
 
 		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+	}
+	else
+	{
+		clip(-1);
 	}
 
 	return final_clr;
@@ -434,28 +414,15 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 	float depth = GetDepth(ndc);
 
 	float4 final_clr;
-	if (0 == GetMtlID(ndc))
+	if (GetMtlID(ndc) != 0)
 	{
-		if (show_skybox)
-		{
-			final_clr = float4(diffuse_clr, 1);
-		}
-		else
-		{
-			clip(-1);
-		}
-	}
-	else
-	{
-		float3 normal = GetNormal(ndc);
-		view_dir = normalize(view_dir);
-
+		view_dir = normalize(-view_dir);
 		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-		view_dir = -view_dir;
 
 		float2 ds = 0;
 
 		float3 dir = light_dir_es.xyz;
+		float3 normal = GetNormal(ndc);
 		ds.x = diffuse_term(dir, normal);
 		if (ds.x > 0)
 		{
@@ -467,6 +434,10 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 		}
 
 		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+	}
+	else
+	{
+		clip(-1);
 	}
 
 	return final_clr;
@@ -491,30 +462,14 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 color = color_tex.Sample(point_sampler, tc);
 	float3 diffuse_clr = GetDiffuse(color);
-	float depth = GetDepth(ndc);
 
 	float4 final_clr;
 	if (0 == GetMtlID(ndc))
 	{
-		if (show_skybox)
-		{
-			final_clr = float4(diffuse_clr, 1);
-		}
-		else
-		{
-			clip(-1);
-		}
+		final_clr = float4(diffuse_clr, 1);
 	}
 	else
 	{
-		float3 normal = GetNormal(ndc);
-		view_dir = normalize(view_dir);
-
-		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-		view_dir = -view_dir;
-
-		float2 ds = 0;
-
 		float ssao = 1;
 		if (ssao_enabled)
 		{
@@ -603,7 +558,8 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 	<technique name="DeferredShadingPoint">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="front"/>
@@ -620,7 +576,8 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	
 	<technique name="DeferredShadingSpot">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="front"/>
@@ -637,7 +594,8 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 				
 	<technique name="DeferredShadingDirectional">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="front"/>
@@ -654,15 +612,11 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			
 	<technique name="DeferredShadingAmbient">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="front"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="one"/>
-			<state name="dest_blend" value="one"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>

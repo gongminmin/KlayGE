@@ -25,7 +25,7 @@ float GetDepth(float4 ndc)
 
 int GetMtlID(float4 ndc)
 {
-	return int(ndc.w + 0.1f);
+	return int(ndc.w + 0.0001f);
 }
 
 float GetShininess(float4 ndc)
