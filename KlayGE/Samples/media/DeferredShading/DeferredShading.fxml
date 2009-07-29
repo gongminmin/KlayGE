@@ -192,7 +192,7 @@ float VSM(float3 pos_es, float len)
 	light_proj_pos.y *= flipping;
 	light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
 	
-	float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0);
+	float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
 	
 	float shadow = 1;
 #ifndef INTEGER_SUPPORT
@@ -255,21 +255,21 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 color = color_tex.Sample(point_sampler, tc);
-	float3 diffuse_clr = GetDiffuse(color);
-	float depth = GetDepth(ndc);
+	
+	view_dir = normalize(-view_dir);
+	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	
+	float3 dir = light_pos_es.xyz - pos_es;
+	float len = length(dir);
+	
+	float shadow = VSM(pos_es, len);
 
 	float4 final_clr;
 	if (GetMtlID(ndc) != 0)
 	{
-		view_dir = normalize(-view_dir);
-		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-
 		float2 ds = 0;
 
-		float3 dir = light_pos_es.xyz - pos_es;
-		float len = length(dir);
 		dir = normalize(dir);
-
 		float3 dir_ws = mul(-dir, (float3x3)inv_view);
 		float3 abs_dir = abs(dir_ws);
 		int face;
@@ -305,7 +305,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 
-				ds *= VSM(pos_es, len) * atten;
+				ds *= shadow * atten;
 			}
 			else
 			{
@@ -317,7 +317,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 			clip(-1);
 		}
 
-		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
 	}
 	else
 	{
@@ -345,23 +345,24 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 color = color_tex.Sample(point_sampler, tc);
-	float3 diffuse_clr = GetDiffuse(color);
-	float depth = GetDepth(ndc);
+	
+	view_dir = normalize(-view_dir);
+	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	
+	float3 dir = light_pos_es.xyz - pos_es;
+	float len = length(dir);
+	
+	float shadow = VSM(pos_es, len);
 
 	float4 final_clr;
 	if (GetMtlID(ndc) != 0)
 	{
-		view_dir = normalize(-view_dir);
-		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
-
 		float2 ds = 0;
 
 		float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
 					float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 		if (spot > 0)
 		{
-			float3 dir = light_pos_es.xyz - pos_es;
-			float len = length(dir);
 			dir = normalize(dir);
 			float3 normal = GetNormal(ndc);
 			ds.x = diffuse_term(dir, normal);
@@ -370,7 +371,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 				
-				ds *= VSM(pos_es, len) * spot * atten;
+				ds *= shadow * spot * atten;
 			}
 			else
 			{
@@ -382,7 +383,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 			clip(-1);
 		}
 
-		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
 	}
 	else
 	{
@@ -410,14 +411,11 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 	
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 color = color_tex.Sample(point_sampler, tc);
-	float3 diffuse_clr = GetDiffuse(color);
-	float depth = GetDepth(ndc);
 
 	float4 final_clr;
 	if (GetMtlID(ndc) != 0)
 	{
 		view_dir = normalize(-view_dir);
-		float3 pos_es = view_dir * ((depth * depth_near_far_invfar.y) / view_dir.z);
 
 		float2 ds = 0;
 
@@ -433,7 +431,7 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 			clip(-1);
 		}
 
-		final_clr = CalcColor(ds, diffuse_clr, GetSpecular(color));
+		final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
 	}
 	else
 	{
@@ -501,10 +499,9 @@ void ShowQuadVS(float4 pos : POSITION,
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth * depth_near_far_invfar.y);
+	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y);
 
 	return float4(pos_es, 1);
 }
@@ -520,8 +517,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ndc = nd_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	return float4(depth.xxx, 1);
+	return float4(GetDepth(ndc).xxx, 1);
 }
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

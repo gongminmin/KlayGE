@@ -147,7 +147,6 @@ namespace
 			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 
-			*(technique_->Effect().ParameterByName("depth_min")) = app.ActiveCamera().NearPlane();
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
 		}
 

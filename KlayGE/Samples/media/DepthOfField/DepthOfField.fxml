@@ -32,7 +32,8 @@ void ColorDepthVS(float4 pos			: POSITION,
 	oPos = mul(pos_ws, view_proj);
 	oDepth = oPos.w;
 
-	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, mul(normal, (float3x3)model))) - 0.5f;
+	normal = mul(normal, (float3x3)model);
+	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
 }
 
 float4 ColorDepthPS(float3 clr : COLOR,
@@ -130,12 +131,12 @@ void NormalMeshVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
 					out float3 oClr		: COLOR,
-					out float2 oDepth	: TEXCOORD0,
+					out float oDepth	: TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
 	oPos = mul(pos_ws, view_proj);
-	oDepth = mul(pos_ws, view).zw;
+	oDepth = oPos.w;
 
 	normal = mul(normal, (float3x3)modelmat);
 	oClr = saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
