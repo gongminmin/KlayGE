@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	KMesh::KMesh(RenderModelPtr model, std::wstring const & name)
+	KMesh::KMesh(RenderModelPtr const & model, std::wstring const & name)
 						: StaticMesh(model, name),
 							model_matrix_(float4x4::Identity())
 	{

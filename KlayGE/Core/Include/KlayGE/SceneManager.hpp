@@ -1,8 +1,11 @@
 // SceneManager.hpp
 // KlayGE 场景管理器类 头文件
-// Ver 2.4.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了SceneObjects (2009.7.30)
 //
 // 2.4.0
 // 增加了NumObjectsRendered，NumPrimitivesRendered和NumVerticesRendered (2005.3.20)
@@ -33,9 +36,10 @@ namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable
 	{
-	protected:
+	public:
 		typedef std::vector<SceneObjectPtr> SceneObjectsType;
 
+	protected:
 		typedef std::vector<RenderablePtr> RenderItemsType;
 		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType> > RenderQueueType;
 
@@ -48,6 +52,9 @@ namespace KlayGE
 		virtual void ClipScene(Camera const & camera) = 0;
 		void AddSceneObject(SceneObjectPtr const & obj);
 		void AddRenderable(RenderablePtr const & obj);
+
+		SceneObjectsType& SceneObjects();
+		SceneObjectsType const & SceneObjects() const;
 
 		virtual void Clear() = 0;
 

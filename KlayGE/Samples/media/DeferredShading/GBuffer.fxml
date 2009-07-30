@@ -11,6 +11,7 @@
 	</cbuffer>
 
 	<parameter type="float4" name="diffuse_clr"/>
+	<parameter type="float4" name="emit_clr"/>
 	<parameter type="float" name="specular_level"/>
 	<parameter type="float" name="shininess"/>
 	<parameter type="texture2D" name="diffuse_tex"/>
@@ -135,6 +136,39 @@ float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
 			
 			<state name="vertex_shader" value="GenShadowMapVS()"/>
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void EmitOnlyVS(float4 pos : POSITION,
+			float3 normal : NORMAL,
+			float3 tangent : TANGENT,
+			float2 texcoord : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+}
+
+float4 EmitOnlyPS() : SV_Target
+{
+	return emit_clr;
+}
+		]]>
+	</shader>
+
+	<technique name="EmitOnly">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			
+			<state name="vertex_shader" value="EmitOnlyVS()"/>
+			<state name="pixel_shader" value="EmitOnlyPS()"/>
 		</pass>
 	</technique>
 </effect>

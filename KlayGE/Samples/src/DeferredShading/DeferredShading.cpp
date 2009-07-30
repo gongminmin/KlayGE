@@ -46,7 +46,7 @@ namespace
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name),
-				gen_sm_pass_(false)
+				gen_sm_pass_(false), emit_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -96,7 +96,10 @@ namespace
 				}
 			}
 
+			is_emit_ = ((mtl.emit.x() != 0) || (mtl.emit.y() != 0) || (mtl.emit.z() != 0));
+
 			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
 			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
 			*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
 
@@ -124,6 +127,7 @@ namespace
 			}
 
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+			emit_technique_ = effect_->TechniqueByName("EmitOnly");
 		}
 
 		void GenShadowMapPass(bool sm_pass)
@@ -137,6 +141,24 @@ namespace
 			{
 				technique_ = gbuffer_technique_;
 			}
+		}
+
+		void EmitPass(bool emit_pass)
+		{
+			emit_pass_ = emit_pass;
+			if (emit_pass_)
+			{
+				technique_ = emit_technique_;
+			}
+			else
+			{
+				technique_ = gbuffer_technique_;
+			}
+		}
+
+		bool IsEmit() const
+		{
+			return is_emit_;			
 		}
 
 		void OnRenderBegin()
@@ -153,17 +175,21 @@ namespace
 		}
 
 	private:
+		bool is_emit_;
+
 		KlayGE::RenderEffectPtr effect_;
 		bool gen_sm_pass_;
-		RenderTechniquePtr gen_sm_technique_;
+		bool emit_pass_;
 		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr emit_technique_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class TorusObject : public SceneObjectHelper
+	class TorusObject : public SceneObjectHelper, public DeferredableObject
 	{
 	public:
 		TorusObject(RenderablePtr const & mesh)
@@ -175,23 +201,41 @@ namespace
 		{
 			checked_pointer_cast<RenderTorus>(renderable_)->GenShadowMapPass(sm_pass);
 		}
+
+		void EmitPass(bool emit_pass)
+		{
+			checked_pointer_cast<RenderTorus>(renderable_)->EmitPass(emit_pass);
+		}
+
+		bool IsEmit() const
+		{
+			return checked_pointer_cast<RenderTorus>(renderable_)->IsEmit();
+		}
 	};
 
 
 	class RenderCone : public RenderableHelper
 	{
 	public:
-		RenderCone(float cone_radius, float cone_height)
-			: RenderableHelper(L"Cone")
+		RenderCone(float cone_radius, float cone_height, float3 const & clr)
+			: RenderableHelper(L"Cone"),
+				gen_sm_pass_(false), emit_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
-			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
+			effect_ = rf.LoadEffect("GBuffer.fxml");
 
-			mvp_param_ = technique_->Effect().ParameterByName("mvp");
-			model_view_param_ = technique_->Effect().ParameterByName("model_view");
-			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
+			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+			emit_technique_ = effect_->TechniqueByName("EmitOnly");
+			technique_ = gbuffer_technique_;
+
+			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
+			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
+
+			mvp_param_ = effect_->ParameterByName("mvp");
+			model_view_param_ = effect_->ParameterByName("model_view");
+			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
 
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
@@ -237,6 +281,32 @@ namespace
 			model_ = mat;
 		}
 
+		void GenShadowMapPass(bool sm_pass)
+		{
+			gen_sm_pass_ = sm_pass;
+			if (gen_sm_pass_)
+			{
+				technique_ = gen_sm_technique_;
+			}
+			else
+			{
+				technique_ = gbuffer_technique_;
+			}
+		}
+
+		void EmitPass(bool emit_pass)
+		{
+			emit_pass_ = emit_pass;
+			if (emit_pass_)
+			{
+				technique_ = emit_technique_;
+			}
+			else
+			{
+				technique_ = gbuffer_technique_;
+			}
+		}
+
 		void OnRenderBegin()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
@@ -253,18 +323,25 @@ namespace
 	private:
 		float4x4 model_;
 
+		KlayGE::RenderEffectPtr effect_;
+		bool gen_sm_pass_;
+		bool emit_pass_;
+		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr emit_technique_;
+
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class ConeObject : public SceneObjectHelper
+	class ConeObject : public SceneObjectHelper, public DeferredableObject
 	{
 	public:
-		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height)
+		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
 			: SceneObjectHelper(SOA_Cullable), rot_speed_(rot_speed), height_(height)
 		{
-			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height);
+			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height, clr);
 			model_org_ = MathLib::rotation_x(org_angle);
 		}
 
@@ -279,6 +356,21 @@ namespace
 			return model_;
 		}
 
+		void GenShadowMapPass(bool sm_pass)
+		{
+			checked_pointer_cast<RenderCone>(renderable_)->GenShadowMapPass(sm_pass);
+		}
+
+		void EmitPass(bool emit_pass)
+		{
+			checked_pointer_cast<RenderCone>(renderable_)->EmitPass(emit_pass);
+		}
+
+		bool IsEmit() const
+		{
+			return true;
+		}
+
 	private:
 		float4x4 model_;
 		float4x4 model_org_;
@@ -289,16 +381,23 @@ namespace
 	{
 	public:
 		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name)
+			: KMesh(model, name),
+				gen_sm_pass_(false), emit_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferNoTexTech");
-			*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
+			effect_ = rf.LoadEffect("GBuffer.fxml");
 
-			mvp_param_ = technique_->Effect().ParameterByName("mvp");
-			model_view_param_ = technique_->Effect().ParameterByName("model_view");
-			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
+			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+			emit_technique_ = effect_->TechniqueByName("EmitOnly");
+			technique_ = gbuffer_technique_;
+
+			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
+
+			mvp_param_ = effect_->ParameterByName("mvp");
+			model_view_param_ = effect_->ParameterByName("model_view");
+			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
 		}
 
 		void BuildMeshInfo()
@@ -308,6 +407,37 @@ namespace
 		void SetModelMatrix(float4x4 const & mat)
 		{
 			model_ = mat;
+		}
+
+		void EmitClr(float3 const & clr)
+		{
+			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
+		}
+
+		void GenShadowMapPass(bool sm_pass)
+		{
+			gen_sm_pass_ = sm_pass;
+			if (gen_sm_pass_)
+			{
+				technique_ = gen_sm_technique_;
+			}
+			else
+			{
+				technique_ = gbuffer_technique_;
+			}
+		}
+
+		void EmitPass(bool emit_pass)
+		{
+			emit_pass_ = emit_pass;
+			if (emit_pass_)
+			{
+				technique_ = emit_technique_;
+			}
+			else
+			{
+				technique_ = gbuffer_technique_;
+			}
 		}
 
 		void OnRenderBegin()
@@ -326,18 +456,26 @@ namespace
 	private:
 		float4x4 model_;
 
+		KlayGE::RenderEffectPtr effect_;
+		bool gen_sm_pass_;
+		bool emit_pass_;
+		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr emit_technique_;
+
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class SphereObject : public SceneObjectHelper
+	class SphereObject : public SceneObjectHelper, public DeferredableObject
 	{
 	public:
-		SphereObject(std::string const & model_name, float move_speed, float3 const & pos)
+		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
 			: SceneObjectHelper(SOA_Cullable), move_speed_(move_speed), pos_(pos)
 		{
 			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())->Mesh(0);
+			checked_pointer_cast<RenderSphere>(renderable_)->EmitClr(clr);
 		}
 
 		void Update()
@@ -349,6 +487,21 @@ namespace
 		float4x4 const & GetModelMatrix() const
 		{
 			return model_;
+		}
+
+		void GenShadowMapPass(bool sm_pass)
+		{
+			checked_pointer_cast<RenderSphere>(renderable_)->GenShadowMapPass(sm_pass);
+		}
+
+		void EmitPass(bool emit_pass)
+		{
+			checked_pointer_cast<RenderSphere>(renderable_)->EmitPass(emit_pass);
+		}
+
+		bool IsEmit() const
+		{
+			return true;
 		}
 
 	private:
@@ -480,9 +633,9 @@ void DeferredShadingApp::InitObjects()
 		scene_objs_[i]->AddToSceneManager();
 	}
 
-	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0));
-	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI / 2, 1 / 1400.0f, 2.0f);
-	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, -PI / 2, -1 / 700.0f, 1.7f);
+	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), float3(1, 1, 1));
+	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, float3(1, 0, 0));
+	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, float3(0, 1, 0));
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
@@ -696,7 +849,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		{
 			float4x4 model_mat = checked_pointer_cast<ConeObject>(spot_light_src_[i])->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, -1, 0), model_mat));
+			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, 0, 1), model_mat));
 			deferred_shading_->LightPos(spot_light_id_[i], p);
 			deferred_shading_->LightDir(spot_light_id_[i], d);
 		}
@@ -705,6 +858,10 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		{
 			checked_pointer_cast<TorusObject>(scene_objs_[i])->GenShadowMapPass(false);
 		}
+
+		checked_pointer_cast<SphereObject>(point_light_src_)->GenShadowMapPass(false);
+		checked_pointer_cast<ConeObject>(spot_light_src_[0])->GenShadowMapPass(false);
+		checked_pointer_cast<ConeObject>(spot_light_src_[1])->GenShadowMapPass(false);
 
 		point_light_src_->Visible(true);
 		spot_light_src_[0]->Visible(true);

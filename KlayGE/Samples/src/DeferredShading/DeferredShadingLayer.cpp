@@ -403,140 +403,174 @@ namespace KlayGE
 				int32_t pass_in_batch = (pass - 1) - batch * 2;
 
 				int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
-				int32_t start = batch;
 
-				int32_t light_index = batch;
-				int32_t org_no = light_scaned_[light_index] >> 16;
-				int32_t offset = light_scaned_[light_index] & 0xFFFF;
-
-				int type = static_cast<int>(light_clr_type_[org_no].w());
-
-				if (0 == pass_in_batch)
+				if ((batch == num_lights) && (pass_in_batch == 0))
 				{
-					// Shadow map generation
-
-					if (type != LT_Ambient)
+					SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
+					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+					non_emit_objs_.resize(0);
+					for (size_t i = 0; i < scene_objs.size(); ++ i)
 					{
-						float3 d, u;
-						if (type != LT_Point)
+						boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+						if (deo)
 						{
-							d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
-							u = float3(0, 1, 0);
-						}
-						else
-						{
-							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
-							d = ad.first;
-							u = ad.second;
-						}
-
-						float fov;
-						if (type != LT_Spot)
-						{
-							fov = PI / 2;
-						}
-						else
-						{
-							fov = light_cos_outer_inner_[org_no].z();
-						}
-
-						float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-						sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-						sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-						float3 dir_es = MathLib::transform_normal(d, view_);
-						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
-
-						*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-							* sm_buffer_->GetViewport().camera->ProjMatrix();
-						if (type != LT_Directional)
-						{
-							float3 loc_es = MathLib::transform_coord(p, view_);
-							float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-							if (LT_Spot == type)
+							if (deo->IsEmit())
 							{
-								light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-								light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+								deo->EmitPass(true);
+								scene_objs[i]->Visible(true);
 							}
-
-							*light_pos_es_param_ = light_pos_es_actived;
-						
+							else
+							{
+								non_emit_objs_.push_back(scene_objs[i]);
+								scene_objs[i]->Visible(false);
+							}
 						}
-
-						*light_dir_es_param_ = light_dir_es_actived;
+						else
+						{
+							non_emit_objs_.push_back(scene_objs[i]);
+							scene_objs[i]->Visible(false);
+						}
 					}
 
-					if (0 == (light_attrib_[org_no] & LSA_NoShadow))
+					return App3DFramework::URV_Need_Flush;
+				}
+				else if ((batch == num_lights) && (pass_in_batch == 1))
+				{
+					for (size_t i = 0; i < non_emit_objs_.size(); ++ i)
 					{
-						re.BindFrameBuffer(sm_buffer_);
-						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+						non_emit_objs_[i]->Visible(true);
+					}
 
-						return App3DFramework::URV_Need_Flush;
-					}
-					else
-					{
-						return App3DFramework::URV_Flushed;
-					}
+					return App3DFramework::URV_Finished;
 				}
 				else
 				{
-					// Lighting
+					int32_t light_index = batch;
+					int32_t org_no = light_scaned_[light_index] >> 16;
+					int32_t offset = light_scaned_[light_index] & 0xFFFF;
 
-					re.BindFrameBuffer(shaded_buffer_);
+					int type = static_cast<int>(light_clr_type_[org_no].w());
 
-					float4x4 light_volume_mvp_actived;
-					if ((LT_Spot == type) || (LT_Point == type))
+					if (0 == pass_in_batch)
 					{
-						float4x4 mat;
-						if (LT_Spot == type)
+						// Shadow map generation
+
+						if (type != LT_Ambient)
 						{
-							technique_ = technique_spot_;
+							float3 d, u;
+							if (type != LT_Point)
+							{
+								d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
+								u = float3(0, 1, 0);
+							}
+							else
+							{
+								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
+								d = ad.first;
+								u = ad.second;
+							}
 
-							float scale = light_cos_outer_inner_[org_no].w();
-							mat = MathLib::scaling(scale, 1.0f, scale);
+							float fov;
+							if (type != LT_Spot)
+							{
+								fov = PI / 2;
+							}
+							else
+							{
+								fov = light_cos_outer_inner_[org_no].z();
+							}
 
-							rl_ = rl_cone_;
+							float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
+							sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+							sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+							float3 dir_es = MathLib::transform_normal(d, view_);
+							float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
+
+							*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+								* sm_buffer_->GetViewport().camera->ProjMatrix();
+							if (type != LT_Directional)
+							{
+								float3 loc_es = MathLib::transform_coord(p, view_);
+								float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+								if (LT_Spot == type)
+								{
+									light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+									light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+								}
+
+								*light_pos_es_param_ = light_pos_es_actived;
+							
+							}
+
+							*light_dir_es_param_ = light_dir_es_actived;
 						}
-						else //if (LT_Point == type)
-						{
-							technique_ = technique_point_;
-							mat = float4x4::Identity();
-							rl_ = rl_pyramid_;
-						}
 
-						light_volume_mvp_actived = mat * MathLib::rotation_x(-PI / 2)
-							* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-							* view_ * proj_;
-					}
-					else
-					{
-						if (LT_Directional == type)
+						if (0 == (light_attrib_[org_no] & LSA_NoShadow))
 						{
-							technique_ = technique_directional_;
+							re.BindFrameBuffer(sm_buffer_);
+							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+							return App3DFramework::URV_Need_Flush;
 						}
 						else
 						{
-							technique_ = technique_ambient_;
+							return App3DFramework::URV_Flushed;
 						}
-
-						rl_ = rl_quad_;
-						light_volume_mvp_actived = float4x4::Identity();
-					}
-
-					*light_attrib_param_ = light_attrib_[org_no];
-					*light_clr_type_param_ = light_clr_type_[org_no];
-					*light_falloff_param_ = light_falloff_[org_no];
-					*light_volume_mvp_param_ = light_volume_mvp_actived;
-
-					re.Render(*technique_, *rl_);
-
-					if (start + 1 >= num_lights)
-					{
-						return App3DFramework::URV_Finished;
 					}
 					else
 					{
+						// Lighting
+
+						re.BindFrameBuffer(shaded_buffer_);
+
+						float4x4 light_volume_mvp_actived;
+						if ((LT_Spot == type) || (LT_Point == type))
+						{
+							float4x4 mat;
+							if (LT_Spot == type)
+							{
+								technique_ = technique_spot_;
+
+								float scale = light_cos_outer_inner_[org_no].w();
+								mat = MathLib::scaling(scale, scale, 1.0f);
+
+								rl_ = rl_cone_;
+							}
+							else //if (LT_Point == type)
+							{
+								technique_ = technique_point_;
+								mat = float4x4::Identity();
+								rl_ = rl_pyramid_;
+							}
+
+							light_volume_mvp_actived = mat
+								* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+								* view_ * proj_;
+						}
+						else
+						{
+							if (LT_Directional == type)
+							{
+								technique_ = technique_directional_;
+							}
+							else
+							{
+								technique_ = technique_ambient_;
+							}
+
+							rl_ = rl_quad_;
+							light_volume_mvp_actived = float4x4::Identity();
+						}
+
+						*light_attrib_param_ = light_attrib_[org_no];
+						*light_clr_type_param_ = light_clr_type_[org_no];
+						*light_falloff_param_ = light_falloff_[org_no];
+						*light_volume_mvp_param_ = light_volume_mvp_actived;
+
+						re.Render(*technique_, *rl_);
+
 						return App3DFramework::URV_Flushed;
 					}
 				}

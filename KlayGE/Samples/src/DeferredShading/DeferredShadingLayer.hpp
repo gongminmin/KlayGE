@@ -1,6 +1,8 @@
 #ifndef _DEFERREDSHADINGLAYER_HPP
 #define _DEFERREDSHADINGLAYER_HPP
 
+#include <KlayGE/SceneManager.hpp>
+
 namespace KlayGE
 {
 	template <typename T>
@@ -18,13 +20,13 @@ namespace KlayGE
 			vb.push_back(T());
 			float angle = i * 2 * PI / n;
 			vb.back().x() = outer_radius * cos(angle);
-			vb.back().z() = outer_radius * sin(angle);
-			vb.back().y() = -height;
+			vb.back().y() = outer_radius * sin(angle);
+			vb.back().z() = height;
 		}
 
 		vb.push_back(T());
-		vb.back().x() = vb.back().z() = 0;
-		vb.back().y() = -height;
+		vb.back().x() = vb.back().y() = 0;
+		vb.back().z() = height;
 
 		for (int i = 0; i < n; ++ i)
 		{
@@ -65,24 +67,24 @@ namespace KlayGE
 		float outer_radius = radius * sqrt(2.0f);
 		vb.push_back(T());
 		vb.back().x() = -outer_radius;
-		vb.back().z() = -outer_radius;
-		vb.back().y() = -height;
+		vb.back().y() = -outer_radius;
+		vb.back().z() = height;
 		vb.push_back(T());
 		vb.back().x() = +outer_radius;
-		vb.back().z() = -outer_radius;
-		vb.back().y() = -height;
+		vb.back().y() = -outer_radius;
+		vb.back().z() = height;
 		vb.push_back(T());
 		vb.back().x() = +outer_radius;
-		vb.back().z() = +outer_radius;
-		vb.back().y() = -height;
+		vb.back().y() = +outer_radius;
+		vb.back().z() = height;
 		vb.push_back(T());
 		vb.back().x() = -outer_radius;
-		vb.back().z() = +outer_radius;
-		vb.back().y() = -height;
+		vb.back().y() = +outer_radius;
+		vb.back().z() = height;
 
 		vb.push_back(T());
-		vb.back().x() = vb.back().z() = 0;
-		vb.back().y() = -height;
+		vb.back().x() = vb.back().y() = 0;
+		vb.back().z() = height;
 
 		for (int i = 0; i < 4; ++ i)
 		{
@@ -130,6 +132,14 @@ namespace KlayGE
 		LSA_NoShadow = 1UL << 0,
 		LSA_NoDiffuse = 1UL << 1,
 		LSA_NoSpecular = 1UL << 2
+	};
+
+	class DeferredableObject
+	{
+	public:
+		virtual void GenShadowMapPass(bool sm_pass) = 0;
+		virtual void EmitPass(bool emit_pass) = 0;
+		virtual bool IsEmit() const = 0;
 	};
 
 	class DeferredShadingLayer : public RenderableHelper
@@ -223,6 +233,8 @@ namespace KlayGE
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_;
+
+		SceneManager::SceneObjectsType non_emit_objs_;
 
 		RenderEffectParameterPtr texel_to_pixel_offset_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;

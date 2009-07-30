@@ -36,7 +36,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API KMesh : public StaticMesh
 	{
 	public:
-		KMesh(RenderModelPtr model, std::wstring const & name);
+		KMesh(RenderModelPtr const & model, std::wstring const & name);
 		virtual ~KMesh();
 
 		virtual void BuildMeshInfo();
@@ -55,7 +55,7 @@ namespace KlayGE
 	template <typename T>
 	struct CreateKMeshFactory
 	{
-		StaticMeshPtr operator()(RenderModelPtr model, std::wstring const & name)
+		StaticMeshPtr operator()(RenderModelPtr const & model, std::wstring const & name)
 		{
 			return MakeSharedPtr<T>(model, name);
 		}

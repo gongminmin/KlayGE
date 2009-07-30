@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 处理Overlay物体 (2009.5.13)
+// 增加了SceneObjects (2009.7.30)
 //
 // 3.5.0
 // 增加了根据technique权重的排序 (2007.1.14)
@@ -172,6 +173,16 @@ namespace KlayGE
 		{
 			render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
 		}
+	}
+
+	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
+	{
+		return scene_objs_;
+	}
+
+	SceneManager::SceneObjectsType const & SceneManager::SceneObjects() const
+	{
+		return scene_objs_;
 	}
 
 	// 更新场景管理器
