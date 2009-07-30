@@ -307,15 +307,16 @@ namespace
 			}
 		}
 
-		void OnRenderBegin()
+		void Update()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*mvp_param_ = model_ * view * proj;
-			*model_view_param_ = model_ * view;
+			float4x4 mv = model_ * view;
+			*mvp_param_ = mv * proj;
+			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
@@ -349,6 +350,7 @@ namespace
 		{
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() * rot_speed_) * MathLib::translation(0.0f, height_, 0.0f);
 			checked_pointer_cast<RenderCone>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderCone>(renderable_)->Update();
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -440,15 +442,16 @@ namespace
 			}
 		}
 
-		void OnRenderBegin()
+		void Update()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*mvp_param_ = model_ * view * proj;
-			*model_view_param_ = model_ * view;
+			float4x4 mv = model_ * view;
+			*mvp_param_ = mv * proj;
+			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
@@ -482,6 +485,7 @@ namespace
 		{
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::translation(sin(std::clock() * move_speed_), 0.0f, 0.0f) * MathLib::translation(pos_);
 			checked_pointer_cast<RenderSphere>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderSphere>(renderable_)->Update();
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -854,15 +858,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 			deferred_shading_->LightDir(spot_light_id_[i], d);
 		}
 
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
-		{
-			checked_pointer_cast<TorusObject>(scene_objs_[i])->GenShadowMapPass(false);
-		}
-
-		checked_pointer_cast<SphereObject>(point_light_src_)->GenShadowMapPass(false);
-		checked_pointer_cast<ConeObject>(spot_light_src_[0])->GenShadowMapPass(false);
-		checked_pointer_cast<ConeObject>(spot_light_src_[1])->GenShadowMapPass(false);
-
 		point_light_src_->Visible(true);
 		spot_light_src_[0]->Visible(true);
 		spot_light_src_[1]->Visible(true);
@@ -874,11 +869,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
-
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
-		{
-			checked_pointer_cast<TorusObject>(scene_objs_[i])->GenShadowMapPass(true);
-		}
 
 		point_light_src_->Visible(false);
 		spot_light_src_[0]->Visible(false);

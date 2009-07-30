@@ -363,6 +363,7 @@ namespace KlayGE
 
 	uint32_t DeferredShadingLayer::Update(uint32_t pass)
 	{
+		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		if (0 == pass)
@@ -391,6 +392,16 @@ namespace KlayGE
 
 			this->ScanLightSrc();
 
+			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+			for (size_t i = 0; i < scene_objs.size(); ++ i)
+			{
+				boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+				if (deo)
+				{
+					deo->GenShadowMapPass(false);
+				}
+			}
+
 			re.BindFrameBuffer(g_buffer_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
 			return App3DFramework::URV_Need_Flush;
@@ -406,7 +417,6 @@ namespace KlayGE
 
 				if ((batch == num_lights) && (pass_in_batch == 0))
 				{
-					SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 					non_emit_objs_.resize(0);
 					for (size_t i = 0; i < scene_objs.size(); ++ i)
@@ -445,6 +455,19 @@ namespace KlayGE
 				}
 				else
 				{
+					if (1 == pass)
+					{
+						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+						for (size_t i = 0; i < scene_objs.size(); ++ i)
+						{
+							boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+							if (deo)
+							{
+								deo->GenShadowMapPass(true);
+							}
+						}
+					}
+
 					int32_t light_index = batch;
 					int32_t org_no = light_scaned_[light_index] >> 16;
 					int32_t offset = light_scaned_[light_index] & 0xFFFF;

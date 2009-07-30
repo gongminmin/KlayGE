@@ -34,8 +34,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/FrameBuffer.hpp>
-#include <KlayGE/Input.hpp>
-#include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
@@ -167,10 +165,6 @@ namespace KlayGE
 		if (0 == pass)
 		{
 			this->UpdateStats();
-
-			InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
-			inputEngine.Update();
-
 			this->DoUpdateOverlay();
 		}
 

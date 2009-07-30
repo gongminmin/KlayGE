@@ -43,6 +43,8 @@
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/SceneObject.hpp>
+#include <KlayGE/Input.hpp>
+#include <KlayGE/InputFactory.hpp>
 
 #include <map>
 #include <algorithm>
@@ -189,8 +191,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
+		inputEngine.Update();
+
+		RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		renderEngine.BeginFrame();
+
+		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
+		{
+			scene_obj->Update();
+		}
 
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)
@@ -198,10 +208,6 @@ namespace KlayGE
 			renderEngine.BeginPass();
 
 			urt_ = app.Update(pass);
-			BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
-			{
-				scene_obj->Update();
-			}
 
 			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
 			{
@@ -258,6 +264,7 @@ namespace KlayGE
 			{
 				if (scene_objs_[i]->Overlay())
 				{
+					scene_objs_[i]->Update();
 					visible_marks_[i] = scene_objs_[i]->Visible();
 				}
 			}
