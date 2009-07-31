@@ -264,7 +264,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 	
 	float shadow = VSM(pos_es, len);
 
-	float4 final_clr;
+	float4 final_clr = 0;
 	if (GetMtlID(ndc) != 0)
 	{
 		float2 ds = 0;
@@ -354,7 +354,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 	
 	float shadow = VSM(pos_es, len);
 
-	float4 final_clr;
+	float4 final_clr = 0;
 	if (GetMtlID(ndc) != 0)
 	{
 		float2 ds = 0;
@@ -412,7 +412,7 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 color = color_tex.Sample(point_sampler, tc);
 
-	float4 final_clr;
+	float4 final_clr = 0;
 	if (GetMtlID(ndc) != 0)
 	{
 		view_dir = normalize(-view_dir);

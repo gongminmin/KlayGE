@@ -82,9 +82,9 @@ float4 SSAO(float2 tc0)
 			arr_scene_depth2[1][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) + ray.z;
 		}
 
-		for (int j = 0; j < 2; ++ j)
+		for (int k = 0; k < 2; ++ k)
 		{
-			float4 dist = depth - arr_scene_depth2[j];
+			float4 dist = depth - arr_scene_depth2[k];
 			float4 dist_scaled = dist * depth_range_scale;
 			float4 range_is_invalid = (saturate(abs(dist_scaled)) + saturate(dist_scaled)) / 2;
 			sky_access += lerp(saturate((-dist) * depth_test_softness), 0.55, range_is_invalid);

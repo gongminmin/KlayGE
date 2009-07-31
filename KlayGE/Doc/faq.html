@@ -19,6 +19,8 @@
 	<li><a href="#q6">KlayGE的网络部分如何？</a></li>
 	<li><a href="#q7">编译例子的时候出现像这样的连接错误信息：“libcmtd.lib(dbgheap.obj) : error LNK2005: __CrtSetDbgFlag 已经在MSVCRTD.lib(MSVCR80D.dll) 中定义”，请问如何解决？</a></li>
 	<li><a href="#q8">Boost编译的时候应该用什么参数？</a></li>
+	<li><a href="#q9">为什么在Visual Studio里运行例子的时候ResLoader::Load出现assert failed？</a></li>
+	<li><a href="#q10">在编译的时候提示"'yasm' is not recognized as an internal or external command, operable program or batch file."，如何解决？</a></li>
 </ol>
 <hr />
 <h4><a name="q0">问：KlayGE是什么？</a></h4>
@@ -63,6 +65,14 @@ bjam --toolset=msvc-9.0 --stagedir=./lib_vc9_x64 --builddir=./ address-model=64 
 <p>直接在boost的目录下运行这个批处理就可以编译出dll版本的boost库。</p>
 <a href="#content">回到目录</a>
 <hr />
-<p>更新日期：2008年10月11日</p>
+<h4><a name="q9">问：为什么在Visual Studio里运行例子的时候ResLoader::Load出现assert failed？</a></h4>
+<p>答：需要在Visual Studio中把工程的Working Directory设置成$(OutDir)。</p>
+<a href="#content">回到目录</a>
+<hr />
+<h4><a name="q10">问：在编译的时候提示"'yasm' is not recognized as an internal or external command, operable program or batch file."，如何解决？</a></h4>
+<p>答：根据设置，Visual Studio的编译工具必须能调用yasm才能编译.asm的文件。解决方法之一是把下载下来的yasm-X.X.X-winYY.exe（X表示版本号，YY表示32或64）改名成yasm.exe，并拷贝到VC的bin目录下，比如"C:\Program Files\Microsoft Visual Studio 9.0\VC\bin"。（注：这个问题实际上不该出现在本FAQ中，因为这其实是个命令行调用的问题，谁都该会的。可悲于国内“开发者”的素质，竟然有不少人都问了我该问题，使得我不得不将它写在这里。）</p>
+<a href="#content">回到目录</a>
+<hr />
+<p>更新日期：2009年7月31日</p>
 </body>
 </html>
