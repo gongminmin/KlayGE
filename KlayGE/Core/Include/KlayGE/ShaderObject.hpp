@@ -28,8 +28,15 @@ namespace KlayGE
 {
 	struct shader_desc
 	{
+		shader_desc()
+			: tech_pass(0xFFFFFFFF)
+		{
+		}
+
 		std::string profile;
 		std::string func_name;
+
+		uint32_t tech_pass;
 
 		struct stream_output_decl
 		{
@@ -37,12 +44,22 @@ namespace KlayGE
 			uint8_t usage_index;
 			uint8_t start_component;
 			uint8_t component_count;
+
+			friend bool operator==(stream_output_decl const & lhs, stream_output_decl const & rhs)
+			{
+				return (lhs.usage == rhs.usage) && (lhs.usage_index == rhs.usage_index)
+					&& (lhs.start_component == rhs.start_component) && (lhs.component_count == rhs.component_count);
+			}
+			friend bool operator!=(stream_output_decl const & lhs, stream_output_decl const & rhs)
+			{
+				return !(lhs == rhs);
+			}
 		};
 		std::vector<stream_output_decl> so_decl;
 
 		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
 		{
-			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name);
+			return (lhs.profile == rhs.profile) && (lhs.func_name == rhs.func_name) && (lhs.so_decl == rhs.so_decl);
 		}
 		friend bool operator!=(shader_desc const & lhs, shader_desc const & rhs)
 		{
@@ -69,7 +86,8 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs) = 0;
+		virtual void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+			uint32_t tech_index, uint32_t pass_index) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect& effect) = 0;
 
 		virtual void Bind() = 0;

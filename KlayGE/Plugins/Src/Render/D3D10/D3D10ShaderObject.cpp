@@ -1,8 +1,11 @@
 // D3D10ShaderObject.cpp
 // KlayGE D3D10 shader对象类 实现文件
-// Ver 3.8.0
+// Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2008-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 加速Shader编译 (2009.7.31)
 //
 // 3.8.0
 // 支持Gemoetry Shader (2009.2.5)
@@ -526,7 +529,8 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D10ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
+	void D3D10ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		uint32_t tech_index, uint32_t pass_index)
 	{
 		D3D10RenderEngine const & render_eng = *checked_cast<D3D10RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D10DevicePtr const & d3d_device = render_eng.D3DDevice();
@@ -536,33 +540,26 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc& sd = (*shader_descs)[type];
-			if (!sd.profile.empty())
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			if (sd.tech_pass != 0xFFFFFFFF)
 			{
-				is_shader_validate_[type] = true;
+				D3D10ShaderObjectPtr so = checked_pointer_cast<D3D10ShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
-				std::string shader_profile = sd.profile;
+				is_shader_validate_[type] = so->is_shader_validate_[type];
 				switch (type)
 				{
 				case ST_VertexShader:
-					if ("auto" == shader_profile)
-					{
-						shader_profile = render_eng.D3D10GetVertexShaderProfile(d3d_device.get());
-					}
+					vertex_shader_ = so->vertex_shader_;
+					vs_code_ = so->vs_code_;
+					geometry_shader_ = so->geometry_shader_;
 					break;
 
 				case ST_PixelShader:
-					if ("auto" == shader_profile)
-					{
-						shader_profile = render_eng.D3D10GetPixelShaderProfile(d3d_device.get());
-					}
+					pixel_shader_ = so->pixel_shader_;
 					break;
 
 				case ST_GeometryShader:
-					if ("auto" == shader_profile)
-					{
-						shader_profile = render_eng.D3D10GetGeometryShaderProfile(d3d_device.get());
-					}
+					geometry_shader_ = so->geometry_shader_;
 					break;
 
 				default:
@@ -570,120 +567,60 @@ namespace KlayGE
 					break;
 				}
 
-				ID3D10Blob* code;
-				ID3D10Blob* err_msg;
-				D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D10", "1" }, { NULL, NULL } };
-				D3DX10CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
-					NULL, sd.func_name.c_str(), shader_profile.c_str(),
-					0, 0, NULL, &code, &err_msg, NULL);
-				if (err_msg != NULL)
-				{
-#ifdef KLAYGE_DEBUG
-					std::istringstream iss(shader_text);
-					std::string s;
-					int line = 1;
-					while (iss)
-					{
-						std::getline(iss, s);
-						std::cerr << line << " " << s << std::endl;
-						++ line;
-					}
-					std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
-#endif
+				textures_[type].resize(so->textures_[type].size());
+				samplers_[type].resize(so->samplers_[type].size());
+				buffers_[type].resize(so->buffers_[type].size());
 
-					err_msg->Release();
+				cbufs_[type] = so->cbufs_[type];
+				dirty_[type] = so->dirty_[type];
+
+				d3d_cbufs_[type].resize(so->d3d_cbufs_[type].size());
+				D3D10_BUFFER_DESC desc;
+				desc.Usage = D3D10_USAGE_DEFAULT;
+				desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
+				desc.CPUAccessFlags = 0;
+				desc.MiscFlags = 0;
+				for (size_t j = 0; j < so->d3d_cbufs_[type].size(); ++ j)
+				{
+					desc.ByteWidth = static_cast<UINT>(so->cbufs_[type][j].size());
+					ID3D10Buffer* tmp_buf;
+					TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+					d3d_cbufs_[type][j] = MakeCOMPtr(tmp_buf);
 				}
 
-				ID3D10BlobPtr code_blob;
-				if (NULL == code)
+				param_binds_[type].reserve(so->param_binds_[type].size());
+				BOOST_FOREACH(BOOST_TYPEOF(so->param_binds_[type])::const_reference pb, so->param_binds_[type])
 				{
-					is_shader_validate_[type] = false;
+					param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 				}
-				else
+			}
+			else
+			{
+				if (!sd.profile.empty())
 				{
-					code_blob = MakeCOMPtr(code);
+					is_shader_validate_[type] = true;
+
+					std::string shader_profile = sd.profile;
 					switch (type)
 					{
 					case ST_VertexShader:
+						if ("auto" == shader_profile)
 						{
-							ID3D10VertexShader* vs;
-							if (FAILED(d3d_device->CreateVertexShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &vs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								vertex_shader_ = MakeCOMPtr(vs);
-							}
-						}
-						vs_code_ = code_blob;
-
-						if (!sd.so_decl.empty())
-						{
-							std::vector<D3D10_SO_DECLARATION_ENTRY> d3d10_decl(sd.so_decl.size());
-							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-							{
-								d3d10_decl[i] = D3D10Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
-							}
-
-							ID3D10GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
-								&d3d10_decl[0], static_cast<UINT>(d3d10_decl.size()), 0, &gs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								geometry_shader_ = MakeCOMPtr(gs);
-							}
+							shader_profile = render_eng.D3D10GetVertexShaderProfile(d3d_device.get());
 						}
 						break;
 
 					case ST_PixelShader:
+						if ("auto" == shader_profile)
 						{
-							ID3D10PixelShader* ps;
-							if (FAILED(d3d_device->CreatePixelShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &ps)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								pixel_shader_ = MakeCOMPtr(ps);
-							}
+							shader_profile = render_eng.D3D10GetPixelShaderProfile(d3d_device.get());
 						}
 						break;
 
 					case ST_GeometryShader:
-						if (!sd.so_decl.empty())
+						if ("auto" == shader_profile)
 						{
-							std::vector<D3D10_SO_DECLARATION_ENTRY> d3d10_decl(sd.so_decl.size());
-							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-							{
-								d3d10_decl[i] = D3D10Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
-							}
-
-							ID3D10GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(vs_code_->GetBufferPointer(), code_blob->GetBufferSize(),
-								&d3d10_decl[0], static_cast<UINT>(d3d10_decl.size()), 0, &gs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								geometry_shader_ = MakeCOMPtr(gs);
-							}
-						}
-						else
-						{
-							ID3D10GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &gs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								geometry_shader_ = MakeCOMPtr(gs);
-							}
+							shader_profile = render_eng.D3D10GetGeometryShaderProfile(d3d_device.get());
 						}
 						break;
 
@@ -692,138 +629,263 @@ namespace KlayGE
 						break;
 					}
 
-					ID3D10ShaderReflection* reflection;
-					render_eng.D3D10ReflectShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &reflection);
-					if (reflection != NULL)
+					ID3D10Blob* code;
+					ID3D10Blob* err_msg;
+					D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D10", "1" }, { NULL, NULL } };
+					D3DX10CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
+						NULL, sd.func_name.c_str(), shader_profile.c_str(),
+						0, 0, NULL, &code, &err_msg, NULL);
+					if (err_msg != NULL)
 					{
-						D3D10_SHADER_DESC desc;
-						reflection->GetDesc(&desc);
-
-						dirty_[type].resize(desc.ConstantBuffers);
-						d3d_cbufs_[type].resize(desc.ConstantBuffers);
-						cbufs_[type].resize(desc.ConstantBuffers);
-						for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
+#ifdef KLAYGE_DEBUG
+						std::istringstream iss(shader_text);
+						std::string s;
+						int line = 1;
+						while (iss)
 						{
-							ID3D10ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
+							std::getline(iss, s);
+							std::cerr << line << " " << s << std::endl;
+							++ line;
+						}
+						std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+#endif
 
-							D3D10_SHADER_BUFFER_DESC cb_desc;
-							reflection_cb->GetDesc(&cb_desc);
-							cbufs_[type][c].resize(cb_desc.Size);
+						err_msg->Release();
+					}
 
-							for (UINT v = 0; v < cb_desc.Variables; ++ v)
+					ID3D10BlobPtr code_blob;
+					if (NULL == code)
+					{
+						is_shader_validate_[type] = false;
+					}
+					else
+					{
+						code_blob = MakeCOMPtr(code);
+						switch (type)
+						{
+						case ST_VertexShader:
 							{
-								ID3D10ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
-
-								D3D10_SHADER_VARIABLE_DESC var_desc;
-								reflection_var->GetDesc(&var_desc);
-								if (var_desc.uFlags & D3D10_SVF_USED)
+								ID3D10VertexShader* vs;
+								if (FAILED(d3d_device->CreateVertexShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &vs)))
 								{
-									RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
+									is_shader_validate_[type] = false;
+								}
+								else
+								{
+									vertex_shader_ = MakeCOMPtr(vs);
+								}
+							}
+							vs_code_ = code_blob;
+
+							if (!sd.so_decl.empty())
+							{
+								std::vector<D3D10_SO_DECLARATION_ENTRY> d3d10_decl(sd.so_decl.size());
+								for (size_t i = 0; i < sd.so_decl.size(); ++ i)
+								{
+									d3d10_decl[i] = D3D10Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+								}
+
+								ID3D10GeometryShader* gs;
+								if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
+									&d3d10_decl[0], static_cast<UINT>(d3d10_decl.size()), 0, &gs)))
+								{
+									is_shader_validate_[type] = false;
+								}
+								else
+								{
+									geometry_shader_ = MakeCOMPtr(gs);
+								}
+							}
+							break;
+
+						case ST_PixelShader:
+							{
+								ID3D10PixelShader* ps;
+								if (FAILED(d3d_device->CreatePixelShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &ps)))
+								{
+									is_shader_validate_[type] = false;
+								}
+								else
+								{
+									pixel_shader_ = MakeCOMPtr(ps);
+								}
+							}
+							break;
+
+						case ST_GeometryShader:
+							if (!sd.so_decl.empty())
+							{
+								std::vector<D3D10_SO_DECLARATION_ENTRY> d3d10_decl(sd.so_decl.size());
+								for (size_t i = 0; i < sd.so_decl.size(); ++ i)
+								{
+									d3d10_decl[i] = D3D10Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+								}
+
+								ID3D10GeometryShader* gs;
+								if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(vs_code_->GetBufferPointer(), code_blob->GetBufferSize(),
+									&d3d10_decl[0], static_cast<UINT>(d3d10_decl.size()), 0, &gs)))
+								{
+									is_shader_validate_[type] = false;
+								}
+								else
+								{
+									geometry_shader_ = MakeCOMPtr(gs);
+								}
+							}
+							else
+							{
+								ID3D10GeometryShader* gs;
+								if (FAILED(d3d_device->CreateGeometryShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &gs)))
+								{
+									is_shader_validate_[type] = false;
+								}
+								else
+								{
+									geometry_shader_ = MakeCOMPtr(gs);
+								}
+							}
+							break;
+
+						default:
+							is_shader_validate_[type] = false;
+							break;
+						}
+
+						ID3D10ShaderReflection* reflection;
+						render_eng.D3D10ReflectShader(code_blob->GetBufferPointer(), code_blob->GetBufferSize(), &reflection);
+						if (reflection != NULL)
+						{
+							D3D10_SHADER_DESC desc;
+							reflection->GetDesc(&desc);
+
+							dirty_[type].resize(desc.ConstantBuffers);
+							d3d_cbufs_[type].resize(desc.ConstantBuffers);
+							cbufs_[type].resize(desc.ConstantBuffers);
+							for (UINT c = 0; c < desc.ConstantBuffers; ++ c)
+							{
+								ID3D10ShaderReflectionConstantBuffer* reflection_cb = reflection->GetConstantBufferByIndex(c);
+
+								D3D10_SHADER_BUFFER_DESC cb_desc;
+								reflection_cb->GetDesc(&cb_desc);
+								cbufs_[type][c].resize(cb_desc.Size);
+
+								for (UINT v = 0; v < cb_desc.Variables; ++ v)
+								{
+									ID3D10ShaderReflectionVariable* reflection_var = reflection_cb->GetVariableByIndex(v);
+
+									D3D10_SHADER_VARIABLE_DESC var_desc;
+									reflection_var->GetDesc(&var_desc);
+									if (var_desc.uFlags & D3D10_SVF_USED)
+									{
+										RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
+										if (p)
+										{
+											D3D10_SHADER_TYPE_DESC type_desc;
+											reflection_var->GetType()->GetDesc(&type_desc);
+
+											D3D10ShaderParameterHandle p_handle;
+											p_handle.shader_type = static_cast<uint8_t>(type);
+											p_handle.param_class = type_desc.Class;
+											p_handle.param_type = type_desc.Type;
+											p_handle.cbuff = c;
+											p_handle.offset = var_desc.StartOffset;
+											p_handle.elements = type_desc.Elements;
+											p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
+											p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
+
+											param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+										}
+									}
+								}
+
+								D3D10_BUFFER_DESC desc;
+								desc.ByteWidth = cb_desc.Size;
+								desc.Usage = D3D10_USAGE_DEFAULT;
+								desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
+								desc.CPUAccessFlags = 0;
+								desc.MiscFlags = 0;
+								ID3D10Buffer* tmp_buf;
+								TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+								d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
+							}
+
+							int num_textures = -1;
+							int num_samplers = -1;
+							int num_buffers = -1;
+							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
+							{
+								D3D10_SHADER_INPUT_BIND_DESC si_desc;
+								reflection->GetResourceBindingDesc(i, &si_desc);
+
+								switch (si_desc.Type)
+								{
+								case D3D10_SIT_TEXTURE:
+									if (si_desc.Dimension != D3D10_SRV_DIMENSION_BUFFER)
+									{
+										num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
+									}
+									else
+									{
+										num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
+									}
+									break;
+
+								case D3D10_SIT_SAMPLER:
+									num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+									break;
+
+								default:
+									break;
+								}
+							}
+
+							textures_[type].resize(num_textures + 1);
+							samplers_[type].resize(num_samplers + 1);
+							buffers_[type].resize(num_buffers + 1);
+
+							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
+							{
+								D3D10_SHADER_INPUT_BIND_DESC si_desc;
+								reflection->GetResourceBindingDesc(i, &si_desc);
+
+								if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
+								{
+									RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
 									if (p)
 									{
-										D3D10_SHADER_TYPE_DESC type_desc;
-										reflection_var->GetType()->GetDesc(&type_desc);
-
 										D3D10ShaderParameterHandle p_handle;
 										p_handle.shader_type = static_cast<uint8_t>(type);
-										p_handle.param_class = type_desc.Class;
-										p_handle.param_type = type_desc.Type;
-										p_handle.cbuff = c;
-										p_handle.offset = var_desc.StartOffset;
-										p_handle.elements = type_desc.Elements;
-										p_handle.rows = static_cast<uint8_t>(type_desc.Rows);
-										p_handle.columns = static_cast<uint8_t>(type_desc.Columns);
+										p_handle.param_class = D3D10_SVC_OBJECT;
+										if (D3D10_SIT_TEXTURE == si_desc.Type)
+										{
+											if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
+											{
+												p_handle.param_type = D3D10_SVT_BUFFER;
+											}
+											else
+											{
+												p_handle.param_type = D3D10_SVT_TEXTURE;
+											}
+										}
+										else
+										{
+											p_handle.param_type = D3D10_SVT_SAMPLER;
+										}
+										p_handle.offset = si_desc.BindPoint;
+										p_handle.elements = 1;
+										p_handle.rows = 0;
+										p_handle.columns = 1;
 
 										param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 									}
 								}
 							}
 
-							D3D10_BUFFER_DESC desc;
-							desc.ByteWidth = cb_desc.Size;
-							desc.Usage = D3D10_USAGE_DEFAULT;
-							desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
-							desc.CPUAccessFlags = 0;
-							desc.MiscFlags = 0;
-							ID3D10Buffer* tmp_buf;
-							TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
-							d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
+							reflection->Release();
 						}
-
-						int num_textures = -1;
-						int num_samplers = -1;
-						int num_buffers = -1;
-						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-						{
-							D3D10_SHADER_INPUT_BIND_DESC si_desc;
-							reflection->GetResourceBindingDesc(i, &si_desc);
-
-							switch (si_desc.Type)
-							{
-							case D3D10_SIT_TEXTURE:
-								if (si_desc.Dimension != D3D10_SRV_DIMENSION_BUFFER)
-								{
-									num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
-								}
-								else
-								{
-									num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
-								}
-								break;
-
-							case D3D10_SIT_SAMPLER:
-								num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
-								break;
-
-							default:
-								break;
-							}
-						}
-
-						textures_[type].resize(num_textures + 1);
-						samplers_[type].resize(num_samplers + 1);
-						buffers_[type].resize(num_buffers + 1);
-
-						for (uint32_t i = 0; i < desc.BoundResources; ++ i)
-						{
-							D3D10_SHADER_INPUT_BIND_DESC si_desc;
-							reflection->GetResourceBindingDesc(i, &si_desc);
-
-							if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
-							{
-								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-								if (p)
-								{
-									D3D10ShaderParameterHandle p_handle;
-									p_handle.shader_type = static_cast<uint8_t>(type);
-									p_handle.param_class = D3D10_SVC_OBJECT;
-									if (D3D10_SIT_TEXTURE == si_desc.Type)
-									{
-										if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
-										{
-											p_handle.param_type = D3D10_SVT_BUFFER;
-										}
-										else
-										{
-											p_handle.param_type = D3D10_SVT_TEXTURE;
-										}
-									}
-									else
-									{
-										p_handle.param_type = D3D10_SVT_SAMPLER;
-									}
-									p_handle.offset = si_desc.BindPoint;
-									p_handle.elements = 1;
-									p_handle.rows = 0;
-									p_handle.columns = 1;
-
-									param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
-								}
-							}
-						}
-
-						reflection->Release();
 					}
+
+					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 		

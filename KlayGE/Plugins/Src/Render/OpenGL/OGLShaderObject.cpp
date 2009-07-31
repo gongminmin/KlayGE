@@ -705,12 +705,13 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
+	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		uint32_t /*tech_index*/, uint32_t /*pass_index*/)
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
 
-		shader_descs_ = shader_descs;
+		shader_desc_ids_ = shader_desc_ids;
 		shader_text_ = MakeSharedPtr<std::string>(this->GenShaderText(effect));
 
 		std::vector<char const *> args;
@@ -735,7 +736,8 @@ namespace KlayGE
 		{
 			shaders[type] = 0;
 
-			if (!(*shader_descs_)[type].profile.empty())
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			if (!sd.profile.empty())
 			{
 				is_shader_validate_[type] = true;
 
@@ -766,7 +768,7 @@ namespace KlayGE
 				}
 
 				shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
-						CG_SOURCE, shader_text_->c_str(), profile, (*shader_descs_)[type].func_name.c_str(), &args[0]);
+						CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
 
 				CGerror error;
 				char const * err_string = cgGetLastErrorString(&error);
@@ -1015,7 +1017,7 @@ namespace KlayGE
 	{
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>();
 
-		ret->shader_descs_ = shader_descs_;
+		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
 		ret->glsl_srcs_ = glsl_srcs_;
 
@@ -1072,7 +1074,8 @@ namespace KlayGE
 				break;
 			}
 
-			if (!(*ret->shader_descs_)[type].func_name.empty())
+			shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
+			if (!sd.func_name.empty())
 			{
 				char const * glsl = (*glsl_srcs_)[type].c_str();
 				GLuint object = glCreateShader(shader_type);

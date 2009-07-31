@@ -393,9 +393,9 @@ namespace KlayGE
 			this->ScanLightSrc();
 
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-			for (size_t i = 0; i < scene_objs.size(); ++ i)
+			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 			{
-				boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+				boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 				if (deo)
 				{
 					deo->GenShadowMapPass(false);
@@ -419,26 +419,26 @@ namespace KlayGE
 				{
 					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 					non_emit_objs_.resize(0);
-					for (size_t i = 0; i < scene_objs.size(); ++ i)
+					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 					{
-						boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+						boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 						if (deo)
 						{
 							if (deo->IsEmit())
 							{
 								deo->EmitPass(true);
-								scene_objs[i]->Visible(true);
+								so->Visible(true);
 							}
 							else
 							{
-								non_emit_objs_.push_back(scene_objs[i]);
-								scene_objs[i]->Visible(false);
+								non_emit_objs_.push_back(so);
+								so->Visible(false);
 							}
 						}
 						else
 						{
-							non_emit_objs_.push_back(scene_objs[i]);
-							scene_objs[i]->Visible(false);
+							non_emit_objs_.push_back(so);
+							so->Visible(false);
 						}
 					}
 
@@ -446,9 +446,9 @@ namespace KlayGE
 				}
 				else if ((batch == num_lights) && (pass_in_batch == 1))
 				{
-					for (size_t i = 0; i < non_emit_objs_.size(); ++ i)
+					BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
 					{
-						non_emit_objs_[i]->Visible(true);
+						so->Visible(true);
 					}
 
 					return App3DFramework::URV_Finished;
@@ -458,9 +458,9 @@ namespace KlayGE
 					if (1 == pass)
 					{
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-						for (size_t i = 0; i < scene_objs.size(); ++ i)
+						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 						{
-							boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(scene_objs[i]);
+							boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 							if (deo)
 							{
 								deo->GenShadowMapPass(true);

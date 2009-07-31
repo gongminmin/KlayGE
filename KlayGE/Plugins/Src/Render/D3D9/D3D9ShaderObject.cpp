@@ -1,8 +1,11 @@
 // D3D9ShaderObject.cpp
 // KlayGE D3D9 shader对象类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 加速Shader编译 (2009.7.31)
 //
 // 3.7.0
 // 改为直接传入RenderEffect (2008.7.4)
@@ -659,7 +662,8 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D9ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<shader_desc> > const & shader_descs)
+	void D3D9ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		uint32_t tech_index, uint32_t pass_index)
 	{
 		D3D9RenderEngine const & render_eng = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D9DevicePtr const & d3d_device = render_eng.D3DDevice();
@@ -669,31 +673,20 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			if (!(*shader_descs)[type].profile.empty())
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			if (sd.tech_pass != 0xFFFFFFFF)
 			{
-				is_shader_validate_[type] = true;
+				D3D9ShaderObjectPtr so = checked_pointer_cast<D3D9ShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
-				std::string shader_profile = (*shader_descs)[type].profile;
+				is_shader_validate_[type] = so->is_shader_validate_[type];
 				switch (type)
 				{
 				case ST_VertexShader:
-					if ("auto" == shader_profile)
-					{
-						shader_profile = D3DXGetVertexShaderProfile(d3d_device.get());
-
-						if ((2 == render_eng.DeviceCaps().max_shader_model) && ("vs_3_0" == shader_profile))
-						{
-							// Fix for Intel DAMN on-board GPUs
-							shader_profile = "vs_2_0";
-						}
-					}
+					vertex_shader_ = so->vertex_shader_;
 					break;
 
 				case ST_PixelShader:
-					if ("auto" == shader_profile)
-					{
-						shader_profile = D3DXGetPixelShaderProfile(d3d_device.get());
-					}
+					pixel_shader_ = so->pixel_shader_;
 					break;
 
 				default:
@@ -701,132 +694,68 @@ namespace KlayGE
 					break;
 				}
 
-				ID3DXConstantTable* constant_table = NULL;
-				ID3DXBuffer* code = NULL;
-				if (is_shader_validate_[type])
+				bool_start_[type] = so->bool_start_[type];
+				int_start_[type] = so->int_start_[type];
+				float_start_[type] = so->float_start_[type];
+
+				bool_registers_[type].resize(so->bool_registers_[type].size());
+				int_registers_[type].resize(so->int_registers_[type].size());
+				float_registers_[type].resize(so->float_registers_[type].size());
+				samplers_[type].resize(so->samplers_[type].size());
+
+				param_binds_[type].reserve(so->param_binds_[type].size());
+				BOOST_FOREACH(BOOST_TYPEOF(so->param_binds_[type])::const_reference pb, so->param_binds_[type])
 				{
-					ID3DXBuffer* err_msg;
-					std::vector<D3DXMACRO> macros;
-					D3DXMACRO macro_d3d9 = { "KLAYGE_D3D9", "1" };
-					D3DXMACRO macro_end = { NULL, NULL };
-					macros.push_back(macro_d3d9);
-					if (!render_eng.DeviceCaps().bc5_support)
+					if (pb.param)
 					{
-						D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
-						macros.push_back(macro_bc5_as_bc3);
+						param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 					}
 					else
 					{
-						D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GR", "1" };
-						macros.push_back(macro_bc5_as_bc3);
-					}
-					macros.push_back(macro_end);
-					D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), &macros[0], NULL,
-						(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-						0, &code, &err_msg, &constant_table);
-					if (err_msg != NULL)
-					{
-#ifdef D3DXSHADER_USE_LEGACY_D3DX9_31_DLL
-						ID3DXConstantTable* constant_table_legacy;
-						ID3DXBuffer* code_legacy;
-						ID3DXBuffer* err_msg_legacy;
-						D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), &macros[0], NULL,
-							(*shader_descs)[type].func_name.c_str(), shader_profile.c_str(),
-							D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
-						if (err_msg_legacy != NULL)
+						for (size_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 						{
-#ifdef KLAYGE_DEBUG
-							std::istringstream iss(shader_text);
-							std::string s;
-							int line = 1;
-							while (iss)
+							if (tex_sampler_binds_[j].first == pb.combined_sampler_name)
 							{
-								std::getline(iss, s);
-								std::cerr << line << " " << s << std::endl;
-								++ line;
-							}
-							std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
-#endif
-
-							if (code_legacy)
-							{
-								code_legacy->Release();
-							}
-							if (constant_table_legacy)
-							{
-								constant_table_legacy->Release();
-							}
-							if (err_msg_legacy)
-							{
-								err_msg_legacy->Release();
-							}
-
-							if (code)
-							{
-								code->Release();
-							}
-							if (constant_table)
-							{
-								constant_table->Release();
-							}
-							if (err_msg)
-							{
-								err_msg->Release();
+								parameter_bind_t new_pb;
+								new_pb.combined_sampler_name = pb.combined_sampler_name;
+								new_pb.p_handle = pb.p_handle;
+								new_pb.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>,
+									std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[pb.p_handle.shader_type][pb.p_handle.register_index],
+									tex_sampler_binds_[j].second.first, tex_sampler_binds_[j].second.second);
+								param_binds_[type].push_back(new_pb);
+								break;
 							}
 						}
-						else
-						{
-							if (code)
-							{
-								code->Release();
-							}
-							if (constant_table)
-							{
-								constant_table->Release();
-							}
-							if (err_msg)
-							{
-								err_msg->Release();
-							}
-
-							code = code_legacy;
-							constant_table = constant_table_legacy;
-						}
-#else
-#ifdef KLAYGE_DEBUG
-						std::cerr << shader_text << std::endl;
-						std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
-#endif
-
-						err_msg->Release();
-#endif
 					}
 				}
+			}
+			else
+			{
+				if (!sd.profile.empty())
+				{
+					is_shader_validate_[type] = true;
 
-				if (NULL == code)
-				{
-					is_shader_validate_[type] = false;
-				}
-				else
-				{
+					std::string shader_profile = sd.profile;
 					switch (type)
 					{
 					case ST_VertexShader:
-						IDirect3DVertexShader9* vs;
-						if (FAILED(d3d_device->CreateVertexShader(static_cast<DWORD*>(code->GetBufferPointer()), &vs)))
+						if ("auto" == shader_profile)
 						{
-							is_shader_validate_[type] = false;
+							shader_profile = D3DXGetVertexShaderProfile(d3d_device.get());
+
+							if ((2 == render_eng.DeviceCaps().max_shader_model) && ("vs_3_0" == shader_profile))
+							{
+								// Fix for Intel DAMN on-board GPUs
+								shader_profile = "vs_2_0";
+							}
 						}
-						vertex_shader_ = MakeCOMPtr(vs);
 						break;
 
 					case ST_PixelShader:
-						IDirect3DPixelShader9* ps;
-						if (FAILED(d3d_device->CreatePixelShader(static_cast<DWORD*>(code->GetBufferPointer()), &ps)))
+						if ("auto" == shader_profile)
 						{
-							is_shader_validate_[type] = false;
+							shader_profile = D3DXGetPixelShaderProfile(d3d_device.get());
 						}
-						pixel_shader_ = MakeCOMPtr(ps);
 						break;
 
 					default:
@@ -834,135 +763,271 @@ namespace KlayGE
 						break;
 					}
 
-					code->Release();
-				}
-
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				switch (type)
-				{
-				case ST_VertexShader:
-					samplers_[type].resize(re.DeviceCaps().max_vertex_texture_units);
-					break;
-
-				case ST_PixelShader:
-					samplers_[type].resize(re.DeviceCaps().max_pixel_texture_units);
-					break;
-
-				default:
-					is_shader_validate_[type] = false;
-					break;
-				}
-
-				if (constant_table)
-				{
-					uint32_t bool_begin = 0xFFFFFFFF, bool_end = 0;
-					uint32_t int_begin = 0xFFFFFFFF, int_end = 0;
-					uint32_t float_begin = 0xFFFFFFFF, float_end = 0;
-
-					D3DXCONSTANTTABLE_DESC ct_desc;
-					constant_table->GetDesc(&ct_desc);
-					for (UINT c = 0; c < ct_desc.Constants; ++ c)
+					ID3DXConstantTable* constant_table = NULL;
+					ID3DXBuffer* code = NULL;
+					if (is_shader_validate_[type])
 					{
-						D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
-						D3DXCONSTANT_DESC constant_desc;
-						UINT count;
-						constant_table->GetConstantDesc(handle, &constant_desc, &count);
-
-						switch (constant_desc.RegisterSet)
+						ID3DXBuffer* err_msg;
+						std::vector<D3DXMACRO> macros;
+						D3DXMACRO macro_d3d9 = { "KLAYGE_D3D9", "1" };
+						D3DXMACRO macro_end = { NULL, NULL };
+						macros.push_back(macro_d3d9);
+						if (!render_eng.DeviceCaps().bc5_support)
 						{
-						case D3DXRS_BOOL:
-							bool_begin = std::min<uint32_t>(bool_begin, constant_desc.RegisterIndex);
-							bool_end = std::max<uint32_t>(bool_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
-							break;
-
-						case D3DXRS_INT4:
-							int_begin = std::min<uint32_t>(int_begin, constant_desc.RegisterIndex);
-							int_end = std::max<uint32_t>(int_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
-							break;
-
-						case D3DXRS_FLOAT4:
-							float_begin = std::min<uint32_t>(float_begin, constant_desc.RegisterIndex);
-							float_end = std::max<uint32_t>(float_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
-							break;
-
-						default:
-							break;
-						}
-					}
-
-					if (bool_end > bool_begin)
-					{
-						bool_registers_[type].resize(bool_end - bool_begin);
-						bool_start_[type] = bool_begin;
-					}
-					if (int_end > int_begin)
-					{
-						int_registers_[type].resize(int_end - int_begin);
-						int_start_[type] = int_begin;
-					}
-					if (float_end > float_begin)
-					{
-						float_registers_[type].resize(float_end - float_begin);
-						float_start_[type] = float_begin;
-					}
-
-					for (UINT c = 0; c < ct_desc.Constants; ++ c)
-					{
-						D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
-						D3DXCONSTANT_DESC constant_desc;
-						UINT count;
-						constant_table->GetConstantDesc(handle, &constant_desc, &count);
-
-						D3D9ShaderParameterHandle p_handle;
-						p_handle.shader_type = static_cast<uint8_t>(type);
-						p_handle.register_set = static_cast<uint8_t>(constant_desc.RegisterSet);
-						switch (p_handle.register_set)
-						{
-						case D3DXRS_BOOL:
-							p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - bool_start_[type]);
-							break;
-
-						case D3DXRS_INT4:
-							p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - int_start_[type]);
-							break;
-
-						case D3DXRS_FLOAT4:
-							p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - float_start_[type]);
-							break;
-
-						default:
-							p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex);
-							break;
-						}
-						p_handle.register_count = static_cast<uint16_t>(constant_desc.RegisterCount);
-						p_handle.rows = static_cast<uint8_t>(constant_desc.Rows);
-						p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
-
-						RenderEffectParameterPtr const & p = effect.ParameterByName(constant_desc.Name);
-						if (p)
-						{
-							param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+							D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+							macros.push_back(macro_bc5_as_bc3);
 						}
 						else
 						{
-							for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+							D3DXMACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GR", "1" };
+							macros.push_back(macro_bc5_as_bc3);
+						}
+						macros.push_back(macro_end);
+						D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), &macros[0], NULL,
+							sd.func_name.c_str(), shader_profile.c_str(),
+							0, &code, &err_msg, &constant_table);
+						if (err_msg != NULL)
+						{
+#ifdef D3DXSHADER_USE_LEGACY_D3DX9_31_DLL
+							ID3DXConstantTable* constant_table_legacy;
+							ID3DXBuffer* code_legacy;
+							ID3DXBuffer* err_msg_legacy;
+							D3DXCompileShader(shader_text.c_str(), static_cast<UINT>(shader_text.size()), &macros[0], NULL,
+								sd.func_name.c_str(), shader_profile.c_str(),
+								D3DXSHADER_USE_LEGACY_D3DX9_31_DLL, &code_legacy, &err_msg_legacy, &constant_table_legacy);
+							if (err_msg_legacy != NULL)
 							{
-								if (tex_sampler_binds_[i].first == constant_desc.Name)
+#ifdef KLAYGE_DEBUG
+								std::istringstream iss(shader_text);
+								std::string s;
+								int line = 1;
+								while (iss)
 								{
-									parameter_bind_t pb;
-									pb.combined_sampler_name = tex_sampler_binds_[i].first;
-									pb.p_handle = p_handle;
-									pb.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>,
-										std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[p_handle.shader_type][p_handle.register_index],
-										tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
-									param_binds_[type].push_back(pb);
-									break;
+									std::getline(iss, s);
+									std::cerr << line << " " << s << std::endl;
+									++ line;
+								}
+								std::cerr << static_cast<char*>(err_msg_legacy->GetBufferPointer()) << std::endl;
+#endif
+
+								if (code_legacy)
+								{
+									code_legacy->Release();
+								}
+								if (constant_table_legacy)
+								{
+									constant_table_legacy->Release();
+								}
+								if (err_msg_legacy)
+								{
+									err_msg_legacy->Release();
+								}
+
+								if (code)
+								{
+									code->Release();
+								}
+								if (constant_table)
+								{
+									constant_table->Release();
+								}
+								if (err_msg)
+								{
+									err_msg->Release();
 								}
 							}
+							else
+							{
+								if (code)
+								{
+									code->Release();
+								}
+								if (constant_table)
+								{
+									constant_table->Release();
+								}
+								if (err_msg)
+								{
+									err_msg->Release();
+								}
+
+								code = code_legacy;
+								constant_table = constant_table_legacy;
+							}
+#else
+#ifdef KLAYGE_DEBUG
+							std::cerr << shader_text << std::endl;
+							std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+#endif
+
+							err_msg->Release();
+#endif
 						}
 					}
 
-					constant_table->Release();
+					if (NULL == code)
+					{
+						is_shader_validate_[type] = false;
+					}
+					else
+					{
+						switch (type)
+						{
+						case ST_VertexShader:
+							IDirect3DVertexShader9* vs;
+							if (FAILED(d3d_device->CreateVertexShader(static_cast<DWORD*>(code->GetBufferPointer()), &vs)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							vertex_shader_ = MakeCOMPtr(vs);
+							break;
+
+						case ST_PixelShader:
+							IDirect3DPixelShader9* ps;
+							if (FAILED(d3d_device->CreatePixelShader(static_cast<DWORD*>(code->GetBufferPointer()), &ps)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							pixel_shader_ = MakeCOMPtr(ps);
+							break;
+
+						default:
+							is_shader_validate_[type] = false;
+							break;
+						}
+
+						code->Release();
+					}
+
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					switch (type)
+					{
+					case ST_VertexShader:
+						samplers_[type].resize(re.DeviceCaps().max_vertex_texture_units);
+						break;
+
+					case ST_PixelShader:
+						samplers_[type].resize(re.DeviceCaps().max_pixel_texture_units);
+						break;
+
+					default:
+						is_shader_validate_[type] = false;
+						break;
+					}
+
+					if (constant_table)
+					{
+						uint32_t bool_begin = 0xFFFFFFFF, bool_end = 0;
+						uint32_t int_begin = 0xFFFFFFFF, int_end = 0;
+						uint32_t float_begin = 0xFFFFFFFF, float_end = 0;
+
+						D3DXCONSTANTTABLE_DESC ct_desc;
+						constant_table->GetDesc(&ct_desc);
+						for (UINT c = 0; c < ct_desc.Constants; ++ c)
+						{
+							D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
+							D3DXCONSTANT_DESC constant_desc;
+							UINT count;
+							constant_table->GetConstantDesc(handle, &constant_desc, &count);
+
+							switch (constant_desc.RegisterSet)
+							{
+							case D3DXRS_BOOL:
+								bool_begin = std::min<uint32_t>(bool_begin, constant_desc.RegisterIndex);
+								bool_end = std::max<uint32_t>(bool_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+								break;
+
+							case D3DXRS_INT4:
+								int_begin = std::min<uint32_t>(int_begin, constant_desc.RegisterIndex);
+								int_end = std::max<uint32_t>(int_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+								break;
+
+							case D3DXRS_FLOAT4:
+								float_begin = std::min<uint32_t>(float_begin, constant_desc.RegisterIndex);
+								float_end = std::max<uint32_t>(float_end, constant_desc.RegisterIndex + constant_desc.RegisterCount);
+								break;
+
+							default:
+								break;
+							}
+						}
+
+						if (bool_end > bool_begin)
+						{
+							bool_registers_[type].resize(bool_end - bool_begin);
+							bool_start_[type] = bool_begin;
+						}
+						if (int_end > int_begin)
+						{
+							int_registers_[type].resize(int_end - int_begin);
+							int_start_[type] = int_begin;
+						}
+						if (float_end > float_begin)
+						{
+							float_registers_[type].resize(float_end - float_begin);
+							float_start_[type] = float_begin;
+						}
+
+						for (UINT c = 0; c < ct_desc.Constants; ++ c)
+						{
+							D3DXHANDLE handle = constant_table->GetConstant(NULL, c);
+							D3DXCONSTANT_DESC constant_desc;
+							UINT count;
+							constant_table->GetConstantDesc(handle, &constant_desc, &count);
+
+							D3D9ShaderParameterHandle p_handle;
+							p_handle.shader_type = static_cast<uint8_t>(type);
+							p_handle.register_set = static_cast<uint8_t>(constant_desc.RegisterSet);
+							switch (p_handle.register_set)
+							{
+							case D3DXRS_BOOL:
+								p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - bool_start_[type]);
+								break;
+
+							case D3DXRS_INT4:
+								p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - int_start_[type]);
+								break;
+
+							case D3DXRS_FLOAT4:
+								p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex - float_start_[type]);
+								break;
+
+							default:
+								p_handle.register_index = static_cast<uint16_t>(constant_desc.RegisterIndex);
+								break;
+							}
+							p_handle.register_count = static_cast<uint16_t>(constant_desc.RegisterCount);
+							p_handle.rows = static_cast<uint8_t>(constant_desc.Rows);
+							p_handle.columns = static_cast<uint8_t>(constant_desc.Columns);
+
+							RenderEffectParameterPtr const & p = effect.ParameterByName(constant_desc.Name);
+							if (p)
+							{
+								param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+							}
+							else
+							{
+								for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+								{
+									if (tex_sampler_binds_[i].first == constant_desc.Name)
+									{
+										parameter_bind_t pb;
+										pb.combined_sampler_name = tex_sampler_binds_[i].first;
+										pb.p_handle = p_handle;
+										pb.func = SetD3D9ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>,
+											std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[p_handle.shader_type][p_handle.register_index],
+											tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
+										param_binds_[type].push_back(pb);
+										break;
+									}
+								}
+							}
+						}
+
+						constant_table->Release();
+					}
+
+					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 		

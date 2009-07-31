@@ -885,6 +885,8 @@ namespace KlayGE
 	{
 		if (source)
 		{
+			shader_descs_.resize(1);
+
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(source);
 
@@ -1005,12 +1007,13 @@ namespace KlayGE
 				}
 			}
 
-			for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"))
+			uint32_t index = 0;
+			for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 			{
 				RenderTechniquePtr technique = MakeSharedPtr<RenderTechnique>(*this);
 				techniques_.push_back(technique);
 
-				technique->Load(node);
+				technique->Load(node, index);
 			}
 		}
 	}
@@ -1022,6 +1025,7 @@ namespace KlayGE
 		ret->prototype_effect_ = prototype_effect_;
 		ret->macros_ = macros_;
 		ret->shaders_ = shaders_;
+		ret->shader_descs_ = shader_descs_;
 
 		ret->params_.resize(params_.size());
 		for (size_t i = 0; i < params_.size(); ++ i)
@@ -1082,6 +1086,33 @@ namespace KlayGE
 		return RenderTechnique::NullObject();
 	}
 
+	uint32_t RenderEffect::AddShaderDesc(shader_desc const & sd)
+	{
+		for (uint32_t i = 0; i < shader_descs_.size(); ++ i)
+		{
+			if (shader_descs_[i] == sd)
+			{
+				return i;
+			}
+		}
+
+		uint32_t id = static_cast<uint32_t>(shader_descs_.size());
+		shader_descs_.push_back(sd);
+		return id;
+	}
+
+	shader_desc& RenderEffect::GetShaderDesc(uint32_t id)
+	{
+		BOOST_ASSERT(id < shader_descs_.size());
+		return shader_descs_[id];
+	}
+
+	shader_desc const & RenderEffect::GetShaderDesc(uint32_t id) const
+	{
+		BOOST_ASSERT(id < shader_descs_.size());
+		return shader_descs_[id];
+	}
+
 	std::string const & RenderEffect::TypeName(uint32_t code) const
 	{
 		return type_define::instance().type_name(code);
@@ -1117,7 +1148,7 @@ namespace KlayGE
 		return obj;
 	}
 
-	void RenderTechnique::Load(XMLNodePtr const & node)
+	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(node->Attrib("name")->ValueString());
 
@@ -1140,12 +1171,13 @@ namespace KlayGE
 
 		bool blend = false;
 		weight_ = 1;
-		for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"))
+		uint32_t index = 0;
+		for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
 		{
 			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
 			passes_.push_back(pass);
 
-			pass->Load(pass_node);
+			pass->Load(pass_node, tech_index, index);
 
 			is_validate_ &= pass->Validate();
 
@@ -1206,7 +1238,7 @@ namespace KlayGE
 		return obj;
 	}
 
-	void RenderPass::Load(XMLNodePtr const & node)
+	void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -1232,8 +1264,8 @@ namespace KlayGE
 		BlendStateDesc bs_desc;
 		shader_obj_ = rf.MakeShaderObject();
 
-		shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>();
-		shader_descs_->resize(ShaderObject::ST_NumShaderTypes);
+		shader_desc_ids_ = MakeSharedPtr<BOOST_TYPEOF(*shader_desc_ids_)>();
+		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
@@ -1467,7 +1499,7 @@ namespace KlayGE
 					type = ShaderObject::ST_GeometryShader;
 				}
 
-				shader_desc& sd = (*shader_descs_)[type];
+				shader_desc sd;
 				sd.profile = get_profile(state_node);
 				sd.func_name = get_func_name(state_node);
 
@@ -1548,6 +1580,8 @@ namespace KlayGE
 						}
 					}
 				}
+
+				(*shader_desc_ids_)[type] = effect_.AddShaderDesc(sd);
 			}
 			else
 			{
@@ -1559,7 +1593,7 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		shader_obj_->SetShader(effect_, shader_descs_);
+		shader_obj_->SetShader(effect_, shader_desc_ids_, tech_index, pass_index);
 
 		is_validate_ = shader_obj_->Validate();
 	}
@@ -1570,7 +1604,7 @@ namespace KlayGE
 
 		ret->name_ = name_;
 		ret->annotations_ = annotations_;
-		ret->shader_descs_ = shader_descs_;
+		ret->shader_desc_ids_ = shader_desc_ids_;
 
 		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
 		ret->depth_stencil_state_obj_ = depth_stencil_state_obj_;

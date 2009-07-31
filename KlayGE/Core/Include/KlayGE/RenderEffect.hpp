@@ -384,6 +384,10 @@ namespace KlayGE
 			return (*shaders_)[n];
 		}
 
+		uint32_t AddShaderDesc(shader_desc const & sd);
+		shader_desc& GetShaderDesc(uint32_t id);
+		shader_desc const & GetShaderDesc(uint32_t id) const;
+
 		uint32_t NumMacros() const
 		{
 			return macros_ ? static_cast<uint32_t>(macros_->size()) : 0;
@@ -405,6 +409,8 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 
 		RenderEffectPtr prototype_effect_;
+
+		std::vector<shader_desc> shader_descs_;
 	};
 
 	class KLAYGE_CORE_API RenderTechnique : boost::noncopyable
@@ -415,7 +421,7 @@ namespace KlayGE
 		{
 		}
 
-		void Load(XMLNodePtr const & node);
+		void Load(XMLNodePtr const & node, uint32_t tech_index);
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
 		static RenderTechniquePtr const & NullObject();
@@ -484,7 +490,7 @@ namespace KlayGE
 
 		static RenderPassPtr const & NullObject();
 
-		void Load(XMLNodePtr const & node);
+		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index);
 		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const
@@ -532,7 +538,7 @@ namespace KlayGE
 
 		boost::shared_ptr<std::string> name_;
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
+		boost::shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
 
 		RasterizerStateObjectPtr rasterizer_state_obj_;
 		DepthStencilStateObjectPtr depth_stencil_state_obj_;
