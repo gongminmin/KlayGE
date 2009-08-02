@@ -175,12 +175,13 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame)
+	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool mesh_opt)
 						: root_node_(root_node),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
-							frame_rate_(GetFrameRate())
+							frame_rate_(GetFrameRate()),
+							mesh_opt_(mesh_opt)
 	{
 	}
 
@@ -1072,6 +1073,72 @@ namespace KlayGE
 		}
 	}
 
+	void meshml_extractor::mesh_optimize()
+	{
+		objects_info_t opt_objs_info;
+		for (size_t i = 0; i < objs_mtl_.size(); ++ i)
+		{
+			std::vector<vertex_elements_t> ves;
+			std::vector<std::pair<size_t, size_t> > oids;
+			for (size_t j = 0; j < objs_info_.size(); ++ j)
+			{
+				if (objs_info_[j].mtl_id == i)
+				{
+					bool found = false;
+					for (size_t k = 0; k < ves.size(); ++ k)
+					{
+						if (ves[k] == objs_info_[j].vertex_elements)
+						{
+							oids.push_back(std::make_pair(j, k));
+							found = true;
+							break;
+						}
+					}
+
+					if (!found)
+					{
+						oids.push_back(std::make_pair(j, ves.size()));
+						ves.push_back(objs_info_[j].vertex_elements);
+					}
+				}
+			}
+
+			for (size_t j = 0; j < ves.size(); ++ j)
+			{
+				opt_objs_info.push_back(object_info_t());
+				object_info_t& opt_obj = opt_objs_info.back();
+
+				std::ostringstream oss;
+				oss << "mesh_for_mtl_" << i << "_ve_" << j;
+				opt_obj.name = oss.str();
+				opt_obj.mtl_id = i;
+				opt_obj.vertex_elements = ves[j];
+
+				BOOST_FOREACH(BOOST_TYPEOF(oids)::reference oid, oids)
+				{
+					int base = static_cast<int>(opt_obj.vertices.size());
+					if (oid.second == j)
+					{
+						opt_obj.vertices.insert(opt_obj.vertices.end(),
+							objs_info_[oid.first].vertices.begin(), objs_info_[oid.first].vertices.end());
+
+						BOOST_FOREACH(BOOST_TYPEOF(objs_info_[oid.first].triangles)::reference old_tri, objs_info_[oid.first].triangles)
+						{
+							triangle_t tri = old_tri;
+							tri.vertex_index[0] += base;
+							tri.vertex_index[1] += base;
+							tri.vertex_index[2] += base;
+
+							opt_obj.triangles.push_back(tri);
+						}
+					}
+				}
+			}
+		}
+
+		objs_info_ = opt_objs_info;
+	}
+
 	void meshml_extractor::write_xml(std::string const & file_name, export_vertex_attrs const & eva)
 	{
 		std::ofstream ofs(file_name.c_str());
@@ -1082,6 +1149,10 @@ namespace KlayGE
 
 		this->remove_redundant_joints();
 		this->remove_redundant_mtls();
+		if (mesh_opt_)
+		{
+			this->mesh_optimize();
+		}
 
 		std::map<std::string, int> joints_name_to_id;
 		std::vector<std::string> joints_id_to_name;

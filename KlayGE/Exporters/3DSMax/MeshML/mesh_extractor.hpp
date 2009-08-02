@@ -54,6 +54,15 @@ namespace KlayGE
 		vertex_element_usage usage;
 		unsigned char usage_index;
 		unsigned char num_components;
+
+		friend bool operator==(vertex_element_t const & lhs, vertex_element_t const & rhs)
+		{
+			return (lhs.usage == rhs.usage) && (lhs.usage_index == rhs.usage_index) && (lhs.num_components == rhs.num_components);
+		}
+		friend bool operator!=(vertex_element_t const & lhs, vertex_element_t const & rhs)
+		{
+			return !(lhs == rhs);
+		}
 	};
 
 	typedef std::vector<std::pair<std::string, float> > binds_t;
@@ -146,7 +155,7 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame);
+		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool mesh_opt);
 
 		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::string const & file_name, export_vertex_attrs const & eva);
@@ -156,6 +165,7 @@ namespace KlayGE
 		void extract_bone(INode* node);
 		void remove_redundant_joints();
 		void remove_redundant_mtls();
+		void mesh_optimize();
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
@@ -180,6 +190,7 @@ namespace KlayGE
 
 		joints_t joints_;
 		int joints_per_ver_;
+		bool mesh_opt_;
 
 		std::map<std::string, joint_and_mat_t> joint_nodes_;
 

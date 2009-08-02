@@ -42,6 +42,7 @@ BEGIN
     PUSHBUTTON      "->",IDC_BUTTON_DEL,114,96,34,14
     LTEXT           "导出的顶点属性：",IDC_STATIC,25,62,65,8
     LTEXT           "忽略的顶点属性：",IDC_STATIC,157,62,65,8
+    CONTROL         "优化mesh",IDC_MESH_OPTIMIZE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,135,35,49,10
 END
 
 

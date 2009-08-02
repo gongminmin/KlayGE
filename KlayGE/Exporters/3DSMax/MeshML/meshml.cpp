@@ -168,6 +168,8 @@ namespace KlayGE
 			::SendMessage(::GetDlgItem(wnd, IDC_LIST_EXPORT_VERTEX_ATTRS), LB_SETITEMDATA, texcoord_index, static_cast<LPARAM>(VEU_TextureCoord));
 
 			::SendMessage(::GetDlgItem(wnd, IDC_LIST_IGNORED_VERTEX_ATTRS), LB_SETITEMDATA, binormal_index, static_cast<LPARAM>(VEU_Binormal));
+
+			::SendMessage(::GetDlgItem(wnd, IDC_MESH_OPTIMIZE), BM_SETCHECK, BST_CHECKED, NULL);
 		}
 		else
 		{
@@ -231,10 +233,12 @@ namespace KlayGE
 						assert(instance != NULL);
 
 						int const joint_per_ver = static_cast<int>(::SendMessage(::GetDlgItem(wnd, IDC_SPIN_JOINT_PER_VER), UDM_GETPOS32, NULL, NULL));
+						bool const mesh_opt = (BST_CHECKED == ::SendMessage(::GetDlgItem(wnd, IDC_MESH_OPTIMIZE), BM_GETCHECK, NULL, NULL));
 						Interval const se_ticks = instance->max_interface_->GetAnimRange();
 						meshml_extractor extractor(instance->max_interface_->GetRootNode(), joint_per_ver,
 							instance->max_interface_->GetTime(),
-							se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame());
+							se_ticks.Start() / GetTicksPerFrame(), se_ticks.End() / GetTicksPerFrame(),
+							mesh_opt);
 
 						export_vertex_attrs eva;
 						eva.normal = false;

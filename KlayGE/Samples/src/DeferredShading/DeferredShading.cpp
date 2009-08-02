@@ -158,7 +158,7 @@ namespace
 
 		bool IsEmit() const
 		{
-			return is_emit_;			
+			return is_emit_;
 		}
 
 		void OnRenderBegin()
@@ -637,15 +637,21 @@ void DeferredShadingApp::InitObjects()
 		scene_objs_[i]->AddToSceneManager();
 	}
 
-	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), float3(1, 1, 1));
-	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, float3(1, 0, 0));
-	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, float3(0, 1, 0));
+	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
+	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
+	point_light_id_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
+	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
+	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
+
+	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), deferred_shading_->LightColor(point_light_id_));
+	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, deferred_shading_->LightColor(spot_light_id_[0]));
+	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, deferred_shading_->LightColor(spot_light_id_[1]));
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
-	this->Proj(0.1f, 100.0f);
+	this->Proj(0.1f, 500.0f);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -675,16 +681,10 @@ void DeferredShadingApp::InitObjects()
 	input_handler->connect(boost::bind(&DeferredShadingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
-
-	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
-	point_light_id_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
-	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

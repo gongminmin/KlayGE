@@ -524,7 +524,6 @@ namespace KlayGE
 								}
 
 								*light_pos_es_param_ = light_pos_es_actived;
-							
 							}
 
 							*light_dir_es_param_ = light_dir_es_actived;
@@ -548,17 +547,14 @@ namespace KlayGE
 
 						re.BindFrameBuffer(shaded_buffer_);
 
-						float4x4 light_volume_mvp_actived;
 						if ((LT_Spot == type) || (LT_Point == type))
 						{
 							float4x4 mat;
 							if (LT_Spot == type)
 							{
 								technique_ = technique_spot_;
-
-								float scale = light_cos_outer_inner_[org_no].w();
+								float const scale = light_cos_outer_inner_[org_no].w();
 								mat = MathLib::scaling(scale, scale, 1.0f);
-
 								rl_ = rl_cone_;
 							}
 							else //if (LT_Point == type)
@@ -568,7 +564,7 @@ namespace KlayGE
 								rl_ = rl_pyramid_;
 							}
 
-							light_volume_mvp_actived = mat
+							*light_volume_mvp_param_ = mat
 								* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
 								* view_ * proj_;
 						}
@@ -584,13 +580,12 @@ namespace KlayGE
 							}
 
 							rl_ = rl_quad_;
-							light_volume_mvp_actived = float4x4::Identity();
+							*light_volume_mvp_param_ = float4x4::Identity();
 						}
 
 						*light_attrib_param_ = light_attrib_[org_no];
 						*light_clr_type_param_ = light_clr_type_[org_no];
 						*light_falloff_param_ = light_falloff_[org_no];
-						*light_volume_mvp_param_ = light_volume_mvp_actived;
 
 						re.Render(*technique_, *rl_);
 
