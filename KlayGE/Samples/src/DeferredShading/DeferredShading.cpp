@@ -543,25 +543,19 @@ namespace
 		SSAOPostProcess()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO"))
 		{
-			*(technique_->Effect().ParameterByName("ssao_param")) = float4(0.6f, 0.075f, 0.3f, 0.03f);
-
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-			tex_width_height_param_ = technique_->Effect().ParameterByName("tex_width_height");
 		}
 
 		void OnRenderBegin()
 		{
 			PostProcess::OnRenderBegin();
 
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-			*tex_width_height_param_ = float2(static_cast<float>(re.CurFrameBuffer()->Width()), static_cast<float>(re.CurFrameBuffer()->Height()));
 		}
 
 	private:
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr tex_width_height_param_;
 	};
 
 

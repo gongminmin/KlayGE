@@ -64,10 +64,6 @@ float linstep(float min, float max, float v)
 		]]>
 	</shader>
 
-	<parameter type="texture2D" name="rand_normal_tex">
-		<annotation type="string" name="SasResourceAddress" value="rand_normal.dds"/>
-	</parameter>
-
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
