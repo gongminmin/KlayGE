@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_provoking_vertex">
+	<tokens>
+		<token name="GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION" value="0x8E4C"/>
+		<token name="GL_FIRST_VERTEX_CONVENTION" value="0x8E4D"/>
+		<token name="GL_LAST_VERTEX_CONVENTION" value="0x8E4E"/>
+		<token name="GL_PROVOKING_VERTEX" value="0x8E4F"/>
+	</tokens>
+
+	<functions>
+		<function name="glProvokingVertex" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_provoking_vertex" name="glProvokingVertexEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

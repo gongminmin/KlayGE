@@ -190,6 +190,10 @@ namespace glloader
 				{
 					features_.push_back("GL_VERSION_3_1");
 				}
+				if (ver_code >= 32)
+				{
+					features_.push_back("GL_VERSION_3_2");
+				}
 			}
 		}
 		void wgl_features()

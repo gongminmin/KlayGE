@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_depth_clamp">
+	<tokens>
+		<token name="GL_DEPTH_CLAMP" value="0x864F"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_NV_depth_clamp"/>
+	</additionals>
+</gl_extension>
