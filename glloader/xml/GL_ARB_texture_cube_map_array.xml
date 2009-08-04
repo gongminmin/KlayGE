@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_cube_map_array" reg_no="71">
+	<tokens>
+		<token name="GL_TEXTURE_CUBE_MAP_ARRAY_ARB" value="0x9009"/>
+		<token name="GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_ARB" value="0x900A"/>
+		<token name="GL_PROXY_TEXTURE_CUBE_MAP_ARRAY_ARB" value="0x900B"/>
+		<token name="GL_SAMPLER_CUBE_MAP_ARRAY_ARB" value="0x900C"/>
+		<token name="GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW_ARB" value="0x900D"/>
+		<token name="GL_INT_SAMPLER_CUBE_MAP_ARRAY_ARB" value="0x900E"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_ARB" value="0x900F"/>
+	</tokens>
+</gl_extension>

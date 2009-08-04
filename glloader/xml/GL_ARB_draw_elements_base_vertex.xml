@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_draw_elements_base_vertex">
+<gl_extension name="GL_ARB_draw_elements_base_vertex" reg_no="62">
 	<functions>
 		<function name="glDrawElementsBaseVertex" return="void">
 			<params>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_texture_multisample">
+<gl_extension name="GL_ARB_texture_multisample" reg_no="67">
 	<tokens>
 		<token name="GL_SAMPLE_POSITION" value="0x8E50"/>
 		<token name="GL_SAMPLE_MASK" value="0x8E51"/>

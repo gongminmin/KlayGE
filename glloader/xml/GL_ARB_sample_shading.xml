@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_sample_shading" reg_no="70">
+	<tokens>
+		<token name="GL_SAMPLE_SHADING_ARB" value="0x8C36"/>
+		<token name="GL_MIN_SAMPLE_SHADING_VALUE_ARB" value="0x8C37"/>
+	</tokens>
+
+	<functions>
+		<function name="glMinSampleShadingARB" return="void">
+			<params>
+				<param type="GLclampf" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

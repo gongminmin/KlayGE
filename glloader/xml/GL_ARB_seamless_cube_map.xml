@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_seamless_cube_map">
+<gl_extension name="GL_ARB_seamless_cube_map" reg_no="65">
 	<tokens>
 		<token name="GL_TEXTURE_CUBE_MAP_SEAMLESS" value="0x884F"/>
 	</tokens>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_provoking_vertex">
+<gl_extension name="GL_ARB_provoking_vertex" reg_no="64">
 	<tokens>
 		<token name="GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION" value="0x8E4C"/>
 		<token name="GL_FIRST_VERTEX_CONVENTION" value="0x8E4D"/>

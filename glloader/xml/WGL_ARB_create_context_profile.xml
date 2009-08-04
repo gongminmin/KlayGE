@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_ARB_create_context_profile" reg_no="74">
+	<tokens>
+		<token name="WGL_CONTEXT_PROFILE_MASK_ARB" value="0x9126"/>
+		<token name="WGL_CONTEXT_CORE_PROFILE_BIT_ARB" value="0x00000001"/>
+		<token name="WGL_CONTEXT_COMPATIBLE_PROFILE_BIT_ARB" value="0x00000002"/>
+		<token name="ERROR_INVALID_PROFILE_ARB" value="0x2096"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_vertex_array_bgra" reg_no="68">
+	<additionals>
+		<ext name="GL_EXT_vertex_array_bgra"/>
+	</additionals>
+</gl_extension>

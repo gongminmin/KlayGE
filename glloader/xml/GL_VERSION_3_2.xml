@@ -86,5 +86,6 @@
 		<ext name="GL_ARB_seamless_cube_map"/>
 		<ext name="GL_ARB_sync"/>
 		<ext name="GL_ARB_texture_multisample"/>
+		<ext name="GL_ARB_vertex_array_bgra"/>
 	</additionals>
 </gl_extension>

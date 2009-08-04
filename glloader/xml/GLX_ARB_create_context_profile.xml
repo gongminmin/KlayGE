@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_ARB_create_context_profile" reg_no="75">
+	<tokens>
+		<token name="GLX_CONTEXT_PROFILE_MASK_ARB" value="0x9126"/>
+		<token name="GLX_CONTEXT_CORE_PROFILE_BIT_ARB" value="0x00000001"/>
+		<token name="GLX_CONTEXT_COMPATIBLE_PROFILE_BIT_ARB" value="0x00000002"/>
+	</tokens>
+</gl_extension>

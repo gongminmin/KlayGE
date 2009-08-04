@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_sync">
+<gl_extension name="GL_ARB_sync" reg_no="66">
 	<typedefs>
 		<typedef type="struct __GLsync*" synonym="GLsync"/>
 	</typedefs>
