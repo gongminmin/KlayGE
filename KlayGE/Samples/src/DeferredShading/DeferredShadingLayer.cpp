@@ -288,7 +288,6 @@ namespace KlayGE
 			break;
 
 		case 6:
-			technique_ = technique_->Effect().TechniqueByName("ShowEdge");
 			break;
 
 		case 7:
@@ -408,7 +407,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (0 == buffer_type_)
+			if ((0 == buffer_type_) || (6 == buffer_type_))
 			{
 				int32_t batch = (pass - 1) / 2;
 				int32_t pass_in_batch = (pass - 1) - batch * 2;

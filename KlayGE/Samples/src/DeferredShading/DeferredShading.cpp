@@ -535,6 +535,18 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("color_tex")) = tex;
 		}
+
+		void ShowEdge(bool se)
+		{
+			if (se)
+			{
+				technique_ = technique_->Effect().TechniqueByName("AdaptiveAntiAliasShowEdge");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("AdaptiveAntiAlias");
+			}
+		}
 	};
 
 	class SSAOPostProcess : public PostProcess
@@ -756,19 +768,34 @@ void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputActio
 	}
 }
 
-void DeferredShadingApp::BufferChangedHandler(KlayGE::UIComboBox const & sender)
+void DeferredShadingApp::BufferChangedHandler(UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
 	deferred_shading_->BufferType(buffer_type_);
 
 	if (buffer_type_ != 0)
 	{
-		dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(false);
 		anti_alias_enabled_ = false;
+	}
+	else
+	{
+		anti_alias_enabled_ = true;
+		edge_anti_alias_->Destinate(hdr_buffer_);
+	}
+	dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(anti_alias_enabled_);
+
+	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ShowEdge(6 == buffer_type_);
+	if (6 == buffer_type_)
+	{
+		edge_anti_alias_->Destinate(FrameBufferPtr());
+	}
+	else
+	{
+		edge_anti_alias_->Destinate(hdr_buffer_);
 	}
 }
 
-void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
+void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 {
 	if (0 == buffer_type_)
 	{
@@ -790,7 +817,7 @@ void DeferredShadingApp::AntiAliasHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-void DeferredShadingApp::SSAOHandler(KlayGE::UICheckBox const & sender)
+void DeferredShadingApp::SSAOHandler(UICheckBox const & sender)
 {
 	if (0 == buffer_type_)
 	{
@@ -799,7 +826,7 @@ void DeferredShadingApp::SSAOHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-void DeferredShadingApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+void DeferredShadingApp::CtrlCameraHandler(UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{
@@ -887,7 +914,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-		if ((0 == buffer_type_) && anti_alias_enabled_)
+		if (((0 == buffer_type_) && anti_alias_enabled_) || (6 == buffer_type_))
 		{
 			edge_anti_alias_->Apply();
 		}

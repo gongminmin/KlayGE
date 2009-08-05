@@ -44,6 +44,7 @@ float GetEdgeWeight(float2 tc0)
 	// Compute Deltas in Depth.
 	float4 Deltas1;
 	float4 Deltas2;
+	float depth0 = GetDepth(nd[0]);
 	Deltas1.x = GetDepth(nd[1]);
 	Deltas1.y = GetDepth(nd[2]);
 	Deltas1.z = GetDepth(nd[3]);
@@ -53,8 +54,8 @@ float GetEdgeWeight(float2 tc0)
 	Deltas2.z = GetDepth(nd[7]);
 	Deltas2.w = GetDepth(nd[8]);
 	// Compute andbsolute gradients from center.
-	Deltas1 = abs(Deltas1 - GetDepth(nd[0]));
-	Deltas2 = abs(GetDepth(nd[0]) - Deltas2);
+	Deltas1 = abs(Deltas1 - depth0);
+	Deltas2 = abs(depth0 - Deltas2);
 	// Find min and max gradient, ensuring min != 0
 	float4 maxDeltas = max(Deltas1, Deltas2);
 	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
@@ -88,14 +89,16 @@ float GetEdgeWeight(float2 tc0)
 
 float4 AdaptiveAntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
+	float2 offset = GetEdgeWeight(tc0) * inv_width_height;
+	return (color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(-offset.x, -offset.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(+offset.x, -offset.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(-offset.x, +offset.y))
+			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(+offset.x, +offset.y))) * 0.25f;
+}
 
-	float edge = GetEdgeWeight(tc0);
-	return (color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(-inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(+inv_width_height.x, -inv_width_height.y))
-			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(-inv_width_height.x, +inv_width_height.y))
-			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + edge * float2(+inv_width_height.x, +inv_width_height.y))) * 0.25f;
+float4 ShowEdgePS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return GetEdgeWeight(tc0);
 }
 		]]>
 	</shader>
@@ -106,6 +109,15 @@ float4 AdaptiveAntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="AdaptiveAntiAliasPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="AdaptiveAntiAliasShowEdge">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ShowEdgePS()"/>
 		</pass>
 	</technique>
 </effect>
