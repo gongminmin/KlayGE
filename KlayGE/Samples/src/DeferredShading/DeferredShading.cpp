@@ -544,6 +544,7 @@ namespace
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO"))
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+			proj_param_ = technique_->Effect().ParameterByName("proj");
 		}
 
 		void OnRenderBegin()
@@ -552,10 +553,14 @@ namespace
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			float4x4 const & proj = camera.ProjMatrix();
+			*proj_param_ = float2(proj(0, 0), proj(1, 1));
 		}
 
 	private:
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+		RenderEffectParameterPtr proj_param_;
 	};
 
 

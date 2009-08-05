@@ -24,10 +24,10 @@
 		<![CDATA[
 float GetEdgeWeight(float2 tc0)
 {
-	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
-	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, -1, +1);
-	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(-1, 0, +1, 0);
-	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(0, -1, 0, +1);
+	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +0, -1);
+	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, +1, +0);
+	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(+1, +1, +0, +1);
+	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(-1, +1, -1, +0);
 	
 	float4 nd[9];  
 	// Retrieve normal and depth data for all neighbors.
@@ -64,7 +64,7 @@ float GetEdgeWeight(float2 tc0)
 	// minimum gradient. It is not resolution dependent. The constant
 	// number here would change based on how the depth values are stored
 	// and how sensitive the edge detection should be.
-	float4 depthResults = step(minDeltas * 25.0, maxDeltas);
+	float4 depthResults = step(minDeltas * 18.0, maxDeltas);
 	// Compute change in the cosine of the angle between normals.
 	float3 normal0 = GetNormal(nd[0]);
 	Deltas1.x = dot(GetNormal(nd[1]), normal0);

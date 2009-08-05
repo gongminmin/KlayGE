@@ -97,10 +97,10 @@ float linstep(float min, float max, float v)
 
 float GetEdgeWeight(float2 tc0)
 {
-	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
-	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, -1, +1);
-	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(-1, 0, +1, 0);
-	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(0, -1, 0, +1);
+	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +0, -1);
+	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, +1, +0);
+	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(+1, +1, +0, +1);
+	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(-1, +1, -1, +0);
 	
 	float4 nd[9];  
 	// Retrieve normal and depth data for all neighbors.
@@ -113,6 +113,8 @@ float GetEdgeWeight(float2 tc0)
 	nd[6] = nd_tex.Sample(point_sampler, tc3.zw);
 	nd[7] = nd_tex.Sample(point_sampler, tc4.xy);
 	nd[8] = nd_tex.Sample(point_sampler, tc4.zw);
+	
+	float depth0 = GetDepth(nd[0]);
 
 	// Compute Deltas in Depth.
 	float4 Deltas1;
@@ -126,8 +128,8 @@ float GetEdgeWeight(float2 tc0)
 	Deltas2.z = GetDepth(nd[7]);
 	Deltas2.w = GetDepth(nd[8]);
 	// Compute andbsolute gradients from center.
-	Deltas1 = abs(Deltas1 - GetDepth(nd[0]));
-	Deltas2 = abs(GetDepth(nd[0]) - Deltas2);
+	Deltas1 = abs(Deltas1 - depth0);
+	Deltas2 = abs(depth0 - Deltas2);
 	// Find min and max gradient, ensuring min != 0
 	float4 maxDeltas = max(Deltas1, Deltas2);
 	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
@@ -137,7 +139,7 @@ float GetEdgeWeight(float2 tc0)
 	// minimum gradient. It is not resolution dependent. The constant
 	// number here would change based on how the depth values are stored
 	// and how sensitive the edge detection should be.
-	float4 depthResults = step(minDeltas * 25.0, maxDeltas);
+	float4 depthResults = step(minDeltas * 18.0, maxDeltas);
 	// Compute change in the cosine of the angle between normals.
 	float3 normal0 = GetNormal(nd[0]);
 	Deltas1.x = dot(GetNormal(nd[1]), normal0);

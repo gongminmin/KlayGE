@@ -6,6 +6,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>
+		<parameter type="float2" name="proj"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">
@@ -32,20 +33,19 @@ float4 SSAO(float2 tc0)
 	const float scale = 0.025f; 
 	const float3 samples[8] =
 	{
-		normalize(half3( 1,  1,  1)) * scale * 1,
-		normalize(half3(-1, -1, -1)) * scale * 2,
-		normalize(half3(-1, -1,  1)) * scale * 3,
-		normalize(half3(-1,  1, -1)) * scale * 4,
-		normalize(half3(-1,  1,  1)) * scale * 5,
-		normalize(half3( 1, -1, -1)) * scale * 6,
-		normalize(half3( 1, -1,  1)) * scale * 7,
-		normalize(half3( 1,  1, -1)) * scale * 8,
+		normalize(float3( 1,  1,  1)) * scale,
+		normalize(float3(-1, -1, -1)) * scale,
+		normalize(float3(-1, -1,  1)) * scale,
+		normalize(float3(-1,  1, -1)) * scale,
+		normalize(float3(-1,  1,  1)) * scale,
+		normalize(float3( 1, -1, -1)) * scale,
+		normalize(float3( 1, -1,  1)) * scale,
+		normalize(float3( 1,  1, -1)) * scale,
 	};
 
 	float3 normal = GetNormal(src_tex.Sample(point_sampler, tc0));
 
-	float3 sample_scale = float3(depth_near_far_invfar.zz / depth, depth_near_far_invfar.z);
-
+	float3 sample_scale = float3(proj / (depth * depth_near_far_invfar.y), depth_near_far_invfar.z);
 	float4 sky_access = 0.0f;
 	float4 arr_scene_depth2[2];
 	float3 ray;
@@ -64,7 +64,7 @@ float4 SSAO(float2 tc0)
 		sky_access += (depth < arr_scene_depth2[1]);
 	}
 
-	return saturate(dot(sky_access, 1 / 8.0f));
+	return saturate(dot(sky_access, 1 / 8.0f) * 1.5f - 0.5f);
 }
 
 float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
