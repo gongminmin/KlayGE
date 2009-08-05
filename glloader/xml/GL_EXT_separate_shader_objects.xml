@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_separate_shader_objects">
+	<tokens>
+		<token name="GL_ACTIVE_PROGRAM_EXT" value="0x8B8D"/>
+	</tokens>
+
+	<functions>
+		<function name="glUseShaderProgramEXT" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="program"/>
+			</params>
+		</function>
+		<function name="glActiveProgramEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+			</params>
+		</function>
+		<function name="glCreateShaderProgramEXT" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLchar*" name="string"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

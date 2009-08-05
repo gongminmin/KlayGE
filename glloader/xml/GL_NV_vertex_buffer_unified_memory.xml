@@ -1,0 +1,114 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_vertex_buffer_unified_memory">
+	<tokens>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV" value="0x8F1E"/>
+		<token name="GL_ELEMENT_ARRAY_UNIFIED_NV" value="0x8F1F"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV" value="0x8F20"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_ADDRESS_NV" value="0x8F25"/>
+		<token name="GL_VERTEX_ARRAY_ADDRESS_NV" value="0x8F21"/>
+		<token name="GL_NORMAL_ARRAY_ADDRESS_NV" value="0x8F22"/>
+		<token name="GL_COLOR_ARRAY_ADDRESS_NV" value="0x8F23"/>
+		<token name="GL_INDEX_ARRAY_ADDRESS_NV" value="0x8F24"/>
+		<token name="GL_EDGE_FLAG_ARRAY_ADDRESS_NV" value="0x8F26"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_ADDRESS_NV" value="0x8F27"/>
+		<token name="GL_FOG_COORD_ARRAY_ADDRESS_NV" value="0x8F28"/>
+		<token name="GL_ELEMENT_ARRAY_ADDRESS_NV" value="0x8F29"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_LENGTH_NV" value="0x8F2A"/>
+		<token name="GL_TEXTURE_COORD_ARRAY_LENGTH_NV" value="0x8F2F"/>
+		<token name="GL_VERTEX_ARRAY_LENGTH_NV" value="0x8F2B"/>
+		<token name="GL_NORMAL_ARRAY_LENGTH_NV" value="0x8F2C"/>
+		<token name="GL_COLOR_ARRAY_LENGTH_NV" value="0x8F2D"/>
+		<token name="GL_INDEX_ARRAY_LENGTH_NV" value="0x8F2E"/>
+		<token name="GL_EDGE_FLAG_ARRAY_LENGTH_NV" value="0x8F30"/>
+		<token name="GL_SECONDARY_COLOR_ARRAY_LENGTH_NV" value="0x8F31"/>
+		<token name="GL_FOG_COORD_ARRAY_LENGTH_NV" value="0x8F32"/>
+		<token name="GL_ELEMENT_ARRAY_LENGTH_NV" value="0x8F33"/>
+	</tokens>
+
+	<functions>
+		<function name="glBufferAddressRangeNV" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT" name="address"/>
+				<param type="GLsizeiptr" name="length"/>
+			</params>
+		</function>
+		<function name="glVertexFormatNV" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glNormalFormatNV" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glColorFormatNV" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glIndexFormatNV" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glTexCoordFormatNV" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glEdgeFlagFormatNV" return="void">
+			<params>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glSecondaryColorFormatNV" return="void">
+			<params>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glFogCoordFormatNV" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glVertexAttribFormatNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glVertexAttribIFormatNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glGetIntegerui64i_vNV" return="void">
+			<params>
+				<param type="GLenum" name="value"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT*" name="result"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

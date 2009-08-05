@@ -1,4 +1,4 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_vertex_array_bgra" reg_no="354">
+<gl_extension name="GL_EXT_vertex_array_bgra" reg_no="354" prefer="GL_ARB_vertex_array_bgra">
 </gl_extension>

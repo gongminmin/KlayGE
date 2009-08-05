@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_depth_clamp" reg_no="260">
+<gl_extension name="GL_NV_depth_clamp" reg_no="260" prefer="GL_ARB_depth_clamp">
 	<tokens>
 		<token name="GL_DEPTH_CLAMP_NV" value="0x864F"/>
 	</tokens>

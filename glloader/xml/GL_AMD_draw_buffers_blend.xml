@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_AMD_draw_buffers_blend" reg_no="366">
+<gl_extension name="GL_AMD_draw_buffers_blend" reg_no="366" prefer="GL_ARB_draw_buffers_blend">
 	<functions>
 		<function name="glBlendFuncIndexedAMD" return="void">
 			<params>

@@ -1,4 +1,4 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ATI_shader_texture_lod">
+<gl_extension name="GL_ATI_shader_texture_lod" prefer="GL_ARB_shader_texture_lod">
 </gl_extension>

@@ -1,0 +1,99 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_shader_buffer_load">
+	<tokens>
+		<token name="GL_BUFFER_GPU_ADDRESS_NV" value="0x8F1D"/>
+		<token name="GL_GPU_ADDRESS_NV" value="0x8F34"/>
+		<token name="GL_MAX_SHADER_BUFFER_ADDRESS_NV" value="0x8F35"/>
+	</tokens>
+
+	<functions>
+		<function name="glMakeBufferResidentNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glMakeBufferNonResidentNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glIsBufferResidentNV" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glNamedMakeBufferResidentNV" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glNamedMakeBufferNonResidentNV" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glIsNamedBufferResidentNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glGetBufferParameterui64vNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetNamedBufferParameterui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetIntegerui64vNV" return="void">
+			<params>
+				<param type="GLenum" name="value"/>
+				<param type="GLuint64EXT*" name="result"/>
+			</params>
+		</function>
+		<function name="glUniformui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetUniformui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramUniformui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64EXT" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLuint64EXT*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
