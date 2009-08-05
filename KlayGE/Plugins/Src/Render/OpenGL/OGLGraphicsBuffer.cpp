@@ -1,8 +1,11 @@
 // OGLGraphicsBuffer.hpp
 // KlayGE OpenGL图形缓冲区类 实现文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2005
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持GL_ARB_copy_buffer (2009.8.5)
 //
 // 3.2.0
 // 把OGLIndexStream和OGLVertexStream合并成OGLGraphicsBuffer (2006.1.10)
@@ -22,6 +25,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -133,9 +137,19 @@ namespace KlayGE
 
 	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
-		GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
-		GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
-		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-			rhs_mapper.Pointer<uint8_t>());
+		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_copy_buffer())
+		{
+			glBindBuffer(GL_COPY_READ_BUFFER, vb_);
+			glBindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+                          0, 0, size_in_byte_);
+		}
+		else
+		{
+			GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
+			GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
+			std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
+				rhs_mapper.Pointer<uint8_t>());
+		}
 	}
 }

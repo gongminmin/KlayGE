@@ -1,8 +1,11 @@
 // OGLTexture.hpp
 // KlayGE OpenGL纹理类 实现文件
-// Ver 3.6.0
+// Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Texture Array (2009.8.5)
 //
 // 3.6.0
 // 用pbo加速 (2007.3.13)
@@ -39,17 +42,36 @@
 
 namespace KlayGE
 {
-	OGLTexture::OGLTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
+	OGLTexture::OGLTexture(TextureType type, uint16_t array_size, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: Texture(type, sample_count, sample_quality, access_hint)
 	{
+		if ((array_size > 1) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
 		switch (type_)
 		{
 		case TT_1D:
-			target_type_ = GL_TEXTURE_1D;
+			if (array_size > 1)
+			{
+				target_type_ = GL_TEXTURE_1D_ARRAY;
+			}
+			else
+			{
+				target_type_ = GL_TEXTURE_1D;
+			}
 			break;
 
 		case TT_2D:
-			target_type_ = GL_TEXTURE_2D;
+			if (array_size > 1)
+			{
+				target_type_ = GL_TEXTURE_2D_ARRAY;
+			}
+			else
+			{
+				target_type_ = GL_TEXTURE_2D;
+			}
 			break;
 
 		case TT_3D:

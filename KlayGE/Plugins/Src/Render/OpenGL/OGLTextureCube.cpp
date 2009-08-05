@@ -1,11 +1,14 @@
-// OGLTextureCube.hpp
+// OGLTextureCube.cpp
 // KlayGE OpenGL Cube纹理类 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
 //
+// 3.9.0
+// 支持GL_NV_copy_image (2009.8.5)
+//
 // 3.8.0
-// 通过EXT_framebuffer_blit加速CopyTexture (2008.10.12)
+// 通过GL_EXT_framebuffer_blit加速CopyTexture (2008.10.12)
 //
 // 3.6.0
 // 用pbo加速 (2007.3.13)
@@ -41,9 +44,9 @@
 
 namespace KlayGE
 {
-	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps, ElementFormat format,
+	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
 								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
-					: OGLTexture(TT_Cube, sample_count, sample_quality, access_hint)
+					: OGLTexture(TT_Cube, array_size, sample_count, sample_quality, access_hint)
 	{
 		if (!glloader_GL_EXT_texture_sRGB())
 		{
@@ -79,10 +82,10 @@ namespace KlayGE
 		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 
 		glGenTextures(1, &texture_);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+		glBindTexture(target_type_, texture_);
+		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, 0);
 
 		for (int face = 0; face < 6; ++ face)
 		{
@@ -175,51 +178,69 @@ namespace KlayGE
 
 		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)))
 		{
-			GLint gl_internalFormat;
-			GLenum gl_format;
-			GLenum gl_type;
-			OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-			for (int face = 0; face < 6; ++ face)
+			if (glloader_GL_NV_copy_image())
 			{
-				for (int level = 0; level < numMipMaps_; ++ level)
+				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+				for (int face = 0; face < 6; ++ face)
 				{
-					glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
-
-					glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
-					if (IsCompressedFormat(format_))
+					for (int level = 0; level < numMipMaps_; ++ level)
 					{
-						glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
+						glCopyImageSubDataNV(
+							texture_, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
+							0, 0, 0,
+							ogl_target.GLTexture(), GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
+							0, 0, 0, widthes_[level], widthes_[level], 1);
 					}
-					else
-					{
-						glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
-					}
+				}
+			}
+			else
+			{
+				GLint gl_internalFormat;
+				GLenum gl_format;
+				GLenum gl_type;
+				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
-					glBindTexture(GL_TEXTURE_CUBE_MAP, checked_cast<OGLTexture*>(&target)->GLTexture());
-
-					if (IsCompressedFormat(format_))
+				for (int face = 0; face < 6; ++ face)
+				{
+					for (int level = 0; level < numMipMaps_; ++ level)
 					{
-						int block_size;
-						if (EF_BC1 == format_)
+						glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
+
+						glBindTexture(target_type_, texture_);
+						if (IsCompressedFormat(format_))
 						{
-							block_size = 8;
+							glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
 						}
 						else
 						{
-							block_size = 16;
+							glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, gl_format, gl_type, NULL);
 						}
 
-						GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Width(level) + 3) / 4) * block_size;
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
+						glBindTexture(target_type_, checked_cast<OGLTexture*>(&target)->GLTexture());
 
-						glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0,
-							this->Width(level), this->Width(level), gl_format, image_size, NULL);
-					}
-					else
-					{
-						glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, this->Width(level), this->Width(level),
-								gl_format, gl_type, NULL);
+						if (IsCompressedFormat(format_))
+						{
+							int block_size;
+							if (EF_BC1 == format_)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Width(level) + 3) / 4) * block_size;
+
+							glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0,
+								this->Width(level), this->Width(level), gl_format, image_size, NULL);
+						}
+						else
+						{
+							glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, this->Width(level), this->Width(level),
+									gl_format, gl_type, NULL);
+						}
 					}
 				}
 			}
@@ -401,7 +422,7 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+				glBindTexture(target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
 					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
@@ -435,7 +456,7 @@ namespace KlayGE
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+				glBindTexture(target_type_, texture_);
 				if (IsCompressedFormat(format_))
 				{
 					glGetCompressedTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, NULL);
@@ -480,7 +501,7 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+				glBindTexture(target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
 				{
@@ -520,7 +541,7 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+				glBindTexture(target_type_, texture_);
 
 				if (IsCompressedFormat(format_))
 				{
@@ -560,7 +581,7 @@ namespace KlayGE
 
 		widthes_.resize(numMipMaps_);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
+		glBindTexture(target_type_, texture_);
 		for (uint16_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_WIDTH, &w);

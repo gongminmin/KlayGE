@@ -1,8 +1,11 @@
 // OGLRenderView.hpp
 // KlayGE OpenGL渲染视图类 头文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Texture Array (2009.8.5)
 //
 // 3.3.0
 // 初次建立 (2006.5.31)
@@ -83,7 +86,7 @@ namespace KlayGE
 	class OGLTexture1DRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLTexture1DRenderView(Texture& texture_1d, int level);
+		OGLTexture1DRenderView(Texture& texture_1d, int array_index, int level);
 
 		void Clear(Color const & clr);
 
@@ -92,6 +95,7 @@ namespace KlayGE
 
 	private:
 		OGLTexture1D& texture_1d_;
+		int array_index_;
 		int level_;
 	};
 
@@ -101,7 +105,7 @@ namespace KlayGE
 	class OGLTexture2DRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLTexture2DRenderView(Texture& texture_2d, int level);
+		OGLTexture2DRenderView(Texture& texture_2d, int array_index, int level);
 
 		void Clear(Color const & clr);
 
@@ -110,6 +114,7 @@ namespace KlayGE
 
 	private:
 		OGLTexture2D& texture_2d_;
+		int array_index_;
 		int level_;
 	};
 
@@ -119,7 +124,7 @@ namespace KlayGE
 	class OGLTexture3DRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLTexture3DRenderView(Texture& texture_3d, uint32_t slice, int level);
+		OGLTexture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
 		~OGLTexture3DRenderView();
 
 		void Clear(Color const & clr);
@@ -146,7 +151,7 @@ namespace KlayGE
 	class OGLTextureCubeRenderView : public OGLRenderView, boost::noncopyable
 	{
 	public:
-		OGLTextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level);
+		OGLTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 
 		void Clear(Color const & clr);
 
@@ -190,7 +195,7 @@ namespace KlayGE
 	{
 	public:
 		OGLDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		OGLDepthStencilRenderView(Texture& texture, int level);
+		OGLDepthStencilRenderView(Texture& texture, int array_index, int level);
 		~OGLDepthStencilRenderView();
 
 		void Clear(Color const & clr);
@@ -199,6 +204,8 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
 	private:
+		GLenum target_type_;
+		int array_index_;
 		int level_;
 		uint32_t sample_count_, sample_quality_;
 		GLuint rbo_;

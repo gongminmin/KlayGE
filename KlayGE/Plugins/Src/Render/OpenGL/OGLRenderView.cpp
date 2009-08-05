@@ -1,8 +1,11 @@
 // OGLRenderView.cpp
 // KlayGE OGL渲染视图类 实现文件
-// Ver 3.3.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Texture Array (2009.8.5)
 //
 // 3.3.0
 // 初次建立 (2006.5.31)
@@ -250,11 +253,16 @@ namespace KlayGE
 	}
 
 
-	OGLTexture1DRenderView::OGLTexture1DRenderView(Texture& texture_1d, int level)
+	OGLTexture1DRenderView::OGLTexture1DRenderView(Texture& texture_1d, int array_index, int level)
 		: texture_1d_(*checked_cast<OGLTexture1D*>(&texture_1d)),
-			level_(level)
+			array_index_(array_index), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
+
+		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		uint32_t const channels = NumComponents(texture_1d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
@@ -277,10 +285,10 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(GL_TEXTURE_1D, tex_);
+			glBindTexture(texture_1d_.GLType(), tex_);
 
 			std::vector<Color> mem_clr(width_, clr);
-			glTexSubImage1D(GL_TEXTURE_1D, level_, 0, width_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+			glTexSubImage1D(texture_1d_.GLType(), level_, 0, width_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
 		}
 	}
 
@@ -289,20 +297,32 @@ namespace KlayGE
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
 		index_ = att - FrameBuffer::ATT_Color0;
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		if (glloader_GL_EXT_direct_state_access())
+
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (GL_TEXTURE_1D == texture_1d_.GLType())
 		{
-			glNamedFramebufferTexture1DEXT(fbo_,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glNamedFramebufferTexture1DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_1d_.GLType(), tex_, level_);
+			}
+			else
+			{
+				re.BindFramebuffer(fbo_);
+
+				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_1d_.GLType(), tex_, level_);
+
+				re.BindFramebuffer(0);
+			}
 		}
 		else
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, tex_, level_);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
+				tex_, array_index_, level_);
 
 			re.BindFramebuffer(0);
 		}
@@ -314,29 +334,47 @@ namespace KlayGE
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		if (glloader_GL_EXT_direct_state_access())
+
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (GL_TEXTURE_1D == texture_1d_.GLType())
 		{
-			glNamedFramebufferTexture1DEXT(fbo_,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glNamedFramebufferTexture1DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_1d_.GLType(), 0, 0);
+			}
+			else
+			{
+				re.BindFramebuffer(fbo_);
+
+				glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_1d_.GLType(), 0, 0);
+
+				re.BindFramebuffer(0);
+			}
 		}
 		else
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			glFramebufferTexture1DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_1D, 0, 0);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
+				0, 0, 0);
 
 			re.BindFramebuffer(0);
 		}
 	}
 
 
-	OGLTexture2DRenderView::OGLTexture2DRenderView(Texture& texture_2d, int level)
+	OGLTexture2DRenderView::OGLTexture2DRenderView(Texture& texture_2d, int array_index, int level)
 		: texture_2d_(*checked_cast<OGLTexture2D*>(&texture_2d)),
-			level_(level)
+			array_index_(array_index), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
+
+		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		uint32_t const channels = NumComponents(texture_2d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
@@ -359,10 +397,10 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(GL_TEXTURE_2D, tex_);
+			glBindTexture(texture_2d_.GLType(), tex_);
 
 			std::vector<Color> mem_clr(width_ * height_, clr);
-			glTexSubImage2D(GL_TEXTURE_2D, level_, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+			glTexSubImage2D(texture_2d_.GLType(), level_, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
 		}
 	}
 
@@ -371,20 +409,32 @@ namespace KlayGE
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
 		index_ = att - FrameBuffer::ATT_Color0;
-
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
-		if (glloader_GL_EXT_direct_state_access())
+
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (GL_TEXTURE_2D == texture_2d_.GLType())
 		{
-			glNamedFramebufferTexture2DEXT(fbo_,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_2d_.GLType(), tex_, level_);
+			}
+			else
+			{
+				re.BindFramebuffer(fbo_);
+
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_2d_.GLType(), tex_, level_);
+
+				re.BindFramebuffer(0);
+			}
 		}
 		else
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, tex_, level_);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
+				tex_, array_index_, level_);
 
 			re.BindFramebuffer(0);
 		}
@@ -396,30 +446,46 @@ namespace KlayGE
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
-		if (glloader_GL_EXT_direct_state_access())
+
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (GL_TEXTURE_2D == texture_2d_.GLType())
 		{
-			glNamedFramebufferTexture2DEXT(fbo_,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_2d_.GLType(), 0, 0);
+			}
+			else
+			{
+				re.BindFramebuffer(fbo_);
+
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+						GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, texture_2d_.GLType(), 0, 0);
+
+				re.BindFramebuffer(0);
+			}
 		}
 		else
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
+				0, 0, 0);
 
 			re.BindFramebuffer(0);
 		}
 	}
 
 
-	OGLTexture3DRenderView::OGLTexture3DRenderView(Texture& texture_3d, uint32_t slice, int level)
+	OGLTexture3DRenderView::OGLTexture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level)
 		: texture_3d_(*checked_cast<OGLTexture3D*>(&texture_3d)),
 			slice_(slice), level_(level), copy_to_tex_(0)
 	{
+		UNREF_PARAM(array_index);
+
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
+		BOOST_ASSERT(0 == array_index);
 
 		uint32_t const channels = NumComponents(texture_3d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
@@ -623,11 +689,14 @@ namespace KlayGE
 	}
 
 
-	OGLTextureCubeRenderView::OGLTextureCubeRenderView(Texture& texture_cube, Texture::CubeFaces face, int level)
+	OGLTextureCubeRenderView::OGLTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 		: texture_cube_(*checked_cast<OGLTextureCube*>(&texture_cube)),
 			face_(face), level_(level)
 	{
+		UNREF_PARAM(array_index);
+
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
+		BOOST_ASSERT(0 == array_index);
 
 		uint32_t const channels = NumComponents(texture_cube.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
@@ -746,10 +815,10 @@ namespace KlayGE
 		}
 		else
 		{
-			glBindTexture(GL_TEXTURE_2D, tex_);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
 
 			std::vector<Color> mem_clr(width_ * height_, clr);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
+			glTexSubImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, 0, 0, width_, height_, GL_RGBA, GL_FLOAT, &mem_clr[0]);
 		}
 	}
 
@@ -839,7 +908,7 @@ namespace KlayGE
 
 	OGLDepthStencilRenderView::OGLDepthStencilRenderView(uint32_t width, uint32_t height,
 									ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
-		: level_(-1),
+		: target_type_(0), array_index_(0), level_(-1),
 			sample_count_(sample_count), sample_quality_(sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
@@ -859,11 +928,16 @@ namespace KlayGE
 								glformat, width_, height_);
 	}
 
-	OGLDepthStencilRenderView::OGLDepthStencilRenderView(Texture& texture, int level)
-		: level_(level)
+	OGLDepthStencilRenderView::OGLDepthStencilRenderView(Texture& texture, int array_index, int level)
+		: target_type_(checked_cast<OGLTexture2D*>(&texture)->GLType()), array_index_(array_index), level_(level)
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture.Type());
 		BOOST_ASSERT(IsDepthFormat(texture.Format()));
+
+		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
@@ -925,33 +999,53 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_GL_EXT_direct_state_access())
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (GL_TEXTURE_2D == target_type_)
 			{
-				if (IsDepthFormat(pf_))
+				if (glloader_GL_EXT_direct_state_access())
 				{
-					glNamedFramebufferTexture2DEXT(fbo_,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, target_type_, tex_, level_);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, target_type_, tex_, level_);
+					}
 				}
-				if (IsStencilFormat(pf_))
+				else
 				{
-					glNamedFramebufferTexture2DEXT(fbo_,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+					re.BindFramebuffer(fbo_);
+
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, target_type_, tex_, level_);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, target_type_, tex_, level_);
+					}
+
+					re.BindFramebuffer(0);
 				}
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindFramebuffer(fbo_);
 
 				if (IsDepthFormat(pf_))
 				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+					glFramebufferTextureLayer(GL_FRAMEBUFFER,
+						GL_DEPTH_ATTACHMENT, tex_, array_index_, level_);
 				}
 				if (IsStencilFormat(pf_))
 				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, tex_, level_);
+					glFramebufferTextureLayer(GL_FRAMEBUFFER,
+						GL_STENCIL_ATTACHMENT, tex_, array_index_, level_);
 				}
 
 				re.BindFramebuffer(0);
@@ -995,33 +1089,51 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_GL_EXT_direct_state_access())
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (GL_TEXTURE_2D == target_type_)
 			{
-				if (IsDepthFormat(pf_))
+				if (glloader_GL_EXT_direct_state_access())
 				{
-					glNamedFramebufferTexture2DEXT(fbo_,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+					if (IsDepthFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_DEPTH_ATTACHMENT_EXT, target_type_, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glNamedFramebufferTexture2DEXT(fbo_,
+							GL_STENCIL_ATTACHMENT_EXT, target_type_, 0, 0);
+					}
 				}
-				if (IsStencilFormat(pf_))
+				else
 				{
-					glNamedFramebufferTexture2DEXT(fbo_,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+					re.BindFramebuffer(fbo_);
+
+					if (IsDepthFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_DEPTH_ATTACHMENT_EXT, target_type_, 0, 0);
+					}
+					if (IsStencilFormat(pf_))
+					{
+						glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+							GL_STENCIL_ATTACHMENT_EXT, target_type_, 0, 0);
+					}
+
+					re.BindFramebuffer(0);
 				}
 			}
 			else
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindFramebuffer(fbo_);
 
 				if (IsDepthFormat(pf_))
 				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+					glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0, 0);
 				}
 				if (IsStencilFormat(pf_))
 				{
-					glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-						GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+					glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, 0, 0, 0);
 				}
 
 				re.BindFramebuffer(0);

@@ -1,8 +1,11 @@
 // OGLRenderStateObject.cpp
 // KlayGE OpenGL渲染状态对象类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2008-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Depth Clamp (2009.8.5)
 //
 // 3.7.0
 // 初次建立 (2007.7.2)
@@ -128,6 +131,18 @@ namespace KlayGE
 		glFrontFace(desc.front_face_ccw ? GL_CCW : GL_CW);
 
 		glPolygonOffset(desc.polygon_offset_factor, desc.polygon_offset_units);
+
+		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_depth_clamp())
+		{
+			if (desc.depth_clip_enable)
+			{
+				glDisable(GL_DEPTH_CLAMP);
+			}
+			else
+			{
+				glEnable(GL_DEPTH_CLAMP);
+			}
+		}
 
 		if (desc.scissor_enable)
 		{
