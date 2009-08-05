@@ -414,7 +414,7 @@ namespace KlayGE
 
 				int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
 
-				if ((batch == num_lights) && (pass_in_batch == 0))
+				if ((batch == num_lights) && (0 == pass_in_batch))
 				{
 					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 					non_emit_objs_.resize(0);
@@ -443,7 +443,7 @@ namespace KlayGE
 
 					return App3DFramework::URV_Need_Flush;
 				}
-				else if ((batch == num_lights) && (pass_in_batch == 1))
+				else if ((batch == num_lights) && (1 == pass_in_batch))
 				{
 					BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
 					{
@@ -454,7 +454,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if (1 == pass)
+					if ((0 == batch) && (0 == pass_in_batch))
 					{
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
