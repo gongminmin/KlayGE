@@ -22,14 +22,9 @@
 
 	<shader>
 		<![CDATA[
-float GetEdgeWeight(float2 tc0)
+float GetEdgeWeight(float2 tc0, float4 tc1, float4 tc2, float4 tc3, float4 tc4)
 {
-	float4 tc1 = tc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +0, -1);
-	float4 tc2 = tc0.xyxy + inv_width_height.xyxy * float4(+1, -1, +1, +0);
-	float4 tc3 = tc0.xyxy + inv_width_height.xyxy * float4(+1, +1, +0, +1);
-	float4 tc4 = tc0.xyxy + inv_width_height.xyxy * float4(-1, +1, -1, +0);
-	
-	float4 nd[9];  
+	float4 nd[9];
 	// Retrieve normal and depth data for all neighbors.
 	nd[0] = src_tex.Sample(point_sampler, tc0);
 	nd[1] = src_tex.Sample(point_sampler, tc1.xy);
@@ -85,20 +80,44 @@ float GetEdgeWeight(float2 tc0)
 	float4 normalResults = step(0.4, Deltas1);
 	normalResults = max(normalResults, depthResults);
 	return dot(normalResults, 0.25);
-}  
+}
 
-float4 AdaptiveAntiAliasPS(float2 tc0 : TEXCOORD0) : SV_Target
+void AdaptiveAntiAliasVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0, // center
+				out float4 oTc1 : TEXCOORD1, // left top / top
+				out float4 oTc2 : TEXCOORD2, // right top / right
+				out float4 oTc3 : TEXCOORD3, // right bottom / bottom
+				out float4 oTc4 : TEXCOORD4, // left bottom / left
+				out float4 oPos : SV_Position)
 {
-	float2 offset = GetEdgeWeight(tc0) * inv_width_height;
+	PostProcessVS(pos, oTc0, oPos);
+
+	oTc1 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +0, -1);
+	oTc2 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, -1, +1, +0);
+	oTc3 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, +1, +0, +1);
+	oTc4 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, +1, -1, +0);
+}
+
+float4 AdaptiveAntiAliasPS(float2 tc0 : TEXCOORD0,
+				float4 tc1 : TEXCOORD1,
+				float4 tc2 : TEXCOORD2,
+				float4 tc3 : TEXCOORD3,
+				float4 tc4 : TEXCOORD4) : SV_Target
+{
+	float2 offset = GetEdgeWeight(tc0, tc1, tc2, tc3, tc4) * inv_width_height;
 	return (color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(-offset.x, -offset.y))
 			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(+offset.x, -offset.y))
 			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(-offset.x, +offset.y))
 			+ color_tex.Sample(bilinear_clamp_sampler, tc0 + float2(+offset.x, +offset.y))) * 0.25f;
 }
 
-float4 ShowEdgePS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 ShowEdgePS(float2 tc0 : TEXCOORD0,
+				float4 tc1 : TEXCOORD1,
+				float4 tc2 : TEXCOORD2,
+				float4 tc3 : TEXCOORD3,
+				float4 tc4 : TEXCOORD4) : SV_Target
 {
-	return GetEdgeWeight(tc0);
+	return GetEdgeWeight(tc0, tc1, tc2, tc3, tc4);
 }
 		]]>
 	</shader>
@@ -107,7 +126,7 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="AdaptiveAntiAliasVS()"/>
 			<state name="pixel_shader" value="AdaptiveAntiAliasPS()"/>
 		</pass>
 	</technique>
@@ -116,7 +135,7 @@ float4 ShowEdgePS(float2 tc0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="AdaptiveAntiAliasVS()"/>
 			<state name="pixel_shader" value="ShowEdgePS()"/>
 		</pass>
 	</technique>

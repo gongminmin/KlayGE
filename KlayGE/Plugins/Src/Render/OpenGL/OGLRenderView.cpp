@@ -119,8 +119,6 @@ namespace KlayGE
 					}
 				}
 			}
-
-			glGetError();
 		}
 		else
 		{

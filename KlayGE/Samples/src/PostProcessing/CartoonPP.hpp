@@ -11,7 +11,6 @@ public:
 
 	void Source(KlayGE::TexturePtr const & tex, bool flipping);
 	void ColorTex(KlayGE::TexturePtr const & tex);
-	void OnRenderBegin();
 };
 
 #endif		// _CARTOONPP_HPP

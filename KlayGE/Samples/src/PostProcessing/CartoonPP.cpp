@@ -29,13 +29,3 @@ void CartoonPostProcess::ColorTex(TexturePtr const & tex)
 {
 	*(technique_->Effect().ParameterByName("color_tex")) = tex;
 }
-
-void CartoonPostProcess::OnRenderBegin()
-{
-	PostProcess::OnRenderBegin();
-
-	Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-	float depth_range = camera.FarPlane() - camera.NearPlane();
-	*(technique_->Effect().ParameterByName("e_barrier")) = float2(0.8f, 0.1f / depth_range);
-}

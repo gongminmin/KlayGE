@@ -28,28 +28,22 @@ float GetDepth(float4 ndc)
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 
-	<cbuffer name="per_frame">
-		<parameter type="float2" name="e_barrier"/>
-	</cbuffer>
-
-	<parameter type="float2" name="e_weights" x="0.25" y="1.0"/>
-
 	<shader>
 		<![CDATA[
 void PostToonVS(float4 pos : POSITION,
 				out float2 oTc0 : TEXCOORD0, // center
-				out float4 oTc1 : TEXCOORD1, // left top / right bottom
-				out float4 oTc2 : TEXCOORD2, // right top / left bottom
-				out float4 oTc3 : TEXCOORD3, // left / right
-				out float4 oTc4 : TEXCOORD4, // top / bottom
+				out float4 oTc1 : TEXCOORD1, // left top / top
+				out float4 oTc2 : TEXCOORD2, // right top / right
+				out float4 oTc3 : TEXCOORD3, // right bottom / bottom
+				out float4 oTc4 : TEXCOORD4, // left bottom / left
 				out float4 oPos : SV_Position)
 {
 	PostProcessVS(pos, oTc0, oPos);
 
-	oTc1 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +1, +1);
-	oTc2 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, -1, -1, +1);
-	oTc3 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, 0, +1, 0);
-	oTc4 = oTc0.xyxy + inv_width_height.xyxy * float4(0, -1, 0, +1);
+	oTc1 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, -1, +0, -1);
+	oTc2 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, -1, +1, +0);
+	oTc3 = oTc0.xyxy + inv_width_height.xyxy * float4(+1, +1, +0, +1);
+	oTc4 = oTc0.xyxy + inv_width_height.xyxy * float4(-1, +1, -1, +0);
 }
 
 float4 PostToonPS(float2 tc0 : TEXCOORD0,
@@ -59,36 +53,69 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc4 : TEXCOORD4) : SV_Target
 {
 	half4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	float3 normal = GetNormal(ndc);
 	
 	half4 color = color_tex.Sample(point_sampler, tc0);
 	half toon = dot(saturate(color.rgb), half3(0.299f, 0.587f, 0.114f));
 
-	half4 s1 = src_tex.Sample(point_sampler, tc1.xy);
-	half4 s2 = src_tex.Sample(point_sampler, tc1.zw);
-	half4 s3 = src_tex.Sample(point_sampler, tc2.xy);
-	half4 s4 = src_tex.Sample(point_sampler, tc2.zw);
-	half4 s5 = src_tex.Sample(point_sampler, tc3.xy);
-	half4 s6 = src_tex.Sample(point_sampler, tc3.zw);
-	half4 s7 = src_tex.Sample(point_sampler, tc4.xy);
-	half4 s8 = src_tex.Sample(point_sampler, tc4.zw);
+	float4 nd[9];
+	// Retrieve normal and depth data for all neighbors.
+	nd[0] = src_tex.Sample(point_sampler, tc0);
+	nd[1] = src_tex.Sample(point_sampler, tc1.xy);
+	nd[2] = src_tex.Sample(point_sampler, tc1.zw);
+	nd[3] = src_tex.Sample(point_sampler, tc2.xy);
+	nd[4] = src_tex.Sample(point_sampler, tc2.zw);
+	nd[5] = src_tex.Sample(point_sampler, tc3.xy);
+	nd[6] = src_tex.Sample(point_sampler, tc3.zw);
+	nd[7] = src_tex.Sample(point_sampler, tc4.xy);
+	nd[8] = src_tex.Sample(point_sampler, tc4.zw);
 
-	// Normal discontinuity filter
-	half4 nd = half4(dot(normal, GetNormal(s1)),
-				dot(normal, GetNormal(s2)),
-				dot(normal, GetNormal(s3)),
-				dot(normal, GetNormal(s4)));
-	nd = step(e_barrier.x, nd);
-	half ne = (dot(nd, e_weights.x).x < 1) ? 0 : 1;
-
-	// Depth filter : compute gradiental difference:
-	half4 dd = half4(GetDepth(s1) + GetDepth(s2), GetDepth(s3) + GetDepth(s4), GetDepth(s5) + GetDepth(s6), GetDepth(s7) + GetDepth(s8));
-	dd = step(e_barrier.y, abs(2 * depth - dd));
-	half de = (dot(dd, e_weights.y).x < 1) ? 1 : 0;
+	// Compute Deltas in Depth.
+	float4 Deltas1;
+	float4 Deltas2;
+	float depth0 = GetDepth(nd[0]);
+	Deltas1.x = GetDepth(nd[1]);
+	Deltas1.y = GetDepth(nd[2]);
+	Deltas1.z = GetDepth(nd[3]);
+	Deltas1.w = GetDepth(nd[4]);
+	Deltas2.x = GetDepth(nd[5]);
+	Deltas2.y = GetDepth(nd[6]);
+	Deltas2.z = GetDepth(nd[7]);
+	Deltas2.w = GetDepth(nd[8]);
+	// Compute andbsolute gradients from center.
+	Deltas1 = abs(Deltas1 - depth0);
+	Deltas2 = abs(depth0 - Deltas2);
+	// Find min and max gradient, ensuring min != 0
+	float4 maxDeltas = max(Deltas1, Deltas2);
+	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
+	// Compare change in gradients, flagging ones that change
+	// significantly.
+	// How severe the change must be to get flagged is a function of the
+	// minimum gradient. It is not resolution dependent. The constant
+	// number here would change based on how the depth values are stored
+	// and how sensitive the edge detection should be.
+	float4 depthResults = step(minDeltas * 10.0, maxDeltas);
+	// Compute change in the cosine of the angle between normals.
+	float3 normal0 = GetNormal(nd[0]);
+	Deltas1.x = dot(GetNormal(nd[1]), normal0);
+	Deltas1.y = dot(GetNormal(nd[2]), normal0);
+	Deltas1.z = dot(GetNormal(nd[3]), normal0);
+	Deltas1.w = dot(GetNormal(nd[4]), normal0);
+	Deltas2.x = dot(GetNormal(nd[5]), normal0);
+	Deltas2.y = dot(GetNormal(nd[6]), normal0);
+	Deltas2.z = dot(GetNormal(nd[7]), normal0);
+	Deltas2.w = dot(GetNormal(nd[8]), normal0);
+	Deltas1 = abs(Deltas1 - Deltas2);
+	// Compare change in the cosine of the angles, flagging changes
+	// above some constant threshold. The cosine of the angle is not a
+	// linear function of the angle, so to have the flagging be
+	// independent of the angles involved, an arccos function would be
+	// required.
+	float4 normalResults = step(0.4, Deltas1);
+	normalResults = max(normalResults, depthResults);
+	float dne = 1 - dot(normalResults, 0.25);
 
 	const float toon_clr[3] = { 0.47f, 0.63f, 1 };
-	return toon_clr[int(toon * 3)] * de * ne * color;
+	return toon_clr[int(toon * 3)] * dne * color;
 }
 		]]>
 	</shader>
