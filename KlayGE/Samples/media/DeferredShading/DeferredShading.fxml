@@ -161,10 +161,9 @@ void DeferredShadingVS(float4 pos : POSITION,
 
 #ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPosSS.xy / oPosSS.w * 0.5f;
+	oViewDir = texcoord_to_view(float2(oTc.x, -oTc.y) + 0.5f);
 	oTc.y *= flipping;
 	oTc += 0.5;
-	
-	oViewDir = texcoord_to_view(oTc);
 #endif
 }
 
@@ -178,10 +177,9 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
 	tc.y *= flipping;
 	tc += 0.5;
-	
-	float3 view_dir = texcoord_to_view(tc);
 #endif
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
@@ -268,10 +266,9 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
 	tc.y *= flipping;
 	tc += 0.5;
-	
-	float3 view_dir = texcoord_to_view(tc);
 #endif
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
@@ -334,10 +331,9 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
 	tc.y *= flipping;
 	tc += 0.5;
-	
-	float3 view_dir = texcoord_to_view(tc);
 #endif
 	
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
@@ -382,10 +378,9 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
 	pos_ss.xy /= pos_ss.w;
 
 	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
 	tc.y *= flipping;
 	tc += 0.5;
-	
-	float3 view_dir = texcoord_to_view(tc);
 #endif
 	
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
@@ -421,10 +416,9 @@ void ShowQuadVS(float4 pos : POSITION,
 	oPos += texel_to_pixel_offset;
 	
 	oTc0 = oPos.xy / oPos.w * 0.5f;
+	oViewDir = texcoord_to_view(float2(oTc0.x, -oTc0.y) + 0.5f);
 	oTc0.y *= flipping;
 	oTc0 += 0.5;
-	
-	oViewDir = texcoord_to_view(oTc0);
 }
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

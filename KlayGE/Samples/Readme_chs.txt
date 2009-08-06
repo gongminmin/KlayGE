@@ -17,11 +17,11 @@ Deferred shading渲染框架。
 1) Deferred Shading
 2) SSAO
 3) Adaptive Anti-alias
-4) 多光源
+4) 任意光源
 5) MRT
 
 需求：Geforce 6600以上或Radeon 9500以上。
-渲染引擎支持：D3D11/D3D10/D3D9。
+渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
 
 ====================================================================================
 Depth of field
