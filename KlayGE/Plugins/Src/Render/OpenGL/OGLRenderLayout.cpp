@@ -111,9 +111,45 @@ namespace KlayGE
 						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 						GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
-						glEnableVertexAttribArray(attr);
-						stream.Active();
-						glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
+						switch (vs_elem.usage)
+						{
+						case VEU_Position:
+							glEnableClientState(GL_VERTEX_ARRAY);
+							stream.Active();
+							glVertexPointer(num_components, type, size, offset);
+							break;
+
+						case VEU_Normal:
+							glEnableClientState(GL_NORMAL_ARRAY);
+							stream.Active();
+							glNormalPointer(type, size, offset);
+							break;
+
+						case VEU_Diffuse:
+							glEnableClientState(GL_COLOR_ARRAY);
+							stream.Active();
+							glColorPointer(num_components, type, size, offset);
+							break;
+
+						case VEU_Specular:
+							glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
+							stream.Active();
+							glSecondaryColorPointer(num_components, type, size, offset);
+							break;
+
+						case VEU_TextureCoord:
+							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+							glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+							stream.Active();
+							glTexCoordPointer(num_components, type, size, offset);
+							break;
+
+						default:
+							glEnableVertexAttribArray(attr);
+							stream.Active();
+							glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
+							break;
+						}
 					}
 
 					elem_offset += vs_elem.element_size();

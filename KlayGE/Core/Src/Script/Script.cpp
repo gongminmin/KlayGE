@@ -23,13 +23,13 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
 	#if PY_MAJOR_VERSION >= 3
-		#pragma comment(lib, "python30_d.lib")
+		#pragma comment(lib, "python31_d.lib")
 	#else
 		#pragma comment(lib, "python26_d.lib")
 	#endif
 #else
 	#if PY_MAJOR_VERSION >= 3
-		#pragma comment(lib, "python30.lib")
+		#pragma comment(lib, "python31.lib")
 	#else
 		#pragma comment(lib, "python26.lib")
 	#endif
