@@ -618,6 +618,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
+			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
 
 			Camera const & camera = app.ActiveCamera();
 			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();

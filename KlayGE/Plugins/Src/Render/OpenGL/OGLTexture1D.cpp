@@ -247,96 +247,108 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 		
-		if (!IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width))
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-			GLuint fbo_src, fbo_dst;
-			re.GetFBOForBlit(fbo_src, fbo_dst);
-
-			GLuint old_fbo = re.BindFramebuffer();
-
-			glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
-			glFramebufferTexture1DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, level);
-
-			glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
-			glFramebufferTexture1DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), level);
-
-			glBlitFramebufferEXT(src_xOffset, 0, src_xOffset + src_width, 1,
-							dst_xOffset, 0, dst_xOffset + dst_width, 1,
-							GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-			re.BindFramebuffer(old_fbo, true);
+			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+			glCopyImageSubDataNV(
+				texture_, target_type_, level,
+				src_xOffset, 0, 0,
+				ogl_target.GLTexture(), ogl_target.GLType(), level,
+				dst_xOffset, 0, 0, src_width, 1, 1);
 		}
 		else
 		{
-			BOOST_ASSERT(format_ == target.Format());
-
-			OGLTexture1D& other = static_cast<OGLTexture1D&>(target);
-
-			GLint gl_internalFormat;
-			GLenum gl_format;
-			GLenum gl_type;
-			OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-			GLint gl_target_internal_format;
-			GLenum gl_target_format;
-			GLenum gl_target_type;
-			OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-			if (IsCompressedFormat(format_))
+			if (!IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
-				BOOST_ASSERT((0 == src_xOffset) && (0 == dst_xOffset));
-				BOOST_ASSERT((src_width == dst_width));
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-				Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
-				Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+				GLuint fbo_src, fbo_dst;
+				re.GetFBOForBlit(fbo_src, fbo_dst);
 
-				int block_size;
-				if (EF_BC1 == format_)
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
+				GLuint old_fbo = re.BindFramebuffer();
 
-				GLsizei const image_size = ((dst_width + 3) / 4) * block_size;
+				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
+				glFramebufferTexture1DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, level);
 
-				memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
+				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
+				glFramebufferTexture1DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), level);
+
+				glBlitFramebufferEXT(src_xOffset, 0, src_xOffset + src_width, 1,
+								dst_xOffset, 0, dst_xOffset + dst_width, 1,
+								GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+				re.BindFramebuffer(old_fbo, true);
 			}
 			else
 			{
-				size_t const src_format_size = NumFormatBytes(format_);
-				size_t const dst_format_size = NumFormatBytes(target.Format());
+				BOOST_ASSERT(format_ == target.Format());
 
-				if (src_width != dst_width)
+				OGLTexture1D& other = static_cast<OGLTexture1D&>(target);
+
+				GLint gl_internalFormat;
+				GLenum gl_format;
+				GLenum gl_type;
+				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+				GLint gl_target_internal_format;
+				GLenum gl_target_format;
+				GLenum gl_target_type;
+				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+				if (IsCompressedFormat(format_))
 				{
-					std::vector<uint8_t> data_in(src_width * src_format_size);
-					std::vector<uint8_t> data_out(dst_width * dst_format_size);
+					BOOST_ASSERT((0 == src_xOffset) && (0 == dst_xOffset));
+					BOOST_ASSERT((src_width == dst_width));
 
+					Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
+					Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+
+					int block_size;
+					if (EF_BC1 == format_)
 					{
-						Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
-						memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
 					}
 
-					gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
-						dst_width, 1, gl_target_type, &data_out[0]);
+					GLsizei const image_size = ((dst_width + 3) / 4) * block_size;
 
-					{
-						Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
-						memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
-					}
+					memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
 				}
 				else
 				{
-					Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
-					Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
-					uint8_t const * s = mapper_src.Pointer<uint8_t>();
-					uint8_t* d = mapper_dst.Pointer<uint8_t>();
-					
-					memcpy(d, s, src_width * src_format_size);
+					size_t const src_format_size = NumFormatBytes(format_);
+					size_t const dst_format_size = NumFormatBytes(target.Format());
+
+					if (src_width != dst_width)
+					{
+						std::vector<uint8_t> data_in(src_width * src_format_size);
+						std::vector<uint8_t> data_out(dst_width * dst_format_size);
+
+						{
+							Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
+							memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
+						}
+
+						gluScaleImage(gl_format, src_width, 1, gl_type, &data_in[0],
+							dst_width, 1, gl_target_type, &data_out[0]);
+
+						{
+							Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
+							memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
+						}
+					}
+					else
+					{
+						Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
+						Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+						uint8_t const * s = mapper_src.Pointer<uint8_t>();
+						uint8_t* d = mapper_dst.Pointer<uint8_t>();
+						
+						memcpy(d, s, src_width * src_format_size);
+					}
 				}
 			}
 		}

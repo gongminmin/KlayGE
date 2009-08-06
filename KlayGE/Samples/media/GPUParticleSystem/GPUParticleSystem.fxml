@@ -17,6 +17,13 @@
 		<state name="address_w" value="wrap"/>
 	</parameter>
 
+	<parameter type="sampler" name="trilinear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
+	</parameter>
+
 	<parameter type="texture2D" name="particle_pos_tex"/>
 	<parameter type="buffer" elem_type="float4" name="particle_pos_buff"/>
 	<parameter type="texture3D" name="noise_vol_tex"/>
@@ -28,6 +35,7 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="View"/>
 		<parameter type="float4x4" name="Proj"/>
+		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="inv_view"/>
 
 		<parameter type="float3" name="upper_left"/>
@@ -416,8 +424,7 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 void TerrainVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
 					out float4 oTex  : TEXCOORD0,
-					out float3 oPosOS : TEXCOORD1,
-					out float2 oDepth : TEXCOORD2,
+					out float4 oLightVec_Depth : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	oTex.xy = float2(tex.x, 1 - tex.y);
@@ -426,18 +433,17 @@ void TerrainVS(float4 pos			: POSITION,
 	pos = pos.xzyw;
 	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
 	
-	oPosOS = pos;
+	oLightVec_Depth.xyz = LightPos - pos;
 	
-	float4 pos_es = mul(pos, View);
-	oPos = mul(pos_es, Proj);
-	oDepth = pos_es.zw;
+	oPos = mul(pos, mvp);
+	oLightVec_Depth.w = oPos.w;
 }
 
-float4 TerrainPS(float4 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float2 depth : TEXCOORD2) : SV_Target
+float4 TerrainPS(float4 tex : TEXCOORD0, float4 light_vec_depth : TEXCOORD1) : SV_Target
 {
 	float3 normal = decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy;
-	return float4(grass_tex.Sample(bilinear_sampler, tex.zw).rgb * dot(normalize(LightPos - pos_os), normal),
-		depth.x / depth.y * inv_far);
+	return float4(grass_tex.Sample(trilinear_sampler, tex.zw).rgb * dot(normalize(light_vec_depth.xyz), normal),
+		light_vec_depth.w * inv_far);
 }
 		]]>
 	</shader>
