@@ -63,14 +63,8 @@ float4 HelperPS() : SV_Target0
 
 	<parameter type="float4x4" name="inv_mvp"/>
 	<parameter type="textureCUBE" name="skybox_tex"/>
-	<parameter type="sampler" name="skybox_cubeMapSampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-		<state name="address_w" value="clamp"/>
-	</parameter>
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
-	<parameter type="sampler" name="skybox_CcubeMapSampler">
+	<parameter type="sampler" name="skybox_cubeMapSampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -95,7 +89,7 @@ float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 float4 HDRSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	float3 rgb = decode_hdr_yc(skybox_tex.Sample(skybox_cubeMapSampler, texCoord0).r,
-					skybox_C_tex.Sample(skybox_CcubeMapSampler, texCoord0));
+					skybox_C_tex.Sample(skybox_cubeMapSampler, texCoord0));
 	
 	return float4(rgb, 1);
 }

@@ -514,6 +514,29 @@ namespace
 		float3 pos_;
 	};
 
+	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox
+	{
+	public:
+		RenderableDeferredHDRSkyBox()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferSkyBoxTech");
+
+			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
+			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
+			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
+		}
+	};
+
+	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox
+	{
+	public:
+		SceneObjectDeferredHDRSkyBox()
+		{
+			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
+		}
+	};
+
 	class AdaptiveAntiAliasPostProcess : public PostProcess
 	{
 	public:
@@ -669,8 +692,8 @@ void DeferredShadingApp::InitObjects()
 
 	TexturePtr y_cube_map = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read)();
 	TexturePtr c_cube_map = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read)();
-	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
+	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 	
 	ssao_buffer_ = rf.MakeFrameBuffer();

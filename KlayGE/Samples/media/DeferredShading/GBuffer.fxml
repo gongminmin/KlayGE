@@ -2,10 +2,12 @@
 
 <effect>
 	<include name="DeferredShadingUtil.fxml"/>
+	<include name="util.fxml"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
+		<parameter type="float4x4" name="inv_mvp"/>
 
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
@@ -16,6 +18,8 @@
 	<parameter type="float" name="shininess"/>
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="bump_tex"/>
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="textureCUBE" name="skybox_C_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -23,6 +27,13 @@
 		<state name="address_v" value="wrap"/>
 	</parameter>
 	
+	<parameter type="sampler" name="skybox_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
 void GBufferVS(float4 pos : POSITION,
@@ -75,6 +86,22 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 	
 	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, specular_level);
 }
+
+void GBufferSkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp);
+}
+
+void GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0,
+			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+{
+	oClr = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texCoord0).r,
+					skybox_C_tex.Sample(skybox_sampler, texCoord0));
+	oNormalDepth = StoreNormalDepthMtl(0, 1, 0, 0);
+}
 		]]>
 	</shader>
 
@@ -103,6 +130,17 @@ void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferNoTexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_write_mask" value="0"/>
+			<state name="depth_func" value="equal"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
 		</pass>
 	</technique>
 	
