@@ -71,11 +71,28 @@ namespace KlayGE
 		RenderEffectParameterPtr inv_gamma_ep_;
 	};
 
-	class KLAYGE_CORE_API SeparableBlurPostProcess : public PostProcess
+	class KLAYGE_CORE_API SeparableBoxFilterPostProcess : public PostProcess
 	{
 	public:
-		SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier);
-		virtual ~SeparableBlurPostProcess();
+		SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		virtual ~SeparableBoxFilterPostProcess();
+
+	protected:
+		void CalSampleOffsets(uint32_t tex_size, float deviation);
+
+	protected:
+		int kernel_radius_;
+		float multiplier_;
+
+		RenderEffectParameterPtr color_weight_ep_;
+		RenderEffectParameterPtr tex_coord_offset_ep_;
+	};
+
+	class KLAYGE_CORE_API SeparableGaussianFilterPostProcess : public PostProcess
+	{
+	public:
+		SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		virtual ~SeparableGaussianFilterPostProcess();
 
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
@@ -101,34 +118,74 @@ namespace KlayGE
 		BrightPassDownsampler2x2PostProcess();
 	};
 
-	class KLAYGE_CORE_API BlurXPostProcess : public SeparableBlurPostProcess
+	template <typename T>
+	class BlurXPostProcess : public T
 	{
 	public:
-		BlurXPostProcess(int kernel_radius, float multiplier);
+		BlurXPostProcess(int kernel_radius, float multiplier)
+			: T("BlurX", kernel_radius, multiplier)
+		{
+		}
 
-		void Source(TexturePtr const & src_tex, bool flipping);
+		void Source(TexturePtr const & src_tex, bool flipping)
+		{
+			T::Source(src_tex, flipping);
+			this->CalSampleOffsets(src_texture_->Width(0), 3);
+		}
 	};
 
-	class KLAYGE_CORE_API BlurYPostProcess : public SeparableBlurPostProcess
+	template <typename T>
+	class BlurYPostProcess : public T
 	{
 	public:
-		BlurYPostProcess(int kernel_radius, float multiplier);
+		BlurYPostProcess(int kernel_radius, float multiplier)
+			: T("BlurY", kernel_radius, multiplier)
+		{
+		}
 
-		void Source(TexturePtr const & src_tex, bool flipping);
+		void Source(TexturePtr const & src_tex, bool flipping)
+		{
+			T::Source(src_tex, flipping);
+			this->CalSampleOffsets(src_texture_->Height(0), 3);
+		}
 	};
 
-	class KLAYGE_CORE_API BlurPostProcess : public PostProcess
+	template <typename T>
+	class BlurPostProcess : public PostProcess
 	{
 	public:
-		BlurPostProcess(int kernel_radius, float multiplier);
+		BlurPostProcess(int kernel_radius, float multiplier)
+			: PostProcess(RenderTechniquePtr()),
+				blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
+		{
+		}
 
-		void Destinate(FrameBufferPtr const & fb);
+		void Destinate(FrameBufferPtr const & fb)
+		{
+			PostProcess::Destinate(fb);
 
-		void Apply();
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, 1, frame_buffer_->Format(),
+				1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+			FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
+			blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0, 0));
+			blur_x_.Source(src_texture_, flipping_);
+			blur_x_.Destinate(blur_x_fb);
+			blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());
+			blur_y_.Destinate(fb);
+		}
+
+		void Apply()
+		{
+			blur_x_.Apply();
+			blur_y_.Apply();
+		}
 
 	private:
-		BlurXPostProcess blur_x_;
-		BlurYPostProcess blur_y_;
+		BlurXPostProcess<T> blur_x_;
+		BlurYPostProcess<T> blur_y_;
 
 		TexturePtr blurx_tex_;
 	};

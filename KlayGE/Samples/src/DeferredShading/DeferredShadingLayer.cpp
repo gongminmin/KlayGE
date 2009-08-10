@@ -10,6 +10,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -114,11 +115,18 @@ namespace KlayGE
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_ = rf.MakeFrameBuffer();
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		blur_sm_buffer_ = rf.MakeFrameBuffer();
+		blur_sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_sm_tex_, 0, 0));
 
-		*(technique_->Effect().ParameterByName("shadow_map_tex")) = sm_tex_;
+		box_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBoxFilterPostProcess> >(3, 1.0f);
+		box_filter_pp_->Source(sm_tex_, sm_buffer_->RequiresFlipping());
+		box_filter_pp_->Destinate(blur_sm_buffer_);
+
+		*(technique_->Effect().ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 
 		texel_to_pixel_offset_param_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
@@ -543,6 +551,8 @@ namespace KlayGE
 					else
 					{
 						// Lighting
+
+						box_filter_pp_->Apply();
 
 						re.BindFrameBuffer(shaded_buffer_);
 

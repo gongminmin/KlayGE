@@ -229,7 +229,11 @@ namespace KlayGE
 		int32_t buffer_type_;
 
 		FrameBufferPtr sm_buffer_;
+		FrameBufferPtr blur_sm_buffer_;
 		TexturePtr sm_tex_;
+		TexturePtr blur_sm_tex_;
+
+		PostProcessPtr box_filter_pp_;
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_;

@@ -135,7 +135,7 @@ namespace KlayGE
 	}
 
 
-	SeparableBlurPostProcess::SeparableBlurPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)
 	{
@@ -145,18 +145,51 @@ namespace KlayGE
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
 
-	SeparableBlurPostProcess::~SeparableBlurPostProcess()
+	SeparableBoxFilterPostProcess::~SeparableBoxFilterPostProcess()
 	{
 	}
 
-	float SeparableBlurPostProcess::GaussianDistribution(float x, float y, float rho)
+	void SeparableBoxFilterPostProcess::CalSampleOffsets(uint32_t tex_size, float /*deviation*/)
+	{
+		std::vector<float> color_weight(kernel_radius_ + 1, multiplier_ / (2 * kernel_radius_ + 1));
+		std::vector<float> tex_coord_offset(kernel_radius_ + 1, 0);
+
+		float const tu = 1.0f / tex_size;
+
+		for (int i = 0; i < kernel_radius_; ++ i)
+		{
+			color_weight[i] *= 2;
+			tex_coord_offset[i] = (i * 2 - kernel_radius_ + 0.5f) * tu;
+		}
+		tex_coord_offset[kernel_radius_] = kernel_radius_ * tu;
+
+		*color_weight_ep_ = color_weight;
+		*tex_coord_offset_ep_ = tex_coord_offset;
+	}
+
+
+	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
+				kernel_radius_(kernel_radius), multiplier_(multiplier)
+	{
+		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
+
+		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");
+		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
+	}
+
+	SeparableGaussianFilterPostProcess::~SeparableGaussianFilterPostProcess()
+	{
+	}
+
+	float SeparableGaussianFilterPostProcess::GaussianDistribution(float x, float y, float rho)
 	{
 		float g = 1.0f / sqrt(2.0f * PI * rho * rho);
 		g *= exp(-(x * x + y * y) / (2 * rho * rho));
 		return g;
 	}
 
-	void SeparableBlurPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
+	void SeparableGaussianFilterPostProcess::CalSampleOffsets(uint32_t tex_size, float deviation)
 	{
 		std::vector<float> color_weight(kernel_radius_, 0);
 		std::vector<float> tex_coord_offset(kernel_radius_, 0);
@@ -198,60 +231,5 @@ namespace KlayGE
 
 		*color_weight_ep_ = color_weight;
 		*tex_coord_offset_ep_ = tex_coord_offset;
-	}
-
-
-	BlurXPostProcess::BlurXPostProcess(int length, float multiplier)
-			: SeparableBlurPostProcess("BlurX", length, multiplier)
-	{
-	}
-
-	void BlurXPostProcess::Source(TexturePtr const & src_tex, bool flipping)
-	{
-		SeparableBlurPostProcess::Source(src_tex, flipping);
-
-		this->CalSampleOffsets(src_texture_->Width(0), 3);
-	}
-
-	BlurYPostProcess::BlurYPostProcess(int length, float multiplier)
-			: SeparableBlurPostProcess("BlurY", length, multiplier)
-	{
-	}
-
-	void BlurYPostProcess::Source(TexturePtr const & src_tex, bool flipping)
-	{
-		SeparableBlurPostProcess::Source(src_tex, flipping);
-
-		this->CalSampleOffsets(src_texture_->Height(0), 3);
-	}
-
-
-	BlurPostProcess::BlurPostProcess(int kernel_radius, float multiplier)
-		: PostProcess(RenderTechniquePtr()),
-			blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
-	{
-	}
-
-	void BlurPostProcess::Destinate(FrameBufferPtr const & fb)
-	{
-		PostProcess::Destinate(fb);
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, 1, frame_buffer_->Format(),
-			1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-		FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
-		blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0, 0));
-		blur_x_.Source(src_texture_, flipping_);
-		blur_x_.Destinate(blur_x_fb);
-		blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());
-		blur_y_.Destinate(fb);
-	}
-
-	void BlurPostProcess::Apply()
-	{
-		blur_x_.Apply();
-		blur_y_.Apply();
 	}
 }

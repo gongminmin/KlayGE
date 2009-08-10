@@ -717,7 +717,7 @@ void DeferredShadingApp::InitObjects()
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
-	blur_pp_ = MakeSharedPtr<BlurPostProcess>(8, 1.0f);
+	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));

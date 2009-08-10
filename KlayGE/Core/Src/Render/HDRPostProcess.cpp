@@ -172,7 +172,7 @@ namespace KlayGE
 			downsampler_ = MakeSharedPtr<Downsampler2x2PostProcess>();
 		}
 
-		blur_ = MakeSharedPtr<BlurPostProcess>(8, 2.0f);
+		blur_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
 		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
 		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
 		for (size_t i = 0; i < sum_lums_.size(); ++ i)
