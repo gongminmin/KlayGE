@@ -27,7 +27,7 @@
 	<parameter type='float4' name='texel_to_pixel_offset'/>
 	<parameter type='int' name='flipping'/>
 
-	<parameter type="float" name="min_variance" value="0.026"/>
+	<parameter type="float" name="min_variance" value="0.3"/>
 	<parameter type="float" name="bleeding_reduce" value="0.55"/>
 
 	<cbuffer name="light_sources">
@@ -144,6 +144,19 @@ float VSM(float3 pos_es, float len)
 	}
 	
 	return shadow;
+}
+
+void DeferredShadingDepthOnlyVS(float4 pos : POSITION,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
+	oPos += texel_to_pixel_offset;
+	oPos.z = min(oPos.z, oPos.w);
+}
+
+float4 DeferredShadingDepthOnlyPS() : SV_Target
+{
+	return 0;
 }
 
 void DeferredShadingVS(float4 pos : POSITION,
@@ -442,7 +455,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ndc = nd_tex.Sample(point_sampler, tc0);
-	return float4(GetDepth(ndc).xxx, 1);
+	return float4(GetDepth(ndc).xxx * 10, 1);
 }
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -468,6 +481,21 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 }
 		]]>
 	</shader>
+
+	<technique name="DeferredShadingLightDepthOnly">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="color_write_mask" value="0"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
+			<state name="pixel_shader" value="DeferredShadingDepthOnlyPS()"/>
+		</pass>
+	</technique>
 
 	<technique name="DeferredShadingPoint">
 		<pass name="p0">

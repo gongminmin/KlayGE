@@ -1,7 +1,7 @@
 #ifndef _DEFERREDSHADINGLAYER_HPP
 #define _DEFERREDSHADINGLAYER_HPP
 
-#include <KlayGE/SceneManager.hpp>
+#include <KlayGE/PreDeclare.hpp>
 
 namespace KlayGE
 {
@@ -225,6 +225,9 @@ namespace KlayGE
 		RenderTechniquePtr technique_directional_;
 		RenderTechniquePtr technique_point_;
 		RenderTechniquePtr technique_spot_;
+		RenderTechniquePtr technique_light_depth_only_;
+
+		QueryPtr conditional_render_;
 
 		int32_t buffer_type_;
 

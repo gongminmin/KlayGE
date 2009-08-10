@@ -674,8 +674,8 @@ void DeferredShadingApp::InitObjects()
 	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
 	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
 	point_light_id_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
-	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
+	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.5f, 0));
+	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.5f, 0));
 
 	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), deferred_shading_->LightColor(point_light_id_));
 	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, deferred_shading_->LightColor(spot_light_id_[0]));

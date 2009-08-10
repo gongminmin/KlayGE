@@ -8,9 +8,11 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Query.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -112,6 +114,9 @@ namespace KlayGE
 		technique_directional_ = technique_->Effect().TechniqueByName("DeferredShadingDirectional");
 		technique_point_ = technique_->Effect().TechniqueByName("DeferredShadingPoint");
 		technique_spot_ = technique_->Effect().TechniqueByName("DeferredShadingSpot");
+		technique_light_depth_only_ = technique_->Effect().TechniqueByName("DeferredShadingLightDepthOnly");
+
+		conditional_render_ = rf.MakeConditionalRender();
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -417,8 +422,10 @@ namespace KlayGE
 		{
 			if ((0 == buffer_type_) || (6 == buffer_type_))
 			{
-				int32_t batch = (pass - 1) / 2;
-				int32_t pass_in_batch = (pass - 1) - batch * 2;
+				int32_t const PASS_PER_BATCH = 2;
+
+				int32_t batch = (pass - 1) / PASS_PER_BATCH;
+				int32_t pass_in_batch = (pass - 1) - batch * PASS_PER_BATCH;
 
 				int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
 
@@ -483,9 +490,7 @@ namespace KlayGE
 
 					if (0 == pass_in_batch)
 					{
-						// Shadow map generation
-
-						if (type != LT_Ambient)
+						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
 						{
 							float3 d, u;
 							if (type != LT_Point)
@@ -534,12 +539,39 @@ namespace KlayGE
 							}
 
 							*light_dir_es_param_ = light_dir_es_actived;
-						}
 
-						if (0 == (light_attrib_[org_no] & LSA_NoShadow))
-						{
+							if ((LT_Spot == type) || (LT_Point == type))
+							{
+								float4x4 mat;
+								if (LT_Spot == type)
+								{
+									float const scale = light_cos_outer_inner_[org_no].w();
+									mat = MathLib::scaling(scale, scale, 1.0f);
+									rl_ = rl_cone_;
+								}
+								else //if (LT_Point == type)
+								{
+									mat = float4x4::Identity();
+									rl_ = rl_pyramid_;
+								}
+
+								*light_volume_mvp_param_ = mat
+									* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+									* view_ * proj_;
+
+								re.BindFrameBuffer(shaded_buffer_);
+
+								conditional_render_->Begin();
+								re.Render(*technique_light_depth_only_, *rl_);
+								conditional_render_->End();
+							}
+
+							// Shadow map generation
+
 							re.BindFrameBuffer(sm_buffer_);
 							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+							checked_pointer_cast<ConditionalRender>(conditional_render_)->BeginConditionalRender();
 
 							return App3DFramework::URV_Need_Flush;
 						}
@@ -550,6 +582,11 @@ namespace KlayGE
 					}
 					else
 					{
+						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
+						{
+							checked_pointer_cast<ConditionalRender>(conditional_render_)->EndConditionalRender();
+						}
+
 						// Lighting
 
 						box_filter_pp_->Apply();
