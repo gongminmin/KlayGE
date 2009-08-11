@@ -5,7 +5,6 @@
 	<include name="PostProcess.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="view_proj"/>
 		<parameter type="float3" name="light_in_world"/>
 		<parameter type="float" name="inv_depth_range"/>

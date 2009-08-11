@@ -32,6 +32,7 @@ using namespace KlayGE;
 
 namespace
 {
+	int32_t const NUM_LINE = 10;
 	int32_t const NUM_INSTANCE = 400;
 
 	class Teapot : public SceneObjectHelper
@@ -106,7 +107,6 @@ namespace
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("view")) = view;
 			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 
@@ -143,11 +143,10 @@ namespace
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("view")) = view;
 			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
 			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
 
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / (app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane());
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / app.ActiveCamera().FarPlane();
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -335,18 +334,18 @@ void DepthOfFieldApp::InitObjects()
 	ScriptModule module("DepthOfField_init");
 
 	renderInstance_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
-	for (int32_t i = 0; i < 10; ++ i)
+	for (int32_t i = 0; i < NUM_LINE; ++ i)
 	{
-		for (int32_t j = 0; j < NUM_INSTANCE / 10; ++ j)
+		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 		{
-			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE));
+			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
 
 			float3 pos;
 			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
 			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
 			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
 
-			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE));
+			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
 
 			Color clr;
 			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
