@@ -57,11 +57,6 @@ namespace
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
 			mat_ = mat;
-			float4x4 matT = MathLib::transpose(mat);
-
-			inst_.col[0] = matT.Row(0);
-			inst_.col[1] = matT.Row(1);
-			inst_.col[2] = matT.Row(2);
 			inst_.clr = clr;
 		}
 
@@ -78,6 +73,16 @@ namespace
 		float4x4 const & GetModelMatrix() const
 		{
 			return mat_;
+		}
+
+		void Update()
+		{
+			mat_ *= MathLib::rotation_y(0.001f);
+
+			float4x4 matT = MathLib::transpose(mat_);
+			inst_.col[0] = matT.Row(0);
+			inst_.col[1] = matT.Row(1);
+			inst_.col[2] = matT.Row(2);
 		}
 
 	private:
@@ -216,7 +221,14 @@ namespace
 		void ShowBlurFactor(bool show)
 		{
 			show_blur_factor_ = show;
-			*(technique_->Effect().ParameterByName("show_blur_factor")) = show_blur_factor_;
+			if (show_blur_factor_)
+			{
+				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldBlurFactor");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("DepthOfField");
+			}
 		}
 		bool ShowBlurFactor() const
 		{
@@ -252,10 +264,9 @@ namespace
 			PostProcess::OnRenderBegin();
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			float const depth_range = app.ActiveCamera().FarPlane() - app.ActiveCamera().NearPlane();
+			float const depth_range = app.ActiveCamera().FarPlane();
 
-			*(technique_->Effect().ParameterByName("focus_plane")) = focus_plane_ / depth_range;
-			*(technique_->Effect().ParameterByName("inv_focus_range")) = depth_range / focus_range_;
+			*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(focus_plane_ / depth_range, depth_range / focus_range_);
 		}
 
 	private:

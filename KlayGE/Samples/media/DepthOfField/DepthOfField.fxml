@@ -25,13 +25,12 @@ void ColorDepthVS(float4 pos			: POSITION,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
-	model = transpose(model);
 
-	float4 pos_ws = mul(pos, model);
+	float4 pos_ws = mul(model, pos);
 	oPos = mul(pos_ws, view_proj);
 	oDepth = oPos.w;
 
-	normal = mul(normal, (float3x3)model);
+	normal = mul((float3x3)model, normal);
 	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
 }
 
@@ -52,11 +51,9 @@ float4 ColorDepthPS(float3 clr : COLOR,
 
 
 	<cbuffer name="per_frame2">
-		<parameter type="float" name="focus_plane"/>
-		<parameter type="float" name="inv_focus_range"/>
+		<parameter type="float2" name="focus_plane_inv_range"/>
 	</cbuffer>
 	<parameter type="float4" name="sat_size"/>
-	<parameter type="bool" name="show_blur_factor"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture2D" name="sat_tex"/>
@@ -69,30 +66,33 @@ float4 ColorDepthPS(float3 clr : COLOR,
 
 	<shader>
 		<![CDATA[
+float BlurFactor(float2 tc)
+{
+	return saturate(abs(src_tex.Sample(point_sampler, tc).a - focus_plane_inv_range.x) * focus_plane_inv_range.y);
+}
+
 float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float4 clr;
-	float blur_factor = saturate(abs(src_tex.Sample(point_sampler, tex_coord0).a - focus_plane) * inv_focus_range);
-	if (show_blur_factor)
-	{
-		clr = blur_factor;
-	}
-	else
-	{
-		int2 rect = clamp(blur_factor * 0.01f * sat_size.xy + 0.5f, 1, 8);
-		float4 corner = (floor(tex_coord0 * sat_size.xy).xyxy + float4(rect - 1, -rect) + 0.5f) * sat_size.zwzw;
-		float2 left_top = max(0.5f * sat_size.zw, corner.zw);
-		float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
-		float2 width_height = (right_bottom - left_top) * sat_size.xy;
-		clr = (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
+	float blur_factor = BlurFactor(tex_coord0);
+
+	int2 rect = clamp(blur_factor * 0.01f * sat_size.xy + 0.5f, 1, 8);
+	float4 corner = (floor(tex_coord0 * sat_size.xy).xyxy + float4(rect - 1, -rect) + 0.5f) * sat_size.zwzw;
+	float2 left_top = max(0.5f * sat_size.zw, corner.zw);
+	float2 right_bottom = min(1 - 0.5f * sat_size.zw, corner.xy);
+	float2 width_height = (right_bottom - left_top) * sat_size.xy;
+	return (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
 				- sat_tex.Sample(point_sampler, corner.xw) + sat_tex.Sample(point_sampler, corner.zw))
 							/ (width_height.x * width_height.y) + 0.5f;
-	}
-	
-	return clr;
+}
+
+float4 DepthOfFieldBlurFactorPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	return BlurFactor(tex_coord0);
 }
 		]]>
 	</shader>
+	
 	<technique name="DepthOfField">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -100,6 +100,16 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="DepthOfFieldPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthOfFieldBlurFactor">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthOfFieldBlurFactorPS()"/>
 		</pass>
 	</technique>
 
