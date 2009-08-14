@@ -17,21 +17,21 @@
 float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float2 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rg;
-	const int NUM_SAMPLES = 8;
+	motion_vec.y = -motion_vec.y;
+	const int NUM_SAMPLES = 12;
 	float4 clr = src_tex.Sample(point_sampler, tex_coord0);
-	float weight = 1;
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
 		clr.rgb += src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).rgb;
-		weight += 1 - i / NUM_SAMPLES;
 	}
-	clr.rgb /= weight;
+	clr.rgb /= NUM_SAMPLES;
 	return clr;
 }
 
 float4 MotionBlurMotionVecPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	return float4(motion_vec_tex.Sample(point_sampler, tex_coord0).rgb,
+	float3 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rgb;
+	return float4(motion_vec.xy * 200, motion_vec.z,
 		src_tex.Sample(point_sampler, tex_coord0).a);
 }
 

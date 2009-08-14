@@ -27,8 +27,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 					float3 clr			: COLOR0,
 
 					out float4 oClrDepth : TEXCOORD0,
-					out float3 oPosSS		: TEXCOORD1,
-					out float3 oLastPosSS	: TEXCOORD2,
+					out float2 oVelocity : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
@@ -36,19 +35,22 @@ void ColorDepthVS(float4 pos			: POSITION,
 
 	float4 pos_ws = mul(model, pos);
 	oPos = mul(pos_ws, view_proj);
-	oPosSS = oPos.xyw;
 	
-	oLastPosSS = mul(mul(last_model, pos), last_view_proj).xyw;
+	float4 pos_curr = oPos;
+	float4 pos_last = mul(mul(last_model, pos), last_view_proj);
+	pos_curr /= pos_curr.w;
+	pos_last /= pos_last.w;
+	oVelocity = (pos_curr.xy - pos_last.xy) / 2;
 
 	normal = mul((float3x3)model, normal);
 	oClrDepth = float4(saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value, oPos.w * inv_depth_range);
 }
 
-void ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ss : TEXCOORD1, float3 last_pos_ss : TEXCOORD2,
+void ColorDepthPS(float4 clr_depth : TEXCOORD0, float2 velocity : TEXCOORD2,
 				out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
 {
 	color_depth = clr_depth;
-	motion_vec = float4((pos_ss.xy / pos_ss.z - last_pos_ss.xy / last_pos_ss.z) * 10, 1, 1);
+	motion_vec = float4(velocity * 20, 1, 1);
 }
 		]]>
 	</shader>
@@ -91,15 +93,17 @@ void NormalMeshVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
 					out float4 oClrDepth : TEXCOORD0,
-					out float3 oPosSS		: TEXCOORD1,
-					out float3 oLastPosSS	: TEXCOORD2,
+					out float2 oVelocity : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
 	oPos = mul(pos_ws, view_proj);
-	oPosSS = oPos.xyw;
 	
-	oLastPosSS = mul(mul(pos, last_modelmat), last_view_proj).xyw;
+	float4 pos_curr = oPos;
+	float4 pos_last = mul(mul(pos, last_modelmat), last_view_proj);
+	pos_curr /= pos_curr.w;
+	pos_last /= pos_last.w;
+	oVelocity = (pos_curr.xy - pos_last.xy) / 2;
 
 	normal = mul(normal, (float3x3)modelmat);
 	oClrDepth = float4(saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value, oPos.w * inv_depth_range);

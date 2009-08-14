@@ -160,13 +160,13 @@ namespace KlayGE
 		{
 		}
 
-		void Destinate(FrameBufferPtr const & fb)
+		void Source(TexturePtr const & src_tex, bool flipping)
 		{
-			PostProcess::Destinate(fb);
+			PostProcess::Source(src_tex, flipping);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			blurx_tex_ = rf.MakeTexture2D(frame_buffer_->Width(), frame_buffer_->Height(), 1, 1, frame_buffer_->Format(),
+			blurx_tex_ = rf.MakeTexture2D(src_texture_->Width(0), src_texture_->Height(0), 1, 1, src_texture_->Format(),
 				1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 			FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
@@ -174,6 +174,11 @@ namespace KlayGE
 			blur_x_.Source(src_texture_, flipping_);
 			blur_x_.Destinate(blur_x_fb);
 			blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());
+		}
+
+		void Destinate(FrameBufferPtr const & fb)
+		{
+			PostProcess::Destinate(fb);
 			blur_y_.Destinate(fb);
 		}
 
