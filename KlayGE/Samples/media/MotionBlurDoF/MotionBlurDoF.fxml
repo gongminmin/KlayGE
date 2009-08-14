@@ -64,9 +64,11 @@ void ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ss : TEXCOORD1, float
 	<parameter type="float4" name="clear_clr"/>
 	<shader>
 		<![CDATA[
-float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+void ClearFloatPS(float2 tex_coord0 : TEXCOORD0,
+	out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
 {
-	return clear_clr - mid_value;
+	color_depth = clear_clr - mid_value;
+	motion_vec = 0;
 }
 		]]>
 	</shader>

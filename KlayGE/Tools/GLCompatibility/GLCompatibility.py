@@ -145,7 +145,7 @@ features_db = {
 			'Multisampled textures and texture samplers for specific sample locations' : lambda : is_supported('GL_ARB_texture_multisample'),
 			'Fragment depth clamping' : lambda : support_one(['GL_ARB_depth_clamp', 'GL_NV_depth_clamp']),
 			'Geometry shaders' : lambda : support_one(['GL_ARB_geometry_shader4', 'GL_EXT_geometry_shader4', 'GL_NV_geometry_shader4', 'GL_NV_geometry_program4']),
-			'Fence sync objects' : lambda : is_supported('GL_ARB_sync'),
+			'Fence sync objects' : lambda : support_one(['GL_ARB_sync', 'GL_NV_fence']),
 		}
 }
 
