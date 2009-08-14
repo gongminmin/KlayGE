@@ -1,56 +1,11 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
 
+	<parameter type="float4" name="mid_value" value="0.5"/>
+		
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="view_proj"/>
-		<parameter type="float3" name="light_in_world"/>
-		<parameter type="float" name="inv_depth_range"/>
-	</cbuffer>
-
-	<shader>
-		<![CDATA[
-void ColorDepthVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
-
-					float4 row0			: TEXCOORD1,
-					float4 row1			: TEXCOORD2,
-					float4 row2			: TEXCOORD3,
-					float3 clr			: COLOR0,
-
-					out float3 oClr		: COLOR,
-					out float oDepth : TEXCOORD0,
-					out float4 oPos		: SV_Position)
-{
-	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
-
-	float4 pos_ws = mul(model, pos);
-	oPos = mul(pos_ws, view_proj);
-	oDepth = oPos.w;
-
-	normal = mul((float3x3)model, normal);
-	oClr = saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
-}
-
-float4 ColorDepthPS(float3 clr : COLOR,
-				float depth : TEXCOORD0) : SV_Target
-{
-	return float4(clr, depth * inv_depth_range);
-}
-		]]>
-	</shader>
-
-	<technique name="ColorDepth">
-		<pass name="p0">
-			<state name="vertex_shader" value="ColorDepthVS()"/>
-			<state name="pixel_shader" value="ColorDepthPS()"/>
-		</pass>
-	</technique>
-
-
-	<cbuffer name="per_frame2">
 		<parameter type="float2" name="focus_plane_inv_range"/>
 	</cbuffer>
 	<parameter type="float4" name="sat_size"/>
@@ -83,12 +38,17 @@ float4 DepthOfFieldPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	float2 width_height = (right_bottom - left_top) * sat_size.xy;
 	return (sat_tex.Sample(point_sampler, corner.xy) - sat_tex.Sample(point_sampler, corner.zy)
 				- sat_tex.Sample(point_sampler, corner.xw) + sat_tex.Sample(point_sampler, corner.zw))
-							/ (width_height.x * width_height.y) + 0.5f;
+							/ (width_height.x * width_height.y) + mid_value;
 }
 
 float4 DepthOfFieldBlurFactorPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	return BlurFactor(tex_coord0);
+}
+
+float4 DepthOfFieldPassThroughPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	return src_tex.Sample(point_sampler, tex_coord0) + mid_value;
 }
 		]]>
 	</shader>
@@ -113,50 +73,13 @@ float4 DepthOfFieldBlurFactorPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<parameter type="float4" name="clear_clr"/>
-	<shader>
-		<![CDATA[
-float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
-{
-	return clear_clr;
-}
-		]]>
-	</shader>
-	<technique name="ClearFloat">
+	<technique name="DepthOfFieldPassThrough">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="ClearFloatPS()"/>
-		</pass>
-	</technique>
-	
-	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
-	<parameter type="float4" name="color"/>
-	
-	<shader>
-		<![CDATA[
-void NormalMeshVS(float4 pos			: POSITION,
-					float3 normal		: NORMAL,
-
-					out float3 oClr		: COLOR,
-					out float oDepth	: TEXCOORD0,
-					out float4 oPos		: SV_Position)
-{
-	float4 pos_ws = mul(pos, modelmat);
-	oPos = mul(pos_ws, view_proj);
-	oDepth = oPos.w;
-
-	normal = mul(normal, (float3x3)modelmat);
-	oClr = saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - 0.5f;
-}
-		]]>
-	</shader>
-
-	<technique name="NormalMesh">
-		<pass name="p0">
-			<state name="vertex_shader" value="NormalMeshVS()"/>
-			<state name="pixel_shader" value="ColorDepthPS()"/>
+			<state name="pixel_shader" value="DepthOfFieldPassThroughPS()"/>
 		</pass>
 	</technique>
 </effect>

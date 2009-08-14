@@ -1,0 +1,114 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="PostProcess.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="view_proj"/>
+		<parameter type="float4x4" name="last_view_proj"/>
+		<parameter type="float3" name="light_in_world"/>
+		<parameter type="float" name="inv_depth_range"/>
+	</cbuffer>
+
+	<parameter type="float4" name="mid_value" value="0.5"/>
+		
+	<shader>
+		<![CDATA[
+void ColorDepthVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					float4 row0			: TEXCOORD1,
+					float4 row1			: TEXCOORD2,
+					float4 row2			: TEXCOORD3,
+					float4 last_row0	: TEXCOORD4,
+					float4 last_row1	: TEXCOORD5,
+					float4 last_row2	: TEXCOORD6,
+					float3 clr			: COLOR0,
+
+					out float4 oClrDepth : TEXCOORD0,
+					out float3 oPosSS		: TEXCOORD1,
+					out float3 oLastPosSS	: TEXCOORD2,
+					out float4 oPos		: SV_Position)
+{
+	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
+	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
+
+	float4 pos_ws = mul(model, pos);
+	oPos = mul(pos_ws, view_proj);
+	oPosSS = oPos.xyw;
+	
+	oLastPosSS = mul(mul(last_model, pos), last_view_proj).xyw;
+
+	normal = mul((float3x3)model, normal);
+	oClrDepth = float4(saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value, oPos.w * inv_depth_range);
+}
+
+void ColorDepthPS(float4 clr_depth : TEXCOORD0, float3 pos_ss : TEXCOORD1, float3 last_pos_ss : TEXCOORD2,
+				out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
+{
+	color_depth = clr_depth;
+	motion_vec = float4((pos_ss.xy / pos_ss.z - last_pos_ss.xy / last_pos_ss.z) * 10, 1, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="ColorDepth">
+		<pass name="p0">
+			<state name="vertex_shader" value="ColorDepthVS()"/>
+			<state name="pixel_shader" value="ColorDepthPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float4" name="clear_clr"/>
+	<shader>
+		<![CDATA[
+float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	return clear_clr - mid_value;
+}
+		]]>
+	</shader>
+	<technique name="ClearFloat">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ClearFloatPS()"/>
+		</pass>
+	</technique>
+	
+	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
+	<parameter type="float4x4" name="last_modelmat"/>
+	<parameter type="float4" name="color"/>
+	
+	<shader>
+		<![CDATA[
+void NormalMeshVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					out float4 oClrDepth : TEXCOORD0,
+					out float3 oPosSS		: TEXCOORD1,
+					out float3 oLastPosSS	: TEXCOORD2,
+					out float4 oPos		: SV_Position)
+{
+	float4 pos_ws = mul(pos, modelmat);
+	oPos = mul(pos_ws, view_proj);
+	oPosSS = oPos.xyw;
+	
+	oLastPosSS = mul(mul(pos, last_modelmat), last_view_proj).xyw;
+
+	normal = mul(normal, (float3x3)modelmat);
+	oClrDepth = float4(saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value, oPos.w * inv_depth_range);
+}
+		]]>
+	</shader>
+
+	<technique name="NormalMesh">
+		<pass name="p0">
+			<state name="vertex_shader" value="NormalMeshVS()"/>
+			<state name="pixel_shader" value="ColorDepthPS()"/>
+		</pass>
+	</technique>
+</effect>

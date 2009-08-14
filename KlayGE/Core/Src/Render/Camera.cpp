@@ -55,4 +55,9 @@ namespace KlayGE
 
 		projMat_ = MathLib::perspective_fov_lh(FOV, aspect, nearPlane, farPlane);
 	}
+
+	void Camera::Update()
+	{
+		last_view_mat_ = viewMat_;
+	}
 }

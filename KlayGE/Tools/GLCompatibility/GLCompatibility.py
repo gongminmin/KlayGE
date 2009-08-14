@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5']
 
 features_db = {
 	'1.1' : {
@@ -132,6 +132,20 @@ features_db = {
 			'Rectangular textures' : lambda : support_one(['GL_ARB_texture_rectangle', 'GL_EXT_texture_rectangle', 'GL_NV_texture_rectangle']),
 			'Uniform buffer objects' : lambda : support_one(['GL_ARB_uniform_buffer_object', 'GL_EXT_bindable_uniform']),
 			'Texture buffer objects' : lambda : is_supported('GL_ARB_texture_buffer_object'),
+		},
+		
+	'3.2' : {
+			'OpenGL Shading Language 1.50' : lambda : is_supported('GLSL_1_5'),
+			'Compatibility profiles' : lambda : is_supported('GL_ARB_compatibility'),
+			'BGRA vertex component ordering' : lambda : support_one(['GL_ARB_vertex_array_bgra', 'GL_EXT_vertex_array_bgra']),
+			'Modification of the base vertex index' : lambda : is_supported('GL_ARB_draw_elements_base_vertex'),
+			'Shader fragment coordinate convention control' : lambda : is_supported('GL_ARB_fragment_coord_conventions'),
+			'Provoking vertex control' : lambda : support_one(['GL_ARB_provoking_vertex', 'GL_EXT_provoking_vertex']),
+			'Seamless cube map filtering' : lambda : is_supported('GL_ARB_seamless_cube_map'),
+			'Multisampled textures and texture samplers for specific sample locations' : lambda : is_supported('GL_ARB_texture_multisample'),
+			'Fragment depth clamping' : lambda : support_one(['GL_ARB_depth_clamp', 'GL_NV_depth_clamp']),
+			'Geometry shaders' : lambda : support_one(['GL_ARB_geometry_shader4', 'GL_EXT_geometry_shader4', 'GL_NV_geometry_shader4', 'GL_NV_geometry_program4']),
+			'Fence sync objects' : lambda : is_supported('GL_ARB_sync'),
 		}
 }
 

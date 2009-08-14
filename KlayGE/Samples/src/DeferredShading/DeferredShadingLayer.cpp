@@ -118,12 +118,11 @@ namespace KlayGE
 
 		conditional_render_ = rf.MakeConditionalRender();
 
-		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_ = rf.MakeFrameBuffer();
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
 		blur_sm_buffer_ = rf.MakeFrameBuffer();
 		blur_sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_sm_tex_, 0, 0));
 
@@ -584,12 +583,11 @@ namespace KlayGE
 					{
 						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
 						{
+							box_filter_pp_->Apply();
 							checked_pointer_cast<ConditionalRender>(conditional_render_)->EndConditionalRender();
 						}
 
 						// Lighting
-
-						box_filter_pp_->Apply();
 
 						re.BindFrameBuffer(shaded_buffer_);
 

@@ -57,6 +57,13 @@ namespace KlayGE
 			float3 const & upVec = float3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
+		void Update();
+
+		float4x4 const & LastViewMatrix() const
+		{
+			return last_view_mat_;
+		}
+
 		Camera();
 
 	private:
@@ -71,6 +78,8 @@ namespace KlayGE
 		float		nearPlane_;
 		float		farPlane_;
 		float4x4	projMat_;
+
+		float4x4	last_view_mat_;
 	};
 }
 

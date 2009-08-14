@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="motion_vec_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	float2 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rg;
+	const int NUM_SAMPLES = 8;
+	float4 clr = src_tex.Sample(point_sampler, tex_coord0);
+	float weight = 1;
+	for (int i = 1; i < NUM_SAMPLES; ++ i)
+	{
+		clr.rgb += src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES).rgb;
+		weight += 1 - i / NUM_SAMPLES;
+	}
+	clr.rgb /= weight;
+	return clr;
+}
+
+float4 MotionBlurMotionVecPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	return float4(motion_vec_tex.Sample(point_sampler, tex_coord0).rgb,
+		src_tex.Sample(point_sampler, tex_coord0).a);
+}
+
+float4 MotionBlurPassThroughPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	return src_tex.Sample(point_sampler, tex_coord0);
+}
+		]]>
+	</shader>
+
+	<technique name="MotionBlur">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurPS()"/>
+		</pass>
+	</technique>
+				
+	<technique name="MotionBlurMotionVec">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurMotionVecPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MotionBlurPassThrough">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurPassThroughPS()"/>
+		</pass>
+	</technique>
+</effect>

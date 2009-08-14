@@ -203,7 +203,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 	
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
-	
+
 	float shadow = VSM(pos_es, len);
 
 	float4 final_clr = 0;

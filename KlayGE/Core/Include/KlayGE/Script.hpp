@@ -37,7 +37,14 @@ namespace KlayGE
 		{
 			if (p != NULL)
 			{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
 				Py_DECREF(p);
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 			}
 		}
 	};

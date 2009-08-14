@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="DepthOfField"
-	ProjectGUID="{EBF7230D-F4AA-4FB4-A105-3B49DA53EB5C}"
-	RootNamespace="DepthOfField"
+	Name="MotionBlurDoF"
+	ProjectGUID="{02B3F585-8608-4383-BEC4-49EDEBBB774F}"
+	RootNamespace="MotionBlurDoF"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -348,11 +348,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\DepthOfField\DepthOfField.cpp"
+				RelativePath="..\..\src\MotionBlurDoF\MotionBlurDoF.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\DepthOfField\DepthOfField_init.py"
+				RelativePath="..\..\media\MotionBlurDoF\MotionBlurDoF_init.py"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -360,7 +360,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying $(InputFileName)"
-						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -370,7 +370,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying $(InputFileName)"
-						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -380,7 +380,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying $(InputFileName)"
-						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -390,7 +390,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying $(InputFileName)"
-						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;"
+						CommandLine="copy /Y &quot;$(InputPath)&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 						Outputs="$(OutDir)/$(InputFileName)"
 					/>
 				</FileConfiguration>
@@ -402,7 +402,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\DepthOfField\DepthOfField.hpp"
+				RelativePath="..\..\src\MotionBlurDoF\MotionBlurDoF.hpp"
 				>
 			</File>
 		</Filter>
@@ -410,7 +410,15 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\DepthOfField\DepthOfField.fxml"
+				RelativePath="..\..\media\MotionBlurDoF\DepthOfFieldPP.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\MotionBlurDoF\MotionBlurDoF.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\MotionBlurDoF\MotionBlurPP.fxml"
 				>
 			</File>
 		</Filter>
@@ -418,7 +426,7 @@
 			Name="UI"
 			>
 			<File
-				RelativePath="..\..\media\DepthOfField\DepthOfField.uiml"
+				RelativePath="..\..\media\MotionBlurDoF\MotionBlurDoF.uiml"
 				>
 			</File>
 		</Filter>

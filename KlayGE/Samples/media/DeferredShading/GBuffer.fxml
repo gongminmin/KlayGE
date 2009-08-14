@@ -150,17 +150,17 @@ void GenShadowMapVS(float4 pos : POSITION,
 						float3 normal : NORMAL,
 						float3 tangent : TANGENT,
 						float2 texcoord : TEXCOORD0,
-						out float4 oLightWorldPos : TEXCOORD0,
+						out float3 oLightWorldPos : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos, mvp);
-	oLightWorldPos = pos_es;
+	oLightWorldPos = pos_es.xyz;
 }
 
-float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float3 LightWorldPos : TEXCOORD0) : SV_Target
 {
-	float dist = length(LightWorldPos.xyz / LightWorldPos.w);
+	float dist = length(LightWorldPos.xyz);
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);

@@ -9,6 +9,13 @@ if ('nt' == os.name):
 	except:
 		from _winreg import *
 
+	try:
+		import win32gui
+		import win32con
+		has_pywin32 = True
+	except:
+		has_pywin32 = False
+
 klayge_path = os.path.split(os.path.abspath(__file__))[0]
 if ('nt' == os.name):
 	klayge_bin_path = "%s\\bin" % klayge_path
@@ -39,6 +46,10 @@ if ('nt' == os.name):
 		FlushKey(k)
 		CloseKey(k)
 
+		if has_pywin32:
+			win32gui.SendMessageTimeout(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0,
+				"Environment", win32con.SMTO_ABORTIFHUNG, 5000);
+
 else:
 	f = open('/etc/profile', 'a')
 	f.seek(0, os.SEEK_END)
@@ -57,3 +68,13 @@ else:
 
 print('Set %%KLAYGE_HOME%% to %s' % klayge_path)
 print('Add %KLAYGE_HOME%\\bin to %PATH%')
+
+if not has_pywin32:
+	print("WM_SETTINGCHANGE can't be delivered because PyWin32 is not installed. Please reboot your computer to update the environment variables.")
+
+print("Please press any key to exit...")
+
+try:
+	raw_input()
+except:
+	input()
