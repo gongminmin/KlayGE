@@ -137,7 +137,7 @@ namespace KlayGE
 			}
 		}
 		IDirect3DSurface9* old_ds = NULL;
-		if (flags & CBM_Depth | flags & CBM_Stencil)
+		if ((flags & CBM_Depth) || (flags & CBM_Stencil))
 		{
 			d3d_device->GetDepthStencilSurface(&old_ds);
 			if (old_ds != this->D3DRenderZBuffer().get())
@@ -160,7 +160,7 @@ namespace KlayGE
 				}
 			}
 		}
-		if (flags & CBM_Depth | flags & CBM_Stencil)
+		if ((flags & CBM_Depth) || (flags & CBM_Stencil))
 		{
 			if (old_ds != this->D3DRenderZBuffer().get())
 			{

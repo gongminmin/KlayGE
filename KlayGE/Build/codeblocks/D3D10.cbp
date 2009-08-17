@@ -27,7 +27,7 @@
 					<Add option="-DKLAYGE_D3D10_RE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="d3d10" />
 					<Add library="d3dx10d" />
@@ -58,7 +58,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_system-mgw43-mt" />
+					<Add library="boost_system-mgw44-mt" />
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="d3d10" />
 					<Add library="d3dx10" />

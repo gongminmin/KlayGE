@@ -6,7 +6,6 @@
 		<Project filename="DistanceMapping.cbp" />
 		<Project filename="Fractal.cbp" />
 		<Project filename="GPUParticleSystem.cbp" />
-		<Project filename="Instancing.cbp" />
 		<Project filename="ModelViewer.cbp" />
 		<Project filename="MotionBlurDoF.cbp" />
 		<Project filename="Parallax.cbp" />

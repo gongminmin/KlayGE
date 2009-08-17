@@ -94,8 +94,9 @@ namespace KlayGE
 
 	FontRenderable::FontRenderable(std::string const & fontName)
 			: RenderableHelper(L"Font"),
+                dirty_(false),
 				curX_(0), curY_(0),
-				three_dim_(false), dirty_(false)
+				three_dim_(false)
 	{
 		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(fontName);
 		BOOST_ASSERT(kfont_input);
@@ -401,7 +402,7 @@ namespace KlayGE
 					float top = ci.top * rel_size * yScale;
 					float width = ci.width * rel_size * xScale;
 					float height = ci.height * rel_size * yScale;
-				
+
 					BOOST_AUTO(cmiter, charInfoMap_.find(ch));
 					Rect_T<float> const & texRect(cmiter->second);
 

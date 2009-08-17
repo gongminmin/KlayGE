@@ -55,7 +55,7 @@ namespace KlayGE
 	public:
 		UIRectRenderable(TexturePtr const & texture, RenderEffectPtr const & effect)
 			: RenderableHelper(L"UIRect"),
-				texture_(texture), dirty_(false)
+				dirty_(false), texture_(texture)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

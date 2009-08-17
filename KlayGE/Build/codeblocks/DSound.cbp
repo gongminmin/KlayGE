@@ -27,8 +27,8 @@
 					<Add option="-DKLAYGE_DSOUND_AE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_system-mgw43-mt-d" />
-					<Add library="boost_thread-mgw43-mt-d" />
+					<Add library="boost_system-mgw44-mt-d" />
+					<Add library="boost_thread-mgw44-mt-d" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="dsound" />
 				</Linker>
@@ -57,8 +57,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_system-mgw43-mt" />
-					<Add library="boost_thread-mgw43-mt" />
+					<Add library="boost_system-mgw44-mt" />
+					<Add library="boost_thread-mgw44-mt" />
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="dsound" />
 				</Linker>

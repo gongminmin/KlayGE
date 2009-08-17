@@ -219,7 +219,7 @@ namespace
 	public:
 		DepthOfField()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
-				show_blur_factor_(false), dof_on_(true)
+				dof_on_(true), show_blur_factor_(false)
 		{
 		}
 
@@ -334,7 +334,7 @@ namespace
 	public:
 		MotionBlur()
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur")),
-				show_motion_vec_(false), mb_on_(true)
+				mb_on_(true), show_motion_vec_(false)
 		{
 		}
 

@@ -695,7 +695,7 @@ void DeferredShadingApp::InitObjects()
 	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
 	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
-	
+
 	ssao_buffer_ = rf.MakeFrameBuffer();
 	ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 

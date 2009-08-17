@@ -27,7 +27,7 @@
 					<Add option="-DKLAYGE_DINPUT_IE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_system-mgw43-mt-d" />
+					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="libKlayGE_Core_mgw_x86_d.a" />
 					<Add library="dinput8" />
 				</Linker>
@@ -56,7 +56,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_system-mgw43-mt" />
+					<Add library="boost_system-mgw44-mt" />
 					<Add library="libKlayGE_Core_mgw_x86.a" />
 					<Add library="dinput8" />
 				</Linker>

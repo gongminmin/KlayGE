@@ -24,8 +24,8 @@
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="freetype239" />
-					<Add library="boost_program_options-mgw43-mt-d" />
-					<Add library="boost_thread-mgw43-mt-d" />
+					<Add library="boost_program_options-mgw44-mt-d" />
+					<Add library="boost_thread-mgw44-mt-d" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
@@ -48,8 +48,8 @@
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="freetype239" />
-					<Add library="boost_program_options-mgw43-mt" />
-					<Add library="boost_thread-mgw43-mt" />
+					<Add library="boost_program_options-mgw44-mt" />
+					<Add library="boost_thread-mgw44-mt" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">

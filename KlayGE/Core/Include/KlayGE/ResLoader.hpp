@@ -24,7 +24,7 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <ios>
+#include <istream>
 #include <vector>
 #include <string>
 

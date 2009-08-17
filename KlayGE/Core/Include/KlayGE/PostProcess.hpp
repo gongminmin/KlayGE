@@ -22,6 +22,8 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
 namespace KlayGE
@@ -130,7 +132,7 @@ namespace KlayGE
 		void Source(TexturePtr const & src_tex, bool flipping)
 		{
 			T::Source(src_tex, flipping);
-			this->CalSampleOffsets(src_texture_->Width(0), 3);
+			this->CalSampleOffsets(T::src_texture_->Width(0), 3);
 		}
 	};
 
@@ -146,7 +148,7 @@ namespace KlayGE
 		void Source(TexturePtr const & src_tex, bool flipping)
 		{
 			T::Source(src_tex, flipping);
-			this->CalSampleOffsets(src_texture_->Height(0), 3);
+			this->CalSampleOffsets(T::src_texture_->Height(0), 3);
 		}
 	};
 
