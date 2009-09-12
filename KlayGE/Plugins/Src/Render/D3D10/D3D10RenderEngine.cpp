@@ -488,6 +488,7 @@ namespace KlayGE
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
 		caps_.primitive_restart_support = true;
+		caps_.multithread_rendering_support = false;
 		caps_.argb8_support = false;
 		caps_.bc4_support = true;
 		caps_.bc5_support = true;

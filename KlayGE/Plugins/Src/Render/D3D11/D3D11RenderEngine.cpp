@@ -51,7 +51,7 @@ namespace KlayGE
 	{
 		// Dynamic loading because these dlls can't be loaded on WinXP
 		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
-		mod_d3d11_ = ::LoadLibraryW(L"D3D11_beta.dll");
+		mod_d3d11_ = ::LoadLibraryW(L"D3D11.dll");
 
 		if (mod_dxgi_ != NULL)
 		{
@@ -543,6 +543,7 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
+			caps_.multithread_rendering_support = true;
 			caps_.argb8_support = false;
 			caps_.bc4_support = true;
 			caps_.bc5_support = true;
@@ -566,9 +567,17 @@ namespace KlayGE
 			caps_.bc6_support = false;
 			caps_.bc7_support = false;
 			caps_.gs_support = true;
-			caps_.cs_support = false;
 			caps_.hs_support = false;
 			caps_.ds_support = false;
+			{
+				D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS cs4_feature;
+				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &cs4_feature, sizeof(cs4_feature));
+				caps_.cs_support = cs4_feature.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x;
+
+				D3D11_FEATURE_DATA_THREADING mt_feature;
+				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
+				caps_.multithread_rendering_support = mt_feature.DriverCommandLists;
+			}
 			break;
 
 		default:
@@ -576,6 +585,7 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
+			caps_.multithread_rendering_support = false;
 			caps_.argb8_support = true;
 			caps_.bc4_support = false;
 			caps_.bc5_support = false;

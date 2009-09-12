@@ -52,7 +52,6 @@
 
 #include <d3d9.h>
 #include <d3dx9.h>
-#include <dxerr9.h>
 
 #include <KlayGE/D3D9/D3D9Texture.hpp>
 

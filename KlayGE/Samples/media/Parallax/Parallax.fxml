@@ -52,32 +52,32 @@ void ParallaxVS(float4 pos				: POSITION,
 	oH = mul(objToTangentSpace, halfVec);
 }
 
-half4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
+float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 					float3 L		: TEXCOORD1,
 					float3 V		: TEXCOORD2,
 					float3 H		: TEXCOORD3) : SV_Target
 {
-	half3 view = normalize(V);
+	float3 view = normalize(V);
 
-	half height = height_tex.Sample(linear_sampler, texCoord0).r * parallax_scale - parallax_bias;
-	half2 texUV = texCoord0 + (view.xy * height);
+	float height = height_tex.Sample(linear_sampler, texCoord0).r * parallax_scale - parallax_bias;
+	float2 texUV = texCoord0 + (view.xy * height);
 
-	half3 diffuse = diffuse_tex.Sample(linear_sampler, texUV).rgb;
+	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV).rgb;
 
-	half3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV));
-	half3 light_vec = normalize(L);
-	half diffuse_factor = diffuse_term(light_vec, bump_normal);
+	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV));
+	float3 light_vec = normalize(L);
+	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
-	half4 clr;
+	float4 clr;
 	if (diffuse_factor > 0)
 	{
-		half3 halfway = normalize(H);
-		half specular_factor = specular_term(halfway, bump_normal, 4);
-		clr = half4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
+		float3 halfway = normalize(H);
+		float specular_factor = specular_term(halfway, bump_normal, 4);
+		clr = float4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
 	}
 	else
 	{
-		clr = half4(0, 0, 0, 1);
+		clr = float4(0, 0, 0, 1);
 	}
 
 	return clr;

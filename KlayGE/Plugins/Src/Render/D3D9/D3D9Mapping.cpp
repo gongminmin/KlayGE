@@ -32,7 +32,6 @@
 
 #include <d3d9.h>
 #include <d3dx9.h>
-#include <dxerr9.h>
 
 #include <boost/assert.hpp>
 
@@ -528,6 +527,7 @@ namespace KlayGE
 		}
 
 		ret.primitive_restart_support = false;
+		ret.multithread_rendering_support = false;
 		ret.argb8_support = true;
 
 		if (S_OK == re.D3DObject()->CheckDeviceFormat(d3d_caps.AdapterOrdinal,

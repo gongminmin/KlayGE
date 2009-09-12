@@ -40,11 +40,11 @@
 	<shader>
 		<![CDATA[
 // fresnel approximation
-half fast_fresnel(half3 eye, half3 normal, half R0)
+float fast_fresnel(float3 eye, float3 normal, float R0)
 {
 	// R0 = pow(1.0 - refractionIndexRatio, 2.0) / pow(1.0 + refractionIndexRatio, 2.0);
 
-	half edn = max(0.0f, dot(eye, normal));
+	float edn = max(0.0f, dot(eye, normal));
 	return R0 + (1.0f - R0) * pow(1.0f - edn, 5);
 }
 
@@ -81,7 +81,7 @@ void RefractVS(float4 pos			: POSITION,
 	float3 n_normal = normalize(out_normal);
 	refract_vec.xyz = refract(n_incident, n_normal, eta_ratio.g);
 	refract_vec.w = fast_fresnel(-n_incident, n_normal, 0.0977f);
-	dir_ss = mul(half4(refract_vec.xyz, 0), proj);
+	dir_ss = mul(float4(refract_vec.xyz, 0), proj);
 }
 
 float4 RefractPS(float3 normal			: TEXCOORD0,
@@ -93,7 +93,7 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	normal = normalize(normal);
 	incident.xyz = normalize(incident.xyz);
 
-	half2 tex = pos_ss.xy / pos_ss.w;
+	float2 tex = pos_ss.xy / pos_ss.w;
 	tex.y *= flip;
 	tex = tex / 2 + 0.5f;
 	float4 backface = BackFace_tex.Sample(BackFace_Sampler, tex);
@@ -105,32 +105,32 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	tex = tex / 2 + 0.5f;
 	backface = BackFace_tex.Sample(BackFace_Sampler, tex);
 
-	half3 back_face_normal = -restore_normal(backface.xy);
+	float3 back_face_normal = -restore_normal(backface.xy);
 
-	half3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
-	half3 reflect_vec = reflect(incident.xyz, normal);
+	float3x3 refract_rgb = my_refract3(refract_vec.xyz, back_face_normal, 1 / eta_ratio);
+	float3 reflect_vec = reflect(incident.xyz, normal);
 	
 	refract_rgb[0] = mul(float4(refract_rgb[0], 0), inv_view).xyz;
 	refract_rgb[1] = mul(float4(refract_rgb[1], 0), inv_view).xyz;
 	refract_rgb[2] = mul(float4(refract_rgb[2], 0), inv_view).xyz;
 	reflect_vec = mul(float4(reflect_vec, 0), inv_view).xyz;
 
-	half4 y = half4(skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[0]).r,
+	float4 y = float4(skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[0]).r,
 									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[1]).r,
 									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_rgb[2]).r,
 									skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, reflect_vec).r);
 	y = exp2(y * 65536 / 2048 - 16);
-	half4 refracted_c = half4(get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[0])).y,
+	float4 refracted_c = float4(get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[0])).y,
 									get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[1])).x,
 									get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_rgb[2])));
-	half2 reflected_c = get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, reflect_vec));
+	float2 reflected_c = get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, reflect_vec));
 	refracted_c *= refracted_c;
 	reflected_c *= reflected_c;
 
-	half3 refracted_clr = y.xyz * half3(refracted_c.x, (1 - refracted_c.z - refracted_c.w), refracted_c.y);
-	half3 reflected_clr = y.w * half3(reflected_c.y, (1 - reflected_c.y - reflected_c.x), reflected_c.x);
+	float3 refracted_clr = y.xyz * float3(refracted_c.x, (1 - refracted_c.z - refracted_c.w), refracted_c.y);
+	float3 reflected_clr = y.w * float3(reflected_c.y, (1 - reflected_c.y - reflected_c.x), reflected_c.x);
 
-	return float4(lerp(refracted_clr, reflected_clr, refract_vec.w) / half3(0.299f, 0.587f, 0.114f), 1);
+	return float4(lerp(refracted_clr, reflected_clr, refract_vec.w) / float3(0.299f, 0.587f, 0.114f), 1);
 }
 		]]>
 	</shader>

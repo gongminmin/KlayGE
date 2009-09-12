@@ -47,13 +47,13 @@ void GBufferVS(float4 pos : POSITION,
 	oPos = mul(pos_es, proj);
 	oNormal.xyz = normal;
 	oNormal.w = pos_es.z * depth_near_far_invfar.z;
-	oPosES = pos_es;
+	oPosES = pos_es.xyz;
 	
 	oTexCoord = texcoord;
 }
 
 void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 pos_es : TEXCOORD2,
-			out half4 oClr : SV_Target0, out half4 oNormalDepth : SV_Target1)
+			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
 {
 	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
@@ -61,11 +61,11 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 	float3 view_dir = -pos_es;
 	float3 light_dir = normalize(light_in_eye - pos_es);
 	
-	float diffuse = diffuse_term(light_dir, normal);
+	float diffuse = diffuse_term(light_dir, normal.xyz);
 	float specular = 0;
 	if (diffuse > 0)
 	{
-		specular = dot(normalize(light_dir + view_dir), normal);
+		specular = dot(normalize(light_dir + view_dir), normal.xyz);
 		if (specular > 0)
 		{
 			specular = pow(specular, 8.0f);
@@ -82,7 +82,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 	
 	float3 diffuse_clr = 1;//diffuse_tex.Sample(linear_sampler, texcoord).rgb;
 	float3 specular_clr = 0;
-	float4 color = float4(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f, 1);
+	float3 color = float3(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f);
 
 	oClr = StoreDiffuseSpecular(color, 0);
 }

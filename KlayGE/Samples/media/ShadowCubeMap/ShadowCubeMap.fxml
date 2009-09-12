@@ -96,7 +96,7 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 				float4 LightWorldPos : TEXCOORD0,
 				float4 LightProjPos[6] : TEXCOORD1) : SV_Target 
 {
-	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos).rgb;
+	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos.xyz).rgb;
 	LightWorldPos /= LightWorldPos.w;
 	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);
 	float dist = sqrt(dist_sq);
@@ -109,12 +109,12 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 	}
 	
 	float2 moments[6];
-	moments[0] = shadow_map_x_pos_tex.Sample(linear_border_sampler, LightProjPos[0].xy);
-	moments[1] = shadow_map_x_neg_tex.Sample(linear_border_sampler, LightProjPos[1].xy);
-	moments[2] = shadow_map_y_pos_tex.Sample(linear_border_sampler, LightProjPos[2].xy);
-	moments[3] = shadow_map_y_neg_tex.Sample(linear_border_sampler, LightProjPos[3].xy);
-	moments[4] = shadow_map_z_pos_tex.Sample(linear_border_sampler, LightProjPos[4].xy);
-	moments[5] = shadow_map_z_neg_tex.Sample(linear_border_sampler, LightProjPos[5].xy);
+	moments[0] = shadow_map_x_pos_tex.Sample(linear_border_sampler, LightProjPos[0].xy).xy;
+	moments[1] = shadow_map_x_neg_tex.Sample(linear_border_sampler, LightProjPos[1].xy).xy;
+	moments[2] = shadow_map_y_pos_tex.Sample(linear_border_sampler, LightProjPos[2].xy).xy;
+	moments[3] = shadow_map_y_neg_tex.Sample(linear_border_sampler, LightProjPos[3].xy).xy;
+	moments[4] = shadow_map_z_pos_tex.Sample(linear_border_sampler, LightProjPos[4].xy).xy;
+	moments[5] = shadow_map_z_neg_tex.Sample(linear_border_sampler, LightProjPos[5].xy).xy;
 
 	float3 final_color = 0;
 	for (int j = 0; j < 6; ++ j)

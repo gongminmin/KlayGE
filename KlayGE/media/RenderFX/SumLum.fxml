@@ -38,10 +38,10 @@ void SumLumVS(float4 pos : POSITION,
 float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 						float4 iTex1 : TEXCOORD1) : SV_Target
 {
-	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
+	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
 	float4 tex[2] = { iTex0, iTex1 };
 
-	half s = 0;
+	float s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
 		s += log(dot(src_tex.Sample(src_sampler, tex[i].xy).rgb, RGB_TO_LUM) + 0.001f);
@@ -56,7 +56,7 @@ float4 SumLum4x4IterativePS(float4 iTex0 : TEXCOORD0,
 {
 	float4 tex[2] = { iTex0, iTex1 };
 
-	half s = 0;
+	float s = 0;
 	for (int i = 0; i < 2; ++ i)
 	{
 		s += src_tex.Sample(src_sampler, tex[i].xy).r;

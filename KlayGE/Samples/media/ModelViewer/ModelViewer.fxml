@@ -108,8 +108,8 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 {
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
 
-	half3 diffuse, specular, emit;
-	half opacity;
+	float3 diffuse, specular, emit;
+	float opacity;
 	if (diffuse_clr.a > 0.5f)
 	{
 		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
@@ -128,7 +128,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	}
 	if (emit_clr.a > 0.5f)
 	{
-		emit = emit_tex.Sample(linear_sampler, uv);
+		emit = emit_tex.Sample(linear_sampler, uv).rgb;
 	}
 	else
 	{
@@ -143,14 +143,14 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		opacity = opacity_clr.r;
 	}
 	
-	half3 light_vec = normalize(L);
-	half diffuse_factor = dot(light_vec, normal);
+	float3 light_vec = normalize(L);
+	float diffuse_factor = dot(light_vec, normal);
 
-	half3 clr = (ambient_clr.rgb + emit) * diffuse;
+	float3 clr = (ambient_clr.rgb + emit) * diffuse;
 	if (diffuse_factor > 0)
 	{
-		half3 half_way = normalize(H);
-		half specular_factor = pow(saturate(dot(half_way, normal)), shininess);
+		float3 half_way = normalize(H);
+		float specular_factor = pow(saturate(dot(half_way, normal)), shininess);
 		clr += diffuse.rgb * diffuse_factor + specular_level * specular * specular_factor;
 	}
 

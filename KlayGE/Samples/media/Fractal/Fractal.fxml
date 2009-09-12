@@ -24,15 +24,15 @@ void MandelbrotVS(float4 pos : POSITION,
 	oTexcoord1 = oTexcoord0 * 2.4 - float2(1.8, -1.2 * flip);
 }
 
-half4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
+float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
 				float2 texcoord1 : TEXCOORD1) : SV_Target
 {
-	half2 z = fractal_tex.Sample(fractal_sampler, texcoord0).rg;
-	half2 c = texcoord1;
+	float2 z = fractal_tex.Sample(fractal_sampler, texcoord0).rg;
+	float2 c = texcoord1;
 
-	z = half2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
+	z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
 
-	return half4(z.xy, 1, 1);
+	return float4(z.xy, 1, 1);
 }
 		]]>
 	</shader>
@@ -57,7 +57,7 @@ void ShowVS(float4 pos : POSITION,
 
 float4 ShowPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
-	half2 z = fractal_tex.Sample(fractal_sampler, texCoord0.xy).rg;
+	float2 z = fractal_tex.Sample(fractal_sampler, texCoord0.xy).rg;
 	return float4((dot(z, z) >= 4) * texCoord0, 1);
 }
 		]]>

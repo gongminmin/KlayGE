@@ -12,7 +12,7 @@
 
 	<shader>
 		<![CDATA[
-half4 BrightPass(half4 c)
+float4 BrightPass(half4 c)
 {
 	const float BRIGHT_THRESHOLD = 1;
 	if (any(c.rgb > BRIGHT_THRESHOLD))

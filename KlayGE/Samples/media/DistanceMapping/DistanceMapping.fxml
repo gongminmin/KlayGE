@@ -49,13 +49,13 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oV = vTanView;
 }
 
-half4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
+float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2) : SV_Target
 {
-	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
+	float3 view = normalize(V) * float3(1, 1, 16) * 0.06;
 
-	half3 texUV = texCoord0;
+	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
 		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
@@ -66,25 +66,25 @@ half4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 		clip(-1);
 	}
 
-	half2 dx = ddx(texCoord0.xy);
-	half2 dy = ddy(texCoord0.xy);
+	float2 dx = ddx(texCoord0.xy);
+	float2 dy = ddy(texCoord0.xy);
 
-	half3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
+	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 
-	half3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
-	half3 light_vec = normalize(L);
-	half diffuse_factor = diffuse_term(light_vec, bump_normal);
+	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
+	float3 light_vec = normalize(L);
+	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
-	return half4(diffuse * diffuse_factor, 1);
+	return float4(diffuse * diffuse_factor, 1);
 }
 
-half4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
+float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 						float3 L		: TEXCOORD1,
 						float3 V		: TEXCOORD2) : SV_Target
 {
-	half3 view = normalize(V) * half3(1, 1, 16) * 0.06;
+	float3 view = normalize(V) * float3(1, 1, 16) * 0.06;
 
-	half3 texUV = texCoord0;
+	float3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
 	{
 		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
@@ -95,13 +95,13 @@ half4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 		clip(-1);
 	}
 
-	half3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy);
+	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
 
-	half3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
-	half3 light_vec = normalize(L);
-	half diffuse_factor = diffuse_term(light_vec, bump_normal);
+	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
+	float3 light_vec = normalize(L);
+	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
-	return half4(diffuse * diffuse_factor, 1);
+	return float4(diffuse * diffuse_factor, 1);
 }
 		]]>
 	</shader>

@@ -202,7 +202,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 			float2 dxdy = (intersect.xy - ps_in.CenterView.xy) / point_radius;
 			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
 			float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb / 50, 0);
-			clr = float4((dot(normalize(LightPos - intersect_ws), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
+			clr = float4((dot(normalize(LightPos - intersect_ws.xyz), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
 		}
 	}
 	
@@ -307,7 +307,7 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0);
+		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0).xyz;
 
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
@@ -353,7 +353,7 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 	float4 cur_pos = particle_pos_buff.Load(vid);
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = particle_vel_buff.Load(vid);
+		float3 cur_vel = particle_vel_buff.Load(vid).xyz;
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
 		cur_pos.w -= elapse_time;
@@ -433,7 +433,7 @@ void TerrainVS(float4 pos			: POSITION,
 	pos = pos.xzyw;
 	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
 	
-	oLightVec_Depth.xyz = LightPos - pos;
+	oLightVec_Depth.xyz = LightPos - pos.xyz;
 	
 	oPos = mul(pos, mvp);
 	oLightVec_Depth.w = oPos.w;

@@ -758,6 +758,7 @@ namespace KlayGE
 		{
 			caps_.primitive_restart_support = false;
 		}
+		caps_.multithread_rendering_support = false;
 		caps_.argb8_support = true;
 		if (glloader_GL_EXT_texture_compression_rgtc())
 		{

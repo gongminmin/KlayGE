@@ -26,15 +26,15 @@
 float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 {
 	const float MIDDLE_GREY = 0.36f;
-	const half3 RGB_TO_LUM = half3(0.27, 0.67, 0.06);
-	const half3 BLUE_SHIFT = half3(1.05, 0.97, 1.27); 
+	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
+	const float3 BLUE_SHIFT = float3(1.05, 0.97, 1.27); 
 
 	color += blur * 0.25f;
 
 	if (blue_shift)
 	{
-		half blue_shift_coef = 1.0f - (adapted_lum + 1.5f) / 4.1f;
-		half3 rod_clr = dot(color, RGB_TO_LUM) * BLUE_SHIFT;
+		float blue_shift_coef = 1.0f - (adapted_lum + 1.5f) / 4.1f;
+		float3 rod_clr = dot(color, RGB_TO_LUM) * BLUE_SHIFT;
 		color = lerp(color, rod_clr, saturate(blue_shift_coef));
 	}
 
@@ -57,13 +57,13 @@ void ToneMapping30VS(float4 pos : POSITION,
 
 float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 {
-	return ToneMapping(src_tex.Sample(linear_sampler, iTex.xy), bloom_tex.Sample(linear_sampler, iTex.xy), iTex.z);
+	return ToneMapping(src_tex.Sample(linear_sampler, iTex.xy).rgb, bloom_tex.Sample(linear_sampler, iTex.xy).rgb, iTex.z);
 }
 
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 {
-	half lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
-	return ToneMapping(src_tex.Sample(linear_sampler, iTex), bloom_tex.Sample(linear_sampler, iTex), lum);
+	float lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
+	return ToneMapping(src_tex.Sample(linear_sampler, iTex).rgb, bloom_tex.Sample(linear_sampler, iTex).rgb, lum);
 }
 		]]>
 	</shader>

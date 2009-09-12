@@ -48,9 +48,9 @@ float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
 					float4 oTex6 : TEXCOORD6,
 					float4 oTex7 : TEXCOORD7) : SV_Target
 {
-	const half3 rgb_to_lum = half3(0.299, 0.587, 0.114);
+	const float3 rgb_to_lum = float3(0.299, 0.587, 0.114);
 
-	half4 s = src_tex.Sample(src_sampler, oTex0.xy)
+	float4 s = src_tex.Sample(src_sampler, oTex0.xy)
 				+ src_tex.Sample(src_sampler, oTex0.zw)
 				+ src_tex.Sample(src_sampler, oTex1.xy)
 				+ src_tex.Sample(src_sampler, oTex1.zw)
@@ -97,8 +97,8 @@ float4 Downsample8x8PS(float4 oTex0 : TEXCOORD0,
 		<![CDATA[
 float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	half lum = src_tex.Sample(src_sampler, tex_coord0).r;
-	half2 t = half2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / cell_per_row_line) / half2(32, 1);
+	float lum = src_tex.Sample(src_sampler, tex_coord0).r;
+	float2 t = float2(floor(lum * 31) / 32, 0) + frac(tex_coord0 / cell_per_row_line) / float2(32, 1);
 	return lum * lums_tex.Sample(lums_sampler, t).r;
 }
 		]]>
