@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLX_NV_copy_image">
+<gl_extension name="GLX_NV_copy_image" reg_no="376">
 	<functions>
 		<function name="glXCopyImageSubDataNV" return="void">
 			<params>

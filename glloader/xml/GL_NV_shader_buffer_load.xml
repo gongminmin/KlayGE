@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_shader_buffer_load">
+<gl_extension name="GL_NV_shader_buffer_load" reg_no="379">
 	<tokens>
 		<token name="GL_BUFFER_GPU_ADDRESS_NV" value="0x8F1D"/>
 		<token name="GL_GPU_ADDRESS_NV" value="0x8F34"/>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_vertex_buffer_unified_memory">
+<gl_extension name="GL_NV_vertex_buffer_unified_memory" reg_no="380">
 	<tokens>
 		<token name="GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV" value="0x8F1E"/>
 		<token name="GL_ELEMENT_ARRAY_UNIFIED_NV" value="0x8F1F"/>

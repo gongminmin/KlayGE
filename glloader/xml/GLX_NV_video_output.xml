@@ -2,7 +2,7 @@
 
 <gl_extension name="GLX_NV_video_output" reg_no="348">
 	<typedefs>
-		<typedef type="unsigned int" synonym="GLXVideoDeviceNV"/>
+		<typedef type="struct { unsigned int dummy; }*" synonym="GLXVideoDeviceNV"/>
 	</typedefs>
 
 	<tokens>

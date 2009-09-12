@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_separate_shader_objects">
+<gl_extension name="GL_EXT_separate_shader_objects" reg_no="377">
 	<tokens>
 		<token name="GL_ACTIVE_PROGRAM_EXT" value="0x8B8D"/>
 	</tokens>
