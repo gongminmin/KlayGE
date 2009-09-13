@@ -1,0 +1,135 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_video_capture" reg_no="374">
+	<tokens>
+		<token name="GL_VIDEO_BUFFER_NV" value="0x9020"/>
+		<token name="GL_VIDEO_BUFFER_BINDING_NV" value="0x9021"/>
+		<token name="GL_FIELD_UPPER_NV" value="0x9022"/>
+		<token name="GL_FIELD_LOWER_NV" value="0x9023"/>
+		<token name="GL_NUM_VIDEO_CAPTURE_STREAMS_NV" value="0x9024"/>
+		<token name="GL_NEXT_VIDEO_CAPTURE_BUFFER_STATUS_NV" value="0x9025"/>
+		<token name="GL_LAST_VIDEO_CAPTURE_STATUS_NV" value="0x9027"/>
+		<token name="GL_VIDEO_BUFFER_PITCH_NV" value="0x9028"/>
+		<token name="GL_VIDEO_CAPTURE_FRAME_WIDTH_NV" value="0x9038"/>
+		<token name="GL_VIDEO_CAPTURE_FRAME_HEIGHT_NV" value="0x9039"/>
+		<token name="GL_VIDEO_CAPTURE_FIELD_UPPER_HEIGHT_NV" value="0x903A"/>
+		<token name="GL_VIDEO_CAPTURE_FIELD_LOWER_HEIGHT_NV" value="0x903B"/>
+		<token name="GL_VIDEO_CAPTURE_TO_422_SUPPORTED_NV" value="0x9026"/>
+		<token name="GL_VIDEO_COLOR_CONVERSION_MATRIX_NV" value="0x9029"/>
+		<token name="GL_VIDEO_COLOR_CONVERSION_MAX_NV" value="0x902A"/>
+		<token name="GL_VIDEO_COLOR_CONVERSION_MIN_NV" value="0x902B"/>
+		<token name="GL_VIDEO_COLOR_CONVERSION_OFFSET_NV" value="0x902C"/>
+		<token name="GL_VIDEO_BUFFER_INTERNAL_FORMAT_NV" value="0x902D"/>
+		<token name="GL_VIDEO_CAPTURE_SURFACE_ORIGIN_NV" value="0x903C"/>
+		<token name="GL_PARTIAL_SUCCESS_NV" value="0x902E"/>
+		<token name="GL_SUCCESS_NV" value="0x902F"/>
+		<token name="GL_FAILURE_NV" value="0x9030"/>
+		<token name="GL_YCBYCR8_422_NV" value="0x9031"/>
+		<token name="GL_YCBAYCR8A_4224_NV" value="0x9032"/>
+		<token name="GL_Z6Y10Z6CB10Z6Y10Z6CR10_422_NV" value="0x9033"/>
+		<token name="GL_Z6Y10Z6CB10Z6A10Z6Y10Z6CR10Z6A10_4224_NV" value="0x9034"/>
+		<token name="GL_Z4Y12Z4CB12Z4Y12Z4CR12_422_NV" value="0x9035"/>
+		<token name="GL_Z4Y12Z4CB12Z4A12Z4Y12Z4CR12Z4A12_4224_NV" value="0x9036"/>
+		<token name="GL_Z4Y12Z4CB12Z4CR12_444_NV" value="0x9037"/>
+	</tokens>
+
+	<functions>
+		<function name="glBeginVideoCaptureNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+			</params>
+		</function>
+
+		<function name="glBindVideoCaptureStreamBufferNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="frame_region"/>
+				<param type="GLintptrARB" name="offset"/>
+			</params>
+		</function>
+
+		<function name="glBindVideoCaptureStreamTextureNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="frame_region"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+
+		<function name="glEndVideoCaptureNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+			</params>
+		</function>
+
+		<function name="glGetVideoCaptureivNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+
+		<function name="glGetVideoCaptureStreamivNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+
+		<function name="glGetVideoCaptureStreamfvNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+
+		<function name="glGetVideoCaptureStreamdvNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+
+		<function name="glVideoCaptureNV" return="GLenum">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint*" name="sequence_num"/>
+				<param type="GLuint64EXT*" name="capture_time"/>
+			</params>
+		</function>
+		<function name="glVideoCaptureStreamParameterivNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glVideoCaptureStreamParameterfvNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glVideoCaptureStreamParameterdvNV" return="void">
+			<params>
+				<param type="GLuint" name="video_capture_slot"/>
+				<param type="GLuint" name="stream"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLdouble*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

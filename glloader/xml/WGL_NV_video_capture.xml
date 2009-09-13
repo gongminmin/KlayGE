@@ -1,0 +1,47 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_NV_video_capture" reg_no="374">
+	<typedefs>
+		<typedef type="void*" synonym="HVIDEOINPUTDEVICENV"/>
+	</typedefs>
+
+	<tokens>
+		<token name="WGL_NUM_VIDEO_CAPTURE_SLOTS_NV" value="0x20CF"/>
+		<token name="WGL_UNIQUE_ID_NV" value="0x20CE"/>
+	</tokens>
+
+	<functions>
+		<function name="wglBindVideoCaptureDeviceNV" return="BOOL">
+			<params>
+				<param type="UINT" name="uVideoSlot"/>
+				<param type="HVIDEOINPUTDEVICENV" name="hDevice"/>
+			</params>
+		</function>
+		<function name="wglEnumerateVideoCaptureDevicesNV" return="UINT">
+			<params>
+				<param type="HDC" name="hDc"/>
+				<param type="HVIDEOINPUTDEVICENV*" name="phDeviceList"/>
+			</params>
+		</function>
+		<function name="wglLockVideoCaptureDeviceNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hDc"/>
+				<param type="HVIDEOINPUTDEVICENV" name="hDevice"/>
+			</params>
+		</function>
+		<function name="wglQueryVideoCaptureDeviceNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hDc"/>
+				<param type="HVIDEOINPUTDEVICENV" name="hDevice"/>
+				<param type="int" name="iAttribute"/>
+				<param type="int*" name="piValue"/>
+			</params>
+		</function>
+		<function name="wglReleaseVideoCaptureDeviceNV" return="BOOL">
+			<params>
+				<param type="HDC" name="hDc"/>
+				<param type="HVIDEOINPUTDEVICENV" name="hDevice"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

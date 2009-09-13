@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_APPLE_rgb_422" reg_no="373">
+	<tokens>
+		<token name="GL_RGB_422_APPLE" value="0x8A1F"/>
+	</tokens>
+</gl_extension>
