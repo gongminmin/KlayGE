@@ -181,11 +181,12 @@ namespace
 	{
 		Texture::TextureType in_type;
 		uint32_t in_width, in_height, in_depth;
-		uint16_t in_numMipMaps;
+		uint32_t in_num_mipmaps;
+		uint32_t in_array_size;
 		ElementFormat in_format;
 		std::vector<ElementInitData> in_data;
 		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data, in_data_block);
+		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
 		if (EF_ABGR16F == in_format)
 		{
@@ -235,8 +236,8 @@ namespace
 			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i]);
 		}
 
-		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_numMipMaps, EF_R16, y_data);
-		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_numMipMaps, EF_BC5, c_data);
+		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, EF_R16, y_data);
+		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_num_mipmaps, in_array_size, EF_BC5, c_data);
 
 		float mse = 0;
 		{

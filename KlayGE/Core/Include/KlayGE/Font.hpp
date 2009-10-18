@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2003-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了KFontLoader (2009.10.16)
 //
 // 3.7.0
 // 新的基于distance的字体格式 (2008.2.13)
@@ -58,10 +61,52 @@
 
 namespace KlayGE
 {
+	class KLAYGE_CORE_API KFontLoader
+	{
+	public:
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(push, 1)
+#endif
+		struct font_info
+		{
+			int16_t top;
+			int16_t left;
+			uint16_t width;
+			uint16_t height;
+		};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+	#pragma pack(pop)
+#endif
+
+	public:
+		explicit KFontLoader(std::string const & font_name);
+
+		uint32_t CharSize() const;
+		int16_t DistBase() const;
+		int16_t DistScale() const;
+
+		int32_t CharIndex(wchar_t ch) const;
+		Vector_T<uint16_t, 2> CharAdvance(wchar_t ch) const;
+
+		font_info const & CharInfo(int32_t offset) const;
+		uint8_t const * DistanceData(int32_t offset) const;
+
+	private:
+		uint32_t char_size_;
+		int16_t dist_base_;
+		int16_t dist_scale_;
+		closed_hash_map<int32_t, int32_t, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::pool_allocator<std::pair<int32_t, int32_t> > > char_index_;
+		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
+		std::vector<font_info> char_info_;
+		std::vector<uint8_t> distances_;
+	};
+
 	class KLAYGE_CORE_API FontRenderable : public RenderableHelper
 	{
 	public:
-		explicit FontRenderable(std::string const & fontName);
+		explicit FontRenderable(std::string const & font_name);
 
 		RenderTechniquePtr const & GetRenderTechnique() const;
 
@@ -108,14 +153,6 @@ namespace KlayGE
 			{
 			}
 		};
-
-		struct font_info
-		{
-			int16_t top;
-			int16_t left;
-			uint16_t width;
-			uint16_t height;
-		};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(pop)
 #endif
@@ -145,15 +182,7 @@ namespace KlayGE
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 		RenderEffectParameterPtr mvp_ep_;
 
-		uint32_t kfont_char_size_;
-		int16_t dist_base_;
-		int16_t dist_scale_;
-		closed_hash_map<int32_t, int32_t, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, int32_t> > > char_index_;
-		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
-		std::vector<font_info> char_info_;
-		std::vector<uint8_t> distances_;
+		KFontLoader kfont_loader_;
 	};
 
 	// 在3D环境中画出文字

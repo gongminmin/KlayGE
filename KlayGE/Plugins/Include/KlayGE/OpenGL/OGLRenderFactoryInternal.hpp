@@ -27,13 +27,13 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		TexturePtr MakeTexture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size,
+		TexturePtr MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
-		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size,
+		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
-		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t array_size,
-				uint16_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
-		TexturePtr MakeTextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size,
+		TexturePtr MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
+				uint32_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+		TexturePtr MakeTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
 		FrameBufferPtr MakeFrameBuffer();

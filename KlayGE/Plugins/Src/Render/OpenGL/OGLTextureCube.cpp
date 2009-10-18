@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	OGLTextureCube::OGLTextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	OGLTextureCube::OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: OGLTexture(TT_Cube, array_size, sample_count, sample_quality, access_hint)
 	{
@@ -90,7 +90,7 @@ namespace KlayGE
 		for (int face = 0; face < 6; ++ face)
 		{
 			uint32_t s = size;
-			for (uint16_t level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t level = 0; level < numMipMaps_; ++ level)
 			{
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 				if (IsCompressedFormat(format_))
@@ -183,7 +183,7 @@ namespace KlayGE
 				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
 				for (int face = 0; face < 6; ++ face)
 				{
-					for (int level = 0; level < numMipMaps_; ++ level)
+					for (uint32_t level = 0; level < numMipMaps_; ++ level)
 					{
 						glCopyImageSubDataNV(
 							texture_, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
@@ -202,7 +202,7 @@ namespace KlayGE
 
 				for (int face = 0; face < 6; ++ face)
 				{
-					for (int level = 0; level < numMipMaps_; ++ level)
+					for (uint32_t level = 0; level < numMipMaps_; ++ level)
 					{
 						glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[face * numMipMaps_ + level]);
 
@@ -249,7 +249,7 @@ namespace KlayGE
 		{
 			for (int face = 0; face < 6; ++ face)
 			{
-				for (int level = 0; level < numMipMaps_; ++ level)
+				for (uint32_t level = 0; level < numMipMaps_; ++ level)
 				{
 					this->CopyToTextureCube(target, static_cast<CubeFaces>(face), level, target.Width(level), target.Height(level), 0, 0,
 						this->Width(level), this->Height(level), 0, 0);
@@ -597,7 +597,7 @@ namespace KlayGE
 		widthes_.resize(numMipMaps_);
 
 		glBindTexture(target_type_, texture_);
-		for (uint16_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_WIDTH, &w);
 			widthes_[level] = w;

@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	D3D11Texture1D::D3D11Texture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	D3D11Texture1D::D3D11Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D11Texture(TT_1D, sample_count, sample_quality, access_hint)
 	{
@@ -63,9 +63,9 @@ namespace KlayGE
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int j = 0; j < array_size_; ++ j)
+			for (uint32_t j = 0; j < array_size_; ++ j)
 			{
-				for (int i = 0; i < numMipMaps_; ++ i)
+				for (uint32_t i = 0; i < numMipMaps_; ++ i)
 				{
 					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
 					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
@@ -259,13 +259,13 @@ namespace KlayGE
 	{
 		d3dTexture1D_->GetDesc(&desc_);
 
-		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
-		array_size_ = static_cast<uint16_t>(desc_.ArraySize);
+		numMipMaps_ = desc_.MipLevels;
+		array_size_ = desc_.ArraySize;
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);
 		widthes_[0] = desc_.Width;
-		for (uint16_t level = 1; level < numMipMaps_; ++ level)
+		for (uint32_t level = 1; level < numMipMaps_; ++ level)
 		{
 			widthes_[level] = widthes_[level - 1] / 2;
 		}

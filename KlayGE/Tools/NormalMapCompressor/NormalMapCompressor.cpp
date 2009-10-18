@@ -169,11 +169,12 @@ namespace
 	{
 		Texture::TextureType in_type;
 		uint32_t in_width, in_height, in_depth;
-		uint16_t in_numMipMaps;
+		uint32_t in_num_mipmaps;
+		uint32_t in_array_size;
 		ElementFormat in_format;
 		std::vector<ElementInitData> in_data;
 		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_numMipMaps, in_format, in_data, in_data_block);
+		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
 		if (in_format != EF_ARGB8)
 		{
@@ -192,7 +193,7 @@ namespace
 			CompressNormalMapSubresource(the_width, the_height, in_format, in_data[sub_res], new_format, new_data[sub_res], new_data_block[sub_res]);
 		}
 
-		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_numMipMaps, new_format, new_data);
+		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, new_format, new_data);
 
 		float mse = 0;
 		{

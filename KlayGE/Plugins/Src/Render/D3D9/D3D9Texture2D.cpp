@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	D3D9Texture2D::D3D9Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D9Texture(TT_2D, sample_count, sample_quality, access_hint),
 						auto_gen_mipmaps_(false)
@@ -96,7 +96,7 @@ namespace KlayGE
 			}
 			else
 			{
-				for (int level = 0; level < numMipMaps_; ++ level)
+				for (uint32_t level = 0; level < numMipMaps_; ++ level)
 				{
 					Texture::Mapper mapper(*this, level, TMA_Write_Only, 0, 0, widths_[level], heights_[level]);
 
@@ -366,12 +366,12 @@ namespace KlayGE
 		D3DSURFACE_DESC desc;
 		std::memset(&desc, 0, sizeof(desc));
 
-		numMipMaps_ = static_cast<uint16_t>(d3dTexture2D_->GetLevelCount());
+		numMipMaps_ = d3dTexture2D_->GetLevelCount();
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widths_.resize(numMipMaps_);
 		heights_.resize(numMipMaps_);
-		for (uint16_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < numMipMaps_; ++ level)
 		{
 			TIF(d3dTexture2D_->GetLevelDesc(level, &desc));
 

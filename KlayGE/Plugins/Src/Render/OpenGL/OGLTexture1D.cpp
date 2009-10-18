@@ -44,7 +44,7 @@
 
 namespace KlayGE
 {
-	OGLTexture1D::OGLTexture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	OGLTexture1D::OGLTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: OGLTexture(TT_1D, array_size, sample_count, sample_quality, access_hint)
 	{
@@ -87,7 +87,7 @@ namespace KlayGE
 		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, 0);
 
-		for (uint16_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 			if (IsCompressedFormat(format_))
@@ -176,7 +176,7 @@ namespace KlayGE
 			if (glloader_GL_NV_copy_image())
 			{
 				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-				for (int level = 0; level < numMipMaps_; ++ level)
+				for (uint32_t level = 0; level < numMipMaps_; ++ level)
 				{
 					glCopyImageSubDataNV(
 						texture_, target_type_, level,
@@ -192,7 +192,7 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				for (int level = 0; level < numMipMaps_; ++ level)
+				for (uint32_t level = 0; level < numMipMaps_; ++ level)
 				{
 					glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 
@@ -235,7 +235,7 @@ namespace KlayGE
 		}
 		else
 		{
-			for (int level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t level = 0; level < numMipMaps_; ++ level)
 			{
 				this->CopyToTexture1D(target, level, target.Width(level), 0, this->Width(level), 0);
 			}
@@ -550,7 +550,7 @@ namespace KlayGE
 		widthes_.resize(numMipMaps_);
 
 		glBindTexture(target_type_, texture_);
-		for (uint16_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < numMipMaps_; ++ level)
 		{
 			glGetTexLevelParameteriv(target_type_, level, GL_TEXTURE_WIDTH, &w);
 			widthes_[level] = w;

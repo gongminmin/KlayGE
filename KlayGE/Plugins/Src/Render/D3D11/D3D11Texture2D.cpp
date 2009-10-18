@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	D3D11Texture2D::D3D11Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	D3D11Texture2D::D3D11Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D11Texture(TT_2D, sample_count, sample_quality, access_hint)
 	{
@@ -84,9 +84,9 @@ namespace KlayGE
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int j = 0; j < array_size_; ++ j)
+			for (uint32_t j = 0; j < array_size_; ++ j)
 			{
-				for (int i = 0; i < numMipMaps_; ++ i)
+				for (uint32_t i = 0; i < numMipMaps_; ++ i)
 				{
 					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
 					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
@@ -191,7 +191,7 @@ namespace KlayGE
 		{
 			if ((this->SampleCount() > 1) && target.SampleCount() == 1)
 			{
-				for (uint16_t l = 0; l < this->NumMipMaps(); ++ l)
+				for (uint32_t l = 0; l < this->NumMipMaps(); ++ l)
 				{
 					d3d_imm_ctx_->ResolveSubresource(other.D3DTexture().get(), D3D11CalcSubresource(l, 0, 1),
 						d3dTexture2D_.get(), D3D11CalcSubresource(l, 0, 1), D3D11Mapping::MappingFormat(target.Format()));
@@ -392,15 +392,15 @@ namespace KlayGE
 	{
 		d3dTexture2D_->GetDesc(&desc_);
 
-		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
-		array_size_ = static_cast<uint16_t>(desc_.ArraySize);
+		numMipMaps_ = desc_.MipLevels;
+		array_size_ = desc_.ArraySize;
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);
 		heights_.resize(numMipMaps_);
 		widthes_[0] = desc_.Width;
 		heights_[0] = desc_.Height;
-		for (uint16_t level = 1; level < numMipMaps_; ++ level)
+		for (uint32_t level = 1; level < numMipMaps_; ++ level)
 		{
 			widthes_[level] = widthes_[level - 1] / 2;
 			heights_[level] = heights_[level - 1] / 2;

@@ -1,8 +1,11 @@
 // Texture.cpp
 // KlayGE 纹理类 实现文件
-// Ver 3.8.0
+// Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 支持Texture Array的读写 (2009.10.15)
 //
 // 3.8.0
 // 支持BC4/BC5纹理压缩的读写和转换 (2008.12.8)
@@ -21,6 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -159,9 +163,529 @@ namespace
 		DDSCAPS2		dds_caps;			// direct draw surface capabilities
 		uint32_t		reserved2;
 	};
+
+	enum D3D10_RESOURCE_DIMENSION
+	{
+		D3D10_RESOURCE_DIMENSION_UNKNOWN = 0,
+		D3D10_RESOURCE_DIMENSION_BUFFER = 1,
+		D3D10_RESOURCE_DIMENSION_TEXTURE1D = 2,
+		D3D10_RESOURCE_DIMENSION_TEXTURE2D = 3,
+		D3D10_RESOURCE_DIMENSION_TEXTURE3D = 4,
+	};
+
+	enum D3D10_RESOURCE_MISC_FLAG
+    {
+		D3D10_RESOURCE_MISC_GENERATE_MIPS = 0x1L,
+		D3D10_RESOURCE_MISC_SHARED = 0x2L,
+		D3D10_RESOURCE_MISC_TEXTURECUBE	= 0x4L,
+		D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x10L,
+		D3D10_RESOURCE_MISC_GDI_COMPATIBLE = 0x20L
+    };
+
+	struct DDS_HEADER_DXT10
+	{
+		uint32_t dxgi_format;
+		D3D10_RESOURCE_DIMENSION resource_dim;
+		uint32_t misc_flag;
+		uint32_t array_size;
+		uint32_t reserved;
+	};
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(pop)
 #endif
+
+#ifndef DXGI_FORMAT_DEFINED
+	enum DXGI_FORMAT
+	{
+		DXGI_FORMAT_UNKNOWN	                    = 0,
+		DXGI_FORMAT_R32G32B32A32_TYPELESS       = 1,
+		DXGI_FORMAT_R32G32B32A32_FLOAT          = 2,
+		DXGI_FORMAT_R32G32B32A32_UINT           = 3,
+		DXGI_FORMAT_R32G32B32A32_SINT           = 4,
+		DXGI_FORMAT_R32G32B32_TYPELESS          = 5,
+		DXGI_FORMAT_R32G32B32_FLOAT             = 6,
+		DXGI_FORMAT_R32G32B32_UINT              = 7,
+		DXGI_FORMAT_R32G32B32_SINT              = 8,
+		DXGI_FORMAT_R16G16B16A16_TYPELESS       = 9,
+		DXGI_FORMAT_R16G16B16A16_FLOAT          = 10,
+		DXGI_FORMAT_R16G16B16A16_UNORM          = 11,
+		DXGI_FORMAT_R16G16B16A16_UINT           = 12,
+		DXGI_FORMAT_R16G16B16A16_SNORM          = 13,
+		DXGI_FORMAT_R16G16B16A16_SINT           = 14,
+		DXGI_FORMAT_R32G32_TYPELESS             = 15,
+		DXGI_FORMAT_R32G32_FLOAT                = 16,
+		DXGI_FORMAT_R32G32_UINT                 = 17,
+		DXGI_FORMAT_R32G32_SINT                 = 18,
+		DXGI_FORMAT_R32G8X24_TYPELESS           = 19,
+		DXGI_FORMAT_D32_FLOAT_S8X24_UINT        = 20,
+		DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS    = 21,
+		DXGI_FORMAT_X32_TYPELESS_G8X24_UINT     = 22,
+		DXGI_FORMAT_R10G10B10A2_TYPELESS        = 23,
+		DXGI_FORMAT_R10G10B10A2_UNORM           = 24,
+		DXGI_FORMAT_R10G10B10A2_UINT            = 25,
+		DXGI_FORMAT_R11G11B10_FLOAT             = 26,
+		DXGI_FORMAT_R8G8B8A8_TYPELESS           = 27,
+		DXGI_FORMAT_R8G8B8A8_UNORM              = 28,
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB         = 29,
+		DXGI_FORMAT_R8G8B8A8_UINT               = 30,
+		DXGI_FORMAT_R8G8B8A8_SNORM              = 31,
+		DXGI_FORMAT_R8G8B8A8_SINT               = 32,
+		DXGI_FORMAT_R16G16_TYPELESS             = 33,
+		DXGI_FORMAT_R16G16_FLOAT                = 34,
+		DXGI_FORMAT_R16G16_UNORM                = 35,
+		DXGI_FORMAT_R16G16_UINT                 = 36,
+		DXGI_FORMAT_R16G16_SNORM                = 37,
+		DXGI_FORMAT_R16G16_SINT                 = 38,
+		DXGI_FORMAT_R32_TYPELESS                = 39,
+		DXGI_FORMAT_D32_FLOAT                   = 40,
+		DXGI_FORMAT_R32_FLOAT                   = 41,
+		DXGI_FORMAT_R32_UINT                    = 42,
+		DXGI_FORMAT_R32_SINT                    = 43,
+		DXGI_FORMAT_R24G8_TYPELESS              = 44,
+		DXGI_FORMAT_D24_UNORM_S8_UINT           = 45,
+		DXGI_FORMAT_R24_UNORM_X8_TYPELESS       = 46,
+		DXGI_FORMAT_X24_TYPELESS_G8_UINT        = 47,
+		DXGI_FORMAT_R8G8_TYPELESS               = 48,
+		DXGI_FORMAT_R8G8_UNORM                  = 49,
+		DXGI_FORMAT_R8G8_UINT                   = 50,
+		DXGI_FORMAT_R8G8_SNORM                  = 51,
+		DXGI_FORMAT_R8G8_SINT                   = 52,
+		DXGI_FORMAT_R16_TYPELESS                = 53,
+		DXGI_FORMAT_R16_FLOAT                   = 54,
+		DXGI_FORMAT_D16_UNORM                   = 55,
+		DXGI_FORMAT_R16_UNORM                   = 56,
+		DXGI_FORMAT_R16_UINT                    = 57,
+		DXGI_FORMAT_R16_SNORM                   = 58,
+		DXGI_FORMAT_R16_SINT                    = 59,
+		DXGI_FORMAT_R8_TYPELESS                 = 60,
+		DXGI_FORMAT_R8_UNORM                    = 61,
+		DXGI_FORMAT_R8_UINT                     = 62,
+		DXGI_FORMAT_R8_SNORM                    = 63,
+		DXGI_FORMAT_R8_SINT                     = 64,
+		DXGI_FORMAT_A8_UNORM                    = 65,
+		DXGI_FORMAT_R1_UNORM                    = 66,
+		DXGI_FORMAT_R9G9B9E5_SHAREDEXP          = 67,
+		DXGI_FORMAT_R8G8_B8G8_UNORM             = 68,
+		DXGI_FORMAT_G8R8_G8B8_UNORM             = 69,
+		DXGI_FORMAT_BC1_TYPELESS                = 70,
+		DXGI_FORMAT_BC1_UNORM                   = 71,
+		DXGI_FORMAT_BC1_UNORM_SRGB              = 72,
+		DXGI_FORMAT_BC2_TYPELESS                = 73,
+		DXGI_FORMAT_BC2_UNORM                   = 74,
+		DXGI_FORMAT_BC2_UNORM_SRGB              = 75,
+		DXGI_FORMAT_BC3_TYPELESS                = 76,
+		DXGI_FORMAT_BC3_UNORM                   = 77,
+		DXGI_FORMAT_BC3_UNORM_SRGB              = 78,
+		DXGI_FORMAT_BC4_TYPELESS                = 79,
+		DXGI_FORMAT_BC4_UNORM                   = 80,
+		DXGI_FORMAT_BC4_SNORM                   = 81,
+		DXGI_FORMAT_BC5_TYPELESS                = 82,
+		DXGI_FORMAT_BC5_UNORM                   = 83,
+		DXGI_FORMAT_BC5_SNORM                   = 84,
+		DXGI_FORMAT_B5G6R5_UNORM                = 85,
+		DXGI_FORMAT_B5G5R5A1_UNORM              = 86,
+		DXGI_FORMAT_B8G8R8A8_UNORM              = 87,
+		DXGI_FORMAT_B8G8R8X8_UNORM              = 88,
+		DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM  = 89,
+		DXGI_FORMAT_B8G8R8A8_TYPELESS           = 90,
+		DXGI_FORMAT_B8G8R8A8_UNORM_SRGB         = 91,
+		DXGI_FORMAT_B8G8R8X8_TYPELESS           = 92,
+		DXGI_FORMAT_B8G8R8X8_UNORM_SRGB         = 93,
+		DXGI_FORMAT_BC6H_TYPELESS               = 94,
+		DXGI_FORMAT_BC6H_UF16                   = 95,
+		DXGI_FORMAT_BC6H_SF16                   = 96,
+		DXGI_FORMAT_BC7_TYPELESS                = 97,
+		DXGI_FORMAT_BC7_UNORM                   = 98,
+		DXGI_FORMAT_BC7_UNORM_SRGB              = 99,
+		DXGI_FORMAT_FORCE_UINT                  = 0xffffffff
+	};
+#endif
+
+	ElementFormat FromDXGIFormat(uint32_t format)
+	{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4063)
+#endif
+		switch (format)
+		{
+		case DXGI_FORMAT_A8_UNORM:
+			return EF_A8;
+
+		case DXGI_FORMAT_R8_UNORM:
+			return EF_R8;
+
+		case DXGI_FORMAT_R8_SNORM:
+			return EF_SIGNED_R8;
+
+		case DXGI_FORMAT_R8G8_UNORM:
+			return EF_GR8;
+
+		case DXGI_FORMAT_R8G8_SNORM:
+			return EF_SIGNED_GR8;
+
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+			return EF_ARGB8;
+
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+			return EF_ABGR8;
+
+		case DXGI_FORMAT_R8G8B8A8_SNORM:
+			return EF_SIGNED_ABGR8;
+
+		case DXGI_FORMAT_R10G10B10A2_UNORM:
+			return EF_A2BGR10;
+
+		case DXGI_FORMAT_R8_UINT:
+			return EF_R8UI;
+
+		case DXGI_FORMAT_R8_SINT:
+			return EF_R8I;
+
+		case DXGI_FORMAT_R8G8_UINT:
+			return EF_GR8UI;
+
+		case DXGI_FORMAT_R8G8_SINT:
+			return EF_GR8I;
+
+		case DXGI_FORMAT_R8G8B8A8_UINT:
+			return EF_ABGR8UI;
+
+		case DXGI_FORMAT_R8G8B8A8_SINT:
+			return EF_ABGR8I;
+
+		case DXGI_FORMAT_R10G10B10A2_UINT:
+			return EF_A2BGR10UI;
+
+		case DXGI_FORMAT_R16_UNORM:
+			return EF_R16;
+
+		case DXGI_FORMAT_R16_SNORM:
+			return EF_SIGNED_R16;
+
+		case DXGI_FORMAT_R16G16_UNORM:
+			return EF_GR16;
+
+		case DXGI_FORMAT_R16G16_SNORM:
+			return EF_SIGNED_GR16;
+
+		case DXGI_FORMAT_R16G16B16A16_UNORM:
+			return EF_ABGR16;
+
+		case DXGI_FORMAT_R16G16B16A16_SNORM:
+			return EF_SIGNED_ABGR16;
+
+		case DXGI_FORMAT_R16_UINT:
+			return EF_R16UI;
+
+		case DXGI_FORMAT_R16_SINT:
+			return EF_R16I;
+
+		case DXGI_FORMAT_R16G16_UINT:
+			return EF_GR16UI;
+
+		case DXGI_FORMAT_R16G16_SINT:
+			return EF_GR16I;
+
+		case DXGI_FORMAT_R16G16B16A16_UINT:
+			return EF_ABGR16UI;
+
+		case DXGI_FORMAT_R16G16B16A16_SINT:
+			return EF_ABGR16I;
+
+		case DXGI_FORMAT_R32_UINT:
+			return EF_R32UI;
+
+		case DXGI_FORMAT_R32_SINT:
+			return EF_R32I;
+
+		case DXGI_FORMAT_R32G32_UINT:
+			return EF_GR32UI;
+
+		case DXGI_FORMAT_R32G32_SINT:
+			return EF_GR32I;
+
+		case DXGI_FORMAT_R32G32B32_UINT:
+			return EF_BGR32UI;
+
+		case DXGI_FORMAT_R32G32B32_SINT:
+			return EF_BGR32I;
+
+		case DXGI_FORMAT_R32G32B32A32_UINT:
+			return EF_ABGR32UI;
+
+		case DXGI_FORMAT_R32G32B32A32_SINT:
+			return EF_ABGR32I;
+
+		case DXGI_FORMAT_R16_FLOAT:
+			return EF_R16F;
+
+		case DXGI_FORMAT_R16G16_FLOAT:
+			return EF_GR16F;
+
+		case DXGI_FORMAT_R11G11B10_FLOAT:
+			return EF_B10G11R11F;
+
+		case DXGI_FORMAT_R16G16B16A16_FLOAT:
+			return EF_ABGR16F;
+
+		case DXGI_FORMAT_R32_FLOAT:
+			return EF_R32F;
+
+		case DXGI_FORMAT_R32G32_FLOAT:
+			return EF_GR32F;
+
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+			return EF_BGR32F;
+
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+			return EF_ABGR32F;
+
+		case DXGI_FORMAT_BC1_UNORM:
+			return EF_BC1;
+
+		case DXGI_FORMAT_BC2_UNORM:
+			return EF_BC2;
+
+		case DXGI_FORMAT_BC3_UNORM:
+			return EF_BC3;
+
+		case DXGI_FORMAT_BC4_UNORM:
+			return EF_BC4;
+
+		case DXGI_FORMAT_BC4_SNORM:
+			return EF_SIGNED_BC4;
+
+		case DXGI_FORMAT_BC5_UNORM:
+			return EF_BC5;
+
+		case DXGI_FORMAT_BC5_SNORM:
+			return EF_SIGNED_BC5;
+
+		case DXGI_FORMAT_BC6H_UF16:
+			return EF_BC6;
+
+		case DXGI_FORMAT_BC6H_SF16:
+			return EF_SIGNED_BC6;
+
+		case DXGI_FORMAT_BC7_UNORM:
+			return EF_BC7;
+
+		case DXGI_FORMAT_D16_UNORM:
+			return EF_D16;
+
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+			return EF_D24S8;
+
+		case DXGI_FORMAT_D32_FLOAT:
+			return EF_D32F;
+
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			return EF_ABGR8_SRGB;
+
+		case DXGI_FORMAT_BC1_UNORM_SRGB:
+			return EF_BC1_SRGB;
+
+		case DXGI_FORMAT_BC2_UNORM_SRGB:
+			return EF_BC2_SRGB;
+
+		case DXGI_FORMAT_BC3_UNORM_SRGB:
+			return EF_BC3_SRGB;
+
+		case DXGI_FORMAT_BC7_UNORM_SRGB:
+			return EF_BC7_SRGB;
+
+		default:
+			THR(boost::system::posix_error::not_supported);
+		}
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+	}
+
+	DXGI_FORMAT ToDXGIFormat(ElementFormat format)
+	{
+		switch (format)
+		{
+		case EF_A8:
+			return DXGI_FORMAT_A8_UNORM;
+
+		case EF_R8:
+			return DXGI_FORMAT_R8_UNORM;
+
+		case EF_SIGNED_R8:
+			return DXGI_FORMAT_R8_SNORM;
+
+		case EF_GR8:
+			return DXGI_FORMAT_R8G8_UNORM;
+
+		case EF_SIGNED_GR8:
+			return DXGI_FORMAT_R8G8_SNORM;
+
+		case EF_ARGB8:
+		case EF_ARGB8_SRGB:
+			return DXGI_FORMAT_B8G8R8A8_UNORM;
+
+		case EF_ABGR8:
+			return DXGI_FORMAT_R8G8B8A8_UNORM;
+
+		case EF_SIGNED_ABGR8:
+			return DXGI_FORMAT_R8G8B8A8_SNORM;
+
+		case EF_A2BGR10:
+			return DXGI_FORMAT_R10G10B10A2_UNORM;
+
+		case EF_R8UI:
+			return DXGI_FORMAT_R8_UINT;
+
+		case EF_R8I:
+			return DXGI_FORMAT_R8_SINT;
+
+		case EF_GR8UI:
+			return DXGI_FORMAT_R8G8_UINT;
+
+		case EF_GR8I:
+			return DXGI_FORMAT_R8G8_SINT;
+
+		case EF_ABGR8UI:
+			return DXGI_FORMAT_R8G8B8A8_UINT;
+
+		case EF_ABGR8I:
+			return DXGI_FORMAT_R8G8B8A8_SINT;
+
+		case EF_A2BGR10UI:
+			return DXGI_FORMAT_R10G10B10A2_UINT;
+
+		case EF_R16:
+			return DXGI_FORMAT_R16_UNORM;
+
+		case EF_SIGNED_R16:
+			return DXGI_FORMAT_R16_SNORM;
+
+		case EF_GR16:
+			return DXGI_FORMAT_R16G16_UNORM;
+
+		case EF_SIGNED_GR16:
+			return DXGI_FORMAT_R16G16_SNORM;
+
+		case EF_ABGR16:
+			return DXGI_FORMAT_R16G16B16A16_UNORM;
+
+		case EF_SIGNED_ABGR16:
+			return DXGI_FORMAT_R16G16B16A16_SNORM;
+
+		case EF_R16UI:
+			return DXGI_FORMAT_R16_UINT;
+
+		case EF_R16I:
+			return DXGI_FORMAT_R16_SINT;
+
+		case EF_GR16UI:
+			return DXGI_FORMAT_R16G16_UINT;
+
+		case EF_GR16I:
+			return DXGI_FORMAT_R16G16_SINT;
+
+		case EF_ABGR16UI:
+			return DXGI_FORMAT_R16G16B16A16_UINT;
+
+		case EF_ABGR16I:
+			return DXGI_FORMAT_R16G16B16A16_SINT;
+
+		case EF_R32UI:
+			return DXGI_FORMAT_R32_UINT;
+
+		case EF_R32I:
+			return DXGI_FORMAT_R32_SINT;
+
+		case EF_GR32UI:
+			return DXGI_FORMAT_R32G32_UINT;
+
+		case EF_GR32I:
+			return DXGI_FORMAT_R32G32_SINT;
+
+		case EF_BGR32UI:
+			return DXGI_FORMAT_R32G32B32_UINT;
+
+		case EF_BGR32I:
+			return DXGI_FORMAT_R32G32B32_SINT;
+
+		case EF_ABGR32UI:
+			return DXGI_FORMAT_R32G32B32A32_UINT;
+
+		case EF_ABGR32I:
+			return DXGI_FORMAT_R32G32B32A32_SINT;
+
+		case EF_R16F:
+			return DXGI_FORMAT_R16_FLOAT;
+
+		case EF_GR16F:
+			return DXGI_FORMAT_R16G16_FLOAT;
+
+		case EF_B10G11R11F:
+			return DXGI_FORMAT_R11G11B10_FLOAT;
+
+		case EF_ABGR16F:
+			return DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+		case EF_R32F:
+			return DXGI_FORMAT_R32_FLOAT;
+
+		case EF_GR32F:
+			return DXGI_FORMAT_R32G32_FLOAT;
+
+		case EF_BGR32F:
+			return DXGI_FORMAT_R32G32B32_FLOAT;
+
+		case EF_ABGR32F:
+			return DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+		case EF_BC1:
+			return DXGI_FORMAT_BC1_UNORM;
+
+		case EF_BC2:
+			return DXGI_FORMAT_BC2_UNORM;
+
+		case EF_BC3:
+			return DXGI_FORMAT_BC3_UNORM;
+
+		case EF_BC4:
+			return DXGI_FORMAT_BC4_UNORM;
+
+		case EF_SIGNED_BC4:
+			return DXGI_FORMAT_BC4_SNORM;
+
+		case EF_BC5:
+			return DXGI_FORMAT_BC5_UNORM;
+
+		case EF_SIGNED_BC5:
+			return DXGI_FORMAT_BC5_SNORM;
+
+		case EF_D16:
+			return DXGI_FORMAT_D16_UNORM;
+
+		case EF_D24S8:
+			return DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+		case EF_D32F:
+			return DXGI_FORMAT_D32_FLOAT;
+
+		case EF_ABGR8_SRGB:
+			return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+
+		case EF_BC1_SRGB:
+			return DXGI_FORMAT_BC1_UNORM_SRGB;
+
+		case EF_BC2_SRGB:
+			return DXGI_FORMAT_BC2_UNORM_SRGB;
+
+		case EF_BC3_SRGB:
+			return DXGI_FORMAT_BC3_UNORM_SRGB;
+
+		default:
+			THR(boost::system::posix_error::not_supported);
+		}
+	}
 
 	class TextureLoader
 	{
@@ -171,7 +695,8 @@ namespace
 			uint32_t access_hint;
 			Texture::TextureType type;
 			uint32_t width, height, depth;
-			uint16_t numMipMaps;
+			uint32_t num_mipmaps;
+			uint32_t array_size;
 			ElementFormat format;
 			std::vector<ElementInitData> tex_data;
 			std::vector<uint8_t> data_block;
@@ -193,22 +718,22 @@ namespace
 				switch (tex_desc->type)
 				{
 				case Texture::TT_1D:
-					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->numMipMaps, 1,
+					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_2D:
-					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->numMipMaps, 1,
+					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->num_mipmaps, tex_desc->array_size,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_3D:
-					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->numMipMaps, 1,
+					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->num_mipmaps, tex_desc->array_size,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
 				case Texture::TT_Cube:
-					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->numMipMaps, 1,
+					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
 						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
 					break;
 
@@ -228,7 +753,7 @@ namespace
 			tex_desc->access_hint = access_hint;
 
 			LoadTexture(tex_name, tex_desc->type, tex_desc->width, tex_desc->height, tex_desc->depth,
-				tex_desc->numMipMaps, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
+				tex_desc->num_mipmaps, tex_desc->array_size, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
 
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
@@ -281,7 +806,7 @@ namespace KlayGE
 {
 	// 载入DDS格式文件
 	void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& numMipMaps, uint32_t& array_size,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
 	{
 		ResIdentifierPtr file = ResLoader::Instance().Load(tex_name);
@@ -292,6 +817,18 @@ namespace KlayGE
 
 		DDSSURFACEDESC2 desc;
 		file->read(&desc, sizeof(desc));
+
+		DDS_HEADER_DXT10 desc10;
+		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
+		{
+			file->read(&desc10, sizeof(desc10));
+			array_size = desc10.array_size;
+		}
+		else
+		{
+			std::memset(&desc10, 0, sizeof(desc10));
+			array_size = 1;
+		}
 
 		BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
 		BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
@@ -358,6 +895,10 @@ namespace KlayGE
 
 			case MakeFourCC<'A', 'T', 'I', '2'>::value:
 				format = EF_BC5;
+				break;
+
+			case MakeFourCC<'D', 'X', '1', '0'>::value:
+				format = FromDXGIFormat(desc10.dxgi_format);
 				break;
 			}
 		}
@@ -577,8 +1118,46 @@ namespace KlayGE
 		}
 
 		width = desc.width;
-		numMipMaps = static_cast<uint16_t>(desc.mip_map_count);
+		numMipMaps = desc.mip_map_count;
 
+		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
+		{
+			if (D3D10_RESOURCE_MISC_TEXTURECUBE == desc10.misc_flag)
+			{
+				type = Texture::TT_Cube;
+				array_size /= 6;
+				height = desc.width;
+				depth = 1;
+			}
+			else
+			{
+				switch (desc10.resource_dim)
+				{
+				case D3D10_RESOURCE_DIMENSION_TEXTURE1D:
+					type = Texture::TT_1D;
+					height = 1;
+					depth = 1;
+					break;
+
+				case D3D10_RESOURCE_DIMENSION_TEXTURE2D:
+					type = Texture::TT_2D;
+					height = desc.height;
+					depth = 1;
+					break;
+
+				case D3D10_RESOURCE_DIMENSION_TEXTURE3D:
+					type = Texture::TT_3D;
+					height = desc.height;
+					depth = desc.depth;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+			}	
+		}
+		else
 		{
 			if ((desc.dds_caps.caps2 & DDSCAPS2_CUBEMAP) != 0)
 			{
@@ -609,166 +1188,59 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			{
-				uint32_t the_width = width;
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
-					uint32_t image_size;
-					if (IsCompressedFormat(format))
+					uint32_t the_width = width;
+					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
-						int block_size;
-						if (EF_BC1 == format)
+						size_t const index = array_index * numMipMaps + level;
+						uint32_t image_size;
+						if (IsCompressedFormat(format))
 						{
-							block_size = 8;
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							image_size = ((the_width + 3) / 4) * block_size;
 						}
 						else
 						{
-							block_size = 16;
+							image_size = main_image_size / (1UL << (level * 2));
 						}
 
-						image_size = ((the_width + 3) / 4) * block_size;
+						base[index] = data_block.size();
+						data_block.resize(base[index] + image_size);
+						init_data[index].row_pitch = image_size;
+						init_data[index].slice_pitch = image_size;
+
+						file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+
+						the_width = std::max<uint32_t>(the_width / 2, 1);
 					}
-					else
-					{
-						image_size = main_image_size / (1UL << (level * 2));
-					}
-
-					base[level] = data_block.size();
-					data_block.resize(base[level] + image_size);
-					init_data[level].row_pitch = image_size;
-					init_data[level].slice_pitch = image_size;
-
-					file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
-					BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
 				}
 			}
 			break;
 
 		case Texture::TT_2D:
 			{
-				uint32_t the_width = width;
-				uint32_t the_height = height;
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
-				{
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
-
-						base[level] = data_block.size();
-						data_block.resize(base[level] + image_size);
-						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
-						init_data[level].slice_pitch = image_size;
-
-						file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-					}
-					else
-					{
-						if (desc.flags & DDSD_PITCH)
-						{
-							init_data[level].row_pitch = static_cast<uint32_t>(desc.pitch);
-						}
-						else
-						{
-							init_data[level].row_pitch = the_width * format_size;
-						}
-						init_data[level].slice_pitch = init_data[level].row_pitch * the_height;
-						base[level] = data_block.size();
-						data_block.resize(base[level] + init_data[level].slice_pitch);
-
-						file->read(&data_block[base[level]], static_cast<std::streamsize>(init_data[level].slice_pitch));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch));
-					}
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
-					the_height = std::max<uint32_t>(the_height / 2, 1);
-				}
-			}
-			break;
-
-		case Texture::TT_3D:
-			{
-				uint32_t the_width = width;
-				uint32_t the_height = height;
-				uint32_t the_depth = depth;
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
-				{
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
-
-						base[level] = data_block.size();
-						data_block.resize(base[level] + image_size);
-						init_data[level].row_pitch = (the_width + 3) / 4 * block_size;
-						init_data[level].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
-
-						file->read(&data_block[base[level]], static_cast<std::streamsize>(image_size));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
-					}
-					else
-					{
-						if (desc.flags & DDSD_PITCH)
-						{
-							init_data[level].row_pitch = static_cast<uint32_t>(desc.pitch);
-							init_data[level].slice_pitch = init_data[level].row_pitch * (the_height + 3) / 4 * 4;
-						}
-						else
-						{
-							init_data[level].row_pitch = the_width * format_size;
-							init_data[level].slice_pitch = init_data[level].row_pitch * the_height;
-						}
-						base[level] = data_block.size();
-						data_block.resize(base[level] + init_data[level].slice_pitch * the_depth);
-
-						file->read(&data_block[base[level]], static_cast<std::streamsize>(init_data[level].slice_pitch * the_depth));
-						BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[level].slice_pitch * the_depth));
-					}
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
-					the_height = std::max<uint32_t>(the_height / 2, 1);
-					the_depth = std::max<uint32_t>(the_depth / 2, 1);
-				}
-			}
-			break;
-
-		case Texture::TT_Cube:
-			{
-				init_data.resize(6 * numMipMaps);
-				base.resize(6 * numMipMaps);
-				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					uint32_t the_width = width;
 					uint32_t the_height = height;
 					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
-						size_t const index = (face - Texture::CF_Positive_X) * numMipMaps + level;
+						size_t const index = array_index * numMipMaps + level;
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
@@ -801,7 +1273,7 @@ namespace KlayGE
 							{
 								init_data[index].row_pitch = the_width * format_size;
 							}
-							init_data[index].slice_pitch = init_data[index].row_pitch * the_width;
+							init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
 							base[index] = data_block.size();
 							data_block.resize(base[index] + init_data[index].slice_pitch);
 
@@ -811,6 +1283,128 @@ namespace KlayGE
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
 						the_height = std::max<uint32_t>(the_height / 2, 1);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_3D:
+			{
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					uint32_t the_width = width;
+					uint32_t the_height = height;
+					uint32_t the_depth = depth;
+					for (uint32_t level = 0; level < numMipMaps; ++ level)
+					{
+						size_t const index = array_index * numMipMaps + level;
+						if (IsCompressedFormat(format))
+						{
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
+
+							base[index] = data_block.size();
+							data_block.resize(base[index] + image_size);
+							init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
+							init_data[index].slice_pitch = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
+
+							file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+							BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+						}
+						else
+						{
+							if (desc.flags & DDSD_PITCH)
+							{
+								init_data[index].row_pitch = static_cast<uint32_t>(desc.pitch);
+								init_data[index].slice_pitch = init_data[index].row_pitch * (the_height + 3) / 4 * 4;
+							}
+							else
+							{
+								init_data[index].row_pitch = the_width * format_size;
+								init_data[index].slice_pitch = init_data[index].row_pitch * the_height;
+							}
+							base[index] = data_block.size();
+							data_block.resize(base[index] + init_data[index].slice_pitch * the_depth);
+
+							file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch * the_depth));
+							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch * the_depth));
+						}
+
+						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_height = std::max<uint32_t>(the_height / 2, 1);
+						the_depth = std::max<uint32_t>(the_depth / 2, 1);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				init_data.resize(array_size * 6 * numMipMaps);
+				base.resize(array_size * 6 * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+					{
+						uint32_t the_width = width;
+						uint32_t the_height = height;
+						for (uint32_t level = 0; level < numMipMaps; ++ level)
+						{
+							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * numMipMaps + level;
+							if (IsCompressedFormat(format))
+							{
+								int block_size;
+								if (EF_BC1 == format)
+								{
+									block_size = 8;
+								}
+								else
+								{
+									block_size = 16;
+								}
+
+								uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
+
+								base[index] = data_block.size();
+								data_block.resize(base[index] + image_size);
+								init_data[index].row_pitch = (the_width + 3) / 4 * block_size;
+								init_data[index].slice_pitch = image_size;
+
+								file->read(&data_block[base[index]], static_cast<std::streamsize>(image_size));
+								BOOST_ASSERT(file->gcount() == static_cast<int>(image_size));
+							}
+							else
+							{
+								if (desc.flags & DDSD_PITCH)
+								{
+									init_data[index].row_pitch = static_cast<uint32_t>(desc.pitch);
+								}
+								else
+								{
+									init_data[index].row_pitch = the_width * format_size;
+								}
+								init_data[index].slice_pitch = init_data[index].row_pitch * the_width;
+								base[index] = data_block.size();
+								data_block.resize(base[index] + init_data[index].slice_pitch);
+
+								file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
+								BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
+							}
+
+							the_width = std::max<uint32_t>(the_width / 2, 1);
+							the_height = std::max<uint32_t>(the_height / 2, 1);
+						}
 					}
 				}
 			}
@@ -829,7 +1423,7 @@ namespace KlayGE
 	}
 
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
-		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
+		uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
 		ElementFormat format, std::vector<ElementInitData> const & init_data)
 	{
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
@@ -1122,116 +1716,52 @@ namespace KlayGE
 
 		file.write(reinterpret_cast<char*>(&desc), sizeof(desc));
 
+		if (array_size != 1)
+		{
+			DDS_HEADER_DXT10 desc10;
+			desc10.dxgi_format = ToDXGIFormat(format);
+			desc10.misc_flag = 0;
+			switch (type)
+			{
+			case Texture::TT_1D:
+				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE1D;
+				break;
+			
+			case Texture::TT_2D:
+				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+				break;
+			
+			case Texture::TT_3D:
+				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE3D;
+				break;
+			
+			case Texture::TT_Cube:
+				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+				desc10.misc_flag = D3D10_RESOURCE_MISC_TEXTURECUBE;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+				break;
+			}
+			desc10.array_size = array_size;
+			desc10.reserved = 0;
+
+			file.write(reinterpret_cast<char*>(&desc10), sizeof(desc10));
+		}
+
 		switch (type)
 		{
 		case Texture::TT_1D:
 			{
-				uint32_t the_width = width;
-				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
-				{
-					uint32_t image_size;
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						image_size = ((the_width + 3) / 4) * block_size;
-					}
-					else
-					{
-						image_size = main_image_size / (1UL << (level * 2));
-					}
-
-					file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(image_size));
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
-				}
-			}
-			break;
-
-		case Texture::TT_2D:
-			{
-				uint32_t the_width = width;
-				uint32_t the_height = height;
-				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
-				{
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
-
-						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(image_size));
-					}
-					else
-					{
-						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * format_size));
-					}
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
-					the_height = std::max<uint32_t>(the_height / 2, 1);
-				}
-			}
-			break;
-
-		case Texture::TT_3D:
-			{
-				uint32_t the_width = width;
-				uint32_t the_height = height;
-				uint32_t the_depth = depth;
-				for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
-				{
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
-
-						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(image_size));
-					}
-					else
-					{
-						file.write(reinterpret_cast<char const *>(init_data[level].data), static_cast<std::streamsize>(the_width * the_height * the_depth * format_size));
-					}
-
-					the_width = std::max<uint32_t>(the_width / 2, 1);
-					the_height = std::max<uint32_t>(the_height / 2, 1);
-					the_depth = std::max<uint32_t>(the_depth / 2, 1);
-				}
-			}
-			break;
-
-		case Texture::TT_Cube:
-			{
-				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					uint32_t the_width = width;
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
-						size_t const index = (face - Texture::CF_Positive_X) * numMipMaps + level;
+						size_t const index = array_index * desc.mip_map_count + level;
+						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
@@ -1244,16 +1774,130 @@ namespace KlayGE
 								block_size = 16;
 							}
 
-							uint32_t image_size = ((the_width + 3) / 4) * ((the_width + 3) / 4) * block_size;
+							image_size = ((the_width + 3) / 4) * block_size;
+						}
+						else
+						{
+							image_size = main_image_size / (1UL << (level * 2));
+						}
+
+						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+
+						the_width = std::max<uint32_t>(the_width / 2, 1);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_2D:
+			{
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					uint32_t the_width = width;
+					uint32_t the_height = height;
+					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+					{
+						size_t const index = array_index * desc.mip_map_count + level;
+						if (IsCompressedFormat(format))
+						{
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 						}
 						else
 						{
-							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_width * format_size));
+							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_height * format_size));
 						}
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_height = std::max<uint32_t>(the_height / 2, 1);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_3D:
+			{
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					uint32_t the_width = width;
+					uint32_t the_height = height;
+					uint32_t the_depth = depth;
+					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+					{
+						size_t const index = array_index * desc.mip_map_count + level;
+						if (IsCompressedFormat(format))
+						{
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
+
+							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+						}
+						else
+						{
+							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_height * the_depth * format_size));
+						}
+
+						the_width = std::max<uint32_t>(the_width / 2, 1);
+						the_height = std::max<uint32_t>(the_height / 2, 1);
+						the_depth = std::max<uint32_t>(the_depth / 2, 1);
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+					{
+						uint32_t the_width = width;
+						for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
+						{
+							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * numMipMaps + level;
+							if (IsCompressedFormat(format))
+							{
+								int block_size;
+								if (EF_BC1 == format)
+								{
+									block_size = 8;
+								}
+								else
+								{
+									block_size = 16;
+								}
+
+								uint32_t image_size = ((the_width + 3) / 4) * ((the_width + 3) / 4) * block_size;
+
+								file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+							}
+							else
+							{
+								file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_width * format_size));
+							}
+
+							the_width = std::max<uint32_t>(the_width / 2, 1);
+						}
 					}
 				}
 			}
@@ -1267,29 +1911,30 @@ namespace KlayGE
 		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 
 		ElementFormat format = texture->Format();
-		uint16_t numMipMaps = texture->NumMipMaps();
+		uint32_t numMipMaps = texture->NumMipMaps();
+		uint32_t array_size = texture->ArraySize();
 
 		TexturePtr texture_sys_mem;
 		switch (texture->Type())
 		{
 		case Texture::TT_1D:
 			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_2D:
 			texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
-				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_3D:
 			texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
-				texture->Depth(0), numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
+				texture->Depth(0), numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		case Texture::TT_Cube:
 			texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
-				numMipMaps, 1, format, 1, 0, EAH_CPU_Read, NULL);
+				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read, NULL);
 			break;
 
 		default:
@@ -1511,7 +2156,8 @@ namespace KlayGE
 		}
 
 		SaveTexture(tex_name, texture_sys_mem->Type(),
-			texture_sys_mem->Width(0), texture_sys_mem->Height(0), texture_sys_mem->Depth(0), numMipMaps,
+			texture_sys_mem->Width(0), texture_sys_mem->Height(0), texture_sys_mem->Depth(0),
+			numMipMaps, array_size,
 			format, init_data);
 	}
 
@@ -1628,12 +2274,12 @@ namespace KlayGE
 		return obj;
 	}
 
-	uint16_t Texture::NumMipMaps() const
+	uint32_t Texture::NumMipMaps() const
 	{
 		return numMipMaps_;
 	}
 
-	uint16_t Texture::ArraySize() const
+	uint32_t Texture::ArraySize() const
 	{
 		return array_size_;
 	}

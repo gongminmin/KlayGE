@@ -572,11 +572,11 @@ namespace KlayGE
 			{
 				D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS cs4_feature;
 				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &cs4_feature, sizeof(cs4_feature));
-				caps_.cs_support = cs4_feature.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x;
+				caps_.cs_support = cs4_feature.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x ? true : false;
 
 				D3D11_FEATURE_DATA_THREADING mt_feature;
 				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
-				caps_.multithread_rendering_support = mt_feature.DriverCommandLists;
+				caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
 			}
 			break;
 

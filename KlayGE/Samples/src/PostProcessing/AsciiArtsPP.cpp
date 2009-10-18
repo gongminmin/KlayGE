@@ -35,11 +35,12 @@ namespace
 
 		Texture::TextureType type;
 		uint32_t width, height, depth;
-		uint16_t numMipMaps;
+		uint32_t num_mipmaps;
+		uint32_t array_size;
 		ElementFormat format;
 		std::vector<ElementInitData> init_data;
 		std::vector<uint8_t> data_block;
-		LoadTexture(tex_name, type, width, height, depth, numMipMaps,
+		LoadTexture(tex_name, type, width, height, depth, num_mipmaps, array_size,
 			format, init_data, data_block);
 
 		BOOST_ASSERT(EF_R8 == format);

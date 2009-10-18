@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	D3D10Texture2D::D3D10Texture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	D3D10Texture2D::D3D10Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D10Texture(TT_2D, sample_count, sample_quality, access_hint)
 	{
@@ -84,9 +84,9 @@ namespace KlayGE
 		std::vector<D3D10_SUBRESOURCE_DATA> subres_data(numMipMaps_);
 		if (init_data != NULL)
 		{
-			for (int j = 0; j < array_size_; ++ j)
+			for (uint32_t j = 0; j < array_size_; ++ j)
 			{
-				for (int i = 0; i < numMipMaps_; ++ i)
+				for (uint32_t i = 0; i < numMipMaps_; ++ i)
 				{
 					subres_data[j * numMipMaps_ + i].pSysMem = init_data[j * numMipMaps_ + i].data;
 					subres_data[j * numMipMaps_ + i].SysMemPitch = init_data[j * numMipMaps_ + i].row_pitch;
@@ -191,7 +191,7 @@ namespace KlayGE
 		{
 			if ((this->SampleCount() > 1) && target.SampleCount() == 1)
 			{
-				for (uint16_t l = 0; l < this->NumMipMaps(); ++ l)
+				for (uint32_t l = 0; l < this->NumMipMaps(); ++ l)
 				{
 					d3d_device_->ResolveSubresource(other.D3DTexture().get(), D3D10CalcSubresource(l, 0, other.NumMipMaps()),
 						d3dTexture2D_.get(), D3D10CalcSubresource(l, 0, this->NumMipMaps()), D3D10Mapping::MappingFormat(target.Format()));
@@ -392,8 +392,8 @@ namespace KlayGE
 	{
 		d3dTexture2D_->GetDesc(&desc_);
 
-		numMipMaps_ = static_cast<uint16_t>(desc_.MipLevels);
-		array_size_ = static_cast<uint16_t>(desc_.ArraySize);
+		numMipMaps_ = desc_.MipLevels;
+		array_size_ = desc_.ArraySize;
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widthes_.resize(numMipMaps_);

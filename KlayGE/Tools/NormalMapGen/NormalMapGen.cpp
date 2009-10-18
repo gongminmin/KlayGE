@@ -16,11 +16,12 @@ namespace
 	{
 		Texture::TextureType type;
 		uint32_t width, height, depth;
-		uint16_t numMipMaps;
+		uint32_t num_mipmaps;
+		uint32_t array_size;
 		ElementFormat format;
 		std::vector<ElementInitData> in_data;
 		std::vector<uint8_t> data_block;
-		LoadTexture(in_file, type, width, height, depth, numMipMaps, format, in_data, data_block);
+		LoadTexture(in_file, type, width, height, depth, num_mipmaps, array_size, format, in_data, data_block);
 
 		if ((Texture::TT_2D == type) && (EF_R8 == format))
 		{
@@ -89,7 +90,7 @@ namespace
 				normals[i].data = &data_block[base[i]];
 			}
 
-			SaveTexture(out_file, type, width, height, depth, numMipMaps, EF_ARGB8, normals);
+			SaveTexture(out_file, type, width, height, depth, num_mipmaps, array_size, EF_ARGB8, normals);
 		}
 		else
 		{

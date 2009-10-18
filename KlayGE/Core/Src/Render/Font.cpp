@@ -1,8 +1,11 @@
 // Font.cpp
 // KlayGE Font类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2003-2008
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 增加了KFontLoader (2009.10.16)
 //
 // 3.7.0
 // 新的基于distance的字体格式 (2008.2.13)
@@ -92,13 +95,9 @@ namespace KlayGE
 	#pragma pack(pop)
 #endif
 
-	FontRenderable::FontRenderable(std::string const & fontName)
-			: RenderableHelper(L"Font"),
-                dirty_(false),
-				curX_(0), curY_(0),
-				three_dim_(false)
+	KFontLoader::KFontLoader(std::string const & font_name)
 	{
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(fontName);
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(font_name);
 		BOOST_ASSERT(kfont_input);
 
 		kfont_header header;
@@ -106,7 +105,7 @@ namespace KlayGE
 		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
 		BOOST_ASSERT((1 == header.version));
 
-		kfont_char_size_ = header.char_size;
+		char_size_ = header.char_size;
 		dist_base_ = header.base;
 		dist_scale_ = header.scale;
 
@@ -125,7 +124,67 @@ namespace KlayGE
 
 		distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
 		kfont_input->read(&distances_[0], static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
+	}
 
+	uint32_t KFontLoader::CharSize() const
+	{
+		return char_size_;
+	}
+
+	int16_t KFontLoader::DistBase() const
+	{
+		return dist_base_;
+	}
+	
+	int16_t KFontLoader::DistScale() const
+	{
+		return dist_scale_;
+	}
+
+	int32_t KFontLoader::CharIndex(wchar_t ch) const
+	{
+		BOOST_AUTO(iter, char_index_.find(ch));
+		if (iter != char_index_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+
+	Vector_T<uint16_t, 2> KFontLoader::CharAdvance(wchar_t ch) const
+	{
+		BOOST_AUTO(iter, char_advance_.find(ch));
+		if (iter != char_advance_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			return Vector_T<uint16_t, 2>(0, 0);
+		}
+	}
+
+	KFontLoader::font_info const & KFontLoader::CharInfo(int32_t offset) const
+	{
+		return char_info_[offset];
+	}
+
+	uint8_t const * KFontLoader::DistanceData(int32_t offset) const
+	{
+		return &distances_[offset * char_size_ * char_size_];
+	}
+
+
+	FontRenderable::FontRenderable(std::string const & font_name)
+			: RenderableHelper(L"Font"),
+                dirty_(false),
+				curX_(0), curY_(0),
+				three_dim_(false),
+				kfont_loader_(font_name)
+	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
@@ -140,15 +199,17 @@ namespace KlayGE
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 		}
 
+		uint32_t const kfont_char_size = kfont_loader_.CharSize();
+
 		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
-		dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size_ * kfont_char_size_,
-			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size_ * kfont_char_size_, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, NULL);
-		a_char_texture_ = rf.MakeTexture2D(kfont_char_size_, kfont_char_size_, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, NULL);
+		dist_texture_ = rf.MakeTexture2D(std::min<uint32_t>(2048, caps.max_texture_width) / kfont_char_size * kfont_char_size,
+			std::min<uint32_t>(2048, caps.max_texture_height) / kfont_char_size * kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, NULL);
+		a_char_texture_ = rf.MakeTexture2D(kfont_char_size, kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, NULL);
 
 		effect_ = rf.LoadEffect("Font.fxml");
 		*(effect_->ParameterByName("distance_tex")) = dist_texture_;
-		*(effect_->ParameterByName("distance_base_scale")) = float2(dist_base_ / 32768.0f * 32 + 1, (dist_scale_ / 32768.0f + 1.0f) * 32);
+		*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_.DistBase() / 32768.0f * 32 + 1, (kfont_loader_.DistScale() / 32768.0f + 1.0f) * 32);
 
 		half_width_height_ep_ = effect_->ParameterByName("half_width_height");
 		texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
@@ -238,7 +299,7 @@ namespace KlayGE
 	{
 		this->UpdateTexture(text);
 
-		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+		float const rel_size = static_cast<float>(font_height) / kfont_loader_.CharSize();
 
 		std::vector<uint32_t> lines(1, 0);
 
@@ -246,11 +307,8 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				BOOST_AUTO(iter, char_advance_.find(ch));
-				if (iter != char_advance_.end())
-				{
-					lines.back() += static_cast<uint32_t>(iter->second.x() * rel_size);
-				}
+				Vector_T<uint16_t, 2> advance = kfont_loader_.CharAdvance(ch);
+				lines.back() += static_cast<uint32_t>(advance.x() * rel_size);
 			}
 			else
 			{
@@ -292,7 +350,7 @@ namespace KlayGE
 		this->UpdateTexture(text);
 
 		float const h = font_height * yScale;
-		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+		float const rel_size = static_cast<float>(font_height) / kfont_loader_.CharSize();
 
 		std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
@@ -300,11 +358,8 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				BOOST_AUTO(iter, char_advance_.find(ch));
-				if (iter != char_advance_.end())
-				{
-					lines.back().first += iter->second.x() * rel_size * xScale;
-				}
+				Vector_T<uint16_t, 2> advance = kfont_loader_.CharAdvance(ch);
+				lines.back().first += advance.x() * rel_size * xScale;
 				lines.back().second.push_back(ch);
 			}
 			else
@@ -393,10 +448,10 @@ namespace KlayGE
 
 			BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 			{
-				BOOST_AUTO(iter, char_index_.find(ch));
-				if (iter != char_index_.end())
+				int32_t offset = kfont_loader_.CharIndex(ch);
+				if (offset != -1)
 				{
-					font_info const & ci = char_info_[iter->second];
+					KFontLoader::font_info const & ci = kfont_loader_.CharInfo(offset);
 
 					float left = ci.left * rel_size * xScale;
 					float top = ci.top * rel_size * yScale;
@@ -444,12 +499,9 @@ namespace KlayGE
 					}
 				}
 
-				BOOST_AUTO(aiter, char_advance_.find(ch));
-				if (aiter != char_advance_.end())
-				{
-					x += aiter->second.x() * rel_size * xScale;
-					y += aiter->second.y() * rel_size * yScale;
-				}
+				Vector_T<uint16_t, 2> advance = kfont_loader_.CharAdvance(ch);
+				x += advance.x() * rel_size * xScale;
+				y += advance.y() * rel_size * yScale;
 			}
 
 			box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
@@ -463,7 +515,7 @@ namespace KlayGE
 
 		uint32_t const clr32 = clr.ABGR();
 		float const h = font_height * yScale;
-		float const rel_size = static_cast<float>(font_height) / kfont_char_size_;
+		float const rel_size = static_cast<float>(font_height) / kfont_loader_.CharSize();
 		size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 		float x = sx, y = sy;
 		float maxx = sx, maxy = sy;
@@ -489,10 +541,10 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				BOOST_AUTO(iter, char_index_.find(ch));
-				if (iter != char_index_.end())
+				int32_t offset = kfont_loader_.CharIndex(ch);
+				if (offset != -1)
 				{
-					font_info const & ci = char_info_[iter->second];
+					KFontLoader::font_info const & ci = kfont_loader_.CharInfo(offset);
 
 					float left = ci.left * rel_size * xScale;
 					float top = ci.top * rel_size * yScale;
@@ -536,12 +588,9 @@ namespace KlayGE
 					lastIndex += 4;
 				}
 
-				BOOST_AUTO(aiter, char_advance_.find(ch));
-				if (aiter != char_advance_.end())
-				{
-					x += aiter->second.x() * rel_size * xScale;
-					y += aiter->second.y() * rel_size * yScale;
-				}
+				Vector_T<uint16_t, 2> advance = kfont_loader_.CharAdvance(ch);
+				x += advance.x() * rel_size * xScale;
+				y += advance.y() * rel_size * yScale;
 
 				if (x > maxx)
 				{
@@ -572,8 +621,8 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
 		{
-			BOOST_AUTO(iter, char_index_.find(ch));
-			if (iter != char_index_.end())
+			int32_t offset = kfont_loader_.CharIndex(ch);
+			if (offset != -1)
 			{
 				if (charInfoMap_.find(ch) != charInfoMap_.end())
 				{
@@ -589,24 +638,25 @@ namespace KlayGE
 				{
 					// 在现有纹理中找不到，所以得在现有纹理中添加新字
 
-					font_info const & ci = char_info_[iter->second];
+					KFontLoader::font_info const & ci = kfont_loader_.CharInfo(offset);
+					uint32_t const kfont_char_size = kfont_loader_.CharSize();
 
 					uint32_t width = ci.width;
 					uint32_t height = ci.height;
 
 					Vector_T<int32_t, 2> char_pos;
 					CharInfo charInfo;
-					if (curX_ + kfont_char_size_ >= tex_width)
+					if (curX_ + kfont_char_size >= tex_width)
 					{
 						curX_ = 0;
-						curY_ += kfont_char_size_;
+						curY_ += kfont_char_size;
 					}
-					if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size_ < tex_height))
+					if ((curX_ < tex_width) && (curY_ < tex_height) && (curY_ + kfont_char_size < tex_height))
 					{
 						// 纹理还有空间
 						char_pos = Vector_T<int32_t, 2>(curX_, curY_);
 
-						curX_ += kfont_char_size_;
+						curX_ += kfont_char_size;
 					}
 					else
 					{
@@ -628,20 +678,20 @@ namespace KlayGE
 
 					{
 						Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
-							0, 0, kfont_char_size_, kfont_char_size_);
+							0, 0, kfont_char_size, kfont_char_size);
 						uint8_t* tex_data = mapper.Pointer<uint8_t>();
-						uint8_t const * char_data = &distances_[iter->second * kfont_char_size_ * kfont_char_size_];
-						for (uint32_t y = 0; y < kfont_char_size_; ++ y)
+						uint8_t const * char_data = kfont_loader_.DistanceData(offset);
+						for (uint32_t y = 0; y < kfont_char_size; ++ y)
 						{
-							std::memcpy(tex_data, char_data, kfont_char_size_);
+							std::memcpy(tex_data, char_data, kfont_char_size);
 							tex_data += mapper.RowPitch();
-							char_data += kfont_char_size_;
+							char_data += kfont_char_size;
 						}
 					}
 
 					a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
-						kfont_char_size_, kfont_char_size_, char_pos.x(), char_pos.y(),
-						kfont_char_size_, kfont_char_size_, 0, 0);
+						kfont_char_size, kfont_char_size, char_pos.x(), char_pos.y(),
+						kfont_char_size, kfont_char_size, 0, 0);
 
 					charInfoMap_.insert(std::make_pair(ch, charInfo));
 					charLRU_.push_front(ch);

@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size, ElementFormat format,
+	D3D9TextureCube::D3D9TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D9Texture(TT_Cube, sample_count, sample_quality, access_hint),
 						auto_gen_mipmaps_(false)
@@ -92,7 +92,7 @@ namespace KlayGE
 			{
 				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
 				{
-					for (int level = 0; level < numMipMaps_; ++ level)
+					for (uint32_t level = 0; level < numMipMaps_; ++ level)
 					{
 						Texture::Mapper mapper(*this, static_cast<Texture::CubeFaces>(face), level, TMA_Write_Only, 0, 0, widths_[level], widths_[level]);
 
@@ -372,11 +372,11 @@ namespace KlayGE
 		D3DSURFACE_DESC desc;
 		std::memset(&desc, 0, sizeof(desc));
 
-		numMipMaps_ = static_cast<uint16_t>(d3dTextureCube_->GetLevelCount());
+		numMipMaps_ = d3dTextureCube_->GetLevelCount();
 		BOOST_ASSERT(numMipMaps_ != 0);
 
 		widths_.resize(numMipMaps_);
-		for (uint16_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < numMipMaps_; ++ level)
 		{
 			TIF(d3dTextureCube_->GetLevelDesc(level, &desc));
 

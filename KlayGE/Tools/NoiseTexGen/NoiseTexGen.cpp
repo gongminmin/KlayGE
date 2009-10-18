@@ -121,23 +121,23 @@ int main()
 	init_data[0].data = permutation;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(permutation);
 	SaveTexture("noise_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, EF_R8, init_data);
+		256, 1, 1, 1, 1, EF_R8, init_data);
 
 	init_data[0].data = perm_2d;
 	init_data[0].row_pitch = 256 * 4;
 	init_data[0].slice_pitch = sizeof(perm_2d);
 	SaveTexture("noise_perm_2d.dds", Texture::TT_2D,
-		256, 256, 1, 1, EF_ARGB8, init_data);
+		256, 256, 1, 1, 1, EF_ARGB8, init_data);
 
 	init_data[0].data = grad3_perm;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(grad3_perm);
 	SaveTexture("noise_grad3_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, EF_ARGB8, init_data);
+		256, 1, 1, 1, 1, EF_ARGB8, init_data);
 
 	init_data[0].data = grad4_perm;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(grad4_perm);
 	SaveTexture("noise_grad4_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, EF_ARGB8, init_data);
+		256, 1, 1, 1, 1, EF_ARGB8, init_data);
 
 	cout << "DONE" << endl;
 

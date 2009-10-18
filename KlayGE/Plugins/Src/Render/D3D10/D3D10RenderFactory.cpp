@@ -39,22 +39,22 @@ namespace KlayGE
 		return name;
 	}
 
-	TexturePtr D3D10RenderFactory::MakeTexture1D(uint32_t width, uint16_t numMipMaps, uint16_t array_size,
+	TexturePtr D3D10RenderFactory::MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<D3D10Texture1D>(width, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
-	TexturePtr D3D10RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint16_t numMipMaps, uint16_t array_size,
+	TexturePtr D3D10RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<D3D10Texture2D>(width, height, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
-	TexturePtr D3D10RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps, uint16_t array_size,
+	TexturePtr D3D10RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<D3D10Texture3D>(width, height, depth, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
-	TexturePtr D3D10RenderFactory::MakeTextureCube(uint32_t size, uint16_t numMipMaps, uint16_t array_size,
+	TexturePtr D3D10RenderFactory::MakeTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
 		return MakeSharedPtr<D3D10TextureCube>(size, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);

@@ -6,7 +6,7 @@
 //
 // 3.9.0
 // 隐藏了TextureLoader (2009.4.9)
-// 支持Texture Array (2009.7.2)
+// 支持Texture Array的读写 (2009.10.15)
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)
@@ -207,9 +207,9 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 
 		// Gets the number of mipmaps to be used for this texture.
-		uint16_t NumMipMaps() const;
+		uint32_t NumMipMaps() const;
 		// Gets the size of texture array
-		uint16_t ArraySize() const;
+		uint32_t ArraySize() const;
 
 		// Returns the width of the texture.
 		virtual uint32_t Width(int level) const = 0;
@@ -271,8 +271,8 @@ namespace KlayGE
 	protected:
 		uint32_t		bpp_;
 
-		uint16_t		numMipMaps_;
-		uint16_t		array_size_;
+		uint32_t		numMipMaps_;
+		uint32_t		array_size_;
 
 		ElementFormat	format_;
 		TextureType		type_;
@@ -281,12 +281,12 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint16_t& numMipMaps,
+		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
 	KLAYGE_CORE_API boost::function<TexturePtr()> LoadTexture(std::string const & tex_name, uint32_t access_hint);
 
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
-		uint32_t width, uint32_t height, uint32_t depth, uint16_t numMipMaps,
+		uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,
 		ElementFormat format, std::vector<ElementInitData> const & init_data);
 	KLAYGE_CORE_API void SaveTexture(TexturePtr texture, std::string const & tex_name);
 
