@@ -12,7 +12,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4251 4275 4273 4512 4701)
+#pragma warning(disable: 4251 4275 4273 4512 4701 4702)
 #endif
 #include <boost/program_options.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -73,7 +73,7 @@ struct font_info
 	uint16_t width;
 	uint16_t height;
 
-	std::vector<float> dist;
+	uint32_t dist_index;
 };
 
 int bsf(uint64_t v)
@@ -91,8 +91,8 @@ int bsf(uint64_t v)
 class disp_thread
 {
 public:
-	disp_thread(std::vector<int32_t>& cur_num_chars, int32_t total_chars)
-		: cur_num_chars_(&cur_num_chars), total_chars_(total_chars)
+	disp_thread(int32_t const * cur_num_chars, uint32_t cur_num_chars_size, int32_t total_chars)
+		: cur_num_chars_(cur_num_chars), cur_num_chars_size_(cur_num_chars_size), total_chars_(total_chars)
 	{
 	}
 
@@ -102,9 +102,9 @@ public:
 		for (;;)
 		{
 			int32_t dist_cur_num_char = 0;
-			for (size_t i = 0; i < cur_num_chars_->size(); ++ i)
+			for (size_t i = 0; i < cur_num_chars_size_; ++ i)
 			{
-				dist_cur_num_char += (*cur_num_chars_)[i];
+				dist_cur_num_char += cur_num_chars_[i];
 			}
 
 			double this_disp_time = timer_.elapsed();
@@ -133,18 +133,19 @@ public:
 
 private:
 	Timer timer_;
-	std::vector<int32_t>* cur_num_chars_;
+	int32_t const * cur_num_chars_;
+	uint32_t cur_num_chars_size_;
 	int32_t total_chars_;
 };
 
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Face ft_face, uint32_t char_size, std::vector<uint32_t>& validate_chars, uint32_t start_code, uint32_t end_code,
-		std::vector<font_info>& char_info,
+	ttf_to_dist(FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars, uint32_t start_code, uint32_t end_code,
+		font_info* char_info, float* char_dist_data,
 		int32_t& cur_num_char)
-		: ft_face_(ft_face), char_size_(char_size), validate_chars_(&validate_chars), start_code_(start_code), end_code_(end_code),
-			char_info_(&char_info),
+		: ft_face_(ft_face), char_size_(char_size), validate_chars_(validate_chars), start_code_(start_code), end_code_(end_code),
+			char_info_(char_info), char_dist_data_(char_dist_data),
 			cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
@@ -184,8 +185,8 @@ public:
 		std::vector<int2> edge_points;
 		for (uint32_t c = start_code_; c < end_code_; ++ c)
 		{
-			uint32_t const ch = (*validate_chars_)[c];
-			font_info& ci = (*char_info_)[ch];
+			uint32_t const ch = validate_chars_[c];
+			font_info& ci = char_info_[ch];
 
 			std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
 
@@ -213,7 +214,7 @@ public:
 			edge_points.resize(0);
 			for (int y = 0; y < buf_height; ++ y)
 			{
-				edge_extract(edge_points, 0, buf_width, char_bitmap, y);
+				edge_extract(edge_points, 0, buf_width, &char_bitmap[0], y);
 			}
 
 			if (!edge_points.empty())
@@ -228,7 +229,6 @@ public:
 				ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
 				ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
 
-				ci.dist.resize(char_size_ * char_size_);
 				for (uint32_t y = 0; y < char_size_; ++ y)
 				{
 					for (uint32_t x = 0; x < char_size_; ++ x)
@@ -255,9 +255,13 @@ public:
 							value = -value;
 						}
 
-						ci.dist[y * char_size_ + x] = value;
+						char_dist_data_[ci.dist_index + y * char_size_ + x] = value;
 					}
 				}
+			}
+			else
+			{
+				ci.dist_index = static_cast<uint32_t>(-1);
 			}
 
 			++ *cur_num_char_;
@@ -297,10 +301,12 @@ private:
 
 	void binary_font_extract_sse2(uint8_t* dst_data, uint8_t const * src_data, int size)
 	{
-		for (int x = 0, x_end = size & ~0xF; x < x_end; x += 16)
+		__m128i const * src_data32 = reinterpret_cast<__m128i const *>(src_data);
+		uint16_t* dst_data16 = reinterpret_cast<uint16_t*>(dst_data);
+		for (int x = 0, x_end = size & ~0xF; x < x_end; x += 16, ++ src_data32, ++ dst_data16)
 		{
-			__m128i mask = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&src_data[x]));
-			*reinterpret_cast<uint16_t*>(&dst_data[x / 8]) = static_cast<uint16_t>(_mm_movemask_epi8(mask));
+			__m128i mask = _mm_loadu_si128(src_data32);
+			*dst_data16 = static_cast<uint16_t>(_mm_movemask_epi8(mask));
 		}
 		for (int x = size & ~0xF; x < size; ++ x)
 		{
@@ -311,7 +317,7 @@ private:
 		}
 	}
 
-	void edge_extract_sse2(std::vector<int2>& edge_points, int start, int end, std::vector<uint8_t> const & char_bitmap, int y)
+	void edge_extract_sse2(std::vector<int2>& edge_points, int start, int end, uint8_t const * char_bitmap, int y)
 	{
 		__m128i zero = _mm_set1_epi8(0);
 		for (int x = start; x < end; x += sizeof(__m128i) * 8)
@@ -381,7 +387,7 @@ private:
 		}
 	}
 
-	void edge_extract_cpp(std::vector<int2>& edge_points, int start, int end, std::vector<uint8_t> const & char_bitmap, int y)
+	void edge_extract_cpp(std::vector<int2>& edge_points, int start, int end, uint8_t const * char_bitmap, int y)
 	{
 		for (int x = start; x < end; x += sizeof(uint64_t) * 8)
 		{
@@ -422,17 +428,18 @@ private:
 private:
 	FT_Face ft_face_;
 	uint32_t char_size_;
-	std::vector<uint32_t>* validate_chars_;
+	uint32_t const * validate_chars_;
 	uint32_t start_code_;
 	uint32_t end_code_;
-	std::vector<font_info>* char_info_;
+	font_info* char_info_;
+	float* char_dist_data_;
 	int32_t* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
-	boost::function<void(std::vector<int2>&, int, int, std::vector<uint8_t> const &, int)> edge_extract;
+	boost::function<void(std::vector<int2>&, int, int, uint8_t const *, int)> edge_extract;
 };
 
-void compute_distance(std::vector<font_info>& char_info,
+void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
 					  int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code, uint32_t char_size)
 {
 	thread_pool tp(1, num_threads + 1);
@@ -458,18 +465,24 @@ void compute_distance(std::vector<font_info>& char_info,
 		if (mapping > 0)
 		{
 			validate_chars.push_back(i);
+			if (static_cast<uint32_t>(-1) == char_info[i].dist_index)
+			{
+				char_info[i].dist_index = static_cast<uint32_t>(char_dist_data.size());
+				char_dist_data.resize(char_dist_data.size() + char_size * char_size);
+			}
 		}
 	}
 
 	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
 
-	joiner<void> disp_joiner = tp(disp_thread(cur_num_char, static_cast<int32_t>(validate_chars.size())));
+	joiner<void> disp_joiner = tp(disp_thread(&cur_num_char[0], static_cast<uint32_t>(cur_num_char.size()), static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		uint32_t const sc = i * num_chars_per_package;
 		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
 
-		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, validate_chars, sc, ec, char_info, cur_num_char[i]));
+		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, &validate_chars[0], sc, ec,
+			&char_info[0], &char_dist_data[0], cur_num_char[i]));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -481,24 +494,24 @@ void compute_distance(std::vector<font_info>& char_info,
 	disp_joiner();
 }
 
-void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, int32_t> > const & char_index, std::vector<font_info> const & char_info, int16_t& base, int16_t& scale)
+void quantizer(uint8_t* uint8_dist, uint32_t non_empty_chars,
+				std::pair<int32_t, int32_t> const * char_index,
+				font_info const * char_info, float const * char_dist_data,
+				uint32_t char_size_sq, int16_t& base, int16_t& scale)
 {
-	std::vector<float> dist_block;
-	dist_block.reserve(char_index.size() * char_info[char_index[0].first].dist.size());
-	for (size_t i = 0; i < char_index.size(); ++ i)
-	{
-		int const ch = char_index[i].first;
-		dist_block.insert(dist_block.end(), char_info[ch].dist.begin(), char_info[ch].dist.end());
-	}
-
 	float max_value = -1;
 	float min_value = 1;
-	for (size_t i = 0; i < dist_block.size(); ++ i)
+	for (size_t i = 0; i < non_empty_chars; ++ i)
 	{
-		float value = dist_block[i];
+		int const ch = char_index[i].first;
+		float const * dist = &char_dist_data[char_info[ch].dist_index];
+		for (size_t j = 0; j < char_size_sq; ++ j)
+		{
+			float value = dist[j];
 
-		min_value = std::min(min_value, value);
-		max_value = std::max(max_value, value);
+			min_value = std::min(min_value, value);
+			max_value = std::max(max_value, value);
+		}
 	}
 
 	if (abs(max_value - min_value) < 2.0f / 65536)
@@ -511,20 +524,30 @@ void quantizer(std::vector<uint8_t>& uint8_dist, std::vector<std::pair<int32_t, 
 	scale = static_cast<int16_t>((fscale - 1) * 32768 + 0.5f);
 	float inv_scale = 255 / fscale;
 
-	uint8_dist.resize(dist_block.size());
-	for (size_t i = 0; i < dist_block.size(); ++ i)
+	for (size_t i = 0; i < non_empty_chars; ++ i)
 	{
-		uint8_dist[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist_block[i] - min_value) * inv_scale + 0.5f), 0, 255));
+		int const ch = char_index[i].first;
+		float const * dist = &char_dist_data[char_info[ch].dist_index];
+		for (size_t j = 0; j < char_size_sq; ++ j)
+		{
+			uint8_dist[i * char_size_sq + j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
+		}
 	}
 
 	{
 		float mse = 0;
 
-		std::vector<float> float_dist(uint8_dist.size());
-		for (size_t i = 0; i < dist_block.size(); ++ i)
+		float const fscale = (scale / 32768.0f + 1) / 255.0f;
+		float const fbase = base / 32768.0f;
+		for (size_t i = 0; i < non_empty_chars; ++ i)
 		{
-			float r = uint8_dist[i] / 255.0f * (scale / 32768.0f + 1) + base / 32768.0f;
-			mse += (dist_block[i] - r) * (dist_block[i] - r);
+			int const ch = char_index[i].first;
+			float const * dist = &char_dist_data[char_info[ch].dist_index];
+			for (size_t j = 0; j < char_size_sq; ++ j)
+			{
+				float const d = dist[j] - (uint8_dist[i * char_size_sq + j] * fscale + fbase);
+				mse += d * d;
+			}
 		}
 
 		cout << "Quantize MSE: " << mse << endl;
@@ -593,8 +616,13 @@ int main(int argc, char* argv[])
 
 	std::vector<std::pair<int32_t, int32_t> > char_index;
 	std::vector<font_info> char_info(NUM_CHARS);
+	std::vector<float> char_dist_data;
 	{
 		memset(&char_info[0], 0, sizeof(char_info[0]) * char_info.size());
+		for (size_t i = 0; i < char_info.size(); ++ i)
+		{
+			char_info[i].dist_index = static_cast<uint32_t>(-1);
+		}
 
 		ifstream kfont_input(kfont_name.c_str(), ios_base::binary);
 		if (kfont_input)
@@ -639,6 +667,7 @@ int main(int argc, char* argv[])
 				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
 			}
 
+			char_dist_data.resize(char_index.size() * header.char_size * header.char_size);
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
 				int const ch = char_index[i].first;
@@ -647,10 +676,11 @@ int main(int argc, char* argv[])
 				kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
 					static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
 
-				char_info[ch].dist.resize(uint8_dist.size());
-				for (size_t i = 0; i < char_info[ch].dist.size(); ++ i)
+				char_info[ch].dist_index = i * header.char_size * header.char_size;
+				for (size_t i = 0; i < uint8_dist.size(); ++ i)
 				{
-					char_info[ch].dist[i] = uint8_dist[i] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
+					char_dist_data[char_info[ch].dist_index + i]
+						= uint8_dist[i] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
 				}
 			}
 		}
@@ -691,7 +721,7 @@ int main(int argc, char* argv[])
 
 	timer_stage.restart();
 	cout << "Compute distance field..." << endl;
-	compute_distance(char_info, num_threads, ttf, start_code, end_code, header.char_size);
+	compute_distance(char_info, char_dist_data, num_threads, ttf, start_code, end_code, header.char_size);
 	cout << "\rTime elapsed: " << timer_stage.elapsed() << " s                                        " << endl;
 
 	timer_stage.restart();
@@ -700,7 +730,7 @@ int main(int argc, char* argv[])
 	header.non_empty_chars = 0;
 	for (size_t i = 0; i < char_info.size(); ++ i)
 	{
-		if (!char_info[i].dist.empty())
+		if (char_info[i].dist_index != static_cast<uint32_t>(-1))
 		{
 			char_index.push_back(std::make_pair(static_cast<int32_t>(i), header.non_empty_chars));
 			++ header.non_empty_chars;
@@ -722,13 +752,14 @@ int main(int argc, char* argv[])
 	cout << "Quantize..." << endl;
 	timer_stage.restart();
 	std::vector<uint8_t> uint8_dist(header.non_empty_chars * header.char_size * header.char_size);
-	quantizer(uint8_dist, char_index, char_info, header.base, header.scale);
+	quantizer(&uint8_dist[0], header.non_empty_chars, &char_index[0], &char_info[0], &char_dist_data[0],
+		header.char_size * header.char_size, header.base, header.scale);
 	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
 	int processed_chars = 0;
 	for (int i = start_code; i <= end_code; ++ i)
 	{
-		if (!char_info[i].dist.empty())
+		if (char_info[i].dist_index != static_cast<uint32_t>(-1))
 		{
 			++ processed_chars;
 		}
