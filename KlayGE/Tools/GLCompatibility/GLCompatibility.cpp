@@ -63,9 +63,22 @@ namespace
 				glsl_minor_ver_ = 0;
 			}
 
-			std::string const extension_str(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS)));
-			boost::algorithm::split(extensions_, extension_str,
-					boost::bind(std::equal_to<char>(), ' ', _1));
+			if (major_ver_ >= 3)
+			{
+				GLint num_exts;
+				::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
+				extensions_.resize(num_exts);
+				for (GLint i = 0; i < num_exts; ++ i)
+				{
+					extensions_[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+				}
+			}
+			else
+			{
+				std::string const extension_str(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS)));
+				boost::algorithm::split(extensions_, extension_str,
+						boost::bind(std::equal_to<char>(), ' ', _1));
+			}
 			extensions_.erase(std::remove_if(extensions_.begin(), extensions_.end(),
 				boost::bind(&std::string::empty, _1)), extensions_.end());
 		}

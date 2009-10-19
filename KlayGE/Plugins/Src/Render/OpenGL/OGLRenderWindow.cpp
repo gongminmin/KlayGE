@@ -186,22 +186,28 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 1, WGL_CONTEXT_FLAGS_ARB, flags, 0 };
-			HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
-			if (NULL == hRC3)
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 2, WGL_CONTEXT_FLAGS_ARB, flags, 
+				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
+			for (int min_ver = 2; min_ver >= 0; -- min_ver)
 			{
-				attribs[3] = 0;
-				hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
-			}
-			if (hRC3 != NULL)
-			{
-				::wglDeleteContext(hRC_);
-				hRC_ = hRC3;
+				attribs[3] = min_ver;
+				HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
+				if (hRC3 != NULL)
+				{
+					::wglDeleteContext(hRC_);
+					hRC_ = hRC3;
 
-				::wglMakeCurrent(hDC_, hRC_);
+					::wglMakeCurrent(hDC_, hRC_);
 
-				// reinit glloader
-				glloader_init();
+					// reinit glloader
+					glloader_init();
+
+					break;
+				}
+				else
+				{
+					attribs[6] = 0;
+				}
 			}
 		}
 
@@ -245,21 +251,21 @@ namespace KlayGE
 		}
 		switch (settings.depth_stencil_fmt)
 		{
-        case EF_D16:
-            d_size = 16;
-            break;
+		case EF_D16:
+			d_size = 16;
+			break;
 
-        case EF_D24S8:
-            d_size = 24;
-            break;
+		case EF_D24S8:
+			d_size = 24;
+			break;
 
-        case EF_D32F:
-            d_size = 32;
-            break;
+		case EF_D32F:
+			d_size = 32;
+			break;
 
-        default:
-            d_size = 0;
-            break;
+		default:
+			d_size = 0;
+			break;
 		}
 
 		std::vector<int> visual_attr;
@@ -289,8 +295,8 @@ namespace KlayGE
 		}
 		visual_attr.push_back(None);				// end of list
 
-        glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
-        glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
+		glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
+		glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
 
 		int num_elements;
 		fbc_ = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
@@ -372,8 +378,6 @@ namespace KlayGE
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
-
-		glEnable(GL_COLOR_MATERIAL);
 
 		if (glloader_GL_ARB_color_buffer_float())
 		{
