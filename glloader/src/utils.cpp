@@ -73,8 +73,17 @@ namespace glloader
 	public:
 		static gl_features_extractor& instance()
 		{
-			static gl_features_extractor inst;
-			return inst;
+			if (NULL == inst_)
+			{
+				inst_ = new gl_features_extractor;
+			}
+			return *inst_;
+		}
+
+		static void delete_instance()
+		{
+			delete inst_;
+			inst_ = NULL;
 		}
 
 		bool is_supported(std::string const & name)
@@ -142,74 +151,77 @@ namespace glloader
 			int major, minor;
 			gl_version(major, minor);
 
-			std::vector<std::string> gl_exts;
-			if (major >= 3)
+			if (major > 0)
 			{
-				LOAD_FUNC1(glGetStringi);
-				GLint num_exts;
-				::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
-				gl_exts.resize(num_exts);
-				for (GLint i = 0; i < num_exts; ++ i)
+				std::vector<std::string> gl_exts;
+				if (major >= 3)
 				{
-					gl_exts[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+					LOAD_FUNC1(glGetStringi);
+					GLint num_exts;
+					::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
+					gl_exts.resize(num_exts);
+					for (GLint i = 0; i < num_exts; ++ i)
+					{
+						gl_exts[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+					}
 				}
-			}
-			else
-			{
-				GLubyte const * str = ::glGetString(GL_EXTENSIONS);
-				if (str != NULL)
+				else
 				{
-					gl_exts = split(reinterpret_cast<char const *>(str));
+					GLubyte const * str = ::glGetString(GL_EXTENSIONS);
+					if (str != NULL)
+					{
+						gl_exts = split(reinterpret_cast<char const *>(str));
+					}
 				}
-			}
 
-			gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
-			features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
+				gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
+				features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
-			int const ver_code = major * 10 + minor;
-			if (ver_code >= 10)
-			{
-				features_.push_back("GL_VERSION_1_0");
-			}
-			if (ver_code >= 11)
-			{
-				features_.push_back("GL_VERSION_1_1");
-			}
-			if (ver_code >= 12)
-			{
-				features_.push_back("GL_VERSION_1_2");
-			}
-			if (ver_code >= 13)
-			{
-				features_.push_back("GL_VERSION_1_3");
-			}
-			if (ver_code >= 14)
-			{
-				features_.push_back("GL_VERSION_1_4");
-			}
-			if (ver_code >= 15)
-			{
-				features_.push_back("GL_VERSION_1_5");
-			}
-			if (ver_code >= 20)
-			{
-				features_.push_back("GL_VERSION_2_0");
-			}
-			if (ver_code >= 21)
-			{
-				features_.push_back("GL_VERSION_2_1");
-			}
-			if (ver_code >= 30)
-			{
-				features_.push_back("GL_VERSION_3_0");
-			}
-			if (ver_code >= 31)
-			{
-				features_.push_back("GL_VERSION_3_1");
-			}
-			if (ver_code >= 32)
-			{
-				features_.push_back("GL_VERSION_3_2");
+				int const ver_code = major * 10 + minor;
+				if (ver_code >= 10)
+				{
+					features_.push_back("GL_VERSION_1_0");
+				}
+				if (ver_code >= 11)
+				{
+					features_.push_back("GL_VERSION_1_1");
+				}
+				if (ver_code >= 12)
+				{
+					features_.push_back("GL_VERSION_1_2");
+				}
+				if (ver_code >= 13)
+				{
+					features_.push_back("GL_VERSION_1_3");
+				}
+				if (ver_code >= 14)
+				{
+					features_.push_back("GL_VERSION_1_4");
+				}
+				if (ver_code >= 15)
+				{
+					features_.push_back("GL_VERSION_1_5");
+				}
+				if (ver_code >= 20)
+				{
+					features_.push_back("GL_VERSION_2_0");
+				}
+				if (ver_code >= 21)
+				{
+					features_.push_back("GL_VERSION_2_1");
+				}
+				if (ver_code >= 30)
+				{
+					features_.push_back("GL_VERSION_3_0");
+				}
+				if (ver_code >= 31)
+				{
+					features_.push_back("GL_VERSION_3_1");
+				}
+				if (ver_code >= 32)
+				{
+					features_.push_back("GL_VERSION_3_2");
+				}
 			}
 		}
 		void wgl_features()
@@ -286,7 +298,11 @@ namespace glloader
 
 	private:
 		std::vector<std::string> features_;
+
+		static gl_features_extractor* inst_;
 	};
+
+	gl_features_extractor* gl_features_extractor::inst_ = NULL;
 }
 
 void promote_low_high(char const * low_name, char const * high_name)
@@ -301,6 +317,8 @@ void promote_high(char const * high_name)
 
 void glloader_init()
 {
+	glloader::gl_features_extractor::delete_instance();
+
 	gl_init();
 
 #ifdef GLLOADER_WGL

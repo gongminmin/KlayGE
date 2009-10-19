@@ -348,6 +348,7 @@ def create_source(prefix, extensions):
 
 				sourceFile.write("\t}\n\n")
 
+		sourceFile.write("\t_%s = 0;\n" % extension.name)
 		sourceFile.write("\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
 		sourceFile.write("\t{\n")
 		sourceFile.write("\t\t_%s = 1;\n" % extension.name)
