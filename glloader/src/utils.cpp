@@ -139,61 +139,77 @@ namespace glloader
 		}
 		void gl_features()
 		{
-			GLubyte const * str = ::glGetString(GL_EXTENSIONS);
-			if (str != NULL)
+			int major, minor;
+			gl_version(major, minor);
+
+			std::vector<std::string> gl_exts;
+			if (major >= 3)
 			{
-				std::vector<std::string> gl_exts = split(reinterpret_cast<char const *>(str));
-				gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
-				features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
+				LOAD_FUNC1(glGetStringi);
+				GLint num_exts;
+				::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
+				gl_exts.resize(num_exts);
+				for (GLint i = 0; i < num_exts; ++ i)
+				{
+					gl_exts[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+				}
+			}
+			else
+			{
+				GLubyte const * str = ::glGetString(GL_EXTENSIONS);
+				if (str != NULL)
+				{
+					gl_exts = split(reinterpret_cast<char const *>(str));
+				}
+			}
 
-				int major, minor;
-				gl_version(major, minor);
+			gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
+			features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
-				int const ver_code = major * 10 + minor;
-				if (ver_code >= 10)
-				{
-					features_.push_back("GL_VERSION_1_0");
-				}
-				if (ver_code >= 11)
-				{
-					features_.push_back("GL_VERSION_1_1");
-				}
-				if (ver_code >= 12)
-				{
-					features_.push_back("GL_VERSION_1_2");
-				}
-				if (ver_code >= 13)
-				{
-					features_.push_back("GL_VERSION_1_3");
-				}
-				if (ver_code >= 14)
-				{
-					features_.push_back("GL_VERSION_1_4");
-				}
-				if (ver_code >= 15)
-				{
-					features_.push_back("GL_VERSION_1_5");
-				}
-				if (ver_code >= 20)
-				{
-					features_.push_back("GL_VERSION_2_0");
-				}
-				if (ver_code >= 21)
-				{
-					features_.push_back("GL_VERSION_2_1");
-				}
-				if (ver_code >= 30)
-				{
-					features_.push_back("GL_VERSION_3_0");
-				}
-				if (ver_code >= 31)
-				{
-					features_.push_back("GL_VERSION_3_1");
-				}
-				if (ver_code >= 32)
-				{
-					features_.push_back("GL_VERSION_3_2");
-				}
+			int const ver_code = major * 10 + minor;
+			if (ver_code >= 10)
+			{
+				features_.push_back("GL_VERSION_1_0");
+			}
+			if (ver_code >= 11)
+			{
+				features_.push_back("GL_VERSION_1_1");
+			}
+			if (ver_code >= 12)
+			{
+				features_.push_back("GL_VERSION_1_2");
+			}
+			if (ver_code >= 13)
+			{
+				features_.push_back("GL_VERSION_1_3");
+			}
+			if (ver_code >= 14)
+			{
+				features_.push_back("GL_VERSION_1_4");
+			}
+			if (ver_code >= 15)
+			{
+				features_.push_back("GL_VERSION_1_5");
+			}
+			if (ver_code >= 20)
+			{
+				features_.push_back("GL_VERSION_2_0");
+			}
+			if (ver_code >= 21)
+			{
+				features_.push_back("GL_VERSION_2_1");
+			}
+			if (ver_code >= 30)
+			{
+				features_.push_back("GL_VERSION_3_0");
+			}
+			if (ver_code >= 31)
+			{
+				features_.push_back("GL_VERSION_3_1");
+			}
+			if (ver_code >= 32)
+			{
+				features_.push_back("GL_VERSION_3_2");
 			}
 		}
 		void wgl_features()

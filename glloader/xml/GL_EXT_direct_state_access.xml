@@ -756,7 +756,7 @@
 				<param type="void**" name="params"/>
 			</params>
 		</function>
-		<function name="glGetFloati_vvEXT" return="void">
+		<function name="glGetFloati_vEXT" return="void">
 			<params>
 				<param type="GLenum" name="pname"/>
 				<param type="GLuint" name="index"/>

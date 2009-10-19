@@ -24,7 +24,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glFuncSync" return="GLsync">
+		<function name="glFenceSync" return="GLsync">
 			<params>
 				<param type="GLenum" name="condition"/>
 				<param type="GLbitfield" name="flags"/>
