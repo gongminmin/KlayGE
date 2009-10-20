@@ -830,7 +830,7 @@ namespace
 				var = MakeSharedPtr<RenderVariableFloat4x4Array>();
 			}
 			break;
-			
+
 		case REDT_buffer:
 			var = MakeSharedPtr<RenderVariableBuffer>();
 			*var = GraphicsBufferPtr();

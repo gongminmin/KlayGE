@@ -888,8 +888,8 @@ namespace KlayGE
 					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
-		
-			is_validate_ &= is_shader_validate_[type];			
+
+			is_validate_ &= is_shader_validate_[type];
 		}
 	}
 

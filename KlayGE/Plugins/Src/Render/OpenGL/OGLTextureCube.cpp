@@ -154,7 +154,7 @@ namespace KlayGE
 
 	uint32_t OGLTextureCube::Width(int level) const
 	{
-		BOOST_ASSERT(level < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
 
 		return widthes_[level];
 	}
@@ -167,7 +167,7 @@ namespace KlayGE
 	uint32_t OGLTextureCube::Depth(int level) const
 	{
 		UNREF_PARAM(level);
-		BOOST_ASSERT(level < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
 
 		return 1;
 	}

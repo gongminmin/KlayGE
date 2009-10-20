@@ -99,7 +99,7 @@ namespace
 
 		std::vector<uint8_t> normals(width * height * 4);
 
-	for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{

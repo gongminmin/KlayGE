@@ -101,7 +101,7 @@ namespace KlayGE
 
 	uint32_t D3D9Texture1D::Width(int level) const
 	{
-		BOOST_ASSERT(level < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
 
 		return widths_[level];
 	}
@@ -109,7 +109,7 @@ namespace KlayGE
 	uint32_t D3D9Texture1D::Height(int level) const
 	{
 		UNREF_PARAM(level);
-		BOOST_ASSERT(level < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
 
 		return 1;
 	}
@@ -117,7 +117,7 @@ namespace KlayGE
 	uint32_t D3D9Texture1D::Depth(int level) const
 	{
 		UNREF_PARAM(level);
-		BOOST_ASSERT(level < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
 
 		return 1;
 	}
