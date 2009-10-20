@@ -3,7 +3,7 @@ GLLoader v3.0.1
 The GLLoader is an OpenGL extension loading library. It supports OpenGL core 1.0 to 3.2, as well as WGL, GLX, and other GL extensions. There is a automatic code generater. All the things you want to do is to write a xml script if you have to support new extensions.
 The GLLoader's primary selling point is that it offers a initializing path of an extension. So if an extension has promoted into the core, the loader will try to load it from the core. If failed, try the extension one.
 After setting include and lib directories, all you need to do is add #include <glloader/glloader.h> into your code.
-The GLLoader is licensed under GPL. See gpl.txt.
+The GLLoader is licensed under GPL. See gplv2.txt.
 
 
 The Interface
@@ -15,6 +15,12 @@ Note: You can use name string "GL_VERSION_x_y" to determine if the x.y core vers
 void* glloader_get_gl_proc_address(const char* name);
 Load a OpenGL function. The parameter "name" is the function's name. The return value is the address of the extension function.
 Note: When the function fails, there is not guarantee that the return value is NULL.
+
+int glloader_num_features();
+Get the number of supported features, including the core and the extensions.
+
+const char* glloader_get_feature_name(int index);
+Get the name of a feature. The parameter 'index' is between [0, num_features - 1].
 
 
 Automatic Code Generater

@@ -3,7 +3,7 @@ GLLoader v3.0.1
 GLLoader是一个OpenGL扩展载入库，可以载入OpenGL1.0-3.2，以及WGL、GLX等OpenGL扩展，只要编写xml脚本就能自动生成扩展载入代码。
 GLLoader的特点是按照功能划分扩展，而不像其他同类产品是通过版本和扩展名称载入。
 设置完include和lib目录之后，你需要做的唯一事情就是把#include <glloader/glloader.h>添加到你的代码中。
-GLLoader遵循GPL协议。协议的内容可以参考附带的gpl.txt
+GLLoader遵循GPL协议。协议的内容可以参考附带的gplv2.txt
 
 接口
 
@@ -14,6 +14,12 @@ int glloader_is_supported(const char* name);
 void* glloader_get_gl_proc_address(const char* name);
 载入一个OpenGL函数。参数name为要载入的函数名称。返回函数地址。
 注意：如果试图载入一个不存在的函数，并不一定会返回NULL。
+
+int glloader_num_features();
+返回支持的扩展数量。
+
+const char* glloader_get_feature_name(int index);
+获取扩展的名字。index参数的取值范围是[0, num_features - 1]。
 
 
 代码自动生成

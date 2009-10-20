@@ -225,6 +225,12 @@ GLLOADER_API int glloader_is_supported(const char* name);
 /* Get the address of OpenGL extension functions, given the function name */
 GLLOADER_API void* glloader_get_gl_proc_address(const char* name);
 
+/* Get the number of supported features, including the core and the extensions */
+GLLOADER_API int glloader_num_features();
+
+/* Get the name of a feature. The parameter 'index' is between [0, num_features - 1] */
+GLLOADER_API const char* glloader_get_feature_name(int index);
+
 #ifdef __cplusplus
 }
 #endif

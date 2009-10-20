@@ -7,6 +7,7 @@ The GLLoader is licensed under GPL. See gplv2.txt.
 
 3.0.1
 Support OpenGL 3.1 & 3.2
+Add glloader_num_features and glloader_get_feature_name
 
 3.0.0
 New xml format. More powerful and better backward compatibility

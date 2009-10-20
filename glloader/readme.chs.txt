@@ -7,6 +7,7 @@ GLLoader遵循GPL协议。协议的内容可以参考附带的gplv2.txt
 
 3.0.1
 支持OpenGL 3.1和3.2
+增加了glloader_num_features和glloader_get_feature_name
 
 3.0.0
 新的xml格式，表达能力更强大，向下兼容更好

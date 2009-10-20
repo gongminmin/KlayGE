@@ -90,6 +90,17 @@ namespace glloader
 		{
 			return std::binary_search(features_.begin(), features_.end(), name);
 		}
+
+		int num_features()
+		{
+			return static_cast<int>(features_.size());
+		}
+
+		char const * feature_name(int index)
+		{
+			return features_[index].c_str();
+		}
+
 		void promote(std::string const & low_name, std::string const & high_name)
 		{
 			if (low_name != high_name)
@@ -371,4 +382,21 @@ int glloader_is_supported(char const * name)
 	assert(name != NULL);
 
 	return glloader::gl_features_extractor::instance().is_supported(name);
+}
+
+int glloader_num_features()
+{
+	return glloader::gl_features_extractor::instance().num_features();
+}
+
+char const * glloader_get_feature_name(int index)
+{
+	if ((index >= 0) && (index < glloader_num_features()))
+	{
+		return glloader::gl_features_extractor::instance().feature_name(index);
+	}
+	else
+	{
+		return NULL;
+	}
 }
