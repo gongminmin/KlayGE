@@ -44,16 +44,11 @@ namespace
 			vendor_ = reinterpret_cast<char const *>(::glGetString(GL_VENDOR));
 			renderer_ = reinterpret_cast<char const *>(::glGetString(GL_RENDERER));
 
-			std::string const ver(reinterpret_cast<char const *>(::glGetString(GL_VERSION)));
-			std::string::size_type const dot_pos(ver.find("."));
-			major_ver_ = ver[dot_pos - 1] - '0';
-			minor_ver_ = ver[dot_pos + 1] - '0';
-
 			char const * glsl_ver_str = reinterpret_cast<char const *>(::glGetString(GL_SHADING_LANGUAGE_VERSION));
 			if (glsl_ver_str != NULL)
 			{
-				std::string const glsl_ver(glsl_ver_str);
-				std::string::size_type const glsl_dot_pos(ver.find("."));
+				std::string const glsl_ver = glsl_ver_str;
+				std::string::size_type const glsl_dot_pos = glsl_ver.find(".");
 				glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
 				glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
 			}
@@ -63,24 +58,21 @@ namespace
 				glsl_minor_ver_ = 0;
 			}
 
-			if (major_ver_ >= 3)
+			int num_exts = glloader_num_features();
+			for (int i = 0; i < num_exts; ++ i)
 			{
-				GLint num_exts;
-				::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
-				extensions_.resize(num_exts);
-				for (GLint i = 0; i < num_exts; ++ i)
+				std::string name = glloader_get_feature_name(i);
+				std::string::size_type p = name.find("GL_VERSION_");
+				if (std::string::npos == p)
 				{
-					extensions_[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+					extensions_.push_back(name);
+				}
+				else
+				{
+					major_ver_ = name[11] - '0';
+					minor_ver_ = name[13] - '0';
 				}
 			}
-			else
-			{
-				std::string const extension_str(reinterpret_cast<char const *>(::glGetString(GL_EXTENSIONS)));
-				boost::algorithm::split(extensions_, extension_str,
-						boost::bind(std::equal_to<char>(), ' ', _1));
-			}
-			extensions_.erase(std::remove_if(extensions_.begin(), extensions_.end(),
-				boost::bind(&std::string::empty, _1)), extensions_.end());
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, information const & info)
