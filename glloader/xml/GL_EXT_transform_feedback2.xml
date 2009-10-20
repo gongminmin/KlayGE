@@ -1,0 +1,67 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_transform_feedback2">
+	<tokens>
+		<token name="GL_TRANSFORM_FEEDBACK_EXT" value="0x8E22"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED_EXT" value="0x8E23"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE_EXT" value="0x8E24"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BINDING_EXT" value="0x8E25"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindTransformFeedbackEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glBindTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glDeleteTransformFeedbacksEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint const *" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glDeleteTransformFeedbacksNV"/>
+			</mappings>
+		</function>
+		<function name="glGenTransformFeedbacksEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glGenTransformFeedbacksNV"/>
+			</mappings>
+		</function>
+		<function name="glIsTransformFeedbackEXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glIsTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glPauseTransformFeedbackEXT" return="void">
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glPauseTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glResumeTransformFeedbackEXT" return="void">
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glResumeTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glDrawTransformFeedbackEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_transform_feedback2" name="glDrawTransformFeedbackNV"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>
