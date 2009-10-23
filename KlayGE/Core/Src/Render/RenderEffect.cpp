@@ -56,6 +56,17 @@
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/bind.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/RenderEffect.hpp>
 
@@ -567,6 +578,28 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableIntArray>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							if (index < strs.size())
+							{
+								boost::algorithm::trim(strs[index]);
+								init_val[index] = boost::lexical_cast<int32_t>(strs[index]);
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -714,6 +747,190 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloatArray>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0.0f);
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							if (index < strs.size())
+							{
+								boost::algorithm::trim(strs[index]);
+								init_val[index] = boost::lexical_cast<float>(strs[index]);
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_int2:
+			if (0 == array_size)
+			{
+				int2 tmp(0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableInt2>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt2Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 2; ++ j)
+							{
+								if (index * 2 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 2 + j]);
+									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 2 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_int3:
+			if (0 == array_size)
+			{
+				int3 tmp(0, 0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueInt();
+				}
+				attr = node->Attrib("z");
+				if (attr)
+				{
+					tmp.z() = attr->ValueInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableInt3>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt3Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 3; ++ j)
+							{
+								if (index * 3 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 3 + j]);
+									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 3 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_int4:
+			if (0 == array_size)
+			{
+				int4 tmp(0, 0, 0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueInt();
+				}
+				attr = node->Attrib("z");
+				if (attr)
+				{
+					tmp.z() = attr->ValueInt();
+				}
+				attr = node->Attrib("w");
+				if (attr)
+				{
+					tmp.w() = attr->ValueInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableInt4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt4Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 4; ++ j)
+							{
+								if (index * 4 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 4 + j]);
+									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 4 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -738,6 +955,31 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloat2Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), float2(0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 2; ++ j)
+							{
+								if (index * 2 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 2 + j]);
+									init_val[index][j] = boost::lexical_cast<float>(strs[index * 2 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -767,6 +1009,31 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloat3Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), float3(0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 3; ++ j)
+							{
+								if (index * 3 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 3 + j]);
+									init_val[index][j] = boost::lexical_cast<float>(strs[index * 3 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -801,6 +1068,31 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloat4Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 4; ++ j)
+							{
+								if (index * 4 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 4 + j]);
+									init_val[index][j] = boost::lexical_cast<float>(strs[index * 4 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -828,6 +1120,31 @@ namespace
 			else
 			{
 				var = MakeSharedPtr<RenderVariableFloat4x4Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 16; ++ j)
+							{
+								if (index * 16 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 16 + j]);
+									init_val[index][j] = boost::lexical_cast<float>(strs[index * 16 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
 			}
 			break;
 
@@ -1761,6 +2078,24 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(int2 const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(int3 const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(int4 const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(float2 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -1833,6 +2168,24 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(std::vector<int2> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<int3> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<int4> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(std::vector<float2> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -1868,6 +2221,21 @@ namespace KlayGE
 	}
 
 	void RenderVariable::Value(float& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(int2& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(int3& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(int4& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
@@ -1928,6 +2296,21 @@ namespace KlayGE
 	}
 
 	void RenderVariable::Value(std::vector<float>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<int2>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<int3>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<int4>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

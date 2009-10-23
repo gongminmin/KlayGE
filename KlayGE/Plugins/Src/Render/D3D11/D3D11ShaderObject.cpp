@@ -82,6 +82,87 @@ namespace
 	};
 
 	template <>
+	class SetD3D11ShaderParameter<int2, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int2*>(target)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			int2 v;
+			param_->Value(v);
+
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
+		}
+
+	private:
+		int2* target_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<int3, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int3*>(target)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			int3 v;
+			param_->Value(v);
+
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
+		}
+
+	private:
+		int3* target_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<int4, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int4*>(target)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			int4 v;
+			param_->Value(v);
+
+			if (*target_ != v)
+			{
+				*target_ = v;
+				*dirty_ = true;
+			}
+		}
+
+	private:
+		int4* target_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
 	class SetD3D11ShaderParameter<float2, float>
 	{
 	public:
@@ -212,6 +293,102 @@ namespace
 	private:
 		DstType* target_;
 		uint32_t elements_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<int2*, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int4*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int2> v;
+			param_->Value(v);
+
+			std::vector<int4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = int4(v[i].x(), v[i].y(), 0, 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(int4)));
+			}
+			*dirty_ = true;
+		}
+
+	private:
+		int4* target_;
+		size_t size_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<int3*, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int4*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int3> v;
+			param_->Value(v);
+
+			std::vector<int4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = int4(v[i].x(), v[i].y(), v[i].z(), 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(target_, &v4[0], std::min(size_, v4.size() * sizeof(int4)));
+			}
+			*dirty_ = true;
+		}
+
+	private:
+		int4* target_;
+		size_t size_;
+		RenderEffectParameterPtr param_;
+		char* dirty_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<int4*, int32_t>
+	{
+	public:
+		SetD3D11ShaderParameter(uint8_t* target, uint32_t elements, RenderEffectParameterPtr const & param, char* dirty)
+			: target_(reinterpret_cast<int4*>(target)), size_(elements * sizeof(int4)), param_(param), dirty_(dirty)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				memcpy(target_, &v[0], std::min(size_, v.size() * sizeof(int4)));
+			}
+			*dirty_ = true;
+		}
+
+	private:
+		int4* target_;
+		size_t size_;
 		RenderEffectParameterPtr param_;
 		char* dirty_;
 	};
@@ -1073,6 +1250,39 @@ namespace KlayGE
 			else
 			{
 				ret.func = SetD3D11ShaderParameter<float, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			break;
+
+		case REDT_int2:
+			if (param->ArraySize())
+			{
+				ret.func = SetD3D11ShaderParameter<int2*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			else
+			{
+				ret.func = SetD3D11ShaderParameter<int2, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			break;
+
+		case REDT_int3:
+			if (param->ArraySize())
+			{
+				ret.func = SetD3D11ShaderParameter<int3*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			else
+			{
+				ret.func = SetD3D11ShaderParameter<int3, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			break;
+
+		case REDT_int4:
+			if (param->ArraySize())
+			{
+				ret.func = SetD3D11ShaderParameter<int4*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
+			}
+			else
+			{
+				ret.func = SetD3D11ShaderParameter<int4, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 			}
 			break;
 

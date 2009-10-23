@@ -115,6 +115,9 @@ namespace KlayGE
 		virtual RenderVariable& operator=(bool const & value);
 		virtual RenderVariable& operator=(int32_t const & value);
 		virtual RenderVariable& operator=(float const & value);
+		virtual RenderVariable& operator=(int2 const & value);
+		virtual RenderVariable& operator=(int3 const & value);
+		virtual RenderVariable& operator=(int4 const & value);
 		virtual RenderVariable& operator=(float2 const & value);
 		virtual RenderVariable& operator=(float3 const & value);
 		virtual RenderVariable& operator=(float4 const & value);
@@ -127,6 +130,9 @@ namespace KlayGE
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
 		virtual RenderVariable& operator=(std::vector<int32_t> const & value);
 		virtual RenderVariable& operator=(std::vector<float> const & value);
+		virtual RenderVariable& operator=(std::vector<int2> const & value);
+		virtual RenderVariable& operator=(std::vector<int3> const & value);
+		virtual RenderVariable& operator=(std::vector<int4> const & value);
 		virtual RenderVariable& operator=(std::vector<float2> const & value);
 		virtual RenderVariable& operator=(std::vector<float3> const & value);
 		virtual RenderVariable& operator=(std::vector<float4> const & value);
@@ -135,6 +141,9 @@ namespace KlayGE
 		virtual void Value(bool& val) const;
 		virtual void Value(int32_t& val) const;
 		virtual void Value(float& val) const;
+		virtual void Value(int2& val) const;
+		virtual void Value(int3& val) const;
+		virtual void Value(int4& val) const;
 		virtual void Value(float2& val) const;
 		virtual void Value(float3& val) const;
 		virtual void Value(float4& val) const;
@@ -147,6 +156,9 @@ namespace KlayGE
 		virtual void Value(std::vector<bool>& val) const;
 		virtual void Value(std::vector<int32_t>& val) const;
 		virtual void Value(std::vector<float>& val) const;
+		virtual void Value(std::vector<int2>& val) const;
+		virtual void Value(std::vector<int3>& val) const;
+		virtual void Value(std::vector<int4>& val) const;
 		virtual void Value(std::vector<float2>& val) const;
 		virtual void Value(std::vector<float3>& val) const;
 		virtual void Value(std::vector<float4>& val) const;
@@ -268,6 +280,9 @@ namespace KlayGE
 	typedef RenderVariableConcrete<bool> RenderVariableBool;
 	typedef RenderVariableConcrete<int32_t> RenderVariableInt;
 	typedef RenderVariableConcrete<float> RenderVariableFloat;
+	typedef RenderVariableConcrete<int2> RenderVariableInt2;
+	typedef RenderVariableConcrete<int3> RenderVariableInt3;
+	typedef RenderVariableConcrete<int4> RenderVariableInt4;
 	typedef RenderVariableConcrete<float2> RenderVariableFloat2;
 	typedef RenderVariableConcrete<float3> RenderVariableFloat3;
 	typedef RenderVariableConcrete<float4> RenderVariableFloat4;
@@ -278,6 +293,9 @@ namespace KlayGE
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
 	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
 	typedef RenderVariableConcrete<std::vector<float> >  RenderVariableFloatArray;
+	typedef RenderVariableConcrete<std::vector<int2> >  RenderVariableInt2Array;
+	typedef RenderVariableConcrete<std::vector<int3> >  RenderVariableInt3Array;
+	typedef RenderVariableConcrete<std::vector<int4> >  RenderVariableInt4Array;
 	typedef RenderVariableConcrete<std::vector<float2> >  RenderVariableFloat2Array;
 	typedef RenderVariableConcrete<std::vector<float3> >  RenderVariableFloat3Array;
 	typedef RenderVariableConcrete<std::vector<float4> >  RenderVariableFloat4Array;
