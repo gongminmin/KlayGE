@@ -4,9 +4,103 @@
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredShadingUtil.fxml"/>
 
+	<macro name="RING_1" value="1"/>
+	<macro name="RING_2" value="2"/>
+	<macro name="RING_3" value="3"/>
+	<macro name="RING_4" value="4"/>
+	<macro name="NUM_RING_1_GATHERS" value="2"/>
+	<macro name="NUM_RING_2_GATHERS" value="6"/>
+	<macro name="NUM_RING_3_GATHERS" value="12"/>
+	<macro name="NUM_RING_4_GATHERS" value="20"/>
+
+	<cbuffer name="never_changes">
+		<parameter type="float" name="inv_ring_weights_total" array_size="4">
+			<value>
+				<![CDATA[
+					 0.18837, 0.087749, 0.0557824, 0.0401020
+				]]>
+			</value>
+		</parameter>
+		<parameter type="int2" name="normal_load_pattern" array_size="4">
+			<value>
+				<![CDATA[
+					 1, 8,
+					 8, -1,
+					 5, 4,
+					 4, -4
+				]]>
+			</value>
+		</parameter>
+		<parameter type="float2" name="hdao_ring_pattern" array_size="20">
+			<value>
+				<![CDATA[
+					1, -1,
+					0, 1,
+					
+					0, 3,
+					2, 1,
+					3, -1,
+					1, -3,
+
+					1, -5,
+					3, -3,
+					5, -1,
+					4, 1,
+					2, 3,
+					0, 5,
+
+					0, 7,
+					2, 5,
+					4, 3,
+					6, 1,
+					7, -1,
+					5, -3,
+					3, -5,
+					1, -7
+				]]>
+			</value>
+		</parameter>
+
+		<parameter type="float4" name="hdao_ring_weight" array_size="20">
+			<value>
+				<![CDATA[
+					1.00000, 0.50000, 0.44721, 0.70711,
+					0.50000, 0.44721, 0.70711, 1.00000,
+
+					0.30000, 0.29104, 0.37947, 0.40000,
+					0.42426, 0.33282, 0.37947, 0.53666,
+					0.40000, 0.30000, 0.29104, 0.37947,
+					0.53666, 0.42426, 0.33282, 0.37947,
+
+					0.31530, 0.29069, 0.24140, 0.25495,
+					0.36056, 0.29069, 0.26000, 0.30641,
+					0.26000, 0.21667, 0.21372, 0.25495,
+					0.29069, 0.24140, 0.25495, 0.31530,
+					0.29069, 0.26000, 0.30641, 0.36056,
+					0.21667, 0.21372, 0.25495, 0.26000,
+
+					0.17500, 0.17365, 0.19799, 0.20000,
+					0.22136, 0.20870, 0.24010, 0.25997,
+					0.24749, 0.21864, 0.24010, 0.28000,
+					0.22136, 0.19230, 0.19799, 0.23016,
+					0.20000, 0.17500, 0.17365, 0.19799,
+					0.25997, 0.22136, 0.20870, 0.24010,
+					0.28000, 0.24749, 0.21864, 0.24010,
+					0.23016, 0.22136, 0.19230, 0.19799,
+				]]>
+				</value>
+			</parameter>
+		</cbuffer>
+
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>
 		<parameter type="float2" name="proj"/>
+		<parameter type="float4" name="rt_size_inv_size"/>
+		<parameter type="float" name="hdao_reject_radius" value="0.43"/>
+		<parameter type="float" name="hdao_accept_radius" value="0.00312"/>
+		<parameter type="float" name="hdao_intensity" value="2.14"/> 
+		<parameter type="float" name="normal_scale" value="0.3"/>
+		<parameter type="float" name="accept_angle" value="0.98"/>
 	</cbuffer>
 
 	<parameter type="sampler" name="point_sampler">
@@ -25,51 +119,150 @@
 
 	<shader>
 		<![CDATA[
-float4 SSAO(float2 tc0)
+float NormalRejectionTest(float2 tc)
 {
-	float4 ndc = src_tex.Sample(point_sampler, tc0);
-	float depth = GetDepth(ndc);
-	
-	const float scale = 0.025f; 
-	const float3 samples[8] =
+	float summed_dot = 0;
+	for (int i = 0; i < 4; ++ i)
 	{
-		normalize(float3( 1,  1,  1)) * scale,
-		normalize(float3(-1, -1, -1)) * scale,
-		normalize(float3(-1, -1,  1)) * scale,
-		normalize(float3(-1,  1, -1)) * scale,
-		normalize(float3(-1,  1,  1)) * scale,
-		normalize(float3( 1, -1, -1)) * scale,
-		normalize(float3( 1, -1,  1)) * scale,
-		normalize(float3( 1,  1, -1)) * scale,
-	};
+		float2 pattern_offset = normal_load_pattern[i] * rt_size_inv_size.zw;
+		float2 offset_tc = tc + pattern_offset;
+		float2 mirror_offset_tc = tc - pattern_offset - rt_size_inv_size.zw;
 
-	float3 normal = GetNormal(src_tex.Sample(point_sampler, tc0));
+		float3 n1 = GetNormal(src_tex.Sample(point_sampler, offset_tc));
+		float3 n2 = GetNormal(src_tex.Sample(point_sampler, mirror_offset_tc));
 
-	float3 sample_scale = float3(proj / (depth * depth_near_far_invfar.y), depth_near_far_invfar.z);
-	float4 sky_access = 0.0f;
-	float4 arr_scene_depth2[2];
-	float3 ray;
-
-	for (int i = 0; i < 2; ++ i)
-	{
-		for (int j = 0; j < 4; ++ j)
-		{
-			ray = reflect(samples[i * 4 + j].xyz, normal) * sample_scale;
-			arr_scene_depth2[0][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
-			ray *= 0.5;
-			arr_scene_depth2[1][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
-		}
-
-		sky_access += (depth < arr_scene_depth2[0]);
-		sky_access += (depth < arr_scene_depth2[1]);
+		float normal_dot = dot(n1, n2);
+		summed_dot += (normal_dot > accept_angle) ? 0 : (1 - abs(normal_dot) * 0.25f);
 	}
 
-	return saturate(dot(sky_access, 1 / 8.0f) * 1.5f - 0.5f);
+	return summed_dot * 0.25f + 0.5f;
+}
+
+float4 SSAO(float2 tc0)
+{
+	float occlusion = 1;
+
+	float normal_dot = NormalRejectionTest(tc0);
+	if (normal_dot > 0.5f)
+	{
+		float4 ndc = src_tex.Sample(point_sampler, tc0);
+		float depth = GetDepth(ndc);
+		
+		const float scale = 0.025f; 
+		const float3 samples[8] =
+		{
+			normalize(float3( 1,  1,  1)) * scale,
+			normalize(float3(-1, -1, -1)) * scale,
+			normalize(float3(-1, -1,  1)) * scale,
+			normalize(float3(-1,  1, -1)) * scale,
+			normalize(float3(-1,  1,  1)) * scale,
+			normalize(float3( 1, -1, -1)) * scale,
+			normalize(float3( 1, -1,  1)) * scale,
+			normalize(float3( 1,  1, -1)) * scale,
+		};
+
+		float3 normal = GetNormal(src_tex.Sample(point_sampler, tc0));
+
+		float3 sample_scale = float3(proj / (depth * depth_near_far_invfar.y), depth_near_far_invfar.z);
+		float4 sky_access = 0.0f;
+		float4 arr_scene_depth2[2];
+		float3 ray;
+
+		[unroll]
+		for (int i = 0; i < 2; ++ i)
+		{
+			for (int j = 0; j < 4; ++ j)
+			{
+				ray = reflect(samples[i * 4 + j].xyz, normal) * sample_scale;
+				arr_scene_depth2[0][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
+				ray *= 0.5;
+				arr_scene_depth2[1][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
+			}
+
+			sky_access += (depth < arr_scene_depth2[0]);
+			sky_access += (depth < arr_scene_depth2[1]);
+		}
+	
+		occlusion = saturate(dot(sky_access, 1 / 8.0f) * 1.5f - 0.5f);
+	}
+
+	return occlusion;
+}
+
+void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
+{
+	float4 texel = src_tex.SampleLevel(point_sampler, tc + float2(0, rt_size_inv_size.w), 0);
+	z_samples.x = GetDepth(texel);
+	nz_samples.x = GetNormal(texel).z;
+
+	texel = src_tex.SampleLevel(point_sampler, tc + rt_size_inv_size.zw, 0);
+	z_samples.y = GetDepth(texel);
+	nz_samples.y = GetNormal(texel).z;
+
+	texel = src_tex.SampleLevel(point_sampler, tc + float2(rt_size_inv_size.z, 0), 0);
+	z_samples.z = GetDepth(texel);
+	nz_samples.z = GetNormal(texel).z;
+
+	texel = src_tex.SampleLevel(point_sampler, tc, 0);
+	z_samples.w = GetDepth(texel);
+	nz_samples.w = GetNormal(texel).z;
+
+	z_samples *= depth_near_far_invfar.y;
+}
+
+float4 HDAO(float2 tc0) : SV_Target
+{
+	int num_ring_gathers = NUM_RING_4_GATHERS;
+	int num_rings = RING_4;
+
+	float4 sampled_z[2];
+	float4 sampled_nz[2];
+	float4 offset_sampled_z[2];
+	float4 compare[2];
+	float occlusion = 1;
+
+	float normal_dot = NormalRejectionTest(tc0);
+	if (normal_dot > 0.5f)
+	{
+		float4 occlusion4 = 0;
+		
+		float4 ndc = src_tex.Sample(point_sampler, tc0);
+		float center_z = GetDepth(ndc) * depth_near_far_invfar.y;
+		float offset_center_z = GetNormal(ndc).z * normal_scale + center_z;
+
+		for (int i = 0; i < num_ring_gathers; ++ i)
+		{
+			float2 pattern_offset = hdao_ring_pattern[i] * rt_size_inv_size.zw;
+			float2 offset_tc = tc0 + pattern_offset;
+			float2 mirror_offset_tc = tc0 - pattern_offset - rt_size_inv_size.zw;
+
+			GatherSamples(offset_tc, sampled_z[0], sampled_nz[0]);
+			GatherSamples(mirror_offset_tc, sampled_z[1], sampled_nz[1]);
+
+			// Scale normals
+			offset_sampled_z[0] = sampled_nz[0] * normal_scale + sampled_z[0];
+			offset_sampled_z[1] = sampled_nz[1] * normal_scale + sampled_z[1];
+
+			// Detect valleys
+			float4 diff = offset_center_z - offset_sampled_z[0];
+			compare[0] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
+
+			diff = offset_center_z - offset_sampled_z[1];
+			compare[1] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
+
+			occlusion4 += hdao_ring_weight[i] * (compare[0] * compare[1].zwxy);
+		}
+
+		occlusion = hdao_intensity * normal_dot * dot(occlusion4, 1) * inv_ring_weights_total[num_rings - 1] * 0.5f;
+		occlusion = 1.0f - saturate(occlusion);
+	}
+
+	return occlusion;
 }
 
 float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return SSAO(tc0);
+	return HDAO(tc0);
 }
 		]]>
 	</shader>

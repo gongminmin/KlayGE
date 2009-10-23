@@ -580,6 +580,7 @@ namespace
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			proj_param_ = technique_->Effect().ParameterByName("proj");
+			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
 		}
 
 		void OnRenderBegin()
@@ -591,11 +592,16 @@ namespace
 
 			float4x4 const & proj = camera.ProjMatrix();
 			*proj_param_ = float2(proj(0, 0), proj(1, 1));
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			*rt_size_inv_size_param_ = float4(1.0f * re.CurFrameBuffer()->Width(), 1.0f * re.CurFrameBuffer()->Height(),
+				1.0f / re.CurFrameBuffer()->Width(), 1.0f / re.CurFrameBuffer()->Height());
 		}
 
 	private:
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr rt_size_inv_size_param_;
 	};
 
 
@@ -773,7 +779,7 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	hdr_pp_->Destinate(FrameBufferPtr());
 
 	ssao_pp_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->GBufferFB()->RequiresFlipping());
-	ssao_pp_->Destinate(ssao_buffer_);
+	ssao_pp_->Destinate(blur_ssao_buffer_);
 
 	blur_pp_->Source(ssao_tex_, ssao_buffer_->RequiresFlipping());
 	blur_pp_->Destinate(blur_ssao_buffer_);
@@ -926,7 +932,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();
-			blur_pp_->Apply();
+			//blur_pp_->Apply();
 		}
 
 		break;
