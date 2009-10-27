@@ -18,7 +18,14 @@
 #endif
 #include <vector>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
 #include <boost/shared_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/CpuInfo.hpp>
 
@@ -333,11 +340,15 @@ namespace KlayGE
 
 			// There is a bug with the implementation of GetLogicalProcessorInformation
 			// on Windows Server 2003 and XP64. Therefore, only
-			// GetLogicalProcessorInformation on Windows Vista is supported for now.
+			// GetLogicalProcessorInformation on Windows Vista and up are supported for now.
 			if (os_ver_info.dwMajorVersion >= 6)
 			{
-				glpi = (GetLogicalProcessorInformationPtr)::GetProcAddress(::GetModuleHandle(TEXT("kernel32")),
+				HMODULE hMod = ::GetModuleHandle(TEXT("kernel32"));
+				if (hMod)
+				{
+					glpi = (GetLogicalProcessorInformationPtr)::GetProcAddress(hMod,
 						"GetLogicalProcessorInformation");
+				}
 			}
 		}
 

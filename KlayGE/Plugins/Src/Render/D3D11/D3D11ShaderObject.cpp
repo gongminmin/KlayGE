@@ -1004,14 +1004,14 @@ namespace KlayGE
 									}
 								}
 
-								D3D11_BUFFER_DESC desc;
-								desc.ByteWidth = cb_desc.Size;
-								desc.Usage = D3D11_USAGE_DEFAULT;
-								desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-								desc.CPUAccessFlags = 0;
-								desc.MiscFlags = 0;
+								D3D11_BUFFER_DESC buf_desc;
+								buf_desc.ByteWidth = cb_desc.Size;
+								buf_desc.Usage = D3D11_USAGE_DEFAULT;
+								buf_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+								buf_desc.CPUAccessFlags = 0;
+								buf_desc.MiscFlags = 0;
 								ID3D11Buffer* tmp_buf;
-								TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
+								TIF(d3d_device->CreateBuffer(&buf_desc, NULL, &tmp_buf));
 								d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 							}
 

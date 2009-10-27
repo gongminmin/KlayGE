@@ -27,7 +27,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4100)
+#pragma warning(disable: 4100 6011 6313)
 #endif
 #include <rapidxml/rapidxml_print.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -252,6 +252,30 @@ namespace KlayGE
 	XMLAttributePtr XMLNode::Attrib(std::string const & name)
 	{
 		return this->FirstAttrib(name);
+	}
+
+	int32_t XMLNode::AttribInt(std::string const & name, int32_t default_val)
+	{
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->ValueInt() : default_val;
+	}
+
+	uint32_t XMLNode::AttribUInt(std::string const & name, uint32_t default_val)
+	{
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->ValueUInt() : default_val;
+	}
+
+	float XMLNode::AttribFloat(std::string const & name, float default_val)
+	{
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->ValueFloat() : default_val;
+	}
+
+	std::string XMLNode::AttribString(std::string const & name, std::string default_val)
+	{
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->ValueString() : default_val;
 	}
 
 	XMLNodePtr XMLNode::FirstNode(std::string const & name)

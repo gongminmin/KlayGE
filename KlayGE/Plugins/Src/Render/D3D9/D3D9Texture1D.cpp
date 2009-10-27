@@ -191,7 +191,6 @@ namespace KlayGE
 			filter |= D3DX_FILTER_SRGB_OUT;
 		}
 
-		ID3D9SurfacePtr src, dst;
 		{
 			IDirect3DSurface9* src;
 			TIF(d3dTexture1D_->GetSurfaceLevel(level, &src));

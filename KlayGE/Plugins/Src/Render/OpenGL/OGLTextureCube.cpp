@@ -267,14 +267,11 @@ namespace KlayGE
 		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height))
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-			for (int face = 0; face < 6; ++ face)
-			{
-				glCopyImageSubDataNV(
-					texture_, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-					src_xOffset, src_yOffset, 0,
-					ogl_target.GLTexture(), GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level,
-					dst_xOffset, dst_yOffset, 0, src_width, src_height, 1);
-			}
+			glCopyImageSubDataNV(
+				texture_, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face - Texture::CF_Positive_X, level,
+				src_xOffset, src_yOffset, 0,
+				ogl_target.GLTexture(), GL_TEXTURE_CUBE_MAP_POSITIVE_X + face - Texture::CF_Positive_X, level,
+				dst_xOffset, dst_yOffset, 0, src_width, src_height, 1);
 		}
 		else
 		{

@@ -59,8 +59,15 @@ namespace KlayGE
 		}
 		App3DFramework& AppInstance()
 		{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
 			BOOST_ASSERT(app_);
 			return *app_;
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		}
 
 		void SceneManagerInstance(SceneManagerPtr const & mgr)

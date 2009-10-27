@@ -33,7 +33,14 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6328)
+#endif
 #include <boost/tokenizer.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/D3D9/D3D9MinGWDefs.hpp>
 
@@ -672,9 +679,9 @@ namespace KlayGE
 
 						std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
 						bool found = false;
-						for (uint32_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+						for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 						{
-							if (tex_sampler_binds_[i].first == combined_sampler_name)
+							if (tex_sampler_binds_[j].first == combined_sampler_name)
 							{
 								found = true;
 								break;

@@ -20,7 +20,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244 4512)
+#pragma warning(disable: 4244 4512 6328)
 #endif
 #include <boost/date_time.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

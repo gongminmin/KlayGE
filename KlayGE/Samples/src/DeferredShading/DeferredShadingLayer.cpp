@@ -395,7 +395,6 @@ namespace KlayGE
 
 			*inv_view_param_ = inv_view_;
 
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 texel_to_pixel = re.TexelToPixelOffset();
 			texel_to_pixel.x() /= shaded_buffer_->Width() / 2.0f;
 			texel_to_pixel.y() /= shaded_buffer_->Height() / 2.0f;

@@ -234,7 +234,8 @@ public:
 					for (uint32_t x = 0; x < char_size_; ++ x)
 					{
 						float value;
-						int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / (char_size_ - 2) - float2(x_offset, y_offset);
+						int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / static_cast<float>(char_size_ - 2)
+							- float2(static_cast<float>(x_offset), static_cast<float>(y_offset));
 						if (kd.query_position(map_xy) > 0)
 						{
 							value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
@@ -537,7 +538,7 @@ void quantizer(uint8_t* uint8_dist, uint32_t non_empty_chars,
 	{
 		float mse = 0;
 
-		float const fscale = (scale / 32768.0f + 1) / 255.0f;
+		float const frscale = (scale / 32768.0f + 1) / 255.0f;
 		float const fbase = base / 32768.0f;
 		for (size_t i = 0; i < non_empty_chars; ++ i)
 		{
@@ -545,7 +546,7 @@ void quantizer(uint8_t* uint8_dist, uint32_t non_empty_chars,
 			float const * dist = &char_dist_data[char_info[ch].dist_index];
 			for (size_t j = 0; j < char_size_sq; ++ j)
 			{
-				float const d = dist[j] - (uint8_dist[i * char_size_sq + j] * fscale + fbase);
+				float const d = dist[j] - (uint8_dist[i * char_size_sq + j] * frscale + fbase);
 				mse += d * d;
 			}
 		}
@@ -676,11 +677,11 @@ int main(int argc, char* argv[])
 				kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
 					static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
 
-				char_info[ch].dist_index = i * header.char_size * header.char_size;
-				for (size_t i = 0; i < uint8_dist.size(); ++ i)
+				char_info[ch].dist_index = static_cast<uint32_t>(i * header.char_size * header.char_size);
+				for (size_t j = 0; j < uint8_dist.size(); ++ j)
 				{
-					char_dist_data[char_info[ch].dist_index + i]
-						= uint8_dist[i] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
+					char_dist_data[char_info[ch].dist_index + j]
+						= uint8_dist[j] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
 				}
 			}
 		}

@@ -52,6 +52,7 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="4"
+				EnablePREfast="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -209,6 +210,7 @@
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
+				EnablePREfast="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

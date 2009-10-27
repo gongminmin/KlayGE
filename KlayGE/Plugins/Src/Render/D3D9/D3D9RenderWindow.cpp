@@ -262,14 +262,14 @@ namespace KlayGE
 		{
 			UINT adapter_to_use = adapter_.AdapterNo();
 			bool use_nvperfhud = false;
-			for (UINT adapter = 0; adapter < d3d->GetAdapterCount(); ++ adapter)
+			for (UINT i = 0; i < d3d->GetAdapterCount(); ++ i)
 			{
 				D3DADAPTER_IDENTIFIER9 identifier;
-				d3d->GetAdapterIdentifier(adapter, 0, &identifier);
+				d3d->GetAdapterIdentifier(i, 0, &identifier);
 				if (strstr(identifier.Description, "PerfHUD") != 0)
 				{
 					use_nvperfhud = true;
-					adapter_to_use = adapter;
+					adapter_to_use = i;
 					break;
 				}
 			}

@@ -1044,8 +1044,8 @@ namespace KlayGE
 								int weight_stream = -1;
 								for (uint32_t l = 0; l < rl->NumVertexStreams(); ++ l)
 								{
-									vertex_element const & ve = rl->VertexStreamFormat(l)[0];
-									if (VEU_BlendWeight == ve.usage)
+									vertex_element const & other_ve = rl->VertexStreamFormat(l)[0];
+									if (VEU_BlendWeight == other_ve.usage)
 									{
 										weight_stream = l;
 										break;
@@ -1058,13 +1058,13 @@ namespace KlayGE
 									XMLNodePtr weight_node = doc.AllocNode(XNT_Element, "weight");
 									vertex_node->AppendNode(weight_node);
 
-									uint8_t* p = reinterpret_cast<uint8_t*>(&buffs[k][0]);
-									weight_node->AppendAttrib(doc.AllocAttribFloat("bone_index", p[j * num_components + c]));
+									uint8_t* bone_indices = reinterpret_cast<uint8_t*>(&buffs[k][0]);
+									weight_node->AppendAttrib(doc.AllocAttribFloat("bone_index", bone_indices[j * num_components + c]));
 
 									if (weight_stream != -1)
 									{
-										float* p = reinterpret_cast<float*>(&buffs[weight_stream][0]);
-										weight_node->AppendAttrib(doc.AllocAttribFloat("weight", p[j * num_components + c]));
+										float* weights = reinterpret_cast<float*>(&buffs[weight_stream][0]);
+										weight_node->AppendAttrib(doc.AllocAttribFloat("weight", weights[j * num_components + c]));
 									}
 								}
 							}
@@ -1136,14 +1136,14 @@ namespace KlayGE
 
 					GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
 
-					for (uint32_t i = 0; i < mesh.NumTriangles(); ++ i)
+					for (uint32_t j = 0; j < mesh.NumTriangles(); ++ j)
 					{
 						XMLNodePtr triangle_node = doc.AllocNode(XNT_Element, "triangle");
 						triangles_chunk->AppendNode(triangle_node);
 
-						triangle_node->AppendAttrib(doc.AllocAttribInt("a", *(mapper.Pointer<uint16_t>() + i * 3 + 0)));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("b", *(mapper.Pointer<uint16_t>() + i * 3 + 1)));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("c", *(mapper.Pointer<uint16_t>() + i * 3 + 2)));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("a", *(mapper.Pointer<uint16_t>() + j * 3 + 0)));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("b", *(mapper.Pointer<uint16_t>() + j * 3 + 1)));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("c", *(mapper.Pointer<uint16_t>() + j * 3 + 2)));
 					}
 				}
 			}

@@ -48,7 +48,14 @@
 #include <list>
 #include <map>
 #include <vector>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6334)
+#endif
 #include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

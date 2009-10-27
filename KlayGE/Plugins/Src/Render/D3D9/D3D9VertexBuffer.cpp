@@ -32,7 +32,7 @@ namespace KlayGE
 	{
 		if (init_data != NULL)
 		{
-			uint32_t usage = 0;
+			uint32_t d3d_usage = 0;
 
 			D3D9RenderEngine const & renderEngine(*checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 			d3d_device_ = renderEngine.D3DDevice();
@@ -41,7 +41,7 @@ namespace KlayGE
 
 			IDirect3DVertexBuffer9* buffer;
 			TIF(d3d_device_->CreateVertexBuffer(init_data->row_pitch,
-					usage, 0, D3DPOOL_MANAGED, &buffer, NULL));
+					d3d_usage, 0, D3DPOOL_MANAGED, &buffer, NULL));
 			buffer_ = MakeCOMPtr(buffer);
 			hw_buf_size_ = init_data->row_pitch;
 

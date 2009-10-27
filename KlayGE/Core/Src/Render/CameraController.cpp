@@ -189,42 +189,44 @@ namespace KlayGE
 
 	void FirstPersonCameraController::Move(float x, float y, float z)
 	{
-		BOOST_ASSERT(camera_ != NULL);
+		if (camera_)
+		{
+			float3 movement(x, y, z);
+			movement *= moveScaler_;
 
-		float3 movement(x, y, z);
-		movement *= moveScaler_;
+			float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
 
-		float3 new_eye_pos = camera_->EyePos() + MathLib::transform_quat(movement, inv_rot_);
-
-		camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ViewVec(), camera_->UpVec());
+			camera_->ViewParams(new_eye_pos, new_eye_pos + camera_->ViewVec(), camera_->UpVec());
+		}
 	}
 
 	void FirstPersonCameraController::Rotate(float yaw, float pitch, float roll)
 	{
-		BOOST_ASSERT(camera_ != NULL);
+		if (camera_)
+		{
+			pitch *= -rotationScaler_ / 2;
+			yaw *= -rotationScaler_ / 2;
+			roll *= -rotationScaler_ / 2;
 
-		pitch *= -rotationScaler_ / 2;
-		yaw *= -rotationScaler_ / 2;
-		roll *= -rotationScaler_ / 2;
+			float2 delta_x, delta_y, delta_z;
+			MathLib::sin_cos(pitch, delta_x.x(), delta_x.y());
+			MathLib::sin_cos(yaw, delta_y.x(), delta_y.y());
+			MathLib::sin_cos(roll, delta_z.x(), delta_z.y());
 
-		float2 delta_x, delta_y, delta_z;
-		MathLib::sin_cos(pitch, delta_x.x(), delta_x.y());
-		MathLib::sin_cos(yaw, delta_y.x(), delta_y.y());
-		MathLib::sin_cos(roll, delta_z.x(), delta_z.y());
+			Quaternion quat_x = Quaternion(rot_x_.x() * delta_x.y() + rot_x_.y() * delta_x.x(), 0, 0, rot_x_.y() * delta_x.y() - rot_x_.x() * delta_x.x());
+			Quaternion quat_y = Quaternion(0, rot_y_.x() * delta_y.y() + rot_y_.y() * delta_y.x(), 0, rot_y_.y() * delta_y.y() - rot_y_.x() * delta_y.x());
+			Quaternion quat_z = Quaternion(0, 0, rot_z_.x() * delta_z.y() + rot_z_.y() * delta_z.x(), rot_z_.y() * delta_z.y() - rot_z_.x() * delta_z.x());
 
-		Quaternion quat_x = Quaternion(rot_x_.x() * delta_x.y() + rot_x_.y() * delta_x.x(), 0, 0, rot_x_.y() * delta_x.y() - rot_x_.x() * delta_x.x());
-		Quaternion quat_y = Quaternion(0, rot_y_.x() * delta_y.y() + rot_y_.y() * delta_y.x(), 0, rot_y_.y() * delta_y.y() - rot_y_.x() * delta_y.x());
-		Quaternion quat_z = Quaternion(0, 0, rot_z_.x() * delta_z.y() + rot_z_.y() * delta_z.x(), rot_z_.y() * delta_z.y() - rot_z_.x() * delta_z.x());
+			rot_x_ = float2(quat_x.x(), quat_x.w());
+			rot_y_ = float2(quat_y.y(), quat_y.w());
+			rot_z_ = float2(quat_z.z(), quat_z.w());
 
-		rot_x_ = float2(quat_x.x(), quat_x.w());
-		rot_y_ = float2(quat_y.y(), quat_y.w());
-		rot_z_ = float2(quat_z.z(), quat_z.w());
+			inv_rot_ = MathLib::inverse(quat_y * quat_x * quat_z);
+			float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
+			float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
 
-		inv_rot_ = MathLib::inverse(quat_y * quat_x * quat_z);
-		float3 view_vec = MathLib::transform_quat(float3(0, 0, 1), inv_rot_);
-		float3 up_vec = MathLib::transform_quat(float3(0, 1, 0), inv_rot_);
-
-		camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
+			camera_->ViewParams(camera_->EyePos(), camera_->EyePos() + view_vec, up_vec);
+		}
 	}
 
 
@@ -250,15 +252,13 @@ namespace KlayGE
 		if (camera_)
 		{
 			InputMousePtr mouse;
+			for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
 			{
-				for (uint32_t i = 0; i < ie.NumDevices(); ++ i)
+				InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
+				if (m)
 				{
-					InputMousePtr m = boost::dynamic_pointer_cast<InputMouse>(ie.Device(i));
-					if (m)
-					{
-						mouse = m;
-						break;
-					}
+					mouse = m;
+					break;
 				}
 			}
 

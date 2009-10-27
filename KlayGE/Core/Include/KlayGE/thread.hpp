@@ -29,7 +29,14 @@
 #endif
 #include <boost/function.hpp>
 #include <boost/optional.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
 #include <boost/shared_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/bind.hpp>
 #include <boost/mpl/if.hpp>

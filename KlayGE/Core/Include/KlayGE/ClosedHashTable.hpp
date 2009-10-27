@@ -569,11 +569,21 @@ namespace KlayGE
 			}
 			num_buckets_ = this->min_size(0, 0);
 			this->reset_thresholds();
-			data_table_ = static_cast<value_type*>(realloc(data_table_, num_buckets_ * sizeof(*data_table_)));
-			BOOST_ASSERT(data_table_);
+			value_type* new_data_table = static_cast<value_type*>(realloc(data_table_, num_buckets_ * sizeof(*data_table_)));
+			if (!new_data_table)
+			{
+				free(data_table_);
+				BOOST_ASSERT(new_data_table);
+			}
+			data_table_ = new_data_table;
 			std::uninitialized_fill(data_table_, data_table_ + num_buckets_, value_type());
-			tag_table_ = static_cast<char*>(realloc(tag_table_, num_buckets_ * sizeof(*tag_table_)));
-			BOOST_ASSERT(tag_table_);
+			char* new_tag_table = static_cast<char*>(realloc(tag_table_, num_buckets_ * sizeof(*tag_table_)));
+			if (!new_tag_table)
+			{
+				free(tag_table_);
+				BOOST_ASSERT(new_tag_table);
+			}
+			tag_table_ = new_tag_table;
 			for (size_type i = 0; i < num_buckets_; ++ i)
 			{
 				this->set_tag(i, DHTAG_EMPTY);
@@ -813,10 +823,20 @@ namespace KlayGE
 
 		void expand_array(size_t resize_to, boost::true_type)
 		{
-			data_table_ = static_cast<value_type*>(realloc(data_table_, resize_to * sizeof(*data_table_)));
-			BOOST_ASSERT(data_table_);
-			tag_table_ = static_cast<char*>(realloc(tag_table_, resize_to * sizeof(*tag_table_)));
-			BOOST_ASSERT(tag_table_);
+			value_type* new_data_table = static_cast<value_type*>(realloc(data_table_, resize_to * sizeof(*data_table_)));
+			if (!new_data_table)
+			{
+				free(data_table_);
+				BOOST_ASSERT(new_data_table);
+			}
+			data_table_ = new_data_table;
+			char* new_tag_table = static_cast<char*>(realloc(tag_table_, resize_to * sizeof(*tag_table_)));
+			if (!new_tag_table)
+			{
+				free(tag_table_);
+				BOOST_ASSERT(new_tag_table);
+			}
+			tag_table_ = new_tag_table;
 			for (size_type i = num_buckets_; i < resize_to; ++ i)
 			{
 				this->set_tag(i, DHTAG_EMPTY);
@@ -835,8 +855,13 @@ namespace KlayGE
 					std::uninitialized_copy(data_table_ + i, data_table_ + i + 1, new_data_table);
 				}
 			}
-			tag_table_ = static_cast<char*>(realloc(tag_table_, resize_to * sizeof(*tag_table_)));
-			BOOST_ASSERT(tag_table_);
+			char* new_tag_table = static_cast<char*>(realloc(tag_table_, resize_to * sizeof(*tag_table_)));
+			if (!new_tag_table)
+			{
+				free(tag_table_);
+				BOOST_ASSERT(new_tag_table);
+			}
+			tag_table_ = new_tag_table;
 			for (size_type i = num_buckets_; i < resize_to; ++ i)
 			{
 				this->set_tag(i, DHTAG_EMPTY);

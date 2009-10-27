@@ -20,8 +20,8 @@ namespace
 		uint32_t array_size;
 		ElementFormat format;
 		std::vector<ElementInitData> in_data;
-		std::vector<uint8_t> data_block;
-		LoadTexture(in_file, type, width, height, depth, num_mipmaps, array_size, format, in_data, data_block);
+		std::vector<uint8_t> in_data_block;
+		LoadTexture(in_file, type, width, height, depth, num_mipmaps, array_size, format, in_data, in_data_block);
 
 		if ((Texture::TT_2D == type) && (EF_R8 == format))
 		{

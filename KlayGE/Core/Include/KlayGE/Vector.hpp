@@ -14,7 +14,14 @@
 #define _VECTOR_HPP
 
 #include <boost/static_assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6385)
+#endif
 #include <boost/array.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/operators.hpp>
 
 #include <KlayGE/Detail/MathHelper.hpp>

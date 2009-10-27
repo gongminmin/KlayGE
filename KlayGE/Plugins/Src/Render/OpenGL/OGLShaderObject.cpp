@@ -44,7 +44,14 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6328)
+#endif
 #include <boost/tokenizer.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <glloader/glloader.h>
 
@@ -694,9 +701,9 @@ namespace KlayGE
 
 						std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
 						bool found = false;
-						for (uint32_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+						for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 						{
-							if (tex_sampler_binds_[i].first == combined_sampler_name)
+							if (tex_sampler_binds_[j].first == combined_sampler_name)
 							{
 								found = true;
 								break;
@@ -1082,7 +1089,7 @@ namespace KlayGE
 
 				if (0 == type)
 				{
-					CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_PROGRAM);
+					cg_param = cgGetFirstParameter(sub_prog, CG_PROGRAM);
 					while (cg_param)
 					{
 						if (cgIsParameterUsed(cg_param, sub_prog)

@@ -1278,16 +1278,7 @@ namespace KlayGE
 					&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray))
 				{
 					XMLNodePtr parent_node = node->Parent();
-					std::string cbuff_name;
-					attr = parent_node->Attrib("name");
-					if (attr)
-					{
-						cbuff_name = attr->ValueString();
-					}
-					else
-					{
-						cbuff_name = "global_cb";
-					}
+					std::string cbuff_name = parent_node->AttribString("name", "global_cb");
 
 					bool found = false;
 					for (size_t i = 0; i < cbuffers_->size(); ++ i)

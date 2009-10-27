@@ -45,6 +45,31 @@
 
 #include <KlayGE/UI.hpp>
 
+namespace
+{
+	bool ReadBool(KlayGE::XMLNodePtr& node, std::string const & name, bool default_val)
+	{
+		bool ret = default_val;
+
+		KlayGE::XMLAttributePtr attr = node->Attrib(name);
+		if (attr)
+		{
+			std::string val_str = attr->ValueString();
+			if (("true" == val_str) || ("1" == val_str))
+			{
+				ret = true;
+			}
+			else
+			{
+				BOOST_ASSERT(("false" == val_str) || ("0" == val_str));
+				ret = false;
+			}
+		}
+
+		return ret;
+	}
+}
+
 namespace KlayGE
 {
 	UIManagerPtr UIManager::ui_mgr_instance_;
@@ -346,22 +371,9 @@ namespace KlayGE
 					int32_t x, y;
 					uint32_t width, height;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
-					std::string id, caption, skin;
-					attr = node->Attrib("id");
-					if (attr)
-					{
-						id = attr->ValueString();
-					}
-					attr = node->Attrib("caption");
-					if (attr)
-					{
-						caption = attr->ValueString();
-					}
-					attr = node->Attrib("skin");
-					if (attr)
-					{
-						skin = attr->ValueString();
-					}
+					std::string id = node->AttribString("id", "");
+					std::string caption = node->AttribString("caption", "");
+					std::string skin = node->AttribString("skin", "");
 					x = node->Attrib("x")->ValueInt();
 					y = node->Attrib("y")->ValueInt();
 					width = node->Attrib("width")->ValueInt();
@@ -440,28 +452,18 @@ namespace KlayGE
 					bool is_default = false;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
 
-					std::string id_str = ctrl_node->Attrib("id")->ValueString();
-					uint32_t id = static_cast<uint32_t>(std::find(ctrl_ids.begin(), ctrl_ids.end(), id_str) - ctrl_ids.begin());
-					dlg->AddIDName(id_str, id);
+					uint32_t id;
+					{
+						std::string id_str = ctrl_node->Attrib("id")->ValueString();
+						id = static_cast<uint32_t>(std::find(ctrl_ids.begin(), ctrl_ids.end(), id_str) - ctrl_ids.begin());
+						dlg->AddIDName(id_str, id);
+					}
 
 					x = ctrl_node->Attrib("x")->ValueInt();
 					y = ctrl_node->Attrib("y")->ValueInt();
 					width = ctrl_node->Attrib("width")->ValueInt();
 					height = ctrl_node->Attrib("height")->ValueInt();
-					attr = ctrl_node->Attrib("is_default");
-					if (attr)
-					{
-						std::string is_default_str = attr->ValueString();
-						if (("true" == is_default_str) || ("1" == is_default_str))
-						{
-							is_default = true;
-						}
-						else
-						{
-							BOOST_ASSERT(("false" == is_default_str) || ("0" == is_default_str));
-							is_default = false;
-						}
-					}
+					is_default = ReadBool(ctrl_node, "is_default", false);
 					attr = ctrl_node->Attrib("align_x");
 					if (attr)
 					{
@@ -505,8 +507,10 @@ namespace KlayGE
 						}
 					}
 
-					UIDialog::ControlLocation loc = { x, y, align_x, align_y };
-					dlg->CtrlLocation(id, loc);
+					{
+						UIDialog::ControlLocation loc = { x, y, align_x, align_y };
+						dlg->CtrlLocation(id, loc);
+					}
 
 					std::string type_str = ctrl_node->Attrib("type")->ValueString();
 					if ("static" == type_str)
@@ -517,25 +521,16 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIStatic>(dlg, id, wcaption,
 							x, y, width, height, is_default));
 					}
-					if ("button" == type_str)
+					else if ("button" == type_str)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
-						uint8_t hotkey;
-						attr = ctrl_node->Attrib("hotkey");
-						if (attr)
-						{
-							hotkey = static_cast<uint8_t>(attr->ValueInt());
-						}
-						else
-						{
-							hotkey = 0;
-						}
+						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIButton>(dlg, id, wcaption,
 							x, y, width, height, hotkey, is_default));
 					}
-					if ("tex_button" == type_str)
+					else if ("tex_button" == type_str)
 					{
 						TexturePtr tex;
 						attr = ctrl_node->Attrib("texture");
@@ -544,126 +539,49 @@ namespace KlayGE
 							std::string tex_name = attr->ValueString();
 							tex = LoadTexture(tex_name, EAH_GPU_Read)();
 						}
-						uint8_t hotkey;
-						attr = ctrl_node->Attrib("hotkey");
-						if (attr)
-						{
-							hotkey = static_cast<uint8_t>(attr->ValueInt());
-						}
-						else
-						{
-							hotkey = 0;
-						}
+						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
 							x, y, width, height, hotkey, is_default));
 					}
-					if ("check_box" == type_str)
+					else if ("check_box" == type_str)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
-						bool checked;
-						std::string checked_str = ctrl_node->Attrib("checked")->ValueString();
-						if (("true" == checked_str) || ("1" == checked_str))
-						{
-							checked = true;
-						}
-						else
-						{
-							BOOST_ASSERT(("false" == checked_str) || ("0" == checked_str));
-							checked = false;
-						}
-						uint8_t hotkey;
-						attr = ctrl_node->Attrib("hotkey");
-						if (attr)
-						{
-							hotkey = static_cast<uint8_t>(attr->ValueInt());
-						}
-						else
-						{
-							hotkey = 0;
-						}
+						bool checked = ReadBool(ctrl_node, "checked", false);
+						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UICheckBox>(dlg, id, wcaption,
 							x, y, width, height, checked, hotkey, is_default));
 					}
-					if ("radio_button" == type_str)
+					else if ("radio_button" == type_str)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						int32_t button_group = ctrl_node->Attrib("button_group")->ValueInt();
-						bool checked;
-						std::string checked_str = ctrl_node->Attrib("checked")->ValueString();
-						if (("true" == checked_str) || ("1" == checked_str))
-						{
-							checked = true;
-						}
-						else
-						{
-							BOOST_ASSERT(("false" == checked_str) || ("0" == checked_str));
-							checked = false;
-						}
-						uint8_t hotkey;
-						attr = ctrl_node->Attrib("hotkey");
-						if (attr)
-						{
-							hotkey = static_cast<uint8_t>(attr->ValueInt());
-						}
-						else
-						{
-							hotkey = 0;
-						}
+						bool checked = ReadBool(ctrl_node, "checked", false);
+						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIRadioButton>(dlg, id, button_group, wcaption,
 							x, y, width, height, checked, hotkey, is_default));
 					}
-					if ("slider" == type_str)
+					else if ("slider" == type_str)
 					{
-						int32_t min_v = 0, max_v = 100, value = 50;
-						attr = ctrl_node->Attrib("min");
-						if (attr)
-						{
-							min_v = attr->ValueInt();
-						}
-						attr = ctrl_node->Attrib("max");
-						if (attr)
-						{
-							max_v = attr->ValueInt();
-						}
-						attr = ctrl_node->Attrib("value");
-						if (attr)
-						{
-							value = attr->ValueInt();
-						}
+						int32_t min_v = ctrl_node->AttribInt("min", 0);
+						int32_t max_v = ctrl_node->AttribInt("max", 100);
+						int32_t value = ctrl_node->AttribInt("value", 50);
 						dlg->AddControl(MakeSharedPtr<UISlider>(dlg, id,
 							x, y, width, height, min_v, max_v, value, is_default));
 					}
-					if ("scroll_bar" == type_str)
+					else if ("scroll_bar" == type_str)
 					{
-						int32_t track_start = 0, track_end = 1, track_pos = 1, page_size = 1;
-						attr = ctrl_node->Attrib("track_start");
-						if (attr)
-						{
-							track_start = attr->ValueInt();
-						}
-						attr = ctrl_node->Attrib("track_end");
-						if (attr)
-						{
-							track_end = attr->ValueInt();
-						}
-						attr = ctrl_node->Attrib("track_pos");
-						if (attr)
-						{
-							track_pos = attr->ValueInt();
-						}
-						attr = ctrl_node->Attrib("page_size");
-						if (attr)
-						{
-							page_size = attr->ValueInt();
-						}
+						int32_t track_start = ctrl_node->AttribInt("track_start", 0);
+						int32_t track_end = ctrl_node->AttribInt("track_end", 1);
+						int32_t track_pos = ctrl_node->AttribInt("track_pos", 1);
+						int32_t page_size = ctrl_node->AttribInt("page_size", 1);
 						dlg->AddControl(MakeSharedPtr<UIScrollBar>(dlg, id,
 							x, y, width, height, track_start, track_end, track_pos, page_size));
 					}
-					if ("list_box" == type_str)
+					else if ("list_box" == type_str)
 					{
 						UIListBox::STYLE style = UIListBox::SINGLE_SELECTION;
 						attr = ctrl_node->Attrib("style");
@@ -691,18 +609,9 @@ namespace KlayGE
 							dlg->Control<UIListBox>(id)->AddItem(wcaption);
 						}
 					}
-					if ("combo_box" == type_str)
+					else if ("combo_box" == type_str)
 					{
-						uint8_t hotkey;
-						attr = ctrl_node->Attrib("hotkey");
-						if (attr)
-						{
-							hotkey = static_cast<uint8_t>(attr->ValueInt());
-						}
-						else
-						{
-							hotkey = 0;
-						}
+						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UIComboBox>(dlg, id,
 							x, y, width, height, hotkey, is_default));
 
@@ -714,7 +623,7 @@ namespace KlayGE
 							dlg->Control<UIComboBox>(id)->AddItem(wcaption);
 						}
 					}
-					if ("edit_box" == type_str)
+					else if ("edit_box" == type_str)
 					{
 						std::string caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
@@ -722,29 +631,13 @@ namespace KlayGE
 						dlg->AddControl(MakeSharedPtr<UIEditBox>(dlg, id, wcaption,
 							x, y, width, height, is_default));
 					}
-					if ("polyline_edit_box" == type_str)
+					else if ("polyline_edit_box" == type_str)
 					{
 						Color line_clr(0, 1, 0, 1);
-						attr = ctrl_node->Attrib("line_r");
-						if (attr)
-						{
-							line_clr.r() = attr->ValueFloat();
-						}
-						attr = ctrl_node->Attrib("line_g");
-						if (attr)
-						{
-							line_clr.g() = attr->ValueFloat();
-						}
-						attr = ctrl_node->Attrib("line_b");
-						if (attr)
-						{
-							line_clr.b() = attr->ValueFloat();
-						}
-						attr = ctrl_node->Attrib("line_a");
-						if (attr)
-						{
-							line_clr.a() = attr->ValueFloat();
-						}
+						line_clr.r() = ctrl_node->AttribFloat("line_r", 0);
+						line_clr.g() = ctrl_node->AttribFloat("line_g", 1);
+						line_clr.b() = ctrl_node->AttribFloat("line_b", 0);
+						line_clr.a() = ctrl_node->AttribFloat("line_a", 1);
 						dlg->AddControl(MakeSharedPtr<UIPolylineEditBox>(dlg, id,
 							x, y, width, height, is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
