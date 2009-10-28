@@ -358,6 +358,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\PostProcessing\NightVisionPP.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\PostProcessing\PostProcessing.cpp"
 				>
 			</File>
@@ -380,6 +384,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\PostProcessing\NightVisionPP.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\PostProcessing\PostProcessing.hpp"
 				>
 			</File>
@@ -397,6 +405,10 @@
 			</File>
 			<File
 				RelativePath="..\..\media\PostProcessing\CartoonPP.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\NightVisionPP.fxml"
 				>
 			</File>
 			<File

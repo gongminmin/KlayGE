@@ -28,6 +28,7 @@
 #include "CartoonPP.hpp"
 #include "TilingPP.hpp"
 #include "PostProcessing.hpp"
+#include "NightVisionPP.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -167,6 +168,7 @@ void PostProcessingApp::InitObjects()
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
 	hdr_ = MakeSharedPtr<HDRPostProcess>(false, false);
+	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -176,12 +178,14 @@ void PostProcessingApp::InitObjects()
 	id_cartoon_ = dialog_->IDFromName("CartoonPP");
 	id_tiling_ = dialog_->IDFromName("TilingPP");
 	id_hdr_ = dialog_->IDFromName("HDRPP");
+	id_night_vision_ = dialog_->IDFromName("NightVisionPP");
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::FPSCameraHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::AsciiArtsHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CartoonHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::TilingHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::HDRHandler, this, _1));
+	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::NightVisionHandler, this, _1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 }
 
@@ -208,6 +212,9 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	hdr_->Source(color_tex_, g_buffer_->RequiresFlipping());
 	hdr_->Destinate(FrameBufferPtr());
+
+	night_vision_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	night_vision_->Destinate(FrameBufferPtr());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -263,6 +270,14 @@ void PostProcessingApp::HDRHandler(UIRadioButton const & sender)
 	if (sender.GetChecked())
 	{
 		active_pp_ = hdr_;
+	}
+}
+
+void PostProcessingApp::NightVisionHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = night_vision_;
 	}
 }
 
