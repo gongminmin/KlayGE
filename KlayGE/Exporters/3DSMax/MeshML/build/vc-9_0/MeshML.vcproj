@@ -275,7 +275,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MESHML_EXPORTS"
 				RuntimeLibrary="0"
 				ForceConformanceInForLoopScope="false"

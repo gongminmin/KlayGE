@@ -273,11 +273,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
+				Optimization="1"
 				PreprocessorDefinitions="WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_D3D10_RE_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
