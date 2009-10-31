@@ -315,7 +315,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 		active_pp_->Apply();
 
 		return App3DFramework::URV_Finished;

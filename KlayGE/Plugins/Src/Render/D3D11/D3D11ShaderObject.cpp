@@ -728,8 +728,6 @@ namespace KlayGE
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 
-		std::string shader_text = this->GenShaderText(effect);
-
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
@@ -791,6 +789,8 @@ namespace KlayGE
 			{
 				if (!sd.profile.empty())
 				{
+					std::string shader_text = this->GenShaderText(effect);
+
 					is_shader_validate_[type] = true;
 
 					std::string shader_profile = sd.profile;

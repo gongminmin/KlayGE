@@ -831,8 +831,6 @@ namespace KlayGE
 		D3D9RenderEngine const & render_eng = *checked_cast<D3D9RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D9DevicePtr const & d3d_device = render_eng.D3DDevice();
 
-		std::string shader_text = this->GenShaderText(effect);
-
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
@@ -896,6 +894,8 @@ namespace KlayGE
 			{
 				if (!sd.profile.empty())
 				{
+					std::string shader_text = this->GenShaderText(effect);
+
 					is_shader_validate_[type] = true;
 
 					std::string shader_profile = sd.profile;

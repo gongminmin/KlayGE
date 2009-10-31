@@ -1,0 +1,97 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="trilinear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
+	</parameter>
+
+	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+
+	<parameter type="texture2D" name="grass_tex"/>
+
+	<parameter type="texture2D" name="height_map_tex"/>
+	<parameter type="texture2D" name="normal_map_tex"/>
+	<parameter type="sampler" name="normal_map_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float" name="inv_far"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+void TerrainVS(float4 pos			: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float4 oTex  : TEXCOORD0,
+					out float4 oLightVec_Depth : TEXCOORD1,
+					out float4 oPos		: SV_Position)
+{
+	oTex.xy = float2(tex.x, 1 - tex.y);
+	oTex.zw = oTex.xy * 8;
+
+	pos = pos.xzyw;
+	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
+	
+	oLightVec_Depth.xyz = LightPos - pos.xyz;
+	
+	oPos = mul(pos, mvp);
+	oLightVec_Depth.w = oPos.w;
+}
+
+float4 TerrainPS(float4 tex : TEXCOORD0, float4 light_vec_depth : TEXCOORD1) : SV_Target
+{
+	float3 normal = decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy;
+	return float4(grass_tex.Sample(trilinear_sampler, tex.zw).rgb * dot(normalize(light_vec_depth.xyz), normal),
+		light_vec_depth.w * inv_far);
+}
+		]]>
+	</shader>
+
+	<technique name="Terrain">
+		<pass name="p0">
+			<state name="vertex_shader" value="TerrainVS()"/>
+			<state name="pixel_shader" value="TerrainPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="tex_with_alpha"/>
+
+	<shader>
+		<![CDATA[
+float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 a = tex_with_alpha.Sample(point_sampler, tex);
+	a.a = saturate(a.a);
+	float4 s = src_tex.Sample(point_sampler, tex);
+	return float4(lerp(s.rgb, a.rgb, a.a), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Blend">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlendPS()"/>
+		</pass>
+	</technique>
+</effect>

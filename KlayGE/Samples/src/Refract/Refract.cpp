@@ -292,7 +292,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 0:
 		// 第一遍，渲染背面
 		re.BindFrameBuffer(render_buffer_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 0.0f, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
 		sky_box_->Visible(false);
@@ -301,7 +301,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 1:
 		// 第二遍，渲染正面
 		re.BindFrameBuffer(hdr_buffer_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 
 		if (settings_.sample_count > 1)
 		{

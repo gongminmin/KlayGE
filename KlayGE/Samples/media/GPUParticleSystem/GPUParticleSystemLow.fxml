@@ -1,0 +1,243 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="address_w" value="wrap"/>
+	</parameter>
+
+	<parameter type="texture2D" name="particle_pos_tex"/>
+	<parameter type="texture3D" name="noise_vol_tex"/>
+
+	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+	<parameter type="float" name="point_radius"/>
+	<parameter type="float4" name="init_pos_life"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="View"/>
+		<parameter type="float4x4" name="Proj"/>
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="inv_view"/>
+
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="upper_right"/>
+		<parameter type="float3" name="lower_left"/>
+		<parameter type="float3" name="lower_right"/>
+
+		<parameter type="float2" name="offset"/>
+		<parameter type="int" name="flip"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="particle_tex"/>
+	<parameter type="texture2D" name="scene_tex"/>
+
+	<shader>
+		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+		]]>
+	</shader>
+	
+	<shader>
+		<![CDATA[
+struct PS_IN
+{
+	float4 pos : SV_Position;
+	float4 clr : COLOR0;
+	float4 PosSS : TEXCOORD0;
+	float4 CenterView : TEXCOORD1;
+	float3 view_dir : TEXCOORD2;
+};
+
+void ParticlesVS(float2 tex_pos		: POSITION,
+					float2 tex			: TEXCOORD0,
+					out PS_IN vs_out)
+{
+	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
+
+	if (pos.w <= 0)
+	{
+		vs_out.pos = float4(-1, -1, 0, 0);
+		vs_out.clr = 0;
+		vs_out.PosSS = 0;
+		vs_out.CenterView = 0;
+		vs_out.view_dir = 0;
+	}
+	else
+	{
+		vs_out.CenterView = mul(float4(pos.xyz, 1), View);
+		float4 view_pos = vs_out.CenterView;
+		view_pos.xy += tex * point_radius;
+		vs_out.pos = mul(view_pos, Proj);
+			  
+		vs_out.clr = float4(1, 1, 1, pos.w);
+		vs_out.PosSS = vs_out.pos / vs_out.pos.w;
+		
+		vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+	}
+}
+
+float4 ParticlesPS(PS_IN ps_in) : SV_Target
+{
+	ps_in.CenterView /= ps_in.CenterView.w;
+	float dir = ps_in.view_dir.z;
+	ps_in.view_dir = normalize(ps_in.view_dir);
+	
+	float4 clr = ps_in.clr;
+	
+	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir);
+	float disc = point_radius * point_radius - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
+	if (disc < 0)
+	{
+		clr = 0;
+	}
+	else
+	{
+		float2 tex_coord = ps_in.PosSS.xy + offset;
+		tex_coord.y *= flip;
+		tex_coord = tex_coord / 2 + 0.5f;
+
+		float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;
+		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
+		float optical_depth = dir * depth - intersect.z;
+		
+		if (optical_depth < 0)
+		{
+			clr = 0;
+		}
+		else
+		{
+			optical_depth = min(optical_depth, 2 * sqrt(disc) * ps_in.view_dir.z);
+			float4 intersect_ws = mul(float4(intersect, 1), inv_view);
+			intersect_ws /= intersect_ws.w;
+			float2 dxdy = (intersect.xy - ps_in.CenterView.xy) / point_radius;
+			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
+			float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb / 50, 0);
+			clr = float4((dot(normalize(LightPos - intersect_ws.xyz), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
+		}
+	}
+	
+	return clr;
+}
+		]]>
+	</shader>
+	
+	<technique name="Particles">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+			
+			<state name="vertex_shader" value="ParticlesVS()"/>
+			<state name="pixel_shader" value="ParticlesPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="texture2D" name="particle_vel_tex"/>
+
+	<cbuffer name="per_frame2">
+		<parameter type="float4x4" name="ps_model_mat"/>
+		<parameter type="float" name="accumulate_time"/>
+		<parameter type="float" name="elapse_time"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="particle_init_vel_tex"/>
+	<parameter type="texture2D" name="particle_birth_time_tex"/>
+	<parameter type="buffer" elem_type="float4" name="particle_init_vel_buff"/>
+	<parameter type="buffer" elem_type="float" name="particle_birth_time_buff"/>
+
+	<parameter type="texture2D" name="height_map_tex"/>
+	<parameter type="texture2D" name="normal_map_tex"/>
+	<parameter type="sampler" name="normal_map_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void UpdateVS(float4 pos			: POSITION,
+					float2 tex			: TEXCOORD0,
+					out float2 oTex		: TEXCOORD0,
+					out float4 oPos		: SV_Position)
+{
+	oPos = pos;
+	oTex = float2(tex.x, 1 - tex.y);
+}
+
+void UpdatePS(float2 tex : TEXCOORD0,
+				out float4 out_pos : SV_Target0,
+				out float4 out_vel : SV_Target1)
+{
+	float4 cur_pos = particle_pos_tex.Sample(point_sampler, tex);
+	if (cur_pos.w > 0)
+	{
+		float3 cur_vel = particle_vel_tex.SampleLevel(point_sampler, tex, 0).xyz;
+
+		cur_vel += float3(0, -0.1f, 0) * elapse_time;
+		cur_pos.xyz += cur_vel * elapse_time;
+		cur_pos.w -= elapse_time;
+		
+		float2 tex_pos = cur_pos.xz / 4 + 0.5;
+		tex_pos.y = 1 - tex_pos.y;
+		float height = height_map_tex.SampleLevel(point_sampler, tex_pos, 0).r;
+		if (cur_pos.y < height)
+		{
+			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.SampleLevel(normal_map_sampler, tex_pos, 0)).xzy) * 0.99f;
+		}
+		
+		out_pos = cur_pos;
+		out_vel = float4(cur_vel, 1);
+	}
+	else
+	{
+		float t = accumulate_time - particle_birth_time_tex.SampleLevel(point_sampler, tex, 0).r;
+		if ((t > 0) && (t < elapse_time))
+		{
+			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
+			pos /= pos.w;
+
+			float3 vel = particle_init_vel_tex.SampleLevel(point_sampler, tex + cur_pos.xz, 0).xyz;
+			vel = mul(vel, (float3x3)ps_model_mat);
+
+			out_pos = float4(pos.xyz, init_pos_life.w);
+			out_vel = float4(vel, 1);
+		}
+		else
+		{
+			out_pos = float4(0, 0, 0, -1);
+			out_vel = 0;
+		}
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="Update">
+		<pass name="p0">
+			<state name="vertex_shader" value="UpdateVS()"/>
+			<state name="pixel_shader" value="UpdatePS()"/>
+		</pass>
+	</technique>
+</effect>

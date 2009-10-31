@@ -169,7 +169,7 @@ namespace
 
 				if (use_so)
 				{
-					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGSSO");
+					technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("ParticlesWithGSSO");
 					rl_->BindDummyVertexStream(max_num_particles);
 				}
 				else
@@ -186,7 +186,7 @@ namespace
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGS");
+					technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("ParticlesWithGS");
 				}
 			}
 			else
@@ -219,7 +219,7 @@ namespace
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Particles");
+				technique_ = rf.LoadEffect("GPUParticleSystemLow.fxml")->TechniqueByName("Particles");
 			}
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
@@ -317,7 +317,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 				rl_->BindDummyVertexStream(max_num_particles);
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
+				technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("UpdateSO");
 
 				std::vector<float4> p(max_num_particles_);
 				for (size_t i = 0; i < p.size(); ++ i)
@@ -401,7 +401,7 @@ namespace
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 				}
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
+				technique_ = rf.LoadEffect("GPUParticleSystemLow.fxml")->TechniqueByName("Update");
 
 				std::vector<float4> p(tex_width_ * tex_height_);
 				for (size_t i = 0; i < p.size(); ++ i)
@@ -598,7 +598,7 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Terrain");
+			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
 
 			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
 			height_map->CopyToTexture(*height_32f);
@@ -616,8 +616,6 @@ namespace
 			float4x4 view = app.ActiveCamera().ViewMatrix();
 			float4x4 proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("View")) = view;
-			*(technique_->Effect().ParameterByName("Proj")) = proj;
 			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
 
 			Camera const & camera = app.ActiveCamera();
@@ -641,7 +639,7 @@ namespace
 	{
 	public:
 		BlendPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Blend"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("Terrain.fxml")->TechniqueByName("Blend"))
 		{
 		}
 
