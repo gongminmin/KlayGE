@@ -83,6 +83,9 @@ namespace KlayGE
 		ID3D11VertexShaderPtr vertex_shader_;
 		ID3D11PixelShaderPtr pixel_shader_;
 		ID3D11GeometryShaderPtr geometry_shader_;
+		ID3D11ComputeShaderPtr compute_shader_;
+		ID3D11HullShaderPtr hull_shader_;
+		ID3D11DomainShaderPtr domain_shader_;
 		ID3D10BlobPtr vs_code_;
 
 		boost::array<std::vector<TexturePtr>, ST_NumShaderTypes> textures_;

@@ -197,24 +197,36 @@ namespace KlayGE
 			vs_profile_ = "vs_5_0";
 			ps_profile_ = "ps_5_0";
 			gs_profile_ = "gs_5_0";
+			cs_profile_ = "cs_5_0";
+			hs_profile_ = "hs_5_0";
+			ds_profile_ = "ds_5_0";
 			break;
 
 		case D3D_FEATURE_LEVEL_10_1:
 			vs_profile_ = "vs_4_1";
 			ps_profile_ = "ps_4_1";
 			gs_profile_ = "gs_4_1";
+			cs_profile_ = "cs_4_1";
+			hs_profile_ = "";
+			ds_profile_ = "";
 			break;
 
 		case D3D_FEATURE_LEVEL_10_0:
 			vs_profile_ = "vs_4_0";
 			ps_profile_ = "ps_4_0";
 			gs_profile_ = "gs_4_0";
+			cs_profile_ = "cs_4_0";
+			hs_profile_ = "";
+			ds_profile_ = "";
 			break;
 
 		default:
 			vs_profile_ = "vs_4_0_level_9_3";
 			ps_profile_ = "ps_4_0_level_9_3";
-			gs_profile_ = "gs_4_0";
+			gs_profile_ = "";
+			cs_profile_ = "";
+			hs_profile_ = "";
+			ds_profile_ = "";
 			break;
 		}
 
@@ -653,6 +665,33 @@ namespace KlayGE
 		{
 			d3d_imm_ctx_->GSSetShader(shader.get(), NULL, 0);
 			geometry_shader_cache_ = shader;
+		}
+	}
+
+	void D3D11RenderEngine::CSSetShader(ID3D11ComputeShaderPtr const & shader)
+	{
+		if (compute_shader_cache_ != shader)
+		{
+			d3d_imm_ctx_->CSSetShader(shader.get(), NULL, 0);
+			compute_shader_cache_ = shader;
+		}
+	}
+
+	void D3D11RenderEngine::HSSetShader(ID3D11HullShaderPtr const & shader)
+	{
+		if (hull_shader_cache_ != shader)
+		{
+			d3d_imm_ctx_->HSSetShader(shader.get(), NULL, 0);
+			hull_shader_cache_ = shader;
+		}
+	}
+
+	void D3D11RenderEngine::DSSetShader(ID3D11DomainShaderPtr const & shader)
+	{
+		if (domain_shader_cache_ != shader)
+		{
+			d3d_imm_ctx_->DSSetShader(shader.get(), NULL, 0);
+			domain_shader_cache_ = shader;
 		}
 	}
 }

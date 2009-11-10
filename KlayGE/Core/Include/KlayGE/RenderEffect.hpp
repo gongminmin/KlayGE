@@ -101,7 +101,19 @@ namespace KlayGE
 		REDT_float4x2,
 		REDT_float4x3,
 		REDT_float4x4,
-		REDT_buffer
+		REDT_buffer,
+		REDT_structured_buffer,
+		REDT_byte_address_buffer,
+		REDT_rw_buffer,
+		REDT_rw_structured_buffer,
+		REDT_rw_texture1D,
+		REDT_rw_texture2D,
+		REDT_rw_texture3D,
+		REDT_rw_texture1DArray,
+		REDT_rw_texture2DArray,
+		REDT_rw_byte_address_buffer,
+		REDT_append_structured_buffer,
+		REDT_consume_structured_buffer
 	};
 
 	class KLAYGE_CORE_API RenderVariable
@@ -241,6 +253,48 @@ namespace KlayGE
 		RenderVariablePtr Clone()
 		{
 			RenderVariablePtr ret = MakeSharedPtr<RenderVariableBuffer>();
+			GraphicsBufferPtr val;
+			this->Value(val);
+			*ret = val;
+			std::string elem_type;
+			this->Value(elem_type);
+			*ret = elem_type;
+			return ret;
+		}
+
+		RenderVariable& operator=(GraphicsBufferPtr const & value)
+		{
+			val_ = value;
+			return *this;
+		}
+
+		void Value(GraphicsBufferPtr& val) const
+		{
+			val = val_;
+		}
+
+		RenderVariable& operator=(std::string const & value)
+		{
+			elem_type_ = value;
+			return *this;
+		}
+
+		void Value(std::string& val) const
+		{
+			val = elem_type_;
+		}
+
+	protected:
+		GraphicsBufferPtr val_;
+		std::string elem_type_;
+	};
+
+	class RenderVariableByteAddressBuffer : public RenderVariable
+	{
+	public:
+		RenderVariablePtr Clone()
+		{
+			RenderVariablePtr ret = MakeSharedPtr<RenderVariableByteAddressBuffer>();
 			GraphicsBufferPtr val;
 			this->Value(val);
 			*ret = val;

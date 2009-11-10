@@ -54,6 +54,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
@@ -144,6 +145,18 @@ namespace
 			types_.push_back("float4x3");
 			types_.push_back("float4x4");
 			types_.push_back("buffer");
+			types_.push_back("structured_buffer");
+			types_.push_back("byte_address_buffer");
+			types_.push_back("rw_buffer");
+			types_.push_back("rw_structured_buffer");
+			types_.push_back("rw_texture1D");
+			types_.push_back("rw_texture2D");
+			types_.push_back("rw_texture3D");
+			types_.push_back("rw_texture1DArray");
+			types_.push_back("rw_texture2DArray");
+			types_.push_back("rw_byte_address_buffer");
+			types_.push_back("append_structured_buffer");
+			types_.push_back("consume_structured_buffer");
 		}
 
 	private:
@@ -625,6 +638,11 @@ namespace
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
+		case REDT_rw_texture1D:
+		case REDT_rw_texture2D:
+		case REDT_rw_texture3D:
+		case REDT_rw_texture1DArray:
+		case REDT_rw_texture2DArray:
 			var = MakeSharedPtr<RenderVariableTexture>();
 			*var = TexturePtr();
 			attr = node->Attrib("elem_type");
@@ -1149,6 +1167,11 @@ namespace
 			break;
 
 		case REDT_buffer:
+		case REDT_structured_buffer:
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_consume_structured_buffer:
+		case REDT_append_structured_buffer:
 			var = MakeSharedPtr<RenderVariableBuffer>();
 			*var = GraphicsBufferPtr();
 			attr = node->Attrib("elem_type");
@@ -1160,6 +1183,12 @@ namespace
 			{
 				*var = std::string("float4");
 			}
+			break;
+
+		case REDT_byte_address_buffer:
+		case REDT_rw_byte_address_buffer:
+			var = MakeSharedPtr<RenderVariableByteAddressBuffer>();
+			*var = GraphicsBufferPtr();
 			break;
 
 		default:
@@ -1802,9 +1831,22 @@ namespace KlayGE
 				{
 					type = ShaderObject::ST_PixelShader;
 				}
-				else
+				else if ("geometry_shader" == state_name)
 				{
 					type = ShaderObject::ST_GeometryShader;
+				}
+				else if ("compute_shader" == state_name)
+				{
+					type = ShaderObject::ST_ComputeShader;
+				}
+				else if ("hull_shader" == state_name)
+				{
+					type = ShaderObject::ST_HullShader;
+				}
+				else
+				{
+					BOOST_ASSERT("domain_shader" == state_name);
+					type = ShaderObject::ST_DomainShader;
 				}
 
 				shader_desc sd;

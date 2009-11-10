@@ -97,6 +97,18 @@ namespace KlayGE
 		{
 			return gs_profile_;
 		}
+		std::string const & ComputeShaderProfile() const
+		{
+			return cs_profile_;
+		}
+		std::string const & HullShaderProfile() const
+		{
+			return hs_profile_;
+		}
+		std::string const & DomainShaderProfile() const
+		{
+			return ds_profile_;
+		}
 
 		void RSSetState(ID3D11RasterizerStatePtr const & ras);
 		void OMSetDepthStencilState(ID3D11DepthStencilStatePtr const & ds, uint16_t stencil_ref);
@@ -104,6 +116,9 @@ namespace KlayGE
 		void VSSetShader(ID3D11VertexShaderPtr const & shader);
 		void PSSetShader(ID3D11PixelShaderPtr const & shader);
 		void GSSetShader(ID3D11GeometryShaderPtr const & shader);
+		void CSSetShader(ID3D11ComputeShaderPtr const & shader);
+		void HSSetShader(ID3D11HullShaderPtr const & shader);
+		void DSSetShader(ID3D11DomainShaderPtr const & shader);
 		
 		void ResetRenderStates();
 
@@ -152,8 +167,11 @@ namespace KlayGE
 		ID3D11VertexShaderPtr vertex_shader_cache_;
 		ID3D11PixelShaderPtr pixel_shader_cache_;
 		ID3D11GeometryShaderPtr geometry_shader_cache_;
+		ID3D11ComputeShaderPtr compute_shader_cache_;
+		ID3D11HullShaderPtr hull_shader_cache_;
+		ID3D11DomainShaderPtr domain_shader_cache_;
 
-		std::string vs_profile_, ps_profile_, gs_profile_;
+		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

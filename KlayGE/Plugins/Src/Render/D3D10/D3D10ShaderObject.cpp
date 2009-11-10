@@ -570,6 +570,36 @@ namespace
 		GraphicsBufferPtr* buffer_;
 		RenderEffectParameterPtr param_;
 	};
+
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] = 
+	{
+		&ID3D10Device::VSSetShaderResources,
+		&ID3D10Device::PSSetShaderResources,
+		&ID3D10Device::GSSetShaderResources,
+		NULL,
+		NULL,
+		NULL
+	};
+
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] = 
+	{
+		&ID3D10Device::VSSetSamplers,
+		&ID3D10Device::PSSetSamplers,
+		&ID3D10Device::GSSetSamplers,
+		NULL,
+		NULL,
+		NULL
+	};
+
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] = 
+	{
+		&ID3D10Device::VSSetConstantBuffers,
+		&ID3D10Device::PSSetConstantBuffers,
+		&ID3D10Device::GSSetConstantBuffers,
+		NULL,
+		NULL,
+		NULL
+	};
 }
 
 namespace KlayGE
@@ -1345,141 +1375,6 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<ID3D10SamplerState*> sss;
-		std::vector<ID3D10ShaderResourceView*> srs;
-
-		BOOST_TYPEOF(textures_)::const_reference vs_textures = textures_[ST_VertexShader];
-		BOOST_TYPEOF(buffers_)::const_reference vs_buffers = buffers_[ST_VertexShader];
-		srs.resize(std::max(vs_textures.size(), vs_buffers.size()));
-		for (size_t i = 0; i < srs.size(); ++ i)
-		{
-			if ((i < vs_textures.size()) && vs_textures[i])
-			{
-				srs[i] = checked_pointer_cast<D3D10Texture>(vs_textures[i])->D3DShaderResourceView().get();
-			}
-			else
-			{
-				if ((i < vs_buffers.size()) && vs_buffers[i])
-				{
-					srs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(vs_buffers[i])->D3DShaderResourceView().get();
-				}
-				else
-				{
-					srs[i] = NULL;
-				}
-			}
-		}
-		if (!srs.empty())
-		{
-			d3d_device->VSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
-		}
-
-		BOOST_TYPEOF(samplers_)::const_reference vs_samplers = samplers_[ST_VertexShader];
-		sss.resize(vs_samplers.size());
-		for (size_t i = 0; i < vs_samplers.size(); ++ i)
-		{
-			if (vs_samplers[i])
-			{
-				sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(vs_samplers[i])->D3DSamplerState().get();
-			}
-			else
-			{
-				sss[i] = NULL;
-			}
-		}
-		if (!sss.empty())
-		{
-			d3d_device->VSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
-		}
-
-		BOOST_TYPEOF(textures_)::const_reference ps_textures = textures_[ST_PixelShader];
-		BOOST_TYPEOF(buffers_)::const_reference ps_buffers = buffers_[ST_PixelShader];
-		srs.resize(std::max(ps_textures.size(), ps_buffers.size()));
-		for (size_t i = 0; i < srs.size(); ++ i)
-		{
-			if ((i < ps_textures.size()) && ps_textures[i])
-			{
-				srs[i] = checked_pointer_cast<D3D10Texture>(ps_textures[i])->D3DShaderResourceView().get();
-			}
-			else
-			{
-				if ((i < ps_buffers.size()) && ps_buffers[i])
-				{
-					srs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(ps_buffers[i])->D3DShaderResourceView().get();
-				}
-				else
-				{
-					srs[i] = NULL;
-				}
-			}
-		}
-		if (!srs.empty())
-		{
-			d3d_device->PSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
-		}
-
-		BOOST_TYPEOF(samplers_)::const_reference ps_samplers = samplers_[ST_PixelShader];
-		sss.resize(ps_samplers.size());
-		for (size_t i = 0; i < ps_samplers.size(); ++ i)
-		{
-			if (ps_samplers[i])
-			{
-				sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(ps_samplers[i])->D3DSamplerState().get();
-			}
-			else
-			{
-				sss[i] = NULL;
-			}
-		}
-		if (!sss.empty())
-		{
-			d3d_device->PSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
-		}
-
-		BOOST_TYPEOF(textures_)::const_reference gs_textures = textures_[ST_GeometryShader];
-		BOOST_TYPEOF(buffers_)::const_reference gs_buffers = buffers_[ST_GeometryShader];
-		srs.resize(std::max(gs_textures.size(), gs_buffers.size()));
-		for (size_t i = 0; i < srs.size(); ++ i)
-		{
-			if ((i < gs_textures.size()) && gs_textures[i])
-			{
-				srs[i] = checked_pointer_cast<D3D10Texture>(gs_textures[i])->D3DShaderResourceView().get();
-			}
-			else
-			{
-				if ((i < gs_buffers.size()) && gs_buffers[i])
-				{
-					srs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(gs_buffers[i])->D3DShaderResourceView().get();
-				}
-				else
-				{
-					srs[i] = NULL;
-				}
-			}
-		}
-		if (!srs.empty())
-		{
-			d3d_device->GSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
-		}
-
-		BOOST_TYPEOF(samplers_)::const_reference gs_samplers = samplers_[ST_GeometryShader];
-		sss.resize(gs_samplers.size());
-		for (size_t i = 0; i < gs_samplers.size(); ++ i)
-		{
-			if (gs_samplers[i])
-			{
-				sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(gs_samplers[i])->D3DSamplerState().get();
-			}
-			else
-			{
-				sss[i] = NULL;
-			}
-		}
-		if (!sss.empty())
-		{
-			d3d_device->GSSetSamplers(0, static_cast<UINT>(sss.size()), &sss[0]);
-		}
-
 		for (size_t i = 0; i < d3d_cbufs_.size(); ++ i)
 		{
 			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
@@ -1494,32 +1389,63 @@ namespace KlayGE
 			}
 		}
 
-		if (!d3d_cbufs_[ST_VertexShader].empty())
+		std::vector<ID3D10SamplerState*> sss;
+		std::vector<ID3D10ShaderResourceView*> srs;
+		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			std::vector<ID3D10Buffer*> cb(d3d_cbufs_[ST_VertexShader].size());
-			for (size_t i = 0; i < cb.size(); ++ i)
+			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
+			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
+			srs.resize(std::max(s_textures.size(), s_buffers.size()));
+			for (size_t i = 0; i < srs.size(); ++ i)
 			{
-				cb[i] = d3d_cbufs_[ST_VertexShader][i].get();
+				if ((i < s_textures.size()) && s_textures[i])
+				{
+					srs[i] = checked_pointer_cast<D3D10Texture>(s_textures[i])->D3DShaderResourceView().get();
+				}
+				else
+				{
+					if ((i < s_buffers.size()) && s_buffers[i])
+					{
+						srs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(s_buffers[i])->D3DShaderResourceView().get();
+					}
+					else
+					{
+						srs[i] = NULL;
+					}
+				}
 			}
-			d3d_device->VSSetConstantBuffers(0, static_cast<UINT>(cb.size()), &cb[0]);
-		}
-		if (!d3d_cbufs_[ST_PixelShader].empty())
-		{
-			std::vector<ID3D10Buffer*> cb(d3d_cbufs_[ST_PixelShader].size());
-			for (size_t i = 0; i < cb.size(); ++ i)
+			if (!srs.empty())
 			{
-				cb[i] = d3d_cbufs_[ST_PixelShader][i].get();
+				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
 			}
-			d3d_device->PSSetConstantBuffers(0, static_cast<UINT>(cb.size()), &cb[0]);
-		}
-		if (!d3d_cbufs_[ST_GeometryShader].empty())
-		{
-			std::vector<ID3D10Buffer*> cb(d3d_cbufs_[ST_GeometryShader].size());
-			for (size_t i = 0; i < cb.size(); ++ i)
+
+			BOOST_TYPEOF(samplers_)::const_reference s_samplers = samplers_[st];
+			sss.resize(s_samplers.size());
+			for (size_t i = 0; i < s_samplers.size(); ++ i)
 			{
-				cb[i] = d3d_cbufs_[ST_GeometryShader][i].get();
+				if (s_samplers[i])
+				{
+					sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(s_samplers[i])->D3DSamplerState().get();
+				}
+				else
+				{
+					sss[i] = NULL;
+				}
 			}
-			d3d_device->GSSetConstantBuffers(0, static_cast<UINT>(cb.size()), &cb[0]);
+			if (!sss.empty())
+			{
+				SetSamplers_[st](d3d_device.get(), 0, static_cast<UINT>(sss.size()), &sss[0]);
+			}
+
+			if (!d3d_cbufs_[st].empty())
+			{
+				std::vector<ID3D10Buffer*> cb(d3d_cbufs_[st].size());
+				for (size_t i = 0; i < cb.size(); ++ i)
+				{
+					cb[i] = d3d_cbufs_[st][i].get();
+				}
+				SetConstantBuffers_[st](d3d_device.get(), 0, static_cast<UINT>(cb.size()), &cb[0]);
+			}
 		}
 	}
 
@@ -1528,20 +1454,14 @@ namespace KlayGE
 		D3D10RenderEngine& re = *checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D10DevicePtr const & d3d_device = re.D3DDevice();
 
-		std::vector<ID3D10ShaderResourceView*> srs(textures_[ST_VertexShader].size(), NULL);
-		if (!srs.empty())
+		std::vector<ID3D10ShaderResourceView*> srs;
+		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			d3d_device->VSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
-		}
-		srs.resize(textures_[ST_PixelShader].size(), NULL);
-		if (!srs.empty())
-		{
-			d3d_device->PSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
-		}
-		srs.resize(textures_[ST_GeometryShader].size(), NULL);
-		if (!srs.empty())
-		{
-			d3d_device->GSSetShaderResources(0, static_cast<UINT>(srs.size()), &srs[0]);
+			srs.resize(textures_[st].size(), NULL);
+			if (!srs.empty())
+			{
+				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
+			}
 		}
 	}
 }
