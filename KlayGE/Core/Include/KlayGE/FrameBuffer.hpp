@@ -6,7 +6,6 @@
 //
 // 3.9.0
 // Color buffer增加至8个 (2009.4.9)
-// 增加了AdjustProjMatrix (2009.11.1)
 //
 // 3.7.0
 // 增加了Clear (2008.1.9)
@@ -90,7 +89,6 @@ namespace KlayGE
 		void Active(bool state);
 
 		virtual bool RequiresFlipping() const = 0;
-		virtual void AdjustProjMatrix(float4x4& proj) const = 0;
 
 		void Attach(uint32_t att, RenderViewPtr const & view);
 		void Detach(uint32_t att);
