@@ -1203,35 +1203,35 @@ namespace KlayGE
 		{
 			ret->is_shader_validate_[type] = is_shader_validate_[type];
 
-			GLenum shader_type;
-			CGprofile profile;
-			switch (type)
-			{
-			case ST_VertexShader:
-				shader_type = GL_VERTEX_SHADER;
-				profile = CG_PROFILE_GLSLV;
-				break;
-
-			case ST_PixelShader:
-				shader_type = GL_FRAGMENT_SHADER;
-				profile = CG_PROFILE_GLSLF;
-				break;
-
-			case ST_GeometryShader:
-				shader_type = GL_GEOMETRY_SHADER_EXT;
-				profile = CG_PROFILE_GLSLG;
-				break;
-
-			default:
-				shader_type = 0;
-				profile = CG_PROFILE_UNKNOWN;
-				BOOST_ASSERT(false);
-				break;
-			}
-
 			shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
 			if (!sd.func_name.empty())
 			{
+				GLenum shader_type;
+				CGprofile profile;
+				switch (type)
+				{
+				case ST_VertexShader:
+					shader_type = GL_VERTEX_SHADER;
+					profile = CG_PROFILE_GLSLV;
+					break;
+
+				case ST_PixelShader:
+					shader_type = GL_FRAGMENT_SHADER;
+					profile = CG_PROFILE_GLSLF;
+					break;
+
+				case ST_GeometryShader:
+					shader_type = GL_GEOMETRY_SHADER_EXT;
+					profile = CG_PROFILE_GLSLG;
+					break;
+
+				default:
+					shader_type = 0;
+					profile = CG_PROFILE_UNKNOWN;
+					BOOST_ASSERT(false);
+					break;
+				}
+
 				char const * glsl = (*glsl_srcs_)[type].c_str();
 				GLuint object = glCreateShader(shader_type);
 				if (0 == object)
