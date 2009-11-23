@@ -213,7 +213,6 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 		</pass>
 	</technique>
 
-	<parameter type="texture2D" name="particle_vel_tex"/>
 	<parameter type="buffer" elem_type="float4" name="particle_vel_buff"/>
 
 	<cbuffer name="per_frame2">
