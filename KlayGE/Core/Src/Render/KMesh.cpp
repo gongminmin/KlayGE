@@ -30,8 +30,10 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/XMLDom.hpp>
+#include <KlayGE/LZMACodec.hpp>
 
 #include <fstream>
+#include <sstream>
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -40,6 +42,8 @@
 
 namespace KlayGE
 {
+	std::string const jit_ext_name = ".model_bin";
+
 	KMesh::KMesh(RenderModelPtr const & model, std::wstring const & name)
 						: StaticMesh(model, name),
 							model_matrix_(float4x4::Identity())
@@ -121,9 +125,7 @@ namespace KlayGE
 
 	void ModelJIT(std::string const & meshml_name)
 	{
-		std::ofstream ofs((meshml_name + ".model_bin").c_str(), std::ios_base::binary);
-		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', 'O'>::value;
-		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
 		ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
 		XMLDocument doc;
@@ -137,12 +139,12 @@ namespace KlayGE
 			{
 				++ num_mtls;
 			}
-			ofs.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+			ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 		}
 		else
 		{
 			uint32_t num_mtls = 0;
-			ofs.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+			ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 		}
 
 		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
@@ -153,12 +155,12 @@ namespace KlayGE
 			{
 				++ num_meshes;
 			}
-			ofs.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 		}
 		else
 		{
 			uint32_t num_meshes = 0;
-			ofs.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 		}
 
 		XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
@@ -169,12 +171,12 @@ namespace KlayGE
 			{
 				++ num_joints;
 			}
-			ofs.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+			ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 		}
 		else
 		{
 			uint32_t num_joints = 0;
-			ofs.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+			ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 		}
 
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
@@ -185,12 +187,12 @@ namespace KlayGE
 			{
 				++ num_kfs;
 			}
-			ofs.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+			ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 		}
 		else
 		{
 			uint32_t num_kfs = 0;
-			ofs.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+			ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 		}
 
 		if (materials_chunk)
@@ -215,21 +217,21 @@ namespace KlayGE
 				float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
 				float shininess = mtl_node->Attrib("shininess")->ValueFloat();
 
-				ofs.write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
-				ofs.write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
-				ofs.write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
-				ofs.write(reinterpret_cast<char*>(&diffuse_r), sizeof(diffuse_r));
-				ofs.write(reinterpret_cast<char*>(&diffuse_g), sizeof(diffuse_g));
-				ofs.write(reinterpret_cast<char*>(&diffuse_b), sizeof(diffuse_b));
-				ofs.write(reinterpret_cast<char*>(&specular_r), sizeof(specular_r));
-				ofs.write(reinterpret_cast<char*>(&specular_g), sizeof(specular_g));
-				ofs.write(reinterpret_cast<char*>(&specular_b), sizeof(specular_b));
-				ofs.write(reinterpret_cast<char*>(&emit_r), sizeof(emit_r));
-				ofs.write(reinterpret_cast<char*>(&emit_g), sizeof(emit_g));
-				ofs.write(reinterpret_cast<char*>(&emit_b), sizeof(emit_b));
-				ofs.write(reinterpret_cast<char*>(&opacity), sizeof(opacity));
-				ofs.write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
-				ofs.write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
+				ss->write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
+				ss->write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
+				ss->write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
+				ss->write(reinterpret_cast<char*>(&diffuse_r), sizeof(diffuse_r));
+				ss->write(reinterpret_cast<char*>(&diffuse_g), sizeof(diffuse_g));
+				ss->write(reinterpret_cast<char*>(&diffuse_b), sizeof(diffuse_b));
+				ss->write(reinterpret_cast<char*>(&specular_r), sizeof(specular_r));
+				ss->write(reinterpret_cast<char*>(&specular_g), sizeof(specular_g));
+				ss->write(reinterpret_cast<char*>(&specular_b), sizeof(specular_b));
+				ss->write(reinterpret_cast<char*>(&emit_r), sizeof(emit_r));
+				ss->write(reinterpret_cast<char*>(&emit_g), sizeof(emit_g));
+				ss->write(reinterpret_cast<char*>(&emit_b), sizeof(emit_b));
+				ss->write(reinterpret_cast<char*>(&opacity), sizeof(opacity));
+				ss->write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
+				ss->write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
 
 				XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
 				if (textures_chunk)
@@ -239,18 +241,18 @@ namespace KlayGE
 					{
 						++ num_texs;
 					}
-					ofs.write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
+					ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 
 					for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
 					{
-						WriteShortString(ofs, tex_node->Attrib("type")->ValueString());
-						WriteShortString(ofs, tex_node->Attrib("name")->ValueString());
+						WriteShortString(*ss, tex_node->Attrib("type")->ValueString());
+						WriteShortString(*ss, tex_node->Attrib("name")->ValueString());
 					}
 				}
 				else
 				{
 					uint32_t num_texs = 0;
-					ofs.write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
+					ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 				}
 			}
 		}
@@ -259,10 +261,10 @@ namespace KlayGE
 		{
 			for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
 			{
-				WriteShortString(ofs, mesh_node->Attrib("name")->ValueString());
+				WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
 
 				int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
-				ofs.write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+				ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
 
 				XMLNodePtr vertex_elements_chunk = mesh_node->FirstNode("vertex_elements_chunk");
 
@@ -271,7 +273,7 @@ namespace KlayGE
 				{
 					++ num_ves;
 				}
-				ofs.write(reinterpret_cast<char*>(&num_ves), sizeof(num_ves));
+				ss->write(reinterpret_cast<char*>(&num_ves), sizeof(num_ves));
 
 				std::vector<vertex_element> vertex_elements;
 				for (XMLNodePtr ve_node = vertex_elements_chunk->FirstNode("vertex_element"); ve_node; ve_node = ve_node->NextSibling("vertex_element"))
@@ -324,7 +326,7 @@ namespace KlayGE
 						}
 					}
 
-					ofs.write(reinterpret_cast<char*>(&ve), sizeof(ve));
+					ss->write(reinterpret_cast<char*>(&ve), sizeof(ve));
 					vertex_elements.push_back(ve);
 				}
 
@@ -335,7 +337,7 @@ namespace KlayGE
 				{
 					++ num_vertices;
 				}
-				ofs.write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
+				ss->write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
 
 				uint32_t max_num_blend = 0;
 				for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
@@ -347,7 +349,7 @@ namespace KlayGE
 					}
 					max_num_blend = std::max(max_num_blend, num_blend);
 				}
-				ofs.write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
+				ss->write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
 
 				BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
 				{
@@ -362,7 +364,7 @@ namespace KlayGE
 									vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -376,7 +378,7 @@ namespace KlayGE
 									normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -390,7 +392,7 @@ namespace KlayGE
 									diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -404,7 +406,7 @@ namespace KlayGE
 									specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -425,7 +427,7 @@ namespace KlayGE
 								}
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -446,7 +448,7 @@ namespace KlayGE
 								}
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -473,7 +475,7 @@ namespace KlayGE
 								}
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -487,7 +489,7 @@ namespace KlayGE
 									tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 
@@ -501,7 +503,7 @@ namespace KlayGE
 									binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat()));
 							}
 
-							ofs.write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
 						}
 						break;
 					}
@@ -514,7 +516,7 @@ namespace KlayGE
 				{
 					++ num_triangles;
 				}
-				ofs.write(reinterpret_cast<char*>(&num_triangles), sizeof(num_triangles));
+				ss->write(reinterpret_cast<char*>(&num_triangles), sizeof(num_triangles));
 
 				std::vector<uint16_t> indices;
 				for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
@@ -523,7 +525,7 @@ namespace KlayGE
 					indices.push_back(static_cast<uint16_t>(tri_node->Attrib("b")->ValueUInt()));
 					indices.push_back(static_cast<uint16_t>(tri_node->Attrib("c")->ValueUInt()));
 				}
-				ofs.write(reinterpret_cast<char*>(&indices[0]), static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
+				ss->write(reinterpret_cast<char*>(&indices[0]), static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
 			}
 		}
 
@@ -531,20 +533,20 @@ namespace KlayGE
 		{
 			for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 			{
-				WriteShortString(ofs, bone_node->Attrib("name")->ValueString());
+				WriteShortString(*ss, bone_node->Attrib("name")->ValueString());
 
 				int16_t joint_parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
-				ofs.write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
+				ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
 				XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
 				float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
 					bind_pos_node->Attrib("z")->ValueFloat());
-				ofs.write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
+				ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
 
 				XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
 				Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
 					bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
-				ofs.write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+				ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
 			}
 		}
 
@@ -553,36 +555,43 @@ namespace KlayGE
 			int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
 			int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
 			int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
-			ofs.write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
-			ofs.write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
-			ofs.write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
+			ss->write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
+			ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
+			ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
 
 			boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
 			for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
 			{
-				WriteShortString(ofs, kf_node->Attrib("joint")->ValueString());
+				WriteShortString(*ss, kf_node->Attrib("joint")->ValueString());
 
 				uint32_t num_kf = 0;
 				for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 				{
 					++ num_kf;
 				}
-				ofs.write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+				ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
 
 				for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 				{
 					XMLNodePtr pos_node = key_node->FirstNode("pos");
 					float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
 						pos_node->Attrib("z")->ValueFloat());
-					ofs.write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
+					ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
 
 					XMLNodePtr quat_node = key_node->FirstNode("quat");
 					Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
 						quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
-					ofs.write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+					ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
 				}
 			}
 		}
+
+		boost::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
+		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', 'O'>::value;
+		ofs->write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+
+		LZMACodec lzma;
+		lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
 	}
 
 	RenderModelPtr LoadModel(std::string const & meshml_name, uint32_t access_hint,
@@ -593,24 +602,31 @@ namespace KlayGE
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
 		std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
-		if (ResLoader::Instance().Locate(full_meshml_name + ".model_bin").empty())
+		if (ResLoader::Instance().Locate(full_meshml_name + jit_ext_name).empty())
 		{
 			ModelJIT(full_meshml_name);
 		}
 
-		ResIdentifierPtr file = ResLoader::Instance().Load(full_meshml_name + ".model_bin");
+		ResIdentifierPtr lzma_file = ResLoader::Instance().Load(full_meshml_name + jit_ext_name);
 		uint32_t fourcc;
-		file->read(&fourcc, sizeof(fourcc));
+		lzma_file->read(&fourcc, sizeof(fourcc));
 		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', 'O'>::value));
 
+		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
+
+		LZMACodec lzma;
+		lzma.Decode(ss, lzma_file);
+
+		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), ss);
+		
 		uint32_t num_mtls;
-		file->read(&num_mtls, sizeof(num_mtls));
+		decoded->read(&num_mtls, sizeof(num_mtls));
 		uint32_t num_meshes;
-		file->read(&num_meshes, sizeof(num_meshes));
+		decoded->read(&num_meshes, sizeof(num_meshes));
 		uint32_t num_joints;
-		file->read(&num_joints, sizeof(num_joints));
+		decoded->read(&num_joints, sizeof(num_joints));
 		uint32_t num_kfs;
-		file->read(&num_kfs, sizeof(num_kfs));
+		decoded->read(&num_kfs, sizeof(num_kfs));
 
 		std::wstring model_name;
 		if (num_joints > 0)
@@ -627,30 +643,30 @@ namespace KlayGE
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
 		{
 			RenderModel::Material& mtl = ret->GetMaterial(mtl_index);
-			file->read(&mtl.ambient.x(), sizeof(float));
-			file->read(&mtl.ambient.y(), sizeof(float));
-			file->read(&mtl.ambient.z(), sizeof(float));
-			file->read(&mtl.diffuse.x(), sizeof(float));
-			file->read(&mtl.diffuse.y(), sizeof(float));
-			file->read(&mtl.diffuse.z(), sizeof(float));
-			file->read(&mtl.specular.x(), sizeof(float));
-			file->read(&mtl.specular.y(), sizeof(float));
-			file->read(&mtl.specular.z(), sizeof(float));
-			file->read(&mtl.emit.x(), sizeof(float));
-			file->read(&mtl.emit.y(), sizeof(float));
-			file->read(&mtl.emit.z(), sizeof(float));
-			file->read(&mtl.opacity, sizeof(float));
-			file->read(&mtl.specular_level, sizeof(float));
-			file->read(&mtl.shininess, sizeof(float));
+			decoded->read(&mtl.ambient.x(), sizeof(float));
+			decoded->read(&mtl.ambient.y(), sizeof(float));
+			decoded->read(&mtl.ambient.z(), sizeof(float));
+			decoded->read(&mtl.diffuse.x(), sizeof(float));
+			decoded->read(&mtl.diffuse.y(), sizeof(float));
+			decoded->read(&mtl.diffuse.z(), sizeof(float));
+			decoded->read(&mtl.specular.x(), sizeof(float));
+			decoded->read(&mtl.specular.y(), sizeof(float));
+			decoded->read(&mtl.specular.z(), sizeof(float));
+			decoded->read(&mtl.emit.x(), sizeof(float));
+			decoded->read(&mtl.emit.y(), sizeof(float));
+			decoded->read(&mtl.emit.z(), sizeof(float));
+			decoded->read(&mtl.opacity, sizeof(float));
+			decoded->read(&mtl.specular_level, sizeof(float));
+			decoded->read(&mtl.shininess, sizeof(float));
 
 			uint32_t num_texs;
-			file->read(&num_texs, sizeof(num_texs));
+			decoded->read(&num_texs, sizeof(num_texs));
 			
 			for (uint32_t tex_index = 0; tex_index < num_texs; ++ tex_index)
 			{
 				std::string type, name;
-				ReadShortString(file, type);
-				ReadShortString(file, name);
+				ReadShortString(decoded, type);
+				ReadShortString(decoded, name);
 				mtl.texture_slots.push_back(std::make_pair(type, name));
 			}
 		}
@@ -659,7 +675,7 @@ namespace KlayGE
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
 			std::string name;
-			ReadShortString(file, name);
+			ReadShortString(decoded, name);
 
 			std::wstring wname;
 			Convert(wname, name);
@@ -668,23 +684,23 @@ namespace KlayGE
 			StaticMeshPtr& mesh = meshes[mesh_index];
 
 			int32_t mtl_id;
-			file->read(&mtl_id, sizeof(mtl_id));
+			decoded->read(&mtl_id, sizeof(mtl_id));
 			mesh->MaterialID(mtl_id);
 
 			uint32_t num_ves;
-			file->read(&num_ves, sizeof(num_ves));
+			decoded->read(&num_ves, sizeof(num_ves));
 
 			std::vector<vertex_element> vertex_elements(num_ves);
 			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
 			{
-				file->read(&vertex_elements[ve_index], sizeof(vertex_elements[ve_index]));
+				decoded->read(&vertex_elements[ve_index], sizeof(vertex_elements[ve_index]));
 			}
 
 			uint32_t num_vertices;
-			file->read(&num_vertices, sizeof(num_vertices));
+			decoded->read(&num_vertices, sizeof(num_vertices));
 
 			uint32_t max_num_blend;
-			file->read(&max_num_blend, sizeof(max_num_blend));
+			decoded->read(&max_num_blend, sizeof(max_num_blend));
 
 			BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
 			{
@@ -693,7 +709,7 @@ namespace KlayGE
 				case VEU_Position:
 					{
 						std::vector<float3> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -701,7 +717,7 @@ namespace KlayGE
 				case VEU_Normal:
 					{
 						std::vector<float3> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -709,7 +725,7 @@ namespace KlayGE
 				case VEU_Diffuse:
 					{
 						std::vector<float4> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -717,7 +733,7 @@ namespace KlayGE
 				case VEU_Specular:
 					{
 						std::vector<float4> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -725,7 +741,7 @@ namespace KlayGE
 				case VEU_BlendIndex:
 					{
 						std::vector<uint8_t> buf(num_vertices * max_num_blend);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -733,7 +749,7 @@ namespace KlayGE
 				case VEU_BlendWeight:
 					{
 						std::vector<float> buf(num_vertices * max_num_blend);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -741,7 +757,7 @@ namespace KlayGE
 				case VEU_TextureCoord:
 					{
 						std::vector<float> buf(num_vertices * NumComponents(ve.format));
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -749,7 +765,7 @@ namespace KlayGE
 				case VEU_Tangent:
 					{
 						std::vector<float3> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -757,7 +773,7 @@ namespace KlayGE
 				case VEU_Binormal:
 					{
 						std::vector<float3> buf(num_vertices);
-						file->read(&buf[0], buf.size() * sizeof(buf[0]));
+						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
 						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
 					}
 					break;
@@ -765,10 +781,10 @@ namespace KlayGE
 			}
 
 			uint32_t num_triangles;
-			file->read(&num_triangles, sizeof(num_triangles));
+			decoded->read(&num_triangles, sizeof(num_triangles));
 
 			std::vector<uint16_t> indices(num_triangles * 3);
-			file->read(&indices[0], indices.size() * sizeof(indices[0]));
+			decoded->read(&indices[0], indices.size() * sizeof(indices[0]));
 			mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16UI, access_hint);
 		}
 
@@ -777,11 +793,11 @@ namespace KlayGE
 		{
 			Joint& joint = joints[joint_index];
 
-			ReadShortString(file, joint.name);
-			file->read(&joint.parent, sizeof(joint.parent));
+			ReadShortString(decoded, joint.name);
+			decoded->read(&joint.parent, sizeof(joint.parent));
 
-			file->read(&joint.bind_pos, sizeof(joint.bind_pos));
-			file->read(&joint.bind_quat, sizeof(joint.bind_quat));
+			decoded->read(&joint.bind_pos, sizeof(joint.bind_pos));
+			decoded->read(&joint.bind_quat, sizeof(joint.bind_quat));
 
 			joint.inverse_origin_quat = MathLib::inverse(joint.bind_quat);
 			joint.inverse_origin_pos = MathLib::transform_quat(-joint.bind_pos, joint.inverse_origin_quat);
@@ -792,26 +808,26 @@ namespace KlayGE
 			int32_t start_frame;
 			int32_t end_frame;
 			int32_t frame_rate;
-			file->read(&start_frame, sizeof(start_frame));
-			file->read(&end_frame, sizeof(end_frame));
-			file->read(&frame_rate, sizeof(frame_rate));
+			decoded->read(&start_frame, sizeof(start_frame));
+			decoded->read(&end_frame, sizeof(end_frame));
+			decoded->read(&frame_rate, sizeof(frame_rate));
 
 			boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
 			for (uint32_t kf_index = 0; kf_index < num_kfs; ++ kf_index)
 			{
 				std::string name;
-				ReadShortString(file, name);
+				ReadShortString(decoded, name);
 
 				uint32_t num_kf;
-				file->read(&num_kf, sizeof(num_kf));
+				decoded->read(&num_kf, sizeof(num_kf));
 
 				KeyFrames kf;
 				kf.bind_pos.resize(num_kf);
 				kf.bind_quat.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
-					file->read(&kf.bind_pos[k_index], sizeof(kf.bind_pos[k_index]));
-					file->read(&kf.bind_quat[k_index], sizeof(kf.bind_quat[k_index]));
+					decoded->read(&kf.bind_pos[k_index], sizeof(kf.bind_pos[k_index]));
+					decoded->read(&kf.bind_quat[k_index], sizeof(kf.bind_quat[k_index]));
 				}
 
 				kfs->insert(std::make_pair(name, kf));

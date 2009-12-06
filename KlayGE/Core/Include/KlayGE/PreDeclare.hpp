@@ -247,6 +247,8 @@ namespace KlayGE
 	class ScriptModule;
 	class RegisterModule;
 	class ScriptEngine;
+
+	class LZMACodec;
 }
 
 #endif			// _PREDECLARE_HPP
