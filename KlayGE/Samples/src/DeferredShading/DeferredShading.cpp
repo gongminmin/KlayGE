@@ -576,11 +576,66 @@ namespace
 	{
 	public:
 		SSAOPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO"))
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
+				hd_mode_(true)
 		{
+			blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			proj_param_ = technique_->Effect().ParameterByName("proj");
 			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
+		}
+
+		void Destinate(FrameBufferPtr const & fb)
+		{
+			PostProcess::Destinate(fb);
+
+			if (!ssao_buffer_)
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderEngine& re = rf.RenderEngineInstance();
+
+				ssao_buffer_ = rf.MakeFrameBuffer();
+				ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+
+				try
+				{
+					ssao_tex_ = rf.MakeTexture2D(fb->Width(), fb->Height(), 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				}
+				catch (...)
+				{
+					ssao_tex_ = rf.MakeTexture2D(fb->Width(), fb->Height(), 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				}
+				ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssao_tex_, 0, 0));
+
+				blur_pp_->Source(ssao_tex_, ssao_buffer_->RequiresFlipping());
+				blur_pp_->Destinate(fb);
+			}
+		}
+
+		void HDAOMode(bool hd)
+		{
+			hd_mode_ = hd;
+			if (hd_mode_)
+			{
+				this->Technique(technique_->Effect().TechniqueByName("HDAO"));
+				PostProcess::Destinate(blur_pp_->Destinate());
+			}
+			else
+			{
+				this->Technique(technique_->Effect().TechniqueByName("SSAO"));
+				PostProcess::Destinate(ssao_buffer_);
+			}
+		}
+
+		void Apply()
+		{
+			PostProcess::Apply();
+
+			if (!hd_mode_)
+			{
+				blur_pp_->Apply();
+			}
 		}
 
 		void OnRenderBegin()
@@ -599,6 +654,13 @@ namespace
 		}
 
 	private:
+		bool hd_mode_;
+
+		PostProcessPtr blur_pp_;
+
+		FrameBufferPtr ssao_buffer_;
+		TexturePtr ssao_tex_;
+
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr proj_param_;
 		RenderEffectParameterPtr rt_size_inv_size_param_;
@@ -661,7 +723,7 @@ int main()
 
 DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings const & settings)
 			: App3DFramework(name, settings),
-				anti_alias_enabled_(true), ssao_enabled_(true)
+				anti_alias_enabled_(true), ssao_type_(0)
 {
 }
 
@@ -705,9 +767,6 @@ void DeferredShadingApp::InitObjects()
 	ssao_buffer_ = rf.MakeFrameBuffer();
 	ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-	blur_ssao_buffer_ = rf.MakeFrameBuffer();
-	blur_ssao_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-
 	hdr_buffer_ = rf.MakeFrameBuffer();
 	hdr_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
@@ -723,7 +782,6 @@ void DeferredShadingApp::InitObjects()
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
-	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
@@ -731,18 +789,18 @@ void DeferredShadingApp::InitObjects()
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
 	id_anti_alias_ = dialog_->IDFromName("AntiAlias");
-	id_ssao_ = dialog_->IDFromName("SSAO");
+	id_ssao_combo_ = dialog_->IDFromName("SSAOCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::BufferChangedHandler, this, _1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
 	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::AntiAliasHandler, this, _1));
-	DeferredShadingApp::AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
-	dialog_->Control<UICheckBox>(id_ssao_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::SSAOHandler, this, _1));
-	DeferredShadingApp::SSAOHandler(*dialog_->Control<UICheckBox>(id_ssao_));
+	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
+	dialog_->Control<UIComboBox>(id_ssao_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::SSAOChangedHandler, this, _1));
+	this->SSAOChangedHandler(*dialog_->Control<UIComboBox>(id_ssao_combo_));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
-	DeferredShadingApp::CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
+	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 }
 
 void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
@@ -762,13 +820,10 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	}
 	ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssao_tex_, 0, 0));
 
-	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	blur_ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_ssao_tex_, 0, 0));
-
 	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadedTex()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 
-	deferred_shading_->SSAOTex(blur_ssao_tex_);
+	deferred_shading_->SSAOTex(ssao_tex_);
 
 	edge_anti_alias_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
 	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(deferred_shading_->ShadedTex());
@@ -779,10 +834,7 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	hdr_pp_->Destinate(FrameBufferPtr());
 
 	ssao_pp_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->GBufferFB()->RequiresFlipping());
-	ssao_pp_->Destinate(blur_ssao_buffer_);
-
-	blur_pp_->Source(ssao_tex_, ssao_buffer_->RequiresFlipping());
-	blur_pp_->Destinate(blur_ssao_buffer_);
+	ssao_pp_->Destinate(ssao_buffer_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -846,12 +898,16 @@ void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 	}
 }
 
-void DeferredShadingApp::SSAOHandler(UICheckBox const & sender)
+void DeferredShadingApp::SSAOChangedHandler(UIComboBox const & sender)
 {
-	if (0 == buffer_type_)
+	if ((0 == buffer_type_) || (7 == buffer_type_))
 	{
-		ssao_enabled_ = sender.GetChecked();
-		deferred_shading_->SSAOEnabled(ssao_enabled_);
+		ssao_type_ = sender.GetSelectedIndex();
+		if (ssao_type_ != 2)
+		{
+			checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->HDAOMode(0 == ssao_type_);
+		}
+		deferred_shading_->SSAOEnabled(ssao_type_ != 2);
 	}
 }
 
@@ -929,10 +985,9 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		spot_light_src_[0]->Visible(false);
 		spot_light_src_[1]->Visible(false);
 
-		if (((0 == buffer_type_) && ssao_enabled_) || (7 == buffer_type_))
+		if (((0 == buffer_type_) && (ssao_type_ != 2)) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();
-			//blur_pp_->Apply();
 		}
 
 		break;

@@ -262,6 +262,11 @@ float4 HDAO(float2 tc0) : SV_Target
 
 float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
+	return SSAO(tc0);
+}
+
+float4 HDAOPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
 	return HDAO(tc0);
 }
 		]]>
@@ -273,6 +278,14 @@ float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SSAOPS()"/>
+		</pass>
+	</technique>
+	<technique name="HDAO">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="HDAOPS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -679,7 +679,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), so_vars_ptrs_.size(), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
@@ -702,7 +702,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), so_vars_ptrs_.size(), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
