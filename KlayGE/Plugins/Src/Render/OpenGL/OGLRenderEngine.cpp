@@ -56,6 +56,7 @@
 #endif
 
 #include <algorithm>
+#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
@@ -356,6 +357,86 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoBindSOBuffers(RenderLayoutPtr const & rl)
 	{
+		so_rl_ = rl;
+
+		if (so_rl_)
+		{
+			switch (rl->TopologyType())
+			{
+			case RenderLayout::TT_PointList:
+				so_primitive_mode_ = GL_POINTS;
+				break;
+
+			case RenderLayout::TT_LineList:
+				so_primitive_mode_ = GL_LINES;
+				break;
+
+			case RenderLayout::TT_TriangleList:
+				so_primitive_mode_ = GL_TRIANGLES;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				so_primitive_mode_ = GL_POINTS;
+				break;
+			}
+
+			so_vars_.resize(0);
+			for (uint32_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
+			{
+				so_buffs_.push_back(checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->OGLvbo());
+
+				vertex_element const & ve = so_rl_->VertexStreamFormat(i)[0];
+				switch (ve.usage)
+				{
+				case VEU_Position:
+					so_vars_.push_back("gl_Position");
+					break;
+
+				case VEU_Normal:
+					so_vars_.push_back("gl_Normal");
+					break;
+
+				case VEU_Diffuse:
+					so_vars_.push_back("gl_FrontColor");
+					break;
+
+				case VEU_Specular:
+					so_vars_.push_back("gl_FrontSecondaryColor");
+					break;
+
+				case VEU_BlendWeight:
+					so_vars_.push_back("_BLENDWEIGHT");
+					break;
+					
+				case VEU_BlendIndex:
+					so_vars_.push_back("_BLENDINDEX");
+					break;
+
+				case VEU_TextureCoord:
+					{
+						std::stringstream ss;
+						ss << "glTexCoord[" << ve.usage_index << "]";
+						so_vars_.push_back(ss.str());
+					}
+					break;
+
+				case VEU_Tangent:
+					so_vars_.push_back("_TANGENT");
+					break;
+					
+				case VEU_Binormal:
+					so_vars_.push_back("_BINORMAL");
+					break;
+				}
+			}
+
+			so_vars_ptrs_.resize(so_vars_.size());
+			for (size_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
+			{
+				so_vars_ptrs_[i] = so_vars_[i].c_str();
+			}
+		}
 	}
 
 	// ¿ªÊ¼Ò»Ö¡
@@ -582,6 +663,11 @@ namespace KlayGE
 				}
 			}
 
+			if (so_rl_)
+			{
+				glBeginTransformFeedbackEXT(so_primitive_mode_);
+			}
+
 			if (rl.UseIndices())
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -589,6 +675,17 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
+
+					if (so_rl_)
+					{
+						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
+						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), so_vars_ptrs_.size(), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+						{
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
+						}
+					}
+
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 						index_type, 0);
 					pass->Unbind();
@@ -601,9 +698,25 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
+
+					if (so_rl_)
+					{
+						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
+						glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), so_vars_ptrs_.size(), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+						{
+							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
+						}
+					}
+
 					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
 					pass->Unbind();
 				}
+			}
+
+			if (so_rl_)
+			{
+				glEndTransformFeedbackEXT();
 			}
 		}
 

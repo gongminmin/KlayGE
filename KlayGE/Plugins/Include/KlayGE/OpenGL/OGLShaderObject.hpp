@@ -47,6 +47,11 @@ namespace KlayGE
 
 		GLint GetAttribLocation(VertexElementUsage usage, uint8_t usage_index);
 
+		GLuint GLSLProgram() const
+		{
+			return glsl_program_;
+		}
+
 	private:
 		struct parameter_bind_t
 		{

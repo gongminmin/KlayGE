@@ -114,6 +114,12 @@ namespace KlayGE
 		GLsizei vp_width_, vp_height_;
 
 		GLuint cur_fbo_;
+
+		RenderLayoutPtr so_rl_;
+		GLenum so_primitive_mode_;
+		std::vector<std::string> so_vars_;
+		std::vector<char const *> so_vars_ptrs_;
+		std::vector<GLuint> so_buffs_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
