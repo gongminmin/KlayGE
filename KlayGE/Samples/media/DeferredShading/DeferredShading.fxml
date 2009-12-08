@@ -241,13 +241,13 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 		if (face == (int)light_dir_es.w)
 		{
 			float3 normal = GetNormal(ndc);
-			ds.x = diffuse_term(dir, normal);
-			if (ds.x > 0)
+			float diff = diffuse_term(dir, normal);
+			if (diff > 0)
 			{
-				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+				float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 
-				ds *= shadow * atten;
+				ds = float2(diff, spec) * shadow * atten;
 			}
 			else
 			{
@@ -306,13 +306,13 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 		{
 			dir = normalize(dir);
 			float3 normal = GetNormal(ndc);
-			ds.x = diffuse_term(dir, normal);
-			if (ds.x > 0)
+			float diff = diffuse_term(dir, normal);
+			if (diff > 0)
 			{
-				ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+				float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 				float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff.xyz);
 				
-				ds *= shadow * spot * atten;
+				ds = float2(diff, spec) * shadow * spot * atten;
 			}
 			else
 			{
@@ -361,10 +361,11 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 
 		float3 dir = light_dir_es.xyz;
 		float3 normal = GetNormal(ndc);
-		ds.x = diffuse_term(dir, normal);
-		if (ds.x > 0)
+		float diff = diffuse_term(dir, normal);
+		if (diff > 0)
 		{
-			ds.y = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+			ds = float2(diff, spec);
 		}
 		else
 		{
