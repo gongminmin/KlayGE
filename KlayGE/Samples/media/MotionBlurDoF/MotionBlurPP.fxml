@@ -20,17 +20,17 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	motion_vec.y = -motion_vec.y;
 	const int NUM_SAMPLES = 12;
 	float4 clr = src_tex.Sample(point_sampler, tex_coord0);
-	uint valid_samples = 1;
+	float sum_weight = 1;
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
 		float4 other_clr = src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES);
-		if (other_clr.a <= clr.a)
+		//if (other_clr.a <= clr.a)
 		{
 			clr.rgb += other_clr.rgb;
-			++ valid_samples;
+			++ sum_weight;
 		}
 	}
-	clr.rgb /= valid_samples;
+	clr.rgb /= sum_weight;
 	return clr;
 }
 

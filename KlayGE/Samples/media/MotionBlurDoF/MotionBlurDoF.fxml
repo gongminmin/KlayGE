@@ -40,7 +40,7 @@ void ColorDepthVS(float4 pos			: POSITION,
 	float4 pos_last = mul(mul(last_model, pos), last_view_proj);
 	pos_curr /= pos_curr.w;
 	pos_last /= pos_last.w;
-	oVelocity = (pos_curr.xy - pos_last.xy) / 2;
+	oVelocity = (pos_curr.xy - pos_last.xy) * 10;
 
 	normal = mul((float3x3)model, normal);
 	oClrDepth = float4(saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value.rgb, oPos.w * inv_depth_range);
@@ -50,7 +50,7 @@ void ColorDepthPS(float4 clr_depth : TEXCOORD0, float2 velocity : TEXCOORD2,
 				out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
 {
 	color_depth = clr_depth;
-	motion_vec = float4(velocity * 20, 1, 1);
+	motion_vec = float4(velocity, 1, clr_depth.a);
 }
 		]]>
 	</shader>
