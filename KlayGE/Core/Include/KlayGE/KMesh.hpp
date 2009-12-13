@@ -1,8 +1,11 @@
 // KMesh.hpp
 // KlayGE KMesh类 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2005-2006
+// Ver 3.9.0
+// 版权所有(C) 龚敏敏, 2005-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.9.0
+// 多线程模型载入 (2009.12.13)
 //
 // 3.4.0
 // 支持蒙皮模型的载入和保存 (2006.8.23)
@@ -70,10 +73,21 @@ namespace KlayGE
 		}
 	};
 
-	KLAYGE_CORE_API RenderModelPtr LoadModel(std::string const & meshml_name, uint32_t access_hint,
+	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<std::vector<vertex_element> >& ves,
+		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs, std::vector<std::vector<uint16_t> >& indices,
+		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
+		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate);
+	KLAYGE_CORE_API boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateKModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateKMeshFactory<StaticMesh>());
-	KLAYGE_CORE_API void SaveModel(RenderModelPtr model, std::string const & meshml_name);
+
+	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
+		std::vector<std::vector<std::vector<uint8_t> > > const & buffs, std::vector<std::vector<uint16_t> > const & indices,
+		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
+		int32_t start_frame, int32_t end_frame, int32_t frame_rate);
+	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
 }
 
 #endif			// _KMESH_HPP

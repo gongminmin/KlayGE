@@ -292,9 +292,9 @@ namespace KlayGE
 		}
 		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
-		KeyFramesType const & GetKeyFrames() const
+		boost::shared_ptr<KlayGE::KeyFramesType> const & GetKeyFrames() const
 		{
-			return *key_frames_;
+			return key_frames_;
 		}
 		uint32_t StartFrame() const
 		{

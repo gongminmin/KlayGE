@@ -6,6 +6,7 @@
 //
 // 3.9.0
 // 增加了KFontLoader (2009.10.16)
+// kfont升级到2.0格式，支持LZMA压缩 (2009.12.13)
 //
 // 3.7.0
 // 新的基于distance的字体格式 (2008.2.13)
@@ -60,6 +61,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/MapVector.hpp>
+#include <KlayGE/LZMACodec.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -103,7 +105,7 @@ namespace KlayGE
 		kfont_header header;
 		kfont_input->read(&header, sizeof(header));
 		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
-		BOOST_ASSERT((1 == header.version));
+		BOOST_ASSERT((2 == header.version));
 
 		char_size_ = header.char_size;
 		dist_base_ = header.base;
@@ -123,7 +125,20 @@ namespace KlayGE
 		kfont_input->read(&char_info_[0], static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
 
 		distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
-		kfont_input->read(&distances_[0], static_cast<std::streamsize>(distances_.size() * sizeof(distances_[0])));
+
+		std::vector<uint8_t> dist;
+		LZMACodec lzma_dec;
+		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
+		{
+			uint64_t len;
+			kfont_input->read(&len, sizeof(len));
+			lzma_dec.Decode(dist, kfont_input, len, header.char_size * header.char_size);
+
+			for (uint32_t j = 0; j < header.char_size * header.char_size; ++ j)
+			{
+				distances_[i * header.char_size * header.char_size + j] = dist[j];
+			}
+		}
 	}
 
 	uint32_t KFontLoader::CharSize() const

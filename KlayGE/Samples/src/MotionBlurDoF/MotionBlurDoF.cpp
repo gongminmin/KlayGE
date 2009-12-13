@@ -454,42 +454,13 @@ MotionBlurDoFApp::MotionBlurDoFApp(std::string const & name, RenderSettings cons
 
 void MotionBlurDoFApp::InitObjects()
 {
+	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>());
+	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>());
+	
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	ScriptEngine scriptEng;
 	ScriptModule module("MotionBlurDoF_init");
-
-	renderInstance_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>())->Mesh(0);
-	for (int32_t i = 0; i < NUM_LINE; ++ i)
-	{
-		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
-		{
-			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
-
-			float3 pos;
-			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
-			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
-			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
-
-			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
-
-			Color clr;
-			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
-			clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
-			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
-			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
-
-			SceneObjectPtr so = MakeSharedPtr<Teapot>();
-			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
-
-			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
-			so->AddToSceneManager();
-			scene_objs_.push_back(so);
-		}
-	}
-	use_instance_ = true;
-
-	renderMesh_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>())->Mesh(0);
 
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
@@ -550,6 +521,38 @@ void MotionBlurDoFApp::InitObjects()
 	this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
 
 	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(boost::bind(&MotionBlurDoFApp::UseInstancingHandler, this, _1));
+
+	renderInstance_ = model_instance_ml()->Mesh(0);
+	for (int32_t i = 0; i < NUM_LINE; ++ i)
+	{
+		for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
+		{
+			PyObjectPtr py_pos = module.Call("get_pos", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+
+			float3 pos;
+			pos.x() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 0)));
+			pos.y() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 1)));
+			pos.z() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_pos.get(), 2)));
+
+			PyObjectPtr py_clr = module.Call("get_clr", boost::make_tuple(i, j, NUM_INSTANCE, NUM_LINE));
+
+			Color clr;
+			clr.r() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 0)));
+			clr.g() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 1)));
+			clr.b() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 2)));
+			clr.a() = static_cast<float>(PyFloat_AsDouble(PyTuple_GetItem(py_clr.get(), 3)));
+
+			SceneObjectPtr so = MakeSharedPtr<Teapot>();
+			checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
+
+			checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
+			so->AddToSceneManager();
+			scene_objs_.push_back(so);
+		}
+	}
+	use_instance_ = true;
+
+	renderMesh_ = model_mesh_ml()->Mesh(0);
 }
 
 void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)

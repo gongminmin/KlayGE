@@ -270,7 +270,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>()));
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>())());
 	model_->SetTime(0);
 
 	frame_ = 0;

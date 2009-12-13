@@ -4,6 +4,8 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/thread.hpp>
 #include <KlayGE/CpuInfo.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KlayGE/LZMACodec.hpp>
 
 #include <iostream>
 #include <string>
@@ -495,7 +497,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 	disp_joiner();
 }
 
-void quantizer(uint8_t* uint8_dist, uint32_t non_empty_chars,
+void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 				std::pair<int32_t, int32_t> const * char_index,
 				font_info const * char_info, float const * char_dist_data,
 				uint32_t char_size_sq, int16_t& base, int16_t& scale)
@@ -525,41 +527,41 @@ void quantizer(uint8_t* uint8_dist, uint32_t non_empty_chars,
 	scale = static_cast<int16_t>((fscale - 1) * 32768 + 0.5f);
 	float inv_scale = 255 / fscale;
 
+	float mse = 0;
+	float const frscale = (scale / 32768.0f + 1) / 255.0f;
+	float const fbase = base / 32768.0f;
+
+	LZMACodec lzma_enc;
+	lzma_enc.EncodeProps(5, char_size_sq);
+	std::vector<uint8_t> uint8_dist(char_size_sq);
+	std::vector<uint8_t> char_lzma_dist;
 	for (size_t i = 0; i < non_empty_chars; ++ i)
 	{
 		int const ch = char_index[i].first;
 		float const * dist = &char_dist_data[char_info[ch].dist_index];
 		for (size_t j = 0; j < char_size_sq; ++ j)
 		{
-			uint8_dist[i * char_size_sq + j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
-		}
-	}
+			uint8_dist[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
 
-	{
-		float mse = 0;
-
-		float const frscale = (scale / 32768.0f + 1) / 255.0f;
-		float const fbase = base / 32768.0f;
-		for (size_t i = 0; i < non_empty_chars; ++ i)
-		{
-			int const ch = char_index[i].first;
-			float const * dist = &char_dist_data[char_info[ch].dist_index];
-			for (size_t j = 0; j < char_size_sq; ++ j)
-			{
-				float const d = dist[j] - (uint8_dist[i * char_size_sq + j] * frscale + fbase);
-				mse += d * d;
-			}
+			float const d = dist[j] - (uint8_dist[j] * frscale + fbase);
+			mse += d * d;
 		}
 
-		cout << "Quantize MSE: " << mse << endl;
+		lzma_enc.Encode(char_lzma_dist, &uint8_dist[0], char_size_sq);
+		uint64_t len = static_cast<uint64_t>(char_lzma_dist.size());
+
+		lzma_dist.insert(lzma_dist.end(), reinterpret_cast<uint8_t*>(&len), reinterpret_cast<uint8_t*>(&len + 1));
+		lzma_dist.insert(lzma_dist.end(), char_lzma_dist.begin(), char_lzma_dist.end());
 	}
+
+	cout << "Quantize MSE: " << mse << endl;
 }
 
 int main(int argc, char* argv[])
 {
 	kfont_header header;
 	header.fourcc = MakeFourCC<'K', 'F', 'N', 'T'>::value;
-	header.version = 1;
+	header.version = 2;
 	header.start_ptr = sizeof(header);
 	header.non_empty_chars = 0;
 	header.char_size = 32;
@@ -625,30 +627,30 @@ int main(int argc, char* argv[])
 			char_info[i].dist_index = static_cast<uint32_t>(-1);
 		}
 
-		ifstream kfont_input(kfont_name.c_str(), ios_base::binary);
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(kfont_name);
 		if (kfont_input)
 		{
-			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+			kfont_input->read(&header, sizeof(header));
 
 			if (header.fourcc != MakeFourCC<'K', 'F', 'N', 'T'>::value)
 			{
 				cout << "Wrong font file." << endl;
 				return 1;
 			}
-			if (header.version != 1)
+			if (header.version != 2)
 			{
 				cout << "Wrong version." << endl;
 				return 1;
 			}
 
-			kfont_input.seekg(header.start_ptr, ios_base::beg);
+			kfont_input->seekg(header.start_ptr, ios_base::beg);
 
 			char_index.resize(header.non_empty_chars);
-			kfont_input.read(reinterpret_cast<char*>(&char_index[0]),
+			kfont_input->read(reinterpret_cast<char*>(&char_index[0]),
 				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
 			std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance(header.validate_chars);
-			kfont_input.read(reinterpret_cast<char*>(&advance[0]),
+			kfont_input->read(reinterpret_cast<char*>(&advance[0]),
 				static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
 			for (size_t i = 0; i < advance.size(); ++ i)
 			{
@@ -662,20 +664,24 @@ int main(int argc, char* argv[])
 			{
 				int const ch = char_index[i].first;
 
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
-				kfont_input.read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
+				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
+				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
+				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
+				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
 			}
 
+			LZMACodec lzma_dec;
 			char_dist_data.resize(char_index.size() * header.char_size * header.char_size);
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
 				int const ch = char_index[i].first;
 
-				std::vector<uint8_t> uint8_dist(header.char_size * header.char_size);
-				kfont_input.read(reinterpret_cast<char*>(&uint8_dist[0]),
-					static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
+				uint64_t len;
+				kfont_input->read(&len, sizeof(len));
+
+				std::vector<uint8_t> uint8_dist;
+				lzma_dec.Decode(uint8_dist, kfont_input, len, header.char_size * header.char_size);
+				BOOST_ASSERT(uint8_dist.size() == header.char_size * header.char_size);
 
 				char_info[ch].dist_index = static_cast<uint32_t>(i * header.char_size * header.char_size);
 				for (size_t j = 0; j < uint8_dist.size(); ++ j)
@@ -752,8 +758,8 @@ int main(int argc, char* argv[])
 
 	cout << "Quantize..." << endl;
 	timer_stage.restart();
-	std::vector<uint8_t> uint8_dist(header.non_empty_chars * header.char_size * header.char_size);
-	quantizer(&uint8_dist[0], header.non_empty_chars, &char_index[0], &char_info[0], &char_dist_data[0],
+	std::vector<uint8_t> lzma_dist;
+	quantizer(lzma_dist, header.non_empty_chars, &char_index[0], &char_info[0], &char_dist_data[0],
 		header.char_size * header.char_size, header.base, header.scale);
 	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
@@ -791,8 +797,8 @@ int main(int argc, char* argv[])
 				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
 			}
 
-			kfont_output.write(reinterpret_cast<char*>(&uint8_dist[0]),
-				static_cast<std::streamsize>(uint8_dist.size() * sizeof(uint8_dist[0])));
+			kfont_output.write(reinterpret_cast<char*>(&lzma_dist[0]),
+				static_cast<std::streamsize>(lzma_dist.size() * sizeof(lzma_dist[0])));
 		}
 	}
 }

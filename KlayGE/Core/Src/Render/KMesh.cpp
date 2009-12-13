@@ -31,6 +31,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/XMLDom.hpp>
 #include <KlayGE/LZMACodec.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -39,6 +40,133 @@
 #include <boost/foreach.hpp>
 
 #include <KlayGE/KMesh.hpp>
+
+namespace
+{
+	using namespace KlayGE;
+
+	class RenderModelLoader
+	{
+	private:
+		struct ModelDesc
+		{
+			uint32_t access_hint;
+			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc;
+			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc;
+
+			std::vector<RenderModel::Material> mtls;
+			std::vector<std::string> mesh_names;
+			std::vector<int32_t> mtl_ids;
+			std::vector<std::vector<vertex_element> > ves;
+			std::vector<uint32_t> max_num_blends;
+			std::vector<std::vector<std::vector<uint8_t> > > buffs;
+			std::vector<std::vector<uint16_t> > indices;
+			std::vector<Joint> joints;
+			boost::shared_ptr<KeyFramesType> kfs;
+			int32_t start_frame;
+			int32_t end_frame;
+			int32_t frame_rate;
+		};
+
+	public:
+		RenderModelLoader(std::string const & meshml_name, uint32_t access_hint,
+			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
+			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+		{
+			ml_thread_ = GlobalThreadPool()(boost::bind(&RenderModelLoader::LoadKModel, this, meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+		}
+
+		RenderModelPtr operator()()
+		{
+			if (!model_)
+			{
+				boost::shared_ptr<ModelDesc> model_desc = ml_thread_();
+
+				std::wstring model_name;
+				if (!model_desc->joints.empty())
+				{
+					model_name = L"KSkinnedMesh";
+				}
+				else
+				{
+					model_name = L"KMesh";
+				}
+				model_ = model_desc->CreateModelFactoryFunc(model_name);
+
+				model_->NumMaterials(model_desc->mtls.size());
+				for (uint32_t mtl_index = 0; mtl_index < model_desc->mtls.size(); ++ mtl_index)
+				{
+					model_->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
+				}
+
+				std::vector<StaticMeshPtr> meshes(model_desc->mesh_names.size());
+				for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
+				{
+					std::wstring wname;
+					Convert(wname, model_desc->mesh_names[mesh_index]);
+
+					meshes[mesh_index] = model_desc->CreateMeshFactoryFunc(model_, wname);
+					StaticMeshPtr& mesh = meshes[mesh_index];
+
+					mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
+
+					for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
+					{
+						std::vector<uint8_t>& buff = model_desc->buffs[mesh_index][ve_index];
+						mesh->AddVertexStream(&buff[0], static_cast<uint32_t>(buff.size() * sizeof(buff[0])), model_desc->ves[mesh_index][ve_index], model_desc->access_hint);
+					}
+
+					mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
+						EF_R16UI, model_desc->access_hint);
+				}
+
+				if (model_desc->kfs && !model_desc->kfs->empty())
+				{
+					if (model_->IsSkinned())
+					{
+						SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model_);
+
+						skinned->AssignJoints(model_desc->joints.begin(), model_desc->joints.end());
+						skinned->AttachKeyFrames(model_desc->kfs);
+
+						skinned->StartFrame(model_desc->start_frame);
+						skinned->EndFrame(model_desc->end_frame);
+						skinned->FrameRate(model_desc->frame_rate);
+					}
+				}
+
+				BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
+				{
+					mesh->BuildMeshInfo();
+				}
+				model_->AssignMeshes(meshes.begin(), meshes.end());
+			}
+
+			return model_;
+		}
+
+	private:
+		boost::shared_ptr<ModelDesc> LoadKModel(std::string const & meshml_name, uint32_t access_hint,
+			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
+			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+		{
+			boost::shared_ptr<ModelDesc> model_desc = MakeSharedPtr<ModelDesc>();
+			model_desc->access_hint = access_hint;
+			model_desc->CreateModelFactoryFunc = CreateModelFactoryFunc;
+			model_desc->CreateMeshFactoryFunc = CreateMeshFactoryFunc;
+
+			LoadModel(meshml_name, model_desc->mtls, model_desc->mesh_names, model_desc->mtl_ids, model_desc->ves, model_desc->max_num_blends,
+				model_desc->buffs, model_desc->indices, model_desc->joints, model_desc->kfs,
+				model_desc->start_frame, model_desc->end_frame, model_desc->frame_rate);
+
+			return model_desc;
+		}
+
+	private:
+		joiner<boost::shared_ptr<ModelDesc> > ml_thread_;
+		RenderModelPtr model_;
+	};
+}
 
 namespace KlayGE
 {
@@ -586,21 +714,31 @@ namespace KlayGE
 			}
 		}
 
-		boost::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
+		std::ofstream ofs((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
+		BOOST_ASSERT(ofs);
 		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', 'O'>::value;
-		ofs->write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+
+		uint64_t original_len = ss->str().size();
+		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
+
+		std::ofstream::pos_type p = ofs.tellp();
+		uint64_t len = 0;
+		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 
 		LZMACodec lzma;
-		lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
+		len = lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
+
+		ofs.seekp(p, std::ios_base::beg);
+		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
 
-	RenderModelPtr LoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+	void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<std::vector<vertex_element> >& ves,
+		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs, std::vector<std::vector<uint16_t> >& indices,
+		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
+		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate)
 	{
-		BOOST_ASSERT(CreateModelFactoryFunc);
-		BOOST_ASSERT(CreateMeshFactoryFunc);
-
 		std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
 		if (ResLoader::Instance().Locate(full_meshml_name + jit_ext_name).empty())
 		{
@@ -614,8 +752,12 @@ namespace KlayGE
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
+		uint64_t original_len, len;
+		lzma_file->read(&original_len, sizeof(original_len));
+		lzma_file->read(&len, sizeof(len));
+
 		LZMACodec lzma;
-		lzma.Decode(ss, lzma_file);
+		lzma.Decode(*ss, lzma_file, len, original_len);
 
 		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), ss);
 		
@@ -628,21 +770,10 @@ namespace KlayGE
 		uint32_t num_kfs;
 		decoded->read(&num_kfs, sizeof(num_kfs));
 
-		std::wstring model_name;
-		if (num_joints > 0)
-		{
-			model_name = L"KSkinnedMesh";
-		}
-		else
-		{
-			model_name = L"KMesh";
-		}
-		RenderModelPtr ret = CreateModelFactoryFunc(model_name);
-
-		ret->NumMaterials(num_mtls);
+		mtls.resize(num_mtls);
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
 		{
-			RenderModel::Material& mtl = ret->GetMaterial(mtl_index);
+			RenderModel::Material& mtl = mtls[mtl_index];
 			decoded->read(&mtl.ambient.x(), sizeof(float));
 			decoded->read(&mtl.ambient.y(), sizeof(float));
 			decoded->read(&mtl.ambient.z(), sizeof(float));
@@ -671,26 +802,23 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<StaticMeshPtr> meshes(num_meshes);
+		mesh_names.resize(num_meshes);
+		mtl_ids.resize(num_meshes);
+		ves.resize(num_meshes),
+		max_num_blends.resize(num_meshes);
+		buffs.resize(num_meshes);
+		indices.resize(num_meshes);
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
-			std::string name;
-			ReadShortString(decoded, name);
+			ReadShortString(decoded, mesh_names[mesh_index]);
 
-			std::wstring wname;
-			Convert(wname, name);
-
-			meshes[mesh_index] = CreateMeshFactoryFunc(ret, wname);
-			StaticMeshPtr& mesh = meshes[mesh_index];
-
-			int32_t mtl_id;
-			decoded->read(&mtl_id, sizeof(mtl_id));
-			mesh->MaterialID(mtl_id);
+			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
 
 			uint32_t num_ves;
 			decoded->read(&num_ves, sizeof(num_ves));
+			ves[mesh_index].resize(num_ves);
 
-			std::vector<vertex_element> vertex_elements(num_ves);
+			std::vector<vertex_element>& vertex_elements = ves[mesh_index];
 			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
 			{
 				decoded->read(&vertex_elements[ve_index], sizeof(vertex_elements[ve_index]));
@@ -699,96 +827,52 @@ namespace KlayGE
 			uint32_t num_vertices;
 			decoded->read(&num_vertices, sizeof(num_vertices));
 
-			uint32_t max_num_blend;
+			uint32_t& max_num_blend = max_num_blends[mesh_index];
 			decoded->read(&max_num_blend, sizeof(max_num_blend));
 
-			BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
+			buffs[mesh_index].resize(num_ves);
+			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
 			{
+				std::vector<uint8_t>& buff = buffs[mesh_index][ve_index];
+				vertex_element const & ve = vertex_elements[ve_index];
 				switch (ve.usage)
 				{
 				case VEU_Position:
-					{
-						std::vector<float3> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
-					break;
-
 				case VEU_Normal:
-					{
-						std::vector<float3> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
+				case VEU_Tangent:
+				case VEU_Binormal:
+					buff.resize(num_vertices * sizeof(float3));
 					break;
 
 				case VEU_Diffuse:
-					{
-						std::vector<float4> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
-					break;
-
 				case VEU_Specular:
-					{
-						std::vector<float4> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
+					buff.resize(num_vertices * sizeof(float4));
 					break;
 
 				case VEU_BlendIndex:
-					{
-						std::vector<uint8_t> buf(num_vertices * max_num_blend);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
+					buff.resize(num_vertices * max_num_blend);
 					break;
 
 				case VEU_BlendWeight:
-					{
-						std::vector<float> buf(num_vertices * max_num_blend);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
+					buff.resize(num_vertices * max_num_blend * sizeof(float));
 					break;
 
 				case VEU_TextureCoord:
-					{
-						std::vector<float> buf(num_vertices * NumComponents(ve.format));
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
-					break;
-
-				case VEU_Tangent:
-					{
-						std::vector<float3> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
-					break;
-
-				case VEU_Binormal:
-					{
-						std::vector<float3> buf(num_vertices);
-						decoded->read(&buf[0], buf.size() * sizeof(buf[0]));
-						mesh->AddVertexStream(&buf[0], static_cast<uint32_t>(buf.size() * sizeof(buf[0])), ve, access_hint);
-					}
+					buff.resize(num_vertices * NumComponents(ve.format) * sizeof(float));
 					break;
 				}
+
+				decoded->read(&buff[0], buff.size() * sizeof(buff[0]));
 			}
 
 			uint32_t num_triangles;
 			decoded->read(&num_triangles, sizeof(num_triangles));
 
-			std::vector<uint16_t> indices(num_triangles * 3);
-			decoded->read(&indices[0], indices.size() * sizeof(indices[0]));
-			mesh->AddIndexStream(&indices[0], static_cast<uint32_t>(indices.size() * sizeof(indices[0])), EF_R16UI, access_hint);
+			indices[mesh_index].resize(num_triangles * 3);
+			decoded->read(&indices[mesh_index][0], indices[mesh_index].size() * sizeof(indices[mesh_index][0]));
 		}
 
-		std::vector<Joint> joints(num_joints);
+		joints.resize(num_joints);
 		for (uint32_t joint_index = 0; joint_index < num_joints; ++ joint_index)
 		{
 			Joint& joint = joints[joint_index];
@@ -805,14 +889,11 @@ namespace KlayGE
 
 		if (num_kfs > 0)
 		{
-			int32_t start_frame;
-			int32_t end_frame;
-			int32_t frame_rate;
 			decoded->read(&start_frame, sizeof(start_frame));
 			decoded->read(&end_frame, sizeof(end_frame));
 			decoded->read(&frame_rate, sizeof(frame_rate));
 
-			boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
+			kfs = MakeSharedPtr<KeyFramesType>();
 			for (uint32_t kf_index = 0; kf_index < num_kfs; ++ kf_index)
 			{
 				std::string name;
@@ -832,30 +913,24 @@ namespace KlayGE
 
 				kfs->insert(std::make_pair(name, kf));
 			}
-
-			if (ret->IsSkinned())
-			{
-				SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(ret);
-
-				skinned->AssignJoints(joints.begin(), joints.end());
-				skinned->AttachKeyFrames(kfs);
-
-				skinned->StartFrame(start_frame);
-				skinned->EndFrame(end_frame);
-				skinned->FrameRate(frame_rate);
-			}
 		}
-
-		BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
-		{
-			mesh->BuildMeshInfo();
-		}
-		ret->AssignMeshes(meshes.begin(), meshes.end());
-
-		return ret;
 	}
 
-	void SaveModel(RenderModelPtr model, std::string const & meshml_name)
+	boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
+		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
+		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+	{
+		BOOST_ASSERT(CreateModelFactoryFunc);
+		BOOST_ASSERT(CreateMeshFactoryFunc);
+
+		return RenderModelLoader(meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc);
+	}
+
+	void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
+		std::vector<std::vector<std::vector<uint8_t> > > const & buffs, std::vector<std::vector<uint16_t> > const & indices,
+		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
+		int32_t start_frame, int32_t end_frame, int32_t frame_rate)
 	{
 		KlayGE::XMLDocument doc;
 
@@ -863,20 +938,18 @@ namespace KlayGE
 		doc.RootNode(root);
 		root->AppendAttrib(doc.AllocAttribUInt("version", 4));
 
-		if (model->IsSkinned())
+		if (kfs)
 		{
-			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
-
 			XMLNodePtr bones_chunk = doc.AllocNode(XNT_Element, "bones_chunk");
 			root->AppendNode(bones_chunk);
 
-			uint32_t num_joints = skinned->NumJoints();
+			uint32_t num_joints = static_cast<uint32_t>(joints.size());
 			for (uint32_t i = 0; i < num_joints; ++ i)
 			{
 				XMLNodePtr bone_node = doc.AllocNode(XNT_Element, "bone");
 				bones_chunk->AppendNode(bone_node);
 
-				Joint const & joint = checked_pointer_cast<SkinnedModel>(model)->GetJoint(i);
+				Joint const & joint = joints[i];
 
 				bone_node->AppendAttrib(doc.AllocAttribString("name", joint.name));
 				bone_node->AppendAttrib(doc.AllocAttribInt("parent", joint.parent));
@@ -899,14 +972,14 @@ namespace KlayGE
 			}
 		}
 
-		if (model->NumMaterials() > 0)
+		if (!mtls.empty())
 		{
 			XMLNodePtr materials_chunk = doc.AllocNode(XNT_Element, "materials_chunk");
 			root->AppendNode(materials_chunk);
 
-			for (uint32_t i = 0; i < model->NumMaterials(); ++ i)
+			for (uint32_t i = 0; i < mtls.size(); ++ i)
 			{
-				RenderModel::Material const & mtl = model->GetMaterial(i);
+				RenderModel::Material const & mtl = mtls[i];
 
 				XMLNodePtr mtl_node = doc.AllocNode(XNT_Element, "material");
 				materials_chunk->AppendNode(mtl_node);
@@ -945,31 +1018,26 @@ namespace KlayGE
 			}
 		}
 
-		if (model->NumMeshes() > 0)
+		if (!mesh_names.empty())
 		{
 			XMLNodePtr meshes_chunk = doc.AllocNode(XNT_Element, "meshes_chunk");
 			root->AppendNode(meshes_chunk);
 
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			for (uint32_t mesh_index = 0; mesh_index < static_cast<uint32_t>(mesh_names.size()); ++ mesh_index)
 			{
-				StaticMesh const & mesh = *model->Mesh(i);
-
 				XMLNodePtr mesh_node = doc.AllocNode(XNT_Element, "mesh");
 				meshes_chunk->AppendNode(mesh_node);
 
-				std::string name;
-				Convert(name, mesh.Name());
-
-				mesh_node->AppendAttrib(doc.AllocAttribString("name", name));
-				mesh_node->AppendAttrib(doc.AllocAttribInt("mtl_id", mesh.MaterialID()));
+				mesh_node->AppendAttrib(doc.AllocAttribString("name", mesh_names[mesh_index]));
+				mesh_node->AppendAttrib(doc.AllocAttribInt("mtl_id", mtl_ids[mesh_index]));
 
 				XMLNodePtr vertex_elements_chunk = doc.AllocNode(XNT_Element, "vertex_elements_chunk");
 				mesh_node->AppendNode(vertex_elements_chunk);
 
-				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
-				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				uint32_t num_vertices = 0;
+				for (uint32_t j = 0; j < ves[mesh_index].size(); ++ j)
 				{
-					vertex_element const & ve = rl->VertexStreamFormat(j)[0];
+					vertex_element const & ve = ves[mesh_index][j];
 
 					XMLNodePtr ve_node = doc.AllocNode(XNT_Element, "vertex_element");
 					vertex_elements_chunk->AppendNode(ve_node);
@@ -977,40 +1045,42 @@ namespace KlayGE
 					ve_node->AppendAttrib(doc.AllocAttribUInt("usage", static_cast<uint32_t>(ve.usage)));
 					ve_node->AppendAttrib(doc.AllocAttribUInt("usage_index", ve.usage_index));
 					ve_node->AppendAttrib(doc.AllocAttribUInt("num_components", NumComponents(ve.format)));
+
+					switch (ve.usage)
+					{
+					case VEU_Position:
+					case VEU_Normal:
+						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / sizeof(float3));
+						break;
+
+					case VEU_Diffuse:
+					case VEU_Specular:
+						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / sizeof(float4));
+						break;
+
+					case VEU_TextureCoord:
+						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / NumComponents(ve.format) / sizeof(float));
+						break;
+					}
 				}
 
 				XMLNodePtr vertices_chunk = doc.AllocNode(XNT_Element, "vertices_chunk");
 				mesh_node->AppendNode(vertices_chunk);
 
-				std::vector<std::vector<uint8_t> > buffs(rl->NumVertexStreams());
-				for (uint32_t k = 0; k < rl->NumVertexStreams(); ++ k)
-				{
-					GraphicsBufferPtr const & vb = rl->GetVertexStream(k);
-					GraphicsBufferPtr vb_cpu = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					vb_cpu->Resize(vb->Size());
-					vb->CopyToBuffer(*vb_cpu);
-
-					buffs[k].resize(vb->Size());
-
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					memcpy(&buffs[k][0], mapper.Pointer<uint8_t>(), vb->Size());
-				}
-
-				uint32_t const num_vertices = static_cast<uint32_t const>(mesh.NumVertices());
 				for (uint32_t j = 0; j < num_vertices; ++ j)
 				{
 					XMLNodePtr vertex_node = doc.AllocNode(XNT_Element, "vertex");
 					vertices_chunk->AppendNode(vertex_node);
 
-					for (uint32_t k = 0; k < rl->NumVertexStreams(); ++ k)
+					for (size_t k = 0; k < ves[mesh_index].size(); ++ k)
 					{
-						vertex_element const & ve = rl->VertexStreamFormat(k)[0];
+						vertex_element const & ve = ves[mesh_index][k];
 
 						switch (ve.usage)
 						{
 						case VEU_Position:
 							{
-								float3* p = reinterpret_cast<float3*>(&buffs[k][0]);
+								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
 								vertex_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
 								vertex_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 								vertex_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
@@ -1022,7 +1092,7 @@ namespace KlayGE
 								XMLNodePtr normal_node = doc.AllocNode(XNT_Element, "normal");
 								vertex_node->AppendNode(normal_node);
 
-								float3* p = reinterpret_cast<float3*>(&buffs[k][0]);
+								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
 								normal_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
 								normal_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 								normal_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
@@ -1034,7 +1104,7 @@ namespace KlayGE
 								XMLNodePtr diffuse_node = doc.AllocNode(XNT_Element, "diffuse");
 								vertex_node->AppendNode(diffuse_node);
 
-								float4* p = reinterpret_cast<float4*>(&buffs[k][0]);
+								float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
 								diffuse_node->AppendAttrib(doc.AllocAttribFloat("r", p[j].x()));
 								diffuse_node->AppendAttrib(doc.AllocAttribFloat("g", p[j].y()));
 								diffuse_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].z()));
@@ -1047,7 +1117,7 @@ namespace KlayGE
 								XMLNodePtr specular_node = doc.AllocNode(XNT_Element, "specular");
 								vertex_node->AppendNode(specular_node);
 
-								float4* p = reinterpret_cast<float4*>(&buffs[k][0]);
+								float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
 								specular_node->AppendAttrib(doc.AllocAttribFloat("r", p[j].x()));
 								specular_node->AppendAttrib(doc.AllocAttribFloat("g", p[j].y()));
 								specular_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].z()));
@@ -1058,9 +1128,9 @@ namespace KlayGE
 						case VEU_BlendIndex:
 							{
 								int weight_stream = -1;
-								for (uint32_t l = 0; l < rl->NumVertexStreams(); ++ l)
+								for (uint32_t l = 0; l < ves[mesh_index].size(); ++ l)
 								{
-									vertex_element const & other_ve = rl->VertexStreamFormat(l)[0];
+									vertex_element const & other_ve = ves[mesh_index][l];
 									if (VEU_BlendWeight == other_ve.usage)
 									{
 										weight_stream = l;
@@ -1074,12 +1144,12 @@ namespace KlayGE
 									XMLNodePtr weight_node = doc.AllocNode(XNT_Element, "weight");
 									vertex_node->AppendNode(weight_node);
 
-									uint8_t* bone_indices = reinterpret_cast<uint8_t*>(&buffs[k][0]);
+									uint8_t const * bone_indices = &buffs[mesh_index][k][0];
 									weight_node->AppendAttrib(doc.AllocAttribFloat("bone_index", bone_indices[j * num_components + c]));
 
 									if (weight_stream != -1)
 									{
-										float* weights = reinterpret_cast<float*>(&buffs[weight_stream][0]);
+										float const * weights = reinterpret_cast<float const *>(&buffs[mesh_index][weight_stream][0]);
 										weight_node->AppendAttrib(doc.AllocAttribFloat("weight", weights[j * num_components + c]));
 									}
 								}
@@ -1098,7 +1168,7 @@ namespace KlayGE
 									tex_coord_node->AppendAttrib(doc.AllocAttribInt("usage_index", ve.usage_index));
 								}
 
-								float* p = reinterpret_cast<float*>(&buffs[k][0]);
+								float const * p = reinterpret_cast<float const *>(&buffs[mesh_index][k][0]);
 								uint32_t num_components = NumComponents(ve.format);
 								if (num_components >= 1)
 								{
@@ -1120,7 +1190,7 @@ namespace KlayGE
 								XMLNodePtr tangent_node = doc.AllocNode(XNT_Element, "tangent");
 								vertex_node->AppendNode(tangent_node);
 
-								float3* p = reinterpret_cast<float3*>(&buffs[k][0]);
+								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
 								tangent_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
 								tangent_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 								tangent_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
@@ -1132,7 +1202,7 @@ namespace KlayGE
 								XMLNodePtr binormal_node = doc.AllocNode(XNT_Element, "binormal");
 								vertex_node->AppendNode(binormal_node);
 
-								float3* p = reinterpret_cast<float3*>(&buffs[k][0]);
+								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
 								binormal_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
 								binormal_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 								binormal_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
@@ -1145,42 +1215,33 @@ namespace KlayGE
 				XMLNodePtr triangles_chunk = doc.AllocNode(XNT_Element, "triangles_chunk");
 				mesh_node->AppendNode(triangles_chunk);
 				{
-					GraphicsBufferPtr ib = rl->GetIndexStream();
-					GraphicsBufferPtr ib_cpu = Context::Instance().RenderFactoryInstance().MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					ib_cpu->Resize(ib->Size());
-					ib->CopyToBuffer(*ib_cpu);
-
-					GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-
-					for (uint32_t j = 0; j < mesh.NumTriangles(); ++ j)
+					for (uint32_t j = 0; j < indices[mesh_index].size(); j += 3)
 					{
 						XMLNodePtr triangle_node = doc.AllocNode(XNT_Element, "triangle");
 						triangles_chunk->AppendNode(triangle_node);
 
-						triangle_node->AppendAttrib(doc.AllocAttribInt("a", *(mapper.Pointer<uint16_t>() + j * 3 + 0)));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("b", *(mapper.Pointer<uint16_t>() + j * 3 + 1)));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("c", *(mapper.Pointer<uint16_t>() + j * 3 + 2)));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("a", indices[mesh_index][j + 0]));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("b", indices[mesh_index][j + 1]));
+						triangle_node->AppendAttrib(doc.AllocAttribInt("c", indices[mesh_index][j + 2]));
 					}
 				}
 			}
 		}
 
-		if (model->IsSkinned())
+		if (kfs)
 		{
-			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
-			if (skinned->GetKeyFrames().size() > 0)
+			if (!kfs->empty())
 			{
-				uint32_t num_key_frames = static_cast<uint32_t>(skinned->GetKeyFrames().size());
+				uint32_t num_key_frames = static_cast<uint32_t>(kfs->size());
 
 				XMLNodePtr key_frames_chunk = doc.AllocNode(XNT_Element, "key_frames_chunk");
 				root->AppendNode(key_frames_chunk);
 
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("start_frame", skinned->StartFrame()));
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("end_frame", skinned->EndFrame()));
-				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("frame_rate", skinned->FrameRate()));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("start_frame", start_frame));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("end_frame", end_frame));
+				key_frames_chunk->AppendAttrib(doc.AllocAttribUInt("frame_rate", frame_rate));
 
-				KeyFramesType const & kfs = checked_pointer_cast<SkinnedModel>(model)->GetKeyFrames();
-				KeyFramesType::const_iterator iter = kfs.begin();
+				KeyFramesType::const_iterator iter = kfs->begin();
 
 				for (uint32_t i = 0; i < num_key_frames; ++ i, ++ iter)
 				{
@@ -1213,5 +1274,89 @@ namespace KlayGE
 
 		std::ofstream file(meshml_name.c_str());
 		doc.Print(file);
+	}
+
+	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
+	{
+		std::vector<RenderModel::Material> mtls(model->NumMaterials());
+		if (!mtls.empty())
+		{
+			for (uint32_t i = 0; i < mtls.size(); ++ i)
+			{
+				mtls[i] = model->GetMaterial(i);
+			}
+		}
+
+		std::vector<std::string> mesh_names(model->NumMeshes());
+		std::vector<int32_t> mtl_ids(mesh_names.size());
+		std::vector<std::vector<vertex_element> > ves(mesh_names.size());
+		std::vector<std::vector<std::vector<uint8_t> > > buffs(mesh_names.size());
+		std::vector<std::vector<uint16_t> > indices(mesh_names.size());
+		if (!mesh_names.empty())
+		{
+			for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
+			{
+				StaticMesh const & mesh = *model->Mesh(mesh_index);
+
+				Convert(mesh_names[mesh_index], mesh.Name());
+				mtl_ids[mesh_index] = mesh.MaterialID();
+
+				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
+				ves[mesh_index].resize(rl->NumVertexStreams());
+				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				{
+					ves[mesh_index][j] = rl->VertexStreamFormat(j)[0];
+				}
+
+				buffs[mesh_index].resize(ves[mesh_index].size());
+				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				{
+					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
+					GraphicsBufferPtr vb_cpu = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					vb_cpu->Resize(vb->Size());
+					vb->CopyToBuffer(*vb_cpu);
+
+					buffs[mesh_index][j].resize(vb->Size());
+
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					memcpy(&buffs[mesh_index][j][0], mapper.Pointer<uint8_t>(), vb->Size());
+				}
+
+				indices[mesh_index].resize(mesh.NumTriangles() * 3);
+				{
+					GraphicsBufferPtr ib = rl->GetIndexStream();
+					GraphicsBufferPtr ib_cpu = Context::Instance().RenderFactoryInstance().MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
+					ib_cpu->Resize(ib->Size());
+					ib->CopyToBuffer(*ib_cpu);
+
+					GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
+					memcpy(&indices[mesh_index][0], mapper.Pointer<uint8_t>(), ib->Size());
+				}
+			}
+		}
+
+		std::vector<Joint> joints;
+		boost::shared_ptr<KeyFramesType> kfs;
+		int32_t start_frame = 0;
+		int32_t end_frame = 0;
+		int32_t frame_rate = 0;
+		if (model->IsSkinned())
+		{
+			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
+			uint32_t num_joints = skinned->NumJoints();
+			joints.resize(num_joints);
+			for (uint32_t i = 0; i < num_joints; ++ i)
+			{
+				joints[i] = checked_pointer_cast<SkinnedModel>(model)->GetJoint(i);
+			}
+
+			start_frame = skinned->StartFrame();
+			end_frame = skinned->EndFrame();
+			frame_rate = skinned->FrameRate();
+
+			kfs = skinned->GetKeyFrames();
+		}
+
+		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, indices, joints, kfs, start_frame, end_frame, frame_rate);
 	}
 }

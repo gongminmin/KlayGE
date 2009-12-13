@@ -32,8 +32,15 @@ namespace KlayGE
 
 		void EncodeProps(int level, uint32_t dict_size);
 
-		uint64_t Encode(boost::shared_ptr<std::ostream> const & os, void const * input, uint64_t len);
-		uint64_t Decode(boost::shared_ptr<std::ostream> const & os, ResIdentifierPtr const & res);
+		uint64_t Encode(std::ostream& os, ResIdentifierPtr const & res, uint64_t len);
+		uint64_t Encode(std::ostream& os, void const * input, uint64_t len);
+		void Encode(std::vector<uint8_t>& output, ResIdentifierPtr const & res, uint64_t len);
+		void Encode(std::vector<uint8_t>& output, void const * input, uint64_t len);
+
+		uint64_t Decode(std::ostream& os, ResIdentifierPtr const & res, uint64_t len, uint64_t original_len);
+		uint64_t Decode(std::ostream& os, void const * input, uint64_t len, uint64_t original_len);
+		void Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & res, uint64_t len, uint64_t original_len);
+		void Decode(std::vector<uint8_t>& output, void const * input, uint64_t len, uint64_t original_len);
 
 	private:
 		void* lzma_enc_;

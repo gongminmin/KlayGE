@@ -477,7 +477,7 @@ namespace
 		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
 			: SceneObjectHelper(SOA_Cullable), move_speed_(move_speed), pos_(pos)
 		{
-			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())->Mesh(0);
+			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())()->Mesh(0);
 			checked_pointer_cast<RenderSphere>(renderable_)->EmitClr(clr);
 		}
 
@@ -729,15 +729,9 @@ DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings 
 
 void DeferredShadingApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
 
-	RenderModelPtr model = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
-	scene_objs_.resize(model->NumMeshes());
-	for (size_t i = 0; i < model->NumMeshes(); ++ i)
-	{
-		scene_objs_[i] = MakeSharedPtr<TorusObject>(model->Mesh(i));
-		scene_objs_[i]->AddToSceneManager();
-	}
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
 	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
@@ -801,6 +795,14 @@ void DeferredShadingApp::InitObjects()
 	this->SSAOChangedHandler(*dialog_->Control<UIComboBox>(id_ssao_combo_));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
+
+	RenderModelPtr model = model_ml();
+	scene_objs_.resize(model->NumMeshes());
+	for (size_t i = 0; i < model->NumMeshes(); ++ i)
+	{
+		scene_objs_[i] = MakeSharedPtr<TorusObject>(model->Mesh(i));
+		scene_objs_[i]->AddToSceneManager();
+	}
 }
 
 void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)

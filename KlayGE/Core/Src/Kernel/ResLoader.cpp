@@ -129,7 +129,6 @@ namespace KlayGE
 			}
 		}
 
-		BOOST_ASSERT(false);
 		return ResIdentifierPtr();
 	}
 }
