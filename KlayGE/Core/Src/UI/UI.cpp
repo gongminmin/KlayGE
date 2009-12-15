@@ -432,6 +432,31 @@ namespace KlayGE
 					Convert(wcaption, caption);
 					dlg->SetCaptionText(wcaption);
 
+					dlg->EnableCaption(ReadBool(node, "show_caption", true));
+
+					Color bg_clr(0.4f, 0.6f, 0.8f, 1);
+					attr = node->Attrib("bg_color_r");
+					if (attr)
+					{
+						bg_clr.r() = attr->ValueFloat();
+					}
+					attr = node->Attrib("bg_color_g");
+					if (attr)
+					{
+						bg_clr.g() = attr->ValueFloat();
+					}
+					attr = node->Attrib("bg_color_b");
+					if (attr)
+					{
+						bg_clr.b() = attr->ValueFloat();
+					}
+					attr = node->Attrib("bg_color_a");
+					if (attr)
+					{
+						bg_clr.a() = attr->ValueFloat();
+					}
+					dlg->SetBackgroundColors(bg_clr);
+
 					UIDialog::ControlLocation loc = { x, y, align_x, align_y };
 					dlg->CtrlLocation(-1, loc);
 					dlg->SetSize(width, height);
@@ -1146,8 +1171,14 @@ namespace KlayGE
 			clrs[2] = bottom_right_clr_;
 			clrs[3] = bottom_left_clr_;
 
-			float3 pos(static_cast<float>(bounding_box_.left()), static_cast<float>(bounding_box_.top()), 0.5f);
 			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
+			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
+			if (this->IsCaptionEnabled())
+			{
+				rcScreen += Vector_T<int32_t, 2>(0, this->GetCaptionHeight());
+			}
+
+			float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_);
 			UIManager::Instance().DrawRect(pos, static_cast<float>(this->GetWidth()),
 				static_cast<float>(this->GetHeight()), &clrs[0], Rect_T<int32_t>(0, 0, 0, 0), TexturePtr());
 		}
@@ -1184,12 +1215,6 @@ namespace KlayGE
 			rc.left() += 5; // Make a left margin
 
 			this->DrawText(wstrOutput, cap_element_, rc, true);
-		}
-
-		if (bg_element_.TextureColor().Current.a() != 0)
-		{
-			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
-			this->DrawRect(rc, 0, bg_element_.TextureColor().Current);
 		}
 
 		// If the dialog is minimized, skip rendering
@@ -1577,12 +1602,6 @@ namespace KlayGE
 		// Pre-blend as we don't need to transition the state
 		cap_element_.TextureColor().SetState(UICS_Normal);
 		cap_element_.FontColor().SetState(UICS_Normal);
-
-		// Element for the background
-		bg_element_.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(17, 269, 241, 287));
-		bg_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.8f, 1);
-		// Pre-blend as we don't need to transition the state
-		bg_element_.TextureColor().SetState(UICS_Normal);
 	}
 
 	bool UIDialog::OnCycleFocus(bool bForward)

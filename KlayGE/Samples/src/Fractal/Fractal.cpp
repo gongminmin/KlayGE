@@ -15,6 +15,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -218,6 +219,8 @@ void Fractal::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&Fractal::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)
@@ -249,6 +252,8 @@ void Fractal::OnResize(uint32_t width, uint32_t height)
 			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0, 0));
 		}
 	}
+
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void Fractal::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -278,6 +283,8 @@ void Fractal::DoUpdateOverlay()
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"GPU Fractal", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	UIManager::Instance().Render();
 }
 
 uint32_t Fractal::DoUpdate(uint32_t pass)

@@ -15,6 +15,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -104,6 +105,8 @@ void TextApp::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&TextApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)
@@ -143,6 +146,8 @@ void TextApp::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
+
+	UIManager::Instance().Render();
 }
 
 uint32_t TextApp::DoUpdate(uint32_t /*pass*/)

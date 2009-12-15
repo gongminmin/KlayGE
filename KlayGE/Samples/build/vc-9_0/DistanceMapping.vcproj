@@ -368,6 +368,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\DistanceMapping\DistanceMapping.uiml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

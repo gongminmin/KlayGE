@@ -13,6 +13,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -149,6 +150,15 @@ void VertexDisplacement::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&VertexDisplacement::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("VertexDisplacement.uiml"));
+}
+
+void VertexDisplacement::OnResize(uint32_t width, uint32_t height)
+{
+	App3DFramework::OnResize(width, height);
+
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void VertexDisplacement::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -178,6 +188,8 @@ void VertexDisplacement::DoUpdateOverlay()
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), renderEngine.Name(), 16);
+
+	UIManager::Instance().Render();
 }
 
 uint32_t VertexDisplacement::DoUpdate(uint32_t /*pass*/)

@@ -17,6 +17,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Timer.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -761,6 +762,8 @@ void GPUParticleSystemApp::InitObjects()
 	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
@@ -783,6 +786,8 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	blend_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
 	blend_pp_->Destinate(FrameBufferPtr());
+
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void GPUParticleSystemApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -807,6 +812,8 @@ void GPUParticleSystemApp::DoUpdateOverlay()
 	RenderEngine& re = rf.RenderEngineInstance();
 	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(re.CurFrameBuffer()));
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), rw.Description(), 16);
+
+	UIManager::Instance().Render();
 }
 
 uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)

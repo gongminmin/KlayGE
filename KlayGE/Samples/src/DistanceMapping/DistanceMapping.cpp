@@ -14,6 +14,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -223,6 +224,13 @@ void DistanceMapping::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&DistanceMapping::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("DistanceMapping.uiml"));
+}
+
+void DistanceMapping::OnResize(uint32_t width, uint32_t height)
+{
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -247,6 +255,8 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 
 void DistanceMapping::DoUpdateOverlay()
 {
+	UIManager::Instance().Render();
+
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	std::wostringstream stream;

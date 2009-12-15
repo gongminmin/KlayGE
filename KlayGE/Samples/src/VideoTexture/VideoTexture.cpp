@@ -16,6 +16,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Show.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -148,6 +149,15 @@ void VideoTextureApp::InitObjects()
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("VideoTexture.uiml"));
+}
+
+void VideoTextureApp::OnResize(uint32_t width, uint32_t height)
+{
+	App3DFramework::OnResize(width, height);
+
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void VideoTextureApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -167,6 +177,8 @@ void VideoTextureApp::DoUpdateOverlay()
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Video Texture", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	UIManager::Instance().Render();
 }
 
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)

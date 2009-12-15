@@ -16,6 +16,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -223,6 +224,8 @@ void Refract::InitObjects()
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	hdr_ = MakeSharedPtr<HDRPostProcess>(true, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("Refract.uiml"));
 }
 
 void Refract::OnResize(uint32_t width, uint32_t height)
@@ -262,6 +265,8 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 	hdr_->Source(hdr_no_aa_tex_, hdr_buffer_->RequiresFlipping());
 	hdr_->Destinate(FrameBufferPtr());
+
+	UIManager::Instance().SettleCtrls(width, height);
 }
 
 void Refract::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -281,6 +286,8 @@ void Refract::DoUpdateOverlay()
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"HDR Refract", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
+
+	UIManager::Instance().Render();
 }
 
 uint32_t Refract::DoUpdate(uint32_t pass)

@@ -10,4 +10,8 @@
 
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="126" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
 </ui>

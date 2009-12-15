@@ -368,6 +368,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\Fractal\Fractal.uiml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

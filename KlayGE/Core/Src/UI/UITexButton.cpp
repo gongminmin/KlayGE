@@ -74,9 +74,10 @@ namespace KlayGE
 				Element.SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
 			}
 			Element.SetFont(0);
-			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 150.0f / 255);
-			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 200.0f / 255);
-			Element.FontColor().States[UICS_MouseOver] = Color(0, 0, 0, 1.0f);
+			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
+			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
+			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 1);
+			Element.FontColor().States[UICS_MouseOver] = Color(0, 0, 0, 1);
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
@@ -84,7 +85,7 @@ namespace KlayGE
 		// Fill layer
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
-			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 160.0f / 255);
+			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
 

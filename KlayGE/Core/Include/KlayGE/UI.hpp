@@ -716,7 +716,6 @@ namespace KlayGE
 		std::vector<UIControlPtr> controls_;
 
 		UIElement cap_element_;  // Element for the caption
-		UIElement bg_element_;  // Element for the background
 
 		float depth_base_;
 

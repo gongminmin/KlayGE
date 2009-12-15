@@ -376,6 +376,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="UI"
+			>
+			<File
+				RelativePath="..\..\media\GPUParticleSystem\GPUParticleSystem.uiml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
