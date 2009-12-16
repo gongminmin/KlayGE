@@ -459,7 +459,7 @@ namespace KlayGE
 				}
 
 				XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
-				
+
 				uint32_t num_vertices = 0;
 				for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 				{
@@ -760,7 +760,7 @@ namespace KlayGE
 		lzma.Decode(*ss, lzma_file, len, original_len);
 
 		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), ss);
-		
+
 		uint32_t num_mtls;
 		decoded->read(&num_mtls, sizeof(num_mtls));
 		uint32_t num_meshes;
@@ -792,7 +792,7 @@ namespace KlayGE
 
 			uint32_t num_texs;
 			decoded->read(&num_texs, sizeof(num_texs));
-			
+
 			for (uint32_t tex_index = 0; tex_index < num_texs; ++ tex_index)
 			{
 				std::string type, name;
@@ -1060,6 +1060,9 @@ namespace KlayGE
 
 					case VEU_TextureCoord:
 						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / NumComponents(ve.format) / sizeof(float));
+						break;
+
+					default:
 						break;
 					}
 				}

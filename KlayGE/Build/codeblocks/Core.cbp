@@ -243,6 +243,7 @@
 		<Unit filename="..\..\Core\Include\KlayGE\InputFactory.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\KMesh.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\KlayGE.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\LZMACodec.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Lobby.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\MapVector.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Math.hpp" />
@@ -337,6 +338,15 @@
 		<Unit filename="..\..\Core\Src\Pack\IPassword.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\IProgress.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\IStream.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\LZMACodec.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzFind.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzFind.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzHash.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzTypes.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzmaDec.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzmaDec.hpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzmaEnc.cpp" />
+		<Unit filename="..\..\Core\Src\Pack\LzmaEnc.hpp" />
 		<Unit filename="..\..\Core\Src\Pack\Streams.cpp" />
 		<Unit filename="..\..\Core\Src\Pack\Streams.hpp" />
 		<Unit filename="..\..\Core\Src\Render\BlockCompression.cpp" />

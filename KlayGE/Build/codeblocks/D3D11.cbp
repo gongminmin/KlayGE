@@ -29,8 +29,8 @@
 				<Linker>
 					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="d3d11_beta" />
-					<Add library="d3dx11" />
+					<Add library="d3d11" />
+					<Add library="d3dx11d" />
 					<Add library="d3dcompiler" />
 					<Add library="gdi32" />
 				</Linker>
@@ -61,7 +61,7 @@
 					<Add option="-s" />
 					<Add library="boost_system-mgw44-mt" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="d3d11_beta" />
+					<Add library="d3d11" />
 					<Add library="d3dx11" />
 					<Add library="d3dcompiler" />
 					<Add library="gdi32" />
