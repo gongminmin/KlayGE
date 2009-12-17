@@ -403,7 +403,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 			depth_view_[0]->Clear(Color(1, 0, 0, 0));
 			return App3DFramework::URV_Need_Flush;
-	
+
 		default:
 			if (1 == pass)
 			{
@@ -452,7 +452,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				{
 					finished = true;
 				}
-				
+
 				if (finished)
 				{
 					re.BindFrameBuffer(FrameBufferPtr());

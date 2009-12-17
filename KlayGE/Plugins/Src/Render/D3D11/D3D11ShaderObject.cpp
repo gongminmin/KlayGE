@@ -578,7 +578,7 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D11DeviceContext::VSSetShaderResources,
 		&ID3D11DeviceContext::PSSetShaderResources,
@@ -588,7 +588,7 @@ namespace
 		&ID3D11DeviceContext::DSSetShaderResources
 	};
 
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D11DeviceContext::VSSetSamplers,
 		&ID3D11DeviceContext::PSSetSamplers,
@@ -598,7 +598,7 @@ namespace
 		&ID3D11DeviceContext::DSSetSamplers
 	};
 
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D11DeviceContext::VSSetConstantBuffers,
 		&ID3D11DeviceContext::PSSetConstantBuffers,

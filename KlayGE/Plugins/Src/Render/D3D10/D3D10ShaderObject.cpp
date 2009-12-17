@@ -571,7 +571,7 @@ namespace
 		RenderEffectParameterPtr param_;
 	};
 
-	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D10Device::VSSetShaderResources,
 		&ID3D10Device::PSSetShaderResources,
@@ -581,7 +581,7 @@ namespace
 		NULL
 	};
 
-	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D10Device::VSSetSamplers,
 		&ID3D10Device::PSSetSamplers,
@@ -591,7 +591,7 @@ namespace
 		NULL
 	};
 
-	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] = 
+	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] =
 	{
 		&ID3D10Device::VSSetConstantBuffers,
 		&ID3D10Device::PSSetConstantBuffers,

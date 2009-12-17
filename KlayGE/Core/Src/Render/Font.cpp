@@ -150,7 +150,7 @@ namespace KlayGE
 	{
 		return dist_base_;
 	}
-	
+
 	int16_t KFontLoader::DistScale() const
 	{
 		return dist_scale_;

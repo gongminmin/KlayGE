@@ -139,7 +139,7 @@ void TextApp::DoUpdateOverlay()
 	stream << fixed << this->FPS() << L" FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
-	
+
 	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 

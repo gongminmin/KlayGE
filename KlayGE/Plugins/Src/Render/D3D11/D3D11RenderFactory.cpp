@@ -141,7 +141,7 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<D3D11RasterizerStateObject>(desc);
 	}
-	
+
 	DepthStencilStateObjectPtr D3D11RenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
 	{
 		return MakeSharedPtr<D3D11DepthStencilStateObject>(desc);

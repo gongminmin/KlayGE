@@ -139,12 +139,18 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Unit filename="..\..\media\PostProcessing\AsciiArtsPP.fxml" />
+		<Unit filename="..\..\media\PostProcessing\CartoonPP.fxml" />
+		<Unit filename="..\..\media\PostProcessing\NightVisionPP.fxml" />
 		<Unit filename="..\..\media\PostProcessing\PostProcessing.fxml" />
 		<Unit filename="..\..\media\PostProcessing\PostProcessing.uiml" />
+		<Unit filename="..\..\media\PostProcessing\TilingPP.fxml" />
 		<Unit filename="..\..\src\PostProcessing\AsciiArtsPP.cpp" />
 		<Unit filename="..\..\src\PostProcessing\AsciiArtsPP.hpp" />
 		<Unit filename="..\..\src\PostProcessing\CartoonPP.cpp" />
 		<Unit filename="..\..\src\PostProcessing\CartoonPP.hpp" />
+		<Unit filename="..\..\src\PostProcessing\NightVisionPP.cpp" />
+		<Unit filename="..\..\src\PostProcessing\NightVisionPP.hpp" />
 		<Unit filename="..\..\src\PostProcessing\PostProcessing.cpp" />
 		<Unit filename="..\..\src\PostProcessing\PostProcessing.hpp" />
 		<Unit filename="..\..\src\PostProcessing\TilingPP.cpp" />
