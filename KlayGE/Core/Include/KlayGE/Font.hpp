@@ -96,7 +96,7 @@ namespace KlayGE
 		Vector_T<uint16_t, 2> CharAdvance(wchar_t ch) const;
 
 		font_info const & CharInfo(int32_t offset) const;
-		uint8_t const * DistanceData(int32_t offset) const;
+		void DistanceData(uint8_t* p, uint32_t pitch, int32_t offset) const;
 
 	private:
 		uint32_t char_size_;
@@ -107,7 +107,8 @@ namespace KlayGE
 		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
 			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
 		std::vector<font_info> char_info_;
-		std::vector<uint8_t> distances_;
+		std::vector<size_t> distances_addr_;
+		std::vector<uint8_t> distances_lzma_;
 	};
 
 	class KLAYGE_CORE_API FontRenderable : public RenderableHelper

@@ -124,21 +124,21 @@ namespace KlayGE
 		char_info_.resize(header.non_empty_chars);
 		kfont_input->read(&char_info_[0], static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
 
-		distances_.resize(header.non_empty_chars * header.char_size * header.char_size);
+		distances_addr_.resize(header.non_empty_chars + 1);
 
 		std::vector<uint8_t> dist;
-		LZMACodec lzma_dec;
 		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
 		{
+			distances_addr_[i] = distances_lzma_.size();
+
 			uint64_t len;
 			kfont_input->read(&len, sizeof(len));
-			lzma_dec.Decode(dist, kfont_input, len, header.char_size * header.char_size);
+			distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
 
-			for (uint32_t j = 0; j < header.char_size * header.char_size; ++ j)
-			{
-				distances_[i * header.char_size * header.char_size + j] = dist[j];
-			}
+			kfont_input->read(&distances_lzma_[distances_addr_[i]], static_cast<size_t>(len));
 		}
+
+		distances_addr_[header.non_empty_chars] = distances_lzma_.size();
 	}
 
 	uint32_t KFontLoader::CharSize() const
@@ -187,9 +187,20 @@ namespace KlayGE
 		return char_info_[offset];
 	}
 
-	uint8_t const * KFontLoader::DistanceData(int32_t offset) const
+	void KFontLoader::DistanceData(uint8_t* p, uint32_t pitch, int32_t offset) const
 	{
-		return &distances_[offset * char_size_ * char_size_];
+		LZMACodec lzma_dec;
+		std::vector<uint8_t> decoded;
+		lzma_dec.Decode(decoded, &distances_lzma_[distances_addr_[offset]],
+			distances_addr_[offset + 1] - distances_addr_[offset], char_size_ * char_size_);
+
+		uint8_t const * char_data = &decoded[0];
+		for (uint32_t y = 0; y < char_size_; ++ y)
+		{
+			std::memcpy(p, char_data, char_size_);
+			p += pitch;
+			char_data += char_size_;
+		}
 	}
 
 
@@ -694,14 +705,7 @@ namespace KlayGE
 					{
 						Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
 							0, 0, kfont_char_size, kfont_char_size);
-						uint8_t* tex_data = mapper.Pointer<uint8_t>();
-						uint8_t const * char_data = kfont_loader_.DistanceData(offset);
-						for (uint32_t y = 0; y < kfont_char_size; ++ y)
-						{
-							std::memcpy(tex_data, char_data, kfont_char_size);
-							tex_data += mapper.RowPitch();
-							char_data += kfont_char_size;
-						}
+						kfont_loader_.DistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
 					}
 
 					a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
