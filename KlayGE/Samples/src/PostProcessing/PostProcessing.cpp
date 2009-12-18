@@ -144,8 +144,8 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100.0f);
 
-	TexturePtr y_cube_map = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
-	TexturePtr c_cube_map = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
+	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read)();
+	TexturePtr c_cube_map = LoadTexture("rnl_cross_c.dds", EAH_GPU_Read)();
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();

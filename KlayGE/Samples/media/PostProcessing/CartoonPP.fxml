@@ -113,9 +113,9 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	float4 normalResults = step(0.4, Deltas1);
 	normalResults = max(normalResults, depthResults);
 	float dne = 1 - dot(normalResults, 0.25);
-
+	
 	const float toon_clr[3] = { 0.47f, 0.63f, 1 };
-	return toon_clr[int(toon * 3)] * dne * color;
+	return toon_clr[int(toon * 2 + 0.5f)] * dne * color;
 }
 		]]>
 	</shader>
