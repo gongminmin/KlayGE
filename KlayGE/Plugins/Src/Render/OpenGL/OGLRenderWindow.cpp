@@ -374,7 +374,7 @@ namespace KlayGE
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
-		if (glloader_GL_VERSION_3_1() && !glloader_GL_ARB_compatibility())
+		if (!glloader_GL_VERSION_3_2() && (glloader_GL_VERSION_3_1() && !glloader_GL_ARB_compatibility()))
 		{
 			THR(boost::system::posix_error::not_supported);
 		}
