@@ -73,7 +73,7 @@ namespace
 			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
 			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
 		{
-			ml_thread_ = GlobalThreadPool()(boost::bind(&RenderModelLoader::LoadKModel, this, meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			ml_thread_ = GlobalThreadPool()(boost::bind(&RenderModelLoader::LoadKModel, this, boost::ref(meshml_name), access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 		}
 
 		RenderModelPtr operator()()

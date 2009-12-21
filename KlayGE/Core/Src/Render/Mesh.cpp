@@ -25,7 +25,6 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <algorithm>
-#include <boost/mem_fn.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -41,17 +40,26 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::AddToRenderQueue));
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		{
+			mesh->AddToRenderQueue();
+		}
 	}
 
 	void RenderModel::OnRenderBegin()
 	{
-		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::OnRenderBegin));
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		{
+			mesh->OnRenderBegin();
+		}
 	}
 
 	void RenderModel::OnRenderEnd()
 	{
-		std::for_each(meshes_.begin(), meshes_.end(), boost::mem_fn(&StaticMesh::OnRenderEnd));
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		{
+			mesh->OnRenderEnd();
+		}
 	}
 
 	void RenderModel::UpdateBoundBox()

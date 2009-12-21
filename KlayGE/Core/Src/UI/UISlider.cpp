@@ -16,8 +16,6 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE

@@ -17,8 +17,6 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE

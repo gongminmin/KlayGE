@@ -37,7 +37,6 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 

@@ -18,8 +18,6 @@
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE

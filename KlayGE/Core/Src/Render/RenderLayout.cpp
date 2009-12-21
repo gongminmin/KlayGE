@@ -17,8 +17,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/MapVector.hpp>
 
-#include <boost/bind.hpp>
-
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
