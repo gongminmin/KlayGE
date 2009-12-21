@@ -705,7 +705,7 @@ namespace
 	public:
 		TextureLoader(std::string const & tex_name, uint32_t access_hint)
 		{
-			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, boost::ref(tex_name), access_hint));
+			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, tex_name, access_hint));
 		}
 
 		TexturePtr operator()()

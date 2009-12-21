@@ -596,6 +596,7 @@ namespace KlayGE
 		EAH_CPU_Write = 1UL << 1,
 		EAH_GPU_Read = 1UL << 2,
 		EAH_GPU_Write = 1UL << 3,
+		EAH_GPU_Unordered = 1UL << 4
 	};
 
 	struct ElementInitData

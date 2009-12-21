@@ -57,6 +57,7 @@ namespace KlayGE
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 		ID3D11BufferPtr buffer_;
 		ID3D11ShaderResourceViewPtr d3d_sr_view_;
+		ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 
 		uint32_t bind_flags_;
 		uint32_t hw_buf_size_;
