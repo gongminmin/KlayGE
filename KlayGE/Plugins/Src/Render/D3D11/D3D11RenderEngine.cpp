@@ -302,6 +302,28 @@ namespace KlayGE
 		}
 	}
 
+	// 设置当前UAV
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D11RenderEngine::DoBindUABuffers(std::vector<GraphicsBufferPtr> const & uabs)
+	{
+		uint32_t num_buffs = static_cast<uint32_t>(uabs.size());
+		if (num_buffs > 0)
+		{
+			std::vector<ID3D11UnorderedAccessView*> cs_uavs(num_buffs);
+			for (uint32_t i = 0; i < num_buffs; ++ i)
+			{
+				cs_uavs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(uabs[i])->D3DUnorderedAccessView().get();
+			}
+
+			d3d_imm_ctx_->CSSetUnorderedAccessViews(0, num_buffs, &cs_uavs[0], reinterpret_cast<UINT*>(&cs_uavs[0]));
+		}
+		else
+		{
+			ID3D11UnorderedAccessView* cs_uavs[1] = { NULL };
+			d3d_imm_ctx_->CSSetUnorderedAccessViews(0, 1, cs_uavs, reinterpret_cast<UINT*>(&cs_uavs[0]));
+		}
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::BeginFrame()
@@ -452,6 +474,32 @@ namespace KlayGE
 					pass->Unbind();
 				}
 			}
+		}
+	}
+
+	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	{
+		BOOST_ASSERT(!rl.InstanceStream());
+		BOOST_ASSERT(!rl.UseIndices());
+
+		std::vector<ID3D11ShaderResourceView*> srvs(rl.NumVertexStreams());
+		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
+		{
+			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
+
+			D3D11GraphicsBuffer& d3dvb(*checked_pointer_cast<D3D11GraphicsBuffer>(stream));
+			srvs[i] = d3dvb.D3DShaderResourceView().get();
+		}
+		d3d_imm_ctx_->CSSetShaderResources(0, rl.NumVertexStreams(), &srvs[0]);
+
+		uint32_t const num_passes = tech.NumPasses();
+		for (uint32_t i = 0; i < num_passes; ++ i)
+		{
+			RenderPassPtr const & pass = tech.Pass(i);
+
+			pass->Bind();
+			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
+			pass->Unbind();
 		}
 	}
 

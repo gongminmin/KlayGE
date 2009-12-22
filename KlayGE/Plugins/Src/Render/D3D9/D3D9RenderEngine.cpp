@@ -430,6 +430,12 @@ namespace KlayGE
 	{
 	}
 
+	// 设置当前UAV
+	/////////////////////////////////////////////////////////////////////////////////
+	void D3D9RenderEngine::DoBindUABuffers(std::vector<GraphicsBufferPtr> const & /*uabs*/)
+	{
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D9RenderEngine::BeginFrame()
@@ -460,6 +466,11 @@ namespace KlayGE
 				this->RenderInstance(tech, rl);
 			}
 		}
+	}
+
+	void D3D9RenderEngine::DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+	{
+		BOOST_ASSERT(false);
 	}
 
 	void D3D9RenderEngine::DoRenderSWInstance(RenderTechnique const & tech, RenderLayout const & rl)

@@ -439,6 +439,12 @@ namespace KlayGE
 		}
 	}
 
+	// 设置当前UAV
+	/////////////////////////////////////////////////////////////////////////////////
+	void OGLRenderEngine::DoBindUABuffers(std::vector<GraphicsBufferPtr> const & /*uabs*/)
+	{
+	}
+
 	// 开始一帧
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::BeginFrame()
@@ -721,6 +727,11 @@ namespace KlayGE
 		}
 
 		checked_cast<OGLRenderLayout const *>(&rl)->Deactive();
+	}
+
+	void OGLRenderEngine::DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+	{
+		BOOST_ASSERT(false);
 	}
 
 	// 结束一帧

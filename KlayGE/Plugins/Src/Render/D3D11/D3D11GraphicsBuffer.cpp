@@ -40,9 +40,8 @@ namespace KlayGE
 		if (init_data != NULL)
 		{
 			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags);
+			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
 			desc.ByteWidth = init_data->row_pitch;
-			desc.MiscFlags = (access_hint_ & EAH_GPU_Unordered) ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : 0;
 			desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
 			size_in_byte_ = init_data->row_pitch;
@@ -86,7 +85,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags)
+	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
 	{
 		if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 		{
@@ -134,6 +133,13 @@ namespace KlayGE
 		{
 			bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
 		}
+
+		misc_flags = 0;
+		if (access_hint_ & EAH_GPU_Unordered)
+		{
+			misc_flags = (access_hint_ & EAH_GPU_Structured)
+				? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+		}
 	}
 
 	void D3D11GraphicsBuffer::DoResize()
@@ -143,9 +149,8 @@ namespace KlayGE
 		if (this->Size() > hw_buf_size_)
 		{
 			D3D11_BUFFER_DESC desc;
-			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags);
+			this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
 			desc.ByteWidth = size_in_byte_;
-			desc.MiscFlags = desc.MiscFlags = (access_hint_ & EAH_GPU_Unordered) ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : 0;;
 			desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
 			ID3D11Buffer* buffer;

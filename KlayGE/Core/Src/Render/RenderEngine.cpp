@@ -1,8 +1,11 @@
 // RenderEngine.cpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.9.0
+// Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2003-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 增加了Dispatch (2009.12.22)
 //
 // 3.9.0
 // 支持Stream Output (2009.5.14)
@@ -114,7 +117,16 @@ namespace KlayGE
 		{
 		}
 
+		void DoBindUABuffers(std::vector<GraphicsBufferPtr> const & /*uabs*/)
+		{
+		}
+
 		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
+		{
+		}
+
+		void DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/,
+			uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 		{
 		}
 	};
@@ -217,11 +229,21 @@ namespace KlayGE
 		this->DoBindSOBuffers(rl);
 	}
 
+	void RenderEngine::BindUABuffers(std::vector<GraphicsBufferPtr> const & uabs)
+	{
+		this->DoBindUABuffers(uabs);
+	}
+
 	// 渲染一个vb
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::Render(RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		this->DoRender(tech, rl);
+	}
+
+	void RenderEngine::Dispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	{
+		this->DoDispatch(tech, rl, tgx, tgy, tgz);
 	}
 
 	// 上次Render()所渲染的图元数

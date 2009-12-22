@@ -1,8 +1,11 @@
 // ElementFormat.hpp
 // KlayGE 元素格式 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2006-2008
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2006-2009
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 增加了EAH_GPU_Unordered和EAH_GPU_Structured (2009.12.22)
 //
 // 3.8.0
 // 增加了access_hint的标志 (2008.9.20)
@@ -596,7 +599,8 @@ namespace KlayGE
 		EAH_CPU_Write = 1UL << 1,
 		EAH_GPU_Read = 1UL << 2,
 		EAH_GPU_Write = 1UL << 3,
-		EAH_GPU_Unordered = 1UL << 4
+		EAH_GPU_Unordered = 1UL << 4,
+		EAH_GPU_Structured = 1UL << 5
 	};
 
 	struct ElementInitData

@@ -41,10 +41,15 @@ namespace KlayGE
 			return d3d_sr_view_;
 		}
 
+		ID3D11UnorderedAccessViewPtr const & D3DUnorderedAccessView() const
+		{
+			return d3d_ua_view_;
+		}
+
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
 	protected:
-		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags);
+		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);
 
 	private:
 		void DoResize();
