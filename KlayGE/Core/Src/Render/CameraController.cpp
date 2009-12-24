@@ -27,6 +27,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/Color.hpp>
+#include <KlayGE/UI.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -267,64 +269,78 @@ namespace KlayGE
 				float xd = static_cast<float>(mouse->X());
 				float yd = static_cast<float>(mouse->Y());
 
-				if (mouse->LeftButton())
+				bool mouse_on_ui = false;
+				std::vector<UIDialogPtr> const & dlgs = UIManager::Instance().GetDialogs();
+				for (size_t i = 0; i < dlgs.size(); ++ i)
 				{
-					Quaternion q = MathLib::rotation_axis(right_, yd * rotationScaler_);
-					float4x4 mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
-					float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
-
-					q = MathLib::rotation_axis(float3(0.0f, MathLib::dot(camera_->UpVec(), float3(0, 1, 0)) < 0 ? -1.0f : 1.0f, 0.0f), xd * rotationScaler_);
-					mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
-					pos = MathLib::transform_coord(pos, mat);
-
-					right_ = MathLib::transform_quat(right_, q);
-
-					float3 dir;
-					if (reverse_target_)
+					if (dlgs[i]->GetVisible() && dlgs[i]->ContainsPoint(Vector_T<int32_t, 2>(mouse->AbsX(), mouse->AbsY())))
 					{
-						dir = pos - target_;
+						mouse_on_ui = true;
+						break;
 					}
-					else
-					{
-						dir = target_ - pos;
-					}
-					dir = MathLib::normalize(dir);
-					float3 up = MathLib::cross(dir, right_);
-
-					camera_->ViewParams(pos, pos + dir, up);
 				}
-				else
+
+				if (!mouse_on_ui)
 				{
-					if (mouse->MiddleButton())
+					if (mouse->LeftButton())
 					{
-						float3 offset = right_ * (-xd * rotationScaler_ * 2);
-						float3 pos = camera_->EyePos() + offset;
-						target_ += offset;
+						Quaternion q = MathLib::rotation_axis(right_, yd * rotationScaler_);
+						float4x4 mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+						float3 pos = MathLib::transform_coord(camera_->EyePos(), mat);
 
-						offset = camera_->UpVec() * (yd * rotationScaler_ * 2);
-						pos += offset;
-						target_ += offset;
+						q = MathLib::rotation_axis(float3(0.0f, MathLib::dot(camera_->UpVec(), float3(0, 1, 0)) < 0 ? -1.0f : 1.0f, 0.0f), xd * rotationScaler_);
+						mat = MathLib::transformation<float>(NULL, NULL, NULL, &target_, &q, NULL);
+						pos = MathLib::transform_coord(pos, mat);
 
-						camera_->ViewParams(pos, target_, camera_->UpVec());
+						right_ = MathLib::transform_quat(right_, q);
 
+						float3 dir;
+						if (reverse_target_)
+						{
+							dir = pos - target_;
+						}
+						else
+						{
+							dir = target_ - pos;
+						}
+						dir = MathLib::normalize(dir);
+						float3 up = MathLib::cross(dir, right_);
+
+						camera_->ViewParams(pos, pos + dir, up);
 					}
 					else
 					{
-						if (mouse->RightButton())
+						if (mouse->MiddleButton())
 						{
-							float3 offset = camera_->ViewVec() * ((xd + yd) * rotationScaler_ * 2);
+							float3 offset = right_ * (-xd * rotationScaler_ * 2);
 							float3 pos = camera_->EyePos() + offset;
+							target_ += offset;
 
-							if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
-							{
-								reverse_target_ = true;
-							}
-							else
-							{
-								reverse_target_ = false;
-							}
+							offset = camera_->UpVec() * (yd * rotationScaler_ * 2);
+							pos += offset;
+							target_ += offset;
 
-							camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
+							camera_->ViewParams(pos, target_, camera_->UpVec());
+
+						}
+						else
+						{
+							if (mouse->RightButton())
+							{
+								float3 offset = camera_->ViewVec() * ((xd + yd) * rotationScaler_ * 2);
+								float3 pos = camera_->EyePos() + offset;
+
+								if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)
+								{
+									reverse_target_ = true;
+								}
+								else
+								{
+									reverse_target_ = false;
+								}
+
+								camera_->ViewParams(pos, pos + camera_->ViewVec(), camera_->UpVec());
+							}
 						}
 					}
 				}
