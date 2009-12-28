@@ -5,6 +5,8 @@ The GLLoader's primary selling point is that it offers a initializing path of an
 After setting include and lib directories, all you need to do is add #include <glloader/glloader.h> into your code.
 The GLLoader is licensed under GPL. See gplv2.txt.
 
+NOTE: Please don't put GLLoader into a folder with non-english name. Or else it's possible that autogen.py can't run normally.
+
 3.0.1
 Support OpenGL 3.1 & 3.2
 Add glloader_num_features and glloader_get_feature_name

@@ -5,6 +5,8 @@ GLLoader的特点是按照功能划分扩展，而不像其他同类产品是通过版本和扩展名称载入。
 设置完include和lib目录之后，你需要做的唯一事情就是把#include <glloader/glloader.h>添加到你的代码中。
 GLLoader遵循GPL协议。协议的内容可以参考附带的gplv2.txt
 
+注意：不要把GLLoader放在包含非英文名的目录中，否则autogen.py有可能无法正常执行。
+
 3.0.1
 支持OpenGL 3.1和3.2
 增加了glloader_num_features和glloader_get_feature_name
