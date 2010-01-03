@@ -196,6 +196,29 @@ namespace
 	};
 
 	template <>
+	class SetD3D9ShaderParameter<int2, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			int2 v;
+			param_->Value(v);
+
+			float_reg_->x() = static_cast<float>(v.x());
+			float_reg_->y() = static_cast<float>(v.y());
+		}
+
+	private:
+		float4* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetD3D9ShaderParameter<int3, int32_t>
 	{
 	public:
@@ -220,6 +243,30 @@ namespace
 	};
 
 	template <>
+	class SetD3D9ShaderParameter<int3, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			int3 v;
+			param_->Value(v);
+
+			float_reg_->x() = static_cast<float>(v.x());
+			float_reg_->y() = static_cast<float>(v.y());
+			float_reg_->z() = static_cast<float>(v.z());
+		}
+
+	private:
+		float4* float_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetD3D9ShaderParameter<int4, int32_t>
 	{
 	public:
@@ -235,6 +282,31 @@ namespace
 
 	private:
 		int4* int_reg_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<int4, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4& float_reg, RenderEffectParameterPtr const & param)
+			: float_reg_(&float_reg), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			float4 v;
+			param_->Value(v);
+
+			float_reg_->x() = static_cast<float>(v.x());
+			float_reg_->y() = static_cast<float>(v.y());
+			float_reg_->z() = static_cast<float>(v.z());
+			float_reg_->w() = static_cast<float>(v.w());
+		}
+
+	private:
+		float4* float_reg_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -436,6 +508,38 @@ namespace
 	};
 
 	template <>
+	class SetD3D9ShaderParameter<int2*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(int4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int2> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(static_cast<float>(v[i].x()), static_cast<float>(v[i].y()), 0, 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v4[0], std::min(reg_size_, v4.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetD3D9ShaderParameter<int3*, int32_t>
 	{
 	public:
@@ -468,6 +572,38 @@ namespace
 	};
 
 	template <>
+	class SetD3D9ShaderParameter<int3*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(int4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int3> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = float4(static_cast<float>(v[i].x()), static_cast<float>(v[i].y()), static_cast<float>(v[i].z()), 0);
+			}
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v4[0], std::min(reg_size_, v4.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetD3D9ShaderParameter<int4*, int32_t>
 	{
 	public:
@@ -489,6 +625,38 @@ namespace
 
 	private:
 		int4* int_regs_;
+		size_t reg_size_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D9ShaderParameter<int4*, float>
+	{
+	public:
+		SetD3D9ShaderParameter(float4* float_regs, uint16_t reg_count, RenderEffectParameterPtr const & param)
+			: float_regs_(float_regs), reg_size_(reg_count * sizeof(int4)), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<int4> v;
+			param_->Value(v);
+
+			std::vector<float4> v4(v.size());
+			for (size_t i = 0; i < v.size(); ++ i)
+			{
+				v4[i] = v[i];
+			}
+
+			if (!v.empty())
+			{
+				memcpy(float_regs_, &v4[0], std::min(reg_size_, v4.size() * sizeof(float4)));
+			}
+		}
+
+	private:
+		float4* float_regs_;
 		size_t reg_size_;
 		RenderEffectParameterPtr param_;
 	};
@@ -1365,33 +1533,111 @@ namespace KlayGE
 		case REDT_int2:
 			if (param->ArraySize())
 			{
-				ret.func = SetD3D9ShaderParameter<int2*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int2*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int2*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			else
 			{
-				ret.func = SetD3D9ShaderParameter<int2, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int2, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int2, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			break;
 
 		case REDT_int3:
 			if (param->ArraySize())
 			{
-				ret.func = SetD3D9ShaderParameter<int3*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int3*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int3*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			else
 			{
-				ret.func = SetD3D9ShaderParameter<int3, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int3, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int3, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			break;
 
 		case REDT_int4:
 			if (param->ArraySize())
 			{
-				ret.func = SetD3D9ShaderParameter<int4*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int4*, int32_t>(&int_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int4*, float>(&float_registers_[p_handle.shader_type][p_handle.register_index], p_handle.register_count, param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			else
 			{
-				ret.func = SetD3D9ShaderParameter<int4, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+				switch (p_handle.register_set)
+				{
+				case D3DXRS_INT4:
+					ret.func = SetD3D9ShaderParameter<int4, int32_t>(int_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				case D3DXRS_FLOAT4:
+					ret.func = SetD3D9ShaderParameter<int4, float>(float_registers_[p_handle.shader_type][p_handle.register_index], param);
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 			break;
 

@@ -168,7 +168,6 @@ float4 SSAO(float2 tc0)
 		float4 arr_scene_depth2[2];
 		float3 ray;
 
-		[unroll]
 		for (int i = 0; i < 2; ++ i)
 		{
 			for (int j = 0; j < 4; ++ j)
@@ -210,7 +209,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	z_samples *= depth_near_far_invfar.y;
 }
 
-float4 HDAO(float2 tc0) : SV_Target
+float4 HDAO(float2 tc0)
 {
 	int num_ring_gathers = NUM_RING_4_GATHERS;
 	int num_rings = RING_4;
