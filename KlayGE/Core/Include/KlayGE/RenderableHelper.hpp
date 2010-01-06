@@ -1,8 +1,11 @@
 // RenderableHelper.hpp
 // KlayGE 一些常用的可渲染对象 头文件
 // Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2005-2009
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// RenderableSkyBox和RenderableHDRSkyBox增加了Technique() (2010.1.4)
 //
 // 3.9.0
 // 增加了RenderableHDRSkyBox (2009.5.4)
@@ -123,6 +126,7 @@ namespace KlayGE
 		{
 		}
 
+		virtual void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
 
 		void OnRenderBegin();
@@ -140,6 +144,7 @@ namespace KlayGE
 		{
 		}
 
+		virtual void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
 
 	protected:

@@ -168,14 +168,16 @@ float4 SSAO(float2 tc0)
 		float4 arr_scene_depth2[2];
 		float3 ray;
 
+		[unroll]
 		for (int i = 0; i < 2; ++ i)
 		{
+			[unroll]
 			for (int j = 0; j < 4; ++ j)
 			{
 				ray = reflect(samples[i * 4 + j].xyz, normal) * sample_scale;
-				arr_scene_depth2[0][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
+				arr_scene_depth2[0][j] = GetDepth(src_tex.SampleLevel(point_sampler, tc0 + ray.xy, 0)) - ray.z;
 				ray *= 0.5;
-				arr_scene_depth2[1][j] = GetDepth(src_tex.Sample(point_sampler, tc0 + ray.xy)) - ray.z;
+				arr_scene_depth2[1][j] = GetDepth(src_tex.SampleLevel(point_sampler, tc0 + ray.xy, 0)) - ray.z;
 			}
 
 			sky_access += (depth < arr_scene_depth2[0]);

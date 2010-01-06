@@ -228,9 +228,10 @@ namespace KlayGE
 		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
 		node_renderable_->AddToRenderQueue();
 #endif
+
+		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 		if (!octree_.empty())
 		{
-			Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
 			this->NodeVisible(0, frustum);
 		}
 
@@ -253,7 +254,15 @@ namespace KlayGE
 						max = MathLib::maximize(max, vec);
 					}
 
-					visible_marks_[i] = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
+					if (obj->Moveable())
+					{
+						Frustum::VIS const vis = frustum.Visiable(Box(min, max));
+						visible_marks_[i] = (vis != Frustum::VIS_NO);
+					}
+					else
+					{
+						visible_marks_[i] = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
+					}
 				}
 				else
 				{

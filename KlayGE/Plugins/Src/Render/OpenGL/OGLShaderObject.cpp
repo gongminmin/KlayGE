@@ -790,7 +790,32 @@ namespace KlayGE
 							}
 							else
 							{
-								shader_ss << this_token;
+								if ("[" == this_token)
+								{
+									++ beg;
+									if (("branch" == *beg)
+										|| ("flatten" == *beg)
+										|| ("forcecase" == *beg)
+										|| ("call" == *beg)
+										|| ("unroll" == *beg)
+										|| ("loop" == *beg))
+									{
+										std::string attr = *beg;
+										++ beg;
+										if (*beg != "]")
+										{
+											shader_ss << "[" << attr << *beg;
+										}
+									}
+									else
+									{
+										shader_ss << "[" << *beg;
+									}
+								}
+								else
+								{
+									shader_ss << this_token;
+								}
 							}
 						}
 					}

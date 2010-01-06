@@ -1,8 +1,11 @@
 // RenderableHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2005-2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// RenderableSkyBox和RenderableHDRSkyBox增加了Technique() (2010.1.4)
 //
 // 3.9.0
 // 增加了RenderableHDRSkyBox (2009.5.4)
@@ -292,7 +295,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		technique_ = rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("SkyBoxTec");
+		this->Technique(rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("SkyBoxTec"));
 
 		float3 xyzs[] =
 		{
@@ -314,7 +317,11 @@ namespace KlayGE
 		rl_->BindVertexStream(vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+	}
 
+	void RenderableSkyBox::Technique(RenderTechniquePtr const & tech)
+	{
+		technique_ = tech;
 		skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
 		inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 	}
@@ -338,8 +345,12 @@ namespace KlayGE
 
 	RenderableHDRSkyBox::RenderableHDRSkyBox()
 	{
-		technique_ = technique_->Effect().TechniqueByName("HDRSkyBoxTec");
+		this->Technique(technique_->Effect().TechniqueByName("HDRSkyBoxTec"));
+	}
 
+	void RenderableHDRSkyBox::Technique(RenderTechniquePtr const & tech)
+	{
+		RenderableSkyBox::Technique(tech);
 		skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
 	}
 

@@ -101,6 +101,7 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);
 	float dist = sqrt(dist_sq);
 
+	[unroll]
 	for (int i = 0; i < 6; ++ i)
 	{
 		LightProjPos[i] /= LightProjPos[i].w;
