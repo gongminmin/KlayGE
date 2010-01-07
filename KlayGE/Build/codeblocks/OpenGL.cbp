@@ -33,6 +33,7 @@
 					<Add library="glu32" />
 					<Add library="gdi32" />
 					<Add library="cg" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -66,6 +67,7 @@
 					<Add library="glu32" />
 					<Add library="gdi32" />
 					<Add library="cg" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -182,6 +184,10 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\Core\Include" />
+			<Add directory="..\..\Plugins\Include" />
+		</Compiler>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLFrameBuffer.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLGraphicsBuffer.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OpenGL\OGLMapping.hpp" />

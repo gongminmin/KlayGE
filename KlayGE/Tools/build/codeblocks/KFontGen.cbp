@@ -23,9 +23,10 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="freetype239" />
+					<Add library="freetype2311" />
 					<Add library="boost_program_options-mgw44-mt-d" />
 					<Add library="boost_thread-mgw44-mt-d" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
@@ -47,9 +48,10 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="freetype239" />
+					<Add library="freetype2311" />
 					<Add library="boost_program_options-mgw44-mt" />
 					<Add library="boost_thread-mgw44-mt" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -148,6 +150,9 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\..\Core\Include" />
+		</Compiler>
 		<Unit filename="..\..\KFontGen\KFontGen.cpp" />
 		<Unit filename="..\..\KFontGen\kdtree.hpp" />
 		<Extensions>

@@ -44,6 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -110,6 +111,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN64;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -180,6 +182,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -245,6 +248,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;KLAYGE_BUILD_DLL"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"

@@ -130,6 +130,10 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\Core\Include" />
+			<Add directory="..\..\Plugins\Include" />
+		</Compiler>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp" />
 		<Unit filename="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp" />
 		<Extensions>

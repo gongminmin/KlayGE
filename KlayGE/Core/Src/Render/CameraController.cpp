@@ -27,6 +27,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/Math.hpp>
 #include <KlayGE/Color.hpp>
 #include <KlayGE/UI.hpp>
 

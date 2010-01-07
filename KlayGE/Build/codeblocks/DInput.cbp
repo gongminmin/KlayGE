@@ -30,6 +30,7 @@
 					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="libKlayGE_Core_mgw_x86_d.a" />
 					<Add library="dinput8" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Input\&quot;' />
@@ -59,6 +60,7 @@
 					<Add library="boost_system-mgw44-mt" />
 					<Add library="libKlayGE_Core_mgw_x86.a" />
 					<Add library="dinput8" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Input\&quot;' />
@@ -68,6 +70,10 @@
 		<VirtualTargets>
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\Core\Include" />
+			<Add directory="..\..\Plugins\Include" />
+		</Compiler>
 		<Unit filename="..\..\Plugins\Include\KlayGE\DInput\DInput.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\DInput\DInputDevice.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\DInput\DInputFactory.hpp" />

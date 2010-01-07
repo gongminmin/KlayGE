@@ -28,6 +28,7 @@
 				<Linker>
 					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
@@ -56,6 +57,7 @@
 					<Add option="-s" />
 					<Add library="boost_system-mgw44-mt" />
 					<Add library="KlayGE_Core_mgw_x86" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
@@ -156,6 +158,10 @@
 			<Add alias="All_Linux" targets="Debug_linux_x86;Release_linux_x86;Debug_linux_x64;Release_linux_x64;" />
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\Core\Include" />
+			<Add directory="..\..\Plugins\Include" />
+		</Compiler>
 		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\Frustum.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTreeFactory.hpp" />

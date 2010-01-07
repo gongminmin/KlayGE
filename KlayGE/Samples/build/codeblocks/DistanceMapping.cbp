@@ -25,6 +25,7 @@
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="boost_signals-mgw44-mt-d" />
 					<Add library="boost_system-mgw44-mt-d" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
@@ -47,6 +48,7 @@
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="boost_signals-mgw44-mt" />
 					<Add library="boost_system-mgw44-mt" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -139,6 +141,9 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\..\Core\Include" />
+		</Compiler>
 		<Unit filename="..\..\media\DistanceMapping\DistanceMapping.fxml" />
 		<Unit filename="..\..\src\DistanceMapping\DistanceMapping.cpp" />
 		<Unit filename="..\..\src\DistanceMapping\DistanceMapping.hpp" />

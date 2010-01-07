@@ -25,7 +25,9 @@
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="python31_d" />
+					<Add library="glloader_x86_d" />
 					<Add library="opengl32" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
@@ -48,7 +50,9 @@
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="boost_system-mgw44-mt" />
 					<Add library="python31" />
+					<Add library="glloader_x86" />
 					<Add library="opengl32" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -148,6 +152,9 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\..\Core\Include" />
+		</Compiler>
 		<Unit filename="..\..\GLCompatibility\GLCompatibility.cpp" />
 		<Unit filename="..\..\GLCompatibility\GLCompatibility.py" />
 		<Unit filename="..\..\GLCompatibility\report.xsl" />

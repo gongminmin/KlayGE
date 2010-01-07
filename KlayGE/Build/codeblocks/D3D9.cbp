@@ -32,6 +32,7 @@
 					<Add library="d3d9" />
 					<Add library="d3dx9d" />
 					<Add library="gdi32" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -63,6 +64,7 @@
 					<Add library="d3d9" />
 					<Add library="d3dx9" />
 					<Add library="gdi32" />
+					<Add directory="..\..\lib\win\x86" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
@@ -72,6 +74,10 @@
 		<VirtualTargets>
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\Core\Include" />
+			<Add directory="..\..\Plugins\Include" />
+		</Compiler>
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9Adapter.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9AdapterList.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D9\D3D9FrameBuffer.hpp" />

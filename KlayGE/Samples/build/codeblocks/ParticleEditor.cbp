@@ -26,6 +26,7 @@
 					<Add library="boost_signals-mgw44-mt-d" />
 					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="comdlg32" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Release_win_x86">
@@ -49,6 +50,7 @@
 					<Add library="boost_signals-mgw44-mt" />
 					<Add library="boost_system-mgw44-mt" />
 					<Add library="comdlg32" />
+					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -141,6 +143,9 @@
 		<VirtualTargets>
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
+		<Compiler>
+			<Add directory="..\..\..\Core\Include" />
+		</Compiler>
 		<Unit filename="..\..\media\ParticleEditor\ParticleEditor.fxml" />
 		<Unit filename="..\..\media\ParticleEditor\ParticleEditor.uiml" />
 		<Unit filename="..\..\src\ParticleEditor\ParticleEditor.cpp" />

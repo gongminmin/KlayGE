@@ -44,6 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OAL_AE_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -67,6 +68,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_vc_x86_d.dll"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/Win32"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -119,6 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN64;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OAL_AE_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -142,6 +145,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_vc_x64_d.dll"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="../../lib/x64"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -198,6 +202,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OAL_AE_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -219,6 +224,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_vc_x86.dll"
+				AdditionalLibraryDirectories="../../lib/Win32"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -274,6 +280,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
+				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
 				PreprocessorDefinitions="WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OAL_AE_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -295,6 +302,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/KlayGE_AudioEngine_OpenAL_vc_x64.dll"
+				AdditionalLibraryDirectories="../../lib/x64"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

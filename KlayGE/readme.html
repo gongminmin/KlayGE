@@ -29,17 +29,19 @@
 <p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="installation">安装</a></h2>
+<p>从KlayGE 3.10.0开始，工程文件里都设置好了include和lib路径，解压后打开Build目录下的相应工程文件就可以直接编译KlayGE本身。如果需要使用本引擎开发自己的程序，就需要：</p>
 <ol>
-	<li>把KlayGE.7z解压缩到一个目录，比如说 F:\KlayGE。</li>
-	<li>执行KlayGE目录下的env_vars.py。该脚本设置了KLAYGE_HOME环境变量，并把bin目录添加到系统PATH环境变量中。</li>
+	<li>执行KlayGE目录下的env_vars.py。该脚本设置了KLAYGE_HOME环境变量，并把bin目录添加到系统PATH环境变量中。如果没有安装pywin32，就可能需要手工修改环境变量，或重启。</li>
 	<li>设置路径。这里拿Visual Studio 2008举例，其他环境请参考它们的帮助文件。
 		<ol>
-			<li>打开“Tools”-&gt;“Options”-&gt;“Projects and Solutions”-&gt;&quot;VC++ Directories&quot;，在“Show directories for:”下拉框中选择“Include files”，在下面添加F:\KlayGE\Core\Include和F:\KlayGE\Plugins\Include。</li>
-			<li>在“Show directories for:”下拉框中选择&quot;Library files&quot;，在下面添加F:\KlayGE\Lib\Win32（如果要用x64的版本，就把Win32换成x64）。</li>
+			<li>打开“Tools”-&gt;“Options”-&gt;“Projects and Solutions”-&gt;&quot;VC++ Directories&quot;，在“Show directories for:”下拉框中选择“Include files”，在下面添加$(KLAYGE_HOME)\Core\Include和$(KLAYGE_HOME)\Plugins\Include。</li>
+			<li>在“Show directories for:”下拉框中选择&quot;Library files&quot;，在下面添加$(KLAYGE_HOME)\lib\Win32（如果要用x64的版本，就把Win32换成x64）。</li>
 			<li>点“确定”按钮，建议关闭VS 2008 IDE以保存设置。</li>
 		</ol>
 	</li>
 </ol>
+<h4>MinGW用户请注意</h4>
+<p>由于新版本Windows SDK，DirectX SDK和MinGW存在一些不兼容，在默认情况下编译DSound插件的时候，编译器会报告找不到sal.h。这时候需要把VC的sal.h拷到MinGW/include下。然后打开MinGW/lib/gcc/mingw32/4.4.1/include/stddef.h，找到"#define NULL __null"，改成"#define NULL 0"。因为sal.h会把__null定义成别的东西。</p>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="third_part">第三方库和工具</a></h2>
@@ -389,8 +391,8 @@
 </pre>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<h2><a id="compiler">支持的编译器</a></h2>
-<p>下列编译器是正式支持的：</p>
+<h2><a id="compiler">经过测试的编译器</a></h2>
+<p>下列编译器是经过测试的：</p>
 <ul>
 	<li>Windows平台上的9.0（Visual Sudio .NET 2008 SP1）。</li>
 	<li>Windows平台上的MinGW GCC 4.4。</li>
@@ -404,6 +406,6 @@
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<p>最后更新：2009-12-22</p>
+<p>最后更新：2010-1-7</p>
 </body>
 </html>
