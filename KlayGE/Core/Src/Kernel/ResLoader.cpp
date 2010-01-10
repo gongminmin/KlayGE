@@ -20,6 +20,11 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
+#if defined KLAYGE_PLATFORM_WINDOWS
+#include <windows.h>
+#elif defined KLAYGE_PLATFORM_LINUX
+#endif
+
 #include <KlayGE/ResLoader.hpp>
 
 namespace KlayGE
@@ -32,6 +37,42 @@ namespace KlayGE
 
 	ResLoader::ResLoader()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS
+		char buf[MAX_PATH];
+		GetModuleFileNameA(NULL, buf, sizeof(buf));
+		exe_path_ = buf;
+		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+#elif defined KLAYGE_PLATFORM_LINUX
+		{
+	　　	char line[1024] = { 0 };
+			void* symbol = static_cast<void*>("");
+			FILE* fp = fopen("/proc/self/maps", "r");
+			if (fp != NULL)
+			{
+				while (!feof(fp))
+				{
+					unsigned long start, end;
+					if (!fgets(sLine, sizeof(sLine), fp))
+					{
+						continue;
+					}
+					if (!strstr (sLine, " r-xp ") || !strchr (sLine, '/'))
+					{
+						continue;
+					}
+
+					sscanf (line, "%lx-%lx ", &start, &end);
+					if ((symbol >= static_cast<void*>(start)) && (symbol < static_cast<void*>(end)))
+					{
+						exe_path_ = strchr(line, '/');
+						exe_path_ = exe_path_.substr(0, exe_path_.rfind("/"));
+					}
+				}
+				fclose(fp);
+			}
+　　	}
+#endif
+
 		pathes_.push_back("");
 
 		this->AddPath("");
@@ -48,7 +89,16 @@ namespace KlayGE
 		boost::filesystem::path new_path(path);
 		if (!new_path.is_complete())
 		{
-			new_path = boost::filesystem::current_path() / new_path;
+			boost::filesystem::path full_path = exe_path_ / new_path;
+			if (!boost::filesystem::exists(full_path))
+			{
+				full_path = boost::filesystem::current_path() / new_path;
+				if (!boost::filesystem::exists(full_path))
+				{
+					return;
+				}
+			}
+			new_path = full_path;
 		}
 		std::string path_str = new_path.string();
 		if (path_str[path_str.length() - 1] != '/')

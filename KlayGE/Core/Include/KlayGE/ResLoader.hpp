@@ -100,6 +100,7 @@ namespace KlayGE
 	private:
 		ResLoader();
 
+		std::string exe_path_;
 		std::vector<std::string> pathes_;
 	};
 }
