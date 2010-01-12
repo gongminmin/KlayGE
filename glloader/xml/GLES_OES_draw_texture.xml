@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_draw_texture">
+<gl_extension name="GLES_OES_draw_texture" reg_no="7">
 	<tokens>
 		<token name="GL_TEXTURE_CROP_RECT_OES" value="0x8B9D"/>
 	</tokens>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_point_size_array">
+<gl_extension name="GLES_OES_point_size_array" reg_no="14">
 	<tokens>
 		<token name="GL_POINT_SIZE_ARRAY_OES" value="0x8B9C"/>
 		<token name="GL_POINT_SIZE_ARRAY_TYPE_OES" value="0x898A"/>

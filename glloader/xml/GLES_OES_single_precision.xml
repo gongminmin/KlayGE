@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_single_precision" reg_no="293">
+<gl_extension name="GL_OES_single_precision" reg_no="18">
 	<functions>
 		<function name="glDepthRangefOES" return="void">
 			<params>

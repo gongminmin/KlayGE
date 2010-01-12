@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_matrix_get">
+<gl_extension name="GLES_OES_matrix_get" reg_no="11">
 	<tokens>
 		<token name="GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES" value="0x898D"/>
 		<token name="GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES" value="0x898E"/>

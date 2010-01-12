@@ -21,6 +21,10 @@
 	#include <Carbon/Carbon.h>
 #endif
 
+#ifdef GLLOADER_GLES
+	#include <EGL/egl.h>
+#endif
+
 #include <string>
 #include <vector>
 
@@ -29,6 +33,12 @@
 
 #ifdef GLLOADER_DEBUG
 #include <iostream>
+#endif
+
+#ifdef GLLOADER_GLES
+#ifdef _MSC_VER
+	#pragma comment(lib, "libEGL.lib")
+#endif
 #endif
 
 #include "utils.h"
@@ -165,6 +175,7 @@ namespace glloader
 			if (major > 0)
 			{
 				std::vector<std::string> gl_exts;
+#ifndef GLLOADER_GLES
 				if (major >= 3)
 				{
 					LOAD_FUNC1(glGetStringi);
@@ -177,6 +188,7 @@ namespace glloader
 					}
 				}
 				else
+#endif
 				{
 					GLubyte const * str = ::glGetString(GL_EXTENSIONS);
 					if (str != NULL)
@@ -330,7 +342,9 @@ void glloader_init()
 {
 	glloader::gl_features_extractor::delete_instance();
 
+#ifdef GLLOADER_GL
 	gl_init();
+#endif
 
 #ifdef GLLOADER_WGL
 	wgl_init();
@@ -339,12 +353,19 @@ void glloader_init()
 #ifdef GLLOADER_GLX
 	glx_init();
 #endif
+
+#ifdef GLLOADER_GLES
+	gles_init();
+#endif
 }
 
 void* glloader_get_gl_proc_address(const char* name)
 {
 	void* ret;
 
+#ifdef GLLOADER_GLES
+	ret = (void*)(::eglGetProcAddress(name));
+#endif
 #ifdef GLLOADER_WGL
 	ret = (void*)(::wglGetProcAddress(name));
 #endif

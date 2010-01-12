@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_stencil4">
+<gl_extension name="GLES_OES_stencil4" reg_no="32">
 	<tokens>
 		<token name="GL_STENCIL_INDEX4_OES" value="0x8D47"/>
 	</tokens>

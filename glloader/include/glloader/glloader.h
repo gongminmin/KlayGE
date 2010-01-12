@@ -65,9 +65,13 @@
 	#define GLLOADER_GLX
 #endif
 
+#ifndef GLLOADER_GLES_SUPPORT
 #define GLLOADER_GL
+#else
+#define GLLOADER_GLES
+#endif
 
-#ifdef GLLOADER_WGL
+#if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -76,6 +80,12 @@
 
 #if defined(__gl_h_) || defined(__GL_H_)
 #error GLLoader.h should be included before gl.h
+#endif
+#if defined(__gl2_h_) || defined(__GL2_H_)
+#error GLLoader.h should be included before gl2.h
+#endif
+#if defined(__gl3_h_) || defined(__GL3_H_)
+#error GLLoader.h should be included before gl3.h
 #endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
 #error GLLoader.h should be included before glext.h
@@ -127,9 +137,13 @@
 	#define GLLOADER_API
 #endif // GLLOADER_HAS_DECLSPEC
 
-#ifdef GLLOADER_GL
+#if defined(GLLOADER_GL) || defined(GLLOADER_GLES)
 #define __gl_h_
 #define __GL_H__
+#define __gl2_h_
+#define __GL2_H_
+#define __gl3_h_
+#define __GL3_H_
 #define __glext_h_
 #define __GLEXT_H_
 #define __gl_ATI_h_
@@ -251,6 +265,10 @@ typedef XID GLXDrawable;
 typedef XID GLXContextID;
 
 #include <glloader/glloader_glx.h>
+#endif
+
+#ifdef GLLOADER_GLES
+#include <glloader/glloader_gles.h>
 #endif
 
 #endif		/* _GLLOADER_H */

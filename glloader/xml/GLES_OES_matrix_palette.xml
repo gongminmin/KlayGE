@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_matrix_palette">
+<gl_extension name="GLES_OES_matrix_palette" reg_no="12">
 	<tokens>
 		<token name="GL_MAX_VERTEX_UNITS_OES" value="0x86A4"/>
 		<token name="GL_MAX_PALETTE_MATRICES_OES" value="0x8842"/>

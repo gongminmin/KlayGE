@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_compressed_paletted_texture" reg_no="294">
+<gl_extension name="GLES_OES_compressed_paletted_texture" reg_no="6">
 	<tokens>
 		<token name="GL_PALETTE4_RGB8_OES" value="0x8B90"/>
 		<token name="GL_PALETTE4_RGBA8_OES" value="0x8B91"/>

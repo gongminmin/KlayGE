@@ -333,6 +333,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\glloader_gles.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\glloader_glx.c"
 				>
 			</File>
@@ -364,6 +368,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\glloader\glloader_gl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\glloader\glloader_gles.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_compressed_ETC1_RGB8_texture">
+<gl_extension name="GLES_OES_compressed_ETC1_RGB8_texture" reg_no="5">
 	<tokens>
 		<token name="GL_ETC1_RGB8_OES" value="0x8D64"/>
 	</tokens>

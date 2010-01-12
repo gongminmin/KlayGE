@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_point_sprite">
+<gl_extension name="GLES_OES_point_sprite" reg_no="15">
 	<tokens>
 		<token name="GL_POINT_SPRITE_OES" value="0x8861"/>
 		<token name="GL_COORD_REPLACE_OES" value="0x8862"/>

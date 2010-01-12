@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_vertex_half_float">
+<gl_extension name="GLES_OES_vertex_half_float" reg_no="38">
 	<tokens>
 		<token name="GL_HALF_FLOAT_OES" value="0x8D61"/>
 	</tokens>

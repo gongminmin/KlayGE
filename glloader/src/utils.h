@@ -15,8 +15,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-#ifndef _UTILS_HPP
-#define _UTILS_HPP
+#ifndef _UTILS_H
+#define _UTILS_H
 
 #define LOAD_FUNC1(f) f = (f##FUNC)(glloader_get_gl_proc_address(#f));
 #define LOAD_FUNC2(f, name) f = (f##FUNC)(glloader_get_gl_proc_address(#name));
@@ -32,9 +32,10 @@ void promote_high(char const * high_name);
 void gl_init();
 void wgl_init();
 void glx_init();
+void gles_init();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif			// _UTILS_HPP
+#endif			// _UTILS_H

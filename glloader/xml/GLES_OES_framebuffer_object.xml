@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_framebuffer_object">
+<gl_extension name="GLES_OES_framebuffer_object" reg_no="10">
 	<tokens>
 		<token name="GL_FRAMEBUFFER_OES" value="0x8D40"/>
 		<token name="GL_RENDERBUFFER_OES" value="0x8D41"/>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_shader_binary">
+<gl_extension name="GLES_OES_shader_binary">
 	<tokens>
 		<token name="GL_PLATFORM_BINARY_OES" value="0x8D63"/>
 	</tokens>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_shader_source">
+<gl_extension name="GLES_OES_shader_source">
 	<functions>
 		<function name="glReleaseShaderCompilerOES" return="void"/>
 		<function name="glGetShaderPrecisionFormatOES" return="void">

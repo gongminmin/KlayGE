@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_OES_byte_coordinates" reg_no="291">
+<gl_extension name="GLES_OES_byte_coordinates" reg_no="4">
 	<functions>
 		<function name="glVertex2bOES" return="void">
 			<params>
