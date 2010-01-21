@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_blend_subtract" reg_no="3">
+	<tokens>
+		<token name="GL_FUNC_ADD_OES" value="0x8006"/>
+		<token name="GL_FUNC_SUBTRACT_OES" value="0x800A"/>
+		<token name="GL_FUNC_REVERSE_SUBTRACT_OES" value="0x800B"/>
+		<token name="GL_BLEND_EQUATION_OES" value="0x8009"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendEquationOES" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

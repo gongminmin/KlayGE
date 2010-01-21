@@ -21,10 +21,6 @@
 	#include <Carbon/Carbon.h>
 #endif
 
-#ifdef GLLOADER_GLES
-	#include <EGL/egl.h>
-#endif
-
 #include <string>
 #include <vector>
 

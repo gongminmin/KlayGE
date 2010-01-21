@@ -1,0 +1,659 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_fixed_point" reg_no="9">
+	<tokens>
+		<token name="GL_FIXED_OES" value="0x140C"/>
+	</tokens>
+
+	<functions>
+		<function name="glVertex2xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+			</params>
+		</function>
+		<function name="glVertex3xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glVertex4xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+				<param type="GLfixed" name="w"/>
+			</params>
+		</function>
+		<function name="glVertex2xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex3xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glVertex4xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glNormal3xOES" return="void">
+			<params>
+				<param type="GLfixed" name="nx"/>
+				<param type="GLfixed" name="ny"/>
+				<param type="GLfixed" name="nz"/>
+			</params>
+		</function>
+		<function name="glNormal3xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glTexCoord1xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+			</params>
+		</function>
+		<function name="glTexCoord2xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+			</params>
+		</function>
+		<function name="glTexCoord3xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glTexCoord4xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+				<param type="GLfixed" name="w"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord1xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="s"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord2xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="s"/>
+				<param type="GLfixed" name="t"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord3xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="s"/>
+				<param type="GLfixed" name="t"/>
+				<param type="GLfixed" name="r"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord4xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="s"/>
+				<param type="GLfixed" name="t"/>
+				<param type="GLfixed" name="r"/>
+				<param type="GLfixed" name="q"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord1xvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord2xvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord3xvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoord4xvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor3xOES" return="void">
+			<params>
+				<param type="GLfixed" name="red"/>
+				<param type="GLfixed" name="green"/>
+				<param type="GLfixed" name="blue"/>
+			</params>
+		</function>
+		<function name="glColor4xOES" return="void">
+			<params>
+				<param type="GLfixed" name="red"/>
+				<param type="GLfixed" name="green"/>
+				<param type="GLfixed" name="blue"/>
+				<param type="GLfixed" name="alpha"/>
+			</params>
+		</function>
+		<function name="glColor3xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glColor4xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glIndexxOES" return="void">
+			<params>
+				<param type="GLfixed" name="c"/>
+			</params>
+		</function>
+		<function name="glIndexxvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="c"/>
+			</params>
+		</function>
+		<function name="glRectxOES" return="void">
+			<params>
+				<param type="GLfixed" name="x1"/>
+				<param type="GLfixed" name="y1"/>
+				<param type="GLfixed" name="x2"/>
+				<param type="GLfixed" name="y2"/>
+			</params>
+		</function>
+		<function name="glRectxvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v1"/>
+				<param type="const GLfixed*" name="v2"/>
+			</params>
+		</function>
+		<function name="glDepthRangexOES" return="void">
+			<params>
+				<param type="GLclampx" name="zNear"/>
+				<param type="GLclampx" name="zFar"/>
+			</params>
+		</function>
+		<function name="glLoadMatrixxOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultMatrixxOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="m"/>
+			</params>
+		</function>
+		<function name="glLoadTransposeMatrixxOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="m"/>
+			</params>
+		</function>
+		<function name="glMultTransposeMatrixxOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="m"/>
+			</params>
+		</function>
+		<function name="glRotatexOES" return="void">
+			<params>
+				<param type="GLfixed" name="angle"/>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glScalexOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glTranslatexOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glFrustumxOES" return="void">
+			<params>
+				<param type="GLfixed" name="left"/>
+				<param type="GLfixed" name="right"/>
+				<param type="GLfixed" name="bottom"/>
+				<param type="GLfixed" name="top"/>
+				<param type="GLfixed" name="zNear"/>
+				<param type="GLfixed" name="zFar"/>
+			</params>
+		</function>
+		<function name="glOrthoxOES" return="void">
+			<params>
+				<param type="GLfixed" name="left"/>
+				<param type="GLfixed" name="right"/>
+				<param type="GLfixed" name="bottom"/>
+				<param type="GLfixed" name="top"/>
+				<param type="GLfixed" name="zNear"/>
+				<param type="GLfixed" name="zFar"/>
+			</params>
+		</function>
+		<function name="glTexGenxOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGenxvOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGenxvOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glClipPlanexOES" return="void">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="const GLfixed*" name="equation"/>
+			</params>
+		</function>
+		<function name="glGetClipPlanexOES" return="void">
+			<params>
+				<param type="GLenum" name="plane"/>
+				<param type="GLfixed*" name="equation"/>
+			</params>
+		</function>
+		<function name="glRasterPos2xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+			</params>
+		</function>
+		<function name="glRasterPos3xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+			</params>
+		</function>
+		<function name="glRasterPos4xOES" return="void">
+			<params>
+				<param type="GLfixed" name="x"/>
+				<param type="GLfixed" name="y"/>
+				<param type="GLfixed" name="z"/>
+				<param type="GLfixed" name="w"/>
+			</params>
+		</function>
+		<function name="glRasterPos2xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos3xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glRasterPos4xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glMaterialxOES" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glMaterialxvOES" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMaterialxOES" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightxOES" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glLightxvOES" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetLightxvOES" return="void">
+			<params>
+				<param type="GLenum" name="light"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glLightModelxOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glLightModelxvOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glPointSizexOES" return="void">
+			<params>
+				<param type="GLfixed" name="size"/>
+			</params>
+		</function>
+		<function name="glPointParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glLineWidthxOES" return="void">
+			<params>
+				<param type="GLfixed" name="width"/>
+			</params>
+		</function>
+		<function name="glPolygonOffsetxOES" return="void">
+			<params>
+				<param type="GLfixed" name="factor"/>
+				<param type="GLfixed" name="units"/>
+			</params>
+		</function>
+		<function name="glPixelStorexOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelTransferxOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glPixelMapxOES" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="mapsize"/>
+				<param type="const GLfixed*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetPixelMapxvOES" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLfixed*" name="values"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameterxOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="params"/>
+			</params>
+		</function>
+		<function name="glConvolutionParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetConvolutionParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetHistogramParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glPixelZoomxOES" return="void">
+			<params>
+				<param type="GLfixed" name="xfactor"/>
+				<param type="GLfixed" name="yfactor"/>
+			</params>
+		</function>
+		<function name="glBitmapxOES" return="void">
+			<params>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLfixed" name="xorig"/>
+				<param type="GLfixed" name="yorig"/>
+				<param type="GLfixed" name="xmove"/>
+				<param type="GLfixed" name="ymove"/>
+				<param type="const GLubyte*" name="bitmap"/>
+			</params>
+		</function>
+		<function name="glTexParameterxOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glGetTexParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexLevelParameterxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glPrioritizeTexturesxOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLclampx*" name="priorities"/>
+			</params>
+		</function>
+		<function name="glTexEnvxOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glGetTexEnvxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glFogxOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed" name="param"/>
+			</params>
+		</function>
+		<function name="glFogxvOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfixed*" name="params"/>
+			</params>
+		</function>
+		<function name="glSampleCoveragexOES" return="void">
+			<params>
+				<param type="GLclampx" name="value"/>
+				<param type="GLboolean" name="invert"/>
+			</params>
+		</function>
+		<function name="glAlphaFuncxOES" return="void">
+			<params>
+				<param type="GLenum" name="func"/>
+				<param type="GLclampx" name="ref"/>
+			</params>
+		</function>
+		<function name="glBlendColorxOES" return="void">
+			<params>
+				<param type="GLclampx" name="red"/>
+				<param type="GLclampx" name="green"/>
+				<param type="GLclampx" name="blue"/>
+				<param type="GLclampx" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearColorxOES" return="void">
+			<params>
+				<param type="GLclampx" name="red"/>
+				<param type="GLclampx" name="green"/>
+				<param type="GLclampx" name="blue"/>
+				<param type="GLclampx" name="alpha"/>
+			</params>
+		</function>
+		<function name="glClearDepthxOES" return="void">
+			<params>
+				<param type="GLclampx" name="depth"/>
+			</params>
+		</function>
+		<function name="glClearAccumxOES" return="void">
+			<params>
+				<param type="GLclampx" name="red"/>
+				<param type="GLclampx" name="green"/>
+				<param type="GLclampx" name="blue"/>
+				<param type="GLclampx" name="alpha"/>
+			</params>
+		</function>
+		<function name="glAccumxOES" return="void">
+			<params>
+				<param type="GLenum" name="op"/>
+				<param type="GLfixed" name="value"/>
+			</params>
+		</function>
+		<function name="glMap1xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="u1"/>
+				<param type="GLfixed" name="u2"/>
+				<param type="GLint" name="stride"/>
+				<param type="GLint" name="order"/>
+				<param type="const GLfixed*" name="points"/>
+			</params>
+		</function>
+		<function name="glMap2xOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLfixed" name="u1"/>
+				<param type="GLfixed" name="u2"/>
+				<param type="GLint" name="ustride"/>
+				<param type="GLint" name="uorder"/>
+				<param type="GLfixed" name="v1"/>
+				<param type="GLfixed" name="v2"/>
+				<param type="GLint" name="vstride"/>
+				<param type="GLint" name="vorder"/>
+				<param type="const GLfixed*" name="points"/>
+			</params>
+		</function>
+		<function name="glMapGrid1xOES" return="void">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfixed" name="u1"/>
+				<param type="GLfixed" name="u2"/>
+			</params>
+		</function>
+		<function name="glMapGrid2xOES" return="void">
+			<params>
+				<param type="GLint" name="un"/>
+				<param type="GLfixed" name="u1"/>
+				<param type="GLfixed" name="u2"/>
+				<param type="GLint" name="vn"/>
+				<param type="GLfixed" name="v1"/>
+				<param type="GLfixed" name="v2"/>
+			</params>
+		</function>
+		<function name="glGetMapxvOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLfixed*" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1xOES" return="void">
+			<params>
+				<param type="GLfixed" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord1xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="u"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2xOES" return="void">
+			<params>
+				<param type="GLfixed" name="u"/>
+				<param type="GLfixed" name="v"/>
+			</params>
+		</function>
+		<function name="glEvalCoord2xvOES" return="void">
+			<params>
+				<param type="const GLfixed*" name="u"/>
+			</params>
+		</function>
+		<function name="glFeedbackBufferxOES" return="void">
+			<params>
+				<param type="GLsizei" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLfixed*" name="buffer"/>
+			</params>
+		</function>
+		<function name="glPassThroughxOES" return="void">
+			<params>
+				<param type="GLfixed" name="token"/>
+			</params>
+		</function>
+		<function name="glGetFixedvOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfixed*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,10 +1,6 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GLES_VERSION_1_1">
-	<typedefs>
-		<typedef type="void" synonym="(*_GLfuncptr)()"/>
-	</typedefs>
-
 	<tokens>
 		<token name="GL_CLIP_PLANE0" value="0x3000"/>
 		<token name="GL_CLIP_PLANE1" value="0x3001"/>

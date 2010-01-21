@@ -1,0 +1,333 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_VERSION_1_4">
+	<typedefs>
+		<typedef type="unsigned int" synonym="EGLBoolean"/>
+		<typedef type="unsigned int" synonym="EGLenum"/>
+		<typedef type="void*" synonym="EGLConfig"/>
+		<typedef type="void*" synonym="EGLContext"/>
+		<typedef type="void*" synonym="EGLDisplay"/>
+		<typedef type="void*" synonym="EGLSurface"/>
+		<typedef type="void*" synonym="EGLClientBuffer"/>
+		<typedef type="void" synonym="(*__eglMustCastToProperFunctionPointerType)(void)"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_FALSE" value="0"/>
+		<token name="EGL_TRUE" value="1"/>
+		<token name="EGL_DEFAULT_DISPLAY" value="((EGLNativeDisplayType)0)"/>
+		<token name="EGL_NO_CONTEXT" value="((EGLContext)0)"/>
+		<token name="EGL_NO_DISPLAY" value="((EGLDisplay)0)"/>
+		<token name="EGL_NO_SURFACE" value="((EGLSurface)0)"/>
+		<token name="EGL_DONT_CARE" value="-1"/>
+		<token name="EGL_SUCCESS" value="0x3000"/>
+		<token name="EGL_NOT_INITIALIZED" value="0x3001"/>
+		<token name="EGL_BAD_ACCESS" value="0x3002"/>
+		<token name="EGL_BAD_ATTRIBUTE" value="0x3004"/>
+		<token name="EGL_BAD_CONFIG" value="0x3005"/>
+		<token name="EGL_BAD_CONTEXT" value="0x3006"/>
+		<token name="EGL_BAD_CURRENT_SURFACE" value="0x3007"/>
+		<token name="EGL_BAD_DISPLAY" value="0x3008"/>
+		<token name="EGL_BAD_MATCH" value="0x3009"/>
+		<token name="EGL_BAD_NATIVE_PIXMAP" value="0x300A"/>
+		<token name="EGL_BAD_NATIVE_WINDOW" value="0x300B"/>
+		<token name="EGL_BAD_PARAMETER" value="0x300C"/>
+		<token name="EGL_BAD_SURFACE" value="0x300D"/>
+		<token name="EGL_CONTEXT_LOST" value="0x300E"/>
+		<token name="EGL_BUFFER_SIZE" value="0x3020"/>
+		<token name="EGL_ALPHA_SIZE" value="0x3021"/>
+		<token name="EGL_BLUE_SIZE" value="0x3022"/>
+		<token name="EGL_GREEN_SIZE" value="0x3023"/>
+		<token name="EGL_RED_SIZE" value="0x3024"/>
+		<token name="EGL_DEPTH_SIZE" value="0x3025"/>
+		<token name="EGL_STENCIL_SIZE" value="0x3026"/>
+		<token name="EGL_CONFIG_CAVEAT" value="0x3027"/>
+		<token name="EGL_CONFIG_ID" value="0x3028"/>
+		<token name="EGL_LEVEL" value="0x3029"/>
+		<token name="EGL_MAX_PBUFFER_HEIGHT" value="0x302A"/>
+		<token name="EGL_MAX_PBUFFER_PIXELS" value="0x302B"/>
+		<token name="EGL_MAX_PBUFFER_WIDTH" value="0x302C"/>
+		<token name="EGL_NATIVE_RENDERABLE" value="0x302D"/>
+		<token name="EGL_NATIVE_VISUAL_ID" value="0x302E"/>
+		<token name="EGL_NATIVE_VISUAL_TYPE" value="0x302F"/>
+		<token name="EGL_SAMPLES" value="0x3031"/>
+		<token name="EGL_SAMPLE_BUFFERS" value="0x3032"/>
+		<token name="EGL_SURFACE_TYPE" value="0x3033"/>
+		<token name="EGL_TRANSPARENT_TYPE" value="0x3034"/>
+		<token name="EGL_TRANSPARENT_BLUE_VALUE" value="0x3035"/>
+		<token name="EGL_TRANSPARENT_GREEN_VALUE" value="0x3036"/>
+		<token name="EGL_TRANSPARENT_RED_VALUE" value="0x3037"/>
+		<token name="EGL_NONE" value="0x3038"/>
+		<token name="EGL_BIND_TO_TEXTURE_RGB" value="0x3039"/>
+		<token name="EGL_BIND_TO_TEXTURE_RGBA" value="0x303A"/>
+		<token name="EGL_MIN_SWAP_INTERVAL" value="0x303B"/>
+		<token name="EGL_MAX_SWAP_INTERVAL" value="0x303C"/>
+		<token name="EGL_LUMINANCE_SIZE" value="0x303D"/>
+		<token name="EGL_ALPHA_MASK_SIZE" value="0x303E"/>
+		<token name="EGL_COLOR_BUFFER_TYPE" value="0x303F"/>
+		<token name="EGL_RENDERABLE_TYPE" value="0x3040"/>
+		<token name="EGL_MATCH_NATIVE_PIXMAP" value="0x3041"/>
+		<token name="EGL_CONFORMANT" value="0x3042"/>
+		<token name="EGL_SLOW_CONFIG" value="0x3050"/>
+		<token name="EGL_NON_CONFORMANT_CONFIG" value="0x3051"/>
+		<token name="EGL_TRANSPARENT_RGB" value="0x3052"/>
+		<token name="EGL_RGB_BUFFER" value="0x308E"/>
+		<token name="EGL_LUMINANCE_BUFFER" value="0x308F"/>
+		<token name="EGL_NO_TEXTURE" value="0x305C"/>
+		<token name="EGL_TEXTURE_RGB" value="0x305D"/>
+		<token name="EGL_TEXTURE_RGBA" value="0x305E"/>
+		<token name="EGL_TEXTURE_2D" value="0x305F"/>
+		<token name="EGL_PBUFFER_BIT" value="0x0001"/>
+		<token name="EGL_PIXMAP_BIT" value="0x0002"/>
+		<token name="EGL_WINDOW_BIT" value="0x0004"/>
+		<token name="EGL_VG_COLORSPACE_LINEAR_BIT" value="0x0020"/>
+		<token name="EGL_VG_ALPHA_FORMAT_PRE_BIT" value="0x0040"/>
+		<token name="EGL_MULTISAMPLE_RESOLVE_BOX_BIT" value="0x0200"/>
+		<token name="EGL_SWAP_BEHAVIOR_PRESERVED_BIT" value="0x0400"/>
+		<token name="EGL_OPENGL_ES_BIT" value="0x0001"/>
+		<token name="EGL_OPENVG_BIT" value="0x0002"/>
+		<token name="EGL_OPENGL_ES2_BIT" value="0x0004"/>
+		<token name="EGL_OPENGL_BIT" value="0x0008"/>
+		<token name="EGL_VENDOR" value="0x3053"/>
+		<token name="EGL_VERSION" value="0x3054"/>
+		<token name="EGL_EXTENSIONS" value="0x3055"/>
+		<token name="EGL_CLIENT_APIS" value="0x308D"/>
+		<token name="EGL_HEIGHT" value="0x3056"/>
+		<token name="EGL_WIDTH" value="0x3057"/>
+		<token name="EGL_LARGEST_PBUFFER" value="0x3058"/>
+		<token name="EGL_TEXTURE_FORMAT" value="0x3080"/>
+		<token name="EGL_TEXTURE_TARGET" value="0x3081"/>
+		<token name="EGL_MIPMAP_TEXTURE" value="0x3082"/>
+		<token name="EGL_MIPMAP_LEVEL" value="0x3083"/>
+		<token name="EGL_RENDER_BUFFER" value="0x3086"/>
+		<token name="EGL_VG_COLORSPACE" value="0x3087"/>
+		<token name="EGL_VG_ALPHA_FORMAT" value="0x3088"/>
+		<token name="EGL_HORIZONTAL_RESOLUTION" value="0x3090"/>
+		<token name="EGL_VERTICAL_RESOLUTION" value="0x3091"/>
+		<token name="EGL_PIXEL_ASPECT_RATIO" value="0x3092"/>
+		<token name="EGL_SWAP_BEHAVIOR" value="0x3093"/>
+		<token name="EGL_MULTISAMPLE_RESOLVE" value="0x3099"/>
+		<token name="EGL_BACK_BUFFER" value="0x3084"/>
+		<token name="EGL_SINGLE_BUFFER" value="0x3085"/>
+		<token name="EGL_VG_COLORSPACE_sRGB" value="0x3089"/>
+		<token name="EGL_VG_COLORSPACE_LINEAR" value="0x308A"/>
+		<token name="EGL_VG_ALPHA_FORMAT_NONPRE" value="0x308B"/>
+		<token name="EGL_VG_ALPHA_FORMAT_PRE" value="0x308C"/>
+		<token name="EGL_DISPLAY_SCALING" value="10000"/>
+		<token name="EGL_UNKNOWN" value="-1"/>
+		<token name="EGL_BUFFER_PRESERVED" value="0x3094"/>
+		<token name="EGL_BUFFER_DESTROYED" value="0x3095"/>
+		<token name="EGL_OPENVG_IMAGE" value="0x3096"/>
+		<token name="EGL_CONTEXT_CLIENT_TYPE" value="0x3097"/>
+		<token name="EGL_CONTEXT_CLIENT_VERSION" value="0x3098"/>
+		<token name="EGL_MULTISAMPLE_RESOLVE_DEFAULT" value="0x309A"/>
+		<token name="EGL_MULTISAMPLE_RESOLVE_BOX" value="0x309B"/>
+		<token name="EGL_OPENGL_ES_API" value="0x30A0"/>
+		<token name="EGL_OPENVG_API" value="0x30A1"/>
+		<token name="EGL_OPENGL_API" value="0x30A2"/>
+		<token name="EGL_DRAW" value="0x3059"/>
+		<token name="EGL_READ" value="0x305A"/>
+		<token name="EGL_CORE_NATIVE_ENGINE" value="0x305B"/>
+		<token name="EGL_COLORSPACE" value="EGL_VG_COLORSPACE"/>
+		<token name="EGL_ALPHA_FORMAT" value="EGL_VG_ALPHA_FORMAT"/>
+		<token name="EGL_COLORSPACE_sRGB" value="EGL_VG_COLORSPACE_sRGB"/>
+		<token name="EGL_COLORSPACE_LINEAR" value="EGL_VG_COLORSPACE_LINEAR"/>
+		<token name="EGL_ALPHA_FORMAT_NONPRE" value="EGL_VG_ALPHA_FORMAT_NONPRE"/>
+		<token name="EGL_ALPHA_FORMAT_PRE" value="EGL_VG_ALPHA_FORMAT_PRE"/>
+	</tokens>
+
+	<functions>
+		<function name="eglGetError" return="GLint" link="static"/>
+		<function name="eglGetDisplay" return="EGLDisplay" link="static">
+			<params>
+				<param type="EGLNativeDisplayType" name="display_id"/>
+			</params>
+		</function>
+		<function name="eglInitialize" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="GLint*" name="major"/>
+				<param type="GLint*" name="minor"/>
+			</params>
+		</function>
+		<function name="eglTerminate" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+			</params>
+		</function>
+		<function name="eglQueryString" return="const char*" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="GLint" name="name"/>
+			</params>
+		</function>
+		<function name="eglGetConfigs" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig*" name="configs"/>
+				<param type="GLint" name="config_size"/>
+				<param type="GLint*" name="num_config"/>
+			</params>
+		</function>
+		<function name="eglChooseConfigs" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="const GLint*" name="attrib_list"/>
+				<param type="EGLConfig*" name="configs"/>
+				<param type="GLint" name="config_size"/>
+				<param type="GLint*" name="num_config"/>
+			</params>
+		</function>
+		<function name="eglGetConfigsAttrib" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig*" name="configs"/>
+				<param type="GLint" name="attribute"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="eglCreateWindowSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="configs"/>
+				<param type="EGLNativeWindowType" name="win"/>
+				<param type="const GLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglCreatePbufferSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="configs"/>
+				<param type="const GLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglCreatePixmapSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="configs"/>
+				<param type="EGLNativePixmapType" name="pixmap"/>
+				<param type="const GLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroySurface" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+			</params>
+		</function>
+		<function name="eglQuerySurface" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="GLint" name="attribute"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="eglBindAPI" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLenum" name="api"/>
+			</params>
+		</function>
+		<function name="eglQueryAPI" return="EGLenum" link="static"/>
+		<function name="eglWaitClient" return="EGLBoolean" link="static"/>
+		<function name="eglReleaseThread" return="EGLBoolean" link="static"/>
+		<function name="eglCreatePbufferFromClientBuffer" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="buftype"/>
+				<param type="EGLClientBuffer" name="buffer"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="const GLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglSurfaceAttrib" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="GLint" name="attribute"/>
+				<param type="GLint" name="value"/>
+			</params>
+		</function>
+		<function name="eglBindTexImage" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="GLint" name="buffer"/>
+			</params>
+		</function>
+		<function name="eglReleaseTexImage" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="GLint" name="buffer"/>
+			</params>
+		</function>
+		<function name="eglSwapInterval" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="GLint" name="interval"/>
+			</params>
+		</function>
+		<function name="eglCreateContext" return="EGLContext" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="EGLContext" name="share_context"/>
+				<param type="const GLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroyContext" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="eglMakeCurrent" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="draw"/>
+				<param type="EGLSurface" name="read"/>
+				<param type="EGLContext" name="ctx"/>
+			</params>
+		</function>
+		<function name="eglGetCurrentContext" return="EGLContext" link="static"/>
+		<function name="eglGetCurrentSurface" return="EGLSurface" link="static">
+			<params>
+				<param type="GLint" name="readdraw"/>
+			</params>
+		</function>
+		<function name="eglGetCurrentDisplay" return="EGLDisplay" link="static"/>
+		<function name="eglQueryContext" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLContext" name="ctx"/>
+				<param type="GLint" name="attribute"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="eglWaitGL" return="EGLBoolean" link="static"/>
+		<function name="eglWaitNative" return="EGLBoolean" link="static">
+			<params>
+				<param type="GLint" name="engine"/>
+			</params>
+		</function>
+		<function name="eglSwapBuffers" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+			</params>
+		</function>
+		<function name="eglCopyBuffers" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLNativePixmapType" name="target"/>
+			</params>
+		</function>
+		<function name="eglGetProcAddress" return="__eglMustCastToProperFunctionPointerType" link="static">
+			<params>
+				<param type="const char*" name="procname"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

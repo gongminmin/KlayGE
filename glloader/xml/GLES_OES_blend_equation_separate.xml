@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_blend_equation_separate" reg_no="1">
+	<tokens>
+		<token name="GL_BLEND_EQUATION_RGB_OES" value="GL_BLEND_EQUATION_OES"/>
+		<token name="GL_BLEND_EQUATION_ALPHA_OES" value="0x883D"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendEquationSeparateOES" return="void">
+			<params>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

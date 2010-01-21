@@ -61,7 +61,7 @@
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 	#define GLLOADER_AGL
 #endif
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
 	#define GLLOADER_GLX
 #endif
 
@@ -69,6 +69,7 @@
 #define GLLOADER_GL
 #else
 #define GLLOADER_GLES
+#define GLLOADER_EGL
 #endif
 
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__)
@@ -76,28 +77,66 @@
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 #include <windows.h>
+
+#ifdef GLLOADER_EGL
+typedef HDC     EGLNativeDisplayType;
+typedef HBITMAP EGLNativePixmapType;
+typedef HWND    EGLNativeWindowType;
+#endif
+
+#endif
+
+#if defined(__WINSCW__) || defined(__SYMBIAN32__)
+#ifdef GLLOADER_EGL
+typedef int   EGLNativeDisplayType;
+typedef void* EGLNativeWindowType;
+typedef void* EGLNativePixmapType;
+#endif
+#endif
+
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__)
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+typedef XID GLXDrawable;
+typedef XID GLXContextID;
+
+#ifdef GLLOADER_EGL
+typedef Display* EGLNativeDisplayType;
+typedef Pixmap   EGLNativePixmapType;
+typedef Window   EGLNativeWindowType;
+#endif
+#endif
+
+#ifdef GLLOADER_EGL
+typedef EGLNativeDisplayType NativeDisplayType;
+typedef EGLNativePixmapType  NativePixmapType;
+typedef EGLNativeWindowType  NativeWindowType;
 #endif
 
 #if defined(__gl_h_) || defined(__GL_H_)
-#error GLLoader.h should be included before gl.h
+#error glloader.h should be included before gl.h
 #endif
 #if defined(__gl2_h_) || defined(__GL2_H_)
-#error GLLoader.h should be included before gl2.h
+#error glloader.h should be included before gl2.h
 #endif
 #if defined(__gl3_h_) || defined(__GL3_H_)
-#error GLLoader.h should be included before gl3.h
+#error glloader.h should be included before gl3.h
 #endif
 #if defined(__glext_h_) || defined(__GLEXT_H_)
-#error GLLoader.h should be included before glext.h
+#error glloader.h should be included before glext.h
 #endif
 #if defined(__glxext_h_) || defined(__GLXEXT_H_)
-#error GLLoader.h should be included before glxext.h
+#error glloader.h should be included before glxext.h
 #endif
 #if defined(__wglext_h_) || defined(__WGLEXT_H_)
-#error GLLoader.h should be included before wglext.h
+#error glloader.h should be included before wglext.h
 #endif
 #if defined(__gl_ATI_h_)
-#error GLLoader.h should be included before glATIext.h
+#error glloader.h should be included before glATIext.h
+#endif
+#if defined(__egl_h_) || defined(__EGL_H_)
+#error glloader.h should be included before egl.h
 #endif
 
 /* GLAPI, part 1 (use WINGDIAPI, if defined) */
@@ -159,6 +198,11 @@
 #ifdef GLLOADER_WGL
 #define __wglext_h_
 #define __WGLEXT_H_
+#endif
+
+#ifdef GLLOADER_EGL
+#define __egl_h_
+#define __EGL_H_
 #endif
 
 typedef void			GLvoid;
@@ -258,17 +302,15 @@ GLLOADER_API const char* glloader_get_feature_name(int index);
 #endif
 
 #ifdef GLLOADER_GLX
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
-typedef XID GLXDrawable;
-typedef XID GLXContextID;
-
 #include <glloader/glloader_glx.h>
 #endif
 
 #ifdef GLLOADER_GLES
 #include <glloader/glloader_gles.h>
+#endif
+
+#ifdef GLLOADER_EGL
+#include <glloader/glloader_egl.h>
 #endif
 
 #endif		/* _GLLOADER_H */
