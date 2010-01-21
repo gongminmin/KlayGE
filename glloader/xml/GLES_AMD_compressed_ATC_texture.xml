@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_AMD_compressed_ATC_texture" reg_no="40">
+	<tokens>
+		<token name="GL_ATC_RGB_AMD" value="0x8C92"/>
+		<token name="GL_ATC_RGBA_EXPLICIT_ALPHA_AMD" value="0x8C93"/>
+		<token name="GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD" value="0x87EE"/>
+	</tokens>
+</gl_extension>

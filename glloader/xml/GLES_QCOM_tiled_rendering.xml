@@ -1,0 +1,55 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_texture_from_pixmap" reg_no="70">
+	<tokens>
+		<token name="GL_COLOR_BUFFER_BIT0_QCOM" value="0x00000001"/>
+		<token name="GL_COLOR_BUFFER_BIT1_QCOM" value="0x00000002"/>
+		<token name="GL_COLOR_BUFFER_BIT2_QCOM" value="0x00000004"/>
+		<token name="GL_COLOR_BUFFER_BIT3_QCOM" value="0x00000008"/>
+		<token name="GL_COLOR_BUFFER_BIT4_QCOM" value="0x00000010"/>
+		<token name="GL_COLOR_BUFFER_BIT5_QCOM" value="0x00000020"/>
+		<token name="GL_COLOR_BUFFER_BIT6_QCOM" value="0x00000040"/>
+		<token name="GL_COLOR_BUFFER_BIT7_QCOM" value="0x00000080"/>
+		<token name="GL_DEPTH_BUFFER_BIT0_QCOM" value="0x00000100"/>
+		<token name="GL_DEPTH_BUFFER_BIT1_QCOM" value="0x00000200"/>
+		<token name="GL_DEPTH_BUFFER_BIT2_QCOM" value="0x00000400"/>
+		<token name="GL_DEPTH_BUFFER_BIT3_QCOM" value="0x00000800"/>
+		<token name="GL_DEPTH_BUFFER_BIT4_QCOM" value="0x00001000"/>
+		<token name="GL_DEPTH_BUFFER_BIT5_QCOM" value="0x00002000"/>
+		<token name="GL_DEPTH_BUFFER_BIT6_QCOM" value="0x00004000"/>
+		<token name="GL_DEPTH_BUFFER_BIT7_QCOM" value="0x00008000"/>
+		<token name="GL_STENCIL_BUFFER_BIT0_QCOM" value="0x00010000"/>
+		<token name="GL_STENCIL_BUFFER_BIT1_QCOM" value="0x00020000"/>
+		<token name="GL_STENCIL_BUFFER_BIT2_QCOM" value="0x00040000"/>
+		<token name="GL_STENCIL_BUFFER_BIT3_QCOM" value="0x00080000"/>
+		<token name="GL_STENCIL_BUFFER_BIT4_QCOM" value="0x00100000"/>
+		<token name="GL_STENCIL_BUFFER_BIT5_QCOM" value="0x00200000"/>
+		<token name="GL_STENCIL_BUFFER_BIT6_QCOM" value="0x00400000"/>
+		<token name="GL_STENCIL_BUFFER_BIT7_QCOM" value="0x00800000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT0_QCOM" value="0x01000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT1_QCOM" value="0x02000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT2_QCOM" value="0x04000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT3_QCOM" value="0x08000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT4_QCOM" value="0x10000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT5_QCOM" value="0x20000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT6_QCOM" value="0x40000000"/>
+		<token name="GL_MULTISAMPLE_BUFFER_BIT7_QCOM" value="0x80000000"/>
+	</tokens>
+
+	<functions>
+		<function name="glStartTilingQCOM" return="void">
+			<params>
+				<param type="GLuint" name="x"/>
+				<param type="GLuint" name="y"/>
+				<param type="GLuint" name="width"/>
+				<param type="GLuint" name="height"/>
+				<param type="GLbitfield" name="preserveMask"/>
+			</params>
+		</function>
+		<function name="glEndTilingQCOM" return="void">
+			<params>
+				<param type="GLbitfield" name="preserveMask"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

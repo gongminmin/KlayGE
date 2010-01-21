@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_driver_control" reg_no="55">
+	<functions>
+		<function name="glGetDriverControlsQCOM" return="void">
+			<params>
+				<param type="GLint*" name="num"/>
+				<param type="GLsizei" name="size"/>
+				<param type="GLuint*" name="driverControls"/>
+			</params>
+		</function>
+		<function name="glGetDriverControlStringQCOM" return="void">
+			<params>
+				<param type="GLuint" name="driverControl"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="driverControlString"/>
+			</params>
+		</function>
+		<function name="glEnableDriverControlQCOM" return="void">
+			<params>
+				<param type="GLuint" name="driverControl"/>
+			</params>
+		</function>
+
+		<function name="glDisableDriverControlQCOM" return="void">
+			<params>
+				<param type="GLuint" name="driverControl"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

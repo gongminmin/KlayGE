@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_stencil_wrap" reg_no="19">
+	<tokens>
+		<token name="GL_INCR_WRAP_OES" value="0x8507"/>
+		<token name="GL_DECR_WRAP_OES" value="0x8508"/>
+
+	</tokens>
+</gl_extension>

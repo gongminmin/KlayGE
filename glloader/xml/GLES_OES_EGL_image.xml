@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_EGL_image" reg_no="23">
+	<typedefs>
+		<typedef type="void*" synonym="GLeglImageOES"/>
+	</typedefs>
+
+	<functions>
+		<function name="EGLImageTargetTexture2DOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLeglImageOES" name="image"/>
+			</params>
+		</function>
+		<function name="EGLImageTargetRenderbufferStorageOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLeglImageOES" name="image"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_read_format" reg_no="53">
+	<tokens>
+		<token name="GL_BGRA_IMG" value="0x80E1"/>
+		<token name="GL_UNSIGNED_SHORT_4_4_4_4_REV_IMG" value="0x8365"/>
+	</tokens>
+</gl_extension>

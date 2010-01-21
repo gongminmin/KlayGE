@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_filter_anisotropic" reg_no="41">
+	<tokens>
+		<token name="GL_TEXTURE_MAX_ANISOTROPY_EXT" value="0x84FE"/>
+		<token name="GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT" value="0x84FF"/>
+	</tokens>
+</gl_extension>

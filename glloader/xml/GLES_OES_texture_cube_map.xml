@@ -1,0 +1,64 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_texture_cube_map" reg_no="20">
+	<tokens>
+		<token name="GL_TEXTURE_GEN_MODE_OES" value="0x2500"/>
+		<token name="GL_NORMAL_MAP_OES" value="0x8511"/>
+		<token name="GL_REFLECTION_MAP_OES" value="0x8512"/>
+		<token name="GL_TEXTURE_CUBE_MAP_OES" value="0x8513"/>
+		<token name="GL_TEXTURE_GEN_STR_OES" value="0x8D60"/>
+		<token name="GL_TEXTURE_BINDING_CUBE_MAP_OES" value="0x8514"/>
+		<token name="GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES" value="0x8515"/>
+		<token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES" value="0x8516"/>
+		<token name="GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES" value="0x8517"/>
+		<token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES" value="0x8518"/>
+		<token name="GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES" value="0x8519"/>
+		<token name="GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_OES" value="0x851A"/>
+		<token name="GL_MAX_CUBE_MAP_TEXTURE_SIZE_OES" value="0x851C"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexGenfOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGenfvOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexGeniOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTexGenivOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGenfvOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTexGenivOES" return="void">
+			<params>
+				<param type="GLenum" name="coord"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

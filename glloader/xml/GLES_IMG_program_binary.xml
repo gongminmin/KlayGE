@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_program_binary" reg_no="67">
+	<tokens>
+		<token name="GL_SGX_PROGRAM_BINARY_IMG" value="0x9130"/>
+	</tokens>
+</gl_extension>

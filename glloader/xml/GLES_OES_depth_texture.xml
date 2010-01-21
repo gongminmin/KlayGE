@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_depth_texture" reg_no="44">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT_OES" value="0x1902"/>
+	</tokens>
+</gl_extension>

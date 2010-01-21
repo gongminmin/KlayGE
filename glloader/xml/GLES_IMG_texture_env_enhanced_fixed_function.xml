@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_texture_env_enhanced_fixed_function" reg_no="58">
+	<tokens>
+		<token name="GL_MODULATE_COLOR_IMG" value="0x8C04"/>
+		<token name="GL_RECIP_ADD_SIGNED_ALPHA_IMG" value="0x8C05"/>
+		<token name="GL_TEXTURE_ALPHA_MODULATE_IMG" value="0x8C06"/>
+		<token name="GL_FACTOR_ALPHA_MODULATE_IMG" value="0x8C07"/>
+		<token name="GL_FRAGMENT_ALPHA_MODULATE_IMG" value="0x8C08"/>
+		<token name="GL_ADD_BLEND_IMG" value="0x8C09"/>
+		<token name="GL_DOT3_RGBA_IMG" value="0x86AF"/>
+	</tokens>
+</gl_extension>

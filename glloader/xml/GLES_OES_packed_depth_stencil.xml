@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_packed_depth_stencil" reg_no="43">
+	<tokens>
+		<token name="GL_DEPTH_STENCIL_OES" value="0x84F9"/>
+		<token name="GL_UNSIGNED_INT_24_8_OES" value="0x84FA"/>
+		<token name="GL_DEPTH24_STENCIL8_OES" value="0x88F0"/>
+	</tokens>
+</gl_extension>

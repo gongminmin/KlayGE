@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_multi_draw_arrays" reg_no="69">
+	<functions>
+		<function name="glMultiDrawArraysEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLint*" name="first"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+		<function name="glMultiDrawElementsEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei*" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid**" name="indices"/>
+				<param type="GLsizei" name="primcount"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

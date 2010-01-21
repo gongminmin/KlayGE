@@ -1,0 +1,85 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_extended_get" reg_no="62">
+	<tokens>
+		<token name="GL_TEXTURE_WIDTH_QCOM" value="0x8BD2"/>
+		<token name="GL_TEXTURE_HEIGHT_QCOM" value="0x8BD3"/>
+		<token name="GL_TEXTURE_DEPTH_QCOM" value="0x8BD4"/>
+		<token name="GL_TEXTURE_INTERNAL_FORMAT_QCOM" value="0x8BD5"/>
+		<token name="GL_TEXTURE_FORMAT_QCOM" value="0x8BD6"/>
+		<token name="GL_TEXTURE_TYPE_QCOM" value="0x8BD7"/>
+		<token name="GL_TEXTURE_IMAGE_VALID_QCOM" value="0x8BD8"/>
+		<token name="GL_TEXTURE_NUM_LEVELS_QCOM" value="0x8BD9"/>
+		<token name="GL_TEXTURE_TARGET_QCOM" value="0x8BDA"/>
+		<token name="GL_TEXTURE_OBJECT_VALID_QCOM" value="0x8BDB"/>
+		<token name="GL_STATE_RESTORE" value="0x8BDC"/>
+	</tokens>
+
+	<functions>
+		<function name="glExtGetTexturesQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="textures"/>
+				<param type="GLint" name="maxTextures"/>
+				<param type="GLint*" name="numTextures"/>
+			</params>
+		</function>
+		<function name="glExtGetBuffersQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="buffers"/>
+				<param type="GLint" name="maxBuffers"/>
+				<param type="GLint*" name="numBuffers"/>
+			</params>
+		</function>
+		<function name="glExtGetRenderbuffersQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="renderbuffers"/>
+				<param type="GLint" name="maxRenderbuffers"/>
+				<param type="GLint*" name="numRenderbuffers"/>
+			</params>
+		</function>
+		<function name="glExtGetFramebuffersQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="framebuffers"/>
+				<param type="GLint" name="maxFramebuffers"/>
+				<param type="GLint*" name="numFramebuffers"/>
+			</params>
+		</function>
+		<function name="glExtGetTexLevelParameterivQCOM" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="face"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glExtTexObjectStateOverrideiQCOM" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glExtGetTexSubImageQCOM" return="void">
+			<params>
+				<param type="GLenum" name="targe"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="void*" name="texels"/>
+			</params>
+		</function>
+		<function name="glExtGetBufferPointervQCOM" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="void**" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

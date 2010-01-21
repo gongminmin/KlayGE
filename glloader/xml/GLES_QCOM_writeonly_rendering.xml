@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_writeonly_rendering" reg_no="61">
+	<tokens>
+		<token name="GL_WRITEONLY_RENDERING_QCOM" value="0x8823"/>
+	</tokens>
+</gl_extension>

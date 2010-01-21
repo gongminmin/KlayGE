@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_extended_get2" reg_no="63">
+	<functions>
+		<function name="glExtGetShadersQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="shaders"/>
+				<param type="GLint" name="maxShaders"/>
+				<param type="GLint*" name="numShaders"/>
+			</params>
+		</function>
+		<function name="glExtGetProgramsQCOM" return="void">
+			<params>
+				<param type="GLuint*" name="programs"/>
+				<param type="GLint" name="maxPrograms"/>
+				<param type="GLint*" name="numPrograms"/>
+			</params>
+		</function>
+		<function name="glExtIsProgramBinaryQCOM" return="GLboolean">
+			<params>
+				<param type="GLuint" name="program"/>
+			</params>
+		</function>
+		<function name="glExtGetProgramBinarySourceQCOM" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLchar*" name="source"/>
+				<param type="GLint*" name="length"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

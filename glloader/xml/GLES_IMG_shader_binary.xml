@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_shader_binary" reg_no="68">
+	<tokens>
+		<token name="GL_SGX_BINARY_IMG" value="0x8C0A"/>
+	</tokens>
+</gl_extension>

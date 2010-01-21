@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_type_2_10_10_10_REV" reg_no="42">
+	<tokens>
+		<token name="GL_UNSIGNED_INT_2_10_10_10_REV_EXT" value="0x8368"/>
+	</tokens>
+</gl_extension>

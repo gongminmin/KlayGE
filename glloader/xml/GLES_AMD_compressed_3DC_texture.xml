@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_AMD_compressed_3DC_texture" reg_no="39">
+	<tokens>
+		<token name="GL_3DC_X_AMD" value="0x87F9"/>
+		<token name="GL_3DC_XY_AMD" value="0x87FA"/>
+	</tokens>
+</gl_extension>

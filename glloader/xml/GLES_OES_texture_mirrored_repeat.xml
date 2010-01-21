@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_texture_mirrored_repeat" reg_no="22">
+	<tokens>
+		<token name="GL_MIRRORED_REPEAT_OES" value="0x8370"/>
+	</tokens>
+</gl_extension>

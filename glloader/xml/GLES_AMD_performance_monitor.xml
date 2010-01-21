@@ -1,0 +1,97 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_AMD_performance_monitor" reg_no="50">
+	<tokens>
+		<token name="GL_COUNTER_TYPE_AMD" value="0x8BC0"/>
+		<token name="GL_COUNTER_RANGE_AMD" value="0x8BC1"/>
+		<token name="GL_UNSIGNED_INT64_AMD" value="0x8BC2"/>
+		<token name="GL_PERCENTAGE_AMD" value="0x8BC3"/>
+		<token name="GL_PERFMON_RESULT_AVAILABLE_AMD" value="0x8BC4"/>
+		<token name="GL_PERFMON_RESULT_SIZE_AMD" value="0x8BC5"/>
+		<token name="GL_PERFMON_RESULT_AMD" value="0x8BC6"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetPerfMonitorGroupsAMD" return="void">
+			<params>
+				<param type="GLint*" name="numGroups"/>
+				<param type="GLsizei" name="groupsSize"/>
+				<param type="GLuint*" name="groups"/>
+			</params>
+		</function>
+		<function name="glGetPerfMonitorCountersAMD" return="void">
+			<params>
+				<param type="GLuint" name="group"/>
+				<param type="GLint*" name="numCounters"/>
+				<param type="GLint*" name="maxActiveCounters"/>
+				<param type="GLsizei" name="countersSize"/>
+				<param type="GLuint*" name="counters"/>
+			</params>
+		</function>
+		<function name="glGetPerfMonitorGroupStringAMD" return="void">
+			<params>
+				<param type="GLuint" name="group"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="groupString"/>
+			</params>
+		</function>
+		<function name="glGetPerfMonitorCounterStringAMD" return="void">
+			<params>
+				<param type="GLuint" name="group"/>
+				<param type="GLuint" name="count"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="counterString"/>
+			</params>
+		</function>
+		<function name="glGetPerfMonitorCounterInfoAMD" return="void">
+			<params>
+				<param type="GLuint" name="group"/>
+				<param type="GLuint" name="counter"/> 
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glGenPerfMonitorsAMD" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="monitors"/>
+			</params>
+		</function>
+		<function name="glDeletePerfMonitorsAMD" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="monitors"/>
+			</params>
+		</function>
+		<function name="glSelectPerfMonitorCountersAMD" return="void">
+			<params>
+				<param type="GLuint" name="monitor"/>
+				<param type="GLboolean" name="enable"/> 
+				<param type="GLuint" name="group"/>
+				<param type="GLint" name="numCounters"/>
+				<param type="GLuint*" name="counterList"/>
+			</params>
+		</function>
+		<function name="glBeginPerfMonitorAMD" return="void">
+			<params>
+				<param type="GLuint" name="monitor"/>
+			</params>
+		</function>
+		<function name="glEndPerfMonitorAMD" return="void">
+			<params>
+				<param type="GLuint" name="monitor"/>
+			</params>
+		</function>
+		<function name="glGetPerfMonitorCounterDataAMD" return="void">
+			<params>
+				<param type="GLuint" name="monitor"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLsizei" name="dataSize"/>
+				<param type="GLuint*" name="data"/>
+				<param type="GLint*" name="bytesWritten"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

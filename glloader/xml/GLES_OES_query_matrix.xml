@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_query_matrix" reg_no="16">
+	<functions>
+		<function name="glQueryMatrixxOES" return="void">
+			<params>
+				<param type="GLfixed*" name="mantissa"/>
+				<param type="GLint*" name="exponent"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

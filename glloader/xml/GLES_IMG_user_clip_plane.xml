@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_user_clip_plane" reg_no="57">
+	<tokens>
+		<token name="GL_MAX_CLIP_PLANES_IMG" value="0x0D32"/>
+		<token name="GL_CLIP_PLANE0_IMG" value="0x3000"/>
+		<token name="GL_CLIP_PLANE1_IMG" value="0x3001"/>
+		<token name="GL_CLIP_PLANE2_IMG" value="0x3002"/>
+		<token name="GL_CLIP_PLANE3_IMG" value="0x3003"/>
+		<token name="GL_CLIP_PLANE4_IMG" value="0x3004"/>
+		<token name="GL_CLIP_PLANE5_IMG" value="0x3005"/>
+	</tokens>
+
+	<functions>
+		<function name="glClipPlanefIMG" return="void">
+			<params>
+				<param type="GLenum" name="p"/>
+				<param type="GLfloat*" name="eqn"/>
+			</params>
+		</function>
+		<function name="glClipPlanexIMG" return="void">
+			<params>
+				<param type="GLenum" name="p"/>
+				<param type="GLfixed*" name="eqn"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

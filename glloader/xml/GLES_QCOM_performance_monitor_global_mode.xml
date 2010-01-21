@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_performance_monitor_global_mode" reg_no="56">
+	<tokens>
+		<token name="GL_PERFMON_GLOBAL_MODE_QCOM" value="0x8FA0"/>
+	</tokens>
+</gl_extension>

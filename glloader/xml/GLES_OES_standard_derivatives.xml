@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_standard_derivatives" reg_no="45">
+	<tokens>
+		<token name="GL_FRAGMENT_SHADER_DERIVATIVE_HING_OES" value="0x8B8B"/>
+	</tokens>
+</gl_extension>

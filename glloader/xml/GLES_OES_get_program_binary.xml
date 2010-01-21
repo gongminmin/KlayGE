@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_get_program_binary" reg_no="47">
+	<tokens>
+		<token name="GL_PROGRAM_BINARY_LENGTH_OES" value="0x8741"/>
+		<token name="GL_NUM_PROGRAM_BINARY_FORMAT_OES" value="0x87FE"/>
+		<token name="GL_PROGRAM_BINARY_FORMAT_OES" value="0x87FF"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetProgramBinaryOES" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLenum*" name="binaryFormat"/>
+				<param type="void*" name="binary"/>
+			</params>
+		</function>
+		<function name="glProgramBinaryOES" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="binaryFormat"/>
+				<param type="const void*" name="binary"/>
+				<param type="GLint" name="length"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

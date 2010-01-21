@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_vertex_type_10_10_10_2" reg_no="46">
+	<tokens>
+		<token name="GL_UNSIGNED_INT_10_10_10_2_OES" value="0x8DF6"/>
+		<token name="GL_INT_10_10_10_2_OES" value="0x8DF7"/>
+	</tokens>
+</gl_extension>

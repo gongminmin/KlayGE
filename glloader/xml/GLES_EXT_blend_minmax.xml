@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_blend_minmax" reg_no="65">
+	<tokens>
+		<token name="GL_BLEND_EQUATION_EXT" value="0x8009"/>
+		<token name="GL_MIN_EXT" value="0x8007"/>
+		<token name="GL_MAX_EXT" value="0x8008"/>
+		<token name="GL_FUNC_ADD_EXT" value="0x8006"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendEquationEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

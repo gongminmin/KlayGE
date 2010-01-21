@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_fence" reg_no="52">
+	<tokens>
+		<token name="GL_ALL_COMPLETED_NV" value="0x84F2"/>
+		<token name="GL_FENCE_STATUS_NV" value="0x84F3"/>
+		<token name="GL_FENCE_CONDITION_NV" value="0x84F4"/>
+	</tokens>
+
+	<functions>
+		<function name="glDeleteFencesNV" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="fences"/>
+			</params>
+		</function>
+		<function name="glGenFencesNV" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="fences"/>
+			</params>
+		</function>
+		<function name="glIsFenceNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="fence"/>
+			</params>
+		</function>
+		<function name="glTestFenceNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="fence"/>
+			</params>
+		</function>
+		<function name="glGetFenceivNV" return="void">
+			<params>
+				<param type="GLuint" name="fence"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glFinishFenceNV" return="void">
+			<params>
+				<param type="GLuint" name="fence"/>
+			</params>
+		</function>
+		<function name="glSetFenceNV" return="void">
+			<params>
+				<param type="GLuint" name="fence"/>
+				<param type="GLenum" name="condition"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

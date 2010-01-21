@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_discard_framebuffer" reg_no="64">
+	<tokens>
+		<token name="GL_COLOR_EXT" value="0x1800"/>
+		<token name="GL_DEPTH_EXT" value="0x1801"/>
+		<token name="GL_STENCIL_EXT" value="0x1802"/>
+	</tokens>
+
+	<functions>
+		<function name="glDiscardFramebufferEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="numAttachments"/>
+				<param type="const GLenum*" name="attachments"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
