@@ -572,7 +572,7 @@ int main(int argc, char* argv[])
 		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
 		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Optional.")
 		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code.")
-		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65536), "End code.")
+		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65535), "End code.")
 		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.")
 		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.")
 		("version,v", "Version.");

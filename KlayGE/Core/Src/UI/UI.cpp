@@ -932,6 +932,7 @@ namespace KlayGE
 		sc.text = strText;
 		sc.align = align;
 	}
+
 	Size_T<uint32_t> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & /*rc*/, uint32_t /*align*/)
 	{

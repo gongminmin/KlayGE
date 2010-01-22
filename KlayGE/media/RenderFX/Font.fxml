@@ -63,7 +63,6 @@ float4 FontPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
 
-			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 			
 			<state name="vertex_shader" value="Font2DVS()"/>
@@ -77,7 +76,6 @@ float4 FontPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
 
-			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="Font3DVS()"/>

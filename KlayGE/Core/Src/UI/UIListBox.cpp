@@ -172,7 +172,7 @@ namespace KlayGE
 	{
 		assert((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
-		boost::shared_ptr<UIListBoxItem> pItem = items_[nIndex];
+		boost::shared_ptr<UIListBoxItem> const & pItem = items_[nIndex];
 
 		items_.erase(items_.begin() + nIndex);
 		scroll_bar_.SetTrackRange(0, items_.size());
@@ -498,7 +498,7 @@ namespace KlayGE
 					{
 						// Determine behavior based on the state of Shift and Ctrl
 
-						boost::shared_ptr<UIListBoxItem> pSelItem = items_[selected_];
+						boost::shared_ptr<UIListBoxItem> const & pSelItem = items_[selected_];
 						if (MB_Ctrl == (buttons & (MB_Shift | MB_Ctrl)))
 						{
 							// Control click. Reverse the selection of this item.
@@ -682,7 +682,7 @@ namespace KlayGE
 					break;
 				}
 
-				boost::shared_ptr<UIListBoxItem> pItem = items_[i];
+				boost::shared_ptr<UIListBoxItem> const & pItem = items_[i];
 
 				// Determine if we need to render this item with the
 				// selected element.

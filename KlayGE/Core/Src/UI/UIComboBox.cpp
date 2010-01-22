@@ -165,7 +165,7 @@ namespace KlayGE
 			// Update the scrollbar's rects
 			scroll_bar_.SetLocation(dropdown_rc_.right(), dropdown_rc_.top() + 2);
 			scroll_bar_.SetSize(sb_width_, dropdown_rc_.Height() - 2);
-			FontPtr font = UIManager::Instance().GetFont(elements_[2]->FontIndex());
+			FontPtr const & font = UIManager::Instance().GetFont(elements_[2]->FontIndex());
 			uint32_t font_size = UIManager::Instance().GetFontSize(elements_[2]->FontIndex());
 			if (font && (font_size != 0))
 			{
@@ -268,7 +268,7 @@ namespace KlayGE
 			// Determine which item has been selected
 			for (size_t i = 0; i < items_.size(); ++ i)
 			{
-				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
+				boost::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 				if (pItem->bVisible && pItem->rcActive.PtInRect(pt))
 				{
 					focused_ = static_cast<int>(i);
@@ -317,7 +317,7 @@ namespace KlayGE
 				// Determine which item has been selected
 				for (size_t i = scroll_bar_.GetTrackPos(); i < items_.size(); ++ i)
 				{
-					boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
+					boost::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 					if (pItem -> bVisible && pItem->rcActive.PtInRect(pt))
 					{
 						focused_ = static_cast<int>(i);
@@ -464,7 +464,7 @@ namespace KlayGE
 		pSelectionElement->TextureColor().Current = pElement->TextureColor().Current;
 		pSelectionElement->FontColor().Current = pSelectionElement->FontColor().States[UICS_Normal];
 
-		FontPtr font = this->GetDialog()->GetFont(pElement->FontIndex());
+		FontPtr const & font = this->GetDialog()->GetFont(pElement->FontIndex());
 		uint32_t font_size = this->GetDialog()->GetFontSize(pElement->FontIndex());
 		if (font)
 		{
@@ -473,7 +473,7 @@ namespace KlayGE
 
 			for (size_t i = scroll_bar_.GetTrackPos(); i < items_.size(); ++ i)
 			{
-				boost::shared_ptr<UIComboBoxItem> pItem = items_[i];
+				boost::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 
 				// Make sure there's room left in the dropdown
 				nRemainingHeight -= font_size;
@@ -568,8 +568,8 @@ namespace KlayGE
 
 		if ((selected_ >= 0) && (selected_ < static_cast<int>(items_.size())))
 		{
-			boost::shared_ptr<UIComboBoxItem> pItem = items_[selected_];
-			if (pItem != NULL)
+			boost::shared_ptr<UIComboBoxItem> const & pItem = items_[selected_];
+			if (pItem)
 			{
 				this->GetDialog()->DrawText(pItem->strText, *pElement, text_rc_, false, depth_bias);
 			}
@@ -711,7 +711,7 @@ namespace KlayGE
 			return boost::any();
 		}
 
-		boost::shared_ptr<UIComboBoxItem> pItem = items_[index];
+		boost::shared_ptr<UIComboBoxItem> const & pItem = items_[index];
 		if (!pItem)
 		{
 			return boost::any();

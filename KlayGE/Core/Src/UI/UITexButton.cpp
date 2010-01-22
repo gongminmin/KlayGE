@@ -59,6 +59,17 @@ namespace KlayGE
 	{
 		UIElement Element;
 
+		// Fill layer
+		{
+			Rect_T<int32_t> const & rc = UIManager::Instance().ElementTextureRect(UICT_Button, 1);
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
+			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
+			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
+			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
+
+			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+		}
+
 		// Button
 		{
 			TexturePtr const & tex = UIManager::Instance().GetTexture(tex_index_);
@@ -76,16 +87,6 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 1);
 			Element.FontColor().States[UICS_MouseOver] = Color(0, 0, 0, 1);
-
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
-		}
-
-		// Fill layer
-		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
-			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
-			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
-			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
 		}
@@ -179,8 +180,9 @@ namespace KlayGE
 			}
 		}
 
-		// Background fill layer
 		//TODO: remove magic numbers
+
+		// Fill layer
 		UIElementPtr pElement = elements_[0];
 
 		Rect_T<int32_t> rcWindow = bounding_box_;
