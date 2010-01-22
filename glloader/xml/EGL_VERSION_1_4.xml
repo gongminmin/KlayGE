@@ -2,6 +2,7 @@
 
 <gl_extension name="EGL_VERSION_1_4">
 	<typedefs>
+		<typedef type="int" synonym="EGLint"/>
 		<typedef type="unsigned int" synonym="EGLBoolean"/>
 		<typedef type="unsigned int" synonym="EGLenum"/>
 		<typedef type="void*" synonym="EGLConfig"/>
@@ -137,7 +138,7 @@
 	</tokens>
 
 	<functions>
-		<function name="eglGetError" return="GLint" link="static"/>
+		<function name="eglGetError" return="EGLint" link="static"/>
 		<function name="eglGetDisplay" return="EGLDisplay" link="static">
 			<params>
 				<param type="EGLNativeDisplayType" name="display_id"/>
@@ -146,8 +147,8 @@
 		<function name="eglInitialize" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
-				<param type="GLint*" name="major"/>
-				<param type="GLint*" name="minor"/>
+				<param type="EGLint*" name="major"/>
+				<param type="EGLint*" name="minor"/>
 			</params>
 		</function>
 		<function name="eglTerminate" return="EGLBoolean" link="static">
@@ -158,32 +159,32 @@
 		<function name="eglQueryString" return="const char*" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
-				<param type="GLint" name="name"/>
+				<param type="EGLint" name="name"/>
 			</params>
 		</function>
 		<function name="eglGetConfigs" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig*" name="configs"/>
-				<param type="GLint" name="config_size"/>
-				<param type="GLint*" name="num_config"/>
+				<param type="EGLint" name="config_size"/>
+				<param type="EGLint*" name="num_config"/>
 			</params>
 		</function>
-		<function name="eglChooseConfigs" return="EGLBoolean" link="static">
+		<function name="eglChooseConfig" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 				<param type="EGLConfig*" name="configs"/>
-				<param type="GLint" name="config_size"/>
-				<param type="GLint*" name="num_config"/>
+				<param type="EGLint" name="config_size"/>
+				<param type="EGLint*" name="num_config"/>
 			</params>
 		</function>
 		<function name="eglGetConfigsAttrib" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig*" name="configs"/>
-				<param type="GLint" name="attribute"/>
-				<param type="GLint*" name="value"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
 			</params>
 		</function>
 		<function name="eglCreateWindowSurface" return="EGLSurface" link="static">
@@ -191,14 +192,14 @@
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig" name="configs"/>
 				<param type="EGLNativeWindowType" name="win"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglCreatePbufferSurface" return="EGLSurface" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig" name="configs"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglCreatePixmapSurface" return="EGLSurface" link="static">
@@ -206,7 +207,7 @@
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig" name="configs"/>
 				<param type="EGLNativePixmapType" name="pixmap"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglDestroySurface" return="EGLBoolean" link="static">
@@ -219,8 +220,8 @@
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLSurface" name="surface"/>
-				<param type="GLint" name="attribute"/>
-				<param type="GLint*" name="value"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
 			</params>
 		</function>
 		<function name="eglBindAPI" return="EGLBoolean" link="static">
@@ -237,35 +238,35 @@
 				<param type="EGLenum" name="buftype"/>
 				<param type="EGLClientBuffer" name="buffer"/>
 				<param type="EGLConfig" name="config"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglSurfaceAttrib" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLSurface" name="surface"/>
-				<param type="GLint" name="attribute"/>
-				<param type="GLint" name="value"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint" name="value"/>
 			</params>
 		</function>
 		<function name="eglBindTexImage" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLSurface" name="surface"/>
-				<param type="GLint" name="buffer"/>
+				<param type="EGLint" name="buffer"/>
 			</params>
 		</function>
 		<function name="eglReleaseTexImage" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLSurface" name="surface"/>
-				<param type="GLint" name="buffer"/>
+				<param type="EGLint" name="buffer"/>
 			</params>
 		</function>
 		<function name="eglSwapInterval" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
-				<param type="GLint" name="interval"/>
+				<param type="EGLint" name="interval"/>
 			</params>
 		</function>
 		<function name="eglCreateContext" return="EGLContext" link="static">
@@ -273,7 +274,7 @@
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig" name="config"/>
 				<param type="EGLContext" name="share_context"/>
-				<param type="const GLint*" name="attrib_list"/>
+				<param type="const EGLint*" name="attrib_list"/>
 			</params>
 		</function>
 		<function name="eglDestroyContext" return="EGLBoolean" link="static">
@@ -293,7 +294,7 @@
 		<function name="eglGetCurrentContext" return="EGLContext" link="static"/>
 		<function name="eglGetCurrentSurface" return="EGLSurface" link="static">
 			<params>
-				<param type="GLint" name="readdraw"/>
+				<param type="EGLint" name="readdraw"/>
 			</params>
 		</function>
 		<function name="eglGetCurrentDisplay" return="EGLDisplay" link="static"/>
@@ -301,14 +302,14 @@
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLContext" name="ctx"/>
-				<param type="GLint" name="attribute"/>
-				<param type="GLint*" name="value"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
 			</params>
 		</function>
 		<function name="eglWaitGL" return="EGLBoolean" link="static"/>
 		<function name="eglWaitNative" return="EGLBoolean" link="static">
 			<params>
-				<param type="GLint" name="engine"/>
+				<param type="EGLint" name="engine"/>
 			</params>
 		</function>
 		<function name="eglSwapBuffers" return="EGLBoolean" link="static">

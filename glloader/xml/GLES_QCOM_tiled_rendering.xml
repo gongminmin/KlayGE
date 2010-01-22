@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLX_EXT_texture_from_pixmap" reg_no="70">
+<gl_extension name="GLES_QCOM_tiled_rendering" reg_no="70">
 	<tokens>
 		<token name="GL_COLOR_BUFFER_BIT0_QCOM" value="0x00000001"/>
 		<token name="GL_COLOR_BUFFER_BIT1_QCOM" value="0x00000002"/>

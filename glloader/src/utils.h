@@ -33,6 +33,7 @@ void gl_init();
 void wgl_init();
 void glx_init();
 void gles_init();
+void egl_init();
 
 #ifdef __cplusplus
 }

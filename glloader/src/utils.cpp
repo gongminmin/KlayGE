@@ -197,6 +197,7 @@ namespace glloader
 				features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
 				int const ver_code = major * 10 + minor;
+#ifndef GLLOADER_GLES
 				if (ver_code >= 10)
 				{
 					features_.push_back("GL_VERSION_1_0");
@@ -241,6 +242,20 @@ namespace glloader
 				{
 					features_.push_back("GL_VERSION_3_2");
 				}
+#else
+				if (ver_code >= 10)
+				{
+					features_.push_back("GLES_VERSION_1_0");
+				}
+				if (ver_code >= 11)
+				{
+					features_.push_back("GLES_VERSION_1_1");
+				}
+				if (ver_code >= 20)
+				{
+					features_.push_back("GLES_VERSION_2_0");
+				}
+#endif
 			}
 		}
 		void wgl_features()
@@ -352,6 +367,10 @@ void glloader_init()
 
 #ifdef GLLOADER_GLES
 	gles_init();
+#endif
+
+#ifdef GLLOADER_EGL
+	egl_init();
 #endif
 }
 

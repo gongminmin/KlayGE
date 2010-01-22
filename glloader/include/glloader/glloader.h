@@ -55,6 +55,9 @@
 #define GLLOADER_DEBUG
 #endif
 
+#ifndef GLLOADER_GLES_SUPPORT
+#define GLLOADER_GL
+
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 	#define GLLOADER_WGL
 #endif
@@ -65,8 +68,6 @@
 	#define GLLOADER_GLX
 #endif
 
-#ifndef GLLOADER_GLES_SUPPORT
-#define GLLOADER_GL
 #else
 #define GLLOADER_GLES
 #define GLLOADER_EGL
@@ -132,8 +133,14 @@ typedef EGLNativeWindowType  NativeWindowType;
 #if defined(__wglext_h_) || defined(__WGLEXT_H_)
 #error glloader.h should be included before wglext.h
 #endif
+#if defined(__gl2ext_h_) || defined(__GL2EXT_H_)
+#error glloader.h should be included before gl2ext.h
+#endif
 #if defined(__gl_ATI_h_)
 #error glloader.h should be included before glATIext.h
+#endif
+#if defined(__gl2atiext_h_)
+#error glloader.h should be included before gl2amdext.h
 #endif
 #if defined(__egl_h_) || defined(__EGL_H_)
 #error glloader.h should be included before egl.h
@@ -185,7 +192,10 @@ typedef EGLNativeWindowType  NativeWindowType;
 #define __GL3_H_
 #define __glext_h_
 #define __GLEXT_H_
+#define __gl2ext_h_
+#define __GL2EXT_h_
 #define __gl_ATI_h_
+#define __gl2atiext_h_
 #endif
 
 #ifdef GLLOADER_GLX

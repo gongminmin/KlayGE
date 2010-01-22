@@ -364,7 +364,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib"
+				AdditionalDependencies="libEGL.lib libGLESv2.lib"
 				OutputFile="$(OutDir)/glloader_es_x86_d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -515,7 +515,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="opengl32.lib"
+				AdditionalDependencies="libEGL.lib libGLESv2.lib"
 				OutputFile="$(OutDir)/glloader_es_x86.dll"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
