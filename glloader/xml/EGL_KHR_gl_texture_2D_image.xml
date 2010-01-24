@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_gl_texture_2D_image" reg_no="5">
+	<tokens>
+		<token name="EGL_GL_TEXTURE_2D_KHR" value="0x30B1"/>
+		<token name="EGL_GL_TEXTURE_LEVEL_KHR" value="0x30BC"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_X_KHR" value="0x30B3"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_X_KHR" value="0x30B4"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Y_KHR" value="0x30B5"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_KHR" value="0x30B6"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_POSITIVE_Z_KHR" value="0x30B7"/>
+		<token name="EGL_GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_KHR" value="0x30B8"/>
+		<token name="EGL_GL_TEXTURE_3D_KHR" value="0x30B2"/>
+		<token name="EGL_GL_TEXTURE_ZOFFSET_KHR" value="0x30BD"/>
+		<token name="EGL_GL_RENDERBUFFER_KHR" value="0x30B9"/>
+	</tokens>
+</gl_extension>

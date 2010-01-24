@@ -73,19 +73,26 @@
 #define GLLOADER_EGL
 #endif
 
+#ifndef GLLOADER_GLES
 #if defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 #include <windows.h>
+#endif
+#else
+#if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif
+#include <windows.h>
 
-#ifdef GLLOADER_EGL
 typedef HDC     EGLNativeDisplayType;
 typedef HBITMAP EGLNativePixmapType;
 typedef HWND    EGLNativeWindowType;
 #endif
-
 #endif
+
 
 #if defined(__WINSCW__) || defined(__SYMBIAN32__)
 #ifdef GLLOADER_EGL

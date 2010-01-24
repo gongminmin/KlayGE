@@ -142,6 +142,7 @@ namespace glloader
 			gl_features();
 			wgl_features();
 			glx_features();
+			egl_features();
 
 			std::sort(features_.begin(), features_.end());
 		}
@@ -194,6 +195,15 @@ namespace glloader
 				}
 
 				gl_exts.erase(std::remove(gl_exts.begin(), gl_exts.end(), ""), gl_exts.end());
+#ifdef GLLOADER_GLES
+				for (std::vector<std::string>::iterator iter = gl_exts.begin(); iter != gl_exts.end(); ++ iter)
+				{
+					if (0 == iter->find("GL_"))
+					{
+						*iter = "GLES_" + iter->substr(3);
+					}
+				}
+#endif
 				features_.insert(features_.end(), gl_exts.begin(), gl_exts.end());
 
 				int const ver_code = major * 10 + minor;
@@ -328,6 +338,64 @@ namespace glloader
 				}
 			}
 #endif		// GLLOADER_GLX
+		}
+		void egl_version(int& major, int& minor)
+		{
+#ifdef GLLOADER_EGL
+			char const * str = ::eglQueryString(::eglGetCurrentDisplay(), EGL_VERSION);
+			if (str != NULL)
+			{
+				std::string const ver(reinterpret_cast<char const *>(str));
+				std::string::size_type const pos(ver.find("."));
+
+				major = ver[pos - 1] - '0';
+				minor = ver[pos + 1] - '0';
+			}
+			else
+			{
+				// GL context has not actived yet
+				major = minor = -1;
+			}
+#else
+			major = minor = 0;
+#endif		// GLLOADER_EGL
+		}
+		void egl_features()
+		{
+#ifdef GLLOADER_EGL
+			char const * str = ::eglQueryString(::eglGetCurrentDisplay(), EGL_EXTENSIONS);
+			if (str != NULL)
+			{
+				std::vector<std::string> egl_exts = split(str);
+				egl_exts.erase(std::remove(egl_exts.begin(), egl_exts.end(), ""), egl_exts.end());
+				features_.insert(features_.end(), egl_exts.begin(), egl_exts.end());
+
+				int major, minor;
+				egl_version(major, minor);
+
+				int const ver_code = major * 10 + minor;
+				if (ver_code >= 10)
+				{
+					features_.push_back("EGL_VERSION_1_0");
+				}
+				if (ver_code >= 11)
+				{
+					features_.push_back("EGL_VERSION_1_1");
+				}
+				if (ver_code >= 12)
+				{
+					features_.push_back("EGL_VERSION_1_2");
+				}
+				if (ver_code >= 13)
+				{
+					features_.push_back("EGL_VERSION_1_3");
+				}
+				if (ver_code >= 14)
+				{
+					features_.push_back("EGL_VERSION_1_4");
+				}
+			}
+#endif		// GLLOADER_EGL
 		}
 
 	private:

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_image_pixmap" reg_no="9">
+	<tokens>
+		<token name="EGL_NATIVE_PIXMAP_KHR" value="0x30B0"/>
+	</tokens>
+</gl_extension>

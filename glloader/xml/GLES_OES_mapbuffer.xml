@@ -1,4 +1,31 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GLES_OES_mapbuffer" reg_no="29">
+	<tokens>
+		<token name="GL_WRITE_ONLY_OES" value="0x88B9"/>
+		<token name="GL_BUFFER_ACCESS_OES" value="0x88BB"/>
+		<token name="GL_BUFFER_MAPPED_OES" value="0x88BC"/>
+		<token name="GL_BUFFER_MAP_POINTER_OES" value="0x88BD"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetBufferPointervOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="void**" name="params"/>
+			</params>
+		</function>
+		<function name="glMapBufferOES" return="void*">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glUnmapBufferOES" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+	</functions>
 </gl_extension>

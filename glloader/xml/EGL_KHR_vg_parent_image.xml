@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_vg_parent_image" reg_no="4">
+	<tokens>
+		<token name="EGL_VG_PARENT_IMAGE_KHR" value="0x30BA"/>
+	</tokens>
+</gl_extension>

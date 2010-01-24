@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_IMG_context_priority" reg_no="10">
+	<tokens>
+		<token name="EGL_CONTEXT_PRIORITY_LEVEL_IMG" value="0x3100"/>
+		<token name="EGL_CONTEXT_PRIORITY_HIGH_IMG" value="0x3101"/>
+		<token name="EGL_CONTEXT_PRIORITY_MEDIUM_IMG" value="0x3102"/>
+		<token name="EGL_CONTEXT_PRIORITY_LOW_IMG" value="0x3103"/>
+	</tokens>
+</gl_extension>

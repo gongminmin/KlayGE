@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_image_base" reg_no="8">
+	<typedefs>
+		<typedef type="void*" synonym="EGLImageKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_NO_IMAGE_KHR" value="((EGLImageKHR)0)"/>
+		<token name="EGL_IMAGE_PRESERVED_KHR" value="0x30D2"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateImageKHR" return="EGLImageKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLContext" name="ctx"/>
+				<param type="EGLenum" name="target"/>
+				<param type="EGLClientBuffer" name="buffer"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroyImageKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLImageKHR" name="image"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
