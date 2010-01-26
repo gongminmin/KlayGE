@@ -552,12 +552,16 @@ namespace KlayGE
 
 		uint32_t new_width = rect.right - rect.left;
 		uint32_t new_height = rect.bottom - rect.top;
+#elif defined KLAYGE_PLATFORM_LINUX
+		int screen = DefaultScreen(x_display_);
+		uint32_t new_width = DisplayWidth(x_display_, screen);
+		uint32_t new_height = DisplayHeight(x_display_, screen);
+#endif
+
 		if ((new_width != width_) || (new_height != height_))
 		{
 			this->Resize(new_width, new_height);
 		}
-#elif defined KLAYGE_PLATFORM_LINUX
-#endif
 	}
 
 	void OGLRenderWindow::Destroy()

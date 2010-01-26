@@ -21,10 +21,6 @@ private:
 
 	KlayGE::FontPtr font_;
 	boost::shared_ptr<KlayGE::Renderable> renderFractal_;
-	boost::shared_ptr<KlayGE::Renderable> renderPlane_;
-
-	KlayGE::FrameBufferPtr render_buffer_[2];
-	KlayGE::TexturePtr rendered_tex_[2];
 };
 
 #endif		// _FRACTAL_HPP

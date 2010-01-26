@@ -595,6 +595,9 @@ namespace KlayGE
 		caps_.hw_instancing_support = true;
 		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
+		caps_.bc1_support = true;
+		caps_.bc2_support = true;
+		caps_.bc3_support = true;
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:

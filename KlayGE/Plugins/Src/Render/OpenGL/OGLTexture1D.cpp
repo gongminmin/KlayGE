@@ -62,7 +62,7 @@ namespace KlayGE
 			{
 				++ numMipMaps_;
 
-				w /= 2;
+				w = std::max(static_cast<uint32_t>(1), w / 2);
 			}
 		}
 		else
@@ -138,7 +138,7 @@ namespace KlayGE
 				glTexImage1D(target_type_, level, glinternalFormat, width, 0, glformat, gltype, NULL);
 			}
 
-			width /= 2;
+			width = std::max(static_cast<uint32_t>(1), width / 2);
 		}
 
 		this->UpdateParams();

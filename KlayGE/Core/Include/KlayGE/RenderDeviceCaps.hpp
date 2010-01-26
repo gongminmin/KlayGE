@@ -46,6 +46,9 @@ namespace KlayGE
 		bool primitive_restart_support;
 		bool multithread_rendering_support;
 		bool argb8_support;
+		bool bc1_support;
+		bool bc2_support;
+		bool bc3_support;
 		bool bc4_support;
 		bool bc5_support;
 		bool bc6_support;

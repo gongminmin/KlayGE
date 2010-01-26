@@ -1,38 +1,39 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="int" name="flip"/>
-	<parameter type="texture2D" name="fractal_tex"/>
-	<parameter type="sampler" name="fractal_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
-
+	<parameter type="float2" name="offset"/>
+	
 	<shader>
 		<![CDATA[
-void MandelbrotVS(float4 pos : POSITION,
-			float2 texcoord0 : TEXCOORD0,
-
+void MandelbrotVS(float2 texcoord0 : TEXCOORD0,
 			out float2 oTexcoord0	: TEXCOORD0,
-			out float2 oTexcoord1	: TEXCOORD1,
 			out float4 oPos			: SV_Position)
 {
-	oPos = pos;
-	oTexcoord0 = texcoord0;
-	oTexcoord0.y *= -flip;
-	oTexcoord1 = oTexcoord0 * 2.4 - float2(1.8, -1.2 * flip);
+	oPos = float4(texcoord0 * 2 - 1, 0.5f, 1);
+	oPos.y *= -1;
+	oPos.xy += offset;
+	oTexcoord0 = texcoord0 * 2.4f - float2(1.8f, 1.2f);
 }
 
-float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
-				float2 texcoord1 : TEXCOORD1) : SV_Target
+float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target
 {
-	float2 z = fractal_tex.Sample(fractal_sampler, texcoord0).rg;
-	float2 c = texcoord1;
+	float2 z = 0;
+	float2 c = texcoord0;
 
-	z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
+	float r2 = 0;
+	int i;
+	for (i = 0; (i < 50) && (r2 < 4); ++ i)
+	{
+		z = float2(z.x * z.x - z.y * z.y, z.x * z.y + z.y * z.x) + c;
+		r2 = dot(z, z);
+    }
 
-	return float4(z.xy, 1, 1);
+	float3 clr = 0;
+	if (r2 >= 4)
+	{
+		clr = lerp(float3(0, 0.2f, 0.6f), float3(0.2f, 1, 0), frac(i * 0.05f));
+	}
+	return float4(clr, 1);
 }
 		]]>
 	</shader>
@@ -41,32 +42,6 @@ float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0,
 		<pass name="p0">
 			<state name="vertex_shader" value="MandelbrotVS()"/>
 			<state name="pixel_shader" value="MandelbrotPS()"/>
-		</pass>
-	</technique>
-
-	<shader>
-		<![CDATA[
-void ShowVS(float4 pos : POSITION,
-		float2 texcoord0 : TEXCOORD0,
-		out float3 oTexcoord0 : TEXCOORD0,
-		out float4 oPos : SV_Position)
-{
-	oPos = pos;
-	oTexcoord0 = float3(texcoord0, 1);
-}
-
-float4 ShowPS(float3 texCoord0 : TEXCOORD0) : SV_Target
-{
-	float2 z = fractal_tex.Sample(fractal_sampler, texCoord0.xy).rg;
-	return float4((dot(z, z) >= 4) * texCoord0, 1);
-}
-		]]>
-	</shader>
-
-	<technique name="Show">
-		<pass name="p0">
-			<state name="vertex_shader" value="ShowVS()"/>
-			<state name="pixel_shader" value="ShowPS()"/>
 		</pass>
 	</technique>
 </effect>

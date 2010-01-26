@@ -500,6 +500,9 @@ namespace KlayGE
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = false;
 		caps_.argb8_support = false;
+		caps_.bc1_support = true;
+		caps_.bc2_support = true;
+		caps_.bc3_support = true;
 		caps_.bc4_support = true;
 		caps_.bc5_support = true;
 		caps_.bc6_support = false;

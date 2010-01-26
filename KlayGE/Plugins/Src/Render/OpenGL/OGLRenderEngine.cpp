@@ -243,6 +243,8 @@ namespace KlayGE
 		}
 		else
 		{
+			glBindTexture(target, tex);
+
 			GLint tmp;
 			glGetTexParameteriv(target, pname, &tmp);
 			if (tmp != param)
@@ -265,6 +267,8 @@ namespace KlayGE
 		}
 		else
 		{
+			glBindTexture(target, tex);
+
 			GLfloat tmp;
 			glGetTexParameterfv(target, pname, &tmp);
 			if (tmp != param)
@@ -287,6 +291,8 @@ namespace KlayGE
 		}
 		else
 		{
+			glActiveTexture(GL_TEXTURE0 + tex_unit);
+
 			GLfloat tmp;
 			glGetTexEnvfv(target, pname, &tmp);
 			if (tmp != param)
@@ -884,6 +890,9 @@ namespace KlayGE
 		}
 		caps_.multithread_rendering_support = false;
 		caps_.argb8_support = true;
+		caps_.bc1_support = true;
+		caps_.bc2_support = true;
+		caps_.bc3_support = true;
 		if (glloader_GL_EXT_texture_compression_rgtc())
 		{
 			caps_.bc4_support = true;

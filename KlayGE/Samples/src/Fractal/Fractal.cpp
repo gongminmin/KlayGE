@@ -29,9 +29,6 @@
 using namespace std;
 using namespace KlayGE;
 
-int const WIDTH = 800;
-int const HEIGHT = 600;
-
 namespace
 {
 	class RenderFractal : public RenderableHelper
@@ -44,16 +41,6 @@ namespace
 
 			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
 
-			float4 const & offset = rf.RenderEngineInstance().TexelToPixelOffset() * 2;
-
-			float3 xyzs[] =
-			{
-				float3(-1 + offset.x() / WIDTH, +1 + offset.y() / HEIGHT, 0.5f),
-				float3(+1 + offset.x() / WIDTH, +1 + offset.y() / HEIGHT, 0.5f),
-				float3(-1 + offset.x() / WIDTH, -1 + offset.y() / HEIGHT, 0.5f),
-				float3(+1 + offset.x() / WIDTH, -1 + offset.y() / HEIGHT, 0.5f),
-			};
-
 			float2 texs[] =
 			{
 				float2(0, 0),
@@ -66,79 +53,21 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			ElementInitData init_data;
-			init_data.row_pitch = sizeof(xyzs);
-			init_data.slice_pitch = 0;
-			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
 		}
 
-		void SetTexture(TexturePtr texture, bool flip)
+		void OnRenderBegin()
 		{
-			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
-		}
-	};
-
-	class RenderPlane : public RenderableHelper
-	{
-	public:
-		RenderPlane()
-			: RenderableHelper(L"Plane")
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Show");
-
-			float3 xyzs[] =
-			{
-				float3(-1, +1, 0.5f),
-				float3(+1, +1, 0.5f),
-				float3(-1, -1, 0.5f),
-				float3(+1, -1, 0.5f),
-			};
-
-			float2 texs[] =
-			{
-				float2(0, 0),
-				float2(1, 0),
-				float2(0, 1),
-				float2(1, 1),
-			};
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-
-			ElementInitData init_data;
-			init_data.row_pitch = sizeof(xyzs);
-			init_data.slice_pitch = 0;
-			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = sizeof(texs);
-			init_data.slice_pitch = 0;
-			init_data.data = texs;
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[0] + sizeof(xyzs) / sizeof(xyzs[0]));
-		}
-
-		void SetTexture(TexturePtr texture, bool flip)
-		{
-			*(technique_->Effect().ParameterByName("fractal_tex")) = texture;
-			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
 		}
 	};
 
@@ -160,16 +89,6 @@ namespace
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-
-		try
-		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0, 0);
-		}
-		catch (...)
 		{
 			return false;
 		}
@@ -202,15 +121,7 @@ void Fractal::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	render_buffer_[0] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	render_buffer_[1] = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	render_buffer_[0]->GetViewport().camera
-		= render_buffer_[1]->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
-
 	renderFractal_ = MakeSharedPtr<RenderFractal>();
-	renderPlane_ = MakeSharedPtr<RenderPlane>();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -226,33 +137,6 @@ void Fractal::InitObjects()
 void Fractal::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-	std::vector<uint8_t> data_v(width * NumFormatBytes(EF_ABGR16F) * height, 0);
-	ElementInitData init_data;
-	init_data.row_pitch = width * NumFormatBytes(EF_GR16F);
-	init_data.data = &data_v[0];
-	init_data.slice_pitch = 0;
-
-	try
-	{
-		for (int i = 0; i < 2; ++ i)
-		{
-			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0, 0));
-		}
-	}
-	catch (...)
-	{
-		init_data.row_pitch = width * NumFormatBytes(EF_ABGR16F);
-		for (int i = 0; i < 2; ++ i)
-		{
-			rendered_tex_[i] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			render_buffer_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rendered_tex_[i], 0, 0));
-		}
-	}
-
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
@@ -287,31 +171,13 @@ void Fractal::DoUpdateOverlay()
 	UIManager::Instance().Render();
 }
 
-uint32_t Fractal::DoUpdate(uint32_t pass)
+uint32_t Fractal::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	static bool odd = false;
+	renderEngine.BindFrameBuffer(FrameBufferPtr());
+	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+	renderFractal_->AddToRenderQueue();
 
-	switch (pass)
-	{
-	case 0:
-		renderEngine.BindFrameBuffer(render_buffer_[!odd]);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-
-		checked_pointer_cast<RenderFractal>(renderFractal_)->SetTexture(rendered_tex_[odd], render_buffer_[odd]->RequiresFlipping());
-		renderFractal_->AddToRenderQueue();
-		return App3DFramework::URV_Need_Flush;
-
-	default:
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-
-		checked_pointer_cast<RenderPlane>(renderPlane_)->SetTexture(rendered_tex_[!odd], render_buffer_[!odd]->RequiresFlipping());
-		renderPlane_->AddToRenderQueue();
-
-		odd = !odd;
-
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
-	}
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

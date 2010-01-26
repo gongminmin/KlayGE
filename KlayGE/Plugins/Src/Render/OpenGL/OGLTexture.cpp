@@ -1,4 +1,4 @@
-// OGLTexture.hpp
+// OGLTexture.cpp
 // KlayGE OpenGL纹理类 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2007
