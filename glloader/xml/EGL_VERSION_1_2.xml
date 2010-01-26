@@ -1,0 +1,60 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_VERSION_1_2">
+	<typedefs>
+		<typedef type="unsigned int" synonym="EGLenum"/>
+		<typedef type="void*" synonym="EGLClientBuffer"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_LUMINANCE_SIZE" value="0x303D"/>
+		<token name="EGL_ALPHA_MASK_SIZE" value="0x303E"/>
+		<token name="EGL_COLOR_BUFFER_TYPE" value="0x303F"/>
+		<token name="EGL_RENDERABLE_TYPE" value="0x3040"/>
+		<token name="EGL_RGB_BUFFER" value="0x308E"/>
+		<token name="EGL_LUMINANCE_BUFFER" value="0x308F"/>
+		<token name="EGL_OPENGL_ES_BIT" value="0x0001"/>
+		<token name="EGL_OPENVG_BIT" value="0x0002"/>
+		<token name="EGL_CLIENT_APIS" value="0x308D"/>
+		<token name="EGL_RENDER_BUFFER" value="0x3086"/>
+		<token name="EGL_COLORSPACE" value="EGL_VG_COLORSPACE"/>
+		<token name="EGL_ALPHA_FORMAT" value="EGL_VG_ALPHA_FORMAT"/>
+		<token name="EGL_COLORSPACE_sRGB" value="EGL_VG_COLORSPACE_sRGB"/>
+		<token name="EGL_COLORSPACE_LINEAR" value="EGL_VG_COLORSPACE_LINEAR"/>
+		<token name="EGL_ALPHA_FORMAT_NONPRE" value="EGL_VG_ALPHA_FORMAT_NONPRE"/>
+		<token name="EGL_ALPHA_FORMAT_PRE" value="EGL_VG_ALPHA_FORMAT_PRE"/>
+		<token name="EGL_HORIZONTAL_RESOLUTION" value="0x3090"/>
+		<token name="EGL_VERTICAL_RESOLUTION" value="0x3091"/>
+		<token name="EGL_PIXEL_ASPECT_RATIO" value="0x3092"/>
+		<token name="EGL_SWAP_BEHAVIOR" value="0x3093"/>
+		<token name="EGL_SINGLE_BUFFER" value="0x3085"/>
+		<token name="EGL_DISPLAY_SCALING" value="10000"/>
+		<token name="EGL_UNKNOWN" value="-1"/>
+		<token name="EGL_BUFFER_PRESERVED" value="0x3094"/>
+		<token name="EGL_BUFFER_DESTROYED" value="0x3095"/>
+		<token name="EGL_OPENVG_IMAGE" value="0x3096"/>
+		<token name="EGL_CONTEXT_CLIENT_TYPE" value="0x3097"/>
+		<token name="EGL_OPENGL_ES_API" value="0x30A0"/>
+		<token name="EGL_OPENVG_API" value="0x30A1"/>
+	</tokens>
+
+	<functions>
+		<function name="eglBindAPI" return="EGLBoolean" link="static">
+			<params>
+				<param type="EGLenum" name="api"/>
+			</params>
+		</function>
+		<function name="eglQueryAPI" return="EGLenum" link="static"/>
+		<function name="eglWaitClient" return="EGLBoolean" link="static"/>
+		<function name="eglReleaseThread" return="EGLBoolean" link="static"/>
+		<function name="eglCreatePbufferFromClientBuffer" return="EGLSurface" link="static">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="buftype"/>
+				<param type="EGLClientBuffer" name="buffer"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

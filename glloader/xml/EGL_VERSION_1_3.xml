@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_VERSION_1_3">
+	<tokens>
+		<token name="EGL_CONFORMANT" value="0x3042"/>
+		<token name="EGL_VG_COLORSPACE_LINEAR_BIT" value="0x0020"/>
+		<token name="EGL_VG_ALPHA_FORMAT_PRE_BIT" value="0x0040"/>
+		<token name="EGL_OPENGL_ES2_BIT" value="0x0004"/>
+		<token name="EGL_VG_COLORSPACE" value="0x3087"/>
+		<token name="EGL_VG_ALPHA_FORMAT" value="0x3088"/>
+		<token name="EGL_VG_COLORSPACE_sRGB" value="0x3089"/>
+		<token name="EGL_VG_COLORSPACE_LINEAR" value="0x308A"/>
+		<token name="EGL_VG_ALPHA_FORMAT_NONPRE" value="0x308B"/>
+		<token name="EGL_VG_ALPHA_FORMAT_PRE" value="0x308C"/>
+		<token name="EGL_CONTEXT_CLIENT_VERSION" value="0x3098"/>
+	</tokens>
+</gl_extension>

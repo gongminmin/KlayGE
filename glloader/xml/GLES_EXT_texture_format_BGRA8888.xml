@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_bgra" reg_no="51">
+<gl_extension name="GLES_EXT_texture_format_BGRA8888" reg_no="51">
 	<tokens>
 		<token name="GL_BGRA_EXT" value="0x80E1"/>
 	</tokens>
