@@ -191,13 +191,25 @@ namespace KlayGE
 	void OGLES2RenderEngine::TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param)
 	{
 		glBindTexture(target, tex);
-		glTexParameteri(target, pname, param);
+
+		GLint tmp;
+		glGetTexParameteriv(target, pname, &tmp);
+		if (tmp != param)
+		{
+			glTexParameteri(target, pname, param);
+		}
 	}
 
 	void OGLES2RenderEngine::TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param)
 	{
 		glBindTexture(target, tex);
-		glTexParameterf(target, pname, param);
+
+		GLfloat tmp;
+		glGetTexParameterfv(target, pname, &tmp);
+		if (tmp != param)
+		{
+			glTexParameterf(target, pname, param);
+		}
 	}
 
 	void OGLES2RenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
@@ -234,7 +246,7 @@ namespace KlayGE
 	{
 		if (force || (cur_fbo_ != fbo))
 		{
-			glBindFramebufferOES(GL_FRAMEBUFFER_OES, fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			cur_fbo_ = fbo;
 		}
 	}

@@ -377,33 +377,34 @@ namespace KlayGE
 	{
 		if (desc_.filter & TFOE_Min_Linear)
 		{
-			ogl_min_filter_ = GL_LINEAR;
+			if (desc_.filter & TFOE_Mip_Linear)
+			{
+				ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			}
+			else
+			{
+				ogl_min_filter_ = GL_LINEAR_MIPMAP_NEAREST;
+			}
 		}
 		else
 		{
-			ogl_min_filter_ = GL_NEAREST;
+			if (desc_.filter & TFOE_Mip_Linear)
+			{
+				ogl_min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
+			}
+			else
+			{
+				ogl_min_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+			}
 		}
 		if (desc_.filter & TFOE_Mag_Linear)
 		{
-			if (desc_.filter & TFOE_Mip_Linear)
-			{
-				ogl_mag_filter_ = GL_LINEAR_MIPMAP_LINEAR;
-			}
-			else
-			{
-				ogl_mag_filter_ = GL_LINEAR_MIPMAP_NEAREST;
-			}
+			ogl_mag_filter_ = GL_LINEAR;
+			
 		}
 		else
 		{
-			if (desc_.filter & TFOE_Mip_Linear)
-			{
-				ogl_mag_filter_ = GL_NEAREST_MIPMAP_LINEAR;
-			}
-			else
-			{
-				ogl_mag_filter_ = GL_NEAREST_MIPMAP_NEAREST;
-			}
+			ogl_mag_filter_ = GL_NEAREST;
 		}
 	}
 

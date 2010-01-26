@@ -251,6 +251,12 @@ namespace KlayGE
 	{
 		switch (ef)
 		{
+		case EF_A8:
+			internalFormat = GL_ALPHA;
+			glformat = GL_ALPHA;
+			gltype = GL_UNSIGNED_BYTE;
+			break;
+
 		case EF_R8:
 			internalFormat = GL_LUMINANCE;
 			glformat = GL_LUMINANCE;
