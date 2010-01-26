@@ -493,7 +493,6 @@ namespace KlayGE
 		if (desc_.filter & TFOE_Mag_Linear)
 		{
 			ogl_mag_filter_ = GL_LINEAR;
-			
 		}
 		else
 		{
@@ -543,8 +542,8 @@ namespace KlayGE
 			}
 		}
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_min_filter_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_mag_filter_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
+		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
 
 		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
 		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MIN_LOD, desc_.min_lod);

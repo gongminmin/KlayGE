@@ -596,7 +596,7 @@ namespace KlayGE
 		glGenRenderbuffers(1, &rbo_);
 		glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
 		glRenderbufferStorage(GL_RENDERBUFFER,
-								glformat, width_, height_);
+								internalFormat, width_, height_);
 	}
 
 	OGLES2DepthStencilRenderView::OGLES2DepthStencilRenderView(Texture& texture, int array_index, int level)

@@ -923,7 +923,7 @@ namespace KlayGE
 		glGenRenderbuffersEXT(1, &rbo_);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo_);
 		glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT,
-								glformat, width_, height_);
+								internalFormat, width_, height_);
 	}
 
 	OGLDepthStencilRenderView::OGLDepthStencilRenderView(Texture& texture, int array_index, int level)

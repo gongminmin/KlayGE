@@ -100,11 +100,11 @@ namespace KlayGE
 
 					if (NULL == init_data)
 					{
-						tex_data_[level].resize(image_size, 0);
+						tex_data_[face * numMipMaps_ + level].resize(image_size, 0);
 					}
 					else
 					{
-						tex_data_[level].resize(image_size);
+						tex_data_[face * numMipMaps_ + level].resize(image_size);
 						memcpy(&tex_data_[face * numMipMaps_ + level][0], init_data[face * numMipMaps_ + level].data, image_size);
 					}
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
@@ -116,11 +116,11 @@ namespace KlayGE
 
 					if (NULL == init_data)
 					{
-						tex_data_[level].resize(image_size, 0);
+						tex_data_[face * numMipMaps_ + level].resize(image_size, 0);
 					}
 					else
 					{
-						tex_data_[level].resize(image_size);
+						tex_data_[face * numMipMaps_ + level].resize(image_size);
 						memcpy(&tex_data_[face * numMipMaps_ + level][0], init_data[face * numMipMaps_ + level].data, image_size);
 					}
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
@@ -184,7 +184,7 @@ namespace KlayGE
 
 						GLsizei const image_size = ((this->Width(level) + 3) / 4) * ((this->Width(level) + 3) / 4) * block_size;
 
-						memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
+						memcpy(&gles_target.tex_data_[face * numMipMaps_ + level][0], &tex_data_[face * numMipMaps_ + level][0], image_size);
 						glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0,
 							this->Width(level), this->Width(level), gl_format, image_size, &tex_data_[face * numMipMaps_ + level][0]);
 					}
@@ -192,7 +192,7 @@ namespace KlayGE
 					{
 						GLsizei const image_size = target.Width(level) * target.Width(level) * bpp_ / 8;
 
-						memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
+						memcpy(&gles_target.tex_data_[face * numMipMaps_ + level][0], &tex_data_[face * numMipMaps_ + level][0], image_size);
 						glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, this->Width(level), this->Width(level),
 								gl_format, gl_type, &tex_data_[face * numMipMaps_ + level][0]);
 					}

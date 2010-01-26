@@ -390,7 +390,7 @@ namespace KlayGE
 			break;
 
 		case EF_D16:
-			internalFormat = GL_DEPTH_COMPONENT;
+			internalFormat = GL_DEPTH_COMPONENT16;
 			glformat = GL_DEPTH_COMPONENT;
 			gltype = GL_UNSIGNED_SHORT;
 			break;

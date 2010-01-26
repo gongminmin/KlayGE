@@ -977,218 +977,224 @@ namespace KlayGE
 					is_shader_validate_[type] = false;
 				}
 
-				char const * glsl = cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM);
-				GLuint object = glCreateShader(shader_type);
-				if (0 == object)
+				if (is_shader_validate_[type])
 				{
-					is_shader_validate_[type] = false;
-				}
-				(*glsl_srcs_)[type] = glsl;
-				//printf("%s\n", glsl);
-
-				glShaderSource(object, 1, &glsl, NULL);
-
-				glCompileShader(object);
-
-				GLint compiled = false;
-				glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
-				if (!compiled)
-				{
-					GLint len = 0;
-					glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-					if (len > 0)
+					char const * glsl = cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM);
+					GLuint object = glCreateShader(shader_type);
+					if (0 == object)
 					{
-						std::vector<char> info(len + 1, 0);
-						glGetShaderInfoLog(object, len, &len, &info[0]);
-						std::cerr << &info[0] << std::endl;
+						is_shader_validate_[type] = false;
 					}
-				}
-#endif
-				is_shader_validate_[type] &= compiled ? true : false;
+					(*glsl_srcs_)[type] = glsl;
+					//printf("%s\n", glsl);
 
-				glAttachShader(glsl_program_, object);
-				glDeleteShader(object);
+					glShaderSource(object, 1, &glsl, NULL);
+
+					glCompileShader(object);
+
+					GLint compiled = false;
+					glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
+#ifdef KLAYGE_DEBUG
+					if (!compiled)
+					{
+						GLint len = 0;
+						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
+						if (len > 0)
+						{
+							std::vector<char> info(len + 1, 0);
+							glGetShaderInfoLog(object, len, &len, &info[0]);
+							std::cerr << &info[0] << std::endl;
+						}
+					}
+#endif
+					is_shader_validate_[type] &= compiled ? true : false;
+
+					glAttachShader(glsl_program_, object);
+					glDeleteShader(object);
+				}
 			}
 
 			is_validate_ &= is_shader_validate_[type];
 		}
 
-		glLinkProgram(glsl_program_);
+		if (is_validate_)
+		{
+			glLinkProgram(glsl_program_);
 
-		GLint linked = false;
-		glGetProgramiv(glsl_program_, GL_LINK_STATUS, &linked);
+			GLint linked = false;
+			glGetProgramiv(glsl_program_, GL_LINK_STATUS, &linked);
 #ifdef KLAYGE_DEBUG
-		if (!linked)
-		{
-			GLint len = 0;
-			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
-			if (len > 0)
+			if (!linked)
 			{
-				std::vector<char> info(len + 1, 0);
-				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
-			}
-		}
-#endif
-		is_validate_ &= linked ? true : false;
-
-		glValidateProgram(glsl_program_);
-
-		GLint validated = false;
-		glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-		if (!validated)
-		{
-			GLint len = 0;
-			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
-			if (len > 0)
-			{
-				std::vector<char> info(len + 1, 0);
-				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
-			}
-		}
-#endif
-		is_validate_ &= validated ? true : false;
-
-		for (int type = 0; type < ST_NumShaderTypes; ++ type)
-		{
-			CGprogram sub_prog = shaders[type];
-			if (shaders[type] != 0)
-			{
-				CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_GLOBAL);
-				while (cg_param)
+				GLint len = 0;
+				glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+				if (len > 0)
 				{
-					if (cgIsParameterUsed(cg_param, sub_prog)
-						&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
+					std::vector<char> info(len + 1, 0);
+					glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
+					std::cerr << &info[0] << std::endl;
+				}
+			}
+#endif
+			is_validate_ &= linked ? true : false;
+
+			glValidateProgram(glsl_program_);
+
+			GLint validated = false;
+			glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
+#ifdef KLAYGE_DEBUG
+			if (!validated)
+			{
+				GLint len = 0;
+				glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+				if (len > 0)
+				{
+					std::vector<char> info(len + 1, 0);
+					glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
+					std::cerr << &info[0] << std::endl;
+				}
+			}
+#endif
+			is_validate_ &= validated ? true : false;
+
+			for (int type = 0; type < ST_NumShaderTypes; ++ type)
+			{
+				CGprogram sub_prog = shaders[type];
+				if (shaders[type] != 0)
+				{
+					CGparameter cg_param = cgGetFirstParameter(sub_prog, CG_GLOBAL);
+					while (cg_param)
 					{
-						char const * pname = cgGetParameterName(cg_param);
-
-						char const * glsl_param_name = cgGetParameterResourceName(cg_param);
-						std::string hacked_name = std::string("_") + pname;
-
-						if (NULL == glsl_param_name)
+						if (cgIsParameterUsed(cg_param, sub_prog)
+							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 						{
-							// Some times cgGetParameterResourceName doesn't work
-							glsl_param_name = hacked_name.c_str();
-						}
+							char const * pname = cgGetParameterName(cg_param);
 
-						GLint location = glGetUniformLocation(glsl_program_, glsl_param_name);
-						if (location != -1)
-						{
-							RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
-							if (p)
+							char const * glsl_param_name = cgGetParameterResourceName(cg_param);
+							std::string hacked_name = std::string("_") + pname;
+
+							if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
 							{
-								param_binds_.push_back(this->GetBindFunc(location, p));
+								// Some times cgGetParameterResourceName doesn't work
+								glsl_param_name = hacked_name.c_str();
 							}
-							else
+
+							GLint location = glGetUniformLocation(glsl_program_, glsl_param_name);
+							if (location != -1)
 							{
-								for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+								RenderEffectParameterPtr const & p = effect.ParameterByName(pname);
+								if (p)
 								{
-									if (tex_sampler_binds_[i].first == pname)
+									param_binds_.push_back(this->GetBindFunc(location, p));
+								}
+								else
+								{
+									for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 									{
-										parameter_bind_t pb;
-										pb.combined_sampler_name = tex_sampler_binds_[i].first;
-										pb.location = location;
-										pb.shader_type = type;
-										pb.tex_sampler_bind_index = static_cast<int>(i);
+										if (tex_sampler_binds_[i].first == pname)
+										{
+											parameter_bind_t pb;
+											pb.combined_sampler_name = tex_sampler_binds_[i].first;
+											pb.location = location;
+											pb.shader_type = type;
+											pb.tex_sampler_bind_index = static_cast<int>(i);
 
-										uint32_t index = static_cast<uint32_t>(samplers_[type].size());
-										samplers_[type].resize(index + 1);
+											uint32_t index = static_cast<uint32_t>(samplers_[type].size());
+											samplers_[type].resize(index + 1);
 
-										pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], location,
-											index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
+											pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], location,
+												index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
 
-										param_binds_.push_back(pb);
-									
-										break;
+											param_binds_.push_back(pb);
+										
+											break;
+										}
 									}
 								}
 							}
 						}
-					}
-
-					cg_param = cgGetNextParameter(cg_param);
-				}
-
-				if (0 == type)
-				{
-					cg_param = cgGetFirstParameter(sub_prog, CG_PROGRAM);
-					while (cg_param)
-					{
-						if (cgIsParameterUsed(cg_param, sub_prog)
-							&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
-							&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
-						{
-							std::string semantic = cgGetParameterSemantic(cg_param);
-							char const * glsl_param_name = semantic.c_str();//cgGetParameterResourceName(cg_param);
-
-							VertexElementUsage usage = VEU_Position;
-							uint8_t usage_index = 0;
-							GLint defalut_attr_loc = 0;
-							if ("POSITION" == semantic)
-							{
-								usage = VEU_Position;
-								defalut_attr_loc = 0;
-							}
-							else if ("NORMAL" == semantic)
-							{
-								usage = VEU_Normal;
-								defalut_attr_loc = 2;
-							}
-							else if (("COLOR0" == semantic) || ("COLOR" == semantic))
-							{
-								usage = VEU_Diffuse;
-								defalut_attr_loc = 3;
-							}
-							else if ("COLOR1" == semantic)
-							{
-								usage = VEU_Specular;
-								defalut_attr_loc = 4;
-							}
-							else if ("BLENDWEIGHT" == semantic)
-							{
-								usage = VEU_BlendWeight;
-								defalut_attr_loc = 1;
-							}
-							else if ("BLENDINDICES" == semantic)
-							{
-								usage = VEU_BlendIndex;
-								defalut_attr_loc = 7;
-							}
-							else if (0 == semantic.find("TEXCOORD"))
-							{
-								usage = VEU_TextureCoord;
-								usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-								defalut_attr_loc = 8 + usage_index;
-							}
-							else if ("TANGENT" == semantic)
-							{
-								usage = VEU_Tangent;
-								defalut_attr_loc = 14;
-							}
-							else
-							{
-								BOOST_ASSERT("BINORMAL" == semantic);
-
-								usage = VEU_Binormal;
-								defalut_attr_loc = 15;
-							}
-
-							GLint attr_loc = glGetAttribLocation(glsl_program_, glsl_param_name);
-							if (-1 == attr_loc)
-							{
-								attr_loc = defalut_attr_loc;
-							}
-							attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index), attr_loc));
-						}
 
 						cg_param = cgGetNextParameter(cg_param);
 					}
-				}
 
-				cgDestroyProgram(shaders[type]);
+					if (0 == type)
+					{
+						cg_param = cgGetFirstParameter(sub_prog, CG_PROGRAM);
+						while (cg_param)
+						{
+							if (cgIsParameterUsed(cg_param, sub_prog)
+								&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
+								&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+							{
+								std::string semantic = cgGetParameterSemantic(cg_param);
+								char const * glsl_param_name = semantic.c_str();//cgGetParameterResourceName(cg_param);
+
+								VertexElementUsage usage = VEU_Position;
+								uint8_t usage_index = 0;
+								GLint defalut_attr_loc = 0;
+								if ("POSITION" == semantic)
+								{
+									usage = VEU_Position;
+									defalut_attr_loc = 0;
+								}
+								else if ("NORMAL" == semantic)
+								{
+									usage = VEU_Normal;
+									defalut_attr_loc = 2;
+								}
+								else if (("COLOR0" == semantic) || ("COLOR" == semantic))
+								{
+									usage = VEU_Diffuse;
+									defalut_attr_loc = 3;
+								}
+								else if ("COLOR1" == semantic)
+								{
+									usage = VEU_Specular;
+									defalut_attr_loc = 4;
+								}
+								else if ("BLENDWEIGHT" == semantic)
+								{
+									usage = VEU_BlendWeight;
+									defalut_attr_loc = 1;
+								}
+								else if ("BLENDINDICES" == semantic)
+								{
+									usage = VEU_BlendIndex;
+									defalut_attr_loc = 7;
+								}
+								else if (0 == semantic.find("TEXCOORD"))
+								{
+									usage = VEU_TextureCoord;
+									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
+									defalut_attr_loc = 8 + usage_index;
+								}
+								else if ("TANGENT" == semantic)
+								{
+									usage = VEU_Tangent;
+									defalut_attr_loc = 14;
+								}
+								else
+								{
+									BOOST_ASSERT("BINORMAL" == semantic);
+
+									usage = VEU_Binormal;
+									defalut_attr_loc = 15;
+								}
+
+								GLint attr_loc = glGetAttribLocation(glsl_program_, glsl_param_name);
+								if (-1 == attr_loc)
+								{
+									attr_loc = defalut_attr_loc;
+								}
+								attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index), attr_loc));
+							}
+
+							cg_param = cgGetNextParameter(cg_param);
+						}
+					}
+
+					cgDestroyProgram(shaders[type]);
+				}
 			}
 		}
 	}
@@ -1209,18 +1215,6 @@ namespace KlayGE
 			ret->tex_sampler_binds_[i].second.second = effect.ParameterByName(*(tex_sampler_binds_[i].second.second->Name()));
 		}
 
-		std::vector<char const *> args;
-		args.push_back("-DKLAYGE_OPENGL=1");
-		if (!Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().bc5_support)
-		{
-			args.push_back("-DKLAYGE_BC5_AS_AG");
-		}
-		else
-		{
-			args.push_back("-DKLAYGE_BC5_AS_GA");
-		}
-		args.push_back(NULL);
-
 		ret->glsl_program_ = glCreateProgram();
 
 		ret->is_validate_ = true;
@@ -1228,140 +1222,141 @@ namespace KlayGE
 		{
 			ret->is_shader_validate_[type] = is_shader_validate_[type];
 
-			shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
-			if (!sd.func_name.empty())
+			if (is_shader_validate_[type])
 			{
-				GLenum shader_type;
-				CGprofile profile;
-				switch (type)
+				shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
+				if (!sd.func_name.empty())
 				{
-				case ST_VertexShader:
-					shader_type = GL_VERTEX_SHADER;
-					profile = CG_PROFILE_GLSLV;
-					break;
-
-				case ST_PixelShader:
-					shader_type = GL_FRAGMENT_SHADER;
-					profile = CG_PROFILE_GLSLF;
-					break;
-
-				case ST_GeometryShader:
-					shader_type = GL_GEOMETRY_SHADER_EXT;
-					profile = CG_PROFILE_GLSLG;
-					break;
-
-				default:
-					shader_type = 0;
-					profile = CG_PROFILE_UNKNOWN;
-					BOOST_ASSERT(false);
-					break;
-				}
-
-				char const * glsl = (*glsl_srcs_)[type].c_str();
-				GLuint object = glCreateShader(shader_type);
-				if (0 == object)
-				{
-					ret->is_shader_validate_[type] = false;
-				}
-
-				glShaderSource(object, 1, &glsl, NULL);
-
-				glCompileShader(object);
-
-				GLint compiled = false;
-				glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
-				if (!compiled)
-				{
-					GLint len = 0;
-					glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-					if (len > 0)
+					GLenum shader_type;
+					switch (type)
 					{
-						std::vector<char> info(len + 1, 0);
-						glGetShaderInfoLog(object, len, &len, &info[0]);
-						std::cerr << &info[0] << std::endl;
-					}
-				}
-#endif
-				ret->is_shader_validate_[type] &= compiled ? true : false;
+					case ST_VertexShader:
+						shader_type = GL_VERTEX_SHADER;
+						break;
 
-				glAttachShader(ret->glsl_program_, object);
-				glDeleteShader(object);
+					case ST_PixelShader:
+						shader_type = GL_FRAGMENT_SHADER;
+						break;
+
+					case ST_GeometryShader:
+						shader_type = GL_GEOMETRY_SHADER_EXT;
+						break;
+
+					default:
+						shader_type = 0;
+						BOOST_ASSERT(false);
+						break;
+					}
+
+					char const * glsl = (*glsl_srcs_)[type].c_str();
+					GLuint object = glCreateShader(shader_type);
+					if (0 == object)
+					{
+						ret->is_shader_validate_[type] = false;
+					}
+
+					glShaderSource(object, 1, &glsl, NULL);
+
+					glCompileShader(object);
+
+					GLint compiled = false;
+					glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
+#ifdef KLAYGE_DEBUG
+					if (!compiled)
+					{
+						GLint len = 0;
+						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
+						if (len > 0)
+						{
+							std::vector<char> info(len + 1, 0);
+							glGetShaderInfoLog(object, len, &len, &info[0]);
+							std::cerr << &info[0] << std::endl;
+						}
+					}
+#endif
+					ret->is_shader_validate_[type] &= compiled ? true : false;
+
+					glAttachShader(ret->glsl_program_, object);
+					glDeleteShader(object);
+				}
 			}
 
 			ret->is_validate_ &= ret->is_shader_validate_[type];
 		}
 
-		glLinkProgram(ret->glsl_program_);
-
-		GLint linked = false;
-		glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
-#ifdef KLAYGE_DEBUG
-		if (!linked)
+		if (ret->is_validate_)
 		{
-			GLint len = 0;
-			glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-			if (len > 0)
-			{
-				std::vector<char> info(len + 1, 0);
-				glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
-			}
-		}
-#endif
-		ret->is_validate_ &= linked ? true : false;
+			glLinkProgram(ret->glsl_program_);
 
-		glValidateProgram(ret->glsl_program_);
-
-		GLint validated = false;
-		glGetProgramiv(ret->glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-		if (!validated)
-		{
-			GLint len = 0;
-			glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-			if (len > 0)
+			GLint linked = false;
+			glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
+	#ifdef KLAYGE_DEBUG
+			if (!linked)
 			{
-				std::vector<char> info(len + 1, 0);
-				glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-				std::cerr << &info[0] << std::endl;
-			}
-		}
-#endif
-		ret->is_validate_ &= validated ? true : false;
-		ret->attrib_locs_ = attrib_locs_;
-
-		BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
-		{
-			if (pb.param)
-			{
-				RenderEffectParameterPtr const & p = effect.ParameterByName(*pb.param->Name());
-				ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
-			}
-			else
-			{
-				std::string const & pname = pb.combined_sampler_name;
-				for (size_t j = 0; j < ret->tex_sampler_binds_.size(); ++ j)
+				GLint len = 0;
+				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+				if (len > 0)
 				{
-					if (ret->tex_sampler_binds_[j].first == pname)
+					std::vector<char> info(len + 1, 0);
+					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+					std::cerr << &info[0] << std::endl;
+				}
+			}
+	#endif
+			ret->is_validate_ &= linked ? true : false;
+
+			glValidateProgram(ret->glsl_program_);
+
+			GLint validated = false;
+			glGetProgramiv(ret->glsl_program_, GL_VALIDATE_STATUS, &validated);
+#ifdef KLAYGE_DEBUG
+			if (!validated)
+			{
+				GLint len = 0;
+				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+				if (len > 0)
+				{
+					std::vector<char> info(len + 1, 0);
+					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+					std::cerr << &info[0] << std::endl;
+				}
+			}
+#endif
+			ret->is_validate_ &= validated ? true : false;
+			ret->attrib_locs_ = attrib_locs_;
+
+			BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
+			{
+				if (pb.param)
+				{
+					RenderEffectParameterPtr const & p = effect.ParameterByName(*pb.param->Name());
+					ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
+				}
+				else
+				{
+					std::string const & pname = pb.combined_sampler_name;
+					for (size_t j = 0; j < ret->tex_sampler_binds_.size(); ++ j)
 					{
-						parameter_bind_t new_pb;
-						new_pb.combined_sampler_name = pname;
-						new_pb.location = pb.location;
-						new_pb.shader_type = pb.shader_type;
-						new_pb.tex_sampler_bind_index = pb.tex_sampler_bind_index;
+						if (ret->tex_sampler_binds_[j].first == pname)
+						{
+							parameter_bind_t new_pb;
+							new_pb.combined_sampler_name = pname;
+							new_pb.location = pb.location;
+							new_pb.shader_type = pb.shader_type;
+							new_pb.tex_sampler_bind_index = pb.tex_sampler_bind_index;
 
-						uint32_t index = static_cast<uint32_t>(ret->samplers_[new_pb.shader_type].size());
-						ret->samplers_[new_pb.shader_type].resize(index + 1);
+							uint32_t index = static_cast<uint32_t>(ret->samplers_[new_pb.shader_type].size());
+							ret->samplers_[new_pb.shader_type].resize(index + 1);
 
-						new_pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[new_pb.shader_type],
-							new_pb.location, index,
-							ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.first,
-							ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.second);
+							new_pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[new_pb.shader_type],
+								new_pb.location, index,
+								ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.first,
+								ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.second);
 
-						ret->param_binds_.push_back(new_pb);
+							ret->param_binds_.push_back(new_pb);
 
-						break;
+							break;
+						}
 					}
 				}
 			}
