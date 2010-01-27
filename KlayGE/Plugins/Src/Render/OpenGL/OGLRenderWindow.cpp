@@ -180,7 +180,7 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_WGL_ARB_create_context())
+		if (!glloader_GL_VERSION_3_0() && glloader_WGL_ARB_create_context())
 		{
 			int flags = 0;//WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 #ifdef KLAYGE_DEBUG
@@ -347,7 +347,7 @@ namespace KlayGE
 
 		uint32_t sample_count = settings.sample_count;
 
-		if (glloader_GLX_ARB_create_context())
+		if (!glloader_GL_VERSION_3_0() && glloader_GLX_ARB_create_context())
 		{
 			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
 			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);

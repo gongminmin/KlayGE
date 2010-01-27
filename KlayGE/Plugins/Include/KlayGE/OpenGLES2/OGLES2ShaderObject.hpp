@@ -71,7 +71,7 @@ namespace KlayGE
 		parameter_binds_t param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
-		boost::array<std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >, ST_NumShaderTypes> samplers_;
+		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
 
 		std::vector<std::pair<std::string, std::pair<RenderEffectParameterPtr, RenderEffectParameterPtr> > > tex_sampler_binds_;
 

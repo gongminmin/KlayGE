@@ -1185,10 +1185,10 @@ namespace KlayGE
 											pb.shader_type = type;
 											pb.tex_sampler_bind_index = static_cast<int>(i);
 
-											uint32_t index = static_cast<uint32_t>(samplers_[type].size());
-											samplers_[type].resize(index + 1);
+											uint32_t index = static_cast<uint32_t>(samplers_.size());
+											samplers_.resize(index + 1);
 
-											pb.func = SetOGLES2ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_[type], location,
+											pb.func = SetOGLES2ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_, location,
 												index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
 
 											param_binds_.push_back(pb);
@@ -1431,10 +1431,10 @@ namespace KlayGE
 							new_pb.shader_type = pb.shader_type;
 							new_pb.tex_sampler_bind_index = pb.tex_sampler_bind_index;
 
-							uint32_t index = static_cast<uint32_t>(ret->samplers_[new_pb.shader_type].size());
-							ret->samplers_[new_pb.shader_type].resize(index + 1);
+							uint32_t index = static_cast<uint32_t>(ret->samplers_.size());
+							ret->samplers_.resize(index + 1);
 
-							new_pb.func = SetOGLES2ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_[new_pb.shader_type],
+							new_pb.func = SetOGLES2ShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_,
 								new_pb.location, index,
 								ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.first,
 								ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index].second.second);
