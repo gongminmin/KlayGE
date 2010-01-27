@@ -276,9 +276,16 @@ namespace KlayGE
 			break;
 
 		case EF_ARGB8:
-			internalFormat = GL_BGRA_EXT;
-			glformat = GL_BGRA_EXT;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GLES_EXT_texture_format_BGRA8888())
+			{
+				internalFormat = GL_BGRA_EXT;
+				glformat = GL_BGRA_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_ABGR8:
@@ -384,9 +391,16 @@ namespace KlayGE
 			break;
 
 		case EF_BC1:
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GLES_EXT_texture_compression_dxt1())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_D16:

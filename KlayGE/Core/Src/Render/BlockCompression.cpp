@@ -1,8 +1,11 @@
 // BlockCompression.cpp
 // KlayGE 纹理分块压缩 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2008
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2008-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 增加了DecodeBC1/3/4 (2010.1.27)
 //
 // 3.8.0
 // 初次建立(2008.12.9)
@@ -82,6 +85,31 @@ namespace KlayGE
 		}
 	}
 
+	void DecodeBC1(uint32_t* argb, uint8_t const * bc1)
+	{
+		DecodeBC1Internal(argb, *reinterpret_cast<BC1_layout const *>(bc1));
+	}
+	
+	void DecodeBC2(uint32_t* argb, uint8_t const * bc2)
+	{
+		BC2_layout const * bc2_layout = reinterpret_cast<BC2_layout const *>(bc2);
+
+		DecodeBC1Internal(argb, bc2_layout->bc1);
+
+		for (int i = 0; i < 16; ++ i)
+		{
+			argb[i] &= 0x00FFFFFF;
+		}
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			for (int j = 0; j < 4; ++ j)
+			{
+				argb[i * 4 + j] |= (((bc2_layout->alpha[i] >> (4 * j)) & 0xF) << 4) << 24;
+			}
+		}
+	}
+
 	void DecodeBC3(uint32_t* argb, uint8_t const * bc3)
 	{
 		BC3_layout const * bc3_layout = reinterpret_cast<BC3_layout const *>(bc3);
@@ -96,6 +124,11 @@ namespace KlayGE
 			argb[i] &= 0x00FFFFFF;
 			argb[i] |= alpha_block[i] << 24;
 		}
+	}
+
+	void DecodeBC4(uint8_t* alpha_block, uint8_t const * bc4)
+	{
+		DecodeBC4Internal(alpha_block, *reinterpret_cast<BC4_layout const *>(bc4));
 	}
 
 	void DecodeBC5(uint32_t* argb, uint8_t const * bc5)

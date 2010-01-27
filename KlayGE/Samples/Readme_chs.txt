@@ -1,4 +1,4 @@
-粘土游戏引擎(KlayGE) 3.9.0 Demo
+粘土游戏引擎(KlayGE) 3.10.0 Demo
 
 Homepage: http://klayge.sourceforge.net
 E-Mail:	  enginedev@163.com
@@ -114,7 +114,7 @@ Parallax mapping，扩展了normal map技术。
 2) Normal map压缩 (3.4.0之后)
 
 需求：Geforce FX以上或Radeon 9500以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9/OpenGL/OpenGLES2。
 
 ====================================================================================
 Particle Editor
@@ -157,7 +157,7 @@ ProceduralTex
 2) Procedural texture
 
 需求：Geforce FX以上或Radeon 9500以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9/OpenGL/OpenGLES2。
 
 ====================================================================================
 Refract
@@ -210,7 +210,7 @@ Vertex displacement
 2) 通过导函数直接计算法线
 
 需求：Geforce 4 Ti以上或Radeon 9200以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9/OpenGL/OpenGLES2。
 
 ====================================================================================
 Video texture
@@ -222,4 +222,4 @@ Video texture
 1) DirectShow解码到纹理
 
 需求：Geforce 4 Ti以上或Radeon 9200以上。
-渲染引擎支持：D3D11/D3D10/D3D9/OpenGL。
+渲染引擎支持：D3D11/D3D10/D3D9/OpenGL/OpenGLES2。

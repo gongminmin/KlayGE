@@ -68,6 +68,7 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 		}
 	};
 

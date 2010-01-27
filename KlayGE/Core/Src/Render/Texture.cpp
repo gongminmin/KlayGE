@@ -1,8 +1,11 @@
 // Texture.cpp
 // KlayGE 纹理类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2005-2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 支持在线解压BC1-BC3 (2010.1.27)
 //
 // 3.9.0
 // 支持Texture Array的读写 (2009.10.15)
@@ -774,12 +777,46 @@ namespace
 
 				tex_desc->format = EF_BC3;
 			}
-			if ((EF_BC3 == tex_desc->format) && !caps.bc3_support)
+			if ((EF_BC1 == tex_desc->format) && !caps.bc1_support)
 			{
-				std::vector<uint8_t> rgba_data_block(tex_desc->data_block.size() * 4);
+				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				uint8_t* sub_rgba_data_block = &rgba_data_block[0];
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				{
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					{
+						size_t const old_size = rgba_data_block.size();
+						rgba_data_block.resize(old_size + width * height * 4);
+						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
+
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
+						{
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
+							{
+								p += sizeof(BC1_layout);
+								DecodeBC1(rgba, p);
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+								}
+							}
+						}
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
+					}
+				}
+
+				tex_desc->format = EF_ARGB8;
+				tex_desc->data_block = rgba_data_block;
+				size_t start = 0;
 				for (size_t index = 0; index < tex_desc->array_size; ++ index)
 				{
 					uint32_t width = tex_desc->width;
@@ -788,53 +825,157 @@ namespace
 					{
 						size_t i = index * tex_desc->num_mipmaps + level;
 
-						uint32_t block_x = 0;
-						uint32_t block_y = 0;
-						for (size_t j = 0; j < tex_desc->tex_data[i].slice_pitch; j += sizeof(BC3_layout))
+						tex_desc->tex_data[i].row_pitch = width * 4;
+						tex_desc->tex_data[i].slice_pitch = width * height * 4;
+						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+
+						start += tex_desc->tex_data[i].slice_pitch;
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
+					}
+				}
+			}
+			if ((EF_BC2 == tex_desc->format) && !caps.bc2_support)
+			{
+				std::vector<uint8_t> rgba_data_block;
+
+				uint32_t rgba[16];
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				{
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					{
+						size_t const old_size = rgba_data_block.size();
+						rgba_data_block.resize(old_size + width * height * 4);
+						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
+
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
-							uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data) + j;
-							DecodeBC3(rgba, p);
-
-							for (int y = 0; y < 4; ++ y)
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
-							}
+								p += sizeof(BC2_layout);
+								DecodeBC2(rgba, p);
 
-							block_x += 4;
-							if (block_x == width)
-							{
-								block_x = 0;
-								block_y += 4;
+								for (int y = 0; y < 4; ++ y)
+								{
+									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+								}
 							}
 						}
 
-						sub_rgba_data_block += width * height * 4;
 						width = std::max(static_cast<uint32_t>(1), width / 2);
 						height = std::max(static_cast<uint32_t>(1), height / 2);
 					}
 				}
 
-				uint8_t const * old_data_block = &tex_desc->data_block[0];
 				tex_desc->format = EF_ARGB8;
 				tex_desc->data_block = rgba_data_block;
-				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+				size_t start = 0;
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
 				{
-					tex_desc->tex_data[i].data = &tex_desc->data_block[0] + (static_cast<uint8_t const *>(tex_desc->tex_data[i].data) - old_data_block) * 4;
-					tex_desc->tex_data[i].slice_pitch *= 4;
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					{
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						tex_desc->tex_data[i].row_pitch = width * 4;
+						tex_desc->tex_data[i].slice_pitch = width * height * 4;
+						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+
+						start += tex_desc->tex_data[i].slice_pitch;
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
+					}
+				}
+			}
+			if ((EF_BC3 == tex_desc->format) && !caps.bc3_support)
+			{
+				std::vector<uint8_t> rgba_data_block;
+
+				uint32_t rgba[16];
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				{
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					{
+						size_t const old_size = rgba_data_block.size();
+						rgba_data_block.resize(old_size + width * height * 4);
+						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
+
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						for (uint32_t block_y = 0; block_y < height; block_y += 4)
+						{
+							for (uint32_t block_x = 0; block_x < width; block_x += 4)
+							{
+								p += sizeof(BC3_layout);
+								DecodeBC3(rgba, p);
+
+								for (int y = 0; y < 4; ++ y)
+								{
+									memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
+								}
+							}
+						}
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
+					}
+				}
+
+				tex_desc->format = EF_ARGB8;
+				tex_desc->data_block = rgba_data_block;
+				size_t start = 0;
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				{
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					{
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						tex_desc->tex_data[i].row_pitch = width * 4;
+						tex_desc->tex_data[i].slice_pitch = width * height * 4;
+						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+
+						start += tex_desc->tex_data[i].slice_pitch;
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
+					}
 				}
 			}
 			if ((EF_ARGB8 == tex_desc->format) && !caps.argb8_support)
 			{
-				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+				for (size_t index = 0; index < tex_desc->array_size; ++ index)
 				{
-					uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
-					for (size_t y = 0; y < tex_desc->height; ++ y)
+					uint32_t width = tex_desc->width;
+					uint32_t height = tex_desc->height;
+					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
 					{
-						for (size_t x = 0; x < tex_desc->width; ++ x)
+						size_t i = index * tex_desc->num_mipmaps + level;
+
+						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
+						for (size_t y = 0; y < height; ++ y)
 						{
-							std::swap(p[x * 4 + 0], p[x * 4 + 2]);
+							for (size_t x = 0; x < width; ++ x)
+							{
+								std::swap(p[x * 4 + 0], p[x * 4 + 2]);
+							}
+							p += tex_desc->tex_data[i].row_pitch;
 						}
-						p += tex_desc->tex_data[i].row_pitch;
+
+						width = std::max(static_cast<uint32_t>(1), width / 2);
+						height = std::max(static_cast<uint32_t>(1), height / 2);
 					}
 				}
 

@@ -2,6 +2,7 @@
 
 <effect>
 	<parameter type="float2" name="offset"/>
+	<parameter type="int" name="flipping"/>
 	
 	<shader>
 		<![CDATA[
@@ -10,9 +11,9 @@ void MandelbrotVS(float2 texcoord0 : TEXCOORD0,
 			out float4 oPos			: SV_Position)
 {
 	oPos = float4(texcoord0 * 2 - 1, 0.5f, 1);
-	oPos.y *= -1;
+	oPos.y *= -flipping;
 	oPos.xy += offset;
-	oTexcoord0 = texcoord0 * 2.4f - float2(1.8f, 1.2f);
+	oTexcoord0 = texcoord0 * 2.4f - float2(1.8f, 1.2f * flipping);
 }
 
 float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target
