@@ -291,7 +291,7 @@ namespace KlayGE
 		}
 		else
 		{
-			glActiveTexture(GL_TEXTURE0 + tex_unit);
+			glActiveTexture(tex_unit);
 
 			GLfloat tmp;
 			glGetTexEnvfv(target, pname, &tmp);

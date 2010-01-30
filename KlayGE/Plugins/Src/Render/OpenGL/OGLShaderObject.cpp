@@ -1290,7 +1290,7 @@ namespace KlayGE
 
 			GLint linked = false;
 			glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
-	#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DEBUG
 			if (!linked)
 			{
 				GLint len = 0;
@@ -1302,7 +1302,7 @@ namespace KlayGE
 					std::cerr << &info[0] << std::endl;
 				}
 			}
-	#endif
+#endif
 			ret->is_validate_ &= linked ? true : false;
 
 			glValidateProgram(ret->glsl_program_);

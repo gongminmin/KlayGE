@@ -58,7 +58,7 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		std::string OGLES2ShaderObject::ConvertTOELSL(std::string const & glsl, ShaderType type);
+		std::string ConvertToELSL(std::string const & glsl, ShaderType type);
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 
 	private:

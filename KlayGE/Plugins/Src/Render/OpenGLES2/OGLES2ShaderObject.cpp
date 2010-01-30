@@ -134,7 +134,7 @@ namespace
 	}\n																	\
 	";
 
-	char const * predefined_vs_attr = "\n		\
+	char const * predefined_attribs = "\n		\
 	attribute vec4 a_gl_Color;\n					\
 	attribute vec3 a_gl_Normal;\n				\
 	attribute vec4 a_gl_Vertex;\n				\
@@ -149,16 +149,10 @@ namespace
 	attribute float a_gl_FogCoord;\n				\
 	";
 
-	char const * predefined_vs_varying = "\n	\
-	varying vec4 v_gl_Color;\n				\
+	char const * predefined_varyings = "\n	\
+	varying vec4 v_gl_FrontColor;\n				\
     varying vec4 v_gl_TexCoord[8];\n			\
     varying float v_gl_FogFragCoord;\n		\
-	";
-
-	char const * predefined_ps_varying = "\n	\
-	varying vec4 v_gl_Color;\n					\
-	varying vec4 v_gl_TexCoord[8];\n			\
-	varying float v_gl_FogFragCoord;\n			\
 	";
 
 	template <typename SrcType>
@@ -906,21 +900,20 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	std::string OGLES2ShaderObject::ConvertTOELSL(std::string const & glsl, ShaderType type)
+	std::string OGLES2ShaderObject::ConvertToELSL(std::string const & glsl, ShaderType type)
 	{
 		std::stringstream ss;
 		switch (type)
 		{
 		case ST_VertexShader:
-			ss << predefined_vs_attr << std::endl;
-			ss << predefined_vs_varying << std::endl;
+			ss << predefined_attribs << std::endl;
 			break;
 
 		case ST_PixelShader:
 			ss << "precision highp float;" << std::endl;
-			ss << predefined_ps_varying << std::endl;
 			break;
 		}
+		ss << predefined_varyings << std::endl;
 
 		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
@@ -949,7 +942,7 @@ namespace KlayGE
 					{
 						if (("gl_FrontColor" == this_token) || ("gl_BackColor" == this_token))
 						{
-							ss << "v_gl_Color";
+							ss << "v_gl_FrontColor";
 						}
 						else
 						{
@@ -960,13 +953,20 @@ namespace KlayGE
 				break;
 
 			case ST_PixelShader:
-				if (("gl_Color" == this_token) || ("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
 				{
 					ss << "v_" << this_token;
 				}
 				else
 				{
-					ss << this_token;
+					if ("gl_Color" == this_token)
+					{
+						ss << "v_gl_FrontColor";
+					}
+					else
+					{
+						ss << this_token;
+					}
 				}
 				break;
 			}
@@ -1064,7 +1064,7 @@ namespace KlayGE
 
 				if (is_shader_validate_[type])
 				{
-					(*glsl_srcs_)[type] = this->ConvertTOELSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
+					(*glsl_srcs_)[type] = this->ConvertToELSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
 						static_cast<ShaderType>(type));
 					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
@@ -1217,66 +1217,57 @@ namespace KlayGE
 
 								VertexElementUsage usage = VEU_Position;
 								uint8_t usage_index = 0;
-								GLint defalut_attr_loc = 0;
 								if ("POSITION" == semantic)
 								{
 									usage = VEU_Position;
-									defalut_attr_loc = 0;
 									glsl_param_name = "a_gl_Vertex";
 								}
 								else if ("NORMAL" == semantic)
 								{
 									usage = VEU_Normal;
-									defalut_attr_loc = 2;
 									glsl_param_name = "a_gl_Normal";
 								}
 								else if (("COLOR0" == semantic) || ("COLOR" == semantic))
 								{
 									usage = VEU_Diffuse;
-									defalut_attr_loc = 3;
 									glsl_param_name = "a_gl_Color";
 								}
 								else if ("COLOR1" == semantic)
 								{
 									usage = VEU_Specular;
-									defalut_attr_loc = 4;
+									glsl_param_name = "a_gl_SecondaryColor";
 								}
 								else if ("BLENDWEIGHT" == semantic)
 								{
 									usage = VEU_BlendWeight;
-									defalut_attr_loc = 1;
+									glsl_param_name = "BLENDWEIGHT";
 								}
 								else if ("BLENDINDICES" == semantic)
 								{
 									usage = VEU_BlendIndex;
-									defalut_attr_loc = 7;
+									glsl_param_name = "BLENDINDICES";
 								}
 								else if (0 == semantic.find("TEXCOORD"))
 								{
 									usage = VEU_TextureCoord;
 									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-									defalut_attr_loc = 8 + usage_index;
 									glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
 								}
 								else if ("TANGENT" == semantic)
 								{
 									usage = VEU_Tangent;
-									defalut_attr_loc = 14;
+									glsl_param_name = "TANGENT";
 								}
 								else
 								{
 									BOOST_ASSERT("BINORMAL" == semantic);
 
 									usage = VEU_Binormal;
-									defalut_attr_loc = 15;
+									glsl_param_name = "BINORMAL";
 								}
 
-								GLint attr_loc = glGetAttribLocation(glsl_program_, glsl_param_name.c_str());
-								if (-1 == attr_loc)
-								{
-									attr_loc = defalut_attr_loc;
-								}
-								attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index), attr_loc));
+								attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index),
+									glGetAttribLocation(glsl_program_, glsl_param_name.c_str())));
 							}
 
 							cg_param = cgGetNextParameter(cg_param);
