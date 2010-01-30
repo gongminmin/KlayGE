@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_INTEL_swap_event" reg_no="384">
+	<tokens>
+		<token name="GLX_BUFFER_SWAP_COMPLETE_INTEL_MASK" value="0x04000000"/>
+		<token name="GLX_EXCHANGE_COMPLETE_INTEL" value="0x8180"/>
+		<token name="GLX_COPY_COMPLETE_INTEL" value="0x8181"/>
+		<token name="GLX_FLIP_COMPLETE_INTEL" value="0x8182"/>
+	</tokens>
+</gl_extension>
