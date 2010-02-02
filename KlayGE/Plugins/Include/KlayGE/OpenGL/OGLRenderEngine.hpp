@@ -122,6 +122,9 @@ namespace KlayGE
 		std::vector<std::string> so_vars_;
 		std::vector<char const *> so_vars_ptrs_;
 		std::vector<GLuint> so_buffs_;
+
+		GLuint cur_ib_;
+		GLuint restart_index_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;

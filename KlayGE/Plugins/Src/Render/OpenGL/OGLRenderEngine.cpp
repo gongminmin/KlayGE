@@ -98,7 +98,7 @@ namespace KlayGE
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
-			cur_fbo_(0)
+			cur_fbo_(0), cur_ib_(0), restart_index_(0)
 	{
 		clear_clr_.assign(0);
 	}
@@ -470,7 +470,8 @@ namespace KlayGE
 		uint32_t const num_instance = rl.NumInstance();
 		BOOST_ASSERT(num_instance != 0);
 
-		checked_cast<OGLRenderLayout const *>(&rl)->Active(tech.Pass(0)->GetShaderObject());
+		OGLShaderObjectPtr cur_shader = checked_pointer_cast<OGLShaderObject>(tech.Pass(0)->GetShaderObject());
+		checked_cast<OGLRenderLayout const *>(&rl)->Active(cur_shader);
 
 		size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;
@@ -484,24 +485,36 @@ namespace KlayGE
 		if (rl.UseIndices())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetIndexStream()));
-			stream.Active();
+			if (cur_ib_ != stream.OGLvbo())
+			{
+				stream.Active();
+				cur_ib_ = stream.OGLvbo();
+			}
 
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
 
-				if (glloader_GL_VERSION_3_1())
+				if (restart_index_ != 0xFFFF)
 				{
-					glPrimitiveRestartIndex(0xFFFF);
+					if (glloader_GL_VERSION_3_1())
+					{
+						glPrimitiveRestartIndex(0xFFFF);
+					}
+					restart_index_ = 0xFFFF;
 				}
 			}
 			else
 			{
 				index_type = GL_UNSIGNED_INT;
 
-				if (glloader_GL_VERSION_3_1())
+				if (restart_index_ != 0xFFFFFFFF)
 				{
-					glPrimitiveRestartIndex(0xFFFFFFFF);
+					if (glloader_GL_VERSION_3_1())
+					{
+						glPrimitiveRestartIndex(0xFFFFFFFF);
+					}
+					restart_index_ = 0xFFFFFFFF;
 				}
 			}
 		}
