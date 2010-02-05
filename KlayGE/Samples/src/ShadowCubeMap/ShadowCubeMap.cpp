@@ -549,7 +549,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			//SaveTexture(shadow_cube_tex_, "shadow_tex.dds");
+			//for (int i = 0; i < 6; ++ i)
+			//{
+			//	SaveTexture(shadow_tex_[i], "shadow_tex.dds");
+			//}
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
