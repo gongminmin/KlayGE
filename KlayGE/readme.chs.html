@@ -17,10 +17,10 @@
 <ul>
 	<li><a href="#license">协议</a></li>
 	<li><a href="#installation">安装</a></li>
-	<li><a href="#third_part">第三方库</a></li>
+	<li><a href="#third_part">第三方库和工具</a></li>
 	<li><a href="#history">发展历程</a></li>
 	<li><a href="#structure">目录结构</a></li>
-	<li><a href="#compiler">编译器支持</a></li>
+	<li><a href="#compiler">经过测试的编译器</a></li>
 </ul>
 <hr />
 <h2><a id="license">协议</a></h2>
@@ -82,6 +82,7 @@
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;Runtime Library，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
 <p>另外，用VC8及以上编译Release版的Boost需要定义_SECURE_SCL=0宏，方法之一是在bjam的命令行中加上define=_SECURE_SCL=0。</p>
 <p>在VS里执行Samples的时候，需要把工程的Working Directory设置成输出目录$(OutDir)。</p>
+<p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
 <p><strong>3.10.0</strong><br />
@@ -337,6 +338,18 @@
 		\MeshML
 			3ds max的导出插件
 
+\media
+	资源文件
+	
+	\Fonts
+		字体文件
+	\Models
+		模型文件
+	\RenderFX
+		渲染特效脚本
+	\Textures
+		纹理文件
+
 \Plugins
 	插件文件
 
@@ -360,9 +373,6 @@
 			播放引擎插件的源文件
 		\Terrain
 			地形插件的源文件
-
-\RenderFX
-	渲染特效脚本
 
 \Samples
 	例子
@@ -394,7 +404,7 @@
 <h2><a id="compiler">经过测试的编译器</a></h2>
 <p>下列编译器是经过测试的：</p>
 <ul>
-	<li>Windows平台上的9.0（Visual Sudio .NET 2008 SP1）。</li>
+	<li>Windows平台上的Microsoft Visual C++ 9.0（Visual Sudio .NET 2008 SP1）。</li>
 	<li>Windows平台上的MinGW GCC 4.4。</li>
 	<li>Linux平台上的GNU GCC 4.4。</li>
 </ul>
@@ -406,6 +416,6 @@
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<p>最后更新：2010-1-7</p>
+<p>最后更新：2010-1-26</p>
 </body>
 </html>
