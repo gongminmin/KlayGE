@@ -641,6 +641,18 @@ namespace KlayGE
 				case REDT_textureCUBEArray:
 				case REDT_sampler:
 				case REDT_buffer:
+				case REDT_structured_buffer:
+				case REDT_byte_address_buffer:
+				case REDT_rw_buffer:
+				case REDT_rw_structured_buffer:
+				case REDT_rw_texture1D:
+				case REDT_rw_texture2D:
+				case REDT_rw_texture3D:
+				case REDT_rw_texture1DArray:
+				case REDT_rw_texture2DArray:
+				case REDT_rw_byte_address_buffer:
+				case REDT_append_structured_buffer:
+				case REDT_consume_structured_buffer:
 					break;
 
 				default:
@@ -1457,7 +1469,9 @@ namespace KlayGE
 		std::vector<ID3D10ShaderResourceView*> srs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			srs.resize(textures_[st].size(), NULL);
+			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
+			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
+			srs.resize(std::max(s_textures.size(), s_buffers.size()));
 			if (!srs.empty())
 			{
 				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);

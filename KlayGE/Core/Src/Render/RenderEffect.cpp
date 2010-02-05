@@ -1820,7 +1820,8 @@ namespace KlayGE
 				std::string value_str = state_node->Attrib("value")->ValueString();
 				dss_desc.back_stencil_pass = stencil_operation_define::instance().from_str(value_str);
 			}
-			else if (("vertex_shader" == state_name) || ("pixel_shader" == state_name) || ("geometry_shader" == state_name))
+			else if (("vertex_shader" == state_name) || ("pixel_shader" == state_name) || ("geometry_shader" == state_name)
+				|| ("compute_shader" == state_name) || ("hull_shader" == state_name) || ("domain_shader" == state_name))
 			{
 				ShaderObject::ShaderType type;
 				if ("vertex_shader" == state_name)

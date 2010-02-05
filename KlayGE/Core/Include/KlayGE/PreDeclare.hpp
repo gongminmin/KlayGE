@@ -168,10 +168,14 @@ namespace KlayGE
 	typedef boost::shared_ptr<SumLumPostProcess> SumLumPostProcessPtr;
 	class SumLumLogPostProcess;
 	typedef boost::shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessPtr;
+	class SumLumLogPostProcessCS;
+	typedef boost::shared_ptr<SumLumLogPostProcess> SumLumLogPostProcessCSPtr;
 	class SumLumIterativePostProcess;
 	typedef boost::shared_ptr<SumLumIterativePostProcess> SumLumIterativePostProcessPtr;
 	class AdaptedLumPostProcess;
 	typedef boost::shared_ptr<AdaptedLumPostProcess> AdaptedLumPostProcessPtr;
+	class AdaptedLumPostProcessCS;
+	typedef boost::shared_ptr<AdaptedLumPostProcessCS> AdaptedLumPostProcessCSPtr;
 	class ToneMappingPostProcess;
 	typedef boost::shared_ptr<ToneMappingPostProcess> ToneMappingPostProcessPtr;
 	class HDRPostProcess;

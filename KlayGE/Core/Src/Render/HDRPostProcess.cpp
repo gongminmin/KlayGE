@@ -26,8 +26,8 @@
 
 namespace KlayGE
 {
-	SumLumPostProcess::SumLumPostProcess(std::string const & tech)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName(tech))
+	SumLumPostProcess::SumLumPostProcess(RenderTechniquePtr const & tech)
+			: PostProcess(tech)
 	{
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
@@ -70,12 +70,43 @@ namespace KlayGE
 
 
 	SumLumLogPostProcess::SumLumLogPostProcess()
-			: SumLumPostProcess("SumLumLog")
+			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumLog"))
 	{
 	}
 
+
+	SumLumLogPostProcessCS::SumLumLogPostProcessCS()
+			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("SumLumLog"))
+	{
+		buff_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_R32F);
+	}
+
+	void SumLumLogPostProcessCS::Apply()
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, buff_));
+		this->OnRenderBegin();
+		re.Dispatch(*technique_, *this->GetRenderLayout(), buff_->Size() / sizeof(float), 1, 1);
+		this->OnRenderEnd();
+		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
+	}
+
+	void SumLumLogPostProcessCS::Source(TexturePtr const & src_tex, bool flipping)
+	{
+		SumLumPostProcess::Source(src_tex, flipping);
+		*(technique_->Effect().ParameterByName("src_tex_dim")) = Vector_T<int32_t, 2>(src_tex->Width(0), src_tex->Height(0));
+	}
+
+	void SumLumLogPostProcessCS::DestinateSize(uint32_t width, uint32_t height)
+	{
+		buff_->Resize(width * height / (256 * 4) * sizeof(float));
+		*(technique_->Effect().ParameterByName("dst_tex_dim")) = Vector_T<int32_t, 2>(width, height);
+	}
+
+
 	SumLumIterativePostProcess::SumLumIterativePostProcess()
-			: SumLumPostProcess("SumLumIterative")
+			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumIterative"))
 	{
 	}
 
@@ -139,29 +170,92 @@ namespace KlayGE
 	}
 
 
+	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
+			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("AdaptedLum"))
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		float data_v = 0;
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(float);
+		init_data.slice_pitch = 0;
+		init_data.data = &data_v;
+		adapted_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
+
+		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
+	}
+
+	void AdaptedLumPostProcessCS::Apply()
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, adapted_buff_));
+		this->OnRenderBegin();
+		re.Dispatch(*technique_, *this->GetRenderLayout(), 1, 1, 1);
+		this->OnRenderEnd();
+		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
+	}
+
+	void AdaptedLumPostProcessCS::OnRenderBegin()
+	{
+		PostProcess::OnRenderBegin();
+
+		*frame_delta_ep_ = float(timer_.elapsed());
+		timer_.restart();
+	}
+
+	void AdaptedLumPostProcessCS::SetLumBuff(GraphicsBufferPtr const & lum_buff)
+	{
+		*(technique_->Effect().ParameterByName("src_buff")) = lum_buff;
+	}
+
+	GraphicsBufferPtr const & AdaptedLumPostProcessCS::AdaptedLum() const
+	{
+		return adapted_buff_;
+	}
+
+
 	ToneMappingPostProcess::ToneMappingPostProcess(bool blue_shift)
 			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml")->TechniqueByName("ToneMapping20"))
 	{
 		RenderEffect const & effect = technique_->Effect();
-		if (effect.TechniqueByName("ToneMapping30")->Validate())
+		if (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support)
 		{
-			technique_ = effect.TechniqueByName("ToneMapping30");
+			technique_ = effect.TechniqueByName("ToneMapping50");
+			lum_buff_ep_ = technique_->Effect().ParameterByName("lum_buff");
+		}
+		else
+		{
+			if (effect.TechniqueByName("ToneMapping30")->Validate())
+			{
+				technique_ = effect.TechniqueByName("ToneMapping30");
+			}
+			lum_tex_ep_ = technique_->Effect().ParameterByName("lum_tex");
 		}
 
-		lum_tex_ep_ = technique_->Effect().ParameterByName("lum_tex");
 		bloom_tex_ep_ = technique_->Effect().ParameterByName("bloom_tex");
 		*(technique_->Effect().ParameterByName("blue_shift")) = blue_shift;
 	}
 
-	void ToneMappingPostProcess::SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex)
+	void ToneMappingPostProcess::SetLumBuff(GraphicsBufferPtr const & lum_buff)
+	{
+		*lum_buff_ep_ = lum_buff;
+	}
+
+	void ToneMappingPostProcess::SetLumTexture(TexturePtr const & lum_tex)
 	{
 		*lum_tex_ep_ = lum_tex;
+	}
+
+	void ToneMappingPostProcess::SetBloomTexture(TexturePtr const & bloom_tex)
+	{
 		*bloom_tex_ep_ = bloom_tex;
 	}
 
 
 	HDRPostProcess::HDRPostProcess(bool bright_pass, bool blue_shift)
-		: PostProcess(RenderTechniquePtr())
+		: PostProcess(RenderTechniquePtr()),
+			cs_support_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support)
 	{
 		if (bright_pass)
 		{
@@ -173,13 +267,22 @@ namespace KlayGE
 		}
 
 		blur_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
-		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
-		sum_lums_.resize(NUM_TONEMAP_TEXTURES);
-		for (size_t i = 0; i < sum_lums_.size(); ++ i)
+		if (cs_support_)
 		{
-			sum_lums_[i] = MakeSharedPtr<SumLumIterativePostProcess>();
+			sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcessCS>();
+			sum_lums_.resize(0);
+			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcessCS>();
 		}
-		adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
+		else
+		{
+			sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
+			sum_lums_.resize(NUM_TONEMAP_TEXTURES);
+			for (size_t i = 0; i < sum_lums_.size(); ++ i)
+			{
+				sum_lums_[i] = MakeSharedPtr<SumLumIterativePostProcess>();
+			}
+			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
+		}
 		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>(blue_shift);
 	}
 
@@ -213,67 +316,76 @@ namespace KlayGE
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
-		lum_texs_.resize(sum_lums_.size() + 1);
-		try
+		if (cs_support_)
 		{
-			int len = 1;
-			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+			sum_lums_1st_->Source(src_texture_, tmp_flipping);
+			checked_pointer_cast<SumLumLogPostProcessCS>(sum_lums_1st_)->DestinateSize(64, 64);
+			checked_pointer_cast<AdaptedLumPostProcessCS>(adapted_lum_)->SetLumBuff(checked_pointer_cast<SumLumLogPostProcessCS>(sum_lums_1st_)->SumLumBuff());
+			checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetLumBuff(checked_pointer_cast<AdaptedLumPostProcessCS>(adapted_lum_)->AdaptedLum());
+		}
+		else
+		{
+			lum_texs_.resize(sum_lums_.size() + 1);
+			try
 			{
-				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_R16F, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				len *= 4;
+				int len = 1;
+				for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+				{
+					lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_R16F, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write, NULL);
+					len *= 4;
+				}
+
+				{
+					FrameBufferPtr fb = rf.MakeFrameBuffer();
+					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
+					sum_lums_1st_->Source(src_texture_, tmp_flipping);
+					sum_lums_1st_->Destinate(fb);
+					tmp_flipping = fb->RequiresFlipping();
+				}
+				for (size_t i = 0; i < sum_lums_.size(); ++ i)
+				{
+					FrameBufferPtr fb = rf.MakeFrameBuffer();
+					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
+					sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+					sum_lums_[i]->Destinate(fb);
+					tmp_flipping = fb->RequiresFlipping();
+				}
+			}
+			catch (...)
+			{
+				int len = 1;
+				for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+				{
+					lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_ABGR16F, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write, NULL);
+					len *= 4;
+				}
+
+				{
+					FrameBufferPtr fb = rf.MakeFrameBuffer();
+					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
+					sum_lums_1st_->Source(src_texture_, tmp_flipping);
+					sum_lums_1st_->Destinate(fb);
+					tmp_flipping = fb->RequiresFlipping();
+				}
+				for (size_t i = 0; i < sum_lums_.size(); ++ i)
+				{
+					FrameBufferPtr fb = rf.MakeFrameBuffer();
+					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
+					sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+					sum_lums_[i]->Destinate(fb);
+					tmp_flipping = fb->RequiresFlipping();
+				}
 			}
 
 			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
-				sum_lums_1st_->Source(src_texture_, tmp_flipping);
-				sum_lums_1st_->Destinate(fb);
-				tmp_flipping = fb->RequiresFlipping();
-			}
-			for (size_t i = 0; i < sum_lums_.size(); ++ i)
-			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
-				sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
-				sum_lums_[i]->Destinate(fb);
-				tmp_flipping = fb->RequiresFlipping();
-			}
-		}
-		catch (...)
-		{
-			int len = 1;
-			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
-			{
-				lum_texs_[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_ABGR16F, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				len *= 4;
-			}
-
-			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
-				sum_lums_1st_->Source(src_texture_, tmp_flipping);
-				sum_lums_1st_->Destinate(fb);
-				tmp_flipping = fb->RequiresFlipping();
-			}
-			for (size_t i = 0; i < sum_lums_.size(); ++ i)
-			{
-				FrameBufferPtr fb = rf.MakeFrameBuffer();
-				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
-				sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
-				sum_lums_[i]->Destinate(fb);
-				tmp_flipping = fb->RequiresFlipping();
+				adapted_lum_->Source(lum_texs_[sum_lums_.size()], tmp_flipping);
 			}
 		}
 
-		{
-			adapted_lum_->Source(lum_texs_[sum_lums_.size()], tmp_flipping);
-		}
-
-		{
-			tone_mapping_->Source(src_texture_, flipping);
-		}
+		tone_mapping_->Source(src_texture_, flipping);
+		checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetBloomTexture(blur_tex_);
 	}
 
 	void HDRPostProcess::Destinate(FrameBufferPtr const & fb)
@@ -300,8 +412,11 @@ namespace KlayGE
 
 		{
 			// Tone mapping
-			checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetTexture(
-				checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum(), blur_tex_);
+			if (!cs_support_)
+			{
+				checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetLumTexture(
+					checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum());
+			}
 			tone_mapping_->Apply();
 		}
 	}

@@ -1203,7 +1203,7 @@ namespace KlayGE
 								}
 
 								D3D11_BUFFER_DESC buf_desc;
-								buf_desc.ByteWidth = cb_desc.Size;
+								buf_desc.ByteWidth = (cb_desc.Size + 15) / 16 * 16;
 								buf_desc.Usage = D3D11_USAGE_DEFAULT;
 								buf_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 								buf_desc.CPUAccessFlags = 0;
@@ -1238,6 +1238,16 @@ namespace KlayGE
 									num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
 									break;
 
+								//case D3D11_SIT_UAV_RWTYPED:
+								case D3D11_SIT_STRUCTURED:
+								//case D3D11_SIT_UAV_RWSTRUCTURED:
+								case D3D11_SIT_BYTEADDRESS:
+								//case D3D11_SIT_UAV_RWBYTEADDRESS:
+								case D3D11_SIT_UAV_APPEND_STRUCTURED:
+								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
+									num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
+									break;
+
 								default:
 									break;
 								}
@@ -1252,36 +1262,51 @@ namespace KlayGE
 								D3D11_SHADER_INPUT_BIND_DESC si_desc;
 								reflection->GetResourceBindingDesc(i, &si_desc);
 
-								if ((D3D10_SIT_TEXTURE == si_desc.Type) || (D3D10_SIT_SAMPLER == si_desc.Type))
+								switch (si_desc.Type)
 								{
-									RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-									if (p)
+								case D3D10_SIT_TEXTURE:
+								case D3D10_SIT_SAMPLER:
+								//case D3D11_SIT_UAV_RWTYPED:
+								case D3D11_SIT_STRUCTURED:
+								//case D3D11_SIT_UAV_RWSTRUCTURED:
+								case D3D11_SIT_BYTEADDRESS:
+								//case D3D11_SIT_UAV_RWBYTEADDRESS:
+								case D3D11_SIT_UAV_APPEND_STRUCTURED:
+								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
 									{
-										D3D11ShaderParameterHandle p_handle;
-										p_handle.shader_type = static_cast<uint8_t>(type);
-										p_handle.param_class = D3D10_SVC_OBJECT;
-										if (D3D10_SIT_TEXTURE == si_desc.Type)
+										RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
+										if (p)
 										{
-											if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
+											D3D11ShaderParameterHandle p_handle;
+											p_handle.shader_type = static_cast<uint8_t>(type);
+											p_handle.param_class = D3D10_SVC_OBJECT;
+											if (D3D10_SIT_SAMPLER == si_desc.Type)
 											{
-												p_handle.param_type = D3D10_SVT_BUFFER;
+												p_handle.param_type = D3D10_SVT_SAMPLER;
 											}
 											else
 											{
-												p_handle.param_type = D3D10_SVT_TEXTURE;
+												if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
+												{
+													p_handle.param_type = D3D10_SVT_BUFFER;
+												}
+												else
+												{
+													p_handle.param_type = D3D10_SVT_TEXTURE;
+												}
 											}
-										}
-										else
-										{
-											p_handle.param_type = D3D10_SVT_SAMPLER;
-										}
-										p_handle.offset = si_desc.BindPoint;
-										p_handle.elements = 1;
-										p_handle.rows = 0;
-										p_handle.columns = 1;
+											p_handle.offset = si_desc.BindPoint;
+											p_handle.elements = 1;
+											p_handle.rows = 0;
+											p_handle.columns = 1;
 
-										param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+											param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+										}
 									}
+									break;
+
+								default:
+									break;
 								}
 							}
 
@@ -1307,6 +1332,9 @@ namespace KlayGE
 		ret->vertex_shader_ = vertex_shader_;
 		ret->pixel_shader_ = pixel_shader_;
 		ret->geometry_shader_ = geometry_shader_;
+		ret->compute_shader_ = compute_shader_;
+		ret->hull_shader_ = hull_shader_;
+		ret->domain_shader_ = domain_shader_;
 		ret->vs_code_ = vs_code_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
@@ -1325,7 +1353,7 @@ namespace KlayGE
 			desc.MiscFlags = 0;
 			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
 			{
-				desc.ByteWidth = static_cast<UINT>(cbufs_[i][j].size());
+				desc.ByteWidth = static_cast<UINT>((cbufs_[i][j].size() + 15) / 16 * 16);
 				ID3D11Buffer* tmp_buf;
 				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
 				ret->d3d_cbufs_[i][j] = MakeCOMPtr(tmp_buf);
@@ -1536,6 +1564,11 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
+		//case REDT_rw_texture1D:
+		//case REDT_rw_texture2D:
+		//case REDT_rw_texture3D:
+		//case REDT_rw_texture1DArray:
+		//case REDT_rw_texture2DArray:
 			ret.func = SetD3D11ShaderParameter<TexturePtr, TexturePtr>(textures_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
@@ -1544,11 +1577,18 @@ namespace KlayGE
 			break;
 
 		case REDT_buffer:
+		case REDT_structured_buffer:
+		//case REDT_rw_buffer:
+		//case REDT_rw_structured_buffer:
+		case REDT_consume_structured_buffer:
+		case REDT_append_structured_buffer:
+		case REDT_byte_address_buffer:
+		//case REDT_rw_byte_address_buffer:
 			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>(buffers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
-			BOOST_ASSERT(false);
+			//BOOST_ASSERT(false);
 			break;
 		}
 
@@ -1657,7 +1697,9 @@ namespace KlayGE
 		std::vector<ID3D11ShaderResourceView*> srs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			srs.resize(textures_[st].size(), NULL);
+			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
+			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
+			srs.resize(std::max(s_textures.size(), s_buffers.size()));
 			if (!srs.empty())
 			{
 				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);

@@ -27,7 +27,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SumLumPostProcess : public PostProcess
 	{
 	public:
-		explicit SumLumPostProcess(std::string const & tech);
+		explicit SumLumPostProcess(RenderTechniquePtr const & tech);
 		virtual ~SumLumPostProcess();
 
 		void Source(TexturePtr const & src_tex, bool flipping);
@@ -35,7 +35,7 @@ namespace KlayGE
 	private:
 		void GetSampleOffsets4x4(uint32_t width, uint32_t height);
 
-	private:
+	protected:
 		std::vector<float4> tex_coord_offset_;
 
 		RenderEffectParameterPtr tex_coord_offset_ep_;
@@ -45,6 +45,24 @@ namespace KlayGE
 	{
 	public:
 		SumLumLogPostProcess();
+	};
+
+	class KLAYGE_CORE_API SumLumLogPostProcessCS : public SumLumPostProcess
+	{
+	public:
+		SumLumLogPostProcessCS();
+		void Apply();
+
+		void Source(TexturePtr const & src_tex, bool flipping);
+		void DestinateSize(uint32_t width, uint32_t height);
+
+		GraphicsBufferPtr const & SumLumBuff() const
+		{
+			return buff_;
+		}
+
+	private:
+		GraphicsBufferPtr buff_;
 	};
 
 	class KLAYGE_CORE_API SumLumIterativePostProcess : public SumLumPostProcess
@@ -74,15 +92,38 @@ namespace KlayGE
 		RenderEffectParameterPtr frame_delta_ep_;
 	};
 
+	class KLAYGE_CORE_API AdaptedLumPostProcessCS : public PostProcess
+	{
+	public:
+		AdaptedLumPostProcessCS();
+
+		void Apply();
+		void OnRenderBegin();
+
+		void SetLumBuff(GraphicsBufferPtr const & lum_buff);
+
+		GraphicsBufferPtr const & AdaptedLum() const;
+
+	private:
+		GraphicsBufferPtr adapted_buff_;
+
+		Timer timer_;
+
+		RenderEffectParameterPtr frame_delta_ep_;
+	};
+
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:
 		explicit ToneMappingPostProcess(bool blue_shift);
 
-		void SetTexture(TexturePtr const & lum_tex, TexturePtr const & bloom_tex);
+		void SetLumBuff(GraphicsBufferPtr const & lum_buff);
+		void SetLumTexture(TexturePtr const & lum_tex);
+		void SetBloomTexture(TexturePtr const & bloom_tex);
 
 	private:
 		RenderEffectParameterPtr lum_tex_ep_;
+		RenderEffectParameterPtr lum_buff_ep_;
 		RenderEffectParameterPtr bloom_tex_ep_;
 	};
 
@@ -112,6 +153,8 @@ namespace KlayGE
 		std::vector<PostProcessPtr> sum_lums_;
 		PostProcessPtr adapted_lum_;
 		PostProcessPtr tone_mapping_;
+
+		bool cs_support_;
 	};
 }
 

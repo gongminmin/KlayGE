@@ -100,11 +100,14 @@ namespace KlayGE
 
 	void PostProcess::OnRenderBegin()
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		float4 texel_to_pixel = re.TexelToPixelOffset();
-		texel_to_pixel.x() /= frame_buffer_->Width() / 2.0f;
-		texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
-		*texel_to_pixel_offset_ep_ = texel_to_pixel;
+		if (frame_buffer_)
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 texel_to_pixel = re.TexelToPixelOffset();
+			texel_to_pixel.x() /= frame_buffer_->Width() / 2.0f;
+			texel_to_pixel.y() /= frame_buffer_->Height() / 2.0f;
+			*texel_to_pixel_offset_ep_ = texel_to_pixel;
+		}
 
 		*src_tex_ep_ = src_texture_;
 		*flipping_ep_ = static_cast<int32_t>(flipping_ ? -1 : +1);

@@ -18,6 +18,7 @@
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="texture2D" name="lum_tex"/>
 	<parameter type="texture2D" name="bloom_tex"/>
+	<parameter type="structured_buffer" elem_type="float" name="lum_buff"/>
 
 	<parameter type="bool" name="blue_shift"/>
 
@@ -60,10 +61,31 @@ float4 ToneMapping30PS(float3 iTex : TEXCOORD0) : SV_Target
 	return ToneMapping(src_tex.Sample(linear_sampler, iTex.xy).rgb, bloom_tex.Sample(linear_sampler, iTex.xy).rgb, iTex.z);
 }
 
+
 float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 {
 	float lum = max(0.001f, lum_tex.Sample(point_sampler, 0.5f.xx).r);
 	return ToneMapping(src_tex.Sample(linear_sampler, iTex).rgb, bloom_tex.Sample(linear_sampler, iTex).rgb, lum);
+}
+
+
+void ToneMapping50VS(float4 pos : POSITION,
+					out float3 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oPos = AdjustPos(pos);
+
+	oTex.xy = TexCoordFromPos(pos);
+#ifdef KLAYGE_D3D11
+	oTex.z = max(0.001f, lum_buff[0]);
+#else
+	oTex.z = 1;
+#endif
+}
+
+float4 ToneMapping50PS(float3 iTex : TEXCOORD0) : SV_Target
+{
+	return ToneMapping(src_tex.Sample(linear_sampler, iTex.xy).rgb, bloom_tex.Sample(linear_sampler, iTex.xy).rgb, iTex.z);
 }
 		]]>
 	</shader>
@@ -85,6 +107,16 @@ float4 ToneMapping20PS(float2 iTex : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="ToneMapping20PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ToneMapping50">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="ToneMapping50VS()"/>
+			<state name="pixel_shader" value="ToneMapping50PS()"/>
 		</pass>
 	</technique>
 </effect>

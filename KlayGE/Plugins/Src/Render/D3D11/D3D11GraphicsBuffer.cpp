@@ -32,6 +32,11 @@ namespace KlayGE
 						: GraphicsBuffer(usage, access_hint),
 							bind_flags_(bind_flags), hw_buf_size_(0), fmt_as_shader_res_(fmt)
 	{
+		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
+		{
+			bind_flags_ = 0;
+		}
+
 		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
@@ -59,7 +64,7 @@ namespace KlayGE
 			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
 			{
 				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-				sr_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+				sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
 				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 				sr_desc.Buffer.ElementOffset = 0;
 				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);
@@ -161,7 +166,7 @@ namespace KlayGE
 			if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
 			{
 				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-				sr_desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+				sr_desc.Format = (access_hint_ & EAH_GPU_Structured) ? DXGI_FORMAT_UNKNOWN : D3D11Mapping::MappingFormat(fmt_as_shader_res_);
 				sr_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 				sr_desc.Buffer.ElementOffset = 0;
 				sr_desc.Buffer.ElementWidth = size_in_byte_ / NumFormatBytes(fmt_as_shader_res_);

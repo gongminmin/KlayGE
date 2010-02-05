@@ -861,12 +861,33 @@ namespace KlayGE
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
-				ss << effect.TypeName(param.type()) << " " << *param.Name();
-				if (param.ArraySize())
+				switch (param.type())
 				{
-					ss << "[" << *param.ArraySize() << "]";
+				case REDT_buffer:
+				case REDT_structured_buffer:
+				case REDT_byte_address_buffer:
+				case REDT_rw_buffer:
+				case REDT_rw_structured_buffer:
+				case REDT_rw_texture1D:
+				case REDT_rw_texture2D:
+				case REDT_rw_texture3D:
+				case REDT_rw_texture1DArray:
+				case REDT_rw_texture2DArray:
+				case REDT_rw_byte_address_buffer:
+				case REDT_append_structured_buffer:
+				case REDT_consume_structured_buffer:
+					ss << std::endl;
+					break;
+
+				default:
+					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					if (param.ArraySize())
+					{
+						ss << "[" << *param.ArraySize() << "]";
+					}
+					ss << ";" << std::endl;
+					break;
 				}
-				ss << ";" << std::endl;
 			}
 		}
 
