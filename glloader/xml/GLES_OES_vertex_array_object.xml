@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_vertex_array_object" reg_no="71">
+	<tokens>
+		<token name="GL_VERTEX_ARRAY_BINDING_OES" value="0x85B5"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindVertexArrayOES" return="void">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+		</function>
+		<function name="glDeleteVertexArraysOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="arrays"/>
+			</params>
+		</function>
+		<function name="glGenVertexArraysOES" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="arrays"/>
+			</params>
+		</function>
+		<function name="glIsVertexArrayOES" return="GLboolean">
+			<params>
+				<param type="GLuint" name="array"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

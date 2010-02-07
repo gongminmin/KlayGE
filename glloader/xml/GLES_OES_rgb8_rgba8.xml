@@ -1,4 +1,8 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GLES_OES_rgb8_rgba8" reg_no="30">
+	<tokens>
+		<token name="GL_RGB8_OES" value="0x8051"/>
+		<token name="GL_RGBA8_OES" value="0x8058"/>
+	</tokens>
 </gl_extension>

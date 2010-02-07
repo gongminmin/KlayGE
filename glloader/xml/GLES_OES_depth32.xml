@@ -1,4 +1,7 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_OES_depth32" reg_no="24">
+<gl_extension name="GLES_OES_depth32" reg_no="25">
+	<tokens>
+		<token name="GL_DEPTH_COMPONENT32_OES" value="0x81A7"/>
+	</tokens>
 </gl_extension>
