@@ -384,6 +384,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Resource Files"
+			>
+			<File
+				RelativePath="..\..\..\klayge_logo.ico"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\Common\KlayGESample.rc"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
