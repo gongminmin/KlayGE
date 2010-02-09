@@ -1,8 +1,11 @@
 // D3D11RenderEngine.cpp
 // KlayGE D3D11渲染引擎类 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2009-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 升级到DXGI 1.1 (2010.2.8)
 //
 // 3.8.0
 // 初次建立 (2008.9.21)
@@ -54,7 +57,7 @@ namespace KlayGE
 
 		if (mod_dxgi_ != NULL)
 		{
-			DynamicCreateDXGIFactory_ = reinterpret_cast<CreateDXGIFactoryFunc>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory"));
+			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
 		}
 
 		if (mod_d3d11_ != NULL)
@@ -62,8 +65,8 @@ namespace KlayGE
 			DynamicD3D11CreateDeviceAndSwapChain_ = reinterpret_cast<D3D11CreateDeviceAndSwapChainFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDeviceAndSwapChain"));
 		}
 
-		IDXGIFactory* gi_factory;
-		TIF(DynamicCreateDXGIFactory_(IID_IDXGIFactory, reinterpret_cast<void**>(&gi_factory)));
+		IDXGIFactory1* gi_factory;
+		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_ = MakeCOMPtr(gi_factory);
 
 		adapterList_.Enumerate(gi_factory_);
@@ -103,7 +106,7 @@ namespace KlayGE
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	IDXGIFactoryPtr const & D3D11RenderEngine::DXGIFactory() const
+	IDXGIFactory1Ptr const & D3D11RenderEngine::DXGIFactory() const
 	{
 		return gi_factory_;
 	}
@@ -606,7 +609,7 @@ namespace KlayGE
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
 			caps_.multithread_rendering_support = true;
-			caps_.argb8_support = false;
+			caps_.argb8_support = true;
 			caps_.bc4_support = true;
 			caps_.bc5_support = true;
 			caps_.bc6_support = true;

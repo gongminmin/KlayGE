@@ -1,8 +1,11 @@
 // D3D11RenderEngine.hpp
 // KlayGE D3D11渲染引擎类 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2009-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 升级到DXGI 1.1 (2010.2.8)
 //
 // 3.8.0
 // 初次建立 (2009.1.30)
@@ -46,7 +49,7 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		IDXGIFactoryPtr const & DXGIFactory() const;
+		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
@@ -138,20 +141,20 @@ namespace KlayGE
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
 
-		typedef HRESULT (WINAPI *CreateDXGIFactoryFunc)(REFIID riid, void** ppFactory);
+		typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
 		typedef HRESULT (WINAPI *D3D11CreateDeviceAndSwapChainFunc)(IDXGIAdapter* pAdapter,
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
 								DXGI_SWAP_CHAIN_DESC* pSwapChainDesc, IDXGISwapChain** ppSwapChain,
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext);
 
-		CreateDXGIFactoryFunc DynamicCreateDXGIFactory_;
+		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
 		D3D11CreateDeviceAndSwapChainFunc DynamicD3D11CreateDeviceAndSwapChain_;
 
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		IDXGIFactoryPtr		gi_factory_;
+		IDXGIFactory1Ptr	gi_factory_;
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;

@@ -61,12 +61,12 @@ namespace KlayGE
 
 	// 枚举系统显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11AdapterList::Enumerate(IDXGIFactoryPtr const & gi_factory)
+	void D3D11AdapterList::Enumerate(IDXGIFactory1Ptr const & gi_factory)
 	{
 		// 枚举系统中的适配器
 		UINT adapter_no = 0;
-		IDXGIAdapter* dxgi_adapter = NULL;
-		while (gi_factory->EnumAdapters(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
+		IDXGIAdapter1* dxgi_adapter = NULL;
+		while (gi_factory->EnumAdapters1(adapter_no, &dxgi_adapter) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (dxgi_adapter != NULL)
 			{

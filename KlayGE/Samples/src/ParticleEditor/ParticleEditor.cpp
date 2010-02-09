@@ -35,7 +35,7 @@
 #include <boost/tuple/tuple.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4127 4512 6385)
+#pragma warning(disable: 4127 4512 6326 6385)
 #endif
 #include <boost/random.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

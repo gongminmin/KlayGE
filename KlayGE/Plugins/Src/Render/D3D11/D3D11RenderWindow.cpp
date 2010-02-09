@@ -42,7 +42,7 @@
 
 namespace KlayGE
 {
-	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactoryPtr const & gi_factory, D3D11AdapterPtr const & adapter,
+	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
 			std::string const & name, RenderSettings const & settings)
 						: hWnd_(NULL),
                             ready_(false), closed_(false),
@@ -198,13 +198,16 @@ namespace KlayGE
 					{
 						if (boost::get<0>(dev_type_beh) != D3D_DRIVER_TYPE_HARDWARE)
 						{
-							IDXGIDevice* dxgi_device = NULL;
-							HRESULT hr = d3d_device_->QueryInterface(IID_IDXGIDevice, reinterpret_cast<void**>(&dxgi_device));
+							IDXGIDevice1* dxgi_device = NULL;
+							HRESULT hr = d3d_device_->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
 							if (SUCCEEDED(hr) && (dxgi_device != NULL))
 							{
 								IDXGIAdapter* ada;
 								dxgi_device->GetAdapter(&ada);
-								adapter_->ResetAdapter(MakeCOMPtr(ada));
+								IDXGIAdapter1* ada1;
+								d3d_device_->QueryInterface(IID_IDXGIAdapter1, reinterpret_cast<void**>(&ada1));
+								adapter_->ResetAdapter(MakeCOMPtr(ada1));
+								ada->Release();
 							}
 							dxgi_device->Release();
 						}
