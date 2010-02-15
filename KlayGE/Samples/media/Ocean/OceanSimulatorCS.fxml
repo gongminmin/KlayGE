@@ -1,0 +1,80 @@
+<?xml version='1.0'?>
+
+<effect>
+	<macro name="PI" value="3.1415926536"/>
+	<macro name="BLOCK_SIZE_X" value="16"/>
+	<macro name="BLOCK_SIZE_Y" value="16"/>
+	
+	<parameter type="uint" name="actual_dim"/>
+	<parameter type="uint" name="in_width"/>
+	<parameter type="uint" name="out_width"/>
+	<parameter type="uint" name="out_height"/>
+	<parameter type="uint" name="dx_addr_offset"/>
+	<parameter type="uint" name="dy_addr_offset"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float" name="time"/>
+	</cbuffer>
+
+	<parameter type="structured_buffer" elem_type="float2" name="input_h0"/>
+	<parameter type="structured_buffer" elem_type="float" name="input_omega"/>
+	<parameter type="rw_structured_buffer" elem_type="float2" name="output_ht"/>
+
+	<shader>
+		<![CDATA[
+// Pre-FFT data preparation:
+
+// Notice: In CS5.0, we can output up to 8 RWBuffers but in CS4.x only one output buffer is allowed,
+// that way we have to allocate one big buffer and manage the offsets manually. The restriction is
+// not caused by NVIDIA GPUs and does not present on NVIDIA GPUs when using other computing APIs like
+// CUDA and OpenCL.
+
+// H(0) -> H(t)
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void UpdateSpectrumCS(uint3 DTid : SV_DispatchThreadID)
+{
+	int in_index = DTid.y * in_width + DTid.x;
+	int in_mindex = (actual_dim - DTid.y) * in_width + (actual_dim - DTid.x);
+	int out_index = DTid.y * out_width + DTid.x;
+
+	// H(0) -> H(t)
+	float2 h0_k  = input_h0[in_index];
+	float2 h0_mk = input_h0[in_mindex];
+	float sin_v, cos_v;
+	sincos(input_omega[in_index] * time, sin_v, cos_v);
+
+	float2 h0_k_add_mk = h0_k + h0_mk;
+	float2 h0_k_sub_mk = h0_k - h0_mk;
+
+	float2 ht;
+	ht.x = h0_k_add_mk.x * cos_v - h0_k_add_mk.y * sin_v;
+	ht.y = h0_k_sub_mk.x * sin_v + h0_k_sub_mk.y * cos_v;
+
+	// H(t) -> Dx(t), Dy(t)
+	float2 kxy = DTid.xy - actual_dim * 0.5f;
+	float sqr_k = dot(kxy, kxy);
+	float rsqr_k = 0;
+	if (sqr_k > 1e-12f)
+	{
+		rsqr_k = 1 / sqrt(sqr_k);
+	}
+	//float rsqr_k = 1 / sqrt(dot(kxy, kxy));
+	kxy *= rsqr_k;
+	float4 dt_xy = float2(ht.y, -ht.x).xyxy * float4(kxy.xx, kxy.yy);
+
+    if ((DTid.x < out_width) && (DTid.y < out_height))
+	{
+        output_ht[out_index] = ht;
+		output_ht[out_index + dx_addr_offset] = dt_xy.xy;
+		output_ht[out_index + dy_addr_offset] = dt_xy.zw;
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="UpdateSpectrum">
+		<pass name="p0">
+			<state name="compute_shader" value="UpdateSpectrumCS()"/>
+		</pass>
+	</technique>
+</effect>

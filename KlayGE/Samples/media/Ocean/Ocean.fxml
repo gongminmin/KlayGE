@@ -1,0 +1,158 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="Noise.fxml"/>
+
+	<macro name="BLEND_FACTOR" value="0.6"/>
+	
+	<parameter type="float3" name="sun_dir"/>
+	<parameter type="float" name="sun_shineness" value="100"/>
+	<parameter type="float3" name="sun_color" x="1.0" y="1.0" z="0.8"/>
+	<parameter type="float3" name="fog_color" x="0.807843" y="0.858824" z="0.839216"/>
+	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4" name="corners" array_size="4"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="displacement_tex"/>
+	<parameter type="texture2D" name="gradient_tex"/>
+	<parameter type="texture2D" name="reflection_tex"/>
+
+	<parameter type="sampler" name="linear_wrap_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="linear_clamp_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+// Schlick's fresnel approximation
+float schlick_fresnel(float3 incident, float3 normal, float r0)
+{
+    // R0 = ((eta - 1) / (eta + 1)) ^ 2;
+
+	float e_n = max(dot(incident, normal), 0);
+	return r0 + (1 - r0) * pow(1 - e_n, 5);
+}
+
+void OceanVS(float2 pos : POSITION,
+					out float4 eye_dir_fog : TEXCOORD0,
+					out float4 tex_coord_noise_grad : TEXCOORD1,
+					out float4 pos_ss : TEXCOORD2,
+					out float4 oPos : SV_Position)
+{
+	float4 pos_os = lerp(lerp(corners[0], corners[1], pos.x), lerp(corners[2], corners[3], pos.x), pos.y);
+	pos_os /= pos_os.w;
+	
+	float2 tex_coord = pos_os.xz / 64;
+	float3 disp = displacement_tex.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
+	
+	pos_os.xz += disp.xz;
+	
+	float lacunarity = 1.93485736f;
+	float gain = 1.0f / 1.93485736f;
+	float noise_height = fBm(tex_coord, 3, lacunarity, gain) * 10;
+	
+	pos_os.y += lerp(noise_height, disp.y, BLEND_FACTOR);
+	
+	float d = 1.0f / 64;
+	float fx = fBm(tex_coord + float2(d, 0), 3, lacunarity, gain);
+	float fy = fBm(tex_coord + float2(0, d), 3, lacunarity, gain);
+	float2 noise_grad = float2(fx, fy) * 10 - noise_height;
+	
+	oPos = mul(pos_os, mvp);
+	
+	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
+	eye_dir_fog.w = saturate(0.005f * length(eye_dir_fog.xyz));
+	
+	tex_coord_noise_grad = float4(tex_coord, noise_grad);
+	pos_ss = oPos;
+}
+
+float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
+{
+	float3 eye_dir = normalize(eye_dir_fog.xyz);
+	
+	float2 gradient = gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
+	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
+	
+	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
+
+	float3 reflect_vec = reflect(-eye_dir, normal);
+	float cos_spec = saturate(dot(reflect_vec, -sun_dir));
+	float sun_spot = pow(cos_spec, sun_shineness);
+	float3 specular = sun_color * sun_spot;
+
+	pos_ss /= pos_ss.w;
+	float2 bump = normal.xz / pos_ss.z;
+	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, pos_ss.xy / 2 + 0.5f + bump * 0.05f).xyz;
+	
+	float fresnel = schlick_fresnel(reflect_vec, normal, 0.0977f);
+	float3 water_color = lerp(waterbody_color, reflection, fresnel);
+
+	float3 diffuse = water_color * (directional_lighting(sun_dir, normal) + 0.1f);
+
+	return float4(lerp(diffuse + specular, fog_color, eye_dir_fog.w), 1);
+}
+		]]>
+	</shader>
+	<technique name="Ocean">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+			
+			<state name="vertex_shader" value="OceanVS()"/>
+			<state name="pixel_shader" value="OceanPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float2" name="scale_bias" x="2.2" y="-0.5"/>
+	<parameter type="float4x4" name="inv_mvp"/>
+
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="sampler" name="skybox_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void SkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
+float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
+{
+	float fog = saturate(normalize(texCoord0).y * scale_bias.x + scale_bias.y);
+	fog *= fog * (3 - 2 * fog);
+
+	return lerp(float4(fog_color, 1), skybox_tex.Sample(skybox_sampler, texCoord0), fog);
+}
+		]]>
+	</shader>
+
+	<technique name="FoggySkyBox">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_write_mask" value="0"/>
+			<state name="depth_func" value="equal"/>
+
+			<state name="vertex_shader" value="SkyBoxVS()"/>
+			<state name="pixel_shader" value="SkyBoxPS()"/>
+		</pass>
+	</technique>
+</effect>

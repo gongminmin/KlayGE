@@ -32,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PostProcessing", "PostProce
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MotionBlurDoF", "MotionBlurDoF.vcproj", "{02B3F585-8608-4383-BEC4-49EDEBBB774F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ocean", "Ocean.vcproj", "{9818C3A2-D619-405D-94B4-0555C3903F12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -168,6 +170,12 @@ Global
 		{02B3F585-8608-4383-BEC4-49EDEBBB774F}.Release|Win32.Build.0 = Release|Win32
 		{02B3F585-8608-4383-BEC4-49EDEBBB774F}.Release|x64.ActiveCfg = Release|x64
 		{02B3F585-8608-4383-BEC4-49EDEBBB774F}.Release|x64.Build.0 = Release|x64
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Debug|Win32.Build.0 = Debug|Win32
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Debug|x64.ActiveCfg = Debug|Win32
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Release|Win32.ActiveCfg = Release|Win32
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Release|Win32.Build.0 = Release|Win32
+		{9818C3A2-D619-405D-94B4-0555C3903F12}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
