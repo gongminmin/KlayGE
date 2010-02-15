@@ -115,7 +115,6 @@ namespace
 		type_define()
 		{
 			types_.push_back("bool");
-			types_.push_back("dword");
 			types_.push_back("string");
 			types_.push_back("texture1D");
 			types_.push_back("texture2D");
@@ -127,6 +126,10 @@ namespace
 			types_.push_back("textureCUBEArray");
 			types_.push_back("sampler");
 			types_.push_back("shader");
+			types_.push_back("uint");
+			types_.push_back("uint2");
+			types_.push_back("uint3");
+			types_.push_back("uint4");
 			types_.push_back("int");
 			types_.push_back("int2");
 			types_.push_back("int3");
@@ -574,7 +577,47 @@ namespace
 			}
 			break;
 
-		case REDT_dword:
+		case REDT_uint:
+			if (0 == array_size)
+			{
+				attr = node->Attrib("value");
+				uint32_t tmp = 0;
+				if (attr)
+				{
+					tmp = attr->ValueInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableUInt>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableUIntArray>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							if (index < strs.size())
+							{
+								boost::algorithm::trim(strs[index]);
+								init_val[index] = boost::lexical_cast<uint32_t>(strs[index]);
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
 		case REDT_int:
 			if (0 == array_size)
 			{
@@ -782,6 +825,168 @@ namespace
 							{
 								boost::algorithm::trim(strs[index]);
 								init_val[index] = boost::lexical_cast<float>(strs[index]);
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_uint2:
+			if (0 == array_size)
+			{
+				int2 tmp(0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueUInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueUInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableUInt2>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt2Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 2; ++ j)
+							{
+								if (index * 2 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 2 + j]);
+									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 2 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_uint3:
+			if (0 == array_size)
+			{
+				int3 tmp(0, 0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueUInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueUInt();
+				}
+				attr = node->Attrib("z");
+				if (attr)
+				{
+					tmp.z() = attr->ValueUInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableUInt3>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt3Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 3; ++ j)
+							{
+								if (index * 3 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 3 + j]);
+									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 3 + j]);
+								}
+							}
+						}
+						*var = init_val;
+					}
+				}
+			}
+			break;
+
+		case REDT_uint4:
+			if (0 == array_size)
+			{
+				int4 tmp(0, 0, 0, 0);
+				attr = node->Attrib("x");
+				if (attr)
+				{
+					tmp.x() = attr->ValueUInt();
+				}
+				attr = node->Attrib("y");
+				if (attr)
+				{
+					tmp.y() = attr->ValueUInt();
+				}
+				attr = node->Attrib("z");
+				if (attr)
+				{
+					tmp.z() = attr->ValueUInt();
+				}
+				attr = node->Attrib("w");
+				if (attr)
+				{
+					tmp.w() = attr->ValueUInt();
+				}
+
+				var = MakeSharedPtr<RenderVariableUInt4>();
+				*var = tmp;
+			}
+			else
+			{
+				var = MakeSharedPtr<RenderVariableInt4Array>();
+
+				XMLNodePtr value_node = node->FirstNode("value");
+				if (value_node)
+				{
+					value_node = value_node->FirstNode();
+					if (value_node && (XNT_CData == value_node->Type()))
+					{
+						std::string value_str = value_node->ValueString();
+						std::vector<std::string> strs;
+						boost::algorithm::split(strs, value_str, boost::bind(std::equal_to<char>(), ',', _1));
+						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
+						for (size_t index = 0; index < init_val.size(); ++ index)
+						{
+							for (size_t j = 0; j < 4; ++ j)
+							{
+								if (index * 4 + j < strs.size())
+								{
+									boost::algorithm::trim(strs[index * 4 + j]);
+									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 4 + j]);
+								}
 							}
 						}
 						*var = init_val;
@@ -2100,6 +2305,12 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(uint32_t const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(int32_t const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -2107,6 +2318,24 @@ namespace KlayGE
 	}
 
 	RenderVariable& RenderVariable::operator=(float const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(uint2 const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(uint3 const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(uint4 const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -2190,6 +2419,12 @@ namespace KlayGE
 		return *this;
 	}
 
+	RenderVariable& RenderVariable::operator=(std::vector<uint32_t> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
 	RenderVariable& RenderVariable::operator=(std::vector<int32_t> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -2197,6 +2432,24 @@ namespace KlayGE
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<uint2> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<uint3> const & /*value*/)
+	{
+		BOOST_ASSERT(false);
+		return *this;
+	}
+
+	RenderVariable& RenderVariable::operator=(std::vector<uint4> const & /*value*/)
 	{
 		BOOST_ASSERT(false);
 		return *this;
@@ -2249,12 +2502,32 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
+	void RenderVariable::Value(uint32_t& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
 	void RenderVariable::Value(int32_t& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
 
 	void RenderVariable::Value(float& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(uint2& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(uint3& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(uint4& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
@@ -2324,12 +2597,32 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
+	void RenderVariable::Value(std::vector<uint32_t>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
 	void RenderVariable::Value(std::vector<int32_t>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}
 
 	void RenderVariable::Value(std::vector<float>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<uint2>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<uint3>& /*value*/) const
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void RenderVariable::Value(std::vector<uint4>& /*value*/) const
 	{
 		BOOST_ASSERT(false);
 	}

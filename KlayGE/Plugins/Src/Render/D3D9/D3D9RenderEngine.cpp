@@ -468,7 +468,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderEngine::DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+	void D3D9RenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 	{
 		BOOST_ASSERT(false);
 	}

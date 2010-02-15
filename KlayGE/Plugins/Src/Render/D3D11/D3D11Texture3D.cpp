@@ -48,7 +48,26 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(1 == array_size);
 
-		numMipMaps_ = numMipMaps;
+		if (0 == numMipMaps)
+		{
+			numMipMaps_ = 1;
+			uint32_t w = width;
+			uint32_t h = height;
+			uint32_t d = depth;
+			while ((w != 1) || (h != 1) || (d != 1))
+			{
+				++ numMipMaps_;
+
+				w = std::max(static_cast<uint32_t>(1), w / 2);
+				h = std::max(static_cast<uint32_t>(1), h / 2);
+				d = std::max(static_cast<uint32_t>(1), d / 2);
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
 		array_size_ = array_size;
 		format_		= format;
 		widthes_.assign(1, width);

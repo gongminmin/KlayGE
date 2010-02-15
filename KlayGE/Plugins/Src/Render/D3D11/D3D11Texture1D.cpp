@@ -46,7 +46,22 @@ namespace KlayGE
 						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 					: D3D11Texture(TT_1D, sample_count, sample_quality, access_hint)
 	{
-		numMipMaps_ = numMipMaps;
+		if (0 == numMipMaps)
+		{
+			numMipMaps_ = 1;
+			uint32_t w = width;
+			while (w != 1)
+			{
+				++ numMipMaps_;
+
+				w = std::max(static_cast<uint32_t>(1), w / 2);
+			}
+		}
+		else
+		{
+			numMipMaps_ = numMipMaps;
+		}
+
 		array_size_ = array_size;
 		format_		= format;
 		widthes_.assign(1, width);

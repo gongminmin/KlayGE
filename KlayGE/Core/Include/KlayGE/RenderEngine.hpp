@@ -94,7 +94,7 @@ namespace KlayGE
 		virtual void BeginFrame() = 0;
 		virtual void BeginPass() = 0;
 		void Render(RenderTechnique const & tech, RenderLayout const & rl);
-		void Dispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz);
+		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
 		virtual void EndPass() = 0;
 		virtual void EndFrame() = 0;
 
@@ -164,7 +164,7 @@ namespace KlayGE
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
 		virtual void DoBindUABuffers(std::vector<GraphicsBufferPtr> const & uabs) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
-		virtual void DoDispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
+		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
 
 	protected:
 		FrameBufferPtr cur_frame_buffer_;

@@ -1011,7 +1011,19 @@ namespace KlayGE
 					break;
 
 				default:
-					ss << effect.TypeName(param.type()) << " " << *param.Name();
+					if ((REDT_uint == param.type())
+						|| (REDT_uint2 == param.type())
+						|| (REDT_uint3 == param.type())
+						|| (REDT_uint4 == param.type()))
+					{
+						ss << "int";
+					}
+					else
+					{
+						ss << effect.TypeName(param.type());
+					}
+
+					ss << " " << *param.Name();
 					if (param.ArraySize())
 					{
 						ss << "[" << *param.ArraySize() << "]";
@@ -1512,7 +1524,7 @@ namespace KlayGE
 			}
 			break;
 
-		case REDT_dword:
+		case REDT_uint:
 		case REDT_int:
 			if (param->ArraySize())
 			{
@@ -1569,6 +1581,7 @@ namespace KlayGE
 			}
 			break;
 
+		case REDT_uint2:
 		case REDT_int2:
 			if (param->ArraySize())
 			{
@@ -1606,6 +1619,7 @@ namespace KlayGE
 			}
 			break;
 
+		case REDT_uint3:
 		case REDT_int3:
 			if (param->ArraySize())
 			{
@@ -1643,6 +1657,7 @@ namespace KlayGE
 			}
 			break;
 
+		case REDT_uint4:
 		case REDT_int4:
 			if (param->ArraySize())
 			{

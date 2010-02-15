@@ -168,6 +168,28 @@ namespace
 	};
 
 	template <>
+	class SetOGLShaderParameter<uint32_t>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint32_t v;
+			param_->Value(v);
+
+			glUniform1ui(location_, v);
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetOGLShaderParameter<int32_t>
 	{
 	public:
@@ -204,6 +226,72 @@ namespace
 			param_->Value(v);
 
 			glUniform1f(location_, v);
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint2>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint2 v;
+			param_->Value(v);
+
+			glUniform2uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint3>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint3 v;
+			param_->Value(v);
+
+			glUniform3uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint4>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint4 v;
+			param_->Value(v);
+
+			glUniform4uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
 		}
 
 	private:
@@ -392,6 +480,31 @@ namespace
 	};
 
 	template <>
+	class SetOGLShaderParameter<uint32_t*>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint32_t> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform1uiv(location_, static_cast<int>(v.size()), reinterpret_cast<GLuint*>(&v[0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetOGLShaderParameter<int32_t*>
 	{
 	public:
@@ -407,7 +520,7 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<int*>(&v[0]));
+				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
 			}
 		}
 
@@ -433,6 +546,81 @@ namespace
 			if (!v.empty())
 			{
 				glUniform1fv(location_, static_cast<int>(v.size()), &v[0]);
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint2*>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint2> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform2uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint3*>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint3> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform3uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLShaderParameter<uint4*>
+	{
+	public:
+		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform4uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
 			}
 		}
 
@@ -1418,7 +1606,17 @@ namespace KlayGE
 			}
 			break;
 
-		case REDT_dword:
+		case REDT_uint:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLShaderParameter<uint32_t*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<uint32_t>(location, param);
+			}
+			break;
+
 		case REDT_int:
 			if (param->ArraySize())
 			{
@@ -1438,6 +1636,39 @@ namespace KlayGE
 			else
 			{
 				ret.func = SetOGLShaderParameter<float>(location, param);
+			}
+			break;
+
+		case REDT_uint2:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLShaderParameter<uint2*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<uint2>(location, param);
+			}
+			break;
+
+		case REDT_uint3:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLShaderParameter<uint3*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<uint3>(location, param);
+			}
+			break;
+
+		case REDT_uint4:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLShaderParameter<uint4*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLShaderParameter<uint4>(location, param);
 			}
 			break;
 

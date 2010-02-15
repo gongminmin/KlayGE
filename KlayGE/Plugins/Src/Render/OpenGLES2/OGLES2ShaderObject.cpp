@@ -183,6 +183,28 @@ namespace
 	};
 
 	template <>
+	class SetOGLES2ShaderParameter<uint32_t>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint32_t v;
+			param_->Value(v);
+
+			glUniform1i(location_, v);
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetOGLES2ShaderParameter<int32_t>
 	{
 	public:
@@ -219,6 +241,72 @@ namespace
 			param_->Value(v);
 
 			glUniform1f(location_, v);
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint2>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint2 v;
+			param_->Value(v);
+
+			glUniform2iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint3>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint3 v;
+			param_->Value(v);
+
+			glUniform3iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint4>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			uint4 v;
+			param_->Value(v);
+
+			glUniform4iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
 		}
 
 	private:
@@ -407,6 +495,31 @@ namespace
 	};
 
 	template <>
+	class SetOGLES2ShaderParameter<uint32_t*>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint32_t> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
 	class SetOGLES2ShaderParameter<int32_t*>
 	{
 	public:
@@ -422,7 +535,7 @@ namespace
 
 			if (!v.empty())
 			{
-				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<int*>(&v[0]));
+				glUniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
 			}
 		}
 
@@ -448,6 +561,81 @@ namespace
 			if (!v.empty())
 			{
 				glUniform1fv(location_, static_cast<int>(v.size()), &v[0]);
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint2*>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint2> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform2iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint3*>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint3> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform3iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
+			}
+		}
+
+	private:
+		GLint location_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetOGLES2ShaderParameter<uint4*>
+	{
+	public:
+		SetOGLES2ShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+			: location_(location), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			std::vector<uint4> v;
+			param_->Value(v);
+
+			if (!v.empty())
+			{
+				glUniform4iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
 			}
 		}
 
@@ -1495,7 +1683,17 @@ namespace KlayGE
 			}
 			break;
 
-		case REDT_dword:
+		case REDT_uint:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLES2ShaderParameter<uint32_t*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLES2ShaderParameter<uint32_t>(location, param);
+			}
+			break;
+
 		case REDT_int:
 			if (param->ArraySize())
 			{
@@ -1515,6 +1713,39 @@ namespace KlayGE
 			else
 			{
 				ret.func = SetOGLES2ShaderParameter<float>(location, param);
+			}
+			break;
+
+		case REDT_uint2:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLES2ShaderParameter<uint2*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLES2ShaderParameter<uint2>(location, param);
+			}
+			break;
+
+		case REDT_uint3:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLES2ShaderParameter<uint3*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLES2ShaderParameter<uint3>(location, param);
+			}
+			break;
+
+		case REDT_uint4:
+			if (param->ArraySize())
+			{
+				ret.func = SetOGLES2ShaderParameter<uint4*>(location, param);
+			}
+			else
+			{
+				ret.func = SetOGLES2ShaderParameter<uint4>(location, param);
 			}
 			break;
 

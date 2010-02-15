@@ -125,8 +125,7 @@ namespace KlayGE
 		{
 		}
 
-		void DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/,
-			uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+		void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 		{
 		}
 	};
@@ -241,9 +240,9 @@ namespace KlayGE
 		this->DoRender(tech, rl);
 	}
 
-	void RenderEngine::Dispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void RenderEngine::Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		this->DoDispatch(tech, rl, tgx, tgy, tgz);
+		this->DoDispatch(tech, tgx, tgy, tgz);
 	}
 
 	// 上次Render()所渲染的图元数

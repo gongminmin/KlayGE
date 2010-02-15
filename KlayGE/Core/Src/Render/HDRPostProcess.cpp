@@ -87,7 +87,7 @@ namespace KlayGE
 
 		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, buff_));
 		this->OnRenderBegin();
-		re.Dispatch(*technique_, *this->GetRenderLayout(), buff_->Size() / sizeof(float), 1, 1);
+		re.Dispatch(*technique_, buff_->Size() / sizeof(float), 1, 1);
 		this->OnRenderEnd();
 		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 	}
@@ -191,7 +191,7 @@ namespace KlayGE
 
 		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, adapted_buff_));
 		this->OnRenderBegin();
-		re.Dispatch(*technique_, *this->GetRenderLayout(), 1, 1, 1);
+		re.Dispatch(*technique_, 1, 1, 1);
 		this->OnRenderEnd();
 		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 	}

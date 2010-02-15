@@ -72,7 +72,6 @@ namespace KlayGE
 	enum RenderEffectDataType
 	{
 		REDT_bool = 0,
-		REDT_dword,
 		REDT_string,
 		REDT_texture1D,
 		REDT_texture2D,
@@ -84,6 +83,10 @@ namespace KlayGE
 		REDT_textureCUBEArray,
 		REDT_sampler,
 		REDT_shader,
+		REDT_uint,
+		REDT_uint2,
+		REDT_uint3,
+		REDT_uint4,
 		REDT_int,
 		REDT_int2,
 		REDT_int3,
@@ -125,8 +128,12 @@ namespace KlayGE
 		virtual RenderVariablePtr Clone() = 0;
 
 		virtual RenderVariable& operator=(bool const & value);
+		virtual RenderVariable& operator=(uint32_t const & value);
 		virtual RenderVariable& operator=(int32_t const & value);
 		virtual RenderVariable& operator=(float const & value);
+		virtual RenderVariable& operator=(uint2 const & value);
+		virtual RenderVariable& operator=(uint3 const & value);
+		virtual RenderVariable& operator=(uint4 const & value);
 		virtual RenderVariable& operator=(int2 const & value);
 		virtual RenderVariable& operator=(int3 const & value);
 		virtual RenderVariable& operator=(int4 const & value);
@@ -140,8 +147,12 @@ namespace KlayGE
 		virtual RenderVariable& operator=(std::string const & value);
 		virtual RenderVariable& operator=(shader_desc const & value);
 		virtual RenderVariable& operator=(std::vector<bool> const & value);
+		virtual RenderVariable& operator=(std::vector<uint32_t> const & value);
 		virtual RenderVariable& operator=(std::vector<int32_t> const & value);
 		virtual RenderVariable& operator=(std::vector<float> const & value);
+		virtual RenderVariable& operator=(std::vector<uint2> const & value);
+		virtual RenderVariable& operator=(std::vector<uint3> const & value);
+		virtual RenderVariable& operator=(std::vector<uint4> const & value);
 		virtual RenderVariable& operator=(std::vector<int2> const & value);
 		virtual RenderVariable& operator=(std::vector<int3> const & value);
 		virtual RenderVariable& operator=(std::vector<int4> const & value);
@@ -151,8 +162,12 @@ namespace KlayGE
 		virtual RenderVariable& operator=(std::vector<float4x4> const & value);
 
 		virtual void Value(bool& val) const;
+		virtual void Value(uint32_t& val) const;
 		virtual void Value(int32_t& val) const;
 		virtual void Value(float& val) const;
+		virtual void Value(uint2& val) const;
+		virtual void Value(uint3& val) const;
+		virtual void Value(uint4& val) const;
 		virtual void Value(int2& val) const;
 		virtual void Value(int3& val) const;
 		virtual void Value(int4& val) const;
@@ -166,8 +181,12 @@ namespace KlayGE
 		virtual void Value(std::string& val) const;
 		virtual void Value(shader_desc& val) const;
 		virtual void Value(std::vector<bool>& val) const;
+		virtual void Value(std::vector<uint32_t>& val) const;
 		virtual void Value(std::vector<int32_t>& val) const;
 		virtual void Value(std::vector<float>& val) const;
+		virtual void Value(std::vector<uint2>& val) const;
+		virtual void Value(std::vector<uint3>& val) const;
+		virtual void Value(std::vector<uint4>& val) const;
 		virtual void Value(std::vector<int2>& val) const;
 		virtual void Value(std::vector<int3>& val) const;
 		virtual void Value(std::vector<int4>& val) const;
@@ -332,8 +351,12 @@ namespace KlayGE
 	};
 
 	typedef RenderVariableConcrete<bool> RenderVariableBool;
+	typedef RenderVariableConcrete<uint32_t> RenderVariableUInt;
 	typedef RenderVariableConcrete<int32_t> RenderVariableInt;
 	typedef RenderVariableConcrete<float> RenderVariableFloat;
+	typedef RenderVariableConcrete<uint2> RenderVariableUInt2;
+	typedef RenderVariableConcrete<uint3> RenderVariableUInt3;
+	typedef RenderVariableConcrete<uint4> RenderVariableUInt4;
 	typedef RenderVariableConcrete<int2> RenderVariableInt2;
 	typedef RenderVariableConcrete<int3> RenderVariableInt3;
 	typedef RenderVariableConcrete<int4> RenderVariableInt4;
@@ -345,6 +368,7 @@ namespace KlayGE
 	typedef RenderVariableConcrete<std::string> RenderVariableString;
 	typedef RenderVariableConcrete<shader_desc> RenderVariableShader;
 	typedef RenderVariableConcrete<std::vector<bool> > RenderVariableBoolArray;
+	typedef RenderVariableConcrete<std::vector<uint32_t> > RenderVariableUIntArray;
 	typedef RenderVariableConcrete<std::vector<int32_t> > RenderVariableIntArray;
 	typedef RenderVariableConcrete<std::vector<float> >  RenderVariableFloatArray;
 	typedef RenderVariableConcrete<std::vector<int2> >  RenderVariableInt2Array;

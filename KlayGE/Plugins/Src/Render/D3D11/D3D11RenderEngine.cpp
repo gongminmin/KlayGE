@@ -480,21 +480,8 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, RenderLayout const & rl, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		BOOST_ASSERT(!rl.InstanceStream());
-		BOOST_ASSERT(!rl.UseIndices());
-
-		std::vector<ID3D11ShaderResourceView*> srvs(rl.NumVertexStreams());
-		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
-		{
-			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
-
-			D3D11GraphicsBuffer& d3dvb(*checked_pointer_cast<D3D11GraphicsBuffer>(stream));
-			srvs[i] = d3dvb.D3DShaderResourceView().get();
-		}
-		d3d_imm_ctx_->CSSetShaderResources(0, rl.NumVertexStreams(), &srvs[0]);
-
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{

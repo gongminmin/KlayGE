@@ -360,7 +360,7 @@ namespace KlayGE
 		checked_cast<OGLES2RenderLayout const *>(&rl)->Deactive(tech.Pass(0)->GetShaderObject());
 	}
 
-	void OGLES2RenderEngine::DoDispatch(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+	void OGLES2RenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 	{
 		BOOST_ASSERT(false);
 	}
