@@ -53,46 +53,58 @@ namespace KlayGE
 		float phase_base = -TWO_PI / (fft_plan->width * fft_plan->height);
 
 		*(fft_plan->fft_effect->ParameterByName("thread_count")) = thread_count;
-		*(fft_plan->fft_effect->ParameterByName("ostride")) = ostride;
-		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
-		*(fft_plan->fft_effect->ParameterByName("pstride")) = pstride;
-		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
 
+		// X direction
+		
+		*(fft_plan->fft_effect->ParameterByName("ostride")) = ostride;
+		*(fft_plan->fft_effect->ParameterByName("pstride")) = pstride;
+
+		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
+		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
 		radix008a(fft_plan, fft_plan->tmp_buffer, src, thread_count, istride);
 
-		istride /= 8;
-		phase_base *= 8.0f;
-		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
-		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
-		radix008a(fft_plan, dst, fft_plan->tmp_buffer, thread_count, istride);
+		GraphicsBufferPtr buf[2] = { dst, fft_plan->tmp_buffer };
+		int index = 0;
 
-		istride /= 8;
-		phase_base *= 8.0f;
-		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
-		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
-		radix008a(fft_plan, fft_plan->tmp_buffer, dst, thread_count, istride);
+		uint32_t t = fft_plan->width;
+		while (t > 8)
+		{
+			istride /= 8;
+			phase_base *= 8.0f;
+			*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
+			*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
+			radix008a(fft_plan, buf[index], buf[!index], thread_count, istride);
+			index = !index;
 
-		istride /= 8;
-		phase_base *= 8.0f;
-		ostride /= fft_plan->width;
+			t /= 8;
+		}
+
+		// Y direction
+		
+		ostride = fft_plan->height / 8;
 		pstride = 1;
-		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
-		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
 		*(fft_plan->fft_effect->ParameterByName("ostride")) = ostride;
 		*(fft_plan->fft_effect->ParameterByName("pstride")) = pstride;
-		radix008a(fft_plan, dst, fft_plan->tmp_buffer, thread_count, istride);
-
+		
 		istride /= 8;
 		phase_base *= 8.0f;
 		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
 		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
-		radix008a(fft_plan, fft_plan->tmp_buffer, dst, thread_count, istride);
+		radix008a(fft_plan, buf[index], buf[!index], thread_count, istride);
+		index = !index;
 
-		istride /= 8;
-		phase_base *= 8.0f;
-		*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
-		*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
-		radix008a(fft_plan, dst, fft_plan->tmp_buffer, thread_count, istride);
+		t = fft_plan->height;
+		while (t > 8)
+		{
+			istride /= 8;
+			phase_base *= 8.0f;
+			*(fft_plan->fft_effect->ParameterByName("istride")) = istride;
+			*(fft_plan->fft_effect->ParameterByName("phase_base")) = phase_base;
+			radix008a(fft_plan, buf[index], buf[!index], thread_count, istride);
+			index = !index;
+
+			t /= 8;
+		}
 	}
 
 	void fft_create_plan(CSFFT_Plan* plan, uint32_t width, uint32_t height, uint32_t slices)

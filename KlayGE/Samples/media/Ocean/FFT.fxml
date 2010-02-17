@@ -132,7 +132,6 @@ void Radix008A_CS(uint3 thread_id : SV_DispatchThreadID)
 	}
 }
 
-
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
 void Radix008A_CS2(uint3 thread_id : SV_DispatchThreadID)
 {

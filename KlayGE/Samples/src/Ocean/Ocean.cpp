@@ -533,7 +533,7 @@ namespace
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 3)
+		if ((caps.max_shader_model < 3) || !caps.cs_support)
 		{
 			return false;
 		}
