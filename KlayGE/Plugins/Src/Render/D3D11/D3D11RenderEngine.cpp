@@ -189,6 +189,8 @@ namespace KlayGE
 	void D3D11RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
+		motion_frames_ = settings.motion_frames;
+
 		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(gi_factory_, this->ActiveAdapter(),
 			name, settings);
 		default_frame_buffer_ = win;
@@ -377,8 +379,15 @@ namespace KlayGE
 		}
 		else
 		{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6309 6387)
+#endif
 			d3d_imm_ctx_->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
 			d3d_imm_ctx_->IASetInputLayout(NULL);
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		}
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());

@@ -93,6 +93,7 @@ namespace KlayGE
 		int sample_count = 1;
 		int sample_quality = 0;
 		bool full_screen = false;
+		int motion_frames = 0;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string rf_name = "D3D9";
@@ -125,7 +126,7 @@ namespace KlayGE
 			XMLNodePtr cfg_root = cfg_doc.Parse(file);
 
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
-			XMLNodePtr screen_node = cfg_root->FirstNode("screen");
+			XMLNodePtr graphics_node = cfg_root->FirstNode("graphics");
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			rf_node = context_node->FirstNode("render_factory");
@@ -159,7 +160,7 @@ namespace KlayGE
 				sm_name = sm_node->Attrib("name")->ValueString();
 			}
 
-			XMLNodePtr frame_node = screen_node->FirstNode("frame");
+			XMLNodePtr frame_node = graphics_node->FirstNode("frame");
 			XMLAttributePtr attr;
 			attr = frame_node->Attrib("width");
 			if (attr)
@@ -234,6 +235,13 @@ namespace KlayGE
 			{
 				sample_quality = attr->ValueInt();
 			}
+
+			XMLNodePtr motion_blur_node = graphics_node->FirstNode("motion_blur");
+			attr = motion_blur_node->Attrib("frames");
+			if (attr)
+			{
+				motion_frames = attr->ValueInt();
+			}
 		}
 
 		this->LoadRenderFactory(rf_name, rf_node);
@@ -250,6 +258,7 @@ namespace KlayGE
 		settings.sample_count = sample_count;
 		settings.sample_quality = sample_quality;
 		settings.full_screen = full_screen;
+		settings.motion_frames = motion_frames;
 
 		return settings;
 	}

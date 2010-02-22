@@ -1,8 +1,11 @@
 // Camera.cpp
 // KlayGE 摄像机类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 支持Motion blur (2010.2.22)
 //
 // 2.0.0
 // 初次建立(2003.10.1)
@@ -11,6 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Math.hpp>
 
 #include <KlayGE/Camera.hpp>
@@ -20,6 +26,8 @@ namespace KlayGE
 	// 构造函数
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
+		: prev_view_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames()),
+			prev_proj_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
 	{
 		// 设置观察矩阵的参数
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
@@ -58,6 +66,7 @@ namespace KlayGE
 
 	void Camera::Update()
 	{
-		last_view_mat_ = viewMat_;
+		prev_view_mats_.push_back(viewMat_);
+		prev_proj_mats_.push_back(projMat_);
 	}
 }

@@ -24,11 +24,8 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
 		float4 other_clr = src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES);
-		//if (other_clr.a <= clr.a)
-		{
-			clr.rgb += other_clr.rgb;
-			++ sum_weight;
-		}
+		clr.rgb += other_clr.rgb;
+		++ sum_weight;
 	}
 	clr.rgb /= sum_weight;
 	return clr;
@@ -37,8 +34,7 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 float4 MotionBlurMotionVecPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	float3 motion_vec = motion_vec_tex.Sample(point_sampler, tex_coord0).rgb;
-	return float4(motion_vec.xy * 200, motion_vec.z,
-		src_tex.Sample(point_sampler, tex_coord0).a);
+	return float4(motion_vec.xy * 500, motion_vec.z, 1);
 }
 
 float4 MotionBlurPassThroughPS(float2 tex_coord0 : TEXCOORD0) : SV_Target

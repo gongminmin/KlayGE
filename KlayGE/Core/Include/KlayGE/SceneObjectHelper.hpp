@@ -30,7 +30,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectHelper : public SceneObject
 	{
 	public:
-		SceneObjectHelper(uint32_t attrib);
+		explicit SceneObjectHelper(uint32_t attrib);
 		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
 		virtual ~SceneObjectHelper()
 		{

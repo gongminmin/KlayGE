@@ -158,6 +158,8 @@ namespace KlayGE
 	void OGLES2RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
+		motion_frames_ = settings.motion_frames;
+
 		FrameBufferPtr win = MakeSharedPtr<OGLES2RenderWindow>(name, settings);
 		default_frame_buffer_ = win;
 

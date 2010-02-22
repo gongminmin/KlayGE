@@ -1,8 +1,11 @@
 // RenderSettings.hpp
 // KlayGE 渲染设置类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2005-2008
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 增加了motion_frames (2010.2.22)
 //
 // 3.7.0
 // 去掉了ConfirmDevice的参数 (2008.3.17)
@@ -31,7 +34,8 @@ namespace KlayGE
 		RenderSettings()
 			: left(0), top(0),
 				depth_stencil_fmt(EF_D16),
-				sample_count(1)
+				sample_count(1), sample_quality(0),
+				motion_frames(0)
 		{
 		}
 
@@ -46,6 +50,7 @@ namespace KlayGE
 		ElementFormat depth_stencil_fmt;
 		uint32_t sample_count;
 		uint32_t sample_quality;
+		uint32_t motion_frames;
 	};
 }
 

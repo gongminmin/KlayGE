@@ -179,6 +179,8 @@ namespace KlayGE
 	void D3D10RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
+		motion_frames_ = settings.motion_frames;
+
 		D3D10RenderWindowPtr win = MakeSharedPtr<D3D10RenderWindow>(gi_factory_, this->ActiveAdapter(),
 			name, settings);
 		default_frame_buffer_ = win;
@@ -310,8 +312,15 @@ namespace KlayGE
 		}
 		else
 		{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6309 6387)
+#endif
 			d3d_device_->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
 			d3d_device_->IASetInputLayout(NULL);
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 		}
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());

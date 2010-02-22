@@ -23,6 +23,15 @@
 
 #include <sstream>
 #include <ctime>
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
+#include <boost/circular_buffer.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/bind.hpp>
 
 #include "MotionBlurDoF.hpp"
@@ -35,7 +44,66 @@ namespace
 	int32_t const NUM_LINE = 10;
 	int32_t const NUM_INSTANCE = 400;
 
-	class Teapot : public SceneObjectHelper
+	int const MOTION_FRAMES = 5;
+
+	class MotionBlurRenderMesh : public KMesh
+	{
+	public:
+		MotionBlurRenderMesh(RenderModelPtr const & model, std::wstring const & name)
+			: KMesh(model, name)
+		{
+		}
+
+		virtual void MotionVecPass(bool motion_vec) = 0;
+	};
+
+	class RenderInstanceMesh : public MotionBlurRenderMesh
+	{
+	public:
+		RenderInstanceMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
+			: MotionBlurRenderMesh(model, L"InstancedMesh")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
+		}
+
+		void BuildMeshInfo()
+		{
+		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+
+			float4x4 const & curr_view = camera.ViewMatrix();
+			float4x4 const & curr_proj = camera.ProjMatrix();
+			float4x4 const & prev_view = camera.PrevViewMatrix();
+			float4x4 const & prev_proj = camera.PrevProjMatrix();
+
+			*(technique_->Effect().ParameterByName("view")) = curr_view;
+			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
+			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
+			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
+
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / camera.FarPlane();
+		}
+
+		void MotionVecPass(bool motion_vec)
+		{
+			if (motion_vec)
+			{
+				technique_ = technique_->Effect().TechniqueByName("MotionVectorInstanced");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("ColorDepthInstanced");
+			}
+		}
+	};
+
+	class RenderNonInstancedMesh : public MotionBlurRenderMesh
 	{
 	private:
 		struct InstData
@@ -46,69 +114,12 @@ namespace
 		};
 
 	public:
-		Teapot()
-			: SceneObjectHelper(SOA_Cullable)
-		{
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR32F));
-		}
-
-		void Instance(float4x4 const & mat, Color const & clr)
-		{
-			mat_ = mat;
-			inst_.clr = clr;
-		}
-
-		void const * InstanceData() const
-		{
-			return &inst_;
-		}
-
-		void SetRenderable(RenderablePtr ra)
-		{
-			renderable_ = ra;
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return mat_;
-		}
-
-		void Update()
-		{
-			last_mat_ = mat_;
-			mat_ *= MathLib::rotation_y(0.001f);
-
-			float4x4 matT = MathLib::transpose(mat_);
-			inst_.mat[0] = matT.Row(0);
-			inst_.mat[1] = matT.Row(1);
-			inst_.mat[2] = matT.Row(2);
-			matT = MathLib::transpose(last_mat_);
-			inst_.last_mat[0] = matT.Row(0);
-			inst_.last_mat[1] = matT.Row(1);
-			inst_.last_mat[2] = matT.Row(2);
-		}
-
-	private:
-		InstData inst_;
-		float4x4 mat_;
-		float4x4 last_mat_;
-	};
-
-	class RenderInstance : public KMesh
-	{
-	public:
-		RenderInstance(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Instance")
+		RenderNonInstancedMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
+			: MotionBlurRenderMesh(model, L"NonInstancedMesh")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepth");
+			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
 		}
 
 		void BuildMeshInfo()
@@ -118,55 +129,19 @@ namespace
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & last_view = app.ActiveCamera().LastViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & curr_view = camera.ViewMatrix();
+			float4x4 const & curr_proj = camera.ProjMatrix();
+			float4x4 const & prev_view = camera.PrevViewMatrix();
+			float4x4 const & prev_proj = camera.PrevProjMatrix();
 
-			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
-			*(technique_->Effect().ParameterByName("last_view_proj")) = last_view * proj;
-			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
+			*(technique_->Effect().ParameterByName("view")) = curr_view;
+			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
+			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
+			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
 
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / app.ActiveCamera().FarPlane();
-		}
-	};
-
-	class RenderNormalMesh : public KMesh
-	{
-	private:
-		struct InstData
-		{
-			float4 mat[3];
-			float4 last_mat[3];
-			Color clr;
-		};
-
-	public:
-		RenderNormalMesh(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"NormalMesh")
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("NormalMesh");
-		}
-
-		void BuildMeshInfo()
-		{
-		}
-
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & last_view = app.ActiveCamera().LastViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
-
-			*(technique_->Effect().ParameterByName("view_proj")) = view * proj;
-			*(technique_->Effect().ParameterByName("last_view_proj")) = last_view * proj;
-			*(technique_->Effect().ParameterByName("light_in_world")) = float3(2, 2, -3);
-
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / app.ActiveCamera().FarPlane();
+			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / camera.FarPlane();
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -190,10 +165,99 @@ namespace
 			*(technique_->Effect().ParameterByName("color")) = float4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
 		}
 
+		void MotionVecPass(bool motion_vec)
+		{
+			if (motion_vec)
+			{
+				technique_ = technique_->Effect().TechniqueByName("MotionVectorNonInstanced");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("ColorDepthNonInstanced");
+			}
+		}
+
 	private:
 		void UpdateInstanceStream()
 		{
 		}
+	};
+
+	class Teapot : public SceneObjectHelper
+	{
+	private:
+		struct InstData
+		{
+			float4 mat[3];
+			float4 last_mat[3];
+			Color clr;
+		};
+
+	public:
+		Teapot()
+			: SceneObjectHelper(SOA_Cullable),
+				last_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
+		{
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR32F));
+		}
+
+		void Instance(float4x4 const & mat, Color const & clr)
+		{
+			mat_ = mat;
+			inst_.clr = clr;
+		}
+
+		void const * InstanceData() const
+		{
+			return &inst_;
+		}
+
+		void SetRenderable(RenderablePtr const & ra)
+		{
+			renderable_ = ra;
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return mat_;
+		}
+
+		void Update()
+		{
+			last_mats_.push_back(mat_);
+
+			float4x4 matT = MathLib::transpose(last_mats_.front());
+			inst_.last_mat[0] = matT.Row(0);
+			inst_.last_mat[1] = matT.Row(1);
+			inst_.last_mat[2] = matT.Row(2);
+
+			double e = rotate_timer_.elapsed() * 0.3f;
+			rotate_timer_.restart();
+			mat_ *= MathLib::rotation_y(static_cast<float>(e));
+
+			matT = MathLib::transpose(mat_);
+			inst_.mat[0] = matT.Row(0);
+			inst_.mat[1] = matT.Row(1);
+			inst_.mat[2] = matT.Row(2);
+		}
+
+		void MotionVecPass(bool motion_vec)
+		{
+			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->MotionVecPass(motion_vec);
+		}
+
+	private:
+		InstData inst_;
+		float4x4 mat_;
+		boost::circular_buffer<float4x4> last_mats_;
+
+		Timer rotate_timer_;
 	};
 
 	class ClearFloatPostProcess : public PostProcess
@@ -454,10 +518,12 @@ MotionBlurDoFApp::MotionBlurDoFApp(std::string const & name, RenderSettings cons
 
 void MotionBlurDoFApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstance>());
-	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNormalMesh>());
-	
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstanceMesh>());
+	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNonInstancedMesh>());
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	ScriptEngine scriptEng;
 	ScriptModule module("MotionBlurDoF_init");
@@ -465,11 +531,13 @@ void MotionBlurDoFApp::InitObjects()
 	this->LookAt(float3(-1.8f, 1.9f, -1.8f), float3(0, 0, 0));
 	this->Proj(0.1f, 100);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	clr_depth_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	clr_depth_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
-	mbed_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	mbed_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	RenderEngine& re = rf.RenderEngineInstance();
+	clr_depth_fb_ = rf.MakeFrameBuffer();
+	motion_vec_fb_ = rf.MakeFrameBuffer();
+	mbed_fb_ = rf.MakeFrameBuffer();
+	clr_depth_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	motion_vec_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	mbed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -560,23 +628,27 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
+
 	clr_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 0));
+	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
 	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	clr_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 0));
-	clr_depth_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*motion_vec_tex_, 0, 0));
-	clr_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
+	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 0));
+	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	mbed_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mbed_tex_, 0, 0));
+	mbed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mbed_tex_, 0, 0));
 
-	motion_blur_->Source(clr_depth_tex_, clr_depth_buffer_->RequiresFlipping());
+	motion_blur_->Source(clr_depth_tex_, clr_depth_fb_->RequiresFlipping());
 	checked_pointer_cast<MotionBlur>(motion_blur_)->MotionVecTex(motion_vec_tex_);
-	motion_blur_->Destinate(mbed_buffer_);
+	motion_blur_->Destinate(mbed_fb_);
 
-	depth_of_field_->Source(mbed_tex_, mbed_buffer_->RequiresFlipping());
+	depth_of_field_->Source(mbed_tex_, mbed_fb_->RequiresFlipping());
 	depth_of_field_->Destinate(FrameBufferPtr());
 
-	clear_float_->Destinate(clr_depth_buffer_);
+	clear_float_->Destinate(clr_depth_fb_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -705,9 +777,22 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 	case 0:
 		this->ActiveCamera().Update();
 
-		renderEngine.BindFrameBuffer(clr_depth_buffer_);
+		renderEngine.BindFrameBuffer(clr_depth_fb_);
 		clear_float_->Apply();
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
+		}
+		return App3DFramework::URV_Need_Flush;
+
+	case 1:
+		renderEngine.BindFrameBuffer(motion_vec_fb_);
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);
+		for (int i = 0; i < NUM_INSTANCE; ++ i)
+		{
+			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(true);
+		}
 		return App3DFramework::URV_Need_Flush;
 
 	default:

@@ -1,11 +1,12 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
 // Ver 3.10.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.10.0
 // 增加了Dispatch (2009.12.22)
+// 增加了NumMotionFrames (2010.2.22)
 //
 // 3.9.0
 // 增加了BeginPass/EndPass (2009.4.9)
@@ -130,6 +131,11 @@ namespace KlayGE
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
 
+		uint32_t NumMotionFrames() const
+		{
+			return motion_frames_;
+		}
+
 		RasterizerStateObjectPtr const & CurRSObj() const
 		{
 			return cur_rs_obj_;
@@ -184,6 +190,8 @@ namespace KlayGE
 		BlendStateObjectPtr cur_bs_obj_;
 		Color cur_blend_factor_;
 		uint32_t cur_sample_mask_;
+
+		uint32_t motion_frames_;
 	};
 }
 

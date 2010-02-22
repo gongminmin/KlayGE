@@ -5,17 +5,28 @@
 	<include name="PostProcess.fxml"/>
 
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="view_proj"/>
-		<parameter type="float4x4" name="last_view_proj"/>
-		<parameter type="float3" name="light_in_world"/>
+		<parameter type="float4x4" name="view"/>
+		<parameter type="float4x4" name="proj"/>
+		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
 		<parameter type="float" name="inv_depth_range"/>
 	</cbuffer>
 
+	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
+	<parameter type="float4x4" name="last_modelmat"/>
+	<parameter type="float4" name="color"/>
+
 	<parameter type="float4" name="mid_value" value="0.5"/>
-		
+
 	<shader>
 		<![CDATA[
-void ColorDepthVS(float4 pos			: POSITION,
+void CalcColorDepth(float4 pos_ws, float3 normal, float3 clr,
+			out float4 oClrDepth, out float4 oPos)
+{
+	oPos = mul(mul(pos_ws, view), proj);
+	oClrDepth = float4(saturate(clr * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value.rgb, oPos.w * inv_depth_range);
+}
+
+void ColorDepthInstancedVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
 					float4 row0			: TEXCOORD1,
@@ -27,50 +38,53 @@ void ColorDepthVS(float4 pos			: POSITION,
 					float3 clr			: COLOR0,
 
 					out float4 oClrDepth : TEXCOORD0,
-					out float2 oVelocity : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
-	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
 
 	float4 pos_ws = mul(model, pos);
-	oPos = mul(pos_ws, view_proj);
-	
-	float4 pos_curr = oPos;
-	float4 pos_last = mul(mul(last_model, pos), last_view_proj);
-	pos_curr /= pos_curr.w;
-	pos_last /= pos_last.w;
-	oVelocity = (pos_curr.xy - pos_last.xy) * 10;
-
 	normal = mul((float3x3)model, normal);
-	oClrDepth = float4(saturate(clr.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value.rgb, oPos.w * inv_depth_range);
+	CalcColorDepth(pos_ws, normal, clr, oClrDepth, oPos);
 }
 
-void ColorDepthPS(float4 clr_depth : TEXCOORD0, float2 velocity : TEXCOORD2,
-				out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
+void ColorDepthNonInstancedVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					out float4 oClrDepth : TEXCOORD0,
+					out float4 oPos		: SV_Position)
 {
-	color_depth = clr_depth;
-	motion_vec = float4(velocity, 1, clr_depth.a);
+	float4 pos_ws = mul(pos, modelmat);
+	normal = mul(normal, (float3x3)modelmat);
+	CalcColorDepth(pos_ws, normal, color.rgb, oClrDepth, oPos);
+}
+
+float4 ColorDepthPS(float4 clr_depth : TEXCOORD0) : SV_Target
+{
+	return clr_depth;
 }
 		]]>
 	</shader>
 
-	<technique name="ColorDepth">
+	<technique name="ColorDepthInstanced">
 		<pass name="p0">
-			<state name="vertex_shader" value="ColorDepthVS()"/>
+			<state name="vertex_shader" value="ColorDepthInstancedVS()"/>
+			<state name="pixel_shader" value="ColorDepthPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="ColorDepthNonInstanced">
+		<pass name="p0">
+			<state name="vertex_shader" value="ColorDepthNonInstancedVS()"/>
 			<state name="pixel_shader" value="ColorDepthPS()"/>
 		</pass>
 	</technique>
 
-
 	<parameter type="float4" name="clear_clr"/>
 	<shader>
 		<![CDATA[
-void ClearFloatPS(float2 tex_coord0 : TEXCOORD0,
-	out float4 color_depth : SV_Target0, out float4 motion_vec : SV_Target1)
+float4 ClearFloatPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
-	color_depth = clear_clr - mid_value;
-	motion_vec = 0;
+	return clear_clr - mid_value;
 }
 		]]>
 	</shader>
@@ -82,39 +96,80 @@ void ClearFloatPS(float2 tex_coord0 : TEXCOORD0,
 			<state name="pixel_shader" value="ClearFloatPS()"/>
 		</pass>
 	</technique>
-	
-	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
-	<parameter type="float4x4" name="last_modelmat"/>
-	<parameter type="float4" name="color"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="prev_view"/>
+		<parameter type="float4x4" name="prev_proj"/>
+	</cbuffer>
 	
 	<shader>
 		<![CDATA[
-void NormalMeshVS(float4 pos			: POSITION,
+void CalcMotionVector(float4 pos_curr, float4 pos_prev, float3 normal_es,
+					out float2 oVelocity, out float4 oPos)
+{
+	pos_curr = mul(pos_curr, view);
+	pos_prev = mul(pos_prev, prev_view);
+	float3 motion_vec = pos_curr.xyz - pos_prev.xyz;
+	
+	pos_curr = mul(pos_curr, proj);
+	pos_prev = mul(pos_prev, prev_proj);
+	oPos = dot(motion_vec, normal_es) > 0 ? pos_curr : pos_prev;
+	
+	pos_curr /= pos_curr.w;
+	pos_prev /= pos_prev.w;
+	oVelocity = (pos_curr.xy - pos_prev.xy) * 0.5f;
+}
+
+void MotionVectorInstancedVS(float4 pos			: POSITION,
 					float3 normal		: NORMAL,
 
-					out float4 oClrDepth : TEXCOORD0,
-					out float2 oVelocity : TEXCOORD1,
+					float4 row0			: TEXCOORD1,
+					float4 row1			: TEXCOORD2,
+					float4 row2			: TEXCOORD3,
+					float4 last_row0	: TEXCOORD4,
+					float4 last_row1	: TEXCOORD5,
+					float4 last_row2	: TEXCOORD6,
+					float3 clr			: COLOR0,
+
+					out float2 oVelocity : TEXCOORD0,
+					out float4 oPos		: SV_Position)
+{
+	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
+	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
+
+	normal = mul(mul((float3x3)model, normal), (float3x3)view);
+	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oVelocity, oPos);
+}
+
+void MotionVectorNonInstancedVS(float4 pos			: POSITION,
+					float3 normal		: NORMAL,
+
+					out float2 oVelocity : TEXCOORD0,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
-	oPos = mul(pos_ws, view_proj);
-	
-	float4 pos_curr = oPos;
-	float4 pos_last = mul(mul(pos, last_modelmat), last_view_proj);
-	pos_curr /= pos_curr.w;
-	pos_last /= pos_last.w;
-	oVelocity = (pos_curr.xy - pos_last.xy) / 2;
+	normal = mul(mul(normal, (float3x3)modelmat), (float3x3)view);
+	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oVelocity, oPos);
+}
 
-	normal = mul(normal, (float3x3)modelmat);
-	oClrDepth = float4(saturate(color.rgb * point_lighting(light_in_world, pos_ws.xyz, normal)) - mid_value.rgb, oPos.w * inv_depth_range);
+float4 MotionVectorPS(float2 velocity : TEXCOORD0) : SV_Target
+{
+	return float4(velocity, 1, 1);
 }
 		]]>
 	</shader>
 
-	<technique name="NormalMesh">
+	<technique name="MotionVectorInstanced">
 		<pass name="p0">
-			<state name="vertex_shader" value="NormalMeshVS()"/>
-			<state name="pixel_shader" value="ColorDepthPS()"/>
+			<state name="vertex_shader" value="MotionVectorInstancedVS()"/>
+			<state name="pixel_shader" value="MotionVectorPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MotionVectorNonInstanced">
+		<pass name="p0">
+			<state name="vertex_shader" value="MotionVectorNonInstancedVS()"/>
+			<state name="pixel_shader" value="MotionVectorPS()"/>
 		</pass>
 	</technique>
 </effect>

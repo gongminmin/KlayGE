@@ -138,7 +138,8 @@ namespace KlayGE
 			cur_front_stencil_ref_(0),
 			cur_back_stencil_ref_(0),
 			cur_blend_factor_(1, 1, 1, 1),
-			cur_sample_mask_(0xFFFFFFFF)
+			cur_sample_mask_(0xFFFFFFFF),
+			motion_frames_(0)
 	{
 	}
 

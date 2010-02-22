@@ -38,8 +38,9 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::FrameBufferPtr clr_depth_buffer_;
-	KlayGE::FrameBufferPtr mbed_buffer_;
+	KlayGE::FrameBufferPtr clr_depth_fb_;
+	KlayGE::FrameBufferPtr motion_vec_fb_;
+	KlayGE::FrameBufferPtr mbed_fb_;
 	KlayGE::TexturePtr clr_depth_tex_;
 	KlayGE::TexturePtr motion_vec_tex_;
 	KlayGE::TexturePtr mbed_tex_;

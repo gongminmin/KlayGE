@@ -19,7 +19,14 @@
 #pragma once
 
 #include <KlayGE/Math.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6385)
+#endif
 #include <boost/array.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {

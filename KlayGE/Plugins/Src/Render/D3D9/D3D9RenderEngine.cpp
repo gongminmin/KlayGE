@@ -179,6 +179,8 @@ namespace KlayGE
 	void D3D9RenderEngine::CreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
+		motion_frames_ = settings.motion_frames;
+
 		D3D9RenderWindowPtr win = MakeSharedPtr<D3D9RenderWindow>(d3d_, this->ActiveAdapter(),
 			name, settings);
 		default_frame_buffer_ = win;

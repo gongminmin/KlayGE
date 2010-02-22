@@ -1,8 +1,11 @@
 // Camera.hpp
 // KlayGE 摄像机类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 支持Motion blur (2010.2.22)
 //
 // 2.0.0
 // 初次建立 (2003.5.31)
@@ -18,6 +21,15 @@
 #ifndef KLAYGE_CORE_SOURCE
 #define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
+#include <boost/circular_buffer.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
 #endif
 
 #include <KlayGE/Vector.hpp>
@@ -59,15 +71,19 @@ namespace KlayGE
 
 		void Update();
 
-		float4x4 const & LastViewMatrix() const
+		float4x4 const & PrevViewMatrix() const
 		{
-			return last_view_mat_;
+			return prev_view_mats_.front();
+		}
+		float4x4 const & PrevProjMatrix() const
+		{
+			return prev_proj_mats_.front();
 		}
 
 		Camera();
 
 	private:
-		float3		eyePos_;			// 观察矩阵的属性
+		float3		eyePos_;		// 观察矩阵的属性
 		float3		lookat_;
 		float3		upVec_;
 		float3		viewVec_;
@@ -79,7 +95,8 @@ namespace KlayGE
 		float		farPlane_;
 		float4x4	projMat_;
 
-		float4x4	last_view_mat_;
+		boost::circular_buffer<float4x4> prev_view_mats_;
+		boost::circular_buffer<float4x4> prev_proj_mats_;
 	};
 }
 
