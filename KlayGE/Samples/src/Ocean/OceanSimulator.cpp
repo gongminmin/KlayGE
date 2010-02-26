@@ -76,7 +76,7 @@ namespace KlayGE
 
 		// RW buffer allocations
 		// H0
-		init_data.row_pitch = h0_data.size() * sizeof(h0_data[0]);
+		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
 		init_data.data = &h0_data[0];
 		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
 
@@ -88,7 +88,7 @@ namespace KlayGE
 		ht_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
 
 		// omega
-		init_data.row_pitch = omega_data.size() * sizeof(omega_data[0]);
+		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
 		init_data.data = &omega_data[0];
 		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
 
@@ -201,7 +201,7 @@ namespace KlayGE
 		}
 	}
 
-	void OceanSimulator::Update(float time)
+	void OceanSimulator::Update()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -209,13 +209,13 @@ namespace KlayGE
 
 		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, ht_buffer_));
 
-		*time_param_ = time * param_.time_scale;
+		*time_param_ = static_cast<float>(timer_.current_time() * param_.time_scale);
 
 		uint32_t group_count_x = (param_.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
 		uint32_t group_count_y = (param_.dmap_dim + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
 		re.Dispatch(*update_spectrum_tech_, group_count_x, group_count_y, 1);
 
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>(0));
+		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 
 
 		// ------------------------------------ Perform FFT -------------------------------------------

@@ -61,7 +61,7 @@ namespace
 
 			ElementInitData init_data;
 			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
@@ -79,7 +79,7 @@ namespace
 			}
 
 			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = indices.size() * sizeof(indices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R32UI);
@@ -221,7 +221,7 @@ namespace
 
 			ElementInitData init_data;
 			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
@@ -242,7 +242,7 @@ namespace
 			}
 
 			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = indices.size() * sizeof(indices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R32UI);
@@ -412,7 +412,7 @@ namespace
 
 			if (!intersect.empty())
 			{
-				ocean_simulator_->Update(static_cast<float>(timer_.elapsed()));
+				ocean_simulator_->Update();
 
 				float3 eye = camera.EyePos();
 				float3 forward = camera.ViewVec();
@@ -514,7 +514,6 @@ namespace
 		float4x4 reflect_mat_;
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
-		Timer timer_;
 	};
 
 
@@ -649,13 +648,6 @@ void OceanApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-	App3DFramework const & app = Context::Instance().AppInstance();
-	Camera const & camera = app.ActiveCamera();
-	float3 vec = camera.ViewVec();
-	stream.str(L"");
-	stream << vec.x() << " " << vec.y() << " " << vec.z();
-	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 
 	UIManager::Instance().Render();
 }

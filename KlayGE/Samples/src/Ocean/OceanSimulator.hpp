@@ -3,6 +3,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Timer.hpp>
 
 #include "FFT.hpp"
 
@@ -37,7 +38,7 @@ namespace KlayGE
 		~OceanSimulator();
 
 		// Update ocean wave when tick arrives.
-		void Update(float time);
+		void Update();
 
 		// Texture access
 		TexturePtr const & DisplacementTex() const;
@@ -87,6 +88,8 @@ namespace KlayGE
 
 		// FFT wrap-up
 		CSFFT_Plan fft_plan_;
+
+		Timer timer_;
 	};
 }
 

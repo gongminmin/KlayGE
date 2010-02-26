@@ -19,15 +19,9 @@
 		<![CDATA[
 void FT2(inout float2 a, inout float2 b)
 {
-	float t;
-
-	t = a.x;
-	a.x += b.x;
-	b.x = t - b.x;
-
-	t = a.y;
-	a.y += b.y;
-	b.y = t - b.y;
+	float2 t = a;
+	a += b;
+	b = t - b;
 }
 
 void CMUL_forward(inout float2 a, float bx, float by)
