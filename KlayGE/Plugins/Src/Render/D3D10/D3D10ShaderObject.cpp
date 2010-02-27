@@ -74,7 +74,6 @@ namespace
 		char* dirty_;
 	};
 
-	
 	template <typename T, int N>
 	class SetD3D10ShaderParameter<Vector_T<T, N>, T>
 	{
@@ -283,59 +282,65 @@ namespace
 	};
 
 	template <>
-	class SetD3D10ShaderParameter<TexturePtr, TexturePtr>
+	class SetD3D10ShaderParameter<SamplerStateObjectPtr, ID3D10SamplerState*>
 	{
 	public:
-		SetD3D10ShaderParameter(TexturePtr& texture, RenderEffectParameterPtr const & param)
-			: texture_(&texture), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			param_->Value(*texture_);
-		}
-
-	private:
-		TexturePtr* texture_;
-		RenderEffectParameterPtr param_;
-	};
-
-	template <>
-	class SetD3D10ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>
-	{
-	public:
-		SetD3D10ShaderParameter(SamplerStateObjectPtr& sampler, RenderEffectParameterPtr const & param)
+		SetD3D10ShaderParameter(ID3D10SamplerState*& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			param_->Value(*sampler_);
+			SamplerStateObjectPtr sampler;
+			param_->Value(sampler);
+			*sampler_ = checked_pointer_cast<D3D10SamplerStateObject>(sampler)->D3DSamplerState().get();
 		}
 
 	private:
-		SamplerStateObjectPtr* sampler_;
+		ID3D10SamplerState** sampler_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D10ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>
+	class SetD3D10ShaderParameter<TexturePtr, ID3D10ShaderResourceView*>
 	{
 	public:
-		SetD3D10ShaderParameter(GraphicsBufferPtr& buffer, RenderEffectParameterPtr const & param)
+		SetD3D10ShaderParameter(ID3D10ShaderResourceView*& texture, RenderEffectParameterPtr const & param)
+			: texture_(&texture), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			TexturePtr tex;
+			param_->Value(tex);
+			*texture_ = checked_pointer_cast<D3D10Texture>(tex)->D3DShaderResourceView().get();
+		}
+
+	private:
+		ID3D10ShaderResourceView** texture_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D10ShaderParameter<GraphicsBufferPtr, ID3D10ShaderResourceView*>
+	{
+	public:
+		SetD3D10ShaderParameter(ID3D10ShaderResourceView*& buffer, RenderEffectParameterPtr const & param)
 			: buffer_(&buffer), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			param_->Value(*buffer_);
+			GraphicsBufferPtr buf;
+			param_->Value(buf);
+			*buffer_ = checked_pointer_cast<D3D10GraphicsBuffer>(buf)->D3DShaderResourceView().get();
 		}
 
 	private:
-		GraphicsBufferPtr* buffer_;
+		ID3D10ShaderResourceView** buffer_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -552,9 +557,8 @@ namespace KlayGE
 					break;
 				}
 
-				textures_[type].resize(so->textures_[type].size());
-				samplers_[type].resize(so->samplers_[type].size());
-				buffers_[type].resize(so->buffers_[type].size());
+				samplers_[type].resize(so->samplers_[type].size(), NULL);
+				srvs_[type].resize(so->srvs_[type].size(), NULL);
 
 				cbufs_[type] = so->cbufs_[type];
 				dirty_[type] = so->dirty_[type];
@@ -772,7 +776,6 @@ namespace KlayGE
 
 											D3D10ShaderParameterHandle p_handle;
 											p_handle.shader_type = static_cast<uint8_t>(type);
-											p_handle.param_class = type_desc.Class;
 											p_handle.param_type = type_desc.Type;
 											p_handle.cbuff = c;
 											p_handle.offset = var_desc.StartOffset;
@@ -796,9 +799,8 @@ namespace KlayGE
 								d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 							}
 
-							int num_textures = -1;
 							int num_samplers = -1;
-							int num_buffers = -1;
+							int num_srvs = -1;
 							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 							{
 								D3D10_SHADER_INPUT_BIND_DESC si_desc;
@@ -806,19 +808,12 @@ namespace KlayGE
 
 								switch (si_desc.Type)
 								{
-								case D3D10_SIT_TEXTURE:
-									if (si_desc.Dimension != D3D10_SRV_DIMENSION_BUFFER)
-									{
-										num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
-									}
-									else
-									{
-										num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
-									}
-									break;
-
 								case D3D10_SIT_SAMPLER:
 									num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
+									break;
+
+								case D3D10_SIT_TEXTURE:
+									num_srvs = std::max(num_srvs, static_cast<int>(si_desc.BindPoint));
 									break;
 
 								default:
@@ -826,9 +821,8 @@ namespace KlayGE
 								}
 							}
 
-							textures_[type].resize(num_textures + 1);
-							samplers_[type].resize(num_samplers + 1);
-							buffers_[type].resize(num_buffers + 1);
+							samplers_[type].resize(num_samplers + 1, NULL);
+							srvs_[type].resize(num_srvs + 1, NULL);
 
 							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 							{
@@ -842,7 +836,6 @@ namespace KlayGE
 									{
 										D3D10ShaderParameterHandle p_handle;
 										p_handle.shader_type = static_cast<uint8_t>(type);
-										p_handle.param_class = D3D10_SVC_OBJECT;
 										if (D3D10_SIT_TEXTURE == si_desc.Type)
 										{
 											if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
@@ -893,9 +886,8 @@ namespace KlayGE
 		ret->vs_code_ = vs_code_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			ret->textures_[i].resize(textures_[i].size());
-			ret->samplers_[i].resize(samplers_[i].size());
-			ret->buffers_[i].resize(buffers_[i].size());
+			ret->samplers_[i].resize(samplers_[i].size(), NULL);
+			ret->srvs_[i].resize(srvs_[i].size(), NULL);
 
 			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
@@ -1212,6 +1204,10 @@ namespace KlayGE
 			}
 			break;
 
+		case REDT_sampler:
+			ret.func = SetD3D10ShaderParameter<SamplerStateObjectPtr, ID3D10SamplerState*>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
 		case REDT_texture1D:
 		case REDT_texture2D:
 		case REDT_texture3D:
@@ -1220,15 +1216,11 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D10ShaderParameter<TexturePtr, TexturePtr>(textures_[p_handle.shader_type][p_handle.offset], param);
-			break;
-
-		case REDT_sampler:
-			ret.func = SetD3D10ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D10ShaderParameter<TexturePtr, ID3D10ShaderResourceView*>(srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_buffer:
-			ret.func = SetD3D10ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>(buffers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D10ShaderParameter<GraphicsBufferPtr, ID3D10ShaderResourceView*>(srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
@@ -1248,9 +1240,9 @@ namespace KlayGE
 		re.GSSetShader(geometry_shader_);
 		re.PSSetShader(pixel_shader_);
 
-		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
+		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::reference pb, param_binds_[i])
+			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[st])::reference pb, param_binds_[st])
 			{
 				pb.func();
 			}
@@ -1270,52 +1262,16 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<ID3D10SamplerState*> sss;
-		std::vector<ID3D10ShaderResourceView*> srs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
-			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
-			srs.resize(std::max(s_textures.size(), s_buffers.size()));
-			for (size_t i = 0; i < srs.size(); ++ i)
+			if (!srvs_[st].empty())
 			{
-				if ((i < s_textures.size()) && s_textures[i])
-				{
-					srs[i] = checked_pointer_cast<D3D10Texture>(s_textures[i])->D3DShaderResourceView().get();
-				}
-				else
-				{
-					if ((i < s_buffers.size()) && s_buffers[i])
-					{
-						srs[i] = checked_pointer_cast<D3D10GraphicsBuffer>(s_buffers[i])->D3DShaderResourceView().get();
-					}
-					else
-					{
-						srs[i] = NULL;
-					}
-				}
-			}
-			if (!srs.empty())
-			{
-				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
+				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srvs_[st].size()), &srvs_[st][0]);
 			}
 
-			BOOST_TYPEOF(samplers_)::const_reference s_samplers = samplers_[st];
-			sss.resize(s_samplers.size());
-			for (size_t i = 0; i < s_samplers.size(); ++ i)
+			if (!samplers_[st].empty())
 			{
-				if (s_samplers[i])
-				{
-					sss[i] = checked_pointer_cast<D3D10SamplerStateObject>(s_samplers[i])->D3DSamplerState().get();
-				}
-				else
-				{
-					sss[i] = NULL;
-				}
-			}
-			if (!sss.empty())
-			{
-				SetSamplers_[st](d3d_device.get(), 0, static_cast<UINT>(sss.size()), &sss[0]);
+				SetSamplers_[st](d3d_device.get(), 0, static_cast<UINT>(samplers_[st].size()), &samplers_[st][0]);
 			}
 
 			if (!d3d_cbufs_[st].empty())
@@ -1335,15 +1291,13 @@ namespace KlayGE
 		D3D10RenderEngine& re = *checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D10DevicePtr const & d3d_device = re.D3DDevice();
 
-		std::vector<ID3D10ShaderResourceView*> srs;
+		std::vector<ID3D10ShaderResourceView*> srvs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
-			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
-			srs.resize(std::max(s_textures.size(), s_buffers.size()));
-			if (!srs.empty())
+			if (!srvs_[st].empty())
 			{
-				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
+				srvs.resize(srvs_[st].size(), NULL);
+				SetShaderResources_[st](d3d_device.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
 			}
 		}
 	}

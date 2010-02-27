@@ -79,17 +79,16 @@ namespace KlayGE
 			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("SumLumLog"))
 	{
 		buff_ = Context::Instance().RenderFactoryInstance().MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_R32F);
+		*(technique_->Effect().ParameterByName("out_buff")) = buff_;
 	}
 
 	void SumLumLogPostProcessCS::Apply()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, buff_));
 		this->OnRenderBegin();
 		re.Dispatch(*technique_, buff_->Size() / sizeof(float), 1, 1);
 		this->OnRenderEnd();
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 	}
 
 	void SumLumLogPostProcessCS::Source(TexturePtr const & src_tex, bool flipping)
@@ -181,6 +180,7 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v;
 		adapted_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
+		*(technique_->Effect().ParameterByName("out_buff")) = adapted_buff_;
 
 		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
 	}
@@ -189,11 +189,9 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, adapted_buff_));
 		this->OnRenderBegin();
 		re.Dispatch(*technique_, 1, 1, 1);
 		this->OnRenderEnd();
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 	}
 
 	void AdaptedLumPostProcessCS::OnRenderBegin()

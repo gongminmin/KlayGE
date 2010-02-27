@@ -24,10 +24,10 @@ namespace KlayGE
 
 		// Buffers
 		*(fft_plan->fft_effect->ParameterByName("src_data")) = src;
+		*(fft_plan->fft_effect->ParameterByName("dst_data")) = dst;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, dst));
 
 		// Shader
 		if (istride > 1)
@@ -38,8 +38,6 @@ namespace KlayGE
 		{
 			re.Dispatch(*fft_plan->radix008a_tech2, grid, 1, 1);
 		}
-
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
 	}
 
 	void fft_c2c(CSFFT_Plan* fft_plan,

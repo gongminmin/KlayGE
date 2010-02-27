@@ -146,6 +146,7 @@ namespace KlayGE
 		*(effect_cs->ParameterByName("dy_addr_offset")) = dty_offset;
 		*(effect_cs->ParameterByName("input_h0")) = h0_buffer_;
 		*(effect_cs->ParameterByName("input_omega")) = omega_buffer_;
+		*(effect_cs->ParameterByName("output_ht")) = ht_buffer_;
 
 		time_param_ = effect_cs->ParameterByName("time");
 
@@ -207,16 +208,11 @@ namespace KlayGE
 
 		// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
 
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>(1, ht_buffer_));
-
 		*time_param_ = static_cast<float>(timer_.current_time() * param_.time_scale);
 
 		uint32_t group_count_x = (param_.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
 		uint32_t group_count_y = (param_.dmap_dim + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
 		re.Dispatch(*update_spectrum_tech_, group_count_x, group_count_y, 1);
-
-		re.BindUABuffers(std::vector<GraphicsBufferPtr>());
-
 
 		// ------------------------------------ Perform FFT -------------------------------------------
 		fft_c2c(&fft_plan_, dxyz_buffer_, ht_buffer_);

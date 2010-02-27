@@ -80,7 +80,6 @@ namespace KlayGE
 	private:
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoBindSOBuffers(RenderLayoutPtr const & rl);
-		void DoBindUABuffers(std::vector<GraphicsBufferPtr> const & uabs);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 		void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
 

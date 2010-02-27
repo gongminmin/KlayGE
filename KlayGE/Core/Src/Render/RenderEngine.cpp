@@ -117,10 +117,6 @@ namespace KlayGE
 		{
 		}
 
-		void DoBindUABuffers(std::vector<GraphicsBufferPtr> const & /*uabs*/)
-		{
-		}
-
 		void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/)
 		{
 		}
@@ -227,11 +223,6 @@ namespace KlayGE
 	{
 		so_buffers_ = rl;
 		this->DoBindSOBuffers(rl);
-	}
-
-	void RenderEngine::BindUABuffers(std::vector<GraphicsBufferPtr> const & uabs)
-	{
-		this->DoBindUABuffers(uabs);
 	}
 
 	// äÖÈ¾Ò»¸övb

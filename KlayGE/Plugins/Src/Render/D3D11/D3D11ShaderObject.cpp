@@ -289,59 +289,107 @@ namespace
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<TexturePtr, TexturePtr>
+	class SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerState*>
 	{
 	public:
-		SetD3D11ShaderParameter(TexturePtr& texture, RenderEffectParameterPtr const & param)
-			: texture_(&texture), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			param_->Value(*texture_);
-		}
-
-	private:
-		TexturePtr* texture_;
-		RenderEffectParameterPtr param_;
-	};
-
-	template <>
-	class SetD3D11ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>
-	{
-	public:
-		SetD3D11ShaderParameter(SamplerStateObjectPtr& sampler, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(ID3D11SamplerState*& sampler, RenderEffectParameterPtr const & param)
 			: sampler_(&sampler), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			param_->Value(*sampler_);
+			SamplerStateObjectPtr sampler;
+			param_->Value(sampler);
+			*sampler_ = checked_pointer_cast<D3D11SamplerStateObject>(sampler)->D3DSamplerState().get();
 		}
 
 	private:
-		SamplerStateObjectPtr* sampler_;
+		ID3D11SamplerState** sampler_;
 		RenderEffectParameterPtr param_;
 	};
 
 	template <>
-	class SetD3D11ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>
+	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>
 	{
 	public:
-		SetD3D11ShaderParameter(GraphicsBufferPtr& buffer, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& texture, RenderEffectParameterPtr const & param)
+			: texture_(&texture), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			TexturePtr tex;
+			param_->Value(tex);
+			*texture_ = checked_pointer_cast<D3D11Texture>(tex)->D3DShaderResourceView().get();
+		}
+
+	private:
+		ID3D11ShaderResourceView** texture_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>
+	{
+	public:
+		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& buffer, RenderEffectParameterPtr const & param)
 			: buffer_(&buffer), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			param_->Value(*buffer_);
+			GraphicsBufferPtr buf;
+			param_->Value(buf);
+			*buffer_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DShaderResourceView().get();
 		}
 
 	private:
-		GraphicsBufferPtr* buffer_;
+		ID3D11ShaderResourceView** buffer_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>
+	{
+	public:
+		SetD3D11ShaderParameter(ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+			: uav_(&uav), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			TexturePtr tex;
+			param_->Value(tex);
+			//*uav_ = checked_pointer_cast<D3D11Texture>(tex)->D3DUnorderedAccessView().get();
+		}
+
+	private:
+		ID3D11UnorderedAccessView** uav_;
+		RenderEffectParameterPtr param_;
+	};
+
+	template <>
+	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>
+	{
+	public:
+		SetD3D11ShaderParameter(ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+			: uav_(&uav), param_(param)
+		{
+		}
+
+		void operator()()
+		{
+			GraphicsBufferPtr buf;
+			param_->Value(buf);
+			*uav_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DUnorderedAccessView().get();
+		}
+
+	private:
+		ID3D11UnorderedAccessView** uav_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -373,6 +421,16 @@ namespace
 		&ID3D11DeviceContext::CSSetConstantBuffers,
 		&ID3D11DeviceContext::HSSetConstantBuffers,
 		&ID3D11DeviceContext::DSSetConstantBuffers
+	};
+
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11UnorderedAccessView * const *, UINT const *)> SetUnorderedAccessViews_[ShaderObject::ST_NumShaderTypes] =
+	{
+		NULL,
+		NULL,
+		NULL,
+		&ID3D11DeviceContext::CSSetUnorderedAccessViews,
+		NULL,
+		NULL
 	};
 }
 
@@ -666,9 +724,9 @@ namespace KlayGE
 					break;
 				}
 
-				textures_[type].resize(so->textures_[type].size());
-				samplers_[type].resize(so->samplers_[type].size());
-				buffers_[type].resize(so->buffers_[type].size());
+				samplers_[type].resize(so->samplers_[type].size(), NULL);
+				srvs_[type].resize(so->srvs_[type].size(), NULL);
+				uavs_[type].resize(so->uavs_[type].size(), NULL);
 
 				cbufs_[type] = so->cbufs_[type];
 				dirty_[type] = so->dirty_[type];
@@ -956,7 +1014,6 @@ namespace KlayGE
 
 											D3D11ShaderParameterHandle p_handle;
 											p_handle.shader_type = static_cast<uint8_t>(type);
-											p_handle.param_class = type_desc.Class;
 											p_handle.param_type = type_desc.Type;
 											p_handle.cbuff = c;
 											p_handle.offset = var_desc.StartOffset;
@@ -980,9 +1037,9 @@ namespace KlayGE
 								d3d_cbufs_[type][c] = MakeCOMPtr(tmp_buf);
 							}
 
-							int num_textures = -1;
 							int num_samplers = -1;
-							int num_buffers = -1;
+							int num_srvs = -1;
+							int num_uavs = -1;
 							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 							{
 								D3D11_SHADER_INPUT_BIND_DESC si_desc;
@@ -990,29 +1047,22 @@ namespace KlayGE
 
 								switch (si_desc.Type)
 								{
-								case D3D10_SIT_TEXTURE:
-									if (si_desc.Dimension != D3D10_SRV_DIMENSION_BUFFER)
-									{
-										num_textures = std::max(num_textures, static_cast<int>(si_desc.BindPoint));
-									}
-									else
-									{
-										num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
-									}
-									break;
-
 								case D3D10_SIT_SAMPLER:
 									num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
 									break;
 
-								//case D3D11_SIT_UAV_RWTYPED:
+								case D3D10_SIT_TEXTURE:
 								case D3D11_SIT_STRUCTURED:
-								//case D3D11_SIT_UAV_RWSTRUCTURED:
 								case D3D11_SIT_BYTEADDRESS:
-								//case D3D11_SIT_UAV_RWBYTEADDRESS:
+									num_srvs = std::max(num_srvs, static_cast<int>(si_desc.BindPoint));
+									break;
+
+								case D3D11_SIT_UAV_RWTYPED:
+								case D3D11_SIT_UAV_RWSTRUCTURED:
+								case D3D11_SIT_UAV_RWBYTEADDRESS:
 								case D3D11_SIT_UAV_APPEND_STRUCTURED:
 								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
-									num_buffers = std::max(num_buffers, static_cast<int>(si_desc.BindPoint));
+									num_uavs = std::max(num_uavs, static_cast<int>(si_desc.BindPoint));
 									break;
 
 								default:
@@ -1020,9 +1070,9 @@ namespace KlayGE
 								}
 							}
 
-							textures_[type].resize(num_textures + 1);
-							samplers_[type].resize(num_samplers + 1);
-							buffers_[type].resize(num_buffers + 1);
+							samplers_[type].resize(num_samplers + 1, NULL);
+							srvs_[type].resize(num_srvs + 1, NULL);
+							uavs_[type].resize(num_uavs + 1, NULL);
 
 							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 							{
@@ -1033,11 +1083,11 @@ namespace KlayGE
 								{
 								case D3D10_SIT_TEXTURE:
 								case D3D10_SIT_SAMPLER:
-								//case D3D11_SIT_UAV_RWTYPED:
 								case D3D11_SIT_STRUCTURED:
-								//case D3D11_SIT_UAV_RWSTRUCTURED:
 								case D3D11_SIT_BYTEADDRESS:
-								//case D3D11_SIT_UAV_RWBYTEADDRESS:
+								case D3D11_SIT_UAV_RWTYPED:
+								case D3D11_SIT_UAV_RWSTRUCTURED:
+								case D3D11_SIT_UAV_RWBYTEADDRESS:
 								case D3D11_SIT_UAV_APPEND_STRUCTURED:
 								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
 									{
@@ -1046,7 +1096,6 @@ namespace KlayGE
 										{
 											D3D11ShaderParameterHandle p_handle;
 											p_handle.shader_type = static_cast<uint8_t>(type);
-											p_handle.param_class = D3D10_SVC_OBJECT;
 											if (D3D10_SIT_SAMPLER == si_desc.Type)
 											{
 												p_handle.param_type = D3D10_SVT_SAMPLER;
@@ -1105,9 +1154,9 @@ namespace KlayGE
 		ret->vs_code_ = vs_code_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-			ret->textures_[i].resize(textures_[i].size());
-			ret->samplers_[i].resize(samplers_[i].size());
-			ret->buffers_[i].resize(buffers_[i].size());
+			ret->samplers_[i].resize(samplers_[i].size(), NULL);
+			ret->srvs_[i].resize(srvs_[i].size(), NULL);
+			ret->uavs_[i].resize(uavs_[i].size(), NULL);
 
 			ret->cbufs_[i] = cbufs_[i];
 			ret->dirty_[i] = dirty_[i];
@@ -1424,6 +1473,10 @@ namespace KlayGE
 			}
 			break;
 
+		case REDT_sampler:
+			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, ID3D11SamplerState*>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
 		case REDT_texture1D:
 		case REDT_texture2D:
 		case REDT_texture3D:
@@ -1432,31 +1485,33 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-		//case REDT_rw_texture1D:
-		//case REDT_rw_texture2D:
-		//case REDT_rw_texture3D:
-		//case REDT_rw_texture1DArray:
-		//case REDT_rw_texture2DArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, TexturePtr>(textures_[p_handle.shader_type][p_handle.offset], param);
-			break;
-
-		case REDT_sampler:
-			ret.func = SetD3D11ShaderParameter<SamplerStateObjectPtr, SamplerStateObjectPtr>(samplers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>(srvs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_buffer:
 		case REDT_structured_buffer:
-		//case REDT_rw_buffer:
-		//case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-		//case REDT_rw_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, GraphicsBufferPtr>(buffers_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>(srvs_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
+		case REDT_rw_texture1D:
+		case REDT_rw_texture2D:
+		case REDT_rw_texture3D:
+		case REDT_rw_texture1DArray:
+		case REDT_rw_texture2DArray:
+			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>(uavs_[p_handle.shader_type][p_handle.offset], param);
+			break;
+
+		case REDT_rw_buffer:
+		case REDT_rw_structured_buffer:
+		case REDT_rw_byte_address_buffer:
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>(uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
-			//BOOST_ASSERT(false);
+			BOOST_ASSERT(false);
 			break;
 		}
 
@@ -1497,52 +1552,16 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<ID3D11SamplerState*> sss;
-		std::vector<ID3D11ShaderResourceView*> srs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
-			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
-			srs.resize(std::max(s_textures.size(), s_buffers.size()));
-			for (size_t i = 0; i < srs.size(); ++ i)
+			if (!srvs_[st].empty())
 			{
-				if ((i < s_textures.size()) && s_textures[i])
-				{
-					srs[i] = checked_pointer_cast<D3D11Texture>(s_textures[i])->D3DShaderResourceView().get();
-				}
-				else
-				{
-					if ((i < s_buffers.size()) && s_buffers[i])
-					{
-						srs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(s_buffers[i])->D3DShaderResourceView().get();
-					}
-					else
-					{
-						srs[i] = NULL;
-					}
-				}
-			}
-			if (!srs.empty())
-			{
-				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
+				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srvs_[st].size()), &srvs_[st][0]);
 			}
 
-			BOOST_TYPEOF(samplers_)::const_reference s_samplers = samplers_[st];
-			sss.resize(s_samplers.size());
-			for (size_t i = 0; i < s_samplers.size(); ++ i)
+			if (!samplers_[st].empty())
 			{
-				if (s_samplers[i])
-				{
-					sss[i] = checked_pointer_cast<D3D11SamplerStateObject>(s_samplers[i])->D3DSamplerState().get();
-				}
-				else
-				{
-					sss[i] = NULL;
-				}
-			}
-			if (!sss.empty())
-			{
-				SetSamplers_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(sss.size()), &sss[0]);
+				SetSamplers_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(samplers_[st].size()), &samplers_[st][0]);
 			}
 
 			if (!d3d_cbufs_[st].empty())
@@ -1554,6 +1573,11 @@ namespace KlayGE
 				}
 				SetConstantBuffers_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(cb.size()), &cb[0]);
 			}
+
+			if (SetUnorderedAccessViews_[st] && !uavs_[st].empty())
+			{
+				SetUnorderedAccessViews_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(uavs_[st].size()), &uavs_[st][0], reinterpret_cast<UINT*>(&uavs_[st][0]));
+			}
 		}
 	}
 
@@ -1562,15 +1586,20 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
-		std::vector<ID3D11ShaderResourceView*> srs;
+		std::vector<ID3D11ShaderResourceView*> srvs;
+		std::vector<ID3D11UnorderedAccessView*> uavs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_TYPEOF(textures_)::const_reference s_textures = textures_[st];
-			BOOST_TYPEOF(buffers_)::const_reference s_buffers = buffers_[st];
-			srs.resize(std::max(s_textures.size(), s_buffers.size()));
-			if (!srs.empty())
+			if (!srvs_[st].empty())
 			{
-				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srs.size()), &srs[0]);
+				srvs.resize(srvs_[st].size(), NULL);
+				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
+			}
+
+			if (SetUnorderedAccessViews_[st] && !uavs_[st].empty())
+			{
+				uavs.resize(uavs_[st].size(), NULL);
+				SetUnorderedAccessViews_[st](d3d_imm_ctx.get(), 0, 1, &uavs[0], reinterpret_cast<UINT*>(&uavs[0]));
 			}
 		}
 	}

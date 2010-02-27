@@ -32,8 +32,7 @@ namespace KlayGE
 	{
 		uint32_t shader_type;
 
-		D3D10_SHADER_VARIABLE_CLASS param_class;
-	    D3D10_SHADER_VARIABLE_TYPE param_type;
+		D3D10_SHADER_VARIABLE_TYPE param_type;
 
 		uint32_t cbuff;
 
@@ -85,9 +84,8 @@ namespace KlayGE
 		ID3D10GeometryShaderPtr geometry_shader_;
 		ID3D10BlobPtr vs_code_;
 
-		boost::array<std::vector<TexturePtr>, ST_NumShaderTypes> textures_;
-		boost::array<std::vector<SamplerStateObjectPtr>, ST_NumShaderTypes> samplers_;
-		boost::array<std::vector<GraphicsBufferPtr>, ST_NumShaderTypes> buffers_;
+		boost::array<std::vector<ID3D10SamplerState*>, ST_NumShaderTypes> samplers_;
+		boost::array<std::vector<ID3D10ShaderResourceView*>, ST_NumShaderTypes> srvs_;
 
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
 		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;

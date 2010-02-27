@@ -113,7 +113,6 @@ namespace KlayGE
 		FrameBufferPtr const & DefaultFrameBuffer() const;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
-		void BindUABuffers(std::vector<GraphicsBufferPtr> const & uabs);
 
 		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
 		virtual uint16_t StencilBufferBitDepth() = 0;
@@ -168,7 +167,6 @@ namespace KlayGE
 	protected:
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
-		virtual void DoBindUABuffers(std::vector<GraphicsBufferPtr> const & uabs) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
 
