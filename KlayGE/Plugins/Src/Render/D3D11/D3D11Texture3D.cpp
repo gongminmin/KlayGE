@@ -106,6 +106,18 @@ namespace KlayGE
 			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
 		}
 
+		if (access_hint_ & EAH_GPU_Unordered)
+		{
+			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+			uav_desc.Format = desc_.Format;
+			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
+			uav_desc.Texture3D.MipSlice = 0;
+
+			ID3D11UnorderedAccessView* d3d_ua_view;
+			TIF(d3d_device_->CreateUnorderedAccessView(d3dTexture3D_.get(), &uav_desc, &d3d_ua_view));
+			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
+		}
+
 		this->UpdateParams();
 	}
 

@@ -140,6 +140,10 @@ namespace KlayGE
 				bind_flags |= D3D11_BIND_RENDER_TARGET;
 			}
 		}
+		if (access_hint_ & EAH_GPU_Unordered)
+		{
+			bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
+		}
 
 		cpu_access_flags = 0;
 		if (access_hint_ & EAH_CPU_Read)

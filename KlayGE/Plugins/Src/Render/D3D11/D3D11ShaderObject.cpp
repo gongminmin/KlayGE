@@ -301,7 +301,10 @@ namespace
 		{
 			SamplerStateObjectPtr sampler;
 			param_->Value(sampler);
-			*sampler_ = checked_pointer_cast<D3D11SamplerStateObject>(sampler)->D3DSamplerState().get();
+			if (sampler)
+			{
+				*sampler_ = checked_pointer_cast<D3D11SamplerStateObject>(sampler)->D3DSamplerState().get();
+			}
 		}
 
 	private:
@@ -313,8 +316,8 @@ namespace
 	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>
 	{
 	public:
-		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& texture, RenderEffectParameterPtr const & param)
-			: texture_(&texture), param_(param)
+		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+			: srv_(&srv), param_(param)
 		{
 		}
 
@@ -322,11 +325,14 @@ namespace
 		{
 			TexturePtr tex;
 			param_->Value(tex);
-			*texture_ = checked_pointer_cast<D3D11Texture>(tex)->D3DShaderResourceView().get();
+			if (tex)
+			{
+				*srv_ = checked_pointer_cast<D3D11Texture>(tex)->D3DShaderResourceView().get();
+			}
 		}
 
 	private:
-		ID3D11ShaderResourceView** texture_;
+		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -334,8 +340,8 @@ namespace
 	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>
 	{
 	public:
-		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& buffer, RenderEffectParameterPtr const & param)
-			: buffer_(&buffer), param_(param)
+		SetD3D11ShaderParameter(ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+			: srv_(&srv), param_(param)
 		{
 		}
 
@@ -343,11 +349,14 @@ namespace
 		{
 			GraphicsBufferPtr buf;
 			param_->Value(buf);
-			*buffer_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DShaderResourceView().get();
+			if (buf)
+			{
+				*srv_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DShaderResourceView().get();
+			}
 		}
 
 	private:
-		ID3D11ShaderResourceView** buffer_;
+		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
 
@@ -364,7 +373,10 @@ namespace
 		{
 			TexturePtr tex;
 			param_->Value(tex);
-			//*uav_ = checked_pointer_cast<D3D11Texture>(tex)->D3DUnorderedAccessView().get();
+			if (tex)
+			{
+				*uav_ = checked_pointer_cast<D3D11Texture>(tex)->D3DUnorderedAccessView().get();
+			}
 		}
 
 	private:
@@ -385,7 +397,10 @@ namespace
 		{
 			GraphicsBufferPtr buf;
 			param_->Value(buf);
-			*uav_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DUnorderedAccessView().get();
+			if (buf)
+			{
+				*uav_ = checked_pointer_cast<D3D11GraphicsBuffer>(buf)->D3DUnorderedAccessView().get();
+			}
 		}
 
 	private:
@@ -421,16 +436,6 @@ namespace
 		&ID3D11DeviceContext::CSSetConstantBuffers,
 		&ID3D11DeviceContext::HSSetConstantBuffers,
 		&ID3D11DeviceContext::DSSetConstantBuffers
-	};
-
-	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11UnorderedAccessView * const *, UINT const *)> SetUnorderedAccessViews_[ShaderObject::ST_NumShaderTypes] =
-	{
-		NULL,
-		NULL,
-		NULL,
-		&ID3D11DeviceContext::CSSetUnorderedAccessViews,
-		NULL,
-		NULL
 	};
 }
 
@@ -1573,11 +1578,12 @@ namespace KlayGE
 				}
 				SetConstantBuffers_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(cb.size()), &cb[0]);
 			}
+		}
 
-			if (SetUnorderedAccessViews_[st] && !uavs_[st].empty())
-			{
-				SetUnorderedAccessViews_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(uavs_[st].size()), &uavs_[st][0], reinterpret_cast<UINT*>(&uavs_[st][0]));
-			}
+		if (!uavs_[ST_ComputeShader].empty())
+		{
+			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_[ST_ComputeShader][0],
+				reinterpret_cast<UINT*>(&uavs_[ST_ComputeShader][0]));
 		}
 	}
 
@@ -1587,7 +1593,6 @@ namespace KlayGE
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		std::vector<ID3D11ShaderResourceView*> srvs;
-		std::vector<ID3D11UnorderedAccessView*> uavs;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
 			if (!srvs_[st].empty())
@@ -1595,12 +1600,12 @@ namespace KlayGE
 				srvs.resize(srvs_[st].size(), NULL);
 				SetShaderResources_[st](d3d_imm_ctx.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
 			}
+		}
 
-			if (SetUnorderedAccessViews_[st] && !uavs_[st].empty())
-			{
-				uavs.resize(uavs_[st].size(), NULL);
-				SetUnorderedAccessViews_[st](d3d_imm_ctx.get(), 0, 1, &uavs[0], reinterpret_cast<UINT*>(&uavs[0]));
-			}
+		if (!uavs_[ST_ComputeShader].empty())
+		{
+			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_[ST_ComputeShader].size(), NULL);
+			d3d_imm_ctx->CSSetUnorderedAccessViews(0, 1, &uavs[0], reinterpret_cast<UINT*>(&uavs[0]));
 		}
 	}
 }

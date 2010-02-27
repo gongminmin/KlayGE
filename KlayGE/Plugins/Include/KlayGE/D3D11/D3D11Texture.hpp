@@ -53,6 +53,10 @@ namespace KlayGE
 		{
 			return d3d_sr_view_;
 		}
+		ID3D11UnorderedAccessViewPtr const & D3DUnorderedAccessView() const
+		{
+			return d3d_ua_view_;
+		}
 
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
@@ -81,6 +85,7 @@ namespace KlayGE
 		ID3D11DevicePtr				d3d_device_;
 		ID3D11DeviceContextPtr		d3d_imm_ctx_;
 		ID3D11ShaderResourceViewPtr d3d_sr_view_;
+		ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 	};
 
 	typedef boost::shared_ptr<D3D11Texture> D3D11TexturePtr;

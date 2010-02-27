@@ -294,7 +294,10 @@ namespace
 		{
 			SamplerStateObjectPtr sampler;
 			param_->Value(sampler);
-			*sampler_ = checked_pointer_cast<D3D10SamplerStateObject>(sampler)->D3DSamplerState().get();
+			if (sampler)
+			{
+				*sampler_ = checked_pointer_cast<D3D10SamplerStateObject>(sampler)->D3DSamplerState().get();
+			}
 		}
 
 	private:
@@ -315,7 +318,10 @@ namespace
 		{
 			TexturePtr tex;
 			param_->Value(tex);
-			*texture_ = checked_pointer_cast<D3D10Texture>(tex)->D3DShaderResourceView().get();
+			if (tex)
+			{
+				*texture_ = checked_pointer_cast<D3D10Texture>(tex)->D3DShaderResourceView().get();
+			}
 		}
 
 	private:
@@ -336,7 +342,10 @@ namespace
 		{
 			GraphicsBufferPtr buf;
 			param_->Value(buf);
-			*buffer_ = checked_pointer_cast<D3D10GraphicsBuffer>(buf)->D3DShaderResourceView().get();
+			if (buf)
+			{
+				*buffer_ = checked_pointer_cast<D3D10GraphicsBuffer>(buf)->D3DShaderResourceView().get();
+			}
 		}
 
 	private:
