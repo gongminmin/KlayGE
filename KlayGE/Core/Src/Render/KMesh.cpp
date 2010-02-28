@@ -1,8 +1,11 @@
 // KMesh.cpp
 // KlayGE KMesh类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2005-2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 支持32-bit index (2010.2.28)
 //
 // 3.9.0
 // 直接读取MeshML (2009.5.3)
@@ -60,7 +63,8 @@ namespace
 			std::vector<std::vector<vertex_element> > ves;
 			std::vector<uint32_t> max_num_blends;
 			std::vector<std::vector<std::vector<uint8_t> > > buffs;
-			std::vector<std::vector<uint16_t> > indices;
+			std::vector<char> is_index_16_bit;
+			std::vector<std::vector<uint8_t> > indices;
 			std::vector<Joint> joints;
 			boost::shared_ptr<KeyFramesType> kfs;
 			int32_t start_frame;
@@ -117,7 +121,7 @@ namespace
 					}
 
 					mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
-						EF_R16UI, model_desc->access_hint);
+						model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);
 				}
 
 				if (model_desc->kfs && !model_desc->kfs->empty())
@@ -156,7 +160,7 @@ namespace
 			model_desc->CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 
 			LoadModel(meshml_name, model_desc->mtls, model_desc->mesh_names, model_desc->mtl_ids, model_desc->ves, model_desc->max_num_blends,
-				model_desc->buffs, model_desc->indices, model_desc->joints, model_desc->kfs,
+				model_desc->buffs, model_desc->is_index_16_bit, model_desc->indices, model_desc->joints, model_desc->kfs,
 				model_desc->start_frame, model_desc->end_frame, model_desc->frame_rate);
 
 			return model_desc;
@@ -253,502 +257,541 @@ namespace KlayGE
 
 	void ModelJIT(std::string const & meshml_name)
 	{
-		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
-
-		ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
-		XMLDocument doc;
-		XMLNodePtr root = doc.Parse(file);
-
-		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
-		if (materials_chunk)
+		bool jit = false;
+		if (ResLoader::Instance().Locate(meshml_name + jit_ext_name).empty())
 		{
-			uint32_t num_mtls = 0;
-			for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"))
-			{
-				++ num_mtls;
-			}
-			ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+			jit = true;
 		}
 		else
 		{
-			uint32_t num_mtls = 0;
-			ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
-		}
-
-		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
-		if (meshes_chunk)
-		{
-			uint32_t num_meshes = 0;
-			for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
+			ResIdentifierPtr lzma_file = ResLoader::Instance().Load(meshml_name + jit_ext_name);
+			uint32_t fourcc;
+			lzma_file->read(&fourcc, sizeof(fourcc));
+			if (fourcc != MakeFourCC<'K', 'L', 'M', '1'>::value)
 			{
-				++ num_meshes;
+				jit = true;
 			}
-			ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
-		}
-		else
-		{
-			uint32_t num_meshes = 0;
-			ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 		}
 
-		XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
-		if (bones_chunk)
+		if (jit)
 		{
-			uint32_t num_joints = 0;
-			for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
+			boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
+
+			ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
+			XMLDocument doc;
+			XMLNodePtr root = doc.Parse(file);
+
+			XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
+			if (materials_chunk)
 			{
-				++ num_joints;
-			}
-			ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
-		}
-		else
-		{
-			uint32_t num_joints = 0;
-			ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
-		}
-
-		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
-		if (key_frames_chunk)
-		{
-			uint32_t num_kfs = 0;
-			for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
-			{
-				++ num_kfs;
-			}
-			ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
-		}
-		else
-		{
-			uint32_t num_kfs = 0;
-			ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
-		}
-
-		if (materials_chunk)
-		{
-			uint32_t mtl_index = 0;
-			for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
-			{
-				RenderModel::Material mtl;
-				float ambient_r = mtl_node->Attrib("ambient_r")->ValueFloat();
-				float ambient_g = mtl_node->Attrib("ambient_g")->ValueFloat();
-				float ambient_b = mtl_node->Attrib("ambient_b")->ValueFloat();
-				float diffuse_r = mtl_node->Attrib("diffuse_r")->ValueFloat();
-				float diffuse_g = mtl_node->Attrib("diffuse_g")->ValueFloat();
-				float diffuse_b = mtl_node->Attrib("diffuse_b")->ValueFloat();
-				float specular_r = mtl_node->Attrib("specular_r")->ValueFloat();
-				float specular_g = mtl_node->Attrib("specular_g")->ValueFloat();
-				float specular_b = mtl_node->Attrib("specular_b")->ValueFloat();
-				float emit_r = mtl_node->Attrib("emit_r")->ValueFloat();
-				float emit_g = mtl_node->Attrib("emit_g")->ValueFloat();
-				float emit_b = mtl_node->Attrib("emit_b")->ValueFloat();
-				float opacity = mtl_node->Attrib("opacity")->ValueFloat();
-				float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
-				float shininess = mtl_node->Attrib("shininess")->ValueFloat();
-
-				ss->write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
-				ss->write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
-				ss->write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
-				ss->write(reinterpret_cast<char*>(&diffuse_r), sizeof(diffuse_r));
-				ss->write(reinterpret_cast<char*>(&diffuse_g), sizeof(diffuse_g));
-				ss->write(reinterpret_cast<char*>(&diffuse_b), sizeof(diffuse_b));
-				ss->write(reinterpret_cast<char*>(&specular_r), sizeof(specular_r));
-				ss->write(reinterpret_cast<char*>(&specular_g), sizeof(specular_g));
-				ss->write(reinterpret_cast<char*>(&specular_b), sizeof(specular_b));
-				ss->write(reinterpret_cast<char*>(&emit_r), sizeof(emit_r));
-				ss->write(reinterpret_cast<char*>(&emit_g), sizeof(emit_g));
-				ss->write(reinterpret_cast<char*>(&emit_b), sizeof(emit_b));
-				ss->write(reinterpret_cast<char*>(&opacity), sizeof(opacity));
-				ss->write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
-				ss->write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
-
-				XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
-				if (textures_chunk)
+				uint32_t num_mtls = 0;
+				for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"))
 				{
-					uint32_t num_texs = 0;
-					for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
-					{
-						++ num_texs;
-					}
-					ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
-
-					for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
-					{
-						WriteShortString(*ss, tex_node->Attrib("type")->ValueString());
-						WriteShortString(*ss, tex_node->Attrib("name")->ValueString());
-					}
+					++ num_mtls;
 				}
-				else
-				{
-					uint32_t num_texs = 0;
-					ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
-				}
+				ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 			}
-		}
-
-		if (meshes_chunk)
-		{
-			for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
+			else
 			{
-				WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
+				uint32_t num_mtls = 0;
+				ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+			}
 
-				int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
-				ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
-
-				XMLNodePtr vertex_elements_chunk = mesh_node->FirstNode("vertex_elements_chunk");
-
-				uint32_t num_ves = 0;
-				for (XMLNodePtr ve_node = vertex_elements_chunk->FirstNode("vertex_element"); ve_node; ve_node = ve_node->NextSibling("vertex_element"))
+			XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
+			if (meshes_chunk)
+			{
+				uint32_t num_meshes = 0;
+				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
 				{
-					++ num_ves;
+					++ num_meshes;
 				}
-				ss->write(reinterpret_cast<char*>(&num_ves), sizeof(num_ves));
+				ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			}
+			else
+			{
+				uint32_t num_meshes = 0;
+				ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+			}
 
-				std::vector<vertex_element> vertex_elements;
-				for (XMLNodePtr ve_node = vertex_elements_chunk->FirstNode("vertex_element"); ve_node; ve_node = ve_node->NextSibling("vertex_element"))
+			XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
+			if (bones_chunk)
+			{
+				uint32_t num_joints = 0;
+				for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 				{
-					vertex_element ve;
+					++ num_joints;
+				}
+				ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+			}
+			else
+			{
+				uint32_t num_joints = 0;
+				ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+			}
 
-					ve.usage = static_cast<VertexElementUsage>(ve_node->Attrib("usage")->ValueUInt());
-					ve.usage_index = static_cast<uint8_t>(ve_node->Attrib("usage_index")->ValueUInt());
-					uint8_t num_components = static_cast<uint8_t>(ve_node->Attrib("num_components")->ValueUInt());
-					if (ve.usage != VEU_BlendIndex)
+			XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
+			if (key_frames_chunk)
+			{
+				uint32_t num_kfs = 0;
+				for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
+				{
+					++ num_kfs;
+				}
+				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+			}
+			else
+			{
+				uint32_t num_kfs = 0;
+				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+			}
+
+			if (materials_chunk)
+			{
+				uint32_t mtl_index = 0;
+				for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
+				{
+					RenderModel::Material mtl;
+					float ambient_r = mtl_node->Attrib("ambient_r")->ValueFloat();
+					float ambient_g = mtl_node->Attrib("ambient_g")->ValueFloat();
+					float ambient_b = mtl_node->Attrib("ambient_b")->ValueFloat();
+					float diffuse_r = mtl_node->Attrib("diffuse_r")->ValueFloat();
+					float diffuse_g = mtl_node->Attrib("diffuse_g")->ValueFloat();
+					float diffuse_b = mtl_node->Attrib("diffuse_b")->ValueFloat();
+					float specular_r = mtl_node->Attrib("specular_r")->ValueFloat();
+					float specular_g = mtl_node->Attrib("specular_g")->ValueFloat();
+					float specular_b = mtl_node->Attrib("specular_b")->ValueFloat();
+					float emit_r = mtl_node->Attrib("emit_r")->ValueFloat();
+					float emit_g = mtl_node->Attrib("emit_g")->ValueFloat();
+					float emit_b = mtl_node->Attrib("emit_b")->ValueFloat();
+					float opacity = mtl_node->Attrib("opacity")->ValueFloat();
+					float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
+					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
+
+					ss->write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
+					ss->write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
+					ss->write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
+					ss->write(reinterpret_cast<char*>(&diffuse_r), sizeof(diffuse_r));
+					ss->write(reinterpret_cast<char*>(&diffuse_g), sizeof(diffuse_g));
+					ss->write(reinterpret_cast<char*>(&diffuse_b), sizeof(diffuse_b));
+					ss->write(reinterpret_cast<char*>(&specular_r), sizeof(specular_r));
+					ss->write(reinterpret_cast<char*>(&specular_g), sizeof(specular_g));
+					ss->write(reinterpret_cast<char*>(&specular_b), sizeof(specular_b));
+					ss->write(reinterpret_cast<char*>(&emit_r), sizeof(emit_r));
+					ss->write(reinterpret_cast<char*>(&emit_g), sizeof(emit_g));
+					ss->write(reinterpret_cast<char*>(&emit_b), sizeof(emit_b));
+					ss->write(reinterpret_cast<char*>(&opacity), sizeof(opacity));
+					ss->write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
+					ss->write(reinterpret_cast<char*>(&shininess), sizeof(shininess));
+
+					XMLNodePtr textures_chunk = mtl_node->FirstNode("textures_chunk");
+					if (textures_chunk)
 					{
-						switch (num_components)
+						uint32_t num_texs = 0;
+						for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
 						{
-						case 1:
-							ve.format = EF_R32F;
-							break;
+							++ num_texs;
+						}
+						ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 
-						case 2:
-							ve.format = EF_GR32F;
-							break;
-
-						case 3:
-							ve.format = EF_BGR32F;
-							break;
-
-						case 4:
-							ve.format = EF_ABGR32F;
-							break;
+						for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
+						{
+							WriteShortString(*ss, tex_node->Attrib("type")->ValueString());
+							WriteShortString(*ss, tex_node->Attrib("name")->ValueString());
 						}
 					}
 					else
 					{
-						switch (num_components)
-						{
-						case 1:
-							ve.format = EF_R8;
-							break;
-
-						case 2:
-							ve.format = EF_GR8;
-							break;
-
-						case 3:
-							ve.format = EF_BGR8;
-							break;
-
-						case 4:
-							ve.format = EF_ABGR8;
-							break;
-						}
-					}
-
-					ss->write(reinterpret_cast<char*>(&ve), sizeof(ve));
-					vertex_elements.push_back(ve);
-				}
-
-				XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
-
-				uint32_t num_vertices = 0;
-				for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-				{
-					++ num_vertices;
-				}
-				ss->write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
-
-				uint32_t max_num_blend = 0;
-				for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-				{
-					uint32_t num_blend = 0;
-					for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
-					{
-						++ num_blend;
-					}
-					max_num_blend = std::max(max_num_blend, num_blend);
-				}
-				ss->write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
-
-				BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
-				{
-					switch (ve.usage)
-					{
-					case VEU_Position:
-						{
-							std::vector<float3> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								buf.push_back(float3(vertex_node->Attrib("x")->ValueFloat(),
-									vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_Normal:
-						{
-							std::vector<float3> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr normal_node = vertex_node->FirstNode("normal");
-								buf.push_back(float3(normal_node->Attrib("x")->ValueFloat(),
-									normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_Diffuse:
-						{
-							std::vector<float4> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr diffuse_node = vertex_node->FirstNode("diffuse");
-								buf.push_back(float4(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
-									diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_Specular:
-						{
-							std::vector<float4> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr specular_node = vertex_node->FirstNode("diffuse");
-								buf.push_back(float4(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
-									specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_BlendIndex:
-						{
-							std::vector<uint8_t> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								uint32_t num_blend = 0;
-								for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
-								{
-									buf.push_back(static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt()));
-									++ num_blend;
-								}
-								for (uint32_t i = num_blend; i < max_num_blend; ++ i)
-								{
-									buf.push_back(0);
-								}
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_BlendWeight:
-						{
-							std::vector<float> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								uint32_t num_blend = 0;
-								for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
-								{
-									buf.push_back(weight_node->Attrib("weight")->ValueFloat());
-									++ num_blend;
-								}
-								for (uint32_t i = num_blend; i < max_num_blend; ++ i)
-								{
-									buf.push_back(0);
-								}
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_TextureCoord:
-						{
-							std::vector<float> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
-								for (uint32_t usage = 0; tex_coord_node && (usage < ve.usage_index); tex_coord_node = tex_coord_node->NextSibling("tex_coord"));
-
-								uint32_t num_components = NumComponents(ve.format);
-								if (num_components >= 1)
-								{
-									buf.push_back(tex_coord_node->Attrib("u")->ValueFloat());
-								}
-								if (num_components >= 2)
-								{
-									buf.push_back(tex_coord_node->Attrib("v")->ValueFloat());
-								}
-								if (num_components >= 3)
-								{
-									buf.push_back(tex_coord_node->Attrib("w")->ValueFloat());
-								}
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_Tangent:
-						{
-							std::vector<float3> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
-								buf.push_back(float3(tangent_node->Attrib("x")->ValueFloat(),
-									tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
-
-					case VEU_Binormal:
-						{
-							std::vector<float3> buf;
-							for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-							{
-								XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
-								buf.push_back(float3(binormal_node->Attrib("x")->ValueFloat(),
-									binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat()));
-							}
-
-							ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
-						}
-						break;
+						uint32_t num_texs = 0;
+						ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 					}
 				}
-
-				XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
-
-				uint32_t num_triangles = 0;
-				for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
-				{
-					++ num_triangles;
-				}
-				ss->write(reinterpret_cast<char*>(&num_triangles), sizeof(num_triangles));
-
-				std::vector<uint16_t> indices;
-				for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
-				{
-					indices.push_back(static_cast<uint16_t>(tri_node->Attrib("a")->ValueUInt()));
-					indices.push_back(static_cast<uint16_t>(tri_node->Attrib("b")->ValueUInt()));
-					indices.push_back(static_cast<uint16_t>(tri_node->Attrib("c")->ValueUInt()));
-				}
-				ss->write(reinterpret_cast<char*>(&indices[0]), static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
 			}
-		}
 
-		if (bones_chunk)
-		{
-			for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
+			if (meshes_chunk)
 			{
-				WriteShortString(*ss, bone_node->Attrib("name")->ValueString());
-
-				int16_t joint_parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
-				ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
-
-				XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
-				float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
-					bind_pos_node->Attrib("z")->ValueFloat());
-				ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
-
-				XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
-				Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
-					bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
-				ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
-			}
-		}
-
-		if (key_frames_chunk)
-		{
-			int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
-			int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
-			int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
-			ss->write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
-			ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
-			ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
-
-			boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
-			for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
-			{
-				WriteShortString(*ss, kf_node->Attrib("joint")->ValueString());
-
-				uint32_t num_kf = 0;
-				for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
 				{
-					++ num_kf;
+					WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
+
+					int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
+					ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+
+					XMLNodePtr vertex_elements_chunk = mesh_node->FirstNode("vertex_elements_chunk");
+
+					uint32_t num_ves = 0;
+					for (XMLNodePtr ve_node = vertex_elements_chunk->FirstNode("vertex_element"); ve_node; ve_node = ve_node->NextSibling("vertex_element"))
+					{
+						++ num_ves;
+					}
+					ss->write(reinterpret_cast<char*>(&num_ves), sizeof(num_ves));
+
+					std::vector<vertex_element> vertex_elements;
+					for (XMLNodePtr ve_node = vertex_elements_chunk->FirstNode("vertex_element"); ve_node; ve_node = ve_node->NextSibling("vertex_element"))
+					{
+						vertex_element ve;
+
+						ve.usage = static_cast<VertexElementUsage>(ve_node->Attrib("usage")->ValueUInt());
+						ve.usage_index = static_cast<uint8_t>(ve_node->Attrib("usage_index")->ValueUInt());
+						uint8_t num_components = static_cast<uint8_t>(ve_node->Attrib("num_components")->ValueUInt());
+						if (ve.usage != VEU_BlendIndex)
+						{
+							switch (num_components)
+							{
+							case 1:
+								ve.format = EF_R32F;
+								break;
+
+							case 2:
+								ve.format = EF_GR32F;
+								break;
+
+							case 3:
+								ve.format = EF_BGR32F;
+								break;
+
+							case 4:
+								ve.format = EF_ABGR32F;
+								break;
+							}
+						}
+						else
+						{
+							switch (num_components)
+							{
+							case 1:
+								ve.format = EF_R8;
+								break;
+
+							case 2:
+								ve.format = EF_GR8;
+								break;
+
+							case 3:
+								ve.format = EF_BGR8;
+								break;
+
+							case 4:
+								ve.format = EF_ABGR8;
+								break;
+							}
+						}
+
+						ss->write(reinterpret_cast<char*>(&ve), sizeof(ve));
+						vertex_elements.push_back(ve);
+					}
+
+					XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
+
+					uint32_t num_vertices = 0;
+					for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+					{
+						++ num_vertices;
+					}
+					ss->write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
+
+					uint32_t max_num_blend = 0;
+					for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+					{
+						uint32_t num_blend = 0;
+						for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+						{
+							++ num_blend;
+						}
+						max_num_blend = std::max(max_num_blend, num_blend);
+					}
+					ss->write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
+
+					BOOST_FOREACH(BOOST_TYPEOF(vertex_elements)::const_reference ve, vertex_elements)
+					{
+						switch (ve.usage)
+						{
+						case VEU_Position:
+							{
+								std::vector<float3> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									buf.push_back(float3(vertex_node->Attrib("x")->ValueFloat(),
+										vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_Normal:
+							{
+								std::vector<float3> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr normal_node = vertex_node->FirstNode("normal");
+									buf.push_back(float3(normal_node->Attrib("x")->ValueFloat(),
+										normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_Diffuse:
+							{
+								std::vector<float4> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr diffuse_node = vertex_node->FirstNode("diffuse");
+									buf.push_back(float4(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
+										diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_Specular:
+							{
+								std::vector<float4> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr specular_node = vertex_node->FirstNode("diffuse");
+									buf.push_back(float4(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
+										specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_BlendIndex:
+							{
+								std::vector<uint8_t> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									uint32_t num_blend = 0;
+									for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+									{
+										buf.push_back(static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt()));
+										++ num_blend;
+									}
+									for (uint32_t i = num_blend; i < max_num_blend; ++ i)
+									{
+										buf.push_back(0);
+									}
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_BlendWeight:
+							{
+								std::vector<float> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									uint32_t num_blend = 0;
+									for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+									{
+										buf.push_back(weight_node->Attrib("weight")->ValueFloat());
+										++ num_blend;
+									}
+									for (uint32_t i = num_blend; i < max_num_blend; ++ i)
+									{
+										buf.push_back(0);
+									}
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_TextureCoord:
+							{
+								std::vector<float> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
+									for (uint32_t usage = 0; tex_coord_node && (usage < ve.usage_index); tex_coord_node = tex_coord_node->NextSibling("tex_coord"));
+
+									uint32_t num_components = NumComponents(ve.format);
+									if (num_components >= 1)
+									{
+										buf.push_back(tex_coord_node->Attrib("u")->ValueFloat());
+									}
+									if (num_components >= 2)
+									{
+										buf.push_back(tex_coord_node->Attrib("v")->ValueFloat());
+									}
+									if (num_components >= 3)
+									{
+										buf.push_back(tex_coord_node->Attrib("w")->ValueFloat());
+									}
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_Tangent:
+							{
+								std::vector<float3> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
+									buf.push_back(float3(tangent_node->Attrib("x")->ValueFloat(),
+										tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+
+						case VEU_Binormal:
+							{
+								std::vector<float3> buf;
+								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+								{
+									XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
+									buf.push_back(float3(binormal_node->Attrib("x")->ValueFloat(),
+										binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat()));
+								}
+
+								ss->write(reinterpret_cast<char*>(&buf[0]), buf.size() * sizeof(buf[0]));
+							}
+							break;
+						}
+					}
+
+					XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
+
+					uint32_t num_triangles = 0;
+					for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
+					{
+						++ num_triangles;
+					}
+					ss->write(reinterpret_cast<char*>(&num_triangles), sizeof(num_triangles));
+
+					char is_index_16 = true;
+					std::vector<uint32_t> indices;
+					for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
+					{
+						uint32_t a = static_cast<uint32_t>(tri_node->Attrib("a")->ValueUInt());
+						uint32_t b = static_cast<uint32_t>(tri_node->Attrib("b")->ValueUInt());
+						uint32_t c = static_cast<uint32_t>(tri_node->Attrib("c")->ValueUInt());
+						indices.push_back(a);
+						indices.push_back(b);
+						indices.push_back(c);
+
+						if ((a > 0xFFFF) || (b > 0xFFFF) || (c > 0xFFFF))
+						{
+							is_index_16 = false;
+						}
+					}
+					ss->write(&is_index_16, sizeof(is_index_16));
+					if (is_index_16)
+					{
+						std::vector<uint16_t> indices_16(indices.size());
+						for (size_t i = 0; i < indices.size(); ++ i)
+						{
+							indices_16[i] = static_cast<uint16_t>(indices[i]);
+						}
+						ss->write(reinterpret_cast<char*>(&indices_16[0]), static_cast<uint32_t>(indices_16.size() * sizeof(indices_16[0])));
+					}
+					else
+					{
+						ss->write(reinterpret_cast<char*>(&indices[0]), static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
+					}
 				}
-				ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+			}
 
-				for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+			if (bones_chunk)
+			{
+				for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 				{
-					XMLNodePtr pos_node = key_node->FirstNode("pos");
-					float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
-						pos_node->Attrib("z")->ValueFloat());
+					WriteShortString(*ss, bone_node->Attrib("name")->ValueString());
+
+					int16_t joint_parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
+
+					XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
+					float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
+						bind_pos_node->Attrib("z")->ValueFloat());
 					ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
 
-					XMLNodePtr quat_node = key_node->FirstNode("quat");
-					Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
-						quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
+					XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
+					Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
+						bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
 					ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
 				}
 			}
+
+			if (key_frames_chunk)
+			{
+				int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
+				int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
+				int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
+				ss->write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
+				ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
+				ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
+
+				boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
+				for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
+				{
+					WriteShortString(*ss, kf_node->Attrib("joint")->ValueString());
+
+					uint32_t num_kf = 0;
+					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+					{
+						++ num_kf;
+					}
+					ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+
+					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
+					{
+						XMLNodePtr pos_node = key_node->FirstNode("pos");
+						float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
+							pos_node->Attrib("z")->ValueFloat());
+						ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
+
+						XMLNodePtr quat_node = key_node->FirstNode("quat");
+						Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
+							quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
+						ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+					}
+				}
+			}
+
+			std::ofstream ofs((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
+			BOOST_ASSERT(ofs);
+			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', '1'>::value;
+			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+
+			uint64_t original_len = ss->str().size();
+			ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
+
+			std::ofstream::pos_type p = ofs.tellp();
+			uint64_t len = 0;
+			ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
+
+			LZMACodec lzma;
+			len = lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
+
+			ofs.seekp(p, std::ios_base::beg);
+			ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 		}
-
-		std::ofstream ofs((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
-		BOOST_ASSERT(ofs);
-		uint32_t fourcc = MakeFourCC<'K', 'L', 'M', 'O'>::value;
-		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
-
-		uint64_t original_len = ss->str().size();
-		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
-
-		std::ofstream::pos_type p = ofs.tellp();
-		uint64_t len = 0;
-		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
-
-		LZMACodec lzma;
-		len = lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
-
-		ofs.seekp(p, std::ios_base::beg);
-		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 	}
 
 	void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<std::vector<vertex_element> >& ves,
-		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs, std::vector<std::vector<uint16_t> >& indices,
+		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs,
+		std::vector<char>& is_index_16_bit, std::vector<std::vector<uint8_t> >& indices,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
 		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate)
 	{
 		std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
-		if (ResLoader::Instance().Locate(full_meshml_name + jit_ext_name).empty())
-		{
-			ModelJIT(full_meshml_name);
-		}
+		ModelJIT(full_meshml_name);
 
 		ResIdentifierPtr lzma_file = ResLoader::Instance().Load(full_meshml_name + jit_ext_name);
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));
-		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', 'O'>::value));
+		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', '1'>::value));
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
@@ -807,6 +850,7 @@ namespace KlayGE
 		ves.resize(num_meshes),
 		max_num_blends.resize(num_meshes);
 		buffs.resize(num_meshes);
+		is_index_16_bit.resize(num_meshes);
 		indices.resize(num_meshes);
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
@@ -868,7 +912,9 @@ namespace KlayGE
 			uint32_t num_triangles;
 			decoded->read(&num_triangles, sizeof(num_triangles));
 
-			indices[mesh_index].resize(num_triangles * 3);
+			decoded->read(&is_index_16_bit[mesh_index], sizeof(is_index_16_bit[mesh_index]));
+
+			indices[mesh_index].resize((is_index_16_bit[mesh_index] ? 2 : 4) * num_triangles * 3);
 			decoded->read(&indices[mesh_index][0], indices[mesh_index].size() * sizeof(indices[mesh_index][0]));
 		}
 
@@ -928,7 +974,8 @@ namespace KlayGE
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
-		std::vector<std::vector<std::vector<uint8_t> > > const & buffs, std::vector<std::vector<uint16_t> > const & indices,
+		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
+		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
 		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
 		int32_t start_frame, int32_t end_frame, int32_t frame_rate)
 	{
@@ -1218,14 +1265,33 @@ namespace KlayGE
 				XMLNodePtr triangles_chunk = doc.AllocNode(XNT_Element, "triangles_chunk");
 				mesh_node->AppendNode(triangles_chunk);
 				{
-					for (uint32_t j = 0; j < indices[mesh_index].size(); j += 3)
+					if (is_index_16_bit[mesh_index])
 					{
-						XMLNodePtr triangle_node = doc.AllocNode(XNT_Element, "triangle");
-						triangles_chunk->AppendNode(triangle_node);
+						size_t size = indices[mesh_index].size() / 2;
+						uint16_t const * indices_16 = reinterpret_cast<uint16_t const *>(&indices[mesh_index][0]);
+						for (size_t j = 0; j < size; j += 3)
+						{
+							XMLNodePtr triangle_node = doc.AllocNode(XNT_Element, "triangle");
+							triangles_chunk->AppendNode(triangle_node);
 
-						triangle_node->AppendAttrib(doc.AllocAttribInt("a", indices[mesh_index][j + 0]));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("b", indices[mesh_index][j + 1]));
-						triangle_node->AppendAttrib(doc.AllocAttribInt("c", indices[mesh_index][j + 2]));
+							triangle_node->AppendAttrib(doc.AllocAttribInt("a", indices_16[j + 0]));
+							triangle_node->AppendAttrib(doc.AllocAttribInt("b", indices_16[j + 1]));
+							triangle_node->AppendAttrib(doc.AllocAttribInt("c", indices_16[j + 2]));
+						}
+					}
+					else
+					{
+						size_t size = indices[mesh_index].size() / 4;
+						uint32_t const * indices_32 = reinterpret_cast<uint32_t const *>(&indices[mesh_index][0]);
+						for (size_t j = 0; j < size; j += 3)
+						{
+							XMLNodePtr triangle_node = doc.AllocNode(XNT_Element, "triangle");
+							triangles_chunk->AppendNode(triangle_node);
+
+							triangle_node->AppendAttrib(doc.AllocAttribInt("a", indices_32[j + 0]));
+							triangle_node->AppendAttrib(doc.AllocAttribInt("b", indices_32[j + 1]));
+							triangle_node->AppendAttrib(doc.AllocAttribInt("c", indices_32[j + 2]));
+						}
 					}
 				}
 			}
@@ -1294,7 +1360,8 @@ namespace KlayGE
 		std::vector<int32_t> mtl_ids(mesh_names.size());
 		std::vector<std::vector<vertex_element> > ves(mesh_names.size());
 		std::vector<std::vector<std::vector<uint8_t> > > buffs(mesh_names.size());
-		std::vector<std::vector<uint16_t> > indices(mesh_names.size());
+		std::vector<char> is_index_16_bit(mesh_names.size());
+		std::vector<std::vector<uint8_t> > indices(mesh_names.size());
 		if (!mesh_names.empty())
 		{
 			for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
@@ -1325,7 +1392,17 @@ namespace KlayGE
 					memcpy(&buffs[mesh_index][j][0], mapper.Pointer<uint8_t>(), vb->Size());
 				}
 
-				indices[mesh_index].resize(mesh.NumTriangles() * 3);
+				if (EF_R16UI == rl->IndexStreamFormat())
+				{
+					is_index_16_bit[mesh_index] = true;
+				}
+				else
+				{
+					BOOST_ASSERT(EF_R32UI == rl->IndexStreamFormat());
+					is_index_16_bit[mesh_index] = false;
+				}
+
+				indices[mesh_index].resize((is_index_16_bit[mesh_index] ? 2 : 4) * mesh.NumTriangles() * 3);
 				{
 					GraphicsBufferPtr ib = rl->GetIndexStream();
 					GraphicsBufferPtr ib_cpu = Context::Instance().RenderFactoryInstance().MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
@@ -1360,6 +1437,6 @@ namespace KlayGE
 			kfs = skinned->GetKeyFrames();
 		}
 
-		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, indices, joints, kfs, start_frame, end_frame, frame_rate);
+		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, is_index_16_bit, indices, joints, kfs, start_frame, end_frame, frame_rate);
 	}
 }
