@@ -1359,11 +1359,11 @@ namespace KlayGE
 			return buffer_[n];
 		}
 		wchar_t& operator[](size_t n);
-		FontPtr GetFont() const
+		FontPtr const & GetFont() const
 		{
 			return font_;
 		}
-		void SetFont(FontPtr font, uint32_t font_size)
+		void SetFont(FontPtr const & font, uint32_t font_size)
 		{
 			font_ = font;
 			font_size_ = font_size;

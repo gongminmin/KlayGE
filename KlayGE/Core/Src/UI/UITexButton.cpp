@@ -61,7 +61,6 @@ namespace KlayGE
 
 		// Fill layer
 		{
-			Rect_T<int32_t> const & rc = UIManager::Instance().ElementTextureRect(UICT_Button, 1);
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);

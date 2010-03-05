@@ -1,8 +1,11 @@
 // Font.hpp
 // KlayGE Font类 头文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// RenderText速度增加20% (2010.3.6)
 //
 // 3.9.0
 // 增加了KFontLoader (2009.10.16)
@@ -142,7 +145,11 @@ namespace KlayGE
 		void UpdateTexture(std::wstring const & text);
 
 	private:
-		typedef Rect_T<float> CharInfo;
+		struct CharInfo
+		{
+			Rect_T<float> rc;
+			uint64_t tick;
+		};
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#pragma pack(push, 1)
@@ -170,7 +177,6 @@ namespace KlayGE
 
 		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
 			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
-		std::list<wchar_t, boost::fast_pool_allocator<wchar_t> > charLRU_;
 
 		uint32_t curX_, curY_;
 
@@ -191,6 +197,8 @@ namespace KlayGE
 		RenderEffectParameterPtr mvp_ep_;
 
 		KFontLoader kfont_loader_;
+
+		uint64_t tick_;
 	};
 
 	// 在3D环境中画出文字

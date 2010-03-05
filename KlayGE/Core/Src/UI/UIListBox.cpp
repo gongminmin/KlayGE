@@ -172,8 +172,6 @@ namespace KlayGE
 	{
 		assert((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
-		boost::shared_ptr<UIListBoxItem> const & pItem = items_[nIndex];
-
 		items_.erase(items_.begin() + nIndex);
 		scroll_bar_.SetTrackRange(0, items_.size());
 		if (selected_ >= static_cast<int>(items_.size()))
