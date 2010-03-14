@@ -264,7 +264,7 @@ namespace
 	{
 	public:
 		ClearFloatPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
+			: PostProcess(std::vector<std::string>(), Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
 		{
 		}
 
@@ -282,7 +282,7 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
 				dof_on_(true), show_blur_factor_(false)
 		{
 		}
@@ -349,14 +349,14 @@ namespace
 			return show_blur_factor_;
 		}
 
-		void Source(TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			PostProcess::Source(tex, flipping);
+			PostProcess::InputPin(index, tex, flipping);
 
 			uint32_t const width = tex->Width(0);
 			uint32_t const height = tex->Height(0);
 
-			sat_.Source(tex, flipping);
+			sat_.InputPin(index, tex, flipping);
 
 			*(technique_->Effect().ParameterByName("sat_size")) = float4(static_cast<float>(width),
 				static_cast<float>(height), 1.0f / width, 1.0f / height);
@@ -397,9 +397,12 @@ namespace
 	{
 	public:
 		MotionBlur()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur")),
-				mb_on_(true), show_motion_vec_(false)
+			: mb_on_(true), show_motion_vec_(false)
 		{
+			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
 		}
 
 		void MBOn(bool on)
@@ -444,11 +447,6 @@ namespace
 		bool ShowMotionVector() const
 		{
 			return show_motion_vec_;
-		}
-
-		void MotionVecTex(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("motion_vec_tex")) = tex;
 		}
 
 	private:
@@ -641,11 +639,11 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	mbed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mbed_tex_, 0, 0));
 
-	motion_blur_->Source(clr_depth_tex_, clr_depth_fb_->RequiresFlipping());
-	checked_pointer_cast<MotionBlur>(motion_blur_)->MotionVecTex(motion_vec_tex_);
+	motion_blur_->InputPin(0, clr_depth_tex_, clr_depth_fb_->RequiresFlipping());
+	motion_blur_->InputPin(1, motion_vec_tex_, clr_depth_fb_->RequiresFlipping());
 	motion_blur_->Destinate(mbed_fb_);
 
-	depth_of_field_->Source(mbed_tex_, mbed_fb_->RequiresFlipping());
+	depth_of_field_->InputPin(0, mbed_tex_, mbed_fb_->RequiresFlipping());
 	depth_of_field_->Destinate(FrameBufferPtr());
 
 	clear_float_->Destinate(clr_depth_fb_);

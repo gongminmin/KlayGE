@@ -9,7 +9,7 @@ class TilingPostProcess : public KlayGE::PostProcess
 public:
 	TilingPostProcess();
 
-	void Source(KlayGE::TexturePtr const & tex, bool flipping);
+	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex, bool flipping);
 	void Apply();
 	void OnRenderBegin();
 

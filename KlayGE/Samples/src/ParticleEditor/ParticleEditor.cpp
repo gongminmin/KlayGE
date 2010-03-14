@@ -396,7 +396,7 @@ namespace
 	{
 	public:
 		CopyPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ParticleEditor.fxml")->TechniqueByName("Copy"))
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("ParticleEditor.fxml")->TechniqueByName("Copy"))
 		{
 		}
 	};
@@ -552,7 +552,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, scene_buffer_->RequiresFlipping());
 
-	copy_pp_->Source(scene_tex_, scene_buffer_->RequiresFlipping());
+	copy_pp_->InputPin(0, scene_tex_, scene_buffer_->RequiresFlipping());
 	copy_pp_->Destinate(FrameBufferPtr());
 
 	UIManager::Instance().SettleCtrls(width, height);

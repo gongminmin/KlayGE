@@ -26,7 +26,7 @@
 namespace KlayGE
 {
 	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir)
-			: PostProcess(tech),
+			: PostProcess(std::vector<std::string>(1, "src_tex"), tech),
 				dir_(dir)
 	{
 		if (technique_)
@@ -61,17 +61,16 @@ namespace KlayGE
 
 
 	SummedAreaTablePostProcess::SummedAreaTablePostProcess()
-		: PostProcess(RenderTechniquePtr()),
-			scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXUpSweep"), true),
+		: scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXUpSweep"), true),
 			scan_x_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXDownSweep"), false),
 			scan_y_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYUpSweep"), true),
 			scan_y_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYDownSweep"), false)
 	{
 	}
 
-	void SummedAreaTablePostProcess::Source(TexturePtr const & tex, bool flipping)
+	void SummedAreaTablePostProcess::InputPin(uint32_t /*index*/, TexturePtr const & tex, bool flipping)
 	{
-		PostProcess::Source(tex, flipping);
+		flipping_ = flipping;
 
 		uint32_t const tex_width = tex->Width(0);
 		uint32_t const tex_height = tex->Height(0);
@@ -169,11 +168,11 @@ namespace KlayGE
 			scan_x_up_.Scale((parent_length * 4.0f) / child_length);
 			if (0 == i)
 			{
-				scan_x_up_.Source(inter_tex_x_up_[i], flipping_);
+				scan_x_up_.InputPin(0, inter_tex_x_up_[i], flipping_);
 			}
 			else
 			{
-				scan_x_up_.Source(inter_tex_x_up_[i], inter_fb_x_up_[i]->RequiresFlipping());
+				scan_x_up_.InputPin(0, inter_tex_x_up_[i], inter_fb_x_up_[i]->RequiresFlipping());
 			}
 			scan_x_up_.Destinate(inter_fb_x_up_[i + 1]);
 			scan_x_up_.Apply();
@@ -185,7 +184,7 @@ namespace KlayGE
 			uint32_t const child_length = inter_tex_x_down_[i + 1]->Width(0);
 
 			scan_x_down_.Length(child_length);
-			scan_x_down_.Source(inter_tex_x_down_[i], inter_fb_x_down_[i]->RequiresFlipping());
+			scan_x_down_.InputPin(0, inter_tex_x_down_[i], inter_fb_x_down_[i]->RequiresFlipping());
 			scan_x_down_.ChildBuffer(inter_tex_x_up_[inter_tex_x_down_.size() - 2 - i]);
 			scan_x_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
 			scan_x_down_.Scale(child_length / (parent_length * 4.0f));
@@ -201,7 +200,7 @@ namespace KlayGE
 			scan_y_up_.Length(child_length);
 			scan_y_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
 			scan_y_up_.Scale((parent_length * 4.0f) / child_length);
-			scan_y_up_.Source(inter_tex_y_up_[i], inter_fb_y_up_[i]->RequiresFlipping());
+			scan_y_up_.InputPin(0, inter_tex_y_up_[i], inter_fb_y_up_[i]->RequiresFlipping());
 			scan_y_up_.Destinate(inter_fb_y_up_[i + 1]);
 			scan_y_up_.Apply();
 		}
@@ -212,7 +211,7 @@ namespace KlayGE
 			uint32_t const child_length = inter_tex_y_down_[i + 1]->Height(0);
 
 			scan_y_down_.Length(child_length);
-			scan_y_down_.Source(inter_tex_y_down_[i], inter_fb_y_down_[i]->RequiresFlipping());
+			scan_y_down_.InputPin(0, inter_tex_y_down_[i], inter_fb_y_down_[i]->RequiresFlipping());
 			scan_y_down_.ChildBuffer(inter_tex_y_up_[inter_tex_y_down_.size() - 2 - i]);
 			scan_y_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
 			scan_y_down_.Scale(child_length / (parent_length * 4.0f));

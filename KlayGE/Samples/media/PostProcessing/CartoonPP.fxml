@@ -25,7 +25,7 @@ float GetDepth(float4 ndc)
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="normal_depth_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 
 	<shader>
@@ -52,22 +52,22 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc3 : TEXCOORD3,
 				float4 tc4 : TEXCOORD4) : SV_Target
 {
-	float4 ndc = src_tex.Sample(point_sampler, tc0);
+	float4 ndc = normal_depth_tex.Sample(point_sampler, tc0);
 	
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float toon = dot(saturate(color.rgb), float3(0.299f, 0.587f, 0.114f));
 
 	float4 nd[9];
 	// Retrieve normal and depth data for all neighbors.
-	nd[0] = src_tex.Sample(point_sampler, tc0);
-	nd[1] = src_tex.Sample(point_sampler, tc1.xy);
-	nd[2] = src_tex.Sample(point_sampler, tc1.zw);
-	nd[3] = src_tex.Sample(point_sampler, tc2.xy);
-	nd[4] = src_tex.Sample(point_sampler, tc2.zw);
-	nd[5] = src_tex.Sample(point_sampler, tc3.xy);
-	nd[6] = src_tex.Sample(point_sampler, tc3.zw);
-	nd[7] = src_tex.Sample(point_sampler, tc4.xy);
-	nd[8] = src_tex.Sample(point_sampler, tc4.zw);
+	nd[0] = normal_depth_tex.Sample(point_sampler, tc0);
+	nd[1] = normal_depth_tex.Sample(point_sampler, tc1.xy);
+	nd[2] = normal_depth_tex.Sample(point_sampler, tc1.zw);
+	nd[3] = normal_depth_tex.Sample(point_sampler, tc2.xy);
+	nd[4] = normal_depth_tex.Sample(point_sampler, tc2.zw);
+	nd[5] = normal_depth_tex.Sample(point_sampler, tc3.xy);
+	nd[6] = normal_depth_tex.Sample(point_sampler, tc3.zw);
+	nd[7] = normal_depth_tex.Sample(point_sampler, tc4.xy);
+	nd[8] = normal_depth_tex.Sample(point_sampler, tc4.zw);
 
 	// Compute Deltas in Depth.
 	float4 Deltas1;

@@ -2,10 +2,12 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="proj"/>
+		<parameter type="float4x4" name="inv_mvp"/>
 
 		<parameter type="float3" name="light_in_eye"/>
 		<parameter type="float3" name="depth_near_far_invfar"/>
@@ -19,6 +21,16 @@
 		<state name="address_v" value="wrap"/>
 	</parameter>
 
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="textureCUBE" name="skybox_C_tex"/>
+
+	<parameter type="sampler" name="skybox_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+	
 	<shader>
 		<![CDATA[
 float4 StoreNormalDepthMat(float3 normal, float depth, float mat_id)
@@ -86,6 +98,23 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 
 	oClr = StoreDiffuseSpecular(color, 0);
 }
+
+
+void GBufferSkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
+void GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0,
+			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
+{
+	oClr = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texCoord0).r,
+					skybox_C_tex.Sample(skybox_sampler, texCoord0));
+	oNormalDepth = StoreNormalDepthMat(0, 1, 0);
+}
 		]]>
 	</shader>
 
@@ -93,6 +122,17 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_write_mask" value="0"/>
+			<state name="depth_func" value="equal"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>

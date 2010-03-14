@@ -71,7 +71,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\..\bin\KlayGE.cfg = ..\..\bin\KlayGE.cfg
 		..\..\KlayGE.plan = ..\..\KlayGE.plan
-		..\..\readme.html = ..\..\readme.html
+		..\..\readme.chs.html = ..\..\readme.chs.html
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL ES 2 Rendering System", "OpenGLES2.vcproj", "{7085B540-4ACC-47EF-9A70-52C3255E4107}"

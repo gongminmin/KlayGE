@@ -75,6 +75,29 @@ namespace
 		}
 	};
 
+	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox
+	{
+	public:
+		RenderableDeferredHDRSkyBox()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("PostProcessing.fxml")->TechniqueByName("GBufferSkyBoxTech");
+
+			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
+			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
+			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
+		}
+	};
+
+	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox
+	{
+	public:
+		SceneObjectDeferredHDRSkyBox()
+		{
+			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
+		}
+	};
+
 	enum
 	{
 		Exit,
@@ -146,8 +169,8 @@ void PostProcessingApp::InitObjects()
 
 	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read)();
 	TexturePtr c_cube_map = LoadTexture("rnl_cross_c.dds", EAH_GPU_Read)();
-	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
-	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
+	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
+	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
 
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -200,20 +223,20 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
-	ascii_arts_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	ascii_arts_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
 	ascii_arts_->Destinate(FrameBufferPtr());
 
-	cartoon_->Source(normal_depth_tex_, g_buffer_->RequiresFlipping());
-	checked_pointer_cast<CartoonPostProcess>(cartoon_)->ColorTex(color_tex_);
+	cartoon_->InputPin(0, normal_depth_tex_, g_buffer_->RequiresFlipping());
+	cartoon_->InputPin(1, color_tex_, g_buffer_->RequiresFlipping());
 	cartoon_->Destinate(FrameBufferPtr());
 
-	tiling_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	tiling_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
 	tiling_->Destinate(FrameBufferPtr());
 
-	hdr_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	hdr_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
 	hdr_->Destinate(FrameBufferPtr());
 
-	night_vision_->Source(color_tex_, g_buffer_->RequiresFlipping());
+	night_vision_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
 	night_vision_->Destinate(FrameBufferPtr());
 
 	UIManager::Instance().SettleCtrls(width, height);

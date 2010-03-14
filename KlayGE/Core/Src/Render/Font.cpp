@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.10.0
-// RenderText速度增加20% (2010.3.6)
+// RenderText速度增加50% (2010.3.9)
 //
 // 3.9.0
 // 增加了KFontLoader (2009.10.16)
@@ -118,11 +118,25 @@ namespace KlayGE
 
 		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
 		kfont_input->read(&temp_char_index[0], static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-		char_index_.insert(temp_char_index.begin(), temp_char_index.end());
-
 		std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
 		kfont_input->read(&temp_char_advance[0], static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
-		char_advance_.insert(temp_char_advance.begin(), temp_char_advance.end());
+
+		BOOST_FOREACH(BOOST_TYPEOF(temp_char_index)::reference ci, temp_char_index)
+		{
+			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, Vector_T<uint16_t, 2>(0, 0))));
+		}
+		BOOST_FOREACH(BOOST_TYPEOF(temp_char_advance)::reference ca, temp_char_advance)
+		{
+			BOOST_AUTO(iter, char_index_advance_.find(ca.first));
+			if (iter != char_index_advance_.end())
+			{
+				iter->second.second = ca.second;
+			}
+			else
+			{
+				char_index_advance_[ca.first] = std::make_pair(-1, ca.second);
+			}
+		}
 
 		char_info_.resize(header.non_empty_chars);
 		kfont_input->read(&char_info_[0], static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
@@ -159,30 +173,27 @@ namespace KlayGE
 		return dist_scale_;
 	}
 
-	int32_t KFontLoader::CharIndex(wchar_t ch) const
+	std::pair<int32_t, Vector_T<uint16_t, 2> > KFontLoader::CharIndexAdvance(wchar_t ch) const
 	{
-		BOOST_AUTO(iter, char_index_.find(ch));
-		if (iter != char_index_.end())
+		BOOST_AUTO(iter, char_index_advance_.find(ch));
+		if (iter != char_index_advance_.end())
 		{
 			return iter->second;
 		}
 		else
 		{
-			return -1;
+			return std::make_pair(-1, Vector_T<uint16_t, 2>(0, 0));
 		}
+	}
+
+	int32_t KFontLoader::CharIndex(wchar_t ch) const
+	{
+		return CharIndexAdvance(ch).first;
 	}
 
 	Vector_T<uint16_t, 2> KFontLoader::CharAdvance(wchar_t ch) const
 	{
-		BOOST_AUTO(iter, char_advance_.find(ch));
-		if (iter != char_advance_.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			return Vector_T<uint16_t, 2>(0, 0);
-		}
+		return CharIndexAdvance(ch).second;
 	}
 
 	KFontLoader::font_info const & KFontLoader::CharInfo(int32_t offset) const
@@ -388,6 +399,8 @@ namespace KlayGE
 
 		float const h = font_height * yScale;
 		float const rel_size = static_cast<float>(font_height) / kl.CharSize();
+		float const rel_size_x = rel_size * xScale;
+		float const rel_size_y = rel_size * yScale;
 
 		std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
@@ -485,15 +498,15 @@ namespace KlayGE
 
 			BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 			{
-				int32_t offset = kl.CharIndex(ch);
-				if (offset != -1)
+				std::pair<int32_t, Vector_T<uint16_t, 2> > offset_adv = kl.CharIndexAdvance(ch);
+				if (offset_adv.first != -1)
 				{
-					KFontLoader::font_info const & ci = kl.CharInfo(offset);
+					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
 
-					float left = ci.left * rel_size * xScale;
-					float top = ci.top * rel_size * yScale;
-					float width = ci.width * rel_size * xScale;
-					float height = ci.height * rel_size * yScale;
+					float left = ci.left * rel_size_x;
+					float top = ci.top * rel_size_y;
+					float width = ci.width * rel_size_x;
+					float height = ci.height * rel_size_y;
 
 					BOOST_AUTO(cmiter, cim.find(ch));
 					Rect_T<float> const & texRect(cmiter->second.rc);
@@ -534,9 +547,8 @@ namespace KlayGE
 					}
 				}
 
-				Vector_T<uint16_t, 2> advance = kl.CharAdvance(ch);
-				x += advance.x() * rel_size * xScale;
-				y += advance.y() * rel_size * yScale;
+				x += offset_adv.second.x() * rel_size_x;
+				y += offset_adv.second.y() * rel_size_y;
 			}
 
 			box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
@@ -556,6 +568,8 @@ namespace KlayGE
 		uint32_t const clr32 = clr.ABGR();
 		float const h = font_height * yScale;
 		float const rel_size = static_cast<float>(font_height) / kl.CharSize();
+		float const rel_size_x = rel_size * xScale;
+		float const rel_size_y = rel_size * yScale;
 		size_t const maxSize = text.length() - std::count(text.begin(), text.end(), L'\n');
 		float x = sx, y = sy;
 		float maxx = sx, maxy = sy;
@@ -581,15 +595,15 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				int32_t offset = kl.CharIndex(ch);
-				if (offset != -1)
+				std::pair<int32_t, Vector_T<uint16_t, 2> > offset_adv = kl.CharIndexAdvance(ch);
+				if (offset_adv.first != -1)
 				{
-					KFontLoader::font_info const & ci = kl.CharInfo(offset);
+					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
 
-					float left = ci.left * rel_size * xScale;
-					float top = ci.top * rel_size * yScale;
-					float width = ci.width * rel_size * xScale;
-					float height = ci.height * rel_size * yScale;
+					float left = ci.left * rel_size_x;
+					float top = ci.top * rel_size_y;
+					float width = ci.width * rel_size_x;
+					float height = ci.height * rel_size_y;
 
 					BOOST_AUTO(cmiter, cim.find(ch));
 					Rect_T<float> const & texRect(cmiter->second.rc);
@@ -626,9 +640,8 @@ namespace KlayGE
 					lastIndex += 4;
 				}
 
-				Vector_T<uint16_t, 2> advance = kl.CharAdvance(ch);
-				x += advance.x() * rel_size * xScale;
-				y += advance.y() * rel_size * yScale;
+				x += offset_adv.second.x() * rel_size_x;
+				y += offset_adv.second.y() * rel_size_y;
 
 				if (x > maxx)
 				{

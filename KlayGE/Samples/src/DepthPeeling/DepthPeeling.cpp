@@ -151,7 +151,7 @@ namespace
 	{
 	public:
 		BlendPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("DepthPeeling.fxml")->TechniqueByName("Blend"))
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("DepthPeeling.fxml")->TechniqueByName("Blend"))
 		{
 		}
 	};
@@ -459,7 +459,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1, 0);
 					for (size_t i = 0; i < num_layers_; ++ i)
 					{
-						blend_pp_->Source(peeled_texs_[num_layers_ - 1 - i],
+						blend_pp_->InputPin(0, peeled_texs_[num_layers_ - 1 - i],
 							peeling_fbs_[num_layers_ - 1 - i]->RequiresFlipping());
 						blend_pp_->Apply();
 					}

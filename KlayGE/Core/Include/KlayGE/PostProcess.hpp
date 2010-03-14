@@ -1,8 +1,11 @@
 // PostProcess.hpp
 // KlayGE 后期处理类 头文件
-// Ver 3.6.0
-// 版权所有(C) 龚敏敏, 2006-2007
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 输入源可以有多个 (2010.3.14)
 //
 // 3.6.0
 // 增加了BlurPostProcess (2007.3.24)
@@ -21,6 +24,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -31,14 +36,19 @@ namespace KlayGE
 	class KLAYGE_CORE_API PostProcess : public RenderableHelper
 	{
 	public:
-		explicit PostProcess(RenderTechniquePtr const & tech);
+		PostProcess();
+		PostProcess(std::vector<std::string> const & input_pin_names, RenderTechniquePtr const & tech);
 		virtual ~PostProcess()
 		{
 		}
 
 		void Technique(RenderTechniquePtr const & tech);
 
-		virtual void Source(TexturePtr const & tex, bool flipping);
+		uint32_t NumInputPins() const;
+		uint32_t InputPinByName(std::string const & name) const;
+		std::string const & InputPinName(uint32_t index) const;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
+
 		virtual void Destinate(FrameBufferPtr const & fb);
 		FrameBufferPtr const & Destinate()
 		{
@@ -49,8 +59,11 @@ namespace KlayGE
 
 		virtual void OnRenderBegin();
 
+	private:
+		void CreateVB();
+
 	protected:
-		TexturePtr src_texture_;
+		std::vector<std::pair<std::string, TexturePtr> > input_pins_;
 		bool flipping_;
 
 		FrameBufferPtr frame_buffer_;
@@ -58,8 +71,8 @@ namespace KlayGE
 		GraphicsBufferPtr pos_vb_;
 
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
-		RenderEffectParameterPtr src_tex_ep_;
 		RenderEffectParameterPtr flipping_ep_;
+		std::vector<RenderEffectParameterPtr> input_pins_ep_;
 	};
 
 	class KLAYGE_CORE_API GammaCorrectionProcess : public PostProcess
@@ -129,10 +142,10 @@ namespace KlayGE
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			T::Source(src_tex, flipping);
-			this->CalSampleOffsets(T::src_texture_->Width(0), 3);
+			T::InputPin(index, tex, flipping);
+			this->CalSampleOffsets(tex->Width(0), 3);
 		}
 	};
 
@@ -145,10 +158,10 @@ namespace KlayGE
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			T::Source(src_tex, flipping);
-			this->CalSampleOffsets(T::src_texture_->Height(0), 3);
+			T::InputPin(index, tex, flipping);
+			this->CalSampleOffsets(tex->Height(0), 3);
 		}
 	};
 
@@ -157,25 +170,24 @@ namespace KlayGE
 	{
 	public:
 		BlurPostProcess(int kernel_radius, float multiplier)
-			: PostProcess(RenderTechniquePtr()),
-				blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
+			: blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			PostProcess::Source(src_tex, flipping);
+			flipping_ = flipping;
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			blurx_tex_ = rf.MakeTexture2D(src_texture_->Width(0), src_texture_->Height(0), 1, 1, src_texture_->Format(),
+			blurx_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
 				1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 			FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
 			blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0, 0));
-			blur_x_.Source(src_texture_, flipping_);
+			blur_x_.InputPin(index, tex, flipping_);
 			blur_x_.Destinate(blur_x_fb);
-			blur_y_.Source(blurx_tex_, blur_x_fb->RequiresFlipping());
+			blur_y_.InputPin(index, blurx_tex_, blur_x_fb->RequiresFlipping());
 		}
 
 		void Destinate(FrameBufferPtr const & fb)

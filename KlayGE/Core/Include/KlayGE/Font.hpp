@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.10.0
-// RenderText速度增加20% (2010.3.6)
+// RenderText速度增加50% (2010.3.9)
 //
 // 3.9.0
 // 增加了KFontLoader (2009.10.16)
@@ -95,6 +95,7 @@ namespace KlayGE
 		int16_t DistBase() const;
 		int16_t DistScale() const;
 
+		std::pair<int32_t, Vector_T<uint16_t, 2> > CharIndexAdvance(wchar_t ch) const;
 		int32_t CharIndex(wchar_t ch) const;
 		Vector_T<uint16_t, 2> CharAdvance(wchar_t ch) const;
 
@@ -105,10 +106,8 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		closed_hash_map<int32_t, int32_t, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, int32_t> > > char_index_;
-		closed_hash_map<int32_t, Vector_T<uint16_t, 2>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, Vector_T<uint16_t, 2> > > > char_advance_;
+		closed_hash_map<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> >, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::pool_allocator<std::pair<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> > > > > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;

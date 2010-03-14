@@ -26,32 +26,31 @@ namespace
 	{
 	public:
 		explicit DownsamplerNxN(uint32_t n)
-			: PostProcess(RenderTechniquePtr()),
-				ds_2x2_(n), ds_tex_(n - 1), ds_fb_(n - 1)
+			: ds_2x2_(n), ds_tex_(n - 1), ds_fb_(n - 1)
 		{
 		}
 
-		void Source(TexturePtr const & src_tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			PostProcess::Source(src_tex, flipping);
+			flipping_ = flipping;
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			uint32_t w = src_tex->Width(0);
-			uint32_t h = src_tex->Height(0);
+			uint32_t w = tex->Width(0);
+			uint32_t h = tex->Height(0);
 			for (size_t i = 0; i < ds_tex_.size(); ++ i)
 			{
-				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, src_tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 				ds_fb_[i] = rf.MakeFrameBuffer();
 				ds_fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ds_tex_[i], 0, 0));
 				if (0 == i)
 				{
-					ds_2x2_[i].Source(src_tex, flipping);
+					ds_2x2_[i].InputPin(index, tex, flipping);
 				}
 				else
 				{
-					ds_2x2_[i].Source(ds_tex_[i - 1], ds_fb_[i - 1]->RequiresFlipping());
+					ds_2x2_[i].InputPin(index, ds_tex_[i - 1], ds_fb_[i - 1]->RequiresFlipping());
 				}
 				ds_2x2_[i].Destinate(ds_fb_[i]);
 
@@ -62,7 +61,7 @@ namespace
 
 		void Destinate(FrameBufferPtr const & fb)
 		{
-			ds_2x2_.back().Source(ds_tex_[ds_tex_.size() - 1], ds_fb_[ds_tex_.size() - 1]->RequiresFlipping());
+			ds_2x2_.back().InputPin(0, ds_tex_[ds_tex_.size() - 1], ds_fb_[ds_tex_.size() - 1]->RequiresFlipping());
 			ds_2x2_.back().Destinate(fb);
 		}
 
@@ -82,14 +81,14 @@ namespace
 }
 
 TilingPostProcess::TilingPostProcess()
-	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
+	: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {
 	downsampler_ = MakeSharedPtr<DownsamplerNxN>(LOG_2_TILE_SIZE);
 
 	tile_per_row_line_ep_ = technique_->Effect().ParameterByName("tile_per_row_line");
 }
 
-void TilingPostProcess::Source(TexturePtr const & tex, bool flipping)
+void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -98,10 +97,10 @@ void TilingPostProcess::Source(TexturePtr const & tex, bool flipping)
 
 	downsample_fb_ = rf.MakeFrameBuffer();
 	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
-	downsampler_->Source(tex, flipping);
+	downsampler_->InputPin(index, tex, flipping);
 	downsampler_->Destinate(downsample_fb_);
 
-	PostProcess::Source(downsample_tex_, downsample_fb_->RequiresFlipping());
+	PostProcess::InputPin(index, downsample_tex_, downsample_fb_->RequiresFlipping());
 }
 
 void TilingPostProcess::Apply()

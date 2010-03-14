@@ -224,14 +224,14 @@ namespace
 	{
 	public:
 		Downsampler8x8()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
 		{
 			tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 		}
 
-		void Source(TexturePtr const & src_tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & src_tex, bool flipping)
 		{
-			PostProcess::Source(src_tex, flipping);
+			PostProcess::InputPin(index, src_tex, flipping);
 
 			this->GetSampleOffsets8x8(src_tex->Width(0), src_tex->Height(0));
 		}
@@ -268,7 +268,7 @@ namespace
 }
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
-	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
+	: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
 {
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 
@@ -278,7 +278,7 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 	*(technique_->Effect().ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromTexture("font.dds")));
 }
 
-void AsciiArtsPostProcess::Source(TexturePtr const & tex, bool flipping)
+void AsciiArtsPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -287,10 +287,10 @@ void AsciiArtsPostProcess::Source(TexturePtr const & tex, bool flipping)
 
 	downsample_fb_ = rf.MakeFrameBuffer();
 	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
-	downsampler_->Source(tex, flipping);
+	downsampler_->InputPin(index, tex, flipping);
 	downsampler_->Destinate(downsample_fb_);
 
-	PostProcess::Source(downsample_tex_, downsample_fb_->RequiresFlipping());
+	PostProcess::InputPin(index, downsample_tex_, downsample_fb_->RequiresFlipping());
 }
 
 void AsciiArtsPostProcess::Apply()

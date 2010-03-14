@@ -30,7 +30,7 @@ namespace KlayGE
 		explicit SumLumPostProcess(RenderTechniquePtr const & tech);
 		virtual ~SumLumPostProcess();
 
-		void Source(TexturePtr const & src_tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
 
 	private:
 		void GetSampleOffsets4x4(uint32_t width, uint32_t height);
@@ -53,7 +53,7 @@ namespace KlayGE
 		SumLumLogPostProcessCS();
 		void Apply();
 
-		void Source(TexturePtr const & src_tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
 		void DestinateSize(uint32_t width, uint32_t height);
 
 		GraphicsBufferPtr const & SumLumBuff() const
@@ -118,13 +118,9 @@ namespace KlayGE
 		explicit ToneMappingPostProcess(bool blue_shift);
 
 		void SetLumBuff(GraphicsBufferPtr const & lum_buff);
-		void SetLumTexture(TexturePtr const & lum_tex);
-		void SetBloomTexture(TexturePtr const & bloom_tex);
 
 	private:
-		RenderEffectParameterPtr lum_tex_ep_;
 		RenderEffectParameterPtr lum_buff_ep_;
-		RenderEffectParameterPtr bloom_tex_ep_;
 	};
 
 
@@ -138,7 +134,7 @@ namespace KlayGE
 	public:
 		HDRPostProcess(bool bright_pass, bool blur_shift);
 
-		void Source(TexturePtr const & tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
 		void Destinate(FrameBufferPtr const & fb);
 		void Apply();
 

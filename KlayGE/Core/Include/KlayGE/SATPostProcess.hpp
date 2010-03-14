@@ -46,7 +46,7 @@ namespace KlayGE
 	public:
 		SummedAreaTablePostProcess();
 
-		void Source(TexturePtr const & tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
 		void Apply();
 
 		TexturePtr SATTexture();

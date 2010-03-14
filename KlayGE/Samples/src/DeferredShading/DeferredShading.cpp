@@ -541,22 +541,20 @@ namespace
 	{
 	public:
 		AdaptiveAntiAliasPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("AdaptiveAntiAliasPP.fxml")->TechniqueByName("AdaptiveAntiAlias"))
 		{
+			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("AdaptiveAntiAliasPP.fxml")->TechniqueByName("AdaptiveAntiAlias"));
 		}
 
-		void Source(TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 		{
-			PostProcess::Source(tex, flipping);
-			if (tex)
+			PostProcess::InputPin(index, tex, flipping);
+			if ((0 == index) && tex)
 			{
 				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
 			}
-		}
-
-		void ColorTex(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("color_tex")) = tex;
 		}
 
 		void ShowEdge(bool se)
@@ -576,7 +574,7 @@ namespace
 	{
 	public:
 		SSAOPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
 				hd_mode_(true)
 		{
 			blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
@@ -608,7 +606,7 @@ namespace
 				}
 				ssao_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ssao_tex_, 0, 0));
 
-				blur_pp_->Source(ssao_tex_, ssao_buffer_->RequiresFlipping());
+				blur_pp_->InputPin(0, ssao_tex_, ssao_buffer_->RequiresFlipping());
 				blur_pp_->Destinate(fb);
 			}
 		}
@@ -827,15 +825,15 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 
 	deferred_shading_->SSAOTex(ssao_tex_);
 
-	edge_anti_alias_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
-	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ColorTex(deferred_shading_->ShadedTex());
+	edge_anti_alias_->InputPin(0, deferred_shading_->NormalDepthTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
+	edge_anti_alias_->InputPin(1, deferred_shading_->ShadedTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
 	edge_anti_alias_->Destinate(hdr_buffer_);
 	//edge_anti_alias_->Destinate(FrameBufferPtr());
 
-	hdr_pp_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
+	hdr_pp_->InputPin(0, hdr_tex_, hdr_buffer_->RequiresFlipping());
 	hdr_pp_->Destinate(FrameBufferPtr());
 
-	ssao_pp_->Source(deferred_shading_->NormalDepthTex(), deferred_shading_->GBufferFB()->RequiresFlipping());
+	ssao_pp_->InputPin(0, deferred_shading_->NormalDepthTex(), deferred_shading_->GBufferFB()->RequiresFlipping());
 	ssao_pp_->Destinate(ssao_buffer_);
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -890,12 +888,12 @@ void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 
 			if (hdr_tex_)
 			{
-				hdr_pp_->Source(hdr_tex_, hdr_buffer_->RequiresFlipping());
+				hdr_pp_->InputPin(0, hdr_tex_, hdr_buffer_->RequiresFlipping());
 			}
 		}
 		else
 		{
-			hdr_pp_->Source(deferred_shading_->ShadedTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
+			hdr_pp_->InputPin(0, deferred_shading_->ShadedTex(), deferred_shading_->ShadedFB()->RequiresFlipping());
 		}
 	}
 }

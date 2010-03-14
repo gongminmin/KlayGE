@@ -27,7 +27,7 @@
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess(RenderTechniquePtr const & tech)
-			: PostProcess(tech)
+			: PostProcess(std::vector<std::string>(1, "src_tex"), tech)
 	{
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
@@ -36,11 +36,11 @@ namespace KlayGE
 	{
 	}
 
-	void SumLumPostProcess::Source(TexturePtr const & src_tex, bool flipping)
+	void SumLumPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 	{
-		PostProcess::Source(src_tex, flipping);
+		PostProcess::InputPin(index, tex, flipping);
 
-		this->GetSampleOffsets4x4(src_tex->Width(0), src_tex->Height(0));
+		this->GetSampleOffsets4x4(tex->Width(0), tex->Height(0));
 	}
 
 	void SumLumPostProcess::GetSampleOffsets4x4(uint32_t width, uint32_t height)
@@ -91,10 +91,10 @@ namespace KlayGE
 		this->OnRenderEnd();
 	}
 
-	void SumLumLogPostProcessCS::Source(TexturePtr const & src_tex, bool flipping)
+	void SumLumLogPostProcessCS::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 	{
-		SumLumPostProcess::Source(src_tex, flipping);
-		*(technique_->Effect().ParameterByName("src_tex_dim")) = Vector_T<int32_t, 2>(src_tex->Width(0), src_tex->Height(0));
+		SumLumPostProcess::InputPin(index, tex, flipping);
+		*(technique_->Effect().ParameterByName("src_tex_dim")) = Vector_T<int32_t, 2>(tex->Width(0), tex->Height(0));
 	}
 
 	void SumLumLogPostProcessCS::DestinateSize(uint32_t width, uint32_t height)
@@ -111,7 +111,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -170,7 +170,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("AdaptedLum"))
+			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("AdaptedLum"))
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -214,24 +214,28 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess(bool blue_shift)
-			: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml")->TechniqueByName("ToneMapping20"))
 	{
-		RenderEffect const & effect = technique_->Effect();
-		if (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support)
+		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
+		
+		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml");
+		technique_ = effect->TechniqueByName("ToneMapping50");
+		if (technique_->Validate())
 		{
-			technique_ = effect.TechniqueByName("ToneMapping50");
 			lum_buff_ep_ = technique_->Effect().ParameterByName("lum_buff");
 		}
 		else
 		{
-			if (effect.TechniqueByName("ToneMapping30")->Validate())
+			technique_ = effect->TechniqueByName("ToneMapping30");
+			if (!technique_->Validate())
 			{
-				technique_ = effect.TechniqueByName("ToneMapping30");
+				technique_ = effect->TechniqueByName("ToneMapping20");
 			}
-			lum_tex_ep_ = technique_->Effect().ParameterByName("lum_tex");
 		}
 
-		bloom_tex_ep_ = technique_->Effect().ParameterByName("bloom_tex");
+		this->Technique(technique_);
+
 		*(technique_->Effect().ParameterByName("blue_shift")) = blue_shift;
 	}
 
@@ -240,20 +244,9 @@ namespace KlayGE
 		*lum_buff_ep_ = lum_buff;
 	}
 
-	void ToneMappingPostProcess::SetLumTexture(TexturePtr const & lum_tex)
-	{
-		*lum_tex_ep_ = lum_tex;
-	}
-
-	void ToneMappingPostProcess::SetBloomTexture(TexturePtr const & bloom_tex)
-	{
-		*bloom_tex_ep_ = bloom_tex;
-	}
-
 
 	HDRPostProcess::HDRPostProcess(bool bright_pass, bool blue_shift)
-		: PostProcess(RenderTechniquePtr()),
-			cs_support_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support)
+		: cs_support_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support)
 	{
 		if (bright_pass)
 		{
@@ -284,9 +277,9 @@ namespace KlayGE
 		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>(blue_shift);
 	}
 
-	void HDRPostProcess::Source(TexturePtr const & tex, bool flipping)
+	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
 	{
-		PostProcess::Source(tex, flipping);
+		flipping_ = flipping;
 
 		uint32_t const width = tex->Width(0);
 		uint32_t const height = tex->Height(0);
@@ -299,7 +292,7 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
-			downsampler_->Source(src_texture_, flipping);
+			downsampler_->InputPin(index, tex, flipping);
 			downsampler_->Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
@@ -309,14 +302,14 @@ namespace KlayGE
 		{
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_tex_, 0, 0));
-			blur_->Source(downsample_tex_, tmp_flipping);
+			blur_->InputPin(index, downsample_tex_, tmp_flipping);
 			blur_->Destinate(fb);
 			tmp_flipping = fb->RequiresFlipping();
 		}
 
 		if (cs_support_)
 		{
-			sum_lums_1st_->Source(src_texture_, tmp_flipping);
+			sum_lums_1st_->InputPin(index, tex, tmp_flipping);
 			checked_pointer_cast<SumLumLogPostProcessCS>(sum_lums_1st_)->DestinateSize(64, 64);
 			checked_pointer_cast<AdaptedLumPostProcessCS>(adapted_lum_)->SetLumBuff(checked_pointer_cast<SumLumLogPostProcessCS>(sum_lums_1st_)->SumLumBuff());
 			checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetLumBuff(checked_pointer_cast<AdaptedLumPostProcessCS>(adapted_lum_)->AdaptedLum());
@@ -337,7 +330,7 @@ namespace KlayGE
 				{
 					FrameBufferPtr fb = rf.MakeFrameBuffer();
 					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
-					sum_lums_1st_->Source(src_texture_, tmp_flipping);
+					sum_lums_1st_->InputPin(index, tex, tmp_flipping);
 					sum_lums_1st_->Destinate(fb);
 					tmp_flipping = fb->RequiresFlipping();
 				}
@@ -345,7 +338,7 @@ namespace KlayGE
 				{
 					FrameBufferPtr fb = rf.MakeFrameBuffer();
 					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
-					sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+					sum_lums_[i]->InputPin(index, lum_texs_[i], tmp_flipping);
 					sum_lums_[i]->Destinate(fb);
 					tmp_flipping = fb->RequiresFlipping();
 				}
@@ -363,7 +356,7 @@ namespace KlayGE
 				{
 					FrameBufferPtr fb = rf.MakeFrameBuffer();
 					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[0], 0, 0));
-					sum_lums_1st_->Source(src_texture_, tmp_flipping);
+					sum_lums_1st_->InputPin(index, tex, tmp_flipping);
 					sum_lums_1st_->Destinate(fb);
 					tmp_flipping = fb->RequiresFlipping();
 				}
@@ -371,19 +364,19 @@ namespace KlayGE
 				{
 					FrameBufferPtr fb = rf.MakeFrameBuffer();
 					fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lum_texs_[i + 1], 0, 0));
-					sum_lums_[i]->Source(lum_texs_[i], tmp_flipping);
+					sum_lums_[i]->InputPin(index, lum_texs_[i], tmp_flipping);
 					sum_lums_[i]->Destinate(fb);
 					tmp_flipping = fb->RequiresFlipping();
 				}
 			}
 
 			{
-				adapted_lum_->Source(lum_texs_[sum_lums_.size()], tmp_flipping);
+				adapted_lum_->InputPin(index, lum_texs_[sum_lums_.size()], tmp_flipping);
 			}
 		}
 
-		tone_mapping_->Source(src_texture_, flipping);
-		checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetBloomTexture(blur_tex_);
+		tone_mapping_->InputPin(0, tex, flipping);
+		tone_mapping_->InputPin(2, blur_tex_, flipping);
 	}
 
 	void HDRPostProcess::Destinate(FrameBufferPtr const & fb)
@@ -412,8 +405,7 @@ namespace KlayGE
 			// Tone mapping
 			if (!cs_support_)
 			{
-				checked_pointer_cast<ToneMappingPostProcess>(tone_mapping_)->SetLumTexture(
-					checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum());
+				tone_mapping_->InputPin(1, checked_pointer_cast<AdaptedLumPostProcess>(adapted_lum_)->AdaptedLum(), flipping_);
 			}
 			tone_mapping_->Apply();
 		}

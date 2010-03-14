@@ -10,7 +10,7 @@
 using namespace KlayGE;
 
 NightVisionPostProcess::NightVisionPostProcess()
-	: PostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("NightVisionPP.fxml")->TechniqueByName("NightVision"))
+	: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("NightVisionPP.fxml")->TechniqueByName("NightVision"))
 {
 }
 

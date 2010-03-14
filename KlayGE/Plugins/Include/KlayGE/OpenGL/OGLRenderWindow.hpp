@@ -53,7 +53,7 @@ namespace KlayGE
 
 		bool RequiresFlipping() const
 		{
-			return false;
+			return true;
 		}
 
 	private:
