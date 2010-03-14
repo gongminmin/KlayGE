@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_gpu_shader5" reg_no="88">
+	<tokens>
+		<token name="GL_GEOMETRY_SHADER_INVOCATIONS" value="0x887F"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_INVOCATIONS" value="0x8E5A"/>
+		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5B"/>
+		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5C"/>
+		<token name="GL_FRAGMENT_INTERPOLATION_OFFSET_BITS" value="0x8E5D"/>
+		<token name="GL_MAX_VERTEX_STREAMS" value="0x8E71"/>
+	</tokens>
+</gl_extension>

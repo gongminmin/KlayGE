@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_blend_func_extended" reg_no="78">
+	<tokens>
+		<token name="GL_SRC1_COLOR" value="0x88F9"/>
+		<token name="GL_ONE_MINUS_SRC1_COLOR" value="0x88FA"/>
+		<token name="GL_ONE_MINUS_SRC1_ALPHA" value="0x88FB"/>
+		<token name="GL_MAX_DUAL_SOURCE_DRAW_BUFFERS" value="0x88FC"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindFragDataLocationIndexed" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="colorNumber"/>
+				<param type="GLuint" name="index"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetFragDataIndex" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

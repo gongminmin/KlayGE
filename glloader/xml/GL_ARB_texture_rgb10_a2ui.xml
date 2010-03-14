@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_rgb10_a2ui" reg_no="83">
+	<tokens>
+		<token name="GL_RGB10_A2UI" value="0x906F"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_transform_feedback2" reg_no="93">
+	<tokens>
+		<token name="GL_TRANSFORM_FEEDBACK" value="0x8E22"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED" value="0x8E23"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BUFFER_ACTIVE" value="0x8E24"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BINDING" value="0x8E25"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindTransformFeedback" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glBindTransformFeedbackEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glBindTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glDeleteTransformFeedbacks" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint const *" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glDeleteTransformFeedbacksEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glDeleteTransformFeedbacksNV"/>
+			</mappings>
+		</function>
+		<function name="glGenTransformFeedbacks" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glGenTransformFeedbacksEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glGenTransformFeedbacksNV"/>
+			</mappings>
+		</function>
+		<function name="glIsTransformFeedback" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glIsTransformFeedbackEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glIsTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glPauseTransformFeedback" return="void">
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glPauseTransformFeedbackEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glPauseTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glResumeTransformFeedback" return="void">
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glResumeTransformFeedbackEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glResumeTransformFeedbackNV"/>
+			</mappings>
+		</function>
+		<function name="glDrawTransformFeedback" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="id"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_transform_feedback2" name="glDrawTransformFeedbackEXT"/>
+				<mapping from="GL_NV_transform_feedback2" name="glDrawTransformFeedbackNV"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

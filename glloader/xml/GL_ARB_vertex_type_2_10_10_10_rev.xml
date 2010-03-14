@@ -1,0 +1,262 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_vertex_type_2_10_10_10_rev" reg_no="86">
+	<tokens>
+		<token name="GL_INT_2_10_10_10_REV" value="0x8D9F"/>
+	</tokens>
+
+	<functions>
+		<function name="glVertexP2ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexP3ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexP4ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexP2uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexP4uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glTexCoordP1ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP2ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP3ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP4ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP1uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP2uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glTexCoordP4uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP1ui" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP2ui" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP3ui" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP4ui" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP1uiv" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP2uiv" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glMultiTexCoordP4uiv" return="void">
+			<params>
+				<param type="GLenum" name="texture"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glNormalP3ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="coords"/>
+			</params>
+		</function>
+		<function name="glNormalP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="coords"/>
+			</params>
+		</function>
+		<function name="glColorP3ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="color"/>
+			</params>
+		</function>
+		<function name="glColorP4ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="color"/>
+			</params>
+		</function>
+		<function name="glColorP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="color"/>
+			</params>
+		</function>
+		<function name="glColorP4uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="color"/>
+			</params>
+		</function>
+		<function name="glSecondaryColorP3ui" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="color"/>
+			</params>
+		</function>
+		<function name="glSecondaryColorP3uiv" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="const GLuint*" name="color"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP1ui" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP2ui" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP3ui" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP4ui" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP1uiv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP2uiv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP3uiv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glVertexAttribP4uiv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

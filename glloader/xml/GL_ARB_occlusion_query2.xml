@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_occlusion_query2" reg_no="80">
+	<tokens>
+		<token name="GL_ANY_SAMPLES_PASSED" value="0x8C2F"/>
+	</tokens>
+</gl_extension>

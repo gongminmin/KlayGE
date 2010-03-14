@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_3_3">
+	<additionals>
+		<ext name="GL_ARB_blend_func_extended"/>
+		<ext name="GL_ARB_sampler_objects"/>
+		<ext name="GL_ARB_explicit_attrib_location"/>
+		<ext name="GL_ARB_occlusion_query2"/>
+		<ext name="GL_ARB_shader_bit_encoding"/>
+		<ext name="GL_ARB_texture_rgb10_a2ui"/>
+		<ext name="GL_ARB_texture_swizzle"/>
+		<ext name="GL_ARB_timer_query"/>
+		<ext name="GL_ARB_vertex_type_2_10_10_10_rev"/>
+	</additionals>
+</gl_extension>

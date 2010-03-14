@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_timer_query" reg_no="85">
+	<tokens>
+		<token name="GL_TIME_ELAPSED" value="0x88BF"/>
+		<token name="GL_TIMESTAMP" value="0x8E28"/>
+	</tokens>
+
+	<functions>
+		<function name="glQueryCounter" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjecti64v" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_timer_query" name="glGetQueryObjecti64vEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetQueryObjectui64v" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_timer_query" name="glGetQueryObjectui64vEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

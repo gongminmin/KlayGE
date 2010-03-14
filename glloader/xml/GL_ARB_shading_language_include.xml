@@ -1,0 +1,58 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shading_language_include" reg_no="76">
+	<tokens>
+		<token name="GL_SHADER_INCLUDE_ARB" value="0x8DAE"/>
+		<token name="GL_NAMED_STRING_LENGTH_ARB" value="0x8DE9"/>
+		<token name="GL_NAMED_STRING_TYPE_ARB" value="0x8DEA"/>
+	</tokens>
+
+	<functions>
+		<function name="glNamedStringARB" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLint" name="namelen"/>
+				<param type="const GLchar*" name="name"/>
+				<param type="GLint" name="stringlen"/>
+				<param type="const GLchar*" name="string"/>
+			</params>
+		</function>
+		<function name="glDeleteNamedStringARB" return="void">
+			<params>
+				<param type="GLint" name="namelen"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glCompileShaderIncludeARB" return="void">
+			<params>
+				<param type="GLuint" name="shader"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLchar**" name="path"/>
+				<param type="const GLint*" name="length"/>
+			</params>
+		</function>
+		<function name="glIsNamedStringARB" return="GLboolean">
+			<params>
+				<param type="GLint" name="namelen"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetNamedStringARB" return="void">
+			<params>
+				<param type="GLint" name="namelen"/>
+				<param type="const GLchar*" name="name"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="stringlen"/>
+				<param type="GLchar*" name="string"/>
+			</params>
+		</function>
+		<function name="glGetNamedStringivARB" return="void">
+			<params>
+				<param type="GLint" name="namelen"/>
+				<param type="const GLchar*" name="name"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

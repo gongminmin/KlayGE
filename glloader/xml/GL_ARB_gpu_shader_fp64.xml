@@ -1,0 +1,305 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_gpu_shader_fp64" reg_no="89">
+	<tokens>
+		<token name="GL_DOUBLE_VEC2" value="0x8FFC"/>
+		<token name="GL_DOUBLE_VEC3" value="0x8FFD"/>
+		<token name="GL_DOUBLE_VEC4" value="0x8FFE"/>
+		<token name="GL_DOUBLE_MAT2" value="0x8F46"/>
+		<token name="GL_DOUBLE_MAT3" value="0x8F47"/>
+		<token name="GL_DOUBLE_MAT4" value="0x8F48"/>
+		<token name="GL_DOUBLE_MAT2x3" value="0x8F49"/>
+		<token name="GL_DOUBLE_MAT2x4" value="0x8F4A"/>
+		<token name="GL_DOUBLE_MAT3x2" value="0x8F4B"/>
+		<token name="GL_DOUBLE_MAT3x4" value="0x8F4C"/>
+		<token name="GL_DOUBLE_MAT4x2" value="0x8F4D"/>
+		<token name="GL_DOUBLE_MAT4x3" value="0x8F4E"/>
+	</tokens>
+
+	<functions>
+		<function name="glUniform1d" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+			</params>
+		</function>
+		<function name="glUniform2d" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+			</params>
+		</function>
+		<function name="glUniform3d" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glUniform4d" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glUniform1dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix2dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix3dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix4dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix2x3dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix2x4dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix3x2dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix3x4dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix4x2dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformMatrix4x3dv" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetUniformdv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1dEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2dEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3dEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4dEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix2dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix3dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix4dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix2x3dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix2x4dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix3x2dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix3x4dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix4x2dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformMatrix4x3dv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLboolean" name="transpose"/>
+				<param type="const GLdouble*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

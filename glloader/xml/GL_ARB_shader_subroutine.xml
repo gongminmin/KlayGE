@@ -1,0 +1,83 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_subroutine" reg_no="90">
+	<tokens>
+		<token name="GL_ACTIVE_SUBROUTINES" value="0x8DE5"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORMS" value="0x8DE6"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS" value="0x8E47"/>
+		<token name="GL_ACTIVE_SUBROUTINE_MAX_LENGTH" value="0x8E48"/>
+		<token name="GL_ACTIVE_SUBROUTINE_UNIFORM_MAX_LENGTH" value="0x8E49"/>
+		<token name="GL_MAX_SUBROUTINES" value="0x8DE7"/>
+		<token name="GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS" value="0x8DE8"/>
+		<token name="GL_NUM_COMPATIBLE_SUBROUTINES" value="0x8E4A"/>
+		<token name="GL_COMPATIBLE_SUBROUTINES" value="0x8E4B"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetSubroutineUniformLocation" return="GLint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetSubroutineIndex" return="GLuint">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetActiveSubroutineUniformiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetActiveSubroutineUniformName" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="bufsize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glGetActiveSubroutineName" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLsizei" name="bufsize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glUniformSubroutinesuiv" return="void">
+			<params>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="indices"/>
+			</params>
+		</function>
+		<function name="glGetUniformSubroutineuiv" return="void">
+			<params>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetProgramStageiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="shadertype"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="values"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

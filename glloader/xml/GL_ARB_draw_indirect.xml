@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_draw_indirect" reg_no="87">
+	<tokens>
+		<token name="GL_DRAW_INDIRECT_BUFFER" value="0x8F3F"/>
+		<token name="GL_DRAW_INDIRECT_BUFFER_BINDING" value="0x8F43"/>
+	</tokens>
+
+	<functions>
+		<function name="glDrawArraysIndirect" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const void*" name="indirect"/>
+			</params>
+		</function>
+		<function name="glDrawElementsIndirect" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indirect"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_0">
+	<additionals>
+		<ext name="GL_ARB_draw_indirect"/>
+		<ext name="GL_ARB_gpu_shader5"/>
+		<ext name="GL_ARB_gpu_shader_fp64"/>
+		<ext name="GL_ARB_shader_subroutine"/>
+		<ext name="GL_ARB_tessellation_shader"/>
+		<ext name="GL_ARB_texture_buffer_object_rgb32"/>
+		<ext name="GL_ARB_transform_feedback2"/>
+		<ext name="GL_ARB_transform_feedback3"/>
+	</additionals>
+</gl_extension>
