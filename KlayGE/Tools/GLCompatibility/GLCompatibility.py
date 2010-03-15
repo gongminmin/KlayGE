@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0']
 
 features_db = {
 	'1.1' : {
@@ -146,6 +146,34 @@ features_db = {
 			'Fragment depth clamping' : lambda : support_one(['GL_ARB_depth_clamp', 'GL_NV_depth_clamp']),
 			'Geometry shaders' : lambda : support_one(['GL_ARB_geometry_shader4', 'GL_EXT_geometry_shader4', 'GL_NV_geometry_shader4', 'GL_NV_geometry_program4']),
 			'Fence sync objects' : lambda : support_one(['GL_ARB_sync', 'GL_NV_fence']),
+		},
+		
+	'3.3' : {
+			'OpenGL Shading Language 3.30' : lambda : support_all(['GLSL_3_3', 'GL_ARB_shader_bit_encoding']),
+			'New blending functions' : lambda : is_supported('GL_ARB_blend_func_extended'),
+			'Pre-assign attribute locations' : lambda : is_supported('GL_ARB_explicit_attrib_location'),
+			'Simple boolean occlusion queries' : lambda : is_supported('GL_ARB_occlusion_query2'),
+			'Sampler objects' : lambda : is_supported('GL_ARB_sampler_objects'),
+			'Unsigned 10.10.10.2 integer textures format' : lambda : is_supported('GL_ARB_texture_rgb10_a2ui'),
+			'Swizzle the components of a texture' : lambda : support_one(['GL_ARB_texture_swizzle', 'GL_EXT_texture_swizzle']),
+			'Timer query' : lambda : support_one(['GL_ARB_timer_query', 'GL_EXT_timer_query']),
+			'Instanced array' : lambda : is_supported('GL_ARB_instanced_arrays'),
+			'New 2.10.10.10 vertex attribute data formats' : lambda : is_supported('GL_ARB_vertex_type_2_10_10_10_rev'),
+		},
+
+	'4.0' : {
+			'OpenGL Shading Language 4.0' : lambda : support_all(['GLSL_4_0', 'GL_ARB_texture_query_lod']),
+			'Set individual blend equations/functions for each color output' : lambda : support_one(['GL_ARB_draw_buffers_blend', 'GL_AMD_draw_buffers_blend']),
+			'Supplying the arguments to a drawing command from buffer object' : lambda : is_supported('GL_ARB_draw_indirect'),
+			'GPU Shader 5' : lambda : is_supported('GL_ARB_gpu_shader5'),
+			'Double-precision floating-point types in shaders' : lambda : is_supported('GL_ARB_gpu_shader_fp64'),
+			'Explicitly shading at samples' : lambda : is_supported('GL_ARB_sample_shading'),
+			'Support for indirect subroutine calls in shaders' : lambda : is_supported('GL_ARB_shader_subroutine'),
+			'Tessellation stages' : lambda : support_one(['GL_ARB_tessellation_shader', 'GL_AMD_vertex_shader_tessellator']),
+			'Three-component buffer texture formats' : lambda : is_supported('GL_ARB_texture_buffer_object_rgb32'),
+			'Cube map array textures' : lambda : is_supported('GL_ARB_texture_cube_map_array'),
+			'textureGather in shaders' : lambda : support_one(['GL_ARB_texture_gather', 'GL_AMD_texture_texture4']),
+			'Additional transform feedback functionality': lambda : support_one(['GL_ARB_transform_feedback2', 'GL_ARB_transform_feedback3', 'GL_NV_transform_feedback2']),
 		}
 }
 
@@ -203,6 +231,12 @@ class information:
 			is_supported.exts.append('GLSL_1_3')
 		if glsl_ver_index >= 4:
 			is_supported.exts.append('GLSL_1_4')
+		if glsl_ver_index >= 5:
+			is_supported.exts.append('GLSL_1_5')
+		if glsl_ver_index >= 6:
+			is_supported.exts.append('GLSL_3_3')
+		if glsl_ver_index >= 7:
+			is_supported.exts.append('GLSL_4_0')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
@@ -239,7 +273,7 @@ def gl_compatibility(info_name):
 		exts.append(ext.getAttribute('name'))
 
 	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2009 Minmin Gong\n')
+	print('Copyright(C) 2004-2010 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)

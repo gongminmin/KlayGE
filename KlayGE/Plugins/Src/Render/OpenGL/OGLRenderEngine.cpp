@@ -806,34 +806,41 @@ namespace KlayGE
 			caps_.max_vertex_texture_units = 0;
 		}
 
-		if (glloader_GL_VERSION_2_0()
-			|| (glloader_GL_ARB_vertex_shader() && glloader_GL_ARB_fragment_shader()))
+		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_gpu_shader5())
 		{
-			if (caps_.max_vertex_texture_units != 0)
-			{
-				if (glloader_GL_EXT_gpu_shader4())
-				{
-					caps_.max_shader_model = 4;
-				}
-				else
-				{
-					caps_.max_shader_model = 3;
-				}
-			}
-			else
-			{
-				caps_.max_shader_model = 2;
-			}
+			caps_.max_shader_model = 5;
 		}
 		else
 		{
-			if (glloader_GL_ARB_vertex_program() && glloader_GL_ARB_fragment_program())
+			if (glloader_GL_VERSION_2_0()
+				|| (glloader_GL_ARB_vertex_shader() && glloader_GL_ARB_fragment_shader()))
 			{
-				caps_.max_shader_model = 1;
+				if (caps_.max_vertex_texture_units != 0)
+				{
+					if (glloader_GL_EXT_gpu_shader4())
+					{
+						caps_.max_shader_model = 4;
+					}
+					else
+					{
+						caps_.max_shader_model = 3;
+					}
+				}
+				else
+				{
+					caps_.max_shader_model = 2;
+				}
 			}
 			else
 			{
-				caps_.max_shader_model = 0;
+				if (glloader_GL_ARB_vertex_program() && glloader_GL_ARB_fragment_program())
+				{
+					caps_.max_shader_model = 1;
+				}
+				else
+				{
+					caps_.max_shader_model = 0;
+				}
 			}
 		}
 
@@ -913,8 +920,16 @@ namespace KlayGE
 			caps_.bc5_support = false;
 		}
 
-		caps_.bc6_support = false;
-		caps_.bc7_support = false;
+		if (glloader_GL_ARB_texture_compression_bptc())
+		{
+			caps_.bc6_support = true;
+			caps_.bc7_support = true;
+		}
+		else
+		{
+			caps_.bc6_support = false;
+			caps_.bc7_support = false;
+		}
 
 		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
 			|| glloader_GL_NV_geometry_shader4())
@@ -927,7 +942,15 @@ namespace KlayGE
 		}
 			
 		caps_.cs_support = false;
-		caps_.hs_support = false;
-		caps_.ds_support = false;
+		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
+		{
+			caps_.hs_support = true;
+			caps_.ds_support = true;
+		}
+		else
+		{
+			caps_.hs_support = false;
+			caps_.ds_support = false;
+		}
 	}
 }

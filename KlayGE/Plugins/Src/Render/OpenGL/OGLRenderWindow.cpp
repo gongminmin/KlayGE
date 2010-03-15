@@ -180,22 +180,32 @@ namespace KlayGE
 			}
 		}
 
-		if (!glloader_GL_VERSION_3_0() && glloader_WGL_ARB_create_context())
+		if (!glloader_GL_VERSION_4_0() && !glloader_GL_VERSION_3_0() && glloader_WGL_ARB_create_context())
 		{
 			int flags = 0;//WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 #ifdef KLAYGE_DEBUG
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 3, WGL_CONTEXT_MINOR_VERSION_ARB, 2, WGL_CONTEXT_FLAGS_ARB, flags, 
-				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
-			for (int min_ver = 2; min_ver >= 0; -- min_ver)
+			int versions[5][2] = 
 			{
-				attribs[3] = min_ver;
-				HGLRC hRC3 = wglCreateContextAttribsARB(hDC_, NULL, attribs);
-				if (hRC3 != NULL)
+				{ 4, 0 },
+				{ 3, 3 },
+				{ 3, 2 },
+				{ 3, 1 },
+				{ 3, 0 },
+			};
+
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 4, WGL_CONTEXT_MINOR_VERSION_ARB, 0, WGL_CONTEXT_FLAGS_ARB, flags, 
+					WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
+			for (int i = 0; i < 5; ++ i)
+			{
+				attribs[1] = versions[i][0];
+				attribs[3] = versions[i][1];
+				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, NULL, attribs);
+				if (hRC_new != NULL)
 				{
 					::wglDeleteContext(hRC_);
-					hRC_ = hRC3;
+					hRC_ = hRC_new;
 
 					::wglMakeCurrent(hDC_, hRC_);
 
@@ -203,10 +213,6 @@ namespace KlayGE
 					glloader_init();
 
 					break;
-				}
-				else
-				{
-					attribs[6] = 0;
 				}
 			}
 		}
@@ -347,24 +353,35 @@ namespace KlayGE
 
 		uint32_t sample_count = settings.sample_count;
 
-		if (!glloader_GL_VERSION_3_0() && glloader_GLX_ARB_create_context())
+		if (!glloader_GL_VERSION_4_0() && !glloader_GL_VERSION_3_0() && glloader_GLX_ARB_create_context())
 		{
-			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 3, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
-			GLXContext x_context3 = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);
-			if (NULL == x_context3)
+			int versions[5][2] = 
 			{
-				attribs[3] = 0;
-				x_context3 = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);
-			}
-			if (x_context3 != NULL)
+				{ 4, 0 },
+				{ 3, 3 },
+				{ 3, 2 },
+				{ 3, 1 },
+				{ 3, 0 },
+			};
+
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 4, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			for (int i = 0; i < 5; ++ i)
 			{
-				glXDestroyContext(x_display_, x_context_);
-				x_context_ = x_context3;
+				attribs[1] = versions[i][0];
+				attribs[3] = versions[i][1];
+				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);
+				if (x_context_new != NULL)
+				{
+					glXDestroyContext(x_display_, x_context_);
+					x_context_ = x_context_new;
 
-				glXMakeCurrent(x_display_, x_window_, x_context_);
+					glXMakeCurrent(x_display_, x_window_, x_context_);
 
-				// reinit glloader
-				glloader_init();
+					// reinit glloader
+					glloader_init();
+
+					break;
+				}
 			}
 		}
 #endif
