@@ -331,7 +331,6 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (GL_TEXTURE_1D == texture_1d_.GLType())
@@ -443,7 +442,6 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (GL_TEXTURE_2D == texture_2d_.GLType())
@@ -619,7 +617,7 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+
 		if (glloader_GL_EXT_direct_state_access())
 		{
 			BOOST_ASSERT(copy_to_tex_ != 0);
@@ -758,7 +756,7 @@ namespace KlayGE
 		UNREF_PARAM(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
+
 		if (glloader_GL_EXT_direct_state_access())
 		{
 			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
@@ -850,7 +848,6 @@ namespace KlayGE
 	{
 		UNREF_PARAM(fb);
 
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 		if (glloader_GL_EXT_direct_state_access())
 		{
 			this->CopyToGB(att);
@@ -880,7 +877,6 @@ namespace KlayGE
 
 		gbuffer_.Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
 
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
@@ -1058,7 +1054,6 @@ namespace KlayGE
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
-		BOOST_ASSERT(fbo_ == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 		if (level_ < 0)
 		{
 			if (glloader_GL_EXT_direct_state_access())

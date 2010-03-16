@@ -221,7 +221,8 @@ namespace KlayGE
 		
 		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml");
 		technique_ = effect->TechniqueByName("ToneMapping50");
-		if (technique_->Validate())
+		if (Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().cs_support
+			&& technique_->Validate())
 		{
 			lum_buff_ep_ = technique_->Effect().ParameterByName("lum_buff");
 		}
