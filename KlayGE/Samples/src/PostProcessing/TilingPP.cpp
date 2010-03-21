@@ -28,6 +28,10 @@ namespace
 		explicit DownsamplerNxN(uint32_t n)
 			: ds_2x2_(n), ds_tex_(n - 1), ds_fb_(n - 1)
 		{
+			for (uint32_t i = 0; i < n; ++ i)
+			{
+				ds_2x2_[i] = MakeSharedPtr<Downsampler2x2PostProcess>();
+			}
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
@@ -36,8 +40,8 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			uint32_t w = tex->Width(0);
-			uint32_t h = tex->Height(0);
+			uint32_t w = std::max(tex->Width(0) / 2, static_cast<uint32_t>(1));
+			uint32_t h = std::max(tex->Height(0) / 2, static_cast<uint32_t>(1));
 			for (size_t i = 0; i < ds_tex_.size(); ++ i)
 			{
 				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -46,13 +50,13 @@ namespace
 				ds_fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ds_tex_[i], 0, 0));
 				if (0 == i)
 				{
-					ds_2x2_[i].InputPin(index, tex, flipping);
+					ds_2x2_[i]->InputPin(index, tex, flipping);
 				}
 				else
 				{
-					ds_2x2_[i].InputPin(index, ds_tex_[i - 1], ds_fb_[i - 1]->RequiresFlipping());
+					ds_2x2_[i]->InputPin(index, ds_tex_[i - 1], ds_fb_[i - 1]->RequiresFlipping());
 				}
-				ds_2x2_[i].Destinate(ds_fb_[i]);
+				ds_2x2_[i]->Destinate(ds_fb_[i]);
 
 				w = std::max(w / 2, static_cast<uint32_t>(1));
 				h = std::max(h / 2, static_cast<uint32_t>(1));
@@ -61,20 +65,20 @@ namespace
 
 		void Destinate(FrameBufferPtr const & fb)
 		{
-			ds_2x2_.back().InputPin(0, ds_tex_[ds_tex_.size() - 1], ds_fb_[ds_tex_.size() - 1]->RequiresFlipping());
-			ds_2x2_.back().Destinate(fb);
+			ds_2x2_.back()->InputPin(0, ds_tex_[ds_tex_.size() - 1], ds_fb_[ds_tex_.size() - 1]->RequiresFlipping());
+			ds_2x2_.back()->Destinate(fb);
 		}
 
 		void Apply()
 		{
 			for (size_t i = 0; i < ds_2x2_.size(); ++ i)
 			{
-				ds_2x2_[i].Apply();
+				ds_2x2_[i]->Apply();
 			}
 		}
 
 	private:
-		std::vector<Downsampler2x2PostProcess> ds_2x2_;
+		std::vector<PostProcessPtr> ds_2x2_;
 		std::vector<TexturePtr> ds_tex_;
 		std::vector<FrameBufferPtr> ds_fb_;
 	};

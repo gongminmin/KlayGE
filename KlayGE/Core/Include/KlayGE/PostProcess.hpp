@@ -26,6 +26,8 @@
 
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -33,7 +35,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API PostProcess : public RenderableHelper
+	class KLAYGE_CORE_API PostProcess : boost::noncopyable, public RenderableHelper
 	{
 	public:
 		PostProcess();
