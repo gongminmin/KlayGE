@@ -60,8 +60,6 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-
 		void StartRendering();
 
 		void BeginFrame();
@@ -78,7 +76,6 @@ namespace KlayGE
 			return float4(0, 0, 0, 0);
 		}
 
-		void Resize(uint32_t width, uint32_t height);
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
@@ -102,10 +99,12 @@ namespace KlayGE
 		}
 
 	private:
+		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoBindSOBuffers(RenderLayoutPtr const & rl);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 		void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
+		void DoResize(uint32_t width, uint32_t height);
 
 		void FillRenderDeviceCaps();
 		void InitRenderStates();

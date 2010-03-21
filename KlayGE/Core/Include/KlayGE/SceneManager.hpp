@@ -77,6 +77,9 @@ namespace KlayGE
 		uint32_t urt_;
 
 	private:
+		void FlushScene();
+
+	private:
 		RenderQueueType render_queue_;
 
 		size_t numObjectsRendered_;

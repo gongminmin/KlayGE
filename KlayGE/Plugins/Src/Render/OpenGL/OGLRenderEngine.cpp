@@ -135,7 +135,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		FrameBuffer& fb = *this->CurFrameBuffer();
+		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -188,13 +188,12 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLRenderEngine::CreateRenderWindow(std::string const & name,
+	void OGLRenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
 		motion_frames_ = settings.motion_frames;
 
 		FrameBufferPtr win = MakeSharedPtr<OGLRenderWindow>(name, settings);
-		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
@@ -518,170 +517,65 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		for (uint32_t instance = 0; instance < num_instance; ++ instance)
+		/*if (glloader_GL_VERSION_3_3() && rl.InstanceStream())
 		{
-			if (rl.InstanceStream())
+			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
+
+			uint32_t const instance_size = rl.InstanceSize();
+			BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+
+			uint8_t* elem_offset = NULL;
+			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
-				GraphicsBuffer& stream = *rl.InstanceStream();
+				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+				GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+				GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+				GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 
-				uint32_t const instance_size = rl.InstanceSize();
-				BOOST_ASSERT(num_instance * instance_size <= stream.Size());
-				GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
-				uint8_t const * buffer = mapper.Pointer<uint8_t>();
-
-				uint32_t elem_offset = 0;
-				for (size_t i = 0; i < inst_format_size; ++ i)
+				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				switch (vs_elem.usage)
 				{
-					BOOST_ASSERT(elem_offset < instance_size);
+				case VEU_Position:
+					glEnableClientState(GL_VERTEX_ARRAY);
+					stream.Active();
+					glVertexPointer(num_components, type, instance_size, offset);
+					break;
 
-					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-					void const * addr = &buffer[instance * instance_size + elem_offset];
-					GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
-					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+				case VEU_Normal:
+					glEnableClientState(GL_NORMAL_ARRAY);
+					stream.Active();
+					glNormalPointer(type, instance_size, offset);
+					break;
 
-					switch (vs_elem.usage)
-					{
-					case VEU_Position:
-						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-						BOOST_ASSERT(elem_offset + num_components * sizeof(float) <= instance_size);
-						switch (num_components)
-						{
-						case 2:
-							glVertex2fv(float_addr);
-							break;
+				case VEU_Diffuse:
+					glEnableClientState(GL_COLOR_ARRAY);
+					stream.Active();
+					glColorPointer(num_components, type, instance_size, offset);
+					break;
 
-						case 3:
-							glVertex3fv(float_addr);
-							break;
+				case VEU_Specular:
+					glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
+					stream.Active();
+					glSecondaryColorPointer(num_components, type, instance_size, offset);
+					break;
 
-						case 4:
-							glVertex4fv(float_addr);
-							break;
+				case VEU_TextureCoord:
+					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+					glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
+					stream.Active();
+					glTexCoordPointer(num_components, type, instance_size, offset);
+					break;
 
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-						break;
-
-					case VEU_Normal:
-						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-						switch (num_components)
-						{
-						case 3:
-							glNormal3fv(float_addr);
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-						break;
-
-					case VEU_Diffuse:
-						if (IsFloatFormat(vs_elem.format))
-						{
-							switch (num_components)
-							{
-							case 3:
-								glColor3fv(float_addr);
-								break;
-
-							case 4:
-								glColor4fv(float_addr);
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-						}
-						else
-						{
-							switch (num_components)
-							{
-							case 3:
-								glColor3ubv(static_cast<GLubyte const *>(addr));
-								break;
-
-							case 4:
-								glColor4ubv(static_cast<GLubyte const *>(addr));
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-						}
-						break;
-
-					case VEU_Specular:
-						if (IsFloatFormat(vs_elem.format))
-						{
-							switch (num_components)
-							{
-							case 3:
-								glSecondaryColor3fv(float_addr);
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-						}
-						else
-						{
-							switch (num_components)
-							{
-							case 3:
-								glSecondaryColor3ubv(static_cast<GLubyte const *>(addr));
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-						}
-						break;
-
-					case VEU_TextureCoord:
-						BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-						{
-							GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
-							glActiveTexture(target);
-
-							switch (num_components)
-							{
-							case 1:
-								glMultiTexCoord1fv(target, float_addr);
-								break;
-
-							case 2:
-								glMultiTexCoord2fv(target, float_addr);
-								break;
-
-							case 3:
-								glMultiTexCoord3fv(target, float_addr);
-								break;
-
-							case 4:
-								glMultiTexCoord4fv(target, float_addr);
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					elem_offset += vs_elem.element_size();
+				default:
+					glEnableVertexAttribArray(attr);
+					stream.Active();
+					glVertexAttribPointer(attr, num_components, type, GL_FALSE, instance_size, offset);
+					break;
 				}
+
+				glVertexAttribDivisor(attr, 1);
+
+				elem_offset += vs_elem.element_size();
 			}
 
 			if (so_rl_)
@@ -707,8 +601,8 @@ namespace KlayGE
 						}
 					}
 
-					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, 0);
+					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
+						index_type, 0, num_instance);
 					pass->Unbind();
 				}
 			}
@@ -730,7 +624,7 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+					glDrawArraysInstanced(mode, 0, static_cast<GLsizei>(rl.NumVertices()), num_instance);
 					pass->Unbind();
 				}
 			}
@@ -738,6 +632,265 @@ namespace KlayGE
 			if (so_rl_)
 			{
 				glEndTransformFeedbackEXT();
+			}
+
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				switch (vs_elem.usage)
+				{
+				case VEU_Position:
+					glDisableClientState(GL_VERTEX_ARRAY);
+					break;
+
+				case VEU_Normal:
+					glDisableClientState(GL_NORMAL_ARRAY);
+					break;
+
+				case VEU_Diffuse:
+					glDisableClientState(GL_COLOR_ARRAY);
+					break;
+
+				case VEU_Specular:
+					glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
+					break;
+
+				case VEU_TextureCoord:
+					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+					break;
+
+				default:
+					glDisableVertexAttribArray(attr);
+					break;
+				}
+
+				glVertexAttribDivisor(attr, 0);
+			}
+		}
+		else*/
+		{
+			for (uint32_t instance = 0; instance < num_instance; ++ instance)
+			{
+				if (rl.InstanceStream())
+				{
+					GraphicsBuffer& stream = *rl.InstanceStream();
+
+					uint32_t const instance_size = rl.InstanceSize();
+					BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+					GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
+					uint8_t const * buffer = mapper.Pointer<uint8_t>();
+
+					uint32_t elem_offset = 0;
+					for (size_t i = 0; i < inst_format_size; ++ i)
+					{
+						BOOST_ASSERT(elem_offset < instance_size);
+
+						vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+						void const * addr = &buffer[instance * instance_size + elem_offset];
+						GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+
+						switch (vs_elem.usage)
+						{
+						case VEU_Position:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							BOOST_ASSERT(elem_offset + num_components * sizeof(float) <= instance_size);
+							switch (num_components)
+							{
+							case 2:
+								glVertex2fv(float_addr);
+								break;
+
+							case 3:
+								glVertex3fv(float_addr);
+								break;
+
+							case 4:
+								glVertex4fv(float_addr);
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							break;
+
+						case VEU_Normal:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							switch (num_components)
+							{
+							case 3:
+								glNormal3fv(float_addr);
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								break;
+							}
+							break;
+
+						case VEU_Diffuse:
+							if (IsFloatFormat(vs_elem.format))
+							{
+								switch (num_components)
+								{
+								case 3:
+									glColor3fv(float_addr);
+									break;
+
+								case 4:
+									glColor4fv(float_addr);
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									break;
+								}
+							}
+							else
+							{
+								switch (num_components)
+								{
+								case 3:
+									glColor3ubv(static_cast<GLubyte const *>(addr));
+									break;
+
+								case 4:
+									glColor4ubv(static_cast<GLubyte const *>(addr));
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									break;
+								}
+							}
+							break;
+
+						case VEU_Specular:
+							if (IsFloatFormat(vs_elem.format))
+							{
+								switch (num_components)
+								{
+								case 3:
+									glSecondaryColor3fv(float_addr);
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									break;
+								}
+							}
+							else
+							{
+								switch (num_components)
+								{
+								case 3:
+									glSecondaryColor3ubv(static_cast<GLubyte const *>(addr));
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									break;
+								}
+							}
+							break;
+
+						case VEU_TextureCoord:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							{
+								GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
+								glActiveTexture(target);
+
+								switch (num_components)
+								{
+								case 1:
+									glMultiTexCoord1fv(target, float_addr);
+									break;
+
+								case 2:
+									glMultiTexCoord2fv(target, float_addr);
+									break;
+
+								case 3:
+									glMultiTexCoord3fv(target, float_addr);
+									break;
+
+								case 4:
+									glMultiTexCoord4fv(target, float_addr);
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									break;
+								}
+							}
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+
+						elem_offset += vs_elem.element_size();
+					}
+				}
+
+				if (so_rl_)
+				{
+					glBeginTransformFeedbackEXT(so_primitive_mode_);
+				}
+
+				if (rl.UseIndices())
+				{
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+
+						if (so_rl_)
+						{
+							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
+							glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+							{
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
+							}
+						}
+
+						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
+							index_type, 0);
+						pass->Unbind();
+					}
+				}
+				else
+				{
+					for (uint32_t i = 0; i < num_passes; ++ i)
+					{
+						RenderPassPtr const & pass = tech.Pass(i);
+
+						pass->Bind();
+
+						if (so_rl_)
+						{
+							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
+							glTransformFeedbackVaryingsEXT(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS_EXT);
+							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
+							{
+								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, j, so_buffs_[j]);
+							}
+						}
+
+						glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+						pass->Unbind();
+					}
+				}
+
+				if (so_rl_)
+				{
+					glEndTransformFeedbackEXT();
+				}
 			}
 		}
 
@@ -775,19 +928,19 @@ namespace KlayGE
 		glScissor(x, y, width, height);
 	}
 
-	void OGLRenderEngine::Resize(uint32_t width, uint32_t height)
+	void OGLRenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->Resize(width, height);
+		checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->Resize(width, height);
 	}
 
 	bool OGLRenderEngine::FullScreen() const
 	{
-		return checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->FullScreen();
+		return checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->FullScreen();
 	}
 
 	void OGLRenderEngine::FullScreen(bool fs)
 	{
-		checked_pointer_cast<OGLRenderWindow>(default_frame_buffer_)->FullScreen(fs);
+		checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->FullScreen(fs);
 	}
 
 	// 填充设备能力

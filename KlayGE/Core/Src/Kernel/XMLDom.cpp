@@ -38,6 +38,11 @@
 
 namespace KlayGE
 {
+	XMLDocument::XMLDocument()
+		: doc_(MakeSharedPtr<rapidxml::xml_document<> >())
+	{
+	}
+
 	XMLNodePtr XMLDocument::Parse(ResIdentifierPtr const & source)
 	{
 		source->seekg(0, std::ios_base::end);
@@ -46,8 +51,8 @@ namespace KlayGE
 		xml_src_.resize(len + 1, 0);
 		source->read(&xml_src_[0], len);
 
-		doc_.parse<0>(&xml_src_[0]);
-		root_ = MakeSharedPtr<XMLNode>(doc_.first_node());
+		doc_->parse<0>(&xml_src_[0]);
+		root_ = MakeSharedPtr<XMLNode>(doc_->first_node());
 
 		return root_;
 	}
@@ -55,17 +60,17 @@ namespace KlayGE
 	void XMLDocument::Print(std::ostream& os)
 	{
 		os << "<?xml version=\"1.0\"?>" << std::endl << std::endl;
-		os << doc_;
+		os << *doc_;
 	}
 
 	XMLNodePtr XMLDocument::CloneNode(XMLNodePtr const & node)
 	{
-		return MakeSharedPtr<XMLNode>(doc_.clone_node(node->node_));
+		return MakeSharedPtr<XMLNode>(doc_->clone_node(node->node_));
 	}
 
 	XMLNodePtr XMLDocument::AllocNode(XMLNodeType type, std::string const & name)
 	{
-		return MakeSharedPtr<XMLNode>(&doc_, type, name);
+		return MakeSharedPtr<XMLNode>(doc_.get(), type, name);
 	}
 	
 	XMLAttributePtr XMLDocument::AllocAttribInt(std::string const & name, int32_t value)
@@ -85,13 +90,13 @@ namespace KlayGE
 
 	XMLAttributePtr XMLDocument::AllocAttribString(std::string const & name, std::string const & value)
 	{
-		return MakeSharedPtr<XMLAttribute>(&doc_, name, value);
+		return MakeSharedPtr<XMLAttribute>(doc_.get(), name, value);
 	}
 
 	void XMLDocument::RootNode(XMLNodePtr const & new_node)
 	{
-		doc_.remove_all_nodes();
-		doc_.append_node(new_node->node_);
+		doc_->remove_all_nodes();
+		doc_->append_node(new_node->node_);
 		root_ = new_node;
 	}
 

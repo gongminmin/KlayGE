@@ -17,6 +17,8 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderSettings.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
@@ -334,7 +336,7 @@ namespace KlayGE
 
 		if ((new_width != width_) || (new_height != height_))
 		{
-			this->Resize(new_width, new_height);
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
 		}
 	}
 

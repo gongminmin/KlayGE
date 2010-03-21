@@ -79,7 +79,9 @@ namespace KlayGE
 	D3D10RenderEngine::~D3D10RenderEngine()
 	{
 		cur_frame_buffer_.reset();
-		default_frame_buffer_.reset();
+		screen_frame_buffer_.reset();
+		stereo_frame_buffers_[0].reset();
+		stereo_frame_buffers_[1].reset();
 
 		d3d_device_->ClearState();
 
@@ -143,7 +145,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		FrameBuffer& fb = *this->CurFrameBuffer();
+		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -176,14 +178,13 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D10RenderEngine::CreateRenderWindow(std::string const & name,
+	void D3D10RenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
 		motion_frames_ = settings.motion_frames;
 
 		D3D10RenderWindowPtr win = MakeSharedPtr<D3D10RenderWindow>(gi_factory_, this->ActiveAdapter(),
 			name, settings);
-		default_frame_buffer_ = win;
 
 		this->BindFrameBuffer(win);
 	}
@@ -463,19 +464,19 @@ namespace KlayGE
 		d3d_device_->RSSetScissorRects(1, &rc);
 	}
 
-	void D3D10RenderEngine::Resize(uint32_t width, uint32_t height)
+	void D3D10RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_pointer_cast<D3D10RenderWindow>(default_frame_buffer_)->Resize(width, height);
+		checked_pointer_cast<D3D10RenderWindow>(screen_frame_buffer_)->Resize(width, height);
 	}
 
 	bool D3D10RenderEngine::FullScreen() const
 	{
-		return checked_pointer_cast<D3D10RenderWindow>(default_frame_buffer_)->FullScreen();
+		return checked_pointer_cast<D3D10RenderWindow>(screen_frame_buffer_)->FullScreen();
 	}
 
 	void D3D10RenderEngine::FullScreen(bool fs)
 	{
-		checked_pointer_cast<D3D10RenderWindow>(default_frame_buffer_)->FullScreen(fs);
+		checked_pointer_cast<D3D10RenderWindow>(screen_frame_buffer_)->FullScreen(fs);
 	}
 
 	// 填充设备能力

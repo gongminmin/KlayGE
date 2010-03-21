@@ -460,7 +460,7 @@ namespace KlayGE
 		uint32_t new_height = rect.bottom - rect.top;
 		if ((new_width != width_) || (new_height != height_))
 		{
-			this->Resize(new_width, new_height);
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
 		}
 	}
 

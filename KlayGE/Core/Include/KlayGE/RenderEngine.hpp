@@ -7,6 +7,7 @@
 // 3.10.0
 // 增加了Dispatch (2009.12.22)
 // 增加了NumMotionFrames (2010.2.22)
+// 支持Stereo (2010.3.20)
 //
 // 3.9.0
 // 增加了BeginPass/EndPass (2009.4.9)
@@ -74,6 +75,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
+#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Color.hpp>
 
 #include <vector>
@@ -102,7 +104,7 @@ namespace KlayGE
 		size_t NumPrimitivesJustRendered();
 		size_t NumVerticesJustRendered();
 
-		virtual void CreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
+		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
 
 		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
 			DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
@@ -111,6 +113,7 @@ namespace KlayGE
 		void BindFrameBuffer(FrameBufferPtr const & fb);
 		FrameBufferPtr const & CurFrameBuffer() const;
 		FrameBufferPtr const & DefaultFrameBuffer() const;
+		FrameBufferPtr const & ScreenFrameBuffer() const;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
 
@@ -126,9 +129,11 @@ namespace KlayGE
 		// Return the appropiate offsets as full coordinates in the texture values.
 		virtual float4 TexelToPixelOffset() const = 0;
 
-		virtual void Resize(uint32_t width, uint32_t height) = 0;
+		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
+
+		void Stereoscopic();
 
 		uint32_t NumMotionFrames() const
 		{
@@ -164,15 +169,46 @@ namespace KlayGE
 			return cur_sample_mask_;
 		}
 
+		bool StereoMode() const
+		{
+			return stereo_mode_;
+		}
+		void StereoMode(bool stereo);
+		uint32_t StereoActiveEye() const
+		{
+			return stereo_active_eye_;
+		}
+		void StereoActiveEye(uint32_t ae)
+		{
+			stereo_active_eye_ = ae;
+		}
+		void StereoSeparation(float separation)
+		{
+			stereo_separation_ = separation;
+		}
+		float StereoSeparation() const
+		{
+			return stereo_separation_;
+		}
+
 	protected:
+		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
 		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
 		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
+		virtual void DoResize(uint32_t width, uint32_t height) = 0;
+
+	private:
+		void CreateStereoscopicVB();
 
 	protected:
+		RenderSettings render_settings_;
+
 		FrameBufferPtr cur_frame_buffer_;
-		FrameBufferPtr default_frame_buffer_;
+		FrameBufferPtr screen_frame_buffer_;
+		FrameBufferPtr stereo_frame_buffers_[2];
+		TexturePtr stereo_colors_[2];
 
 		RenderLayoutPtr so_buffers_;
 
@@ -190,6 +226,16 @@ namespace KlayGE
 		uint32_t cur_sample_mask_;
 
 		uint32_t motion_frames_;
+
+		bool stereo_mode_;
+		float stereo_separation_;
+		uint32_t stereo_active_eye_;
+		RenderLayoutPtr stereoscopic_rl_;
+		RenderEffectPtr stereoscopic_effect_;
+		RenderTechniquePtr stereoscopic_tech_;
+		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
+		RenderEffectParameterPtr left_tex_ep_;
+		RenderEffectParameterPtr right_tex_ep_;
 	};
 }
 

@@ -49,6 +49,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API XMLDocument
 	{
 	public:
+		XMLDocument();
 		XMLNodePtr Parse(ResIdentifierPtr const & source);
 		void Print(std::ostream& os);
 
@@ -63,7 +64,7 @@ namespace KlayGE
 		void RootNode(XMLNodePtr const & new_node);
 
 	private:
-		rapidxml::xml_document<> doc_;
+		boost::shared_ptr<rapidxml::xml_document<> > doc_;
 		std::vector<char> xml_src_;
 
 		XMLNodePtr root_;

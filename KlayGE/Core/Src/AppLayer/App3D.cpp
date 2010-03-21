@@ -182,6 +182,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::UpdateStats()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		if (re.StereoActiveEye() != 0)
+		{
+			return;
+		}
+
 		// measure statistics
 		++ num_frames_;
 		accumulate_time_ += static_cast<float>(timer_.elapsed());

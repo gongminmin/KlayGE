@@ -37,6 +37,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Viewport.hpp>
@@ -77,10 +78,6 @@ namespace KlayGE
 		{
 		}
 
-		void CreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
-		{
-		}
-
 		uint16_t StencilBufferBitDepth()
 		{
 			return 0;
@@ -95,10 +92,6 @@ namespace KlayGE
 			return float4(0, 0, 0, 0);
 		}
 
-		void Resize(uint32_t /*width*/, uint32_t /*height*/)
-		{
-		}
-
 		bool FullScreen() const
 		{
 			return false;
@@ -109,6 +102,10 @@ namespace KlayGE
 		}
 
 	private:
+		void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/)
+		{
+		}
+
 		void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/)
 		{
 		}
@@ -124,6 +121,10 @@ namespace KlayGE
 		void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
 		{
 		}
+
+		void DoResize(uint32_t /*width*/, uint32_t /*height*/)
+		{
+		}
 	};
 
 	// 构造函数
@@ -135,7 +136,8 @@ namespace KlayGE
 			cur_back_stencil_ref_(0),
 			cur_blend_factor_(1, 1, 1, 1),
 			cur_sample_mask_(0xFFFFFFFF),
-			motion_frames_(0)
+			motion_frames_(0),
+			stereo_mode_(false), stereo_separation_(0), stereo_active_eye_(0)
 	{
 	}
 
@@ -151,6 +153,17 @@ namespace KlayGE
 	{
 		static RenderEnginePtr obj = MakeSharedPtr<NullRenderEngine>();
 		return obj;
+	}
+
+	// 建立渲染窗口
+	/////////////////////////////////////////////////////////////////////////////////
+	void RenderEngine::CreateRenderWindow(std::string const & name, RenderSettings const & settings)
+	{
+		render_settings_ = settings;
+		stereo_separation_ = settings.stereo_separation;
+		this->DoCreateRenderWindow(name, settings);
+		screen_frame_buffer_ = cur_frame_buffer_;
+		this->StereoMode(settings.stereo_mode);
 	}
 
 	// 设置当前渲染状态对象
@@ -193,7 +206,14 @@ namespace KlayGE
 
 		if (!fb)
 		{
-			cur_frame_buffer_ = default_frame_buffer_;
+			if (stereo_mode_)
+			{
+				cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+			}
+			else
+			{
+				cur_frame_buffer_ = screen_frame_buffer_;
+			}
 		}
 		else
 		{
@@ -216,7 +236,21 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
-		return default_frame_buffer_;
+		if (stereo_mode_)
+		{
+			return stereo_frame_buffers_[stereo_active_eye_];
+		}
+		else
+		{
+			return screen_frame_buffer_;
+		}
+	}
+
+	// 获取屏幕渲染目标
+	/////////////////////////////////////////////////////////////////////////////////
+	FrameBufferPtr const & RenderEngine::ScreenFrameBuffer() const
+	{
+		return screen_frame_buffer_;
 	}
 
 	void RenderEngine::BindSOBuffers(RenderLayoutPtr const & rl)
@@ -260,5 +294,105 @@ namespace KlayGE
 	RenderDeviceCaps const & RenderEngine::DeviceCaps() const
 	{
 		return caps_;
+	}
+
+	void RenderEngine::Resize(uint32_t width, uint32_t height)
+	{
+		this->DoResize(width, height);
+
+		if (stereo_mode_)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			for (int i = 0; i < 2; ++ i)
+			{
+				stereo_colors_[i] = rf.MakeTexture2D(width, height, 1, 1, stereo_colors_[i]->Format(),
+					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality(),
+					EAH_GPU_Read | EAH_GPU_Write, NULL);
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
+
+				RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+					stereo_frame_buffers_[i]->Attached(FrameBuffer::ATT_DepthStencil)->Format(),
+					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality());
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
+		}
+	}
+
+	void RenderEngine::Stereoscopic()
+	{
+		if (stereo_mode_)
+		{
+			this->BindFrameBuffer(screen_frame_buffer_);
+
+			float4 texel_to_pixel = this->TexelToPixelOffset();
+			texel_to_pixel.x() /= screen_frame_buffer_->Width() / 2.0f;
+			texel_to_pixel.y() /= screen_frame_buffer_->Height() / 2.0f;
+			*texel_to_pixel_offset_ep_ = texel_to_pixel;
+
+			*left_tex_ep_ = stereo_colors_[0];
+			*right_tex_ep_ = stereo_colors_[1];
+
+			this->Render(*stereoscopic_tech_, *stereoscopic_rl_);
+		}
+	}
+
+	void RenderEngine::CreateStereoscopicVB()
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		stereoscopic_rl_ = rf.MakeRenderLayout();
+		stereoscopic_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+		float2 pos[] =
+		{
+			float2(-1, +1),
+			float2(+1, +1),
+			float2(-1, -1),
+			float2(+1, -1)
+		};
+		ElementInitData init_data;
+		init_data.row_pitch = sizeof(pos);
+		init_data.data = &pos[0];
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		stereoscopic_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+		stereoscopic_effect_ = rf.LoadEffect("Stereoscopic.fxml");
+		stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("RedCyan");
+		texel_to_pixel_offset_ep_ = stereoscopic_effect_->ParameterByName("texel_to_pixel_offset");
+		left_tex_ep_ = stereoscopic_effect_->ParameterByName("left_tex");
+		right_tex_ep_ = stereoscopic_effect_->ParameterByName("right_tex");
+		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(stereo_frame_buffers_[0]->RequiresFlipping() ? -1 : +1);;
+	}
+
+	void RenderEngine::StereoMode(bool stereo)
+	{
+		stereo_mode_ = stereo;
+		stereo_active_eye_ = 0;
+		if (stereo_mode_)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			for (int i = 0; i < 2; ++ i)
+			{
+				stereo_frame_buffers_[i] = rf.MakeFrameBuffer();
+				stereo_frame_buffers_[i]->GetViewport().camera = screen_frame_buffer_->GetViewport().camera;
+
+				stereo_colors_[i] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+					1, 1, screen_frame_buffer_->Format(), render_settings_.sample_count, render_settings_.sample_quality,
+					EAH_GPU_Read | EAH_GPU_Write, NULL);
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
+
+				RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+					render_settings_.depth_stencil_fmt, render_settings_.sample_count, render_settings_.sample_quality);
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
+
+			cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+
+			this->CreateStereoscopicVB();
+		}
+		else
+		{
+			cur_frame_buffer_ = screen_frame_buffer_;
+		}
 	}
 }

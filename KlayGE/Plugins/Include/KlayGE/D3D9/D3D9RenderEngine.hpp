@@ -71,8 +71,6 @@ namespace KlayGE
 		ID3D9DevicePtr const & D3DDevice() const;
 		void D3DDevice(ID3D9DevicePtr const & device);
 
-		void CreateRenderWindow(std::string const & name, RenderSettings const & settings);
-
 		void StartRendering();
 
 		void BeginFrame();
@@ -91,7 +89,6 @@ namespace KlayGE
 			return float4(-0.5f, 0.5f, 0, 0);
 		}
 
-		void Resize(uint32_t width, uint32_t height);
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
@@ -113,10 +110,12 @@ namespace KlayGE
 		void SetPixelShaderConstantF(uint32_t start_register, float const * constant_data, uint32_t register_count);
 
 	private:
+		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
 		void DoBindSOBuffers(RenderLayoutPtr const & rl);
 		void DoRender(RenderTechnique const & tech, RenderLayout const & rl);
 		void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
+		void DoResize(uint32_t width, uint32_t height);
 
 		void FillRenderDeviceCaps();
 		void InitRenderStates();

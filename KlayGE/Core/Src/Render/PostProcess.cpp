@@ -109,23 +109,20 @@ namespace KlayGE
 
 	void PostProcess::Destinate(FrameBufferPtr const & fb)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		if (fb)
-		{
-			frame_buffer_ = fb;
-		}
-		else
-		{
-			frame_buffer_ = re.DefaultFrameBuffer();
-		}
+		frame_buffer_ = fb;
 	}
 
 	void PostProcess::Apply()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		re.BindFrameBuffer(frame_buffer_);
+		FrameBufferPtr fb = frame_buffer_;
+		if (!fb)
+		{
+			fb = re.DefaultFrameBuffer();
+		}
+
+		re.BindFrameBuffer(fb);
 		this->Render();
 	}
 

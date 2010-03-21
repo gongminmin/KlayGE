@@ -6,6 +6,7 @@
 //
 // 3.10.0
 // 增加了motion_frames (2010.2.22)
+// 支持Stereo (2010.3.20)
 //
 // 3.7.0
 // 去掉了ConfirmDevice的参数 (2008.3.17)
@@ -32,10 +33,12 @@ namespace KlayGE
 	struct RenderSettings
 	{
 		RenderSettings()
-			: left(0), top(0),
-				depth_stencil_fmt(EF_D16),
+			: full_screen(false),
+				left(0), top(0),
+				color_fmt(EF_ARGB8), depth_stencil_fmt(EF_D16),
 				sample_count(1), sample_quality(0),
-				motion_frames(0)
+				motion_frames(0),
+				stereo_mode(false), stereo_separation(0)
 		{
 		}
 
@@ -51,6 +54,8 @@ namespace KlayGE
 		uint32_t sample_count;
 		uint32_t sample_quality;
 		uint32_t motion_frames;
+		bool stereo_mode;
+		float stereo_separation;
 	};
 }
 

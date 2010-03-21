@@ -191,35 +191,32 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Update()
 	{
-		InputEngine& inputEngine = Context::Instance().InputFactoryInstance().InputEngineInstance();
-		inputEngine.Update();
+		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
+		ie.Update();
 
-		RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		renderEngine.BeginFrame();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BeginFrame();
 
 		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
 		{
 			scene_obj->Update();
 		}
 
-		App3DFramework& app = Context::Instance().AppInstance();
-		for (uint32_t pass = 0;; ++ pass)
+		if (re.StereoMode())
 		{
-			renderEngine.BeginPass();
-
-			urt_ = app.Update(pass);
-
-			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
+			for (uint32_t i = 0; i < 2; ++ i)
 			{
-				this->Flush();
+				re.StereoActiveEye(i);
+				re.BindFrameBuffer(FrameBufferPtr());
+
+				this->FlushScene();
 			}
 
-			renderEngine.EndPass();
-
-			if (urt_ & App3DFramework::URV_Finished)
-			{
-				break;
-			}
+			re.Stereoscopic();
+		}
+		else
+		{
+			this->FlushScene();
 		}
 
 		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
@@ -234,20 +231,20 @@ namespace KlayGE
 			}
 		}
 
-		renderEngine.EndFrame();
+		re.EndFrame();
 	}
 
 	// 把渲染队列中的物体渲染出来
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Flush()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		App3DFramework& app = Context::Instance().AppInstance();
+
 		numObjectsRendered_ = 0;
 		numRenderablesRendered_ = 0;
 		numPrimitivesRendered_ = 0;
 		numVerticesRendered_ = 0;
-
-		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		App3DFramework& app = Context::Instance().AppInstance();
 
 		visible_marks_.resize(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
@@ -270,7 +267,6 @@ namespace KlayGE
 			}
 		}
 
-		numObjectsRendered_ = 0;
 		std::vector<std::pair<RenderablePtr, SceneObjectsType>,
 			boost::pool_allocator<std::pair<RenderablePtr, SceneObjectsType> > > renderables;
 		std::map<RenderablePtr, size_t, std::less<RenderablePtr>,
@@ -312,8 +308,8 @@ namespace KlayGE
 			{
 				item->Render();
 
-				numPrimitivesRendered_ += renderEngine.NumPrimitivesJustRendered();
-				numVerticesRendered_ += renderEngine.NumVerticesJustRendered();
+				numPrimitivesRendered_ += re.NumPrimitivesJustRendered();
+				numVerticesRendered_ += re.NumVerticesJustRendered();
 			}
 			numRenderablesRendered_ += items.second.size();
 		}
@@ -348,5 +344,29 @@ namespace KlayGE
 	size_t SceneManager::NumVerticesRendered() const
 	{
 		return numVerticesRendered_;
+	}
+
+	void SceneManager::FlushScene()
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		App3DFramework& app = Context::Instance().AppInstance();
+		for (uint32_t pass = 0;; ++ pass)
+		{
+			re.BeginPass();
+
+			urt_ = app.Update(pass);
+
+			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
+			{
+				this->Flush();
+			}
+
+			re.EndPass();
+
+			if (urt_ & App3DFramework::URV_Finished)
+			{
+				break;
+			}
+		}
 	}
 }

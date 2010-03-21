@@ -42,6 +42,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API Camera
 	{
 	public:
+		Camera();
+
 		float3 const & EyePos() const
 			{ return eyePos_; }
 		float3 const & LookAt() const
@@ -60,43 +62,32 @@ namespace KlayGE
 		float FarPlane() const
 			{ return farPlane_; }
 
-		float4x4 const & ViewMatrix() const
-			{ return this->viewMat_; }
-		float4x4 const & ProjMatrix() const
-			{ return this->projMat_; }
-
 		void ViewParams(float3 const & eyePos, float3 const & lookat,
 			float3 const & upVec = float3(0, 1, 0));
 		void ProjParams(float FOV, float aspect, float nearPlane, float farPlane);
 
 		void Update();
 
-		float4x4 const & PrevViewMatrix() const
-		{
-			return prev_view_mats_.front();
-		}
-		float4x4 const & PrevProjMatrix() const
-		{
-			return prev_proj_mats_.front();
-		}
-
-		Camera();
+		float4x4 const & ViewMatrix() const;
+		float4x4 const & ProjMatrix() const;
+		float4x4 const & PrevViewMatrix() const;
+		float4x4 const & PrevProjMatrix() const;
 
 	private:
 		float3		eyePos_;		// 观察矩阵的属性
 		float3		lookat_;
 		float3		upVec_;
 		float3		viewVec_;
-		float4x4	viewMat_;
+		float4x4	viewMat_[2];
 
 		float		FOV_;			// 投射矩阵的属性
 		float		aspect_;
 		float		nearPlane_;
 		float		farPlane_;
-		float4x4	projMat_;
+		float4x4	projMat_[2];
 
-		boost::circular_buffer<float4x4> prev_view_mats_;
-		boost::circular_buffer<float4x4> prev_proj_mats_;
+		boost::circular_buffer<float4x4> prev_view_mats_[2];
+		boost::circular_buffer<float4x4> prev_proj_mats_[2];
 	};
 }
 

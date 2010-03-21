@@ -94,6 +94,8 @@ namespace KlayGE
 		int sample_quality = 0;
 		bool full_screen = false;
 		int motion_frames = 0;
+		bool stereo_mode = 0;
+		float stereo_separation = 0;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		std::string rf_name = "D3D9";
@@ -113,6 +115,7 @@ namespace KlayGE
 #endif
 		std::string sm_name;
 
+		XMLDocument cfg_doc;
 		XMLNodePtr rf_node;
 		XMLNodePtr af_node;
 		XMLNodePtr if_node;
@@ -122,7 +125,6 @@ namespace KlayGE
 		ResIdentifierPtr file = ResLoader::Instance().Load(cfg_file);
 		if (file)
 		{
-			XMLDocument cfg_doc;
 			XMLNodePtr cfg_root = cfg_doc.Parse(file);
 
 			XMLNodePtr context_node = cfg_root->FirstNode("context");
@@ -242,6 +244,26 @@ namespace KlayGE
 			{
 				motion_frames = attr->ValueInt();
 			}
+
+			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
+			attr = stereo_node->Attrib("enabled");
+			if (attr)
+			{
+				std::string stereo_str = attr->ValueString();
+				if (("1" == stereo_str) || ("true" == stereo_str))
+				{
+					stereo_mode = true;
+				}
+				else
+				{
+					stereo_mode = false;
+				}
+			}
+			attr = stereo_node->Attrib("separation");
+			if (attr)
+			{
+				stereo_separation = attr->ValueFloat();
+			}
 		}
 
 		this->LoadRenderFactory(rf_name, rf_node);
@@ -259,6 +281,8 @@ namespace KlayGE
 		settings.sample_quality = sample_quality;
 		settings.full_screen = full_screen;
 		settings.motion_frames = motion_frames;
+		settings.stereo_mode = stereo_mode;
+		settings.stereo_separation = stereo_separation;
 
 		return settings;
 	}

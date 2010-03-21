@@ -102,7 +102,7 @@ namespace KlayGE
 
 		::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-		FrameBuffer& fb = *this->CurFrameBuffer();
+		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		while (WM_QUIT != msg.message)
 		{
 			// 如果窗口是激活的，用 PeekMessage()以便我们可以用空闲时间渲染场景
@@ -155,13 +155,12 @@ namespace KlayGE
 
 	// 建立渲染窗口
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLES2RenderEngine::CreateRenderWindow(std::string const & name,
+	void OGLES2RenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
 		motion_frames_ = settings.motion_frames;
 
 		FrameBufferPtr win = MakeSharedPtr<OGLES2RenderWindow>(name, settings);
-		default_frame_buffer_ = win;
 
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
@@ -387,19 +386,19 @@ namespace KlayGE
 		glScissor(x, y, width, height);
 	}
 
-	void OGLES2RenderEngine::Resize(uint32_t width, uint32_t height)
+	void OGLES2RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_pointer_cast<OGLES2RenderWindow>(default_frame_buffer_)->Resize(width, height);
+		checked_pointer_cast<OGLES2RenderWindow>(screen_frame_buffer_)->Resize(width, height);
 	}
 
 	bool OGLES2RenderEngine::FullScreen() const
 	{
-		return checked_pointer_cast<OGLES2RenderWindow>(default_frame_buffer_)->FullScreen();
+		return checked_pointer_cast<OGLES2RenderWindow>(screen_frame_buffer_)->FullScreen();
 	}
 
 	void OGLES2RenderEngine::FullScreen(bool fs)
 	{
-		checked_pointer_cast<OGLES2RenderWindow>(default_frame_buffer_)->FullScreen(fs);
+		checked_pointer_cast<OGLES2RenderWindow>(screen_frame_buffer_)->FullScreen(fs);
 	}
 
 	// 填充设备能力
