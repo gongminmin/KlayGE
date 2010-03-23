@@ -43,6 +43,7 @@
 #include <functional>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/assert.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
 
@@ -303,7 +304,7 @@ namespace KlayGE
 
 	void OCTree::NodeVisible(size_t index, Frustum const & frustum)
 	{
-		assert(index < octree_.size());
+		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
 		Frustum::VIS const vis = frustum.Visiable(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size));
@@ -329,7 +330,7 @@ namespace KlayGE
 
 	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size)
 	{
-		assert(index < octree_.size());
+		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
 		float3 const t = bb_center - node.bb_center;

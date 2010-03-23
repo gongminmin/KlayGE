@@ -26,7 +26,7 @@ namespace
 	{
 	public:
 		explicit DownsamplerNxN(uint32_t n)
-			: ds_2x2_(n), ds_tex_(n - 1), ds_fb_(n - 1)
+			: ds_2x2_(n), ds_tex_(n - 1)
 		{
 			for (uint32_t i = 0; i < n; ++ i)
 			{
@@ -34,10 +34,8 @@ namespace
 			}
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			flipping_ = flipping;
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			uint32_t w = std::max(tex->Width(0) / 2, static_cast<uint32_t>(1));
@@ -46,27 +44,36 @@ namespace
 			{
 				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-				ds_fb_[i] = rf.MakeFrameBuffer();
-				ds_fb_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ds_tex_[i], 0, 0));
 				if (0 == i)
 				{
-					ds_2x2_[i]->InputPin(index, tex, flipping);
+					ds_2x2_[i]->InputPin(index, tex);
 				}
 				else
 				{
-					ds_2x2_[i]->InputPin(index, ds_tex_[i - 1], ds_fb_[i - 1]->RequiresFlipping());
+					ds_2x2_[i]->InputPin(index, ds_tex_[i - 1]);
 				}
-				ds_2x2_[i]->Destinate(ds_fb_[i]);
+				ds_2x2_[i]->OutputPin(index, ds_tex_[i]);
 
 				w = std::max(w / 2, static_cast<uint32_t>(1));
 				h = std::max(h / 2, static_cast<uint32_t>(1));
 			}
+
+			ds_2x2_.back()->InputPin(index, ds_tex_[ds_tex_.size() - 1]);
 		}
 
-		void Destinate(FrameBufferPtr const & fb)
+		TexturePtr const & InputPin(uint32_t index) const
 		{
-			ds_2x2_.back()->InputPin(0, ds_tex_[ds_tex_.size() - 1], ds_fb_[ds_tex_.size() - 1]->RequiresFlipping());
-			ds_2x2_.back()->Destinate(fb);
+			return ds_2x2_[0]->InputPin(index);
+		}
+
+		void OutputPin(uint32_t index, TexturePtr const & tex)
+		{
+			ds_2x2_.back()->OutputPin(index, tex);
+		}
+
+		TexturePtr const & OutputPin(uint32_t index) const
+		{
+			return ds_2x2_.back()->OutputPin(index);
 		}
 
 		void Apply()
@@ -80,31 +87,35 @@ namespace
 	private:
 		std::vector<PostProcessPtr> ds_2x2_;
 		std::vector<TexturePtr> ds_tex_;
-		std::vector<FrameBufferPtr> ds_fb_;
 	};
 }
 
 TilingPostProcess::TilingPostProcess()
-	: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
+	: PostProcess(std::vector<std::string>(1, "src_tex"),
+		std::vector<std::string>(1, "output"),
+		Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {
 	downsampler_ = MakeSharedPtr<DownsamplerNxN>(LOG_2_TILE_SIZE);
 
 	tile_per_row_line_ep_ = technique_->Effect().ParameterByName("tile_per_row_line");
 }
 
-void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+void TilingPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	downsample_tex_ = rf.MakeTexture2D(tex->Width(0) / TILE_SIZE, tex->Height(0) / TILE_SIZE,
 		1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	downsample_fb_ = rf.MakeFrameBuffer();
-	downsample_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*downsample_tex_, 0, 0));
-	downsampler_->InputPin(index, tex, flipping);
-	downsampler_->Destinate(downsample_fb_);
+	downsampler_->InputPin(index, tex);
+	downsampler_->OutputPin(index, downsample_tex_);
 
-	PostProcess::InputPin(index, downsample_tex_, downsample_fb_->RequiresFlipping());
+	PostProcess::InputPin(index, downsample_tex_);
+}
+
+TexturePtr const & TilingPostProcess::InputPin(uint32_t index) const
+{
+	return downsampler_->InputPin(index);
 }
 
 void TilingPostProcess::Apply()

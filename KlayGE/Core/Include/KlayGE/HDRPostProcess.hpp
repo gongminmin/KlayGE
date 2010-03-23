@@ -30,7 +30,7 @@ namespace KlayGE
 		explicit SumLumPostProcess(RenderTechniquePtr const & tech);
 		virtual ~SumLumPostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex);
 
 	private:
 		void GetSampleOffsets4x4(uint32_t width, uint32_t height);
@@ -53,7 +53,7 @@ namespace KlayGE
 		SumLumLogPostProcessCS();
 		void Apply();
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex);
 		void DestinateSize(uint32_t width, uint32_t height);
 
 		GraphicsBufferPtr const & SumLumBuff() const
@@ -79,10 +79,7 @@ namespace KlayGE
 		void Apply();
 		void OnRenderBegin();
 
-		TexturePtr AdaptedLum() const;
-
 	private:
-		FrameBufferPtr fb_[2];
 		TexturePtr adapted_textures_[2];
 		bool last_index_;
 
@@ -134,8 +131,10 @@ namespace KlayGE
 	public:
 		HDRPostProcess(bool bright_pass, bool blur_shift);
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
-		void Destinate(FrameBufferPtr const & fb);
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
+		void OutputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & OutputPin(uint32_t index) const;
 		void Apply();
 
 	private:

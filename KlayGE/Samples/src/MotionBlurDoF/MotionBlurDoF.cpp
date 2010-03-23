@@ -264,7 +264,9 @@ namespace
 	{
 	public:
 		ClearFloatPostProcess()
-			: PostProcess(std::vector<std::string>(), Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
+			: PostProcess(std::vector<std::string>(),
+					std::vector<std::string>(1, "output"),
+					Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
 		{
 		}
 
@@ -282,7 +284,9 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
+			: PostProcess(std::vector<std::string>(1, "src_tex"),
+					std::vector<std::string>(1, "output"),
+					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
 				dof_on_(true), show_blur_factor_(false)
 		{
 		}
@@ -349,14 +353,14 @@ namespace
 			return show_blur_factor_;
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			PostProcess::InputPin(index, tex, flipping);
+			PostProcess::InputPin(index, tex);
 
 			uint32_t const width = tex->Width(0);
 			uint32_t const height = tex->Height(0);
 
-			sat_.InputPin(index, tex, flipping);
+			sat_.InputPin(index, tex);
 
 			*(technique_->Effect().ParameterByName("sat_size")) = float4(static_cast<float>(width),
 				static_cast<float>(height), 1.0f / width, 1.0f / height);
@@ -401,6 +405,8 @@ namespace
 		{
 			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));
+
+			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
 		}
@@ -532,10 +538,8 @@ void MotionBlurDoFApp::InitObjects()
 	RenderEngine& re = rf.RenderEngineInstance();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
 	motion_vec_fb_ = rf.MakeFrameBuffer();
-	mbed_fb_ = rf.MakeFrameBuffer();
 	clr_depth_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 	motion_vec_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-	mbed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -548,7 +552,6 @@ void MotionBlurDoFApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	depth_of_field_ = MakeSharedPtr<DepthOfField>();
-	depth_of_field_->Destinate(FrameBufferPtr());
 
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
 
@@ -631,22 +634,19 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	clr_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	clear_float_->OutputPin(0, clr_depth_tex_);
 
 	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	mbed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mbed_tex_, 0, 0));
 
-	motion_blur_->InputPin(0, clr_depth_tex_, clr_depth_fb_->RequiresFlipping());
-	motion_blur_->InputPin(1, motion_vec_tex_, clr_depth_fb_->RequiresFlipping());
-	motion_blur_->Destinate(mbed_fb_);
+	motion_blur_->InputPin(0, clr_depth_tex_);
+	motion_blur_->InputPin(1, motion_vec_tex_);
+	motion_blur_->OutputPin(0, mbed_tex_);
 
-	depth_of_field_->InputPin(0, mbed_tex_, mbed_fb_->RequiresFlipping());
-	depth_of_field_->Destinate(FrameBufferPtr());
-
-	clear_float_->Destinate(clr_depth_fb_);
+	depth_of_field_->InputPin(0, mbed_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -775,8 +775,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 	case 0:
 		this->ActiveCamera().Update();
 
-		renderEngine.BindFrameBuffer(clr_depth_fb_);
 		clear_float_->Apply();
+		renderEngine.BindFrameBuffer(clr_depth_fb_);
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{

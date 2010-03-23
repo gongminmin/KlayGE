@@ -38,7 +38,7 @@ namespace KlayGE
 	// Inserts the char at specified index.
 	void UniBuffer::InsertChar(size_t index, wchar_t wChar)
 	{
-		assert(index <= buffer_.size());
+		BOOST_ASSERT(index <= buffer_.size());
 
 		buffer_.insert(index, 1, wChar);
 		analyse_required_ = true;
@@ -47,7 +47,7 @@ namespace KlayGE
 	// Removes the char at specified index.
 	void UniBuffer::RemoveChar(size_t index)
 	{
-		assert(index <= buffer_.size());
+		BOOST_ASSERT(index <= buffer_.size());
 
 		buffer_.erase(index, 1);
 		analyse_required_ = true;
@@ -56,7 +56,7 @@ namespace KlayGE
 	// Inserts the first nCount characters of the string pStr at specified index.
 	void UniBuffer::InsertString(size_t index, std::wstring const & str)
 	{
-		assert(index <= buffer_.size());
+		BOOST_ASSERT(index <= buffer_.size());
 
 		buffer_.insert(index, str);
 		analyse_required_ = true;
@@ -341,7 +341,7 @@ namespace KlayGE
 	//             necessary.
 	void UIEditBox::PlaceCaret(int nCP)
 	{
-		assert((nCP >= 0) && (nCP <= static_cast<int>(buffer_.GetTextSize())));
+		BOOST_ASSERT((nCP >= 0) && (nCP <= static_cast<int>(buffer_.GetTextSize())));
 		caret_pos_ = nCP;
 
 		// Obtain the X offset of the character.

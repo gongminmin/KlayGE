@@ -38,11 +38,9 @@ private:
 
 	KlayGE::PostProcessPtr edge_anti_alias_;
 
-	KlayGE::FrameBufferPtr ssao_buffer_;
 	KlayGE::TexturePtr ssao_tex_;
 	KlayGE::PostProcessPtr ssao_pp_;
 
-	KlayGE::FrameBufferPtr hdr_buffer_;
 	KlayGE::TexturePtr hdr_tex_;
 	KlayGE::HDRPostProcessPtr hdr_pp_;
 

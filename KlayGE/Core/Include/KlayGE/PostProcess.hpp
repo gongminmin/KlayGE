@@ -5,7 +5,7 @@
 // Homepage: http://klayge.sourceforge.net
 //
 // 3.10.0
-// 输入源可以有多个 (2010.3.14)
+// 使用InputPin和OutputPin来指定输入输出 (2010.3.23)
 //
 // 3.6.0
 // 增加了BlurPostProcess (2007.3.24)
@@ -39,7 +39,9 @@ namespace KlayGE
 	{
 	public:
 		PostProcess();
-		PostProcess(std::vector<std::string> const & input_pin_names, RenderTechniquePtr const & tech);
+		PostProcess(std::vector<std::string> const & input_pin_names,
+			std::vector<std::string> const & output_pin_names,
+			RenderTechniquePtr const & tech);
 		virtual ~PostProcess()
 		{
 		}
@@ -49,10 +51,16 @@ namespace KlayGE
 		uint32_t NumInputPins() const;
 		uint32_t InputPinByName(std::string const & name) const;
 		std::string const & InputPinName(uint32_t index) const;
-		virtual void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
+		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		virtual TexturePtr const & InputPin(uint32_t index) const;
 
-		virtual void Destinate(FrameBufferPtr const & fb);
-		FrameBufferPtr const & Destinate()
+		uint32_t NumOutputPins() const;
+		uint32_t OutputPinByName(std::string const & name) const;
+		std::string const & OutputPinName(uint32_t index) const;
+		virtual void OutputPin(uint32_t index, TexturePtr const & tex);
+		virtual TexturePtr const & OutputPin(uint32_t index) const;
+
+		FrameBufferPtr const & OutputFrameBuffer() const
 		{
 			return frame_buffer_;
 		}
@@ -66,7 +74,8 @@ namespace KlayGE
 
 	protected:
 		std::vector<std::pair<std::string, TexturePtr> > input_pins_;
-		bool flipping_;
+		std::vector<std::pair<std::string, TexturePtr> > output_pins_;
+		uint32_t num_bind_output_;
 
 		FrameBufferPtr frame_buffer_;
 
@@ -144,9 +153,9 @@ namespace KlayGE
 		{
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			T::InputPin(index, tex, flipping);
+			T::InputPin(index, tex);
 			this->CalSampleOffsets(tex->Width(0), 3);
 		}
 	};
@@ -160,9 +169,9 @@ namespace KlayGE
 		{
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			T::InputPin(index, tex, flipping);
+			T::InputPin(index, tex);
 			this->CalSampleOffsets(tex->Height(0), 3);
 		}
 	};
@@ -176,26 +185,31 @@ namespace KlayGE
 		{
 		}
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			flipping_ = flipping;
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			blurx_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
 				1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-			FrameBufferPtr blur_x_fb = rf.MakeFrameBuffer();
-			blur_x_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blurx_tex_, 0, 0));
-			blur_x_.InputPin(index, tex, flipping_);
-			blur_x_.Destinate(blur_x_fb);
-			blur_y_.InputPin(index, blurx_tex_, blur_x_fb->RequiresFlipping());
+			blur_x_.InputPin(index, tex);
+			blur_x_.OutputPin(0, blurx_tex_);
+			blur_y_.InputPin(index, blurx_tex_);
 		}
 
-		void Destinate(FrameBufferPtr const & fb)
+		TexturePtr const & InputPin(uint32_t index) const
 		{
-			PostProcess::Destinate(fb);
-			blur_y_.Destinate(fb);
+			return blur_x_.OutputPin(index);
+		}
+
+		void OutputPin(uint32_t index, TexturePtr const & tex)
+		{
+			blur_y_.OutputPin(index, tex);
+		}
+
+		TexturePtr const & OutputPin(uint32_t index) const
+		{
+			return blur_y_.OutputPin(index);
 		}
 
 		void Apply()

@@ -232,7 +232,6 @@ namespace KlayGE
 		int32_t buffer_type_;
 
 		FrameBufferPtr sm_buffer_;
-		FrameBufferPtr blur_sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr blur_sm_tex_;
 

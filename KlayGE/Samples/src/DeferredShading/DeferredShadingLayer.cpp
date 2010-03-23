@@ -132,12 +132,10 @@ namespace KlayGE
 		}
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		blur_sm_buffer_ = rf.MakeFrameBuffer();
-		blur_sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*blur_sm_tex_, 0, 0));
 
 		box_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBoxFilterPostProcess> >(3, 1.0f);
-		box_filter_pp_->InputPin(0, sm_tex_, sm_buffer_->RequiresFlipping());
-		box_filter_pp_->Destinate(blur_sm_buffer_);
+		box_filter_pp_->InputPin(0, sm_tex_);
+		box_filter_pp_->OutputPin(0, blur_sm_tex_);
 
 		*(technique_->Effect().ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 

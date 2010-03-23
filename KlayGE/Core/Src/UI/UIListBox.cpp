@@ -170,7 +170,7 @@ namespace KlayGE
 
 	void UIListBox::RemoveItem(int nIndex)
 	{
-		assert((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
+		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
 		items_.erase(items_.begin() + nIndex);
 		scroll_bar_.SetTrackRange(0, items_.size());
@@ -190,7 +190,7 @@ namespace KlayGE
 
 	boost::shared_ptr<UIListBoxItem> UIListBox::GetItem(int nIndex) const
 	{
-		assert((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
+		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
 		return items_[nIndex];
 	}

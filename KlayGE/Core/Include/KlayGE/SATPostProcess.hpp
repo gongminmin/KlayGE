@@ -46,7 +46,8 @@ namespace KlayGE
 	public:
 		SummedAreaTablePostProcess();
 
-		void InputPin(uint32_t index, TexturePtr const & tex, bool flipping);
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
 		void Apply();
 
 		TexturePtr SATTexture();
@@ -56,10 +57,6 @@ namespace KlayGE
 		std::vector<TexturePtr> inter_tex_x_down_;
 		std::vector<TexturePtr> inter_tex_y_up_;
 		std::vector<TexturePtr> inter_tex_y_down_;
-		std::vector<FrameBufferPtr> inter_fb_x_up_;
-		std::vector<FrameBufferPtr> inter_fb_x_down_;
-		std::vector<FrameBufferPtr> inter_fb_y_up_;
-		std::vector<FrameBufferPtr> inter_fb_y_down_;
 
 		SATSeparableScanSweepPostProcess scan_x_up_;
 		SATSeparableScanSweepPostProcess scan_x_down_;

@@ -26,7 +26,7 @@
 namespace KlayGE
 {
 	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir)
-			: PostProcess(std::vector<std::string>(1, "src_tex"), tech),
+			: PostProcess(std::vector<std::string>(1, "src_tex"), std::vector<std::string>(1, "output"), tech),
 				dir_(dir)
 	{
 		if (technique_)
@@ -68,10 +68,8 @@ namespace KlayGE
 	{
 	}
 
-	void SummedAreaTablePostProcess::InputPin(uint32_t /*index*/, TexturePtr const & tex, bool flipping)
+	void SummedAreaTablePostProcess::InputPin(uint32_t /*index*/, TexturePtr const & tex)
 	{
-		flipping_ = flipping;
-
 		uint32_t const tex_width = tex->Width(0);
 		uint32_t const tex_height = tex->Height(0);
 
@@ -105,55 +103,43 @@ namespace KlayGE
 		}
 
 		inter_tex_x_up_.resize(widths.size());
-		inter_fb_x_up_.resize(widths.size());
 		inter_tex_x_down_.resize(widths.size());
-		inter_fb_x_down_.resize(widths.size());
 		inter_tex_y_up_.resize(heights.size());
-		inter_fb_y_up_.resize(heights.size());
 		inter_tex_y_down_.resize(heights.size());
-		inter_fb_y_down_.resize(heights.size());
 
 		{
 			inter_tex_x_up_[0] = tex;
-			inter_fb_x_up_[0] = rf.MakeFrameBuffer();
-			inter_fb_x_up_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_up_[0], 0, 0));
 		}
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
 			inter_tex_x_up_[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			inter_fb_x_up_[i] = rf.MakeFrameBuffer();
-			inter_fb_x_up_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_up_[i], 0, 0));
 		}
 		{
 			inter_tex_x_down_[0] = inter_tex_x_up_.back();
-			inter_fb_x_down_[0] = inter_fb_x_up_.back();
 		}
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
 			inter_tex_x_down_[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			inter_fb_x_down_[i] = rf.MakeFrameBuffer();
-			inter_fb_x_down_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_x_down_[i], 0, 0));
 		}
 		{
 			inter_tex_y_up_[0] = inter_tex_x_down_.back();
-			inter_fb_y_up_[0] = inter_fb_x_down_.back();
 		}
 		for (size_t i = 1; i < heights.size(); ++ i)
 		{
 			inter_tex_y_up_[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			inter_fb_y_up_[i] = rf.MakeFrameBuffer();
-			inter_fb_y_up_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_y_up_[i], 0, 0));
 		}
 		{
 			inter_tex_y_down_[0] = inter_tex_y_up_.back();
-			inter_fb_y_down_[0] = inter_fb_y_up_.back();
 		}
 		for (size_t i = 1; i < heights.size(); ++ i)
 		{
 			inter_tex_y_down_[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			inter_fb_y_down_[i] = rf.MakeFrameBuffer();
-			inter_fb_y_down_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*inter_tex_y_down_[i], 0, 0));
 		}
+	}
+
+	TexturePtr const & SummedAreaTablePostProcess::InputPin(uint32_t /*index*/) const
+	{
+		return inter_tex_x_up_[0];
 	}
 
 	void SummedAreaTablePostProcess::Apply()
@@ -166,15 +152,8 @@ namespace KlayGE
 			scan_x_up_.Length(child_length);
 			scan_x_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
 			scan_x_up_.Scale((parent_length * 4.0f) / child_length);
-			if (0 == i)
-			{
-				scan_x_up_.InputPin(0, inter_tex_x_up_[i], flipping_);
-			}
-			else
-			{
-				scan_x_up_.InputPin(0, inter_tex_x_up_[i], inter_fb_x_up_[i]->RequiresFlipping());
-			}
-			scan_x_up_.Destinate(inter_fb_x_up_[i + 1]);
+			scan_x_up_.InputPin(0, inter_tex_x_up_[i]);
+			scan_x_up_.OutputPin(0, inter_tex_x_up_[i + 1]);
 			scan_x_up_.Apply();
 		}
 
@@ -184,11 +163,11 @@ namespace KlayGE
 			uint32_t const child_length = inter_tex_x_down_[i + 1]->Width(0);
 
 			scan_x_down_.Length(child_length);
-			scan_x_down_.InputPin(0, inter_tex_x_down_[i], inter_fb_x_down_[i]->RequiresFlipping());
+			scan_x_down_.InputPin(0, inter_tex_x_down_[i]);
 			scan_x_down_.ChildBuffer(inter_tex_x_up_[inter_tex_x_down_.size() - 2 - i]);
 			scan_x_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
 			scan_x_down_.Scale(child_length / (parent_length * 4.0f));
-			scan_x_down_.Destinate(inter_fb_x_down_[i + 1]);
+			scan_x_down_.OutputPin(0, inter_tex_x_down_[i + 1]);
 			scan_x_down_.Apply();
 		}
 
@@ -200,8 +179,8 @@ namespace KlayGE
 			scan_y_up_.Length(child_length);
 			scan_y_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
 			scan_y_up_.Scale((parent_length * 4.0f) / child_length);
-			scan_y_up_.InputPin(0, inter_tex_y_up_[i], inter_fb_y_up_[i]->RequiresFlipping());
-			scan_y_up_.Destinate(inter_fb_y_up_[i + 1]);
+			scan_y_up_.InputPin(0, inter_tex_y_up_[i]);
+			scan_y_up_.OutputPin(0, inter_tex_y_up_[i + 1]);
 			scan_y_up_.Apply();
 		}
 
@@ -211,11 +190,11 @@ namespace KlayGE
 			uint32_t const child_length = inter_tex_y_down_[i + 1]->Height(0);
 
 			scan_y_down_.Length(child_length);
-			scan_y_down_.InputPin(0, inter_tex_y_down_[i], inter_fb_y_down_[i]->RequiresFlipping());
+			scan_y_down_.InputPin(0, inter_tex_y_down_[i]);
 			scan_y_down_.ChildBuffer(inter_tex_y_up_[inter_tex_y_down_.size() - 2 - i]);
 			scan_y_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
 			scan_y_down_.Scale(child_length / (parent_length * 4.0f));
-			scan_y_down_.Destinate(inter_fb_y_down_[i + 1]);
+			scan_y_down_.OutputPin(0, inter_tex_y_down_[i + 1]);
 			scan_y_down_.Apply();
 		}
 	}

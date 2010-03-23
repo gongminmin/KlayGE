@@ -223,21 +223,16 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
-	ascii_arts_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
-	ascii_arts_->Destinate(FrameBufferPtr());
+	ascii_arts_->InputPin(0, color_tex_);
 
-	cartoon_->InputPin(0, normal_depth_tex_, g_buffer_->RequiresFlipping());
-	cartoon_->InputPin(1, color_tex_, g_buffer_->RequiresFlipping());
-	cartoon_->Destinate(FrameBufferPtr());
+	cartoon_->InputPin(0, normal_depth_tex_);
+	cartoon_->InputPin(1, color_tex_);
 
-	tiling_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
-	tiling_->Destinate(FrameBufferPtr());
+	tiling_->InputPin(0, color_tex_);
 
-	hdr_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
-	hdr_->Destinate(FrameBufferPtr());
+	hdr_->InputPin(0, color_tex_);
 
-	night_vision_->InputPin(0, color_tex_, g_buffer_->RequiresFlipping());
-	night_vision_->Destinate(FrameBufferPtr());
+	night_vision_->InputPin(0, color_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }

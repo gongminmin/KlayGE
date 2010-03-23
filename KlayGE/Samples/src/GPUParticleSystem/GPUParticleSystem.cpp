@@ -640,13 +640,13 @@ namespace
 	{
 	public:
 		BlendPostProcess()
-			: PostProcess(std::vector<std::string>(1, "src_tex"), Context::Instance().RenderFactoryInstance().LoadEffect("Terrain.fxml")->TechniqueByName("Blend"))
 		{
-		}
+			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("tex_with_alpha", TexturePtr()));
 
-		void TexWithAlpha(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("tex_with_alpha")) = tex;
+			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("Terrain.fxml")->TechniqueByName("Blend"));
 		}
 	};
 
@@ -784,8 +784,7 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	checked_pointer_cast<RenderParticles>(particles_->GetRenderable())->SceneTexture(scene_tex_, scene_buffer_->RequiresFlipping());
 
-	blend_pp_->InputPin(0, scene_tex_, scene_buffer_->RequiresFlipping());
-	blend_pp_->Destinate(FrameBufferPtr());
+	blend_pp_->InputPin(0, scene_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -862,7 +861,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			terrain_->Visible(false);
 			particles_->Visible(false);
 
-			checked_pointer_cast<BlendPostProcess>(blend_pp_)->TexWithAlpha(fog_tex_);
+			blend_pp_->InputPin(1, fog_tex_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);

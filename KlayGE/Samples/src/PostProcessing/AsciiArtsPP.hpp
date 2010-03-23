@@ -9,14 +9,14 @@ class AsciiArtsPostProcess : public KlayGE::PostProcess
 public:
 	AsciiArtsPostProcess();
 
-	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex, bool flipping);
+	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex);
+	KlayGE::TexturePtr const & InputPin(KlayGE::uint32_t index) const;
 	void Apply();
 	void OnRenderBegin();
 
 private:
 	KlayGE::PostProcessPtr downsampler_;
 	KlayGE::TexturePtr downsample_tex_;
-	KlayGE::FrameBufferPtr downsample_fb_;
 
 	KlayGE::RenderEffectParameterPtr cell_per_row_line_ep_;
 };

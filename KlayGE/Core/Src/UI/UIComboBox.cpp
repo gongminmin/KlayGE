@@ -578,7 +578,7 @@ namespace KlayGE
 
 	int UIComboBox::AddItem(std::wstring const & strText)
 	{
-		assert(!strText.empty());
+		BOOST_ASSERT(!strText.empty());
 
 		// Create a new item and set the data
 		boost::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
@@ -611,7 +611,7 @@ namespace KlayGE
 
 	int UIComboBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
-		assert(!strText.empty());
+		BOOST_ASSERT(!strText.empty());
 
 		// Create a new item and set the data
 		boost::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
@@ -729,7 +729,7 @@ namespace KlayGE
 
 	void UIComboBox::SetSelectedByIndex(uint32_t index)
 	{
-		assert(index < GetNumItems());
+		BOOST_ASSERT(index < GetNumItems());
 
 		focused_ = selected_ = index;
 		this->OnSelectionChangedEvent()(*this);
@@ -737,10 +737,10 @@ namespace KlayGE
 
 	void UIComboBox::SetSelectedByText(std::wstring const & strText)
 	{
-		assert(!strText.empty());
+		BOOST_ASSERT(!strText.empty());
 
 		int index = this->FindItem(strText);
-		assert(index != -1);
+		BOOST_ASSERT(index != -1);
 
 		this->SetSelectedByIndex(index);
 	}

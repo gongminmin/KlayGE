@@ -9,7 +9,7 @@ class CartoonPostProcess : public KlayGE::PostProcess
 public:
 	CartoonPostProcess();
 
-	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex, bool flipping);
+	void InputPin(KlayGE::uint32_t index, KlayGE::TexturePtr const & tex);
 };
 
 #endif		// _CARTOONPP_HPP

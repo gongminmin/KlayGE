@@ -19,9 +19,9 @@ CartoonPostProcess::CartoonPostProcess()
 	this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("CartoonPP.fxml")->TechniqueByName("Cartoon"));
 }
 
-void CartoonPostProcess::InputPin(uint32_t index, TexturePtr const & tex, bool flipping)
+void CartoonPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 {
-	PostProcess::InputPin(index, tex, flipping);
+	PostProcess::InputPin(index, tex);
 	if ((0 == index) && tex)
 	{
 		*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));

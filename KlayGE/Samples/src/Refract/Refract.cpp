@@ -263,8 +263,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 		hdr_no_aa_tex_ = hdr_tex_;
 	}
 
-	hdr_->InputPin(0, hdr_no_aa_tex_, hdr_buffer_->RequiresFlipping());
-	hdr_->Destinate(FrameBufferPtr());
+	hdr_->InputPin(0, hdr_no_aa_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
