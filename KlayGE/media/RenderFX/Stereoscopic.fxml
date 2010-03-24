@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="texture2D" name="left_tex"/>
+	<parameter type="texture2D" name="right_tex"/>
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	return float4(dot(left_tex.Sample(point_sampler, tex).gb, float2(0.7f, 0.3f)),
+		right_tex.Sample(point_sampler, tex).gb, 1);
+}
+		]]>
+	</shader>
+	
+	<technique name="RedCyan">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="RedCyanPS()"/>
+		</pass>
+	</technique>
+</effect>

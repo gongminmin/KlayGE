@@ -606,6 +606,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\Stereoscopic.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\SumLum.fxml"
 					>
 				</File>
