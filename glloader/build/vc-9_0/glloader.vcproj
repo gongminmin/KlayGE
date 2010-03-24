@@ -50,6 +50,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="4"
 				DisableSpecificWarnings="4055"
 			/>
@@ -123,6 +124,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4055"
 			/>
@@ -200,6 +202,7 @@
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4055"
 			/>
@@ -277,7 +280,8 @@
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
-				WarningLevel="3"
+				WarningLevel="4"
+				WarnAsError="true"
 				DisableSpecificWarnings="4055"
 			/>
 			<Tool
@@ -350,6 +354,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="4"
 				DisableSpecificWarnings="4055"
 			/>
@@ -423,6 +428,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4055"
 			/>
@@ -501,6 +507,7 @@
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
 				WarningLevel="4"
+				WarnAsError="true"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4055"
 			/>
@@ -578,7 +585,8 @@
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				FloatingPointModel="2"
-				WarningLevel="3"
+				WarningLevel="4"
+				WarnAsError="true"
 				DisableSpecificWarnings="4055"
 			/>
 			<Tool
