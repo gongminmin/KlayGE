@@ -1,6 +1,8 @@
 /* LzmaDec.c -- LZMA Decoder
 2008-11-06 : Igor Pavlov : Public domain */
 
+#include <KlayGE/KlayGE.hpp>
+
 #include "LzmaDec.hpp"
 
 #include <string.h>

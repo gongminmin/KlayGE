@@ -1,6 +1,8 @@
 /* LzmaEnc.c -- LZMA Encoder
 2009-02-02 : Igor Pavlov : Public domain */
 
+#include <KlayGE/KlayGE.hpp>
+
 #include <string.h>
 
 /* #define SHOW_STAT */

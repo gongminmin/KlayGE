@@ -1,6 +1,8 @@
 /* LzFind.c -- Match finder for LZ algorithms
 2008-10-04 : Igor Pavlov : Public domain */
 
+#include <KlayGE/KlayGE.hpp>
+
 #include <string.h>
 
 #include "LzFind.hpp"

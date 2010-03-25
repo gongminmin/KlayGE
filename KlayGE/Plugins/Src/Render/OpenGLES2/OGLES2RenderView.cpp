@@ -496,6 +496,7 @@ namespace KlayGE
 	void OGLES2Texture3DRenderView::CopyToSlice(uint32_t att)
 	{
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+		UNREF_PARAM(att);
 
 		glBindTexture(GL_TEXTURE_3D_OES, tex_);
 		glCopyTexSubImage3DOES(GL_TEXTURE_3D_OES, level_, 0, 0, slice_, 0, 0, width_, height_);

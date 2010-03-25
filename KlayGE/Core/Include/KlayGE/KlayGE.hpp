@@ -34,6 +34,17 @@
 #define KLAYGE_VER_RELEASE	0
 #define KLAYGE_VER_STR		KLAYGE_STRINGIZE(KLAYGE_NAME)" "KLAYGE_STRINGIZE(KLAYGE_VER_MAJOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_MINOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_RELEASE)
 
+#include <vector>
+#include <string>
+
+#include <boost/assert.hpp>
+
+#include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/ThrowErr.hpp>
+#include <KlayGE/Util.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/Math.hpp>
+
 #include <boost/config/requires_threads.hpp>
 
 #endif		// _KLAYGE_HPP
