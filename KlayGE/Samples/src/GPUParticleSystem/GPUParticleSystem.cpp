@@ -636,21 +636,6 @@ namespace
 		}
 	};
 
-	class BlendPostProcess : public PostProcess
-	{
-	public:
-		BlendPostProcess()
-		{
-			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("tex_with_alpha", TexturePtr()));
-
-			output_pins_.push_back(std::make_pair("output", TexturePtr()));
-
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("Terrain.fxml")->TechniqueByName("Blend"));
-		}
-	};
-
-
 	boost::shared_ptr<GPUParticleSystem> gpu_ps;
 
 
@@ -761,7 +746,7 @@ void GPUParticleSystemApp::InitObjects()
 	fog_buffer_ = rf.MakeFrameBuffer();
 	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
+	blend_pp_ = LoadPostProcess(ResLoader::Instance().Load("Blend.ppml"), "blend");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("GPUParticleSystem.uiml"));
 }

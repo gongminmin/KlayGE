@@ -21,6 +21,8 @@
 
 namespace KlayGE
 {
+	typedef boost::shared_ptr<IDXGIFactory>					IDXGIFactoryPtr;
+	typedef boost::shared_ptr<IDXGIAdapter>					IDXGIAdapterPtr;
 	typedef boost::shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
 	typedef boost::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
 	typedef boost::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;

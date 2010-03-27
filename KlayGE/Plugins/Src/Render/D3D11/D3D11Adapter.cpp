@@ -31,11 +31,11 @@ namespace KlayGE
 	{
 	}
 
-	D3D11Adapter::D3D11Adapter(uint32_t adapter_no, IDXGIAdapter1Ptr const & adapter)
+	D3D11Adapter::D3D11Adapter(uint32_t adapter_no, IDXGIAdapterPtr const & adapter)
 					: adapter_no_(adapter_no),
 						adapter_(adapter)
 	{
-		adapter_->GetDesc1(&adapter_desc_);
+		adapter_->GetDesc(&adapter_desc_);
 	}
 
 	// 获取设备描述字符串
@@ -107,9 +107,9 @@ namespace KlayGE
 		std::sort(modes_.begin(), modes_.end());
 	}
 
-	void D3D11Adapter::ResetAdapter(IDXGIAdapter1Ptr const & ada)
+	void D3D11Adapter::ResetAdapter(IDXGIAdapterPtr const & ada)
 	{
 		adapter_ = ada;
-		adapter_->GetDesc1(&adapter_desc_);
+		adapter_->GetDesc(&adapter_desc_);
 	}
 }

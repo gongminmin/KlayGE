@@ -264,7 +264,8 @@ namespace
 	{
 	public:
 		ClearFloatPostProcess()
-			: PostProcess(std::vector<std::string>(),
+			: PostProcess(L"ClearFloat",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
 		{
@@ -274,17 +275,14 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("clear_clr")) = clr;
 		}
-
-		void OnRenderBegin()
-		{
-		}
 	};
 
 	class DepthOfField : public PostProcess
 	{
 	public:
 		DepthOfField()
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
+			: PostProcess(L"DepthOfField",
+					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
 				dof_on_(true), show_blur_factor_(false)
@@ -371,7 +369,7 @@ namespace
 			if (!show_blur_factor_ && dof_on_)
 			{
 				sat_.Apply();
-				*(technique_->Effect().ParameterByName("sat_tex")) = sat_.SATTexture();
+				*(technique_->Effect().ParameterByName("sat_tex")) = sat_.OutputPin(0);
 			}
 
 			PostProcess::Apply();
@@ -401,7 +399,8 @@ namespace
 	{
 	public:
 		MotionBlur()
-			: mb_on_(true), show_motion_vec_(false)
+			: PostProcess(L"MotionBlur"),
+				mb_on_(true), show_motion_vec_(false)
 		{
 			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));

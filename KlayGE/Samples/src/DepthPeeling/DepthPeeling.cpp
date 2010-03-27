@@ -147,17 +147,6 @@ namespace
 		}
 	};
 
-	class BlendPostProcess : public PostProcess
-	{
-	public:
-		BlendPostProcess()
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("DepthPeeling.fxml")->TechniqueByName("Blend"))
-		{
-		}
-	};
-
 
 	enum
 	{
@@ -258,7 +247,7 @@ void DepthPeelingApp::InitObjects()
 	input_handler->connect(boost::bind(&DepthPeelingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	blend_pp_ = MakeSharedPtr<BlendPostProcess>();
+	blend_pp_ = LoadPostProcess(ResLoader::Instance().Load("Blend.ppml"), "blend");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.uiml"));
 	dialog_peeling_ = UIManager::Instance().GetDialogs()[0];

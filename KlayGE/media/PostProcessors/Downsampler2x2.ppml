@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="downsampler2x2">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Downsample.fxml" tech="Downsample"/>
+	</post_processor>
+
+	<post_processor name="bright_pass_downsampler2x2">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Downsample.fxml" tech="BrightPassDownsample"/>
+	</post_processor>
+</post_processors>

@@ -25,8 +25,8 @@
 
 namespace KlayGE
 {
-	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir)
-			: PostProcess(std::vector<std::string>(1, "src_tex"), std::vector<std::string>(1, "output"), tech),
+	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr const & tech, bool dir)
+			: PostProcess(L"SATSeparableScanSweep", std::vector<std::string>(1, "src_tex"), std::vector<std::string>(1, "output"), tech),
 				dir_(dir)
 	{
 		if (technique_)
@@ -61,10 +61,7 @@ namespace KlayGE
 
 
 	SummedAreaTablePostProcess::SummedAreaTablePostProcess()
-		: scan_x_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXUpSweep"), true),
-			scan_x_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanXDownSweep"), false),
-			scan_y_up_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYUpSweep"), true),
-			scan_y_down_(Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml")->TechniqueByName("SATScanYDownSweep"), false)
+		: PostProcessChain(L"SummedAreaTable")
 	{
 	}
 
@@ -102,105 +99,107 @@ namespace KlayGE
 			height = (height + 3) / 4;
 		}
 
-		inter_tex_x_up_.resize(widths.size());
-		inter_tex_x_down_.resize(widths.size());
-		inter_tex_y_up_.resize(heights.size());
-		inter_tex_y_down_.resize(heights.size());
+		std::vector<TexturePtr> inter_tex_x_up(widths.size());
+		std::vector<TexturePtr> inter_tex_x_down(widths.size());
+		std::vector<TexturePtr> inter_tex_y_up(heights.size());
+		std::vector<TexturePtr> inter_tex_y_down(heights.size());
 
 		{
-			inter_tex_x_up_[0] = tex;
+			inter_tex_x_up[0] = tex;
 		}
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
-			inter_tex_x_up_[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			inter_tex_x_up[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		{
-			inter_tex_x_down_[0] = inter_tex_x_up_.back();
+			inter_tex_x_down[0] = inter_tex_x_up.back();
 		}
 		for (size_t i = 1; i < widths.size(); ++ i)
 		{
-			inter_tex_x_down_[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			inter_tex_x_down[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		{
-			inter_tex_y_up_[0] = inter_tex_x_down_.back();
+			inter_tex_y_up[0] = inter_tex_x_down.back();
 		}
 		for (size_t i = 1; i < heights.size(); ++ i)
 		{
-			inter_tex_y_up_[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			inter_tex_y_up[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		{
-			inter_tex_y_down_[0] = inter_tex_y_up_.back();
+			inter_tex_y_down[0] = inter_tex_y_up.back();
 		}
 		for (size_t i = 1; i < heights.size(); ++ i)
 		{
-			inter_tex_y_down_[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+
+		for (size_t i = 0; i < inter_tex_x_up.size() - 1; ++ i)
+		{
+			uint32_t const parent_length = inter_tex_x_up[i + 1]->Width(0);
+			uint32_t const child_length = inter_tex_x_up[i]->Width(0);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+			SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanXUpSweep"), true);
+			pp->Length(child_length);
+			pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
+			pp->Scale((parent_length * 4.0f) / child_length);
+			pp->InputPin(0, inter_tex_x_up[i]);
+			pp->OutputPin(0, inter_tex_x_up[i + 1]);
+
+			this->Append(pp);
+		}
+		for (size_t i = 0; i < inter_tex_x_down.size() - 1; ++ i)
+		{
+			uint32_t const parent_length = inter_tex_x_down[i]->Width(0);
+			uint32_t const child_length = inter_tex_x_down[i + 1]->Width(0);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+			SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanXDownSweep"), false);
+			pp->Length(child_length);
+			pp->InputPin(0, inter_tex_x_down[i]);
+			pp->ChildBuffer(inter_tex_x_up[inter_tex_x_down.size() - 2 - i]);
+			pp->AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
+			pp->Scale(child_length / (parent_length * 4.0f));
+			pp->OutputPin(0, inter_tex_x_down[i + 1]);
+
+			this->Append(pp);
+		}
+		for (size_t i = 0; i < inter_tex_y_up.size() - 1; ++ i)
+		{
+			uint32_t const parent_length = inter_tex_y_up[i + 1]->Height(0);
+			uint32_t const child_length = inter_tex_y_up[i]->Height(0);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+			SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanYUpSweep"), true);
+			pp->Length(child_length);
+			pp->AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
+			pp->Scale((parent_length * 4.0f) / child_length);
+			pp->InputPin(0, inter_tex_y_up[i]);
+			pp->OutputPin(0, inter_tex_y_up[i + 1]);
+			pp->Apply();
+
+			this->Append(pp);
+		}
+		for (size_t i = 0; i < inter_tex_y_down.size() - 1; ++ i)
+		{
+			uint32_t const parent_length = inter_tex_y_down[i]->Height(0);
+			uint32_t const child_length = inter_tex_y_down[i + 1]->Height(0);
+
+			RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("SummedAreaTable.fxml");
+			SATSeparableScanSweepPostProcessPtr pp = MakeSharedPtr<SATSeparableScanSweepPostProcess>(effect->TechniqueByName("SATScanYDownSweep"), false);
+			pp->Length(child_length);
+			pp->InputPin(0, inter_tex_y_down[i]);
+			pp->ChildBuffer(inter_tex_y_up[inter_tex_y_down.size() - 2 - i]);
+			pp->AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
+			pp->Scale(child_length / (parent_length * 4.0f));
+			pp->OutputPin(0, inter_tex_y_down[i + 1]);
+
+			this->Append(pp);
 		}
 	}
 
-	TexturePtr const & SummedAreaTablePostProcess::InputPin(uint32_t /*index*/) const
+	TexturePtr const & SummedAreaTablePostProcess::InputPin(uint32_t index) const
 	{
-		return inter_tex_x_up_[0];
-	}
-
-	void SummedAreaTablePostProcess::Apply()
-	{
-		for (size_t i = 0; i < inter_tex_x_up_.size() - 1; ++ i)
-		{
-			uint32_t const parent_length = inter_tex_x_up_[i + 1]->Width(0);
-			uint32_t const child_length = inter_tex_x_up_[i]->Width(0);
-
-			scan_x_up_.Length(child_length);
-			scan_x_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
-			scan_x_up_.Scale((parent_length * 4.0f) / child_length);
-			scan_x_up_.InputPin(0, inter_tex_x_up_[i]);
-			scan_x_up_.OutputPin(0, inter_tex_x_up_[i + 1]);
-			scan_x_up_.Apply();
-		}
-
-		for (size_t i = 0; i < inter_tex_x_down_.size() - 1; ++ i)
-		{
-			uint32_t const parent_length = inter_tex_x_down_[i]->Width(0);
-			uint32_t const child_length = inter_tex_x_down_[i + 1]->Width(0);
-
-			scan_x_down_.Length(child_length);
-			scan_x_down_.InputPin(0, inter_tex_x_down_[i]);
-			scan_x_down_.ChildBuffer(inter_tex_x_up_[inter_tex_x_down_.size() - 2 - i]);
-			scan_x_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
-			scan_x_down_.Scale(child_length / (parent_length * 4.0f));
-			scan_x_down_.OutputPin(0, inter_tex_x_down_[i + 1]);
-			scan_x_down_.Apply();
-		}
-
-		for (size_t i = 0; i < inter_tex_y_up_.size() - 1; ++ i)
-		{
-			uint32_t const parent_length = inter_tex_y_up_[i + 1]->Height(0);
-			uint32_t const child_length = inter_tex_y_up_[i]->Height(0);
-
-			scan_y_up_.Length(child_length);
-			scan_y_up_.AddrOffset(float3(0.5f / child_length, 1.5f / child_length, 0));
-			scan_y_up_.Scale((parent_length * 4.0f) / child_length);
-			scan_y_up_.InputPin(0, inter_tex_y_up_[i]);
-			scan_y_up_.OutputPin(0, inter_tex_y_up_[i + 1]);
-			scan_y_up_.Apply();
-		}
-
-		for (size_t i = 0; i < inter_tex_y_down_.size() - 1; ++ i)
-		{
-			uint32_t const parent_length = inter_tex_y_down_[i]->Height(0);
-			uint32_t const child_length = inter_tex_y_down_[i + 1]->Height(0);
-
-			scan_y_down_.Length(child_length);
-			scan_y_down_.InputPin(0, inter_tex_y_down_[i]);
-			scan_y_down_.ChildBuffer(inter_tex_y_up_[inter_tex_y_down_.size() - 2 - i]);
-			scan_y_down_.AddrOffset(float3(1.0f / parent_length, 1.0f / child_length, 2.0f / child_length));
-			scan_y_down_.Scale(child_length / (parent_length * 4.0f));
-			scan_y_down_.OutputPin(0, inter_tex_y_down_[i + 1]);
-			scan_y_down_.Apply();
-		}
-	}
-
-	TexturePtr SummedAreaTablePostProcess::SATTexture()
-	{
-		return inter_tex_y_down_.back();
+		return PostProcessChain::InputPin(index);
 	}
 }

@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="blend">
+		<input>
+			<pin name="src_tex"/>
+			<pin name="tex_with_alpha"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Terrain.fxml" tech="Blend"/>
+	</post_processor>
+</post_processors>

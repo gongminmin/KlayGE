@@ -29,24 +29,28 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/XMLDom.hpp>
 
 #include <cstring>
+#include <boost/foreach.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include <KlayGE/PostProcess.hpp>
 
 namespace KlayGE
 {
-	PostProcess::PostProcess()
-			: RenderableHelper(L"PostProcess"),
+	PostProcess::PostProcess(std::wstring const & name)
+			: RenderableHelper(name),
 				num_bind_output_(0)
 	{
 		this->CreateVB();
 	}
 
-	PostProcess::PostProcess(std::vector<std::string> const & input_pin_names,
+	PostProcess::PostProcess(std::wstring const & name,
+		std::vector<std::string> const & input_pin_names,
 		std::vector<std::string> const & output_pin_names,
 		RenderTechniquePtr const & tech)
-			: RenderableHelper(L"PostProcess"),
+			: RenderableHelper(name),
 				input_pins_(input_pin_names.size()),
 				output_pins_(output_pin_names.size()),
 				input_pins_ep_(input_pin_names.size()),
@@ -79,6 +83,12 @@ namespace KlayGE
 			for (size_t i = 0; i < input_pins_.size(); ++ i)
 			{
 				input_pins_ep_[i] = technique_->Effect().ParameterByName(input_pins_[i].first);
+			}
+
+			output_pins_ep_.resize(output_pins_.size());
+			for (size_t i = 0; i < output_pins_.size(); ++ i)
+			{
+				output_pins_ep_[i] = technique_->Effect().ParameterByName(output_pins_[i].first);
 			}
 		}
 	}
@@ -155,6 +165,11 @@ namespace KlayGE
 		{
 			frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index,
 				Context::Instance().RenderFactoryInstance().Make2DRenderView(*tex, 0, 0));
+
+			if (output_pins_ep_[index])
+			{
+				*(output_pins_ep_[index]) = tex;
+			}
 		}
 	}
 
@@ -207,9 +222,134 @@ namespace KlayGE
 		frame_buffer_ = rf.MakeFrameBuffer();
 	}
 
+	
+	PostProcessPtr LoadPostProcess(ResIdentifierPtr const & ppml, std::string const & pp_name)
+	{
+		XMLDocument doc;
+		XMLNodePtr root = doc.Parse(ppml);
+
+		std::wstring wname;
+		std::vector<std::string> input_pin_names;
+		std::vector<std::string> output_pin_names;
+		RenderTechniquePtr tech;
+
+		for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
+		{
+			std::string name = pp_node->Attrib("name")->ValueString();
+			if (pp_name == name)
+			{
+				Convert(wname, name);
+
+				XMLNodePtr input_chunk = pp_node->FirstNode("input");
+				if (input_chunk)
+				{
+					for (XMLNodePtr pin_node = input_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+					{
+						input_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+					}
+				}
+				XMLNodePtr output_chunk = pp_node->FirstNode("output");
+				if (output_chunk)
+				{
+					for (XMLNodePtr pin_node = output_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
+					{
+						output_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+					}
+				}
+				XMLNodePtr shader_chunk = pp_node->FirstNode("shader");
+				if (shader_chunk)
+				{
+					std::string effect_name = shader_chunk->Attrib("effect")->ValueString();
+					std::string tech_name = shader_chunk->Attrib("tech")->ValueString();
+					tech = Context::Instance().RenderFactoryInstance().LoadEffect(effect_name)->TechniqueByName(tech_name);
+				}
+			}
+		}
+
+		return MakeSharedPtr<PostProcess>(wname, input_pin_names, output_pin_names, tech);
+	}
+
+
+	PostProcessChain::PostProcessChain(std::wstring const & name)
+			: PostProcess(name)
+	{
+	}
+
+	PostProcessChain::PostProcessChain(std::wstring const & name,
+		std::vector<std::string> const & input_pin_names,
+		std::vector<std::string> const & output_pin_names,
+		RenderTechniquePtr const & tech)
+			: PostProcess(name, input_pin_names, output_pin_names, tech)
+	{
+	}
+
+	void PostProcessChain::Append(PostProcessPtr const & pp)
+	{
+		pp_chain_.push_back(pp);
+	}
+
+	uint32_t PostProcessChain::NumInputPins() const
+	{
+		return pp_chain_.front()->NumInputPins();
+	}
+
+	uint32_t PostProcessChain::InputPinByName(std::string const & name) const
+	{
+		return pp_chain_.front()->InputPinByName(name);
+	}
+
+	std::string const & PostProcessChain::InputPinName(uint32_t index) const
+	{
+		return pp_chain_.front()->InputPinName(index);
+	}
+
+	void PostProcessChain::InputPin(uint32_t index, TexturePtr const & tex)
+	{
+		pp_chain_.front()->InputPin(index, tex);
+	}
+
+	TexturePtr const & PostProcessChain::InputPin(uint32_t index) const
+	{
+		return pp_chain_.front()->InputPin(index);
+	}
+
+	uint32_t PostProcessChain::NumOutputPins() const
+	{
+		return pp_chain_.back()->NumOutputPins();
+	}
+
+	uint32_t PostProcessChain::OutputPinByName(std::string const & name) const
+	{
+		return pp_chain_.back()->OutputPinByName(name);
+	}
+
+	std::string const & PostProcessChain::OutputPinName(uint32_t index) const
+	{
+		return pp_chain_.back()->OutputPinName(index);
+	}
+
+	void PostProcessChain::OutputPin(uint32_t index, TexturePtr const & tex)
+	{
+		pp_chain_.back()->OutputPin(index, tex);
+	}
+
+	TexturePtr const & PostProcessChain::OutputPin(uint32_t index) const
+	{
+		return pp_chain_.back()->OutputPin(index);
+	}
+
+	void PostProcessChain::Apply()
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(pp_chain_)::reference pp, pp_chain_)
+		{
+			pp->Apply();
+		}
+	}
+
 
 	GammaCorrectionProcess::GammaCorrectionProcess()
-		: PostProcess(std::vector<std::string>(1, "src_tex"),
+		: PostProcess(L"GammaCorrection",
+				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
 				Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.fxml")->TechniqueByName("GammaCorrection"))
 	{
@@ -222,24 +362,9 @@ namespace KlayGE
 	}
 
 
-	Downsampler2x2PostProcess::Downsampler2x2PostProcess()
-		: PostProcess(std::vector<std::string>(1, "src_tex"),
-				std::vector<std::string>(1, "output"),
-				Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fxml")->TechniqueByName("Downsample"))
-	{
-	}
-
-
-	BrightPassDownsampler2x2PostProcess::BrightPassDownsampler2x2PostProcess()
-		: PostProcess(std::vector<std::string>(1, "src_tex"),
-				std::vector<std::string>(1, "output"),
-				Context::Instance().RenderFactoryInstance().LoadEffect("Downsample.fxml")->TechniqueByName("BrightPassDownsample"))
-	{
-	}
-
-
 	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-		: PostProcess(std::vector<std::string>(1, "src_tex"),
+		: PostProcess(L"SeparableBoxFilter",
+				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
 				Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
 			kernel_radius_(kernel_radius), multiplier_(multiplier)
@@ -274,7 +399,8 @@ namespace KlayGE
 
 
 	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
+			: PostProcess(L"SeparableGaussian",
+					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
 				kernel_radius_(kernel_radius), multiplier_(multiplier)

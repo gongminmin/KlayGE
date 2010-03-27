@@ -6,6 +6,7 @@
 //
 // 3.10.0
 // 使用InputPin和OutputPin来指定输入输出 (2010.3.23)
+// 增加了PostProcessChain和ppml格式 (2010.3.26)
 //
 // 3.6.0
 // 增加了BlurPostProcess (2007.3.24)
@@ -38,8 +39,9 @@ namespace KlayGE
 	class KLAYGE_CORE_API PostProcess : boost::noncopyable, public RenderableHelper
 	{
 	public:
-		PostProcess();
-		PostProcess(std::vector<std::string> const & input_pin_names,
+		explicit PostProcess(std::wstring const & name);
+		PostProcess(std::wstring const & name,
+			std::vector<std::string> const & input_pin_names,
 			std::vector<std::string> const & output_pin_names,
 			RenderTechniquePtr const & tech);
 		virtual ~PostProcess()
@@ -84,7 +86,44 @@ namespace KlayGE
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 		RenderEffectParameterPtr flipping_ep_;
 		std::vector<RenderEffectParameterPtr> input_pins_ep_;
+		std::vector<RenderEffectParameterPtr> output_pins_ep_;
 	};
+
+	KLAYGE_CORE_API PostProcessPtr LoadPostProcess(ResIdentifierPtr const & ppml, std::string const & pp_name);
+
+
+	class KLAYGE_CORE_API PostProcessChain : public PostProcess
+	{
+	public:
+		explicit PostProcessChain(std::wstring const & name);
+		PostProcessChain(std::wstring const & name,
+			std::vector<std::string> const & input_pin_names,
+			std::vector<std::string> const & output_pin_names,
+			RenderTechniquePtr const & tech);
+		virtual ~PostProcessChain()
+		{
+		}
+
+		void Append(PostProcessPtr const & pp);
+
+		uint32_t NumInputPins() const;
+		uint32_t InputPinByName(std::string const & name) const;
+		std::string const & InputPinName(uint32_t index) const;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex);
+		virtual TexturePtr const & InputPin(uint32_t index) const;
+
+		uint32_t NumOutputPins() const;
+		uint32_t OutputPinByName(std::string const & name) const;
+		std::string const & OutputPinName(uint32_t index) const;
+		virtual void OutputPin(uint32_t index, TexturePtr const & tex);
+		virtual TexturePtr const & OutputPin(uint32_t index) const;
+
+		virtual void Apply();
+
+	protected:
+		std::vector<PostProcessPtr> pp_chain_;
+	};
+	
 
 	class KLAYGE_CORE_API GammaCorrectionProcess : public PostProcess
 	{
@@ -132,18 +171,6 @@ namespace KlayGE
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
-	class KLAYGE_CORE_API Downsampler2x2PostProcess : public PostProcess
-	{
-	public:
-		Downsampler2x2PostProcess();
-	};
-
-	class KLAYGE_CORE_API BrightPassDownsampler2x2PostProcess : public PostProcess
-	{
-	public:
-		BrightPassDownsampler2x2PostProcess();
-	};
-
 	template <typename T>
 	class BlurXPostProcess : public T
 	{
@@ -177,52 +204,26 @@ namespace KlayGE
 	};
 
 	template <typename T>
-	class BlurPostProcess : public PostProcess
+	class BlurPostProcess : public PostProcessChain
 	{
 	public:
 		BlurPostProcess(int kernel_radius, float multiplier)
-			: blur_x_(kernel_radius, multiplier), blur_y_(kernel_radius, multiplier)
+			: PostProcessChain(L"Blur")
 		{
+			this->Append(MakeSharedPtr<BlurXPostProcess<T> >(kernel_radius, multiplier));
+			this->Append(MakeSharedPtr<BlurYPostProcess<T> >(kernel_radius, multiplier));
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
+			pp_chain_[0]->InputPin(index, tex);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			blurx_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-				1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
-			blur_x_.InputPin(index, tex);
-			blur_x_.OutputPin(0, blurx_tex_);
-			blur_y_.InputPin(index, blurx_tex_);
+			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
+					1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			pp_chain_[0]->OutputPin(0, blur_x);
+			pp_chain_[1]->InputPin(0, blur_x);
 		}
-
-		TexturePtr const & InputPin(uint32_t index) const
-		{
-			return blur_x_.OutputPin(index);
-		}
-
-		void OutputPin(uint32_t index, TexturePtr const & tex)
-		{
-			blur_y_.OutputPin(index, tex);
-		}
-
-		TexturePtr const & OutputPin(uint32_t index) const
-		{
-			return blur_y_.OutputPin(index);
-		}
-
-		void Apply()
-		{
-			blur_x_.Apply();
-			blur_y_.Apply();
-		}
-
-	private:
-		BlurXPostProcess<T> blur_x_;
-		BlurYPostProcess<T> blur_y_;
-
-		TexturePtr blurx_tex_;
 	};
 }
 

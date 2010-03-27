@@ -1,9 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Math.hpp>
 #include <KlayGE/MapVector.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -224,7 +221,8 @@ namespace
 	{
 	public:
 		Downsampler8x8()
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
+			: PostProcess(L"Downsampler8x8",
+					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
 		{
@@ -269,7 +267,8 @@ namespace
 }
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
-	: PostProcess(std::vector<std::string>(1, "src_tex"),
+	: PostProcess(L"AsciiArts",
+			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),
 			Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
 {

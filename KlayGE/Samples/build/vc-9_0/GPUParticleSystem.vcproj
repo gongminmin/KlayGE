@@ -404,6 +404,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Post Processors"
+			>
+			<File
+				RelativePath="..\..\media\GPUParticleSystem\Blend.ppml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

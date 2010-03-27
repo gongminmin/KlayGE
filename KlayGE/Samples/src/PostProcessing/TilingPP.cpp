@@ -2,9 +2,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
-#include <KlayGE/MapVector.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/Camera.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -26,11 +24,12 @@ namespace
 	{
 	public:
 		explicit DownsamplerNxN(uint32_t n)
-			: ds_2x2_(n), ds_tex_(n - 1)
+			: PostProcess(L"DownsamplerNxN"),
+				ds_2x2_(n), ds_tex_(n - 1)
 		{
 			for (uint32_t i = 0; i < n; ++ i)
 			{
-				ds_2x2_[i] = MakeSharedPtr<Downsampler2x2PostProcess>();
+				ds_2x2_[i] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
 			}
 		}
 
@@ -91,7 +90,8 @@ namespace
 }
 
 TilingPostProcess::TilingPostProcess()
-	: PostProcess(std::vector<std::string>(1, "src_tex"),
+	: PostProcess(L"Tiling",
+		std::vector<std::string>(1, "src_tex"),
 		std::vector<std::string>(1, "output"),
 		Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))
 {

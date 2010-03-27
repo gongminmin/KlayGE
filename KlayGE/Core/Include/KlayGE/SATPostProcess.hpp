@@ -24,7 +24,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SATSeparableScanSweepPostProcess : public PostProcess
 	{
 	public:
-		SATSeparableScanSweepPostProcess(RenderTechniquePtr tech, bool dir);
+		SATSeparableScanSweepPostProcess(RenderTechniquePtr const & tech, bool dir);
 
 		void ChildBuffer(TexturePtr const & tex);
 		void Length(int32_t length);
@@ -41,27 +41,13 @@ namespace KlayGE
 		RenderEffectParameterPtr scale_ep_;
 	};
 
-	class KLAYGE_CORE_API SummedAreaTablePostProcess : public PostProcess
+	class KLAYGE_CORE_API SummedAreaTablePostProcess : public PostProcessChain
 	{
 	public:
 		SummedAreaTablePostProcess();
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;
-		void Apply();
-
-		TexturePtr SATTexture();
-
-	private:
-		std::vector<TexturePtr> inter_tex_x_up_;
-		std::vector<TexturePtr> inter_tex_x_down_;
-		std::vector<TexturePtr> inter_tex_y_up_;
-		std::vector<TexturePtr> inter_tex_y_down_;
-
-		SATSeparableScanSweepPostProcess scan_x_up_;
-		SATSeparableScanSweepPostProcess scan_x_down_;
-		SATSeparableScanSweepPostProcess scan_y_up_;
-		SATSeparableScanSweepPostProcess scan_y_down_;
 	};
 }
 

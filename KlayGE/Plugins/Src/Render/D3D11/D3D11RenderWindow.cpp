@@ -204,9 +204,7 @@ namespace KlayGE
 							{
 								IDXGIAdapter* ada;
 								dxgi_device->GetAdapter(&ada);
-								IDXGIAdapter1* ada1;
-								d3d_device_->QueryInterface(IID_IDXGIAdapter1, reinterpret_cast<void**>(&ada1));
-								adapter_->ResetAdapter(MakeCOMPtr(ada1));
+								adapter_->ResetAdapter(MakeCOMPtr(ada));
 								ada->Release();
 							}
 							dxgi_device->Release();

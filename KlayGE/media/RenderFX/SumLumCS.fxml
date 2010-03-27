@@ -16,21 +16,16 @@
 
 	<parameter type="float" name="frame_delta"/>
 
-	<parameter type="structured_buffer" elem_type="float" name="src_buff"/>
-	<parameter type="rw_structured_buffer" elem_type="float" name="out_buff"/>
+	<parameter type="rw_texture2D" elem_type="float" name="out_tex"/>
 
 	<shader>
 		<![CDATA[
 groupshared float shared_l[256];
 
-[numthreads(256, 1, 1)]
+[numthreads(16, 16, 1)]
 void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
 {
-	float2 addr;
-	addr.y = tid.x / dst_tex_dim.x;
-	addr.x = tid.x - addr.y * dst_tex_dim.x;
-	
-	float2 faddr = (addr + 0.5f) / dst_tex_dim;
+	float2 faddr = ((group_id.xy * 16 + tid.xy) * 2 + 0.5f) / dst_tex_dim;
 
 	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
 	
@@ -61,17 +56,17 @@ void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, ui
 	}
 	if (GI < 1)
 	{
-		out_buff[group_id.x] = (shared_l[GI] + shared_l[GI + 1]) / 256;
+		out_tex[group_id.xy] = (shared_l[GI] + shared_l[GI + 1]) / 256;
 	}
 }
 
 [numthreads(1, 1, 1)]
 void AdaptedLumCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
 {
-	float adapted_lum = out_buff[0];
-	float current_lum = exp((src_buff[0] + src_buff[1] + src_buff[2] + src_buff[3]) * 0.25f);
+	float adapted_lum = out_tex[int2(0, 0)];
+	float current_lum = exp(src_tex.SampleLevel(src_sampler, 0.5, 0).x * 0.25f);
 
-	out_buff[0] = adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+	out_tex[int2(0, 0)] = adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
 }
 		]]>
 	</shader>

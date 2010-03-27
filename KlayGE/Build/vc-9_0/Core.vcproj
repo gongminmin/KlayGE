@@ -637,6 +637,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Post Processors"
+				>
+				<File
+					RelativePath="..\..\media\PostProcessors\Downsampler2x2.ppml"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Kernel"

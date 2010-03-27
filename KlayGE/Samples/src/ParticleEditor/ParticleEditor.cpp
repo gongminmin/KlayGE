@@ -392,17 +392,6 @@ namespace
 	UpdateParticle<Particle> update_particle;
 
 
-	class CopyPostProcess : public PostProcess
-	{
-	public:
-		CopyPostProcess()
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("ParticleEditor.fxml")->TechniqueByName("Copy"))
-		{
-		}
-	};
-
 	enum
 	{
 		Exit
@@ -498,7 +487,7 @@ void ParticleEditorApp::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	copy_pp_ = MakeSharedPtr<CopyPostProcess>();
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

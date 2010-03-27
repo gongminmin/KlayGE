@@ -31,6 +31,7 @@ namespace KlayGE
 		virtual ~SumLumPostProcess();
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
+		TexturePtr const & InputPin(uint32_t index) const;
 
 	private:
 		void GetSampleOffsets4x4(uint32_t width, uint32_t height);
@@ -52,17 +53,6 @@ namespace KlayGE
 	public:
 		SumLumLogPostProcessCS();
 		void Apply();
-
-		void InputPin(uint32_t index, TexturePtr const & tex);
-		void DestinateSize(uint32_t width, uint32_t height);
-
-		GraphicsBufferPtr const & SumLumBuff() const
-		{
-			return buff_;
-		}
-
-	private:
-		GraphicsBufferPtr buff_;
 	};
 
 	class KLAYGE_CORE_API SumLumIterativePostProcess : public SumLumPostProcess
@@ -97,13 +87,7 @@ namespace KlayGE
 		void Apply();
 		void OnRenderBegin();
 
-		void SetLumBuff(GraphicsBufferPtr const & lum_buff);
-
-		GraphicsBufferPtr const & AdaptedLum() const;
-
 	private:
-		GraphicsBufferPtr adapted_buff_;
-
 		Timer timer_;
 
 		RenderEffectParameterPtr frame_delta_ep_;
@@ -113,11 +97,6 @@ namespace KlayGE
 	{
 	public:
 		explicit ToneMappingPostProcess(bool blue_shift);
-
-		void SetLumBuff(GraphicsBufferPtr const & lum_buff);
-
-	private:
-		RenderEffectParameterPtr lum_buff_ep_;
 	};
 
 
@@ -138,10 +117,6 @@ namespace KlayGE
 		void Apply();
 
 	private:
-		TexturePtr downsample_tex_;
-		TexturePtr blur_tex_;
-		std::vector<TexturePtr> lum_texs_;
-
 		PostProcessPtr downsampler_;
 		PostProcessPtr blur_;
 		PostProcessPtr sum_lums_1st_;

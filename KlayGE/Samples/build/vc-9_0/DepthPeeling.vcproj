@@ -396,6 +396,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Post Processors"
+			>
+			<File
+				RelativePath="..\..\media\DepthPeeling\Blend.ppml"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

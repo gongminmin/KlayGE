@@ -541,6 +541,7 @@ namespace
 	{
 	public:
 		AdaptiveAntiAliasPostProcess()
+			: PostProcess(L"AdaptiveAntiAlias")
 		{
 			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
@@ -576,7 +577,8 @@ namespace
 	{
 	public:
 		SSAOPostProcess()
-			: PostProcess(std::vector<std::string>(1, "src_tex"),
+			: PostProcess(L"SSAO",
+					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
 				hd_mode_(true)
