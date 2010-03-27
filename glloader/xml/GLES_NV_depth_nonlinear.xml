@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_depth_nonlinear" reg_no="73">
+	<tokens>
+		<token name="DEPTH_COMPONENT16_NONLINEAR_NV" value="0x8E2C"/>
+	</tokens>
+</gl_extension>

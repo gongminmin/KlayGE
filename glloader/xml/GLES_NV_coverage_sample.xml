@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_coverage_sample" reg_no="72">
+	<tokens>
+		<token name="GL_COVERAGE_COMPONENT_NV" value="0x8ED0"/>
+		<token name="GL_COVERAGE_COMPONENT4_NV" value="0x8ED1"/>
+		<token name="GL_COVERAGE_ALL_FRAGMENTS_NV" value="0x8ED5"/>
+		<token name="GL_COVERAGE_EDGE_FRAGMENTS_NV" value="0x8ED6"/>
+		<token name="GL_COVERAGE_AUTOMATIC_NV" value="0x8ED7"/>
+		<token name="GL_COVERAGE_ATTACHMENT_NV" value="0x8ED2"/>
+		<token name="GL_COVERAGE_BUFFER_BIT_NV" value="0x8000"/>
+		<token name="GL_COVERAGE_BUFFERS_NV" value="0x8ED3"/>
+		<token name="GL_COVERAGE_SAMPLES_NV" value="0x8ED4"/>
+	</tokens>
+
+	<functions>
+		<function name="glCoverageMaskNV" return="void">
+			<params>
+				<param type="GLboolean" name="mask"/>
+			</params>
+		</function>
+		<function name="glCoverageOperationNV" return="void">
+			<params>
+				<param type="GLenum" name="operation"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

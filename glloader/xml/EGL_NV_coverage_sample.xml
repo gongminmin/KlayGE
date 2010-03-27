@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_coverage_sample" reg_no="17">
+	<tokens>
+		<token name="EGL_COVERAGE_BUFFERS_NV" value="0x30E0"/>
+		<token name="EGL_COVERAGE_SAMPLES_NV" value="0x30E1"/>
+	</tokens>
+</gl_extension>

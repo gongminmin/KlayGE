@@ -1,0 +1,64 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_sync" reg_no="19">
+	<typedefs>
+		<typedef type="void*" synonym="EGLSyncNV"/>
+		<typedef type="unsigned long long" synonym="EGLTimeNV"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_SYNC_PRIOR_COMMANDS_COMPLETE_NV" value="0x30E6"/>
+		<token name="EGL_SYNC_STATUS_NV" value="0x30E7"/>
+		<token name="EGL_SIGNALED_NV" value="0x30E8"/>
+		<token name="EGL_UNSIGNALED_NV" value="0x30E9"/>
+		<token name="EGL_SYNC_FLUSH_COMMANDS_BIT_NV" value="0x0001"/>
+		<token name="EGL_FOREVER_NV" value="0xFFFFFFFFFFFFFFFFull"/>
+		<token name="EGL_ALREADY_SIGNALED_NV" value="0x30EA"/>
+		<token name="EGL_TIMEOUT_EXPIRED_NV" value="0x30EB"/>
+		<token name="EGL_CONDITION_SATISFIED_NV" value="0x30EC"/>
+		<token name="EGL_SYNC_TYPE_NV" value="0x30ED"/>
+		<token name="EGL_SYNC_CONDITION_NV" value="0x30EE"/>
+		<token name="EGL_SYNC_FENCE_NV" value="0x30EF"/>
+		<token name="EGL_NO_SYNC_NV" value="((EGLSyncNV)0)"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateFenceSyncNV" return="EGLSyncNV">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="condition"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroySyncNV" return="EGLBoolean">
+			<params>
+				<param type="EGLSyncNV" name="sync"/>
+			</params>
+		</function>
+		<function name="eglFenceNV" return="EGLBoolean">
+			<params>
+				<param type="EGLSyncNV" name="sync"/>
+			</params>
+		</function>
+		<function name="eglClientWaitSyncNV" return="EGLint">
+			<params>
+				<param type="EGLSyncNV" name="sync"/>
+				<param type="EGLint" name="flags"/>
+				<param type="EGLTimeNV" name="timeout"/>
+			</params>
+		</function>
+		<function name="eglSignalSyncNV" return="EGLBoolean">
+			<params>
+				<param type="EGLSyncNV" name="sync"/>
+				<param type="EGLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="eglGetSyncAttribNV" return="EGLBoolean">
+			<params>
+				<param type="EGLSyncNV" name="sync"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

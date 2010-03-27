@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_depth_nonlinear" reg_no="18">
+	<tokens>
+		<token name="EGL_DEPTH_ENCODING_NV" value="0x30E2"/>
+		<token name="EGL_DEPTH_ENCODING_NONE_NV" value="0"/>
+		<token name="EGL_DEPTH_ENCODING_NONLINEAR_NV" value="0x30E3"/>
+	</tokens>
+</gl_extension>
