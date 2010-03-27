@@ -467,6 +467,7 @@ namespace KlayGE
 		caps_.depth_texture_support = true;
 		caps_.primitive_restart_support = false;
 		caps_.multithread_rendering_support = false;
+		caps_.multithread_res_creating_support = false;
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{
 			caps_.argb8_support = true;

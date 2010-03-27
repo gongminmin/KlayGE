@@ -503,6 +503,7 @@ namespace KlayGE
 		caps_.depth_texture_support = true;
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = false;
+		caps_.multithread_res_creating_support = false;
 		caps_.argb8_support = false;
 		caps_.bc1_support = true;
 		caps_.bc2_support = true;

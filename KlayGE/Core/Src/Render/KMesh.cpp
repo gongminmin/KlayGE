@@ -70,6 +70,8 @@ namespace
 			int32_t start_frame;
 			int32_t end_frame;
 			int32_t frame_rate;
+
+			RenderModelPtr model;
 		};
 
 	public:
@@ -86,64 +88,14 @@ namespace
 			{
 				boost::shared_ptr<ModelDesc> model_desc = ml_thread_();
 
-				std::wstring model_name;
-				if (!model_desc->joints.empty())
+				if (model_desc->model)
 				{
-					model_name = L"KSkinnedMesh";
+					model_ = model_desc->model;
 				}
 				else
 				{
-					model_name = L"KMesh";
+					model_ = this->CreateModel(model_desc);
 				}
-				model_ = model_desc->CreateModelFactoryFunc(model_name);
-
-				model_->NumMaterials(model_desc->mtls.size());
-				for (uint32_t mtl_index = 0; mtl_index < model_desc->mtls.size(); ++ mtl_index)
-				{
-					model_->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
-				}
-
-				std::vector<StaticMeshPtr> meshes(model_desc->mesh_names.size());
-				for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
-				{
-					std::wstring wname;
-					Convert(wname, model_desc->mesh_names[mesh_index]);
-
-					meshes[mesh_index] = model_desc->CreateMeshFactoryFunc(model_, wname);
-					StaticMeshPtr& mesh = meshes[mesh_index];
-
-					mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
-
-					for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
-					{
-						std::vector<uint8_t>& buff = model_desc->buffs[mesh_index][ve_index];
-						mesh->AddVertexStream(&buff[0], static_cast<uint32_t>(buff.size() * sizeof(buff[0])), model_desc->ves[mesh_index][ve_index], model_desc->access_hint);
-					}
-
-					mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
-						model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);
-				}
-
-				if (model_desc->kfs && !model_desc->kfs->empty())
-				{
-					if (model_->IsSkinned())
-					{
-						SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model_);
-
-						skinned->AssignJoints(model_desc->joints.begin(), model_desc->joints.end());
-						skinned->AttachKeyFrames(model_desc->kfs);
-
-						skinned->StartFrame(model_desc->start_frame);
-						skinned->EndFrame(model_desc->end_frame);
-						skinned->FrameRate(model_desc->frame_rate);
-					}
-				}
-
-				BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
-				{
-					mesh->BuildMeshInfo();
-				}
-				model_->AssignMeshes(meshes.begin(), meshes.end());
 			}
 
 			return model_;
@@ -163,7 +115,77 @@ namespace
 				model_desc->buffs, model_desc->is_index_16_bit, model_desc->indices, model_desc->joints, model_desc->kfs,
 				model_desc->start_frame, model_desc->end_frame, model_desc->frame_rate);
 
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
+			{
+				model_desc->model = this->CreateModel(model_desc);
+			}
+
 			return model_desc;
+		}
+
+		RenderModelPtr CreateModel(boost::shared_ptr<ModelDesc> const & model_desc)
+		{
+			std::wstring model_name;
+			if (!model_desc->joints.empty())
+			{
+				model_name = L"KSkinnedMesh";
+			}
+			else
+			{
+				model_name = L"KMesh";
+			}
+			RenderModelPtr model = model_desc->CreateModelFactoryFunc(model_name);
+
+			model->NumMaterials(model_desc->mtls.size());
+			for (uint32_t mtl_index = 0; mtl_index < model_desc->mtls.size(); ++ mtl_index)
+			{
+				model->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
+			}
+
+			std::vector<StaticMeshPtr> meshes(model_desc->mesh_names.size());
+			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
+			{
+				std::wstring wname;
+				Convert(wname, model_desc->mesh_names[mesh_index]);
+
+				meshes[mesh_index] = model_desc->CreateMeshFactoryFunc(model, wname);
+				StaticMeshPtr& mesh = meshes[mesh_index];
+
+				mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
+
+				for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
+				{
+					std::vector<uint8_t>& buff = model_desc->buffs[mesh_index][ve_index];
+					mesh->AddVertexStream(&buff[0], static_cast<uint32_t>(buff.size() * sizeof(buff[0])), model_desc->ves[mesh_index][ve_index], model_desc->access_hint);
+				}
+
+				mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
+					model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);
+			}
+
+			if (model_desc->kfs && !model_desc->kfs->empty())
+			{
+				if (model->IsSkinned())
+				{
+					SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
+
+					skinned->AssignJoints(model_desc->joints.begin(), model_desc->joints.end());
+					skinned->AttachKeyFrames(model_desc->kfs);
+
+					skinned->StartFrame(model_desc->start_frame);
+					skinned->EndFrame(model_desc->end_frame);
+					skinned->FrameRate(model_desc->frame_rate);
+				}
+			}
+
+			BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
+			{
+				mesh->BuildMeshInfo();
+			}
+			model->AssignMeshes(meshes.begin(), meshes.end());
+
+			return model;
 		}
 
 	private:

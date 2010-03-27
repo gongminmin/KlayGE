@@ -1058,6 +1058,7 @@ namespace KlayGE
 			caps_.primitive_restart_support = false;
 		}
 		caps_.multithread_rendering_support = false;
+		caps_.multithread_res_creating_support = false;
 		caps_.argb8_support = true;
 		caps_.bc1_support = true;
 		caps_.bc2_support = true;

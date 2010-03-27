@@ -528,6 +528,7 @@ namespace KlayGE
 
 		ret.primitive_restart_support = false;
 		ret.multithread_rendering_support = false;
+		ret.multithread_res_creating_support = false;
 		ret.argb8_support = true;
 
 		ret.bc1_support = true;

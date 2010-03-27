@@ -703,6 +703,9 @@ namespace
 			ElementFormat format;
 			std::vector<ElementInitData> tex_data;
 			std::vector<uint8_t> data_block;
+
+			// for multithread resource creation
+			TexturePtr texture;
 		};
 
 	public:
@@ -716,33 +719,13 @@ namespace
 			if (!texture_)
 			{
 				boost::shared_ptr<TexDesc> tex_desc = tl_thread_();
-
-				RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-				switch (tex_desc->type)
+				if (tex_desc->texture)
 				{
-				case Texture::TT_1D:
-					texture_ = renderFactory.MakeTexture1D(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
-						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-					break;
-
-				case Texture::TT_2D:
-					texture_ = renderFactory.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->num_mipmaps, tex_desc->array_size,
-						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-					break;
-
-				case Texture::TT_3D:
-					texture_ = renderFactory.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->num_mipmaps, tex_desc->array_size,
-						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-					break;
-
-				case Texture::TT_Cube:
-					texture_ = renderFactory.MakeTextureCube(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
-						tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
+					texture_ = tex_desc->texture;
+				}
+				else
+				{
+					texture_ = this->CreateTexture(tex_desc);
 				}
 			}
 
@@ -982,7 +965,47 @@ namespace
 				tex_desc->format = EF_ABGR8;
 			}
 
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
+			{
+				tex_desc->texture = this->CreateTexture(tex_desc);
+			}
+
 			return tex_desc;
+		}
+
+		TexturePtr CreateTexture(boost::shared_ptr<TexDesc> const & tex_desc)
+		{
+			TexturePtr texture;
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			switch (tex_desc->type)
+			{
+			case Texture::TT_1D:
+				texture = rf.MakeTexture1D(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				break;
+
+			case Texture::TT_2D:
+				texture = rf.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->num_mipmaps, tex_desc->array_size,
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				break;
+
+			case Texture::TT_3D:
+				texture = rf.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->num_mipmaps, tex_desc->array_size,
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				break;
+
+			case Texture::TT_Cube:
+				texture = rf.MakeTextureCube(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
+					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
+			return texture;
 		}
 
 	private:
