@@ -19,7 +19,6 @@
 	<parameter type="texture2D" name="particle_pos_tex"/>
 	<parameter type="texture3D" name="noise_vol_tex"/>
 
-	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
 	<parameter type="float" name="point_radius"/>
 	<parameter type="float4" name="init_pos_life"/>
 
@@ -28,6 +27,7 @@
 		<parameter type="float4x4" name="Proj"/>
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="inv_view"/>
+		<parameter type="float4x4" name="inv_proj"/>
 
 		<parameter type="float3" name="upper_left"/>
 		<parameter type="float3" name="upper_right"/>
@@ -61,6 +61,7 @@ struct PS_IN
 	float4 PosSS : TEXCOORD0;
 	float4 CenterView : TEXCOORD1;
 	float3 view_dir : TEXCOORD2;
+	float2 tex : TEXCOORD3;
 };
 
 void ParticlesVS(float2 tex_pos		: POSITION,
@@ -76,6 +77,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 		vs_out.PosSS = 0;
 		vs_out.CenterView = 0;
 		vs_out.view_dir = 0;
+		vs_out.tex = 0;
 	}
 	else
 	{
@@ -88,6 +90,8 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 		vs_out.PosSS = vs_out.pos / vs_out.pos.w;
 		
 		vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+		
+		vs_out.tex = tex * 0.5f + 0.5f;
 	}
 }
 
@@ -97,38 +101,30 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	float dir = ps_in.view_dir.z;
 	ps_in.view_dir = normalize(ps_in.view_dir);
 	
-	float4 clr = ps_in.clr;
+	float life = ps_in.clr.a;
+	float4 clr = particle_tex.Sample(bilinear_sampler, ps_in.tex);
 	
-	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir);
-	float disc = point_radius * point_radius - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
-	if (disc < 0)
+	float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w + offset;
+	tex_coord.y *= flip;
+	tex_coord = tex_coord / 2 + 0.5f;
+
+	float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;
+	float4 intersect4 = mul(ps_in.PosSS, inv_proj);
+	float3 intersect = intersect4.xyz / intersect4.w;
+	float optical_depth = dir * depth - intersect.z;
+		
+	if (optical_depth < 0)
 	{
 		clr = 0;
 	}
 	else
 	{
-		float2 tex_coord = ps_in.PosSS.xy + offset;
-		tex_coord.y *= flip;
-		tex_coord = tex_coord / 2 + 0.5f;
-
-		float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;
-		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir;
-		float optical_depth = dir * depth - intersect.z;
-		
-		if (optical_depth < 0)
-		{
-			clr = 0;
-		}
-		else
-		{
-			optical_depth = min(optical_depth, 2 * sqrt(disc) * ps_in.view_dir.z);
-			float4 intersect_ws = mul(float4(intersect, 1), inv_view);
-			intersect_ws /= intersect_ws.w;
-			float2 dxdy = (intersect.xy - ps_in.CenterView.xy) / point_radius;
-			float intensity = 5 * exp(-dot(dxdy, dxdy) / 0.125f);
-			float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb / 50, 0);
-			clr = float4((dot(normalize(LightPos - intersect_ws.xyz), n.xyz) / n.w / 100).xxx, optical_depth * intensity * saturate(clr.a / init_pos_life.w));
-		}
+		optical_depth = min(optical_depth, clr.w);
+		float4 intersect_ws = mul(float4(intersect, 1), inv_view);
+		float3 normal = clr.xyz * 2 - 1;
+		float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb, 0);
+		normal = lerp(normal, n.xyz * 2 - 1, 0.2f);
+		clr = float4(normal.xyz, optical_depth * clr.w * saturate(life / init_pos_life.w));
 	}
 	
 	return clr;

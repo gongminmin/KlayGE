@@ -17,7 +17,7 @@
 		<state name="address_w" value="wrap"/>
 	</parameter>
 
-	<parameter type="float3" name="LightPos" x="0" y="10" z="3"/>
+	<parameter type="float3" name="LightDir" x="0" y="10" z="3"/>
 
 	<parameter type="texture2D" name="grass_tex"/>
 
@@ -48,7 +48,7 @@ void TerrainVS(float4 pos			: POSITION,
 	pos = pos.xzyw;
 	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
 	
-	oLightVec_Depth.xyz = LightPos - pos.xyz;
+	oLightVec_Depth.xyz = LightDir;
 	
 	oPos = mul(pos, mvp);
 	oLightVec_Depth.w = oPos.w;
@@ -78,10 +78,12 @@ float4 TerrainPS(float4 tex : TEXCOORD0, float4 light_vec_depth : TEXCOORD1) : S
 		<![CDATA[
 float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	float4 a = tex_with_alpha.Sample(point_sampler, tex);
-	a.a = saturate(a.a);
+	float4 fog = tex_with_alpha.Sample(point_sampler, tex);
+	float clr = max(0, dot(LightDir, fog.xyz) / sqrt(dot(LightDir, LightDir) * dot(fog.xyz, fog.xyz)));
+	fog.rgb = clr;
+	fog.a = saturate(fog.a);
 	float4 s = src_tex.Sample(point_sampler, tex);
-	return float4(lerp(s.rgb, a.rgb, a.a), 1);
+	return float4(lerp(s.rgb, fog.rgb, fog.a), 1);
 }
 		]]>
 	</shader>

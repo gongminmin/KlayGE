@@ -69,6 +69,7 @@ GPU Particle System
 1) 粒子系统
 2) GPU多遍计算
 3) Vertex texture fetch
+4) Deferred particle
 
 需求：Geforce 6以上或Radeon HD 2400以上。
 渲染引擎支持：D3D11/D3D10/D3D9。

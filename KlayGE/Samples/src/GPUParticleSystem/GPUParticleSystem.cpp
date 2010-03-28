@@ -249,6 +249,7 @@ namespace
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
+			*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(proj);
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
@@ -731,7 +732,7 @@ void GPUParticleSystemApp::InitObjects()
 	particles_->AddToSceneManager();
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height(), terrain_normal());
-	gpu_ps->AutoEmit(500);
+	gpu_ps->AutoEmit(256);
 
 	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height(), terrain_normal());
 	terrain_->AddToSceneManager();
