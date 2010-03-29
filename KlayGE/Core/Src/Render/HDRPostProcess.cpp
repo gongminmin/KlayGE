@@ -264,8 +264,14 @@ namespace KlayGE
 		{
 			TexturePtr lum_tex = rf.MakeTexture2D(2, 2, 1, 1, EF_R16F, 1, 0,
 						EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
-			TexturePtr adapted_lum_tex = rf.MakeTexture2D(1, 1, 1, 1, EF_R16F, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, NULL);
+
+			float init_lum = 0;
+			ElementInitData init_data;
+			init_data.row_pitch = sizeof(float);
+			init_data.slice_pitch = 0;
+			init_data.data = &init_lum;
+			TexturePtr adapted_lum_tex = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0,
+						EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, &init_data);
 
 			sum_lums_1st_->InputPin(index, tex);
 			sum_lums_1st_->OutputPin(index, lum_tex);
@@ -360,7 +366,7 @@ namespace KlayGE
 
 		{
 			// Tone mapping
-			if (!cs_support_)
+			//if (!cs_support_)
 			{
 				tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
 			}

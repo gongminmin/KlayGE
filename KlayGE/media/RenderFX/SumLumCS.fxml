@@ -25,7 +25,7 @@ groupshared float shared_l[256];
 [numthreads(16, 16, 1)]
 void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
 {
-	float2 faddr = ((group_id.xy * 16 + tid.xy) * 2 + 0.5f) / dst_tex_dim;
+	float2 faddr = (tid.xy * 2 + 0.5f) / dst_tex_dim;
 
 	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
 	
@@ -64,7 +64,7 @@ void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, ui
 void AdaptedLumCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
 {
 	float adapted_lum = out_tex[int2(0, 0)];
-	float current_lum = exp(src_tex.SampleLevel(src_sampler, 0.5, 0).x * 0.25f);
+	float current_lum = exp(src_tex.SampleLevel(src_sampler, 0.5f, 0).x);
 
 	out_tex[int2(0, 0)] = adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
 }
