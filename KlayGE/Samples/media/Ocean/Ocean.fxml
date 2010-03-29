@@ -11,6 +11,7 @@
 	<parameter type="float3" name="sun_color" x="1.0" y="1.0" z="0.8"/>
 	<parameter type="float3" name="fog_color" x="0.807843" y="0.858824" z="0.839216"/>
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
+	<parameter type="float" name="patch_length"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="eye_pos"/>
@@ -53,7 +54,7 @@ void OceanVS(float2 pos : POSITION,
 	float4 pos_os = lerp(lerp(corners[0], corners[1], pos.x), lerp(corners[2], corners[3], pos.x), pos.y);
 	pos_os /= pos_os.w;
 	
-	float2 tex_coord = pos_os.xz / 64;
+	float2 tex_coord = pos_os.xz / (patch_length * 3.2);
 	float3 disp = displacement_tex.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
 	
 	pos_os.xz += disp.xz;

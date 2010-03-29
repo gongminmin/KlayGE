@@ -20,10 +20,8 @@ namespace KlayGE
 		float time_scale;
 		// Amplitude for transverse wave. Around 1.0
 		float wave_amplitude;
-		// Wind direction. Normalization not required.
-		float2 wind_dir;
-		// Around 1 ~ 10
-		float wind_speed;
+		// Wind speed (2 dimension).
+		float2 wind_speed;
 		// This value damps out the waves against the wind direction.
 		// Smaller value means higher wind dependency.
 		float wind_dependency;
@@ -34,7 +32,7 @@ namespace KlayGE
 	class OceanSimulator
 	{
 	public:
-		explicit OceanSimulator(OceanParameter& params);
+		OceanSimulator();
 		~OceanSimulator();
 
 		// Update ocean wave when tick arrives.
@@ -45,6 +43,7 @@ namespace KlayGE
 		TexturePtr const & GradientTex() const;
 
 		OceanParameter const & Parameters() const;
+		void Parameters(OceanParameter const & params);
 
 	private:
 		void InitHeightMap(std::vector<float2>& out_h0, std::vector<float>& out_omega);

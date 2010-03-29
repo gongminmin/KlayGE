@@ -24,8 +24,11 @@ float4 MotionBlurPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	for (int i = 1; i < NUM_SAMPLES; ++ i)
 	{
 		float4 other_clr = src_tex.Sample(point_sampler, tex_coord0 + motion_vec * i / NUM_SAMPLES);
-		clr.rgb += other_clr.rgb;
-		++ sum_weight;
+		if (clr.w >= other_clr.w)
+		{
+			clr.rgb += other_clr.rgb;
+			++ sum_weight;
+		}
 	}
 	clr.rgb /= sum_weight;
 	return clr;

@@ -32,8 +32,11 @@ namespace
 
 	// Phillips Spectrum
 	// K: normalized wave vector, W: wind direction, v: wind velocity, a: amplitude constant
-	float Phillips(float2 K, float2 W, float v, float a, float dir_depend)
+	float Phillips(float2 K, float2 W, float a, float dir_depend)
 	{
+		float v = MathLib::length(W);
+		W /= v;
+
 		// largest possible wave from constant wind of velocity v
 		float l = v * v / GRAV_ACCEL;
 		// damp out waves with very small length w << l
@@ -56,56 +59,9 @@ namespace
 
 namespace KlayGE
 {
-	OceanSimulator::OceanSimulator(OceanParameter& params)
-		: param_(params)
+	OceanSimulator::OceanSimulator()
 	{
-		param_.wind_dir = MathLib::normalize(param_.wind_dir);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		// Height map H(0)
-		int height_map_size = (params.dmap_dim + 4) * (params.dmap_dim + 1);
-		std::vector<float2> h0_data(height_map_size);
-		std::vector<float> omega_data(height_map_size);
-		this->InitHeightMap(h0_data, omega_data);
-
-		ElementInitData init_data;
-
-		// For filling the buffer with zeroes.
-		std::vector<char> zero_data(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2, 0);
-
-		// RW buffer allocations
-		// H0
-		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
-		init_data.data = &h0_data[0];
-		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
-
-		// Notice: The following 3 should be half sized buffer due to conjugate symmetric input. But we use full
-		// spectrum buffer due to the CS4.0 restriction.
-
-		// Put H(t), Dx(t) and Dy(t) into one buffer
-		ht_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
-		ht_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
-
-		// omega
-		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
-		init_data.data = &omega_data[0];
-		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
-
-		// Notice: The following 3 should be real number data. But here we use the complex numbers and C2C FFT
-		// instead due to the CS4.0 restriction.
-		// Put Dz, Dx and Dy into one buffer
-		dxyz_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
-		dxyz_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
-
-		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		gradient_tex_->BuildMipSubLevels();
-
-		displacement_fb_ = rf.MakeFrameBuffer();
-		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 0));
-		gradient_fb_ = rf.MakeFrameBuffer();
-		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 0));
 
 		RenderEffectPtr effect_cs = rf.LoadEffect("OceanSimulatorCS.fxml");
 		RenderEffectPtr effect_vsps = rf.LoadEffect("OceanSimulatorVSPS.fxml");
@@ -123,43 +79,14 @@ namespace KlayGE
 			float3(-1, -1, 0),
 			float3(+1, -1, 0)
 		};
+		ElementInitData init_data;
 		init_data.row_pitch = sizeof(xyzs);
 		init_data.slice_pitch = 0;
 		init_data.data = xyzs;
 		quad_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		quad_layout_->BindVertexStream(quad_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		// Constant buffers
-		uint32_t actual_dim = param_.dmap_dim;
-		uint32_t input_width = actual_dim + 4;
-		// We use full sized data here. The value "output_width" should be actual_dim/2+1 though.
-		uint32_t output_width = actual_dim;
-		uint32_t output_height = actual_dim;
-		uint32_t dtx_offset = actual_dim * actual_dim;
-		uint32_t dty_offset = actual_dim * actual_dim * 2;
-
-		*(effect_cs->ParameterByName("actual_dim")) = actual_dim;
-		*(effect_cs->ParameterByName("in_width")) = input_width;
-		*(effect_cs->ParameterByName("out_width")) = output_width;
-		*(effect_cs->ParameterByName("out_height")) = output_height;
-		*(effect_cs->ParameterByName("dx_addr_offset")) = dtx_offset;
-		*(effect_cs->ParameterByName("dy_addr_offset")) = dty_offset;
-		*(effect_cs->ParameterByName("input_h0")) = h0_buffer_;
-		*(effect_cs->ParameterByName("input_omega")) = omega_buffer_;
-		*(effect_cs->ParameterByName("output_ht")) = ht_buffer_;
-
 		time_param_ = effect_cs->ParameterByName("time");
-
-		*(effect_vsps->ParameterByName("out_width")) = output_width;
-		*(effect_vsps->ParameterByName("out_height")) = output_height;
-		*(effect_vsps->ParameterByName("dx_addr_offset")) = dtx_offset;
-		*(effect_vsps->ParameterByName("dy_addr_offset")) = dty_offset;
-		*(effect_vsps->ParameterByName("choppy_scale")) = param_.choppy_scale;
-		*(effect_vsps->ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
-		*(effect_vsps->ParameterByName("input_dxyz")) = dxyz_buffer_;
-		*(effect_vsps->ParameterByName("displacement_tex")) = displacement_tex_;
-
-		fft_create_plan(&fft_plan_, params.dmap_dim, params.dmap_dim, 3);
 	}
 
 	OceanSimulator::~OceanSimulator()
@@ -186,7 +113,7 @@ namespace KlayGE
 			{
 				K.x() = (-param_.dmap_dim / 2.0f + j) * (2 * PI / param_.patch_length);
 
-				float phil = ((K.x() == 0) && (K.y() == 0)) ? 0 : sqrt(Phillips(K, param_.wind_dir, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
+				float phil = ((K.x() == 0) && (K.y() == 0)) ? 0 : sqrt(Phillips(K, param_.wind_speed, param_.wave_amplitude, param_.wind_dependency)) * HALF_SQRT_2;
 				out_h0[i * (param_.dmap_dim + 4) + j] = phil * float2(Gauss(), Gauss());
 
 				// The angular frequency is following the dispersion relation:
@@ -250,5 +177,89 @@ namespace KlayGE
 	OceanParameter const & OceanSimulator::Parameters() const
 	{
 		return param_;
+	}
+
+	void OceanSimulator::Parameters(OceanParameter const & params)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		param_ = params;
+
+		// Height map H(0)
+		int height_map_size = (params.dmap_dim + 4) * (params.dmap_dim + 1);
+		std::vector<float2> h0_data(height_map_size);
+		std::vector<float> omega_data(height_map_size);
+		this->InitHeightMap(h0_data, omega_data);
+
+		ElementInitData init_data;
+
+		// For filling the buffer with zeroes.
+		std::vector<char> zero_data(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2, 0);
+
+		// RW buffer allocations
+		// H0
+		init_data.row_pitch = static_cast<uint32_t>(h0_data.size() * sizeof(h0_data[0]));
+		init_data.data = &h0_data[0];
+		h0_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
+
+		// Notice: The following 3 should be half sized buffer due to conjugate symmetric input. But we use full
+		// spectrum buffer due to the CS4.0 restriction.
+
+		// Put H(t), Dx(t) and Dy(t) into one buffer
+		ht_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
+		ht_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
+
+		// omega
+		init_data.row_pitch = static_cast<uint32_t>(omega_data.size() * sizeof(omega_data[0]));
+		init_data.data = &omega_data[0];
+		omega_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_R32F);
+
+		// Notice: The following 3 should be real number data. But here we use the complex numbers and C2C FFT
+		// instead due to the CS4.0 restriction.
+		// Put Dz, Dx and Dy into one buffer
+		dxyz_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
+		dxyz_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
+
+		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		gradient_tex_->BuildMipSubLevels();
+
+		displacement_fb_ = rf.MakeFrameBuffer();
+		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 0));
+		gradient_fb_ = rf.MakeFrameBuffer();
+		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 0));
+
+		// Constant buffers
+		uint32_t actual_dim = param_.dmap_dim;
+		uint32_t input_width = actual_dim + 4;
+		// We use full sized data here. The value "output_width" should be actual_dim/2+1 though.
+		uint32_t output_width = actual_dim;
+		uint32_t output_height = actual_dim;
+		uint32_t dtx_offset = actual_dim * actual_dim;
+		uint32_t dty_offset = actual_dim * actual_dim * 2;
+
+		RenderEffect& effect_cs = update_spectrum_tech_->Effect();
+		*(effect_cs.ParameterByName("actual_dim")) = actual_dim;
+		*(effect_cs.ParameterByName("in_width")) = input_width;
+		*(effect_cs.ParameterByName("out_width")) = output_width;
+		*(effect_cs.ParameterByName("out_height")) = output_height;
+		*(effect_cs.ParameterByName("dx_addr_offset")) = dtx_offset;
+		*(effect_cs.ParameterByName("dy_addr_offset")) = dty_offset;
+		*(effect_cs.ParameterByName("input_h0")) = h0_buffer_;
+		*(effect_cs.ParameterByName("input_omega")) = omega_buffer_;
+		*(effect_cs.ParameterByName("output_ht")) = ht_buffer_;
+
+		RenderEffect& effect_vsps = update_displacement_tech_->Effect();
+		*(effect_vsps.ParameterByName("out_width")) = output_width;
+		*(effect_vsps.ParameterByName("out_height")) = output_height;
+		*(effect_vsps.ParameterByName("dx_addr_offset")) = dtx_offset;
+		*(effect_vsps.ParameterByName("dy_addr_offset")) = dty_offset;
+		*(effect_vsps.ParameterByName("choppy_scale")) = param_.choppy_scale;
+		*(effect_vsps.ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
+		*(effect_vsps.ParameterByName("input_dxyz")) = dxyz_buffer_;
+		*(effect_vsps.ParameterByName("displacement_tex")) = displacement_tex_;
+
+		fft_destroy_plan(&fft_plan_);
+		fft_create_plan(&fft_plan_, params.dmap_dim, params.dmap_dim, 3);
 	}
 }

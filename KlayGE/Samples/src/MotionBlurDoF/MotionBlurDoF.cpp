@@ -237,7 +237,7 @@ namespace
 			inst_.last_mat[1] = matT.Row(1);
 			inst_.last_mat[2] = matT.Row(2);
 
-			double e = rotate_timer_.elapsed() * 0.3f;
+			double e = rotate_timer_.elapsed() * 0.3f * -mat_(3, 1);
 			rotate_timer_.restart();
 			mat_ *= MathLib::rotation_y(static_cast<float>(e));
 

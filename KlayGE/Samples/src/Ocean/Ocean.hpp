@@ -19,6 +19,16 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
+	void DMapDimChangedHandler(KlayGE::UISlider const & sender);
+	void PatchLengthChangedHandler(KlayGE::UISlider const & sender);
+	void TimeScaleChangedHandler(KlayGE::UISlider const & sender);
+	void WaveAmplitudeChangedHandler(KlayGE::UISlider const & sender);
+	void WindSpeedXChangedHandler(KlayGE::UISlider const & sender);
+	void WindSpeedYChangedHandler(KlayGE::UISlider const & sender);
+	void WindDependencyChangedHandler(KlayGE::UISlider const & sender);
+	void ChoppyScaleChangedHandler(KlayGE::UISlider const & sender);
+	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
+
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr ocean_;
 	KlayGE::SceneObjectPtr sky_box_;
@@ -28,6 +38,25 @@ private:
 
 	KlayGE::TexturePtr reflection_tex_;
 	KlayGE::FrameBufferPtr reflection_fb_;
+
+	KlayGE::UIDialogPtr dialog_params_;
+	int id_dmap_dim_static_;
+	int id_dmap_dim_slider_;
+	int id_patch_length_static_;
+	int id_patch_length_slider_;
+	int id_time_scale_static_;
+	int id_time_scale_slider_;
+	int id_wave_amplitude_static_;
+	int id_wave_amplitude_slider_;
+	int id_wind_speed_x_static_;
+	int id_wind_speed_x_slider_;
+	int id_wind_speed_y_static_;
+	int id_wind_speed_y_slider_;
+	int id_wind_dependency_static_;
+	int id_wind_dependency_slider_;
+	int id_choppy_scale_static_;
+	int id_choppy_scale_slider_;
+	int id_fps_camera_;
 };
 
 #endif		// _OCEAN_HPP

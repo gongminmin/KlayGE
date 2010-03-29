@@ -265,6 +265,11 @@ namespace
 			*(technique_->Effect().ParameterByName("corners")) = corners;
 		}
 
+		void PatchLength(float patch_length)
+		{
+			*(technique_->Effect().ParameterByName("patch_length")) = patch_length;
+		}
+
 		void DisplacementMap(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("displacement_tex")) = tex;
@@ -312,32 +317,28 @@ namespace
 			ocean_plane_ = MathLib::from_point_normal(float3(0, y0, 0), float3(0, 1, 0));
 			reflect_mat_ = MathLib::reflect(ocean_plane_);
 
-			OceanParameter ocean_param;
-
 			// The size of displacement map. In this sample, it's fixed to 512.
-			ocean_param.dmap_dim			= 512;
+			ocean_param_.dmap_dim			= 512;
 			// The side length (world space) of square sized patch
-			ocean_param.patch_length		= 20;
+			ocean_param_.patch_length		= 20;
 			// Adjust this parameter to control the simulation speed
-			ocean_param.time_scale			= 0.8f;
+			ocean_param_.time_scale			= 0.8f;
 			// A scale to control the amplitude. Not the world space height
-			ocean_param.wave_amplitude		= 0.0035f;
+			ocean_param_.wave_amplitude		= 0.0035f;
 			// 2D wind direction. No need to be normalized
-			ocean_param.wind_dir			= float2(0.8f, 0.6f);
 			// The bigger the wind speed, the larger scale of wave crest.
 			// But the wave scale can be no larger than patch_length
-			ocean_param.wind_speed			= 6;
+			ocean_param_.wind_speed			= float2(0.8f, 0.6f) * 6;
 			// Damp out the components opposite to wind direction.
 			// The smaller the value, the higher wind dependency
-			ocean_param.wind_dependency		= 0.07f;
+			ocean_param_.wind_dependency	= 0.07f;
 			// Control the scale of horizontal movement. Higher value creates
 			// pointy crests.
-			ocean_param.choppy_scale		= 1.3f;
+			ocean_param_.choppy_scale		= 1.3f;
 
-			ocean_simulator_.reset(new OceanSimulator(ocean_param));
+			dirty_ = true;
 
-			checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(ocean_simulator_->DisplacementTex());
-			checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(ocean_simulator_->GradientTex());
+			ocean_simulator_.reset(new OceanSimulator);
 		}
 
 		void SunDirection(float3 const & dir)
@@ -347,6 +348,16 @@ namespace
 
 		void Update()
 		{
+			if (dirty_)
+			{
+				ocean_simulator_->Parameters(ocean_param_);
+				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(ocean_simulator_->DisplacementTex());
+				checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(ocean_simulator_->GradientTex());
+				checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
+
+				dirty_ = false;
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
@@ -508,7 +519,90 @@ namespace
 			reflect_up *= -1.0f;
 		}
 
+		int DMapDim() const
+		{
+			return ocean_param_.dmap_dim;
+		}
+		void DMapDim(int dmap_dim)
+		{
+			ocean_param_.dmap_dim = dmap_dim;
+			dirty_ = true;
+		}
+
+		float PatchLength() const
+		{
+			return ocean_param_.patch_length;
+		}
+		void PatchLength(float patch_length)
+		{
+			ocean_param_.patch_length = patch_length;
+			dirty_ = true;
+		}
+
+		float TimeScale() const
+		{
+			return ocean_param_.time_scale;
+		}
+		void TimeScale(float time_scale)
+		{
+			ocean_param_.time_scale = time_scale;
+			dirty_ = true;
+		}
+
+		float WaveAmplitude() const
+		{
+			return ocean_param_.wave_amplitude;
+		}
+		void WaveAmplitude(float amp)
+		{
+			ocean_param_.wave_amplitude = amp;
+			dirty_ = true;
+		}
+
+		float WindSpeedX() const
+		{
+			return ocean_param_.wind_speed.x();
+		}
+		void WindSpeedX(float speed)
+		{
+			ocean_param_.wind_speed.x() = speed;
+			dirty_ = true;
+		}
+
+		float WindSpeedY() const
+		{
+			return ocean_param_.wind_speed.y();
+		}
+		void WindSpeedY(float speed)
+		{
+			ocean_param_.wind_speed.y() = speed;
+			dirty_ = true;
+		}
+
+		float WindDependency() const
+		{
+			return ocean_param_.wind_dependency;
+		}
+		void WindDependency(float dep)
+		{
+			ocean_param_.wind_dependency = dep;
+			dirty_ = true;
+		}
+
+		float ChoppyScale() const
+		{
+			return ocean_param_.choppy_scale;
+		}
+		void ChoppyScale(float choppy)
+		{
+			ocean_param_.choppy_scale = choppy;
+			dirty_ = true;
+		}
+
 	private:
+		OceanParameter ocean_param_;
+		bool dirty_;
+
 		float strength_;
 		Plane ocean_plane_;
 		float4x4 reflect_mat_;
@@ -586,7 +680,6 @@ void OceanApp::InitObjects()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(skybox_tex);
 	sky_box_->AddToSceneManager();
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 1.0f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -603,6 +696,50 @@ void OceanApp::InitObjects()
 			scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
+	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
+	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");
+	id_patch_length_static_ = dialog_params_->IDFromName("PatchLengthStatic");
+	id_patch_length_slider_ = dialog_params_->IDFromName("PatchLengthSlider");
+	id_time_scale_static_ = dialog_params_->IDFromName("TimeScaleStatic");
+	id_time_scale_slider_ = dialog_params_->IDFromName("TimeScaleSlider");
+	id_wave_amplitude_static_ = dialog_params_->IDFromName("WaveAmplitudeStatic");
+	id_wave_amplitude_slider_ = dialog_params_->IDFromName("WaveAmplitudeSlider");
+	id_wind_speed_x_static_ = dialog_params_->IDFromName("WindSpeedXStatic");
+	id_wind_speed_x_slider_ = dialog_params_->IDFromName("WindSpeedXSlider");
+	id_wind_speed_y_static_ = dialog_params_->IDFromName("WindSpeedYStatic");
+	id_wind_speed_y_slider_ = dialog_params_->IDFromName("WindSpeedYSlider");
+	id_wind_dependency_static_ = dialog_params_->IDFromName("WindDependencyStatic");
+	id_wind_dependency_slider_ = dialog_params_->IDFromName("WindDependencySlider");
+	id_choppy_scale_static_ = dialog_params_->IDFromName("ChoppyScaleStatic");
+	id_choppy_scale_slider_ = dialog_params_->IDFromName("ChoppyScaleSlider");
+	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
+
+	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::DMapDimChangedHandler, this, _1));
+	this->DMapDimChangedHandler(*dialog_params_->Control<UISlider>(id_dmap_dim_slider_));
+
+	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::PatchLengthChangedHandler, this, _1));
+	this->PatchLengthChangedHandler(*dialog_params_->Control<UISlider>(id_patch_length_slider_));
+
+	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::TimeScaleChangedHandler, this, _1));
+	this->TimeScaleChangedHandler(*dialog_params_->Control<UISlider>(id_time_scale_slider_));
+
+	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WaveAmplitudeChangedHandler, this, _1));
+	this->WaveAmplitudeChangedHandler(*dialog_params_->Control<UISlider>(id_wave_amplitude_slider_));
+
+	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindSpeedXChangedHandler, this, _1));
+	this->WindSpeedXChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_x_slider_));
+
+	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindSpeedYChangedHandler, this, _1));
+	this->WindSpeedYChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_y_slider_));
+
+	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::WindDependencyChangedHandler, this, _1));
+	this->WindDependencyChangedHandler(*dialog_params_->Control<UISlider>(id_wind_dependency_slider_));
+
+	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&OceanApp::ChoppyScaleChangedHandler, this, _1));
+	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
+
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&OceanApp::FPSCameraHandler, this, _1));
 }
 
 void OceanApp::OnResize(uint32_t width, uint32_t height)
@@ -633,8 +770,110 @@ void OceanApp::InputHandler(InputEngine const & /*sender*/, InputAction const & 
 	}
 }
 
+void OceanApp::DMapDimChangedHandler(UISlider const & sender)
+{
+	int dmap_dim = 1UL << (3 * sender.GetValue());
+
+	std::wostringstream stream;
+	stream << L"DMap dim: " << dmap_dim;
+	dialog_params_->Control<UIStatic>(id_dmap_dim_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->DMapDim(dmap_dim);
+}
+
+void OceanApp::PatchLengthChangedHandler(UISlider const & sender)
+{
+	float patch_length = sender.GetValue() * 0.5f;
+
+	std::wostringstream stream;
+	stream << L"Patch length: " << patch_length;
+	dialog_params_->Control<UIStatic>(id_patch_length_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->PatchLength(patch_length);
+}
+
+void OceanApp::TimeScaleChangedHandler(UISlider const & sender)
+{
+	float time_scale = sender.GetValue() * 0.1f;
+
+	std::wostringstream stream;
+	stream << L"Time scale: " << time_scale;
+	dialog_params_->Control<UIStatic>(id_time_scale_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->TimeScale(time_scale);
+}
+
+void OceanApp::WaveAmplitudeChangedHandler(UISlider const & sender)
+{
+	float wave_amp = sender.GetValue() * 0.0001f;
+
+	std::wostringstream stream;
+	stream << L"Wave amplitude: " << wave_amp;
+	dialog_params_->Control<UIStatic>(id_wave_amplitude_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->WaveAmplitude(wave_amp);
+}
+
+void OceanApp::WindSpeedXChangedHandler(UISlider const & sender)
+{
+	float wind_speed = sender.GetValue() * 0.05f;
+
+	std::wostringstream stream;
+	stream << L"Wind speed X: " << wind_speed;
+	dialog_params_->Control<UIStatic>(id_wind_speed_x_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->WindSpeedX(wind_speed);
+}
+
+void OceanApp::WindSpeedYChangedHandler(UISlider const & sender)
+{
+	float wind_speed = sender.GetValue() * 0.05f;
+
+	std::wostringstream stream;
+	stream << L"Wind speed Y: " << wind_speed;
+	dialog_params_->Control<UIStatic>(id_wind_speed_y_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->WindSpeedY(wind_speed);
+}
+
+void OceanApp::WindDependencyChangedHandler(UISlider const & sender)
+{
+	float dep = sender.GetValue() * 0.01f;
+
+	std::wostringstream stream;
+	stream << L"Wind dependency: " << dep;
+	dialog_params_->Control<UIStatic>(id_wind_dependency_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->WindDependency(dep);
+}
+
+void OceanApp::ChoppyScaleChangedHandler(UISlider const & sender)
+{
+	float choppy = sender.GetValue() * 0.1f;
+
+	std::wostringstream stream;
+	stream << L"Choppy scale: " << choppy;
+	dialog_params_->Control<UIStatic>(id_choppy_scale_static_)->SetText(stream.str());
+
+	checked_pointer_cast<OceanObject>(ocean_)->ChoppyScale(choppy);
+}
+
+void OceanApp::FPSCameraHandler(UICheckBox const & sender)
+{
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
+	}
+}
+
 void OceanApp::DoUpdateOverlay()
 {
+	UIManager::Instance().Render();
+
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
 	std::wostringstream stream;
@@ -648,8 +887,6 @@ void OceanApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-	UIManager::Instance().Render();
 }
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
