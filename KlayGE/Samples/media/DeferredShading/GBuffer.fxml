@@ -72,7 +72,7 @@ void GBufferDiffPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 void GBufferBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
 			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
 {
-	normal.xyz = normalize(normal.xyz);
+	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord).xyz, (float3x3)model_view));
 	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
 
 	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, specular_level);

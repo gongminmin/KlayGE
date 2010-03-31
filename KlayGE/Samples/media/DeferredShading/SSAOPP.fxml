@@ -4,15 +4,6 @@
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredShadingUtil.fxml"/>
 
-	<macro name="RING_1" value="1"/>
-	<macro name="RING_2" value="2"/>
-	<macro name="RING_3" value="3"/>
-	<macro name="RING_4" value="4"/>
-	<macro name="NUM_RING_1_GATHERS" value="2"/>
-	<macro name="NUM_RING_2_GATHERS" value="6"/>
-	<macro name="NUM_RING_3_GATHERS" value="12"/>
-	<macro name="NUM_RING_4_GATHERS" value="20"/>
-
 	<cbuffer name="never_changes">
 		<parameter type="float" name="inv_ring_weights_total" array_size="4">
 			<value>
@@ -119,6 +110,13 @@
 
 	<shader>
 		<![CDATA[
+#ifdef KLAYGE_D3D10
+#define OFFSET_SUPPORT
+#endif
+#ifdef KLAYGE_D3D11
+#define OFFSET_SUPPORT
+#endif
+
 float NormalRejectionTest(float2 tc)
 {
 	float summed_dot = 0;
@@ -192,15 +190,29 @@ float4 SSAO(float2 tc0)
 
 void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 {
-	float4 texel = src_tex.SampleLevel(point_sampler, tc + float2(0, rt_size_inv_size.w), 0);
+	float4 texel;
+	
+#ifdef OFFSET_SUPPORT
+	texel = src_tex.SampleLevel(point_sampler, tc, int2(0, 1), 0);
+#else
+	texel = src_tex.SampleLevel(point_sampler, tc + float2(0, rt_size_inv_size.w), 0);
+#endif
 	z_samples.x = GetDepth(texel);
 	nz_samples.x = GetNormal(texel).z;
 
+#ifdef OFFSET_SUPPORT
+	texel = src_tex.SampleLevel(point_sampler, tc, int2(1, 1), 0);
+#else
 	texel = src_tex.SampleLevel(point_sampler, tc + rt_size_inv_size.zw, 0);
+#endif
 	z_samples.y = GetDepth(texel);
 	nz_samples.y = GetNormal(texel).z;
 
+#ifdef OFFSET_SUPPORT
+	texel = src_tex.SampleLevel(point_sampler, tc, int2(1, 0), 0);
+#else
 	texel = src_tex.SampleLevel(point_sampler, tc + float2(rt_size_inv_size.z, 0), 0);
+#endif
 	z_samples.z = GetDepth(texel);
 	nz_samples.z = GetNormal(texel).z;
 
@@ -213,8 +225,8 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 
 float4 HDAO(float2 tc0)
 {
-	int num_ring_gathers = NUM_RING_4_GATHERS;
-	int num_rings = RING_4;
+	int num_rings = 4;
+	int num_ring_gathers = (1 + num_rings) * num_rings;
 
 	float4 sampled_z[2];
 	float4 sampled_nz[2];
