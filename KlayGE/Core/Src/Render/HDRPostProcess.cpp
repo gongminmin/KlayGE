@@ -366,7 +366,7 @@ namespace KlayGE
 
 		{
 			// Tone mapping
-			//if (!cs_support_)
+			if (!cs_support_)
 			{
 				tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
 			}

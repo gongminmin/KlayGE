@@ -221,10 +221,7 @@ namespace KlayGE
 
 		std::vector<uint32_t> light_scaned_;
 
-		RenderTechniquePtr technique_ambient_;
-		RenderTechniquePtr technique_directional_;
-		RenderTechniquePtr technique_point_;
-		RenderTechniquePtr technique_spot_;
+		RenderTechniquePtr technique_lights_[4];
 		RenderTechniquePtr technique_light_depth_only_;
 
 		QueryPtr conditional_render_;

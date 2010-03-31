@@ -110,10 +110,10 @@ namespace KlayGE
 
 		technique_ = rf.LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShadingPoint");
 
-		technique_ambient_ = technique_->Effect().TechniqueByName("DeferredShadingAmbient");
-		technique_directional_ = technique_->Effect().TechniqueByName("DeferredShadingDirectional");
-		technique_point_ = technique_->Effect().TechniqueByName("DeferredShadingPoint");
-		technique_spot_ = technique_->Effect().TechniqueByName("DeferredShadingSpot");
+		technique_lights_[LT_Ambient] = technique_->Effect().TechniqueByName("DeferredShadingAmbient");
+		technique_lights_[LT_Directional] = technique_->Effect().TechniqueByName("DeferredShadingDirectional");
+		technique_lights_[LT_Point] = technique_->Effect().TechniqueByName("DeferredShadingPoint");
+		technique_lights_[LT_Spot] = technique_->Effect().TechniqueByName("DeferredShadingSpot");
 		technique_light_depth_only_ = technique_->Effect().TechniqueByName("DeferredShadingLightDepthOnly");
 
 		conditional_render_ = rf.MakeConditionalRender();
@@ -495,75 +495,83 @@ namespace KlayGE
 
 					if (0 == pass_in_batch)
 					{
+						float3 d, u;
+						if (type != LT_Point)
+						{
+							d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
+							u = float3(0, 1, 0);
+						}
+						else
+						{
+							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
+							d = ad.first;
+							u = ad.second;
+						}
+
+						float fov;
+						if (type != LT_Spot)
+						{
+							fov = PI / 2;
+						}
+						else
+						{
+							fov = light_cos_outer_inner_[org_no].z();
+						}
+
+						float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
+						sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+						sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+						float3 dir_es = MathLib::transform_normal(d, view_);
+						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
+
+						*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+							* sm_buffer_->GetViewport().camera->ProjMatrix();
+						if (type != LT_Directional)
+						{
+							float3 loc_es = MathLib::transform_coord(p, view_);
+							float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+							if (LT_Spot == type)
+							{
+								light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+								light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+							}
+
+							*light_pos_es_param_ = light_pos_es_actived;
+						}
+
+						*light_dir_es_param_ = light_dir_es_actived;
+
+						if ((LT_Spot == type) || (LT_Point == type))
+						{
+							float4x4 mat;
+							if (LT_Spot == type)
+							{
+								float const scale = light_cos_outer_inner_[org_no].w();
+								mat = MathLib::scaling(scale, scale, 1.0f);
+								rl_ = rl_cone_;
+							}
+							else //if (LT_Point == type)
+							{
+								mat = float4x4::Identity();
+								rl_ = rl_pyramid_;
+							}
+
+							*light_volume_mvp_param_ = mat
+								* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+								* view_ * proj_;
+						}
+						else
+						{
+							rl_ = rl_quad_;
+							*light_volume_mvp_param_ = float4x4::Identity();
+						}
+
 						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
 						{
-							float3 d, u;
-							if (type != LT_Point)
-							{
-								d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
-								u = float3(0, 1, 0);
-							}
-							else
-							{
-								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
-								d = ad.first;
-								u = ad.second;
-							}
-
-							float fov;
-							if (type != LT_Spot)
-							{
-								fov = PI / 2;
-							}
-							else
-							{
-								fov = light_cos_outer_inner_[org_no].z();
-							}
-
-							float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-							sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-							sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-							float3 dir_es = MathLib::transform_normal(d, view_);
-							float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
-
-							*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-								* sm_buffer_->GetViewport().camera->ProjMatrix();
-							if (type != LT_Directional)
-							{
-								float3 loc_es = MathLib::transform_coord(p, view_);
-								float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-								if (LT_Spot == type)
-								{
-									light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-									light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
-								}
-
-								*light_pos_es_param_ = light_pos_es_actived;
-							}
-
-							*light_dir_es_param_ = light_dir_es_actived;
-
 							if ((LT_Spot == type) || (LT_Point == type))
 							{
-								float4x4 mat;
-								if (LT_Spot == type)
-								{
-									float const scale = light_cos_outer_inner_[org_no].w();
-									mat = MathLib::scaling(scale, scale, 1.0f);
-									rl_ = rl_cone_;
-								}
-								else //if (LT_Point == type)
-								{
-									mat = float4x4::Identity();
-									rl_ = rl_pyramid_;
-								}
-
-								*light_volume_mvp_param_ = mat
-									* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-									* view_ * proj_;
-
 								re.BindFrameBuffer(shaded_buffer_);
 
 								conditional_render_->Begin();
@@ -597,41 +605,7 @@ namespace KlayGE
 
 						re.BindFrameBuffer(shaded_buffer_);
 
-						if ((LT_Spot == type) || (LT_Point == type))
-						{
-							float4x4 mat;
-							if (LT_Spot == type)
-							{
-								technique_ = technique_spot_;
-								float const scale = light_cos_outer_inner_[org_no].w();
-								mat = MathLib::scaling(scale, scale, 1.0f);
-								rl_ = rl_cone_;
-							}
-							else //if (LT_Point == type)
-							{
-								technique_ = technique_point_;
-								mat = float4x4::Identity();
-								rl_ = rl_pyramid_;
-							}
-
-							*light_volume_mvp_param_ = mat
-								* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-								* view_ * proj_;
-						}
-						else
-						{
-							if (LT_Directional == type)
-							{
-								technique_ = technique_directional_;
-							}
-							else
-							{
-								technique_ = technique_ambient_;
-							}
-
-							rl_ = rl_quad_;
-							*light_volume_mvp_param_ = float4x4::Identity();
-						}
+						technique_ = technique_lights_[type];
 
 						*light_attrib_param_ = light_attrib_[org_no];
 						*light_clr_type_param_ = light_clr_type_[org_no];

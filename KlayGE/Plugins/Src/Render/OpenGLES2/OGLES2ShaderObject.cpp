@@ -135,7 +135,7 @@ namespace
 	";
 
 	char const * predefined_attribs = "\n		\
-	attribute vec4 a_gl_Color;\n					\
+	attribute vec4 a_gl_Color;\n				\
 	attribute vec3 a_gl_Normal;\n				\
 	attribute vec4 a_gl_Vertex;\n				\
 	attribute vec4 a_gl_MultiTexCoord0;\n		\
@@ -146,12 +146,12 @@ namespace
 	attribute vec4 a_gl_MultiTexCoord5;\n		\
 	attribute vec4 a_gl_MultiTexCoord6;\n		\
 	attribute vec4 a_gl_MultiTexCoord7;\n		\
-	attribute float a_gl_FogCoord;\n				\
+	attribute float a_gl_FogCoord;\n			\
 	";
 
 	char const * predefined_varyings = "\n	\
-	varying vec4 v_gl_FrontColor;\n				\
-    varying vec4 v_gl_TexCoord[8];\n			\
+	varying vec4 v_gl_FrontColor;\n			\
+    varying vec4 v_gl_TexCoord[8];\n		\
     varying float v_gl_FogFragCoord;\n		\
 	";
 
