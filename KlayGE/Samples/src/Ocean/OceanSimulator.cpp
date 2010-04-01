@@ -63,11 +63,10 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect_cs = rf.LoadEffect("OceanSimulatorCS.fxml");
-		RenderEffectPtr effect_vsps = rf.LoadEffect("OceanSimulatorVSPS.fxml");
-		update_spectrum_tech_ = effect_cs->TechniqueByName("UpdateSpectrum");
-		update_displacement_tech_ = effect_vsps->TechniqueByName("UpdateDisplacement");
-		gen_gradient_folding_tech_ = effect_vsps->TechniqueByName("GenGradientFolding");
+		RenderEffectPtr effect = rf.LoadEffect("OceanSimulator.fxml");
+		update_spectrum_tech_ = effect->TechniqueByName("UpdateSpectrum");
+		update_displacement_tech_ = effect->TechniqueByName("UpdateDisplacement");
+		gen_gradient_folding_tech_ = effect->TechniqueByName("GenGradientFolding");
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -86,7 +85,7 @@ namespace KlayGE
 		quad_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		quad_layout_->BindVertexStream(quad_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-		time_param_ = effect_cs->ParameterByName("time");
+		time_param_ = effect->ParameterByName("time");
 	}
 
 	OceanSimulator::~OceanSimulator()
@@ -238,26 +237,20 @@ namespace KlayGE
 		uint32_t dtx_offset = actual_dim * actual_dim;
 		uint32_t dty_offset = actual_dim * actual_dim * 2;
 
-		RenderEffect& effect_cs = update_spectrum_tech_->Effect();
-		*(effect_cs.ParameterByName("actual_dim")) = actual_dim;
-		*(effect_cs.ParameterByName("in_width")) = input_width;
-		*(effect_cs.ParameterByName("out_width")) = output_width;
-		*(effect_cs.ParameterByName("out_height")) = output_height;
-		*(effect_cs.ParameterByName("dx_addr_offset")) = dtx_offset;
-		*(effect_cs.ParameterByName("dy_addr_offset")) = dty_offset;
-		*(effect_cs.ParameterByName("input_h0")) = h0_buffer_;
-		*(effect_cs.ParameterByName("input_omega")) = omega_buffer_;
-		*(effect_cs.ParameterByName("output_ht")) = ht_buffer_;
-
-		RenderEffect& effect_vsps = update_displacement_tech_->Effect();
-		*(effect_vsps.ParameterByName("out_width")) = output_width;
-		*(effect_vsps.ParameterByName("out_height")) = output_height;
-		*(effect_vsps.ParameterByName("dx_addr_offset")) = dtx_offset;
-		*(effect_vsps.ParameterByName("dy_addr_offset")) = dty_offset;
-		*(effect_vsps.ParameterByName("choppy_scale")) = param_.choppy_scale;
-		*(effect_vsps.ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
-		*(effect_vsps.ParameterByName("input_dxyz")) = dxyz_buffer_;
-		*(effect_vsps.ParameterByName("displacement_tex")) = displacement_tex_;
+		RenderEffect& effect = update_spectrum_tech_->Effect();
+		*(effect.ParameterByName("actual_dim")) = actual_dim;
+		*(effect.ParameterByName("in_width")) = input_width;
+		*(effect.ParameterByName("out_width")) = output_width;
+		*(effect.ParameterByName("out_height")) = output_height;
+		*(effect.ParameterByName("dx_addr_offset")) = dtx_offset;
+		*(effect.ParameterByName("dy_addr_offset")) = dty_offset;
+		*(effect.ParameterByName("input_h0")) = h0_buffer_;
+		*(effect.ParameterByName("input_omega")) = omega_buffer_;
+		*(effect.ParameterByName("output_ht")) = ht_buffer_;
+		*(effect.ParameterByName("choppy_scale")) = param_.choppy_scale;
+		*(effect.ParameterByName("grid_len")) = param_.dmap_dim / param_.patch_length;
+		*(effect.ParameterByName("input_dxyz")) = dxyz_buffer_;
+		*(effect.ParameterByName("displacement_tex")) = displacement_tex_;
 
 		fft_destroy_plan(&fft_plan_);
 		fft_create_plan(&fft_plan_, params.dmap_dim, params.dmap_dim, 3);

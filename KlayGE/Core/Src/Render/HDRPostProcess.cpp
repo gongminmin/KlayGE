@@ -81,17 +81,15 @@ namespace KlayGE
 
 
 	SumLumLogPostProcessCS::SumLumLogPostProcessCS()
-			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("SumLumLog"))
+			: SumLumPostProcess(Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("SumLumLogCS"))
 	{
 	}
 
 	void SumLumLogPostProcessCS::Apply()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
 
-		TexturePtr const & tex = this->InputPin(0);
-
-		*(technique_->Effect().ParameterByName("src_tex_dim")) = int2(tex->Width(0), tex->Height(0));
 		*(technique_->Effect().ParameterByName("dst_tex_dim")) = int2(64, 64);
 
 		this->OnRenderBegin();
@@ -161,7 +159,7 @@ namespace KlayGE
 			: PostProcess(L"AdaptedLumCS", 
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SumLumCS.fxml")->TechniqueByName("AdaptedLum"))
+					Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLumCS"))
 	{
 		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
 	}
@@ -169,6 +167,7 @@ namespace KlayGE
 	void AdaptedLumPostProcessCS::Apply()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
 
 		this->OnRenderBegin();
 		re.Dispatch(*technique_, 1, 1, 1);

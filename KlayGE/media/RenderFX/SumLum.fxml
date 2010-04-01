@@ -106,4 +106,73 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 			<state name="pixel_shader" value="AdaptedLumPS()"/>
 		</pass>
 	</technique>
+
+
+	<parameter type="int2" name="dst_tex_dim"/>
+	<parameter type="rw_texture2D" elem_type="float" name="out_tex"/>
+	
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+groupshared float shared_l[256];
+
+[numthreads(16, 16, 1)]
+void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
+{
+	float2 faddr = (tid.xy * 2 + 0.5f) / dst_tex_dim;
+
+	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
+	
+	shared_l[GI] = log(dot(src_tex.SampleLevel(src_sampler, faddr, 0).rgb, RGB_TO_LUM) + 0.001f);
+	for (uint step = 128; step > 16; step >>= 1)
+	{
+		GroupMemoryBarrierWithGroupSync();
+		if (GI < step)
+		{
+			shared_l[GI] += shared_l[GI + step];
+		}
+	}
+	if (GI < 16)
+	{
+		shared_l[GI] += shared_l[GI + 16];
+	}
+	if (GI < 8)
+	{
+		shared_l[GI] += shared_l[GI + 8];
+	}
+	if (GI < 4)
+	{
+		shared_l[GI] += shared_l[GI + 4];
+	}
+	if (GI < 2)
+	{
+		shared_l[GI] += shared_l[GI + 2];
+	}
+	if (GI < 1)
+	{
+		out_tex[group_id.xy] = (shared_l[GI] + shared_l[GI + 1]) / 256;
+	}
+}
+
+[numthreads(1, 1, 1)]
+void AdaptedLumCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID)
+{
+	float adapted_lum = out_tex[int2(0, 0)];
+	float current_lum = exp(src_tex.SampleLevel(src_sampler, 0.5f, 0).x);
+
+	out_tex[int2(0, 0)] = adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+}
+		]]>
+	</shader>
+
+	<technique name="SumLumLogCS">
+		<pass name="p0">
+			<state name="compute_shader" value="SumLum4x4LogCS()"/>
+		</pass>
+	</technique>
+
+	<technique name="AdaptedLumCS">
+		<pass name="p0">
+			<state name="compute_shader" value="AdaptedLumCS()"/>
+		</pass>
+	</technique>
 </effect>

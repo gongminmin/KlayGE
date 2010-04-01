@@ -412,12 +412,24 @@ namespace KlayGE
 	public:
 		void Load(XMLNodePtr const & node);
 
+		ShaderObject::ShaderType Type() const
+		{
+			return type_;
+		}
+
+		uint32_t Version() const
+		{
+			return version_;
+		}
+
 		std::string const & str() const
 		{
 			return str_;
 		}
 
 	private:
+		ShaderObject::ShaderType type_;
+		uint32_t version_;
 		std::string str_;
 	};
 

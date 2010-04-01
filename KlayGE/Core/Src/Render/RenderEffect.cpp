@@ -2281,6 +2281,44 @@ namespace KlayGE
 
 	void RenderShaderFunc::Load(XMLNodePtr const & node)
 	{
+		type_ = ShaderObject::ST_NumShaderTypes;
+		XMLAttributePtr attr = node->Attrib("type");
+		if (attr)
+		{
+			std::string type_str = attr->ValueString();
+			if ("vertex_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_VertexShader;
+			}
+			else if ("pixel_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_PixelShader;
+			}
+			else if ("geometry_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_GeometryShader;
+			}
+			else if ("compute_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_ComputeShader;
+			}
+			else if ("hull_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_HullShader;
+			}
+			else if ("domain_shader" == type_str)
+			{
+				type_ = ShaderObject::ST_DomainShader;
+			}
+		}
+		
+		version_ = 0;
+		attr = node->Attrib("version");
+		if (attr)
+		{
+			version_ = attr->ValueInt();
+		}
+
 		for (XMLNodePtr shader_text_node = node->FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
 		{
 			if ((XNT_Comment == shader_text_node->Type()) || (XNT_CData == shader_text_node->Type()))

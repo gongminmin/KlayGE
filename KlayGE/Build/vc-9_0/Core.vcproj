@@ -621,10 +621,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\media\RenderFX\SumLumCS.fxml"
-					>
-				</File>
-				<File
 					RelativePath="..\..\media\RenderFX\SummedAreaTable.fxml"
 					>
 				</File>

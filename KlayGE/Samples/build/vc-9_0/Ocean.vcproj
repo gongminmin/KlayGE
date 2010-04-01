@@ -416,11 +416,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\media\Ocean\OceanSimulatorCS.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\Ocean\OceanSimulatorVSPS.fxml"
+				RelativePath="..\..\media\Ocean\OceanSimulator.fxml"
 				>
 			</File>
 			<File

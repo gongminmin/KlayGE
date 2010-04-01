@@ -391,7 +391,7 @@ namespace KlayGE
 		is_shader_validate_.assign(true);
 	}
 
-	std::string D3D10ShaderObject::GenShaderText(RenderEffect const & effect) const
+	std::string D3D10ShaderObject::GenShaderText(RenderEffect const & effect, ShaderType cur_type) const
 	{
 		std::stringstream ss;
 
@@ -524,7 +524,12 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
-			ss << effect.ShaderByIndex(i).str() << std::endl;
+			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
+			ShaderType shader_type = effect_shader.Type();
+			if ((ST_NumShaderTypes == shader_type) || (cur_type == shader_type))
+			{
+				ss << effect_shader.str() << std::endl;
+			}
 		}
 
 		return ss.str();
@@ -596,7 +601,7 @@ namespace KlayGE
 			{
 				if (!sd.profile.empty())
 				{
-					std::string shader_text = this->GenShaderText(effect);
+					std::string shader_text = this->GenShaderText(effect, static_cast<ShaderType>(type));
 
 					is_shader_validate_[type] = true;
 
@@ -629,28 +634,31 @@ namespace KlayGE
 						break;
 					}
 
-					ID3D10Blob* code;
-					ID3D10Blob* err_msg;
-					D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D10", "1" }, { NULL, NULL } };
-					D3DX10CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
-						NULL, sd.func_name.c_str(), shader_profile.c_str(),
-						0, 0, NULL, &code, &err_msg, NULL);
-					if (err_msg != NULL)
+					ID3D10Blob* code = NULL;
+					if (is_shader_validate_[type])
 					{
-#ifdef KLAYGE_DEBUG
-						std::istringstream iss(shader_text);
-						std::string s;
-						int line = 1;
-						while (iss)
+						ID3D10Blob* err_msg;
+						D3D10_SHADER_MACRO macros[] = { { "CONSTANT_BUFFER", "1" }, { "KLAYGE_D3D10", "1" }, { NULL, NULL } };
+						D3DX10CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, macros,
+							NULL, sd.func_name.c_str(), shader_profile.c_str(),
+							0, 0, NULL, &code, &err_msg, NULL);
+						if (err_msg != NULL)
 						{
-							std::getline(iss, s);
-							std::cerr << line << " " << s << std::endl;
-							++ line;
-						}
-						std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
+#ifdef KLAYGE_DEBUG
+							std::istringstream iss(shader_text);
+							std::string s;
+							int line = 1;
+							while (iss)
+							{
+								std::getline(iss, s);
+								std::cerr << line << " " << s << std::endl;
+								++ line;
+							}
+							std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
 #endif
 
-						err_msg->Release();
+							err_msg->Release();
+						}
 					}
 
 					ID3D10BlobPtr code_blob;

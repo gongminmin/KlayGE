@@ -50,7 +50,7 @@ namespace KlayGE
 	public:
 		D3D10ShaderObject();
 
-		std::string GenShaderText(RenderEffect const & effect) const;
+		std::string GenShaderText(RenderEffect const & effect, ShaderType cur_type) const;
 
 		void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
 			uint32_t tech_index, uint32_t pass_index);

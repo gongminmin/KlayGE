@@ -124,7 +124,9 @@ namespace KlayGE
 		LT_Ambient = 0,
 		LT_Point,
 		LT_Directional,
-		LT_Spot
+		LT_Spot,
+
+		LT_NumLightTypes
 	};
 
 	enum LightSrcAttrib
@@ -221,7 +223,7 @@ namespace KlayGE
 
 		std::vector<uint32_t> light_scaned_;
 
-		RenderTechniquePtr technique_lights_[4];
+		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
 
 		QueryPtr conditional_render_;

@@ -860,158 +860,164 @@ namespace KlayGE
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
-			std::string const & s = effect.ShaderByIndex(i).str();
-			boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
-			boost::tokenizer<boost::char_separator<char> > tok(s, sep);
-			std::string this_token;
-			for (BOOST_AUTO(beg, tok.begin()); beg != tok.end();)
+			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
+			ShaderType shader_type = effect_shader.Type();
+			if ((ST_NumShaderTypes == shader_type) || (ST_VertexShader == shader_type) || (ST_PixelShader == shader_type)
+				 || (ST_GeometryShader == shader_type))
 			{
-				this_token = *beg;
-
-				RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
-				if (param &&
-					((REDT_texture1D == param->type()) || (REDT_texture2D == param->type()) || (REDT_texture3D == param->type())
-						|| (REDT_textureCUBE == param->type())))
+				std::string const & s = effect_shader.str();
+				boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
+				boost::tokenizer<boost::char_separator<char> > tok(s, sep);
+				std::string this_token;
+				for (BOOST_AUTO(beg, tok.begin()); beg != tok.end();)
 				{
-					std::vector<std::string> sample_tokens;
-					sample_tokens.push_back(this_token);
-					++ beg;
-					if ("." == *beg)
+					this_token = *beg;
+
+					RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
+					if (param &&
+						((REDT_texture1D == param->type()) || (REDT_texture2D == param->type()) || (REDT_texture3D == param->type())
+							|| (REDT_textureCUBE == param->type())))
 					{
-						while (*beg != ",")
+						std::vector<std::string> sample_tokens;
+						sample_tokens.push_back(this_token);
+						++ beg;
+						if ("." == *beg)
 						{
-							if ((*beg != " ") && (*beg != "\t") && (*beg != "\n"))
+							while (*beg != ",")
 							{
-								sample_tokens.push_back(*beg);
+								if ((*beg != " ") && (*beg != "\t") && (*beg != "\n"))
+								{
+									sample_tokens.push_back(*beg);
+								}
+								++ beg;
 							}
-							++ beg;
-						}
 
-						std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
-						bool found = false;
-						for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
-						{
-							if (tex_sampler_binds_[j].first == combined_sampler_name)
+							std::string combined_sampler_name = sample_tokens[0] + "__" + sample_tokens[4];
+							bool found = false;
+							for (uint32_t j = 0; j < tex_sampler_binds_.size(); ++ j)
 							{
-								found = true;
-								break;
+								if (tex_sampler_binds_[j].first == combined_sampler_name)
+								{
+									found = true;
+									break;
+								}
 							}
-						}
-						if (!found)
-						{
-							tex_sampler_binds_.push_back(std::make_pair(combined_sampler_name,
-								std::make_pair(param, effect.ParameterByName(sample_tokens[4]))));
-						}
+							if (!found)
+							{
+								tex_sampler_binds_.push_back(std::make_pair(combined_sampler_name,
+									std::make_pair(param, effect.ParameterByName(sample_tokens[4]))));
+							}
 
-						if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
-						{
-							sample_helper = true;
-						}
-
-						switch (param->type())
-						{
-						case REDT_texture1D:
-						case REDT_texture2D:
-						case REDT_texture3D:
-						case REDT_textureCUBE:
-							shader_ss << "tex";
+							if ((!sample_helper) && (("SampleLevel" == sample_tokens[2]) || ("SampleBias" == sample_tokens[2])))
+							{
+								sample_helper = true;
+							}
 
 							switch (param->type())
 							{
 							case REDT_texture1D:
-								shader_ss << "1D";
-								break;
-
 							case REDT_texture2D:
-								shader_ss << "2D";
-								break;
-
 							case REDT_texture3D:
-								shader_ss << "3D";
-								break;
-
 							case REDT_textureCUBE:
-								shader_ss << "CUBE";
+								shader_ss << "tex";
+
+								switch (param->type())
+								{
+								case REDT_texture1D:
+									shader_ss << "1D";
+									break;
+
+								case REDT_texture2D:
+									shader_ss << "2D";
+									break;
+
+								case REDT_texture3D:
+									shader_ss << "3D";
+									break;
+
+								case REDT_textureCUBE:
+									shader_ss << "CUBE";
+									break;
+								}
+
+								if ("SampleLevel" == sample_tokens[2])
+								{
+									shader_ss << "Level";
+								}
+								else
+								{
+									if ("SampleBias" == sample_tokens[2])
+									{
+										shader_ss << "Bias";
+									}
+								}
+
 								break;
 							}
+							shader_ss << "(" << combined_sampler_name << ",";
 
-							if ("SampleLevel" == sample_tokens[2])
-							{
-								shader_ss << "Level";
-							}
-							else
-							{
-								if ("SampleBias" == sample_tokens[2])
-								{
-									shader_ss << "Bias";
-								}
-							}
-
-							break;
-						}
-						shader_ss << "(" << combined_sampler_name << ",";
-
-						++ beg;
-					}
-					else
-					{
-						shader_ss << this_token;
-					}
-				}
-				else
-				{
-					if ("SV_Position" == this_token)
-					{
-						shader_ss << "POSITION";
-					}
-					else
-					{
-						if ("SV_Depth" == this_token)
-						{
-							shader_ss << "DEPTH";
+							++ beg;
 						}
 						else
 						{
-							if (0 == this_token.find("SV_Target"))
+							shader_ss << this_token;
+						}
+					}
+					else
+					{
+						if ("SV_Position" == this_token)
+						{
+							shader_ss << "POSITION";
+						}
+						else
+						{
+							if ("SV_Depth" == this_token)
 							{
-								shader_ss << "COLOR" << this_token.substr(9);
+								shader_ss << "DEPTH";
 							}
 							else
 							{
-								if ("[" == this_token)
+								if (0 == this_token.find("SV_Target"))
 								{
-									++ beg;
-									if (("branch" == *beg)
-										|| ("flatten" == *beg)
-										|| ("forcecase" == *beg)
-										|| ("call" == *beg)
-										|| ("unroll" == *beg)
-										|| ("loop" == *beg))
+									shader_ss << "COLOR" << this_token.substr(9);
+								}
+								else
+								{
+									if ("[" == this_token)
 									{
-										std::string attr = *beg;
 										++ beg;
-										if (*beg != "]")
+										if (("branch" == *beg)
+											|| ("flatten" == *beg)
+											|| ("forcecase" == *beg)
+											|| ("call" == *beg)
+											|| ("unroll" == *beg)
+											|| ("loop" == *beg))
 										{
-											shader_ss << "[" << attr << *beg;
+											std::string attr = *beg;
+											++ beg;
+											if (*beg != "]")
+											{
+												shader_ss << "[" << attr << *beg;
+											}
+										}
+										else
+										{
+											shader_ss << "[" << *beg;
 										}
 									}
 									else
 									{
-										shader_ss << "[" << *beg;
+										shader_ss << this_token;
 									}
-								}
-								else
-								{
-									shader_ss << this_token;
 								}
 							}
 						}
-					}
 
-					++ beg;
+						++ beg;
+					}
 				}
+				shader_ss << std::endl;
 			}
-			shader_ss << std::endl;
 		}
 
 		std::stringstream ss;
@@ -1152,38 +1158,41 @@ namespace KlayGE
 				default:
 					shader_type = 0;
 					profile = CG_PROFILE_UNKNOWN;
-					BOOST_ASSERT(false);
+					is_shader_validate_[type] = false;
 					break;
 				}
 
-				shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
-						CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
-
-				CGerror error;
-				char const * err_string = cgGetLastErrorString(&error);
-				if (error != CG_NO_ERROR)
+				if (is_shader_validate_[type])
 				{
-#ifdef KLAYGE_DEBUG
-					if (CG_COMPILER_ERROR == error)
-					{
-						std::istringstream iss(*shader_text_);
-						std::string s;
-						int line = 1;
-						while (iss)
-						{
-							std::getline(iss, s);
-							std::cerr << line << " " << s << std::endl;
-							++ line;
-						}
-						std::cerr << err_string << std::endl;
+					shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
+							CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
 
-						std::cerr << cgGetLastListing(CGContextIniter::Instance().Context()) << std::endl;
-					}
+					CGerror error;
+					char const * err_string = cgGetLastErrorString(&error);
+					if (error != CG_NO_ERROR)
+					{
+#ifdef KLAYGE_DEBUG
+						if (CG_COMPILER_ERROR == error)
+						{
+							std::istringstream iss(*shader_text_);
+							std::string s;
+							int line = 1;
+							while (iss)
+							{
+								std::getline(iss, s);
+								std::cerr << line << " " << s << std::endl;
+								++ line;
+							}
+							std::cerr << err_string << std::endl;
+
+							std::cerr << cgGetLastListing(CGContextIniter::Instance().Context()) << std::endl;
+						}
 #else
-					UNREF_PARAM(err_string);
+						UNREF_PARAM(err_string);
 #endif
 
-					is_shader_validate_[type] = false;
+						is_shader_validate_[type] = false;
+					}
 				}
 
 				if (is_shader_validate_[type])
