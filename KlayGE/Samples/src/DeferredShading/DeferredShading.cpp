@@ -579,36 +579,51 @@ namespace
 		SSAOPostProcess()
 			: PostProcess(L"SSAO",
 					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
+					std::vector<std::string>(1, "out_tex"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
 				hd_mode_(true)
 		{
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
+
 			blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			proj_param_ = technique_->Effect().ParameterByName("proj");
 			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
+
+			if (cs_support_)
+			{
+				this->Technique(technique_->Effect().TechniqueByName("HDAOCS"));
+			}
+			else
+			{
+				this->Technique(technique_->Effect().TechniqueByName("HDAO"));
+			}
 		}
 
 		void OutputPin(uint32_t index, TexturePtr const & tex)
 		{
 			PostProcess::OutputPin(index, tex);
 
-			if (!ssao_tex_)
+			if (tex)
 			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-				try
+				if (!ssao_tex_)
 				{
-					ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				}
-				catch (...)
-				{
-					ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				}
+					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-				blur_pp_->InputPin(0, ssao_tex_);
-				blur_pp_->OutputPin(index, tex);
+					try
+					{
+						ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+					}
+					catch (...)
+					{
+						ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+					}
+
+					blur_pp_->InputPin(0, ssao_tex_);
+					blur_pp_->OutputPin(index, tex);
+				}
 			}
 		}
 
@@ -617,23 +632,47 @@ namespace
 			hd_mode_ = hd;
 			if (hd_mode_)
 			{
-				this->Technique(technique_->Effect().TechniqueByName("HDAO"));
-				PostProcess::OutputPin(0, blur_pp_->OutputPin(0));
+				if (cs_support_)
+				{
+					this->Technique(technique_->Effect().TechniqueByName("HDAOCS"));
+				}
+				else
+				{
+					this->Technique(technique_->Effect().TechniqueByName("HDAO"));
+				}
+				this->OutputPin(0, blur_pp_->OutputPin(0));
 			}
 			else
 			{
 				this->Technique(technique_->Effect().TechniqueByName("SSAO"));
-				PostProcess::OutputPin(0, ssao_tex_);
+				this->OutputPin(0, ssao_tex_);
 			}
 		}
 
 		void Apply()
 		{
-			PostProcess::Apply();
-
-			if (!hd_mode_)
+			if (cs_support_ && hd_mode_)
 			{
-				blur_pp_->Apply();
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+				TexturePtr const & tex = this->InputPin(0);
+
+				int const BLOCK_SIZE_X = 16;
+				int const BLOCK_SIZE_Y = 16;
+
+				this->OnRenderBegin();
+				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
+				this->OnRenderEnd();
+			}
+			else
+			{
+				PostProcess::Apply();
+
+				if (!hd_mode_)
+				{
+					blur_pp_->Apply();
+				}
 			}
 		}
 
@@ -653,6 +692,8 @@ namespace
 		}
 
 	private:
+		bool cs_support_;
+
 		bool hd_mode_;
 
 		PostProcessPtr blur_pp_;
@@ -803,7 +844,13 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 
 	try
 	{
-		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.cs_support && (5 == caps.max_shader_model))
+		{
+			access_hint |= EAH_GPU_Unordered;
+		}
+		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, access_hint, NULL);
 	}
 	catch (...)
 	{

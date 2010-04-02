@@ -4,6 +4,14 @@
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredShadingUtil.fxml"/>
 
+	<macro name="BLOCK_SIZE_X" value="16"/>
+	<macro name="BLOCK_SIZE_Y" value="16"/>
+	<macro name="BLOCK_SIZE" value="(BLOCK_SIZE_X * BLOCK_SIZE_Y)"/>
+	<macro name="MAX_KERNEL_SIZE" value="8"/>
+	<macro name="TILE_SIZE_X" value="(BLOCK_SIZE_X + 2 * MAX_KERNEL_SIZE)"/>
+	<macro name="TILE_SIZE_Y" value="(BLOCK_SIZE_Y + 2 * MAX_KERNEL_SIZE)"/>
+	<macro name="TILE_SIZE" value="(TILE_SIZE_X * TILE_SIZE_Y)"/>
+
 	<cbuffer name="never_changes">
 		<parameter type="float" name="inv_ring_weights_total" array_size="4">
 			<value>
@@ -133,7 +141,7 @@ float NormalRejectionTest(float2 tc)
 		summed_dot += (normal_dot > accept_angle) ? 0 : (1 - abs(normal_dot) * 0.25f);
 	}
 
-	return summed_dot * 0.25f + 0.5f;
+	return summed_dot * 0.25f;
 }
 
 float4 SSAO(float2 tc0)
@@ -141,7 +149,7 @@ float4 SSAO(float2 tc0)
 	float occlusion = 1;
 
 	float normal_dot = NormalRejectionTest(tc0);
-	if (normal_dot > 0.5f)
+	if (normal_dot > 0)
 	{
 		float4 ndc = src_tex.Sample(point_sampler, tc0);
 		float depth = GetDepth(ndc);
@@ -193,7 +201,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	float4 texel;
 	
 #ifdef OFFSET_SUPPORT
-	texel = src_tex.SampleLevel(point_sampler, tc, int2(0, 1), 0);
+	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(0, 1));
 #else
 	texel = src_tex.SampleLevel(point_sampler, tc + float2(0, rt_size_inv_size.w), 0);
 #endif
@@ -201,7 +209,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	nz_samples.x = GetNormal(texel).z;
 
 #ifdef OFFSET_SUPPORT
-	texel = src_tex.SampleLevel(point_sampler, tc, int2(1, 1), 0);
+	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(1, 1));
 #else
 	texel = src_tex.SampleLevel(point_sampler, tc + rt_size_inv_size.zw, 0);
 #endif
@@ -209,7 +217,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	nz_samples.y = GetNormal(texel).z;
 
 #ifdef OFFSET_SUPPORT
-	texel = src_tex.SampleLevel(point_sampler, tc, int2(1, 0), 0);
+	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(1, 0));
 #else
 	texel = src_tex.SampleLevel(point_sampler, tc + float2(rt_size_inv_size.z, 0), 0);
 #endif
@@ -225,8 +233,8 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 
 float4 HDAO(float2 tc0)
 {
-	int num_rings = 4;
-	int num_ring_gathers = (1 + num_rings) * num_rings;
+	const int num_rings = 4;
+	const int num_ring_gathers = (1 + num_rings) * num_rings;
 
 	float4 sampled_z[2];
 	float4 sampled_nz[2];
@@ -235,7 +243,7 @@ float4 HDAO(float2 tc0)
 	float occlusion = 1;
 
 	float normal_dot = NormalRejectionTest(tc0);
-	if (normal_dot > 0.5f)
+	if (normal_dot > 0)
 	{
 		float4 occlusion4 = 0;
 		
@@ -299,6 +307,127 @@ float4 HDAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="HDAOPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="rw_texture2D" elem_type="float" name="out_tex"/>
+	
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+groupshared float2 shared_block[TILE_SIZE];
+
+float NormalRejectionTestCS(int2 tc)
+{
+	float summed_dot = 0;
+	for (int i = 0; i < 4; ++ i)
+	{
+		int2 pattern_offset = normal_load_pattern[i];
+		int2 offset_tc = tc + pattern_offset;
+		int2 mirror_offset_tc = tc - pattern_offset - 1;
+
+		float3 n1 = GetNormal(src_tex[offset_tc]);
+		float3 n2 = GetNormal(src_tex[mirror_offset_tc]);
+
+		float normal_dot = dot(n1, n2);
+		summed_dot += (normal_dot > accept_angle) ? 0 : (1 - abs(normal_dot) * 0.25f);
+	}
+
+	return summed_dot * 0.25f;
+}
+
+void GatherSamplesCS(int2 tc, out float4 z_samples, out float4 nz_samples)
+{
+	float2 znz;
+	
+	int base = (tc.y + MAX_KERNEL_SIZE) * TILE_SIZE_X + (tc.x + MAX_KERNEL_SIZE);
+	
+	znz = shared_block[base + TILE_SIZE_X];
+	z_samples.x = znz.x;
+	nz_samples.x = znz.y;
+
+	znz = shared_block[base + TILE_SIZE_X + 1];
+	z_samples.y = znz.x;
+	nz_samples.y = znz.y;
+
+	znz = shared_block[base + 1];
+	z_samples.z = znz.x;
+	nz_samples.z = znz.y;
+
+	znz = shared_block[base];
+	z_samples.w = znz.x;
+	nz_samples.w = znz.y;
+
+	z_samples *= depth_near_far_invfar.y;
+}
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void HDAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+{
+	const int num_rings = 4;
+	const int num_ring_gathers = (1 + num_rings) * num_rings;
+	
+	int2 base_addr = int2(group_id.x * BLOCK_SIZE_X, group_id.y * BLOCK_SIZE_Y) - MAX_KERNEL_SIZE;
+	for (int s = 0; s < TILE_SIZE / BLOCK_SIZE; ++ s)
+	{
+		int offset = GI + BLOCK_SIZE * s;
+		int y = offset / TILE_SIZE_X;
+		int x = offset - y * TILE_SIZE_X;
+		float4 texel = src_tex[base_addr + int2(x, y)];
+		shared_block[offset] = float2(GetDepth(texel), GetNormal(texel).z);
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	float4 sampled_z[2];
+	float4 sampled_nz[2];
+	float4 offset_sampled_z[2];
+	float4 compare[2];
+	float occlusion = 1;
+
+	float normal_dot = NormalRejectionTestCS(tid.xy);
+	if (normal_dot > 0)
+	{
+		float4 occlusion4 = 0;
+
+		float2 znz = shared_block[(gtid.y + MAX_KERNEL_SIZE) * TILE_SIZE_X + (gtid.x + MAX_KERNEL_SIZE)];
+		float center_z = znz.x * depth_near_far_invfar.y;
+		float offset_center_z = znz.y * normal_scale + center_z;
+
+		for (int i = 0; i < num_ring_gathers; ++ i)
+		{
+			int2 pattern_offset = hdao_ring_pattern[i];
+			int2 offset_tc = gtid.xy + pattern_offset;
+			int2 mirror_offset_tc = gtid.xy - pattern_offset - 1;
+
+			GatherSamplesCS(offset_tc, sampled_z[0], sampled_nz[0]);
+			GatherSamplesCS(mirror_offset_tc, sampled_z[1], sampled_nz[1]);
+
+			// Scale normals
+			offset_sampled_z[0] = sampled_nz[0] * normal_scale + sampled_z[0];
+			offset_sampled_z[1] = sampled_nz[1] * normal_scale + sampled_z[1];
+
+			// Detect valleys
+			float4 diff = offset_center_z - offset_sampled_z[0];
+			compare[0] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
+
+			diff = offset_center_z - offset_sampled_z[1];
+			compare[1] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
+
+			occlusion4 += hdao_ring_weight[i] * (compare[0] * compare[1].zwxy);
+		}
+
+		occlusion = hdao_intensity * normal_dot * dot(occlusion4, 1) * inv_ring_weights_total[num_rings - 1] * 0.5f;
+		occlusion = 1.0f - saturate(occlusion);
+	}
+
+	out_tex[tid.xy] = occlusion;
+}
+		]]>
+	</shader>
+				
+	<technique name="HDAOCS">
+		<pass name="p0">
+			<state name="compute_shader" value="HDAOCS()"/>
 		</pass>
 	</technique>
 </effect>
