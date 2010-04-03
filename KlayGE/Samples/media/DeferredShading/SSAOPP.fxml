@@ -87,9 +87,9 @@
 					0.28000, 0.24749, 0.21864, 0.24010,
 					0.23016, 0.22136, 0.19230, 0.19799,
 				]]>
-				</value>
-			</parameter>
-		</cbuffer>
+			</value>
+		</parameter>
+	</cbuffer>
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>

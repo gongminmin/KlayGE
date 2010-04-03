@@ -64,6 +64,16 @@ namespace KlayGE
 			numMipMaps_ = numMipMaps;
 		}
 
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
+		{
+			if ((numMipMaps_ > 1) && (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0)))
+			{
+				// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
+				numMipMaps_ = 1;
+			}
+		}
+
 		array_size_ = array_size;
 		format_		= format;
 		widthes_.assign(1, width);

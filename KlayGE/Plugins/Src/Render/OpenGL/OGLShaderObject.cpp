@@ -857,13 +857,14 @@ namespace KlayGE
 	{
 		std::stringstream shader_ss;
 		
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
 			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
 			ShaderType shader_type = effect_shader.Type();
-			if ((ST_NumShaderTypes == shader_type) || (ST_VertexShader == shader_type) || (ST_PixelShader == shader_type)
-				 || (ST_GeometryShader == shader_type))
+			if (((ST_NumShaderTypes == shader_type) || (ST_VertexShader == shader_type) || (ST_PixelShader == shader_type) || (ST_GeometryShader == shader_type))
+				 && (caps.max_shader_model >= effect_shader.Version()))
 			{
 				std::string const & s = effect_shader.str();
 				boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");

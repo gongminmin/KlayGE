@@ -372,11 +372,7 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\GPUParticleSystem\GPUParticleSystemHigh.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GPUParticleSystem\GPUParticleSystemLow.fxml"
+				RelativePath="..\..\media\GPUParticleSystem\GPUParticleSystem.fxml"
 				>
 			</File>
 			<File

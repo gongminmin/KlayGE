@@ -307,15 +307,11 @@ namespace KlayGE
 		}
 		else
 		{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6309 6387)
-#endif
-			d3d_device_->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+			ID3D10Buffer* null_vbs[] = { NULL };
+			UINT stride = 0;
+			UINT offset = 0;
+			d3d_device_->IASetVertexBuffers(0, 1, null_vbs, &stride, &offset);
 			d3d_device_->IASetInputLayout(NULL);
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 		}
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());

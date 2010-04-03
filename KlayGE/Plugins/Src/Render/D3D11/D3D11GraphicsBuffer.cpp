@@ -126,17 +126,21 @@ namespace KlayGE
 		{
 			bind_flags = bind_flags_;
 		}
-		if (access_hint_ & EAH_GPU_Read)
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.DeviceFeatureLevel() > D3D_FEATURE_LEVEL_9_3)
 		{
-			bind_flags |= D3D11_BIND_SHADER_RESOURCE;
-		}
-		if (access_hint_ & EAH_GPU_Write)
-		{
-			bind_flags |= D3D11_BIND_STREAM_OUTPUT;
-		}
-		if (access_hint_ & EAH_GPU_Unordered)
-		{
-			bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
+			if (access_hint_ & EAH_GPU_Read)
+			{
+				bind_flags |= D3D11_BIND_SHADER_RESOURCE;
+			}
+			if (access_hint_ & EAH_GPU_Write)
+			{
+				bind_flags |= D3D11_BIND_STREAM_OUTPUT;
+			}
+			if (access_hint_ & EAH_GPU_Unordered)
+			{
+				bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
+			}
 		}
 
 		misc_flags = 0;

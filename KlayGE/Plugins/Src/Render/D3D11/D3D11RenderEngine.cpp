@@ -358,15 +358,11 @@ namespace KlayGE
 		}
 		else
 		{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6309 6387)
-#endif
-			d3d_imm_ctx_->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+			ID3D11Buffer* null_vbs[] = { NULL };
+			UINT stride = 0;
+			UINT offset = 0;
+			d3d_imm_ctx_->IASetVertexBuffers(0, 1, null_vbs, &stride, &offset);
 			d3d_imm_ctx_->IASetInputLayout(NULL);
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 		}
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
@@ -544,34 +540,32 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
-		caps_.max_vertex_texture_units = 16;
-		if (D3D_FEATURE_LEVEL_11_0 == d3d_feature_level_)
-		{
-			caps_.max_shader_model = 5;
-		}
-		else
-		{
-			caps_.max_shader_model = 4;
-		}
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_3)
 		{
+			caps_.max_vertex_texture_units = 0;
 			caps_.max_texture_height = caps_.max_texture_width = 4096;
-			caps_.max_texture_depth = 511;
-			caps_.max_texture_cube_size = 4096;
+			caps_.max_texture_depth = 256;
+			caps_.max_texture_cube_size = 512;
+			caps_.max_texture_array_length = 0;
+			caps_.max_simultaneous_rts = 4;
+			caps_.max_vertices = 1048575;
+			caps_.max_indices = 1048575;
+			caps_.alpha_to_coverage_support = false;
 		}
 		else
 		{
+			caps_.max_vertex_texture_units = 16;
 			caps_.max_texture_height = caps_.max_texture_width = 8192;
 			caps_.max_texture_depth = 2048;
 			caps_.max_texture_cube_size = 8192;
+			caps_.max_texture_array_length = 512;
+			caps_.max_simultaneous_rts = 8;
+			caps_.max_vertices = 8388607;
+			caps_.max_indices = 16777215;
+			caps_.alpha_to_coverage_support = true;
 		}
-		caps_.max_texture_array_length = 512;
 		caps_.max_texture_anisotropy = 16;
-		caps_.max_simultaneous_rts = 8;
-		caps_.max_vertices = 8388607;
-		caps_.max_indices = 16777215;
 		caps_.hw_instancing_support = true;
-		caps_.alpha_to_coverage_support = true;
 		caps_.depth_texture_support = true;
 		caps_.bc1_support = true;
 		caps_.bc2_support = true;
@@ -579,6 +573,7 @@ namespace KlayGE
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
+			caps_.max_shader_model = 5;
 			caps_.stream_output_support = true;
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
@@ -598,6 +593,7 @@ namespace KlayGE
 
 		case D3D_FEATURE_LEVEL_10_1:
 		case D3D_FEATURE_LEVEL_10_0:
+			caps_.max_shader_model = 4;
 			caps_.stream_output_support = true;
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
@@ -623,6 +619,7 @@ namespace KlayGE
 			break;
 
 		default:
+			caps_.max_shader_model = 2;
 			caps_.stream_output_support = false;
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;

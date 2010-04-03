@@ -20,16 +20,15 @@ int const TILE_SIZE = 1 << LOG_2_TILE_SIZE;
 
 namespace
 {
-	class DownsamplerNxN : public PostProcess
+	class DownsamplerNxN : public PostProcessChain
 	{
 	public:
 		explicit DownsamplerNxN(uint32_t n)
-			: PostProcess(L"DownsamplerNxN"),
-				ds_2x2_(n), ds_tex_(n - 1)
+			: PostProcessChain(L"DownsamplerNxN")
 		{
 			for (uint32_t i = 0; i < n; ++ i)
 			{
-				ds_2x2_[i] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
+				this->Append(LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2"));
 			}
 		}
 
@@ -39,53 +38,26 @@ namespace
 
 			uint32_t w = std::max(tex->Width(0) / 2, static_cast<uint32_t>(1));
 			uint32_t h = std::max(tex->Height(0) / 2, static_cast<uint32_t>(1));
-			for (size_t i = 0; i < ds_tex_.size(); ++ i)
+			for (size_t i = 0; i < pp_chain_.size(); ++ i)
 			{
-				ds_tex_[i] = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-
 				if (0 == i)
 				{
-					ds_2x2_[i]->InputPin(index, tex);
+					pp_chain_[i]->InputPin(index, tex);
 				}
 				else
 				{
-					ds_2x2_[i]->InputPin(index, ds_tex_[i - 1]);
+					pp_chain_[i]->InputPin(index, pp_chain_[i - 1]->OutputPin(index));
 				}
-				ds_2x2_[i]->OutputPin(index, ds_tex_[i]);
+				if (i != pp_chain_.size() - 1)
+				{
+					TexturePtr ds_tex = rf.MakeTexture2D(w, h, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+					pp_chain_[i]->OutputPin(index, ds_tex);
+				}
 
 				w = std::max(w / 2, static_cast<uint32_t>(1));
 				h = std::max(h / 2, static_cast<uint32_t>(1));
 			}
-
-			ds_2x2_.back()->InputPin(index, ds_tex_[ds_tex_.size() - 1]);
 		}
-
-		TexturePtr const & InputPin(uint32_t index) const
-		{
-			return ds_2x2_[0]->InputPin(index);
-		}
-
-		void OutputPin(uint32_t index, TexturePtr const & tex)
-		{
-			ds_2x2_.back()->OutputPin(index, tex);
-		}
-
-		TexturePtr const & OutputPin(uint32_t index) const
-		{
-			return ds_2x2_.back()->OutputPin(index);
-		}
-
-		void Apply()
-		{
-			for (size_t i = 0; i < ds_2x2_.size(); ++ i)
-			{
-				ds_2x2_[i]->Apply();
-			}
-		}
-
-	private:
-		std::vector<PostProcessPtr> ds_2x2_;
-		std::vector<TexturePtr> ds_tex_;
 	};
 }
 

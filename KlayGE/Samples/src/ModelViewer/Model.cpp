@@ -291,7 +291,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	*(effect_->ParameterByName("emit_tex")) = em;
 	*(effect_->ParameterByName("opacity_tex")) = om;
 
-	*(effect_->ParameterByName("has_skinned")) = has_skinned;
+	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned);
 
 	*(effect_->ParameterByName("ambient_clr")) = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
 	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));

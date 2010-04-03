@@ -11,7 +11,7 @@
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
 
-	<parameter type="bool" name="has_skinned"/>
+	<parameter type="int" name="has_skinned"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>

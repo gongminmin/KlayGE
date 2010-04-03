@@ -522,13 +522,17 @@ namespace KlayGE
 			}
 		}
 
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
 			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
 			ShaderType shader_type = effect_shader.Type();
 			if ((ST_NumShaderTypes == shader_type) || (cur_type == shader_type))
 			{
-				ss << effect_shader.str() << std::endl;
+				if (caps.max_shader_model >= effect_shader.Version())
+				{
+					ss << effect_shader.str() << std::endl;
+				}
 			}
 		}
 

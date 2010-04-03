@@ -170,7 +170,7 @@ namespace
 
 				if (use_so)
 				{
-					technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("ParticlesWithGSSO");
+					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGSSO");
 					rl_->BindDummyVertexStream(max_num_particles);
 				}
 				else
@@ -187,7 +187,7 @@ namespace
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-					technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("ParticlesWithGS");
+					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGS");
 				}
 			}
 			else
@@ -220,7 +220,7 @@ namespace
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = rf.LoadEffect("GPUParticleSystemLow.fxml")->TechniqueByName("Particles");
+				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Particles");
 			}
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
@@ -319,7 +319,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 				rl_->BindDummyVertexStream(max_num_particles);
 
-				technique_ = rf.LoadEffect("GPUParticleSystemHigh.fxml")->TechniqueByName("UpdateSO");
+				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
 
 				std::vector<float4> p(max_num_particles_);
 				for (size_t i = 0; i < p.size(); ++ i)
@@ -403,7 +403,7 @@ namespace
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 				}
 
-				technique_ = rf.LoadEffect("GPUParticleSystemLow.fxml")->TechniqueByName("Update");
+				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
 
 				std::vector<float4> p(tex_width_ * tex_height_);
 				for (size_t i = 0; i < p.size(); ++ i)
