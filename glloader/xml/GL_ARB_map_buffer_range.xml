@@ -11,7 +11,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glMapBufferRange" return="void">
+		<function name="glMapBufferRange" return="GLvoid*">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLintptr" name="offset"/>
