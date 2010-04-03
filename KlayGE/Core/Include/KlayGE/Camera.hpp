@@ -6,6 +6,7 @@
 //
 // 3.10.0
 // 支持Motion blur (2010.2.22)
+// 支持Stereo (2010.4.2)
 //
 // 2.0.0
 // 初次建立 (2003.5.31)
@@ -73,6 +74,12 @@ namespace KlayGE
 		float4x4 const & PrevViewMatrix() const;
 		float4x4 const & PrevProjMatrix() const;
 
+		bool StereoMode() const
+		{
+			return stereo_mode_;
+		}
+		void StereoMode(bool stereo);
+
 	private:
 		float3		eyePos_;		// 观察矩阵的属性
 		float3		lookat_;
@@ -88,6 +95,8 @@ namespace KlayGE
 
 		boost::circular_buffer<float4x4> prev_view_mats_[2];
 		boost::circular_buffer<float4x4> prev_proj_mats_[2];
+
+		bool		stereo_mode_;
 	};
 }
 

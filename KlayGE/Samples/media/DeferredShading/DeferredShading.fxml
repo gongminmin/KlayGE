@@ -167,10 +167,8 @@ void DeferredShadingVS(float4 pos : POSITION,
 #endif
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
+	DeferredShadingDepthOnlyVS(pos, oPos);
 	oPosSS = oPos;
-	oPos += texel_to_pixel_offset;
-	oPos.z = min(oPos.z, oPos.w);
 
 #ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPosSS.xy / oPosSS.w * 0.5f;

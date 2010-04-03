@@ -6,6 +6,7 @@
 //
 // 3.10.0
 // 支持Motion blur (2010.2.22)
+// 支持Stereo (2010.4.2)
 //
 // 2.0.0
 // 初次建立(2003.10.1)
@@ -26,13 +27,12 @@ namespace KlayGE
 	// 构造函数
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
+		: stereo_mode_(false)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
 		prev_view_mats_[0].resize(num_motion_frames);
 		prev_proj_mats_[0].resize(num_motion_frames);
-		prev_view_mats_[1].resize(num_motion_frames);
-		prev_proj_mats_[1].resize(num_motion_frames);
 
 		// 设置观察矩阵的参数
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
@@ -53,9 +53,9 @@ namespace KlayGE
 
 		viewVec_ = MathLib::normalize(lookat_ - eyePos_);
 		float4x4 view_mat = MathLib::look_at_lh(eyePos_, lookat_, upVec);
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (re.StereoMode())
+		if (this->StereoMode())
 		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float separation = re.StereoSeparation();
 			viewMat_[0] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
 			viewMat_[1] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
@@ -77,9 +77,9 @@ namespace KlayGE
 		nearPlane_	= nearPlane;
 		farPlane_	= farPlane;
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (re.StereoMode())
+		if (this->StereoMode())
 		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float separation = re.StereoSeparation() * 0.005f;
 			float height = 2 * nearPlane * tan(FOV / 2);
 			float width = height * aspect;
@@ -96,8 +96,7 @@ namespace KlayGE
 	{
 		prev_view_mats_[0].push_back(viewMat_[0]);
 		prev_proj_mats_[0].push_back(projMat_[0]);
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (re.StereoMode())
+		if (this->StereoMode())
 		{
 			prev_view_mats_[1].push_back(viewMat_[1]);
 			prev_proj_mats_[1].push_back(projMat_[1]);
@@ -106,25 +105,55 @@ namespace KlayGE
 
 	float4x4 const & Camera::ViewMatrix() const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		return viewMat_[re.StereoActiveEye()];
+		uint32_t eye = 0;
+		if (this->StereoMode())
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			eye = re.StereoActiveEye();
+		}
+		return viewMat_[eye];
 	}
 
 	float4x4 const & Camera::ProjMatrix() const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		return projMat_[re.StereoActiveEye()];
+		uint32_t eye = 0;
+		if (this->StereoMode())
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			eye = re.StereoActiveEye();
+		}
+		return projMat_[eye];
 	}
 
 	float4x4 const & Camera::PrevViewMatrix() const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		return prev_view_mats_[re.StereoActiveEye()].front();
+		uint32_t eye = 0;
+		if (this->StereoMode())
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			eye = re.StereoActiveEye();
+		}
+		return prev_view_mats_[eye].front();
 	}
 	
 	float4x4 const & Camera::PrevProjMatrix() const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		return prev_proj_mats_[re.StereoActiveEye()].front();
+		uint32_t eye = 0;
+		if (this->StereoMode())
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			eye = re.StereoActiveEye();
+		}
+		return prev_proj_mats_[eye].front();
+	}
+
+	void Camera::StereoMode(bool stereo)
+	{
+		stereo_mode_ = stereo;
+		if (stereo_mode_)
+		{
+			prev_view_mats_[1].resize(prev_view_mats_[0].size());
+			prev_proj_mats_[1].resize(prev_proj_mats_[0].size());
+		}
 	}
 }

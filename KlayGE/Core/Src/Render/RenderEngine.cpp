@@ -370,6 +370,8 @@ namespace KlayGE
 		stereo_active_eye_ = 0;
 		if (stereo_mode_)
 		{
+			screen_frame_buffer_->GetViewport().camera->StereoMode(stereo_mode_);
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			for (int i = 0; i < 2; ++ i)
 			{

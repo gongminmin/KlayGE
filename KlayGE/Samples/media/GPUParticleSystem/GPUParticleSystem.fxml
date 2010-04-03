@@ -68,7 +68,6 @@ struct PS_IN
 	float3 view_dir : TEXCOORD2;
 	float2 tex : TEXCOORD3;
 };
-
 		]]>
 	</shader>
 	
