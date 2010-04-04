@@ -53,6 +53,8 @@ namespace KlayGE
 		void BeginConditionalRender();
 		void EndConditionalRender();
 
+		bool AnySamplesPassed();
+
 	private:
 		void DoOnLostDevice();
 		void DoOnResetDevice();

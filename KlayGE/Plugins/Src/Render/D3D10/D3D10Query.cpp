@@ -64,8 +64,8 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = render_eng.D3DDevice();
 
 		D3D10_QUERY_DESC desc;
-		desc.MiscFlags = D3D10_QUERY_MISC_PREDICATEHINT;
 		desc.Query = D3D10_QUERY_OCCLUSION_PREDICATE;
+		desc.MiscFlags = 0;
 
 		ID3D10Predicate* predicate;
 		d3d_device->CreatePredicate(&desc, &predicate);
@@ -96,5 +96,12 @@ namespace KlayGE
 		ID3D10DevicePtr const & d3d_device = render_eng.D3DDevice();
 
 		d3d_device->SetPredication(NULL, false);
+	}
+
+	bool D3D10ConditionalRender::AnySamplesPassed()
+	{
+		BOOL ret;
+		while (S_OK != predicate_->GetData(&ret, sizeof(ret), 0));
+		return (TRUE == ret);
 	}
 }

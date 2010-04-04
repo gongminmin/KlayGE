@@ -46,6 +46,8 @@ namespace KlayGE
 		void BeginConditionalRender();
 		void EndConditionalRender();
 
+		bool AnySamplesPassed();
+
 	private:
 		GLuint query_;
 	};

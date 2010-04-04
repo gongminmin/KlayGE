@@ -65,27 +65,62 @@ namespace KlayGE
 
 	void OGLConditionalRender::Begin()
 	{
-		glBeginQuery(GL_SAMPLES_PASSED, query_);
+		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_occlusion_query2())
+		{
+			glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
+		}
+		else
+		{
+			glBeginQuery(GL_SAMPLES_PASSED, query_);
+		}
 	}
 
 	void OGLConditionalRender::End()
 	{
-		glEndQuery(GL_SAMPLES_PASSED);
+		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_occlusion_query2())
+		{
+			glEndQuery(GL_ANY_SAMPLES_PASSED);
+		}
+		else
+		{
+			glEndQuery(GL_SAMPLES_PASSED);
+		}
 	}
 
 	void OGLConditionalRender::BeginConditionalRender()
 	{
-		if (glloader_GL_NV_conditional_render())
+		if (glloader_GL_VERSION_3_0())
 		{
-			glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
+			glBeginConditionalRender(query_, GL_QUERY_WAIT);
+		}
+		else
+		{
+			if (glloader_GL_NV_conditional_render())
+			{
+				glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
+			}
 		}
 	}
 
 	void OGLConditionalRender::EndConditionalRender()
 	{
-		if (glloader_GL_NV_conditional_render())
+		if (glloader_GL_VERSION_3_0())
 		{
-			glEndConditionalRenderNV();
+			glEndConditionalRender();
 		}
+		else
+		{
+			if (glloader_GL_NV_conditional_render())
+			{
+				glEndConditionalRenderNV();
+			}
+		}
+	}
+
+	bool OGLConditionalRender::AnySamplesPassed()
+	{
+		GLuint ret;
+		glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
+		return (ret != 0);
 	}
 }

@@ -1,8 +1,11 @@
 // Query.hpp
 // KlayGE 查询抽象类 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2005-2008
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2005-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 增加了ConditionalRender::AnySamplesPassed (2010.4.3)
 //
 // 3.8.0
 // 增加ConditionalRender (2008.10.11)
@@ -59,6 +62,8 @@ namespace KlayGE
 
 		virtual void BeginConditionalRender() = 0;
 		virtual void EndConditionalRender() = 0;
+
+		virtual bool AnySamplesPassed() = 0;
 	};
 }
 

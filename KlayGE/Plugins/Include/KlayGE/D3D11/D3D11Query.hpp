@@ -44,6 +44,8 @@ namespace KlayGE
 		void BeginConditionalRender();
 		void EndConditionalRender();
 
+		bool AnySamplesPassed();
+
 	private:
 		ID3D11PredicatePtr predicate_;
 	};

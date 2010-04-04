@@ -143,6 +143,7 @@ namespace KlayGE
 		virtual void EmitPass(bool emit_pass) = 0;
 		virtual bool IsEmit() const = 0;
 	};
+	typedef boost::shared_ptr<DeferredableObject> DeferredableObjectPtr;
 
 	class DeferredShadingLayer : public RenderableHelper
 	{
@@ -226,7 +227,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
 
-		QueryPtr conditional_render_;
+		std::vector<std::vector<QueryPtr> > light_crs_;
 
 		int32_t buffer_type_;
 

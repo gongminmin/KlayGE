@@ -118,13 +118,6 @@ float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 
 float VSM(float3 pos_es, float len)
 {
-	float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
-	light_proj_pos /= light_proj_pos.w;
-	light_proj_pos.y *= flipping;
-	light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-	
-	float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
-	
 	float shadow = 1;
 #ifndef INTEGER_SUPPORT
 	if (0 == ((light_attrib / LSA_NoShadow) % 2))
@@ -132,6 +125,13 @@ float VSM(float3 pos_es, float len)
 	if (0 == (light_attrib & LSA_NoShadow))
 #endif
 	{
+		float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
+		light_proj_pos /= light_proj_pos.w;
+		light_proj_pos.y *= flipping;
+		light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
+	
+		float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
+
 		float p = (len < moments.x);
 		// Variance shadow mapping
 		float variance = moments.y - moments.x * moments.x;
@@ -151,7 +151,6 @@ void DeferredShadingDepthOnlyVS(float4 pos : POSITION,
 {
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
 	oPos += texel_to_pixel_offset;
-	oPos.z = min(oPos.z, oPos.w);
 }
 
 float4 DeferredShadingDepthOnlyPS() : SV_Target
@@ -209,7 +208,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 	{
 		float2 ds = 0;
 
-		dir = normalize(dir);
+		dir /= len;
 		float3 dir_ws = mul(-dir, (float3x3)inv_view);
 		float3 abs_dir = abs(dir_ws);
 		int face;
@@ -302,7 +301,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 					float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 		if (spot > 0)
 		{
-			dir = normalize(dir);
+			dir /= len;
 			float3 normal = GetNormal(ndc);
 			float diff = diffuse_term(dir, normal);
 			if (diff > 0)
@@ -488,7 +487,8 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="color_write_mask" value="0"/>
-
+			
+			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
@@ -502,6 +502,7 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
+			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="blend_enable" value="true"/>
@@ -520,6 +521,7 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
+			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="blend_enable" value="true"/>
@@ -538,6 +540,7 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
+			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="blend_enable" value="true"/>
@@ -556,6 +559,7 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
 
+			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>

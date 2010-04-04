@@ -73,8 +73,8 @@ namespace KlayGE
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 
 		D3D11_QUERY_DESC desc;
-		desc.MiscFlags = D3D11_QUERY_MISC_PREDICATEHINT;
 		desc.Query = D3D11_QUERY_OCCLUSION_PREDICATE;
+		desc.MiscFlags = 0;
 
 		ID3D11Predicate* predicate;
 		d3d_device->CreatePredicate(&desc, &predicate);
@@ -111,5 +111,15 @@ namespace KlayGE
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->SetPredication(NULL, false);
+	}
+
+	bool D3D11ConditionalRender::AnySamplesPassed()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		BOOL ret;
+		while (S_OK != d3d_imm_ctx->GetData(predicate_.get(), &ret, sizeof(ret), 0));
+		return (TRUE == ret);
 	}
 }

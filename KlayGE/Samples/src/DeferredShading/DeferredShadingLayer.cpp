@@ -116,8 +116,6 @@ namespace KlayGE
 		technique_lights_[LT_Spot] = technique_->Effect().TechniqueByName("DeferredShadingSpot");
 		technique_light_depth_only_ = technique_->Effect().TechniqueByName("DeferredShadingLightDepthOnly");
 
-		conditional_render_ = rf.MakeConditionalRender();
-
 		sm_buffer_ = rf.MakeFrameBuffer();
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
 		try
@@ -158,6 +156,7 @@ namespace KlayGE
 	int DeferredShadingLayer::AddAmbientLight(float3 const & clr)
 	{
 		light_clr_type_[0] += float4(clr.x(), clr.y(), clr.z(), 0);
+		light_crs_.push_back(std::vector<QueryPtr>());
 		return 0;
 	}
 
@@ -171,6 +170,14 @@ namespace KlayGE
 		light_dir_.push_back(float4(0, 0, 0, 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		light_crs_.push_back(std::vector<QueryPtr>());
+		for (int i = 0; i < 6; ++ i)
+		{
+			light_crs_.back().push_back(rf.MakeConditionalRender());
+		}
+
 		return id;
 	}
 
@@ -185,6 +192,7 @@ namespace KlayGE
 		light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
+		light_crs_.push_back(std::vector<QueryPtr>());
 		return id;
 	}
 
@@ -199,6 +207,10 @@ namespace KlayGE
 		light_dir_.push_back(float4(d.x(), d.y(), d.z(), 0));
 		light_falloff_.push_back(float4(falloff.x(), falloff.y(), falloff.z(), 0));
 		light_cos_outer_inner_.push_back(float4(cos(outer), cos(inner), outer * 2, tan(outer)));
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		light_crs_.push_back(std::vector<QueryPtr>(1, rf.MakeConditionalRender()));
+
 		return id;
 	}
 
@@ -320,6 +332,57 @@ namespace KlayGE
 
 	void DeferredShadingLayer::ScanLightSrc()
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		re.BindFrameBuffer(shaded_buffer_);
+
+		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
+		{
+			if (light_enabled_[i])
+			{
+				int type = static_cast<int>(light_clr_type_[i].w());
+				if (LT_Spot == type)
+				{
+					float3 d, u;
+					d = *reinterpret_cast<float3*>(&light_dir_[i]);
+					u = float3(0, 1, 0);
+
+					float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
+					float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+
+					float const scale = light_cos_outer_inner_[i].w();
+					float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+					rl_ = rl_cone_;
+
+					*light_volume_mvp_param_ = mat * MathLib::inverse(light_view) * view_ * proj_;
+
+					light_crs_[i][0]->Begin();
+					re.Render(*technique_light_depth_only_, *rl_);
+					light_crs_[i][0]->End();
+				}
+				else if (LT_Point == type)
+				{
+					float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
+					rl_ = rl_pyramid_;
+					float4x4 vp = view_ * proj_;
+					for (int j = 0; j < 6; ++ j)
+					{
+						float3 d, u;
+						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+						d = ad.first;
+						u = ad.second;
+
+						float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+						*light_volume_mvp_param_ = MathLib::inverse(light_view) * vp;
+
+						light_crs_[i][j]->Begin();
+						re.Render(*technique_light_depth_only_, *rl_);
+						light_crs_[i][j]->End();
+					}
+				}
+			}
+		}
+
 		light_scaned_.resize(0);
 		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 		{
@@ -386,6 +449,8 @@ namespace KlayGE
 
 		if (0 == pass)
 		{
+			// Generate G-Buffer
+
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
 			view_ = camera.ViewMatrix();
@@ -412,7 +477,7 @@ namespace KlayGE
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 			{
-				boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+				DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 				if (deo)
 				{
 					deo->GenShadowMapPass(false);
@@ -440,7 +505,7 @@ namespace KlayGE
 					non_emit_objs_.resize(0);
 					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 					{
-						boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 						if (deo)
 						{
 							if (deo->IsEmit())
@@ -479,7 +544,7 @@ namespace KlayGE
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 						{
-							boost::shared_ptr<DeferredableObject> deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+							DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 							if (deo)
 							{
 								deo->GenShadowMapPass(true);
@@ -545,22 +610,20 @@ namespace KlayGE
 
 						if ((LT_Spot == type) || (LT_Point == type))
 						{
-							float4x4 mat;
+							float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+								* view_ * proj_;
 							if (LT_Spot == type)
 							{
 								float const scale = light_cos_outer_inner_[org_no].w();
-								mat = MathLib::scaling(scale, scale, 1.0f);
+								mat = MathLib::scaling(scale, scale, 1.0f) * mat;
 								rl_ = rl_cone_;
 							}
 							else //if (LT_Point == type)
 							{
-								mat = float4x4::Identity();
 								rl_ = rl_pyramid_;
 							}
 
-							*light_volume_mvp_param_ = mat
-								* MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-								* view_ * proj_;
+							*light_volume_mvp_param_ = mat;
 						}
 						else
 						{
@@ -568,25 +631,23 @@ namespace KlayGE
 							*light_volume_mvp_param_ = float4x4::Identity();
 						}
 
-						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
+						if ((type != LT_Ambient) && (type != LT_Directional))
 						{
-							if ((LT_Spot == type) || (LT_Point == type))
+							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][offset])->BeginConditionalRender();
+
+							if (0 == (light_attrib_[org_no] & LSA_NoShadow))
 							{
-								re.BindFrameBuffer(shaded_buffer_);
+								// Shadow map generation
 
-								conditional_render_->Begin();
-								re.Render(*technique_light_depth_only_, *rl_);
-								conditional_render_->End();
+								re.BindFrameBuffer(sm_buffer_);
+								re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+								return App3DFramework::URV_Need_Flush;
 							}
-
-							// Shadow map generation
-
-							re.BindFrameBuffer(sm_buffer_);
-							re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
-
-							checked_pointer_cast<ConditionalRender>(conditional_render_)->BeginConditionalRender();
-
-							return App3DFramework::URV_Need_Flush;
+							else
+							{
+								return App3DFramework::URV_Flushed;
+							}
 						}
 						else
 						{
@@ -598,7 +659,6 @@ namespace KlayGE
 						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
 						{
 							box_filter_pp_->Apply();
-							checked_pointer_cast<ConditionalRender>(conditional_render_)->EndConditionalRender();
 						}
 
 						// Lighting
@@ -612,6 +672,11 @@ namespace KlayGE
 						*light_falloff_param_ = light_falloff_[org_no];
 
 						re.Render(*technique_, *rl_);
+
+						if ((type != LT_Ambient) && (type != LT_Directional))
+						{
+							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][offset])->EndConditionalRender();
+						}
 
 						return App3DFramework::URV_Flushed;
 					}

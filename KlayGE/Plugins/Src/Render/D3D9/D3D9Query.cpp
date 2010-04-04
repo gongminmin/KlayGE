@@ -106,6 +106,13 @@ namespace KlayGE
 		re.ConditionalRender(true);
 	}
 
+	bool D3D9ConditionalRender::AnySamplesPassed()
+	{
+		uint32_t ret;
+		while (S_FALSE == query_->GetData(&ret, sizeof(ret), D3DGETDATA_FLUSH));
+		return (ret != 0);
+	}
+
 	void D3D9ConditionalRender::DoOnLostDevice()
 	{
 		query_.reset();

@@ -41,12 +41,12 @@ void GBufferVS(float4 pos : POSITION,
 			float3 tangent : TANGENT,
 			float2 texcoord : TEXCOORD0,
 			out float2 oTexCoord : TEXCOORD0,
-			out float4 oNormal : TEXCOORD1,
+			out float4 oNormalDepth : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oNormal.xyz = mul(normal, (float3x3)model_view);
-	oNormal.w = oPos.w * depth_near_far_invfar.z;
+	oNormalDepth.xyz = mul(normal, (float3x3)model_view);
+	oNormalDepth.w = oPos.w * depth_near_far_invfar.z;
 
 	oTexCoord = texcoord;
 }
@@ -150,19 +150,17 @@ void GenShadowMapVS(float4 pos : POSITION,
 						float3 normal : NORMAL,
 						float3 tangent : TANGENT,
 						float2 texcoord : TEXCOORD0,
-						out float3 oLightWorldPos : TEXCOORD0,
+						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos, mvp);
-	oLightWorldPos = pos_es.xyz;
+	oDist = length(pos_es.xyz);
 }
 
-float4 GenShadowMapPS(float3 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-	float dist = length(LightWorldPos.xyz);
 	float2 dxdy = float2(ddx(dist), ddy(dist));
-
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
