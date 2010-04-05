@@ -93,11 +93,14 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>
-		<parameter type="float2" name="proj"/>
 		<parameter type="float4" name="rt_size_inv_size"/>
+	</cbuffer>
+
+	<cbuffer name="hdao_params">
+		<parameter type="int" name="num_rings"/>
 		<parameter type="float" name="hdao_reject_radius" value="0.43"/>
 		<parameter type="float" name="hdao_accept_radius" value="0.00312"/>
-		<parameter type="float" name="hdao_intensity" value="2.14"/> 
+		<parameter type="float" name="hdao_intensity" value="2.14"/>
 		<parameter type="float" name="normal_scale" value="0.3"/>
 		<parameter type="float" name="accept_angle" value="0.98"/>
 	</cbuffer>
@@ -144,58 +147,6 @@ float NormalRejectionTest(float2 tc)
 	return summed_dot * 0.25f;
 }
 
-float4 SSAO(float2 tc0)
-{
-	float occlusion = 1;
-
-	float normal_dot = NormalRejectionTest(tc0);
-	if (normal_dot > 0)
-	{
-		float4 ndc = src_tex.Sample(point_sampler, tc0);
-		float depth = GetDepth(ndc);
-		
-		const float scale = 0.025f; 
-		const float3 samples[8] =
-		{
-			normalize(float3( 1,  1,  1)) * scale,
-			normalize(float3(-1, -1, -1)) * scale,
-			normalize(float3(-1, -1,  1)) * scale,
-			normalize(float3(-1,  1, -1)) * scale,
-			normalize(float3(-1,  1,  1)) * scale,
-			normalize(float3( 1, -1, -1)) * scale,
-			normalize(float3( 1, -1,  1)) * scale,
-			normalize(float3( 1,  1, -1)) * scale,
-		};
-
-		float3 normal = GetNormal(src_tex.Sample(point_sampler, tc0));
-
-		float3 sample_scale = float3(proj / (depth * depth_near_far_invfar.y), depth_near_far_invfar.z);
-		float4 sky_access = 0.0f;
-		float4 arr_scene_depth2[2];
-		float3 ray;
-
-		[unroll]
-		for (int i = 0; i < 2; ++ i)
-		{
-			[unroll]
-			for (int j = 0; j < 4; ++ j)
-			{
-				ray = reflect(samples[i * 4 + j].xyz, normal) * sample_scale;
-				arr_scene_depth2[0][j] = GetDepth(src_tex.SampleLevel(point_sampler, tc0 + ray.xy, 0)) - ray.z;
-				ray *= 0.5;
-				arr_scene_depth2[1][j] = GetDepth(src_tex.SampleLevel(point_sampler, tc0 + ray.xy, 0)) - ray.z;
-			}
-
-			sky_access += (depth < arr_scene_depth2[0]);
-			sky_access += (depth < arr_scene_depth2[1]);
-		}
-	
-		occlusion = saturate(dot(sky_access, 1 / 8.0f) * 1.5f - 0.5f);
-	}
-
-	return occlusion;
-}
-
 void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 {
 	float4 texel;
@@ -231,10 +182,9 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	z_samples *= depth_near_far_invfar.y;
 }
 
-float4 HDAO(float2 tc0)
+float4 SSAO(float2 tc0)
 {
-	const int num_rings = 4;
-	const int num_ring_gathers = (1 + num_rings) * num_rings;
+	int num_ring_gathers = (1 + num_rings) * num_rings;
 
 	float4 sampled_z[2];
 	float4 sampled_nz[2];
@@ -285,11 +235,6 @@ float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	return SSAO(tc0);
 }
-
-float4 HDAOPS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	return HDAO(tc0);
-}
 		]]>
 	</shader>
 
@@ -299,14 +244,6 @@ float4 HDAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SSAOPS()"/>
-		</pass>
-	</technique>
-	<technique name="HDAO">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="HDAOPS()"/>
 		</pass>
 	</technique>
 
@@ -362,7 +299,7 @@ void GatherSamplesCS(int2 tc, out float4 z_samples, out float4 nz_samples)
 }
 
 [numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
-void HDAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
 {
 	const int num_rings = 4;
 	const int num_ring_gathers = (1 + num_rings) * num_rings;
@@ -425,9 +362,9 @@ void HDAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 grou
 		]]>
 	</shader>
 				
-	<technique name="HDAOCS">
+	<technique name="SSAOCS">
 		<pass name="p0">
-			<state name="compute_shader" value="HDAOCS()"/>
+			<state name="compute_shader" value="SSAOCS()"/>
 		</pass>
 	</technique>
 </effect>

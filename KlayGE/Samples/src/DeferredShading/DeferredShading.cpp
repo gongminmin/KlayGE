@@ -580,98 +580,52 @@ namespace
 			: PostProcess(L"SSAO",
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("HDAO")),
-				hd_mode_(true)
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO")),
+				ssao_level_(4)
 		{
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
 
-			blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
-
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-			proj_param_ = technique_->Effect().ParameterByName("proj");
 			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
 
 			if (cs_support_)
 			{
-				this->Technique(technique_->Effect().TechniqueByName("HDAOCS"));
-			}
-			else
-			{
-				this->Technique(technique_->Effect().TechniqueByName("HDAO"));
-			}
-		}
-
-		void OutputPin(uint32_t index, TexturePtr const & tex)
-		{
-			PostProcess::OutputPin(index, tex);
-
-			if (tex)
-			{
-				if (!ssao_tex_)
-				{
-					RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-					try
-					{
-						ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-					}
-					catch (...)
-					{
-						ssao_tex_ = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-					}
-
-					blur_pp_->InputPin(0, ssao_tex_);
-					blur_pp_->OutputPin(index, tex);
-				}
-			}
-		}
-
-		void HDAOMode(bool hd)
-		{
-			hd_mode_ = hd;
-			if (hd_mode_)
-			{
-				if (cs_support_)
-				{
-					this->Technique(technique_->Effect().TechniqueByName("HDAOCS"));
-				}
-				else
-				{
-					this->Technique(technique_->Effect().TechniqueByName("HDAO"));
-				}
-				this->OutputPin(0, blur_pp_->OutputPin(0));
+				this->Technique(technique_->Effect().TechniqueByName("SSAOCS"));
 			}
 			else
 			{
 				this->Technique(technique_->Effect().TechniqueByName("SSAO"));
-				this->OutputPin(0, ssao_tex_);
 			}
+		}
+
+		void SSAOLevel(int level)
+		{
+			ssao_level_ = level;
+			*(technique_->Effect().ParameterByName("num_rings")) = static_cast<int32_t>(level);
 		}
 
 		void Apply()
 		{
-			if (cs_support_ && hd_mode_)
+			if (ssao_level_ > 0)
 			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-				TexturePtr const & tex = this->InputPin(0);
-
-				int const BLOCK_SIZE_X = 16;
-				int const BLOCK_SIZE_Y = 16;
-
-				this->OnRenderBegin();
-				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
-				this->OnRenderEnd();
-			}
-			else
-			{
-				PostProcess::Apply();
-
-				if (!hd_mode_)
+				if (cs_support_)
 				{
-					blur_pp_->Apply();
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+					TexturePtr const & tex = this->InputPin(0);
+
+					int const BLOCK_SIZE_X = 16;
+					int const BLOCK_SIZE_Y = 16;
+
+					this->OnRenderBegin();
+					re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
+					this->OnRenderEnd();
+				}
+				else
+				{
+					PostProcess::Apply();
 				}
 			}
 		}
@@ -683,9 +637,6 @@ namespace
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
-			float4x4 const & proj = camera.ProjMatrix();
-			*proj_param_ = float2(proj(0, 0), proj(1, 1));
-
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			*rt_size_inv_size_param_ = float4(1.0f * re.CurFrameBuffer()->Width(), 1.0f * re.CurFrameBuffer()->Height(),
 				1.0f / re.CurFrameBuffer()->Width(), 1.0f / re.CurFrameBuffer()->Height());
@@ -694,14 +645,9 @@ namespace
 	private:
 		bool cs_support_;
 
-		bool hd_mode_;
-
-		PostProcessPtr blur_pp_;
-
-		TexturePtr ssao_tex_;
+		int ssao_level_;
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr proj_param_;
 		RenderEffectParameterPtr rt_size_inv_size_param_;
 	};
 
@@ -762,7 +708,7 @@ int main()
 
 DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings const & settings)
 			: App3DFramework(name, settings),
-				anti_alias_enabled_(true), ssao_type_(0)
+				anti_alias_enabled_(true)
 {
 }
 
@@ -935,12 +881,9 @@ void DeferredShadingApp::SSAOChangedHandler(UIComboBox const & sender)
 {
 	if ((0 == buffer_type_) || (7 == buffer_type_))
 	{
-		ssao_type_ = sender.GetSelectedIndex();
-		if (ssao_type_ != 2)
-		{
-			checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->HDAOMode(0 == ssao_type_);
-		}
-		deferred_shading_->SSAOEnabled(ssao_type_ != 2);
+		int ssao_level = sender.GetNumItems() - 1 - sender.GetSelectedIndex();
+		checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
+		deferred_shading_->SSAOEnabled(ssao_level != 0);
 	}
 }
 
@@ -1018,7 +961,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		spot_light_src_[0]->Visible(false);
 		spot_light_src_[1]->Visible(false);
 
-		if (((0 == buffer_type_) && (ssao_type_ != 2)) || (7 == buffer_type_))
+		if ((0 == buffer_type_) || (7 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 		}

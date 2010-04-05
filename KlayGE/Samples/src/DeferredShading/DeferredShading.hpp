@@ -47,7 +47,6 @@ private:
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
 	bool anti_alias_enabled_;
-	int ssao_type_;
 
 	int id_buffer_combo_;
 	int id_anti_alias_;
