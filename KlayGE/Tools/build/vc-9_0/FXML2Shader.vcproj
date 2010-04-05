@@ -2,11 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="KFontGen"
-	ProjectGUID="{70E59123-49E0-41B1-B0CB-F92FA8FD0659}"
-	RootNamespace="KFontGen"
+	Name="FXML2Shader"
+	ProjectGUID="{95248844-4E14-4043-99DD-50858D0699EA}"
+	RootNamespace="FXML2Shader"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -51,6 +51,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="4"
@@ -132,6 +133,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetFileName).pdb"
 				WarningLevel="4"
 				DebugInformationFormat="3"
@@ -149,7 +151,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../../lib/x64"
+				AdditionalLibraryDirectories="../../../lib/Win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
@@ -290,7 +292,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				AdditionalIncludeDirectories="../../../Core/Include"
-				PreprocessorDefinitions="WIN64;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
@@ -311,7 +313,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../../lib/x64"
+				AdditionalLibraryDirectories="../../../lib/Win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
@@ -351,7 +353,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\KFontGen\KFontGen.cpp"
+				RelativePath="..\..\FXML2Shader\FXML2Shader.cpp"
 				>
 			</File>
 		</Filter>
@@ -360,10 +362,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\KFontGen\kdtree.hpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

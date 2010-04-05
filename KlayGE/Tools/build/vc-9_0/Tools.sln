@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KFontGen", "KFontGen.vcproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseTexGen", "NoiseTexGen.vcproj", "{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FXML2Shader", "FXML2Shader.vcproj", "{95248844-4E14-4043-99DD-50858D0699EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -78,6 +80,14 @@ Global
 		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|Win32.Build.0 = Release|Win32
 		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|x64.ActiveCfg = Release|x64
 		{306ADFBB-E20B-4FA1-BAEB-77C5544E4147}.Release|x64.Build.0 = Release|x64
+		{95248844-4E14-4043-99DD-50858D0699EA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95248844-4E14-4043-99DD-50858D0699EA}.Debug|Win32.Build.0 = Debug|Win32
+		{95248844-4E14-4043-99DD-50858D0699EA}.Debug|x64.ActiveCfg = Debug|x64
+		{95248844-4E14-4043-99DD-50858D0699EA}.Debug|x64.Build.0 = Debug|x64
+		{95248844-4E14-4043-99DD-50858D0699EA}.Release|Win32.ActiveCfg = Release|Win32
+		{95248844-4E14-4043-99DD-50858D0699EA}.Release|Win32.Build.0 = Release|Win32
+		{95248844-4E14-4043-99DD-50858D0699EA}.Release|x64.ActiveCfg = Release|x64
+		{95248844-4E14-4043-99DD-50858D0699EA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
