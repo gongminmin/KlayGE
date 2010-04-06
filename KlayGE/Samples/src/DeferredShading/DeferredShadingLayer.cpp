@@ -31,6 +31,13 @@ namespace KlayGE
 {
 	int const SM_SIZE = 512;
 
+	enum PassType
+	{
+		PT_GenShadowMap,
+		PT_Lighting,
+		PT_Emit
+	};
+
 	DeferredShadingLayer::DeferredShadingLayer()
 			: RenderableHelper(L"DeferredShadingLayer"),
 				buffer_type_(0)
@@ -383,25 +390,34 @@ namespace KlayGE
 			}
 		}
 
-		light_scaned_.resize(0);
+		pass_scaned_.resize(0);
 		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 		{
 			if (light_enabled_[i])
 			{
 				int type = static_cast<int>(light_clr_type_[i].w());
+				int sub_light;
 				if (LT_Point == type)
 				{
-					for (int j = 0; j < 6; ++ j)
-					{
-						light_scaned_.push_back(static_cast<uint32_t>((i << 16) + j));
-					}
+					sub_light = 6;
 				}
 				else
 				{
-					light_scaned_.push_back(static_cast<uint32_t>((i << 16) + 0));
+					sub_light = 1;
+				}
+
+				for (int j = 0; j < sub_light; ++ j)
+				{
+					if (0 == (light_attrib_[i] & LSA_NoShadow))
+					{
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+					}
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + j));
 				}
 			}
 		}
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_Emit << 28) + 0));
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_Emit << 28) + 1));
 	}
 
 	void DeferredShadingLayer::OnResize(uint32_t width, uint32_t height)
@@ -492,14 +508,11 @@ namespace KlayGE
 		{
 			if ((0 == buffer_type_) || (6 == buffer_type_))
 			{
-				int32_t const PASS_PER_BATCH = 2;
+				int32_t pass_type = pass_scaned_[pass - 1] >> 28;
+				int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
+				int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
 
-				int32_t batch = (pass - 1) / PASS_PER_BATCH;
-				int32_t pass_in_batch = (pass - 1) - batch * PASS_PER_BATCH;
-
-				int32_t num_lights = static_cast<int32_t>(light_scaned_.size());
-
-				if ((batch == num_lights) && (0 == pass_in_batch))
+				if ((PT_Emit == pass_type) && (0 == index_in_pass))
 				{
 					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 					non_emit_objs_.resize(0);
@@ -528,7 +541,7 @@ namespace KlayGE
 
 					return App3DFramework::URV_Need_Flush;
 				}
-				else if ((batch == num_lights) && (1 == pass_in_batch))
+				else if ((PT_Emit == pass_type) && (1 == index_in_pass))
 				{
 					BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
 					{
@@ -539,7 +552,7 @@ namespace KlayGE
 				}
 				else
 				{
-					if ((0 == batch) && (0 == pass_in_batch))
+					if (PT_GenShadowMap == pass_type)
 					{
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
@@ -552,14 +565,12 @@ namespace KlayGE
 						}
 					}
 
-					int32_t light_index = batch;
-					int32_t org_no = light_scaned_[light_index] >> 16;
-					int32_t offset = light_scaned_[light_index] & 0xFFFF;
-
 					int type = static_cast<int>(light_clr_type_[org_no].w());
 
-					if (0 == pass_in_batch)
+					if (PT_GenShadowMap == pass_type)
 					{
+						BOOST_ASSERT((LT_Spot == type) || (LT_Point == type));
+
 						float3 d, u;
 						if (type != LT_Point)
 						{
@@ -568,7 +579,7 @@ namespace KlayGE
 						}
 						else
 						{
-							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(offset));
+							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
 							d = ad.first;
 							u = ad.second;
 						}
@@ -588,77 +599,66 @@ namespace KlayGE
 						sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 						float3 dir_es = MathLib::transform_normal(d, view_);
-						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), offset + 0.1f);
+						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
 
 						*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
 							* sm_buffer_->GetViewport().camera->ProjMatrix();
-						if (type != LT_Directional)
+						
+						float3 loc_es = MathLib::transform_coord(p, view_);
+						float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+						if (LT_Spot == type)
 						{
-							float3 loc_es = MathLib::transform_coord(p, view_);
-							float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-							if (LT_Spot == type)
-							{
-								light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-								light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
-							}
-
-							*light_pos_es_param_ = light_pos_es_actived;
+							light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+							light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
 						}
 
+						*light_pos_es_param_ = light_pos_es_actived;
 						*light_dir_es_param_ = light_dir_es_actived;
 
-						if ((LT_Spot == type) || (LT_Point == type))
+						float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
+							* view_ * proj_;
+						if (LT_Spot == type)
 						{
-							float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-								* view_ * proj_;
-							if (LT_Spot == type)
-							{
-								float const scale = light_cos_outer_inner_[org_no].w();
-								mat = MathLib::scaling(scale, scale, 1.0f) * mat;
-								rl_ = rl_cone_;
-							}
-							else //if (LT_Point == type)
-							{
-								rl_ = rl_pyramid_;
-							}
+							float const scale = light_cos_outer_inner_[org_no].w();
+							mat = MathLib::scaling(scale, scale, 1.0f) * mat;
+							rl_ = rl_cone_;
+						}
+						else //if (LT_Point == type)
+						{
+							rl_ = rl_pyramid_;
+						}
 
-							*light_volume_mvp_param_ = mat;
+						*light_volume_mvp_param_ = mat;
+
+						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+
+						// Shadow map generation
+
+						re.BindFrameBuffer(sm_buffer_);
+						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+						return App3DFramework::URV_Need_Flush;
+					}
+					else //if (PT_Lighting == pass_type)
+					{
+						if (0 == (light_attrib_[org_no] & LSA_NoShadow))
+						{
+							box_filter_pp_->Apply();
+						}
+
+						if (LT_Spot == type)
+						{
+							rl_ = rl_cone_;
+						}
+						else if (LT_Point == type)
+						{
+							rl_ = rl_pyramid_;
 						}
 						else
 						{
 							rl_ = rl_quad_;
 							*light_volume_mvp_param_ = float4x4::Identity();
-						}
-
-						if ((type != LT_Ambient) && (type != LT_Directional))
-						{
-							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][offset])->BeginConditionalRender();
-
-							if (0 == (light_attrib_[org_no] & LSA_NoShadow))
-							{
-								// Shadow map generation
-
-								re.BindFrameBuffer(sm_buffer_);
-								re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
-
-								return App3DFramework::URV_Need_Flush;
-							}
-							else
-							{
-								return App3DFramework::URV_Flushed;
-							}
-						}
-						else
-						{
-							return App3DFramework::URV_Flushed;
-						}
-					}
-					else
-					{
-						if ((0 == (light_attrib_[org_no] & LSA_NoShadow)) && (type != LT_Ambient))
-						{
-							box_filter_pp_->Apply();
 						}
 
 						// Lighting
@@ -675,7 +675,7 @@ namespace KlayGE
 
 						if ((type != LT_Ambient) && (type != LT_Directional))
 						{
-							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][offset])->EndConditionalRender();
+							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->EndConditionalRender();
 						}
 
 						return App3DFramework::URV_Flushed;

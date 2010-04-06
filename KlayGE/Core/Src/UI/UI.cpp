@@ -633,6 +633,12 @@ namespace KlayGE
 							Convert(wcaption, caption);
 							dlg->Control<UIListBox>(id)->AddItem(wcaption);
 						}
+
+						attr = ctrl_node->Attrib("selected");
+						if (attr)
+						{
+							dlg->Control<UIListBox>(id)->SelectItem(attr->ValueInt());
+						}
 					}
 					else if ("combo_box" == type_str)
 					{
@@ -646,6 +652,12 @@ namespace KlayGE
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->Control<UIComboBox>(id)->AddItem(wcaption);
+						}
+
+						attr = ctrl_node->Attrib("selected");
+						if (attr)
+						{
+							dlg->Control<UIComboBox>(id)->SetSelectedByIndex(attr->ValueInt());
 						}
 					}
 					else if ("edit_box" == type_str)

@@ -222,7 +222,7 @@ namespace KlayGE
 		std::vector<float4> light_cos_outer_inner_;
 		std::vector<float4> light_falloff_;
 
-		std::vector<uint32_t> light_scaned_;
+		std::vector<uint32_t> pass_scaned_;
 
 		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
