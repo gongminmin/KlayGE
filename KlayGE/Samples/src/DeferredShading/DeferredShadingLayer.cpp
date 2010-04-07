@@ -512,19 +512,27 @@ namespace KlayGE
 				int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
 				int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
 
-				if ((PT_Emit == pass_type) && (0 == index_in_pass))
+				if (PT_Emit == pass_type)
 				{
-					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-					non_emit_objs_.resize(0);
-					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+					if (0 == index_in_pass)
 					{
-						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-						if (deo)
+						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+						non_emit_objs_.resize(0);
+						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 						{
-							if (deo->IsEmit())
+							DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+							if (deo)
 							{
-								deo->EmitPass(true);
-								so->Visible(true);
+								if (deo->IsEmit())
+								{
+									deo->EmitPass(true);
+									so->Visible(true);
+								}
+								else
+								{
+									non_emit_objs_.push_back(so);
+									so->Visible(false);
+								}
 							}
 							else
 							{
@@ -532,26 +540,90 @@ namespace KlayGE
 								so->Visible(false);
 							}
 						}
-						else
-						{
-							non_emit_objs_.push_back(so);
-							so->Visible(false);
-						}
-					}
 
-					return App3DFramework::URV_Need_Flush;
-				}
-				else if ((PT_Emit == pass_type) && (1 == index_in_pass))
-				{
-					BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
+						return App3DFramework::URV_Need_Flush;
+					}
+					else //if (1 == index_in_pass)
 					{
-						so->Visible(true);
-					}
+						BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
+						{
+							so->Visible(true);
+						}
 
-					return App3DFramework::URV_Finished;
+						return App3DFramework::URV_Finished;
+					}
 				}
 				else
 				{
+					int type = static_cast<int>(light_clr_type_[org_no].w());
+					BOOST_ASSERT(type < LT_NumLightTypes);
+
+					float3 d, u;
+					if (type != LT_Point)
+					{
+						d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
+						u = float3(0, 1, 0);
+					}
+					else
+					{
+						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
+						d = ad.first;
+						u = ad.second;
+					}
+
+					float fov;
+					if (type != LT_Spot)
+					{
+						fov = PI / 2;
+					}
+					else
+					{
+						fov = light_cos_outer_inner_[org_no].z();
+					}
+
+					float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
+					sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+					sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+					float3 dir_es = MathLib::transform_normal(d, view_);
+					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
+
+					*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+						* sm_buffer_->GetViewport().camera->ProjMatrix();
+					
+					float3 loc_es = MathLib::transform_coord(p, view_);
+					float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+					if (LT_Spot == type)
+					{
+						light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+						light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+					}
+
+					*light_pos_es_param_ = light_pos_es_actived;
+					*light_dir_es_param_ = light_dir_es_actived;
+
+					float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
+					switch (type)
+					{
+					case LT_Spot:
+						{
+							float const scale = light_cos_outer_inner_[org_no].w();
+							*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
+							rl_ = rl_cone_;
+						}
+						break;
+
+					case LT_Point:
+						rl_ = rl_pyramid_;
+						*light_volume_mvp_param_ = mat;
+						break;
+
+					default:
+						rl_ = rl_quad_;
+						*light_volume_mvp_param_ = float4x4::Identity();
+					}
+
 					if (PT_GenShadowMap == pass_type)
 					{
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
@@ -563,73 +635,6 @@ namespace KlayGE
 								deo->GenShadowMapPass(true);
 							}
 						}
-					}
-
-					int type = static_cast<int>(light_clr_type_[org_no].w());
-
-					if (PT_GenShadowMap == pass_type)
-					{
-						BOOST_ASSERT((LT_Spot == type) || (LT_Point == type));
-
-						float3 d, u;
-						if (type != LT_Point)
-						{
-							d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
-							u = float3(0, 1, 0);
-						}
-						else
-						{
-							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-							d = ad.first;
-							u = ad.second;
-						}
-
-						float fov;
-						if (type != LT_Spot)
-						{
-							fov = PI / 2;
-						}
-						else
-						{
-							fov = light_cos_outer_inner_[org_no].z();
-						}
-
-						float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-						sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-						sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-						float3 dir_es = MathLib::transform_normal(d, view_);
-						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
-
-						*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-							* sm_buffer_->GetViewport().camera->ProjMatrix();
-						
-						float3 loc_es = MathLib::transform_coord(p, view_);
-						float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-						if (LT_Spot == type)
-						{
-							light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-							light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
-						}
-
-						*light_pos_es_param_ = light_pos_es_actived;
-						*light_dir_es_param_ = light_dir_es_actived;
-
-						float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix())
-							* view_ * proj_;
-						if (LT_Spot == type)
-						{
-							float const scale = light_cos_outer_inner_[org_no].w();
-							mat = MathLib::scaling(scale, scale, 1.0f) * mat;
-							rl_ = rl_cone_;
-						}
-						else //if (LT_Point == type)
-						{
-							rl_ = rl_pyramid_;
-						}
-
-						*light_volume_mvp_param_ = mat;
 
 						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
 
@@ -647,20 +652,6 @@ namespace KlayGE
 							box_filter_pp_->Apply();
 						}
 
-						if (LT_Spot == type)
-						{
-							rl_ = rl_cone_;
-						}
-						else if (LT_Point == type)
-						{
-							rl_ = rl_pyramid_;
-						}
-						else
-						{
-							rl_ = rl_quad_;
-							*light_volume_mvp_param_ = float4x4::Identity();
-						}
-
 						// Lighting
 
 						re.BindFrameBuffer(shaded_buffer_);
@@ -670,6 +661,11 @@ namespace KlayGE
 						*light_attrib_param_ = light_attrib_[org_no];
 						*light_clr_type_param_ = light_clr_type_[org_no];
 						*light_falloff_param_ = light_falloff_[org_no];
+
+						if ((light_attrib_[org_no] & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+						{
+							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+						}
 
 						re.Render(*technique_, *rl_);
 

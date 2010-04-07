@@ -252,7 +252,7 @@ float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 	
 	<shader type="compute_shader" version="5">
 		<![CDATA[
-groupshared float2 shared_block[TILE_SIZE];
+groupshared float shared_block[TILE_SIZE];
 
 float NormalRejectionTestCS(int2 tc)
 {
@@ -273,51 +273,30 @@ float NormalRejectionTestCS(int2 tc)
 	return summed_dot * 0.25f;
 }
 
-void GatherSamplesCS(int2 tc, out float4 z_samples, out float4 nz_samples)
+float4 GatherSamplesCS(int2 tc)
 {
-	float2 znz;
-	
-	int base = (tc.y + MAX_KERNEL_SIZE) * TILE_SIZE_X + (tc.x + MAX_KERNEL_SIZE);
-	
-	znz = shared_block[base + TILE_SIZE_X];
-	z_samples.x = znz.x;
-	nz_samples.x = znz.y;
-
-	znz = shared_block[base + TILE_SIZE_X + 1];
-	z_samples.y = znz.x;
-	nz_samples.y = znz.y;
-
-	znz = shared_block[base + 1];
-	z_samples.z = znz.x;
-	nz_samples.z = znz.y;
-
-	znz = shared_block[base];
-	z_samples.w = znz.x;
-	nz_samples.w = znz.y;
-
-	z_samples *= depth_near_far_invfar.y;
+	int base = tc.y * TILE_SIZE_X + tc.x;
+	return float4(shared_block[base + TILE_SIZE_X], shared_block[base + TILE_SIZE_X + 1],
+		shared_block[base + 1], shared_block[base]);
 }
 
 [numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
 void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
 {
-	const int num_rings = 4;
-	const int num_ring_gathers = (1 + num_rings) * num_rings;
+	int num_ring_gathers = (1 + num_rings) * num_rings;
+	int kernel_size = 2 * num_rings;
 	
-	int2 base_addr = int2(group_id.x * BLOCK_SIZE_X, group_id.y * BLOCK_SIZE_Y) - MAX_KERNEL_SIZE;
-	for (int s = 0; s < TILE_SIZE / BLOCK_SIZE; ++ s)
+	int2 base_addr = int2(group_id.x * BLOCK_SIZE_X, group_id.y * BLOCK_SIZE_Y) - kernel_size;
+	for (int s = 0; s < (TILE_SIZE + BLOCK_SIZE - 1) / BLOCK_SIZE; ++ s)
 	{
 		int offset = GI + BLOCK_SIZE * s;
 		int y = offset / TILE_SIZE_X;
 		int x = offset - y * TILE_SIZE_X;
 		float4 texel = src_tex[base_addr + int2(x, y)];
-		shared_block[offset] = float2(GetDepth(texel), GetNormal(texel).z);
+		shared_block[offset] = GetNormal(texel).z * normal_scale + GetDepth(texel) * depth_near_far_invfar.y;
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	float4 sampled_z[2];
-	float4 sampled_nz[2];
-	float4 offset_sampled_z[2];
 	float4 compare[2];
 	float occlusion = 1;
 
@@ -326,28 +305,19 @@ void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 grou
 	{
 		float4 occlusion4 = 0;
 
-		float2 znz = shared_block[(gtid.y + MAX_KERNEL_SIZE) * TILE_SIZE_X + (gtid.x + MAX_KERNEL_SIZE)];
-		float center_z = znz.x * depth_near_far_invfar.y;
-		float offset_center_z = znz.y * normal_scale + center_z;
-
+		uint2 index = gtid.xy + kernel_size;
+		float offset_center_z = shared_block[index.y * TILE_SIZE_X + index.x];
 		for (int i = 0; i < num_ring_gathers; ++ i)
 		{
-			int2 pattern_offset = hdao_ring_pattern[i];
-			int2 offset_tc = gtid.xy + pattern_offset;
-			int2 mirror_offset_tc = gtid.xy - pattern_offset - 1;
-
-			GatherSamplesCS(offset_tc, sampled_z[0], sampled_nz[0]);
-			GatherSamplesCS(mirror_offset_tc, sampled_z[1], sampled_nz[1]);
-
-			// Scale normals
-			offset_sampled_z[0] = sampled_nz[0] * normal_scale + sampled_z[0];
-			offset_sampled_z[1] = sampled_nz[1] * normal_scale + sampled_z[1];
+			uint2 pattern_offset = hdao_ring_pattern[i];
+			uint2 offset_tc = index + pattern_offset;
+			uint2 mirror_offset_tc = index - pattern_offset - 1;
 
 			// Detect valleys
-			float4 diff = offset_center_z - offset_sampled_z[0];
+			float4 diff = offset_center_z - GatherSamplesCS(offset_tc);
 			compare[0] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
 
-			diff = offset_center_z - offset_sampled_z[1];
+			diff = offset_center_z - GatherSamplesCS(mirror_offset_tc);
 			compare[1] = float4(diff < hdao_reject_radius) * float4(diff > hdao_accept_radius);
 
 			occlusion4 += hdao_ring_weight[i] * (compare[0] * compare[1].zwxy);

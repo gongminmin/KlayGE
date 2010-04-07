@@ -119,6 +119,86 @@ namespace KlayGE
 		ib.push_back(vertex_base + 9);
 	}
 
+	template <typename T>
+	void CreateBoxMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float half_length)
+	{
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = -half_length;
+
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = +half_length;
+
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 0);
+
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 5);
+
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 4);
+
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 1);
+
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 3);
+
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 4);
+	}
+
 	enum LightType
 	{
 		LT_Ambient = 0,

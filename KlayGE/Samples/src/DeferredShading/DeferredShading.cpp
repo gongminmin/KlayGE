@@ -177,7 +177,7 @@ namespace
 	private:
 		bool is_emit_;
 
-		KlayGE::RenderEffectPtr effect_;
+		RenderEffectPtr effect_;
 		bool gen_sm_pass_;
 		bool emit_pass_;
 		RenderTechniquePtr gbuffer_technique_;
@@ -324,7 +324,7 @@ namespace
 	private:
 		float4x4 model_;
 
-		KlayGE::RenderEffectPtr effect_;
+		RenderEffectPtr effect_;
 		bool gen_sm_pass_;
 		bool emit_pass_;
 		RenderTechniquePtr gbuffer_technique_;
@@ -583,20 +583,8 @@ namespace
 					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO")),
 				ssao_level_(4)
 		{
-			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
-
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
-
-			if (cs_support_)
-			{
-				this->Technique(technique_->Effect().TechniqueByName("SSAOCS"));
-			}
-			else
-			{
-				this->Technique(technique_->Effect().TechniqueByName("SSAO"));
-			}
 		}
 
 		void SSAOLevel(int level)
@@ -609,24 +597,7 @@ namespace
 		{
 			if (ssao_level_ > 0)
 			{
-				if (cs_support_)
-				{
-					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-					TexturePtr const & tex = this->InputPin(0);
-
-					int const BLOCK_SIZE_X = 16;
-					int const BLOCK_SIZE_Y = 16;
-
-					this->OnRenderBegin();
-					re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
-					this->OnRenderEnd();
-				}
-				else
-				{
-					PostProcess::Apply();
-				}
+				PostProcess::Apply();
 			}
 		}
 
@@ -643,12 +614,61 @@ namespace
 		}
 
 	private:
-		bool cs_support_;
-
 		int ssao_level_;
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr rt_size_inv_size_param_;
+	};
+
+	class SSAOPostProcessCS : public PostProcess
+	{
+	public:
+		SSAOPostProcessCS()
+			: PostProcess(L"SSAOCS",
+					std::vector<std::string>(1, "src_tex"),
+					std::vector<std::string>(1, "out_tex"),
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOCS")),
+				ssao_level_(4)
+		{
+			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+		}
+
+		void SSAOLevel(int level)
+		{
+			ssao_level_ = level;
+			*(technique_->Effect().ParameterByName("num_rings")) = static_cast<int32_t>(level);
+		}
+
+		void Apply()
+		{
+			if (ssao_level_ > 0)
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+				TexturePtr const & tex = this->InputPin(0);
+
+				int const BLOCK_SIZE_X = 16;
+				int const BLOCK_SIZE_Y = 16;
+
+				this->OnRenderBegin();
+				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
+				this->OnRenderEnd();
+			}
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+		}
+
+	private:
+		int ssao_level_;
+
+		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
 
@@ -751,7 +771,16 @@ void DeferredShadingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
-	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
+
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.cs_support && (5 == caps.max_shader_model))
+	{
+		ssao_pp_ = MakeSharedPtr<SSAOPostProcessCS>();
+	}
+	else
+	{
+		ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
+	}
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
