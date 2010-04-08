@@ -97,7 +97,6 @@
 	</cbuffer>
 
 	<cbuffer name="hdao_params">
-		<parameter type="int" name="num_rings"/>
 		<parameter type="float" name="hdao_reject_radius" value="0.43"/>
 		<parameter type="float" name="hdao_accept_radius" value="0.00312"/>
 		<parameter type="float" name="hdao_intensity" value="2.14"/>
@@ -182,7 +181,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 	z_samples *= depth_near_far_invfar.y;
 }
 
-float4 SSAO(float2 tc0)
+float4 SSAO(float2 tc0, int num_rings)
 {
 	int num_ring_gathers = (1 + num_rings) * num_rings;
 
@@ -231,19 +230,45 @@ float4 SSAO(float2 tc0)
 	return occlusion;
 }
 
-float4 SSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 SSAOLowPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return SSAO(tc0);
+	return SSAO(tc0, 1);
+}
+
+float4 SSAOMiddlePS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return SSAO(tc0, 2);
+}
+
+float4 SSAOHighPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return SSAO(tc0, 4);
 }
 		]]>
 	</shader>
 
-	<technique name="SSAO">
+	<technique name="SSAOLow">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="SSAOPS()"/>
+			<state name="pixel_shader" value="SSAOLowPS()"/>
+		</pass>
+	</technique>
+	<technique name="SSAOMiddle">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SSAOMiddlePS()"/>
+		</pass>
+	</technique>
+	<technique name="SSAOHigh">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="SSAOHighPS()"/>
 		</pass>
 	</technique>
 
@@ -280,8 +305,7 @@ float4 GatherSamplesCS(int2 tc)
 		shared_block[base + 1], shared_block[base]);
 }
 
-[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
-void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID, int num_rings)
 {
 	int num_ring_gathers = (1 + num_rings) * num_rings;
 	int kernel_size = 2 * num_rings;
@@ -329,12 +353,40 @@ void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 grou
 
 	out_tex[tid.xy] = occlusion;
 }
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void SSAOLowCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+{
+	SSAOCS(tid, GI, group_id, gtid, 1);
+}
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void SSAOMiddleCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+{
+	SSAOCS(tid, GI, group_id, gtid, 2);
+}
+
+[numthreads(BLOCK_SIZE_X, BLOCK_SIZE_Y, 1)]
+void SSAOHighCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 group_id : SV_GroupID, uint3 gtid : SV_GroupThreadID)
+{
+	SSAOCS(tid, GI, group_id, gtid, 4);
+}
 		]]>
 	</shader>
-				
-	<technique name="SSAOCS">
+
+	<technique name="SSAOLowCS">
 		<pass name="p0">
-			<state name="compute_shader" value="SSAOCS()"/>
+			<state name="compute_shader" value="SSAOLowCS()"/>
+		</pass>
+	</technique>
+	<technique name="SSAOMiddleCS">
+		<pass name="p0">
+			<state name="compute_shader" value="SSAOMiddleCS()"/>
+		</pass>
+	</technique>
+	<technique name="SSAOHighCS">
+		<pass name="p0">
+			<state name="compute_shader" value="SSAOHighCS()"/>
 		</pass>
 	</technique>
 </effect>

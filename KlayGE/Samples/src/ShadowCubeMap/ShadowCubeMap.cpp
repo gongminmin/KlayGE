@@ -40,8 +40,7 @@ namespace
 	{
 	public:
 		ShadowMapped(uint32_t shadow_map_size)
-			: shadow_map_size_(shadow_map_size),
-				light_view_proj_mat_(6)
+			: shadow_map_size_(shadow_map_size)
 		{
 		}
 
@@ -55,7 +54,7 @@ namespace
 			gen_sm_pass_ = gen_sm;
 		}
 
-		void LightMatrices(int pass, float4x4 const & model)
+		void LightMatrices(float4x4 const & model)
 		{
 			light_pos_ = transform_coord(float3(0, 0, 0), model);
 
@@ -64,17 +63,14 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			light_view_ = app.ActiveCamera().ViewMatrix();
 			light_proj_ = app.ActiveCamera().ProjMatrix();
-
-			light_view_proj_mat_[pass] = light_view_ * light_proj_;
 		}
 
-		void ShadowMapTexture(TexturePtr tex[6], bool flip)
+		void ShadowMapTexture(TexturePtr const & cube_tex)
 		{
-			sm_tex_.assign(&tex[0], &tex[6]);
-			flip_ = flip;
+			sm_cube_tex_ = cube_tex;
 		}
 
-		void LampTexture(TexturePtr tex)
+		void LampTexture(TexturePtr const & tex)
 		{
 			lamp_tex_ = tex;
 		}
@@ -98,17 +94,9 @@ namespace
 
 				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
-				*(effect->ParameterByName("flip")) = static_cast<int32_t>(flip_ ? -1 : 1);
 
 				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
-				*(effect->ParameterByName("shadow_map_x_pos_tex")) = sm_tex_[0];
-				*(effect->ParameterByName("shadow_map_x_neg_tex")) = sm_tex_[1];
-				*(effect->ParameterByName("shadow_map_y_pos_tex")) = sm_tex_[2];
-				*(effect->ParameterByName("shadow_map_y_neg_tex")) = sm_tex_[3];
-				*(effect->ParameterByName("shadow_map_z_pos_tex")) = sm_tex_[4];
-				*(effect->ParameterByName("shadow_map_z_neg_tex")) = sm_tex_[5];
-
-				*(effect->ParameterByName("light_view_proj")) = light_view_proj_mat_;
+				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
 			}
 		}
 
@@ -116,9 +104,7 @@ namespace
 		uint32_t shadow_map_size_;
 
 		bool gen_sm_pass_;
-		std::vector<TexturePtr> sm_tex_;
-		std::vector<float4x4> light_view_proj_mat_;
-		bool flip_;
+		TexturePtr sm_cube_tex_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
@@ -421,6 +407,8 @@ void ShadowCubeMap::InitObjects()
 		camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
 	}
 
+	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
 	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -539,8 +527,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(shadow_buffers_[pass]);
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(pass, light_model_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(pass, light_model_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
 		}
 		return App3DFramework::URV_Need_Flush;
 
@@ -549,13 +537,15 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			//for (int i = 0; i < 6; ++ i)
-			//{
-			//	SaveTexture(shadow_tex_[i], "shadow_tex.dds");
-			//}
+			for (int i = 0; i < 6; ++ i)
+			{
+				shadow_tex_[i]->CopyToTextureCube(*shadow_cube_tex_, static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i), 0,
+					shadow_cube_tex_->Width(0), shadow_cube_tex_->Width(0), 0, 0,
+					shadow_tex_[i]->Width(0), shadow_tex_[i]->Height(0), 0, 0);
+			}
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_tex_, shadow_buffers_[0]->RequiresFlipping());
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);

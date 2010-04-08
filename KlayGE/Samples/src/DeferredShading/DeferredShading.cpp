@@ -580,17 +580,24 @@ namespace
 			: PostProcess(L"SSAO",
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAO")),
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOHigh")),
 				ssao_level_(4)
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
+
+			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLow");
+			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddle");
+			ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHigh");
 		}
 
 		void SSAOLevel(int level)
 		{
 			ssao_level_ = level;
-			*(technique_->Effect().ParameterByName("num_rings")) = static_cast<int32_t>(level);
+			if (level > 0)
+			{
+				technique_ = ssao_techs_[level - 1];
+			}
 		}
 
 		void Apply()
@@ -616,6 +623,8 @@ namespace
 	private:
 		int ssao_level_;
 
+		RenderTechniquePtr ssao_techs_[4];
+
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr rt_size_inv_size_param_;
 	};
@@ -627,16 +636,23 @@ namespace
 			: PostProcess(L"SSAOCS",
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOCS")),
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOHighCS")),
 				ssao_level_(4)
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+
+			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLowCS");
+			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddleCS");
+			ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHighCS");
 		}
 
 		void SSAOLevel(int level)
 		{
 			ssao_level_ = level;
-			*(technique_->Effect().ParameterByName("num_rings")) = static_cast<int32_t>(level);
+			if (level > 0)
+			{
+				technique_ = ssao_techs_[level - 1];
+			}
 		}
 
 		void Apply()
@@ -667,6 +683,8 @@ namespace
 
 	private:
 		int ssao_level_;
+
+		RenderTechniquePtr ssao_techs_[4];
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};

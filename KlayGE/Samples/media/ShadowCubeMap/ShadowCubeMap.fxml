@@ -9,20 +9,18 @@
 		<![CDATA[
 void GenShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
-						out float4 oLightWorldPos : TEXCOORD0,
+						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
     oPos = mul(Position, model_view_proj);
-    oLightWorldPos = mul(Position, obj_model_to_light_model);
+    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
+    LightWorldPos /= LightWorldPos.w;
+	oDist = length(LightWorldPos.xyz);
 }
 
-float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-	LightWorldPos /= LightWorldPos.w;
-	float dist = length(LightWorldPos.xyz);
-	
 	float2 dxdy = float2(ddx(dist), ddy(dist));
-
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
@@ -40,28 +38,19 @@ float4 GenShadowMapPS(float4 LightWorldPos : TEXCOORD0) : SV_Target
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>
-	<parameter type="int" name="flip"/>
-	<parameter type="float4x4" name="light_view_proj" array_size="6"/>
 
 	<parameter type="textureCUBE" name="lamp_tex"/>
 	<parameter type="sampler" name="lamp_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
 	</parameter>
 	
-	<parameter type="texture2D" name="shadow_map_x_pos_tex"/>
-	<parameter type="texture2D" name="shadow_map_x_neg_tex"/>
-	<parameter type="texture2D" name="shadow_map_y_pos_tex"/>
-	<parameter type="texture2D" name="shadow_map_y_neg_tex"/>
-	<parameter type="texture2D" name="shadow_map_z_pos_tex"/>
-	<parameter type="texture2D" name="shadow_map_z_neg_tex"/>
-
-	<parameter type="sampler" name="linear_border_sampler">
+	<parameter type="textureCUBE" name="shadow_cube_tex"/>
+	<parameter type="sampler" name="shadow_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="border"/>
-		<state name="address_v" value="border"/>
-		<state name="border_clr" r="0" g="0" b="0" a="0"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<shader>
@@ -70,7 +59,6 @@ void RenderSceneVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
 					out float3 oDiffuse : COLOR0,
 					out float4 oLightWorldPos : TEXCOORD0,
-					out float4 oLightProjPos[6] : TEXCOORD1,
 					out float4 oPos : SV_Position)
 {
 	float4 world_pos = mul(Position, model);
@@ -78,11 +66,7 @@ void RenderSceneVS(float4 Position : POSITION,
 
 	oPos = mul(Position, model_view_proj);
 	oLightWorldPos = mul(Position, obj_model_to_light_model);
-	for (int i = 0; i < 6; ++ i)
-	{
-		oLightProjPos[i] = mul(world_pos, light_view_proj[i]);
-	}
-	
+
 	world_pos /= world_pos.w;
 	oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
 }
@@ -93,52 +77,28 @@ float linstep(float min, float max, float v)
 }
 
 float4 RenderScenePS(float3 diffuse : COLOR0,
-				float4 LightWorldPos : TEXCOORD0,
-				float4 LightProjPos[6] : TEXCOORD1) : SV_Target 
+				float4 LightWorldPos : TEXCOORD0) : SV_Target 
 {
 	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos.xyz).rgb;
+	float2 moments = shadow_cube_tex.Sample(shadow_sampler, LightWorldPos.xyz).xy;
+	
 	LightWorldPos /= LightWorldPos.w;
 	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);
 	float dist = sqrt(dist_sq);
 
-	[unroll]
-	for (int i = 0; i < 6; ++ i)
-	{
-		LightProjPos[i] /= LightProjPos[i].w;
-		LightProjPos[i].y *= flip;
-		LightProjPos[i].xy = LightProjPos[i].xy / 2 + 0.5f;
-	}
+	float f = 1 / (0.01f + 0.5f * dist_sq);
+
+	float p = (dist <= moments.x);
+	// Variance shadow mapping
+	float variance = moments.y - moments.x * moments.x;
+	variance = max(variance, min_variance);
+	float m_d = moments.x - dist;
+	float p_max = variance / (variance + m_d * m_d);
+	p_max = linstep(bleeding_reduce, 1, p_max);
+
+	f *= max(p, p_max);
 	
-	float2 moments[6];
-	moments[0] = shadow_map_x_pos_tex.Sample(linear_border_sampler, LightProjPos[0].xy).xy;
-	moments[1] = shadow_map_x_neg_tex.Sample(linear_border_sampler, LightProjPos[1].xy).xy;
-	moments[2] = shadow_map_y_pos_tex.Sample(linear_border_sampler, LightProjPos[2].xy).xy;
-	moments[3] = shadow_map_y_neg_tex.Sample(linear_border_sampler, LightProjPos[3].xy).xy;
-	moments[4] = shadow_map_z_pos_tex.Sample(linear_border_sampler, LightProjPos[4].xy).xy;
-	moments[5] = shadow_map_z_neg_tex.Sample(linear_border_sampler, LightProjPos[5].xy).xy;
-
-	float3 final_color = 0;
-	for (int j = 0; j < 6; ++ j)
-	{
-		if (LightProjPos[j].z > 0)
-		{
-			float f = 1 / (0.01f + 0.5f * dist * dist);
-			
-			float p = (dist <= moments[j].x);
-			// Variance shadow mapping
-			float variance = moments[j].y - moments[j].x * moments[j].x;
-			variance = max(variance, min_variance);
-			float m_d = moments[j].x - dist;
-			float p_max = variance / (variance + m_d * m_d);
-			p_max = linstep(bleeding_reduce, 1, p_max);
-
-			f *= max(p, p_max);
-			
-			final_color += ori_color * f;
-		}
-	}
-
-	return float4(final_color, 1.0);
+	return float4(ori_color * f, 1.0);
 }
 		]]>
 	</shader>
