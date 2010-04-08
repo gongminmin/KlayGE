@@ -51,40 +51,16 @@ void GBufferVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 }
 
-void GBufferDiffBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
-			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
+float4 GBufferBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
 {
 	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord).xyz, (float3x3)model_view));
-	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
-	
-	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, specular_level);
+	return StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
 }
 
-void GBufferDiffPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
-			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
+float4 GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
 {
 	normal.xyz = normalize(normal.xyz);
-	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
-	
-	oClr = StoreDiffuseSpecular(diffuse_tex.Sample(linear_sampler, texcoord).rgb, specular_level);
-}
-
-void GBufferBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
-			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
-{
-	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord).xyz, (float3x3)model_view));
-	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
-
-	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, specular_level);
-}
-
-void GBufferNoTexPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1,
-			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
-{
-	normal.xyz = normalize(normal.xyz);
-	oNormalDepth = StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
-	
-	oClr = StoreDiffuseSpecular(diffuse_clr.rgb, specular_level);
+	return StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -96,28 +72,12 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 }
 
 void GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0,
-			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
+			out float4 oNormalDepth : SV_Target0)
 {
-	oClr = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texCoord0).r,
-					skybox_C_tex.Sample(skybox_sampler, texCoord0));
 	oNormalDepth = StoreNormalDepthMtl(0, 1, 0, 0);
 }
 		]]>
 	</shader>
-
-	<technique name="GBufferDiffBumpTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferDiffBumpPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferDiffTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferDiffPS()"/>
-		</pass>
-	</technique>
 
 	<technique name="GBufferBumpTech">
 		<pass name="p0">
@@ -126,18 +86,18 @@ void GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="GBufferNoTexTech">
+	<technique name="GBufferNoBumpTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferNoTexPS()"/>
+			<state name="pixel_shader" value="GBufferNoBumpPS()"/>
 		</pass>
 	</technique>
 
 	<technique name="GBufferSkyBoxTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
-			<state name="depth_write_mask" value="0"/>
 			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
 			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
@@ -175,37 +135,93 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
+	<parameter type="texture2D" name="lighting_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type='float4' name='texel_to_pixel_offset'/>
+	<parameter type='int' name='flipping'/>
+	
 	<shader>
 		<![CDATA[
-void EmitOnlyVS(float4 pos : POSITION,
+void ShadingVS(float4 pos : POSITION,
 			float3 normal : NORMAL,
 			float3 tangent : TANGENT,
 			float2 texcoord : TEXCOORD0,
+			out float2 oTexCoord : TEXCOORD0,
+			out float4 oPosSS : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
+	oPosSS = oPos;
+	oTexCoord = texcoord;
 }
 
-float4 EmitOnlyPS() : SV_Target
+float4 ShadingDiffPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
 {
-	return emit_clr;
+	pos_ss += texel_to_pixel_offset;
+	float2 tc = pos_ss.xy / pos_ss.w * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
+
+	float4 lighting = lighting_tex.Sample(point_sampler, tc);
+	return float4(lighting.rgb * diffuse_tex.Sample(linear_sampler, texcoord).rgb + emit_clr.rgb + lighting.a * specular_level, 1);
+}
+
+float4 ShadingNoTexPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
+{
+	pos_ss += texel_to_pixel_offset;
+	float2 tc = pos_ss.xy / pos_ss.w * 0.5f;
+	tc.y *= flipping;
+	tc += 0.5;
+	
+	float4 lighting = lighting_tex.Sample(point_sampler, tc);
+	return float4(lighting.rgb * diffuse_clr.rgb + emit_clr.rgb + lighting.a * specular_level, 1);
+}
+
+float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+{
+	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
+					skybox_C_tex.Sample(skybox_sampler, texcoord));
 }
 		]]>
 	</shader>
 
-	<technique name="EmitOnly">
+	<technique name="ShadingDiff">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
-			
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="one"/>
-			<state name="dest_blend" value="one"/>
 
-			<state name="vertex_shader" value="EmitOnlyVS()"/>
-			<state name="pixel_shader" value="EmitOnlyPS()"/>
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="ShadingDiffPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingNoTex">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="ShadingNoTexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingSkyBox">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="ShadingSkyBoxPS()"/>
 		</pass>
 	</technique>
 </effect>

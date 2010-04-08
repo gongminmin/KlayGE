@@ -46,7 +46,7 @@ namespace
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name),
-				gen_sm_pass_(false), emit_pass_(false)
+				gen_sm_pass_(false), shading_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -96,38 +96,29 @@ namespace
 				}
 			}
 
-			is_emit_ = ((mtl.emit.x() != 0) || (mtl.emit.y() != 0) || (mtl.emit.z() != 0));
-
 			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
 			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
 			*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
 
-			if (has_diffuse_map)
+			if (has_bump_map)
 			{
-				if (has_bump_map)
-				{
-					gbuffer_technique_ = effect_->TechniqueByName("GBufferDiffBumpTech");
-				}
-				else
-				{
-					gbuffer_technique_ = effect_->TechniqueByName("GBufferDiffTech");
-				}
+				gbuffer_technique_ = effect_->TechniqueByName("GBufferBumpTech");
 			}
 			else
 			{
-				if (has_bump_map)
-				{
-					gbuffer_technique_ = effect_->TechniqueByName("GBufferBumpTech");
-				}
-				else
-				{
-					gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
-				}
+				gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
+			}
+			if (has_diffuse_map)
+			{
+				shading_technique_ = effect_->TechniqueByName("ShadingDiff");
+			}
+			else
+			{
+				shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
 			}
 
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			emit_technique_ = effect_->TechniqueByName("EmitOnly");
 		}
 
 		void GenShadowMapPass(bool sm_pass)
@@ -143,12 +134,12 @@ namespace
 			}
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			emit_pass_ = emit_pass;
-			if (emit_pass_)
+			shading_pass_ = shading_pass;
+			if (shading_pass_)
 			{
-				technique_ = emit_technique_;
+				technique_ = shading_technique_;
 			}
 			else
 			{
@@ -156,9 +147,9 @@ namespace
 			}
 		}
 
-		bool IsEmit() const
+		void LightingTex(TexturePtr const & lighting_tex)
 		{
-			return is_emit_;
+			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
 		}
 
 		void OnRenderBegin()
@@ -172,17 +163,22 @@ namespace
 			*model_view_param_ = view;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
 		}
 
 	private:
-		bool is_emit_;
-
 		RenderEffectPtr effect_;
 		bool gen_sm_pass_;
-		bool emit_pass_;
+		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr emit_technique_;
+		RenderTechniquePtr shading_technique_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
@@ -202,14 +198,14 @@ namespace
 			checked_pointer_cast<RenderTorus>(renderable_)->GenShadowMapPass(sm_pass);
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			checked_pointer_cast<RenderTorus>(renderable_)->EmitPass(emit_pass);
+			checked_pointer_cast<RenderTorus>(renderable_)->ShadingPass(shading_pass);
 		}
 
-		bool IsEmit() const
+		void LightingTex(TexturePtr const & lighting_tex)
 		{
-			return checked_pointer_cast<RenderTorus>(renderable_)->IsEmit();
+			checked_pointer_cast<RenderTorus>(renderable_)->LightingTex(lighting_tex);
 		}
 	};
 
@@ -219,15 +215,15 @@ namespace
 	public:
 		RenderCone(float cone_radius, float cone_height, float3 const & clr)
 			: RenderableHelper(L"Cone"),
-				gen_sm_pass_(false), emit_pass_(false)
+				gen_sm_pass_(false), shading_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = rf.LoadEffect("GBuffer.fxml");
 
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			emit_technique_ = effect_->TechniqueByName("EmitOnly");
+			shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
 			technique_ = gbuffer_technique_;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
@@ -294,17 +290,22 @@ namespace
 			}
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			emit_pass_ = emit_pass;
-			if (emit_pass_)
+			shading_pass_ = shading_pass;
+			if (shading_pass_)
 			{
-				technique_ = emit_technique_;
+				technique_ = shading_technique_;
 			}
 			else
 			{
 				technique_ = gbuffer_technique_;
 			}
+		}
+
+		void LightingTex(TexturePtr const & lighting_tex)
+		{
+			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
 		}
 
 		void Update()
@@ -319,6 +320,13 @@ namespace
 			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
 		}
 
 	private:
@@ -326,10 +334,10 @@ namespace
 
 		RenderEffectPtr effect_;
 		bool gen_sm_pass_;
-		bool emit_pass_;
+		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr emit_technique_;
+		RenderTechniquePtr shading_technique_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
@@ -361,16 +369,24 @@ namespace
 		void GenShadowMapPass(bool sm_pass)
 		{
 			checked_pointer_cast<RenderCone>(renderable_)->GenShadowMapPass(sm_pass);
+			if (sm_pass)
+			{
+				this->Visible(false);
+			}
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			checked_pointer_cast<RenderCone>(renderable_)->EmitPass(emit_pass);
+			checked_pointer_cast<RenderCone>(renderable_)->ShadingPass(shading_pass);
+			if (shading_pass)
+			{
+				this->Visible(true);
+			}
 		}
 
-		bool IsEmit() const
+		void LightingTex(TexturePtr const & lighting_tex)
 		{
-			return true;
+			checked_pointer_cast<RenderCone>(renderable_)->LightingTex(lighting_tex);
 		}
 
 	private:
@@ -384,15 +400,15 @@ namespace
 	public:
 		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name),
-				gen_sm_pass_(false), emit_pass_(false)
+				gen_sm_pass_(false), shading_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			effect_ = rf.LoadEffect("GBuffer.fxml");
 
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoTexTech");
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			emit_technique_ = effect_->TechniqueByName("EmitOnly");
+			shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
 			technique_ = gbuffer_technique_;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
@@ -429,17 +445,22 @@ namespace
 			}
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			emit_pass_ = emit_pass;
-			if (emit_pass_)
+			shading_pass_ = shading_pass;
+			if (shading_pass_)
 			{
-				technique_ = emit_technique_;
+				technique_ = shading_technique_;
 			}
 			else
 			{
 				technique_ = gbuffer_technique_;
 			}
+		}
+
+		void LightingTex(TexturePtr const & lighting_tex)
+		{
+			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
 		}
 
 		void Update()
@@ -454,17 +475,24 @@ namespace
 			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
 		}
 
 	private:
 		float4x4 model_;
 
-		KlayGE::RenderEffectPtr effect_;
+		RenderEffectPtr effect_;
 		bool gen_sm_pass_;
-		bool emit_pass_;
+		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr emit_technique_;
+		RenderTechniquePtr shading_technique_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
@@ -496,16 +524,24 @@ namespace
 		void GenShadowMapPass(bool sm_pass)
 		{
 			checked_pointer_cast<RenderSphere>(renderable_)->GenShadowMapPass(sm_pass);
+			if (sm_pass)
+			{
+				this->Visible(false);
+			}
 		}
 
-		void EmitPass(bool emit_pass)
+		void ShadingPass(bool shading_pass)
 		{
-			checked_pointer_cast<RenderSphere>(renderable_)->EmitPass(emit_pass);
+			checked_pointer_cast<RenderSphere>(renderable_)->ShadingPass(shading_pass);
+			if (shading_pass)
+			{
+				this->Visible(true);
+			}
 		}
 
-		bool IsEmit() const
+		void LightingTex(TexturePtr const & lighting_tex)
 		{
-			return true;
+			checked_pointer_cast<RenderSphere>(renderable_)->LightingTex(lighting_tex);
 		}
 
 	private:
@@ -520,20 +556,59 @@ namespace
 		RenderableDeferredHDRSkyBox()
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("GBuffer.fxml")->TechniqueByName("GBufferSkyBoxTech");
+
+			effect_ = rf.LoadEffect("GBuffer.fxml");
+
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferSkyBoxTech");
+			shading_technique_ = effect_->TechniqueByName("ShadingSkyBox");
+			this->Technique(gbuffer_technique_);
 
 			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
 			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
 			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 		}
+
+		void ShadingPass(bool shading_pass)
+		{
+			shading_pass_ = shading_pass;
+			if (shading_pass_)
+			{
+				this->Technique(shading_technique_);
+			}
+			else
+			{
+				this->Technique(gbuffer_technique_);
+			}
+		}
+
+	private:
+		RenderEffectPtr effect_;
+		bool shading_pass_;
+		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr shading_technique_;
+
 	};
 
-	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox
+	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox, public DeferredableObject
 	{
 	public:
 		SceneObjectDeferredHDRSkyBox()
 		{
 			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
+		}
+
+		void GenShadowMapPass(bool /*sm_pass*/)
+		{
+		}
+
+		void ShadingPass(bool shading_pass)
+		{
+			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->ShadingPass(shading_pass);
+		}
+
+		void LightingTex(TexturePtr const & /*lighting_tex*/)
+		{
 		}
 	};
 
@@ -850,12 +925,12 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadedTex()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadingTex()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	deferred_shading_->SSAOTex(ssao_tex_);
 
 	edge_anti_alias_->InputPin(0, deferred_shading_->NormalDepthTex());
-	edge_anti_alias_->InputPin(1, deferred_shading_->ShadedTex());
+	edge_anti_alias_->InputPin(1, deferred_shading_->ShadingTex());
 	edge_anti_alias_->OutputPin(0, hdr_tex_);
 
 	hdr_pp_->InputPin(0, hdr_tex_);
@@ -892,8 +967,8 @@ void DeferredShadingApp::BufferChangedHandler(UIComboBox const & sender)
 	}
 	dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(anti_alias_enabled_);
 
-	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ShowEdge(6 == buffer_type_);
-	if (6 == buffer_type_)
+	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ShowEdge(4 == buffer_type_);
+	if (4 == buffer_type_)
 	{
 		edge_anti_alias_->OutputPin(0, TexturePtr());
 	}
@@ -919,17 +994,25 @@ void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 		}
 		else
 		{
-			hdr_pp_->InputPin(0, deferred_shading_->ShadedTex());
+			hdr_pp_->InputPin(0, deferred_shading_->ShadingTex());
 		}
 	}
 }
 
 void DeferredShadingApp::SSAOChangedHandler(UIComboBox const & sender)
 {
-	if ((0 == buffer_type_) || (7 == buffer_type_))
+	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
 		int ssao_level = sender.GetNumItems() - 1 - sender.GetSelectedIndex();
-		checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.cs_support && (5 == caps.max_shader_model))
+		{
+			checked_pointer_cast<SSAOPostProcessCS>(ssao_pp_)->SSAOLevel(ssao_level);
+		}
+		else
+		{
+			checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
+		}
 		deferred_shading_->SSAOEnabled(ssao_level != 0);
 	}
 }
@@ -991,11 +1074,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 			deferred_shading_->LightPos(spot_light_id_[i], p);
 			deferred_shading_->LightDir(spot_light_id_[i], d);
 		}
-
-		point_light_src_->Visible(true);
-		spot_light_src_[0]->Visible(true);
-		spot_light_src_[1]->Visible(true);
-
 		break;
 
 	case 1:
@@ -1004,11 +1082,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 
-		point_light_src_->Visible(false);
-		spot_light_src_[0]->Visible(false);
-		spot_light_src_[1]->Visible(false);
-
-		if ((0 == buffer_type_) || (7 == buffer_type_))
+		if ((0 == buffer_type_) || (5 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 		}
@@ -1021,7 +1095,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-		if (((0 == buffer_type_) && anti_alias_enabled_) || (6 == buffer_type_))
+		if (((0 == buffer_type_) && anti_alias_enabled_) || (4 == buffer_type_))
 		{
 			edge_anti_alias_->Apply();
 		}

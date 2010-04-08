@@ -220,8 +220,8 @@ namespace KlayGE
 	{
 	public:
 		virtual void GenShadowMapPass(bool sm_pass) = 0;
-		virtual void EmitPass(bool emit_pass) = 0;
-		virtual bool IsEmit() const = 0;
+		virtual void ShadingPass(bool emit_pass) = 0;
+		virtual void LightingTex(TexturePtr const & lighting_tex) = 0;
 	};
 	typedef boost::shared_ptr<DeferredableObject> DeferredableObjectPtr;
 
@@ -266,17 +266,13 @@ namespace KlayGE
 		{
 			return normal_depth_tex_;
 		}
-		TexturePtr const & DiffuseSpecularTex() const
+		FrameBufferPtr const & ShadingFB() const
 		{
-			return diffuse_specular_tex_;
+			return shading_buffer_;
 		}
-		FrameBufferPtr const & ShadedFB() const
+		TexturePtr const & ShadingTex() const
 		{
-			return shaded_buffer_;
-		}
-		TexturePtr const & ShadedTex() const
-		{
-			return shaded_tex_;
+			return shading_tex_;
 		}
 
 	private:
@@ -285,10 +281,12 @@ namespace KlayGE
 	private:
 		FrameBufferPtr g_buffer_;
 		TexturePtr normal_depth_tex_;
-		TexturePtr diffuse_specular_tex_;
 
-		FrameBufferPtr shaded_buffer_;
-		TexturePtr shaded_tex_;
+		FrameBufferPtr lighting_buffer_;
+		TexturePtr lighting_tex_;
+
+		FrameBufferPtr shading_buffer_;
+		TexturePtr shading_tex_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
@@ -319,8 +317,6 @@ namespace KlayGE
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_;
-
-		SceneManager::SceneObjectsType non_emit_objs_;
 
 		RenderEffectParameterPtr texel_to_pixel_offset_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;

@@ -311,11 +311,11 @@ void SSAOCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 grou
 	int kernel_size = 2 * num_rings;
 	
 	int2 base_addr = int2(group_id.x * BLOCK_SIZE_X, group_id.y * BLOCK_SIZE_Y) - kernel_size;
-	for (int s = 0; s < (TILE_SIZE + BLOCK_SIZE - 1) / BLOCK_SIZE; ++ s)
+	for (uint s = 0; s < (TILE_SIZE + BLOCK_SIZE - 1) / BLOCK_SIZE; ++ s)
 	{
-		int offset = GI + BLOCK_SIZE * s;
-		int y = offset / TILE_SIZE_X;
-		int x = offset - y * TILE_SIZE_X;
+		uint offset = GI + BLOCK_SIZE * s;
+		uint y = offset / TILE_SIZE_X;
+		uint x = offset - y * TILE_SIZE_X;
 		float4 texel = src_tex[base_addr + int2(x, y)];
 		shared_block[offset] = GetNormal(texel).z * normal_scale + GetDepth(texel) * depth_near_far_invfar.y;
 	}

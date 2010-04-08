@@ -78,7 +78,6 @@ float linstep(float min, float max, float v)
 
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="texture2D" name="nd_tex"/>
-	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="texture2D" name="ssao_tex"/>
 
 	<parameter type="bool" name="ssao_enabled"/>
@@ -94,7 +93,7 @@ float linstep(float min, float max, float v)
 #define INTEGER_SUPPORT
 #endif
 
-float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
+float4 CalcColor(float2 ds)
 {
 #ifndef INTEGER_SUPPORT
 	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
@@ -113,7 +112,7 @@ float4 CalcColor(float2 ds, float3 diffuse_clr, float specular_clr)
 		ds.y = 0;
 	}
 
-	return float4((ds.x * diffuse_clr + ds.y * specular_clr) * light_clr_type.xyz, 1);
+	return float4(ds.x * light_clr_type.xyz, ds.y);
 }
 
 float VSM(float3 pos_es, float len)
@@ -252,8 +251,7 @@ float4 DeferredShadingPointPS(float4 pos_ss : TEXCOORD0
 		clip(-1);
 	}
 
-	float4 color = color_tex.Sample(point_sampler, tc);
-	final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
+	final_clr = CalcColor(ds);
 
 	return final_clr;
 }
@@ -311,8 +309,7 @@ float4 DeferredShadingSpotPS(float4 pos_ss : TEXCOORD0
 		clip(-1);
 	}
 
-	float4 color = color_tex.Sample(point_sampler, tc);
-	final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
+	final_clr = CalcColor(ds);
 
 	return final_clr;
 }
@@ -356,8 +353,7 @@ float4 DeferredShadingDirectionalPS(float4 pos_ss : TEXCOORD0
 		clip(-1);
 	}
 
-	float4 color = color_tex.Sample(point_sampler, tc);
-	final_clr = CalcColor(ds, GetDiffuse(color), GetSpecular(color));
+	final_clr = CalcColor(ds);
 
 	return final_clr;
 }
@@ -378,25 +374,20 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
 #endif
 	
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
-	float4 color = color_tex.Sample(point_sampler, tc);
-	float3 diffuse_clr = GetDiffuse(color);
 
 	float4 final_clr;
 	if (0 == GetMtlID(ndc))
 	{
-		final_clr = float4(diffuse_clr, 1);
+		clip(-1);
 	}
-	else
+	
+	float ssao = 1;
+	if (ssao_enabled)
 	{
-		float ssao = 1;
-		if (ssao_enabled)
-		{
-			ssao = ssao_tex.Sample(point_sampler, tc).x;
-		}
-
-		final_clr = CalcColor(float2(0.1f * ssao, 0), diffuse_clr, GetSpecular(color));
+		ssao = ssao_tex.Sample(point_sampler, tc).x;
 	}
 
+	final_clr = CalcColor(float2(0.1f * ssao, 0));
 	return final_clr;
 }
 
@@ -437,20 +428,6 @@ float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 {
 	float4 ndc = nd_tex.Sample(point_sampler, tc0);
 	return float4(GetDepth(ndc).xxx * 10, 1);
-}
-
-float4 ShowDiffusePS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
-	float4 color = color_tex.Sample(point_sampler, tc0);
-	float3 diffuse_clr = GetDiffuse(color);
-	return float4(diffuse_clr, 1);
-}
-
-float4 ShowSpecularPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
-	float4 color = color_tex.Sample(point_sampler, tc0);
-	float specular_clr = GetSpecular(color);
-	return float4(specular_clr.xxx, 1);
 }
 
 float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -583,30 +560,6 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 
 			<state name="vertex_shader" value="ShowQuadVS()"/>
 			<state name="pixel_shader" value="ShowDepthPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="ShowDiffuse">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-	
-			<state name="cull_mode" value="front"/>
-
-			<state name="vertex_shader" value="ShowQuadVS()"/>
-			<state name="pixel_shader" value="ShowDiffusePS()"/>
-		</pass>
-	</technique>
-
-	<technique name="ShowSpecular">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-				
-			<state name="cull_mode" value="front"/>
-
-			<state name="vertex_shader" value="ShowQuadVS()"/>
-			<state name="pixel_shader" value="ShowSpecularPS()"/>
 		</pass>
 	</technique>
 

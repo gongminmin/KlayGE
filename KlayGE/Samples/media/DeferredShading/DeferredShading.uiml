@@ -8,8 +8,6 @@
 			<item name="Position"/>
 			<item name="Normal"/>
 			<item name="Depth"/>
-			<item name="Diffuse"/>
-			<item name="Specular"/>
 			<item name="Edge"/>
 			<item name="SSAO"/>
 		</control>

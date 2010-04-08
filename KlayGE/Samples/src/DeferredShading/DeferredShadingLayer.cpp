@@ -35,7 +35,7 @@ namespace KlayGE
 	{
 		PT_GenShadowMap,
 		PT_Lighting,
-		PT_Emit
+		PT_Shading
 	};
 
 	DeferredShadingLayer::DeferredShadingLayer()
@@ -53,7 +53,8 @@ namespace KlayGE
 		light_cos_outer_inner_.push_back(float4(0, 0, 0, 0));
 
 		g_buffer_ = rf.MakeFrameBuffer();
-		shaded_buffer_ = rf.MakeFrameBuffer();
+		lighting_buffer_ = rf.MakeFrameBuffer();
+		shading_buffer_ = rf.MakeFrameBuffer();
 
 		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
@@ -318,17 +319,9 @@ namespace KlayGE
 			break;
 
 		case 4:
-			technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
 			break;
 
 		case 5:
-			technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
-			break;
-
-		case 6:
-			break;
-
-		case 7:
 			technique_ = technique_->Effect().TechniqueByName("ShowSSAO");
 			break;
 
@@ -341,7 +334,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
-		re.BindFrameBuffer(shaded_buffer_);
+		re.BindFrameBuffer(lighting_buffer_);
 
 		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 		{
@@ -416,8 +409,8 @@ namespace KlayGE
 				}
 			}
 		}
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_Emit << 28) + 0));
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_Emit << 28) + 1));
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 0));
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
 	}
 
 	void DeferredShadingLayer::OnResize(uint32_t width, uint32_t height)
@@ -426,27 +419,30 @@ namespace KlayGE
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-		shaded_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-		diffuse_specular_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*diffuse_specular_tex_, 0, 0));
-		g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
+		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+		lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 0));
+		lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		try
 		{
-			shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
+			shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 0));
 		}
 		catch (...)
 		{
-			shaded_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shaded_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shaded_tex_, 0, 0));
+			shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 0));
 		}
-		shaded_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		if (normal_depth_tex_)
 		{
@@ -454,7 +450,6 @@ namespace KlayGE
 		}
 
 		*(technique_->Effect().ParameterByName("nd_tex")) = normal_depth_tex_;
-		*(technique_->Effect().ParameterByName("color_tex")) = diffuse_specular_tex_;
 		*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 	}
 
@@ -484,8 +479,8 @@ namespace KlayGE
 			*inv_view_param_ = inv_view_;
 
 			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= shaded_buffer_->Width() / 2.0f;
-			texel_to_pixel.y() /= shaded_buffer_->Height() / 2.0f;
+			texel_to_pixel.x() /= g_buffer_->Width() / 2.0f;
+			texel_to_pixel.y() /= g_buffer_->Height() / 2.0f;
 			*texel_to_pixel_offset_param_ = texel_to_pixel;
 
 			this->ScanLightSrc();
@@ -506,50 +501,33 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((0 == buffer_type_) || (6 == buffer_type_))
+			if ((0 == buffer_type_) || (4 == buffer_type_))
 			{
 				int32_t pass_type = pass_scaned_[pass - 1] >> 28;
 				int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
 				int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
 
-				if (PT_Emit == pass_type)
+				if (PT_Shading == pass_type)
 				{
 					if (0 == index_in_pass)
 					{
+						re.BindFrameBuffer(shading_buffer_);
+
 						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-						non_emit_objs_.resize(0);
 						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 						{
 							DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
 							if (deo)
 							{
-								if (deo->IsEmit())
-								{
-									deo->EmitPass(true);
-									so->Visible(true);
-								}
-								else
-								{
-									non_emit_objs_.push_back(so);
-									so->Visible(false);
-								}
-							}
-							else
-							{
-								non_emit_objs_.push_back(so);
-								so->Visible(false);
+								deo->LightingTex(lighting_tex_);
+								deo->ShadingPass(true);
 							}
 						}
 
 						return App3DFramework::URV_Need_Flush;
 					}
-					else //if (1 == index_in_pass)
+					else
 					{
-						BOOST_FOREACH(BOOST_TYPEOF(non_emit_objs_)::reference so, non_emit_objs_)
-						{
-							so->Visible(true);
-						}
-
 						return App3DFramework::URV_Finished;
 					}
 				}
@@ -654,7 +632,7 @@ namespace KlayGE
 
 						// Lighting
 
-						re.BindFrameBuffer(shaded_buffer_);
+						re.BindFrameBuffer(lighting_buffer_);
 
 						technique_ = technique_lights_[type];
 
