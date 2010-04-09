@@ -66,10 +66,9 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
-void GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0,
-			out float4 oNormalDepth : SV_Target0)
+float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0)
 {
-	oNormalDepth = StoreNormalDepthMtl(0, 1, 0, 0);
+	return StoreNormalDepthMtl(0, 1, 0, 0);
 }
 		]]>
 	</shader>

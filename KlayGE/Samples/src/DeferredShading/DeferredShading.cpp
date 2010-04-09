@@ -45,8 +45,7 @@ namespace
 	{
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name),
-				gen_sm_pass_(false), shading_pass_(false)
+			: KMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -121,29 +120,24 @@ namespace
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			gen_sm_pass_ = sm_pass;
-			if (gen_sm_pass_)
+			switch (type)
 			{
-				technique_ = gen_sm_technique_;
-			}
-			else
-			{
+			case PT_GBuffer:
 				technique_ = gbuffer_technique_;
-			}
-		}
+				break;
 
-		void ShadingPass(bool shading_pass)
-		{
-			shading_pass_ = shading_pass;
-			if (shading_pass_)
-			{
+			case PT_GenShadowMap:
+				technique_ = gen_sm_technique_;
+				break;
+
+			case PT_Shading:
 				technique_ = shading_technique_;
-			}
-			else
-			{
-				technique_ = gbuffer_technique_;
+				break;
+
+			default:
+				break;
 			}
 		}
 
@@ -174,8 +168,6 @@ namespace
 
 	private:
 		RenderEffectPtr effect_;
-		bool gen_sm_pass_;
-		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr shading_technique_;
@@ -193,14 +185,9 @@ namespace
 		{
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			checked_pointer_cast<RenderTorus>(renderable_)->GenShadowMapPass(sm_pass);
-		}
-
-		void ShadingPass(bool shading_pass)
-		{
-			checked_pointer_cast<RenderTorus>(renderable_)->ShadingPass(shading_pass);
+			checked_pointer_cast<RenderTorus>(renderable_)->Pass(type);
 		}
 
 		void LightingTex(TexturePtr const & lighting_tex)
@@ -214,8 +201,7 @@ namespace
 	{
 	public:
 		RenderCone(float cone_radius, float cone_height, float3 const & clr)
-			: RenderableHelper(L"Cone"),
-				gen_sm_pass_(false), shading_pass_(false)
+			: RenderableHelper(L"Cone")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -277,29 +263,24 @@ namespace
 			model_ = mat;
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			gen_sm_pass_ = sm_pass;
-			if (gen_sm_pass_)
+			switch (type)
 			{
-				technique_ = gen_sm_technique_;
-			}
-			else
-			{
+			case PT_GBuffer:
 				technique_ = gbuffer_technique_;
-			}
-		}
+				break;
 
-		void ShadingPass(bool shading_pass)
-		{
-			shading_pass_ = shading_pass;
-			if (shading_pass_)
-			{
+			case PT_GenShadowMap:
+				technique_ = gen_sm_technique_;
+				break;
+
+			case PT_Shading:
 				technique_ = shading_technique_;
-			}
-			else
-			{
-				technique_ = gbuffer_technique_;
+				break;
+
+			default:
+				break;
 			}
 		}
 
@@ -338,8 +319,6 @@ namespace
 		float4x4 model_;
 
 		RenderEffectPtr effect_;
-		bool gen_sm_pass_;
-		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr shading_technique_;
@@ -371,22 +350,10 @@ namespace
 			return model_;
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			checked_pointer_cast<RenderCone>(renderable_)->GenShadowMapPass(sm_pass);
-			if (sm_pass)
-			{
-				this->Visible(false);
-			}
-		}
-
-		void ShadingPass(bool shading_pass)
-		{
-			checked_pointer_cast<RenderCone>(renderable_)->ShadingPass(shading_pass);
-			if (shading_pass)
-			{
-				this->Visible(true);
-			}
+			checked_pointer_cast<RenderCone>(renderable_)->Pass(type);
+			this->Visible(PT_GenShadowMap != type);
 		}
 
 		void LightingTex(TexturePtr const & lighting_tex)
@@ -404,8 +371,7 @@ namespace
 	{
 	public:
 		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name),
-				gen_sm_pass_(false), shading_pass_(false)
+			: KMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -437,29 +403,24 @@ namespace
 			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			gen_sm_pass_ = sm_pass;
-			if (gen_sm_pass_)
+			switch (type)
 			{
-				technique_ = gen_sm_technique_;
-			}
-			else
-			{
+			case PT_GBuffer:
 				technique_ = gbuffer_technique_;
-			}
-		}
+				break;
 
-		void ShadingPass(bool shading_pass)
-		{
-			shading_pass_ = shading_pass;
-			if (shading_pass_)
-			{
+			case PT_GenShadowMap:
+				technique_ = gen_sm_technique_;
+				break;
+
+			case PT_Shading:
 				technique_ = shading_technique_;
-			}
-			else
-			{
-				technique_ = gbuffer_technique_;
+				break;
+
+			default:
+				break;
 			}
 		}
 
@@ -498,8 +459,6 @@ namespace
 		float4x4 model_;
 
 		RenderEffectPtr effect_;
-		bool gen_sm_pass_;
-		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr shading_technique_;
@@ -531,22 +490,10 @@ namespace
 			return model_;
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			checked_pointer_cast<RenderSphere>(renderable_)->GenShadowMapPass(sm_pass);
-			if (sm_pass)
-			{
-				this->Visible(false);
-			}
-		}
-
-		void ShadingPass(bool shading_pass)
-		{
-			checked_pointer_cast<RenderSphere>(renderable_)->ShadingPass(shading_pass);
-			if (shading_pass)
-			{
-				this->Visible(true);
-			}
+			checked_pointer_cast<RenderSphere>(renderable_)->Pass(type);
+			this->Visible(PT_GenShadowMap != type);
 		}
 
 		void LightingTex(TexturePtr const & lighting_tex)
@@ -564,7 +511,6 @@ namespace
 	{
 	public:
 		RenderableDeferredHDRSkyBox()
-			: shading_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -579,26 +525,28 @@ namespace
 			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 		}
 
-		void ShadingPass(bool shading_pass)
+		void Pass(PassType type)
 		{
-			shading_pass_ = shading_pass;
-			if (shading_pass_)
+			switch (type)
 			{
-				this->Technique(shading_technique_);
-			}
-			else
-			{
-				this->Technique(gbuffer_technique_);
+			case PT_GBuffer:
+				technique_ = gbuffer_technique_;
+				break;
+
+			case PT_Shading:
+				technique_ = shading_technique_;
+				break;
+
+			default:
+				break;
 			}
 		}
 
 	private:
 		RenderEffectPtr effect_;
-		bool shading_pass_;
 		RenderTechniquePtr gbuffer_technique_;
 		RenderTechniquePtr gen_sm_technique_;
 		RenderTechniquePtr shading_technique_;
-
 	};
 
 	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox, public DeferredableObject
@@ -609,21 +557,10 @@ namespace
 			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
 		}
 
-		void GenShadowMapPass(bool sm_pass)
+		void Pass(PassType type)
 		{
-			if (sm_pass)
-			{
-				this->Visible(false);
-			}
-		}
-
-		void ShadingPass(bool shading_pass)
-		{
-			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->ShadingPass(shading_pass);
-			if (shading_pass)
-			{
-				this->Visible(true);
-			}
+			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->Pass(type);
+			this->Visible(PT_GenShadowMap != type);
 		}
 
 		void LightingTex(TexturePtr const & /*lighting_tex*/)

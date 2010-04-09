@@ -31,16 +31,12 @@ namespace KlayGE
 {
 	int const SM_SIZE = 512;
 
-	enum PassType
-	{
-		PT_GenShadowMap,
-		PT_Lighting,
-		PT_Shading
-	};
-
 	DeferredShadingLayer::DeferredShadingLayer()
 			: RenderableHelper(L"DeferredShadingLayer")
 	{
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
+		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
+		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		light_enabled_.push_back(1);
@@ -299,58 +295,7 @@ namespace KlayGE
 
 	void DeferredShadingLayer::ScanLightSrc()
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		re.BindFrameBuffer(lighting_buffer_);
-
-		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
-		{
-			if (light_enabled_[i])
-			{
-				int type = static_cast<int>(light_clr_type_[i].w());
-				if (LT_Spot == type)
-				{
-					float3 d, u;
-					d = *reinterpret_cast<float3*>(&light_dir_[i]);
-					u = float3(0, 1, 0);
-
-					float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
-					float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
-
-					float const scale = light_cos_outer_inner_[i].w();
-					float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
-					rl_ = rl_cone_;
-
-					*light_volume_mvp_param_ = mat * MathLib::inverse(light_view) * view_ * proj_;
-
-					light_crs_[i][0]->Begin();
-					re.Render(*technique_light_depth_only_, *rl_);
-					light_crs_[i][0]->End();
-				}
-				else if (LT_Point == type)
-				{
-					float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
-					rl_ = rl_pyramid_;
-					float4x4 vp = view_ * proj_;
-					for (int j = 0; j < 6; ++ j)
-					{
-						float3 d, u;
-						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
-						d = ad.first;
-						u = ad.second;
-
-						float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
-						*light_volume_mvp_param_ = MathLib::inverse(light_view) * vp;
-
-						light_crs_[i][j]->Begin();
-						re.Render(*technique_light_depth_only_, *rl_);
-						light_crs_[i][j]->End();
-					}
-				}
-			}
-		}
-
-		pass_scaned_.resize(0);
+		pass_scaned_.resize(2);
 		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 		{
 			if (light_enabled_[i])
@@ -425,70 +370,118 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		if (0 == pass)
+		int32_t pass_type = pass_scaned_[pass] >> 28;
+		int32_t org_no = (pass_scaned_[pass] >> 16) & 0xFFF;
+		int32_t index_in_pass = pass_scaned_[pass] & 0xFFFF;
+
+		SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+		BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 		{
-			// Generate G-Buffer
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			view_ = camera.ViewMatrix();
-			proj_ = camera.ProjMatrix();
-			inv_view_ = MathLib::inverse(view_);
-			float4x4 const inv_proj = MathLib::inverse(proj_);
-
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-			*upper_left_param_ = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*upper_right_param_ = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-
-			*inv_view_param_ = inv_view_;
-
-			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= g_buffer_->Width() / 2.0f;
-			texel_to_pixel.y() /= g_buffer_->Height() / 2.0f;
-			*texel_to_pixel_offset_param_ = texel_to_pixel;
-
-			this->ScanLightSrc();
-
-			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+			DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+			if (deo)
 			{
-				DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-				if (deo)
+				deo->Pass(static_cast<PassType>(pass_type));
+				if (0 == pass)
 				{
-					deo->GenShadowMapPass(false);
+					deo->LightingTex(lighting_tex_);
 				}
 			}
+		}
 
-			re.BindFrameBuffer(g_buffer_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
-			return App3DFramework::URV_Need_Flush;
+		if (PT_GBuffer == pass_type)
+		{
+			if (0 == index_in_pass)
+			{
+				// Generate G-Buffer
+
+				Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+				view_ = camera.ViewMatrix();
+				proj_ = camera.ProjMatrix();
+				inv_view_ = MathLib::inverse(view_);
+				float4x4 const inv_proj = MathLib::inverse(proj_);
+
+				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+				*upper_left_param_ = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+				*upper_right_param_ = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+				*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+				*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+
+				*inv_view_param_ = inv_view_;
+
+				float4 texel_to_pixel = re.TexelToPixelOffset();
+				texel_to_pixel.x() /= g_buffer_->Width() / 2.0f;
+				texel_to_pixel.y() /= g_buffer_->Height() / 2.0f;
+				*texel_to_pixel_offset_param_ = texel_to_pixel;
+
+				this->ScanLightSrc();
+
+				re.BindFrameBuffer(g_buffer_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
+				return App3DFramework::URV_Need_Flush;
+			}
+			else
+			{
+				// Light depth only
+
+				re.BindFrameBuffer(lighting_buffer_);
+
+				for (size_t i = 0; i < light_clr_type_.size(); ++ i)
+				{
+					if (light_enabled_[i])
+					{
+						float4x4 vp = view_ * proj_;
+						int type = static_cast<int>(light_clr_type_[i].w());
+						if (LT_Spot == type)
+						{
+							float3 d, u;
+							d = *reinterpret_cast<float3*>(&light_dir_[i]);
+							u = float3(0, 1, 0);
+
+							float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
+							float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+
+							float const scale = light_cos_outer_inner_[i].w();
+							float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+
+							*light_volume_mvp_param_ = mat * MathLib::inverse(light_view) * vp;
+
+							light_crs_[i][0]->Begin();
+							re.Render(*technique_light_depth_only_, *rl_cone_);
+							light_crs_[i][0]->End();
+						}
+						else if (LT_Point == type)
+						{
+							float3 p = *reinterpret_cast<float3*>(&light_pos_[i]);
+							for (int j = 0; j < 6; ++ j)
+							{
+								float3 d, u;
+								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+								d = ad.first;
+								u = ad.second;
+
+								float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+								*light_volume_mvp_param_ = MathLib::inverse(light_view) * vp;
+
+								light_crs_[i][j]->Begin();
+								re.Render(*technique_light_depth_only_, *rl_pyramid_);
+								light_crs_[i][j]->End();
+							}
+						}
+					}
+				}
+
+				return App3DFramework::URV_Flushed;
+			}
 		}
 		else
 		{
-			int32_t pass_type = pass_scaned_[pass - 1] >> 28;
-			int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
-			int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
-
 			if (PT_Shading == pass_type)
 			{
 				if (0 == index_in_pass)
 				{
 					re.BindFrameBuffer(shading_buffer_);
-
-					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
-					{
-						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-						if (deo)
-						{
-							deo->LightingTex(lighting_tex_);
-							deo->ShadingPass(true);
-						}
-					}
-
 					return App3DFramework::URV_Need_Flush;
 				}
 				else
@@ -569,16 +562,6 @@ namespace KlayGE
 
 				if (PT_GenShadowMap == pass_type)
 				{
-					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
-					{
-						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-						if (deo)
-						{
-							deo->GenShadowMapPass(true);
-						}
-					}
-
 					checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
 
 					// Shadow map generation

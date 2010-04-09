@@ -216,11 +216,18 @@ namespace KlayGE
 		LSA_NoSpecular = 1UL << 2
 	};
 
+	enum PassType
+	{
+		PT_GBuffer,
+		PT_GenShadowMap,
+		PT_Lighting,
+		PT_Shading
+	};
+
 	class DeferredableObject
 	{
 	public:
-		virtual void GenShadowMapPass(bool sm_pass) = 0;
-		virtual void ShadingPass(bool emit_pass) = 0;
+		virtual void Pass(PassType type) = 0;
 		virtual void LightingTex(TexturePtr const & lighting_tex) = 0;
 	};
 	typedef boost::shared_ptr<DeferredableObject> DeferredableObjectPtr;
