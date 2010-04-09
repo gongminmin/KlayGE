@@ -10,6 +10,7 @@
 			<item name="Depth"/>
 			<item name="Edge"/>
 			<item name="SSAO"/>
+			<item name="Lighting"/>
 		</control>
 
 		<control type="check_box" id="AntiAlias" caption="Anti alias" x="20" y="88" width="350" height="24" checked="1" hotkey="0" is_default="0"/>

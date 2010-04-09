@@ -388,6 +388,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\media\DeferredShading\DeferredShadingDebug.fxml"
+				>
+			</File>
+			<File
 				RelativePath="..\..\media\DeferredShading\GBuffer.fxml"
 				>
 			</File>

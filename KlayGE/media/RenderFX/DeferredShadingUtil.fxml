@@ -8,11 +8,6 @@ float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id, float shini
 	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5), depth, mtl_id + shininess);
 }
 
-float4 StoreDiffuseSpecular(float3 diffuse, float specular)
-{
-	return float4(diffuse, specular);
-}
-
 float3 GetNormal(float4 ndc)
 {
 	float3 normal;
@@ -34,16 +29,6 @@ int GetMtlID(float4 ndc)
 float GetShininess(float4 ndc)
 {
 	return max(1.0f, frac(ndc.w) * 256);
-}
-
-float3 GetDiffuse(float4 clr)
-{
-	return clr.xyz;
-}
-
-float GetSpecular(float4 clr)
-{
-	return clr.w;
 }
 		]]>
 	</shader>

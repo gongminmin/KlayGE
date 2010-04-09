@@ -253,22 +253,17 @@ namespace KlayGE
 
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
-		void BufferType(int buffer_type);
 
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
 
-		FrameBufferPtr const & GBufferFB() const
-		{
-			return g_buffer_;
-		}
 		TexturePtr const & NormalDepthTex() const
 		{
 			return normal_depth_tex_;
 		}
-		FrameBufferPtr const & ShadingFB() const
+		TexturePtr const & LightingTex() const
 		{
-			return shading_buffer_;
+			return lighting_tex_;
 		}
 		TexturePtr const & ShadingTex() const
 		{
@@ -306,8 +301,6 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_depth_only_;
 
 		std::vector<std::vector<QueryPtr> > light_crs_;
-
-		int32_t buffer_type_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;

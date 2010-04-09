@@ -169,7 +169,7 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 		}
 
 	private:
@@ -326,7 +326,12 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+		}
+
+		void OnRenderBegin()
+		{
+			this->Update();
 		}
 
 	private:
@@ -481,7 +486,12 @@ namespace
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer() ? -1 : +1);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+		}
+
+		void OnRenderBegin()
+		{
+			this->Update();
 		}
 
 	private:
@@ -554,6 +564,7 @@ namespace
 	{
 	public:
 		RenderableDeferredHDRSkyBox()
+			: shading_pass_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -598,13 +609,21 @@ namespace
 			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
 		}
 
-		void GenShadowMapPass(bool /*sm_pass*/)
+		void GenShadowMapPass(bool sm_pass)
 		{
+			if (sm_pass)
+			{
+				this->Visible(false);
+			}
 		}
 
 		void ShadingPass(bool shading_pass)
 		{
 			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->ShadingPass(shading_pass);
+			if (shading_pass)
+			{
+				this->Visible(true);
+			}
 		}
 
 		void LightingTex(TexturePtr const & /*lighting_tex*/)
@@ -764,6 +783,70 @@ namespace
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
+	class DeferredShadingDebug : public PostProcess
+	{
+	public:
+		DeferredShadingDebug()
+			: PostProcess(L"DeferredShadingDebug")
+		{
+			input_pins_.push_back(std::make_pair("nd_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("ssao_tex", TexturePtr()));
+
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShadingDebug.fxml")->TechniqueByName("ShowPosition"));
+		}
+
+		void ShowType(int show_type)
+		{
+			switch (show_type)
+			{
+			case 0:
+				break;
+
+			case 1:
+				technique_ = technique_->Effect().TechniqueByName("ShowPosition");
+				break;
+
+			case 2:
+				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
+				break;
+
+			case 3:
+				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
+				break;
+
+			case 4:
+				break;
+
+			case 5:
+				technique_ = technique_->Effect().TechniqueByName("ShowSSAO");
+				break;
+
+			case 6:
+				technique_ = technique_->Effect().TechniqueByName("ShowLighting");
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		void OnRenderBegin()
+		{
+			PostProcess::OnRenderBegin();
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+			float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
+
+			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+		}
+	};
+
 
 	enum
 	{
@@ -876,6 +959,8 @@ void DeferredShadingApp::InitObjects()
 	}
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
 
+	debug_pp_ = MakeSharedPtr<DeferredShadingDebug>();
+
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
@@ -938,6 +1023,10 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	ssao_pp_->InputPin(0, deferred_shading_->NormalDepthTex());
 	ssao_pp_->OutputPin(0, ssao_tex_);
 
+	debug_pp_->InputPin(0, deferred_shading_->NormalDepthTex());
+	debug_pp_->InputPin(1, deferred_shading_->LightingTex());
+	debug_pp_->InputPin(2, ssao_tex_);
+
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
@@ -954,7 +1043,7 @@ void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputActio
 void DeferredShadingApp::BufferChangedHandler(UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
-	deferred_shading_->BufferType(buffer_type_);
+	checked_pointer_cast<DeferredShadingDebug>(debug_pp_)->ShowType(buffer_type_);
 
 	if (buffer_type_ != 0)
 	{
@@ -1082,7 +1171,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 
-		if ((0 == buffer_type_) || (5 == buffer_type_))
+		if ((0 == buffer_type_) || (5 == buffer_type_) || (6 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 		}
@@ -1095,13 +1184,20 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
-		if (((0 == buffer_type_) && anti_alias_enabled_) || (4 == buffer_type_))
+		if ((buffer_type_ > 0) && (buffer_type_ != 4))
 		{
-			edge_anti_alias_->Apply();
+			debug_pp_->Apply();
 		}
-		if (0 == buffer_type_)
+		else
 		{
-			hdr_pp_->Apply();
+			if (((0 == buffer_type_) && anti_alias_enabled_) || (4 == buffer_type_))
+			{
+				edge_anti_alias_->Apply();
+			}
+			if (0 == buffer_type_)
+			{
+				hdr_pp_->Apply();
+			}
 		}
 	}
 

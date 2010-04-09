@@ -44,6 +44,8 @@ private:
 	KlayGE::TexturePtr hdr_tex_;
 	KlayGE::HDRPostProcessPtr hdr_pp_;
 
+	KlayGE::PostProcessPtr debug_pp_;
+
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
 	bool anti_alias_enabled_;

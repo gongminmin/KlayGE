@@ -1,0 +1,152 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="DeferredShadingUtil.fxml"/>
+	<include name="PostProcess.fxml"/>
+	
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="upper_right"/>
+		<parameter type="float3" name="lower_left"/>
+		<parameter type="float3" name="lower_right"/>
+
+		<parameter type="float3" name="depth_near_far_invfar"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+
+float linstep(float min, float max, float v)
+{
+	return saturate((v - min) / (max - min));
+}
+		]]>
+	</shader>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="nd_tex"/>
+	<parameter type="texture2D" name="lighting_tex"/>
+	<parameter type="texture2D" name="ssao_tex"/>
+
+	<shader>
+		<![CDATA[
+void ShowQuadVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTc0, oPos);
+	
+	oViewDir = texcoord_to_view(float2(oPos.x, -oPos.y) + 0.5f);
+}
+
+float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y);
+
+	return float4(pos_es, 1);
+}
+
+float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float3 normal = GetNormal(ndc);
+	
+	return float4(normal / 2 + 0.5f, 1);
+}
+
+float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	return float4(GetDepth(ndc).xxx * 10, 1);
+}
+
+float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+
+	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
+	return color;
+}
+
+float4 ShowLightingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	return lighting_tex.Sample(point_sampler, tc0);
+}
+		]]>
+	</shader>
+
+	<technique name="ShowPosition">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowPositionPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowNormal">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+	
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowNormalPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowDepth">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowDepthPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowSSAO">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowSSAOPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShowLighting">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="ShowQuadVS()"/>
+			<state name="pixel_shader" value="ShowLightingPS()"/>
+		</pass>
+	</technique>
+</effect>

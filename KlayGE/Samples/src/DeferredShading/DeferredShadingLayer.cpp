@@ -39,8 +39,7 @@ namespace KlayGE
 	};
 
 	DeferredShadingLayer::DeferredShadingLayer()
-			: RenderableHelper(L"DeferredShadingLayer"),
-				buffer_type_(0)
+			: RenderableHelper(L"DeferredShadingLayer")
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -298,38 +297,6 @@ namespace KlayGE
 		*(technique_->Effect().ParameterByName("ssao_enabled")) = ssao;
 	}
 
-	void DeferredShadingLayer::BufferType(int buffer_type)
-	{
-		buffer_type_ = buffer_type;
-		switch (buffer_type_)
-		{
-		case 0:
-			break;
-
-		case 1:
-			technique_ = technique_->Effect().TechniqueByName("ShowPosition");
-			break;
-
-		case 2:
-			technique_ = technique_->Effect().TechniqueByName("ShowNormal");
-			break;
-
-		case 3:
-			technique_ = technique_->Effect().TechniqueByName("ShowDepth");
-			break;
-
-		case 4:
-			break;
-
-		case 5:
-			technique_ = technique_->Effect().TechniqueByName("ShowSSAO");
-			break;
-
-		default:
-			break;
-		}
-	}
-
 	void DeferredShadingLayer::ScanLightSrc()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -501,167 +468,157 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((0 == buffer_type_) || (4 == buffer_type_))
+			int32_t pass_type = pass_scaned_[pass - 1] >> 28;
+			int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
+			int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
+
+			if (PT_Shading == pass_type)
 			{
-				int32_t pass_type = pass_scaned_[pass - 1] >> 28;
-				int32_t org_no = (pass_scaned_[pass - 1] >> 16) & 0xFFF;
-				int32_t index_in_pass = pass_scaned_[pass - 1] & 0xFFFF;
-
-				if (PT_Shading == pass_type)
+				if (0 == index_in_pass)
 				{
-					if (0 == index_in_pass)
-					{
-						re.BindFrameBuffer(shading_buffer_);
+					re.BindFrameBuffer(shading_buffer_);
 
-						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+					{
+						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+						if (deo)
 						{
-							DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-							if (deo)
-							{
-								deo->LightingTex(lighting_tex_);
-								deo->ShadingPass(true);
-							}
+							deo->LightingTex(lighting_tex_);
+							deo->ShadingPass(true);
 						}
+					}
 
-						return App3DFramework::URV_Need_Flush;
-					}
-					else
-					{
-						return App3DFramework::URV_Finished;
-					}
+					return App3DFramework::URV_Need_Flush;
 				}
 				else
 				{
-					int type = static_cast<int>(light_clr_type_[org_no].w());
-					BOOST_ASSERT(type < LT_NumLightTypes);
-
-					float3 d, u;
-					if (type != LT_Point)
-					{
-						d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
-						u = float3(0, 1, 0);
-					}
-					else
-					{
-						std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-						d = ad.first;
-						u = ad.second;
-					}
-
-					float fov;
-					if (type != LT_Spot)
-					{
-						fov = PI / 2;
-					}
-					else
-					{
-						fov = light_cos_outer_inner_[org_no].z();
-					}
-
-					float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
-					sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-					sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-					float3 dir_es = MathLib::transform_normal(d, view_);
-					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
-
-					*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-						* sm_buffer_->GetViewport().camera->ProjMatrix();
-					
-					float3 loc_es = MathLib::transform_coord(p, view_);
-					float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-					if (LT_Spot == type)
-					{
-						light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
-						light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
-					}
-
-					*light_pos_es_param_ = light_pos_es_actived;
-					*light_dir_es_param_ = light_dir_es_actived;
-
-					float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
-					switch (type)
-					{
-					case LT_Spot:
-						{
-							float const scale = light_cos_outer_inner_[org_no].w();
-							*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
-							rl_ = rl_cone_;
-						}
-						break;
-
-					case LT_Point:
-						rl_ = rl_pyramid_;
-						*light_volume_mvp_param_ = mat;
-						break;
-
-					default:
-						rl_ = rl_quad_;
-						*light_volume_mvp_param_ = float4x4::Identity();
-					}
-
-					if (PT_GenShadowMap == pass_type)
-					{
-						SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-						BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
-						{
-							DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
-							if (deo)
-							{
-								deo->GenShadowMapPass(true);
-							}
-						}
-
-						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
-
-						// Shadow map generation
-
-						re.BindFrameBuffer(sm_buffer_);
-						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
-
-						return App3DFramework::URV_Need_Flush;
-					}
-					else //if (PT_Lighting == pass_type)
-					{
-						if (0 == (light_attrib_[org_no] & LSA_NoShadow))
-						{
-							box_filter_pp_->Apply();
-						}
-
-						// Lighting
-
-						re.BindFrameBuffer(lighting_buffer_);
-
-						technique_ = technique_lights_[type];
-
-						*light_attrib_param_ = light_attrib_[org_no];
-						*light_clr_type_param_ = light_clr_type_[org_no];
-						*light_falloff_param_ = light_falloff_[org_no];
-
-						if ((light_attrib_[org_no] & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
-						{
-							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
-						}
-
-						re.Render(*technique_, *rl_);
-
-						if ((type != LT_Ambient) && (type != LT_Directional))
-						{
-							checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->EndConditionalRender();
-						}
-
-						return App3DFramework::URV_Flushed;
-					}
+					return App3DFramework::URV_Finished;
 				}
 			}
 			else
 			{
-				re.BindFrameBuffer(FrameBufferPtr());
-				re.Render(*technique_, *rl_quad_);
+				int type = static_cast<int>(light_clr_type_[org_no].w());
+				BOOST_ASSERT(type < LT_NumLightTypes);
 
-				return App3DFramework::URV_Finished;
+				float3 d, u;
+				if (type != LT_Point)
+				{
+					d = *reinterpret_cast<float3*>(&light_dir_[org_no]);
+					u = float3(0, 1, 0);
+				}
+				else
+				{
+					std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
+					d = ad.first;
+					u = ad.second;
+				}
+
+				float fov;
+				if (type != LT_Spot)
+				{
+					fov = PI / 2;
+				}
+				else
+				{
+					fov = light_cos_outer_inner_[org_no].z();
+				}
+
+				float3 p = *reinterpret_cast<float3*>(&light_pos_[org_no]);
+				sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
+				sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+				float3 dir_es = MathLib::transform_normal(d, view_);
+				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
+
+				*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
+					* sm_buffer_->GetViewport().camera->ProjMatrix();
+				
+				float3 loc_es = MathLib::transform_coord(p, view_);
+				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+				if (LT_Spot == type)
+				{
+					light_pos_es_actived.w() = light_cos_outer_inner_[org_no].x();
+					light_dir_es_actived.w() = light_cos_outer_inner_[org_no].y();
+				}
+
+				*light_pos_es_param_ = light_pos_es_actived;
+				*light_dir_es_param_ = light_dir_es_actived;
+
+				float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
+				switch (type)
+				{
+				case LT_Spot:
+					{
+						float const scale = light_cos_outer_inner_[org_no].w();
+						*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
+						rl_ = rl_cone_;
+					}
+					break;
+
+				case LT_Point:
+					rl_ = rl_pyramid_;
+					*light_volume_mvp_param_ = mat;
+					break;
+
+				default:
+					rl_ = rl_quad_;
+					*light_volume_mvp_param_ = float4x4::Identity();
+				}
+
+				if (PT_GenShadowMap == pass_type)
+				{
+					SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+					BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+					{
+						DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+						if (deo)
+						{
+							deo->GenShadowMapPass(true);
+						}
+					}
+
+					checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+
+					// Shadow map generation
+
+					re.BindFrameBuffer(sm_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+
+					return App3DFramework::URV_Need_Flush;
+				}
+				else //if (PT_Lighting == pass_type)
+				{
+					if (0 == (light_attrib_[org_no] & LSA_NoShadow))
+					{
+						box_filter_pp_->Apply();
+					}
+
+					// Lighting
+
+					re.BindFrameBuffer(lighting_buffer_);
+
+					technique_ = technique_lights_[type];
+
+					*light_attrib_param_ = light_attrib_[org_no];
+					*light_clr_type_param_ = light_clr_type_[org_no];
+					*light_falloff_param_ = light_falloff_[org_no];
+
+					if ((light_attrib_[org_no] & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+					{
+						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+					}
+
+					re.Render(*technique_, *rl_);
+
+					if ((type != LT_Ambient) && (type != LT_Directional))
+					{
+						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->EndConditionalRender();
+					}
+
+					return App3DFramework::URV_Flushed;
+				}
 			}
 		}
 	}
