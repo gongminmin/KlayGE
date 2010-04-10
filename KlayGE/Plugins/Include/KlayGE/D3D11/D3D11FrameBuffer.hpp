@@ -40,6 +40,9 @@ namespace KlayGE
 		}
 
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
+
+	private:
+		D3D11_VIEWPORT d3d_viewport_;
 	};
 
 	typedef boost::shared_ptr<D3D11FrameBuffer> D3D11FrameBufferPtr;

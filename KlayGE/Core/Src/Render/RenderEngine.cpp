@@ -199,30 +199,33 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::BindFrameBuffer(FrameBufferPtr const & fb)
 	{
-		if (cur_frame_buffer_)
+		if (fb != cur_frame_buffer_)
 		{
-			cur_frame_buffer_->OnUnbind();
-		}
-
-		if (!fb)
-		{
-			if (stereo_mode_)
+			if (cur_frame_buffer_)
 			{
-				cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+				cur_frame_buffer_->OnUnbind();
+			}
+
+			if (!fb)
+			{
+				if (stereo_mode_)
+				{
+					cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+				}
+				else
+				{
+					cur_frame_buffer_ = screen_frame_buffer_;
+				}
 			}
 			else
 			{
-				cur_frame_buffer_ = screen_frame_buffer_;
+				cur_frame_buffer_ = fb;
 			}
-		}
-		else
-		{
-			cur_frame_buffer_ = fb;
-		}
 
-		cur_frame_buffer_->OnBind();
+			cur_frame_buffer_->OnBind();
 
-		this->DoBindFrameBuffer(cur_frame_buffer_);
+			this->DoBindFrameBuffer(cur_frame_buffer_);
+		}
 	}
 
 	// 获取当前渲染目标

@@ -22,10 +22,10 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 
 		<parameter type="float4x4" name="inv_view"/>
-	</cbuffer>
 
-	<parameter type='float4' name='texel_to_pixel_offset'/>
-	<parameter type='int' name='flipping'/>
+		<parameter type='float4' name='texel_to_pixel_offset'/>
+		<parameter type='int' name='flipping'/>
+	</cbuffer>
 
 	<parameter type="float" name="min_variance" value="0.3"/>
 	<parameter type="float" name="bleeding_reduce" value="0.55"/>
@@ -78,9 +78,6 @@ float linstep(float min, float max, float v)
 
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="texture2D" name="nd_tex"/>
-	<parameter type="texture2D" name="ssao_tex"/>
-
-	<parameter type="bool" name="ssao_enabled"/>
 
 	<shader>
 		<![CDATA[
@@ -381,13 +378,7 @@ float4 DeferredShadingAmbientPS(float4 pos_ss : TEXCOORD0
 		clip(-1);
 	}
 	
-	float ssao = 1;
-	if (ssao_enabled)
-	{
-		ssao = ssao_tex.Sample(point_sampler, tc).x;
-	}
-
-	final_clr = CalcColor(float2(0.1f * ssao, 0));
+	final_clr = CalcColor(float2(0.1f, 0));
 	return final_clr;
 }
 		]]>

@@ -41,16 +41,12 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTorus : public KMesh
+	class RenderTorus : public KMesh, public DeferredRenderable
 	{
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			effect_ = rf.LoadEffect("GBuffer.fxml");
-
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
@@ -122,28 +118,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			switch (type)
-			{
-			case PT_GBuffer:
-				technique_ = gbuffer_technique_;
-				break;
-
-			case PT_GenShadowMap:
-				technique_ = gen_sm_technique_;
-				break;
-
-			case PT_Shading:
-				technique_ = shading_technique_;
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		void LightingTex(TexturePtr const & lighting_tex)
-		{
-			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
+			technique_ = DeferredRenderable::Pass(type);
 		}
 
 		void OnRenderBegin()
@@ -167,17 +142,12 @@ namespace
 		}
 
 	private:
-		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
-
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class TorusObject : public SceneObjectHelper, public DeferredableObject
+	class TorusObject : public SceneObjectHelper, public DeferredSceneObject
 	{
 	public:
 		TorusObject(RenderablePtr const & mesh)
@@ -190,14 +160,24 @@ namespace
 			checked_pointer_cast<RenderTorus>(renderable_)->Pass(type);
 		}
 
-		void LightingTex(TexturePtr const & lighting_tex)
+		void LightingTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderTorus>(renderable_)->LightingTex(lighting_tex);
+			checked_pointer_cast<RenderTorus>(renderable_)->LightingTex(tex);
+		}
+
+		void SSAOTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<RenderTorus>(renderable_)->SSAOTex(tex);
+		}
+
+		void SSAOEnabled(bool ssao)
+		{
+			checked_pointer_cast<RenderTorus>(renderable_)->SSAOEnabled(ssao);
 		}
 	};
 
 
-	class RenderCone : public RenderableHelper
+	class RenderCone : public RenderableHelper, public DeferredRenderable
 	{
 	public:
 		RenderCone(float cone_radius, float cone_height, float3 const & clr)
@@ -205,11 +185,6 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			effect_ = rf.LoadEffect("GBuffer.fxml");
-
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
-			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
 			technique_ = gbuffer_technique_;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
@@ -265,28 +240,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			switch (type)
-			{
-			case PT_GBuffer:
-				technique_ = gbuffer_technique_;
-				break;
-
-			case PT_GenShadowMap:
-				technique_ = gen_sm_technique_;
-				break;
-
-			case PT_Shading:
-				technique_ = shading_technique_;
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		void LightingTex(TexturePtr const & lighting_tex)
-		{
-			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
+			technique_ = DeferredRenderable::Pass(type);
 		}
 
 		void Update()
@@ -318,21 +272,16 @@ namespace
 	private:
 		float4x4 model_;
 
-		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
-
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class ConeObject : public SceneObjectHelper, public DeferredableObject
+	class ConeObject : public SceneObjectHelper, public DeferredSceneObject
 	{
 	public:
 		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable), rot_speed_(rot_speed), height_(height)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable), rot_speed_(rot_speed), height_(height)
 		{
 			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height, clr);
 			model_org_ = MathLib::rotation_x(org_angle);
@@ -356,9 +305,19 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void LightingTex(TexturePtr const & lighting_tex)
+		void LightingTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderCone>(renderable_)->LightingTex(lighting_tex);
+			checked_pointer_cast<RenderCone>(renderable_)->LightingTex(tex);
+		}
+
+		void SSAOTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<RenderCone>(renderable_)->SSAOTex(tex);
+		}
+
+		void SSAOEnabled(bool ssao)
+		{
+			checked_pointer_cast<RenderCone>(renderable_)->SSAOEnabled(ssao);
 		}
 
 	private:
@@ -367,19 +326,12 @@ namespace
 		float rot_speed_, height_;
 	};
 
-	class RenderSphere : public KMesh
+	class RenderSphere : public KMesh, public DeferredRenderable
 	{
 	public:
 		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			effect_ = rf.LoadEffect("GBuffer.fxml");
-
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
-			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
 			technique_ = gbuffer_technique_;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
@@ -405,28 +357,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			switch (type)
-			{
-			case PT_GBuffer:
-				technique_ = gbuffer_technique_;
-				break;
-
-			case PT_GenShadowMap:
-				technique_ = gen_sm_technique_;
-				break;
-
-			case PT_Shading:
-				technique_ = shading_technique_;
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		void LightingTex(TexturePtr const & lighting_tex)
-		{
-			*(effect_->ParameterByName("lighting_tex")) = lighting_tex;
+			technique_ = DeferredRenderable::Pass(type);
 		}
 
 		void Update()
@@ -458,21 +389,16 @@ namespace
 	private:
 		float4x4 model_;
 
-		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
-
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class SphereObject : public SceneObjectHelper, public DeferredableObject
+	class SphereObject : public SceneObjectHelper, public DeferredSceneObject
 	{
 	public:
 		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable), move_speed_(move_speed), pos_(pos)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable), move_speed_(move_speed), pos_(pos)
 		{
 			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())()->Mesh(0);
 			checked_pointer_cast<RenderSphere>(renderable_)->EmitClr(clr);
@@ -496,9 +422,19 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void LightingTex(TexturePtr const & lighting_tex)
+		void LightingTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderSphere>(renderable_)->LightingTex(lighting_tex);
+			checked_pointer_cast<RenderSphere>(renderable_)->LightingTex(tex);
+		}
+
+		void SSAOTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<RenderSphere>(renderable_)->SSAOTex(tex);
+		}
+
+		void SSAOEnabled(bool ssao)
+		{
+			checked_pointer_cast<RenderSphere>(renderable_)->SSAOEnabled(ssao);
 		}
 
 	private:
@@ -507,15 +443,11 @@ namespace
 		float3 pos_;
 	};
 
-	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox
+	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox, public DeferredRenderable
 	{
 	public:
 		RenderableDeferredHDRSkyBox()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			effect_ = rf.LoadEffect("GBuffer.fxml");
-
 			gbuffer_technique_ = effect_->TechniqueByName("GBufferSkyBoxTech");
 			shading_technique_ = effect_->TechniqueByName("ShadingSkyBox");
 			this->Technique(gbuffer_technique_);
@@ -541,15 +473,9 @@ namespace
 				break;
 			}
 		}
-
-	private:
-		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
 	};
 
-	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox, public DeferredableObject
+	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox, public DeferredSceneObject
 	{
 	public:
 		SceneObjectDeferredHDRSkyBox()
@@ -563,7 +489,15 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void LightingTex(TexturePtr const & /*lighting_tex*/)
+		void LightingTex(TexturePtr const & /*tex*/)
+		{
+		}
+
+		void SSAOTex(TexturePtr const & /*tex*/)
+		{
+		}
+
+		void SSAOEnabled(bool /*ssao*/)
 		{
 		}
 	};
@@ -651,7 +585,7 @@ namespace
 				1.0f / re.CurFrameBuffer()->Width(), 1.0f / re.CurFrameBuffer()->Height());
 		}
 
-	private:
+	protected:
 		int ssao_level_;
 
 		RenderTechniquePtr ssao_techs_[4];
@@ -660,30 +594,16 @@ namespace
 		RenderEffectParameterPtr rt_size_inv_size_param_;
 	};
 
-	class SSAOPostProcessCS : public PostProcess
+	class SSAOPostProcessCS : public SSAOPostProcess
 	{
 	public:
 		SSAOPostProcessCS()
-			: PostProcess(L"SSAOCS",
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOHighCS")),
-				ssao_level_(4)
 		{
-			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-
 			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLowCS");
 			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddleCS");
 			ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHighCS");
-		}
 
-		void SSAOLevel(int level)
-		{
-			ssao_level_ = level;
-			if (level > 0)
-			{
-				technique_ = ssao_techs_[level - 1];
-			}
+			technique_ = ssao_techs_[2];
 		}
 
 		void Apply()
@@ -703,21 +623,6 @@ namespace
 				this->OnRenderEnd();
 			}
 		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-		}
-
-	private:
-		int ssao_level_;
-
-		RenderTechniquePtr ssao_techs_[4];
-
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
 	class DeferredShadingDebug : public PostProcess
@@ -848,6 +753,8 @@ DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings 
 void DeferredShadingApp::InitObjects()
 {
 	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
+	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
+	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -866,12 +773,6 @@ void DeferredShadingApp::InitObjects()
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 500.0f);
-
-	TexturePtr y_cube_map = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read)();
-	TexturePtr c_cube_map = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read)();
-	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
-	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -923,6 +824,10 @@ void DeferredShadingApp::InitObjects()
 		scene_objs_[i] = MakeSharedPtr<TorusObject>(model->Mesh(i));
 		scene_objs_[i]->AddToSceneManager();
 	}
+
+	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
+	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
+	sky_box_->AddToSceneManager();
 }
 
 void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
@@ -1030,15 +935,7 @@ void DeferredShadingApp::SSAOChangedHandler(UIComboBox const & sender)
 	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
 		int ssao_level = sender.GetNumItems() - 1 - sender.GetSelectedIndex();
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.cs_support && (5 == caps.max_shader_model))
-		{
-			checked_pointer_cast<SSAOPostProcessCS>(ssao_pp_)->SSAOLevel(ssao_level);
-		}
-		else
-		{
-			checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
-		}
+		checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
 		deferred_shading_->SSAOEnabled(ssao_level != 0);
 	}
 }

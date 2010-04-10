@@ -224,13 +224,35 @@ namespace KlayGE
 		PT_Shading
 	};
 
-	class DeferredableObject
+	class DeferredRenderable
+	{
+	public:
+		DeferredRenderable();
+		virtual ~DeferredRenderable()
+		{
+		}
+
+		virtual RenderTechniquePtr const & Pass(PassType type) const;
+		virtual void LightingTex(TexturePtr const & tex);
+		virtual void SSAOTex(TexturePtr const & tex);
+		virtual void SSAOEnabled(bool ssao);
+
+	protected:
+		RenderEffectPtr effect_;
+		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr shading_technique_;
+	};
+
+	class DeferredSceneObject
 	{
 	public:
 		virtual void Pass(PassType type) = 0;
-		virtual void LightingTex(TexturePtr const & lighting_tex) = 0;
+		virtual void LightingTex(TexturePtr const & tex) = 0;
+		virtual void SSAOTex(TexturePtr const & tex) = 0;
+		virtual void SSAOEnabled(bool ssao) = 0;
 	};
-	typedef boost::shared_ptr<DeferredableObject> DeferredableObjectPtr;
+	typedef boost::shared_ptr<DeferredSceneObject> DeferredSceneObjectPtr;
 
 	class DeferredShadingLayer : public RenderableHelper
 	{
@@ -289,6 +311,9 @@ namespace KlayGE
 
 		FrameBufferPtr shading_buffer_;
 		TexturePtr shading_tex_;
+
+		TexturePtr ssao_tex_;
+		bool ssao_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;

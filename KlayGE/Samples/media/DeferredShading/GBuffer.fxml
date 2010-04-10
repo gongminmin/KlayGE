@@ -128,11 +128,13 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>
 	</technique>
-	
 
-	<parameter type="float4" name="diffuse_clr"/>
-	<parameter type="float4" name="emit_clr"/>
-	<parameter type="float" name="specular_level"/>
+
+	<cbuffer name="model">
+		<parameter type="float4" name="diffuse_clr"/>
+		<parameter type="float4" name="emit_clr"/>
+		<parameter type="float" name="specular_level"/>
+	</cbuffer>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
 
@@ -147,8 +149,13 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type='float4' name='texel_to_pixel_offset'/>
-	<parameter type='int' name='flipping'/>
+	<cbuffer name="per_frame2">
+		<parameter type='float4' name='texel_to_pixel_offset'/>
+		<parameter type='int' name='flipping'/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="ssao_tex"/>
+	<parameter type="bool" name="ssao_enabled"/>
 	
 	<shader>
 		<![CDATA[
@@ -165,6 +172,18 @@ void ShadingVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 }
 
+float4 Shading(float2 tc, float3 diffuse, float3 emit, float specular_level)
+{
+	float ssao = 1;
+	if (ssao_enabled)
+	{
+		ssao = ssao_tex.Sample(point_sampler, tc).x;
+	}
+	
+	float4 lighting = lighting_tex.Sample(point_sampler, tc);
+	return float4((lighting.rgb * diffuse + emit + lighting.a * specular_level) * ssao, 1);
+}
+
 float4 ShadingDiffPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
 {
 	pos_ss += texel_to_pixel_offset;
@@ -172,8 +191,7 @@ float4 ShadingDiffPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : S
 	tc.y *= flipping;
 	tc += 0.5;
 
-	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(lighting.rgb * diffuse_tex.Sample(linear_sampler, texcoord).rgb + emit_clr.rgb + lighting.a * specular_level, 1);
+	return Shading(tc, diffuse_tex.Sample(linear_sampler, texcoord).rgb, emit_clr.rgb, specular_level);
 }
 
 float4 ShadingNoTexPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
@@ -183,8 +201,7 @@ float4 ShadingNoTexPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : 
 	tc.y *= flipping;
 	tc += 0.5;
 	
-	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(lighting.rgb * diffuse_clr.rgb + emit_clr.rgb + lighting.a * specular_level, 1);
+	return Shading(tc, diffuse_clr.rgb, emit_clr.rgb, specular_level);
 }
 
 float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target

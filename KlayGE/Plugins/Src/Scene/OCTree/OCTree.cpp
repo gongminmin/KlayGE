@@ -227,7 +227,6 @@ namespace KlayGE
 			node_renderable_ = MakeSharedPtr<NodeRenderable>();
 		}
 		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
-		node_renderable_->AddToRenderQueue();
 #endif
 
 		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
@@ -238,6 +237,8 @@ namespace KlayGE
 
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
+			bool visible;
+
 			SceneObjectPtr const & obj = scene_objs_[i];
 			if (!obj->Overlay() && obj->Visible())
 			{
@@ -257,24 +258,43 @@ namespace KlayGE
 
 					if (obj->Moveable())
 					{
-						Frustum::VIS const vis = frustum.Visiable(Box(min, max));
-						visible_marks_[i] = (vis != Frustum::VIS_NO);
+						visible = true;
 					}
 					else
 					{
-						visible_marks_[i] = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
+						// Frustum VS node
+						visible = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
+					}
+					if (visible)
+					{
+						// Frustum VS AABB
+						Frustum::VIS const vis = frustum.Visiable(Box(min, max));
+						visible = (vis != Frustum::VIS_NO);
+
+#ifdef KLAYGE_DEBUG
+						if (visible)
+						{
+							checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling((max - min) / 2) * MathLib::translation((min + max) / 2));
+						}
+#endif
 					}
 				}
 				else
 				{
-					visible_marks_[i] = 1;
+					visible = true;
 				}
 			}
 			else
 			{
-				visible_marks_[i] = 0;
+				visible = false;
 			}
+
+			visible_marks_[i] = visible;
 		}
+
+#ifdef KLAYGE_DEBUG
+		node_renderable_->Render();
+#endif
 	}
 
 	void OCTree::Clear()

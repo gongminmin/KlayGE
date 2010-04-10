@@ -37,6 +37,11 @@ namespace KlayGE
 
 		viewport_.left	= left_;
 		viewport_.top	= top_;
+
+		d3d_viewport_.MinDepth = 0.0f;
+		d3d_viewport_.MaxDepth = 1.0f;
+		d3d_viewport_.TopLeftX = 0;
+		d3d_viewport_.TopLeftY = 0;
 	}
 
 	D3D10FrameBuffer::~D3D10FrameBuffer()
@@ -102,14 +107,9 @@ namespace KlayGE
 
 		d3d_device->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
 
-		D3D10_VIEWPORT d3d_viewport;
-		d3d_viewport.Width = viewport_.width;
-		d3d_viewport.Height = viewport_.height;
-		d3d_viewport.MinDepth = 0.0f;
-		d3d_viewport.MaxDepth = 1.0f;
-		d3d_viewport.TopLeftX = 0;
-		d3d_viewport.TopLeftY = 0;
-		d3d_device->RSSetViewports(1, &d3d_viewport);
+		d3d_viewport_.Width = viewport_.width;
+		d3d_viewport_.Height = viewport_.height;
+		d3d_device->RSSetViewports(1, &d3d_viewport_);
 	}
 
 	void D3D10FrameBuffer::OnUnbind()

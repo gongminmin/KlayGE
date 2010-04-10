@@ -31,6 +31,52 @@ namespace KlayGE
 {
 	int const SM_SIZE = 512;
 
+	DeferredRenderable::DeferredRenderable()
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = rf.LoadEffect("GBuffer.fxml");
+
+		gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
+		gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+		shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
+	}
+
+	RenderTechniquePtr const & DeferredRenderable::Pass(PassType type) const
+	{
+		switch (type)
+		{
+		case PT_GBuffer:
+			return gbuffer_technique_;
+
+		case PT_GenShadowMap:
+			return gen_sm_technique_;
+
+		case PT_Shading:
+			return shading_technique_;
+
+		default:
+			BOOST_ASSERT(false);
+			return gbuffer_technique_;
+		}
+	}
+
+	void DeferredRenderable::LightingTex(TexturePtr const & tex)
+	{
+		*(effect_->ParameterByName("lighting_tex")) = tex;
+	}
+
+	void DeferredRenderable::SSAOTex(TexturePtr const & tex)
+	{
+		*(effect_->ParameterByName("ssao_tex")) = tex;
+	}
+
+	void DeferredRenderable::SSAOEnabled(bool ssao)
+	{
+		*(effect_->ParameterByName("ssao_enabled")) = ssao;
+	}
+
+
 	DeferredShadingLayer::DeferredShadingLayer()
 			: RenderableHelper(L"DeferredShadingLayer")
 	{
@@ -285,12 +331,12 @@ namespace KlayGE
 
 	void DeferredShadingLayer::SSAOTex(TexturePtr const & tex)
 	{
-		*(technique_->Effect().ParameterByName("ssao_tex")) = tex;
+		ssao_tex_ = tex;
 	}
 
 	void DeferredShadingLayer::SSAOEnabled(bool ssao)
 	{
-		*(technique_->Effect().ParameterByName("ssao_enabled")) = ssao;
+		ssao_enabled_ = ssao;
 	}
 
 	void DeferredShadingLayer::ScanLightSrc()
@@ -377,13 +423,18 @@ namespace KlayGE
 		SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 		BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 		{
-			DeferredableObjectPtr deo = boost::dynamic_pointer_cast<DeferredableObject>(so);
+			DeferredSceneObjectPtr deo = boost::dynamic_pointer_cast<DeferredSceneObject>(so);
 			if (deo)
 			{
-				deo->Pass(static_cast<PassType>(pass_type));
+				if (pass_type != PT_Lighting)
+				{
+					deo->Pass(static_cast<PassType>(pass_type));
+				}
 				if (0 == pass)
 				{
 					deo->LightingTex(lighting_tex_);
+					deo->SSAOTex(ssao_tex_);
+					deo->SSAOEnabled(ssao_enabled_);
 				}
 			}
 		}
@@ -491,7 +542,7 @@ namespace KlayGE
 			}
 			else
 			{
-				int type = static_cast<int>(light_clr_type_[org_no].w());
+				LightType type = static_cast<LightType>(static_cast<int>(light_clr_type_[org_no].w()));
 				BOOST_ASSERT(type < LT_NumLightTypes);
 
 				float3 d, u;
@@ -558,6 +609,7 @@ namespace KlayGE
 				default:
 					rl_ = rl_quad_;
 					*light_volume_mvp_param_ = float4x4::Identity();
+					break;
 				}
 
 				if (PT_GenShadowMap == pass_type)
