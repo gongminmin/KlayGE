@@ -177,7 +177,7 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneManager::BoxVisible(Box const & /*box*/)
+	bool SceneManager::AABBVisible(Box const & /*box*/)
 	{
 		return true;
 	}
