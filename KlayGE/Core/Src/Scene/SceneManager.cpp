@@ -177,6 +177,11 @@ namespace KlayGE
 		}
 	}
 
+	bool SceneManager::BoxVisible(Box const & /*box*/)
+	{
+		return true;
+	}
+
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
 	{
 		return scene_objs_;

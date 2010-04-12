@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	Frustum::Frustum(float4x4 const & clip)
+	void Frustum::ClipMatrix(float4x4 const & clip)
 	{
 		float4 const & column1(clip.Col(0));
 		float4 const & column2(clip.Col(1));

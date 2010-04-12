@@ -48,6 +48,8 @@ namespace KlayGE
 	public:
 		explicit OCTree(uint32_t max_tree_depth);
 
+		bool BoxVisible(Box const & box);
+
 	private:
 		void ClipScene(Camera const & camera);
 		void Clear();
@@ -55,7 +57,7 @@ namespace KlayGE
 		void DoAddSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
 
-		void NodeVisible(size_t index, Frustum const & frustum);
+		void NodeVisible(size_t index);
 		bool BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size);
 
 	private:
@@ -72,6 +74,8 @@ namespace KlayGE
 
 			Frustum::VIS visible;
 		};
+
+		Frustum frustum_;
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
 		std::vector<size_t, boost::pool_allocator<size_t> > base_address_;

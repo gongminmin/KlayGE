@@ -300,9 +300,6 @@ namespace KlayGE
 		}
 
 	private:
-		void ScanLightSrc();
-
-	private:
 		FrameBufferPtr g_buffer_;
 		TexturePtr normal_depth_tex_;
 
@@ -318,6 +315,8 @@ namespace KlayGE
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_quad_;
+		Box cone_bbox_;
+		Box pyramid_bbox_;
 
 		std::vector<char> light_enabled_;
 		std::vector<int32_t> light_attrib_;

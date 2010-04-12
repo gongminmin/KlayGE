@@ -229,10 +229,10 @@ namespace KlayGE
 		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
 #endif
 
-		Frustum frustum(camera.ViewMatrix() * camera.ProjMatrix());
+		frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
 		if (!octree_.empty())
 		{
-			this->NodeVisible(0, frustum);
+			this->NodeVisible(0);
 		}
 
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
@@ -256,26 +256,11 @@ namespace KlayGE
 						max = MathLib::maximize(max, vec);
 					}
 
-					if (obj->Moveable())
-					{
-						visible = true;
-					}
-					else
-					{
-						// Frustum VS node
-						visible = this->BBVisible(0, (max + min) / 2, (max - min) / 2);
-					}
+					visible = this->BoxVisible(Box(min, max));
 					if (visible)
 					{
-						// Frustum VS AABB
-						Frustum::VIS const vis = frustum.Visiable(Box(min, max));
-						visible = (vis != Frustum::VIS_NO);
-
 #ifdef KLAYGE_DEBUG
-						if (visible)
-						{
-							checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling((max - min) / 2) * MathLib::translation((min + max) / 2));
-						}
+						checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling((max - min) / 2) * MathLib::translation((min + max) / 2));
 #endif
 					}
 				}
@@ -322,12 +307,12 @@ namespace KlayGE
 		return scene_objs_.erase(iter);
 	}
 
-	void OCTree::NodeVisible(size_t index, Frustum const & frustum)
+	void OCTree::NodeVisible(size_t index)
 	{
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		Frustum::VIS const vis = frustum.Visiable(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size));
+		Frustum::VIS const vis = frustum_.Visiable(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size));
 		node.visible = vis;
 		if (Frustum::VIS_PART == vis)
 		{
@@ -335,7 +320,7 @@ namespace KlayGE
 			{
 				for (int i = 0; i < 8; ++ i)
 				{
-					this->NodeVisible(node.first_child_index + i, frustum);
+					this->NodeVisible(node.first_child_index + i);
 				}
 			}
 		}
@@ -346,6 +331,19 @@ namespace KlayGE
 			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb_half_size) * MathLib::translation(node.bb_center));
 		}
 #endif
+	}
+
+	bool OCTree::BoxVisible(Box const & box)
+	{
+		// Frustum VS node
+		bool visible = this->BBVisible(0, box.Center(), box.HalfSize());
+		if (visible)
+		{
+			// Frustum VS AABB
+			Frustum::VIS const vis = frustum_.Visiable(box);
+			visible = (vis != Frustum::VIS_NO);
+		}
+		return visible;
 	}
 
 	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size)
@@ -367,22 +365,20 @@ namespace KlayGE
 				return false;
 
 			case Frustum::VIS_PART:
+				if (node.first_child_index != -1)
 				{
-					if (node.first_child_index != -1)
+					for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
 					{
-						for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
+						if (this->BBVisible(i, bb_center, bb_half_size))
 						{
-							if (this->BBVisible(i, bb_center, bb_half_size))
-							{
-								return true;
-							}
+							return true;
 						}
-						return false;
 					}
-					else
-					{
-						return true;
-					}
+					return false;
+				}
+				else
+				{
+					return true;
 				}
 				break;
 

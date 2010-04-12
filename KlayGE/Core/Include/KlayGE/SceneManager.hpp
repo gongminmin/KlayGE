@@ -56,6 +56,8 @@ namespace KlayGE
 		SceneObjectsType& SceneObjects();
 		SceneObjectsType const & SceneObjects() const;
 
+		virtual bool BoxVisible(Box const & box);
+
 		virtual void Clear() = 0;
 
 		void Update();

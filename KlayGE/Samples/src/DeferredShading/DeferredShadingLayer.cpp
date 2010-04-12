@@ -106,6 +106,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreateConeMesh(pos, index, 0, 100.0f, 100.0f, 12);
+			cone_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -125,6 +126,7 @@ namespace KlayGE
 			std::vector<float3> pos;
 			std::vector<uint16_t> index;
 			CreatePyramidMesh(pos, index, 0, 100.0f, 100.0f);
+			pyramid_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -339,38 +341,6 @@ namespace KlayGE
 		ssao_enabled_ = ssao;
 	}
 
-	void DeferredShadingLayer::ScanLightSrc()
-	{
-		pass_scaned_.resize(2);
-		for (size_t i = 0; i < light_clr_type_.size(); ++ i)
-		{
-			if (light_enabled_[i])
-			{
-				int type = static_cast<int>(light_clr_type_[i].w());
-				int sub_light;
-				if (LT_Point == type)
-				{
-					sub_light = 6;
-				}
-				else
-				{
-					sub_light = 1;
-				}
-
-				for (int j = 0; j < sub_light; ++ j)
-				{
-					if (0 == (light_attrib_[i] & LSA_NoShadow))
-					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
-					}
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + j));
-				}
-			}
-		}
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 0));
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
-	}
-
 	void DeferredShadingLayer::OnResize(uint32_t width, uint32_t height)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -466,8 +436,6 @@ namespace KlayGE
 				texel_to_pixel.y() /= g_buffer_->Height() / 2.0f;
 				*texel_to_pixel_offset_param_ = texel_to_pixel;
 
-				this->ScanLightSrc();
-
 				re.BindFrameBuffer(g_buffer_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
 				return App3DFramework::URV_Need_Flush;
@@ -478,6 +446,7 @@ namespace KlayGE
 
 				re.BindFrameBuffer(lighting_buffer_);
 
+				pass_scaned_.resize(2);
 				for (size_t i = 0; i < light_clr_type_.size(); ++ i)
 				{
 					if (light_enabled_[i])
@@ -495,12 +464,30 @@ namespace KlayGE
 
 							float const scale = light_cos_outer_inner_[i].w();
 							float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+							float4x4 light_model = mat * MathLib::inverse(light_view);
+							*light_volume_mvp_param_ = light_model * vp;
 
-							*light_volume_mvp_param_ = mat * MathLib::inverse(light_view) * vp;
+							float3 min, max;
+							min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
+							for (size_t k = 1; k < 8; ++ k)
+							{
+								float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
+								min = MathLib::minimize(min, vec);
+								max = MathLib::maximize(max, vec);
+							}
 
-							light_crs_[i][0]->Begin();
-							re.Render(*technique_light_depth_only_, *rl_cone_);
-							light_crs_[i][0]->End();
+							if (scene_mgr.BoxVisible(Box(min, max)))
+							{
+								if (0 == (light_attrib_[i] & LSA_NoShadow))
+								{
+									pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+								}
+								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
+
+								light_crs_[i][0]->Begin();
+								re.Render(*technique_light_depth_only_, *rl_cone_);
+								light_crs_[i][0]->End();
+							}
 						}
 						else if (LT_Point == type)
 						{
@@ -513,15 +500,44 @@ namespace KlayGE
 								u = ad.second;
 
 								float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
-								*light_volume_mvp_param_ = MathLib::inverse(light_view) * vp;
+								float4x4 light_model = MathLib::inverse(light_view);
+								*light_volume_mvp_param_ = light_model * vp;
 
-								light_crs_[i][j]->Begin();
-								re.Render(*technique_light_depth_only_, *rl_pyramid_);
-								light_crs_[i][j]->End();
+								float3 min, max;
+								min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
+								for (size_t k = 1; k < 8; ++ k)
+								{
+									float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
+									min = MathLib::minimize(min, vec);
+									max = MathLib::maximize(max, vec);
+								}
+
+								if (scene_mgr.BoxVisible(Box(min, max)))
+								{
+									if (0 == (light_attrib_[i] & LSA_NoShadow))
+									{
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+									}
+									pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + j));
+
+									light_crs_[i][j]->Begin();
+									re.Render(*technique_light_depth_only_, *rl_pyramid_);
+									light_crs_[i][j]->End();
+								}
 							}
+						}
+						else
+						{
+							if (0 == (light_attrib_[i] & LSA_NoShadow))
+							{
+								pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+							}
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
 						}
 					}
 				}
+				pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 0));
+				pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
 
 				return App3DFramework::URV_Flushed;
 			}

@@ -41,8 +41,7 @@ namespace KlayGE
 		};
 
 	public:
-		explicit Frustum(float4x4 const & clip);
-
+		void ClipMatrix(float4x4 const & clip);
 		VIS Visiable(Box const & box) const;
 
 	private:
