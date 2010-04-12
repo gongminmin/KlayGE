@@ -476,7 +476,7 @@ namespace KlayGE
 								max = MathLib::maximize(max, vec);
 							}
 
-							if (scene_mgr.BoxVisible(Box(min, max)))
+							if (scene_mgr.AABBVisible(Box(min, max)))
 							{
 								if (0 == (light_attrib_[i] & LSA_NoShadow))
 								{
@@ -512,7 +512,7 @@ namespace KlayGE
 									max = MathLib::maximize(max, vec);
 								}
 
-								if (scene_mgr.BoxVisible(Box(min, max)))
+								if (scene_mgr.AABBVisible(Box(min, max)))
 								{
 									if (0 == (light_attrib_[i] & LSA_NoShadow))
 									{
