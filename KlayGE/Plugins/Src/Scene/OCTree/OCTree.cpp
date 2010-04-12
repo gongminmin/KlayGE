@@ -256,7 +256,7 @@ namespace KlayGE
 						max = MathLib::maximize(max, vec);
 					}
 
-					visible = this->BoxVisible(Box(min, max));
+					visible = this->AABBVisible(Box(min, max));
 					if (visible)
 					{
 #ifdef KLAYGE_DEBUG
@@ -333,7 +333,7 @@ namespace KlayGE
 #endif
 	}
 
-	bool OCTree::BoxVisible(Box const & box)
+	bool OCTree::AABBVisible(Box const & box)
 	{
 		// Frustum VS node
 		bool visible = this->BBVisible(0, box.Center(), box.HalfSize());
