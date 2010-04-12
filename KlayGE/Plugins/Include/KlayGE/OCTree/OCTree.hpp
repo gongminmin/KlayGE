@@ -48,7 +48,7 @@ namespace KlayGE
 	public:
 		explicit OCTree(uint32_t max_tree_depth);
 
-		bool BoxVisible(Box const & box);
+		bool AABBVisible(Box const & box);
 
 	private:
 		void ClipScene(Camera const & camera);
