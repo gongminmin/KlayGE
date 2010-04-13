@@ -6,7 +6,6 @@
 #include <KlayGE/CpuInfo.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/LZMACodec.hpp>
-#include <KlayGE/atomic.hpp>
 
 #include <iostream>
 #include <string>
@@ -94,8 +93,8 @@ int bsf(uint64_t v)
 class disp_thread
 {
 public:
-	disp_thread(atomic<int32_t>& cur_num_chars, int32_t total_chars)
-		: cur_num_chars_(&cur_num_chars), total_chars_(total_chars)
+	disp_thread(int32_t const * cur_num_chars, uint32_t cur_num_chars_size, int32_t total_chars)
+		: cur_num_chars_(cur_num_chars), cur_num_chars_size_(cur_num_chars_size), total_chars_(total_chars)
 	{
 	}
 
@@ -104,7 +103,11 @@ public:
 		double last_disp_time = 0;
 		for (;;)
 		{
-			int32_t dist_cur_num_char = cur_num_chars_->value();
+			int32_t dist_cur_num_char = 0;
+			for (size_t i = 0; i < cur_num_chars_size_; ++ i)
+			{
+				dist_cur_num_char += cur_num_chars_[i];
+			}
 
 			double this_disp_time = timer_.elapsed();
 			if ((dist_cur_num_char == total_chars_) || (this_disp_time - last_disp_time > 1))
@@ -132,19 +135,20 @@ public:
 
 private:
 	Timer timer_;
-	atomic<int32_t>* cur_num_chars_;
+	int32_t const * cur_num_chars_;
+	uint32_t cur_num_chars_size_;
 	int32_t total_chars_;
 };
 
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars, int32_t total_chars,
+	ttf_to_dist(FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars, uint32_t start_code, uint32_t end_code,
 		font_info* char_info, float* char_dist_data,
-		atomic<int32_t>& cur_num_chars)
-		: ft_face_(ft_face), char_size_(char_size), validate_chars_(validate_chars), total_chars_(total_chars),
+		int32_t& cur_num_char)
+		: ft_face_(ft_face), char_size_(char_size), validate_chars_(validate_chars), start_code_(start_code), end_code_(end_code),
 			char_info_(char_info), char_dist_data_(char_dist_data),
-			cur_num_chars_(&cur_num_chars)
+			cur_num_char_(&cur_num_char)
 	{
 #ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
@@ -181,11 +185,9 @@ public:
 
 		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
-
-		int32_t working_char = ((*cur_num_chars_) ++).value();
-		while (working_char < total_chars_)
+		for (uint32_t c = start_code_; c < end_code_; ++ c)
 		{
-			uint32_t const ch = validate_chars_[working_char];
+			uint32_t const ch = validate_chars_[c];
 			font_info& ci = char_info_[ch];
 
 			std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
@@ -265,7 +267,7 @@ public:
 				ci.dist_index = static_cast<uint32_t>(-1);
 			}
 
-			working_char = ((*cur_num_chars_) ++).value();
+			++ *cur_num_char_;
 		}
 	}
 
@@ -430,10 +432,11 @@ private:
 	FT_Face ft_face_;
 	uint32_t char_size_;
 	uint32_t const * validate_chars_;
-	int32_t total_chars_;
+	uint32_t start_code_;
+	uint32_t end_code_;
 	font_info* char_info_;
 	float* char_dist_data_;
-	atomic<int32_t>* cur_num_chars_;
+	int32_t* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
 	boost::function<void(std::vector<int2>&, int, int, uint8_t const *, int)> edge_extract;
@@ -443,6 +446,8 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 					  int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code, uint32_t char_size)
 {
 	thread_pool tp(1, num_threads + 1);
+
+	std::vector<int32_t> cur_num_char(num_threads, 0);
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
@@ -471,13 +476,16 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		}
 	}
 
-	atomic<int32_t> cur_num_char(0);
+	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
 
-	joiner<void> disp_joiner = tp(disp_thread(cur_num_char, static_cast<int32_t>(validate_chars.size())));
+	joiner<void> disp_joiner = tp(disp_thread(&cur_num_char[0], static_cast<uint32_t>(cur_num_char.size()), static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, &validate_chars[0], static_cast<int32_t>(validate_chars.size()),
-			&char_info[0], &char_dist_data[0], cur_num_char));
+		uint32_t const sc = i * num_chars_per_package;
+		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
+
+		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, &validate_chars[0], sc, ec,
+			&char_info[0], &char_dist_data[0], cur_num_char[i]));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -709,7 +717,7 @@ int main(int argc, char* argv[])
 	{
 		ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
 		ttf_input.seekg(0, ios_base::end);
-		ttf.resize(ttf_input.tellg());
+		ttf.resize(static_cast<size_t>(ttf_input.tellg()));
 		ttf_input.seekg(0, ios_base::beg);
 		ttf_input.read(reinterpret_cast<char*>(&ttf[0]),
 			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));

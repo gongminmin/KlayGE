@@ -36,22 +36,17 @@
 
 	#define KLAYGE_HAS_DECLSPEC
 
-	#if _MSC_VER >= 1500
+	#if _MSC_VER >= 1600
+		#define KLAYGE_COMPILER_VERSION 100
+	#elif _MSC_VER >= 1500
 		#define KLAYGE_COMPILER_VERSION 90
-		#pragma warning(disable: 4251 4275 4819)
-
-		#ifndef _CRT_SECURE_NO_DEPRECATE
-			#define _CRT_SECURE_NO_DEPRECATE
-		#endif
-		#ifndef _SCL_SECURE_NO_DEPRECATE
-			#define _SCL_SECURE_NO_DEPRECATE
-		#endif
-
-		#ifndef KLAYGE_DEBUG
-			#define _SECURE_SCL 0
-		#endif
 	#elif _MSC_VER >= 1400
 		#define KLAYGE_COMPILER_VERSION 80
+	#else
+		#error Unknown compiler.
+	#endif
+
+	#if _MSC_VER >= 1400
 		#pragma warning(disable: 4251 4275 4819)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
@@ -64,8 +59,6 @@
 		#ifndef KLAYGE_DEBUG
 			#define _SECURE_SCL 0
 		#endif
-	#else
-		#error Unknown compiler.
 	#endif
 #endif
 

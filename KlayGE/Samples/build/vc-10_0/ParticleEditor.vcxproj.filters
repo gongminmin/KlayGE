@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{799458a7-533e-4c9d-ad7b-74bdd5a854df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{4eee4fda-ce8a-4f92-847e-22f30bdb7d21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{3c899bb3-95be-4783-a64e-c2d83b318530}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Post Processors">
+      <UniqueIdentifier>{5a9b1cdd-7ce7-4b1e-b10e-f8953610dabd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\ParticleEditor\ParticleEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\ParticleEditor\ParticleEditor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\media\ParticleEditor\ParticleEditor.fxml">
+      <Filter>Effects</Filter>
+    </None>
+    <None Include="..\..\media\ParticleEditor\ParticleEditor.uiml">
+      <Filter>UI</Filter>
+    </None>
+    <None Include="..\..\..\klayge_logo.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\ParticleEditor\Copy.ppml">
+      <Filter>Post Processors</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\media\Common\KlayGESample.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

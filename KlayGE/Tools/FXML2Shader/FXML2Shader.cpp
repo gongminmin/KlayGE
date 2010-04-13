@@ -8,8 +8,6 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/XMLDom.hpp>
 
-#include <KlayGE/D3D11/D3D11ShaderObject.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

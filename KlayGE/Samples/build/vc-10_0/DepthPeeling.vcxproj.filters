@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{87da8284-faaf-48e7-92dd-4b9585e239c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{a9adef45-e7fc-44e7-95bb-32f423962b43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{813e47b2-ff5c-4e5b-b8f6-5e895bbad6bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Post Processors">
+      <UniqueIdentifier>{c968fbd5-1c64-44c5-9af8-a060054e155e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\DepthPeeling\DepthPeeling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\DepthPeeling\DepthPeeling.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\media\DepthPeeling\DepthPeeling.fxml">
+      <Filter>Effects</Filter>
+    </None>
+    <None Include="..\..\media\DepthPeeling\DepthPeeling.uiml">
+      <Filter>UI</Filter>
+    </None>
+    <None Include="..\..\..\klayge_logo.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\DepthPeeling\Blend.ppml">
+      <Filter>Post Processors</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\media\Common\KlayGESample.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

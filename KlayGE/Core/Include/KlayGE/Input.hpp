@@ -33,7 +33,7 @@
 #include <KlayGE/Timer.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4100 4512)
+#pragma warning(disable: 4100 4512 6011)
 #endif
 #include <boost/signals2.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

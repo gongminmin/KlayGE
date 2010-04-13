@@ -1,0 +1,430 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6683CE2B-0296-477C-AB39-C32AA8F659D5}</ProjectGuid>
+    <RootNamespace>Core</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../lib/$(Platform)/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../lib/$(Platform)/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../lib/$(Platform)/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../lib/$(Platform)/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)_$(ProjectName)_vc_x86</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)_$(ProjectName)_vc_x86_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)_$(ProjectName)_vc_x64_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)_$(ProjectName)_vc_x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>KlayGE/KlayGE.hpp</PrecompiledHeaderFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>KlayGE/KlayGE.hpp</PrecompiledHeaderFile>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>false</EnablePREfast>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>KlayGE/KlayGE.hpp</PrecompiledHeaderFile>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>MinSpace</Optimization>
+      <AdditionalIncludeDirectories>../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>KlayGE/KlayGE.hpp</PrecompiledHeaderFile>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>false</EnablePREfast>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>../../lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Core\Src\Render\BlockCompression.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Camera.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\CameraController.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Font.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\FrameBuffer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\GraphicsBuffer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\HDRPostProcess.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\KMesh.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Mesh.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\PostProcess.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Query.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Renderable.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderableHelper.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderEffect.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderEngine.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderFactory.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderLayout.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderStateObject.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\RenderView.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\SATPostProcess.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\ShaderObject.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Texture.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\Context.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\CpuInfo.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\DllLoader.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\KlayGE.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Kernel\ResLoader.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\ThrowErr.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\Timer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\Util.cpp" />
+    <ClCompile Include="..\..\Core\Src\Kernel\XMLDom.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\AudioBuffer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\AudioDataSource.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\AudioEngine.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\AudioFactory.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\MusicBuffer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Audio\SoundBuffer.cpp" />
+    <ClCompile Include="..\..\Core\Src\Net\Lobby.cpp" />
+    <ClCompile Include="..\..\Core\Src\Net\Player.cpp" />
+    <ClCompile Include="..\..\Core\Src\Net\Socket.cpp" />
+    <ClCompile Include="..\..\Core\Src\Script\Script.cpp" />
+    <ClCompile Include="..\..\Core\Src\Show\ShowEngine.cpp" />
+    <ClCompile Include="..\..\Core\Src\Show\ShowFactory.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\InputActionMap.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\InputDevice.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\InputEngine.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\InputFactory.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\Joystick.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\Keyboard.cpp" />
+    <ClCompile Include="..\..\Core\Src\Input\Mouse.cpp" />
+    <ClCompile Include="..\..\Core\Src\Scene\SceneManager.cpp" />
+    <ClCompile Include="..\..\Core\Src\Scene\SceneObject.cpp" />
+    <ClCompile Include="..\..\Core\Src\Scene\SceneObjectHelper.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\ArchiveExtractCallback.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\BSTR.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\Extract7z.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\LzFind.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\LZMACodec.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\LzmaDec.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\LzmaEnc.cpp" />
+    <ClCompile Include="..\..\Core\Src\Pack\Streams.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UI.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIButton.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UICheckBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIComboBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIEditBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIListBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIPolylineEditBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIRadioButton.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIScrollBar.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UISlider.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIStatic.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UITexButton.cpp" />
+    <ClCompile Include="..\..\Core\Src\AppLayer\App3D.cpp" />
+    <ClCompile Include="..\..\Core\Src\AppLayer\Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Camera.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\CameraController.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ElementFormat.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Font.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\FrameBuffer.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\HDRPostProcess.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\KMesh.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\PostProcess.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Query.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Renderable.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderableHelper.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderDeviceCaps.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderEffect.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderEngine.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderFactory.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderLayout.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderSettings.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderStateObject.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\RenderView.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SATPostProcess.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ShaderObject.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Texture.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Viewport.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\aligned_allocator.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\atomic.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\config\auto_link.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashMap.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashSet.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashTable.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\COMPtr.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Config.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Context.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\CpuInfo.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\DllLoader.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\KlayGE.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\MapVector.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\PreDeclare.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ResLoader.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SetVector.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\thread.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ThrowErr.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Timer.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Trace.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Types.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Util.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\XMLDom.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Audio.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\AudioFactory.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Bound.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Box.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Color.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\half.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Math.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Matrix.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\PerlinNoise.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Plane.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Quaternion.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Rect.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Size.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Sphere.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Vector.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Detail\MathHelper.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Lobby.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\NetMsg.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Player.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Socket.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Script.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Show.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\ShowFactory.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Input.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\InputFactory.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SceneManager.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SceneNode.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SceneObject.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\ArchiveExtractCallback.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\BaseDefines.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\BSTR.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Extract7z.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\IArchive.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\IPassword.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\IProgress.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\IStream.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\LzFind.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\LzHash.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\LzmaDec.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\LzmaEnc.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\LzTypes.hpp" />
+    <ClInclude Include="..\..\Core\Src\Pack\Streams.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\UI.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\App3D.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\media\RenderFX\2D.fxml" />
+    <None Include="..\..\media\RenderFX\Blur.fxml" />
+    <None Include="..\..\media\RenderFX\Bone.fxml" />
+    <None Include="..\..\media\RenderFX\DeferredShadingUtil.fxml" />
+    <None Include="..\..\media\RenderFX\DownSample.fxml" />
+    <None Include="..\..\media\RenderFX\Fog.fxml" />
+    <None Include="..\..\media\RenderFX\Font.fxml" />
+    <None Include="..\..\media\RenderFX\GammaCorrection.fxml" />
+    <None Include="..\..\media\RenderFX\KMesh.fxml" />
+    <None Include="..\..\media\RenderFX\Lighting.fxml" />
+    <None Include="..\..\media\RenderFX\Noise.fxml" />
+    <None Include="..\..\media\RenderFX\PointSprite.fxml" />
+    <None Include="..\..\media\RenderFX\PostProcess.fxml" />
+    <None Include="..\..\media\RenderFX\Quaternion.fxml" />
+    <None Include="..\..\media\RenderFX\RenderableHelper.fxml" />
+    <None Include="..\..\media\RenderFX\Stereoscopic.fxml" />
+    <None Include="..\..\media\RenderFX\SumLum.fxml" />
+    <None Include="..\..\media\RenderFX\SummedAreaTable.fxml" />
+    <None Include="..\..\media\RenderFX\ToneMapping.fxml" />
+    <None Include="..\..\media\RenderFX\util.fxml" />
+    <None Include="..\..\media\PostProcessors\Downsampler2x2.ppml" />
+    <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Assembly %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">yasm -Xvc -fwin32 -o "$(IntDir)%(Filename)".obj "%(FullPath)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Assembly %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">yasm -Xvc -fwin64 -o "$(IntDir)%(Filename)".obj "%(FullPath)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Assembly %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">yasm -Xvc -fwin32 -o "$(IntDir)%(Filename)".obj "%(FullPath)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Assembly %(FullPath)</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">yasm -Xvc -fwin64 -o "$(IntDir)%(Filename)".obj "%(FullPath)"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <None Include="..\..\media\RenderFX\UI.fxml" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

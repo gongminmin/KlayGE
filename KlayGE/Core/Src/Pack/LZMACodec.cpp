@@ -102,7 +102,7 @@ namespace KlayGE
 	uint64_t LZMACodec::Decode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
 	{
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		is->read(&in_data[0], static_cast<std::streamsize>(len));
+		is->read(&in_data[0], static_cast<size_t>(len));
 
 		std::vector<uint8_t> output;
 		this->Decode(output, &in_data[0], len, original_len);
@@ -125,7 +125,7 @@ namespace KlayGE
 	void LZMACodec::Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
 	{
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		is->read(&in_data[0], static_cast<std::streamsize>(len));
+		is->read(&in_data[0], static_cast<size_t>(len));
 
 		this->Decode(output, &in_data[0], len, original_len);
 	}
