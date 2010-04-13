@@ -376,17 +376,17 @@ void SSAOHighCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint3 
 
 	<technique name="SSAOLowCS">
 		<pass name="p0">
-			<state name="compute_shader" value="SSAOLowCS()"/>
+			<state name="compute_shader" profile="cs_5_0" value="SSAOLowCS()"/>
 		</pass>
 	</technique>
 	<technique name="SSAOMiddleCS">
 		<pass name="p0">
-			<state name="compute_shader" value="SSAOMiddleCS()"/>
+			<state name="compute_shader" profile="cs_5_0" value="SSAOMiddleCS()"/>
 		</pass>
 	</technique>
 	<technique name="SSAOHighCS">
 		<pass name="p0">
-			<state name="compute_shader" value="SSAOHighCS()"/>
+			<state name="compute_shader" profile="cs_5_0" value="SSAOHighCS()"/>
 		</pass>
 	</technique>
 </effect>

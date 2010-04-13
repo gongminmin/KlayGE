@@ -137,15 +137,24 @@ namespace
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			RenderLayoutPtr multi_stream_rl = rf.MakeRenderLayout();;
-			multi_stream_rl->TopologyType(rl_->TopologyType());
-			multi_stream_rl->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			multi_stream_rl->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			multi_stream_rl->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			multi_stream_rl->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			multi_stream_rl->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_->TopologyType(rl_->TopologyType());
+			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			rl_ = multi_stream_rl;
+			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_->TopologyType(rl_->TopologyType());
+			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+
+			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_->TopologyType(rl_->TopologyType());
+			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			shading_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 			std::map<std::string, TexturePtr> tex_pool;
 
@@ -193,6 +202,23 @@ namespace
 		void Pass(PassType type)
 		{
 			technique_ = DeferredRenderable::Pass(type);
+			switch (type)
+			{
+			case PT_GBuffer:
+				rl_ = gbuffer_rl_;
+				break;
+
+			case PT_GenShadowMap:
+				rl_ = gen_sm_rl_;
+				break;
+
+			case PT_Shading:
+				rl_ = shading_rl_;
+				break;
+
+			default:
+				break;
+			}
 		}
 
 		void OnRenderBegin()
@@ -219,6 +245,10 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+
+		RenderLayoutPtr gbuffer_rl_;
+		RenderLayoutPtr gen_sm_rl_;
+		RenderLayoutPtr shading_rl_;
 	};
 
 	class TorusObject : public SceneObjectHelper, public DeferredSceneObject
@@ -291,19 +321,30 @@ namespace
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(float2));
 			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			rl_ = rf.MakeRenderLayout();;
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_->TopologyType(RenderLayout::TT_TriangleList);
+			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+
+			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_->TopologyType(RenderLayout::TT_TriangleList);
+			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_->TopologyType(RenderLayout::TT_TriangleList);
+			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &index[0];
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16UI);
+			gbuffer_rl_->BindIndexStream(ib, EF_R16UI);
+			gen_sm_rl_->BindIndexStream(ib, EF_R16UI);
+			shading_rl_->BindIndexStream(ib, EF_R16UI);
 
 			box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 		}
@@ -316,6 +357,23 @@ namespace
 		void Pass(PassType type)
 		{
 			technique_ = DeferredRenderable::Pass(type);
+			switch (type)
+			{
+			case PT_GBuffer:
+				rl_ = gbuffer_rl_;
+				break;
+
+			case PT_GenShadowMap:
+				rl_ = gen_sm_rl_;
+				break;
+
+			case PT_Shading:
+				rl_ = shading_rl_;
+				break;
+
+			default:
+				break;
+			}
 		}
 
 		void Update()
@@ -350,6 +408,10 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+
+		RenderLayoutPtr gbuffer_rl_;
+		RenderLayoutPtr gen_sm_rl_;
+		RenderLayoutPtr shading_rl_;
 	};
 
 	class ConeObject : public SceneObjectHelper, public DeferredSceneObject
@@ -503,15 +565,24 @@ namespace
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			RenderLayoutPtr multi_stream_rl = rf.MakeRenderLayout();;
-			multi_stream_rl->TopologyType(rl_->TopologyType());
-			multi_stream_rl->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			multi_stream_rl->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			multi_stream_rl->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			multi_stream_rl->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			multi_stream_rl->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_->TopologyType(rl_->TopologyType());
+			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			rl_ = multi_stream_rl;
+			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_->TopologyType(rl_->TopologyType());
+			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+
+			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_->TopologyType(rl_->TopologyType());
+			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			shading_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 		}
 
 		void SetModelMatrix(float4x4 const & mat)
@@ -527,6 +598,23 @@ namespace
 		void Pass(PassType type)
 		{
 			technique_ = DeferredRenderable::Pass(type);
+			switch (type)
+			{
+			case PT_GBuffer:
+				rl_ = gbuffer_rl_;
+				break;
+
+			case PT_GenShadowMap:
+				rl_ = gen_sm_rl_;
+				break;
+
+			case PT_Shading:
+				rl_ = shading_rl_;
+				break;
+
+			default:
+				break;
+			}
 		}
 
 		void Update()
@@ -561,6 +649,10 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+
+		RenderLayoutPtr gbuffer_rl_;
+		RenderLayoutPtr gen_sm_rl_;
+		RenderLayoutPtr shading_rl_;
 	};
 
 	class SphereObject : public SceneObjectHelper, public DeferredSceneObject

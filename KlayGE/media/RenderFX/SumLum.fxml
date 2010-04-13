@@ -166,13 +166,13 @@ void AdaptedLumCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint
 
 	<technique name="SumLumLogCS">
 		<pass name="p0">
-			<state name="compute_shader" value="SumLum4x4LogCS()"/>
+			<state name="compute_shader" profile="cs_5_0" value="SumLum4x4LogCS()"/>
 		</pass>
 	</technique>
 
 	<technique name="AdaptedLumCS">
 		<pass name="p0">
-			<state name="compute_shader" value="AdaptedLumCS()"/>
+			<state name="compute_shader" profile="cs_5_0" value="AdaptedLumCS()"/>
 		</pass>
 	</technique>
 </effect>

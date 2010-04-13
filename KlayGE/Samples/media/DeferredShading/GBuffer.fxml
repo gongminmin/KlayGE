@@ -34,9 +34,8 @@
 	<shader>
 		<![CDATA[
 void GBufferVS(float4 pos : POSITION,
-			float3 normal : NORMAL,
-			float3 tangent : TANGENT,
 			float2 texcoord : TEXCOORD0,
+			float3 normal : NORMAL,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oNormalDepth : TEXCOORD1,
 			out float4 oPos : SV_Position)
@@ -94,9 +93,6 @@ float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 	<shader>
 		<![CDATA[
 void GenShadowMapVS(float4 pos : POSITION,
-						float3 normal : NORMAL,
-						float3 tangent : TANGENT,
-						float2 texcoord : TEXCOORD0,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
@@ -154,8 +150,6 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<shader>
 		<![CDATA[
 void ShadingVS(float4 pos : POSITION,
-			float3 normal : NORMAL,
-			float3 tangent : TANGENT,
 			float2 texcoord : TEXCOORD0,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oPosSS : TEXCOORD1,

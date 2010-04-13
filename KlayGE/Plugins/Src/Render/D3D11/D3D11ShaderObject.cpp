@@ -793,6 +793,7 @@ namespace KlayGE
 
 					is_shader_validate_[type] = true;
 
+					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 					std::string shader_profile = sd.profile;
 					switch (type)
 					{
@@ -821,6 +822,10 @@ namespace KlayGE
 						if ("auto" == shader_profile)
 						{
 							shader_profile = render_eng.ComputeShaderProfile();
+						}
+						if (("cs_5_0" == shader_profile) && (caps.max_shader_model < 5))
+						{
+							is_shader_validate_[type] = false;
 						}
 						break;
 
