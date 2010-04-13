@@ -15,11 +15,13 @@
 	<parameter type="float" name="shininess"/>
 
 	<parameter type="texture2D" name="bump_tex"/>
+	<parameter type="bool" name="bump_map_enabled"/>
 
-	<parameter type="sampler" name="linear_sampler">
-		<state name="filtering" value="min_mag_mip_linear"/>
+	<parameter type="sampler" name="aniso_sampler">
+		<state name="filtering" value="anisotropic"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
+		<state name="max_anisotropy" value="8"/>
 	</parameter>
 	
 	<parameter type="sampler" name="skybox_sampler">
@@ -46,15 +48,13 @@ void GBufferVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 }
 
-float4 GBufferBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
+float4 GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
 {
-	normal.xyz = normalize(normal.xyz + 0.1f * mul(bump_tex.Sample(linear_sampler, texcoord).xyz, (float3x3)model_view));
-	return StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
-}
-
-float4 GBufferNoBumpPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
-{
-	normal.xyz = normalize(normal.xyz);
+	if (bump_map_enabled)
+	{
+		normal.xyz += 0.1f * mul(bump_tex.Sample(aniso_sampler, texcoord).xyz, (float3x3)model_view);
+	}
+	normal.xyz = normalize(normal.xyz);	
 	return StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
 }
 
@@ -66,24 +66,17 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
-float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0)
+float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	return StoreNormalDepthMtl(0, 1, 0, 0);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferBumpTech">
+	<technique name="GBufferTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferBumpPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferNoBumpTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferNoBumpPS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
 		</pass>
 	</technique>
 
@@ -137,6 +130,7 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	</cbuffer>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="bool" name="diffuse_map_enabled"/>
 
 	<parameter type="textureCUBE" name="skybox_tex"/>
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
@@ -184,24 +178,24 @@ float4 Shading(float2 tc, float3 diffuse, float3 emit, float specular_level)
 	return float4((lighting.rgb * diffuse + emit + lighting.a * specular_level) * ssao, 1);
 }
 
-float4 ShadingDiffPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
-{
-	pos_ss += texel_to_pixel_offset;
-	float2 tc = pos_ss.xy / pos_ss.w * 0.5f;
-	tc.y *= flipping;
-	tc += 0.5;
-
-	return Shading(tc, diffuse_tex.Sample(linear_sampler, texcoord).rgb, emit_clr.rgb, specular_level);
-}
-
-float4 ShadingNoTexPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
+float4 ShadingPS(float2 texcoord : TEXCOORD0, float4 pos_ss : TEXCOORD1) : SV_Target
 {
 	pos_ss += texel_to_pixel_offset;
 	float2 tc = pos_ss.xy / pos_ss.w * 0.5f;
 	tc.y *= flipping;
 	tc += 0.5;
 	
-	return Shading(tc, diffuse_clr.rgb, emit_clr.rgb, specular_level);
+	float3 diffuse;
+	if (diffuse_map_enabled)
+	{
+		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+
+	return Shading(tc, diffuse, emit_clr.rgb, specular_level);
 }
 
 float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
@@ -212,25 +206,14 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="ShadingDiff">
+	<technique name="Shading">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="ShadingDiffPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="ShadingNoTex">
-		<pass name="p0">
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="ShadingNoTexPS()"/>
+			<state name="pixel_shader" value="ShadingPS()"/>
 		</pass>
 	</technique>
 

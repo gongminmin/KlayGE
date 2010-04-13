@@ -58,8 +58,8 @@ namespace
 
 			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
-			bool has_diffuse_map = false;
-			bool has_bump_map = false;
+			bool diffuse_map_enabled = false;
+			bool bump_map_enabled = false;
 			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
 			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
 				iter != texture_slots.end(); ++ iter)
@@ -75,7 +75,7 @@ namespace
 					tex = LoadTexture(iter->second, EAH_GPU_Read)();
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
-				has_diffuse_map = tex;
+				diffuse_map_enabled = tex;
 
 				if ("Diffuse Color" == iter->first)
 				{
@@ -84,36 +84,17 @@ namespace
 				if ("Bump" == iter->first)
 				{
 					*(effect_->ParameterByName("bump_tex")) = tex;
-					if (tex)
-					{
-						has_bump_map = true;
-					}
+					bump_map_enabled = tex;
 				}
 			}
+
+			*(effect_->ParameterByName("bump_map_enabled")) = bump_map_enabled;
+			*(effect_->ParameterByName("diffuse_map_enabled")) = diffuse_map_enabled;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
 			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
 			*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
-
-			if (has_bump_map)
-			{
-				gbuffer_technique_ = effect_->TechniqueByName("GBufferBumpTech");
-			}
-			else
-			{
-				gbuffer_technique_ = effect_->TechniqueByName("GBufferNoBumpTech");
-			}
-			if (has_diffuse_map)
-			{
-				shading_technique_ = effect_->TechniqueByName("ShadingDiff");
-			}
-			else
-			{
-				shading_technique_ = effect_->TechniqueByName("ShadingNoTex");
-			}
-
-			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
 		}
 
 		void Pass(PassType type)
@@ -186,6 +167,9 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			technique_ = gbuffer_technique_;
+
+			*(effect_->ParameterByName("bump_map_enabled")) = false;
+			*(effect_->ParameterByName("diffuse_map_enabled")) = false;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
@@ -333,6 +317,9 @@ namespace
 			: KMesh(model, name)
 		{
 			technique_ = gbuffer_technique_;
+
+			*(effect_->ParameterByName("bump_map_enabled")) = false;
+			*(effect_->ParameterByName("diffuse_map_enabled")) = false;
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 
@@ -759,14 +746,14 @@ void DeferredShadingApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
-	ambient_light_id_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
-	point_light_id_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_id_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.5f, 0));
-	spot_light_id_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.5f, 0));
+	ambient_light_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
+	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
+	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.5f, 0));
+	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.5f, 0));
 
-	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), deferred_shading_->LightColor(point_light_id_));
-	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, deferred_shading_->LightColor(spot_light_id_[0]));
-	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, deferred_shading_->LightColor(spot_light_id_[1]));
+	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), point_light_->Color());
+	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, spot_light_[0]->Color());
+	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, spot_light_[1]->Color());
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
@@ -987,15 +974,15 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		{
 			float4x4 model_mat = checked_pointer_cast<SphereObject>(point_light_src_)->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			deferred_shading_->LightPos(point_light_id_, p);
+			point_light_->Position(p);
 		}
 		for (int i = 0; i < 2; ++ i)
 		{
 			float4x4 model_mat = checked_pointer_cast<ConeObject>(spot_light_src_[i])->GetModelMatrix();
 			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
 			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, 0, 1), model_mat));
-			deferred_shading_->LightPos(spot_light_id_[i], p);
-			deferred_shading_->LightDir(spot_light_id_[i], d);
+			spot_light_[i]->Position(p);
+			spot_light_[i]->Direction(d);
 		}
 		break;
 

@@ -224,6 +224,115 @@ namespace KlayGE
 		PT_Shading
 	};
 
+	
+	class DeferredLightSource
+	{
+	public:
+		explicit DeferredLightSource(LightType type);
+		virtual ~DeferredLightSource();
+
+		LightType Type() const;
+
+		int32_t Attrib() const;
+		void Attrib(int32_t attrib);
+
+		bool Enabled() const;
+		void Enabled(bool enabled);
+
+		float3 const & Color() const;
+		void Color(float3 const & clr);
+
+		virtual float3 const & Position() const;
+		virtual float3 const & Direction() const;
+		virtual float3 const & Falloff() const;
+		virtual float CosInnerAngle() const;
+		virtual float CosOuterAngle() const;
+		virtual float4 const & CosOuterInner() const;
+
+	protected:
+		LightType type_;
+		int32_t attrib_;
+		bool enabled_;
+		float3 color_;
+	};
+	typedef boost::shared_ptr<DeferredLightSource> DeferredLightSourcePtr;
+
+	class DeferredAmbientLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredAmbientLightSource();
+		virtual ~DeferredAmbientLightSource();
+	};
+	typedef boost::shared_ptr<DeferredAmbientLightSource> DeferredAmbientLightSourcePtr;
+
+	class DeferredPointLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredPointLightSource();
+		virtual ~DeferredPointLightSource();
+
+		float3 const & Position() const;
+		void Position(float3 const & pos);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & fall_off);
+
+	protected:
+		float3 pos_;
+		float3 falloff_;
+	};
+	typedef boost::shared_ptr<DeferredPointLightSource> DeferredPointLightSourcePtr;
+
+	class DeferredSpotLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredSpotLightSource();
+		virtual ~DeferredSpotLightSource();
+
+		float3 const & Position() const;
+		void Position(float3 const & pos);
+
+		float3 const & Direction() const;
+		void Direction(float3 const & dir);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & falloff);
+
+		float CosInnerAngle() const;
+		void InnerAngle(float angle);
+
+		float CosOuterAngle() const;
+		void OuterAngle(float angle);
+
+		float4 const & CosOuterInner() const;
+
+	protected:
+		float3 pos_;
+		float3 dir_;
+		float3 falloff_;
+		float4 cos_outer_inner_;
+	};
+	typedef boost::shared_ptr<DeferredSpotLightSource> DeferredSpotLightSourcePtr;
+
+	class DeferredDirectionalLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredDirectionalLightSource();
+		virtual ~DeferredDirectionalLightSource();
+
+		float3 const & Direction() const;
+		void Direction(float3 const & dir);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & falloff);
+
+	protected:
+		float3 dir_;
+		float3 falloff_;
+	};
+	typedef boost::shared_ptr<DeferredDirectionalLightSource> DeferredDirectionalLightSourcePtr;
+
+
 	class DeferredRenderable
 	{
 	public:
@@ -254,31 +363,16 @@ namespace KlayGE
 	};
 	typedef boost::shared_ptr<DeferredSceneObject> DeferredSceneObjectPtr;
 
+
 	class DeferredShadingLayer : public RenderableHelper
 	{
 	public:
 		DeferredShadingLayer();
 
-		int AddAmbientLight(float3 const & clr);
-		int AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
-		int AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
-		int AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
-
-		void LightAttrib(int index, uint32_t attr);
-		void LightColor(int index, float3 const & clr);
-		void LightDir(int index, float3 const & dir);
-		void LightPos(int index, float3 const & pos);
-		void LightFalloff(int index, float3 const & falloff);
-		void SpotLightAngle(int index, float outer, float inner);
-
-		float3 LightColor(int index) const;
-		float3 LightDir(int index) const;
-		float3 LightPos(int index) const;
-		float3 LightFalloff(int index) const;
-		float2 SpotLightAngle(int index) const;
-
-		void LightEnabled(int index, bool enable);
-		bool LightEnabled(int index) const;
+		DeferredAmbientLightSourcePtr AddAmbientLight(float3 const & clr);
+		DeferredPointLightSourcePtr AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
+		DeferredDirectionalLightSourcePtr AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
+		DeferredSpotLightSourcePtr AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
 
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
@@ -318,20 +412,13 @@ namespace KlayGE
 		Box cone_bbox_;
 		Box pyramid_bbox_;
 
-		std::vector<char> light_enabled_;
-		std::vector<int32_t> light_attrib_;
-		std::vector<float4> light_clr_type_;
-		std::vector<float4> light_pos_;
-		std::vector<float4> light_dir_;
-		std::vector<float4> light_cos_outer_inner_;
-		std::vector<float4> light_falloff_;
+		std::vector<DeferredLightSourcePtr> lights_;
+		std::vector<std::vector<QueryPtr> > light_crs_;
 
 		std::vector<uint32_t> pass_scaned_;
 
 		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
-
-		std::vector<std::vector<QueryPtr> > light_crs_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;

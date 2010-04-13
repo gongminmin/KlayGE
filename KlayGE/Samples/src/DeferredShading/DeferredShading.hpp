@@ -6,6 +6,8 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
+#include "DeferredShadingLayer.hpp"
+
 class DeferredShadingApp : public KlayGE::App3DFramework
 {
 public:
@@ -55,9 +57,9 @@ private:
 	int id_ssao_combo_;
 	int id_ctrl_camera_;
 
-	int ambient_light_id_;
-	int point_light_id_;
-	int spot_light_id_[2];
+	KlayGE::DeferredAmbientLightSourcePtr ambient_light_;
+	KlayGE::DeferredPointLightSourcePtr point_light_;
+	KlayGE::DeferredSpotLightSourcePtr spot_light_[2];
 
 	size_t num_objs_rendered_;
 	size_t num_renderable_rendered_;
