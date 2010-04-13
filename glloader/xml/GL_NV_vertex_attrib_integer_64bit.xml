@@ -1,0 +1,136 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_vertex_attrib_integer_64bit">
+	<functions>
+		<function name="glVertexAttribL1i64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2i64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3i64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4i64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT" name="x"/>
+				<param type="GLint64EXT" name="y"/>
+				<param type="GLint64EXT" name="z"/>
+				<param type="GLint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4i64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4ui64NV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT" name="x"/>
+				<param type="GLuint64EXT" name="y"/>
+				<param type="GLuint64EXT" name="z"/>
+				<param type="GLuint64EXT" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4ui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint64EXT const *" name="v"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribLi64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribLui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64EXT*" name="params"/>
+			</params>
+		</function>
+		<function name="glVertexAttribLFormatNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,102 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_vertex_attrib_64bit">
+	<tokens>
+		<token name="GL_DOUBLE_VEC2_EXT" value="0x8FFC"/>
+		<token name="GL_DOUBLE_VEC3_EXT" value="0x8FFD"/>
+		<token name="GL_DOUBLE_VEC4_EXT" value="0x8FFE"/>
+		<token name="GL_DOUBLE_MAT2_EXT" value="0x8F46"/>
+		<token name="GL_DOUBLE_MAT3_EXT" value="0x8F47"/>
+		<token name="GL_DOUBLE_MAT4_EXT" value="0x8F48"/>
+		<token name="GL_DOUBLE_MAT2x3_EXT" value="0x8F49"/>
+		<token name="GL_DOUBLE_MAT2x4_EXT" value="0x8F4A"/>
+		<token name="GL_DOUBLE_MAT3x2_EXT" value="0x8F4B"/>
+		<token name="GL_DOUBLE_MAT3x4_EXT" value="0x8F4C"/>
+		<token name="GL_DOUBLE_MAT4x2_EXT" value="0x8F4D"/>
+		<token name="GL_DOUBLE_MAT4x3_EXT" value="0x8F4E"/>
+	</tokens>
+
+	<functions>
+		<function name="glVertexAttribL1dEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble" name="x"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2dEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3dEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4dEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble" name="x"/>
+				<param type="GLdouble" name="y"/>
+				<param type="GLdouble" name="z"/>
+				<param type="GLdouble" name="w"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL1dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL2dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL3dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribL4dvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble const *" name="v"/>
+			</params>
+		</function>
+		<function name="glVertexAttribLPointerEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="void const *" name="pointer"/>
+			</params>
+		</function>
+		<function name="glGetVertexAttribLdvEXT" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribLOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

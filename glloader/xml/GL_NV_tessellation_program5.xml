@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_tessellation_program5">
+	<tokens>
+		<token name="GL_TESS_CONTROL_PROGRAM_NV" value="0x891E"/>
+		<token name="GL_TESS_EVALUATION_PROGRAM_NV" value="0x891F"/>
+		<token name="GL_TESS_CONTROL_PROGRAM_PARAMETER_BUFFER_NV" value="0x8C74"/>
+		<token name="GL_TESS_EVALUATION_PROGRAM_PARAMETER_BUFFER_NV" value="0x8C75"/>
+		<token name="GL_MAX_PROGRAM_PATCH_ATTRIBS_NV" value="0x86D8"/>
+	</tokens>
+</gl_extension>
