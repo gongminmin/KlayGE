@@ -517,7 +517,7 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
-		/*if (glloader_GL_VERSION_3_3() && rl.InstanceStream())
+		if (glloader_GL_VERSION_3_3() && rl.InstanceStream())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.InstanceStream()));
 
@@ -533,45 +533,9 @@ namespace KlayGE
 				GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 
 				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				switch (vs_elem.usage)
-				{
-				case VEU_Position:
-					glEnableClientState(GL_VERTEX_ARRAY);
-					stream.Active();
-					glVertexPointer(num_components, type, instance_size, offset);
-					break;
-
-				case VEU_Normal:
-					glEnableClientState(GL_NORMAL_ARRAY);
-					stream.Active();
-					glNormalPointer(type, instance_size, offset);
-					break;
-
-				case VEU_Diffuse:
-					glEnableClientState(GL_COLOR_ARRAY);
-					stream.Active();
-					glColorPointer(num_components, type, instance_size, offset);
-					break;
-
-				case VEU_Specular:
-					glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
-					stream.Active();
-					glSecondaryColorPointer(num_components, type, instance_size, offset);
-					break;
-
-				case VEU_TextureCoord:
-					glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-					glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-					stream.Active();
-					glTexCoordPointer(num_components, type, instance_size, offset);
-					break;
-
-				default:
-					glEnableVertexAttribArray(attr);
-					stream.Active();
-					glVertexAttribPointer(attr, num_components, type, GL_FALSE, instance_size, offset);
-					break;
-				}
+				glEnableVertexAttribArray(attr);
+				stream.Active();
+				glVertexAttribPointer(attr, num_components, type, GL_FALSE, instance_size, offset);
 
 				glVertexAttribDivisor(attr, 1);
 
@@ -638,37 +602,11 @@ namespace KlayGE
 			{
 				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				switch (vs_elem.usage)
-				{
-				case VEU_Position:
-					glDisableClientState(GL_VERTEX_ARRAY);
-					break;
-
-				case VEU_Normal:
-					glDisableClientState(GL_NORMAL_ARRAY);
-					break;
-
-				case VEU_Diffuse:
-					glDisableClientState(GL_COLOR_ARRAY);
-					break;
-
-				case VEU_Specular:
-					glDisableClientState(GL_SECONDARY_COLOR_ARRAY);
-					break;
-
-				case VEU_TextureCoord:
-					glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-					break;
-
-				default:
-					glDisableVertexAttribArray(attr);
-					break;
-				}
-
+				glDisableVertexAttribArray(attr);
 				glVertexAttribDivisor(attr, 0);
 			}
 		}
-		else*/
+		else
 		{
 			for (uint32_t instance = 0; instance < num_instance; ++ instance)
 			{
