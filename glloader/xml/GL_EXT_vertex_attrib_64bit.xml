@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_vertex_attrib_64bit">
+<gl_extension name="GL_EXT_vertex_attrib_64bit" reg_no="387">
 	<tokens>
 		<token name="GL_DOUBLE_VEC2_EXT" value="0x8FFC"/>
 		<token name="GL_DOUBLE_VEC3_EXT" value="0x8FFD"/>

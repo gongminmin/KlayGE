@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_vertex_attrib_integer_64bit">
+<gl_extension name="GL_NV_vertex_attrib_integer_64bit" reg_no="392">
 	<functions>
 		<function name="glVertexAttribL1i64NV" return="void">
 			<params>

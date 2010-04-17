@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_shader_buffer_store">
+<gl_extension name="GL_NV_shader_buffer_store" reg_no="390">
 	<tokens>
 		<token name="GL_SHADER_GLOBAL_ACCESS_BARRIER_BIT_NV" value="0x00000010"/>
 	</tokens>

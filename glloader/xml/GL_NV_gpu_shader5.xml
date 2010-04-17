@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_gpu_shader5">
+<gl_extension name="GL_NV_gpu_shader5" reg_no="389">
 	<tokens>
 		<token name="GL_INT64_NV" value="0x140E"/>
 		<token name="GL_UNSIGNED_INT64_NV" value="0x140F"/>

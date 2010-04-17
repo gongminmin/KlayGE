@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_gpu_program5">
+<gl_extension name="GL_NV_gpu_program5" reg_no="388">
 	<tokens>
 		<token name="GL_MAX_GEOMETRY_PROGRAM_INVOCATIONS_NV" value="0x8E5A"/>
 		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_NV" value="0x8E5B"/>

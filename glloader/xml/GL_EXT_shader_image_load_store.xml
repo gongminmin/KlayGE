@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_shader_image_load_store">
+<gl_extension name="GL_EXT_shader_image_load_store" reg_no="386">
 	<tokens>
 		<token name="GL_MAX_IMAGE_UNITS_EXT" value="0x8F38"/>
 		<token name="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS_EXT" value="0x8F39"/>

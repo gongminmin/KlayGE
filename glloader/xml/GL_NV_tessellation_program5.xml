@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_tessellation_program5">
+<gl_extension name="GL_NV_tessellation_program5" reg_no="391">
 	<tokens>
 		<token name="GL_TESS_CONTROL_PROGRAM_NV" value="0x891E"/>
 		<token name="GL_TESS_EVALUATION_PROGRAM_NV" value="0x891F"/>
