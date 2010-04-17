@@ -156,6 +156,7 @@
       <ProgramDataBaseFileName>$(IntDir)$(TargetFileName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../../../lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -182,6 +183,7 @@
       </PrecompiledHeader>
       <ProgramDataBaseFileName>$(IntDir)$(TargetFileName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../../../lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
