@@ -124,36 +124,36 @@ namespace KlayGE
 	{
 		vb.push_back(T());
 		vb.back().x() = -half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = -half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = -half_length;
+		vb.back().y() = +half_length;
 		vb.back().z() = -half_length;
 		vb.push_back(T());
 		vb.back().x() = +half_length;
 		vb.back().y() = +half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
 		vb.back().z() = -half_length;
 		vb.push_back(T());
 		vb.back().x() = -half_length;
-		vb.back().y() = +half_length;
+		vb.back().y() = -half_length;
 		vb.back().z() = -half_length;
 
 		vb.push_back(T());
 		vb.back().x() = -half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = +half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = -half_length;
+		vb.back().y() = +half_length;
 		vb.back().z() = +half_length;
 		vb.push_back(T());
 		vb.back().x() = +half_length;
 		vb.back().y() = +half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
 		vb.back().z() = +half_length;
 		vb.push_back(T());
 		vb.back().x() = -half_length;
-		vb.back().y() = +half_length;
+		vb.back().y() = -half_length;
 		vb.back().z() = +half_length;
 
 		ib.push_back(vertex_base + 0);
@@ -408,12 +408,14 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
+		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
 		Box cone_bbox_;
 		Box pyramid_bbox_;
+		Box box_bbox_;
 
 		std::vector<DeferredLightSourcePtr> lights_;
-		std::vector<std::vector<QueryPtr> > light_crs_;
+		std::vector<std::vector<ConditionalRenderPtr> > light_crs_;
 
 		std::vector<uint32_t> pass_scaned_;
 
@@ -423,8 +425,9 @@ namespace KlayGE
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
 		TexturePtr blur_sm_tex_;
+		TexturePtr sm_cube_tex_;
 
-		PostProcessPtr box_filter_pp_;
+		PostProcessPtr sm_filter_pps_[7];
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_;
@@ -437,7 +440,7 @@ namespace KlayGE
 		RenderEffectParameterPtr lower_right_param_;
 		RenderEffectParameterPtr inv_view_param_;
 		RenderEffectParameterPtr light_attrib_param_;
-		RenderEffectParameterPtr light_clr_type_param_;
+		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_volume_mvp_param_;

@@ -117,22 +117,22 @@ namespace
 			}
 
 			ElementInitData init_data;
-			init_data.row_pitch = pos.size() * sizeof(pos[0]);
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = normal.size() * sizeof(normal[0]);
+			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &normal[0];
 			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = texcoord.size() * sizeof(texcoord[0]);
+			init_data.row_pitch = static_cast<uint32_t>(texcoord.size() * sizeof(texcoord[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &texcoord[0];
 			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = tangent.size() * sizeof(tangent[0]);
+			init_data.row_pitch = static_cast<uint32_t>(tangent.size() * sizeof(tangent[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
@@ -388,18 +388,16 @@ namespace
 			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+		}
 
+		void OnRenderBegin()
+		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
 			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
-		}
-
-		void OnRenderBegin()
-		{
-			this->Update();
 		}
 
 	private:
@@ -545,22 +543,22 @@ namespace
 			}
 
 			ElementInitData init_data;
-			init_data.row_pitch = pos.size() * sizeof(pos[0]);
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = normal.size() * sizeof(normal[0]);
+			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &normal[0];
 			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = texcoord.size() * sizeof(texcoord[0]);
+			init_data.row_pitch = static_cast<uint32_t>(texcoord.size() * sizeof(texcoord[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &texcoord[0];
 			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = tangent.size() * sizeof(tangent[0]);
+			init_data.row_pitch = static_cast<uint32_t>(tangent.size() * sizeof(tangent[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
@@ -629,18 +627,16 @@ namespace
 			*model_view_param_ = mv;
 
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+		}
 
+		void OnRenderBegin()
+		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
 			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
-		}
-
-		void OnRenderBegin()
-		{
-			this->Update();
 		}
 
 	private:

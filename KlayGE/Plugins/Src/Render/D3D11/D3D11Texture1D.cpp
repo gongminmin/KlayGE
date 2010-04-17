@@ -213,8 +213,8 @@ namespace KlayGE
 			src_box.bottom = 1;
 			src_box.back = 1;
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, 0, 1),
-				dst_xOffset, 0, 0, d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, 1), &src_box);
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, 0, other.NumMipMaps()),
+				dst_xOffset, 0, 0, d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -237,8 +237,8 @@ namespace KlayGE
 			D3DX11_TEXTURE_LOAD_INFO info;
 			info.pSrcBox = &src_box;
 			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D11CalcSubresource(level, 0, 1);
-			info.DstFirstMip = D3D11CalcSubresource(level, 0, 1);
+			info.SrcFirstMip = D3D11CalcSubresource(level, 0, this->NumMipMaps());
+			info.DstFirstMip = D3D11CalcSubresource(level, 0, other.NumMipMaps());
 			info.NumMips = 1;
 			info.SrcFirstElement = 0;
 			info.DstFirstElement = 0;
@@ -271,7 +271,7 @@ namespace KlayGE
 
 	void D3D11Texture1D::Unmap1D(int level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, 1));
+		d3d_imm_ctx_->Unmap(d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, numMipMaps_));
 	}
 
 	void D3D11Texture1D::BuildMipSubLevels()

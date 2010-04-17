@@ -246,6 +246,51 @@ namespace KlayGE
 		}
 	}
 
+	void D3D9Texture2D::CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	{
+		BOOST_ASSERT(TT_Cube == target.Type());
+
+		D3D9TextureCube& other(*checked_cast<D3D9TextureCube*>(&target));
+
+		DWORD filter = D3DX_FILTER_LINEAR;
+		if (IsSRGB(format_))
+		{
+			filter |= D3DX_FILTER_SRGB_IN;
+		}
+		if (IsSRGB(target.Format()))
+		{
+			filter |= D3DX_FILTER_SRGB_OUT;
+		}
+
+		{
+			IDirect3DSurface9* src;
+			TIF(d3dTexture2D_->GetSurfaceLevel(level, &src));
+
+			IDirect3DSurface9* dst;
+			TIF(other.D3DTextureCube()->GetCubeMapSurface(static_cast<D3DCUBEMAP_FACES>(face), level, &dst));
+
+			RECT srcRc = { src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height };
+			RECT dstRc = { dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height };
+			if ((this->AccessHint() & EAH_GPU_Write) && (target.AccessHint() & EAH_GPU_Write))
+			{
+				if (FAILED(d3dDevice_->StretchRect(src, &srcRc, dst, &dstRc, D3DTEXF_LINEAR)))
+				{
+					TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
+				}
+			}
+			else
+			{
+				TIF(D3DXLoadSurfaceFromSurface(dst, NULL, &dstRc, src, NULL, &srcRc, filter, 0));
+			}
+
+			src->Release();
+			dst->Release();
+		}
+	}
+
+
 	void D3D9Texture2D::Map2D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch)

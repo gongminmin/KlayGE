@@ -112,7 +112,7 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;
-		void OutputPin(uint32_t index, TexturePtr const & tex);
+		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		TexturePtr const & OutputPin(uint32_t index) const;
 		void Apply();
 

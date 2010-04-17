@@ -59,7 +59,7 @@ namespace KlayGE
 		uint32_t NumOutputPins() const;
 		uint32_t OutputPinByName(std::string const & name) const;
 		std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex);
+		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;
 
 		FrameBufferPtr const & OutputFrameBuffer() const
@@ -115,7 +115,7 @@ namespace KlayGE
 		uint32_t NumOutputPins() const;
 		uint32_t OutputPinByName(std::string const & name) const;
 		std::string const & OutputPinName(uint32_t index) const;
-		virtual void OutputPin(uint32_t index, TexturePtr const & tex);
+		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;
 
 		virtual void Apply();

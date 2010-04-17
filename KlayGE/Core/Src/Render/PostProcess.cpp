@@ -149,7 +149,7 @@ namespace KlayGE
 		return output_pins_[index].first;
 	}
 
-	void PostProcess::OutputPin(uint32_t index, TexturePtr const & tex)
+	void PostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
 	{
 		if (!output_pins_[index].second && tex)
 		{
@@ -163,8 +163,18 @@ namespace KlayGE
 		output_pins_[index].second = tex;
 		if (tex)
 		{
-			frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index,
-				Context::Instance().RenderFactoryInstance().Make2DRenderView(*tex, 0, 0));
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderViewPtr view;
+			if (Texture::TT_2D == tex->Type())
+			{
+				view = rf.Make2DRenderView(*tex, array_index, level);
+			}
+			else
+			{
+				BOOST_ASSERT(Texture::TT_Cube == tex->Type());
+				view = rf.Make2DRenderView(*tex, array_index, static_cast<Texture::CubeFaces>(face), level);
+			}
+			frame_buffer_->Attach(FrameBuffer::ATT_Color0 + index, view);
 
 			if (output_pins_ep_[index])
 			{
@@ -328,9 +338,9 @@ namespace KlayGE
 		return pp_chain_.back()->OutputPinName(index);
 	}
 
-	void PostProcessChain::OutputPin(uint32_t index, TexturePtr const & tex)
+	void PostProcessChain::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
 	{
-		pp_chain_.back()->OutputPin(index, tex);
+		pp_chain_.back()->OutputPin(index, tex, level, array_index, face);
 	}
 
 	TexturePtr const & PostProcessChain::OutputPin(uint32_t index) const

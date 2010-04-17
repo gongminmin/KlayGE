@@ -312,6 +312,71 @@ namespace KlayGE
 		}
 	}
 
+	void D3D10Texture2D::CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	{
+		BOOST_ASSERT(TT_Cube == target.Type());
+
+		D3D10TextureCube& other(*checked_cast<D3D10TextureCube*>(&target));
+
+		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
+		{
+			D3D10_BOX src_box;
+			src_box.left = src_xOffset;
+			src_box.top = src_yOffset;
+			src_box.front = 0;
+			src_box.right = src_xOffset + src_width;
+			src_box.bottom = src_yOffset + src_height;
+			src_box.back = 1;
+
+			d3d_device_->CopySubresourceRegion(other.D3DTexture().get(), D3D10CalcSubresource(level, face, other.NumMipMaps()),
+				dst_xOffset, dst_yOffset, 0, d3dTexture2D_.get(), D3D10CalcSubresource(level, 0, this->NumMipMaps()), &src_box);
+		}
+		else
+		{
+			D3D10_BOX src_box, dst_box;
+
+			src_box.left = src_xOffset;
+			src_box.top = src_yOffset;
+			src_box.front = 0;
+			src_box.right = src_xOffset + src_width;
+			src_box.bottom = src_yOffset + src_height;
+			src_box.back = 1;
+
+			dst_box.left = dst_xOffset;
+			dst_box.top = dst_yOffset;
+			dst_box.front = 0;
+			dst_box.right = dst_xOffset + dst_width;
+			dst_box.bottom = dst_yOffset + dst_height;
+			dst_box.back = 1;
+
+			D3DX10_TEXTURE_LOAD_INFO info;
+			info.pSrcBox = &src_box;
+			info.pDstBox = &dst_box;
+			info.SrcFirstMip = D3D10CalcSubresource(level, 0, this->NumMipMaps());
+			info.DstFirstMip = D3D10CalcSubresource(level, face, other.NumMipMaps());
+			info.NumMips = 1;
+			info.SrcFirstElement = 0;
+			info.DstFirstElement = 0;
+			info.NumElements = 0;
+			info.Filter = D3DX10_FILTER_LINEAR;
+			info.MipFilter = D3DX10_FILTER_LINEAR;
+			if (IsSRGB(format_))
+			{
+				info.Filter |= D3DX10_FILTER_SRGB_IN;
+				info.MipFilter |= D3DX10_FILTER_SRGB_IN;
+			}
+			if (IsSRGB(target.Format()))
+			{
+				info.Filter |= D3DX10_FILTER_SRGB_OUT;
+				info.MipFilter |= D3DX10_FILTER_SRGB_OUT;
+			}
+
+			D3DX10LoadTextureFromTexture(d3dTexture2D_.get(), &info, other.D3DTexture().get());
+		}
+	}
+
 	void D3D10Texture2D::Map2D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,
 			void*& data, uint32_t& row_pitch)

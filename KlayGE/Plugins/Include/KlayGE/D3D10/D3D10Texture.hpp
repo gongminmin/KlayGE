@@ -134,6 +134,9 @@ namespace KlayGE
 		void CopyToTexture2D(Texture& target, int level,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+		void CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 		void BuildMipSubLevels();
 

@@ -336,9 +336,9 @@ namespace KlayGE
 		return downsampler_->InputPin(index);
 	}
 
-	void HDRPostProcess::OutputPin(uint32_t index, TexturePtr const & tex)
+	void HDRPostProcess::OutputPin(uint32_t index, TexturePtr const & tex, int level, int array_index, int face)
 	{
-		tone_mapping_->OutputPin(index, tex);
+		tone_mapping_->OutputPin(index, tex, level, array_index, face);
 	}
 
 	TexturePtr const & HDRPostProcess::OutputPin(uint32_t index) const

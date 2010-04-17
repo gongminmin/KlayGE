@@ -302,6 +302,101 @@ namespace KlayGE
 			}
 		}
 	}
+	
+	void OGLES2Texture2D::CopyToTextureCube(Texture& target, CubeFaces face, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	{
+		BOOST_ASSERT(TT_Cube == target.Type());
+		BOOST_ASSERT(format_ == target.Format());
+
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLES2Mapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		GLint gl_target_internal_format;
+		GLenum gl_target_format;
+		GLenum gl_target_type;
+		OGLES2Mapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+		if (IsCompressedFormat(format_))
+		{
+			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
+			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
+
+			Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+
+			int block_size;
+			if (EF_BC1 == format_)
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+
+			GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
+
+			memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
+		}
+		else
+		{
+			size_t const src_format_size = NumFormatBytes(format_);
+			size_t const dst_format_size = NumFormatBytes(target.Format());
+
+			if ((src_width != dst_width) || (src_height != dst_height))
+			{
+				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
+				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
+
+				{
+					Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					uint8_t const * s = mapper.Pointer<uint8_t>();
+					uint8_t* d = &data_in[0];
+					for (uint32_t y = 0; y < src_height; ++ y)
+					{
+						memcpy(d, s, src_width * src_format_size);
+
+						s += mapper.RowPitch();
+						d += src_width * src_format_size;
+					}
+				}
+
+				gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
+					dst_width, dst_height, gl_target_type, &data_out[0]);
+
+				{
+					Texture::Mapper mapper(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					uint8_t const * s = &data_out[0];
+					uint8_t* d = mapper.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < dst_height; ++ y)
+					{
+						memcpy(d, s, dst_width * dst_format_size);
+
+						s += dst_width * src_format_size;
+						d += mapper.RowPitch();
+					}
+				}
+			}
+			else
+			{
+				Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				uint8_t const * s = mapper_src.Pointer<uint8_t>();
+				uint8_t* d = mapper_dst.Pointer<uint8_t>();
+				for (uint32_t y = 0; y < src_height; ++ y)
+				{
+					memcpy(d, s, src_width * src_format_size);
+
+					s += mapper_src.RowPitch();
+					d += mapper_dst.RowPitch();
+				}
+			}
+		}
+	}
 
 	void OGLES2Texture2D::Map2D(int level, TextureMapAccess tma,
 					uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,

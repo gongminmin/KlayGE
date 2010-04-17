@@ -302,7 +302,7 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		lights_.push_back(MakeSharedPtr<DeferredAmbientLightSource>());
-		light_crs_.push_back(std::vector<QueryPtr>());
+		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
 
 		g_buffer_ = rf.MakeFrameBuffer();
 		lighting_buffer_ = rf.MakeFrameBuffer();
@@ -351,6 +351,26 @@ namespace KlayGE
 			rl_pyramid_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
 		}
 		{
+			rl_box_ = rf.MakeRenderLayout();
+			rl_box_->TopologyType(RenderLayout::TT_TriangleList);
+
+			std::vector<float3> pos;
+			std::vector<uint16_t> index;
+			CreateBoxMesh(pos, index, 0, 100.0f);
+			box_bbox_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
+
+			ElementInitData init_data;
+			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.slice_pitch = 0;
+			init_data.data = &pos[0];
+			rl_box_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+			init_data.data = &index[0];
+			rl_box_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+		}
+		{
 			rl_quad_ = rf.MakeRenderLayout();
 			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 
@@ -392,12 +412,22 @@ namespace KlayGE
 		}
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		box_filter_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBoxFilterPostProcess> >(3, 1.0f);
-		box_filter_pp_->InputPin(0, sm_tex_);
-		box_filter_pp_->OutputPin(0, blur_sm_tex_);
+		for (int i = 0; i < 7; ++ i)
+		{
+			sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
+		}
+		sm_filter_pps_[0]->InputPin(0, sm_tex_);
+		sm_filter_pps_[0]->OutputPin(0, blur_sm_tex_);
+		for (int i = 1; i < 7; ++ i)
+		{
+			sm_filter_pps_[i]->InputPin(0, sm_tex_);
+			sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, i - 1);
+		}
 
 		*(technique_->Effect().ParameterByName("shadow_map_tex")) = blur_sm_tex_;
+		*(technique_->Effect().ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
 		texel_to_pixel_offset_param_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
@@ -407,7 +437,7 @@ namespace KlayGE
 		lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
 		inv_view_param_ = technique_->Effect().ParameterByName("inv_view");
 		light_attrib_param_ = technique_->Effect().ParameterByName("light_attrib");
-		light_clr_type_param_ = technique_->Effect().ParameterByName("light_clr_type");
+		light_color_param_ = technique_->Effect().ParameterByName("light_color");
 		light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 		light_view_proj_param_ = technique_->Effect().ParameterByName("light_view_proj");
 		light_volume_mvp_param_ = technique_->Effect().ParameterByName("light_volume_mvp");
@@ -432,10 +462,10 @@ namespace KlayGE
 		lights_.push_back(point);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		light_crs_.push_back(std::vector<QueryPtr>());
-		for (int i = 0; i < 6; ++ i)
+		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
+		for (int i = 0; i < 7; ++ i)
 		{
-			light_crs_.back().push_back(rf.MakeConditionalRender());
+			light_crs_.back().push_back(checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender()));
 		}
 
 		return point;
@@ -449,7 +479,7 @@ namespace KlayGE
 		directional->Direction(MathLib::normalize(dir));
 		directional->Falloff(falloff);
 		lights_.push_back(directional);
-		light_crs_.push_back(std::vector<QueryPtr>());
+		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
 		return directional;
 	}
 
@@ -466,7 +496,8 @@ namespace KlayGE
 		lights_.push_back(spot);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		light_crs_.push_back(std::vector<QueryPtr>(1, rf.MakeConditionalRender()));
+		light_crs_.push_back(std::vector<ConditionalRenderPtr>(1,
+			checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender())));
 
 		return spot;
 	}
@@ -594,86 +625,112 @@ namespace KlayGE
 					{
 						float4x4 vp = view_ * proj_;
 						int type = light->Type();
-						if (LT_Spot == type)
+						int32_t attr = light->Attrib();
+						switch (type)
 						{
-							float3 d, u;
-							d = light->Direction();
-							u = float3(0, 1, 0);
-
-							float3 p = light->Position();
-							float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
-
-							float const scale = light->CosOuterInner().w();
-							float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
-							float4x4 light_model = mat * MathLib::inverse(light_view);
-							*light_volume_mvp_param_ = light_model * vp;
-
-							float3 min, max;
-							min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
-							for (size_t k = 1; k < 8; ++ k)
+						case LT_Spot:
 							{
-								float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
-								min = MathLib::minimize(min, vec);
-								max = MathLib::maximize(max, vec);
-							}
+								float3 const & d = light->Direction();
+								float3 const & u = float3(0, 1, 0);
 
-							if (scene_mgr.AABBVisible(Box(min, max)))
-							{
-								if (0 == (light->Attrib() & LSA_NoShadow))
-								{
-									pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
-								}
-								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
-
-								light_crs_[i][0]->Begin();
-								re.Render(*technique_light_depth_only_, *rl_cone_);
-								light_crs_[i][0]->End();
-							}
-						}
-						else if (LT_Point == type)
-						{
-							float3 p = light->Position();
-							for (int j = 0; j < 6; ++ j)
-							{
-								float3 d, u;
-								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
-								d = ad.first;
-								u = ad.second;
-
+								float3 const & p = light->Position();
 								float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
-								float4x4 light_model = MathLib::inverse(light_view);
+
+								float const scale = light->CosOuterInner().w();
+								float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+								float4x4 light_model = mat * MathLib::inverse(light_view);
 								*light_volume_mvp_param_ = light_model * vp;
 
 								float3 min, max;
-								min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
+								min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
 								for (size_t k = 1; k < 8; ++ k)
 								{
-									float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
+									float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
 									min = MathLib::minimize(min, vec);
 									max = MathLib::maximize(max, vec);
 								}
 
 								if (scene_mgr.AABBVisible(Box(min, max)))
 								{
-									if (0 == (light->Attrib() & LSA_NoShadow))
+									if (0 == (attr & LSA_NoShadow))
 									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
 									}
-									pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + j));
+									pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
 
-									light_crs_[i][j]->Begin();
-									re.Render(*technique_light_depth_only_, *rl_pyramid_);
-									light_crs_[i][j]->End();
+									light_crs_[i][0]->Begin();
+									re.Render(*technique_light_depth_only_, *rl_cone_);
+									light_crs_[i][0]->End();
 								}
 							}
-						}
-						else
-						{
-							if (0 == (light->Attrib() & LSA_NoShadow))
+							break;
+						
+						case LT_Point:
+							{
+								float3 const & p = light->Position();
+								for (int j = 0; j < 6; ++ j)
+								{
+									std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+									float3 const & d = ad.first;
+									float3 const & u = ad.second;
+
+									float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+									float4x4 light_model = MathLib::inverse(light_view);
+									*light_volume_mvp_param_ = light_model * vp;
+
+									float3 min, max;
+									min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
+									for (size_t k = 1; k < 8; ++ k)
+									{
+										float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
+										min = MathLib::minimize(min, vec);
+										max = MathLib::maximize(max, vec);
+									}
+
+									if (scene_mgr.AABBVisible(Box(min, max)))
+									{
+										if (0 == (attr & LSA_NoShadow))
+										{
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+										}
+
+										light_crs_[i][j]->Begin();
+										re.Render(*technique_light_depth_only_, *rl_pyramid_);
+										light_crs_[i][j]->End();
+									}
+								}
+								{
+									float4x4 light_model = MathLib::translation(p);
+									*light_volume_mvp_param_ = light_model * vp;
+
+									float3 min, max;
+									min = max = MathLib::transform_coord(box_bbox_[0], light_model);
+									for (size_t k = 1; k < 8; ++ k)
+									{
+										float3 vec = MathLib::transform_coord(box_bbox_[k], light_model);
+										min = MathLib::minimize(min, vec);
+										max = MathLib::maximize(max, vec);
+									}
+
+									if (scene_mgr.AABBVisible(Box(min, max)))
+									{
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
+
+										light_crs_[i][6]->Begin();
+										re.Render(*technique_light_depth_only_, *rl_box_);
+										light_crs_[i][6]->End();
+									}
+								}
+							}
+							break;
+
+						default:
+							if (0 == (attr & LSA_NoShadow))
 							{
 								pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
 							}
 							pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
+							break;
 						}
 					}
 				}
@@ -702,6 +759,7 @@ namespace KlayGE
 				DeferredLightSourcePtr const & light = lights_[org_no];
 
 				LightType type = light->Type();
+				int32_t attr = light->Attrib();
 
 				float3 d, u;
 				if (type != LT_Point)
@@ -726,12 +784,12 @@ namespace KlayGE
 					fov = light->CosOuterInner().z();
 				}
 
-				float3 p = light->Position();
+				float3 const & p = light->Position();
 				sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
 				sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 				float3 dir_es = MathLib::transform_normal(d, view_);
-				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), index_in_pass + 0.1f);
+				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
 				*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
 					* sm_buffer_->GetViewport().camera->ProjMatrix();
@@ -739,29 +797,32 @@ namespace KlayGE
 				float3 loc_es = MathLib::transform_coord(p, view_);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
-				if (LT_Spot == type)
-				{
-					light_pos_es_actived.w() = light->CosOuterInner().x();
-					light_dir_es_actived.w() = light->CosOuterInner().y();
-				}
-
-				*light_pos_es_param_ = light_pos_es_actived;
-				*light_dir_es_param_ = light_dir_es_actived;
-
 				float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
 				switch (type)
 				{
 				case LT_Spot:
 					{
+						light_pos_es_actived.w() = light->CosOuterInner().x();
+						light_dir_es_actived.w() = light->CosOuterInner().y();
+
+						rl_ = rl_cone_;
 						float const scale = light->CosOuterInner().w();
 						*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
-						rl_ = rl_cone_;
 					}
 					break;
 
 				case LT_Point:
-					rl_ = rl_pyramid_;
-					*light_volume_mvp_param_ = mat;
+					if (PT_Lighting == pass_type)
+					{
+						rl_ = rl_box_;
+						float4x4 light_model = MathLib::translation(p);
+						*light_volume_mvp_param_ = light_model * view_ * proj_;
+					}
+					else
+					{
+						rl_ = rl_pyramid_;
+						*light_volume_mvp_param_ = mat;
+					}
 					break;
 
 				default:
@@ -770,9 +831,28 @@ namespace KlayGE
 					break;
 				}
 
+				*light_pos_es_param_ = light_pos_es_actived;
+				*light_dir_es_param_ = light_dir_es_actived;
+
+				if ((index_in_pass > 0) || (PT_Lighting == pass_type))
+				{
+					if (0 == (attr & LSA_NoShadow))
+					{
+						if (LT_Point == type)
+						{
+							sm_filter_pps_[index_in_pass]->Apply();
+							light_crs_[org_no][index_in_pass - 1]->EndConditionalRender();
+						}
+						else
+						{
+							sm_filter_pps_[0]->Apply();
+						}
+					}
+				}
+
 				if (PT_GenShadowMap == pass_type)
 				{
-					checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+					light_crs_[org_no][index_in_pass]->BeginConditionalRender();
 
 					// Shadow map generation
 
@@ -783,31 +863,26 @@ namespace KlayGE
 				}
 				else //if (PT_Lighting == pass_type)
 				{
-					if (0 == (light->Attrib() & LSA_NoShadow))
-					{
-						box_filter_pp_->Apply();
-					}
-
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
 
 					technique_ = technique_lights_[type];
 
-					*light_attrib_param_ = light->Attrib();
-					*light_clr_type_param_ = float4(light->Color().x(), light->Color().y(), light->Color().z(), light->Type() + 0.0001f);
-					*light_falloff_param_ = float4(light->Falloff().x(), light->Falloff().y(), light->Falloff().z(), 0);
+					*light_attrib_param_ = attr;
+					*light_color_param_ = light->Color();
+					*light_falloff_param_ = light->Falloff();
 
-					if ((light->Attrib() & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
 					{
-						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->BeginConditionalRender();
+						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
 					}
 
 					re.Render(*technique_, *rl_);
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						checked_pointer_cast<ConditionalRender>(light_crs_[org_no][index_in_pass])->EndConditionalRender();
+						light_crs_[org_no][index_in_pass]->EndConditionalRender();
 					}
 
 					return App3DFramework::URV_Flushed;

@@ -185,8 +185,8 @@ namespace KlayGE
 
 			for (int face = 0; face < 6; ++ face)
 			{
-				info.SrcFirstMip = D3D11CalcSubresource(0, face, 1);
-				info.DstFirstMip = D3D11CalcSubresource(0, face, 1);
+				info.SrcFirstMip = D3D11CalcSubresource(0, face, this->NumMipMaps());
+				info.DstFirstMip = D3D11CalcSubresource(0, face, other.NumMipMaps());
 				D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), d3dTextureCube_.get(), &info, other.D3DTexture().get());
 			}
 		}
@@ -210,8 +210,8 @@ namespace KlayGE
 			src_box.bottom = src_yOffset + src_height;
 			src_box.back = 1;
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, 1),
-				dst_xOffset, dst_yOffset, 0, d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, 1), &src_box);
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, other.NumMipMaps()),
+				dst_xOffset, dst_yOffset, 0, d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -234,8 +234,8 @@ namespace KlayGE
 			D3DX11_TEXTURE_LOAD_INFO info;
 			info.pSrcBox = &src_box;
 			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D11CalcSubresource(level, face - Texture::CF_Positive_X, 1);
-			info.DstFirstMip = D3D11CalcSubresource(level, face - Texture::CF_Positive_X, 1);
+			info.SrcFirstMip = D3D11CalcSubresource(level, face - Texture::CF_Positive_X, this->NumMipMaps());
+			info.DstFirstMip = D3D11CalcSubresource(level, face - Texture::CF_Positive_X, other.NumMipMaps());
 			info.NumMips = 1;
 			info.SrcFirstElement = 0;
 			info.DstFirstElement = 0;
@@ -271,7 +271,7 @@ namespace KlayGE
 
 	void D3D11TextureCube::UnmapCube(CubeFaces face, int level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, 1));
+		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, numMipMaps_));
 	}
 
 	void D3D11TextureCube::BuildMipSubLevels()

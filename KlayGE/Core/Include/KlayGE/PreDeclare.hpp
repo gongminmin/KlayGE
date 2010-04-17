@@ -22,9 +22,6 @@ namespace KlayGE
 	class MapVector;
 	template <typename Key, class Traits, class Allocator>
 	class SetVector;
-	class Exception;
-	template <typename Sender, typename EventArg>
-	class Event;
 
 	class XMLDocument;
 	typedef boost::shared_ptr<XMLDocument> XMLDocumentPtr;
@@ -150,6 +147,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<Query> QueryPtr;
 	class OcclusionQuery;
 	typedef boost::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
+	class ConditionalRender;
+	typedef boost::shared_ptr<ConditionalRender> ConditionalRenderPtr;
 	class PostProcess;
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
 	class PostProcessChain;

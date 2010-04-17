@@ -53,7 +53,15 @@ namespace KlayGE
 	{
 		// Dynamic loading because these dlls can't be loaded on WinXP
 		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
+		if (NULL == mod_dxgi_)
+		{
+			::MessageBoxW(NULL, L"Can't load dxgi.dll", L"Error", MB_OK);
+		}
 		mod_d3d11_ = ::LoadLibraryW(L"D3D11.dll");
+		if (NULL == mod_d3d11_)
+		{
+			::MessageBoxW(NULL, L"Can't load d3d11.dll", L"Error", MB_OK);
+		}
 
 		if (mod_dxgi_ != NULL)
 		{
