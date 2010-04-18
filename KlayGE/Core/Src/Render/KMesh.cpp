@@ -96,6 +96,11 @@ namespace
 				{
 					model_ = this->CreateModel(model_desc);
 				}
+
+				for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
+				{
+					model_->Mesh(i)->BuildMeshInfo();
+				}
 			}
 
 			return model_;
@@ -179,10 +184,6 @@ namespace
 				}
 			}
 
-			BOOST_FOREACH(BOOST_TYPEOF(meshes)::reference mesh, meshes)
-			{
-				mesh->BuildMeshInfo();
-			}
 			model->AssignMeshes(meshes.begin(), meshes.end());
 
 			return model;

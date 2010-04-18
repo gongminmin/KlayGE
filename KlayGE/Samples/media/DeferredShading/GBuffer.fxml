@@ -93,19 +93,18 @@ float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 	<shader>
 		<![CDATA[
 void GenShadowMapVS(float4 pos : POSITION,
-						out float3 oPosES : TEXCOORD0,
+						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos, mvp);
-	oPosES = pos_es.xyz;
+	oDist = length(pos_es.xyz);
 }
 
-float4 GenShadowMapPS(float3 pos_es : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
-	float dist = length(pos_es.xyz);
 	float2 dxdy = float2(ddx(dist), ddy(dist));
-	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
+	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
 	</shader>

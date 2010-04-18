@@ -38,9 +38,6 @@ namespace KlayGE
 	{
 		if (dirty_decl_)
 		{
-			D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-			ID3D11DevicePtr const & d3d_device = renderEngine.D3DDevice();
-
 			input_elems_type elems;
 			elems.reserve(vertex_streams_.size());
 
@@ -57,9 +54,8 @@ namespace KlayGE
 				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 
-			ID3D11InputLayout* input_layout;
-			TIF(d3d_device->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &input_layout));
-			input_layout_ = MakeCOMPtr(input_layout);
+			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			input_layout_ = re.CreateD3D11InputLayout(elems, vs_code);
 
 			dirty_decl_ = false;
 		}

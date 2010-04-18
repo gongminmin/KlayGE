@@ -42,12 +42,37 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTorus : public KMesh, public DeferredRenderable
+	class RenderModelTorus : public RenderModel
+	{
+	public:
+		RenderModelTorus(std::wstring const & name)
+			: RenderModel(name)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			effect_ = rf.LoadEffect("GBuffer.fxml");
+		}
+
+		RenderEffectPtr const & Effect() const
+		{
+			return effect_;
+		}
+
+	private:
+		RenderEffectPtr effect_;
+	};
+
+	class RenderTorus : public KMesh
 	{
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name)
 		{
+			effect_ = checked_pointer_cast<RenderModelTorus>(model)->Effect();
+
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
+			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+			shading_technique_ = effect_->TechniqueByName("Shading");
+
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
@@ -159,9 +184,6 @@ namespace
 			std::map<std::string, TexturePtr> tex_pool;
 
 			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
-
-			bool diffuse_map_enabled = false;
-			bool bump_map_enabled = false;
 			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
 			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
 				iter != texture_slots.end(); ++ iter)
@@ -177,48 +199,56 @@ namespace
 					tex = LoadTexture(iter->second, EAH_GPU_Read)();
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
-				diffuse_map_enabled = tex;
 
 				if ("Diffuse Color" == iter->first)
 				{
-					*(effect_->ParameterByName("diffuse_tex")) = tex;
+					diffuse_tex_ = tex;
 				}
 				if ("Bump" == iter->first)
 				{
-					*(effect_->ParameterByName("bump_tex")) = tex;
-					bump_map_enabled = tex;
+					bump_tex_ = tex;
 				}
 			}
-
-			*(effect_->ParameterByName("bump_map_enabled")) = bump_map_enabled;
-			*(effect_->ParameterByName("diffuse_map_enabled")) = diffuse_map_enabled;
-
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
-			*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
 		}
 
 		void Pass(PassType type)
 		{
-			technique_ = DeferredRenderable::Pass(type);
+			type_ = type;
 			switch (type)
 			{
 			case PT_GBuffer:
+				technique_ = gbuffer_technique_;
 				rl_ = gbuffer_rl_;
 				break;
 
 			case PT_GenShadowMap:
+				technique_ = gen_sm_technique_;
 				rl_ = gen_sm_rl_;
 				break;
 
 			case PT_Shading:
+				technique_ = shading_technique_;
 				rl_ = shading_rl_;
 				break;
 
 			default:
 				break;
 			}
+		}
+
+		void LightingTex(TexturePtr const & tex)
+		{
+			*(effect_->ParameterByName("lighting_tex")) = tex;
+		}
+
+		void SSAOTex(TexturePtr const & tex)
+		{
+			*(effect_->ParameterByName("ssao_tex")) = tex;
+		}
+
+		void SSAOEnabled(bool ssao)
+		{
+			*(effect_->ParameterByName("ssao_enabled")) = ssao;
 		}
 
 		void OnRenderBegin()
@@ -231,17 +261,40 @@ namespace
 			*mvp_param_ = view * proj;
 			*model_view_param_ = view;
 
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+			switch (type_)
+			{
+			case PT_GBuffer:
+				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+				*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
+				*(effect_->ParameterByName("bump_map_enabled")) = !!bump_tex_;
+				*(effect_->ParameterByName("bump_tex")) = bump_tex_;
+				break;
 
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
-			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+			case PT_GenShadowMap:
+				break;
+
+			case PT_Shading:
+				*(effect_->ParameterByName("diffuse_map_enabled")) = !!diffuse_tex_;
+				*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+				*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
+				*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
+				*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
+				{
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+					float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
+					float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
+					*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
+					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				}
+				break;
+			}
 		}
 
 	private:
+		PassType type_;
+
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
@@ -249,6 +302,14 @@ namespace
 		RenderLayoutPtr gbuffer_rl_;
 		RenderLayoutPtr gen_sm_rl_;
 		RenderLayoutPtr shading_rl_;
+
+		RenderEffectPtr effect_;
+		RenderTechniquePtr gbuffer_technique_;
+		RenderTechniquePtr gen_sm_technique_;
+		RenderTechniquePtr shading_technique_;
+
+		TexturePtr diffuse_tex_;
+		TexturePtr bump_tex_;
 	};
 
 	class TorusObject : public SceneObjectHelper, public DeferredSceneObject
@@ -427,6 +488,11 @@ namespace
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() * rot_speed_) * MathLib::translation(0.0f, height_, 0.0f);
 			checked_pointer_cast<RenderCone>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderCone>(renderable_)->Update();
+
+			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_);
+			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, 0, 1), model_));
+			light_->Position(p);
+			light_->Direction(d);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -455,10 +521,17 @@ namespace
 			checked_pointer_cast<RenderCone>(renderable_)->SSAOEnabled(ssao);
 		}
 
+		void AttachLightSrc(DeferredLightSourcePtr const & light)
+		{
+			light_ = checked_pointer_cast<DeferredSpotLightSource>(light);
+		}
+
 	private:
 		float4x4 model_;
 		float4x4 model_org_;
 		float rot_speed_, height_;
+
+		DeferredSpotLightSourcePtr light_;
 	};
 
 	class RenderSphere : public KMesh, public DeferredRenderable
@@ -666,6 +739,9 @@ namespace
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::translation(sin(std::clock() * move_speed_), 0.0f, 0.0f) * MathLib::translation(pos_);
 			checked_pointer_cast<RenderSphere>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderSphere>(renderable_)->Update();
+
+			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_);
+			light_->Position(p);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -694,10 +770,17 @@ namespace
 			checked_pointer_cast<RenderSphere>(renderable_)->SSAOEnabled(ssao);
 		}
 
+		void AttachLightSrc(DeferredLightSourcePtr const & light)
+		{
+			light_ = checked_pointer_cast<DeferredPointLightSource>(light);
+		}
+
 	private:
 		float4x4 model_;
 		float move_speed_;
 		float3 pos_;
+
+		DeferredPointLightSourcePtr light_;
 	};
 
 	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox, public DeferredRenderable
@@ -1009,7 +1092,7 @@ DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings 
 
 void DeferredShadingApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>());
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModelTorus>(), CreateKMeshFactory<RenderTorus>());
 	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
 	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
 
@@ -1027,6 +1110,10 @@ void DeferredShadingApp::InitObjects()
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
+
+	checked_pointer_cast<SphereObject>(point_light_src_)->AttachLightSrc(point_light_);
+	checked_pointer_cast<ConeObject>(spot_light_src_[0])->AttachLightSrc(spot_light_[0]);
+	checked_pointer_cast<ConeObject>(spot_light_src_[1])->AttachLightSrc(spot_light_[1]);
 
 	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
 	this->Proj(0.1f, 500.0f);
@@ -1074,11 +1161,11 @@ void DeferredShadingApp::InitObjects()
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
-	RenderModelPtr model = model_ml();
-	scene_objs_.resize(model->NumMeshes());
-	for (size_t i = 0; i < model->NumMeshes(); ++ i)
+	scene_model_ = model_ml();
+	scene_objs_.resize(scene_model_->NumMeshes());
+	for (size_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
-		scene_objs_[i] = MakeSharedPtr<TorusObject>(model->Mesh(i));
+		scene_objs_[i] = MakeSharedPtr<TorusObject>(scene_model_->Mesh(i));
 		scene_objs_[i]->AddToSceneManager();
 	}
 
@@ -1240,22 +1327,6 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 
 	switch (pass)
 	{
-	case 0:
-		{
-			float4x4 model_mat = checked_pointer_cast<SphereObject>(point_light_src_)->GetModelMatrix();
-			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			point_light_->Position(p);
-		}
-		for (int i = 0; i < 2; ++ i)
-		{
-			float4x4 model_mat = checked_pointer_cast<ConeObject>(spot_light_src_[i])->GetModelMatrix();
-			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_mat);
-			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, 0, 1), model_mat));
-			spot_light_[i]->Position(p);
-			spot_light_[i]->Direction(d);
-		}
-		break;
-
 	case 1:
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();

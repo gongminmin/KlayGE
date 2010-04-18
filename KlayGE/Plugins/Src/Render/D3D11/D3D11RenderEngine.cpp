@@ -282,6 +282,51 @@ namespace KlayGE
 		d3d_imm_ctx_->RSSetState(rasterizer_state_cache_.get());
 		d3d_imm_ctx_->OMSetDepthStencilState(depth_stencil_state_cache_.get(), stencil_ref_cache_);
 		d3d_imm_ctx_->OMSetBlendState(blend_state_cache_.get(), &blend_factor_cache_.r(), sample_mask_cache_);
+
+		topology_type_cache_ = RenderLayout::TT_PointList;
+		d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(topology_type_cache_));
+
+		input_layout_cache_.reset();
+		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_.get());
+	}
+
+	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, ID3D10BlobPtr const & vs_code)
+	{
+		for (BOOST_AUTO(iter, input_layout_bank_.begin()); iter != input_layout_bank_.end(); ++ iter)
+		{
+			if (iter->first.size() == elems.size())
+			{
+				bool match = true;
+				for (size_t i = 0; i < elems.size(); ++ i)
+				{
+					D3D11_INPUT_ELEMENT_DESC const & lhs = iter->first[i];
+					D3D11_INPUT_ELEMENT_DESC const & rhs = elems[i];
+					if ((std::string(lhs.SemanticName) != std::string(rhs.SemanticName))
+						|| (lhs.SemanticIndex != rhs.SemanticIndex)
+						|| (lhs.Format != rhs.Format)
+						|| (lhs.InputSlot != rhs.InputSlot)
+						|| (lhs.AlignedByteOffset != rhs.AlignedByteOffset)
+						|| (lhs.InputSlotClass != rhs.InputSlotClass)
+						|| (lhs.InstanceDataStepRate != rhs.InstanceDataStepRate))
+					{
+						match = false;
+						break;
+					}
+				}
+
+				if (match)
+				{
+					return iter->second;
+				}
+			}
+		}
+
+		ID3D11InputLayout* ia;
+		TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &ia));
+		ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
+		input_layout_bank_.push_back(std::make_pair(elems, ret));
+
+		return ret;
 	}
 
 	// 设置当前渲染目标
@@ -362,7 +407,12 @@ namespace KlayGE
 			d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
 			D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
-			d3d_imm_ctx_->IASetInputLayout(d3d_rl.InputLayout(checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode()).get());
+			ID3D11InputLayoutPtr layout = d3d_rl.InputLayout(checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode());
+			if (layout != input_layout_cache_)
+			{
+				d3d_imm_ctx_->IASetInputLayout(layout.get());
+				input_layout_cache_ = layout;
+			}
 		}
 		else
 		{
@@ -375,7 +425,11 @@ namespace KlayGE
 
 		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
-		d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(rl.TopologyType()));
+		if (topology_type_cache_ != rl.TopologyType())
+		{
+			d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(rl.TopologyType()));
+			topology_type_cache_ = rl.TopologyType();
+		}
 
 		uint32_t primCount;
 		switch (rl.TopologyType())

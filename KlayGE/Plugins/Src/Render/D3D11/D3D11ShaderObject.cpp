@@ -123,8 +123,11 @@ namespace
 			param_->Value(v);
 
 			v = MathLib::transpose(v);
-			memcpy(target_, &v[0], size_);
-			*dirty_ = true;
+			if (memcmp(target_, &v[0], size_))
+			{
+				memcpy(target_, &v[0], size_);
+				*dirty_ = true;
+			}
 		}
 
 	private:
@@ -150,9 +153,12 @@ namespace
 
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				target_[i * 4] = static_cast<DstType>(v[i]);
+				if (target_[i * 4] != static_cast<DstType>(v[i]))
+				{
+					target_[i * 4] = static_cast<DstType>(v[i]);
+					*dirty_ = true;
+				}
 			}
-			*dirty_ = true;
 		}
 
 	private:

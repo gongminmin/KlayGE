@@ -129,6 +129,8 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
+		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, ID3D10BlobPtr const & vs_code);
+
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -180,6 +182,10 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_cache_;
 		ID3D11HullShaderPtr hull_shader_cache_;
 		ID3D11DomainShaderPtr domain_shader_cache_;
+		RenderLayout::topology_type topology_type_cache_;
+		ID3D11InputLayoutPtr input_layout_cache_;
+
+		std::vector<std::pair<std::vector<D3D11_INPUT_ELEMENT_DESC>, ID3D11InputLayoutPtr> > input_layout_bank_;
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 	};
