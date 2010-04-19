@@ -116,8 +116,11 @@ namespace
 			param_->Value(v);
 
 			v = MathLib::transpose(v);
-			memcpy(target_, &v[0], size_);
-			*dirty_ = true;
+			if (memcmp(target_, &v[0], size_))
+			{
+				memcpy(target_, &v[0], size_);
+				*dirty_ = true;
+			}
 		}
 
 	private:
@@ -143,9 +146,12 @@ namespace
 
 			for (size_t i = 0; i < v.size(); ++ i)
 			{
-				target_[i * 4] = static_cast<DstType>(v[i]);
+				if (target_[i * 4] != static_cast<DstType>(v[i]))
+				{
+					target_[i * 4] = static_cast<DstType>(v[i]);
+					*dirty_ = true;
+				}
 			}
-			*dirty_ = true;
 		}
 
 	private:
@@ -583,9 +589,9 @@ namespace KlayGE
 
 				d3d_cbufs_[type].resize(so->d3d_cbufs_[type].size());
 				D3D10_BUFFER_DESC desc;
-				desc.Usage = D3D10_USAGE_DEFAULT;
+				desc.Usage = D3D10_USAGE_DYNAMIC;
 				desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
-				desc.CPUAccessFlags = 0;
+				desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 				desc.MiscFlags = 0;
 				for (size_t j = 0; j < so->d3d_cbufs_[type].size(); ++ j)
 				{
@@ -810,10 +816,10 @@ namespace KlayGE
 								}
 
 								D3D10_BUFFER_DESC buf_desc;
-								buf_desc.ByteWidth = cb_desc.Size;
-								buf_desc.Usage = D3D10_USAGE_DEFAULT;
+								buf_desc.ByteWidth = (cb_desc.Size + 15) / 16 * 16;
+								buf_desc.Usage = D3D10_USAGE_DYNAMIC;
 								buf_desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
-								buf_desc.CPUAccessFlags = 0;
+								buf_desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 								buf_desc.MiscFlags = 0;
 								ID3D10Buffer* tmp_buf;
 								TIF(d3d_device->CreateBuffer(&buf_desc, NULL, &tmp_buf));
@@ -915,13 +921,13 @@ namespace KlayGE
 
 			ret->d3d_cbufs_[i].resize(d3d_cbufs_[i].size());
 			D3D10_BUFFER_DESC desc;
-			desc.Usage = D3D10_USAGE_DEFAULT;
+			desc.Usage = D3D10_USAGE_DYNAMIC;
 			desc.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
-			desc.CPUAccessFlags = 0;
+			desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
 			desc.MiscFlags = 0;
 			for (size_t j = 0; j < d3d_cbufs_[i].size(); ++ j)
 			{
-				desc.ByteWidth = static_cast<UINT>(cbufs_[i][j].size());
+				desc.ByteWidth = static_cast<UINT>((cbufs_[i][j].size() + 15) / 16 * 16);
 				ID3D10Buffer* tmp_buf;
 				TIF(d3d_device->CreateBuffer(&desc, NULL, &tmp_buf));
 				ret->d3d_cbufs_[i][j] = MakeCOMPtr(tmp_buf);
@@ -1275,8 +1281,10 @@ namespace KlayGE
 			{
 				if (dirty_[i][j])
 				{
-					d3d_device->UpdateSubresource(d3d_cbufs_[i][j].get(), D3D10CalcSubresource(0, 0, 1), NULL, &cbufs_[i][j][0],
-						static_cast<UINT>(cbufs_[i][j].size()), static_cast<UINT>(cbufs_[i][j].size()));
+					void* mapped;
+					d3d_cbufs_[i][j]->Map(D3D10_MAP_WRITE_DISCARD, 0, &mapped);
+					memcpy(mapped, &cbufs_[i][j][0], static_cast<UINT>(cbufs_[i][j].size()));
+					d3d_cbufs_[i][j]->Unmap();
 
 					dirty_[i][j] = false;
 				}
