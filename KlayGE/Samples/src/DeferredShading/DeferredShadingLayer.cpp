@@ -16,14 +16,6 @@
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "DeferredShadingLayer.hpp"
 
@@ -247,15 +239,15 @@ namespace KlayGE
 	}
 
 
-	DeferredRenderable::DeferredRenderable()
+	DeferredRenderable::DeferredRenderable(RenderEffectPtr const & effect)
+		: effect_(effect)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		effect_ = rf.LoadEffect("GBuffer.fxml");
-
-		gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
-		gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-		shading_technique_ = effect_->TechniqueByName("Shading");
+		if (effect_)
+		{
+			gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
+			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
+			shading_technique_ = effect_->TechniqueByName("Shading");
+		}
 	}
 
 	RenderTechniquePtr const & DeferredRenderable::Pass(PassType type) const

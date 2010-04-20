@@ -25,14 +25,6 @@
 #include <ctime>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
-#include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "DeferredShadingLayer.hpp"
 #include "DeferredShading.hpp"
@@ -61,14 +53,13 @@ namespace
 		RenderEffectPtr effect_;
 	};
 
-	class RenderTorus : public KMesh
+	class RenderTorus : public KMesh, public DeferredRenderable
 	{
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name)
+			: KMesh(model, name),
+				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect())
 		{
-			effect_ = checked_pointer_cast<RenderModelTorus>(model)->Effect();
-
 			gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
 			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
 			shading_technique_ = effect_->TechniqueByName("Shading");
@@ -76,6 +67,16 @@ namespace
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
+			shininess_param_ = effect_->ParameterByName("shininess");
+			bump_map_enabled_param_ = effect_->ParameterByName("bump_map_enabled");
+			bump_tex_param_ = effect_->ParameterByName("bump_tex");
+			diffuse_map_enabled_param_ = effect_->ParameterByName("diffuse_map_enabled");
+			diffuse_tex_param_ = effect_->ParameterByName("diffuse_tex");
+			diffuse_clr_param_ = effect_->ParameterByName("diffuse_clr");
+			emit_clr_param_ = effect_->ParameterByName("emit_clr");
+			specular_level_param_ = effect_->ParameterByName("specular_level");
+			texel_to_pixel_offset_param_ = effect_->ParameterByName("texel_to_pixel_offset");
+			flipping_param_ = effect_->ParameterByName("flipping");
 		}
 
 		void BuildMeshInfo()
@@ -214,20 +215,18 @@ namespace
 		void Pass(PassType type)
 		{
 			type_ = type;
+			technique_ = DeferredRenderable::Pass(type);
 			switch (type)
 			{
 			case PT_GBuffer:
-				technique_ = gbuffer_technique_;
 				rl_ = gbuffer_rl_;
 				break;
 
 			case PT_GenShadowMap:
-				technique_ = gen_sm_technique_;
 				rl_ = gen_sm_rl_;
 				break;
 
 			case PT_Shading:
-				technique_ = shading_technique_;
 				rl_ = shading_rl_;
 				break;
 
@@ -266,28 +265,28 @@ namespace
 			{
 			case PT_GBuffer:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-				*(effect_->ParameterByName("shininess")) = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
-				*(effect_->ParameterByName("bump_map_enabled")) = !!bump_tex_;
-				*(effect_->ParameterByName("bump_tex")) = bump_tex_;
-				break;
-
-			case PT_GenShadowMap:
+				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
+				*bump_map_enabled_param_ = !!bump_tex_;
+				*bump_tex_param_ = bump_tex_;
 				break;
 
 			case PT_Shading:
-				*(effect_->ParameterByName("diffuse_map_enabled")) = !!diffuse_tex_;
-				*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
-				*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
-				*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-				*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
+				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_tex_param_ = diffuse_tex_;
+				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
+				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
+				*specular_level_param_ = mtl.specular_level;
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 					float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
 					float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 					float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-					*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
-					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+					*texel_to_pixel_offset_param_ = float4(x_offset, y_offset, 0, 0);
+					*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				}
+				break;
+
+			default:
 				break;
 			}
 		}
@@ -298,15 +297,20 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+		RenderEffectParameterPtr shininess_param_;
+		RenderEffectParameterPtr bump_map_enabled_param_;
+		RenderEffectParameterPtr bump_tex_param_;
+		RenderEffectParameterPtr diffuse_map_enabled_param_;
+		RenderEffectParameterPtr diffuse_tex_param_;
+		RenderEffectParameterPtr diffuse_clr_param_;
+		RenderEffectParameterPtr emit_clr_param_;
+		RenderEffectParameterPtr specular_level_param_;
+		RenderEffectParameterPtr texel_to_pixel_offset_param_;
+		RenderEffectParameterPtr flipping_param_;
 
 		RenderLayoutPtr gbuffer_rl_;
 		RenderLayoutPtr gen_sm_rl_;
 		RenderLayoutPtr shading_rl_;
-
-		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
 
 		TexturePtr diffuse_tex_;
 		TexturePtr bump_tex_;
@@ -346,7 +350,8 @@ namespace
 	{
 	public:
 		RenderCone(float cone_radius, float cone_height, float3 const & clr)
-			: RenderableHelper(L"Cone")
+			: RenderableHelper(L"Cone"),
+				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -538,7 +543,8 @@ namespace
 	{
 	public:
 		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name)
+			: KMesh(model, name),
+				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
 			technique_ = gbuffer_technique_;
 
@@ -787,6 +793,7 @@ namespace
 	{
 	public:
 		RenderableDeferredHDRSkyBox()
+			: DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
 			gbuffer_technique_ = effect_->TechniqueByName("GBufferSkyBoxTech");
 			shading_technique_ = effect_->TechniqueByName("ShadingSkyBox");

@@ -336,7 +336,7 @@ namespace KlayGE
 	class DeferredRenderable
 	{
 	public:
-		DeferredRenderable();
+		explicit DeferredRenderable(RenderEffectPtr const & effect);
 		virtual ~DeferredRenderable()
 		{
 		}
