@@ -2164,7 +2164,11 @@ namespace KlayGE
 
 		ret->rasterizer_state_obj_ = rasterizer_state_obj_;
 		ret->depth_stencil_state_obj_ = depth_stencil_state_obj_;
+		ret->front_stencil_ref_ = front_stencil_ref_;
+		ret->back_stencil_ref_ = back_stencil_ref_;
 		ret->blend_state_obj_ = blend_state_obj_;
+		ret->blend_factor_ = blend_factor_;
+		ret->sample_mask_ = sample_mask_;
 		ret->shader_obj_ = shader_obj_->Clone(effect);
 
 		ret->is_validate_ = is_validate_;

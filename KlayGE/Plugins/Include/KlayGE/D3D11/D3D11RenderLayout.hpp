@@ -20,6 +20,7 @@
 #include <vector>
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
+#include <D3D11Shader.h>
 
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
@@ -31,7 +32,7 @@ namespace KlayGE
 	public:
 		D3D11RenderLayout();
 
-		ID3D11InputLayoutPtr const & InputLayout(ID3D10BlobPtr const & vs_code) const;
+		ID3D11InputLayoutPtr const & InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code) const;
 
 	private:
 		typedef std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems_type;

@@ -336,7 +336,11 @@ namespace KlayGE
 	bool OCTree::AABBVisible(Box const & box)
 	{
 		// Frustum VS node
-		bool visible = this->BBVisible(0, box.Center(), box.HalfSize());
+		bool visible = true;
+		if (!octree_.empty())
+		{
+			visible = this->BBVisible(0, box.Center(), box.HalfSize());
+		}
 		if (visible)
 		{
 			// Frustum VS AABB

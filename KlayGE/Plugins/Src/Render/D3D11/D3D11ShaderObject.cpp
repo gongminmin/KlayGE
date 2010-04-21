@@ -37,7 +37,6 @@
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
 #include <d3dx11.h>
-#include <D3D11Shader.h>
 #include <D3DCompiler.h>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -736,6 +735,7 @@ namespace KlayGE
 				case ST_VertexShader:
 					vertex_shader_ = so->vertex_shader_;
 					vs_code_ = so->vs_code_;
+					vs_signature_ = so->vs_signature_;
 					geometry_shader_ = so->geometry_shader_;
 					break;
 
@@ -1174,6 +1174,15 @@ namespace KlayGE
 								}
 							}
 
+							if (ST_VertexShader == type)
+							{
+								vs_signature_.resize(desc.InputParameters);
+								for (uint32_t i = 0; i < desc.InputParameters; ++ i)
+								{
+									reflection->GetInputParameterDesc(i, &vs_signature_[i]);
+								}
+							}
+
 							reflection->Release();
 						}
 					}
@@ -1200,6 +1209,7 @@ namespace KlayGE
 		ret->hull_shader_ = hull_shader_;
 		ret->domain_shader_ = domain_shader_;
 		ret->vs_code_ = vs_code_;
+		ret->vs_signature_ = vs_signature_;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
 			ret->samplers_[i].resize(samplers_[i].size(), NULL);

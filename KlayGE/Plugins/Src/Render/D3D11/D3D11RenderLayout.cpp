@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(ID3D10BlobPtr const & vs_code) const
+	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code) const
 	{
 		if (dirty_decl_)
 		{
@@ -55,7 +55,7 @@ namespace KlayGE
 			}
 
 			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			input_layout_ = re.CreateD3D11InputLayout(elems, vs_code);
+			input_layout_ = re.CreateD3D11InputLayout(elems, signature, vs_code);
 
 			dirty_decl_ = false;
 		}

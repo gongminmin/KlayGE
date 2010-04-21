@@ -21,6 +21,8 @@
 
 #include <boost/function.hpp>
 
+#include <D3D11Shader.h>
+
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
 namespace KlayGE
@@ -64,6 +66,11 @@ namespace KlayGE
 			return vs_code_;
 		}
 
+		std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & VSSignature() const
+		{
+			return vs_signature_;
+		}
+
 	private:
 		struct parameter_bind_t
 		{
@@ -94,6 +101,8 @@ namespace KlayGE
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
 		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;
 		boost::array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> d3d_cbufs_;
+
+		std::vector<D3D11_SIGNATURE_PARAMETER_DESC> vs_signature_;
 	};
 
 	typedef boost::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;

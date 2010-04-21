@@ -290,16 +290,16 @@ namespace KlayGE
 		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_.get());
 	}
 
-	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, ID3D10BlobPtr const & vs_code)
+	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code)
 	{
 		for (BOOST_AUTO(iter, input_layout_bank_.begin()); iter != input_layout_bank_.end(); ++ iter)
 		{
-			if (iter->first.size() == elems.size())
+			if ((iter->first.input_elems.size() == elems.size()) && (iter->first.signature.size() == signature.size()))
 			{
 				bool match = true;
 				for (size_t i = 0; i < elems.size(); ++ i)
 				{
-					D3D11_INPUT_ELEMENT_DESC const & lhs = iter->first[i];
+					D3D11_INPUT_ELEMENT_DESC const & lhs = iter->first.input_elems[i];
 					D3D11_INPUT_ELEMENT_DESC const & rhs = elems[i];
 					if ((std::string(lhs.SemanticName) != std::string(rhs.SemanticName))
 						|| (lhs.SemanticIndex != rhs.SemanticIndex)
@@ -313,6 +313,26 @@ namespace KlayGE
 						break;
 					}
 				}
+				if (match)
+				{
+					for (size_t i = 0; i < signature.size(); ++ i)
+					{
+						D3D11_SIGNATURE_PARAMETER_DESC const & lhs = iter->first.signature[i];
+						D3D11_SIGNATURE_PARAMETER_DESC const & rhs = signature[i];
+						if ((std::string(lhs.SemanticName) != std::string(rhs.SemanticName))
+							|| (lhs.SemanticIndex != rhs.SemanticIndex)
+							|| (lhs.Register != rhs.Register)
+							|| (lhs.SystemValueType != rhs.SystemValueType)
+							|| (lhs.ComponentType != rhs.ComponentType)
+							|| (lhs.Mask != rhs.Mask)
+							|| (lhs.ReadWriteMask != rhs.ReadWriteMask)
+							|| (lhs.Stream != rhs.Stream))
+						{
+							match = false;
+							break;
+						}
+					}
+				}
 
 				if (match)
 				{
@@ -324,7 +344,8 @@ namespace KlayGE
 		ID3D11InputLayout* ia;
 		TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &ia));
 		ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
-		input_layout_bank_.push_back(std::make_pair(elems, ret));
+
+		input_layout_bank_.push_back(std::make_pair(InputElementTag(elems, signature), ret));
 
 		return ret;
 	}
@@ -407,7 +428,8 @@ namespace KlayGE
 			d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
 			D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
-			ID3D11InputLayoutPtr layout = d3d_rl.InputLayout(checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject())->VSCode());
+			D3D11ShaderObjectPtr shader = checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject());
+			ID3D11InputLayoutPtr layout = d3d_rl.InputLayout(shader->VSSignature(), shader->VSCode());
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout.get());
@@ -420,6 +442,7 @@ namespace KlayGE
 			UINT stride = 0;
 			UINT offset = 0;
 			d3d_imm_ctx_->IASetVertexBuffers(0, 1, null_vbs, &stride, &offset);
+			input_layout_cache_.reset();
 			d3d_imm_ctx_->IASetInputLayout(NULL);
 		}
 

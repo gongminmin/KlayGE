@@ -24,6 +24,7 @@
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
 #include <d3dx11.h>
+#include <D3D11Shader.h>
 
 #include <vector>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -129,7 +130,7 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, ID3D10BlobPtr const & vs_code);
+		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code);
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -185,7 +186,21 @@ namespace KlayGE
 		RenderLayout::topology_type topology_type_cache_;
 		ID3D11InputLayoutPtr input_layout_cache_;
 
-		std::vector<std::pair<std::vector<D3D11_INPUT_ELEMENT_DESC>, ID3D11InputLayoutPtr> > input_layout_bank_;
+		struct InputElementTag
+		{
+			std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems;
+			std::vector<D3D11_SIGNATURE_PARAMETER_DESC> signature;
+
+			InputElementTag()
+			{
+			}
+			InputElementTag(std::vector<D3D11_INPUT_ELEMENT_DESC> const & ie,
+					std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & sig)
+				: input_elems(ie), signature(sig)
+			{
+			}
+		};
+		std::vector<std::pair<InputElementTag, ID3D11InputLayoutPtr> > input_layout_bank_;
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 	};
