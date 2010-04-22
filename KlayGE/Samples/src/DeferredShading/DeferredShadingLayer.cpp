@@ -382,13 +382,17 @@ namespace KlayGE
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		technique_ = rf.LoadEffect("DeferredShading.fxml")->TechniqueByName("DeferredShadingPoint");
+		RenderEffectPtr effect = rf.LoadEffect("DeferredShading.fxml");
 
-		technique_lights_[LT_Ambient] = technique_->Effect().TechniqueByName("DeferredShadingAmbient");
-		technique_lights_[LT_Directional] = technique_->Effect().TechniqueByName("DeferredShadingDirectional");
-		technique_lights_[LT_Point] = technique_->Effect().TechniqueByName("DeferredShadingPoint");
-		technique_lights_[LT_Spot] = technique_->Effect().TechniqueByName("DeferredShadingSpot");
-		technique_light_depth_only_ = technique_->Effect().TechniqueByName("DeferredShadingLightDepthOnly");
+		technique_lights_[LT_Ambient] = effect->TechniqueByName("DeferredShadingAmbient");
+		technique_lights_[LT_Directional] = effect->TechniqueByName("DeferredShadingDirectional");
+		technique_lights_[LT_Point] = effect->TechniqueByName("DeferredShadingPoint");
+		technique_lights_[LT_Spot] = effect->TechniqueByName("DeferredShadingSpot");
+		technique_light_depth_only_ = effect->TechniqueByName("DeferredShadingLightDepthOnly");
+		technique_light_stencil_eiv_ = effect->TechniqueByName("DeferredShadingLightStencilEIV");
+		technique_light_stencil_eov_ = effect->TechniqueByName("DeferredShadingLightStencilEOV");
+
+		technique_ = technique_light_depth_only_;
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
@@ -513,7 +517,7 @@ namespace KlayGE
 		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
+		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
 		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
@@ -600,12 +604,14 @@ namespace KlayGE
 				*texel_to_pixel_offset_param_ = texel_to_pixel;
 
 				re.BindFrameBuffer(g_buffer_);
-				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 0), 1.0f, 0);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
 				return App3DFramework::URV_Need_Flush;
 			}
 			else
 			{
 				// Light depth only
+
+				float4x4 vp = view_ * proj_;
 
 				re.BindFrameBuffer(lighting_buffer_);
 
@@ -615,7 +621,6 @@ namespace KlayGE
 					DeferredLightSourcePtr const & light = lights_[i];
 					if (light->Enabled())
 					{
-						float4x4 vp = view_ * proj_;
 						int type = light->Type();
 						int32_t attr = light->Attrib();
 						switch (type)
@@ -858,6 +863,7 @@ namespace KlayGE
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0L);
 
 					technique_ = technique_lights_[type];
 
@@ -868,6 +874,46 @@ namespace KlayGE
 					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
 					{
 						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
+					}
+
+					if ((LT_Point == type) || (LT_Spot == type))
+					{
+						Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+						float3 eye = camera.EyePos();
+
+						bool eye_in_volume = false;
+					
+						if (LT_Spot == type)
+						{
+							float3 v = MathLib::normalize(eye - p);
+							float cos_direction = MathLib::dot(v, d);
+							if (light->CosOuterInner().x() < cos_direction * 1.01f)
+							{
+								Plane plane = MathLib::from_point_normal(p, d);
+								float dist = MathLib::dot_coord(plane, eye);
+								if (dist < 100.0f)
+								{
+									eye_in_volume = true;
+								}
+							}
+						}
+						else
+						{
+							float3 v = eye - p;
+							if ((abs(v.x()) < 100.0f) && (abs(v.y()) < 100.0f) && (abs(v.z()) < 100.0f))
+							{
+								eye_in_volume = true;
+							}
+						}
+					
+						if (eye_in_volume)
+						{
+							re.Render(*technique_light_stencil_eiv_, *rl_);
+						}
+						else
+						{
+							re.Render(*technique_light_stencil_eov_, *rl_);
+						}
 					}
 
 					re.Render(*technique_, *rl_);
