@@ -126,7 +126,7 @@ namespace
 		{
 			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
 		{
@@ -221,7 +221,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0));
+	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
 
 	ascii_arts_->InputPin(0, color_tex_);
 

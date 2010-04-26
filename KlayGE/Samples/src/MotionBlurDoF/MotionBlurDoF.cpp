@@ -487,7 +487,7 @@ namespace
 		{
 			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
 		{
@@ -628,7 +628,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
 	clr_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 0));

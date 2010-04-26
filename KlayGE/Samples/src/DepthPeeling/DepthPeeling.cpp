@@ -234,7 +234,7 @@ void DepthPeelingApp::InitObjects()
 
 	for (size_t i = 0; i < oc_queries_.size(); ++ i)
 	{
-		oc_queries_[i] = rf.MakeOcclusionQuery();
+		oc_queries_[i] = rf.MakeConditionalRender();
 	}
 
 	fpcController_.Scalers(0.05f, 0.01f);
@@ -303,7 +303,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, depth_texs_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_[1] = rf.Make2DRenderView(*depth_texs_[1], 0, 0);
 
-	peeled_depth_view_ = rf.MakeDepthStencilRenderView(width, height, EF_D16, 1, 0);
+	peeled_depth_view_ = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
@@ -414,7 +414,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 					oc_queries_.back()->End();
 					for (size_t j = 0; j < oc_queries_.size(); ++ j)
 					{
-						if (checked_pointer_cast<OcclusionQuery>(oc_queries_[j])->SamplesPassed() < 1)
+						if (!checked_pointer_cast<ConditionalRender>(oc_queries_[j])->AnySamplesPassed())
 						{
 							finished = true;
 						}

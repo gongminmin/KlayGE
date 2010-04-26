@@ -395,7 +395,7 @@ namespace KlayGE
 		technique_ = technique_light_depth_only_;
 
 		sm_buffer_ = rf.MakeFrameBuffer();
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
 		try
 		{
 			sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -517,7 +517,7 @@ namespace KlayGE
 		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-		RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
+		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
 		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));

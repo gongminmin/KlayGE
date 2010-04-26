@@ -1065,7 +1065,7 @@ namespace
 		{
 			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.MakeDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
 		}
 		catch (...)
 		{
