@@ -110,7 +110,17 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr MakeCubeRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
@@ -120,13 +130,38 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/,
+		RenderViewPtr Make2DDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/,
 			uint32_t /*sample_count*/, uint32_t /*sample_quality*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr MakeDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		RenderViewPtr Make1DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t slice, int level)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr MakeCubeDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		{
+			return RenderView::NullObject();
+		}
+
+		RenderViewPtr Make3DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}

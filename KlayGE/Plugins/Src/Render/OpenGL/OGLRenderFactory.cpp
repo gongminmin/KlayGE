@@ -108,9 +108,19 @@ namespace KlayGE
 		return MakeSharedPtr<OGLTextureCubeRenderView>(texture, array_index, face, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int array_index, uint32_t slice, int level)
 	{
 		return MakeSharedPtr<OGLTexture3DRenderView>(texture, array_index, slice, level);
+	}
+
+	RenderViewPtr OGLRenderFactory::MakeCubeRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+	{
+		return RenderViewPtr();
+	}
+
+	RenderViewPtr OGLRenderFactory::Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	{
+		return RenderViewPtr();
 	}
 
 	RenderViewPtr OGLRenderFactory::MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf)
@@ -118,14 +128,39 @@ namespace KlayGE
 		return MakeSharedPtr<OGLGraphicsBufferRenderView>(gbuffer, width, height, pf);
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
+	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
 	{
 		return MakeSharedPtr<OGLDepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr OGLRenderFactory::MakeDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLRenderFactory::Make1DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	{
+		return this->Make2DDepthStencilRenderView(texture, array_index, level);
+	}
+
+	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, int level)
 	{
 		return MakeSharedPtr<OGLDepthStencilRenderView>(texture, array_index, level);
+	}
+	
+	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	{
+		return RenderViewPtr();
+	}
+
+	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
+	{
+		return RenderViewPtr();
+	}
+
+	RenderViewPtr OGLRenderFactory::MakeCubeDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+	{
+		return RenderViewPtr();
+	}
+
+	RenderViewPtr OGLRenderFactory::Make3DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	{
+		return RenderViewPtr();
 	}
 
 	ShaderObjectPtr OGLRenderFactory::MakeShaderObject()

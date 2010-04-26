@@ -313,7 +313,7 @@ namespace KlayGE
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
 
-				RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+				RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
 					stereo_frame_buffers_[i]->Attached(FrameBuffer::ATT_DepthStencil)->Format(),
 					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality());
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -386,7 +386,7 @@ namespace KlayGE
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
 
-				RenderViewPtr ds_view = rf.MakeDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+				RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
 					render_settings_.depth_stencil_fmt, render_settings_.sample_count, render_settings_.sample_quality);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 			}

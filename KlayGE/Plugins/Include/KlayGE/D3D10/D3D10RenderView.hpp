@@ -45,8 +45,8 @@ namespace KlayGE
 	class D3D10RenderTargetRenderView : public D3D10RenderView
 	{
 	public:
-		D3D10RenderTargetRenderView(Texture& texture_1d_2d, int array_index, int level);
-		D3D10RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
+		D3D10RenderTargetRenderView(Texture& texture_1d_2d_cube, int array_index, int level);
+		D3D10RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
 		D3D10RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 		D3D10RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf);
 		D3D10RenderTargetRenderView(ID3D10RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf);
@@ -72,7 +72,8 @@ namespace KlayGE
 	class D3D10DepthStencilRenderView : public D3D10RenderView
 	{
 	public:
-		D3D10DepthStencilRenderView(Texture& texture_1d_2d, int array_index, int level);
+		D3D10DepthStencilRenderView(Texture& texture_1d_2d_cube, int array_index, int level);
+		D3D10DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
 		D3D10DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 		D3D10DepthStencilRenderView(ID3D10DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf);
 		D3D10DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);

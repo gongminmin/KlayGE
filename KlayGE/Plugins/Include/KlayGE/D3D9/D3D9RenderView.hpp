@@ -175,6 +175,7 @@ namespace KlayGE
 		D3D9DepthStencilRenderView(uint32_t width, uint32_t height,
 			ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
 		D3D9DepthStencilRenderView(Texture& texture, int array_index, int level);
+		D3D9DepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

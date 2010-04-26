@@ -38,78 +38,108 @@ namespace KlayGE
 	}
 
 
-	D3D10RenderTargetRenderView::D3D10RenderTargetRenderView(Texture& texture_1d_2d, int array_index, int level)
+	D3D10RenderTargetRenderView::D3D10RenderTargetRenderView(Texture& texture, int array_index, int level)
 	{
-		BOOST_ASSERT((Texture::TT_1D == texture_1d_2d.Type()) || (Texture::TT_2D == texture_1d_2d.Type()));
-		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(texture.AccessHint() & EAH_GPU_Write);
 
 		D3D10_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D10Mapping::MappingFormat(texture_1d_2d.Format());
-		if (Texture::TT_1D == texture_1d_2d.Type())
-		{
-			if (texture_1d_2d.ArraySize() > 1)
-			{
-				desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE1DARRAY;
-				desc.Texture1DArray.MipSlice = level;
-				desc.Texture1DArray.ArraySize = 1;
-				desc.Texture1DArray.FirstArraySlice = array_index;
-			}
-			else
-			{
-				desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE1D;
-				desc.Texture1D.MipSlice = level;
-			}
+		desc.Format = D3D10Mapping::MappingFormat(texture.Format());
 
-			ID3D10RenderTargetView* rt_view;
-			TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10Texture1D*>(&texture_1d_2d)->D3DTexture().get(), &desc, &rt_view));
-			rt_view_ = MakeCOMPtr(rt_view);
-		}
-		else
+		switch (texture.Type())
 		{
-			if (texture_1d_2d.SampleCount() > 1)
+		case Texture::TT_1D:
 			{
-				if (texture_1d_2d.ArraySize() > 1)
+				if (texture.ArraySize() > 1)
+				{
+					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE1DARRAY;
+					desc.Texture1DArray.MipSlice = level;
+					desc.Texture1DArray.ArraySize = 1;
+					desc.Texture1DArray.FirstArraySlice = array_index;
+				}
+				else
+				{
+					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE1D;
+					desc.Texture1D.MipSlice = level;
+				}
+
+				ID3D10RenderTargetView* rt_view;
+				TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10Texture1D*>(&texture)->D3DTexture().get(), &desc, &rt_view));
+				rt_view_ = MakeCOMPtr(rt_view);
+			}
+			break;
+
+		case Texture::TT_2D:
+			{
+				if (texture.SampleCount() > 1)
+				{
+					if (texture.ArraySize() > 1)
+					{
+						desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMSARRAY;
+					}
+					else
+					{
+						desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMS;
+					}
+				}
+				else
+				{
+					if (texture.ArraySize() > 1)
+					{
+						desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DARRAY;
+					}
+					else
+					{
+						desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
+					}
+				}
+				if (texture.ArraySize() > 1)
+				{
+					desc.Texture2DArray.MipSlice = level;
+					desc.Texture2DArray.ArraySize = 1;
+					desc.Texture2DArray.FirstArraySlice = array_index;
+				}
+				else
+				{
+					desc.Texture2D.MipSlice = level;
+				}
+
+				ID3D10RenderTargetView* rt_view;
+				TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10Texture2D*>(&texture)->D3DTexture().get(), &desc, &rt_view));
+				rt_view_ = MakeCOMPtr(rt_view);
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				if (texture.SampleCount() > 1)
 				{
 					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMSARRAY;
 				}
 				else
 				{
-					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DMS;
-				}
-			}
-			else
-			{
-				if (texture_1d_2d.ArraySize() > 1)
-				{
 					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2DARRAY;
 				}
-				else
-				{
-					desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
-				}
-			}
-			if (texture_1d_2d.ArraySize() > 1)
-			{
 				desc.Texture2DArray.MipSlice = level;
-				desc.Texture2DArray.ArraySize = 1;
-				desc.Texture2DArray.FirstArraySlice = array_index;
-			}
-			else
-			{
-				desc.Texture2D.MipSlice = level;
-			}
+				desc.Texture2DArray.ArraySize = 6;
+				desc.Texture2DArray.FirstArraySlice = array_index * 6;
 
-			ID3D10RenderTargetView* rt_view;
-			TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10Texture2D*>(&texture_1d_2d)->D3DTexture().get(), &desc, &rt_view));
-			rt_view_ = MakeCOMPtr(rt_view);
+				ID3D10RenderTargetView* rt_view;
+				TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10TextureCube*>(&texture)->D3DTexture().get(), &desc, &rt_view));
+				rt_view_ = MakeCOMPtr(rt_view);
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 
-		width_ = texture_1d_2d.Width(0);
-		height_ = texture_1d_2d.Height(0);
-		pf_ = texture_1d_2d.Format();
+		width_ = texture.Width(0);
+		height_ = texture.Height(0);
+		pf_ = texture.Format();
 	}
 
-	D3D10RenderTargetRenderView::D3D10RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level)
+	D3D10RenderTargetRenderView::D3D10RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
 	{
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d.AccessHint() & EAH_GPU_Write);
@@ -120,8 +150,8 @@ namespace KlayGE
 		desc.Format = D3D10Mapping::MappingFormat(texture_3d.Format());
 		desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
-		desc.Texture3D.FirstWSlice = slice;
-		desc.Texture3D.WSize = 1;
+		desc.Texture3D.FirstWSlice = first_slice;
+		desc.Texture3D.WSize = num_slices;
 
 		ID3D10RenderTargetView* rt_view;
 		TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D10Texture3D*>(&texture_3d)->D3DTexture().get(), &desc, &rt_view));
@@ -216,76 +246,135 @@ namespace KlayGE
 	}
 
 
-	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_1d_2d, int array_index, int level)
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture, int array_index, int level)
 	{
-		BOOST_ASSERT((Texture::TT_1D == texture_1d_2d.Type()) || (Texture::TT_2D == texture_1d_2d.Type()));
-		BOOST_ASSERT(texture_1d_2d.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(texture.AccessHint() & EAH_GPU_Write);
 
 		D3D10_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = D3D10Mapping::MappingFormat(texture_1d_2d.Format());
-		if (Texture::TT_1D == texture_1d_2d.Type())
+		desc.Format = D3D10Mapping::MappingFormat(texture.Format());
+		switch (texture.Type())
 		{
-			if (texture_1d_2d.ArraySize() > 1)
+		case Texture::TT_1D:
 			{
-				desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE1DARRAY;
-				desc.Texture1DArray.MipSlice = level;
-				desc.Texture1DArray.ArraySize = 1;
-				desc.Texture1DArray.FirstArraySlice = array_index;
-			}
-			else
-			{
-				desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE1D;
-				desc.Texture1D.MipSlice = level;
-			}
+				if (texture.ArraySize() > 1)
+				{
+					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE1DARRAY;
+					desc.Texture1DArray.MipSlice = level;
+					desc.Texture1DArray.ArraySize = 1;
+					desc.Texture1DArray.FirstArraySlice = array_index;
+				}
+				else
+				{
+					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE1D;
+					desc.Texture1D.MipSlice = level;
+				}
 
-			ID3D10DepthStencilView* ds_view;
-			TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10Texture1D*>(&texture_1d_2d)->D3DTexture().get(), &desc, &ds_view));
-			ds_view_ = MakeCOMPtr(ds_view);
-		}
-		else
-		{
-			if (texture_1d_2d.SampleCount() > 1)
+				ID3D10DepthStencilView* ds_view;
+				TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10Texture1D*>(&texture)->D3DTexture().get(), &desc, &ds_view));
+				ds_view_ = MakeCOMPtr(ds_view);
+			}
+			break;
+
+		case Texture::TT_2D:
 			{
-				if (texture_1d_2d.ArraySize() > 1)
+				if (texture.SampleCount() > 1)
+				{
+					if (texture.ArraySize() > 1)
+					{
+						desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMSARRAY;
+					}
+					else
+					{
+						desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
+					}
+				}
+				else
+				{
+					if (texture.ArraySize() > 1)
+					{
+						desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DARRAY;
+					}
+					else
+					{
+						desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+					}
+				}
+				if (texture.ArraySize() > 1)
+				{
+					desc.Texture2DArray.MipSlice = level;
+					desc.Texture2DArray.ArraySize = 1;
+					desc.Texture2DArray.FirstArraySlice = array_index;
+				}
+				else
+				{
+					desc.Texture2D.MipSlice = level;
+				}
+
+				ID3D10DepthStencilView* ds_view;
+				TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10Texture2D*>(&texture)->D3DTexture().get(), &desc, &ds_view));
+				ds_view_ = MakeCOMPtr(ds_view);
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				if (texture.SampleCount() > 1)
 				{
 					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMSARRAY;
 				}
 				else
 				{
-					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMS;
-				}
-			}
-			else
-			{
-				if (texture_1d_2d.ArraySize() > 1)
-				{
 					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DARRAY;
 				}
-				else
-				{
-					desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
-				}
-			}
-			if (texture_1d_2d.ArraySize() > 1)
-			{
 				desc.Texture2DArray.MipSlice = level;
-				desc.Texture2DArray.ArraySize = 1;
-				desc.Texture2DArray.FirstArraySlice = array_index;
-			}
-			else
-			{
-				desc.Texture2D.MipSlice = level;
-			}
+				desc.Texture2DArray.ArraySize = 6;
+				desc.Texture2DArray.FirstArraySlice = array_index * 6;
 
-			ID3D10DepthStencilView* ds_view;
-			TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10Texture2D*>(&texture_1d_2d)->D3DTexture().get(), &desc, &ds_view));
-			ds_view_ = MakeCOMPtr(ds_view);
+				ID3D10DepthStencilView* ds_view;
+				TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10TextureCube*>(&texture)->D3DTexture().get(), &desc, &ds_view));
+				ds_view_ = MakeCOMPtr(ds_view);
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 
-		width_ = texture_1d_2d.Width(0);
-		height_ = texture_1d_2d.Height(0);
-		pf_ = texture_1d_2d.Format();
+		width_ = texture.Width(0);
+		height_ = texture.Height(0);
+		pf_ = texture.Format();
 	}
+
+	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+	{
+		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
+		BOOST_ASSERT(texture_3d.AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
+		D3D10_DEPTH_STENCIL_VIEW_DESC desc;
+		desc.Format = D3D10Mapping::MappingFormat(texture_3d.Format());
+		if (texture_3d.SampleCount() > 1)
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DMSARRAY;
+		}
+		else
+		{
+			desc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2DARRAY;
+		}
+		desc.Texture2DArray.MipSlice = level;
+		desc.Texture2DArray.ArraySize = num_slices;
+		desc.Texture2DArray.FirstArraySlice = first_slice;
+
+		ID3D10DepthStencilView* ds_view;
+		TIF(d3d_device_->CreateDepthStencilView(checked_cast<D3D10Texture3D*>(&texture_3d)->D3DTexture().get(), &desc, &ds_view));
+		ds_view_ = MakeCOMPtr(ds_view);
+
+		width_ = texture_3d.Width(0);
+		height_ = texture_3d.Height(0);
+		pf_ = texture_3d.Format();
+    }
 
 	D3D10DepthStencilRenderView::D3D10DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
 	{
