@@ -95,6 +95,12 @@ namespace KlayGE
 		vertex_shader_cache_.reset();
 		pixel_shader_cache_.reset();
 		geometry_shader_cache_.reset();
+		compute_shader_cache_.reset();
+		hull_shader_cache_.reset();
+		domain_shader_cache_.reset();
+		input_layout_cache_.reset();
+
+		input_layout_bank_.clear();
 
 		d3d_imm_ctx_->ClearState();
 		d3d_imm_ctx_.reset();
@@ -266,6 +272,9 @@ namespace KlayGE
 		vertex_shader_cache_.reset();
 		pixel_shader_cache_.reset();
 		geometry_shader_cache_.reset();
+		compute_shader_cache_.reset();
+		hull_shader_cache_.reset();
+		domain_shader_cache_.reset();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);

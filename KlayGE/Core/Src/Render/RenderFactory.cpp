@@ -151,7 +151,7 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t slice, int level)
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}

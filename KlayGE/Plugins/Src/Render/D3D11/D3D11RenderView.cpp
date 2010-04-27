@@ -453,6 +453,8 @@ namespace KlayGE
 		TIF(d3d_device_->CreateDepthStencilView(depth_tex, &desc, &ds_view));
 		ds_view_ = MakeCOMPtr(ds_view);
 
+		depth_tex->Release();
+
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
