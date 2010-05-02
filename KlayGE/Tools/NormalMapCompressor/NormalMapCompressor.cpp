@@ -37,10 +37,10 @@ namespace
 
 		uint8_t const * normals = static_cast<uint8_t const *>(in_data.data);
 
-		new_data_block.resize(width * height);
+		new_data.row_pitch = (width + 3) / 4 * 16;
+		new_data.slice_pitch = new_data.row_pitch * (height + 3) / 4;
+		new_data_block.resize(new_data.slice_pitch);
 		new_data.data = &new_data_block[0];
-		new_data.row_pitch = width;
-		new_data.slice_pitch = width * height;
 
 		uint8_t* com_normals = &new_data_block[0];
 
@@ -122,15 +122,21 @@ namespace
 
 				for (int y = 0; y < 4; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					if (y_base + y < height)
 					{
-						memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+						for (int x = 0; x < 4; ++ x)
+						{
+							if (x_base + x < width)
+							{
+								memcpy(&normals[((y_base + y) * width + (x_base + x)) * 4], &argb[y * 4 + x], sizeof(uint32_t));
+							}
+						}
 					}
 				}
 			}
 		}
 
-		restored_data_block.resize(restored_data.slice_pitch);
+		restored_data_block.resize(width * height * 4);
 		restored_data.row_pitch = width * 4;
 		restored_data.slice_pitch = width * height * 4;
 		restored_data.data = &restored_data_block[0];

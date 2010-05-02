@@ -61,16 +61,18 @@ namespace KlayGE
 			{
 				if (!(node_data.leaf_children_dim & 0x80000000UL))
 				{
-					typename T::value_type const old_off = query_offsets[node_data.leaf_children_dim & 0xF];
-					typename T::value_type const new_off = query_position[node_data.leaf_children_dim & 0xF] - node_data.cut_val;
+					int const dim = node_data.leaf_children_dim & 0xF;
+					typename T::value_type const old_off = query_offsets[dim];
+					typename T::value_type const new_off = query_position[dim] - node_data.cut_val;
 					int const branch = new_off < 0 ? 0 : 1;
-					node_pool[(node_data.children_dim >> 4) + branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
+					int const children = node_data.leaf_children_dim >> 4;
+					node_pool[children + branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
 					rd += new_off * new_off - old_off * old_off;
 					if (rd < neighbors.back().second)
 					{
-		  				query_offsets[node_data.leaf_children_dim & 0xF] = new_off;
-		  				node_pool[(node_data.leaf_children_dim >> 4) + !branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
-		  				query_offsets[node_data.leaf_children_dim & 0xF] = old_off;
+		  				query_offsets[dim] = new_off;
+		  				node_pool[children + !branch].query_node(node_pool, points, rd, neighbors, num_neighbors, query_position, query_offsets);
+		  				query_offsets[dim] = old_off;
 					}
 				}
   				else
@@ -101,16 +103,18 @@ namespace KlayGE
 			{
 				if (!(node_data.leaf_children_dim & 0x80000000UL))
 				{
-					typename T::value_type const old_off = query_offsets[node_data.leaf_children_dim & 0xF];
-					typename T::value_type const new_off = query_position[node_data.leaf_children_dim & 0xF] - node_data.cut_val;
+					int const dim = node_data.leaf_children_dim & 0xF;
+					typename T::value_type const old_off = query_offsets[dim];
+					typename T::value_type const new_off = query_position[dim] - node_data.cut_val;
 					int const branch = new_off < 0 ? 0 : 1;
-					node_pool[(node_data.leaf_children_dim >> 4) + branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
+					int const children = node_data.leaf_children_dim >> 4;
+					node_pool[children + branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
 					rd += new_off * new_off - old_off * old_off;
 					if (rd < neighbor.second)
 					{
-		  				query_offsets[node_data.leaf_children_dim & 0xF] = new_off;
-		  				node_pool[(node_data.leaf_children_dim >> 4) + !branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
-		  				query_offsets[node_data.leaf_children_dim & 0xF] = old_off;
+		  				query_offsets[dim] = new_off;
+		  				node_pool[children + !branch].query_node(node_pool, points, rd, neighbor, query_position, query_offsets);
+		  				query_offsets[dim] = old_off;
 					}
 				}
   				else

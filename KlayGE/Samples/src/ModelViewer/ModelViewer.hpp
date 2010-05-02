@@ -1,5 +1,5 @@
-#ifndef _SKINNEDMESH_HPP
-#define _SKINNEDMESH_HPP
+#ifndef _MODELVIEWER_HPP
+#define _MODELVIEWER_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -61,4 +61,4 @@ private:
 	int id_line_mode_;
 };
 
-#endif		// _SKINNEDMESH_HPP
+#endif		// _MODELVIEWER_HPP

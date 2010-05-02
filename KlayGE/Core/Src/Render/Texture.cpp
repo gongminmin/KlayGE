@@ -1479,7 +1479,7 @@ namespace KlayGE
 						{
 							if (desc.flags & DDSD_PITCH)
 							{
-								init_data[index].row_pitch = static_cast<uint32_t>(desc.pitch);
+								init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
 							}
 							else
 							{
@@ -1538,7 +1538,7 @@ namespace KlayGE
 						{
 							if (desc.flags & DDSD_PITCH)
 							{
-								init_data[index].row_pitch = static_cast<uint32_t>(desc.pitch);
+								init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
 								init_data[index].slice_pitch = init_data[index].row_pitch * (the_height + 3) / 4 * 4;
 							}
 							else
@@ -1600,7 +1600,7 @@ namespace KlayGE
 							{
 								if (desc.flags & DDSD_PITCH)
 								{
-									init_data[index].row_pitch = static_cast<uint32_t>(desc.pitch);
+									init_data[index].row_pitch = static_cast<uint32_t>(((desc.pitch >> level) + 3) / 4 * 4);
 								}
 								else
 								{

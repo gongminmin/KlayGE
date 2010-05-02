@@ -6,6 +6,7 @@
 #include <KlayGE/CpuInfo.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/LZMACodec.hpp>
+#include <KlayGE/aligned_allocator.hpp>
 
 #include <iostream>
 #include <string>
@@ -155,11 +156,11 @@ public:
 		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 		{
 			binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
-			edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4, _5);
+			edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4);
 		}
 		else
 		{
-			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4, _5);
+			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4);
 
 			if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
 			{
@@ -173,7 +174,7 @@ public:
 		}
 #else
 		binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
-		edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4, _5);
+		edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4);
 #endif
 	}
 
@@ -183,7 +184,7 @@ public:
 
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 
-		std::vector<uint8_t> char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
+		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
 		for (uint32_t c = start_code_; c < end_code_; ++ c)
 		{
@@ -216,7 +217,7 @@ public:
 			edge_points.resize(0);
 			for (int y = 0; y < buf_height; ++ y)
 			{
-				edge_extract(edge_points, 0, buf_width, &char_bitmap[0], y);
+				edge_extract(edge_points, buf_width, &char_bitmap[0], y);
 			}
 
 			if (!edge_points.empty())
@@ -320,18 +321,18 @@ private:
 		}
 	}
 
-	void edge_extract_sse2(std::vector<int2>& edge_points, int start, int end, uint8_t const * char_bitmap, int y)
+	void edge_extract_sse2(std::vector<int2>& edge_points, int width, uint8_t const * char_bitmap, int y)
 	{
 		__m128i zero = _mm_set1_epi8(0);
-		for (int x = start; x < end; x += sizeof(__m128i) * 8)
+		for (int x = 0; x < width; x += sizeof(__m128i) * 8)
 		{
-			__m128i center = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
+			__m128i center = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]));
 			if (_mm_movemask_epi8(_mm_cmpeq_epi32(center, zero)) != 0xFFFF)
 			{
 				__m128i up;
 				if (y != 0)
 				{
-					up = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					up = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y - 1) * INTERNAL_CHAR_SIZE + x) / 8]));
 				}
 				else
 				{
@@ -340,7 +341,7 @@ private:
 				__m128i down;
 				if (y != INTERNAL_CHAR_SIZE - 1)
 				{
-					down = _mm_loadu_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
+					down = _mm_load_si128(reinterpret_cast<__m128i const *>(&char_bitmap[((y + 1) * INTERNAL_CHAR_SIZE + x) / 8]));
 				}
 				else
 				{
@@ -390,9 +391,9 @@ private:
 		}
 	}
 
-	void edge_extract_cpp(std::vector<int2>& edge_points, int start, int end, uint8_t const * char_bitmap, int y)
+	void edge_extract_cpp(std::vector<int2>& edge_points, int width, uint8_t const * char_bitmap, int y)
 	{
-		for (int x = start; x < end; x += sizeof(uint64_t) * 8)
+		for (int x = 0; x < width; x += sizeof(uint64_t) * 8)
 		{
 			uint64_t center = *reinterpret_cast<uint64_t const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
 			if (center != 0)
@@ -439,7 +440,7 @@ private:
 	int32_t* cur_num_char_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
-	boost::function<void(std::vector<int2>&, int, int, uint8_t const *, int)> edge_extract;
+	boost::function<void(std::vector<int2>&, int, uint8_t const *, int)> edge_extract;
 };
 
 void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
