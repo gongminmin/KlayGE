@@ -314,14 +314,14 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::get_material(materials_t& mtls, std::vector<std::map<int, Matrix2> >& uv_transss, Mtl* max_mtl)
+	void meshml_extractor::get_material(materials_t& mtls, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
 	{
 		if (0 == max_mtl->NumSubMtls())
 		{
 			mtls.push_back(material_t());
 			material_t& mtl = mtls.back();
-			uv_transss.push_back(std::map<int, Matrix2>());
-			std::map<int, Matrix2>& uv_transs = uv_transss.back();
+			uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
+			std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
 
 			mtl.ambient = max_mtl->GetAmbient();
 			mtl.diffuse = max_mtl->GetDiffuse();
@@ -349,14 +349,33 @@ namespace KlayGE
 
 						Matrix3 uv_mat;
 						tex_map->GetUVTransform(uv_mat);
-						Matrix2 uv_trans(TRUE);
-						uv_trans.SetRow(0, Point2(uv_mat.GetRow(0)[0], uv_mat.GetRow(0)[1]));
-						uv_trans.SetRow(1, Point2(uv_mat.GetRow(1)[0], uv_mat.GetRow(1)[1]));
-						uv_trans.SetRow(2, Point2(uv_mat.GetRow(2)[0], uv_mat.GetRow(2)[1]));
+
+						int tex_u = 0;
+						UVGen* uv_gen = tex_map->GetTheUVGen();
+						if (uv_gen != NULL)
+						{
+							int axis = uv_gen->GetAxis();
+							switch (axis)
+							{
+							case AXIS_UV:
+								tex_u = 0;
+								break;
+						
+							case AXIS_VW:
+								tex_u = 1;
+								break;
+
+							case AXIS_WU:
+								tex_u = 2;
+								break;
+							}
+						}
+
+						int channel = bitmap_tex->GetMapChannel();
+						uv_transs[channel] = std::make_pair(uv_mat, tex_u);
 
 						mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()),
 							tstr_to_str(bitmap_tex->GetMapName())));
-						uv_transs[j] = uv_trans;
 					}
 				}
 			}
@@ -388,7 +407,7 @@ namespace KlayGE
 		std::map<int, std::vector<Point2> > texs;
 		std::vector<int> pos_indices;
 		std::map<int, std::vector<int> > tex_indices;
-		std::vector<std::map<int, Matrix2> > uv_transs;
+		std::vector<std::map<int, std::pair<Matrix3, int> > > uv_transs;
 
 		size_t mtl_base_index = objs_mtl_.size();
 		Mtl* mtl = node->GetMtl();
@@ -429,28 +448,35 @@ namespace KlayGE
 					{
 						texs[channel].resize(num_map_verts);
 
-						UVVert* uv_verts = mesh.mapVerts(channel);
-						for (size_t i = 0; i < texs[channel].size(); ++ i)
+						Matrix3 tex_mat;
+						tex_mat.IdentityMatrix();
+						int tex_u = 0;
+						for (size_t j = 0; j < uv_transs.size(); ++ j)
 						{
-							texs[channel][i].x = uv_verts[i].x;
-							texs[channel][i].y = uv_verts[i].y;
-
-							for (size_t j = 0; j < uv_transs.size(); ++ j)
+							if (uv_transs[j].find(channel) == uv_transs[j].end())
 							{
-								if (uv_transs[j].find(channel - 1) != uv_transs[j].end())
-								{
-									texs[channel][i] = texs[channel][i] * uv_transs[j][channel - 1];
-									break;
-								}
+								uv_transs[j][channel] = std::make_pair(tex_mat, tex_u);
+								break;
 							}
 						}
 
+						UVVert* uv_verts = mesh.mapVerts(channel);
 						TVFace* tv_faces = mesh.mapFaces(channel);
 						for (size_t i = 0; i < obj_triangles.size(); ++ i)
 						{
+							int mtl_id = mesh.getFaceMtlIndex(static_cast<int>(i)) % (objs_mtl_.size() - mtl_base_index);
+
+							tex_mat = uv_transs[mtl_id][channel].first;
+							tex_u = uv_transs[mtl_id][channel].second;
+
 							for (int j = 2; j >= 0; -- j)
 							{
-								tex_indices[channel].push_back(tv_faces[i].t[j]);
+								int ti = tv_faces[i].t[j];
+								tex_indices[channel].push_back(ti);
+
+								Point3 uvw = uv_verts[ti] * tex_mat;
+								texs[channel][ti].x = uvw[tex_u];
+								texs[channel][ti].y = uvw[(tex_u + 1) % 3];
 							}
 						}
 					}
@@ -461,7 +487,7 @@ namespace KlayGE
 			BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
 			{
 				std::map<Point2, int, less_Point2> tex_index_set;
-				for (int i = 0; i < tex_index.second.size(); ++ i)
+				for (size_t i = 0; i < tex_index.second.size(); ++ i)
 				{
 					Point2 tex = texs[tex_index.first][tex_index.second[i]];
 					BOOST_AUTO(iter, tex_index_set.find(tex));
@@ -573,13 +599,12 @@ namespace KlayGE
 				std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
 				if (v_iter != vertex_indices.end())
 				{
-					v_iter->ref_triangle.push_back(i * 3 + j);
+					// Respect set Immutability in C++0x
+					vertex_index.ref_triangle = v_iter->ref_triangle;
+					vertex_indices.erase(v_iter);
 				}
-				else
-				{
-					vertex_index.ref_triangle.resize(1, i * 3 + j);
-					vertex_indices.insert(vertex_index);
-				}
+				vertex_index.ref_triangle.push_back(i * 3 + j);
+				vertex_indices.insert(vertex_index);
 			}
 		}
 
@@ -634,7 +659,7 @@ namespace KlayGE
 						* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
 				}
 
-				if (pos_binds.second.size() > joints_per_ver_)
+				if (pos_binds.second.size() > static_cast<size_t>(joints_per_ver_))
 				{
 					std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_, pos_binds.second.end(), bind_cmp);
 					pos_binds.second.resize(joints_per_ver_);
@@ -683,7 +708,7 @@ namespace KlayGE
 
 		obj_vertices.resize(vertex_indices.size());
 		int ver_index = 0;
-		BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::reference vertex_index, vertex_indices)
+		BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::const_reference vertex_index, vertex_indices)
 		{
 			vertex_t& vertex = obj_vertices[ver_index];
 
@@ -1166,7 +1191,7 @@ namespace KlayGE
 			while (swapped)
 			{
 				swapped = false;
-				for (int i = 0; i < joints_id_to_name.size(); ++ i)
+				for (int i = 0; i < static_cast<int>(joints_id_to_name.size()); ++ i)
 				{
 					int par_index = -1;
 					if (!joints_[joints_id_to_name[i]].parent_name.empty())
@@ -1186,7 +1211,7 @@ namespace KlayGE
 				}
 			}
 
-			for (int i = 0; i < joints_id_to_name.size(); ++ i)
+			for (int i = 0; i < static_cast<int>(joints_id_to_name.size()); ++ i)
 			{
 				joints_name_to_id.insert(std::make_pair(joints_id_to_name[i], i));
 			}
