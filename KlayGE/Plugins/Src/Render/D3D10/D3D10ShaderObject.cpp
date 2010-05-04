@@ -32,6 +32,7 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/mem_fn.hpp>
 
 #include <KlayGE/D3D10/D3D10MinGWDefs.hpp>
 #include <d3d10.h>
@@ -361,9 +362,9 @@ namespace
 
 	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D10Device::VSSetShaderResources,
-		&ID3D10Device::PSSetShaderResources,
-		&ID3D10Device::GSSetShaderResources,
+		boost::mem_fn(&ID3D10Device::VSSetShaderResources),
+		boost::mem_fn(&ID3D10Device::PSSetShaderResources),
+		boost::mem_fn(&ID3D10Device::GSSetShaderResources),
 		NULL,
 		NULL,
 		NULL
@@ -371,9 +372,9 @@ namespace
 
 	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D10Device::VSSetSamplers,
-		&ID3D10Device::PSSetSamplers,
-		&ID3D10Device::GSSetSamplers,
+		boost::mem_fn(&ID3D10Device::VSSetSamplers),
+		boost::mem_fn(&ID3D10Device::PSSetSamplers),
+		boost::mem_fn(&ID3D10Device::GSSetSamplers),
 		NULL,
 		NULL,
 		NULL
@@ -381,9 +382,9 @@ namespace
 
 	boost::function<void(ID3D10Device*, UINT, UINT, ID3D10Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D10Device::VSSetConstantBuffers,
-		&ID3D10Device::PSSetConstantBuffers,
-		&ID3D10Device::GSSetConstantBuffers,
+		boost::mem_fn(&ID3D10Device::VSSetConstantBuffers),
+		boost::mem_fn(&ID3D10Device::PSSetConstantBuffers),
+		boost::mem_fn(&ID3D10Device::GSSetConstantBuffers),
 		NULL,
 		NULL,
 		NULL

@@ -33,6 +33,7 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#include <boost/mem_fn.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
@@ -415,32 +416,32 @@ namespace
 
 	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> SetShaderResources_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D11DeviceContext::VSSetShaderResources,
-		&ID3D11DeviceContext::PSSetShaderResources,
-		&ID3D11DeviceContext::GSSetShaderResources,
-		&ID3D11DeviceContext::CSSetShaderResources,
-		&ID3D11DeviceContext::HSSetShaderResources,
-		&ID3D11DeviceContext::DSSetShaderResources
+		boost::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
 
 	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> SetSamplers_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D11DeviceContext::VSSetSamplers,
-		&ID3D11DeviceContext::PSSetSamplers,
-		&ID3D11DeviceContext::GSSetSamplers,
-		&ID3D11DeviceContext::CSSetSamplers,
-		&ID3D11DeviceContext::HSSetSamplers,
-		&ID3D11DeviceContext::DSSetSamplers
+		boost::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
 
 	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> SetConstantBuffers_[ShaderObject::ST_NumShaderTypes] =
 	{
-		&ID3D11DeviceContext::VSSetConstantBuffers,
-		&ID3D11DeviceContext::PSSetConstantBuffers,
-		&ID3D11DeviceContext::GSSetConstantBuffers,
-		&ID3D11DeviceContext::CSSetConstantBuffers,
-		&ID3D11DeviceContext::HSSetConstantBuffers,
-		&ID3D11DeviceContext::DSSetConstantBuffers
+		boost::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
 	};
 }
 
