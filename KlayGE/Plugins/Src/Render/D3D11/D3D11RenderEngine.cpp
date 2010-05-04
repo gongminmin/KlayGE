@@ -664,6 +664,12 @@ namespace KlayGE
 		caps_.bc1_support = true;
 		caps_.bc2_support = true;
 		caps_.bc3_support = true;
+		{
+			D3D11_FEATURE_DATA_THREADING mt_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
+			caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
+			caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
+		}
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_11_0:
@@ -672,8 +678,6 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
-			caps_.multithread_rendering_support = true;
-			caps_.multithread_res_creating_support = true;
 			caps_.argb8_support = true;
 			caps_.bc4_support = true;
 			caps_.bc5_support = true;
@@ -704,11 +708,6 @@ namespace KlayGE
 				D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS cs4_feature;
 				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &cs4_feature, sizeof(cs4_feature));
 				caps_.cs_support = cs4_feature.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x ? true : false;
-
-				D3D11_FEATURE_DATA_THREADING mt_feature;
-				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
-				caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
-				caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
 			}
 			break;
 
@@ -718,8 +717,6 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
-			caps_.multithread_rendering_support = false;
-			caps_.multithread_res_creating_support = false;
 			caps_.argb8_support = true;
 			caps_.bc4_support = false;
 			caps_.bc5_support = false;
