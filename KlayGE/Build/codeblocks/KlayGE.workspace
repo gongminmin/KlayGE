@@ -11,6 +11,7 @@
 		<Project filename="D3D10.cbp" />
 		<Project filename="D3D11.cbp" />
 		<Project filename="OpenGL.cbp" />
+		<Project filename="OpenGLES2.cbp" />
 		<Project filename="OCTree.cbp" />
 		<Project filename="Heightmap.cbp" />
 	</Workspace>

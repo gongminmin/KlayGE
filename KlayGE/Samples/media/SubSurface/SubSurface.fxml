@@ -1,0 +1,166 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+
+	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="eye_pos"/>
+	<parameter type="float" name="material_thickness" value="0.6"/>
+	<parameter type="float3" name="extinction_coefficient" x="0.8" y="0.2" z="0.12"/>
+	<parameter type="float" name="rim_scalar" value="1"/>
+
+	<parameter type="float2" name="offset"/>
+	<parameter type="int" name="flip"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<parameter type="float4" name="ambient_clr"/>
+	<parameter type="float4" name="diffuse_clr"/>
+	<parameter type="float4" name="specular_clr"/>
+
+	<parameter type="float" name="specular_level"/>
+	<parameter type="float" name="shininess"/>
+	
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="bump_tex"/>
+	<parameter type="texture2D" name="specular_tex"/>
+
+	<shader>
+		<![CDATA[
+void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float oDepth : TEXCOORD0,
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, worldviewproj);
+	oDepth = oPos.w;
+}
+
+float4 BackFaceDepthPS(float depth : TEXCOORD1) : SV_Target
+{
+	return depth;	
+}
+		]]>
+	</shader>
+
+	<technique name="BackFaceDepthTech">
+		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			<state name="depth_func" value="greater"/>
+
+			<state name="vertex_shader" value="BackFaceDepthVS()"/>
+			<state name="pixel_shader" value="BackFaceDepthPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="texture2D" name="back_face_depth_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void SubSurfaceVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float3 N	: NORMAL,	// in object space
+				float3 T	: TANGENT,	// in object space
+				
+				out float2 oTex0 : TEXCOORD0,
+				out float3 oL	: TEXCOORD1,
+				out float3 oV	: TEXCOORD2,
+				out float3 oH	: TEXCOORD3,
+				out float3 oN	: TEXCOORD4,
+				out float4 oPosSS : TEXCOORD5,
+				out float4 oPos : SV_Position)
+{
+	oTex0 = tex0;
+	
+	oV = eye_pos - pos.xyz;
+	oL = light_pos - pos.xyz;
+	oH = oL + oV;
+	oN = N;
+
+	oPos = mul(pos, worldviewproj);
+	oPosSS = oPos;
+}
+
+float4 SubSurfacePS(float2 uv : TEXCOORD0,
+				float3 L	: TEXCOORD1,
+				float3 V	: TEXCOORD2,
+				float3 H	: TEXCOORD3,
+				float3 N	: TEXCOORD4,
+				float4 oPosSS : TEXCOORD5) : SV_Target
+{
+	float attenuation = 2.0f / length(L);
+
+	L = normalize(L);
+	V = normalize(V);
+	H = normalize(H);
+	N = normalize(N + 0.11f * bump_tex.Sample(linear_sampler, uv).rgb);
+	
+	float3 diffuse, specular;
+	if (diffuse_clr.a > 0.5f)
+	{
+		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	if (specular_clr.a > 0.5f)
+	{
+		specular = specular_tex.Sample(linear_sampler, uv).rgb;
+	}
+	else
+	{
+		specular = specular_clr.rgb;
+	}
+
+	float2 tex_coord = oPosSS.xy / oPosSS.w - offset;
+	tex_coord.y *= flip;
+	tex_coord = tex_coord * 0.5f + 0.5f;
+	float thickness = back_face_depth_tex.Sample(point_sampler, tex_coord).r - oPosSS.w;
+
+	float indirect_light = material_thickness * (max(0, dot(-N, L)) + max(0, dot(-V, L)));
+	indirect_light *= attenuation;
+	indirect_light *= clamp(exp(1 / max(1e-5f, thickness)) * 0.001f, 0, 5.0f);
+
+	float rim = 1.0f - max(0, dot(N, V));
+	rim *= rim;
+
+	float diffuse_factor = dot(L, N);
+
+	float3 clr = ambient_clr.rgb * 0.2f * diffuse;
+	clr += rim * rim_scalar * indirect_light * extinction_coefficient;
+	if (diffuse_factor > 0)
+	{
+		float specular_factor = pow(saturate(dot(H, N)), shininess);
+		clr.rgb += diffuse_factor * diffuse + specular_level * specular_factor * specular;
+	}
+
+	return float4(clr.rgb, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="SubSurfaceTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="SubSurfaceVS()"/>
+			<state name="pixel_shader" value="SubSurfacePS()"/>
+		</pass>
+	</technique>
+</effect>
