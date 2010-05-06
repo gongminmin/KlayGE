@@ -27,7 +27,6 @@
 					<Add option="-DKLAYGE_D3D10_RE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add library="d3d10" />
 					<Add library="d3dx10d" />
@@ -37,6 +36,11 @@
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
 				</ExtraCommands>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
@@ -59,7 +63,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_system-mgw44-mt" />
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add library="d3d10" />
 					<Add library="d3dx10" />
@@ -69,6 +72,11 @@
 				<ExtraCommands>
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
 				</ExtraCommands>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 		</Build>
 		<VirtualTargets>
@@ -78,6 +86,10 @@
 			<Add directory="..\..\Core\Include" />
 			<Add directory="..\..\Plugins\Include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+		</Linker>
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10Adapter.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10AdapterList.hpp" />
 		<Unit filename="..\..\Plugins\Include\KlayGE\D3D10\D3D10FrameBuffer.hpp" />

@@ -871,7 +871,7 @@ namespace KlayGE
 	std::string OGLES2ShaderObject::GenShaderText(RenderEffect const & effect)
 	{
 		std::stringstream shader_ss;
-		
+
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
 		{
@@ -1126,6 +1126,10 @@ namespace KlayGE
 		case ST_PixelShader:
 			ss << "precision highp float;" << std::endl;
 			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 		ss << predefined_varyings << std::endl;
 
@@ -1182,6 +1186,10 @@ namespace KlayGE
 						ss << this_token;
 					}
 				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -1409,7 +1417,7 @@ namespace KlayGE
 												index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
 
 											param_binds_.push_back(pb);
-										
+
 											break;
 										}
 									}

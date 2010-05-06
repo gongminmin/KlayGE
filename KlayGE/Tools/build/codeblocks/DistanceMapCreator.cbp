@@ -25,6 +25,11 @@
 					<Add library="KlayGE_Core_mgw_x86_d" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
@@ -46,6 +51,11 @@
 					<Add library="KlayGE_Core_mgw_x86" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
@@ -65,6 +75,11 @@
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x86_d" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
@@ -85,6 +100,11 @@
 					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
@@ -104,6 +124,11 @@
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x64_d" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
@@ -132,6 +157,10 @@
 		<Compiler>
 			<Add directory="..\..\..\Core\Include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+		</Linker>
 		<Unit filename="..\..\DistanceMapCreator\DistanceMapCreator.cpp" />
 		<Extensions>
 			<code_completion />

@@ -26,10 +26,6 @@
 					<Add option="-DKLAYGE_CORE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_filesystem-mgw44-mt-d" />
-					<Add library="boost_system-mgw44-mt-d" />
-					<Add library="boost_signals-mgw44-mt-d" />
-					<Add library="boost_thread-mgw44-mt-d" />
 					<Add library="gdi32" />
 					<Add library="oleaut32" />
 					<Add library="wsock32" />
@@ -40,7 +36,10 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="win32" />
+					<Variable name="YASM_OBJFMT" value="win32" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
@@ -63,11 +62,6 @@
 					<Add option="-DKLAYGE_CORE_SOURCE" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
-					<Add library="boost_filesystem-mgw44-mt" />
-					<Add library="boost_system-mgw44-mt" />
-					<Add library="boost_signals-mgw44-mt" />
-					<Add library="boost_thread-mgw44-mt" />
 					<Add library="gdi32" />
 					<Add library="oleaut32" />
 					<Add library="wsock32" />
@@ -78,7 +72,10 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="win32" />
+					<Variable name="YASM_OBJFMT" value="win32" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -98,18 +95,17 @@
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_filesystem-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
-					<Add library="python3.0_d" />
+					<Add library="python3.1_d" />
 					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="elf32" />
+					<Variable name="YASM_OBJFMT" value="elf32" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
@@ -130,18 +126,17 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_filesystem-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
-					<Add library="python3.0" />
+					<Add library="python3.1" />
 					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="elf32" />
+					<Variable name="YASM_OBJFMT" value="elf32" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
@@ -163,18 +158,17 @@
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="boost_filesystem-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
-					<Add library="python3.0" />
+					<Add library="python3.1" />
 					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="elf64" />
+					<Variable name="YASM_OBJFMT" value="elf64" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
@@ -197,18 +191,17 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="boost_filesystem-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
-					<Add library="python3.0" />
+					<Add library="python3.1" />
 					<Add library="X11" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="yasm_objfmt" value="elf64" />
+					<Variable name="YASM_OBJFMT" value="elf64" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 		</Build>
@@ -219,6 +212,13 @@
 		<Compiler>
 			<Add directory="..\..\Core\Include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+			<Add library="boost_filesystem-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_thread-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+		</Linker>
 		<Unit filename="..\..\Core\Include\KlayGE\App3D.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Audio.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
@@ -326,7 +326,7 @@
 		<Unit filename="..\..\Core\Src\Kernel\Util.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\XMLDom.cpp" />
 		<Unit filename="..\..\Core\Src\Kernel\asm\CpuID.asm">
-			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -f$(yasm_objfmt) -o $object $file\n" />
+			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -f$(YASM_OBJFMT) -o $object $file\n" />
 		</Unit>
 		<Unit filename="..\..\Core\Src\Net\Lobby.cpp" />
 		<Unit filename="..\..\Core\Src\Net\Player.cpp" />

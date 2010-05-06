@@ -23,11 +23,14 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="freetype2311" />
-					<Add library="boost_program_options-mgw44-mt-d" />
-					<Add library="boost_thread-mgw44-mt-d" />
+					<Add library="freetype2312" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
@@ -48,11 +51,14 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="freetype2311" />
-					<Add library="boost_program_options-mgw44-mt" />
-					<Add library="boost_thread-mgw44-mt" />
+					<Add library="freetype2312" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
@@ -72,9 +78,12 @@
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x86_d" />
 					<Add library="freetype" />
-					<Add library="boost_program_options-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
@@ -96,9 +105,12 @@
 					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x86" />
 					<Add library="freetype" />
-					<Add library="boost_program_options-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
@@ -118,9 +130,12 @@
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x64_d" />
 					<Add library="freetype" />
-					<Add library="boost_program_options-gcc43-mt-d" />
-					<Add library="boost_thread-gcc43-mt-d" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
@@ -142,9 +157,12 @@
 					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x64" />
 					<Add library="freetype" />
-					<Add library="boost_program_options-gcc43-mt" />
-					<Add library="boost_thread-gcc43-mt" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 		</Build>
 		<VirtualTargets>
@@ -153,6 +171,12 @@
 		<Compiler>
 			<Add directory="..\..\..\Core\Include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_program_options-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_thread-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+		</Linker>
 		<Unit filename="..\..\KFontGen\KFontGen.cpp" />
 		<Unit filename="..\..\KFontGen\kdtree.hpp" />
 		<Extensions>

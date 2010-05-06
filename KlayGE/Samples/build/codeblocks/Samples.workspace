@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Samples workspace">
-		<Project filename="DeferredShading.cbp" />
+		<Project filename="DeferredShading.cbp" active="1" />
 		<Project filename="DepthPeeling.cbp" />
 		<Project filename="DistanceMapping.cbp" />
 		<Project filename="Fractal.cbp" />
@@ -9,7 +9,7 @@
 		<Project filename="ModelViewer.cbp" />
 		<Project filename="MotionBlurDoF.cbp" />
 		<Project filename="Parallax.cbp" />
-		<Project filename="ParticleEditor.cbp" active="1" />
+		<Project filename="ParticleEditor.cbp" />
 		<Project filename="PostProcessing.cbp" />
 		<Project filename="ProceduralTex.cbp" />
 		<Project filename="Refract.cbp" />

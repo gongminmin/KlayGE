@@ -24,7 +24,7 @@ namespace KlayGE
 	int const SM_SIZE = 512;
 
 	DeferredLightSource::DeferredLightSource(LightType type)
-		: type_(type), attrib_(0), enabled_(true), 
+		: type_(type), attrib_(0), enabled_(true),
 			color_(0, 0, 0)
 	{
 	}
@@ -290,7 +290,7 @@ namespace KlayGE
 	{
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
-		
+
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		lights_.push_back(MakeSharedPtr<DeferredAmbientLightSource>());
@@ -661,7 +661,7 @@ namespace KlayGE
 								}
 							}
 							break;
-						
+
 						case LT_Point:
 							{
 								float3 const & p = light->Position();
@@ -790,7 +790,7 @@ namespace KlayGE
 
 				*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
 					* sm_buffer_->GetViewport().camera->ProjMatrix();
-				
+
 				float3 loc_es = MathLib::transform_coord(p, view_);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
@@ -863,7 +863,7 @@ namespace KlayGE
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0L);
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(static_cast<int32_t>(0));
 
 					technique_ = technique_lights_[type];
 
@@ -882,7 +882,7 @@ namespace KlayGE
 						float3 eye = camera.EyePos();
 
 						bool eye_in_volume = false;
-					
+
 						if (LT_Spot == type)
 						{
 							float3 v = MathLib::normalize(eye - p);
@@ -905,7 +905,7 @@ namespace KlayGE
 								eye_in_volume = true;
 							}
 						}
-					
+
 						if (eye_in_volume)
 						{
 							re.Render(*technique_light_stencil_eiv_, *rl_);

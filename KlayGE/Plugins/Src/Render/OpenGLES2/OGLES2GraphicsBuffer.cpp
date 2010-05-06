@@ -72,6 +72,10 @@ namespace KlayGE
 		case BA_Write_Only:
 			flag = GL_WRITE_ONLY_OES;
 			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 
 		if (glloader_GLES_OES_mapbuffer())
@@ -82,7 +86,7 @@ namespace KlayGE
 		else
 		{
 			return &buf_data_[0];
-		}		
+		}
 	}
 
 	void OGLES2GraphicsBuffer::Unmap()

@@ -23,11 +23,14 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="boost_signals-mgw44-mt-d" />
-					<Add library="boost_system-mgw44-mt-d" />
 					<Add library="python31_d" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="-d" />
+				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
@@ -47,11 +50,14 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="boost_signals-mgw44-mt" />
-					<Add library="boost_system-mgw44-mt" />
 					<Add library="python31" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
+				<Environment>
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="mgw45" />
+					<Variable name="DEBUG_STR" value="" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
@@ -70,9 +76,13 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x86_d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
+					<Add library="python31_d" />
 				</Linker>
+				<Environment>
+					<Variable name="DEBUG_STR" value="-d" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
@@ -92,9 +102,13 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x86" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
+					<Add library="python31" />
 				</Linker>
+				<Environment>
+					<Variable name="DEBUG_STR" value="" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
@@ -104,6 +118,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=nocona" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-O0" />
@@ -113,9 +128,13 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_gcc_x64_d" />
-					<Add library="boost_signals-gcc43-mt-d" />
-					<Add library="boost_system-gcc43-mt-d" />
+					<Add library="python31_d" />
 				</Linker>
+				<Environment>
+					<Variable name="DEBUG_STR" value="-d" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
@@ -125,6 +144,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=nocona" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
@@ -135,9 +155,13 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_gcc_x64" />
-					<Add library="boost_signals-gcc43-mt" />
-					<Add library="boost_system-gcc43-mt" />
+					<Add library="python31" />
 				</Linker>
+				<Environment>
+					<Variable name="DEBUG_STR" value="" />
+					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="TOOLSET" value="gcc45" />
+				</Environment>
 			</Target>
 		</Build>
 		<VirtualTargets>
@@ -146,6 +170,11 @@
 		<Compiler>
 			<Add directory="..\..\..\Core\Include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+			<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+		</Linker>
 		<Unit filename="..\..\media\MotionBlurDoF\DepthOfFieldPP.fxml" />
 		<Unit filename="..\..\media\MotionBlurDoF\MotionBlurDoF.fxml" />
 		<Unit filename="..\..\media\MotionBlurDoF\MotionBlurDoF.uiml" />
@@ -155,7 +184,6 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
-			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
