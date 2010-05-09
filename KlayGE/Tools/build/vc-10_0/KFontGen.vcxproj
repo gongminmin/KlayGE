@@ -199,9 +199,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\KFontGen\KFontGen.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\KFontGen\kdtree.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

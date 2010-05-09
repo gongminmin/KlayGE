@@ -39,13 +39,11 @@
 #endif
 #endif
 
-#include "kdtree.hpp"
-
 using namespace std;
 using namespace KlayGE;
 
-int const INTERNAL_CHAR_SIZE = 4096;
-int const NUM_CHARS = 65536;
+uint32_t const INTERNAL_CHAR_SIZE = 4096;
+uint32_t const NUM_CHARS = 65536;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #pragma pack(push, 1)
@@ -90,6 +88,102 @@ int bsf(uint64_t v)
 	fnu.f = static_cast<float>(v);
 	return (fnu.u >> 23) - 127;
 }
+
+
+// A type to hold the distance map while it's being constructed
+class DistanceMap
+{
+public:
+	DistanceMap(uint32_t width, uint32_t height)
+		: data_(width * height, float2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max())),
+			width_(width), height_(height)
+	{
+	}
+
+	float2& operator()(int x, int y)
+	{
+		return data_[y * width_ + x];
+	}
+
+	float2 const & operator()(int x, int y) const
+	{
+		return data_[y * width_ + x];
+	}
+
+	bool inside(int x, int y) const
+	{
+		return (static_cast<uint32_t>(x) < width_)
+			&& (static_cast<uint32_t>(y) < height_);
+	}
+
+	// Do a single pass over the data.
+	// Start at (x,y,z) and walk in the direction (cx,cy,cz)
+	// Combine each pixel (x,y,z) with the value at (x+dx,y+dy,z+dz)
+	void combine(int dx, int dy,
+		int cx, int cy,
+		int x, int y)
+	{
+		while (inside(x, y) && inside(x + dx, y + dy))
+		{
+			float2 v1 = operator()(x, y);
+			float2 v2 = operator()(x + dx, y + dy) + float2(static_cast<float>(abs(dx)), static_cast<float>(abs(dy)));
+			if (MathLib::dot(v1, v1) > MathLib::dot(v2, v2))
+			{
+				operator()(x, y) = v2;
+			}
+
+			x += cx;
+			y += cy;
+		}
+	}
+
+private:
+	std::vector<float2> data_;
+	uint32_t width_, height_;
+};
+
+void ComputeDistanceField(std::vector<float>& distances, uint32_t width, uint32_t height,
+						DistanceMap& dmap)
+{
+	// Compute the rest of dmap by sequential sweeps over the data
+	// using a 3d variant of Danielsson's algorithm
+
+	{
+		for (uint32_t y = 1; y < height; ++ y)
+		{
+			dmap.combine(0, -1,
+				1, 0,
+				0, y);
+			dmap.combine(-1, 0,
+				1, 0,
+				1, y);
+			dmap.combine(+1, 0,
+				-1, 0,
+				width - 2, y);
+		}
+		for (int y = height - 1; y >= 0; -- y)
+		{
+			dmap.combine(0, +1,
+				1, 0,
+				0, y);
+			dmap.combine(-1, 0,
+				1, 0,
+				1, y);
+			dmap.combine(+1, 0,
+				-1, 0,
+				width - 1, y);
+		}
+	}
+
+	for (uint32_t y = 0; y < height; ++ y)
+	{
+		for (uint32_t x = 0; x < width; ++ x)
+		{
+			distances[y * width + x] = MathLib::length_sq(dmap(x, y));
+		}
+	}
+}
+
 
 class disp_thread
 {
@@ -183,6 +277,7 @@ public:
 		FT_GlyphSlot ft_slot = ft_face_->glyph;
 
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
+		float const scale = static_cast<float>(INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE) / (char_size_ * char_size_) / max_dist_sq;
 
 		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
@@ -195,8 +290,8 @@ public:
 
 			FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
 
-			int const buf_width = std::min(ft_slot->bitmap.width, INTERNAL_CHAR_SIZE);
-			int const buf_height = std::min(ft_slot->bitmap.rows, INTERNAL_CHAR_SIZE);
+			int const buf_width = std::min(ft_slot->bitmap.width, static_cast<int>(INTERNAL_CHAR_SIZE));
+			int const buf_height = std::min(ft_slot->bitmap.rows, static_cast<int>(INTERNAL_CHAR_SIZE));
 
 			if ((buf_width > 0) && (buf_height > 0))
 			{
@@ -225,7 +320,64 @@ public:
 				float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
 				float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
 
-				kdtree<int2> kd(&edge_points[0], edge_points.size());
+				DistanceMap dmap(char_size_, char_size_);
+				std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
+				for (size_t pt = 0; pt < edge_points.size(); ++ pt)
+				{
+					int2 ep = edge_points[pt];
+					float2 map_xy = float2(static_cast<float>(ep.x() + x_offset), static_cast<float>(ep.y() + y_offset))
+						/ static_cast<float>(INTERNAL_CHAR_SIZE) * static_cast<float>(char_size_ - 2) - 0.5f;
+					int2 p0(static_cast<int32_t>(map_xy.x()), static_cast<int32_t>(map_xy.y()));
+					int2 p1(p0.x() + 1, p0.y() + 1);
+					float2 s(map_xy.x() - p0.x(), map_xy.y() - p0.y());
+					if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
+					{
+						float2 new_pos = s;
+						float new_dist = MathLib::length_sq(new_pos);
+						float& old_dist = tmp_dist[p0.y() * char_size_ + p0.x()];
+						if (old_dist > new_dist)
+						{
+							dmap(p0.x(), p0.y()) = new_pos;
+							old_dist = new_dist;
+						}
+					}
+					if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
+					{
+						float2 new_pos = float2(1 - s.x(), s.y());
+						float new_dist = MathLib::length_sq(new_pos);
+						float& old_dist = tmp_dist[p0.y() * char_size_ + p1.x()];
+						if (old_dist > new_dist)
+						{
+							dmap(p1.x(), p0.y()) = new_pos;
+							old_dist = new_dist;
+						}
+					}
+					if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
+					{
+						float2 new_pos = float2(s.x(), 1 - s.y());
+						float new_dist = MathLib::length_sq(new_pos);
+						float& old_dist = tmp_dist[p1.y() * char_size_ + p0.x()];
+						if (old_dist > new_dist)
+						{
+							dmap(p0.x(), p1.y()) = new_pos;
+							old_dist = new_dist;
+						}
+					}
+					if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
+					{
+						float2 new_pos = float2(1 - s.x(), 1 - s.y());
+						float new_dist = MathLib::length_sq(new_pos);
+						float& old_dist = tmp_dist[p1.y() * char_size_ + p1.x()];
+						if (old_dist > new_dist)
+						{
+							dmap(p1.x(), p1.y()) = new_pos;
+							old_dist = new_dist;
+						}
+					}
+				}
+
+				std::vector<float> distances(char_size_ * char_size_);
+				ComputeDistanceField(distances, char_size_, char_size_, dmap);
 
 				ci.left = static_cast<int16_t>((ft_slot->bitmap_left - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
 				ci.top = static_cast<int16_t>((3 / 4.0f - (ft_slot->bitmap_top + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
@@ -236,18 +388,10 @@ public:
 				{
 					for (uint32_t x = 0; x < char_size_; ++ x)
 					{
-						float value;
 						int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / static_cast<float>(char_size_ - 2)
 							- float2(static_cast<float>(x_offset), static_cast<float>(y_offset));
-						if (kd.query_position(map_xy) > 0)
-						{
-							value = MathLib::sqrt(static_cast<float>(kd.squared_distance(0)) / max_dist_sq);
-						}
-						else
-						{
-							value = 1.0f;
-						}
-						if ((map_xy.x() > 0) && (map_xy.y() > 0) && (map_xy.x() < INTERNAL_CHAR_SIZE) && (map_xy.y() < INTERNAL_CHAR_SIZE))
+						float value = MathLib::sqrt(distances[y * char_size_ + x] * scale);
+						if ((static_cast<uint32_t>(map_xy.x()) < INTERNAL_CHAR_SIZE) && (static_cast<uint32_t>(map_xy.y()) < INTERNAL_CHAR_SIZE))
 						{
 							if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
 							{
