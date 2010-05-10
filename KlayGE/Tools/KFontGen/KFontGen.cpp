@@ -7,6 +7,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/aligned_allocator.hpp>
+#include <KlayGE/atomic.hpp>
 
 #include <iostream>
 #include <string>
@@ -30,6 +31,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_STROKER_H
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
@@ -224,7 +226,14 @@ public:
 				}
 			}
 
-			KlayGE::Sleep(500);
+			if (dist_cur_num_char >= total_chars_)
+			{
+				break;
+			}
+			else
+			{
+				KlayGE::Sleep(500);
+			}
 		}
 	}
 
@@ -235,15 +244,39 @@ private:
 	int32_t total_chars_;
 };
 
+struct Span
+{
+  Span() { }
+  Span(int _x, int _y, int _width, int _coverage)
+  : x(_x), y(_y), width(_width), coverage(_coverage) { }
+
+  int x, y, width, coverage;
+};
+
+void RasterCallback(const int y,
+               const int count,
+               const FT_Span * const spans,
+               void * const user) 
+{
+	std::vector<Span>* sptr = static_cast<std::vector<Span>*>(user);
+	for (int i = 0; i < count; ++i) 
+	{
+		sptr->push_back(Span(spans[i].x, y, spans[i].len, spans[i].coverage));
+	}
+}
+
 class ttf_to_dist
 {
 public:
-	ttf_to_dist(FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars, uint32_t start_code, uint32_t end_code,
+	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t char_size, uint32_t const * validate_chars,
 		font_info* char_info, float* char_dist_data,
-		int32_t& cur_num_char)
-		: ft_face_(ft_face), char_size_(char_size), validate_chars_(validate_chars), start_code_(start_code), end_code_(end_code),
+		int32_t& cur_num_char, atomic<int32_t>& cur_package,
+		uint32_t num_chars, uint32_t thread_id, uint32_t num_threads, uint32_t num_chars_per_package)
+		: ft_lib_(ft_lib), ft_face_(ft_face), char_size_(char_size), validate_chars_(validate_chars),
 			char_info_(char_info), char_dist_data_(char_dist_data),
-			cur_num_char_(&cur_num_char)
+			cur_num_char_(&cur_num_char),
+			cur_package_(&cur_package),
+			num_chars_(num_chars), thread_id_(thread_id), num_threads_(num_threads), num_chars_per_package_(num_chars_per_package)
 	{
 #ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
@@ -279,140 +312,170 @@ public:
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 		float const scale = static_cast<float>(INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE) / (char_size_ * char_size_) / max_dist_sq;
 
+		std::vector<Span> spans;
+		FT_Raster_Params params;
+		memset(&params, 0, sizeof(params));
+		params.flags = FT_RASTER_FLAG_AA | FT_RASTER_FLAG_DIRECT;
+		params.gray_spans = RasterCallback;
+		params.user = &spans;
+
 		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
 		std::vector<int2> edge_points;
-		for (uint32_t c = start_code_; c < end_code_; ++ c)
+
+		int32_t num_packages = (num_chars_ + num_chars_per_package_ - 1) / num_chars_per_package_;
+		int32_t working_package = (*cur_package_) ++;
+		while (working_package < num_packages)
 		{
-			uint32_t const ch = validate_chars_[c];
-			font_info& ci = char_info_[ch];
-
-			std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
-
-			FT_Load_Char(ft_face_, ch, FT_LOAD_RENDER);
-
-			int const buf_width = std::min(ft_slot->bitmap.width, static_cast<int>(INTERNAL_CHAR_SIZE));
-			int const buf_height = std::min(ft_slot->bitmap.rows, static_cast<int>(INTERNAL_CHAR_SIZE));
-
-			if ((buf_width > 0) && (buf_height > 0))
+			uint32_t const start_code = working_package * num_chars_per_package_;
+			uint32_t const end_code = std::min(num_chars_, start_code + num_chars_per_package_);
+			for (uint32_t c = start_code; c < end_code; ++ c)
 			{
-				uint8_t* font_data = &char_bitmap[0];
-				uint8_t const * src_data = ft_slot->bitmap.buffer;
+				spans.resize(0);
+
+				uint32_t const ch = validate_chars_[c];
+				font_info& ci = char_info_[ch];
+
+				std::fill(char_bitmap.begin(), char_bitmap.end(), 0);
+
+				FT_UInt gindex = FT_Get_Char_Index(ft_face_, ch);
+				FT_Load_Glyph(ft_face_, gindex, FT_LOAD_NO_BITMAP);
+				FT_Outline_Render(ft_lib_, &ft_slot->outline, &params);
+
+				Rect_T<int> rc(std::numeric_limits<int>::max(), std::numeric_limits<int>::max(), std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
+				for (std::vector<Span>::const_iterator s = spans.begin(); s != spans.end(); ++ s)
+				{
+					rc.left() = std::min(rc.left(), s->x);
+					rc.right() = std::max(rc.right(), s->x + s->width);
+					rc.top() = std::min(rc.top(), s->y);
+					rc.bottom() = std::max(rc.bottom(), s->y + 1);
+				}
+
+				int const buf_width = std::min(rc.Width(), static_cast<int>(INTERNAL_CHAR_SIZE));
+				int const buf_height = std::min(rc.Height(), static_cast<int>(INTERNAL_CHAR_SIZE));
+
+				for (std::vector<Span>::const_iterator s = spans.begin(); s != spans.end(); ++ s)
+				{
+					if (s->coverage > 127)
+					{
+						int const x0 = s->x - rc.left();
+						int const y = buf_height - 1 - (s->y - rc.top());
+						for (int x = x0, x_end = x0 + s->width; x < x_end; ++ x)
+						{
+							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] |= 1UL << (x & 0x7);
+						}
+					}
+				}
+
+				ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
+				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
+
+				edge_points.resize(0);
 				for (int y = 0; y < buf_height; ++ y)
 				{
-					binary_font_extract(font_data, src_data, buf_width);
-
-					font_data += INTERNAL_CHAR_SIZE / 8;
-					src_data += ft_slot->bitmap.pitch;
-				}
-			}
-
-			ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
-			ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
-
-			edge_points.resize(0);
-			for (int y = 0; y < buf_height; ++ y)
-			{
-				edge_extract(edge_points, buf_width, &char_bitmap[0], y);
-			}
-
-			if (!edge_points.empty())
-			{
-				float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
-				float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
-
-				DistanceMap dmap(char_size_, char_size_);
-				std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
-				for (size_t pt = 0; pt < edge_points.size(); ++ pt)
-				{
-					int2 ep = edge_points[pt];
-					float2 map_xy = float2(static_cast<float>(ep.x() + x_offset), static_cast<float>(ep.y() + y_offset))
-						/ static_cast<float>(INTERNAL_CHAR_SIZE) * static_cast<float>(char_size_ - 2) - 0.5f;
-					int2 p0(static_cast<int32_t>(map_xy.x()), static_cast<int32_t>(map_xy.y()));
-					int2 p1(p0.x() + 1, p0.y() + 1);
-					float2 s(map_xy.x() - p0.x(), map_xy.y() - p0.y());
-					if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
-					{
-						float2 new_pos = s;
-						float new_dist = MathLib::length_sq(new_pos);
-						float& old_dist = tmp_dist[p0.y() * char_size_ + p0.x()];
-						if (old_dist > new_dist)
-						{
-							dmap(p0.x(), p0.y()) = new_pos;
-							old_dist = new_dist;
-						}
-					}
-					if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
-					{
-						float2 new_pos = float2(1 - s.x(), s.y());
-						float new_dist = MathLib::length_sq(new_pos);
-						float& old_dist = tmp_dist[p0.y() * char_size_ + p1.x()];
-						if (old_dist > new_dist)
-						{
-							dmap(p1.x(), p0.y()) = new_pos;
-							old_dist = new_dist;
-						}
-					}
-					if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
-					{
-						float2 new_pos = float2(s.x(), 1 - s.y());
-						float new_dist = MathLib::length_sq(new_pos);
-						float& old_dist = tmp_dist[p1.y() * char_size_ + p0.x()];
-						if (old_dist > new_dist)
-						{
-							dmap(p0.x(), p1.y()) = new_pos;
-							old_dist = new_dist;
-						}
-					}
-					if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
-					{
-						float2 new_pos = float2(1 - s.x(), 1 - s.y());
-						float new_dist = MathLib::length_sq(new_pos);
-						float& old_dist = tmp_dist[p1.y() * char_size_ + p1.x()];
-						if (old_dist > new_dist)
-						{
-							dmap(p1.x(), p1.y()) = new_pos;
-							old_dist = new_dist;
-						}
-					}
+					edge_extract(edge_points, buf_width, &char_bitmap[0], y);
 				}
 
-				std::vector<float> distances(char_size_ * char_size_);
-				ComputeDistanceField(distances, char_size_, char_size_, dmap);
-
-				ci.left = static_cast<int16_t>((ft_slot->bitmap_left - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
-				ci.top = static_cast<int16_t>((3 / 4.0f - (ft_slot->bitmap_top + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
-				ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
-				ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
-
-				for (uint32_t y = 0; y < char_size_; ++ y)
+				if (!edge_points.empty())
 				{
-					for (uint32_t x = 0; x < char_size_; ++ x)
+					float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
+					float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
+
+					DistanceMap dmap(char_size_, char_size_);
+					std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
+					for (size_t pt = 0; pt < edge_points.size(); ++ pt)
 					{
-						int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / static_cast<float>(char_size_ - 2)
-							- float2(static_cast<float>(x_offset), static_cast<float>(y_offset));
-						float value = MathLib::sqrt(distances[y * char_size_ + x] * scale);
-						if ((static_cast<uint32_t>(map_xy.x()) < INTERNAL_CHAR_SIZE) && (static_cast<uint32_t>(map_xy.y()) < INTERNAL_CHAR_SIZE))
+						int2 const & ep = edge_points[pt];
+						float2 map_xy = float2(static_cast<float>(ep.x() + x_offset), static_cast<float>(ep.y() + y_offset))
+							/ static_cast<float>(INTERNAL_CHAR_SIZE) * static_cast<float>(char_size_ - 2) - 0.5f;
+						int2 p0(static_cast<int32_t>(map_xy.x()), static_cast<int32_t>(map_xy.y()));
+						int2 p1(p0.x() + 1, p0.y() + 1);
+						float2 s(map_xy.x() - p0.x(), map_xy.y() - p0.y());
+						if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
 						{
-							if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
+							float2 new_pos = s;
+							float new_dist = MathLib::length_sq(new_pos);
+							float& old_dist = tmp_dist[p0.y() * char_size_ + p0.x()];
+							if (old_dist > new_dist)
+							{
+								dmap(p0.x(), p0.y()) = new_pos;
+								old_dist = new_dist;
+							}
+						}
+						if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p0.y()) < char_size_))
+						{
+							float2 new_pos = float2(1 - s.x(), s.y());
+							float new_dist = MathLib::length_sq(new_pos);
+							float& old_dist = tmp_dist[p0.y() * char_size_ + p1.x()];
+							if (old_dist > new_dist)
+							{
+								dmap(p1.x(), p0.y()) = new_pos;
+								old_dist = new_dist;
+							}
+						}
+						if ((static_cast<uint32_t>(p0.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
+						{
+							float2 new_pos = float2(s.x(), 1 - s.y());
+							float new_dist = MathLib::length_sq(new_pos);
+							float& old_dist = tmp_dist[p1.y() * char_size_ + p0.x()];
+							if (old_dist > new_dist)
+							{
+								dmap(p0.x(), p1.y()) = new_pos;
+								old_dist = new_dist;
+							}
+						}
+						if ((static_cast<uint32_t>(p1.x()) < char_size_) && (static_cast<uint32_t>(p1.y()) < char_size_))
+						{
+							float2 new_pos = float2(1 - s.x(), 1 - s.y());
+							float new_dist = MathLib::length_sq(new_pos);
+							float& old_dist = tmp_dist[p1.y() * char_size_ + p1.x()];
+							if (old_dist > new_dist)
+							{
+								dmap(p1.x(), p1.y()) = new_pos;
+								old_dist = new_dist;
+							}
+						}
+					}
+
+					std::vector<float> distances(char_size_ * char_size_);
+					ComputeDistanceField(distances, char_size_, char_size_, dmap);
+
+					ci.left = static_cast<int16_t>((rc.left() - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
+					ci.top = static_cast<int16_t>((3 / 4.0f - (rc.bottom() + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
+					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
+					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
+
+					for (uint32_t y = 0; y < char_size_; ++ y)
+					{
+						for (uint32_t x = 0; x < char_size_; ++ x)
+						{
+							int2 const map_xy = float2(x + 0.5f, y + 0.5f) * static_cast<float>(INTERNAL_CHAR_SIZE) / static_cast<float>(char_size_ - 2)
+								- float2(static_cast<float>(x_offset), static_cast<float>(y_offset));
+							float value = MathLib::sqrt(distances[y * char_size_ + x] * scale);
+							if ((static_cast<uint32_t>(map_xy.x()) < INTERNAL_CHAR_SIZE) && (static_cast<uint32_t>(map_xy.y()) < INTERNAL_CHAR_SIZE))
+							{
+								if (0 == ((char_bitmap[(map_xy.y() * INTERNAL_CHAR_SIZE + map_xy.x()) / 8] >> (map_xy.x() & 0x7)) & 0x1))
+								{
+									value = -value;
+								}
+							}
+							else
 							{
 								value = -value;
 							}
-						}
-						else
-						{
-							value = -value;
-						}
 
-						char_dist_data_[ci.dist_index + y * char_size_ + x] = value;
+							char_dist_data_[ci.dist_index + y * char_size_ + x] = value;
+						}
 					}
 				}
-			}
-			else
-			{
-				ci.dist_index = static_cast<uint32_t>(-1);
+				else
+				{
+					ci.dist_index = static_cast<uint32_t>(-1);
+				}
+
+				++ *cur_num_char_;
 			}
 
-			++ *cur_num_char_;
+			working_package = (*cur_package_) ++;
 		}
 	}
 
@@ -574,14 +637,18 @@ private:
 	}
 
 private:
+	FT_Library ft_lib_;
 	FT_Face ft_face_;
 	uint32_t char_size_;
 	uint32_t const * validate_chars_;
-	uint32_t start_code_;
-	uint32_t end_code_;
 	font_info* char_info_;
 	float* char_dist_data_;
 	int32_t* cur_num_char_;
+	atomic<int32_t>* cur_package_;
+	uint32_t num_chars_;
+	uint32_t thread_id_;
+	uint32_t num_threads_;
+	uint32_t num_chars_per_package_;
 
 	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
 	boost::function<void(std::vector<int2>&, int, uint8_t const *, int)> edge_extract;
@@ -621,16 +688,13 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		}
 	}
 
-	uint32_t const num_chars_per_package = static_cast<uint32_t>((validate_chars.size() + num_threads - 1) / num_threads);
-
+	atomic<int32_t> cur_package(0);
 	joiner<void> disp_joiner = tp(disp_thread(&cur_num_char[0], static_cast<uint32_t>(cur_num_char.size()), static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		uint32_t const sc = i * num_chars_per_package;
-		uint32_t const ec = std::min(sc + num_chars_per_package, static_cast<uint32_t>(validate_chars.size()));
-
-		joiners[i] = tp(ttf_to_dist(ft_faces[i], char_size, &validate_chars[0], sc, ec,
-			&char_info[0], &char_dist_data[0], cur_num_char[i]));
+		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, &validate_chars[0],
+			&char_info[0], &char_dist_data[0], cur_num_char[i],
+			cur_package, static_cast<uint32_t>(validate_chars.size()), i, num_threads, 64));
 	}
 	for (int i = 0; i < num_threads; ++ i)
 	{
