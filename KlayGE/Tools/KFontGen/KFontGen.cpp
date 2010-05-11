@@ -186,64 +186,6 @@ void ComputeDistanceField(std::vector<float>& distances, uint32_t width, uint32_
 	}
 }
 
-
-class disp_thread
-{
-public:
-	disp_thread(int32_t const * cur_num_chars, uint32_t cur_num_chars_size, int32_t total_chars)
-		: cur_num_chars_(cur_num_chars), cur_num_chars_size_(cur_num_chars_size), total_chars_(total_chars)
-	{
-	}
-
-	void operator()()
-	{
-		double last_disp_time = 0;
-		for (;;)
-		{
-			int32_t dist_cur_num_char = 0;
-			for (size_t i = 0; i < cur_num_chars_size_; ++ i)
-			{
-				dist_cur_num_char += cur_num_chars_[i];
-			}
-
-			double this_disp_time = timer_.elapsed();
-			if ((dist_cur_num_char == total_chars_) || (this_disp_time - last_disp_time > 1))
-			{
-				cout << '\r';
-				cout.width(5);
-				cout << dist_cur_num_char << " / ";
-				cout.width(5);
-				cout << total_chars_;
-				cout.precision(2);
-				cout << "  Time remaining (estimated): "
-					<< fixed << this_disp_time / dist_cur_num_char * (total_chars_ - dist_cur_num_char) << " s     ";
-
-				last_disp_time = this_disp_time;
-
-				if (dist_cur_num_char == total_chars_)
-				{
-					break;
-				}
-			}
-
-			if (dist_cur_num_char >= total_chars_)
-			{
-				break;
-			}
-			else
-			{
-				KlayGE::Sleep(500);
-			}
-		}
-	}
-
-private:
-	Timer timer_;
-	int32_t const * cur_num_chars_;
-	uint32_t cur_num_chars_size_;
-	int32_t total_chars_;
-};
-
 struct Span
 {
   Span() { }
@@ -278,35 +220,31 @@ public:
 			cur_package_(&cur_package),
 			num_chars_(num_chars), thread_id_(thread_id), num_threads_(num_threads), num_chars_per_package_(num_chars_per_package)
 	{
-#ifndef KLAYGE_CPU_X64
 		CPUInfo cpu;
 		if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
 		{
-			binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
 			edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4);
 		}
 		else
 		{
 			edge_extract = boost::bind(&ttf_to_dist::edge_extract_cpp, this, _1, _2, _3, _4);
-
-			if (cpu.IsFeatureSupport(CPUInfo::CF_MMX))
-			{
-				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_mmx, this, _1, _2, _3);
-
-			}
-			else
-			{
-				binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_cpp, this, _1, _2, _3);
-			}
 		}
-#else
-		binary_font_extract = boost::bind(&ttf_to_dist::binary_font_extract_sse2, this, _1, _2, _3);
-		edge_extract = boost::bind(&ttf_to_dist::edge_extract_sse2, this, _1, _2, _3, _4);
-#endif
 	}
 
 	void operator()()
 	{
+		static const uint8_t EDGE_MASK[8] = 
+		{
+			0x00,
+			0x01,
+			0x03,
+			0x07,
+			0x0F,
+			0x1F,
+			0x3F,
+			0x7F
+		};
+
 		FT_GlyphSlot ft_slot = ft_face_->glyph;
 
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
@@ -359,9 +297,19 @@ public:
 					{
 						int const x0 = s->x - rc.left();
 						int const y = buf_height - 1 - (s->y - rc.top());
-						for (int x = x0, x_end = x0 + s->width; x < x_end; ++ x)
+						int const x_end = x0 + s->width;
+						int x = x0;
+						for (; ((x & 0x7) != 0) && (x < x_end); ++ x)
 						{
 							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] |= 1UL << (x & 0x7);
+						}
+						for (; x < (x_end & ~0x7); x += 8)
+						{
+							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] = 0xFF;
+						}
+						if (x < x_end)
+						{
+							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] = EDGE_MASK[x_end - x];
 						}
 					}
 				}
@@ -480,54 +428,6 @@ public:
 	}
 
 private:
-	void binary_font_extract_cpp(uint8_t* dst_data, uint8_t const * src_data, int size)
-	{
-		for (int x = 0; x < size; ++ x)
-		{
-			if (src_data[x] >= 128)
-			{
-				dst_data[x / 8] |= 1UL << (x & 0x7);
-			}
-		}
-	}
-
-#ifndef KLAYGE_CPU_X64
-	void binary_font_extract_mmx(uint8_t* dst_data, uint8_t const * src_data, int size)
-	{
-		for (int x = 0, x_end = size & ~0x7; x < x_end; x += 8)
-		{
-			__m64 mask = *reinterpret_cast<__m64 const *>(&src_data[x]);
-			dst_data[x / 8] = static_cast<uint8_t>(_mm_movemask_pi8(mask));
-		}
-		for (int x = size & ~0x7; x < size; ++ x)
-		{
-			if (src_data[x] >= 128)
-			{
-				dst_data[x / 8] |= 1UL << (x & 0x7);
-			}
-		}
-		_m_empty();
-	}
-#endif
-
-	void binary_font_extract_sse2(uint8_t* dst_data, uint8_t const * src_data, int size)
-	{
-		__m128i const * src_data32 = reinterpret_cast<__m128i const *>(src_data);
-		uint16_t* dst_data16 = reinterpret_cast<uint16_t*>(dst_data);
-		for (int x = 0, x_end = size & ~0xF; x < x_end; x += 16, ++ src_data32, ++ dst_data16)
-		{
-			__m128i mask = _mm_loadu_si128(src_data32);
-			*dst_data16 = static_cast<uint16_t>(_mm_movemask_epi8(mask));
-		}
-		for (int x = size & ~0xF; x < size; ++ x)
-		{
-			if (src_data[x] >= 128)
-			{
-				dst_data[x / 8] |= 1UL << (x & 0x7);
-			}
-		}
-	}
-
 	void edge_extract_sse2(std::vector<int2>& edge_points, int width, uint8_t const * char_bitmap, int y)
 	{
 		__m128i zero = _mm_set1_epi8(0);
@@ -650,14 +550,13 @@ private:
 	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
-	boost::function<void(uint8_t*, uint8_t const *, int)> binary_font_extract;
 	boost::function<void(std::vector<int2>&, int, uint8_t const *, int)> edge_extract;
 };
 
 void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
 					  int num_threads, std::vector<uint8_t> const & ttf, int start_code, int end_code, uint32_t char_size)
 {
-	thread_pool tp(1, num_threads + 1);
+	thread_pool tp(1, num_threads);
 
 	std::vector<int32_t> cur_num_char(num_threads, 0);
 
@@ -689,13 +588,47 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 	}
 
 	atomic<int32_t> cur_package(0);
-	joiner<void> disp_joiner = tp(disp_thread(&cur_num_char[0], static_cast<uint32_t>(cur_num_char.size()), static_cast<int32_t>(validate_chars.size())));
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, &validate_chars[0],
 			&char_info[0], &char_dist_data[0], cur_num_char[i],
 			cur_package, static_cast<uint32_t>(validate_chars.size()), i, num_threads, 64));
 	}
+	
+	Timer timer;
+	int32_t total_chars = static_cast<int32_t>(validate_chars.size());
+	double last_disp_time = 0;
+	for (;;)
+	{
+		int32_t dist_cur_num_char = 0;
+		for (int i = 0; i < num_threads; ++ i)
+		{
+			dist_cur_num_char += cur_num_char[i];
+		}
+
+		double this_disp_time = timer.elapsed();
+		if ((dist_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+		{
+			cout << '\r';
+			cout.width(5);
+			cout << dist_cur_num_char << " / ";
+			cout.width(5);
+			cout << total_chars;
+			cout.precision(2);
+			cout << "  Time remaining (estimated): "
+				<< fixed << this_disp_time / dist_cur_num_char * (total_chars - dist_cur_num_char) << " s     ";
+
+			last_disp_time = this_disp_time;
+
+			if (dist_cur_num_char == total_chars)
+			{
+				break;
+			}
+		}
+
+		KlayGE::Sleep(1000);
+	}
+
 	for (int i = 0; i < num_threads; ++ i)
 	{
 		joiners[i]();
@@ -703,7 +636,6 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		FT_Done_Face(ft_faces[i]);
 		FT_Done_FreeType(ft_libs[i]);
 	}
-	disp_joiner();
 }
 
 void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
