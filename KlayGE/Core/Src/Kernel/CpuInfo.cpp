@@ -47,15 +47,20 @@ namespace
 		CFM_ApicId_Intel = 0xFF000000,
 
 		// In ECX of type 1
-		CFM_SSE3		= 1UL << 0,		// SSE3 Extention
-		CFM_SSSE3		= 1UL << 9,		// SSSE3 Extention
-		CFM_SSE41		= 1UL << 19,	// SSE41 Extention
-		CFM_SSE42		= 1UL << 20,	// SSE42 Extention
+		CFM_SSE3		= 1UL << 0,		// SSE3
+		CFM_SSSE3		= 1UL << 9,		// SSSE3
+		CFM_FMA			= 1UL << 12,	// 256-bit FMA (Intel)
+		CFM_SSE41		= 1UL << 19,	// SSE4.1
+		CFM_SSE42		= 1UL << 20,	// SSE4.2
+		CFM_MOVBE		= 1UL << 22,	// MOVBE (Intel)
+		CFM_POPCNT		= 1UL << 23,	// POPCNT
+		CFM_AES			= 1UL << 25,	// AES support (Intel)
+		CFM_AVX			= 1UL << 28,	// 256-bit AVX (Intel)
 
 		// In EDX of type 1
 		CFM_MMX			= 1UL << 23,	// MMX Technology
-		CFM_SSE			= 1UL << 25,	// SSE Extention
-		CFM_SSE2		= 1UL << 26,	// SSE2 Extention
+		CFM_SSE			= 1UL << 25,	// SSE
+		CFM_SSE2		= 1UL << 26,	// SSE2
 		CFM_HTT			= 1UL << 28,	// Hyper-threading technology
 
 		// In EAX of type 4. Intel only.
@@ -63,6 +68,7 @@ namespace
 
 		// In ECX of type 0x80000001. AMD only.
 		CFM_CmpLegacy_AMD           = 0x00000002,
+		CFM_LZCNT_AMD				= 1UL << 5,
 		CFM_SSE4A_AMD				= 1UL << 6,
 		CFM_MisalignedSSE_AMD		= 1UL << 7,
 
@@ -279,6 +285,11 @@ namespace KlayGE
 			feature_mask_ |= cpuid.Ecx() & CFM_SSSE3 ? CF_SSSE3 : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_SSE41 ? CF_SSE41 : 0;
 			feature_mask_ |= cpuid.Ecx() & CFM_SSE42 ? CF_SSE42 : 0;
+			feature_mask_ |= cpuid.Ecx() & CFM_FMA ? CF_FMA : 0;
+			feature_mask_ |= cpuid.Ecx() & CFM_MOVBE ? CF_MOVBE : 0;
+			feature_mask_ |= cpuid.Ecx() & CFM_POPCNT ? CF_POPCNT : 0;
+			feature_mask_ |= cpuid.Ecx() & CFM_AES ? CF_AES : 0;
+			feature_mask_ |= cpuid.Ecx() & CFM_AVX ? CF_AVX : 0;
 		}
 
 		cpuid.Call(0x80000000);
@@ -290,6 +301,7 @@ namespace KlayGE
 				cpuid.Call(0x80000001);
 				if (AuthenticAMD == cpu_string_)
 				{
+					feature_mask_ |= cpuid.Ecx() & CFM_LZCNT_AMD ? CF_LZCNT : 0;
 					feature_mask_ |= cpuid.Ecx() & CFM_SSE4A_AMD ? CF_SSE4A : 0;
 					feature_mask_ |= cpuid.Ecx() & CFM_MisalignedSSE_AMD ? CF_MisalignedSSE : 0;
 				}

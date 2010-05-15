@@ -186,24 +186,50 @@ void ComputeDistanceField(std::vector<float>& distances, uint32_t width, uint32_
 	}
 }
 
-struct Span
+struct raster_user_struct
 {
-  Span() { }
-  Span(int _x, int _y, int _width, int _coverage)
-  : x(_x), y(_y), width(_width), coverage(_coverage) { }
-
-  int x, y, width, coverage;
+	FT_BBox bbox;
+	int buf_width;
+	int buf_height;
+	uint8_t* char_bitmap;
 };
-
-void RasterCallback(const int y,
-               const int count,
-               const FT_Span * const spans,
-               void * const user) 
+		
+void RasterCallback(int y, int count, FT_Span const * const spans, void* const user) 
 {
-	std::vector<Span>* sptr = static_cast<std::vector<Span>*>(user);
-	for (int i = 0; i < count; ++i) 
+	static const uint8_t EDGE_MASK[8] = 
 	{
-		sptr->push_back(Span(spans[i].x, y, spans[i].len, spans[i].coverage));
+		0x00,
+		0x01,
+		0x03,
+		0x07,
+		0x0F,
+		0x1F,
+		0x3F,
+		0x7F
+	};
+
+	raster_user_struct* sptr = static_cast<raster_user_struct*>(user);
+	for (int i = 0; i < count; ++ i) 
+	{
+		if (spans[i].coverage > 127)
+		{
+			int const x0 = spans[i].x - sptr->bbox.xMin;
+			int const y0 = sptr->buf_height - 1 - (y - sptr->bbox.yMin);
+			int const x_end = x0 + spans[i].len;
+			int x = x0;
+			for (; ((x & 0x7) != 0) && (x < x_end); ++ x)
+			{
+				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] |= 1UL << (x & 0x7);
+			}
+			for (; x < (x_end & ~0x7); x += 8)
+			{
+				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = 0xFF;
+			}
+			if (x < x_end)
+			{
+				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = EDGE_MASK[x_end - x];
+			}
+		}
 	}
 }
 
@@ -233,32 +259,22 @@ public:
 
 	void operator()()
 	{
-		static const uint8_t EDGE_MASK[8] = 
-		{
-			0x00,
-			0x01,
-			0x03,
-			0x07,
-			0x0F,
-			0x1F,
-			0x3F,
-			0x7F
-		};
-
 		FT_GlyphSlot ft_slot = ft_face_->glyph;
 
 		int const max_dist_sq = 2 * INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE;
 		float const scale = static_cast<float>(INTERNAL_CHAR_SIZE * INTERNAL_CHAR_SIZE) / (char_size_ * char_size_) / max_dist_sq;
 
-		std::vector<Span> spans;
+		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
+		std::vector<int2> edge_points;
+
+		raster_user_struct raster_user;
+		raster_user.char_bitmap = &char_bitmap[0];
+
 		FT_Raster_Params params;
 		memset(&params, 0, sizeof(params));
 		params.flags = FT_RASTER_FLAG_AA | FT_RASTER_FLAG_DIRECT;
 		params.gray_spans = RasterCallback;
-		params.user = &spans;
-
-		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(INTERNAL_CHAR_SIZE / 8 * INTERNAL_CHAR_SIZE);
-		std::vector<int2> edge_points;
+		params.user = &raster_user;
 
 		int32_t num_packages = (num_chars_ + num_chars_per_package_ - 1) / num_chars_per_package_;
 		int32_t working_package = (*cur_package_) ++;
@@ -268,8 +284,6 @@ public:
 			uint32_t const end_code = std::min(num_chars_, start_code + num_chars_per_package_);
 			for (uint32_t c = start_code; c < end_code; ++ c)
 			{
-				spans.resize(0);
-
 				uint32_t const ch = validate_chars_[c];
 				font_info& ci = char_info_[ch];
 
@@ -277,45 +291,21 @@ public:
 
 				FT_UInt gindex = FT_Get_Char_Index(ft_face_, ch);
 				FT_Load_Glyph(ft_face_, gindex, FT_LOAD_NO_BITMAP);
-				FT_Outline_Render(ft_lib_, &ft_slot->outline, &params);
-
-				Rect_T<int> rc(std::numeric_limits<int>::max(), std::numeric_limits<int>::max(), std::numeric_limits<int>::min(), std::numeric_limits<int>::min());
-				for (std::vector<Span>::const_iterator s = spans.begin(); s != spans.end(); ++ s)
-				{
-					rc.left() = std::min(rc.left(), s->x);
-					rc.right() = std::max(rc.right(), s->x + s->width);
-					rc.top() = std::min(rc.top(), s->y);
-					rc.bottom() = std::max(rc.bottom(), s->y + 1);
-				}
-
-				int const buf_width = std::min(rc.Width(), static_cast<int>(INTERNAL_CHAR_SIZE));
-				int const buf_height = std::min(rc.Height(), static_cast<int>(INTERNAL_CHAR_SIZE));
-
-				for (std::vector<Span>::const_iterator s = spans.begin(); s != spans.end(); ++ s)
-				{
-					if (s->coverage > 127)
-					{
-						int const x0 = s->x - rc.left();
-						int const y = buf_height - 1 - (s->y - rc.top());
-						int const x_end = x0 + s->width;
-						int x = x0;
-						for (; ((x & 0x7) != 0) && (x < x_end); ++ x)
-						{
-							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] |= 1UL << (x & 0x7);
-						}
-						for (; x < (x_end & ~0x7); x += 8)
-						{
-							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] = 0xFF;
-						}
-						if (x < x_end)
-						{
-							char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8] = EDGE_MASK[x_end - x];
-						}
-					}
-				}
-
 				ci.advance_x = static_cast<uint16_t>(ft_slot->advance.x / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
 				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
+
+				FT_Outline_Get_CBox(&ft_slot->outline, &raster_user.bbox);
+				raster_user.bbox.xMin /= 64;
+				raster_user.bbox.xMax /= 64;
+				raster_user.bbox.yMin /= 64;
+				raster_user.bbox.yMax /= 64;
+
+				int const buf_width = std::min(static_cast<int>(raster_user.bbox.xMax - raster_user.bbox.xMin), static_cast<int>(INTERNAL_CHAR_SIZE));
+				int const buf_height = std::min(static_cast<int>(raster_user.bbox.yMax - raster_user.bbox.yMin), static_cast<int>(INTERNAL_CHAR_SIZE));
+				raster_user.buf_width = buf_width;
+				raster_user.buf_height = buf_height;
+
+				FT_Outline_Render(ft_lib_, &ft_slot->outline, &params);
 
 				edge_points.resize(0);
 				for (int y = 0; y < buf_height; ++ y)
@@ -387,8 +377,8 @@ public:
 					std::vector<float> distances(char_size_ * char_size_);
 					ComputeDistanceField(distances, char_size_, char_size_, dmap);
 
-					ci.left = static_cast<int16_t>((rc.left() - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
-					ci.top = static_cast<int16_t>((3 / 4.0f - (rc.bottom() + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
+					ci.left = static_cast<int16_t>((raster_user.bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
+					ci.top = static_cast<int16_t>((3 / 4.0f - (raster_user.bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
 					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
 					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
 
