@@ -354,6 +354,9 @@
     <ClCompile Include="..\..\Core\Src\AppLayer\Window.cpp">
       <Filter>App Layer\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Scene\Frustum.cpp">
+      <Filter>Scene Management\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -652,6 +655,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Window.hpp">
       <Filter>App Layer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp">
+      <Filter>Scene Management\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

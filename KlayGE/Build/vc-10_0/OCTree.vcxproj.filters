@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Plugins\Src\Scene\OCTree\Frustum.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Plugins\Src\Scene\OCTree\OCTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -22,9 +19,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Plugins\Include\KlayGE\OCTree\Frustum.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -19,19 +19,19 @@ namespace KlayGE
 	class NullRenderView : public RenderView
 	{
 	public:
-		void Clear(Color const & /*clr*/)
+		void ClearColor(Color const & /*clr*/)
 		{
 		}
 
-		void Clear(float /*depth*/)
+		void ClearDepth(float /*depth*/)
 		{
 		}
 		
-		void Clear(int32_t /*stencil*/)
+		void ClearStencil(int32_t /*stencil*/)
 		{
 		}
 
-		void Clear(float /*depth*/, int32_t /*stencil*/)
+		void ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 		{
 		}
 

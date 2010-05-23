@@ -31,9 +31,9 @@ namespace KlayGE
 		OGLRenderView();
 		virtual ~OGLRenderView();
 
-		void Clear(float depth);
-		void Clear(int32_t stencil);
-		void Clear(float depth, int32_t stencil);
+		void ClearDepth(float depth);
+		void ClearStencil(int32_t stencil);
+		void ClearDepthStencil(float depth, int32_t stencil);
 
 		GLuint OGLTexture() const
 		{
@@ -57,10 +57,10 @@ namespace KlayGE
 	public:
 		OGLScreenColorRenderView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void Clear(Color const & clr);
-		void Clear(float depth);
-		void Clear(int32_t stencil);
-		void Clear(float depth, int32_t stencil);
+		void ClearColor(Color const & clr);
+		void ClearDepth(float depth);
+		void ClearStencil(int32_t stencil);
+		void ClearDepthStencil(float depth, int32_t stencil);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -74,7 +74,7 @@ namespace KlayGE
 	public:
 		OGLScreenDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf);
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -88,7 +88,7 @@ namespace KlayGE
 	public:
 		OGLTexture1DRenderView(Texture& texture_1d, int array_index, int level);
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -107,7 +107,7 @@ namespace KlayGE
 	public:
 		OGLTexture2DRenderView(Texture& texture_2d, int array_index, int level);
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -127,7 +127,7 @@ namespace KlayGE
 		OGLTexture3DRenderView(Texture& texture_3d, int array_index, uint32_t slice, int level);
 		~OGLTexture3DRenderView();
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -153,7 +153,7 @@ namespace KlayGE
 	public:
 		OGLTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -174,7 +174,7 @@ namespace KlayGE
 							uint32_t width, uint32_t height, ElementFormat pf);
 		~OGLGraphicsBufferRenderView();
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -198,7 +198,7 @@ namespace KlayGE
 		OGLDepthStencilRenderView(Texture& texture, int array_index, int level);
 		~OGLDepthStencilRenderView();
 
-		void Clear(Color const & clr);
+		void ClearColor(Color const & clr);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

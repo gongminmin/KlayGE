@@ -40,17 +40,17 @@ namespace KlayGE
 	{
 	}
 
-	void OGLRenderView::Clear(float depth)
+	void OGLRenderView::ClearDepth(float depth)
 	{
 		this->DoClear(GL_DEPTH_BUFFER_BIT, Color(), depth, 0);
 	}
 
-	void OGLRenderView::Clear(int32_t stencil)
+	void OGLRenderView::ClearStencil(int32_t stencil)
 	{
 		this->DoClear(GL_STENCIL_BUFFER_BIT, Color(), 0, stencil);
 	}
 
-	void OGLRenderView::Clear(float depth, int32_t stencil)
+	void OGLRenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
 		uint32_t flags = 0;
 		if (IsDepthFormat(pf_))
@@ -170,22 +170,22 @@ namespace KlayGE
 		pf_ = pf;
 	}
 
-	void OGLScreenColorRenderView::Clear(Color const & clr)
+	void OGLScreenColorRenderView::ClearColor(Color const & clr)
 	{
 		this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
 	}
 
-	void OGLScreenColorRenderView::Clear(float /*depth*/)
+	void OGLScreenColorRenderView::ClearDepth(float /*depth*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLScreenColorRenderView::Clear(int32_t /*stencil*/)
+	void OGLScreenColorRenderView::ClearStencil(int32_t /*stencil*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLScreenColorRenderView::Clear(float /*depth*/, int32_t /*stencil*/)
+	void OGLScreenColorRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -223,7 +223,7 @@ namespace KlayGE
 		pf_ = pf;
 	}
 
-	void OGLScreenDepthStencilRenderView::Clear(Color const & /*clr*/)
+	void OGLScreenDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -275,7 +275,7 @@ namespace KlayGE
 		pf_ = texture_1d_.Format();
 	}
 
-	void OGLTexture1DRenderView::Clear(Color const & clr)
+	void OGLTexture1DRenderView::ClearColor(Color const & clr)
 	{
 		if (fbo_ != 0)
 		{
@@ -386,7 +386,7 @@ namespace KlayGE
 		pf_ = texture_2d_.Format();
 	}
 
-	void OGLTexture2DRenderView::Clear(Color const & clr)
+	void OGLTexture2DRenderView::ClearColor(Color const & clr)
 	{
 		if (fbo_ != 0)
 		{
@@ -504,7 +504,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3DRenderView::Clear(Color const & clr)
+	void OGLTexture3DRenderView::ClearColor(Color const & clr)
 	{
 		BOOST_ASSERT(fbo_ != 0);
 
@@ -707,7 +707,7 @@ namespace KlayGE
 		pf_ = texture_cube_.Format();
 	}
 
-	void OGLTextureCubeRenderView::Clear(Color const & clr)
+	void OGLTextureCubeRenderView::ClearColor(Color const & clr)
 	{
 		if (fbo_ != 0)
 		{
@@ -803,7 +803,7 @@ namespace KlayGE
 		glDeleteTextures(1, &tex_);
 	}
 
-	void OGLGraphicsBufferRenderView::Clear(Color const & clr)
+	void OGLGraphicsBufferRenderView::ClearColor(Color const & clr)
 	{
 		if (fbo_ != 0)
 		{
@@ -945,7 +945,7 @@ namespace KlayGE
 		glDeleteRenderbuffersEXT(1, &rbo_);
 	}
 
-	void OGLDepthStencilRenderView::Clear(Color const & /*clr*/)
+	void OGLDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
 	}

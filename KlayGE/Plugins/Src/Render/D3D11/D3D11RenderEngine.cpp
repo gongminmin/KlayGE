@@ -464,31 +464,44 @@ namespace KlayGE
 		}
 
 		uint32_t primCount;
-		switch (rl.TopologyType())
+		RenderLayout::topology_type tt = rl.TopologyType();
+		switch (tt)
 		{
 		case RenderLayout::TT_PointList:
 			primCount = vertex_count;
 			break;
 
 		case RenderLayout::TT_LineList:
+		case RenderLayout::TT_LineList_Adj:
 			primCount = vertex_count / 2;
 			break;
 
 		case RenderLayout::TT_LineStrip:
+		case RenderLayout::TT_LineStrip_Adj:
 			primCount = vertex_count - 1;
 			break;
 
 		case RenderLayout::TT_TriangleList:
+		case RenderLayout::TT_TriangleList_Adj:
 			primCount = vertex_count / 3;
 			break;
 
 		case RenderLayout::TT_TriangleStrip:
+		case RenderLayout::TT_TriangleStrip_Adj:
 			primCount = vertex_count - 2;
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			primCount = 0;
+			if ((rl.TopologyType() >= RenderLayout::TT_1_Ctrl_Pt_PatchList)
+				&& (rl.TopologyType() <= RenderLayout::TT_32_Ctrl_Pt_PatchList))
+			{
+				primCount = vertex_count / 3;
+			}
+			else
+			{
+				BOOST_ASSERT(false);
+				primCount = 0;
+			}
 			break;
 		}
 

@@ -275,6 +275,7 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Renderable.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\RenderableHelper.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ResLoader.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\Frustum.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneManager.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneNode.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneObject.hpp" />
@@ -376,6 +377,7 @@
 		<Unit filename="..\..\Core\Src\Render\SATPostProcess.cpp" />
 		<Unit filename="..\..\Core\Src\Render\ShaderObject.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Texture.cpp" />
+		<Unit filename="..\..\Core\Src\Scene\Frustum.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneManager.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneObject.cpp" />
 		<Unit filename="..\..\Core\Src\Scene\SceneObjectHelper.cpp" />

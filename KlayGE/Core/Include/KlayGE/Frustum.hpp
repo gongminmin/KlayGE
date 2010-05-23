@@ -1,8 +1,11 @@
 // Frustum.hpp
-// KlayGE 八叉树视锥类 头文件
-// Ver 2.5.0
-// 版权所有(C) 龚敏敏, 2004-2005
+// KlayGE 视锥类 头文件
+// Ver 3.10.0
+// 版权所有(C) 龚敏敏, 2004-2010
 // Homepage: http://klayge.sourceforge.net
+//
+// 3.10.0
+// 移致Core中 (2010.5.23)
 //
 // 2.5.0
 // 改为LUT实现 (2005.3.30)
@@ -30,7 +33,7 @@
 
 namespace KlayGE
 {
-	class Frustum
+	class KLAYGE_CORE_API Frustum
 	{
 	public:
 		enum VIS

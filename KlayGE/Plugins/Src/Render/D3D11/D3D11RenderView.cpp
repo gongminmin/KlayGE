@@ -219,22 +219,22 @@ namespace KlayGE
 		pf_ = pf;
 	}
 
-	void D3D11RenderTargetRenderView::Clear(Color const & clr)
+	void D3D11RenderTargetRenderView::ClearColor(Color const & clr)
 	{
 		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), &clr.r());
 	}
 
-	void D3D11RenderTargetRenderView::Clear(float /*depth*/)
+	void D3D11RenderTargetRenderView::ClearDepth(float /*depth*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11RenderTargetRenderView::Clear(int32_t /*stencil*/)
+	void D3D11RenderTargetRenderView::ClearStencil(int32_t /*stencil*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11RenderTargetRenderView::Clear(float /*depth*/, int32_t /*stencil*/)
+	void D3D11RenderTargetRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
 		BOOST_ASSERT(false);
 	}
@@ -460,22 +460,22 @@ namespace KlayGE
 		pf_ = pf;
 	}
 
-	void D3D11DepthStencilRenderView::Clear(Color const & /*clr*/)
+	void D3D11DepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11DepthStencilRenderView::Clear(float depth)
+	void D3D11DepthStencilRenderView::ClearDepth(float depth)
 	{
 		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH, depth, 0);
 	}
 
-	void D3D11DepthStencilRenderView::Clear(int32_t stencil)
+	void D3D11DepthStencilRenderView::ClearStencil(int32_t stencil)
 	{
 		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_STENCIL, 1, static_cast<uint8_t>(stencil));
 	}
 
-	void D3D11DepthStencilRenderView::Clear(float depth, int32_t stencil)
+	void D3D11DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
 		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, static_cast<uint8_t>(stencil));
 	}

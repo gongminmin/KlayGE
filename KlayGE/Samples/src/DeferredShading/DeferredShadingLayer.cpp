@@ -863,7 +863,7 @@ namespace KlayGE
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(static_cast<int32_t>(0));
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearStencil(0);
 
 					technique_ = technique_lights_[type];
 

@@ -776,7 +776,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 
 		clear_float_->Apply();
 		renderEngine.BindFrameBuffer(clr_depth_fb_);
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		for (int i = 0; i < NUM_INSTANCE; ++ i)
 		{
 			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
@@ -802,7 +802,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		depth_of_field_->Apply();
 
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		return App3DFramework::URV_Finished;
 	}
 }

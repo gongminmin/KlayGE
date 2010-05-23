@@ -32,7 +32,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D9RenderView::Clear(Color const & clr)
+	void D3D9RenderView::ClearColor(Color const & clr)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
@@ -70,7 +70,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D9RenderView::Clear(float depth)
+	void D3D9RenderView::ClearDepth(float depth)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
@@ -91,7 +91,7 @@ namespace KlayGE
 		old_ds->Release();
 	}
 
-	void D3D9RenderView::Clear(int32_t stencil)
+	void D3D9RenderView::ClearStencil(int32_t stencil)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();
@@ -112,7 +112,7 @@ namespace KlayGE
 		old_ds->Release();
 	}
 
-	void D3D9RenderView::Clear(float depth, int32_t stencil)
+	void D3D9RenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
 		RenderEngine const & render_eng = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		ID3D9DevicePtr const & d3d_device = checked_cast<D3D9RenderEngine const *>(&render_eng)->D3DDevice();

@@ -54,10 +54,10 @@ namespace KlayGE
 			return NumFormatBits(pf_);
 		}
 
-		virtual void Clear(Color const & clr) = 0;
-		virtual void Clear(float depth) = 0;
-		virtual void Clear(int32_t stencil) = 0;
-		virtual void Clear(float depth, int32_t stencil) = 0;
+		virtual void ClearColor(Color const & clr) = 0;
+		virtual void ClearDepth(float depth) = 0;
+		virtual void ClearStencil(int32_t stencil) = 0;
+		virtual void ClearDepthStencil(float depth, int32_t stencil) = 0;
 
 		virtual void OnAttached(FrameBuffer& fb, uint32_t att) = 0;
 		virtual void OnDetached(FrameBuffer& fb, uint32_t att) = 0;

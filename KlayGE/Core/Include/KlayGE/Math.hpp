@@ -779,7 +779,7 @@ namespace KlayGE
 			Vector_T<T, 3> const & vUp = Vector_T<T, 3>(0, 1, 0))
 		{
 			Vector_T<T, 3> zAxis(normalize(vEye - vAt));
-			Vector_T<T, 3> xAxis(normalize(Cross(vUp, zAxis)));
+			Vector_T<T, 3> xAxis(normalize(cross(vUp, zAxis)));
 			Vector_T<T, 3> yAxis(cross(zAxis, xAxis));
 
 			return Matrix4_T<T>(

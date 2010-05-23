@@ -51,10 +51,10 @@ namespace KlayGE
 		D3D10RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf);
 		D3D10RenderTargetRenderView(ID3D10RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf);
 
-		void Clear(Color const & clr);
-		void Clear(float depth);
-		void Clear(int32_t stencil);
-		void Clear(float depth, int32_t stencil);
+		void ClearColor(Color const & clr);
+		void ClearDepth(float depth);
+		void ClearStencil(int32_t stencil);
+		void ClearDepthStencil(float depth, int32_t stencil);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
@@ -78,10 +78,10 @@ namespace KlayGE
 		D3D10DepthStencilRenderView(ID3D10DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf);
 		D3D10DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
 
-		void Clear(Color const & clr);
-		void Clear(float depth);
-		void Clear(int32_t stencil);
-		void Clear(float depth, int32_t stencil);
+		void ClearColor(Color const & clr);
+		void ClearDepth(float depth);
+		void ClearStencil(int32_t stencil);
+		void ClearDepthStencil(float depth, int32_t stencil);
 
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);

@@ -333,7 +333,7 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 
 		return App3DFramework::URV_Finished;

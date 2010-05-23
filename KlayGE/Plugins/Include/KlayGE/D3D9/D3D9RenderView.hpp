@@ -37,10 +37,10 @@ namespace KlayGE
 	public:
 		virtual ~D3D9RenderView();
 
-		void Clear(Color const & clr);
-		void Clear(float depth);
-		void Clear(int32_t stencil);
-		void Clear(float depth, int32_t stencil);
+		void ClearColor(Color const & clr);
+		void ClearDepth(float depth);
+		void ClearStencil(int32_t stencil);
+		void ClearDepthStencil(float depth, int32_t stencil);
 
 		ID3D9SurfacePtr D3DRenderSurface() const
 		{

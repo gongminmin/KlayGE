@@ -1125,6 +1125,10 @@
 				Name="Source Files"
 				>
 				<File
+					RelativePath="..\..\Core\Src\Scene\Frustum.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Scene\SceneManager.cpp"
 					>
 				</File>
@@ -1140,6 +1144,10 @@
 			<Filter
 				Name="Header Files"
 				>
+				<File
+					RelativePath="..\..\Core\Include\Frustum.hpp"
+					>
+				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\SceneManager.hpp"
 					>

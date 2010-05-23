@@ -200,7 +200,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Plugins\Src\Scene\OCTree\Frustum.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Scene\OCTree\OCTree.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Scene\OCTree\OCTreeFactory.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -210,7 +209,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Plugins\Include\KlayGE\OCTree\Frustum.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OCTree\OCTreeFactory.hpp" />
   </ItemGroup>

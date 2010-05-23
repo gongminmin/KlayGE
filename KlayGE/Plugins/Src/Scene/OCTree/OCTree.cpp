@@ -229,7 +229,6 @@ namespace KlayGE
 		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
 #endif
 
-		frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
 		if (!octree_.empty())
 		{
 			this->NodeVisible(0);

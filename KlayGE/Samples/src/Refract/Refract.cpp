@@ -298,7 +298,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 0:
 		// 第一遍，渲染背面
 		re.BindFrameBuffer(render_buffer_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(0.0f);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(0);
 		sky_box_->Visible(false);
@@ -307,7 +307,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 	case 1:
 		// 第二遍，渲染正面
 		re.BindFrameBuffer(hdr_buffer_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		if (settings_.sample_count > 1)
 		{
@@ -331,7 +331,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		hdr_->Apply();
 
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		return App3DFramework::URV_Finished;
 	}

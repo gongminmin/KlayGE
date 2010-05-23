@@ -334,18 +334,22 @@ namespace KlayGE
 			break;
 
 		case RenderLayout::TT_LineList:
+		case RenderLayout::TT_LineList_Adj:
 			primCount = vertex_count / 2;
 			break;
 
 		case RenderLayout::TT_LineStrip:
+		case RenderLayout::TT_LineStrip_Adj:
 			primCount = vertex_count - 1;
 			break;
 
 		case RenderLayout::TT_TriangleList:
+		case RenderLayout::TT_TriangleList_Adj:
 			primCount = vertex_count / 3;
 			break;
 
 		case RenderLayout::TT_TriangleStrip:
+		case RenderLayout::TT_TriangleStrip_Adj:
 			primCount = vertex_count - 2;
 			break;
 

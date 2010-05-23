@@ -358,6 +358,18 @@ namespace KlayGE
 		case RenderLayout::TT_TriangleStrip:
 			return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
+		case RenderLayout::TT_LineList_Adj:
+			return D3D10_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+
+		case RenderLayout::TT_LineStrip_Adj:
+			return D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+
+		case RenderLayout::TT_TriangleList_Adj:
+			return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+
+		case RenderLayout::TT_TriangleStrip_Adj:
+			return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+
 		default:
 			BOOST_ASSERT(false);
 			return D3D10_PRIMITIVE_TOPOLOGY_POINTLIST;

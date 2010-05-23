@@ -94,8 +94,10 @@ namespace KlayGE
 		{
 		}
 
-		void ClipScene(Camera const & /*camera*/)
+		void ClipScene(Camera const & camera)
 		{
+			frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
+
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				if (!scene_objs_[i]->Overlay())
@@ -177,9 +179,9 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneManager::AABBVisible(Box const & /*box*/)
+	bool SceneManager::AABBVisible(Box const & box)
 	{
-		return true;
+		return frustum_.Visiable(box) != Frustum::VIS_NO;
 	}
 
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()

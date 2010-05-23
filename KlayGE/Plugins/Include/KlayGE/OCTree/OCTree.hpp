@@ -28,7 +28,6 @@
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Box.hpp>
-#include <KlayGE/OCTree/Frustum.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -74,8 +73,6 @@ namespace KlayGE
 
 			Frustum::VIS visible;
 		};
-
-		Frustum frustum_;
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;
 		std::vector<size_t, boost::pool_allocator<size_t> > base_address_;

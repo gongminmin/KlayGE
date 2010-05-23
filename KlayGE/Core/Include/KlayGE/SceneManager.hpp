@@ -27,6 +27,7 @@
 
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/MapVector.hpp>
+#include <KlayGE/Frustum.hpp>
 
 #include <vector>
 
@@ -74,6 +75,7 @@ namespace KlayGE
 		virtual SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter) = 0;
 
 	protected:
+		Frustum frustum_;
 		SceneObjectsType scene_objs_;
 		std::vector<char> visible_marks_;
 		uint32_t urt_;

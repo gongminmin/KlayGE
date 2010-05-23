@@ -1352,7 +1352,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	if (App3DFramework::URV_Finished == ret)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->Clear(1.0f);
+		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		if ((buffer_type_ > 0) && (buffer_type_ != 4))
 		{
 			debug_pp_->Apply();
