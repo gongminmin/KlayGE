@@ -170,6 +170,10 @@ def create_header(prefix, extensions):
 	header_str.write("{\n")
 	header_str.write("#endif\n\n")
 
+	typedef_set = set()
+	token_set = set()
+	function_set = set()
+
 	for extension in extensions:
 		header_str.write("#ifndef %s\n" % extension.name)
 		header_str.write("#define %s 1\n" % extension.name)
@@ -182,7 +186,9 @@ def create_header(prefix, extensions):
 				header_str.write("#ifdef %s\n\n" % extension.predefined)
 
 			for token in extension.tokens:
-				header_str.write("%s\n" % token)
+				if (token.name not in token_set):
+					header_str.write("%s\n" % token)
+					token_set.add(token.name)
 
 			header_str.write("\n")
 
@@ -198,7 +204,9 @@ def create_header(prefix, extensions):
 				header_str.write("#ifdef %s\n\n" % extension.predefined)
 
 			for typedef in extension.typedefs:
-				header_str.write("%s\n" % typedef)
+				if (typedef.synonym not in typedef_set):
+					header_str.write("%s\n" % typedef)
+					typedef_set.add(typedef.synonym)
 
 			header_str.write("\n")
 
@@ -216,8 +224,9 @@ def create_header(prefix, extensions):
 			all_static = True
 			for function in extension.functions:
 				if not function.static_link:
-					header_str.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
-					all_static = False
+					if (function.name not in function_set):
+						header_str.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
+						all_static = False
 
 			if not all_static:
 				header_str.write("\n")
@@ -226,7 +235,9 @@ def create_header(prefix, extensions):
 				if function.static_link:
 					header_str.write("extern %s APIENTRY %s(%s);\n" % (function.return_type, function.name, function.params_str()))
 				else:
-					header_str.write("extern GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
+					if (function.name not in function_set):
+						header_str.write("extern GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
+						function_set.add(function.name)
 
 			header_str.write("\n")
 
@@ -249,11 +260,15 @@ def create_header(prefix, extensions):
 
 	header_str.write("#endif		/* _GLLOADER_%s_H */\n" % prefix.upper())
 
-	cur_header_file = open("include/glloader/glloader_%s.h" % prefix.lower(), "r")
-	cur_header_str = cur_header_file.read()
-	cur_header_file.close()
+	try:
+		cur_header_file = open("include/glloader/glloader_%s.h" % prefix.lower(), "r")
+		cur_header_str = cur_header_file.read()
+		cur_header_file.close()
+	except:
+		cur_header_str = ""
 	new_header_str = header_str.getvalue()
 	if new_header_str != cur_header_str:
+		print("glloader_%s.h is updated" % prefix.lower())
 		header_file = open("include/glloader/glloader_%s.h" % prefix.lower(), "w")
 		header_file.write(new_header_str)
 		header_file.close()
@@ -274,6 +289,8 @@ def create_source(prefix, extensions):
 	source_str.write("extern \"C\"\n")
 	source_str.write("{\n")
 	source_str.write("#endif\n\n")
+
+	function_set = set()
 
 	for extension in extensions:
 		if extension.predefined != None:
@@ -316,14 +333,16 @@ def create_source(prefix, extensions):
 
 			for function in extension.functions:
 				if not function.static_link:
-					source_str.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
-					source_str.write("{\n")
-					source_str.write("\tglloader_init();\n")
-					source_str.write("\t")
-					if (function.return_type != "void") and (function.return_type != "VOID"):
-						source_str.write("return ")
-					source_str.write("%s(%s);\n" % (function.name, function.param_names_str()))
-					source_str.write("}\n")
+					if (function.name not in function_set):
+						source_str.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
+						source_str.write("{\n")
+						source_str.write("\tglloader_init();\n")
+						source_str.write("\t")
+						if (function.return_type != "void") and (function.return_type != "VOID"):
+							source_str.write("return ")
+						source_str.write("%s(%s);\n" % (function.name, function.param_names_str()))
+						source_str.write("}\n")
+						function_set.add(function.name)
 			if not all_static:
 				source_str.write("\n")
 
@@ -372,7 +391,7 @@ def create_source(prefix, extensions):
 				source_str.write("\n")
 			for function in extension.functions:
 				if not function.static_link:
-					source_str.write("\t\tLOAD_FUNC1(%s, %s);\n" % extension.name, function.name)
+					source_str.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
 		source_str.write("\t}\n")
 
 		backup = False
@@ -418,7 +437,7 @@ def create_source(prefix, extensions):
 					source_str.write("\t\t{\n")
 					for j in range(0, len(plan[1])):
 						function = extension.functions[plan[1][j]]
-						source_str.write("\t\t\tLOAD_FUNC2(%s %s, %s);\n" % (plan[0][i], function.name, function.mappings[i].name))
+						source_str.write("\t\t\tLOAD_FUNC2(%s, %s);\n" % (function.name, function.mappings[i].name))
 
 					if all_covered and len(plans) == 1 and len(extension.additionals) == 0:
 						source_str.write("\n\t\t\t_%s = 1;\n" % extension.name)
@@ -494,11 +513,15 @@ def create_source(prefix, extensions):
 
 	source_str.write("#endif\t\t/* GLLOADER_%s */\n" % prefix.upper())
 
-	cur_source_file = open("src/glloader_%s.c" % prefix.lower(), "r")
-	cur_source_str = cur_source_file.read()
-	cur_source_file.close()
+	try:
+		cur_source_file = open("src/glloader_%s.c" % prefix.lower(), "r")
+		cur_source_str = cur_source_file.read()
+		cur_source_file.close()
+	except:
+		cur_source_str = ""
 	new_source_str = source_str.getvalue()
 	if new_source_str != cur_source_str:
+		print("glloader_%s.c is updated" % prefix.lower())
 		source_file = open("src/glloader_%s.c" % prefix.lower(), "w")
 		source_file.write(new_source_str)
 		source_file.close()
@@ -526,7 +549,9 @@ if __name__ == "__main__":
 	print("Creating Header Files...")
 	for extensions in extension_set.items():
 		create_header(extensions[0], extensions[1])
+	print("")
 
 	print("Creating Source Files...")
 	for extensions in extension_set.items():
 		create_source(extensions[0], extensions[1])
+	print("")
