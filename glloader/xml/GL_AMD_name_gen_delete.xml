@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_name_gen_delete" reg_no="394">
+	<tokens>
+		<token name="GL_DATA_BUFFER_AMD" value="0x9151"/>
+		<token name="GL_PERFORMANCE_MONITOR_AMD" value="0x9152"/>
+		<token name="GL_QUERY_OBJECT_AMD" value="0x9153"/>
+		<token name="GL_VERTEX_ARRAY_OBJECT_AMD" value="0x9154"/>
+		<token name="GL_SAMPLER_OBJECT_AMD" value="0x9155"/>
+	</tokens>
+
+	<functions>
+		<function name="glGenNamesAMD" return="void">
+			<params>
+				<param type="GLenum" name="identifier"/>
+				<param type="GLuint" name="num"/>
+				<param type="GLuint*" name="names"/>
+			</params>
+		</function>
+		<function name="glDeleteNamesAMD" return="void">
+			<params>
+				<param type="GLenum" name="identifier"/>
+				<param type="GLuint" name="num"/>
+				<param type="const GLuint*" name="names"/>
+			</params>
+		</function>
+ 		<function name="glIsNameAMD" return="GLboolean">
+			<params>
+				<param type="GLenum" name="identifier"/>
+				<param type="GLuint" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

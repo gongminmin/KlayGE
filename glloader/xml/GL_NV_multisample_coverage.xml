@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_multisample_coverage" reg_no="393">
+	<tokens>
+		<token name="GL_COVERAGE_SAMPLES_NV" value="0x80A9"/>
+		<token name="GL_COLOR_SAMPLES_NV" value="0x8E20"/>
+	</tokens>
+</gl_extension>
