@@ -1,0 +1,55 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_fence_sync" reg_no="20">
+	<typedefs>
+		<typedef type="void*" synonym="EGLSyncKHR"/>
+		<typedef type="GLuint64" synonym="EGLTimeKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_SYNC_FENCE_KHR" value="0x30F9"/>
+		<token name="EGL_SYNC_TYPE_KHR" value="0x30F7"/>
+		<token name="EGL_SYNC_STATUS_KHR" value="0x30F1"/>
+		<token name="EGL_SYNC_CONDITION_KHR" value="0x30F8"/>
+		<token name="EGL_SIGNALED_KHR" value="0x30F2"/>
+		<token name="EGL_UNSIGNALED_KHR" value="0x30F3"/>
+		<token name="EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR" value="0x30F0"/>
+		<token name="EGL_SYNC_FLUSH_COMMANDS_BIT_KHR" value="0x0001"/>
+		<token name="EGL_FOREVER_KHR" value="0xFFFFFFFFFFFFFFFFull"/>
+		<token name="EGL_TIMEOUT_EXPIRED_KHR" value="0x30F5"/>
+		<token name="EGL_CONDITION_SATISFIED_KHR" value="0x30F6"/>
+		<token name="EGL_NO_SYNC_KHR" value="((EGLSyncKHR)0)"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateSyncKHR" return="EGLSyncKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLenum" name="type"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroySyncKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSyncKHR" name="sync"/>
+			</params>
+		</function>
+		<function name="eglClientWaitSyncKHR" return="EGLint">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSyncKHR" name="sync"/>
+				<param type="EGLint" name="flags"/>
+				<param type="EGLTimeKHR" name="timeout"/>
+			</params>
+		</function>
+		<function name="eglGetSyncAttribKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSyncKHR" name="sync"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLint*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

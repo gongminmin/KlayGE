@@ -2,7 +2,10 @@
 #-*- coding: ascii -*-
 
 from __future__ import print_function
-import StringIO
+try:
+	from StringIO import StringIO
+except:
+	from io import StringIO
 
 GPLNotice = """// glloader
 // Copyright (C) 2004-2009 Minmin Gong
@@ -158,7 +161,7 @@ class Extension:
 				self.additionals.append(one_of)
 
 def create_header(prefix, extensions):
-	header_str = StringIO.StringIO()
+	header_str = StringIO()
 
 	header_str.write("/*\n%s*/\n\n" % GPLNotice);
 
@@ -276,7 +279,7 @@ def create_header(prefix, extensions):
 		print("No change detected. Skip glloader_%s.h" % prefix.lower())
 
 def create_source(prefix, extensions):
-	source_str = StringIO.StringIO()
+	source_str = StringIO()
 
 	source_str.write("/*\n%s*/\n\n" % GPLNotice);
 
@@ -342,13 +345,15 @@ def create_source(prefix, extensions):
 							source_str.write("return ")
 						source_str.write("%s(%s);\n" % (function.name, function.param_names_str()))
 						source_str.write("}\n")
-						function_set.add(function.name)
+
 			if not all_static:
 				source_str.write("\n")
 
 			for function in extension.functions:
 				if not function.static_link:
-					source_str.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
+					if (function.name not in function_set):
+						source_str.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
+						function_set.add(function.name)
 
 			if not all_static:
 				source_str.write("\n")
