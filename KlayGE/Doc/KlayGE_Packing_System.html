@@ -3,12 +3,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
 <title>KlayGE Packing System</title>
-<base target="main_frame" />
 </head>
 <body>
 <h1>KlayGE打包系统</h1>
-<h2>编译</h2>
-<p>从KlayGE 3.6开始，打包系统使用了7zip作为打包格式。在编译打包系统之前，需要先编译Tools下的7za，生成7za.dll。</p>
+<p>从KlayGE 3.6开始，打包系统使用了7zip作为打包格式。在使用打包系统之前，需要确保系统中有7zip的7z.dll。</p>
 <h2>使用</h2>
 <p>KlayGE打包系统可以统一地通过ResLoader来调用。命名规则是用“//”来区分压缩包路径和包内路径。如果压缩包有密码，则可以在它的路径之后加上“|”和密码。例如，有一个folder/example.7z的压缩包，它的密码是abcd，包中有文件ex1/ex2/test.cpp，那么它的全路径就是：</p>
 <blockquote>
