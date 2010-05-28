@@ -170,9 +170,9 @@ void ShadingVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 
 #ifdef NOPERSPECTIVE_SUPPORT
-	oTc = oPos.xy / oPos.w * 0.5f;
+	oTc = oPos.xy / oPos.w - texel_to_pixel_offset.xy;
 	oTc.y *= flipping;
-	oTc += 0.5;
+	oTc = oTc * 0.5f + 0.5f;
 #else
 	oPosSS = oPos;
 #endif
@@ -199,9 +199,9 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = pos_ss.xy / pos_ss.w * 0.5f;
+	float2 tc = pos_ss.xy / pos_ss.w - texel_to_pixel_offset.xy;
 	tc.y *= flipping;
-	tc += 0.5;
+	tc = tc * 0.5f + 0.5f;
 #endif
 
 	float3 diffuse;
