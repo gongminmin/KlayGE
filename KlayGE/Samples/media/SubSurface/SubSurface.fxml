@@ -2,7 +2,6 @@
 
 <effect>
 	<include name="util.fxml"/>
-	<include name="Quaternion.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
