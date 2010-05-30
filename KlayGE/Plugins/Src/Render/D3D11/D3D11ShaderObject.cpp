@@ -822,34 +822,62 @@ namespace KlayGE
 						break;
 
 					case ST_GeometryShader:
-						if ("auto" == shader_profile)
+						if (caps.max_shader_model < 4)
 						{
-							shader_profile = render_eng.GeometryShaderProfile();
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							if ("auto" == shader_profile)
+							{
+								shader_profile = render_eng.GeometryShaderProfile();
+							}
 						}
 						break;
 
 					case ST_ComputeShader:
-						if ("auto" == shader_profile)
-						{
-							shader_profile = render_eng.ComputeShaderProfile();
-						}
-						if (("cs_5_0" == shader_profile) && (caps.max_shader_model < 5))
+						if (caps.max_shader_model < 4)
 						{
 							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							if ("auto" == shader_profile)
+							{
+								shader_profile = render_eng.ComputeShaderProfile();
+							}
+							if (("cs_5_0" == shader_profile) && (caps.max_shader_model < 5))
+							{
+								is_shader_validate_[type] = false;
+							}
 						}
 						break;
 
 					case ST_HullShader:
-						if ("auto" == shader_profile)
+						if (caps.max_shader_model < 5)
 						{
-							shader_profile = render_eng.HullShaderProfile();
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							if ("auto" == shader_profile)
+							{
+								shader_profile = render_eng.HullShaderProfile();
+							}
 						}
 						break;
 
 					case ST_DomainShader:
-						if ("auto" == shader_profile)
+						if (caps.max_shader_model < 5)
 						{
-							shader_profile = render_eng.DomainShaderProfile();
+							is_shader_validate_[type] = false;
+						}
+						else
+						{
+							if ("auto" == shader_profile)
+							{
+								shader_profile = render_eng.DomainShaderProfile();
+							}
 						}
 						break;
 

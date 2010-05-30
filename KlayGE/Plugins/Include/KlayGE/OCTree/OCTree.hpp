@@ -50,7 +50,7 @@ namespace KlayGE
 		bool AABBVisible(Box const & box);
 
 	private:
-		void ClipScene(Camera const & camera);
+		void ClipScene();
 		void Clear();
 
 		void DoAddSceneObject(SceneObjectPtr const & obj);

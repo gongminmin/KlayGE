@@ -50,7 +50,7 @@ namespace KlayGE
 
 		static SceneManagerPtr NullObject();
 
-		virtual void ClipScene(Camera const & camera) = 0;
+		virtual void ClipScene();
 		void AddSceneObject(SceneObjectPtr const & obj);
 		void AddRenderable(RenderablePtr const & obj);
 

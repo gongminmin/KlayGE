@@ -94,23 +94,6 @@ namespace KlayGE
 		{
 		}
 
-		void ClipScene(Camera const & camera)
-		{
-			frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
-
-			for (size_t i = 0; i < scene_objs_.size(); ++ i)
-			{
-				if (!scene_objs_[i]->Overlay())
-				{
-					visible_marks_[i] = scene_objs_[i]->Visible();
-				}
-				else
-				{
-					visible_marks_[i] = false;
-				}
-			}
-		}
-
 		void Clear()
 		{
 			scene_objs_.resize(0);
@@ -153,6 +136,47 @@ namespace KlayGE
 	{
 		static SceneManagerPtr obj = MakeSharedPtr<NullSceneManager>();
 		return obj;
+	}
+
+	// 场景裁减
+	/////////////////////////////////////////////////////////////////////////////////
+	void SceneManager::ClipScene()
+	{
+		for (size_t i = 0; i < scene_objs_.size(); ++ i)
+		{
+			bool visible;
+
+			SceneObjectPtr const & obj = scene_objs_[i];
+			if (!obj->Overlay() && obj->Visible())
+			{
+				if (obj->Cullable())
+				{
+					Box const & box = obj->GetBound();
+					float4x4 const & mat = obj->GetModelMatrix();
+
+					float3 min, max;
+					min = max = MathLib::transform_coord(box[0], mat);
+					for (size_t j = 1; j < 8; ++ j)
+					{
+						float3 vec = MathLib::transform_coord(box[j], mat);
+						min = MathLib::minimize(min, vec);
+						max = MathLib::maximize(max, vec);
+					}
+
+					visible = this->AABBVisible(Box(min, max));
+				}
+				else
+				{
+					visible = true;
+				}
+			}
+			else
+			{
+				visible = false;
+			}
+
+			visible_marks_[i] = visible;
+		}
 	}
 
 	// 加入渲染物体
@@ -256,7 +280,10 @@ namespace KlayGE
 		visible_marks_.resize(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
 		{
-			this->ClipScene(app.ActiveCamera());
+			Camera& camera = app.ActiveCamera();
+			frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
+
+			this->ClipScene();
 		}
 		else
 		{

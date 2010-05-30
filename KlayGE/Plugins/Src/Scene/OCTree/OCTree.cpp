@@ -28,10 +28,10 @@
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/Plane.hpp>
-#include <KlayGE/Camera.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #ifdef KLAYGE_DEBUG
+#include <KlayGE/Camera.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -108,7 +108,7 @@ namespace KlayGE
 	{
 	}
 
-	void OCTree::ClipScene(Camera const & camera)
+	void OCTree::ClipScene()
 	{
 		if (rebuild_tree_)
 		{
@@ -229,53 +229,12 @@ namespace KlayGE
 		checked_pointer_cast<NodeRenderable>(node_renderable_)->ClearInstances();
 #endif
 
-		frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
 		if (!octree_.empty())
 		{
 			this->NodeVisible(0);
 		}
 
-		for (size_t i = 0; i < scene_objs_.size(); ++ i)
-		{
-			bool visible;
-
-			SceneObjectPtr const & obj = scene_objs_[i];
-			if (!obj->Overlay() && obj->Visible())
-			{
-				if (obj->Cullable())
-				{
-					Box const & box = obj->GetBound();
-					float4x4 const & mat = obj->GetModelMatrix();
-
-					float3 min, max;
-					min = max = MathLib::transform_coord(box[0], mat);
-					for (size_t j = 1; j < 8; ++ j)
-					{
-						float3 vec = MathLib::transform_coord(box[j], mat);
-						min = MathLib::minimize(min, vec);
-						max = MathLib::maximize(max, vec);
-					}
-
-					visible = this->AABBVisible(Box(min, max));
-					if (visible)
-					{
-#ifdef KLAYGE_DEBUG
-						checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling((max - min) / 2) * MathLib::translation((min + max) / 2));
-#endif
-					}
-				}
-				else
-				{
-					visible = true;
-				}
-			}
-			else
-			{
-				visible = false;
-			}
-
-			visible_marks_[i] = visible;
-		}
+		SceneManager::ClipScene();
 
 #ifdef KLAYGE_DEBUG
 		node_renderable_->Render();

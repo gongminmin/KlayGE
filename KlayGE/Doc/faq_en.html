@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>KlayGE FAQs</title>
+</head>
+<body>
+<img src="image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" />
+<h1>KlayGE Frequently Asked Questions</h1>
+<hr />
+<h2><a name="content">Content</a></h2>
+<ol>
+	<li><a href="#q0">What is KlayGE?</a></li>
+	<li><a href="#q1">You are the only developer of KlayGE?</a></li>
+	<li><a href="#q2">Where can I find KlayGE's documents?</a></li>
+	<li><a href="#q3">Why GPL?</a></li>
+	<li><a href="#q4">Why not using LUA instead of Python?</a></li>
+	<li><a href="#q5">Why requires Shader Model 2.0 and above?</a></li>
+	<li><a href="#q6">How's the network system in KlayGE?</a></li>
+	<li><a href="#q7">When compiling samples, there are some link errors such as: &quot;libcmtd.lib(dbgheap.obj) : error LNK2005: __CrtSetDbgFlag already defined in MSVCRTD.lib(MSVCR80D.dll)&quot;. How to solve this problem?</a></li>
+	<li><a href="#q8">What's the parameters when compiling Boost?</a></li>
+	<li><a href="#q9">Why running any sample inside Visual Studio cause assert failed in ResLoader::Load?</a></li>
+	<li><a href="#q10">How to solve compling error "'yasm' is not recognized as an internal or external command, operable program or batch file."?</a></li>
+</ol>
+<hr />
+<h4><a name="q0">Q: What is KlayGE?</a></h4>
+<p>A: KlayGE is an open source, cross-platform game engine. It's written in C++, and use Python as scripting language. KlayGE is released under GPL license.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q1">Q: You are the only developer of KlayGE?</a></h4>
+<p>A: Yes. Almost all of the development is completed by myself. However, during this process, some 3rd-party libraries are used, for example 7zip encoding/decoding. Many friends also provide their indispensable advices in the development.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q2">Q: Where can I find KlayGE's documents?</a></h4>
+<p>A: The only documents are files in the <em>doc</em> directory. The main reason of lacking documentation is I do not have enough time to write them down. Also, I hope the code can achieve self-explanatory.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q3">Q: Why GPL?</a></h4>
+<p>A: Before 2.7, KlayGE is released under LGPL. But, in order to prevent KlayGE from <span onmouseover="_tipon(this)" onmouseout="_tipoff()">annexation </span>by some proprietary projects, it's replaced by GPL since 2.7. </p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q4">Q: Why not using LUA instead of Python?</a></h4>
+<p>A: Before 2.0 (named Clay! Engine at that time), LUA is the primary scripting language. The advantage of LUA is fast. However, calling it in C++ is extremely complex. And LUA's ability is weaker than Python. Although Python is not as fast as LUA, it's a much more powerful language, and easier for calling. In KlayGE, runtime efficiency of scripting is not a concern, so Python is more desirable.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q5">Q: Why requires Shader Model 2.0 and above?</a></h4>
+<p>A: KlayGE is a high-end game engine, so it requires to be run on some powerful machine to meet the need of advanced techniques. On the other hand, Shader Model 2.0 is not a very high demand. Nearly all graphics cards now support Shader Model 3.0. For a game developer, using a card that doesn't support Shader Model 2.0 is behind the times too much. </p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q6">Q: How's the network system in KlayGE?</a></h4>
+<p>A: The network part is a weak point of KlayGE, or even impossible be used. Therefore it needs to be developed, or using 3rd-party network library.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q7">Q: When compiling samples, there are some link errors such as: &quot;libcmtd.lib(dbgheap.obj) : error LNK2005: __CrtSetDbgFlag already defined in MSVCRTD.lib(MSVCR80D.dll)&quot;. How to solve this problem?</a></h4>
+<p>A£ºKlayGE in VC is compiled with multi-threaded DLL runtime library. So it requires <strong>ALL</strong> lib that link to an exe uses multi-threaded DLL (Project-  &gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code  Generation-&gt;Runtime Library, choose Multi-threaded Debug DLL/Multi-threaded  DLL).</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q8">Q: What's the parameters when compiling Boost?</a></h4>
+<p>A: Boost 1.36+'s parameters are set though bjam's command line. They can be written in a batch:</p>
+<blockquote>
+	<pre>SET BZIP2_SOURCE=&quot;D:/bzip2-1.0.5&quot;<br />SET ZLIB_SOURCE=&quot;D:/zlib-1.2.3&quot;<br />SET ICU_PATH=&quot;D:/icu4c-3_6&quot;<br />bjam --toolset=msvc-9.0 --stagedir=./lib_vc9_x86 --builddir=./ address-model=32 link=shared runtime-link=shared threading=multi cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE define=_SECURE_SCL=0 stage debug release
+bjam --toolset=msvc-9.0 --stagedir=./lib_vc9_x64 --builddir=./ address-model=64 link=shared runtime-link=shared threading=multi cxxflags=-wd4819 cxxflags=-wd4910 define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE define=_SECURE_SCL=0 stage debug release
+	</pre>
+</blockquote>
+<p>Run this batch under boost's directory compiles boost into the dll form.</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q9">Q: Why running any sample inside Visual Studio cause assert failed in ResLoader::Load?</a></h4>
+<p>A: Project's working directory should be set to $(OutDir).</p>
+<a href="#content">Back to content</a>
+<hr />
+<h4><a name="q10">Q: How to solve compling error "'yasm' is not recognized as an internal or external command, operable program or batch file."?</a></h4>
+<p>A: According to the project settings, Visual Studio must call <em>yasm</em>  to compile .asm files. One solution is that rename the downloaded <em>yasm-X.X.X-winYY.exe</em> (X is the version, YY is 32 or 64) to <em>yasm.exe</em>. Then copy it to VC's <em>bin</em> folder, for example, <em>C:\Program Files\Microsoft Visual Studio 9.0\VC\bin</em>.</p>
+<a href="#content">Back to content</a>
+<hr />
+<p>Updated: 2010/5/29</p>
+</body>
+</html>
