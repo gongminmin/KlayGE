@@ -7,8 +7,8 @@
 <body>
 <h1>粘土游戏引擎(KlayGE) 3.10.0 Readme</h1>
 <p>龚敏敏<br />
-	Homepage: <a href="http://klayge.sourceforge.net" target="_blank">http://klayge.sourceforge.net</a><br />
-	E-Mail:	  <a href="mailto:enginedev@163.com">enginedev@163.com</a><br />
+	Homepage: <a href="http://www.klayge.org" target="_blank">http://www.klayge.org</a><br />
+	E-Mail:	  <a href="mailto:webmaster@klayge.org">webmaster@klayge.org</a><br />
 	QQ:       33611210</p>
 <p>欢迎使用粘土游戏引擎 3.10.0<br />
 	压缩包中包含的组件：KlayGE头文件，源代码，构建工程文件和文档。</p>
@@ -50,7 +50,7 @@
 <ul>
 	<li><a href="http://www.python.org" target="_blank">Python 2.6或3.1</a>。</li>
 	<li><a href="http://www.boost.org" target="_blank">Boost 1.43.0</a>。</li>
-	<li><a href="http://www.tortall.net/projects/yasm/" target="_blank">Yasm 1.0.0</a>。</li>
+	<li><a href="http://www.tortall.net/projects/yasm/" target="_blank">Yasm 1.0.1</a>。</li>
 	<li><a href="http://rapidxml.sourceforge.net/" target="_blank">RapidXml 1.13</a>。</li>
 </ul>
 <h4>D3D9 Rendering System，D3D10 Rendering System, D3D11 Rendering System和DSound Audio System需要：</h4>
@@ -59,7 +59,7 @@
 </ul>
 <h4>DShow Show System需要：</h4>
 <ul>
-	<li>Visual Studio 2008附带的Microsoft Windows SDK 6.0A，或者<a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=484269e2-3b89-47e3-8eb7-1f2be6d7123a&amp;displaylang=en" target="_blank">Windows(R) Server 2003 R2 Platform SDK</a>。</li>
+	<li>Visual Studio 2010附带的Microsoft Windows SDK 7.0A，或者Visual Studio 2008附带的Microsoft Windows SDK 6.0A，或者<a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=484269e2-3b89-47e3-8eb7-1f2be6d7123a&amp;displaylang=en" target="_blank">Windows(R) Server 2003 R2 Platform SDK</a>。</li>
 </ul>
 <h4>OggVorbis Audio Datasource需要：</h4>
 <ul>
@@ -85,7 +85,6 @@
 <p>第一次编译KlayGE之前需要先执行env_vars.py来设置环境变量。</p>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;Runtime Library，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
 <p>另外，用VC8及以上编译Release版的Boost需要定义_SECURE_SCL=0宏，方法之一是在bjam的命令行中加上define=_SECURE_SCL=0。</p>
-<p>在VS里执行Samples的时候，需要把工程的Working Directory设置成输出目录$(OutDir)。</p>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
@@ -413,18 +412,18 @@
 <h2><a id="compiler">经过测试的编译器</a></h2>
 <p>下列编译器是经过测试的：</p>
 <ul>
-	<li>Windows平台上的Microsoft Visual C++ 9.0（Visual Sudio 2008 SP1），Microsoft Visual C++ 10.0（Visual Sudio 2010）。</li>
+	<li>Windows平台上的Microsoft Visual C++ 9.0（Visual Studio 2008 SP1），Microsoft Visual C++ 10.0（Visual Studio 2010）。</li>
 	<li>Windows平台上的MinGW GCC 4.4，4.5。</li>
 	<li>Linux平台上的GNU GCC 4.4。</li>
 </ul>
 <p>还有一些编译器应该也支持，但没有经过测试：</p>
 <ul>
-	<li>Windows平台上的Microsoft Visual C++ 7.1和8.0（Visual Sudio .NET 2003和2005）。</li>
+	<li>Windows平台上的Microsoft Visual C++ 7.1和8.0（Visual Studio .NET 2003和2005）。</li>
 	<li>Windows平台上的Intel C++ 10及以上。</li>
 	<li>Linux平台上的Intel C++ 9及以上。</li>
 </ul>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
-<p>最后更新：2010-1-26</p>
+<p>最后更新：2010-6-2</p>
 </body>
 </html>
