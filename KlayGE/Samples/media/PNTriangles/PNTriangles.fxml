@@ -1,0 +1,314 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
+
+	<parameter type="float4" name="joint_rots" array_size="64"/>
+	<parameter type="float4" name="joint_poss" array_size="64"/>
+
+	<parameter type="float4" name="tess_factors"/>
+	<parameter type="float3" name="eye_pos"/>
+	<parameter type="float3" name="light_dir" x="1" y="2" z="1"/>
+
+	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float4x4" name="worldview" semantic="WORLDVIEW"/>
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void NoPNTrianglesVS(float3 pos : POSITION,
+					float2 texcoord0 : TEXCOORD0,
+					float3 normal : NORMAL,
+					float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+					float4 blend_indices_f : BLENDINDICES,
+#else
+					int4 blend_indices : BLENDINDICES,
+#endif
+
+					out float2 oTex0 : TEXCOORD0,
+					out float3 oNormal : TEXCOORD1,
+					out float4 oPos : SV_Position)
+{
+#ifdef KLAYGE_OPENGL
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+
+	float3 result_pos = float3(0, 0, 0);
+	float3 result_normal = float3(0, 0, 0);
+	for (int i = 0; i < 4; ++ i)
+	{
+		float4 joint_rot = joint_rots[blend_indices[i]];
+		float4 joint_pos = joint_poss[blend_indices[i]];
+		float weight = blend_weights[i];
+
+		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
+		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
+	}
+
+	oPos = mul(float4(result_pos, 1), worldviewproj);
+	oTex0 = texcoord0;
+	oNormal = mul(result_normal, (float3x3)worldview);
+}
+
+float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
+{
+	float lighting = dot(-light_dir, normal) / sqrt(dot(light_dir, light_dir) * dot(normal, normal));
+	return diffuse_tex.Sample(linear_sampler, oTex0) * lighting;
+}
+		]]>
+	</shader>
+
+	<technique name="NoPNTriangles">
+		<pass name="p0">
+			<state name="vertex_shader" value="NoPNTrianglesVS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+    float3 Pos : WORLDPOS;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+};
+
+struct BEZIER_CONTROL_POINT
+{
+    float3 Pos : WORLDPOS;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+};
+
+struct DS_OUTPUT
+{
+	float4 Pos : SV_Position;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+};
+
+VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
+					float2 texcoord0 : TEXCOORD0,
+					float3 normal : NORMAL,
+					float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+					float4 blend_indices_f : BLENDINDICES,
+#else
+					int4 blend_indices : BLENDINDICES
+#endif
+					)
+{
+	VS_CONTROL_POINT_OUTPUT output;
+	
+#ifdef KLAYGE_OPENGL
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+
+	float3 result_pos = float3(0, 0, 0);
+	float3 result_normal = float3(0, 0, 0);
+	for (int i = 0; i < 4; ++ i)
+	{
+		float4 joint_rot = joint_rots[blend_indices[i]];
+		float4 joint_pos = joint_poss[blend_indices[i]];
+		float weight = blend_weights[i];
+
+		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
+		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
+	}
+
+	output.Pos = result_pos;
+	output.Texcoord0 = texcoord0;
+	output.Normal = result_normal;
+
+	return output;
+}
+
+//--------------------------------------------------------------------------------------
+// Passthrough Geometry Shader
+// BUG: We need a geometry shader between the DS and PS right now... for no reason.
+//--------------------------------------------------------------------------------------
+[maxvertexcount(3)]
+void DoNothingGS(triangle DS_OUTPUT input[3], inout TriangleStream<DS_OUTPUT> TriangleOutputStream)
+{
+    TriangleOutputStream.Append(input[0]);
+    TriangleOutputStream.Append(input[1]);
+    TriangleOutputStream.Append(input[2]);
+    TriangleOutputStream.RestartStrip();
+}
+
+
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	// Tess factor for the FF HW block
+	float Edges[3]			: SV_TessFactor;
+	float Inside			: SV_InsideTessFactor;
+
+	// Geometry cubic generated control points
+	float3 f3B210    : POSITION3;
+	float3 f3B120    : POSITION4;
+	float3 f3B021    : POSITION5;
+	float3 f3B012    : POSITION6;
+	float3 f3B102    : POSITION7;
+	float3 f3B201    : POSITION8;
+	float3 f3B111    : CENTER;
+
+	// Normal quadratic generated control points
+	float3 f3N110    : NORMAL3;      
+	float3 f3N011    : NORMAL4;
+	float3 f3N101    : NORMAL5;
+};
+
+//--------------------------------------------------------------------------------------
+// Constant data function for the PNTrianglesHS.  This is executed once per patch.
+//--------------------------------------------------------------------------------------
+HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
+{	
+	HS_CONSTANT_DATA_OUTPUT Output;
+    
+#ifdef USE_ADAPTIVE_TESSELLATION
+	// Calculate the tessellation factor per edge, based on distance from camera
+	float fDistance;
+	float3 f3MidPoint;
+	// Edge 0
+	f3MidPoint = (ip[2].Pos + ip[0].Pos) / 2.0f;
+	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+    Output.Edges[0] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
+	// Edge 1
+	f3MidPoint = (ip[0].Pos + ip[1].Pos) / 2.0f;
+	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+	Output.Edges[1] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
+	// Edge 2
+	f3MidPoint = (ip[1].Pos + ip[2].Pos) / 2.0f;
+	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+	Output.Edges[2] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
+	// Inside
+	Output.Inside = (Output.Edges[0] + Output.Edges[1] + Output.Edges[2]) / 3;   
+#else
+	// Simply output the tessellation factors from constant space 
+	// for use by the FF tessellation unit
+	Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = tess_factors.x;
+	Output.Inside = tess_factors.y;
+#endif
+
+	// Assign Positions
+	float3 f3B003 = ip[0].Pos;
+	float3 f3B030 = ip[1].Pos;
+	float3 f3B300 = ip[2].Pos;
+	// And Normals
+	float3 f3N002 = ip[0].Normal;
+	float3 f3N020 = ip[1].Normal;
+    float3 f3N200 = ip[2].Normal;
+    
+	// Compute the cubic geometry control points
+	// Edge control points
+	Output.f3B210 = ((2 * f3B003) + f3B030 - (dot((f3B030 - f3B003), f3N002) * f3N002)) / 3;
+	Output.f3B120 = ((2 * f3B030) + f3B003 - (dot((f3B003 - f3B030), f3N020) * f3N020)) / 3;
+	Output.f3B021 = ((2 * f3B030) + f3B300 - (dot((f3B300 - f3B030), f3N020) * f3N020)) / 3;
+	Output.f3B012 = ((2 * f3B300) + f3B030 - (dot((f3B030 - f3B300), f3N200) * f3N200)) / 3;
+	Output.f3B102 = ((2 * f3B300) + f3B003 - (dot((f3B003 - f3B300), f3N200) * f3N200)) / 3;
+	Output.f3B201 = ((2 * f3B003) + f3B300 - (dot((f3B300 - f3B003), f3N002) * f3N002)) / 3;
+	// Center control point
+	float3 f3E = (Output.f3B210 + Output.f3B120 + Output.f3B021 + Output.f3B012 + Output.f3B102 + Output.f3B201) / 6;
+	float3 f3V = (f3B003 + f3B030 + f3B300) / 3;
+	Output.f3B111 = f3E + ((f3E - f3V) / 2);
+
+	// Compute the quadratic normal control points, and rotate into world space
+	float fV12 = 2 * dot(f3B030 - f3B003, f3N002 + f3N020) / dot(f3B030 - f3B003, f3B030 - f3B003);
+	Output.f3N110 = normalize(f3N002 + f3N020 - fV12 * (f3B030 - f3B003));
+	float fV23 = 2 * dot(f3B300 - f3B030, f3N020 + f3N200) / dot(f3B300 - f3B030, f3B300 - f3B030);
+	Output.f3N011 = normalize(f3N020 + f3N200 - fV23 * (f3B300 - f3B030));
+	float fV31 = 2 * dot(f3B003 - f3B300, f3N200 + f3N002) / dot(f3B003 - f3B300, f3B003 - f3B300);
+	Output.f3N101 = normalize(f3N200 + f3N002 - fV31 * (f3B003 - f3B300));
+
+	return Output;
+}
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("PNTrianglesConstantsHS")]
+BEZIER_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+										uint i : SV_OutputControlPointID)
+{
+	BEZIER_CONTROL_POINT Output;
+	Output.Pos = p[i].Pos;
+	Output.Texcoord0 = p[i].Texcoord0;
+	Output.Normal = p[i].Normal;
+	return Output;
+}
+
+[domain("tri")]
+DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 f3BarycentricCoords : SV_DomainLocation,
+							const OutputPatch<BEZIER_CONTROL_POINT, 3> patch)
+{
+	// The barycentric coordinates
+	float fU = f3BarycentricCoords.x;
+	float fV = f3BarycentricCoords.y;
+	float fW = f3BarycentricCoords.z;
+
+	// Precompute squares and squares * 3 
+	float fUU = fU * fU;
+	float fVV = fV * fV;
+	float fWW = fW * fW;
+	float fUU3 = fUU * 3.0f;
+	float fVV3 = fVV * 3.0f;
+	float fWW3 = fWW * 3.0f;
+
+	// Compute position from cubic control points and barycentric coords
+	float3 WorldPos = patch[0].Pos * fWW * fW +
+						patch[1].Pos * fUU * fU +
+						patch[2].Pos * fVV * fV +
+						HSConstantData.f3B210 * fWW3 * fU +
+						HSConstantData.f3B120 * fW * fUU3 +
+						HSConstantData.f3B201 * fWW3 * fV +
+						HSConstantData.f3B021 * fUU3 * fV +
+						HSConstantData.f3B102 * fW * fVV3 +
+						HSConstantData.f3B012 * fU * fVV3 +
+						HSConstantData.f3B111 * 6.0f * fW * fU * fV;
+
+	// Compute normal from quadratic control points and barycentric coords
+	float3 f3Normal = patch[0].Normal * fWW +
+						patch[1].Normal * fUU +
+						patch[2].Normal * fVV +
+						HSConstantData.f3N110 * fW * fU +
+						HSConstantData.f3N011 * fU * fV +
+						HSConstantData.f3N101 * fW * fV;
+
+	// Normalize the interpolated normal    
+	f3Normal = normalize(f3Normal);
+
+	DS_OUTPUT Output;
+	// Linearly interpolate the texture coords
+	Output.Texcoord0 = patch[0].Texcoord0 * fW + patch[1].Texcoord0 * fU + patch[2].Texcoord0 * fV;
+
+	// Transform model position with view-projection matrix
+	Output.Pos = mul(float4(WorldPos, 1), worldviewproj);
+	Output.Normal = mul(f3Normal, (float3x3)worldview);
+
+	return Output;    
+}
+		]]>
+	</shader>
+
+	<technique name="PNTriangles">
+		<pass name="p0">
+			<state name="vertex_shader" value="PNTrianglesVS()"/>
+			<state name="hull_shader" value="PNTrianglesHS()"/>
+			<state name="domain_shader" value="PNTrianglesDS()"/>
+			<state name="geometry_shader" value="DoNothingGS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+</effect>
+

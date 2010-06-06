@@ -808,10 +808,18 @@ namespace KlayGE
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
 		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate)
 	{
-		std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
-		ModelJIT(full_meshml_name);
+		ResIdentifierPtr lzma_file;
+		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
+		{
+			lzma_file = ResLoader::Instance().Load(meshml_name);
+		}
+		else
+		{
+			std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
+			ModelJIT(full_meshml_name);
 
-		ResIdentifierPtr lzma_file = ResLoader::Instance().Load(full_meshml_name + jit_ext_name);
+			lzma_file = ResLoader::Instance().Load(full_meshml_name + jit_ext_name);
+		}
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));
 		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', '1'>::value));

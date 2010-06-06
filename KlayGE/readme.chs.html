@@ -84,7 +84,7 @@
 <h3>注意事项</h3>
 <p>第一次编译KlayGE之前需要先执行env_vars.py来设置环境变量。</p>
 <p>由于KlayGE在VC下使用的运行库是多线程的DLL，所以需要把<strong>所有</strong>连接到exe的lib的运行库改为多线程DLL（Project-&gt;Properties-&gt;Configuration Properties-&gt;C/C++-&gt;Code Generation-&gt;Runtime Library，选择Multi-threaded Debug DLL/Multi-threaded DLL）。</p>
-<p>另外，用VC8及以上编译Release版的Boost需要定义_SECURE_SCL=0宏，方法之一是在bjam的命令行中加上define=_SECURE_SCL=0。</p>
+<p>另外，用VC8和VC9编译Release版的Boost需要定义_SECURE_SCL=0宏，方法之一是在bjam的命令行中加上define=_SECURE_SCL=0。</p>
 <p><a href="#menu">^返回目录</a></p>
 <hr />
 <h2><a id="history">发展历程</a></h2>
