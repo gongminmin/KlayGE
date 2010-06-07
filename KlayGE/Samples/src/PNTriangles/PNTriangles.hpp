@@ -22,7 +22,12 @@ private:
 	void LineModeHandler(KlayGE::UICheckBox const & sender);
 	void AdaptiveTessHandler(KlayGE::UICheckBox const & sender);
 	void EnablePNTrianglesHandler(KlayGE::UICheckBox const & sender);
+	void AnimationHandler(KlayGE::UICheckBox const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
+
+	bool animation_;
+	float last_time_;
+	int frame_;
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
@@ -35,6 +40,7 @@ private:
 	int id_line_mode_;
 	int id_adaptive_tess_;
 	int id_enable_pn_triangles_;
+	int id_animation_;
 	int id_fps_camera_;
 
 	int tess_;

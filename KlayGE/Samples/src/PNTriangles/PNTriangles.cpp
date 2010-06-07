@@ -249,6 +249,21 @@ namespace
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->SetFrame(frame);
 		}
 
+		uint32_t FrameRate() const
+		{
+			return checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->FrameRate();
+		}
+
+		uint32_t StartFrame() const
+		{
+			return checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->StartFrame();
+		}
+
+		uint32_t EndFrame() const
+		{
+			return checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->EndFrame();
+		}
+
 	private:
 		float4x4 model_matrix_;
 	};
@@ -270,7 +285,7 @@ namespace
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 5)
+		if (caps.max_shader_model < 2)
 		{
 			return false;
 		}
@@ -295,7 +310,7 @@ int main()
 
 PNTrianglesApp::PNTrianglesApp(std::string const & name, RenderSettings const & settings)
 					: App3DFramework(name, settings),
-						tess_(5)
+						tess_(5), last_time_(0), frame_(0)
 {
 }
 
@@ -305,6 +320,7 @@ void PNTrianglesApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
+	checked_pointer_cast<PolygonObject>(polygon_)->SetFrame(0);
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(2, 3, -2), float3(0, 1, 0));
@@ -327,6 +343,7 @@ void PNTrianglesApp::InitObjects()
 	id_line_mode_ = dialog_params_->IDFromName("LineModeCheck");
 	id_adaptive_tess_ = dialog_params_->IDFromName("AdaptiveTess");
 	id_enable_pn_triangles_ = dialog_params_->IDFromName("EnablePNTriangles");
+	id_animation_ = dialog_params_->IDFromName("Animation");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
 	dialog_params_->Control<UISlider>(id_tess_slider_)->OnValueChangedEvent().connect(boost::bind(&PNTrianglesApp::TessChangedHandler, this, _1));
@@ -336,6 +353,8 @@ void PNTrianglesApp::InitObjects()
 	dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->OnChangedEvent().connect(boost::bind(&PNTrianglesApp::AdaptiveTessHandler, this, _1));
 	this->AdaptiveTessHandler(*dialog_params_->Control<UICheckBox>(id_adaptive_tess_));
 	dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->OnChangedEvent().connect(boost::bind(&PNTrianglesApp::EnablePNTrianglesHandler, this, _1));
+	dialog_params_->Control<UICheckBox>(id_animation_)->OnChangedEvent().connect(boost::bind(&PNTrianglesApp::AnimationHandler, this, _1));
+	this->AnimationHandler(*dialog_params_->Control<UICheckBox>(id_animation_));
 	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PNTrianglesApp::FPSCameraHandler, this, _1));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -403,6 +422,11 @@ void PNTrianglesApp::EnablePNTrianglesHandler(UICheckBox const & sender)
 	checked_pointer_cast<PolygonObject>(polygon_)->EnablePNTriangles(sender.GetChecked());
 }
 
+void PNTrianglesApp::AnimationHandler(KlayGE::UICheckBox const & sender)
+{
+	animation_ = sender.GetChecked();
+}
+
 void PNTrianglesApp::FPSCameraHandler(UICheckBox const & sender)
 {
 	if (sender.GetChecked())
@@ -433,6 +457,22 @@ uint32_t PNTrianglesApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-	checked_pointer_cast<PolygonObject>(polygon_)->SetFrame(0);
+
+	boost::shared_ptr<PolygonObject> obj = checked_pointer_cast<PolygonObject>(polygon_);
+
+	if (animation_)
+	{
+		float this_time = clock() / 1000.0f;
+		if (this_time - last_time_ > 1.0f / obj->FrameRate())
+		{
+			++ frame_;
+			frame_ = frame_ % (obj->EndFrame() - obj->StartFrame()) + obj->StartFrame();
+
+			obj->SetFrame(frame_);
+
+			last_time_ = this_time;
+		}
+	}
+
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }
