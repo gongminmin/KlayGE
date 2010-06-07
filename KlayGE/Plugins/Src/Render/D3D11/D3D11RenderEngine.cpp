@@ -249,6 +249,7 @@ namespace KlayGE
 			break;
 		}
 
+		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
 	}
 
@@ -260,7 +261,6 @@ namespace KlayGE
 		Verify(d3d_device_ != ID3D11DevicePtr());
 
 		this->FillRenderDeviceCaps();
-		this->ResetRenderStates();
 	}
 
 	void D3D11RenderEngine::ResetRenderStates()

@@ -192,6 +192,7 @@ namespace KlayGE
 			win->Attach(FrameBuffer::ATT_DepthStencil, MakeSharedPtr<D3D9SurfaceRenderView>(win->D3DDepthStencilBuffer()));
 		}
 
+		this->InitRenderStates();
 		this->BindFrameBuffer(win);
 	}
 
@@ -201,7 +202,6 @@ namespace KlayGE
 		Verify(d3dDevice_ != ID3D9DevicePtr());
 
 		this->FillRenderDeviceCaps();
-		this->InitRenderStates();
 
 		if (caps_.hw_instancing_support)
 		{

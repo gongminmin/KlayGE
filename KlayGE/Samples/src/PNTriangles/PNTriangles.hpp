@@ -1,14 +1,14 @@
-#ifndef _SUBD_HPP
-#define _SUBD_HPP
+#ifndef _PNTRIANGLES_HPP
+#define _PNTRIANGLES_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 
-class SubDApp : public KlayGE::App3DFramework
+class PNTrianglesApp : public KlayGE::App3DFramework
 {
 public:
-	SubDApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	PNTrianglesApp(std::string const & name, KlayGE::RenderSettings const & settings);
 
 private:
 	void InitObjects();
@@ -40,4 +40,4 @@ private:
 	int tess_;
 };
 
-#endif		// _SUBD_HPP
+#endif		// _PNTRIANGLES_HPP

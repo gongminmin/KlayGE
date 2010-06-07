@@ -194,6 +194,7 @@ namespace KlayGE
 		D3D10RenderWindowPtr win = MakeSharedPtr<D3D10RenderWindow>(gi_factory_, this->ActiveAdapter(),
 			name, settings);
 
+		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
 	}
 
@@ -203,7 +204,6 @@ namespace KlayGE
 		Verify(d3d_device_ != ID3D10DevicePtr());
 
 		this->FillRenderDeviceCaps();
-		this->ResetRenderStates();
 	}
 
 	void D3D10RenderEngine::ResetRenderStates()
