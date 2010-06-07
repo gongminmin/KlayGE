@@ -1,6 +1,16 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
+	<dialog id="Parameters" caption="Parameters" x="-220" y="130" align_x="right" width="220" height="300">
+		<control type="static" id="TessStatic" caption="Tessellation factor: 0" x="25" y="30" width="120" height="24" is_default="0"/>
+		<control type="slider" id="TessSlider" x="25" y="60" width="180" height="24" min="1" max="32" value="5" is_default="0"/>
+
+		<control type="check_box" id="LineModeCheck" caption="Line mode" x="20" y="120" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="AdaptiveTess" caption="Adaptive Tessellation" x="20" y="150" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="EnablePNTriangles" caption="Enable PN Triangles" x="20" y="180" width="120" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="240" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+	
 	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" bg_color_a="0">
 		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
 	</dialog>

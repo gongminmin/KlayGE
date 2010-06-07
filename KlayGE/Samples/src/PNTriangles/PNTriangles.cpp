@@ -38,28 +38,23 @@ namespace
 	{
 	public:
 		SubDSkinnedMesh(RenderModelPtr model, std::wstring const & name)
-			: SkinnedMesh(model, name)
+			: SkinnedMesh(model, name),
+				tess_factor_(5), line_mode_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			RenderEffectPtr effect = rf.LoadEffect("PNTriangles.fxml");
-
 			if (caps.max_shader_model < 5)
 			{
+				pn_enabled_ = false;
 				technique_ = effect->TechniqueByName("NoPNTriangles");
-			}
-			else
-			{
-				technique_ = effect->TechniqueByName("PNTriangles");
-			}
-
-			if (caps.max_shader_model < 5)
-			{
 				rl_->TopologyType(RenderLayout::TT_TriangleList);
 			}
 			else
 			{
+				pn_enabled_ = true;
+				technique_ = effect->TechniqueByName("PNTriangles");
 				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 			}
 		}
@@ -88,19 +83,66 @@ namespace
 			model_matrix_ = model_matrix;
 		}
 
+		void LineMode(bool line)
+		{
+			line_mode_ = line;
+		}
+
+		void AdaptiveTess(bool adaptive)
+		{
+			*(technique_->Effect().ParameterByName("adaptive_tess")) = adaptive;
+		}
+
+		void SetTessFactor(int32_t tess_factor)
+		{
+			tess_factor_ = static_cast<float>(tess_factor);
+		}
+
+		void EnablePNTriangles(bool pn)
+		{
+			pn_enabled_ = pn;
+		}
+
 		void OnRenderBegin()
 		{
+			if (pn_enabled_)
+			{
+				if (line_mode_)
+				{
+					technique_ = technique_->Effect().TechniqueByName("PNTrianglesLine");
+				}
+				else
+				{
+					technique_ = technique_->Effect().TechniqueByName("PNTriangles");
+				}
+				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+			}
+			else
+			{
+				if (line_mode_)
+				{
+					technique_ = technique_->Effect().TechniqueByName("NoPNTrianglesLine");
+				}
+				else
+				{
+					technique_ = technique_->Effect().TechniqueByName("NoPNTriangles");
+				}
+				rl_->TopologyType(RenderLayout::TT_TriangleList);
+			}
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("worldviewproj")) = model_matrix_ * view * proj;
+			*(technique_->Effect().ParameterByName("world")) = model_matrix_;
+			*(technique_->Effect().ParameterByName("view")) = view;
 			*(technique_->Effect().ParameterByName("worldview")) = model_matrix_ * view;
+			*(technique_->Effect().ParameterByName("viewproj")) = view * proj;
+			*(technique_->Effect().ParameterByName("worldviewproj")) = model_matrix_ * view * proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 
-			float tess_factor = 5;
-			*(technique_->Effect().ParameterByName("tess_factors")) = float4(tess_factor, tess_factor, 1.0f, 9.0f);    
+			*(technique_->Effect().ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
 
 			RenderModelPtr model = model_.lock();
 			if (model)
@@ -112,6 +154,9 @@ namespace
 
 	private:
 		float4x4 model_matrix_;
+		float tess_factor_;
+		bool line_mode_;
+		bool pn_enabled_;
 	};
 
 	class SubDSkinnedModel : public SkinnedModel
@@ -127,6 +172,38 @@ namespace
 			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<SubDSkinnedMesh>(Mesh(i))->SetModelMatrix(model_matrix);
+			}
+		}
+
+		void LineMode(bool line)
+		{
+			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<SubDSkinnedMesh>(Mesh(i))->LineMode(line);
+			}
+		}
+
+		void SetTessFactor(int32_t tess_factor)
+		{
+			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<SubDSkinnedMesh>(Mesh(i))->SetTessFactor(tess_factor);
+			}
+		}
+
+		void AdaptiveTess(bool adaptive)
+		{
+			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<SubDSkinnedMesh>(Mesh(i))->AdaptiveTess(adaptive);
+			}
+		}
+
+		void EnablePNTriangles(bool pn)
+		{
+			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<SubDSkinnedMesh>(Mesh(i))->EnablePNTriangles(pn);
 			}
 		}
 	};
@@ -145,6 +222,26 @@ namespace
 		float4x4 const & GetModelMatrix() const
 		{
 			return model_matrix_;
+		}
+
+		void SetTessFactor(int32_t tess_factor)
+		{
+			checked_pointer_cast<SubDSkinnedModel>(renderable_)->SetTessFactor(tess_factor);
+		}
+
+		void LineMode(bool line)
+		{
+			checked_pointer_cast<SubDSkinnedModel>(renderable_)->LineMode(line);
+		}
+
+		void AdaptiveTess(bool adaptive)
+		{
+			checked_pointer_cast<SubDSkinnedModel>(renderable_)->AdaptiveTess(adaptive);
+		}
+
+		void EnablePNTriangles(bool pn)
+		{
+			checked_pointer_cast<SubDSkinnedModel>(renderable_)->EnablePNTriangles(pn);
 		}
 
 		void SetFrame(uint32_t frame)
@@ -197,7 +294,8 @@ int main()
 }
 
 SubDApp::SubDApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+					: App3DFramework(name, settings),
+						tess_(5)
 {
 }
 
@@ -212,7 +310,6 @@ void SubDApp::InitObjects()
 	this->LookAt(float3(2, 3, -2), float3(0, 1, 0));
 	this->Proj(0.1f, 100);
 
-	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -224,6 +321,36 @@ void SubDApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PNTriangles.uiml"));
+	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	id_tess_static_ = dialog_params_->IDFromName("TessStatic");
+	id_tess_slider_ = dialog_params_->IDFromName("TessSlider");
+	id_line_mode_ = dialog_params_->IDFromName("LineModeCheck");
+	id_adaptive_tess_ = dialog_params_->IDFromName("AdaptiveTess");
+	id_enable_pn_triangles_ = dialog_params_->IDFromName("EnablePNTriangles");
+	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
+
+	dialog_params_->Control<UISlider>(id_tess_slider_)->OnValueChangedEvent().connect(boost::bind(&SubDApp::TessChangedHandler, this, _1));
+	this->TessChangedHandler(*dialog_params_->Control<UISlider>(id_tess_slider_));
+
+	dialog_params_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&SubDApp::LineModeHandler, this, _1));
+	dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->OnChangedEvent().connect(boost::bind(&SubDApp::AdaptiveTessHandler, this, _1));
+	this->AdaptiveTessHandler(*dialog_params_->Control<UICheckBox>(id_adaptive_tess_));
+	dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->OnChangedEvent().connect(boost::bind(&SubDApp::EnablePNTrianglesHandler, this, _1));
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&SubDApp::FPSCameraHandler, this, _1));
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 5)
+	{
+		dialog_params_->Control<UISlider>(id_tess_slider_)->SetEnabled(false);
+		dialog_params_->Control<UIStatic>(id_tess_static_)->SetEnabled(false);
+
+		dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetChecked(false);
+		dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetEnabled(false);
+
+		dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetChecked(false);
+		dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetEnabled(false);
+	}
 }
 
 void SubDApp::OnResize(uint32_t width, uint32_t height)
@@ -248,6 +375,43 @@ void SubDApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 	case Exit:
 		this->Quit();
 		break;
+	}
+}
+
+void SubDApp::TessChangedHandler(UISlider const & sender)
+{
+	tess_ = sender.GetValue();
+	checked_pointer_cast<PolygonObject>(polygon_)->SetTessFactor(tess_);
+
+	std::wostringstream stream;
+	stream << L"Tessellation factor: " << tess_;
+	dialog_params_->Control<UIStatic>(id_tess_static_)->SetText(stream.str());
+}
+
+void SubDApp::LineModeHandler(UICheckBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->LineMode(sender.GetChecked());
+}
+
+void SubDApp::AdaptiveTessHandler(UICheckBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->AdaptiveTess(sender.GetChecked());
+}
+
+void SubDApp::EnablePNTrianglesHandler(UICheckBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->EnablePNTriangles(sender.GetChecked());
+}
+
+void SubDApp::FPSCameraHandler(UICheckBox const & sender)
+{
+	if (sender.GetChecked())
+	{
+		fpcController_.AttachCamera(this->ActiveCamera());
+	}
+	else
+	{
+		fpcController_.DetachCamera();
 	}
 }
 

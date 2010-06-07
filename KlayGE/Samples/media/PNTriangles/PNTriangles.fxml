@@ -8,12 +8,16 @@
 	<parameter type="float4" name="joint_rots" array_size="64"/>
 	<parameter type="float4" name="joint_poss" array_size="64"/>
 
+	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
 	<parameter type="float3" name="eye_pos"/>
 	<parameter type="float3" name="light_dir" x="1" y="2" z="1"/>
 
-	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<parameter type="float4x4" name="world" semantic="WORLD"/>
+	<parameter type="float4x4" name="view" semantic="VIEW"/>
+	<parameter type="float4x4" name="viewproj"/>
 	<parameter type="float4x4" name="worldview" semantic="WORLDVIEW"/>
+	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -73,27 +77,36 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 		</pass>
 	</technique>
 
+	<technique name="NoPNTrianglesLine">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			
+			<state name="vertex_shader" value="NoPNTrianglesVS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+
 	<shader version="5">
 		<![CDATA[
 struct VS_CONTROL_POINT_OUTPUT
 {
-    float3 Pos : WORLDPOS;
+	float3 Pos : WORLDPOS;
 	float2 Texcoord0 : TEXCOORD0;
 	float3 Normal : TEXCOORD1;
 };
 
-struct BEZIER_CONTROL_POINT
+struct HS_CONTROL_POINT
 {
-    float3 Pos : WORLDPOS;
+	float3 Pos : WORLDPOS;
 	float2 Texcoord0 : TEXCOORD0;
 	float3 Normal : TEXCOORD1;
 };
 
 struct DS_OUTPUT
 {
-	float4 Pos : SV_Position;
 	float2 Texcoord0 : TEXCOORD0;
 	float3 Normal : TEXCOORD1;
+	float4 Pos : SV_Position;
 };
 
 VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
@@ -125,46 +138,32 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
 	}
 
-	output.Pos = result_pos;
+	output.Pos = mul(float4(result_pos, 1), world).xyz;
 	output.Texcoord0 = texcoord0;
-	output.Normal = result_normal;
+	output.Normal = normalize(mul(result_normal, (float3x3)world));
 
 	return output;
 }
 
-//--------------------------------------------------------------------------------------
-// Passthrough Geometry Shader
-// BUG: We need a geometry shader between the DS and PS right now... for no reason.
-//--------------------------------------------------------------------------------------
-[maxvertexcount(3)]
-void DoNothingGS(triangle DS_OUTPUT input[3], inout TriangleStream<DS_OUTPUT> TriangleOutputStream)
-{
-    TriangleOutputStream.Append(input[0]);
-    TriangleOutputStream.Append(input[1]);
-    TriangleOutputStream.Append(input[2]);
-    TriangleOutputStream.RestartStrip();
-}
-
-
 struct HS_CONSTANT_DATA_OUTPUT
 {
 	// Tess factor for the FF HW block
-	float Edges[3]			: SV_TessFactor;
-	float Inside			: SV_InsideTessFactor;
+	float Edges[3]	: SV_TessFactor;
+	float Inside	: SV_InsideTessFactor;
 
 	// Geometry cubic generated control points
-	float3 f3B210    : POSITION3;
-	float3 f3B120    : POSITION4;
-	float3 f3B021    : POSITION5;
-	float3 f3B012    : POSITION6;
-	float3 f3B102    : POSITION7;
-	float3 f3B201    : POSITION8;
-	float3 f3B111    : CENTER;
+	float3 f3B210	: POSITION3;
+	float3 f3B120	: POSITION4;
+	float3 f3B021	: POSITION5;
+	float3 f3B012	: POSITION6;
+	float3 f3B102	: POSITION7;
+	float3 f3B201	: POSITION8;
+	float3 f3B111	: CENTER;
 
 	// Normal quadratic generated control points
-	float3 f3N110    : NORMAL3;      
-	float3 f3N011    : NORMAL4;
-	float3 f3N101    : NORMAL5;
+	float3 f3N110	: NORMAL3;      
+	float3 f3N011	: NORMAL4;
+	float3 f3N101	: NORMAL5;
 };
 
 //--------------------------------------------------------------------------------------
@@ -174,30 +173,33 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 {	
 	HS_CONSTANT_DATA_OUTPUT Output;
     
-#ifdef USE_ADAPTIVE_TESSELLATION
-	// Calculate the tessellation factor per edge, based on distance from camera
-	float fDistance;
-	float3 f3MidPoint;
-	// Edge 0
-	f3MidPoint = (ip[2].Pos + ip[0].Pos) / 2.0f;
-	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-    Output.Edges[0] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
-	// Edge 1
-	f3MidPoint = (ip[0].Pos + ip[1].Pos) / 2.0f;
-	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-	Output.Edges[1] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
-	// Edge 2
-	f3MidPoint = (ip[1].Pos + ip[2].Pos) / 2.0f;
-	fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-	Output.Edges[2] = tess_factors.x * (1.0f - clamp((fDistance / tess_factors.w), 0, 1 - (1 / tess_factors.x)));
-	// Inside
-	Output.Inside = (Output.Edges[0] + Output.Edges[1] + Output.Edges[2]) / 3;   
-#else
-	// Simply output the tessellation factors from constant space 
-	// for use by the FF tessellation unit
-	Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = tess_factors.x;
-	Output.Inside = tess_factors.y;
-#endif
+	if (adaptive_tess)
+	{
+		// Calculate the tessellation factor per edge, based on distance from camera
+		float fDistance;
+		float3 f3MidPoint;
+		// Edge 0
+		f3MidPoint = (ip[2].Pos + ip[0].Pos) / 2;
+		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+		Output.Edges[0] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Edge 1
+		f3MidPoint = (ip[0].Pos + ip[1].Pos) / 2;
+		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+		Output.Edges[1] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Edge 2
+		f3MidPoint = (ip[1].Pos + ip[2].Pos) / 2;
+		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
+		Output.Edges[2] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Inside
+		Output.Inside = (Output.Edges[0] + Output.Edges[1] + Output.Edges[2]) / 3;
+	}
+	else
+	{
+		// Simply output the tessellation factors from constant space 
+		// for use by the FF tessellation unit
+		Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = tess_factors.x;
+		Output.Inside = tess_factors.y;
+	}
 
 	// Assign Positions
 	float3 f3B003 = ip[0].Pos;
@@ -206,20 +208,20 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 	// And Normals
 	float3 f3N002 = ip[0].Normal;
 	float3 f3N020 = ip[1].Normal;
-    float3 f3N200 = ip[2].Normal;
+	float3 f3N200 = ip[2].Normal;
     
 	// Compute the cubic geometry control points
 	// Edge control points
-	Output.f3B210 = ((2 * f3B003) + f3B030 - (dot((f3B030 - f3B003), f3N002) * f3N002)) / 3;
-	Output.f3B120 = ((2 * f3B030) + f3B003 - (dot((f3B003 - f3B030), f3N020) * f3N020)) / 3;
-	Output.f3B021 = ((2 * f3B030) + f3B300 - (dot((f3B300 - f3B030), f3N020) * f3N020)) / 3;
-	Output.f3B012 = ((2 * f3B300) + f3B030 - (dot((f3B030 - f3B300), f3N200) * f3N200)) / 3;
-	Output.f3B102 = ((2 * f3B300) + f3B003 - (dot((f3B003 - f3B300), f3N200) * f3N200)) / 3;
-	Output.f3B201 = ((2 * f3B003) + f3B300 - (dot((f3B300 - f3B003), f3N002) * f3N002)) / 3;
+	Output.f3B210 = ((2 * f3B003) + f3B030 - (dot(f3B030 - f3B003, f3N002) * f3N002)) / 3;
+	Output.f3B120 = ((2 * f3B030) + f3B003 - (dot(f3B003 - f3B030, f3N020) * f3N020)) / 3;
+	Output.f3B021 = ((2 * f3B030) + f3B300 - (dot(f3B300 - f3B030, f3N020) * f3N020)) / 3;
+	Output.f3B012 = ((2 * f3B300) + f3B030 - (dot(f3B030 - f3B300, f3N200) * f3N200)) / 3;
+	Output.f3B102 = ((2 * f3B300) + f3B003 - (dot(f3B003 - f3B300, f3N200) * f3N200)) / 3;
+	Output.f3B201 = ((2 * f3B003) + f3B300 - (dot(f3B300 - f3B003, f3N002) * f3N002)) / 3;
 	// Center control point
 	float3 f3E = (Output.f3B210 + Output.f3B120 + Output.f3B021 + Output.f3B012 + Output.f3B102 + Output.f3B201) / 6;
 	float3 f3V = (f3B003 + f3B030 + f3B300) / 3;
-	Output.f3B111 = f3E + ((f3E - f3V) / 2);
+	Output.f3B111 = f3E + (f3E - f3V) / 2;
 
 	// Compute the quadratic normal control points, and rotate into world space
 	float fV12 = 2 * dot(f3B030 - f3B003, f3N002 + f3N020) / dot(f3B030 - f3B003, f3B030 - f3B003);
@@ -237,10 +239,10 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(3)]
 [patchconstantfunc("PNTrianglesConstantsHS")]
-BEZIER_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+HS_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
 										uint i : SV_OutputControlPointID)
 {
-	BEZIER_CONTROL_POINT Output;
+	HS_CONTROL_POINT Output;
 	Output.Pos = p[i].Pos;
 	Output.Texcoord0 = p[i].Texcoord0;
 	Output.Normal = p[i].Normal;
@@ -250,7 +252,7 @@ BEZIER_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p,
 [domain("tri")]
 DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
 							float3 f3BarycentricCoords : SV_DomainLocation,
-							const OutputPatch<BEZIER_CONTROL_POINT, 3> patch)
+							const OutputPatch<HS_CONTROL_POINT, 3> patch)
 {
 	// The barycentric coordinates
 	float fU = f3BarycentricCoords.x;
@@ -278,7 +280,7 @@ DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 						HSConstantData.f3B111 * 6.0f * fW * fU * fV;
 
 	// Compute normal from quadratic control points and barycentric coords
-	float3 f3Normal = patch[0].Normal * fWW +
+	float3 Normal = patch[0].Normal * fWW +
 						patch[1].Normal * fUU +
 						patch[2].Normal * fVV +
 						HSConstantData.f3N110 * fW * fU +
@@ -286,15 +288,15 @@ DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 						HSConstantData.f3N101 * fW * fV;
 
 	// Normalize the interpolated normal    
-	f3Normal = normalize(f3Normal);
+	Normal = normalize(Normal);
 
 	DS_OUTPUT Output;
 	// Linearly interpolate the texture coords
 	Output.Texcoord0 = patch[0].Texcoord0 * fW + patch[1].Texcoord0 * fU + patch[2].Texcoord0 * fV;
 
 	// Transform model position with view-projection matrix
-	Output.Pos = mul(float4(WorldPos, 1), worldviewproj);
-	Output.Normal = mul(f3Normal, (float3x3)worldview);
+	Output.Pos = mul(float4(WorldPos, 1), viewproj);
+	Output.Normal = mul(Normal, (float3x3)view);
 
 	return Output;    
 }
@@ -306,7 +308,17 @@ DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="vertex_shader" value="PNTrianglesVS()"/>
 			<state name="hull_shader" value="PNTrianglesHS()"/>
 			<state name="domain_shader" value="PNTrianglesDS()"/>
-			<state name="geometry_shader" value="DoNothingGS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="PNTrianglesLine">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			
+			<state name="vertex_shader" value="PNTrianglesVS()"/>
+			<state name="hull_shader" value="PNTrianglesHS()"/>
+			<state name="domain_shader" value="PNTrianglesDS()"/>
 			<state name="pixel_shader" value="PS()"/>
 		</pass>
 	</technique>

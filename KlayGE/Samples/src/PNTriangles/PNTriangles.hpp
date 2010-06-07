@@ -18,10 +18,26 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 
+	void TessChangedHandler(KlayGE::UISlider const & sender);
+	void LineModeHandler(KlayGE::UICheckBox const & sender);
+	void AdaptiveTessHandler(KlayGE::UICheckBox const & sender);
+	void EnablePNTrianglesHandler(KlayGE::UICheckBox const & sender);
+	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
+
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
+
+	KlayGE::UIDialogPtr dialog_params_;
+	int id_tess_static_;
+	int id_tess_slider_;
+	int id_line_mode_;
+	int id_adaptive_tess_;
+	int id_enable_pn_triangles_;
+	int id_fps_camera_;
+
+	int tess_;
 };
 
 #endif		// _SUBD_HPP
