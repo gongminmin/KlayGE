@@ -25,6 +25,7 @@ private:
 	void AnimationHandler(KlayGE::UICheckBox const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
+	int tess_factor_;
 	bool animation_;
 	float last_time_;
 	int frame_;
@@ -35,6 +36,7 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::UIDialogPtr dialog_params_;
+	int id_warning_static_;
 	int id_tess_static_;
 	int id_tess_slider_;
 	int id_line_mode_;
@@ -42,8 +44,6 @@ private:
 	int id_enable_pn_triangles_;
 	int id_animation_;
 	int id_fps_camera_;
-
-	int tess_;
 };
 
 #endif		// _PNTRIANGLES_HPP

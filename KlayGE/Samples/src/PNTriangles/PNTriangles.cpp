@@ -310,7 +310,7 @@ int main()
 
 PNTrianglesApp::PNTrianglesApp(std::string const & name, RenderSettings const & settings)
 					: App3DFramework(name, settings),
-						tess_(5), last_time_(0), frame_(0)
+						tess_factor_(5), last_time_(0), frame_(0)
 {
 }
 
@@ -338,6 +338,7 @@ void PNTrianglesApp::InitObjects()
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PNTriangles.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	id_warning_static_ = dialog_params_->IDFromName("WarningStatic");
 	id_tess_static_ = dialog_params_->IDFromName("TessStatic");
 	id_tess_slider_ = dialog_params_->IDFromName("TessSlider");
 	id_line_mode_ = dialog_params_->IDFromName("LineModeCheck");
@@ -359,17 +360,18 @@ void PNTrianglesApp::InitObjects()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 5)
-	{
-		dialog_params_->Control<UISlider>(id_tess_slider_)->SetEnabled(false);
-		dialog_params_->Control<UIStatic>(id_tess_static_)->SetEnabled(false);
+	bool tess_support = (caps.max_shader_model >= 5);
 
-		dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetChecked(false);
-		dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetEnabled(false);
+	dialog_params_->Control<UIStatic>(id_warning_static_)->SetVisible(!tess_support);
 
-		dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetChecked(false);
-		dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetEnabled(false);
-	}
+	dialog_params_->Control<UISlider>(id_tess_slider_)->SetEnabled(tess_support);
+	dialog_params_->Control<UIStatic>(id_tess_static_)->SetEnabled(tess_support);
+
+	dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetChecked(tess_support);
+	dialog_params_->Control<UICheckBox>(id_adaptive_tess_)->SetEnabled(tess_support);
+
+	dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetChecked(tess_support);
+	dialog_params_->Control<UICheckBox>(id_enable_pn_triangles_)->SetEnabled(tess_support);
 }
 
 void PNTrianglesApp::OnResize(uint32_t width, uint32_t height)
@@ -399,11 +401,11 @@ void PNTrianglesApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 
 void PNTrianglesApp::TessChangedHandler(UISlider const & sender)
 {
-	tess_ = sender.GetValue();
-	checked_pointer_cast<PolygonObject>(polygon_)->SetTessFactor(tess_);
+	tess_factor_ = sender.GetValue();
+	checked_pointer_cast<PolygonObject>(polygon_)->SetTessFactor(tess_factor_);
 
 	std::wostringstream stream;
-	stream << L"Tessellation factor: " << tess_;
+	stream << L"Tessellation factor: " << tess_factor_;
 	dialog_params_->Control<UIStatic>(id_tess_static_)->SetText(stream.str());
 }
 

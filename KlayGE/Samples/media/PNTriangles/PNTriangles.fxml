@@ -27,6 +27,26 @@
 
 	<shader>
 		<![CDATA[
+void Skinned(float3 pos : POSITION,
+			float3 normal : NORMAL,
+			float4 blend_weights : BLENDWEIGHT,
+			int4 blend_indices : BLENDINDICES,
+			out float3 result_pos,
+			out float3 result_normal)
+{
+	result_pos = float3(0, 0, 0);
+	result_normal = float3(0, 0, 0);
+	for (int i = 0; i < 4; ++ i)
+	{
+		float4 joint_rot = joint_rots[blend_indices[i]];
+		float4 joint_pos = joint_poss[blend_indices[i]];
+		float weight = blend_weights[i];
+
+		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
+		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
+	}
+}
+
 void NoPNTrianglesVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float3 normal : NORMAL,
@@ -45,17 +65,9 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
-	float3 result_pos = float3(0, 0, 0);
-	float3 result_normal = float3(0, 0, 0);
-	for (int i = 0; i < 4; ++ i)
-	{
-		float4 joint_rot = joint_rots[blend_indices[i]];
-		float4 joint_pos = joint_poss[blend_indices[i]];
-		float weight = blend_weights[i];
-
-		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
-		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
-	}
+	float3 result_pos, result_normal;
+	Skinned(pos, normal, blend_weights, blend_indices,
+		result_pos, result_normal);
 
 	oPos = mul(float4(result_pos, 1), worldviewproj);
 	oTex0 = texcoord0;
@@ -102,19 +114,12 @@ struct HS_CONTROL_POINT
 	float3 Normal : TEXCOORD1;
 };
 
-struct DS_OUTPUT
-{
-	float2 Texcoord0 : TEXCOORD0;
-	float3 Normal : TEXCOORD1;
-	float4 Pos : SV_Position;
-};
-
 VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float3 normal : NORMAL,
 					float4 blend_weights : BLENDWEIGHT,
 #ifdef KLAYGE_OPENGL
-					float4 blend_indices_f : BLENDINDICES,
+					float4 blend_indices_f : BLENDINDICES
 #else
 					int4 blend_indices : BLENDINDICES
 #endif
@@ -126,17 +131,9 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
 
-	float3 result_pos = float3(0, 0, 0);
-	float3 result_normal = float3(0, 0, 0);
-	for (int i = 0; i < 4; ++ i)
-	{
-		float4 joint_rot = joint_rots[blend_indices[i]];
-		float4 joint_pos = joint_poss[blend_indices[i]];
-		float weight = blend_weights[i];
-
-		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
-		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
-	}
+	float3 result_pos, result_normal;
+	Skinned(pos, normal, blend_weights, blend_indices,
+		result_pos, result_normal);
 
 	output.Pos = mul(float4(result_pos, 1), world).xyz;
 	output.Texcoord0 = texcoord0;
@@ -148,22 +145,22 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 struct HS_CONSTANT_DATA_OUTPUT
 {
 	// Tess factor for the FF HW block
-	float Edges[3]	: SV_TessFactor;
-	float Inside	: SV_InsideTessFactor;
+	float edges[3]	: SV_TessFactor;
+	float inside	: SV_InsideTessFactor;
 
 	// Geometry cubic generated control points
-	float3 f3B210	: POSITION3;
-	float3 f3B120	: POSITION4;
-	float3 f3B021	: POSITION5;
-	float3 f3B012	: POSITION6;
-	float3 f3B102	: POSITION7;
-	float3 f3B201	: POSITION8;
-	float3 f3B111	: CENTER;
+	float3 b210	: POSITION3;
+	float3 b120	: POSITION4;
+	float3 b021	: POSITION5;
+	float3 b012	: POSITION6;
+	float3 b102	: POSITION7;
+	float3 b201	: POSITION8;
+	float3 b111	: CENTER;
 
 	// Normal quadratic generated control points
-	float3 f3N110	: NORMAL3;      
-	float3 f3N011	: NORMAL4;
-	float3 f3N101	: NORMAL5;
+	float3 n110	: NORMAL3;      
+	float3 n011	: NORMAL4;
+	float3 n101	: NORMAL5;
 };
 
 //--------------------------------------------------------------------------------------
@@ -171,67 +168,67 @@ struct HS_CONSTANT_DATA_OUTPUT
 //--------------------------------------------------------------------------------------
 HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
 {	
-	HS_CONSTANT_DATA_OUTPUT Output;
+	HS_CONSTANT_DATA_OUTPUT output;
     
 	if (adaptive_tess)
 	{
 		// Calculate the tessellation factor per edge, based on distance from camera
-		float fDistance;
-		float3 f3MidPoint;
+		float dist;
+		float3 mid_point;
 		// Edge 0
-		f3MidPoint = (ip[2].Pos + ip[0].Pos) / 2;
-		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-		Output.Edges[0] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		mid_point = (ip[2].Pos + ip[0].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Edge 1
-		f3MidPoint = (ip[0].Pos + ip[1].Pos) / 2;
-		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-		Output.Edges[1] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		mid_point = (ip[0].Pos + ip[1].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Edge 2
-		f3MidPoint = (ip[1].Pos + ip[2].Pos) / 2;
-		fDistance = distance(f3MidPoint, eye_pos) - tess_factors.z;
-		Output.Edges[2] = tess_factors.x * (1 - clamp(fDistance / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		mid_point = (ip[1].Pos + ip[2].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Inside
-		Output.Inside = (Output.Edges[0] + Output.Edges[1] + Output.Edges[2]) / 3;
+		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
 	}
 	else
 	{
 		// Simply output the tessellation factors from constant space 
 		// for use by the FF tessellation unit
-		Output.Edges[0] = Output.Edges[1] = Output.Edges[2] = tess_factors.x;
-		Output.Inside = tess_factors.y;
+		output.edges[0] = output.edges[1] = output.edges[2] = tess_factors.x;
+		output.inside = tess_factors.y;
 	}
 
 	// Assign Positions
-	float3 f3B003 = ip[0].Pos;
-	float3 f3B030 = ip[1].Pos;
-	float3 f3B300 = ip[2].Pos;
+	float3 b003 = ip[0].Pos;
+	float3 b030 = ip[1].Pos;
+	float3 b300 = ip[2].Pos;
 	// And Normals
-	float3 f3N002 = ip[0].Normal;
-	float3 f3N020 = ip[1].Normal;
-	float3 f3N200 = ip[2].Normal;
+	float3 n002 = ip[0].Normal;
+	float3 n020 = ip[1].Normal;
+	float3 n200 = ip[2].Normal;
     
 	// Compute the cubic geometry control points
 	// Edge control points
-	Output.f3B210 = ((2 * f3B003) + f3B030 - (dot(f3B030 - f3B003, f3N002) * f3N002)) / 3;
-	Output.f3B120 = ((2 * f3B030) + f3B003 - (dot(f3B003 - f3B030, f3N020) * f3N020)) / 3;
-	Output.f3B021 = ((2 * f3B030) + f3B300 - (dot(f3B300 - f3B030, f3N020) * f3N020)) / 3;
-	Output.f3B012 = ((2 * f3B300) + f3B030 - (dot(f3B030 - f3B300, f3N200) * f3N200)) / 3;
-	Output.f3B102 = ((2 * f3B300) + f3B003 - (dot(f3B003 - f3B300, f3N200) * f3N200)) / 3;
-	Output.f3B201 = ((2 * f3B003) + f3B300 - (dot(f3B300 - f3B003, f3N002) * f3N002)) / 3;
+	output.b210 = (2 * b003 + b030 - (dot(b030 - b003, n002) * n002)) / 3;
+	output.b120 = (2 * b030 + b003 - (dot(b003 - b030, n020) * n020)) / 3;
+	output.b021 = (2 * b030 + b300 - (dot(b300 - b030, n020) * n020)) / 3;
+	output.b012 = (2 * b300 + b030 - (dot(b030 - b300, n200) * n200)) / 3;
+	output.b102 = (2 * b300 + b003 - (dot(b003 - b300, n200) * n200)) / 3;
+	output.b201 = (2 * b003 + b300 - (dot(b300 - b003, n002) * n002)) / 3;
 	// Center control point
-	float3 f3E = (Output.f3B210 + Output.f3B120 + Output.f3B021 + Output.f3B012 + Output.f3B102 + Output.f3B201) / 6;
-	float3 f3V = (f3B003 + f3B030 + f3B300) / 3;
-	Output.f3B111 = f3E + (f3E - f3V) / 2;
+	float3 e = (output.b210 + output.b120 + output.b021 + output.b012 + output.b102 + output.b201) / 6;
+	float3 v = (b003 + b030 + b300) / 3;
+	output.b111 = lerp(e, v, 0.5f);
 
 	// Compute the quadratic normal control points, and rotate into world space
-	float fV12 = 2 * dot(f3B030 - f3B003, f3N002 + f3N020) / dot(f3B030 - f3B003, f3B030 - f3B003);
-	Output.f3N110 = normalize(f3N002 + f3N020 - fV12 * (f3B030 - f3B003));
-	float fV23 = 2 * dot(f3B300 - f3B030, f3N020 + f3N200) / dot(f3B300 - f3B030, f3B300 - f3B030);
-	Output.f3N011 = normalize(f3N020 + f3N200 - fV23 * (f3B300 - f3B030));
-	float fV31 = 2 * dot(f3B003 - f3B300, f3N200 + f3N002) / dot(f3B003 - f3B300, f3B003 - f3B300);
-	Output.f3N101 = normalize(f3N200 + f3N002 - fV31 * (f3B003 - f3B300));
+	float v12 = 2 * dot(b030 - b003, n002 + n020) / dot(b030 - b003, b030 - b003);
+	output.n110 = normalize(n002 + n020 - v12 * (b030 - b003));
+	float v23 = 2 * dot(b300 - b030, n020 + n200) / dot(b300 - b030, b300 - b030);
+	output.n011 = normalize(n020 + n200 - v23 * (b300 - b030));
+	float v31 = 2 * dot(b003 - b300, n200 + n002) / dot(b003 - b300, b003 - b300);
+	output.n101 = normalize(n200 + n002 - v31 * (b003 - b300));
 
-	return Output;
+	return output;
 }
 
 [domain("tri")]
@@ -242,63 +239,62 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 HS_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
 										uint i : SV_OutputControlPointID)
 {
-	HS_CONTROL_POINT Output;
-	Output.Pos = p[i].Pos;
-	Output.Texcoord0 = p[i].Texcoord0;
-	Output.Normal = p[i].Normal;
-	return Output;
+	HS_CONTROL_POINT output;
+	output.Pos = p[i].Pos;
+	output.Texcoord0 = p[i].Texcoord0;
+	output.Normal = p[i].Normal;
+	return output;
 }
 
 [domain("tri")]
-DS_OUTPUT PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
-							float3 f3BarycentricCoords : SV_DomainLocation,
-							const OutputPatch<HS_CONTROL_POINT, 3> patch)
+void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<HS_CONTROL_POINT, 3> patch,
+
+							out float2 oTex0 : TEXCOORD0,
+							out float3 oNormal : TEXCOORD1,
+							out float4 oPos : SV_Position)
 {
 	// The barycentric coordinates
-	float fU = f3BarycentricCoords.x;
-	float fV = f3BarycentricCoords.y;
-	float fW = f3BarycentricCoords.z;
+	float u = bc_coords.x;
+	float v = bc_coords.y;
+	float w = bc_coords.z;
 
 	// Precompute squares and squares * 3 
-	float fUU = fU * fU;
-	float fVV = fV * fV;
-	float fWW = fW * fW;
-	float fUU3 = fUU * 3.0f;
-	float fVV3 = fVV * 3.0f;
-	float fWW3 = fWW * 3.0f;
+	float uu = u * u;
+	float vv = v * v;
+	float ww = w * w;
+	float uu3 = uu * 3;
+	float vv3 = vv * 3;
+	float ww3 = ww * 3;
 
 	// Compute position from cubic control points and barycentric coords
-	float3 WorldPos = patch[0].Pos * fWW * fW +
-						patch[1].Pos * fUU * fU +
-						patch[2].Pos * fVV * fV +
-						HSConstantData.f3B210 * fWW3 * fU +
-						HSConstantData.f3B120 * fW * fUU3 +
-						HSConstantData.f3B201 * fWW3 * fV +
-						HSConstantData.f3B021 * fUU3 * fV +
-						HSConstantData.f3B102 * fW * fVV3 +
-						HSConstantData.f3B012 * fU * fVV3 +
-						HSConstantData.f3B111 * 6.0f * fW * fU * fV;
+	float3 world_pos = patch[0].Pos * ww * w
+					+ patch[1].Pos * uu * u
+					+ patch[2].Pos * vv * v
+					+ HSConstantData.b210 * ww3 * u
+					+ HSConstantData.b120 * w * uu3
+					+ HSConstantData.b201 * ww3 * v
+					+ HSConstantData.b021 * uu3 * v
+					+ HSConstantData.b102 * w * vv3
+					+ HSConstantData.b012 * u * vv3
+					+ HSConstantData.b111 * 6 * w * u * v;
 
 	// Compute normal from quadratic control points and barycentric coords
-	float3 Normal = patch[0].Normal * fWW +
-						patch[1].Normal * fUU +
-						patch[2].Normal * fVV +
-						HSConstantData.f3N110 * fW * fU +
-						HSConstantData.f3N011 * fU * fV +
-						HSConstantData.f3N101 * fW * fV;
+	float3 normal = patch[0].Normal * ww
+					+ patch[1].Normal * uu
+					+ patch[2].Normal * vv
+					+ HSConstantData.n110 * w * u
+					+ HSConstantData.n011 * u * v
+					+ HSConstantData.n101 * w * v;
+	normal = normalize(normal);
 
-	// Normalize the interpolated normal    
-	Normal = normalize(Normal);
-
-	DS_OUTPUT Output;
 	// Linearly interpolate the texture coords
-	Output.Texcoord0 = patch[0].Texcoord0 * fW + patch[1].Texcoord0 * fU + patch[2].Texcoord0 * fV;
+	oTex0 = patch[0].Texcoord0 * w + patch[1].Texcoord0 * u + patch[2].Texcoord0 * v;
 
 	// Transform model position with view-projection matrix
-	Output.Pos = mul(float4(WorldPos, 1), viewproj);
-	Output.Normal = mul(Normal, (float3x3)view);
-
-	return Output;    
+	oPos = mul(float4(world_pos, 1), viewproj);
+	oNormal = mul(normal, (float3x3)view); 
 }
 		]]>
 	</shader>
