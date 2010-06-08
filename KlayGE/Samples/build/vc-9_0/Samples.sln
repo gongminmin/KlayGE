@@ -36,6 +36,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ocean", "Ocean.vcproj", "{9
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SubSurface", "SubSurface.vcproj", "{68F2CEED-BFF6-4E1A-B6A5-2B95E341634E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PNTriangles", "PNTriangles.vcproj", "{98846677-45CF-4A86-AF8A-922B38B33A5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -188,6 +190,14 @@ Global
 		{68F2CEED-BFF6-4E1A-B6A5-2B95E341634E}.Release|Win32.Build.0 = Release|Win32
 		{68F2CEED-BFF6-4E1A-B6A5-2B95E341634E}.Release|x64.ActiveCfg = Release|x64
 		{68F2CEED-BFF6-4E1A-B6A5-2B95E341634E}.Release|x64.Build.0 = Release|x64
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Debug|Win32.Build.0 = Debug|Win32
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Debug|x64.ActiveCfg = Debug|x64
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Debug|x64.Build.0 = Debug|x64
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Release|Win32.ActiveCfg = Release|Win32
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Release|Win32.Build.0 = Release|Win32
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Release|x64.ActiveCfg = Release|x64
+		{98846677-45CF-4A86-AF8A-922B38B33A5C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

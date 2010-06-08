@@ -10,6 +10,7 @@
 		<Project filename="MotionBlurDoF.cbp" />
 		<Project filename="Parallax.cbp" />
 		<Project filename="ParticleEditor.cbp" />
+		<Project filename="PNTriangles.cbp" />
 		<Project filename="PostProcessing.cbp" />
 		<Project filename="ProceduralTex.cbp" />
 		<Project filename="Refract.cbp" />
