@@ -128,6 +128,8 @@ namespace KlayGE
 		}
 
 		std::vector<EGLint> visual_attr;
+		visual_attr.push_back(EGL_RENDERABLE_TYPE);
+		visual_attr.push_back(EGL_OPENGL_ES2_BIT);
 		visual_attr.push_back(EGL_RED_SIZE);
 		visual_attr.push_back(r_size);
 		visual_attr.push_back(EGL_GREEN_SIZE);
