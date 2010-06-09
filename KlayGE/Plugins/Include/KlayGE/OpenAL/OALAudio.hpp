@@ -21,8 +21,13 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/thread.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#include <al.h>
+#include <alc.h>
+#else
 #include <AL/al.h>
 #include <AL/alc.h>
+#endif
 
 #include <vector>
 
