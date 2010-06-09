@@ -15,7 +15,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#define INITGUID
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
@@ -908,9 +907,9 @@ namespace KlayGE
 							D3D10_SHADER_MACRO macro_end = { NULL, NULL };
 							macros.push_back(macro_end);
 						}
-						D3DX11CompileFromMemory(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
+						D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
 							NULL, sd.func_name.c_str(), shader_profile.c_str(),
-							0, 0, NULL, &code, &err_msg, NULL);
+							0, 0, &code, &err_msg);
 						if (err_msg != NULL)
 						{
 #ifdef KLAYGE_DEBUG
