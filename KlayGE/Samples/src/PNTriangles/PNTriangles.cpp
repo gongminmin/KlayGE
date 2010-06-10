@@ -323,7 +323,7 @@ void PNTrianglesApp::InitObjects()
 	checked_pointer_cast<PolygonObject>(polygon_)->SetFrame(0);
 	polygon_->AddToSceneManager();
 
-	this->LookAt(float3(2, 3, -2), float3(0, 1, 0));
+	this->LookAt(float3(-1.3f, 3, -2.2f), float3(0, 1.5f, 0));
 	this->Proj(0.1f, 100);
 
 	fpcController_.Scalers(0.05f, 0.1f);

@@ -11,7 +11,7 @@
 	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
 	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float3" name="light_dir" x="1" y="2" z="1"/>
+	<parameter type="float3" name="light_dir" x="-1" y="2" z="1"/>
 
 	<parameter type="float4x4" name="world" semantic="WORLD"/>
 	<parameter type="float4x4" name="view" semantic="VIEW"/>
@@ -59,6 +59,7 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oNormal : TEXCOORD1,
+					out float3 oPosES : TEXCOORD2,
 					out float4 oPos : SV_Position)
 {
 #ifdef KLAYGE_OPENGL
@@ -74,10 +75,15 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 	oNormal = mul(result_normal, (float3x3)worldview);
 }
 
-float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
+float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : TEXCOORD2) : SV_Target
 {
-	float lighting = dot(-light_dir, normal) / sqrt(dot(light_dir, light_dir) * dot(normal, normal));
-	return diffuse_tex.Sample(linear_sampler, oTex0) * lighting;
+	float3 l = normalize(-light_dir);
+	float3 n = normalize(normal);
+	float3 e = normalize(eye_pos - pos_es);
+
+	float diff = diffuse_term(l, n);
+	float spec = specular_term(l, e, n, 20.0f);
+	return diffuse_tex.Sample(linear_sampler, oTex0) * (diff + 0.2f) * 0.7f + spec * 0.3f;
 }
 		]]>
 	</shader>
@@ -253,6 +259,7 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 							out float2 oTex0 : TEXCOORD0,
 							out float3 oNormal : TEXCOORD1,
+							out float3 oPosES : TEXCOORD2,
 							out float4 oPos : SV_Position)
 {
 	// The barycentric coordinates
@@ -294,6 +301,7 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	// Transform model position with view-projection matrix
 	oPos = mul(float4(world_pos, 1), viewproj);
+	oPosES = mul(float4(world_pos, 1), view);
 	oNormal = mul(normal, (float3x3)view); 
 }
 		]]>

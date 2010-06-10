@@ -1,7 +1,7 @@
 粘土游戏引擎(KlayGE) 3.10.0 Demo
 
-Homepage: http://klayge.sourceforge.net
-E-Mail:	  enginedev@163.com
+Homepage: http://www.klayge.org
+E-Mail:	  webmaster@klayge.org
 QQ:       33611210
 
 注意：如果要在没有安装Microsoft Visual C++ 2008 SP1的机器上运行二进制版本的Demo，就需要事先安装Microsoft Visual C++ 2008 SP1 Redistributable Package。
