@@ -2,7 +2,7 @@
 // KlayGE 3DSMax网格数据析取类 实现文件
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2005-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 能导出骨骼动画 (2007.6.2)
