@@ -2,7 +2,7 @@
 // KlayGE DirectSound音乐缓冲区类 实现文件
 // Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.0.4
 // 改用timeSetEvent实现 (2004.3.28)

@@ -2,7 +2,7 @@
 // KlayGE RenderEngine和D3D9本地之间的映射 实现文件
 // Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.2.0
 // 支持ATI的instancing (2006.1.1)

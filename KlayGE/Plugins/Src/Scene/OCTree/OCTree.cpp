@@ -2,7 +2,7 @@
 // KlayGE 八叉树类 实现文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2004-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 提升了遍历速度 (2007.12.18)

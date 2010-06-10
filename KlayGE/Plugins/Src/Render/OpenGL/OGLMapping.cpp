@@ -2,7 +2,7 @@
 // KlayGE RenderEngine和OpenGL本地之间的映射 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2005-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 支持EF_B10G11R11F (2009.4.28)

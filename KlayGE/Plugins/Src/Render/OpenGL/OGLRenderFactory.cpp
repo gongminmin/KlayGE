@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染工厂类 实现文件
 // Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2004-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.7.0
 // 可以建立静态OGLVertexStream和OGLIndexStream (2005.6.19)

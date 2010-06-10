@@ -2,7 +2,7 @@
 // KlayGE D3D11渲染引擎抽象工厂 实现文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 初次建立 (2009.1.30)

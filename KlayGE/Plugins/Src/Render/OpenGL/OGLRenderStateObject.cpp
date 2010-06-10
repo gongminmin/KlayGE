@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染状态对象类 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2008-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 支持Depth Clamp (2009.8.5)

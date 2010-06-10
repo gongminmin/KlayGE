@@ -2,7 +2,7 @@
 // KlayGE OpenGL 3D纹理类 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 支持GL_NV_copy_image (2009.8.5)

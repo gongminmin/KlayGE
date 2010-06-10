@@ -2,7 +2,7 @@
 // KlayGE D3D9渲染窗口类 实现文件
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2003-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 支持动态切换全屏/窗口模式 (2007.3.24)

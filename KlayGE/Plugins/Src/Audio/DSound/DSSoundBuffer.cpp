@@ -2,7 +2,7 @@
 // KlayGE DirectSound声音缓冲区类 实现文件
 // Ver 2.1.3
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.0.0
 // 初次建立 (2003.10.4)

@@ -2,7 +2,7 @@
 // KlayGE D3D9顶点缓冲区类 实现文件
 // Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.2.0
 // 初次建立 (2006.1.9)

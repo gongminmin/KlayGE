@@ -2,7 +2,7 @@
 // KlayGE DInput游戏杆管理类 实现文件
 // Ver 2.8.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.8.0
 // 改用多继承结构 (2005.8.11)

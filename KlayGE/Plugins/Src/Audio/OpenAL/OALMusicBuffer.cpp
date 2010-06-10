@@ -2,7 +2,7 @@
 // KlayGE OpenAL音乐缓冲区类 实现文件
 // Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.2.0
 // 改进了线程的使用 (2006.4.29)
