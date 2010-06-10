@@ -2,7 +2,7 @@
 // KlayGE 输入动作映射类 实现文件
 // Ver 2.0.5
 // 版权所有(C) 龚敏敏, 2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.0.5
 // 初次建立 (2004.4.10)

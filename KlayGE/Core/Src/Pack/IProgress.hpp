@@ -2,7 +2,7 @@
 // KlayGE 打包系统进度接口 头文件 来自7zip
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 初次建立 (2007.5.24)

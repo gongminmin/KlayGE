@@ -2,7 +2,7 @@
 // KlayGE 场景对象类 头文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2005-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 增加了Overlay标志 (2009.5.13)

@@ -2,7 +2,7 @@
 // KlayGE 游戏消息定义 头文件
 // Ver 2.0.0
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.enginedev.com
+// Homepage: http://www.klayge.org
 //
 // 2.0.0
 // 初次建立 (2003.7.24)

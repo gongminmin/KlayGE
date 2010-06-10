@@ -2,7 +2,7 @@
 // KlayGE 可渲染对象类 头文件
 // Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.1.0
 // 拆出SceneObject (2005.11.2)

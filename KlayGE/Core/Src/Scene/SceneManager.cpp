@@ -2,7 +2,7 @@
 // KlayGE 场景管理器类 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 处理Overlay物体 (2009.5.13)

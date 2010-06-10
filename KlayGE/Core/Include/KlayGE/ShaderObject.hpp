@@ -2,7 +2,7 @@
 // KlayGE shader对象类 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 支持Gemoetry Shader (2009.2.5)

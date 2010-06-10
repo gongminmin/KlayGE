@@ -2,7 +2,7 @@
 // KlayGE 类型定义头文件
 // Ver 2.6.0
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.2.0
 // 用boost的类型定义代替直接定义 (2004.10.30)

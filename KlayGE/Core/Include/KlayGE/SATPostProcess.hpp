@@ -2,7 +2,7 @@
 // KlayGE Summed-Area Table后期处理类 头文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 初次建立 (2006.10.10)

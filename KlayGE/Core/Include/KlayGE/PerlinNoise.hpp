@@ -2,7 +2,7 @@
 // KlayGE 数学函数库 头文件
 // Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2005-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 // This algorithm is based on the great work done by Ken Perlin.
 // http://mrl.nyu.edu/~perlin/doc/oscar.html
 //

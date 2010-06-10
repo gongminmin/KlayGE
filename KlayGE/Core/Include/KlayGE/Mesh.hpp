@@ -2,7 +2,7 @@
 // KlayGE Mesh类 头文件
 // Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2004-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.4.0
 // 增加了AddVertexStream和AddIndexStream (2006.8.21)

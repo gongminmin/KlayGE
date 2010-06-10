@@ -2,7 +2,7 @@
 // KlayGE 打包系统7z提取器 实现文件 来自7zip
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2007-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 改用7z.dll (2009.3.8)

@@ -2,7 +2,7 @@
 // KlayGE 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2003-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 改成DLL的形式 (2008.10.17)

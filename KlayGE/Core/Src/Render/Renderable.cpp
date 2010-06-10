@@ -2,7 +2,7 @@
 // KlayGE 可渲染对象类 实现文件
 // Ver 3.4.0
 // 版权所有(C) 龚敏敏, 2003-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.4.0
 // 修正了Render没有设置Technique的bug (2006.7.26)

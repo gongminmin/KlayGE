@@ -2,7 +2,7 @@
 // KlayGE 渲染流布局类 头文件
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2006-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 去掉了TT_TriangleFan (2007.6.23)

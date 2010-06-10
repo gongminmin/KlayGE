@@ -2,7 +2,7 @@
 // KlayGE 后期处理类 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2006-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 使用InputPin和OutputPin来指定输入输出 (2010.3.23)

@@ -2,7 +2,7 @@
 // KlayGE 场景管理器类 头文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2003-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 增加了SceneObjects (2009.7.30)

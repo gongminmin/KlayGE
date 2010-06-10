@@ -2,7 +2,7 @@
 // KlayGE 颜色 头文件
 // Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2004-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.5.0
 // 改为模板实现 (2005.4.18)

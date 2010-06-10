@@ -2,7 +2,7 @@
 // KlayGE 渲染视图类 头文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2006-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 增加了Clear (2007.8.23)

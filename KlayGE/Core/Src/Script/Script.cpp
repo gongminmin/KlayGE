@@ -2,7 +2,7 @@
 // KlayGE 脚本引擎类 实现文件
 // Ver 1.2.8.11
 // 版权所有(C) 龚敏敏, 2001--2002
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 1.2.8.9
 // 修正了调用两次Close会出错的问题 (2002.10.11)

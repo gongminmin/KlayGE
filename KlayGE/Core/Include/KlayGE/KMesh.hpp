@@ -2,7 +2,7 @@
 // KlayGE KMesh类 头文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2005-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 支持32-bit index (2010.2.28)

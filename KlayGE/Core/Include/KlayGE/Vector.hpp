@@ -2,7 +2,7 @@
 // KlayGE 向量 头文件
 // Ver 2.1.1
 // 版权所有(C) 龚敏敏, 2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.1.1
 // 初次建立 (2004.4.22)

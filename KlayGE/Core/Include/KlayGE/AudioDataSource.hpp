@@ -2,7 +2,7 @@
 // KlayGE 音频数据源引擎 头文件
 // Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.0.4
 // 增加了NullObject (2004.4.7)

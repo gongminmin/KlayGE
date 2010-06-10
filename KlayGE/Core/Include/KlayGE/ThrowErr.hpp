@@ -2,7 +2,7 @@
 // KlayGE 抛出错误 头文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2001-2008
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 改用Boost.System的异常 (2008.5.21)

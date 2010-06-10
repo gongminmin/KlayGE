@@ -2,7 +2,7 @@
 // KlayGE 游戏大厅 实现文件
 // Ver 1.4.8.3
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 1.4.8.3
 // 初次建立 (2003.3.8)

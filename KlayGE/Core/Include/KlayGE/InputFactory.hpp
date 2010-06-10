@@ -2,7 +2,7 @@
 // KlayGE 输入引擎抽象工厂 头文件
 // Ver 3.1.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.1.0
 // 增加了NullObject (2005.10.29)

@@ -2,7 +2,7 @@
 // KlayGE 定时器类 实现文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2008
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 初次建立 (2008.1.8)

@@ -2,7 +2,7 @@
 // KlayGE 渲染视口类 头文件
 // Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.0.0
 // camera改为指针 (2005.8.18)

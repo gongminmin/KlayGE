@@ -2,7 +2,7 @@
 // KlayGE 纹理分块压缩 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2008-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 增加了DecodeBC1/3/4 (2010.1.27)

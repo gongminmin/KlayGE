@@ -2,7 +2,7 @@
 // KlayGE 元素格式 头文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 增加了EAH_GPU_Unordered和EAH_GPU_Structured (2009.12.22)

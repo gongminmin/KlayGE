@@ -2,7 +2,7 @@
 // KlayGE 纹理类 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2005-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 支持在线解压BC1-BC3 (2010.1.27)

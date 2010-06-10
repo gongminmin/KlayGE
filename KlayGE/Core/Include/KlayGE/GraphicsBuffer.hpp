@@ -2,7 +2,7 @@
 // KlayGE 图形缓冲区类 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2003-2008
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 增加了access_hint (2008.9.20)

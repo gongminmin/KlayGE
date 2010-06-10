@@ -2,7 +2,7 @@
 // KlayGE 集合向量容器模板 头文件
 // Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.2.0
 // 默认分配器改用boost的 (2004.10.30)

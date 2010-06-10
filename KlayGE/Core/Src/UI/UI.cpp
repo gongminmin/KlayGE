@@ -2,7 +2,7 @@
 // KlayGE 图形用户界面 实现文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2007-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 直接从uiml文件读取ui布局 (2009.4.20)

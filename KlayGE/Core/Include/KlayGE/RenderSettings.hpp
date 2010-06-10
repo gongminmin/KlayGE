@@ -2,7 +2,7 @@
 // KlayGE 渲染设置类 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2005-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 增加了motion_frames (2010.2.22)

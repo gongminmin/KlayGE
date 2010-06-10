@@ -2,7 +2,7 @@
 // KlayGE 跟踪器 头文件
 // Ver 2.2.0
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.2.0
 // 初次建立 (2003.11.9)

@@ -2,7 +2,7 @@
 // KlayGE 声音引擎 头文件
 // Ver 2.0.4
 // 版权所有(C) 龚敏敏, 2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.0.4
 // 初次建立 (2004.4.7)

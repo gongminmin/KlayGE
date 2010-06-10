@@ -2,7 +2,7 @@
 // KlayGE 渲染引擎类 实现文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2003-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 增加了Dispatch (2009.12.22)

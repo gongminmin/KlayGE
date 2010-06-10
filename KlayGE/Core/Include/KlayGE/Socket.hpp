@@ -2,7 +2,7 @@
 // KlayGE 套接字 头文件
 // Ver 1.4.8.4
 // 版权所有(C) 龚敏敏, 2003
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 1.4.8.3
 // 增加了同步Socket (2003.3.8)

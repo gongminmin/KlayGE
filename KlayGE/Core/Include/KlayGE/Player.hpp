@@ -2,7 +2,7 @@
 // KlayGE 游戏者 头文件
 // Ver 2.1.2
 // 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.1.2
 // 增加了发送队列 (2004.5.28)
