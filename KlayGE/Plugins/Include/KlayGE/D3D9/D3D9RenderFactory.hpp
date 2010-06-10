@@ -2,7 +2,7 @@
 // KlayGE D3D9渲染引擎抽象工厂 头文件
 // Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.4.0
 // 增加了resource_pool_成员 (2005.3.3)

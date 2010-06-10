@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染工厂类 头文件
 // Ver 2.7.0
 // 版权所有(C) 龚敏敏, 2004-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.7.0
 // 支持vertex_buffer_object (2005.6.19)

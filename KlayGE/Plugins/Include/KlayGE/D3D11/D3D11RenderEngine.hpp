@@ -2,7 +2,7 @@
 // KlayGE D3D11渲染引擎类 头文件
 // Ver 3.10.0
 // 版权所有(C) 龚敏敏, 2009-2010
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.10.0
 // 升级到DXGI 1.1 (2010.2.8)

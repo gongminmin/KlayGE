@@ -2,7 +2,7 @@
 // KlayGE Ogg音频数据源 头文件
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2003-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 用vorbisfile重写，可以返回原始大小 (2007.7.12)

@@ -2,7 +2,7 @@
 // KlayGE OpenGL纹理类 头文件
 // Ver 3.6.0
 // 版权所有(C) 龚敏敏, 2003-2007
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.6.0
 // 用pbo加速 (2007.3.13)

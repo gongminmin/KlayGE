@@ -2,7 +2,7 @@
 // KlayGE D3D9资源类 头文件
 // Ver 2.4.0
 // 版权所有(C) 龚敏敏, 2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 2.4.0
 // 初次建立 (2005.3.2)

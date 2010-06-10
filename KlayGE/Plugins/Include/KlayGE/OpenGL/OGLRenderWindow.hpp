@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染窗口类 头文件
 // Ver 3.7.0
 // 版权所有(C) 龚敏敏, 2004-2008
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.7.0
 // 实验性的linux支持 (2008.5.19)

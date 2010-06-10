@@ -2,7 +2,7 @@
 // KlayGE HeightMap地形生成类 头文件
 // Ver 2.0.0
 // 版权所有(C) 龚敏敏, 2003-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.4.0
 // 使用boost::function (2006.7.23)

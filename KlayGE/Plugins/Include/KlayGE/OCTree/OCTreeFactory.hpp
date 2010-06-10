@@ -2,7 +2,7 @@
 // KlayGE OCTree场景管理类 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2008
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 初次建立 (2008.10.17)

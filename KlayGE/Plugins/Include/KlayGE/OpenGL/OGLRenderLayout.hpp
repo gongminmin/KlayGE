@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染分布类 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.8.0
 // 支持GL_ARB_vertex_array_object (2009.2.15)

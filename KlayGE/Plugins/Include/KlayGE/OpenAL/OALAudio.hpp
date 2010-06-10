@@ -2,7 +2,7 @@
 // KlayGE OpenAL声音引擎 头文件
 // Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2006
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.2.0
 // 改进了OALMusicBuffer中线程的使用 (2006.4.29)

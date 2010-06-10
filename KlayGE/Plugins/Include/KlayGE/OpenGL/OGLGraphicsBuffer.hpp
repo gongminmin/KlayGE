@@ -2,7 +2,7 @@
 // KlayGE OpenGL图形缓冲区类 头文件
 // Ver 3.2.0
 // 版权所有(C) 龚敏敏, 2003-2005
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.2.0
 // 把OGLIndexStream和OGLVertexStream合并成OGLGraphicsBuffer (2006.1.10)

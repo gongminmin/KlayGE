@@ -2,7 +2,7 @@
 // KlayGE OpenGL渲染视图类 头文件
 // Ver 3.9.0
 // 版权所有(C) 龚敏敏, 2006-2009
-// Homepage: http://klayge.sourceforge.net
+// Homepage: http://www.klayge.org
 //
 // 3.9.0
 // 支持Texture Array (2009.8.5)
