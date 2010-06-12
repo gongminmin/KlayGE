@@ -357,8 +357,8 @@ public:
 
 					ci.left = static_cast<int16_t>((raster_user.bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
 					ci.top = static_cast<int16_t>((3 / 4.0f - (raster_user.bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
-					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_);
-					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_);
+					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 1);
+					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 1);
 
 					for (uint32_t y = 0; y < char_size_; ++ y)
 					{
@@ -462,12 +462,12 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(m64), mask);
 					while (bsf64(index, m64[0]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 64 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m64[0] &= m64[0] - 1;
 					}
 					while (bsf64(index, m64[1]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 64 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m64[1] &= m64[1] - 1;
 					}
 #else
@@ -475,22 +475,22 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(m32), mask);
 					while (bsf32(index, m32[0]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[0] &= m32[0] - 1;
 					}
 					while (bsf32(index, m32[1]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[1] &= m32[1] - 1;
 					}
 					while (bsf32(index, m32[2]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 2 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[2] &= m32[2] - 1;
 					}
 					while (bsf32(index, m32[3]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 3 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[3] &= m32[3] - 1;
 					}
 #endif
@@ -546,12 +546,12 @@ private:
 					uint32_t* m32 = reinterpret_cast<uint32_t*>(&mask);
 					while (bsf32(index, m32[0]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 0 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[0] &= m32[0] - 1;
 					}
 					while (bsf32(index, m32[1]))
 					{
-						this->add_edge_point(x + index, y, dmap, dist_cache, x_offset, y_offset);
+						this->add_edge_point(x + 32 * 1 + index, y, dmap, dist_cache, x_offset, y_offset);
 						m32[1] &= m32[1] - 1;
 					}
 #endif
