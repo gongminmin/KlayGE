@@ -3,9 +3,22 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>KlayGE technology features</title>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-16460301-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 <body>
-<img src="image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" />
+<a href="../index.html"><img src="../image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" /></a>
 <h1>KlayGE technology features</h1>
 <h2>Overview</h2>
 <p>KlayGE is a framework for developing the next generation games. It's an open source game engine with cross-platform plugin-based architecture. It introduces many advanced technologies with unlimited expansibility.</p>
@@ -24,6 +37,8 @@
 	<li>Support per-pixel lighting and rendering</li>
 	<li>Distance-based font system, takes advantages from both vector fonts and bitmap fonts.</li>
 	<li>Support procedural texture</li>
+	<li>Support Subsurface Scattering, which can be used to render translucency materials such as leaf, skin, jadeware.</li>
+	<li>Support PN Triangles to smooth low polygon mesh at runtime</li>
 	<li>Shading
 		<ul>
 			<li>A shader library includs common operations</li>
@@ -56,6 +71,7 @@
 	<li>HDR compressor, compresses both cubemap and 2D HDR textures.</li>
 	<li>Normal map compressor, provides 2:1 or 4:1 compression ratio. </li>
 	<li>Distance-based font generator, converts a vector font to the format that engine uses.</li>
+	<li>FXML2Shader tool, converts a FXML effect script to HLSL or Cg shader.</li>
 </ul>
 <h2>Programming </h2>
 <ul>

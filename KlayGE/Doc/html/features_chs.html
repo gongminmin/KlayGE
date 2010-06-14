@@ -3,9 +3,22 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
 <title>KlayGE技术特性</title>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-16460301-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 <body>
-<img src="image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" />
+<a href="../index.html"><img src="../image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" /></a>
 <h1>KlayGE技术特性</h1>
 <h2>概览</h2>
 <p>KlayGE是用于下一代游戏的一个完整的游戏开发框架。它是API无关的插件式结构，提供了很多先进技术，并且有无限的扩展性。</p>
@@ -24,6 +37,8 @@
 	<li>支持逐像素光照和渲染技术</li>
 	<li>基于distance的字体系统，兼有矢量和点阵的优点</li>
 	<li>支持Procedural texture</li>
+	<li>支持Subsurface Scattering，可用于渲染树叶、皮肤、玉器等半透明材质</li>
+	<li>支持PN Triangles技术，在运行期自动光滑低模</li>
 	<li>着色
 		<ul>
 			<li>包含常用操作的shader库</li>
@@ -56,6 +71,7 @@
 	<li>HDR压缩器，支持cubemap和2D HDR纹理的压缩</li>
 	<li>Normal map压缩器，2:1或4:1的压缩率</li>
 	<li>基于distance的字体生成器，可以把矢量字体转换成引擎使用的字体格式</li>
+	<li>FXML2Shader工具，把FXML的特效脚本转换成HLSL或Cg</li>
 </ul>
 <h2>程序特性</h2>
 <ul>

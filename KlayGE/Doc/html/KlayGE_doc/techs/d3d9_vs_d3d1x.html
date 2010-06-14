@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>D3D9 vs D3D1x</title>
+<style type="text/css">
+<!--
+.STYLE1 {color: #FF0000}
+-->
+</style>
+</head>
+<body>
+<h1>D3D9 vs D3D1x</h1>
+<p>KlayGE 3.8.0开始正式支持D3D10和D3D11，可以在不改任何上层代码的情况下切换D3D9，D3D10，D3D11和OpenGL四个渲染插件。于是，这给了我们一个比较性能的机会。本文着重比较了D3D9和D3D10两个插件的性能。由于目前（2009年4月）市面上还没有支持D3D11的硬件，D3D11插件只能通过D3D11 Level 10在支持D3D10的硬件上执行的，性能也就和D3D10几乎相同，遂不必多讨论。</p>
+<p>表1列举了KlayGE现有例子在D3D9和D3D10两插件下得到的fps数据，并由此计算出D3D10的提升。</p>
+<p>运行的平台：Pentium Core2 2.3GHz、4GB DDR2-800、Geforce 8800GT/185.66驱动，操作系统：Vista SP1 64bit。</p>
+<table border="1" cellpadding="0" cellspacing="0" valign="top">
+	<caption>
+	<strong>表1. </strong>两插件fps对比
+	</caption>
+	<tr>
+		<td>例子</td>
+		<td>D3D9 （fps)</td>
+		<td>D3D10 (fps)</td>
+		<td>D3D10的提升</td>
+	</tr>
+	<tr>
+		<td>Ascii Arts</td>
+		<td>1784</td>
+		<td><span class="STYLE1">1828</span></td>
+		<td>2.47%</td>
+	</tr>
+	<tr>
+		<td>Cartoon</td>
+		<td>961</td>
+		<td><span class="STYLE1">979</span></td>
+		<td>1.87%</td>
+	</tr>
+	<tr>
+		<td>Deferred Shading</td>
+		<td><span class="STYLE1">150</span></td>
+		<td>147</td>
+		<td>-2.00%</td>
+	</tr>
+	<tr>
+		<td>Depth of Field</td>
+		<td>152</td>
+		<td>152</td>
+		<td>0.00%</td>
+	</tr>
+	<tr>
+		<td>Depth Peeling</td>
+		<td><span class="STYLE1">406</span></td>
+		<td>350</td>
+		<td>-13.79%</td>
+	</tr>
+	<tr>
+		<td>Distance Mapping</td>
+		<td>1517</td>
+		<td><span class="STYLE1">1533</span></td>
+		<td>1.05%</td>
+	</tr>
+	<tr>
+		<td>Fractal</td>
+		<td>1425</td>
+		<td><span class="STYLE1">1467</span></td>
+		<td>2.95%</td>
+	</tr>
+	<tr>
+		<td>GPU Particle System</td>
+		<td>57</td>
+		<td><span class="STYLE1">62</span></td>
+		<td>8.77%</td>
+	</tr>
+	<tr>
+		<td>Instancing</td>
+		<td>477</td>
+		<td><span class="STYLE1">498</span></td>
+		<td>4.40%</td>
+	</tr>
+	<tr>
+		<td>Model Viewer</td>
+		<td>1979</td>
+		<td><span class="STYLE1">2271</span></td>
+		<td>14.75%</td>
+	</tr>
+	<tr>
+		<td>Parallax</td>
+		<td>3066</td>
+		<td><span class="STYLE1">3219</span></td>
+		<td>4.99%</td>
+	</tr>
+	<tr>
+		<td>Particle System</td>
+		<td>705</td>
+		<td><span class="STYLE1">734</span></td>
+		<td>4.11%</td>
+	</tr>
+	<tr>
+		<td>Procedural Texture</td>
+		<td>852</td>
+		<td><span class="STYLE1">1138</span></td>
+		<td>33.57%</td>
+	</tr>
+	<tr>
+		<td>Refract</td>
+		<td>712</td>
+		<td><span class="STYLE1">713</span></td>
+		<td>0.14%</td>
+	</tr>
+	<tr>
+		<td>Shadow Cubemap</td>
+		<td>1033</td>
+		<td><span class="STYLE1">1061</span></td>
+		<td>2.71%</td>
+	</tr>
+	<tr>
+		<td>Text</td>
+		<td>863</td>
+		<td><span class="STYLE1">910</span></td>
+		<td>5.45%</td>
+	</tr>
+	<tr>
+		<td>Vertex Displacement</td>
+		<td>3734</td>
+		<td><span class="STYLE1">4012</span></td>
+		<td>7.45%</td>
+	</tr>
+	<tr>
+		<td>Video Texture</td>
+		<td><span class="STYLE1">724</span></td>
+		<td>711</td>
+		<td>-1.80%</td>
+	</tr>
+</table>
+<p>从表1可以看出，在绝大部分情况下，如果算法和效果相同，D3D10的性能要高于D3D9。可见，得益于API设计的巨大进步，D3D10的runtime/driver性能优于D3D9。</p>
+<p>由此可以看出，在Vista下使用D3D10确实有利于性能的提高。在新硬件上，D3D1x更能发挥出硬件的能力。</p>
+<p>在未来的KlayGE中，D3D9和D3D10插件都会被抛弃，只留下D3D11一个D3D插件，通过D3D11 Level 9或D3D11 Level 10来在不支持D3D11的硬件上渲染。对于不支持D3D11的Windows XP，可以使用OpenGL插件。</p>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<link rel="shortcut icon" href="image/klayge_logo.ico" type="image/x-icon" />
+<title>Klay Game Engine</title>
+<style type="text/css">
+div#wrapper
+{
+	margin: auto;
+	padding-top: 12px;
+}
+
+div#nifty
+{
+	margin: 0 0;
+	background: #FFFFFF;
+}
+
+span.rtop, span.rbottom
+{
+	display: block;
+	background: rgb(60, 45, 33);
+}
+
+span.rtop span, span.rbottom span
+{
+	display: block;
+	height: 1px;
+	overflow: hidden;
+	background: #FFFFFF;
+}
+
+span.r1
+{
+	margin: 0 5px
+}
+
+span.r2
+{
+	margin: 0 3px
+}
+
+span.r3
+{
+	margin: 0 2px
+}
+
+span.rtop span.r4, span.rbottom span.r4
+{
+	margin: 0 1px;
+	height: 2px
+}
+
+td.headline
+{
+	line-height: 32px;
+	color: #FFFFFF;
+	font-size: 120%;
+	font-weight: bold;
+	text-shadow: 3px 3px 3px #000000;
+	padding-left: 12px;
+	font-family: "Arial Black";
+
+	background: rgb(23, 73, 176); /* for non-css3 browsers */
+	/*background-image: url(image/gradient.png);
+	background-repeat: no-repeat;
+	background-position: right bottom;*/
+
+	/*filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='image/gradient.png', sizingMethod='scale'); /* for IE */
+	/*background: -webkit-gradient(linear, left top, right top, from(rgb(23, 73, 176)), to(#FFFFFF)); /* for webkit browsers */
+	/*background: -moz-linear-gradient(left, rgb(23, 73, 176),  #FFFFFF); /* for firefox 3.6+ */
+}
+
+td.info
+{
+	padding: 12px;
+}
+
+td.menu
+{
+	padding-top: 8px;
+	padding-bottom: 8px;
+	font-weight: bold;
+	font-family: "Arial Black";
+}
+
+td.menu2
+{
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-left: 22px;
+}
+</style>
+<script type="text/javascript">
+function mouse_over(obj)
+{
+	obj.style.background="#FFFFFF";
+	return true;
+}
+
+function mouse_out(obj)
+{
+	obj.style.background="transparent";
+	return true;
+}
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-16460301-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body style="background: rgb(60, 45, 33)">
+<div id="wrapper" style="width:85%">
+	<div id="nifty" style="width:100%">
+		<span class="rtop"><span class="r1"></span><span class="r2"></span><span class="r3"></span><span class="r4"></span></span>
+		<table style="width:100%">
+			<tr>
+				<td style="width:360px">
+					<a href="http://www.klayge.org"><img src="image/klayge_logo_small.png" alt="KlayGE" width="320" height="200" border="0" /></a>
+					<p style="font-family: Arial Narrow; font-size: 110%">To arm your engine with cutting-edge technology</p>
+				</td>
+				<td style="width:50%; vertical-align:top"></td>
+				<td style="vertical-align:top; text-align:right"><a href="index_chs.html">中文</a> <a href="index_en.html">English</a></td>
+			</tr>
+		</table>
+		<span class="rbottom"><span class="r4"></span><span class="r3"></span><span class="r2"></span><span class="r1"></span></span>
+	</div>
+	<div style="margin: 5px 0%; background-color: rgb(60, 45, 33); width:100%">
+		<span class="rtop"><span class="r1"></span><span class="r2"></span><span class="r3"></span><span class="r4"></span></span>
+		<table style="width:100%; background-color: #FFFFFF; vertical-align: top; float: left">
+			<tr>
+				<td>
+					<table style="width:100%">
+						<tr>
+							<td class="headline">Trac和图集启用 (2010.6.2)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>启用了由sf.net提供的<a href="https://sourceforge.net/apps/trac/klayge/">Trac系统</a>，以及<a href="http://www.klayge.org/gallery/">新的图集</a>。</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">英文版上线 (2010.5.30)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>英文版的网站上线了</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">新增两篇文档 (2010.5.23)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>关于<a href="html/KlayGE_doc/engine/KlayGE_Rendering_System.html">渲染系统的架构图</a>和<a href="html/KlayGE_doc/engine/KlayGE_Packing_System_chs.html">打包系统的使用方法</a>：</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">顶级域名启用 (2010.5.17)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>申请了新的顶级域名：<a href="http://www.klayge.org">http://www.klayge.org</a>。请大家更新收藏夹吧！</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">字体生成工具更新 (2010.5.15)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>KlayGE SVN中的字体生成工具更新了，速度提高3倍以上，同时并行性更好，速度可以基本线性地随着core数增长。相关文档也更新了，参见：<a href="html/KlayGE_doc/techs/font_in_klayge_r2.html">KlayGE中的字体系统 Revision 2</a>。</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE SVN原生支持立体显示 (2010.3.21)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>KlayGE SVN中的版本增加了立体渲染模式，同时上层代码完全不需要修改。<strong>KlayGE成为第一个原生支持立体显示的开源游戏引擎！</strong>目前支持红青眼镜，即将加入更多不同的颜色组合和LCD shutter模式。</p>
+								<p><img src="image/stereo_sm.jpg" width="480" height="310" border="0" alt="Stereo mode" /></p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.9.0发布 (2009.12.19)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<ul>
+									<li>增加了TrackballCameraController</li>
+									<li>增加了Model Viewer和Particle Editor</li>
+									<li>UI dialog改进</li>
+									<li>直接读取uiml，fxml和meshml</li>
+									<li>Cg载入后编译成GLSL使用</li>
+									<li>支持Motion blur</li>
+									<li>支持DX10 DDS的读写</li>
+									<li>支持Stream output</li>
+									<li>更快的Deferred Shading</li>
+									<li>加入LZMA的编解码</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.9.0预告(2009.5.9)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>KlayGE 3.9.0将增加一系列的内容创建工具，包括Model Viewer，Particle Editor，UI Editor，Material Editor等。3DSMax导出插件支持完整的材质导出。</p>
+								<p><img src="image/model_viewer_sm.jpg" width="480" height="310" border="0" alt="Model Viewer" /></p>
+								<p>引擎可以直接读写XML文档，使得fxml，uiml和MeshML不再需要编译的过程，简化了开发流程。</p>
+								<p>在渲染引擎方面，KlayGE 3.9.0将完全支持Stream output和Multi thread rendering。在未来的版本里，D3D9插件不再增加新功能，只是保持接口兼容。</p>
+								<p>KlayGE 3.9.0的发布时间预计于2009年8月。</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.8.0发布(2009.3.1)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<ul>
+									<li><strong>支持DX10，DX11和OpenGL 3.0</strong></li>
+									<li>改成DLL的形式</li>
+									<li>增加了描述UI的UIML文件格式和编译器</li>
+									<li>增加了ElementAccessHint和ElementInitData</li>
+									<li>支持硬件depth texture</li>
+									<li>支持BC4/BC5纹理压缩</li>
+									<li>去掉了归一化cubemap生成器</li>
+									<li>多线程资源载入</li>
+									<li>支持Procedural Texture</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.8.0预告(2009.2.11)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>经过这段时间的开发，KlayGE 3.8.0即将在2月底之前出炉。 支持的渲染插件有D3D9/D3D10/D3D11/OpenGL，<strong>将成为第一个支持D3D11的游戏引擎</strong>！</p>
+								<p>同时，由于可以在一定程度上把D3D10的shader编译成D3D9的shader，D3D10的支持程度将会极大地提升，除了上次提到的那4个特性，还可以全面支持<strong>Geometry Shader</strong>和Integer Texture，甚至Stream output。 </p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">后续版本路线图</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<p>KlayGE 3.8.0将保守支持D3D10，接口上兼容现有的D3D9插件和OpenGL插件。使用到的D3D10特性有：</p>
+								<ul>
+									<li>Constant Buffer </li>
+									<li>Float Depth Texture</li>
+									<li>Draw predicate</li>
+									<li>BC4/BC5 Texture Compression </li>
+								</ul>
+								<p>KlayGE 3.9.0将去掉D3D9的插件，完全使用D3D10级别的硬件提供的各种特性。同时可能提供一个软件渲染的插件。</p>
+								<p>3.8.0预计于今年年底发布，3.9.0将在明年上半年。</p>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.7.0发布(2008.7.18)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<ul>
+									<li>改进了Clear</li>
+									<li>增加了Depth Peeling例子</li>
+									<li>加速了Octree</li>
+									<li>无死角的FirstPersonCameraController</li>
+									<li>新的基于distance的字体格式</li>
+									<li>支持Visual Studio 2008</li>
+									<li>支持lock-free atomic操作</li>
+									<li>增加了CPUInfo</li>
+									<li>增加了Summed-Area Table Postprocess</li>
+									<li>实验性支持Linux</li>
+									<li>性能提升5%-10%</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<td class="headline">KlayGE 3.6.0发布，支持UI！(2007.7.30)</td>
+						</tr>
+						<tr>
+							<td class="info">
+								<ul>
+									<li>兼容Vista 32/64</li>
+									<li>使用pbo加速纹理填充</li>
+									<li>改用7z作为打包格式</li>
+									<li>加强了3DS Max插件</li>
+									<li>RenderEffect增加了Clone方法</li>
+									<li>去掉了RenderTarget和RenderWindow</li>
+									<li>去掉了Triangle fan的拓扑方式</li>
+									<li>增加了UI系统</li>
+									<li>增加了Depth of field例子</li>
+									<li>去掉了对Wav的支持</li>
+									<li>启用了新的thread和thread_pool</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+					<hr />
+					<table style="width:100%">
+						<tr>
+							<th colspan="4" style="text-align:left; padding-left:12px">友情链接</th>
+						</tr>
+						<tr>
+							<td style="font-size:80%; width:25%"><a href="http://www.opengpu.org/bbs/" target="_blank">OpenGPU Forum (开源图形处理器论坛)</a></td>
+							<td style="font-size:80%; width:25%"><a href="http://code.google.com/p/softart/" target="_blank">SoftArt软件渲染器</a></td>
+							<td style="font-size:80%; width:25%"> </td>
+							<td style="font-size:80%; width:25%"> </td>
+						</tr>
+					</table>
+					<hr />
+					<table style="width:100%">
+						<tr><td style="text-align:center">Contact me：<a href="mailto:webmaster@klayge.org">webmaster@klayge.org</a></td></tr>
+					</table>
+				</td>
+				<td style="width:300px; background-color:#DDDDDD; vertical-align:top; float: right; text-shadow:0px 0px 2px #404040">
+					<table style="width:100%; padding:10px">
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="http://sourceforge.net/projects/klayge">项目主页</a></td>
+						</tr>
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)">关于</td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="html/features_chs.html">技术特性</a></td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="html/faq_chs.html">FAQ</a></td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="html/wishlist.html">Wish list</a></td>
+						</tr>
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)">开发人员</td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="http://sourceforge.net/svn/?group_id=97862">SVN</a></td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="https://sourceforge.net/apps/trac/klayge/">Trac</a></td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="http://www.opengpu.org/bbs/forumdisplay.php?fid=90">论坛</a></td>
+						</tr>
+						<tr>
+							<td class="menu2" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="http://www.cnblogs.com/gongminmin/">博客</a></td>
+						</tr>
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="html/KlayGE_doc/doc_chs.html">文档</a></td>
+						</tr>
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="http://www.klayge.org/gallery/">图集</a></td>
+						</tr>
+						<tr>
+							<td class="menu" onmouseover="mouse_over(this)" onmouseout="mouse_out(this)"><a style="display:block" href="html/download_chs.html">下载</a></td>
+						</tr>
+						<tr>
+							<td><a href="http://sourceforge.net/projects/klayge"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=97862&amp;type=15" width="150" height="40" border="0" alt="Get Klay Game Engine at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a></td>
+						</tr>
+						<tr>
+							<td class="menu2">
+								<p>如果你喜欢KlayGE，可以考虑捐款，$1也是有帮助的！</p>
+								<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+									<input type="hidden" name="cmd" value="_donations" />
+									<input type="hidden" name="business" value="gongminmin@126.com" />
+									<input type="hidden" name="lc" value="US" />
+									<input type="hidden" name="item_name" value="klayge.org" />
+									<input type="hidden" name="no_note" value="0" />
+									<input type="hidden" name="currency_code" value="USD" />
+									<input type="hidden" name="bn" value="PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest" />
+									<input type="image" src="https://www.paypal.com/zh_XC/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+									<img alt="" border="0" src="https://www.paypal.com/zh_XC/i/scr/pixel.gif" width="1" height="1" />
+								</form>
+							</td>
+						</tr>
+					</table>
+					<br />
+					<script type="text/javascript">
+					  u_a_client="5343";
+					  u_a_width="300"; 
+					  u_a_height="300"; 
+					  u_a_zones="13104"; 
+					  u_a_type="0"; 
+					</script>
+					<script src="http://www.bbtbb.com/i.js"></script>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<script type="text/javascript">
+					  u_a_client="5343";
+					  u_a_width="950"; 
+					  u_a_height="90"; 
+					  u_a_zones="13107"; 
+					  u_a_type="0"; 
+					</script>
+					<script src="http://www.bbtbb.com/i.js"></script>
+				</td>
+			</tr>
+		</table>
+		<span class="rbottom"><span class="r4"></span><span class="r3"></span><span class="r2"></span><span class="r1"></span></span>
+	</div>
+</div>
+</body>
+</html>
