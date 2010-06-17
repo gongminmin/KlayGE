@@ -110,7 +110,7 @@ void SubSurfaceApp::InitObjects()
 	model_ = MakeSharedPtr<ModelObject>();
 	model_->AddToSceneManager();
 
-	this->LookAt(float3(2, 2, 4), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
+	this->LookAt(float3(-3, 3, -1.8f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 200.0f);
 
 	tbController_.AttachCamera(this->ActiveCamera());

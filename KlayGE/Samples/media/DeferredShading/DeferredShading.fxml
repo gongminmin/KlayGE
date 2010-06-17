@@ -136,7 +136,14 @@ float VSM_Omnidirectional(float3 dir_ws, float len)
 	if (0 == (light_attrib & LSA_NoShadow))
 #endif
 	{
-		float2 moments = shadow_map_cube_tex.SampleLevel(linear_sampler, dir_ws, 0).xy;
+
+		float2 moments = shadow_map_cube_tex.SampleLevel(linear_sampler,
+#ifndef KLAYGE_OPENGL
+			dir_ws,
+#else
+			float3(dir_ws.x, -dir_ws.y, dir_ws.z),
+#endif
+			0).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	

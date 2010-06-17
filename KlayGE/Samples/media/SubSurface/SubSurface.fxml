@@ -145,7 +145,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	clr += rim * rim_scalar * indirect_light * extinction_coefficient;
 	if (diffuse_factor > 0)
 	{
-		float specular_factor = pow(saturate(dot(H, N)), shininess);
+		float specular_factor = pow(max(dot(H, N), 0.0f), shininess);
 		clr.rgb += diffuse_factor * diffuse + specular_level * specular_factor * specular;
 	}
 
