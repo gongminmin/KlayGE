@@ -284,7 +284,7 @@ namespace
 	{
 	public:
 		explicit ParticlesObject(int max_num_particles)
-			: SceneObjectHelper(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Cullable)
+			: SceneObjectHelper(MakeSharedPtr<RenderParticles>(max_num_particles), SOA_Moveable)
 		{
 		}
 

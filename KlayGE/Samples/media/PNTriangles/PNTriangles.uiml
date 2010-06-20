@@ -2,7 +2,7 @@
 
 <ui>
 	<dialog id="Parameters" caption="Parameters" x="-220" y="130" align_x="right" width="220" height="340">
-		<control type="static" id="TessStatic" caption="Tessellation factor: 0" x="25" y="30" width="120" height="24" is_default="0"/>
+		<control type="static" id="TessStatic" caption="Tessellation factor: 0" x="25" y="30" width="160" height="24" is_default="0"/>
 		<control type="slider" id="TessSlider" x="25" y="60" width="180" height="24" min="1" max="32" value="5" is_default="0"/>
 
 		<control type="static" id="WarningStatic" caption="No D3D11 cards detected!" x="25" y="100" width="140" height="24" is_default="0"/>

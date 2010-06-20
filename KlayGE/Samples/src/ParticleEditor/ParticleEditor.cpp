@@ -246,7 +246,7 @@ namespace
 	{
 	public:
 		ParticlesObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObjectHelper(SOA_Moveable)
 		{
 			renderable_ = MakeSharedPtr<RenderParticles>();
 		}
