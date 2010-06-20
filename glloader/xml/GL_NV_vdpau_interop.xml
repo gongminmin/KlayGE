@@ -1,0 +1,78 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_vdpau_interop" reg_no="396">
+	<typedefs>
+		<typedef type="GLintptr" synonym="GLvdpauSurfaceNV"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GL_SURFACE_STATE_NV" value="0x86EB"/>
+		<token name="GL_SURFACE_REGISTERED_NV" value="0x86FD"/>
+		<token name="GL_SURFACE_MAPPED_NV" value="0x8700"/>
+		<token name="GL_WRITE_DISCARD_NV" value="0x88BE"/>
+	</tokens>
+
+	<functions>
+		<function name="glVDPAUInitNV" return="void">
+			<params>
+				<param type="const void*" name="vdpDevice"/>
+				<param type="const void*" name="getProcAddress"/>
+			</params>
+		</function>
+		<function name="glVDPAUFiniNV" return="void" />
+		<function name="glVDPAURegisterVideoSurfaceNV" return="GLvdpauSurfaceNV">
+			<params>
+				<param type="const void*" name="vdpSurface"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="numTextureNames"/>
+				<param type="const GLuint*" name="textureNames"/>
+			</params>
+		</function>
+		<function name="glVDPAURegisterOutputSurfaceNV" return="GLvdpauSurfaceNV">
+			<params>
+				<param type="const void*" name="vdpSurface"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="numTextureNames"/>
+				<param type="const GLuint*" name="textureNames"/>
+			</params>
+		</function>
+		<function name="glVDPAUIsSurfaceNV" return="void">
+			<params>
+				<param type="GLvdpauSurfaceNV" name="surface"/>
+			</params>
+		</function>
+		<function name="glVDPAUUnregisterSurfaceNV" return="void">
+			<params>
+				<param type="GLvdpauSurfaceNV" name="surface"/>
+			</params>
+		</function>
+		<function name="glVDPAUGetSurfaceivNV" return="void">
+			<params>
+				<param type="GLvdpauSurfaceNV" name="surface"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLint*" name="values"/>
+			</params>
+		</function>
+		<function name="glVDPAUSurfaceAccessNV" return="void">
+			<params>
+				<param type="GLvdpauSurfaceNV" name="surface"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+
+		<function name="VDPAUMapSurfacesNV" return="void">
+			<params>
+				<param type="GLsizei" name="numSurfaces"/>
+				<param type="const GLvdpauSurfaceNV*" name="surfaces"/>
+			</params>
+		</function>
+		<function name="VDPAUUnmapSurfacesNV" return="void">
+			<params>
+				<param type="GLsizei" name="numSurface"/>
+				<param type="const GLvdpauSurfaceNV*" name="surfaces"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
