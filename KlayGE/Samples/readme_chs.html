@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>KlayGE Samples Readme</title>
+</head>
+<body>
+<h1>粘土游戏引擎(KlayGE) 3.10.0 Samples</h1>
+<p>龚敏敏<br />
+Homepage: <a href="http://www.klayge.org" target="_blank">http://www.klayge.org</a><br />
+E-Mail: <a href="mailto:webmaster@klayge.org">webmaster@klayge.org</a><br />
+QQ:       33611210</p>
+<h3>注意</h3>
+<p>如果要在没有安装Microsoft Visual C++ 2010的机器上运行二进制版本的例子，需要事先安装Microsoft Visual C++ 2010 Redistributable Package。<br />
+	x86版本可以从<a href="http://www.microsoft.com/downloads/details.aspx?displaylang=en&amp;FamilyID=a7b7a05e-6de6-4d3a-a423-37bf0912db84">http://www.microsoft.com/downloads/details.aspx?displaylang=en&amp;FamilyID=a7b7a05e-6de6-4d3a-a423-37bf0912db84</a>下载。<br />
+	x64版本可以从<a href="http://www.microsoft.com/downloads/details.aspx?displaylang=en&amp;FamilyID=bd512d9e-43c8-4655-81bf-9350143d5867">http://www.microsoft.com/downloads/details.aspx?displaylang=en&amp;FamilyID=bd512d9e-43c8-4655-81bf-9350143d5867</a>下载。</p>
+<hr />
+<h2>Deferred Shading</h2>
+<p>Deferred shading渲染框架。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Deferred Lighting</li>
+	<li>SSAO</li>
+	<li>Adaptive Anti-alias</li>
+	<li>任意光源</li>
+	<li>Soft shadow</li>
+	<li>MRT</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 6600以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<h4>已知问题</h4>
+<ul>
+	<li>在OpenGL中点光源的阴影渲染不正确。</li>
+	<li>在D3D9中有闪烁的问题。</li>
+</ul>
+<hr />
+<h2>Depth peeling</h2>
+<p>顺序无关的透明物体渲染。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Depth peeling</li>
+	<li>MRT</li>
+	<li>UI</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 6600以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Distance mapping</h2>
+<p>GPU Gems 2中提到的distance mapping。在pixel shader中根据预处理的距离场进行局部球面光线跟踪。这里我做的扩展是可以表现出边缘的轮廓。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Distance mapping</li>
+	<li>轮廓检测</li>
+	<li>Normal map压缩 (3.4.0之后)</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Fractal</h2>
+<p>在GPU中计算分形图形。</p>
+<h4>技术点</h4>
+<ol>
+	<li>双缓存切换</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<hr />
+<h2>GPU Particle System</h2>
+<p>基于GPU的粒子系统。</p>
+<h4>技术点</h4>
+<ol>
+	<li>粒子系统</li>
+	<li>GPU多遍计算</li>
+	<li>Vertex texture fetch</li>
+	<li>Deferred particle</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 6以上或Radeon HD 2400以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9。</p>
+<hr />
+<h2>Model viewer</h2>
+<p>一个MeshML模型查看器，支持Skinned mesh和Normal map。初始模型来自于<a href="http://www.cgrealm.cn">http://www.cgrealm.cn</a>。</p>
+<h4>技术点</h4>
+<ol>
+	<li>GPU骨骼动画</li>
+	<li>模型格式的读取</li>
+	<li>Normal map的渲染</li>
+	<li>UI</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Motion Blur and Depth of Field</h2>
+<p>运动模糊和景深post process。可以调节焦平面和焦距范围。并演示了引擎中的instancing实现。在硬件支持instancing的时候会自动切换到硬件实现，否则使用CPU解开instance数据。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Motion Blur</li>
+	<li>Depth of field</li>
+	<li>Summed-Area Table</li>
+	<li>软件/硬件instancing</li>
+	<li>Script engine</li>
+	<li>UI</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 6600以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Ocean</h2>
+<p>演示水面的渲染。水面的运动通过在GPU上实时地做FFT来模拟。核心来自于NVIDIA的Demo。</p>
+<h4>技术点</h4>
+<ol>
+	<li>水面渲染</li>
+	<li>Compute shader</li>
+	<li>GPU上的FFT</li>
+	<li>反射贴图</li>
+	<li>雾</li>
+	<li>镜头眩光</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 8系列以上或RadeonHD 4系列以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11。</p>
+<hr />
+<h2>Parallax</h2>
+<p>Parallax mapping，扩展了normal map技术。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Parallax mapping</li>
+	<li>Normal map压缩 (3.4.0之后)</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<hr />
+<h2>Particle Editor</h2>
+<p>粒子系统编辑器</p>
+<h4>技术点</h4>
+<ol>
+	<li>粒子系统</li>
+	<li>复杂的UI</li>
+	<li>Soft particle</li>
+	<li>Geometry shader</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9。</p>
+<hr />
+<h2>PNTriangles</h2>
+<p>用D3D11的Tessellator实现了Curved PN Triangles，把低模在运行期细分成高模曲面。</p>
+<h4>技术点</h4>
+<ol>
+	<li>PN Triangles算法</li>
+	<li>Tessellation</li>
+	<li>Hull Shader/Domain Shader</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce GTX 4系列以上或RadeonHD 5系列以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11。</p>
+<hr />
+<h2>PostProcessing</h2>
+<p>演示后处理的能力。支持的特效有：</p>
+<ul>
+	<li>Ascii Arts，把渲染的图像拟合成ascii字符的表示。</li>
+	<li>卡通渲染。使用两遍的方法，第一遍得出几何位置，第二遍进行光照和勾边。</li>
+	<li>Tiling，砖块的效果。</li>
+	<li>HDR。</li>
+	<li>Night Vision，模拟夜视仪看到的效果。</li>
+</ul>
+<h4>技术点</h4>
+<ol>
+	<li>post process</li>
+	<li>用GPU进行ascii匹配</li>
+	<li>Cartoon post process</li>
+	<li>深度和法线间断点的查找</li>
+	<li>MRT</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 6600以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>ProceduralTex</h2>
+<p>在GPU上使用Perlin noise来产生多种Procedural texture。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Perlin noise</li>
+	<li>Procedural texture</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<hr />
+<h2>Refract</h2>
+<p>折射的演示。支持Fresnel和色散现象。</p>
+<h4>技术点</h4>
+<ol>
+	<li>反射、折射和Fresnel</li>
+	<li>色散</li>
+	<li>HDR渲染</li>
+	<li>Tone mapping</li>
+	<li>HDR纹理压缩</li>
+	<li>双面折射</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Shadow cube map</h2>
+<p>把传统的shadow map扩展到cube map上，模拟了全方向的点光源和光源的投射。另一个改进是加入了<a href="http://www.punkuser.net/vsm/">Variance Shadow Maps</a>。</p>
+<h4>技术点</h4>
+<ol>
+	<li>全方向的shadow map</li>
+	<li>VSM</li>
+	<li>纹理投射</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX 5600以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Sub-surface</h2>
+<p>次表面散射的实时渲染。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Sub-surface scattering</li>
+	<li>Bump map</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX 5600以上或Radeon 9500以上。推荐使用Geforce 6以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL。</p>
+<hr />
+<h2>Text</h2>
+<p>演示了基于signed distance field的字体显示方法。</p>
+<h4>技术点</h4>
+<ol>
+	<li>Font</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce FX以上或Radeon 9500以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<hr />
+<h2>Vertex displacement</h2>
+<p>在vertex shader中用sin计算顶点和法线的偏移。</p>
+<h4>技术点</h4>
+<ol>
+	<li>顶点偏移</li>
+	<li>通过导函数直接计算法线</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 4 Ti以上或Radeon 9200以上。</p>
+<h4>	渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<hr />
+<h2>Video texture</h2>
+<p>演示了Show engine，解码后的视频作为纹理贴到3D物体上。其中用到的视频来自开源电影<a href="http://www.bigbuckbunny.org/">Big Buck Bunny</a>。</p>
+<h4>技术点</h4>
+<ol>
+	<li>DirectShow解码到纹理</li>
+</ol>
+<h4>需求</h4>
+<p>Geforce 4 Ti以上或Radeon 9200以上。</p>
+<h4>渲染引擎支持</h4>
+<p>D3D11/D3D10/D3D9/OpenGL/OpenGLES2。</p>
+<h4>已知问题</h4>
+<ul>
+	<li>在D3D11和D3D10中无法全屏。</li>
+</ul>
+<hr />
+<p>最后更新：2010-6-20</p>
+</body>
+</html>
