@@ -690,8 +690,6 @@ int main()
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Context::Instance().SceneManagerInstance(SceneManager::NullObject());
-
 	GPUParticleSystemApp app("GPU Particle System", settings);
 	app.Create();
 	app.Run();

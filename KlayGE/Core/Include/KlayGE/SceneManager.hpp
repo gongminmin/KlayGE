@@ -59,7 +59,7 @@ namespace KlayGE
 
 		virtual bool AABBVisible(Box const & box);
 
-		virtual void Clear() = 0;
+		virtual void Clear();
 
 		void Update();
 

@@ -435,8 +435,6 @@ int main()
 	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
 	settings.ConfirmDevice = ConfirmDevice;
 
-	Context::Instance().SceneManagerInstance(SceneManager::NullObject());
-
 	ParticleEditorApp app("Particle Editor", settings);
 	app.Create();
 	app.Run();

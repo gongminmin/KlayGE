@@ -82,6 +82,8 @@ namespace KlayGE
 		this->DelObjects();
 
 		Context::Instance().SceneManagerInstance(SceneManagerPtr());
+		Context::Instance().AudioFactoryInstance(AudioFactoryPtr());
+		Context::Instance().ShowFactoryInstance(ShowFactoryPtr());
 
 		UIManager::ForceDestroy();
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());

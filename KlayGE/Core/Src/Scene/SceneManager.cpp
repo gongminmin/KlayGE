@@ -94,11 +94,6 @@ namespace KlayGE
 		{
 		}
 
-		void Clear()
-		{
-			scene_objs_.resize(0);
-		}
-
 		void DoAddSceneObject(SceneObjectPtr const & obj)
 		{
 			scene_objs_.push_back(obj);
@@ -128,6 +123,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	SceneManager::~SceneManager()
 	{
+		this->Clear();
 	}
 
 	// 返回空对象
@@ -216,6 +212,11 @@ namespace KlayGE
 	SceneManager::SceneObjectsType const & SceneManager::SceneObjects() const
 	{
 		return scene_objs_;
+	}
+
+	void SceneManager::Clear()
+	{
+		scene_objs_.resize(0);
 	}
 
 	// 更新场景管理器

@@ -21,6 +21,9 @@
     <Filter Include="Post Processors">
       <UniqueIdentifier>{5a9b1cdd-7ce7-4b1e-b10e-f8953610dabd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Particle Systems">
+      <UniqueIdentifier>{e0e494df-ec0f-4ac1-9e10-58c35f98db87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\ParticleEditor\ParticleEditor.cpp">
@@ -44,6 +47,9 @@
     </None>
     <None Include="..\..\media\ParticleEditor\Copy.ppml">
       <Filter>Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\ParticleEditor\Fire.psml">
+      <Filter>Particle Systems</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
