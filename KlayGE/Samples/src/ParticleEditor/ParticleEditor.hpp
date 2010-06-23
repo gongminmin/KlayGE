@@ -37,7 +37,8 @@ private:
 	void AngleChangedHandler(KlayGE::UISlider const & sender);
 	void LifeChangedHandler(KlayGE::UISlider const & sender);
 	void DensityChangedHandler(KlayGE::UISlider const & sender);
-	void VelocityChangedHandler(KlayGE::UISlider const & sender);
+	void MinVelocityChangedHandler(KlayGE::UISlider const & sender);
+	void MaxVelocityChangedHandler(KlayGE::UISlider const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 	void ChangeParticleTexHandler(KlayGE::UITexButton const & sender);
 
@@ -74,8 +75,10 @@ private:
 	int id_life_slider_;
 	int id_density_static_;
 	int id_density_slider_;
-	int id_velocity_static_;
-	int id_velocity_slider_;
+	int id_min_velocity_static_;
+	int id_min_velocity_slider_;
+	int id_max_velocity_static_;
+	int id_max_velocity_slider_;
 	int id_fps_camera_;
 	int id_particle_tex_button_;
 	int id_size_over_life_;

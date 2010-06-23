@@ -288,6 +288,15 @@ namespace
 		{
 		}
 
+		void SetMaxPositionDeviation(float3 const & dev)
+		{
+			max_position_deviation_ = dev;
+		}
+		float3 const & GetMaxPositionDeviation() const
+		{
+			return max_position_deviation_;
+		}
+
 		void SetAngle(float angle)
 		{
 			angle_ = angle;
@@ -306,29 +315,41 @@ namespace
 			return life_;
 		}
 
-		void InitVelocity(float vel)
+		void InitMinVelocity(float min_vel)
 		{
-			velocity_ = vel;
+			min_velocity_ = min_vel;
+		}
+		void InitMaxVelocity(float max_vel)
+		{
+			max_velocity_ = max_vel;
 		}
 
 		void operator()(ParticleType& par, float4x4 const & mat)
 		{
-			par.pos = MathLib::transform_coord(float3(0, 0, 0), mat);
+			float x = random_gen_() * max_position_deviation_.x();
+			float y = random_gen_() * max_position_deviation_.y();
+			float z = random_gen_() * max_position_deviation_.z();
+			par.pos = MathLib::transform_coord(float3(x, y, z), mat);
 			float theta = random_gen_() * PI;
 			float phi = abs(random_gen_()) * angle_ / 2;
-			float velocity = (random_gen_() + 1) * velocity_;
-			float x = cos(theta) * sin(phi);
-			float z = sin(theta) * sin(phi);
-			float y = cos(phi);
-			par.vel = MathLib::transform_normal(float3(x, y, z) * velocity, mat);
+			float velocity = (random_gen_() * 0.5f + 0.5f) * (max_velocity_ - min_velocity_) + min_velocity_;
+			float vx = cos(theta) * sin(phi);
+			float vz = sin(theta) * sin(phi);
+			float vy = cos(phi);
+			par.vel = MathLib::transform_normal(float3(vx, vy, vz) * velocity, mat);
 			par.life = life_;
 		}
 
 	private:
 		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
+
+		float3 max_position_deviation_;
 		float angle_;
+
+		float min_velocity_;
+		float max_velocity_;
+
 		float life_;
-		float velocity_;
 	};
 
 	GenParticle<Particle> gen_particle;
@@ -476,7 +497,7 @@ void ParticleEditorApp::InitObjects()
 	ps_ = MakeSharedPtr<ParticleSystem<Particle> >(NUM_PARTICLE, boost::bind(&GenParticle<Particle>::operator(), &gen_particle, _1, _2),
 		boost::bind(&UpdateParticle<Particle>::operator(), &update_particle, _1, _2));
 
-	ps_->AutoEmit(256);
+	ps_->AutoEmit(300);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -498,8 +519,10 @@ void ParticleEditorApp::InitObjects()
 	id_life_slider_ = dialog_->IDFromName("LifeSlider");
 	id_density_static_ = dialog_->IDFromName("DensityStatic");
 	id_density_slider_ = dialog_->IDFromName("DensitySlider");
-	id_velocity_static_ = dialog_->IDFromName("VelocityStatic");
-	id_velocity_slider_ = dialog_->IDFromName("VelocitySlider");
+	id_min_velocity_static_ = dialog_->IDFromName("MinVelocityStatic");
+	id_min_velocity_slider_ = dialog_->IDFromName("MinVelocitySlider");
+	id_max_velocity_static_ = dialog_->IDFromName("MaxVelocityStatic");
+	id_max_velocity_slider_ = dialog_->IDFromName("MaxVelocitySlider");
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
 	id_particle_tex_button_ = dialog_->IDFromName("ParticleTexButton");
 	id_size_over_life_ = dialog_->IDFromName("SizeOverLifePolyline");
@@ -515,8 +538,10 @@ void ParticleEditorApp::InitObjects()
 	this->LifeChangedHandler(*dialog_->Control<UISlider>(id_life_slider_));
 	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::DensityChangedHandler, this, _1));
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
-	dialog_->Control<UISlider>(id_velocity_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::VelocityChangedHandler, this, _1));
-	this->VelocityChangedHandler(*dialog_->Control<UISlider>(id_velocity_slider_));
+	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::MinVelocityChangedHandler, this, _1));
+	this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
+	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(boost::bind(&ParticleEditorApp::MaxVelocityChangedHandler, this, _1));
+	this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ParticleEditorApp::FPSCameraHandler, this, _1));
 
@@ -643,14 +668,24 @@ void ParticleEditorApp::DensityChangedHandler(KlayGE::UISlider const & sender)
 	dialog_->Control<UIStatic>(id_density_static_)->SetText(stream.str());
 }
 
-void ParticleEditorApp::VelocityChangedHandler(KlayGE::UISlider const & sender)
+void ParticleEditorApp::MinVelocityChangedHandler(KlayGE::UISlider const & sender)
 {
 	float velocity = sender.GetValue() / 100.0f;
-	gen_particle.InitVelocity(velocity);
+	gen_particle.InitMinVelocity(velocity);
 
 	std::wostringstream stream;
 	stream << velocity;
-	dialog_->Control<UIStatic>(id_velocity_static_)->SetText(stream.str());
+	dialog_->Control<UIStatic>(id_min_velocity_static_)->SetText(stream.str());
+}
+
+void ParticleEditorApp::MaxVelocityChangedHandler(KlayGE::UISlider const & sender)
+{
+	float velocity = sender.GetValue() / 100.0f;
+	gen_particle.InitMaxVelocity(velocity);
+
+	std::wostringstream stream;
+	stream << velocity;
+	dialog_->Control<UIStatic>(id_max_velocity_static_)->SetText(stream.str());
 }
 
 void ParticleEditorApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
@@ -729,9 +764,34 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 	dialog_->Control<UISlider>(id_density_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
 
-	attr = root->Attrib("velocity");
-	dialog_->Control<UISlider>(id_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
-	this->VelocityChangedHandler(*dialog_->Control<UISlider>(id_velocity_slider_));
+	attr = root->Attrib("min_velocity");
+	dialog_->Control<UISlider>(id_min_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
+	this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
+
+	attr = root->Attrib("max_velocity");
+	dialog_->Control<UISlider>(id_max_velocity_slider_)->SetValue(static_cast<int>(attr->ValueFloat() * 100.0f + 0.5f));
+	this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
+
+	{
+		XMLNodePtr node = root->FirstNode("max_position_deviation");
+		float3 max_pos_dev(0, 0, 0);
+		attr = node->Attrib("x");
+		if (attr)
+		{
+			max_pos_dev.x() = attr->ValueFloat();
+		}
+		attr = node->Attrib("y");
+		if (attr)
+		{
+			max_pos_dev.y() = attr->ValueFloat();
+		}
+		attr = node->Attrib("z");
+		if (attr)
+		{
+			max_pos_dev.z() = attr->ValueFloat();
+		}
+		gen_particle.SetMaxPositionDeviation(max_pos_dev);
+	}
 
 	for (XMLNodePtr node = root->FirstNode("curve"); node; node = node->NextSibling("curve"))
 	{
@@ -780,8 +840,11 @@ void ParticleEditorApp::SaveParticleSystem(std::string const & name)
 	float density = dialog_->Control<UISlider>(id_density_slider_)->GetValue() / 100.0f;
 	root->AppendAttrib(doc.AllocAttribFloat("media_density", density));
 
-	float velocity = dialog_->Control<UISlider>(id_velocity_slider_)->GetValue() / 100.0f;
-	root->AppendAttrib(doc.AllocAttribFloat("velocity", velocity));
+	float min_velocity = dialog_->Control<UISlider>(id_min_velocity_slider_)->GetValue() / 100.0f;
+	root->AppendAttrib(doc.AllocAttribFloat("min_velocity", min_velocity));
+
+	float max_velocity = dialog_->Control<UISlider>(id_max_velocity_slider_)->GetValue() / 100.0f;
+	root->AppendAttrib(doc.AllocAttribFloat("max_velocity", max_velocity));
 
 	XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
 	size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));

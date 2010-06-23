@@ -44,7 +44,7 @@ void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 	oDepth = oPos.w;
 }
 
-float4 BackFaceDepthPS(float depth : TEXCOORD1) : SV_Target
+float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 {
 	return depth;	
 }
