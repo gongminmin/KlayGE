@@ -39,7 +39,8 @@ namespace
 	{
 	public:
 		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Torus")
+			: KMesh(model, L"Torus"),
+				model_(float4x4::Identity())
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -50,6 +51,11 @@ namespace
 		{
 		}
 
+		void SetModelMatrix(float4x4 const & model)
+		{
+			model_ = model;
+		}
+
 		void OnRenderBegin()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
@@ -57,22 +63,40 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("model_view")) = view;
+			*(technique_->Effect().ParameterByName("model_view")) = model_ * view;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
 
 			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
+
+	private:
+		float4x4 model_;
 	};
 
 	class TorusObject : public SceneObjectHelper
 	{
 	public:
 		TorusObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObjectHelper(SOA_Cullable),
+				model_(float4x4::Identity())
 		{
 			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())()->Mesh(0);
 		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
+
+		void Update()
+		{
+			model_ = MathLib::rotation_y(-std::clock() / 1500.0f);
+			checked_pointer_cast<RenderTorus>(renderable_)->SetModelMatrix(model_);
+		}
+
+	private:
+		float4x4 model_;
 	};
 
 	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox
@@ -164,7 +188,7 @@ void PostProcessingApp::InitObjects()
 	torus_ = MakeSharedPtr<TorusObject>();
 	torus_->AddToSceneManager();
 
-	this->LookAt(float3(0, 0, -2), float3(0, 0, 0));
+	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100.0f);
 
 	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read)();
@@ -192,6 +216,7 @@ void PostProcessingApp::InitObjects()
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
 	hdr_ = MakeSharedPtr<HDRPostProcess>(false, false);
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
+	old_fashion_ = LoadPostProcess(ResLoader::Instance().Load("OldFashion.ppml"), "old_fashion");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -202,6 +227,7 @@ void PostProcessingApp::InitObjects()
 	id_tiling_ = dialog_->IDFromName("TilingPP");
 	id_hdr_ = dialog_->IDFromName("HDRPP");
 	id_night_vision_ = dialog_->IDFromName("NightVisionPP");
+	id_old_fashion_ = dialog_->IDFromName("OldFashionPP");
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::FPSCameraHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::AsciiArtsHandler, this, _1));
@@ -209,6 +235,7 @@ void PostProcessingApp::InitObjects()
 	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::TilingHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::HDRHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::NightVisionHandler, this, _1));
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::OldFashionHandler, this, _1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 }
 
@@ -233,6 +260,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	hdr_->InputPin(0, color_tex_);
 
 	night_vision_->InputPin(0, color_tex_);
+
+	old_fashion_->InputPin(0, color_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -296,6 +325,14 @@ void PostProcessingApp::NightVisionHandler(UIRadioButton const & sender)
 	if (sender.GetChecked())
 	{
 		active_pp_ = night_vision_;
+	}
+}
+
+void PostProcessingApp::OldFashionHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = old_fashion_;
 	}
 }
 

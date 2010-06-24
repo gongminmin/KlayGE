@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+
+	<shader>
+		<![CDATA[
+float4 OldFashionPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	const float3 to_intensity = float3(0.299f, 0.587f, 0.114f);
+	const float4 sepia = float4(0.191f, -0.054f, -0.221f, 0);
+
+	float3 c = src_tex.Sample(point_sampler, tc0).rgb;
+	float y = dot(c, to_intensity);
+	return y + sepia;
+}
+		]]>
+	</shader>
+
+	<technique name="OldFashion">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="OldFashionPS()"/>
+		</pass>
+	</technique>
+</effect>

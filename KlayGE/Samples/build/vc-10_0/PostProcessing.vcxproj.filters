@@ -18,6 +18,9 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{cc6c13cc-87c7-4f22-ae4e-e7c10a1f3d38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Post Processors">
+      <UniqueIdentifier>{89461b1c-5dc6-4515-a0e4-2a5256ad42c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\PostProcessing\AsciiArtsPP.cpp">
@@ -74,6 +77,12 @@
     </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessing\OldFashion.fxml">
+      <Filter>Effects</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessing\OldFashion.ppml">
+      <Filter>Post Processors</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

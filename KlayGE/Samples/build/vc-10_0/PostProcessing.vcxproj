@@ -216,6 +216,8 @@
     <None Include="..\..\media\PostProcessing\AsciiArtsPP.fxml" />
     <None Include="..\..\media\PostProcessing\CartoonPP.fxml" />
     <None Include="..\..\media\PostProcessing\NightVisionPP.fxml" />
+    <None Include="..\..\media\PostProcessing\OldFashion.fxml" />
+    <None Include="..\..\media\PostProcessing\OldFashion.ppml" />
     <None Include="..\..\media\PostProcessing\PostProcessing.fxml" />
     <None Include="..\..\media\PostProcessing\TilingPP.fxml" />
     <None Include="..\..\media\PostProcessing\PostProcessing.uiml" />

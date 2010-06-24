@@ -26,6 +26,7 @@ private:
 	void TilingHandler(KlayGE::UIRadioButton const & sender);
 	void HDRHandler(KlayGE::UIRadioButton const & sender);
 	void NightVisionHandler(KlayGE::UIRadioButton const & sender);
+	void OldFashionHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr torus_;
@@ -42,6 +43,7 @@ private:
 	KlayGE::PostProcessPtr tiling_;
 	KlayGE::PostProcessPtr hdr_;
 	KlayGE::PostProcessPtr night_vision_;
+	KlayGE::PostProcessPtr old_fashion_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_fps_camera_;
@@ -50,6 +52,7 @@ private:
 	int id_tiling_;
 	int id_hdr_;
 	int id_night_vision_;
+	int id_old_fashion_;
 };
 
 #endif		// _POSTPROCESSING_HPP
