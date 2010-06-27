@@ -212,11 +212,11 @@ namespace KlayGE
 		tex_index_ = UIManager::Instance().AddTexture(tex);
 		if (tex)
 		{
-			elements_[0]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+			elements_[1]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
 		}
 		else
 		{
-			elements_[0]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+			elements_[1]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
 		}
 	}
 
