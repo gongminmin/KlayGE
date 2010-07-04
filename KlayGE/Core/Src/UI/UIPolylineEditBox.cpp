@@ -368,69 +368,72 @@ namespace KlayGE
 			}
 		}
 
-		UIDialogPtr dlg = this->GetDialog();
-
-		dlg->DrawRect(bounding_box_, 0, elements_[BACKGROUND_INDEX]->TextureColor().Current);
-
-		for (size_t i = 0; i < 21; ++ i)
+		if (visible_)
 		{
-			int32_t x = static_cast<int32_t>(bounding_box_.left() + bounding_box_.Width() * i / 20.0f);
-			int32_t offset = 0;
-			if (10 == i)
-			{
-				offset = -1;
-			}
-			dlg->DrawRect(Rect_T<int32_t>(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
-		}
-		for (size_t i = 0; i < 11; ++ i)
-		{
-			int32_t y = static_cast<int32_t>(bounding_box_.top() + bounding_box_.Height() * i / 10.0f);
-			int32_t offset = 0;
-			if (5 == i)
-			{
-				offset = -1;
-			}
-			dlg->DrawRect(Rect_T<int32_t>(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
-		}
+			UIDialogPtr dlg = this->GetDialog();
 
-		{
-			Color const & clr = elements_[POLYLINE_INDEX]->TextureColor().Current;
-			for (size_t i = 0; i < ctrl_points_.size() - 1; ++ i)
+			dlg->DrawRect(bounding_box_, 0, elements_[BACKGROUND_INDEX]->TextureColor().Current);
+
+			for (size_t i = 0; i < 21; ++ i)
 			{
-				float2 dir = ctrl_points_[i + 1] - ctrl_points_[i + 0];
-				dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2;
-				float x0 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() - dir.x();
-				float x1 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() - dir.x();
-				float x2 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() + dir.x();
-				float x3 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() + dir.x();
-				float y0 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() - dir.y();
-				float y1 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() - dir.y();
-				float y2 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() + dir.y();
-				float y3 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() + dir.y();
-				UIManager::VertexFormat vd[] = 
+				int32_t x = static_cast<int32_t>(bounding_box_.left() + bounding_box_.Width() * i / 20.0f);
+				int32_t offset = 0;
+				if (10 == i)
 				{
-					UIManager::VertexFormat(float3(x0, y0, 0), clr, float2(0, 0)),
-					UIManager::VertexFormat(float3(x1, y1, 0), clr, float2(0, 0)),
-					UIManager::VertexFormat(float3(x2, y2, 0), clr, float2(0, 0)),
-					UIManager::VertexFormat(float3(x3, y3, 0), clr, float2(0, 0))
-				};
-				dlg->DrawQuad(vd, 0, TexturePtr());
+					offset = -1;
+				}
+				dlg->DrawRect(Rect_T<int32_t>(x + offset, bounding_box_.top(), x + 1, bounding_box_.bottom()), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
-		}
-
-		{
-			Color const & clr_normal = elements_[CTRLPOINTS_INDEX]->TextureColor().Current;
-			Color const & clr_active = elements_[CTRLPOINTS_INDEX]->TextureColor().States[UICS_MouseOver];
-			for (int i = 0; i < static_cast<int>(ctrl_points_.size()); ++ i)
+			for (size_t i = 0; i < 11; ++ i)
 			{
-				int32_t offset = (i == this->ActivePoint()) ? 3 : 2;
-
-				int32_t x0 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) - offset;
-				int32_t x1 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) + offset;
-				int32_t y0 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) - offset;
-				int32_t y1 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) + offset;
-				dlg->DrawRect(Rect_T<int32_t>(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
+				int32_t y = static_cast<int32_t>(bounding_box_.top() + bounding_box_.Height() * i / 10.0f);
+				int32_t offset = 0;
+				if (5 == i)
+				{
+					offset = -1;
+				}
+				dlg->DrawRect(Rect_T<int32_t>(bounding_box_.left(), y + offset, bounding_box_.right(), y + 1), 0, elements_[COORDLINE_INDEX]->TextureColor().Current);
 			}
-		}
+
+			{
+				Color const & clr = elements_[POLYLINE_INDEX]->TextureColor().Current;
+				for (size_t i = 0; i < ctrl_points_.size() - 1; ++ i)
+				{
+					float2 dir = ctrl_points_[i + 1] - ctrl_points_[i + 0];
+					dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2;
+					float x0 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() - dir.x();
+					float x1 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() - dir.x();
+					float x2 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() + dir.x();
+					float x3 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() + dir.x();
+					float y0 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() - dir.y();
+					float y1 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() - dir.y();
+					float y2 = bounding_box_.top() + ctrl_points_[i + 0].y() * bounding_box_.Height() + dir.y();
+					float y3 = bounding_box_.top() + ctrl_points_[i + 1].y() * bounding_box_.Height() + dir.y();
+					UIManager::VertexFormat vd[] = 
+					{
+						UIManager::VertexFormat(float3(x0, y0, 0), clr, float2(0, 0)),
+						UIManager::VertexFormat(float3(x1, y1, 0), clr, float2(0, 0)),
+						UIManager::VertexFormat(float3(x2, y2, 0), clr, float2(0, 0)),
+						UIManager::VertexFormat(float3(x3, y3, 0), clr, float2(0, 0))
+					};
+					dlg->DrawQuad(vd, 0, TexturePtr());
+				}
+			}
+
+			{
+				Color const & clr_normal = elements_[CTRLPOINTS_INDEX]->TextureColor().Current;
+				Color const & clr_active = elements_[CTRLPOINTS_INDEX]->TextureColor().States[UICS_MouseOver];
+				for (int i = 0; i < static_cast<int>(ctrl_points_.size()); ++ i)
+				{
+					int32_t offset = (i == this->ActivePoint()) ? 3 : 2;
+
+					int32_t x0 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) - offset;
+					int32_t x1 = bounding_box_.left() + static_cast<int32_t>(ctrl_points_[i].x() * bounding_box_.Width()) + offset;
+					int32_t y0 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) - offset;
+					int32_t y1 = bounding_box_.top() + static_cast<int32_t>(ctrl_points_[i].y() * bounding_box_.Height()) + offset;
+					dlg->DrawRect(Rect_T<int32_t>(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
+				}
+			}
+			}
 	}
 }

@@ -475,6 +475,7 @@ namespace KlayGE
 					int32_t x, y;
 					uint32_t width, height;
 					bool is_default = false;
+					bool visible = true;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
 
 					uint32_t id;
@@ -489,6 +490,7 @@ namespace KlayGE
 					width = ctrl_node->Attrib("width")->ValueInt();
 					height = ctrl_node->Attrib("height")->ValueInt();
 					is_default = ReadBool(ctrl_node, "is_default", false);
+					visible = ReadBool(ctrl_node, "visible", true);
 					attr = ctrl_node->Attrib("align_x");
 					if (attr)
 					{
@@ -679,6 +681,8 @@ namespace KlayGE
 							x, y, width, height, is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
+
+					dlg->GetControl(id)->SetVisible(visible);
 				}
 			}
 		}

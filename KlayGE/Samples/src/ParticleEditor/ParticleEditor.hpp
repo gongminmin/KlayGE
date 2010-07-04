@@ -17,6 +17,7 @@ struct Particle
 	KlayGE::float3 pos;
 	KlayGE::float3 vel;
 	float life;
+	float spin;
 	float birth_time;
 };
 
@@ -41,6 +42,7 @@ private:
 	void MaxVelocityChangedHandler(KlayGE::UISlider const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 	void ChangeParticleTexHandler(KlayGE::UITexButton const & sender);
+	void CurveTypeChangedHandler(KlayGE::UIComboBox const & sender);
 
 	void LoadParticleTex(std::string const & name);
 
@@ -81,6 +83,7 @@ private:
 	int id_max_velocity_slider_;
 	int id_fps_camera_;
 	int id_particle_tex_button_;
+	int id_curve_type_;
 	int id_size_over_life_;
 	int id_weight_over_life_;
 	int id_transparency_over_life_;

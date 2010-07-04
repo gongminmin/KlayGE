@@ -24,12 +24,15 @@
 		<control type="static" id="ParticleTexStatic" caption="Particle Texture" x="20" y="80" width="100" height="24" is_default="0"/>
 		<control type="tex_button" id="ParticleTexButton" texture="particle.dds" x="140" y="60" width="64" height="64" is_default="0"/>
 
-		<control type="static" id="SizeOverLifeStatic" caption="Size over life" x="20" y="260" width="120" height="24" is_default="0"/>
-		<control type="polyline_edit_box" id="SizeOverLifePolyline" x="20" y="280" width="200" height="120" is_default="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
-		<control type="static" id="WeightOverLifeStatic" caption="Weight over life" x="20" y="420" width="120" height="24" is_default="0"/>
-		<control type="polyline_edit_box" id="WeightOverLifePolyline" x="20" y="440" width="200" height="120" is_default="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
-		<control type="static" id="TransparencyOverLifeStatic" caption="Transparency over life" x="20" y="580" width="120" height="24" is_default="0"/>
-		<control type="polyline_edit_box" id="TransparencyOverLifePolyline" x="20" y="600" width="200" height="120" is_default="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
+		<control type="combo_box" id="CurveTypeCombo" x="20" y="260" width="200" height="24" hotkey="0" is_default="0">
+			<item name="Size over life"/>
+			<item name="Weight over life"/>
+			<item name="Transparency over life"/>
+		</control>
+
+		<control type="polyline_edit_box" id="SizeOverLifePolyline" x="20" y="290" width="200" height="120" is_default="0" visible="1" line_r="0" line_g="1" line_b="0" line_a="1"/>
+		<control type="polyline_edit_box" id="WeightOverLifePolyline" x="20" y="290" width="200" height="120" is_default="0" visible="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
+		<control type="polyline_edit_box" id="TransparencyOverLifePolyline" x="20" y="290" width="200" height="120" is_default="0" visible="0" line_r="0" line_g="1" line_b="0" line_a="1"/>
 
 		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="740" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

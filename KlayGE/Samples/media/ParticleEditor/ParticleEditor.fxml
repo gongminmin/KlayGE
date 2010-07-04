@@ -89,6 +89,7 @@ struct VS_TO_GS
 {
 	float4 CenterView_Life : SV_Position;
 	float radius : TEXCOORD0;
+	float spin : TEXCOORD1;
 };
 
 struct PS_IN
@@ -98,42 +99,52 @@ struct PS_IN
 	float4 PosSS : TEXCOORD0;
 	float4 CenterView : TEXCOORD1;
 	float4 view_dir : TEXCOORD2;
+	float2 tex : TEXCOORD3;
 };
 
 void ParticleVS(float4 pos : TEXCOORD0,
+					float spin : TEXCOORD1,
 					float2 tex : POSITION,
 					out PS_IN vs_out)
 {
 	float radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
-			
+
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
-	view_pos.xy += tex * radius;
+	float2 offset = tex * radius;
+	float cz = cos(spin);
+	float sz = sin(spin);
+	view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 	vs_out.pos = mul(view_pos, Proj);
-	vs_out.clr = float4(1, 1, 1, GetTransparencyOverLife(init_life - pos.w) * 2);
+	vs_out.clr = float4(1, 0.45f, 0.25f, GetTransparencyOverLife(init_life - pos.w));
 	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
 	vs_out.view_dir.xyz = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
 	vs_out.view_dir.w = radius;
+	vs_out.tex = float2(tex.x, -tex.y) / 2 + 0.5f;
 }
 
 void ParticleVS2(float4 pos : POSITION,
+					float spin : TEXCOORD0,
 					out VS_TO_GS vs_out)
 {
 	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 	vs_out.radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
+	vs_out.spin = spin;
 }
 
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : SV_Position, AttribArray<float> input1 : TEXCOORD0)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : SV_Position, AttribArray<float> input1 : TEXCOORD0, AttribArray<float> input2 : TEXCOORD1)
 {
 	float4 CenterView_Life = input0[0];
 	float radius = input1[0];
+	float spin = input2[0];
 #else
 [maxvertexcount(4)]
 void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 {
 	float4 CenterView_Life = input[0].CenterView_Life;
 	float radius = input[0].radius;
+	float spin = input[0].spin;
 #endif
 	PS_IN gs_out;
 
@@ -159,16 +170,20 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		
 		float4 view_pos = float4(CenterView_Life.xyz, 1);
 		gs_out.CenterView = view_pos;
-		view_pos.xy += tex * radius;
+		float2 offset = tex * radius;
+		float cz = cos(spin);
+		float sz = sin(spin);
+		view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr = float4(1, 1, 1, GetTransparencyOverLife(init_life - CenterView_Life.w) * 2);
+		gs_out.clr = float4(1, 0.45f, 0.25f, GetTransparencyOverLife(init_life - CenterView_Life.w));
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir.xyz = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
 		gs_out.view_dir.w = radius;
+		gs_out.tex = float2(tex.x, -tex.y) / 2 + 0.5f;
 
 #ifdef KLAYGE_OPENGL
 		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
-			gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2);
+			gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2, gs_out.tex : TEXCOORD3);
 #else
 		out_stream.Append(gs_out);
 #endif
@@ -204,7 +219,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
 		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;
-		clr *= particle_tex.SampleLevel(particle_sampler, (intersect.xy - ps_in.CenterView.xy) * float2(1, -1) / ps_in.view_dir.w / 2 + 0.5, 0);
+		clr.a *= particle_tex.SampleLevel(particle_sampler, ps_in.tex, 0).r;
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 	}
@@ -221,7 +236,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="dest_blend" value="one"/>
 
 			<state name="vertex_shader" value="ParticleVS()"/>
 			<state name="pixel_shader" value="ParticlePS()"/>
@@ -235,7 +250,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 
 			<state name="blend_enable" value="true"/>
 			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
+			<state name="dest_blend" value="one"/>
 
 			<state name="vertex_shader" value="ParticleVS2()"/>
 			<state name="geometry_shader" value="ParticleGS()"/>
