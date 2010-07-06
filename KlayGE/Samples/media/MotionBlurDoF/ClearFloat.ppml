@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="clear_float">
+		<params>
+			<param name="clear_clr"/>
+		</params>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlurDoF.fxml" tech="ClearFloat"/>
+	</post_processor>
+</post_processors>

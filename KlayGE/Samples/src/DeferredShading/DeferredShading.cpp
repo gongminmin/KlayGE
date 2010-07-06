@@ -890,6 +890,7 @@ namespace
 	public:
 		SSAOPostProcess()
 			: PostProcess(L"SSAO",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOHigh")),

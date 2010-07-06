@@ -28,7 +28,7 @@ namespace KlayGE
 
 		void ChildBuffer(TexturePtr const & tex);
 		void Length(int32_t length);
-		void AddrOffset(float3 offset);
+		void AddrOffset(float3 const & offset);
 		void Scale(float scale);
 
 	private:

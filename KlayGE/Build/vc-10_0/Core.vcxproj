@@ -384,6 +384,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\media\PostProcessors\GammaCorrection.ppml" />
     <None Include="..\..\media\RenderFX\2D.fxml" />
     <None Include="..\..\media\RenderFX\Blur.fxml" />
     <None Include="..\..\media\RenderFX\Bone.fxml" />

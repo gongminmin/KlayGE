@@ -18,6 +18,9 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{69f698d2-aae7-4f0e-87cb-953ae8ce6568}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Post Processors">
+      <UniqueIdentifier>{2a7136d7-f60d-4783-a3a4-ca9e5e86ee68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\MotionBlurDoF\MotionBlurDoF.cpp">
@@ -39,6 +42,9 @@
     </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\MotionBlurDoF\ClearFloat.ppml">
+      <Filter>Post Processors</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -26,7 +26,11 @@
 namespace KlayGE
 {
 	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderTechniquePtr const & tech, bool dir)
-			: PostProcess(L"SATSeparableScanSweep", std::vector<std::string>(1, "src_tex"), std::vector<std::string>(1, "output"), tech),
+			: PostProcess(L"SATSeparableScanSweep",
+					std::vector<std::string>(),
+					std::vector<std::string>(1, "src_tex"),
+					std::vector<std::string>(1, "output"),
+					tech),
 				dir_(dir)
 	{
 		if (technique_)
@@ -43,7 +47,7 @@ namespace KlayGE
 		*child_tex_ep_ = tex;
 	}
 
-	void SATSeparableScanSweepPostProcess::AddrOffset(float3 offset)
+	void SATSeparableScanSweepPostProcess::AddrOffset(float3 const & offset)
 	{
 		*addr_offset_ep_ = offset;
 	}

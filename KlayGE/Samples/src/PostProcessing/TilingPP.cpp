@@ -63,6 +63,7 @@ namespace
 
 TilingPostProcess::TilingPostProcess()
 	: PostProcess(L"Tiling",
+		std::vector<std::string>(),
 		std::vector<std::string>(1, "src_tex"),
 		std::vector<std::string>(1, "output"),
 		Context::Instance().RenderFactoryInstance().LoadEffect("TilingPP.fxml")->TechniqueByName("Tiling"))

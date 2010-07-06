@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="gamma_correction">
+		<params>
+			<param name="inv_gamma"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="GammaCorrection.fxml" tech="GammaCorrection"/>
+	</post_processor>
+</post_processors>

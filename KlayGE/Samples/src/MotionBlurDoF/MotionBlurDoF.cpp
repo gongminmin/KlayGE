@@ -260,28 +260,12 @@ namespace
 		Timer rotate_timer_;
 	};
 
-	class ClearFloatPostProcess : public PostProcess
-	{
-	public:
-		ClearFloatPostProcess()
-			: PostProcess(L"ClearFloat",
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("MotionBlurDoF.fxml")->TechniqueByName("ClearFloat"))
-		{
-		}
-
-		void ClearColor(float4 const & clr)
-		{
-			*(technique_->Effect().ParameterByName("clear_clr")) = clr;
-		}
-	};
-
 	class DepthOfField : public PostProcess
 	{
 	public:
 		DepthOfField()
 			: PostProcess(L"DepthOfField",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("DepthOfFieldPP.fxml")->TechniqueByName("DepthOfField")),
@@ -554,8 +538,8 @@ void MotionBlurDoFApp::InitObjects()
 
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
 
-	clear_float_ = MakeSharedPtr<ClearFloatPostProcess>();
-	checked_pointer_cast<ClearFloatPostProcess>(clear_float_)->ClearColor(float4(0.2f, 0.4f, 0.6f, 1));
+	clear_float_ = LoadPostProcess(ResLoader::Instance().Load("ClearFloat.ppml"), "clear_float");
+	clear_float_->SetParam(clear_float_->ParamByName("clear_clr"), float4(0.2f, 0.4f, 0.6f, 1));
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];

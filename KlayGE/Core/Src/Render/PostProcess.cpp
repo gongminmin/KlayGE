@@ -47,6 +47,7 @@ namespace KlayGE
 	}
 
 	PostProcess::PostProcess(std::wstring const & name,
+		std::vector<std::string> const & param_names,
 		std::vector<std::string> const & input_pin_names,
 		std::vector<std::string> const & output_pin_names,
 		RenderTechniquePtr const & tech)
@@ -54,7 +55,8 @@ namespace KlayGE
 				input_pins_(input_pin_names.size()),
 				output_pins_(output_pin_names.size()),
 				num_bind_output_(0),
-				input_pins_ep_(input_pin_names.size())
+				input_pins_ep_(input_pin_names.size()),
+				params_(param_names.size())
 	{
 		this->CreateVB();
 
@@ -66,13 +68,21 @@ namespace KlayGE
 		{
 			output_pins_[i].first = output_pin_names[i];
 		}
+		for (size_t i = 0; i < param_names.size(); ++ i)
+		{
+			params_[i].first = param_names[i];
+		}
 		this->Technique(tech);
 	}
 
 	void PostProcess::Technique(RenderTechniquePtr const & tech)
 	{
 		technique_ = tech;
+		this->UpdateBinds();
+	}
 
+	void PostProcess::UpdateBinds()
+	{
 		if (technique_)
 		{
 			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
@@ -90,7 +100,314 @@ namespace KlayGE
 			{
 				output_pins_ep_[i] = technique_->Effect().ParameterByName(output_pins_[i].first);
 			}
+
+			for (size_t i = 0; i < params_.size(); ++ i)
+			{
+				params_[i].second = technique_->Effect().ParameterByName(params_[i].first);
+			}
 		}
+	}
+
+	uint32_t PostProcess::NumParams() const
+	{
+		return static_cast<uint32_t>(params_.size());
+	}
+
+	uint32_t PostProcess::ParamByName(std::string const & name) const
+	{
+		for (size_t i = 0; i < params_.size(); ++ i)
+		{
+			if (params_[i].first == name)
+			{
+				return static_cast<uint32_t>(i);
+			}
+		}
+		return 0xFFFFFFFF;
+	}
+
+	std::string const & PostProcess::ParamName(uint32_t index) const
+	{
+		return params_[index].first;
+	}
+
+	void PostProcess::SetParam(uint32_t index, bool const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, uint32_t const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, int32_t const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, float const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, uint2 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, uint3 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, uint4 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, int2 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, int3 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, int4 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, float2 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, float3 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, float4 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, float4x4 const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<bool> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<uint32_t> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<int32_t> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<float> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<uint2> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<uint3> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<uint4> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<int2> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<int3> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<int4> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<float2> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<float3> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<float4> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::SetParam(uint32_t index, std::vector<float4x4> const & value)
+	{
+		*params_[index].second = value;
+	}
+
+	void PostProcess::GetParam(uint32_t index, bool& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, uint32_t& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, int32_t& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, float& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, uint2& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, uint3& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, uint4& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, int2& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, int3& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, int4& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, float2& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, float3& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, float4& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, float4x4& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<bool>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<uint32_t>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<int32_t>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<float>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<uint2>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<uint3>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<uint4>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<int2>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<int3>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<int4>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<float2>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<float3>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<float4>& value)
+	{
+		params_[index].second->Value(value);
+	}
+
+	void PostProcess::GetParam(uint32_t index, std::vector<float4x4>& value)
+	{
+		params_[index].second->Value(value);
 	}
 
 	uint32_t PostProcess::NumInputPins() const
@@ -239,6 +556,7 @@ namespace KlayGE
 		XMLNodePtr root = doc.Parse(ppml);
 
 		std::wstring wname;
+		std::vector<std::string> param_names;
 		std::vector<std::string> input_pin_names;
 		std::vector<std::string> output_pin_names;
 		RenderTechniquePtr tech;
@@ -250,6 +568,14 @@ namespace KlayGE
 			{
 				Convert(wname, name);
 
+				XMLNodePtr params_chunk = pp_node->FirstNode("params");
+				if (params_chunk)
+				{
+					for (XMLNodePtr p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
+					{
+						param_names.push_back(p_node->Attrib("name")->ValueString());
+					}
+				}
 				XMLNodePtr input_chunk = pp_node->FirstNode("input");
 				if (input_chunk)
 				{
@@ -276,7 +602,7 @@ namespace KlayGE
 			}
 		}
 
-		return MakeSharedPtr<PostProcess>(wname, input_pin_names, output_pin_names, tech);
+		return MakeSharedPtr<PostProcess>(wname, param_names, input_pin_names, output_pin_names, tech);
 	}
 
 
@@ -286,16 +612,312 @@ namespace KlayGE
 	}
 
 	PostProcessChain::PostProcessChain(std::wstring const & name,
+		std::vector<std::string> const & param_names,
 		std::vector<std::string> const & input_pin_names,
 		std::vector<std::string> const & output_pin_names,
 		RenderTechniquePtr const & tech)
-			: PostProcess(name, input_pin_names, output_pin_names, tech)
+			: PostProcess(name, param_names, input_pin_names, output_pin_names, tech)
 	{
 	}
 
 	void PostProcessChain::Append(PostProcessPtr const & pp)
 	{
 		pp_chain_.push_back(pp);
+	}
+
+	uint32_t PostProcessChain::NumParams() const
+	{
+		return pp_chain_.front()->NumParams();
+	}
+
+	uint32_t PostProcessChain::ParamByName(std::string const & name) const
+	{
+		return pp_chain_.front()->ParamByName(name);
+	}
+
+	std::string const & PostProcessChain::ParamName(uint32_t index) const
+	{
+		return pp_chain_.front()->ParamName(index);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, bool const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, uint32_t const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, int32_t const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, float const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, uint2 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, uint3 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, uint4 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, int2 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, int3 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, int4 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, float2 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, float3 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, float4 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, float4x4 const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<bool> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<uint32_t> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<int32_t> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<float> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<uint2> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<uint3> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<uint4> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<int2> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<int3> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<int4> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<float2> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<float3> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<float4> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::SetParam(uint32_t index, std::vector<float4x4> const & value)
+	{
+		pp_chain_.front()->SetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, bool& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, uint32_t& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, int32_t& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, float& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, uint2& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, uint3& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, uint4& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, int2& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, int3& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, int4& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, float2& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, float3& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, float4& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, float4x4& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<bool>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<uint32_t>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<int32_t>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<float>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<uint2>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<uint3>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<uint4>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<int2>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<int3>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<int4>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<float2>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<float3>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<float4>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
+	}
+
+	void PostProcessChain::GetParam(uint32_t index, std::vector<float4x4>& value)
+	{
+		pp_chain_.front()->GetParam(index, value);
 	}
 
 	uint32_t PostProcessChain::NumInputPins() const
@@ -357,23 +979,9 @@ namespace KlayGE
 	}
 
 
-	GammaCorrectionProcess::GammaCorrectionProcess()
-		: PostProcess(L"GammaCorrection",
-				std::vector<std::string>(1, "src_tex"),
-				std::vector<std::string>(1, "output"),
-				Context::Instance().RenderFactoryInstance().LoadEffect("GammaCorrection.fxml")->TechniqueByName("GammaCorrection"))
-	{
-		inv_gamma_ep_ = technique_->Effect().ParameterByName("inv_gamma");
-	}
-
-	void GammaCorrectionProcess::Gamma(float gamma)
-	{
-		*inv_gamma_ep_ = 1 / gamma;
-	}
-
-
 	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 		: PostProcess(L"SeparableBoxFilter",
+				std::vector<std::string>(),
 				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
 				Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
@@ -410,6 +1018,7 @@ namespace KlayGE
 
 	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
 			: PostProcess(L"SeparableGaussian",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),

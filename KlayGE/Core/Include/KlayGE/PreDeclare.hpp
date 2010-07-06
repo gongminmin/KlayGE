@@ -153,8 +153,6 @@ namespace KlayGE
 	typedef boost::shared_ptr<PostProcess> PostProcessPtr;
 	class PostProcessChain;
 	typedef boost::shared_ptr<PostProcessChain> PostProcessChainPtr;
-	class GammaCorrectionProcess;
-	typedef boost::shared_ptr<GammaCorrectionProcess> GammaCorrectionProcessPtr;
 	class SeparableBoxFilterPostProcess;
 	typedef boost::shared_ptr<SeparableBoxFilterPostProcess> SeparableBoxFilterPostProcessPtr;
 	class SeparableGaussianFilterPostProcess;

@@ -28,7 +28,11 @@
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess(RenderTechniquePtr const & tech)
-		: PostProcess(L"SumLum", std::vector<std::string>(1, "src_tex"), std::vector<std::string>(1, "out_tex"), tech)
+		: PostProcess(L"SumLum",
+			std::vector<std::string>(),
+			std::vector<std::string>(1, "src_tex"),
+			std::vector<std::string>(1, "out_tex"),
+			tech)
 	{
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
@@ -106,6 +110,7 @@ namespace KlayGE
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
 			: PostProcess(L"AdaptedLum",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLum")),
@@ -148,7 +153,7 @@ namespace KlayGE
 		PostProcess::OnRenderBegin();
 
 		*last_lum_tex_ep_ = adapted_textures_[last_index_];
-		*frame_delta_ep_ = float(timer_.elapsed());
+		*frame_delta_ep_ = static_cast<float>(timer_.elapsed());
 		timer_.restart();
 
 		last_index_ = !last_index_;
@@ -157,6 +162,7 @@ namespace KlayGE
 
 	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
 			: PostProcess(L"AdaptedLumCS", 
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("SumLum.fxml")->TechniqueByName("AdaptedLumCS"))
@@ -178,7 +184,7 @@ namespace KlayGE
 	{
 		PostProcess::OnRenderBegin();
 
-		*frame_delta_ep_ = float(timer_.elapsed());
+		*frame_delta_ep_ = static_cast<float>(timer_.elapsed());
 		timer_.restart();
 	}
 
@@ -197,7 +203,7 @@ namespace KlayGE
 			technique_ = effect->TechniqueByName("ToneMapping20");
 		}
 
-		this->Technique(technique_);
+		this->UpdateBinds();
 
 		*(technique_->Effect().ParameterByName("blue_shift")) = blue_shift;
 	}

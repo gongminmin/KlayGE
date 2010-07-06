@@ -727,6 +727,9 @@
     <None Include="..\..\media\RenderFX\UI.fxml">
       <Filter>UI System\Effect Files</Filter>
     </None>
+    <None Include="..\..\media\PostProcessors\GammaCorrection.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">

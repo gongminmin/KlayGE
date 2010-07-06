@@ -134,7 +134,7 @@ namespace KlayGE
 
 		// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
 
-		*time_param_ = static_cast<float>(timer_.current_time() * param_.time_scale);
+		*time_param_ = static_cast<float>(timer_.elapsed() * param_.time_scale);
 
 		uint32_t group_count_x = (param_.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
 		uint32_t group_count_y = (param_.dmap_dim + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;

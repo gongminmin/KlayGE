@@ -222,6 +222,7 @@ namespace
 	public:
 		Downsampler8x8()
 			: PostProcess(L"Downsampler8x8",
+					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
 					Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("Downsample8x8"))
@@ -268,6 +269,7 @@ namespace
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
 	: PostProcess(L"AsciiArts",
+			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),
 			Context::Instance().RenderFactoryInstance().LoadEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))

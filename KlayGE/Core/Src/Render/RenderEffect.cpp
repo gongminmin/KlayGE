@@ -1,8 +1,11 @@
 // RenderEffect.cpp
 // KlayGE 渲染效果类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Thead-safe singleton (2010.7.6)
 //
 // 3.9.0
 // 直接从fxml文件读取特效脚本 (2009.4.21)
@@ -58,6 +61,14 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244 4512 4267 6011)
+#endif
+#include <boost/thread.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -77,13 +88,22 @@ namespace
 {
 	using namespace KlayGE;
 
+	boost::mutex singleton_mutex;
+
 	class type_define
 	{
 	public:
 		static type_define& instance()
 		{
-			static type_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new type_define;
+				}
+			}
+			return *instance_;
 		}
 
 		uint32_t type_code(std::string const & name) const
@@ -164,15 +184,25 @@ namespace
 
 	private:
 		std::vector<std::string> types_;
+
+		static type_define* instance_;
 	};
+	type_define* type_define::instance_;
 
 	class shade_mode_define
 	{
 	public:
 		static shade_mode_define& instance()
 		{
-			static shade_mode_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new shade_mode_define;
+				}
+			}
+			return *instance_;
 		}
 
 		ShadeMode from_str(std::string const & name) const
@@ -197,15 +227,25 @@ namespace
 
 	private:
 		std::vector<std::string> sms_;
+
+		static shade_mode_define* instance_;
 	};
+	shade_mode_define* shade_mode_define::instance_;
 
 	class compare_function_define
 	{
 	public:
 		static compare_function_define& instance()
 		{
-			static compare_function_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new compare_function_define;
+				}
+			}
+			return *instance_;
 		}
 
 		CompareFunction from_str(std::string const & name) const
@@ -236,15 +276,25 @@ namespace
 
 	private:
 		std::vector<std::string> cfs_;
+
+		static compare_function_define* instance_;
 	};
+	compare_function_define* compare_function_define::instance_;
 
 	class cull_mode_define
 	{
 	public:
 		static cull_mode_define& instance()
 		{
-			static cull_mode_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new cull_mode_define;
+				}
+			}
+			return *instance_;
 		}
 
 		CullMode from_str(std::string const & name) const
@@ -270,15 +320,25 @@ namespace
 
 	private:
 		std::vector<std::string> cms_;
+
+		static cull_mode_define* instance_;
 	};
+	cull_mode_define* cull_mode_define::instance_;
 
 	class polygon_mode_define
 	{
 	public:
 		static polygon_mode_define& instance()
 		{
-			static polygon_mode_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new polygon_mode_define;
+				}
+			}
+			return *instance_;
 		}
 
 		PolygonMode from_str(std::string const & name) const
@@ -304,15 +364,25 @@ namespace
 
 	private:
 		std::vector<std::string> pms_;
+
+		static polygon_mode_define* instance_;
 	};
+	polygon_mode_define* polygon_mode_define::instance_;
 
 	class alpha_blend_factor_define
 	{
 	public:
 		static alpha_blend_factor_define& instance()
 		{
-			static alpha_blend_factor_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new alpha_blend_factor_define;
+				}
+			}
+			return *instance_;
 		}
 
 		AlphaBlendFactor from_str(std::string const & name) const
@@ -346,15 +416,25 @@ namespace
 
 	private:
 		std::vector<std::string> abfs_;
+
+		static alpha_blend_factor_define* instance_;
 	};
+	alpha_blend_factor_define* alpha_blend_factor_define::instance_;
 
 	class blend_operation_define
 	{
 	public:
 		static blend_operation_define& instance()
 		{
-			static blend_operation_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new blend_operation_define;
+				}
+			}
+			return *instance_;
 		}
 
 		BlendOperation from_str(std::string const & name) const
@@ -382,15 +462,25 @@ namespace
 
 	private:
 		std::vector<std::string> bops_;
+
+		static blend_operation_define* instance_;
 	};
+	blend_operation_define* blend_operation_define::instance_;
 
 	class stencil_operation_define
 	{
 	public:
 		static stencil_operation_define& instance()
 		{
-			static stencil_operation_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new stencil_operation_define;
+				}
+			}
+			return *instance_;
 		}
 
 		StencilOperation from_str(std::string const & name) const
@@ -419,15 +509,25 @@ namespace
 
 	private:
 		std::vector<std::string> sops_;
+
+		static stencil_operation_define* instance_;
 	};
+	stencil_operation_define* stencil_operation_define::instance_;
 
 	class texture_filter_mode_define
 	{
 	public:
 		static texture_filter_mode_define& instance()
 		{
-			static texture_filter_mode_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new texture_filter_mode_define;
+				}
+			}
+			return *instance_;
 		}
 
 		TexFilterOp from_str(std::string const & name) const
@@ -474,15 +574,25 @@ namespace
 
 	private:
 		std::vector<std::string> tfs_;
+
+		static texture_filter_mode_define* instance_;
 	};
+	texture_filter_mode_define* texture_filter_mode_define::instance_;
 
 	class texture_addr_mode_define
 	{
 	public:
 		static texture_addr_mode_define& instance()
 		{
-			static texture_addr_mode_define ret;
-			return ret;
+			if (NULL == instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (NULL == instance_)
+				{
+					instance_ = new texture_addr_mode_define;
+				}
+			}
+			return *instance_;
 		}
 
 		TexAddressingMode from_str(std::string const & name) const
@@ -509,7 +619,10 @@ namespace
 
 	private:
 		std::vector<std::string> tams_;
+
+		static texture_addr_mode_define* instance_;
 	};
+	texture_addr_mode_define* texture_addr_mode_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{
