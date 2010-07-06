@@ -95,12 +95,12 @@ namespace
 	public:
 		static type_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new type_define;
+					instance_ = MakeSharedPtr<type_define>();
 				}
 			}
 			return *instance_;
@@ -131,7 +131,6 @@ namespace
 			return empty_str;
 		}
 
-	private:
 		type_define()
 		{
 			types_.push_back("bool");
@@ -185,21 +184,21 @@ namespace
 	private:
 		std::vector<std::string> types_;
 
-		static type_define* instance_;
+		static boost::shared_ptr<type_define> instance_;
 	};
-	type_define* type_define::instance_;
+	boost::shared_ptr<type_define> type_define::instance_;
 
 	class shade_mode_define
 	{
 	public:
 		static shade_mode_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new shade_mode_define;
+					instance_ = MakeSharedPtr<shade_mode_define>();
 				}
 			}
 			return *instance_;
@@ -218,7 +217,6 @@ namespace
 			return static_cast<ShadeMode>(0xFFFFFFFF);
 		}
 
-	private:
 		shade_mode_define()
 		{
 			sms_.push_back("flat");
@@ -228,21 +226,21 @@ namespace
 	private:
 		std::vector<std::string> sms_;
 
-		static shade_mode_define* instance_;
+		static boost::shared_ptr<shade_mode_define> instance_;
 	};
-	shade_mode_define* shade_mode_define::instance_;
+	boost::shared_ptr<shade_mode_define> shade_mode_define::instance_;
 
 	class compare_function_define
 	{
 	public:
 		static compare_function_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new compare_function_define;
+					instance_ = MakeSharedPtr<compare_function_define>();
 				}
 			}
 			return *instance_;
@@ -261,7 +259,6 @@ namespace
 			return static_cast<CompareFunction>(0xFFFFFFFF);
 		}
 
-	private:
 		compare_function_define()
 		{
 			cfs_.push_back("always_fail");
@@ -277,21 +274,21 @@ namespace
 	private:
 		std::vector<std::string> cfs_;
 
-		static compare_function_define* instance_;
+		static boost::shared_ptr<compare_function_define> instance_;
 	};
-	compare_function_define* compare_function_define::instance_;
+	boost::shared_ptr<compare_function_define> compare_function_define::instance_;
 
 	class cull_mode_define
 	{
 	public:
 		static cull_mode_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new cull_mode_define;
+					instance_ = MakeSharedPtr<cull_mode_define>();
 				}
 			}
 			return *instance_;
@@ -310,7 +307,6 @@ namespace
 			return static_cast<CullMode>(0xFFFFFFFF);
 		}
 
-	private:
 		cull_mode_define()
 		{
 			cms_.push_back("none");
@@ -321,21 +317,21 @@ namespace
 	private:
 		std::vector<std::string> cms_;
 
-		static cull_mode_define* instance_;
+		static boost::shared_ptr<cull_mode_define> instance_;
 	};
-	cull_mode_define* cull_mode_define::instance_;
+	boost::shared_ptr<cull_mode_define> cull_mode_define::instance_;
 
 	class polygon_mode_define
 	{
 	public:
 		static polygon_mode_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new polygon_mode_define;
+					instance_ = MakeSharedPtr<polygon_mode_define>();
 				}
 			}
 			return *instance_;
@@ -354,7 +350,6 @@ namespace
 			return static_cast<PolygonMode>(0xFFFFFFFF);
 		}
 
-	private:
 		polygon_mode_define()
 		{
 			pms_.push_back("point");
@@ -365,21 +360,21 @@ namespace
 	private:
 		std::vector<std::string> pms_;
 
-		static polygon_mode_define* instance_;
+		static boost::shared_ptr<polygon_mode_define> instance_;
 	};
-	polygon_mode_define* polygon_mode_define::instance_;
+	boost::shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
 
 	class alpha_blend_factor_define
 	{
 	public:
 		static alpha_blend_factor_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new alpha_blend_factor_define;
+					instance_ = MakeSharedPtr<alpha_blend_factor_define>();
 				}
 			}
 			return *instance_;
@@ -398,7 +393,6 @@ namespace
 			return static_cast<AlphaBlendFactor>(0xFFFFFFFF);
 		}
 
-	private:
 		alpha_blend_factor_define()
 		{
 			abfs_.push_back("zero");
@@ -417,21 +411,21 @@ namespace
 	private:
 		std::vector<std::string> abfs_;
 
-		static alpha_blend_factor_define* instance_;
+		static boost::shared_ptr<alpha_blend_factor_define> instance_;
 	};
-	alpha_blend_factor_define* alpha_blend_factor_define::instance_;
+	boost::shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
 
 	class blend_operation_define
 	{
 	public:
 		static blend_operation_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new blend_operation_define;
+					instance_ = MakeSharedPtr<blend_operation_define>();
 				}
 			}
 			return *instance_;
@@ -450,7 +444,6 @@ namespace
 			return static_cast<BlendOperation>(0xFFFFFFFF);
 		}
 
-	private:
 		blend_operation_define()
 		{
 			bops_.push_back("add");
@@ -463,21 +456,21 @@ namespace
 	private:
 		std::vector<std::string> bops_;
 
-		static blend_operation_define* instance_;
+		static boost::shared_ptr<blend_operation_define> instance_;
 	};
-	blend_operation_define* blend_operation_define::instance_;
+	boost::shared_ptr<blend_operation_define> blend_operation_define::instance_;
 
 	class stencil_operation_define
 	{
 	public:
 		static stencil_operation_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new stencil_operation_define;
+					instance_ = MakeSharedPtr<stencil_operation_define>();
 				}
 			}
 			return *instance_;
@@ -496,7 +489,6 @@ namespace
 			return static_cast<StencilOperation>(0xFFFFFFFF);
 		}
 
-	private:
 		stencil_operation_define()
 		{
 			sops_.push_back("keep");
@@ -510,21 +502,21 @@ namespace
 	private:
 		std::vector<std::string> sops_;
 
-		static stencil_operation_define* instance_;
+		static boost::shared_ptr<stencil_operation_define> instance_;
 	};
-	stencil_operation_define* stencil_operation_define::instance_;
+	boost::shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
 
 	class texture_filter_mode_define
 	{
 	public:
 		static texture_filter_mode_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new texture_filter_mode_define;
+					instance_ = MakeSharedPtr<texture_filter_mode_define>();
 				}
 			}
 			return *instance_;
@@ -559,7 +551,6 @@ namespace
 			return static_cast<TexFilterOp>(0xFFFFFFFF);
 		}
 
-	private:
 		texture_filter_mode_define()
 		{
 			tfs_.push_back("min_mag_mip_point");
@@ -575,21 +566,21 @@ namespace
 	private:
 		std::vector<std::string> tfs_;
 
-		static texture_filter_mode_define* instance_;
+		static boost::shared_ptr<texture_filter_mode_define> instance_;
 	};
-	texture_filter_mode_define* texture_filter_mode_define::instance_;
+	boost::shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
 
 	class texture_addr_mode_define
 	{
 	public:
 		static texture_addr_mode_define& instance()
 		{
-			if (NULL == instance_)
+			if (!instance_)
 			{
 				boost::mutex::scoped_lock lock(singleton_mutex);
-				if (NULL == instance_)
+				if (!instance_)
 				{
-					instance_ = new texture_addr_mode_define;
+					instance_ = MakeSharedPtr<texture_addr_mode_define>();
 				}
 			}
 			return *instance_;
@@ -608,7 +599,6 @@ namespace
 			return static_cast<TexAddressingMode>(0xFFFFFFFF);
 		}
 
-	private:
 		texture_addr_mode_define()
 		{
 			tams_.push_back("wrap");
@@ -620,9 +610,9 @@ namespace
 	private:
 		std::vector<std::string> tams_;
 
-		static texture_addr_mode_define* instance_;
+		static boost::shared_ptr<texture_addr_mode_define> instance_;
 	};
-	texture_addr_mode_define* texture_addr_mode_define::instance_;
+	boost::shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{

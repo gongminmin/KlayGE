@@ -391,6 +391,7 @@ namespace KlayGE
 		technique_light_depth_only_ = effect->TechniqueByName("DeferredShadingLightDepthOnly");
 		technique_light_stencil_eiv_ = effect->TechniqueByName("DeferredShadingLightStencilEIV");
 		technique_light_stencil_eov_ = effect->TechniqueByName("DeferredShadingLightStencilEOV");
+		technique_clear_stencil_ = effect->TechniqueByName("ClearStencil");
 
 		technique_ = technique_light_depth_only_;
 
@@ -863,7 +864,8 @@ namespace KlayGE
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
-					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearStencil(0);
+					// Clear stencil to 0 with write mask
+					re.Render(*technique_clear_stencil_, *rl_quad_);
 
 					technique_ = technique_lights_[type];
 

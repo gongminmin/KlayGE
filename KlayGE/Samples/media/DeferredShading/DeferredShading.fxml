@@ -223,10 +223,6 @@ float4 DeferredShadingPointPS(
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
-	if (0 == GetMtlID(ndc))
-	{
-		clip(-1);
-	}
 
 	float2 ds = 0;
 
@@ -273,10 +269,6 @@ float4 DeferredShadingSpotPS(
 
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
-	if (0 == GetMtlID(ndc))
-	{
-		clip(-1);
-	}
 	
 	float2 ds = 0;
 
@@ -332,10 +324,6 @@ float4 DeferredShadingDirectionalPS(
 	
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
-	if (0 == GetMtlID(ndc))
-	{
-		clip(-1);
-	}
 	
 	view_dir = normalize(-view_dir);
 
@@ -367,25 +355,7 @@ float4 DeferredShadingAmbientPS(
 #endif
 	) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
-#endif
-	
-	float4 ndc = nd_tex.Sample(point_sampler, tc);
-
-	float4 final_clr;
-	if (0 == GetMtlID(ndc))
-	{
-		clip(-1);
-	}
-	
-	final_clr = CalcColor(float2(0.1f, 0));
-	return final_clr;
+	return CalcColor(float2(0.1f, 0));
 }
 		]]>
 	</shader>
@@ -418,10 +388,12 @@ float4 DeferredShadingAmbientPS(
 			<state name="cull_mode" value="none"/>
 
 			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="increment"/>
 			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="decrement"/>
 
 			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
@@ -441,13 +413,13 @@ float4 DeferredShadingAmbientPS(
 			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="1"/>
-			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="increment"/>
 			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="1"/>
-			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="increment"/>
 
 			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
 			<state name="pixel_shader" value="DeferredShadingDepthOnlyPS()"/>
@@ -467,10 +439,12 @@ float4 DeferredShadingAmbientPS(
 			<state name="front_stencil_func" value="less"/>
 			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="less"/>
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -495,10 +469,12 @@ float4 DeferredShadingAmbientPS(
 			<state name="front_stencil_func" value="less"/>
 			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="less"/>
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -519,6 +495,17 @@ float4 DeferredShadingAmbientPS(
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
+
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
@@ -537,6 +524,42 @@ float4 DeferredShadingAmbientPS(
 
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ClearStencil">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="color_write_mask" value="0"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="greater"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="greater"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="127"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>

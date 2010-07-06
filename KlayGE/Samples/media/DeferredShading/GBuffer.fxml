@@ -85,6 +85,15 @@ float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
 
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
 			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
 			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
 		</pass>
