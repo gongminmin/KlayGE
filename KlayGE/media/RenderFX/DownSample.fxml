@@ -4,8 +4,16 @@
 	<include name="PostProcess.fxml"/>
 
 	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="lum_tex"/>
+	
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -32,8 +40,27 @@ float4 DownsamplePS(float2 tex : TEXCOORD0) : SV_Target
 
 float4 BrightPassDownsamplePS(float2 tex : TEXCOORD0) : SV_Target
 {
+	const float MIDDLE_GREY = 0.36f;
+	const float BRIGHT_THRESHOLD = 3.0f;
+	const float BRIGHT_OFFSET = 6.0f;
+
+	float lum = lum_tex.Sample(point_sampler, 0.5f.xx).r;
 	float4 clr = src_tex.Sample(src_sampler, tex);
-	return clr * clr;
+	
+	clr.rgb *= MIDDLE_GREY / (lerp(0.2f, lum, 0.5f) + 0.001f);
+	
+	// Subtract out dark pixels
+	clr.rgb -= BRIGHT_THRESHOLD;
+  
+	// Clamp to 0
+	clr = max(clr, 0.0f);
+	
+	// Map the resulting value into the 0 to 1 range. Higher values for
+	// BRIGHT_PASS_OFFSET will isolate lights from illuminated scene 
+	// objects.
+	clr.rgb /= (BRIGHT_OFFSET + clr.rgb);
+	
+	return clr;
 }
 		]]>
 	</shader>

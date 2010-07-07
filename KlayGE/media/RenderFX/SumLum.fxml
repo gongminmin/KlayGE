@@ -23,6 +23,15 @@
 
 	<shader>
 		<![CDATA[
+float CalcAdaptedLum(float adapted_lum, float current_lum)
+{
+	return adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+}
+		]]>
+	</shader>
+
+	<shader>
+		<![CDATA[
 void SumLumVS(float4 pos : POSITION,
 					out float4 oTex0 : TEXCOORD0,
 					out float4 oTex1 : TEXCOORD1,
@@ -72,7 +81,7 @@ float4 AdaptedLumPS(float4 tex0 : TEXCOORD0,
 	float adapted_lum = last_lum_tex.Sample(last_lum_sampler, float2(0.5f, 0.5f)).r;
 	float current_lum = exp(src_tex.Sample(src_sampler, float2(0.5f, 0.5f)).r);
 
-	return adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+	return CalcAdaptedLum(adapted_lum, current_lum);
 }
 		]]>
 	</shader>
@@ -159,7 +168,7 @@ void AdaptedLumCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, uint
 	float adapted_lum = out_tex[int2(0, 0)];
 	float current_lum = exp(src_tex.SampleLevel(src_sampler, 0.5f, 0).x);
 
-	out_tex[int2(0, 0)] = adapted_lum + (current_lum - adapted_lum) * (1 - pow(0.98f, 50 * frame_delta));
+	out_tex[int2(0, 0)] = CalcAdaptedLum(adapted_lum, current_lum);
 }
 		]]>
 	</shader>

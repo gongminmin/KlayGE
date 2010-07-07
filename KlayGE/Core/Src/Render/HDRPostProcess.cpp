@@ -1,8 +1,11 @@
 // HDRPostProcess.cpp
 // KlayGE HDR后期处理类 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 改进了Tone mapping (2010.7.7)
 //
 // 3.4.0
 // 初次建立 (2006.8.1)
@@ -189,7 +192,7 @@ namespace KlayGE
 	}
 
 
-	ToneMappingPostProcess::ToneMappingPostProcess(bool blue_shift)
+	ToneMappingPostProcess::ToneMappingPostProcess()
 		: PostProcess(L"ToneMapping")
 	{
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
@@ -204,27 +207,15 @@ namespace KlayGE
 		}
 
 		this->UpdateBinds();
-
-		*(technique_->Effect().ParameterByName("blue_shift")) = blue_shift;
 	}
 
 
-	HDRPostProcess::HDRPostProcess(bool bright_pass, bool blue_shift)
+	HDRPostProcess::HDRPostProcess()
 		: PostProcess(L"HDR")
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (5 == caps.max_shader_model);
 
-		if (bright_pass)
-		{
-			downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
-		}
-		else
-		{
-			downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
-		}
-
-		blur_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
 		if (cs_support_)
 		{
 			sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcessCS>();
@@ -241,7 +232,11 @@ namespace KlayGE
 			}
 			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
 		}
-		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>(blue_shift);
+
+		downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
+		blur_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
+
+		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
 	}
 
 	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
@@ -250,20 +245,6 @@ namespace KlayGE
 		uint32_t const height = tex->Height(0);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		TexturePtr downsample_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, NULL);
-		{
-			downsampler_->InputPin(index, tex);
-			downsampler_->OutputPin(index, downsample_tex);
-		}
-
-		TexturePtr blur_tex = rf.MakeTexture2D(width / 4, height / 4, 1, 1, EF_ABGR16F, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, NULL);
-		{
-			blur_->InputPin(index, downsample_tex);
-			blur_->OutputPin(index, blur_tex);
-		}
 
 		if (cs_support_)
 		{
@@ -283,6 +264,7 @@ namespace KlayGE
 			adapted_lum_->InputPin(index, lum_tex);
 			adapted_lum_->OutputPin(index, adapted_lum_tex);
 			tone_mapping_->InputPin(1, adapted_lum_tex);
+			downsampler_->InputPin(1, adapted_lum_tex);
 		}
 		else
 		{
@@ -332,6 +314,20 @@ namespace KlayGE
 				adapted_lum_->InputPin(index, lum_texs[sum_lums_.size()]);
 			}
 		}
+		
+		TexturePtr downsample_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
+		{
+			downsampler_->InputPin(index, tex);
+			downsampler_->OutputPin(index, downsample_tex);
+		}
+
+		TexturePtr blur_tex = rf.MakeTexture2D(width / 4, height / 4, 1, 1, EF_ABGR16F, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
+		{
+			blur_->InputPin(index, downsample_tex);
+			blur_->OutputPin(index, blur_tex);
+		}
 
 		tone_mapping_->InputPin(0, tex);
 		tone_mapping_->InputPin(2, blur_tex);
@@ -354,11 +350,6 @@ namespace KlayGE
 
 	void HDRPostProcess::Apply()
 	{
-		// 降采样
-		downsampler_->Apply();
-		// Blur
-		blur_->Apply();
-
 		// 降采样4x4 log
 		sum_lums_1st_->Apply();
 		for (size_t i = 0; i < sum_lums_.size(); ++ i)
@@ -369,13 +360,18 @@ namespace KlayGE
 
 		adapted_lum_->Apply();
 
+		if (!cs_support_)
 		{
-			// Tone mapping
-			if (!cs_support_)
-			{
-				tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
-			}
-			tone_mapping_->Apply();
+			tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
+			downsampler_->InputPin(1, adapted_lum_->OutputPin(0));
 		}
+
+		// 降采样
+		downsampler_->Apply();
+		// Blur
+		blur_->Apply();
+
+		// Tone mapping
+		tone_mapping_->Apply();
 	}
 }

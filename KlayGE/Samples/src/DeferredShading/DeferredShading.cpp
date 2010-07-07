@@ -1147,7 +1147,7 @@ void DeferredShadingApp::InitObjects()
 	{
 		ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	}
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>(true, false);
+	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 
 	debug_pp_ = MakeSharedPtr<DeferredShadingDebug>();
 

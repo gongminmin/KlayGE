@@ -1,8 +1,11 @@
 // HDRPostProcess.hpp
 // KlayGE HDR后期处理类 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 改进了Tone mapping (2010.7.7)
 //
 // 3.4.0
 // 初次建立 (2006.8.1)
@@ -96,7 +99,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:
-		explicit ToneMappingPostProcess(bool blue_shift);
+		explicit ToneMappingPostProcess();
 	};
 
 
@@ -108,7 +111,7 @@ namespace KlayGE
 		};
 
 	public:
-		HDRPostProcess(bool bright_pass, bool blur_shift);
+		HDRPostProcess();
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;
@@ -117,11 +120,11 @@ namespace KlayGE
 		void Apply();
 
 	private:
-		PostProcessPtr downsampler_;
-		PostProcessPtr blur_;
 		PostProcessPtr sum_lums_1st_;
 		std::vector<PostProcessPtr> sum_lums_;
 		PostProcessPtr adapted_lum_;
+		PostProcessPtr downsampler_;
+		PostProcessPtr blur_;
 		PostProcessPtr tone_mapping_;
 
 		bool cs_support_;

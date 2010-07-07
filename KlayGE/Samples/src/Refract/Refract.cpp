@@ -223,7 +223,7 @@ void Refract::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	hdr_ = MakeSharedPtr<HDRPostProcess>(true, true);
+	hdr_ = MakeSharedPtr<HDRPostProcess>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Refract.uiml"));
 }
