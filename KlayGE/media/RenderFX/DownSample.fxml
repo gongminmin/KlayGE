@@ -44,8 +44,8 @@ float4 BrightPassDownsamplePS(float2 tex : TEXCOORD0) : SV_Target
 	const float BRIGHT_THRESHOLD = 3.0f;
 	const float BRIGHT_OFFSET = 6.0f;
 
-	float lum = lum_tex.Sample(point_sampler, 0.5f.xx).r;
 	float4 clr = src_tex.Sample(src_sampler, tex);
+	float lum = lum_tex.Sample(point_sampler, 0.5f.xx).r;
 	
 	clr.rgb *= MIDDLE_GREY / (lerp(0.2f, lum, 0.5f) + 0.001f);
 	

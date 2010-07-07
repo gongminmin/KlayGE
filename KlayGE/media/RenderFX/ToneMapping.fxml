@@ -28,16 +28,15 @@ float EyeAdaption(float lum)
 
 float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 {
-	const float MIDDLE_GREY = 0.36f;
 	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
-	const float3 BLUE_SHIFT = float3(1.05, 0.97, 1.27);
+	const float3 BLUE_SHIFT = float3(0.8f, 0.8f, 1.4f);
 
 	color += blur * 2.5f;
 	
 	float lum = dot(color, RGB_TO_LUM);
 	
 	// martin's modified blue shift
-	color = lerp(lum * float3(0.8f, 0.8f, 1.4f), color, saturate(5.0f * lum));
+	color = lerp(lum * BLUE_SHIFT, color, saturate(5.0f * lum));
 
 	// tone mapping
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));

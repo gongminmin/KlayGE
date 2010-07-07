@@ -730,6 +730,12 @@
     <None Include="..\..\media\PostProcessors\GammaCorrection.ppml">
       <Filter>Rendering System\Post Processors</Filter>
     </None>
+    <None Include="..\..\media\PostProcessors\GlowMerger.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\GlowMerger.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">
