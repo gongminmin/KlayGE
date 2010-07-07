@@ -31,7 +31,7 @@ float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
 	const float3 BLUE_SHIFT = float3(0.8f, 0.8f, 1.4f);
 
-	color += blur * 2.5f;
+	color += blur * 0.35f;
 	
 	float lum = dot(color, RGB_TO_LUM);
 	
@@ -41,7 +41,7 @@ float4 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	// tone mapping
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 
-	//color.xyz = 1 - exp(-adapted_lum_dest * pow(color, 1.15f)); // better contrast but slower
+	//color = 1 - exp(-adapted_lum_dest * pow(color, 1.15f)); // better contrast but slower
 	color = 1 - exp(-adapted_lum_dest * color); 
 
 	return float4(color, 1);

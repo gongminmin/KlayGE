@@ -233,12 +233,12 @@ namespace KlayGE
 			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
 		}
 
-		downsample_texs_.resize(3);
-		glow_texs_.resize(3);
-
 		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
-		downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
-		blur_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
+		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
+		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
+		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
+		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
+		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
 
 		glow_merger_ = LoadPostProcess(ResLoader::Instance().Load("GlowMerger.ppml"), "glow_merger");
 
@@ -270,7 +270,6 @@ namespace KlayGE
 			adapted_lum_->InputPin(index, lum_tex);
 			adapted_lum_->OutputPin(index, adapted_lum_tex);
 			tone_mapping_->InputPin(1, adapted_lum_tex);
-			bright_pass_downsampler_->InputPin(1, adapted_lum_tex);
 		}
 		else
 		{
@@ -320,30 +319,43 @@ namespace KlayGE
 				adapted_lum_->InputPin(index, lum_texs[sum_lums_.size()]);
 			}
 		}
-		
-		downsample_texs_[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
+
+		TexturePtr downsample_texs[3];
+		TexturePtr glow_texs[3];
+
+		downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		{
 			bright_pass_downsampler_->InputPin(index, tex);
-			bright_pass_downsampler_->OutputPin(index, downsample_texs_[0]);
+			bright_pass_downsampler_->OutputPin(index, downsample_texs[0]);
 		}
 		for (size_t i = 1; i < 3; ++ i)
 		{
-			downsample_texs_[i] = rf.MakeTexture2D(width / (i * 4), height / (i * 4), 1, 1, EF_ABGR16F, 1, 0,
+			downsample_texs[i] = rf.MakeTexture2D(width / (i * 4), height / (i * 4), 1, 1, EF_ABGR16F, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
-
 		for (size_t i = 0; i < 3; ++ i)
 		{
-			glow_texs_[i] = rf.MakeTexture2D(width / ((i + 1) * 2), height / ((i + 1) * 2), 1, 1, EF_ABGR16F, 1, 0,
+			glow_texs[i] = rf.MakeTexture2D(width / ((i + 1) * 2), height / ((i + 1) * 2), 1, 1, EF_ABGR16F, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+		
+		for (size_t i = 0; i < 2; ++ i)
+		{
+			downsamplers_[i]->InputPin(0, downsample_texs[i]);
+			downsamplers_[i]->OutputPin(0, downsample_texs[i + 1]);
+		}
+		for (size_t i = 0; i < 3; ++ i)
+		{
+			blurs_[i]->InputPin(0, downsample_texs[i]);
+			blurs_[i]->OutputPin(0, glow_texs[i]);
 		}
 
 		TexturePtr glow_merged_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, NULL);
-		glow_merger_->InputPin(0, glow_texs_[0]);
-		glow_merger_->InputPin(1, glow_texs_[1]);
-		glow_merger_->InputPin(2, glow_texs_[2]);
+		glow_merger_->InputPin(0, glow_texs[0]);
+		glow_merger_->InputPin(1, glow_texs[1]);
+		glow_merger_->InputPin(2, glow_texs[2]);
 		glow_merger_->OutputPin(0, glow_merged_tex);
 
 		tone_mapping_->InputPin(0, tex);
@@ -380,21 +392,16 @@ namespace KlayGE
 		if (!cs_support_)
 		{
 			tone_mapping_->InputPin(1, adapted_lum_->OutputPin(0));
-			bright_pass_downsampler_->InputPin(1, adapted_lum_->OutputPin(0));
 		}
 
 		bright_pass_downsampler_->Apply();
 		for (size_t i = 0; i < 2; ++ i)
 		{
-			downsampler_->InputPin(0, downsample_texs_[i]);
-			downsampler_->OutputPin(0, downsample_texs_[i + 1]);
-			downsampler_->Apply();
+			downsamplers_[i]->Apply();
 		}
 		for (size_t i = 0; i < 3; ++ i)
 		{
-			blur_->InputPin(0, downsample_texs_[i]);
-			blur_->OutputPin(0, glow_texs_[i]);
-			blur_->Apply();
+			blurs_[i]->Apply();
 		}
 
 		glow_merger_->Apply();

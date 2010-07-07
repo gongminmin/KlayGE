@@ -124,13 +124,10 @@ namespace KlayGE
 		std::vector<PostProcessPtr> sum_lums_;
 		PostProcessPtr adapted_lum_;
 		PostProcessPtr bright_pass_downsampler_;
-		PostProcessPtr downsampler_;
-		PostProcessPtr blur_;
+		PostProcessPtr downsamplers_[2];
+		PostProcessPtr blurs_[3];
 		PostProcessPtr glow_merger_;
 		PostProcessPtr tone_mapping_;
-
-		std::vector<TexturePtr> downsample_texs_;
-		std::vector<TexturePtr> glow_texs_;
 
 		bool cs_support_;
 	};
