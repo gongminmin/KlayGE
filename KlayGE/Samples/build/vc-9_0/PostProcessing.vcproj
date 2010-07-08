@@ -408,7 +408,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\media\PostProcessing\Copy.fxml"
+				>
+			</File>
+			<File
 				RelativePath="..\..\media\PostProcessing\NightVisionPP.fxml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\OldFashion.fxml"
 				>
 			</File>
 			<File
@@ -437,6 +445,18 @@
 			</File>
 			<File
 				RelativePath="..\..\media\Common\KlayGESample.rc"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Post Processors"
+			>
+			<File
+				RelativePath="..\..\media\PostProcessing\Copy.ppml"
+				>
+			</File>
+			<File
+				RelativePath="..\..\media\PostProcessing\OldFashion.ppml"
 				>
 			</File>
 		</Filter>

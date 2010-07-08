@@ -582,6 +582,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\GlowMerger.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\KMesh.fxml"
 					>
 				</File>
@@ -635,6 +639,14 @@
 				>
 				<File
 					RelativePath="..\..\media\PostProcessors\Downsampler2x2.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\GammaCorrection.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\GlowMerger.ppml"
 					>
 				</File>
 			</Filter>
