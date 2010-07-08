@@ -215,6 +215,8 @@
   <ItemGroup>
     <None Include="..\..\media\PostProcessing\AsciiArtsPP.fxml" />
     <None Include="..\..\media\PostProcessing\CartoonPP.fxml" />
+    <None Include="..\..\media\PostProcessing\Copy.fxml" />
+    <None Include="..\..\media\PostProcessing\Copy.ppml" />
     <None Include="..\..\media\PostProcessing\NightVisionPP.fxml" />
     <None Include="..\..\media\PostProcessing\OldFashion.fxml" />
     <None Include="..\..\media\PostProcessing\OldFashion.ppml" />

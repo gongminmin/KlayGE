@@ -80,7 +80,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 		specular = dot(normalize(light_dir + view_dir), normal.xyz);
 		if (specular > 0)
 		{
-			specular = pow(specular, 8.0f);
+			specular = pow(specular, 10.0f);
 		}
 		else
 		{
@@ -93,8 +93,8 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 	}
 	
 	float3 diffuse_clr = 1;//diffuse_tex.Sample(linear_sampler, texcoord).rgb;
-	float3 specular_clr = 0;
-	float3 color = float3(0.15f + diffuse_clr * diffuse * 0.7f + specular_clr * specular * 0.3f);
+	float3 specular_clr = 1;
+	float3 color = float3(0.1f + diffuse_clr * diffuse * 0.6f + specular_clr * specular * 0.3f);
 
 	oClr = StoreDiffuseSpecular(color, 0);
 }

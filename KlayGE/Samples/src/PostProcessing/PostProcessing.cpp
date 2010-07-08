@@ -211,6 +211,7 @@ void PostProcessingApp::InitObjects()
 	input_handler->connect(boost::bind(&PostProcessingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
+	copy_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
@@ -222,6 +223,7 @@ void PostProcessingApp::InitObjects()
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");
+	id_copy_ = dialog_->IDFromName("CopyPP");
 	id_ascii_arts_ = dialog_->IDFromName("AsciiArtsPP");
 	id_cartoon_ = dialog_->IDFromName("CartoonPP");
 	id_tiling_ = dialog_->IDFromName("TilingPP");
@@ -230,6 +232,7 @@ void PostProcessingApp::InitObjects()
 	id_old_fashion_ = dialog_->IDFromName("OldFashionPP");
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::FPSCameraHandler, this, _1));
+	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CopyHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::AsciiArtsHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::CartoonHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::TilingHandler, this, _1));
@@ -249,6 +252,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
 	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
+
+	copy_->InputPin(0, color_tex_);
 
 	ascii_arts_->InputPin(0, color_tex_);
 
@@ -285,6 +290,14 @@ void PostProcessingApp::FPSCameraHandler(UICheckBox const & sender)
 	else
 	{
 		fpcController_.DetachCamera();
+	}
+}
+
+void PostProcessingApp::CopyHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = copy_;
 	}
 }
 

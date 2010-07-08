@@ -21,6 +21,7 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
+	void CopyHandler(KlayGE::UIRadioButton const & sender);
 	void AsciiArtsHandler(KlayGE::UIRadioButton const & sender);
 	void CartoonHandler(KlayGE::UIRadioButton const & sender);
 	void TilingHandler(KlayGE::UIRadioButton const & sender);
@@ -38,6 +39,7 @@ private:
 	KlayGE::TexturePtr normal_depth_tex_;
 	KlayGE::TexturePtr color_tex_;
 	KlayGE::PostProcessPtr active_pp_;
+	KlayGE::PostProcessPtr copy_;
 	KlayGE::PostProcessPtr ascii_arts_;
 	KlayGE::PostProcessPtr cartoon_;
 	KlayGE::PostProcessPtr tiling_;
@@ -47,6 +49,7 @@ private:
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_fps_camera_;
+	int id_copy_;
 	int id_ascii_arts_;
 	int id_cartoon_;
 	int id_tiling_;

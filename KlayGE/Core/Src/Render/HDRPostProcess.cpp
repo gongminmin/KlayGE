@@ -236,9 +236,9 @@ namespace KlayGE
 		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
 		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
 		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
-		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
-		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
-		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 2.0f);
+		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
 		glow_merger_ = LoadPostProcess(ResLoader::Instance().Load("GlowMerger.ppml"), "glow_merger");
 
@@ -331,12 +331,12 @@ namespace KlayGE
 		}
 		for (size_t i = 1; i < 3; ++ i)
 		{
-			downsample_texs[i] = rf.MakeTexture2D(width / (i * 4), height / (i * 4), 1, 1, EF_ABGR16F, 1, 0,
+			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, EF_ABGR16F, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		for (size_t i = 0; i < 3; ++ i)
 		{
-			glow_texs[i] = rf.MakeTexture2D(width / ((i + 1) * 2), height / ((i + 1) * 2), 1, 1, EF_ABGR16F, 1, 0,
+			glow_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, EF_ABGR16F, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		
