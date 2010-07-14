@@ -13,14 +13,19 @@
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
 	<parameter type="float" name="patch_length"/>
 
+	<parameter type="float" name="stretch"/>
+	<parameter type="float" name="base_level"/>
+
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4" name="corners" array_size="4"/>
+		<parameter type="float4x4" name="inv_virtual_view"/>
+		<parameter type="float" name="offset_y"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="displacement_tex"/>
 	<parameter type="texture2D" name="gradient_tex"/>
+	<parameter type="texture2D" name="refraction_tex"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
@@ -30,6 +35,11 @@
 	</parameter>
 	<parameter type="sampler" name="linear_clamp_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="point_clamp_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
@@ -51,29 +61,35 @@ void OceanVS(float2 pos : POSITION,
 					out float4 pos_ss : TEXCOORD2,
 					out float4 oPos : SV_Position)
 {
-	float4 pos_os = lerp(lerp(corners[0], corners[1], pos.x), lerp(corners[2], corners[3], pos.x), pos.y);
-	pos_os /= pos_os.w;
+	float lacunarity = 1.93485736f;
+	float gain = 1.0f / 1.93485736f;
+
+	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y - 10.0f, 1);
+	float4 pos_os = mul(pos_es, inv_virtual_view);
+
+	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
+	float fog_scale = saturate(length(eye_dir_fog.xyz) / 1500.0f);
+	float height_scale = 1 - fog_scale;
 	
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2);
 	float3 disp = displacement_tex.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
-	
+
 	pos_os.xz += disp.xz;
 	
-	float lacunarity = 1.93485736f;
-	float gain = 1.0f / 1.93485736f;
-	float noise_height = fBm(tex_coord, 3, lacunarity, gain) * 10;
+	float noise_height = fBm(tex_coord, 3, lacunarity, gain) * stretch;
 	
-	pos_os.y += lerp(noise_height, disp.y, BLEND_FACTOR);
+	pos_os.y += lerp(noise_height, disp.y, BLEND_FACTOR) * height_scale;
 	
 	float d = 1.0f / 64;
 	float fx = fBm(tex_coord + float2(d, 0), 3, lacunarity, gain);
 	float fy = fBm(tex_coord + float2(0, d), 3, lacunarity, gain);
-	float2 noise_grad = float2(fx, fy) * 10 - noise_height;
+	float2 noise_grad = float2(fx, fy) * stretch - noise_height;
+
+	pos_os.y += base_level;
 	
 	oPos = mul(pos_os, mvp);
 	
-	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
-	eye_dir_fog.w = saturate(0.005f * length(eye_dir_fog.xyz));
+	eye_dir_fog.w = fog_scale;
 	
 	tex_coord_noise_grad = float4(tex_coord, noise_grad);
 	pos_ss = oPos;
@@ -93,22 +109,43 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float sun_spot = pow(cos_spec, sun_shineness);
 	float3 specular = sun_color * sun_spot;
 
-	pos_ss /= pos_ss.w;
+	pos_ss.xyz /= pos_ss.w;
 	float2 bump = normal.xz / pos_ss.z;
 	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, pos_ss.xy / 2 + 0.5f + bump * 0.05f).xyz;
-	
+
+	float2 tc = float2(pos_ss.x, -pos_ss.y) / 2 + 0.5f;
+	float no_water_depth = refraction_tex.Sample(point_clamp_sampler, tc).w;
+	float3 refraction;
+	float offseted_depth = refraction_tex.Sample(point_clamp_sampler, tc + bump * 0.2f).w;
+	if (offseted_depth < no_water_depth)
+	{
+		refraction = refraction_tex.Sample(linear_clamp_sampler, tc).rgb;
+	}
+	else
+	{
+		refraction.r = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.10f).r;
+		refraction.g = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.15f).g;
+		refraction.b = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.20f).b;
+	}
+
+	float water_depth = saturate((no_water_depth - pos_ss.w) * 0.1f);
+
 	float fresnel = schlick_fresnel(reflect_vec, normal, 0.0977f);
-	float3 water_color = lerp(waterbody_color, reflection, fresnel);
+	float3 water_color = lerp(lerp(waterbody_color, refraction, saturate(10 / pos_ss.w)), reflection, fresnel);
 
 	float3 diffuse = water_color * (directional_lighting(sun_dir, normal) + 0.1f);
 
-	return float4(lerp(diffuse + specular, fog_color, eye_dir_fog.w), 1);
+	return float4(lerp(diffuse + specular, fog_color, eye_dir_fog.w), water_depth);
 }
 		]]>
 	</shader>
 	<technique name="Ocean">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
 			
 			<state name="vertex_shader" value="OceanVS()"/>
 			<state name="pixel_shader" value="OceanPS()"/>

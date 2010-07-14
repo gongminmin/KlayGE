@@ -222,6 +222,7 @@
       </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Outputs)</Outputs>
     </CustomBuild>
+    <None Include="..\..\media\Ocean\InfTerrain.fxml" />
     <None Include="..\..\media\Ocean\OceanSimulator.fxml" />
     <None Include="..\..\media\Ocean\Sun.fxml" />
     <None Include="..\..\media\Ocean\Ocean.uiml" />

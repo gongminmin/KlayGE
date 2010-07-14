@@ -30,14 +30,20 @@ private:
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
+	KlayGE::SceneObjectPtr terrain_;
 	KlayGE::SceneObjectPtr ocean_;
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr sun_flare_;
+	KlayGE::PostProcessPtr copy_pp_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	KlayGE::TexturePtr refraction_tex_;
+	KlayGE::FrameBufferPtr refraction_fb_;
 	KlayGE::TexturePtr reflection_tex_;
+	KlayGE::TexturePtr reflection_blur_tex_;
 	KlayGE::FrameBufferPtr reflection_fb_;
+	KlayGE::PostProcessPtr blur_y_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;

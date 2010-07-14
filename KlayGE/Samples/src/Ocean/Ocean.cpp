@@ -16,6 +16,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/PostProcess.hpp>
 #include <KlayGe/Timer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -143,16 +144,9 @@ namespace
 			float4x4 const & proj = camera.ProjMatrix();
 
 			float3 sun_vec = MathLib::normalize(dir_);
-			float3 view_vec = camera.ViewVec();
+			float3 const & view_vec = camera.ViewVec();
 
 			float angle = MathLib::dot(view_vec, sun_vec);
-
-			// calculate flare pos
-
-			float2 center_pos(0, 0);
-			float3 sun_vec_es = MathLib::transform_normal(dir_, view);
-			float3 sun_pos_es = camera.FarPlane() / sun_vec_es.z() * sun_vec_es;
-			float2 axis_vec = MathLib::transform_coord(sun_pos_es, proj);
 
 			// update flare
 			if (angle > FLARE_RENDERANGLE)
@@ -173,14 +167,20 @@ namespace
 					alpha_fac = 1 - angle_amount;
 				}
 
+				// calculate flare pos
+				float2 center_pos(0, 0);
+				float3 sun_vec_es = MathLib::transform_normal(dir_, view);
+				float3 sun_pos_es = camera.FarPlane() / sun_vec_es.z() * sun_vec_es;
+				float2 axis_vec = MathLib::transform_coord(sun_pos_es, proj);
+
 				// update flare pos and scale matrix by pos and angle amount
 				std::vector<float3> flare_param(SUN_FLARENUM);
-				for (int iFlare = 0; iFlare < SUN_FLARENUM; ++ iFlare)
+				for (int flare = 0; flare < SUN_FLARENUM; ++ flare)
 				{
-					float2 flare_pos = center_pos + (iFlare - SUN_FLARENUM * 0.2f) / ((SUN_FLARENUM - 1.0f) * 1.2f) * axis_vec;
-					float scale_fac = FLARE_SCALEAMOUNT * inv_angle_amount * ((SUN_FLARENUM - iFlare) / (SUN_FLARENUM - 1.0f));
+					float2 flare_pos = center_pos + (flare - SUN_FLARENUM * 0.2f) / ((SUN_FLARENUM - 1.0f) * 1.5f) * axis_vec;
+					float scale_fac = FLARE_SCALEAMOUNT * inv_angle_amount * ((SUN_FLARENUM - flare) / (SUN_FLARENUM - 1.0f));
 
-					flare_param[iFlare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
+					flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
 				}
 
 				checked_pointer_cast<RenderSun>(renderable_)->FlareParam(flare_param, alpha_fac);
@@ -195,13 +195,13 @@ namespace
 		float3 dir_;
 	};
 
-	class RenderOcean : public RenderableHelper
+	class RenderInfFlatObject : public RenderableHelper
 	{
 	public:
-		RenderOcean()
-			: RenderableHelper(L"Ocean")
+		RenderInfFlatObject(std::wstring const & name)
+			: RenderableHelper(name)
 		{
-			int const NX = 512;
+			int const NX = 256;
 			int const NY = 256;
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -209,19 +209,52 @@ namespace
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+
+			float angle = atan(tan(camera.FOV() / 2) * camera.Aspect());
+			x_dir_ = float2(-sin(angle), cos(angle));
+			y_dir_ = float2(-x_dir_.x(), x_dir_.y());
+
+			float2 addr(0, 0);
+			float2 increment(1, 1);
 			std::vector<float2> vertices;
-			for (int y = 0; y < NY; ++ y)
+			for (int y = 0; y < NY - 1; ++ y, addr.y() += increment.y())
 			{
-				for (int x = 0; x < NX; ++ x)
+				increment.x() = 1;
+				addr.x() = 0;
+				for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
 				{
-					vertices.push_back(float2(static_cast<float>(x) / (NX - 1),
-						static_cast<float>(y) / (NY - 1)));
+					float2 p(addr.x() * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
+					vertices.push_back(p);
+					increment.x() *= 1.012f;
+				}
+				{
+					float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
+					vertices.push_back(p);
+				}
+
+				increment.y() *= 1.012f;
+			}
+			{
+				increment.x() = 1;
+				addr.x() = 0;
+				for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
+				{
+					float2 p(addr.x() * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
+					vertices.push_back(p);
+
+					increment.x() *= 1.012f;
+				}
+				{
+					float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
+					vertices.push_back(p);
 				}
 			}
 
 			ElementInitData init_data;
 			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
+			init_data.slice_pitch = init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
@@ -242,12 +275,155 @@ namespace
 			}
 
 			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
+			init_data.slice_pitch = init_data.row_pitch = indices.size() * sizeof(indices[0]);
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R32UI);
+		}
 
-			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
+		virtual ~RenderInfFlatObject()
+		{
+		}
+
+		float2 const & XDir() const
+		{
+			return x_dir_;
+		}
+
+		float2 const & YDir() const
+		{
+			return y_dir_;
+		}
+
+		void SetStretch(float stretch)
+		{
+			*(technique_->Effect().ParameterByName("stretch")) = stretch;
+		}
+
+		void SetBaseLevel(float base_level)
+		{
+			*(technique_->Effect().ParameterByName("base_level")) = base_level;
+		}
+
+		void OffsetY(float y)
+		{
+			*(technique_->Effect().ParameterByName("offset_y")) = y;
+		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+
+			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
+			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
+			{
+				look_at_vec = float3(0, 0, 1);
+			}
+			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
+			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
+
+			float4x4 vp = view * proj;
+			*(technique_->Effect().ParameterByName("mvp")) = vp;
+			*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+		}
+
+	protected:
+		float2 x_dir_, y_dir_;
+	};
+
+	class InfFlatObject : public SceneObjectHelper
+	{
+	public:
+		InfFlatObject()
+			: SceneObjectHelper(SOA_Moveable)
+		{
+		}
+
+		virtual ~InfFlatObject()
+		{
+		}
+
+		void Update()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+
+			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
+			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
+			{
+				look_at_vec = float3(0, 0, 1);
+			}
+			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
+			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+			float4x4 proj_to_virtual_view = MathLib::inverse(view * proj) * virtual_view;
+
+			float2 const & x_dir_2d = checked_pointer_cast<RenderInfFlatObject>(renderable_)->XDir();
+			float2 const & y_dir_2d = checked_pointer_cast<RenderInfFlatObject>(renderable_)->YDir();
+			float3 x_dir(x_dir_2d.x(), -camera.EyePos().y(), x_dir_2d.y());
+			float3 y_dir(y_dir_2d.x(), -camera.EyePos().y(), y_dir_2d.y());
+
+			float3 const frustum[8] = 
+			{
+				MathLib::transform_coord(float3(-1, +1, 1), proj_to_virtual_view),
+				MathLib::transform_coord(float3(+1, +1, 1), proj_to_virtual_view),
+				MathLib::transform_coord(float3(-1, -1, 1), proj_to_virtual_view),
+				MathLib::transform_coord(float3(+1, -1, 1), proj_to_virtual_view),
+				MathLib::transform_coord(float3(-1, +1, 0), proj_to_virtual_view),
+				MathLib::transform_coord(float3(+1, +1, 0), proj_to_virtual_view),
+				MathLib::transform_coord(float3(-1, -1, 0), proj_to_virtual_view),
+				MathLib::transform_coord(float3(+1, -1, 0), proj_to_virtual_view)
+			};
+
+			int const view_cube[24] =
+			{
+				0, 1, 1, 3, 3, 2, 2, 0,
+				4, 5, 5, 7, 7, 6, 6, 4,
+				0, 4, 1, 5, 3, 7, 2, 6
+			};
+
+			Plane const lower_bound = MathLib::from_point_normal(float3(0, base_level_ - camera.EyePos().y() - strength_, 0), float3(0, 1, 0));
+
+			bool intersect = false;
+			float sy = 0;
+			for (int i = 0; i < 12; ++ i)
+			{
+				int src = view_cube[i * 2 + 0];
+				int dst = view_cube[i * 2 + 1];
+				if (MathLib::dot_coord(lower_bound, frustum[src]) / MathLib::dot_coord(lower_bound, frustum[dst]) < 0)
+				{
+					float t = MathLib::intersect_ray(lower_bound, frustum[src], frustum[dst] - frustum[src]);
+					float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
+					sy = std::max(sy, std::max((x_dir.z() * p.x() - x_dir.x() * p.z()) / x_dir.x(),
+						(y_dir.z() * p.x() - y_dir.x() * p.z()) / y_dir.x()));
+					intersect = true;
+				}
+			}
+			checked_pointer_cast<RenderInfFlatObject>(renderable_)->OffsetY(sy);
+
+			this->Visible(intersect);
+		}
+
+	protected:
+		float base_level_;
+		float strength_;
+	};
+
+	class RenderTerrain : public RenderInfFlatObject
+	{
+	public:
+		RenderTerrain()
+			: RenderInfFlatObject(L"Terrain")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("InfTerrain.fxml")->TechniqueByName("Terrain");
 		}
 
 		void SunDirection(float3 const & dir)
@@ -255,14 +431,56 @@ namespace
 			*(technique_->Effect().ParameterByName("sun_dir")) = -dir;
 		}
 
-		void SetBox(Box const & box)
+		void ReflectionPass(bool ref)
 		{
-			box_ = box;
+			if (ref)
+			{
+				technique_ = technique_->Effect().TechniqueByName("TerrainReflection");
+			}
+			else
+			{
+				technique_ = technique_->Effect().TechniqueByName("Terrain");
+			}
+		}
+	};
+
+	class TerrainObject : public InfFlatObject
+	{
+	public:
+		TerrainObject()
+		{
+			base_level_ = 0;
+			strength_ = 50;
+
+			renderable_.reset(new RenderTerrain);
+			checked_pointer_cast<RenderTerrain>(renderable_)->SetStretch(strength_);
+			checked_pointer_cast<RenderTerrain>(renderable_)->SetBaseLevel(base_level_);
 		}
 
-		void SetCorners(std::vector<float4> const & corners)
+		void SunDirection(float3 const & dir)
 		{
-			*(technique_->Effect().ParameterByName("corners")) = corners;
+			checked_pointer_cast<RenderTerrain>(renderable_)->SunDirection(dir);
+		}
+
+		void ReflectionPass(bool ref)
+		{
+			checked_pointer_cast<RenderTerrain>(renderable_)->ReflectionPass(ref);
+		}
+	};
+
+	class RenderOcean : public RenderInfFlatObject
+	{
+	public:
+		RenderOcean()
+			: RenderInfFlatObject(L"Ocean")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
+		}
+
+		void SunDirection(float3 const & dir)
+		{
+			*(technique_->Effect().ParameterByName("sun_dir")) = -dir;
 		}
 
 		void PatchLength(float patch_length)
@@ -280,61 +498,51 @@ namespace
 			*(technique_->Effect().ParameterByName("gradient_tex")) = tex;
 		}
 
-		void SkyboxTex(TexturePtr const & tex)
+		void RefractionTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("skybox_tex")) = tex;
+			*(technique_->Effect().ParameterByName("refraction_tex")) = tex;
 		}
 
 		void ReflectionTex(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("reflection_tex")) = tex;
 		}
-
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 vp = view * proj;
-			*(technique_->Effect().ParameterByName("mvp")) = vp;
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
-		}
 	};
 
-	class OceanObject : public SceneObjectHelper
+	class OceanObject : public InfFlatObject
 	{
 	public:
 		OceanObject()
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
-				strength_(20)
 		{
-			renderable_.reset(new RenderOcean);
+			base_level_ = 0;
+			strength_ = 10;
 
-			float y0 = 0;
-			ocean_plane_ = MathLib::from_point_normal(float3(0, y0, 0), float3(0, 1, 0));
-			reflect_mat_ = MathLib::reflect(ocean_plane_);
+			renderable_.reset(new RenderOcean);
+			checked_pointer_cast<RenderOcean>(renderable_)->SetStretch(strength_);
+			checked_pointer_cast<RenderOcean>(renderable_)->SetBaseLevel(base_level_);
+
+			Plane ocean_plane;
+			ocean_plane = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
+			reflect_mat_ = MathLib::reflect(ocean_plane);
 
 			// The size of displacement map. In this sample, it's fixed to 512.
 			ocean_param_.dmap_dim			= 512;
 			// The side length (world space) of square sized patch
-			ocean_param_.patch_length		= 20;
+			ocean_param_.patch_length		= 42;
 			// Adjust this parameter to control the simulation speed
 			ocean_param_.time_scale			= 0.8f;
 			// A scale to control the amplitude. Not the world space height
-			ocean_param_.wave_amplitude		= 0.0035f;
+			ocean_param_.wave_amplitude		= 0.005f;
 			// 2D wind direction. No need to be normalized
 			// The bigger the wind speed, the larger scale of wave crest.
 			// But the wave scale can be no larger than patch_length
 			ocean_param_.wind_speed			= float2(0.8f, 0.6f) * 6;
 			// Damp out the components opposite to wind direction.
 			// The smaller the value, the higher wind dependency
-			ocean_param_.wind_dependency	= 0.07f;
+			ocean_param_.wind_dependency	= 0.1f;
 			// Control the scale of horizontal movement. Higher value creates
 			// pointy crests.
-			ocean_param_.choppy_scale		= 1.3f;
+			ocean_param_.choppy_scale		= 0.7f;
 
 			dirty_ = true;
 
@@ -358,151 +566,17 @@ namespace
 				dirty_ = false;
 			}
 
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
+			InfFlatObject::Update();
 
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 vp = view * proj;
-			float4x4 inv_vp = MathLib::inverse(vp);
-			float4x4 inv_view = MathLib::inverse(view);
-
-			Plane upper_bound = ocean_plane_;
-			upper_bound.d() += strength_;
-			Plane lower_bound = ocean_plane_;
-			lower_bound.d() -= strength_;
-
-			float3 frustum[8];
-			frustum[0] = MathLib::transform_coord(float3(-1, +1, 1), inv_vp);
-			frustum[1] = MathLib::transform_coord(float3(+1, +1, 1), inv_vp);
-			frustum[2] = MathLib::transform_coord(float3(-1, -1, 1), inv_vp);
-			frustum[3] = MathLib::transform_coord(float3(+1, -1, 1), inv_vp);
-			frustum[4] = MathLib::transform_coord(float3(-1, +1, 0), inv_vp);
-			frustum[5] = MathLib::transform_coord(float3(+1, +1, 0), inv_vp);
-			frustum[6] = MathLib::transform_coord(float3(-1, -1, 0), inv_vp);
-			frustum[7] = MathLib::transform_coord(float3(+1, -1, 0), inv_vp);
-
-			int const view_cube[24] =
-			{
-				0, 1, 1, 3, 3, 2, 2, 0,
-				4, 5, 5, 7, 7, 6, 6, 4,
-				0, 4, 1, 5, 3, 7, 2, 6
-			};
-
-			float3 min_p(1e10f, 1e10f, 1e10f), max_p(-1e10f, -1e10f, -1e10f);
-			std::vector<float3> intersect;
-			for (int i = 0; i < 12; ++ i)
-			{
-				int src = view_cube[i * 2 + 0];
-				int dst = view_cube[i * 2 + 1];
-				if (MathLib::dot_coord(upper_bound, frustum[src]) / MathLib::dot_coord(upper_bound, frustum[dst]) < 0)
-				{
-					float t = MathLib::intersect_ray(upper_bound, frustum[src], frustum[dst] - frustum[src]);
-					float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
-					min_p = MathLib::minimize(min_p, p);
-					max_p = MathLib::maximize(max_p, p);
-					intersect.push_back(p);
-				}
-				if (MathLib::dot_coord(lower_bound, frustum[src]) / MathLib::dot_coord(lower_bound, frustum[dst]) < 0)
-				{
-					float t = MathLib::intersect_ray(lower_bound, frustum[src], frustum[dst] - frustum[src]);
-					float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
-					min_p = MathLib::minimize(min_p, p);
-					max_p = MathLib::maximize(max_p, p);
-					intersect.push_back(p);
-				}
-			}
-			for (int i = 0; i < 8; ++ i)
-			{
-				if (MathLib::dot_coord(upper_bound, frustum[i]) / MathLib::dot_coord(lower_bound, frustum[i]) < 0)
-				{
-					intersect.push_back(frustum[i]);
-				}
-			}
-
-			if (!intersect.empty())
+			if (this->Visible())
 			{
 				ocean_simulator_->Update();
-
-				float3 eye = camera.EyePos();
-				float3 forward = camera.ViewVec();
-				float3 virtual_eye = eye;
-
-				float height_in_plane = MathLib::dot_normal(lower_bound, eye);
-				bool underwater = (height_in_plane < ocean_plane_.d());
-				if (height_in_plane < strength_)
-				{
-					virtual_eye += lower_bound.Normal() * (strength_ - height_in_plane * (underwater ? 2 : 1));
-				}
-
-				// aim the projector at the point where the camera view-vector intersects the plane
-				// if the camera is aimed away from the plane, mirror it's view-vector against the plane
-				float3 aim_point;
-				if ((MathLib::dot_normal(ocean_plane_, forward) < 0) ^ (MathLib::dot_coord(ocean_plane_, eye) < 0))
-				{
-					float t = MathLib::intersect_ray(ocean_plane_, eye, forward);
-					aim_point = eye + t * forward;
-				}
-				else
-				{
-					float3 flipped = forward - 2 * ocean_plane_.Normal() * MathLib::dot(forward, ocean_plane_.Normal());
-					float t = MathLib::intersect_ray(ocean_plane_, eye, flipped);
-					aim_point = eye + t * flipped;
-				}
-
-				// force the point the camera is looking at in a plane, and have the projector look at it
-				// works well against horizon, even when camera is looking upwards
-				// doesn't work straight down/up
-				float af = abs(MathLib::dot_normal(ocean_plane_, forward));
-				float3 aim_point2 = eye + 10 * forward;
-				aim_point2 = aim_point2 - ocean_plane_.Normal() * MathLib::dot(aim_point2, ocean_plane_.Normal());
-
-				// fade between aim_point & aim_point2 depending on view angle
-
-				aim_point = MathLib::lerp(aim_point2, aim_point, af);
-
-				float3 up = MathLib::transform_normal(float3(0, 1, 0), inv_view);
-
-				float4x4 virtual_view = MathLib::look_at_lh(virtual_eye, aim_point, up);
-				float4x4 virtual_vp = virtual_view * proj;
-				float4x4 inv_virtual_vp = MathLib::inverse(virtual_vp);
-
-				Box box(min_p, max_p);
-				box.Max().y() += strength_;
-
-				float x_min = 1e10f, y_min = 1e10f, x_max = -1e10f, y_max = -1e10f;
-				for (size_t i = 0; i < intersect.size(); ++ i)
-				{
-					intersect[i] -= ocean_plane_.Normal() * MathLib::dot_normal(ocean_plane_, intersect[i]);
-					float3 pt = MathLib::transform_coord(intersect[i], virtual_vp);
-					x_min = std::min(x_min, pt.x());
-					x_max = std::max(x_max, pt.x());
-					y_min = std::min(y_min, pt.y());
-					y_max = std::max(y_max, pt.y());
-				}
-
-				std::vector<float4> corners(4);
-				corners[0] = float4(x_min, y_max, 0, 1);
-				corners[1] = float4(x_max, y_max, 0, 1);
-				corners[2] = float4(x_min, y_min, 0, 1);
-				corners[3] = float4(x_max, y_min, 0, 1);
-				for (int i = 0; i < 4; ++ i)
-				{
-					float4 origin = MathLib::transform(float4(corners[i].x(), corners[i].y(), -1, 1), inv_virtual_vp);
-					float4 direction = MathLib::transform(float4(0, 0, 2, 0), inv_virtual_vp);
-
-					corners[i] = origin + direction * (ocean_plane_.d() - origin.y()) / direction.y();
-				}
-
-				checked_pointer_cast<RenderOcean>(renderable_)->SetBox(box);
-				checked_pointer_cast<RenderOcean>(renderable_)->SetCorners(corners);
 			}
 		}
 
-		void SkyboxTex(TexturePtr const & tex)
+		void RefractionTex(TexturePtr const & tex)
 		{
-			checked_pointer_cast<RenderOcean>(renderable_)->SkyboxTex(tex);
+			checked_pointer_cast<RenderOcean>(renderable_)->RefractionTex(tex);
 		}
 
 		void ReflectionTex(TexturePtr const & tex)
@@ -603,8 +677,6 @@ namespace
 		OceanParameter ocean_param_;
 		bool dirty_;
 
-		float strength_;
-		Plane ocean_plane_;
 		float4x4 reflect_mat_;
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
@@ -657,21 +729,23 @@ OceanApp::OceanApp(std::string const & name, RenderSettings const & settings)
 
 void OceanApp::InitObjects()
 {
+	this->LookAt(float3(0, 20, 0), float3(0, 19.8f, 1));
+	this->Proj(0.01f, 3000);
+
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	TexturePtr skybox_tex = LoadTexture("Langholmen.dds", EAH_GPU_Read)();
 
+	terrain_.reset(new TerrainObject);
+	terrain_->AddToSceneManager();
 	ocean_.reset(new OceanObject);
-	checked_pointer_cast<OceanObject>(ocean_)->SkyboxTex(skybox_tex);
 	ocean_->AddToSceneManager();
 	sun_flare_.reset(new SunObject);
 	sun_flare_->AddToSceneManager();
 
+	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<SunObject>(sun_flare_)->Direction());
 	checked_pointer_cast<OceanObject>(ocean_)->SunDirection(checked_pointer_cast<SunObject>(sun_flare_)->Direction());
-
-	this->LookAt(float3(0, 20, 0), float3(0, 19.8f, 1));
-	this->Proj(0.01f, 3000);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -690,10 +764,17 @@ void OceanApp::InitObjects()
 	input_handler->connect(boost::bind(&OceanApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+
+	refraction_fb_ = rf.MakeFrameBuffer();
+	refraction_fb_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
+
 	Camera& scene_camera = this->ActiveCamera();
 	reflection_fb_ = rf.MakeFrameBuffer();
 	reflection_fb_->GetViewport().camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 			scene_camera.NearPlane(), scene_camera.FarPlane());
+
+	blur_y_ = MakeSharedPtr<BlurYPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -747,15 +828,26 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	reflection_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 0));
+	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.RenderEngineInstance().CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
+	copy_pp_->InputPin(0, refraction_tex_);
+
+	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
-	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
+	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
 	reflection_fb_->GetViewport().left = 0;
 	reflection_fb_->GetViewport().top = 0;
-	reflection_fb_->GetViewport().width = width;
-	reflection_fb_->GetViewport().height = height;
+	reflection_fb_->GetViewport().width = width / 2;
+	reflection_fb_->GetViewport().height = height / 2;
 
-	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_tex_);
+	blur_y_->InputPin(0, reflection_tex_);
+	blur_y_->OutputPin(0, reflection_blur_tex_);
+
+	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
+	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -896,11 +988,23 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
+		re.BindFrameBuffer(refraction_fb_);
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+		checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(false);
+		terrain_->Visible(true);
+		sky_box_->Visible(true);
+		ocean_->Visible(false);
+		return App3DFramework::URV_Need_Flush;
+
+	case 1:
 		{
 			Camera& scene_camera = this->ActiveCamera();
 
 			re.BindFrameBuffer(reflection_fb_);
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+			checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(true);
+			terrain_->Visible(true);
+			sky_box_->Visible(true);
 			ocean_->Visible(false);
 
 			float3 reflect_eye, reflect_at, reflect_up;
@@ -912,8 +1016,11 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
+		blur_y_->Apply();
 		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+		copy_pp_->Apply();
+		terrain_->Visible(false);
+		sky_box_->Visible(false);
 		ocean_->Visible(true);
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

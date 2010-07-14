@@ -84,12 +84,6 @@
     <None Include="..\..\media\PostProcessing\OldFashion.ppml">
       <Filter>Post Processors</Filter>
     </None>
-    <None Include="..\..\media\PostProcessing\Copy.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\PostProcessing\Copy.ppml">
-      <Filter>Post Processors</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\media\Common\KlayGESample.rc">

@@ -209,7 +209,6 @@
     <None Include="..\..\media\ParticleEditor\ParticleEditor.fxml" />
     <None Include="..\..\media\ParticleEditor\ParticleEditor.uiml" />
     <None Include="..\..\..\klayge_logo.ico" />
-    <None Include="..\..\media\ParticleEditor\Copy.ppml" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\media\Common\KlayGESample.rc" />

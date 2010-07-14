@@ -114,9 +114,12 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		// Compute shaders
-		plan->fft_effect = rf.LoadEffect("FFT.fxml");
-		plan->radix008a_tech = plan->fft_effect->TechniqueByName("Radix008A");
-		plan->radix008a_tech2 = plan->fft_effect->TechniqueByName("Radix008A2");
+		if (!plan->fft_effect)
+		{
+			plan->fft_effect = rf.LoadEffect("FFT.fxml");
+			plan->radix008a_tech = plan->fft_effect->TechniqueByName("Radix008A");
+			plan->radix008a_tech2 = plan->fft_effect->TechniqueByName("Radix008A2");
+		}
 
 		// Temp buffer
 		plan->tmp_buffer = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, NULL, EF_GR32F);
@@ -126,7 +129,5 @@ namespace KlayGE
 	void fft_destroy_plan(CSFFT_Plan* plan)
 	{
 		plan->tmp_buffer.reset();
-		plan->radix008a_tech.reset();
-		plan->radix008a_tech2.reset();
 	}
 }

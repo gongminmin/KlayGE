@@ -736,6 +736,12 @@
     <None Include="..\..\media\RenderFX\GlowMerger.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
+    <None Include="..\..\media\RenderFX\Copy.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\Copy.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">
