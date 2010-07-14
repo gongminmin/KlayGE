@@ -14,7 +14,7 @@
 	<parameter type="int" name="has_skinned"/>
 
 	<parameter type="sampler" name="linear_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="filtering" value="min_mag_mip_linear"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>

@@ -631,7 +631,7 @@ namespace KlayGE
 								for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 								{
 									XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord");
-									for (uint32_t usage = 0; tex_coord_node && (usage < ve.usage_index); tex_coord_node = tex_coord_node->NextSibling("tex_coord"));
+									for (uint32_t usage = 0; tex_coord_node && (usage < ve.usage_index); ++ usage, tex_coord_node = tex_coord_node->NextSibling("tex_coord"));
 
 									uint32_t num_components = NumComponents(ve.format);
 									if (num_components >= 1)

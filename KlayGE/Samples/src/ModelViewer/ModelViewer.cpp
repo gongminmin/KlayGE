@@ -291,7 +291,7 @@ void ModelViewerApp::InputHandler(InputEngine const & /*sender*/, InputAction co
 	switch (action.first)
 	{
 	case Exit:
-		this->Quit();
+		//this->Quit();
 		break;
 	}
 }
