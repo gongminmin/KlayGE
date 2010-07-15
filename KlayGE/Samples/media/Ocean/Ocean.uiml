@@ -12,7 +12,7 @@
 		<control type="slider" id="TimeScaleSlider" x="20" y="160" width="180" height="24" min="0" max="50" value="8" is_default="0"/>
 
 		<control type="static" id="WaveAmplitudeStatic" caption="Wave amplitude: " x="20" y="200" width="120" height="24" is_default="0"/>
-		<control type="slider" id="WaveAmplitudeSlider" x="20" y="220" width="180" height="24" min="0" max="200" value="50" is_default="0"/>
+		<control type="slider" id="WaveAmplitudeSlider" x="20" y="220" width="180" height="24" min="0" max="200" value="30" is_default="0"/>
 
 		<control type="static" id="WindSpeedXStatic" caption="Wind speed X: " x="20" y="260" width="120" height="24" is_default="0"/>
 		<control type="slider" id="WindSpeedXSlider" x="20" y="280" width="180" height="24" min="1" max="200" value="96" is_default="0"/>
@@ -23,7 +23,7 @@
 		<control type="slider" id="WindDependencySlider" x="20" y="400" width="180" height="24" min="0" max="30" value="10" is_default="0"/>
 
 		<control type="static" id="ChoppyScaleStatic" caption="Choppy scale: " x="20" y="440" width="120" height="24" is_default="0"/>
-		<control type="slider" id="ChoppyScaleSlider" x="20" y="460" width="180" height="24" min="0" max="30" value="7" is_default="0"/>
+		<control type="slider" id="ChoppyScaleSlider" x="20" y="460" width="180" height="24" min="0" max="30" value="11" is_default="0"/>
 
 		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="520" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

@@ -7,7 +7,7 @@
 	<macro name="BLEND_FACTOR" value="0.6"/>
 	
 	<parameter type="float3" name="sun_dir"/>
-	<parameter type="float" name="sun_shineness" value="200"/>
+	<parameter type="float" name="sun_shineness" value="20"/>
 	<parameter type="float3" name="sun_color" x="1.0" y="1.0" z="0.8"/>
 	<parameter type="float3" name="fog_color" x="0.807843" y="0.858824" z="0.839216"/>
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
@@ -70,26 +70,23 @@ void OceanVS(float2 pos : POSITION,
 	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir_fog.xyz) / 1500.0f);
 	float height_scale = 1 - fog_scale;
+	eye_dir_fog.w = fog_scale;
 	
-	float2 tex_coord = pos_os.xz / (patch_length * 3.2);
+	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
 	float3 disp = displacement_tex.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
 
-	pos_os.xz += disp.xz;
+	pos_os.xz += disp.xy;
 	
-	float noise_height = fBm(tex_coord, 3, lacunarity, gain) * stretch;
-	
-	pos_os.y += lerp(noise_height, disp.y, BLEND_FACTOR) * height_scale;
-	
+	float noise_height = fBm(tex_coord, 3, lacunarity, gain);
+
 	float d = 1.0f / 64;
 	float fx = fBm(tex_coord + float2(d, 0), 3, lacunarity, gain);
 	float fy = fBm(tex_coord + float2(0, d), 3, lacunarity, gain);
-	float2 noise_grad = float2(fx, fy) * stretch - noise_height;
+	float2 noise_grad = (float2(fx, fy) - noise_height) * stretch;
 
-	pos_os.y += base_level;
+	pos_os.y = base_level + lerp(noise_height * stretch, disp.z, BLEND_FACTOR) * height_scale;
 	
 	oPos = mul(pos_os, mvp);
-	
-	eye_dir_fog.w = fog_scale;
 	
 	tex_coord_noise_grad = float4(tex_coord, noise_grad);
 	pos_ss = oPos;
@@ -113,19 +110,19 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float2 bump = normal.xz / pos_ss.z;
 	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, pos_ss.xy / 2 + 0.5f + bump * 0.05f).xyz;
 
-	float2 tc = float2(pos_ss.x, -pos_ss.y) / 2 + 0.5f;
-	float no_water_depth = refraction_tex.Sample(point_clamp_sampler, tc).w;
+	float2 ss_tc = float2(pos_ss.x, -pos_ss.y) / 2 + 0.5f;
+	float no_water_depth = refraction_tex.Sample(point_clamp_sampler, ss_tc).w;
 	float3 refraction;
-	float offseted_depth = refraction_tex.Sample(point_clamp_sampler, tc + bump * 0.2f).w;
-	if (offseted_depth < no_water_depth)
+	float offseted_depth = refraction_tex.Sample(point_clamp_sampler, ss_tc + bump * 0.2f).w;
+	if (offseted_depth < pos_ss.w)
 	{
-		refraction = refraction_tex.Sample(linear_clamp_sampler, tc).rgb;
+		refraction = refraction_tex.Sample(linear_clamp_sampler, ss_tc).rgb;
 	}
 	else
 	{
-		refraction.r = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.10f).r;
-		refraction.g = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.15f).g;
-		refraction.b = refraction_tex.Sample(linear_clamp_sampler, tc + bump * 0.20f).b;
+		refraction.r = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.10f).r;
+		refraction.g = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.15f).g;
+		refraction.b = refraction_tex.Sample(linear_clamp_sampler, ss_tc + bump * 0.20f).b;
 	}
 
 	float water_depth = saturate((no_water_depth - pos_ss.w) * 0.1f);

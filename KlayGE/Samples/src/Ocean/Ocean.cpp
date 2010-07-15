@@ -449,7 +449,7 @@ namespace
 	public:
 		TerrainObject()
 		{
-			base_level_ = 0;
+			base_level_ = -10;
 			strength_ = 50;
 
 			renderable_.reset(new RenderTerrain);
@@ -532,7 +532,7 @@ namespace
 			// Adjust this parameter to control the simulation speed
 			ocean_param_.time_scale			= 0.8f;
 			// A scale to control the amplitude. Not the world space height
-			ocean_param_.wave_amplitude		= 0.005f;
+			ocean_param_.wave_amplitude		= 0.003f;
 			// 2D wind direction. No need to be normalized
 			// The bigger the wind speed, the larger scale of wave crest.
 			// But the wave scale can be no larger than patch_length
@@ -542,7 +542,7 @@ namespace
 			ocean_param_.wind_dependency	= 0.1f;
 			// Control the scale of horizontal movement. Higher value creates
 			// pointy crests.
-			ocean_param_.choppy_scale		= 0.7f;
+			ocean_param_.choppy_scale		= 1.1f;
 
 			dirty_ = true;
 
