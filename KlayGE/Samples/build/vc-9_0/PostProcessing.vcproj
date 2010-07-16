@@ -408,10 +408,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\PostProcessing\Copy.fxml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\PostProcessing\NightVisionPP.fxml"
 				>
 			</File>
@@ -451,10 +447,6 @@
 		<Filter
 			Name="Post Processors"
 			>
-			<File
-				RelativePath="..\..\media\PostProcessing\Copy.ppml"
-				>
-			</File>
 			<File
 				RelativePath="..\..\media\PostProcessing\OldFashion.ppml"
 				>

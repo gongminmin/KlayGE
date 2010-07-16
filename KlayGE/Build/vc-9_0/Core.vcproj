@@ -562,6 +562,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\Copy.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\DeferredShadingUtil.fxml"
 					>
 				</File>
@@ -637,6 +641,10 @@
 			<Filter
 				Name="Post Processors"
 				>
+				<File
+					RelativePath="..\..\media\PostProcessors\Copy.ppml"
+					>
+				</File>
 				<File
 					RelativePath="..\..\media\PostProcessors\Downsampler2x2.ppml"
 					>

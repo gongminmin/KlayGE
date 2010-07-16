@@ -392,14 +392,6 @@
 				>
 			</File>
 		</Filter>
-		<Filter
-			Name="Post Processors"
-			>
-			<File
-				RelativePath="..\..\media\ParticleEditor\Copy.ppml"
-				>
-			</File>
-		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
