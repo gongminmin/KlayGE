@@ -41,10 +41,11 @@ void TerrainVS(float2 pos : POSITION,
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
+	pos *= 1 + (eye_pos.y - 20) / 80;
 	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y, 1);
 	float4 pos_os = mul(pos_es, inv_virtual_view);
 
-	float fog_scale = saturate(length(pos_os.xyz - eye_pos) / 1500.0f);
+	float fog_scale = saturate(length(pos_os.xyz - eye_pos) / 1200.0f);
 	float height_scale = 1 - fog_scale;
 
 	pos_os.y = fBm(pos_os.xz / 128, 4, lacunarity, gain);
