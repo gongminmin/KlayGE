@@ -92,7 +92,7 @@ void TWIDDLE_8(inout float2 D[8], float phase)
 
 
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
-void Radix008A_CS(uint3 thread_id : SV_DispatchThreadID)
+void Radix008ACS(uint3 thread_id : SV_DispatchThreadID)
 {
     if (thread_id.x < thread_count)
 	{
@@ -127,7 +127,7 @@ void Radix008A_CS(uint3 thread_id : SV_DispatchThreadID)
 }
 
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
-void Radix008A_CS2(uint3 thread_id : SV_DispatchThreadID)
+void Radix008AFinalCS(uint3 thread_id : SV_DispatchThreadID)
 {
 	if (thread_id.x < thread_count)
 	{
@@ -160,13 +160,13 @@ void Radix008A_CS2(uint3 thread_id : SV_DispatchThreadID)
 
 	<technique name="Radix008A">
 		<pass name="p0">
-			<state name="compute_shader" value="Radix008A_CS()"/>
+			<state name="compute_shader" value="Radix008ACS()"/>
 		</pass>
 	</technique>
 
-	<technique name="Radix008A2">
+	<technique name="Radix008AFinal">
 		<pass name="p0">
-			<state name="compute_shader" value="Radix008A_CS2()"/>
+			<state name="compute_shader" value="Radix008AFinalCS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -36,7 +36,7 @@ namespace KlayGE
 		}
 		else
 		{
-			re.Dispatch(*fft_plan->radix008a_tech2, grid, 1, 1);
+			re.Dispatch(*fft_plan->radix008a_final_tech, grid, 1, 1);
 		}
 	}
 
@@ -118,7 +118,7 @@ namespace KlayGE
 		{
 			plan->fft_effect = rf.LoadEffect("FFT.fxml");
 			plan->radix008a_tech = plan->fft_effect->TechniqueByName("Radix008A");
-			plan->radix008a_tech2 = plan->fft_effect->TechniqueByName("Radix008A2");
+			plan->radix008a_final_tech = plan->fft_effect->TechniqueByName("Radix008AFinal");
 		}
 
 		// Temp buffer

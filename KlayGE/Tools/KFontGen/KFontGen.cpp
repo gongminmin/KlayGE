@@ -35,9 +35,9 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-#pragma comment(lib, "freetype2312_D.lib")
+#pragma comment(lib, "freetype240_D.lib")
 #else
-#pragma comment(lib, "freetype2312.lib")
+#pragma comment(lib, "freetype240.lib")
 #endif
 #endif
 
@@ -229,38 +229,43 @@ struct raster_user_struct
 	FT_BBox bbox;
 	int buf_width;
 	int buf_height;
+	bool non_empty;
 	uint8_t* char_bitmap;
 };
 		
 void RasterCallback(int y, int count, FT_Span const * const spans, void* const user) 
 {
 	raster_user_struct* sptr = static_cast<raster_user_struct*>(user);
-	for (int i = 0; i < count; ++ i) 
+	int const y0 = sptr->buf_height - 1 - (y - sptr->bbox.yMin);
+	if (y0 >= 0)
 	{
-		if (spans[i].coverage > 127)
+		for (int i = 0; i < count; ++ i) 
 		{
-			int const x0 = spans[i].x - sptr->bbox.xMin;
-			int const y0 = sptr->buf_height - 1 - (y - sptr->bbox.yMin);
-			int const x_end = x0 + spans[i].len;
-			int const x_align_8 = ((x0 + 7) & ~0x7);
-			int x = x0;
-			sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = static_cast<uint8_t>(~(0xFF >> (x_align_8 - x)));
-			if (x_align_8 < x_end)
+			if (spans[i].coverage > 127)
 			{
-				x = x_align_8;
-			}
-			else
-			{
-				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] &= static_cast<uint8_t>((1UL << (x_end - (x & ~0x7))) - 1);
-				x = x_end;
-			}
-			for (; x < (x_end & ~0x7); x += 8)
-			{
-				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = 0xFF;
-			}
-			if (x < x_end)
-			{
-				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = static_cast<uint8_t>((1UL << (x_end - x)) - 1);
+				sptr->non_empty = true;
+				int const x0 = spans[i].x - sptr->bbox.xMin;
+				int const x_end = x0 + spans[i].len;
+				int const x_align_8 = ((x0 + 7) & ~0x7);
+				int x = max(0, x0);
+				sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = static_cast<uint8_t>(~(0xFF >> (x_align_8 - x)));
+				if (x_align_8 < x_end)
+				{
+					x = x_align_8;
+				}
+				else
+				{
+					sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] &= static_cast<uint8_t>((1UL << (x_end - (x & ~0x7))) - 1);
+					x = x_end;
+				}
+				for (; x < (x_end & ~0x7); x += 8)
+				{
+					sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = 0xFF;
+				}
+				if (x < x_end)
+				{
+					sptr->char_bitmap[(y0 * INTERNAL_CHAR_SIZE + x) / 8] = static_cast<uint8_t>((1UL << (x_end - x)) - 1);
+				}
 			}
 		}
 	}
@@ -328,30 +333,30 @@ public:
 				ci.advance_y = static_cast<uint16_t>(ft_slot->advance.y / 64.0f / INTERNAL_CHAR_SIZE * char_size_);
 
 				FT_Outline_Get_CBox(&ft_slot->outline, &raster_user.bbox);
-				raster_user.bbox.xMin /= 64;
-				raster_user.bbox.xMax /= 64;
-				raster_user.bbox.yMin /= 64;
-				raster_user.bbox.yMax /= 64;
+				raster_user.bbox.xMin = (raster_user.bbox.xMin + 63) / 64;
+				raster_user.bbox.xMax = (raster_user.bbox.xMax + 63) / 64;
+				raster_user.bbox.yMin = (raster_user.bbox.yMin + 63) / 64;
+				raster_user.bbox.yMax = (raster_user.bbox.yMax + 63) / 64;
 
 				int const buf_width = std::min(static_cast<int>(raster_user.bbox.xMax - raster_user.bbox.xMin), static_cast<int>(INTERNAL_CHAR_SIZE));
 				int const buf_height = std::min(static_cast<int>(raster_user.bbox.yMax - raster_user.bbox.yMin), static_cast<int>(INTERNAL_CHAR_SIZE));
 				raster_user.buf_width = buf_width;
 				raster_user.buf_height = buf_height;
+				raster_user.non_empty = false;
 
 				FT_Outline_Render(ft_lib_, &ft_slot->outline, &params);
 
-				DistanceMap dmap(char_size_, char_size_);
-				std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
-				float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
-				float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
-				bool non_empty = false;
-				for (int y = 0; y < buf_height; ++ y)
+				if (raster_user.non_empty)
 				{
-					non_empty |= edge_extract(buf_width, &char_bitmap[0], y, dmap, tmp_dist, x_offset, y_offset);
-				}
-
-				if (non_empty)
-				{
+					DistanceMap dmap(char_size_, char_size_);
+					std::vector<float> tmp_dist(char_size_ * char_size_, static_cast<float>(max_dist_sq));
+					float const x_offset = (INTERNAL_CHAR_SIZE - buf_width) / 2.0f;
+					float const y_offset = (INTERNAL_CHAR_SIZE - buf_height) / 2.0f;
+					for (int y = 0; y < buf_height; ++ y)
+					{
+						edge_extract(buf_width, &char_bitmap[0], y, dmap, tmp_dist, x_offset, y_offset);
+					}
+				
 					std::vector<float> distances(char_size_ * char_size_);
 					ComputeDistanceField(distances, char_size_, char_size_, dmap);
 
@@ -396,9 +401,8 @@ public:
 	}
 
 private:
-	bool edge_extract_sse2(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
+	void edge_extract_sse2(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
 	{
-		bool non_empty = false;
 		__m128i zero = _mm_setzero_si128();
 		for (int x = 0; x < width; x += sizeof(__m128i) * 8)
 		{
@@ -454,8 +458,6 @@ private:
 
 				if (_mm_movemask_epi8(_mm_cmpeq_epi32(mask, zero)) != 0xFFFF)
 				{
-					non_empty = true;
-
 					uint32_t index;
 #ifdef KLAYGE_CPU_X64
 					uint64_t m64[2];
@@ -497,13 +499,10 @@ private:
 				}
 			}
 		}
-
-		return non_empty;
 	}
 
-	bool edge_extract_cpp(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
+	void edge_extract_cpp(int width, uint8_t const * char_bitmap, int y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
 	{
-		bool non_empty = false;
 		for (int x = 0; x < width; x += sizeof(uint64_t) * 8)
 		{
 			uint64_t center = *reinterpret_cast<uint64_t const *>(&char_bitmap[(y * INTERNAL_CHAR_SIZE + x) / 8]);
@@ -533,8 +532,6 @@ private:
 				mask = center & (center ^ mask);
 				if (mask != 0)
 				{
-					non_empty = true;
-
 					uint32_t index;
 #ifdef KLAYGE_CPU_X64
 					while (bsf64(index, mask))
@@ -558,8 +555,6 @@ private:
 				}
 			}
 		}
-
-		return non_empty;
 	}
 
 	void add_edge_point(int ep_x, int ep_y, DistanceMap& dmap, std::vector<float>& dist_cache, float x_offset, float y_offset)
@@ -629,7 +624,7 @@ private:
 	uint32_t num_threads_;
 	uint32_t num_chars_per_package_;
 
-	boost::function<bool(int, uint8_t const *, int, DistanceMap&, std::vector<float>&, float, float)> edge_extract;
+	boost::function<void(int, uint8_t const *, int, DistanceMap&, std::vector<float>&, float, float)> edge_extract;
 };
 
 void compute_distance(std::vector<font_info>& char_info, std::vector<float>& char_dist_data,
@@ -809,14 +804,14 @@ int main(int argc, char* argv[])
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
 	boost::program_options::notify(vm);
 
-	if (vm.count("help"))
+	if ((argc <= 1) || (vm.count("help")))
 	{
 		cout << desc << endl;
 		return 1;
 	}
 	if (vm.count("version"))
 	{
-		cout << "KlayGE Font Generator, Version 1.0.0" << endl;
+		cout << "KlayGE Font Generator, Version 2.0.0" << endl;
 		return 1;
 	}
 	if (vm.count("input-name"))

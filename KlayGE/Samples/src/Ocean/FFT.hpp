@@ -20,7 +20,7 @@ namespace KlayGE
 
 		RenderEffectPtr fft_effect;
 		RenderTechniquePtr radix008a_tech;
-		RenderTechniquePtr radix008a_tech2;
+		RenderTechniquePtr radix008a_final_tech;
 
 		// More than one array can be transformed at same time
 		uint32_t slices;
