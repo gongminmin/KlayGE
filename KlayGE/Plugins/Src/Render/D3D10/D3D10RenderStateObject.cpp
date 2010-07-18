@@ -99,9 +99,9 @@ namespace KlayGE
 		d3d_desc.SrcBlend = D3D10Mapping::Mapping(desc.src_blend[0]);
 		d3d_desc.DestBlend = D3D10Mapping::Mapping(desc.dest_blend[0]);
 		d3d_desc.BlendOp = D3D10Mapping::Mapping(desc.blend_op[0]);
-		d3d_desc.SrcBlendAlpha = D3D10Mapping::Mapping(desc.src_blend[0]);
-		d3d_desc.DestBlendAlpha = D3D10Mapping::Mapping(desc.dest_blend[0]);
-		d3d_desc.BlendOpAlpha = D3D10Mapping::Mapping(desc.blend_op[0]);
+		d3d_desc.SrcBlendAlpha = D3D10Mapping::Mapping(desc.src_blend_alpha[0]);
+		d3d_desc.DestBlendAlpha = D3D10Mapping::Mapping(desc.dest_blend_alpha[0]);
+		d3d_desc.BlendOpAlpha = D3D10Mapping::Mapping(desc.blend_op_alpha[0]);
 
 		ID3D10DevicePtr const & d3d_device = checked_cast<D3D10RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 

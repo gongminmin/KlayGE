@@ -48,7 +48,7 @@ namespace KlayGE
 			return model_mat_;
 		}
 
-		void AutoEmit(float freq)
+		void Frequency(float freq)
 		{
 			inv_emit_freq_ = 1.0f / freq;
 
@@ -59,6 +59,11 @@ namespace KlayGE
 				particle.birth_time = time;
 				time += inv_emit_freq_;
 			}
+		}
+
+		float Frequency() const
+		{
+			return 1.0f / inv_emit_freq_;
 		}
 
 		void Update(float elapse_time)

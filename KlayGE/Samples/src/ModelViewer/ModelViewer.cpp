@@ -283,6 +283,9 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	this->Proj(0.1f, std::max(200.0f, MathLib::length(half_size) * 5));
 	this->FPSCameraHandler(*dialog_animation_->Control<UICheckBox>(id_fps_camera_));
 
+	tbController_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
+	fpsController_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
+
 	this->MeshChangedHandler(*dialog_model_->Control<UIComboBox>(id_mesh_));
 }
 

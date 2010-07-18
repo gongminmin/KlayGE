@@ -45,6 +45,9 @@
     <None Include="..\..\media\ParticleEditor\Fire.psml">
       <Filter>Particle Systems</Filter>
     </None>
+    <None Include="..\..\media\ParticleEditor\Explosive.psml">
+      <Filter>Particle Systems</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\media\Common\KlayGESample.rc">

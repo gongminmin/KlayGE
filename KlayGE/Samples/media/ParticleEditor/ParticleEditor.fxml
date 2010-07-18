@@ -31,7 +31,12 @@
 		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
-	<parameter type="texture2D" name="particle_tex"/>
+
+	<parameter type="float4" name="particle_color_from"/>
+	<parameter type="float4" name="particle_color_to"/>
+
+	<parameter type="texture2D" name="particle_alpha_from_tex"/>
+	<parameter type="texture2D" name="particle_alpha_to_tex"/>
 	<parameter type="sampler" name="particle_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
@@ -99,7 +104,7 @@ struct PS_IN
 	float4 PosSS : TEXCOORD0;
 	float4 CenterView : TEXCOORD1;
 	float4 view_dir : TEXCOORD2;
-	float2 tex : TEXCOORD3;
+	float3 tex : TEXCOORD3;
 };
 
 void ParticleVS(float4 pos : TEXCOORD0,
@@ -109,6 +114,8 @@ void ParticleVS(float4 pos : TEXCOORD0,
 {
 	float radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
 
+	float life_factor = (init_life - pos.w) / init_life;
+
 	vs_out.CenterView = mul(float4(pos.xyz, 1), View);
 	float4 view_pos = vs_out.CenterView;
 	float2 offset = tex * radius;
@@ -116,11 +123,12 @@ void ParticleVS(float4 pos : TEXCOORD0,
 	float sz = sin(spin);
 	view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 	vs_out.pos = mul(view_pos, Proj);
-	vs_out.clr = float4(1, 0.45f, 0.25f, GetTransparencyOverLife(init_life - pos.w));
+	vs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
+	vs_out.clr.a = GetTransparencyOverLife(init_life - pos.w);
 	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
 	vs_out.view_dir.xyz = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
 	vs_out.view_dir.w = radius;
-	vs_out.tex = float2(tex.x, -tex.y) / 2 + 0.5f;
+	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 }
 
 void ParticleVS2(float4 pos : POSITION,
@@ -167,6 +175,8 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		{
 			tex = float2(1, -1);
 		}
+
+		float life_factor = (init_life - CenterView_Life.w) / init_life;
 		
 		float4 view_pos = float4(CenterView_Life.xyz, 1);
 		gs_out.CenterView = view_pos;
@@ -175,11 +185,12 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		float sz = sin(spin);
 		view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr = float4(1, 0.45f, 0.25f, GetTransparencyOverLife(init_life - CenterView_Life.w));
+		gs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
+		gs_out.clr.a = GetTransparencyOverLife(init_life - CenterView_Life.w);
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir.xyz = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
 		gs_out.view_dir.w = radius;
-		gs_out.tex = float2(tex.x, -tex.y) / 2 + 0.5f;
+		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
 #ifdef KLAYGE_OPENGL
 		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
@@ -219,7 +230,9 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
 		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;
-		clr.a *= particle_tex.SampleLevel(particle_sampler, ps_in.tex, 0).r;
+		clr.a *= lerp(particle_alpha_from_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
+						particle_alpha_to_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
+						ps_in.tex.z);
 		clr.a *= saturate((dir * depth - intersect.z) * 5);
 		clip(clr.a - 0.03f);
 	}
@@ -249,6 +262,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="one"/>
 

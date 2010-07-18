@@ -313,11 +313,11 @@ namespace KlayGE
 					{
 						if (mouse->MiddleButton())
 						{
-							float3 offset = right_ * (-xd * rotationScaler_ * 2);
+							float3 offset = right_ * (-xd * moveScaler_ * 2);
 							float3 pos = camera_->EyePos() + offset;
 							target_ += offset;
 
-							offset = camera_->UpVec() * (yd * rotationScaler_ * 2);
+							offset = camera_->UpVec() * (yd * moveScaler_ * 2);
 							pos += offset;
 							target_ += offset;
 
@@ -328,7 +328,7 @@ namespace KlayGE
 						{
 							if (mouse->RightButton())
 							{
-								float3 offset = camera_->ViewVec() * ((xd + yd) * rotationScaler_ * 2);
+								float3 offset = camera_->ViewVec() * ((xd + yd) * moveScaler_ * 2);
 								float3 pos = camera_->EyePos() + offset;
 
 								if (MathLib::dot(target_ - pos, camera_->ViewVec()) <= 0)

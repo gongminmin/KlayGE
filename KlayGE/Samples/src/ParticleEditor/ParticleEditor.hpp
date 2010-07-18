@@ -41,10 +41,14 @@ private:
 	void MinVelocityChangedHandler(KlayGE::UISlider const & sender);
 	void MaxVelocityChangedHandler(KlayGE::UISlider const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
-	void ChangeParticleTexHandler(KlayGE::UITexButton const & sender);
+	void ChangeParticleAlphaFromHandler(KlayGE::UITexButton const & sender);
+	void ChangeParticleAlphaToHandler(KlayGE::UITexButton const & sender);
+	void ChangeParticleColorFromHandler(KlayGE::UITexButton const & sender);
+	void ChangeParticleColorToHandler(KlayGE::UITexButton const & sender);
 	void CurveTypeChangedHandler(KlayGE::UIComboBox const & sender);
 
-	void LoadParticleTex(std::string const & name);
+	void LoadParticleAlpha(int id, std::string const & name);
+	void LoadParticleColor(int id, KlayGE::Color const & clr);
 
 	void LoadParticleSystem(std::string const & name);
 	void SaveParticleSystem(std::string const & name);
@@ -59,7 +63,10 @@ private:
 	boost::shared_ptr<KlayGE::ParticleSystem<Particle> > ps_;
 	float init_life_;
 
-	std::string particle_tex_;
+	std::string particle_alpha_from_tex_;
+	std::string particle_alpha_to_tex_;
+	KlayGE::Color particle_color_from_;
+	KlayGE::Color particle_color_to_;
 
 	KlayGE::Timer timer_;
 
@@ -82,7 +89,10 @@ private:
 	int id_max_velocity_static_;
 	int id_max_velocity_slider_;
 	int id_fps_camera_;
-	int id_particle_tex_button_;
+	int id_particle_alpha_from_button_;
+	int id_particle_alpha_to_button_;
+	int id_particle_color_from_button_;
+	int id_particle_color_to_button_;
 	int id_curve_type_;
 	int id_size_over_life_;
 	int id_weight_over_life_;

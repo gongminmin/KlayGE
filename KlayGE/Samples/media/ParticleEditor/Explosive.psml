@@ -1,0 +1,30 @@
+<particle_system frequency="8192">
+	<particle>
+		<alpha>
+			<from tex="fire.dds"/>
+			<to tex="fire.dds"/>
+		</alpha>
+		<color>
+			<from r="1" g="0.45" b="0.25"/>
+			<to r="1" g="0.45" b="0.25"/>
+		</color>
+	</particle>
+	<emittor angle="281" life="4" min_velocity="0.170000002" max_velocity="0.280000001"/>
+	<max_position_deviation x="0.00999999978" y="0" z="0.00999999978"/>
+	<curve name="size_over_life">
+		<ctrl_point x="0" y="0.266666681"/>
+		<ctrl_point x="0.370000005" y="0.0583333336"/>
+		<ctrl_point x="0.74000001" y="0.0333333351"/>
+		<ctrl_point x="0.845000029" y="0.0333333351"/>
+		<ctrl_point x="1" y="0"/>
+	</curve>
+	<curve name="weight_over_life">
+		<ctrl_point x="0" y="0.850000024"/>
+		<ctrl_point x="1" y="1"/>
+	</curve>
+	<curve name="transparency_over_life">
+		<ctrl_point x="0" y="0.5"/>
+		<ctrl_point x="1" y="1"/>
+	</curve>
+</particle_system>
+
