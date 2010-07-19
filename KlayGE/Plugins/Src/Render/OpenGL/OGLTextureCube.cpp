@@ -108,41 +108,20 @@ namespace KlayGE
 					GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
 
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-					if (NULL == init_data)
-					{
-						memset(p, 0, image_size);
-					}
-					else
-					{
-						memcpy(p, init_data[face * numMipMaps_ + level].data, image_size);
-					}
-					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, image_size, NULL);
+						s, s, 0, image_size, (NULL == init_data) ? NULL : init_data[face * numMipMaps_ + level].data);
 				}
 				else
 				{
 					GLsizei const image_size = s * s * bpp_ / 8;
 
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-					uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-					if (NULL == init_data)
-					{
-						memset(p, 0, image_size);
-					}
-					else
-					{
-						for (uint32_t h = 0; h < s; ++ h)
-						{
-							memcpy(p + h * s * bpp_ / 8, static_cast<uint8_t const *>(init_data[face * numMipMaps_ + level].data) + h * init_data[face * numMipMaps_ + level].row_pitch, s * bpp_ / 8);
-						}
-					}
-					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, glformat, gltype, NULL);
+						s, s, 0, glformat, gltype, (NULL == init_data) ? NULL : init_data[face * numMipMaps_ + level].data);
 				}
 
 				s /= 2;

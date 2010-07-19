@@ -5,7 +5,11 @@
 		<![CDATA[
 float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id, float shininess)
 {
-	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5), depth, mtl_id + shininess);
+	if (dot(normal.xy, normal.xy) > 1e-6f)
+	{
+		normal.xy = normalize(normal.xy);
+	}
+	return float4(normal.xy * sqrt(normal.z * 0.5 + 0.5), depth, mtl_id + shininess);
 }
 
 float3 GetNormal(float4 ndc)

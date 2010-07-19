@@ -107,40 +107,20 @@ namespace KlayGE
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				if (NULL == init_data)
-				{
-					memset(p, 0, image_size);
-				}
-				else
-				{
-					memcpy(p, init_data[level].data, image_size);
-				}
-				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 				glCompressedTexImage2D(target_type_, level, glinternalFormat,
-					width, height, 0, image_size, NULL);
+					width, height, 0, image_size, (NULL == init_data) ? NULL : init_data[level].data);
 			}
 			else
 			{
 				GLsizei const image_size = width * height * bpp_ / 8;
 
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-				uint8_t* p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-				if (NULL == init_data)
-				{
-					memset(p, 0, image_size);
-				}
-				else
-				{
-					for (uint32_t h = 0; h < height; ++ h)
-					{
-						memcpy(p + h * width * bpp_ / 8, static_cast<char const *>(init_data[level].data) + h * init_data[level].row_pitch, width * bpp_ / 8);
-					}
-				}
-				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-				glTexImage2D(target_type_, level, glinternalFormat, width, height, 0, glformat, gltype, NULL);
+				glTexImage2D(target_type_, level, glinternalFormat, width, height, 0, glformat, gltype,
+					(NULL == init_data) ? NULL : init_data[level].data);
 			}
 
 			width = std::max(static_cast<uint32_t>(1), width / 2);
