@@ -124,17 +124,21 @@ namespace KlayGE
 				std::string::size_type const pkt_offset(res_name.find("//"));
 				if (pkt_offset != std::string::npos)
 				{
-					std::string pkt_name = res_name.substr(0, pkt_offset - 1);
+					std::string pkt_name = res_name.substr(0, pkt_offset);
 					std::string::size_type const password_offset = pkt_name.find("|");
-					std::string password = pkt_name.substr(password_offset + 1);
-					pkt_name = pkt_name.substr(0, password_offset - 1);
+					std::string password;
+					if (password_offset != std::string::npos)
+					{
+						password = pkt_name.substr(password_offset + 1);
+						pkt_name = pkt_name.substr(0, password_offset - 1);
+					}
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
 					ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
 						MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 					if (*pkt_file)
 					{
-						if (Find7z(pkt_file, password, file_name))
+						if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
 						{
 							return res_name;
 						}
@@ -162,10 +166,14 @@ namespace KlayGE
 				std::string::size_type const pkt_offset(res_name.find("//"));
 				if (pkt_offset != std::string::npos)
 				{
-					std::string pkt_name = res_name.substr(0, pkt_offset - 1);
+					std::string pkt_name = res_name.substr(0, pkt_offset);
 					std::string::size_type const password_offset = pkt_name.find("|");
-					std::string password = pkt_name.substr(password_offset + 1);
-					pkt_name = pkt_name.substr(0, password_offset - 1);
+					std::string password;
+					if (password_offset != std::string::npos)
+					{
+						password = pkt_name.substr(password_offset + 1);
+						pkt_name = pkt_name.substr(0, password_offset - 1);
+					}
 					std::string const file_name = res_name.substr(pkt_offset + 2);
 
 					ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,

@@ -450,6 +450,9 @@ float4 DeferredShadingAmbientPS(
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
 			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingPointPS()"/>
@@ -480,6 +483,9 @@ float4 DeferredShadingAmbientPS(
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
 			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingSpotPS()"/>
@@ -510,6 +516,9 @@ float4 DeferredShadingAmbientPS(
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
 			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingDirectionalPS()"/>

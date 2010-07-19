@@ -280,14 +280,39 @@ namespace KlayGE
 
 	void ModelJIT(std::string const & meshml_name)
 	{
+		std::string::size_type const pkt_offset(meshml_name.find("//"));
+		std::string path_name;
+		if (pkt_offset != std::string::npos)
+		{
+			std::string pkt_name = meshml_name.substr(0, pkt_offset);
+			std::string::size_type const password_offset = pkt_name.find("|");
+			if (password_offset != std::string::npos)
+			{
+				pkt_name = pkt_name.substr(0, password_offset - 1);
+			}
+
+			std::string::size_type offset = pkt_name.rfind("/");
+			if (offset != std::string::npos)
+			{
+				path_name = pkt_name.substr(0, offset + 1);
+			}
+
+			std::string const file_name = meshml_name.substr(pkt_offset + 2);
+			path_name += file_name;
+		}
+		else
+		{
+			path_name = meshml_name;
+		}
+
 		bool jit = false;
-		if (ResLoader::Instance().Locate(meshml_name + jit_ext_name).empty())
+		if (ResLoader::Instance().Locate(path_name + jit_ext_name).empty())
 		{
 			jit = true;
 		}
 		else
 		{
-			ResIdentifierPtr lzma_file = ResLoader::Instance().Load(meshml_name + jit_ext_name);
+			ResIdentifierPtr lzma_file = ResLoader::Instance().Load(path_name + jit_ext_name);
 			uint32_t fourcc;
 			lzma_file->read(&fourcc, sizeof(fourcc));
 			if (fourcc != MakeFourCC<'K', 'L', 'M', '1'>::value)
@@ -781,7 +806,7 @@ namespace KlayGE
 				}
 			}
 
-			std::ofstream ofs((meshml_name + jit_ext_name).c_str(), std::ios_base::binary);
+			std::ofstream ofs((path_name + jit_ext_name).c_str(), std::ios_base::binary);
 			BOOST_ASSERT(ofs);
 			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', '1'>::value;
 			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
@@ -818,7 +843,17 @@ namespace KlayGE
 			std::string full_meshml_name = ResLoader::Instance().Locate(meshml_name);
 			ModelJIT(full_meshml_name);
 
-			lzma_file = ResLoader::Instance().Load(full_meshml_name + jit_ext_name);
+			std::string no_packing_name;
+			size_t offset = full_meshml_name.rfind("//");
+			if (offset != std::string::npos)
+			{
+				no_packing_name = full_meshml_name.substr(offset);
+			}
+			else
+			{
+				no_packing_name = full_meshml_name;
+			}
+			lzma_file = ResLoader::Instance().Load(no_packing_name + jit_ext_name);
 		}
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));

@@ -1100,7 +1100,10 @@ DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings 
 
 void DeferredShadingApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModelTorus>(), CreateKMeshFactory<RenderTorus>());
+	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
+	this->Proj(0.1f, 500.0f);
+
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModelTorus>(), CreateKMeshFactory<RenderTorus>());
 	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
 	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
 
@@ -1108,9 +1111,9 @@ void DeferredShadingApp::InitObjects()
 
 	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
 	ambient_light_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
-	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.5f, 0));
-	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.5f, 0));
-	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.5f, 0));
+	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.2f, 0));
+	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
+	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
 
 	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), point_light_->Color());
 	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, spot_light_[0]->Color());
@@ -1122,9 +1125,6 @@ void DeferredShadingApp::InitObjects()
 	checked_pointer_cast<SphereObject>(point_light_src_)->AttachLightSrc(point_light_);
 	checked_pointer_cast<ConeObject>(spot_light_src_[0])->AttachLightSrc(spot_light_[0]);
 	checked_pointer_cast<ConeObject>(spot_light_src_[1])->AttachLightSrc(spot_light_[1]);
-
-	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
-	this->Proj(0.1f, 500.0f);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
