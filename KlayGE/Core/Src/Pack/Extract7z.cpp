@@ -159,7 +159,14 @@ namespace
 		SevenZipLoader()
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("7z.dll");
+			if (!dll_loader_.Load("7z.dll"))
+			{
+#ifdef KLAYGE_PLATFORM_WIN32
+				dll_loader_.Load("7z_x86.dll");
+#elif KLAYGE_PLATFORM_WIN64
+				dll_loader_.Load("7z_x64.dll");
+#endif
+			}
 #elif defined KLAYGE_PLATFORM_LINUX
 			dll_loader_.Load("7z.so");
 #endif

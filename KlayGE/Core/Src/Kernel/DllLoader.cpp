@@ -36,15 +36,21 @@ namespace KlayGE
 		this->Free();
 	}
 
-	void DllLoader::Load(std::string const & dll_name)
+	bool DllLoader::Load(std::string const & dll_name)
 	{
 		std::string name = ResLoader::Instance().Locate(dll_name);
+		if (name.empty())
+		{
+			return false;
+		}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 		dll_handle_ = static_cast<void*>(::LoadLibraryA(name.c_str()));
 #else
 		dll_handle_ = ::dlopen(name.c_str(), RTLD_LAZY);
 #endif
+
+		return (dll_handle_ != NULL);
 	}
 
 	void DllLoader::Free()

@@ -28,7 +28,7 @@ namespace KlayGE
 		DllLoader();
 		~DllLoader();
 
-		void Load(std::string const & dll_name);
+		bool Load(std::string const & dll_name);
 		void Free();
 
 		void* GetProcAddress(std::string const & proc_name);
