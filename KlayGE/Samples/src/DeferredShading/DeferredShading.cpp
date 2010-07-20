@@ -73,6 +73,8 @@ namespace
 			diffuse_map_enabled_param_ = effect_->ParameterByName("diffuse_map_enabled");
 			diffuse_tex_param_ = effect_->ParameterByName("diffuse_tex");
 			diffuse_clr_param_ = effect_->ParameterByName("diffuse_clr");
+			specular_map_enabled_param_ = effect_->ParameterByName("specular_map_enabled");
+			specular_tex_param_ = effect_->ParameterByName("specular_tex");
 			emit_clr_param_ = effect_->ParameterByName("emit_clr");
 			specular_level_param_ = effect_->ParameterByName("specular_level");
 			texel_to_pixel_offset_param_ = effect_->ParameterByName("texel_to_pixel_offset");
@@ -174,6 +176,7 @@ namespace
 			gen_sm_rl_ = rf.MakeRenderLayout();;
 			gen_sm_rl_->TopologyType(rl_->TopologyType());
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 			shading_rl_ = rf.MakeRenderLayout();;
@@ -201,11 +204,15 @@ namespace
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
 
-				if ("Diffuse Color" == iter->first)
+				if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 				{
 					diffuse_tex_ = tex;
 				}
-				if ("Bump" == iter->first)
+				if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+				{
+					specular_tex_ = tex;
+				}
+				if (("Bump" == iter->first) || ("Bump Map" == iter->first))
 				{
 					bump_tex_ = tex;
 				}
@@ -266,8 +273,15 @@ namespace
 			case PT_GBuffer:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
+				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_tex_param_ = diffuse_tex_;
 				*bump_map_enabled_param_ = !!bump_tex_;
 				*bump_tex_param_ = bump_tex_;
+				break;
+
+			case PT_GenShadowMap:
+				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_tex_param_ = diffuse_tex_;
 				break;
 
 			case PT_Shading:
@@ -275,6 +289,8 @@ namespace
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
+				*specular_map_enabled_param_ = !!specular_tex_;
+				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = mtl.specular_level;
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -298,6 +314,8 @@ namespace
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr shininess_param_;
+		RenderEffectParameterPtr specular_map_enabled_param_;
+		RenderEffectParameterPtr specular_tex_param_;
 		RenderEffectParameterPtr bump_map_enabled_param_;
 		RenderEffectParameterPtr bump_tex_param_;
 		RenderEffectParameterPtr diffuse_map_enabled_param_;
@@ -313,6 +331,7 @@ namespace
 		RenderLayoutPtr shading_rl_;
 
 		TexturePtr diffuse_tex_;
+		TexturePtr specular_tex_;
 		TexturePtr bump_tex_;
 	};
 
@@ -397,6 +416,7 @@ namespace
 			gen_sm_rl_ = rf.MakeRenderLayout();;
 			gen_sm_rl_->TopologyType(RenderLayout::TT_TriangleList);
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 			shading_rl_ = rf.MakeRenderLayout();;
 			shading_rl_->TopologyType(RenderLayout::TT_TriangleList);
@@ -653,6 +673,7 @@ namespace
 			gen_sm_rl_ = rf.MakeRenderLayout();;
 			gen_sm_rl_->TopologyType(rl_->TopologyType());
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 			shading_rl_ = rf.MakeRenderLayout();;
@@ -1115,9 +1136,9 @@ void DeferredShadingApp::InitObjects()
 	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
 	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
 
-	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 5, 0), point_light_->Color());
-	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 2.0f, spot_light_[0]->Color());
-	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 1.7f, spot_light_[1]->Color());
+	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
+	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
+	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 3.4f, spot_light_[1]->Color());
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();

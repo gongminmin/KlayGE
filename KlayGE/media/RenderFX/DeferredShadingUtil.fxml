@@ -15,8 +15,13 @@ float4 StoreNormalDepthMtl(float3 normal, float depth, float mtl_id, float shini
 float3 GetNormal(float4 ndc)
 {
 	float3 normal;
-	normal.z = dot(ndc.xy, ndc.xy) * 2 - 1;
-	normal.xy = normalize(ndc.xy) * sqrt(1 - normal.z * normal.z);
+	float len2 = dot(ndc.xy, ndc.xy);
+	normal.z = len2 * 2 - 1;
+	if (len2 > 1e-6f)
+	{
+		ndc.xy = normalize(ndc.xy);
+	}
+	normal.xy = ndc.xy * sqrt(1 - normal.z * normal.z);
 	return normal;
 }
 

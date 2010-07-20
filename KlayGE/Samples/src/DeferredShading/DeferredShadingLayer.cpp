@@ -396,17 +396,28 @@ namespace KlayGE
 		technique_ = technique_light_depth_only_;
 
 		sm_buffer_ = rf.MakeFrameBuffer();
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0));
-		try
+		/*try
 		{
+			sm_aa_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 4, 0, EAH_GPU_Write, NULL);
+			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_aa_tex_, 0, 0));
 			sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		}
-		catch (...)
+		catch (...)*/
 		{
-			sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
+			try
+			{
+				sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
+				sm_aa_tex_ = sm_tex_;
+			}
+			catch (...)
+			{
+				sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
+				sm_aa_tex_ = sm_tex_;
+			}
 		}
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality()));
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -648,7 +659,7 @@ namespace KlayGE
 									max = MathLib::maximize(max, vec);
 								}
 
-								if (scene_mgr.AABBVisible(Box(min, max)))
+								//if (scene_mgr.AABBVisible(Box(min, max)))
 								{
 									if (0 == (attr & LSA_NoShadow))
 									{
@@ -685,7 +696,7 @@ namespace KlayGE
 										max = MathLib::maximize(max, vec);
 									}
 
-									if (scene_mgr.AABBVisible(Box(min, max)))
+									//if (scene_mgr.AABBVisible(Box(min, max)))
 									{
 										if (0 == (attr & LSA_NoShadow))
 										{
@@ -710,7 +721,7 @@ namespace KlayGE
 										max = MathLib::maximize(max, vec);
 									}
 
-									if (scene_mgr.AABBVisible(Box(min, max)))
+									//if (scene_mgr.AABBVisible(Box(min, max)))
 									{
 										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
 
@@ -836,6 +847,11 @@ namespace KlayGE
 				{
 					if (0 == (attr & LSA_NoShadow))
 					{
+						if (sm_aa_tex_->SampleCount() > 1)
+						{
+							sm_aa_tex_->CopyToTexture(*sm_tex_);
+						}
+
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();

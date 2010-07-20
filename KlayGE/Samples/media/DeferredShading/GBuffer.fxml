@@ -3,6 +3,8 @@
 <effect>
 	<include name="DeferredShadingUtil.fxml"/>
 	<include name="util.fxml"/>
+
+	<macro name="ALPHA_TEST_THRESHOLD" value="0.03"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -12,8 +14,17 @@
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
-	<parameter type="float" name="shininess"/>
+	<cbuffer name="model">
+		<parameter type="float4" name="diffuse_clr"/>
+		<parameter type="float4" name="emit_clr"/>
+		<parameter type="float" name="specular_level"/>
+		<parameter type="float" name="shininess"/>
+	</cbuffer>
 
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="bool" name="diffuse_map_enabled"/>
+	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="bool" name="specular_map_enabled"/>
 	<parameter type="texture2D" name="bump_tex"/>
 	<parameter type="bool" name="bump_map_enabled"/>
 
@@ -36,25 +47,53 @@
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float3 normal : NORMAL,
-			out float2 oTexCoord : TEXCOORD0,
-			out float4 oNormalDepth : TEXCOORD1,
+			float3 tangent : TANGENT,
+			out float4 oTexCoordDepth_2x : TEXCOORD0,
+			out float4 oTsToView0_2y : TEXCOORD1,
+			out float4 oTsToView1_2z : TEXCOORD2,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oNormalDepth.xyz = mul(normal, (float3x3)model_view);
-	oNormalDepth.w = oPos.w * depth_near_far_invfar.z;
+	oTexCoordDepth_2x.xyz = float3(texcoord, oPos.w * depth_near_far_invfar.z);
 
-	oTexCoord = texcoord;
+	float3x3 obj_to_ts;
+	obj_to_ts[0] = tangent;
+	obj_to_ts[1] = cross(normal, tangent);
+	obj_to_ts[2] = normal;
+	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
+	oTsToView0_2y.xyz = ts_to_view[0];
+	oTsToView1_2z.xyz = ts_to_view[1];
+	oTexCoordDepth_2x.w = ts_to_view[2].x;
+	oTsToView0_2y.w = ts_to_view[2].y;
+	oTsToView1_2z.w = ts_to_view[2].z;
 }
 
-float4 GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1) : SV_Target
+float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
 {
+	if (diffuse_map_enabled)
+	{
+		clip(diffuse_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
+	}
+
+	float3 normal;
 	if (bump_map_enabled)
 	{
-		normal.xyz += 0.1f * mul(bump_tex.Sample(aniso_sampler, texcoord).xyz, (float3x3)model_view);
+		float3x3 ts_to_view;
+		ts_to_view[0] = ts_to_view0_2y.xyz;
+		ts_to_view[1] = ts_to_view1_2z.xyz;
+		ts_to_view[2] = float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w);
+		normal = mul(bump_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).xyz, ts_to_view);
 	}
-	normal.xyz = normalize(normal.xyz);	
-	return StoreNormalDepthMtl(normal.xyz, normal.w, 1, shininess);
+	else
+	{
+		normal = float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w);
+	}
+
+	if (dot(normal, normal) > 1e-6f)
+	{
+		normal = normalize(normal);
+	}
+	return StoreNormalDepthMtl(normal, texcoord_depth_2x.z, 1, shininess);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -70,48 +109,55 @@ float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 	return StoreNormalDepthMtl(0, 1, 0, 0);
 }
 		]]>
-	</shader>
+</shader>
 
-	<technique name="GBufferTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferPS()"/>
-		</pass>
-	</technique>
+<technique name="GBufferTech">
+	<pass name="p0">
+		<state name="vertex_shader" value="GBufferVS()"/>
+		<state name="pixel_shader" value="GBufferPS()"/>
+	</pass>
+</technique>
 
-	<technique name="GBufferSkyBoxTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
+<technique name="GBufferSkyBoxTech">
+	<pass name="p0">
+		<state name="cull_mode" value="none"/>
+		<state name="depth_func" value="equal"/>
+		<state name="depth_write_mask" value="false"/>
 
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
+		<state name="front_stencil_enable" value="true"/>
+		<state name="front_stencil_func" value="always_pass"/>
+		<state name="front_stencil_ref" value="128"/>
+		<state name="front_stencil_pass" value="replace"/>
+		<state name="back_stencil_enable" value="true"/>
+		<state name="back_stencil_func" value="always_pass"/>
+		<state name="back_stencil_ref" value="128"/>
+		<state name="back_stencil_pass" value="replace"/>
 
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
-		</pass>
-	</technique>
-	
-	<shader>
-		<![CDATA[
+		<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+		<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
+	</pass>
+</technique>
+
+<shader>
+	<![CDATA[
 void GenShadowMapVS(float4 pos : POSITION,
-						out float oDist : TEXCOORD0,
+						float2 texcoord : TEXCOORD0,
+						out float3 oTcDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos, mvp);
-	oDist = length(pos_es.xyz);
+	oTcDist = float3(texcoord, length(pos_es.xyz));
 }
 
-float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 {
+	if (diffuse_map_enabled)
+	{
+		clip(diffuse_tex.Sample(aniso_sampler, tc_dist.xy).a - ALPHA_TEST_THRESHOLD);
+	}
+
+	float dist = tc_dist.z;
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
 }
@@ -127,15 +173,6 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-
-	<cbuffer name="model">
-		<parameter type="float4" name="diffuse_clr"/>
-		<parameter type="float4" name="emit_clr"/>
-		<parameter type="float" name="specular_level"/>
-	</cbuffer>
-
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="bool" name="diffuse_map_enabled"/>
 
 	<parameter type="textureCUBE" name="skybox_tex"/>
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
@@ -187,7 +224,7 @@ void ShadingVS(float4 pos : POSITION,
 #endif
 }
 
-float4 Shading(float2 tc, float3 diffuse, float3 emit, float specular_level)
+float4 Shading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 {
 	float ssao = 1;
 	if (ssao_enabled)
@@ -196,7 +233,7 @@ float4 Shading(float2 tc, float3 diffuse, float3 emit, float specular_level)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4((lighting.rgb * diffuse + emit + lighting.a * specular_level) * ssao, 1);
+	return float4((lighting.rgb * diffuse + emit + lighting.a * specular) * ssao, 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0
@@ -216,14 +253,25 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	float3 diffuse;
 	if (diffuse_map_enabled)
 	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
+		float4 d4 = diffuse_tex.Sample(aniso_sampler, texcoord);
+		clip(d4.a - ALPHA_TEST_THRESHOLD);
+		diffuse = d4.rgb;
 	}
 	else
 	{
 		diffuse = diffuse_clr.rgb;
 	}
+	float3 specular;
+	if (specular_map_enabled)
+	{
+		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		specular = specular_level;
+	}
 
-	return Shading(tc, diffuse, emit_clr.rgb, specular_level);
+	return Shading(tc, diffuse, emit_clr.rgb, specular);
 }
 
 float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target

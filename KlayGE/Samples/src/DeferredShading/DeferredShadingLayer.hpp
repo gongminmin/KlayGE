@@ -426,6 +426,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_clear_stencil_;
 
 		FrameBufferPtr sm_buffer_;
+		TexturePtr sm_aa_tex_;
 		TexturePtr sm_tex_;
 		TexturePtr blur_sm_tex_;
 		TexturePtr sm_cube_tex_;
