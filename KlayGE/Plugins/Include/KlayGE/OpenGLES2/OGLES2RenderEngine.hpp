@@ -50,6 +50,8 @@ namespace KlayGE
 		void BeginPass();
 		void EndPass();
 
+		void ForceFlush();
+
 		uint16_t StencilBufferBitDepth();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);

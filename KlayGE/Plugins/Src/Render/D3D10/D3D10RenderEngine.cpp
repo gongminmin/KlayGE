@@ -442,6 +442,11 @@ namespace KlayGE
 	{
 	}
 
+	void D3D10RenderEngine::ForceFlush()
+	{
+		d3d_device_->Flush();
+	}
+
 	// 获取模板位数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint16_t D3D10RenderEngine::StencilBufferBitDepth()

@@ -372,6 +372,11 @@ namespace KlayGE
 	{
 	}
 
+	void OGLES2RenderEngine::ForceFlush()
+	{
+		glFlush();
+	}
+
 	// 设置模板位数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint16_t OGLES2RenderEngine::StencilBufferBitDepth()

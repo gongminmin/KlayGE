@@ -66,6 +66,8 @@ namespace KlayGE
 		void EndFrame();
 		void BeginPass();
 		void EndPass();
+		
+		void ForceFlush();
 
 		uint16_t StencilBufferBitDepth();
 

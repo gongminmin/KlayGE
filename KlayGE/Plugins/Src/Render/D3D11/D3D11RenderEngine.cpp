@@ -597,6 +597,11 @@ namespace KlayGE
 	{
 	}
 
+	void D3D11RenderEngine::ForceFlush()
+	{
+		d3d_imm_ctx_->Flush();
+	}
+
 	// 获取模板位数
 	/////////////////////////////////////////////////////////////////////////////////
 	uint16_t D3D11RenderEngine::StencilBufferBitDepth()

@@ -1,8 +1,11 @@
 // RenderEngine.hpp
 // KlayGE 渲染引擎类 实现文件
-// Ver 3.10.0
+// Ver 3.11.0
 // 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 增加了ForceFlush (2010.7.20)
 //
 // 3.10.0
 // 增加了Dispatch (2009.12.22)
@@ -100,6 +103,9 @@ namespace KlayGE
 		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
 		virtual void EndPass() = 0;
 		virtual void EndFrame() = 0;
+
+		// Just for debug or profile propose
+		virtual void ForceFlush() = 0;
 
 		size_t NumPrimitivesJustRendered();
 		size_t NumVerticesJustRendered();

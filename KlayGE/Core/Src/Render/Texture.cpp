@@ -1669,218 +1669,230 @@ namespace KlayGE
 			desc.reserved1[0] = 1;
 		}
 
-		if ((EF_ABGR16 == format)
-			|| IsFloatFormat(format) || IsCompressedFormat(format))
+		if (array_size != 1)
 		{
 			desc.pixel_format.flags |= DDSPF_FOURCC;
-
-			switch (format)
-			{
-			case EF_ABGR16:
-				desc.pixel_format.four_cc = 36;
-				break;
-
-			case EF_SIGNED_ABGR16:
-				desc.pixel_format.four_cc = 110;
-				break;
-
-			case EF_R16F:
-				desc.pixel_format.four_cc = 111;
-				break;
-
-			case EF_GR16F:
-				desc.pixel_format.four_cc = 112;
-				break;
-
-			case EF_ABGR16F:
-				desc.pixel_format.four_cc = 113;
-				break;
-
-			case EF_R32F:
-				desc.pixel_format.four_cc = 114;
-				break;
-
-			case EF_GR32F:
-				desc.pixel_format.four_cc = 115;
-				break;
-
-			case EF_ABGR32F:
-				desc.pixel_format.four_cc = 116;
-				break;
-
-			case EF_BC1:
-			case EF_BC1_SRGB:
-				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
-				break;
-
-			case EF_BC2:
-			case EF_BC2_SRGB:
-				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
-				break;
-
-			case EF_BC3:
-			case EF_BC3_SRGB:
-				desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
-				break;
-
-			case EF_BC4:
-			case EF_BC4_SRGB:
-				desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '1'>::value;
-				break;
-
-			case EF_BC5:
-			case EF_BC5_SRGB:
-				desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '2'>::value;
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
+			desc.pixel_format.four_cc = MakeFourCC<'D', 'X', '1', '0'>::value;
 		}
 		else
 		{
-			switch (format)
+			if ((EF_ABGR16 == format)
+				|| IsFloatFormat(format) || IsCompressedFormat(format))
 			{
-			case EF_ARGB4:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
-				desc.pixel_format.rgb_bit_count = 16;
+				desc.pixel_format.flags |= DDSPF_FOURCC;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x0000F000;
-				desc.pixel_format.r_bit_mask = 0x00000F00;
-				desc.pixel_format.g_bit_mask = 0x000000F0;
-				desc.pixel_format.b_bit_mask = 0x0000000F;
-				break;
+				switch (format)
+				{
+				case EF_ABGR16:
+					desc.pixel_format.four_cc = 36;
+					break;
 
-			case EF_SIGNED_GR8:
-				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.rgb_bit_count = 16;
+				case EF_SIGNED_ABGR16:
+					desc.pixel_format.four_cc = 110;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x000000FF;
-				desc.pixel_format.g_bit_mask = 0x0000FF00;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_R16F:
+					desc.pixel_format.four_cc = 111;
+					break;
 
-			case EF_SIGNED_R16:
-				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.rgb_bit_count = 16;
+				case EF_GR16F:
+					desc.pixel_format.four_cc = 112;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x0000FFFF;
-				desc.pixel_format.g_bit_mask = 0x00000000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_ABGR16F:
+					desc.pixel_format.four_cc = 113;
+					break;
 
-			case EF_ARGB8:
-			case EF_ARGB8_SRGB:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
-				desc.pixel_format.rgb_bit_count = 32;
+				case EF_R32F:
+					desc.pixel_format.four_cc = 114;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
-				desc.pixel_format.r_bit_mask = 0x00FF0000;
-				desc.pixel_format.g_bit_mask = 0x0000FF00;
-				desc.pixel_format.b_bit_mask = 0x000000FF;
-				break;
+				case EF_GR32F:
+					desc.pixel_format.four_cc = 115;
+					break;
 
-			case EF_ABGR8:
-			case EF_ABGR8_SRGB:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
-				desc.pixel_format.rgb_bit_count = 32;
+				case EF_ABGR32F:
+					desc.pixel_format.four_cc = 116;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
-				desc.pixel_format.r_bit_mask = 0x000000FF;
-				desc.pixel_format.g_bit_mask = 0x0000FF00;
-				desc.pixel_format.b_bit_mask = 0x00FF0000;
-				break;
+				case EF_BC1:
+				case EF_BC1_SRGB:
+					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '1'>::value;
+					break;
 
-			case EF_SIGNED_ABGR8:
-				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.rgb_bit_count = 32;
+				case EF_BC2:
+				case EF_BC2_SRGB:
+					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '3'>::value;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
-				desc.pixel_format.r_bit_mask = 0x000000FF;
-				desc.pixel_format.g_bit_mask = 0x0000FF00;
-				desc.pixel_format.b_bit_mask = 0x00FF0000;
-				break;
+				case EF_BC3:
+				case EF_BC3_SRGB:
+					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', 'T', '5'>::value;
+					break;
 
-			case EF_A2BGR10:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
-				desc.pixel_format.rgb_bit_count = 32;
+				case EF_BC4:
+				case EF_BC4_SRGB:
+					desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '1'>::value;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
-				desc.pixel_format.r_bit_mask = 0x000003FF;
-				desc.pixel_format.g_bit_mask = 0x000FFC00;
-				desc.pixel_format.b_bit_mask = 0x3FF00000;
-				break;
+				case EF_BC5:
+				case EF_BC5_SRGB:
+					desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '2'>::value;
+					break;
 
-			case EF_SIGNED_A2BGR10:
-				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.rgb_bit_count = 32;
+				case EF_B10G11R11F:
+					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', '1', '0'>::value;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
-				desc.pixel_format.r_bit_mask = 0x000003FF;
-				desc.pixel_format.g_bit_mask = 0x000FFC00;
-				desc.pixel_format.b_bit_mask = 0x3FF00000;
-				break;
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+			}
+			else
+			{
+				switch (format)
+				{
+				case EF_ARGB4:
+					desc.pixel_format.flags |= DDSPF_RGB;
+					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.rgb_bit_count = 16;
 
-			case EF_GR16:
-				desc.pixel_format.flags |= DDSPF_RGB;
-				desc.pixel_format.rgb_bit_count = 32;
+					desc.pixel_format.rgb_alpha_bit_mask = 0x0000F000;
+					desc.pixel_format.r_bit_mask = 0x00000F00;
+					desc.pixel_format.g_bit_mask = 0x000000F0;
+					desc.pixel_format.b_bit_mask = 0x0000000F;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x0000FFFF;
-				desc.pixel_format.g_bit_mask = 0xFFFF0000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_SIGNED_GR8:
+					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+					desc.pixel_format.rgb_bit_count = 16;
 
-			case EF_SIGNED_GR16:
-				desc.pixel_format.flags |= DDSPF_BUMPDUDV;
-				desc.pixel_format.rgb_bit_count = 32;
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x000000FF;
+					desc.pixel_format.g_bit_mask = 0x0000FF00;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x0000FFFF;
-				desc.pixel_format.g_bit_mask = 0xFFFF0000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_SIGNED_R16:
+					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+					desc.pixel_format.rgb_bit_count = 16;
 
-			case EF_R8:
-				desc.pixel_format.flags |= DDSPF_LUMINANCE;
-				desc.pixel_format.rgb_bit_count = 8;
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x0000FFFF;
+					desc.pixel_format.g_bit_mask = 0x00000000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x000000FF;
-				desc.pixel_format.g_bit_mask = 0x00000000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_ARGB8:
+				case EF_ARGB8_SRGB:
+					desc.pixel_format.flags |= DDSPF_RGB;
+					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.rgb_bit_count = 32;
 
-			case EF_R16:
-				desc.pixel_format.flags |= DDSPF_LUMINANCE;
-				desc.pixel_format.rgb_bit_count = 16;
+					desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
+					desc.pixel_format.r_bit_mask = 0x00FF0000;
+					desc.pixel_format.g_bit_mask = 0x0000FF00;
+					desc.pixel_format.b_bit_mask = 0x000000FF;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
-				desc.pixel_format.r_bit_mask = 0x0000FFFF;
-				desc.pixel_format.g_bit_mask = 0x00000000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_ABGR8:
+				case EF_ABGR8_SRGB:
+					desc.pixel_format.flags |= DDSPF_RGB;
+					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.rgb_bit_count = 32;
 
-			case EF_A8:
-				desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
-				desc.pixel_format.rgb_bit_count = 8;
+					desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
+					desc.pixel_format.r_bit_mask = 0x000000FF;
+					desc.pixel_format.g_bit_mask = 0x0000FF00;
+					desc.pixel_format.b_bit_mask = 0x00FF0000;
+					break;
 
-				desc.pixel_format.rgb_alpha_bit_mask = 0x000000FF;
-				desc.pixel_format.r_bit_mask = 0x00000000;
-				desc.pixel_format.g_bit_mask = 0x00000000;
-				desc.pixel_format.b_bit_mask = 0x00000000;
-				break;
+				case EF_SIGNED_ABGR8:
+					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+					desc.pixel_format.rgb_bit_count = 32;
 
-			default:
-				BOOST_ASSERT(false);
-				break;
+					desc.pixel_format.rgb_alpha_bit_mask = 0xFF000000;
+					desc.pixel_format.r_bit_mask = 0x000000FF;
+					desc.pixel_format.g_bit_mask = 0x0000FF00;
+					desc.pixel_format.b_bit_mask = 0x00FF0000;
+					break;
+
+				case EF_A2BGR10:
+					desc.pixel_format.flags |= DDSPF_RGB;
+					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.rgb_bit_count = 32;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
+					desc.pixel_format.r_bit_mask = 0x000003FF;
+					desc.pixel_format.g_bit_mask = 0x000FFC00;
+					desc.pixel_format.b_bit_mask = 0x3FF00000;
+					break;
+
+				case EF_SIGNED_A2BGR10:
+					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+					desc.pixel_format.rgb_bit_count = 32;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0xC0000000;
+					desc.pixel_format.r_bit_mask = 0x000003FF;
+					desc.pixel_format.g_bit_mask = 0x000FFC00;
+					desc.pixel_format.b_bit_mask = 0x3FF00000;
+					break;
+
+				case EF_GR16:
+					desc.pixel_format.flags |= DDSPF_RGB;
+					desc.pixel_format.rgb_bit_count = 32;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x0000FFFF;
+					desc.pixel_format.g_bit_mask = 0xFFFF0000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
+
+				case EF_SIGNED_GR16:
+					desc.pixel_format.flags |= DDSPF_BUMPDUDV;
+					desc.pixel_format.rgb_bit_count = 32;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x0000FFFF;
+					desc.pixel_format.g_bit_mask = 0xFFFF0000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
+
+				case EF_R8:
+					desc.pixel_format.flags |= DDSPF_LUMINANCE;
+					desc.pixel_format.rgb_bit_count = 8;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x000000FF;
+					desc.pixel_format.g_bit_mask = 0x00000000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
+
+				case EF_R16:
+					desc.pixel_format.flags |= DDSPF_LUMINANCE;
+					desc.pixel_format.rgb_bit_count = 16;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0x00000000;
+					desc.pixel_format.r_bit_mask = 0x0000FFFF;
+					desc.pixel_format.g_bit_mask = 0x00000000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
+
+				case EF_A8:
+					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.rgb_bit_count = 8;
+
+					desc.pixel_format.rgb_alpha_bit_mask = 0x000000FF;
+					desc.pixel_format.r_bit_mask = 0x00000000;
+					desc.pixel_format.g_bit_mask = 0x00000000;
+					desc.pixel_format.b_bit_mask = 0x00000000;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
 			}
 		}
 
@@ -1928,7 +1940,7 @@ namespace KlayGE
 
 		file.write(reinterpret_cast<char*>(&desc), sizeof(desc));
 
-		if (array_size != 1)
+		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
 			DDS_HEADER_DXT10 desc10;
 			desc10.dxgi_format = ToDXGIFormat(format);

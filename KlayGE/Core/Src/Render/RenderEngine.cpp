@@ -78,6 +78,10 @@ namespace KlayGE
 		{
 		}
 
+		void ForceFlush()
+		{
+		}
+
 		uint16_t StencilBufferBitDepth()
 		{
 			return 0;

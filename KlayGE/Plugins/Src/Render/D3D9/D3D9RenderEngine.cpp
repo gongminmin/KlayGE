@@ -641,6 +641,10 @@ namespace KlayGE
 	void D3D9RenderEngine::EndPass()
 	{
 	}
+	
+	void D3D9RenderEngine::ForceFlush()
+	{
+	}
 
 	// 获取模板位数
 	/////////////////////////////////////////////////////////////////////////////////
