@@ -97,22 +97,22 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
-			out float3 texcoord0 : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
 	oPos = pos;
-	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
-float4 GBufferSkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
+float4 GBufferSkyBoxPS() : SV_Target
 {
-	return StoreNormalDepthMtl(0, 1, 0, 0);
+	return 0;
 }
 		]]>
 </shader>
 
 <technique name="GBufferTech">
 	<pass name="p0">
+		<state name="cull_mode" value="back"/>
+
 		<state name="vertex_shader" value="GBufferVS()"/>
 		<state name="pixel_shader" value="GBufferPS()"/>
 	</pass>
@@ -272,6 +272,14 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	return Shading(tc, diffuse, emit_clr.rgb, specular);
 }
 
+void ShadingSkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
 float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 {
 	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
@@ -282,6 +290,7 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 
 	<technique name="Shading">
 		<pass name="p0">
+			<state name="cull_mode" value="back"/>
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
@@ -298,7 +307,7 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="vertex_shader" value="ShadingSkyBoxVS()"/>
 			<state name="pixel_shader" value="ShadingSkyBoxPS()"/>
 		</pass>
 	</technique>

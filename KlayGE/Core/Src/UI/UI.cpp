@@ -326,6 +326,16 @@ namespace KlayGE
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(14, 113, 241, 121));
 		elem_texture_rcs_[UICT_EditBox].push_back(Rect_T<int32_t>(241, 113, 246, 121));
 
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 0, 141, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 0, 247, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 0, 252, 5));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 5, 141, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 5, 247, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 5, 252, 49));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(136, 49, 141, 54));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(141, 49, 247, 54));
+		elem_texture_rcs_[UICT_TexButton].push_back(Rect_T<int32_t>(247, 49, 252, 54));
+
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnKeyDown().connect(boost::bind(&UIManager::KeyDownHandler, this, _2));
 		main_wnd->OnKeyUp().connect(boost::bind(&UIManager::KeyUpHandler, this, _2));

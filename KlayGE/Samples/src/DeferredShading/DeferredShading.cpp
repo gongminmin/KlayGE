@@ -1121,7 +1121,7 @@ DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings 
 
 void DeferredShadingApp::InitObjects()
 {
-	this->LookAt(float3(-2, 2, 0), float3(0, 2, 0));
+	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
 	this->Proj(0.1f, 500.0f);
 
 	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModelTorus>(), CreateKMeshFactory<RenderTorus>());

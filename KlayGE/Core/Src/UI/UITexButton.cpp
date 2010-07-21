@@ -60,8 +60,9 @@ namespace KlayGE
 		UIElement Element;
 
 		// Fill layer
+		for (int i = 0; i < 9; ++ i)
 		{
-			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Button, 1), Color(1, 1, 1, 0));
+			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_TexButton, i), Color(1, 1, 1, 0));
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
@@ -181,25 +182,41 @@ namespace KlayGE
 
 		//TODO: remove magic numbers
 
-		// Fill layer
-		UIElementPtr pElement = elements_[0];
-
 		Rect_T<int32_t> rcWindow = bounding_box_;
 
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		pElement->FontColor().SetState(iState);
+		for (int i = 0; i < 10; ++ i)
+		{
+			UIElementPtr pElement = elements_[i];
 
-		this->GetDialog()->DrawSprite(*pElement, rcWindow);
+			// Blend current color
+			pElement->TextureColor().SetState(iState);
+			pElement->FontColor().SetState(iState);
+		}
+
+		// Fill layer
+		this->GetDialog()->DrawSprite(*elements_[0], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top(),
+			bounding_box_.left() + 5, bounding_box_.top() + 5));
+		this->GetDialog()->DrawSprite(*elements_[1], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.top(),
+			bounding_box_.right() - 5, bounding_box_.top() + 5));
+		this->GetDialog()->DrawSprite(*elements_[2], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.top(),
+			bounding_box_.right(), bounding_box_.top() + 5));
+
+		this->GetDialog()->DrawSprite(*elements_[3], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.top() + 5,
+			bounding_box_.left() + 5, bounding_box_.bottom() - 5));
+		this->GetDialog()->DrawSprite(*elements_[4], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.top() + 5,
+			bounding_box_.right() - 5, bounding_box_.bottom() - 5));
+		this->GetDialog()->DrawSprite(*elements_[5], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.top() + 5,
+			bounding_box_.right(), bounding_box_.bottom() - 5));
+
+		this->GetDialog()->DrawSprite(*elements_[6], Rect_T<int32_t>(bounding_box_.left(), bounding_box_.bottom() - 5,
+			bounding_box_.left() + 5, bounding_box_.bottom()));
+		this->GetDialog()->DrawSprite(*elements_[7], Rect_T<int32_t>(bounding_box_.left() + 5, bounding_box_.bottom() - 5,
+			bounding_box_.right() - 5, bounding_box_.bottom()));
+		this->GetDialog()->DrawSprite(*elements_[8], Rect_T<int32_t>(bounding_box_.right() - 5, bounding_box_.bottom() - 5,
+			bounding_box_.right(), bounding_box_.bottom()));
 
 		// Main button
-		pElement = elements_[1];
-
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		pElement->FontColor().SetState(iState);
-
-		this->GetDialog()->DrawSprite(*pElement, rcWindow);
+		this->GetDialog()->DrawSprite(*elements_[9], rcWindow);
 	}
 
 	TexturePtr const & UITexButton::GetTexture() const
@@ -212,11 +229,11 @@ namespace KlayGE
 		tex_index_ = UIManager::Instance().AddTexture(tex);
 		if (tex)
 		{
-			elements_[1]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
+			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, tex->Width(0), tex->Height(0)));
 		}
 		else
 		{
-			elements_[1]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
+			elements_[9]->SetTexture(static_cast<uint32_t>(tex_index_), Rect_T<int32_t>(0, 0, 1, 1));
 		}
 	}
 
