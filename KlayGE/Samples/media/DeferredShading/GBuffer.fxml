@@ -4,7 +4,7 @@
 	<include name="DeferredShadingUtil.fxml"/>
 	<include name="util.fxml"/>
 
-	<macro name="ALPHA_TEST_THRESHOLD" value="0.03"/>
+	<macro name="ALPHA_TEST_THRESHOLD" value="0.05"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -253,9 +253,7 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	float3 diffuse;
 	if (diffuse_map_enabled)
 	{
-		float4 d4 = diffuse_tex.Sample(aniso_sampler, texcoord);
-		clip(d4.a - ALPHA_TEST_THRESHOLD);
-		diffuse = d4.rgb;
+		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
 	else
 	{

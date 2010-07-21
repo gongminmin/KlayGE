@@ -912,18 +912,34 @@ namespace KlayGE
 							0, 0, &code, &err_msg);
 						if (err_msg != NULL)
 						{
-#ifdef KLAYGE_DEBUG
-							std::istringstream iss(shader_text);
+							std::string err_str(static_cast<char*>(err_msg->GetBufferPointer()));
+							std::string::size_type pos = err_str.find("): error X");
+							if (pos == std::string::npos)
+							{
+								pos = err_str.find("): warning X");
+							}
+							std::string part_err_str = err_str.substr(0, pos);
+							pos = part_err_str.rfind("(");
+							part_err_str = part_err_str.substr(pos + 1);
+							int err_line;
+							std::istringstream iss(part_err_str);
+							iss >> err_line;
+
+							iss.str(shader_text);
 							std::string s;
 							int line = 1;
+							std::cerr << "..." << std::endl;
 							while (iss)
 							{
 								std::getline(iss, s);
-								std::cerr << line << " " << s << std::endl;
+								if ((line - err_line > -3) && (line - err_line < 3))
+								{
+									std::cerr << line << " " << s << std::endl;
+								}
 								++ line;
 							}
-							std::cerr << static_cast<char*>(err_msg->GetBufferPointer()) << std::endl;
-#endif
+							std::cerr << "..." << std::endl;
+							std::cerr << err_str.c_str() << std::endl;
 
 							err_msg->Release();
 						}

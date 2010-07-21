@@ -376,6 +376,14 @@ namespace KlayGE
 			{
 				element.Type = D3DDECLTYPE_FLOAT1 - 1 + static_cast<uint8_t>(NumComponents(vs_elem.format));
 			}
+			else if (EF_ABGR8 == vs_elem.format)
+			{
+				element.Type = D3DDECLTYPE_UBYTE4N;
+			}
+			else if (EF_ARGB8 == vs_elem.format)
+			{
+				element.Type = D3DDECLTYPE_D3DCOLOR;
+			}
 			element.Offset		= elem_offset;
 			element.Method		= D3DDECLMETHOD_DEFAULT;
 			element.Stream		= static_cast<WORD>(stream);
@@ -396,27 +404,11 @@ namespace KlayGE
 			// Vertex colors
 			case VEU_Diffuse:
 				element.Usage = D3DDECLUSAGE_COLOR;
-				if (EF_ABGR8 == vs_elem.format)
-				{
-					element.Type = D3DDECLTYPE_UBYTE4N;
-				}
-				if (EF_ARGB8 == vs_elem.format)
-				{
-					element.Type = D3DDECLTYPE_D3DCOLOR;
-				}
 				break;
 
 			// Vertex speculars
 			case VEU_Specular:
 				element.Usage = D3DDECLUSAGE_COLOR;
-				if (EF_ABGR8 == vs_elem.format)
-				{
-					element.Type = D3DDECLTYPE_UBYTE4N;
-				}
-				if (EF_ARGB8 == vs_elem.format)
-				{
-					element.Type = D3DDECLTYPE_D3DCOLOR;
-				}
 				break;
 
 			// Blend Weights

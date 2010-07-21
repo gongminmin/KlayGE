@@ -1040,10 +1040,11 @@ namespace KlayGE
 		{
 			std::memset(&desc10, 0, sizeof(desc10));
 			array_size = 1;
+	
+			BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
+			BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
 		}
 
-		BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
-		BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
 		BOOST_ASSERT((desc.flags & DDSD_WIDTH) != 0);
 		BOOST_ASSERT((desc.flags & DDSD_HEIGHT) != 0);
 
@@ -1648,8 +1649,6 @@ namespace KlayGE
 
 		desc.size = sizeof(desc);
 
-		desc.flags |= DDSD_CAPS;
-		desc.flags |= DDSD_PIXELFORMAT;
 		desc.flags |= DDSD_WIDTH;
 		desc.flags |= DDSD_HEIGHT;
 
@@ -1895,30 +1894,36 @@ namespace KlayGE
 				}
 			}
 		}
+		
+		if (desc.pixel_format.four_cc != MakeFourCC<'D', 'X', '1', '0'>::value)
+		{
+			desc.flags |= DDSD_CAPS;
+			desc.flags |= DDSD_PIXELFORMAT;
 
-		desc.dds_caps.caps1 = DDSCAPS_TEXTURE;
-		if (numMipMaps != 1)
-		{
-			desc.dds_caps.caps1 |= DDSCAPS_MIPMAP;
-			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
-		}
-		if (Texture::TT_3D == type)
-		{
-			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
-			desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
-			desc.flags |= DDSD_DEPTH;
-			desc.depth = depth;
-		}
-		if (Texture::TT_Cube == type)
-		{
-			desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEX;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEX;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEY;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEY;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEZ;
-			desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
+			desc.dds_caps.caps1 = DDSCAPS_TEXTURE;
+			if (numMipMaps != 1)
+			{
+				desc.dds_caps.caps1 |= DDSCAPS_MIPMAP;
+				desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+			}
+			if (Texture::TT_3D == type)
+			{
+				desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+				desc.dds_caps.caps2 |= DDSCAPS2_VOLUME;
+				desc.flags |= DDSD_DEPTH;
+				desc.depth = depth;
+			}
+			if (Texture::TT_Cube == type)
+			{
+				desc.dds_caps.caps1 |= DDSCAPS_COMPLEX;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEX;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEX;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEY;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEY;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_POSITIVEZ;
+				desc.dds_caps.caps2 |= DDSCAPS2_CUBEMAP_NEGATIVEZ;
+			}
 		}
 
 		uint32_t format_size = NumFormatBytes(format);
