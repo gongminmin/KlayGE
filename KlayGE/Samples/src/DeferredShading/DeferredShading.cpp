@@ -879,9 +879,25 @@ namespace
 			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
 
-			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+			output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("AdaptiveAntiAliasPP.fxml")->TechniqueByName("AdaptiveAntiAlias"));
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderEffectPtr effect = rf.LoadEffect("AdaptiveAntiAliasPP.fxml");
+
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+			if (caps.cs_support && (5 == caps.max_shader_model))
+			{
+				adaptive_aa_tech_ = effect->TechniqueByName("AdaptiveAntiAliasCS");
+				cs_pp_ = true;
+			}
+			else
+			{
+				adaptive_aa_tech_ = effect->TechniqueByName("AdaptiveAntiAlias");
+				cs_pp_ = false;
+			}
+			show_edge_tech_ = effect->TechniqueByName("AdaptiveAntiAliasShowEdge");
+
+			this->Technique(adaptive_aa_tech_);
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
@@ -893,17 +909,46 @@ namespace
 			}
 		}
 
+		using PostProcess::InputPin;
+
 		void ShowEdge(bool se)
 		{
 			if (se)
 			{
-				technique_ = technique_->Effect().TechniqueByName("AdaptiveAntiAliasShowEdge");
+				technique_ = show_edge_tech_;
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("AdaptiveAntiAlias");
+				technique_ = adaptive_aa_tech_;
 			}
 		}
+
+		void Apply()
+		{
+			if (cs_pp_)
+			{
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+				TexturePtr const & tex = this->InputPin(0);
+
+				int const BLOCK_SIZE_X = 16;
+				int const BLOCK_SIZE_Y = 16;
+
+				this->OnRenderBegin();
+				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
+				this->OnRenderEnd();
+			}
+			else
+			{
+				PostProcess::Apply();
+			}
+		}
+
+	protected:
+		bool cs_pp_;
+		RenderTechniquePtr adaptive_aa_tech_;
+		RenderTechniquePtr show_edge_tech_;
 	};
 
 	class SSAOPostProcess : public PostProcess
@@ -918,12 +963,36 @@ namespace
 				ssao_level_(4)
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-			rt_size_inv_size_param_ = technique_->Effect().ParameterByName("rt_size_inv_size");
+			
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (caps.cs_support && (5 == caps.max_shader_model))
+			{
+				ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLowCS");
+				ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddleCS");
+				ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHighCS");
+				cs_pp_ = true;
+			}
+			else
+			{
+				ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLow");
+				ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddle");
+				ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHigh");
+				cs_pp_ = false;
+			}
 
-			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLow");
-			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddle");
-			ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHigh");
+			this->Technique(ssao_techs_[2]);
 		}
+
+		void InputPin(uint32_t index, TexturePtr const & tex)
+		{
+			PostProcess::InputPin(index, tex);
+			if ((0 == index) && tex)
+			{
+				*(technique_->Effect().ParameterByName("inv_tex_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
+			}
+		}
+
+		using PostProcess::InputPin;
 
 		void SSAOLevel(int level)
 		{
@@ -938,7 +1007,24 @@ namespace
 		{
 			if (ssao_level_ > 0)
 			{
-				PostProcess::Apply();
+				if (cs_pp_)
+				{
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					re.BindFrameBuffer(re.DefaultFrameBuffer());
+
+					TexturePtr const & tex = this->InputPin(0);
+
+					int const BLOCK_SIZE_X = 16;
+					int const BLOCK_SIZE_Y = 16;
+
+					this->OnRenderBegin();
+					re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
+					this->OnRenderEnd();
+				}
+				else
+				{
+					PostProcess::Apply();
+				}
 			}
 		}
 
@@ -948,50 +1034,15 @@ namespace
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*rt_size_inv_size_param_ = float4(1.0f * re.CurFrameBuffer()->Width(), 1.0f * re.CurFrameBuffer()->Height(),
-				1.0f / re.CurFrameBuffer()->Width(), 1.0f / re.CurFrameBuffer()->Height());
 		}
 
 	protected:
-		int ssao_level_;
+		bool cs_pp_;
 
+		int ssao_level_;
 		RenderTechniquePtr ssao_techs_[4];
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr rt_size_inv_size_param_;
-	};
-
-	class SSAOPostProcessCS : public SSAOPostProcess
-	{
-	public:
-		SSAOPostProcessCS()
-		{
-			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLowCS");
-			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddleCS");
-			ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHighCS");
-
-			technique_ = ssao_techs_[2];
-		}
-
-		void Apply()
-		{
-			if (ssao_level_ > 0)
-			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-				TexturePtr const & tex = this->InputPin(0);
-
-				int const BLOCK_SIZE_X = 16;
-				int const BLOCK_SIZE_Y = 16;
-
-				this->OnRenderBegin();
-				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
-				this->OnRenderEnd();
-			}
-		}
 	};
 
 	class DeferredShadingDebug : public PostProcess
@@ -1158,16 +1209,7 @@ void DeferredShadingApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
-
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.cs_support && (5 == caps.max_shader_model))
-	{
-		ssao_pp_ = MakeSharedPtr<SSAOPostProcessCS>();
-	}
-	else
-	{
-		ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
-	}
+	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 
 	debug_pp_ = MakeSharedPtr<DeferredShadingDebug>();
@@ -1225,7 +1267,15 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadingTex()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	{
+		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.cs_support && (5 == caps.max_shader_model))
+		{
+			access_hint |= EAH_GPU_Unordered;
+		}
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadingTex()->Format(), 1, 0, access_hint, NULL);
+	}
 
 	deferred_shading_->SSAOTex(ssao_tex_);
 
