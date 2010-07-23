@@ -132,7 +132,7 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code);
+		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code);
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);

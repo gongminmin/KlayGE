@@ -161,9 +161,9 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			if (!dll_loader_.Load("7z.dll"))
 			{
-#ifdef KLAYGE_PLATFORM_WIN32
+#if defined KLAYGE_PLATFORM_WIN32
 				dll_loader_.Load("7z_x86.dll");
-#elif KLAYGE_PLATFORM_WIN64
+#elif defined KLAYGE_PLATFORM_WIN64
 				dll_loader_.Load("7z_x64.dll");
 #endif
 			}

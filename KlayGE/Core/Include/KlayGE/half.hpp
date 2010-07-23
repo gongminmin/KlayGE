@@ -66,7 +66,7 @@ namespace KlayGE
 
 		explicit half(float f)
 		{
-			union
+			union FNI
 			{
 				float f;
 				int32_t i;
@@ -162,7 +162,7 @@ namespace KlayGE
 
 			ret = s | (e << 23) | m;
 
-			union
+			union INF
 			{
 				int32_t i;
 				float f;

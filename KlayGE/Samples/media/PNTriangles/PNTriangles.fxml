@@ -73,6 +73,7 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 	oPos = mul(float4(result_pos, 1), worldviewproj);
 	oTex0 = texcoord0;
 	oNormal = mul(result_normal, (float3x3)worldview);
+	oPosES = mul(float4(result_pos, 1), worldview).xyz;
 }
 
 float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : TEXCOORD2) : SV_Target
@@ -301,7 +302,7 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 	// Transform model position with view-projection matrix
 	oPos = mul(float4(world_pos, 1), viewproj);
-	oPosES = mul(float4(world_pos, 1), view);
+	oPosES = mul(float4(world_pos, 1), view).xyz;
 	oNormal = mul(normal, (float3x3)view); 
 }
 		]]>

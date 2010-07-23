@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3D10BlobPtr const & vs_code) const
+	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code) const
 	{
 		if (dirty_decl_)
 		{

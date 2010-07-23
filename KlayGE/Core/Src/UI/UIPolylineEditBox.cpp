@@ -122,7 +122,7 @@ namespace KlayGE
 				++ iter;
 			}
 			index = static_cast<int>(iter + 1 - ctrl_points_.begin());
-			if ((iter + 1 == ctrl_points_.end()) || (abs((iter + 1)->x() - pos) > 0.05f))
+			if ((iter + 1 == ctrl_points_.end()) || (MathLib::abs((iter + 1)->x() - pos) > 0.05f))
 			{
 				ctrl_points_.insert(iter + 1, float2(pos, value));
 			}
@@ -224,7 +224,7 @@ namespace KlayGE
 			if (this->ContainsPoint(pt))
 			{
 				float2 p = this->PtFromCoord(pt.x(), pt.y());
-				if (abs(this->GetValue(p.x()) - p.y()) < 0.1f)
+				if (MathLib::abs(this->GetValue(p.x()) - p.y()) < 0.1f)
 				{
 					bool found = false;
 					for (int i = 0; i < static_cast<int>(this->NumCtrlPoints()); ++ i)
@@ -285,7 +285,7 @@ namespace KlayGE
 			if (0 == buttons)
 			{
 				float2 p = this->PtFromCoord(pt.x(), pt.y());
-				if (abs(this->GetValue(p.x()) - p.y()) < 0.1f)
+				if (MathLib::abs(this->GetValue(p.x()) - p.y()) < 0.1f)
 				{
 					elements_[POLYLINE_INDEX]->TextureColor().SetState(UICS_MouseOver);
 				}

@@ -885,26 +885,26 @@ namespace KlayGE
 						break;
 					}
 
-					ID3D10Blob* code = NULL;
+					ID3DBlob* code = NULL;
 					if (is_shader_validate_[type])
 					{
-						ID3D10Blob* err_msg;
-						std::vector<D3D10_SHADER_MACRO> macros;
+						ID3DBlob* err_msg;
+						std::vector<D3D_SHADER_MACRO> macros;
 						{
-							D3D10_SHADER_MACRO macro_cb = { "CONSTANT_BUFFER", "1" };
+							D3D_SHADER_MACRO macro_cb = { "CONSTANT_BUFFER", "1" };
 							macros.push_back(macro_cb);
 						}
 						{
-							D3D10_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" };
+							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" };
 							macros.push_back(macro_d3d11);
 						}
 						if (feature_level <= D3D_FEATURE_LEVEL_9_3)
 						{
-							D3D10_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+							D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
 							macros.push_back(macro_bc5_as_bc3);
 						}
 						{
-							D3D10_SHADER_MACRO macro_end = { NULL, NULL };
+							D3D_SHADER_MACRO macro_end = { NULL, NULL };
 							macros.push_back(macro_end);
 						}
 						D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), NULL, &macros[0],
@@ -945,7 +945,7 @@ namespace KlayGE
 						}
 					}
 
-					ID3D10BlobPtr code_blob;
+					ID3DBlobPtr code_blob;
 					if (NULL == code)
 					{
 						is_shader_validate_[type] = false;
@@ -1099,7 +1099,7 @@ namespace KlayGE
 
 									D3D11_SHADER_VARIABLE_DESC var_desc;
 									reflection_var->GetDesc(&var_desc);
-									if (var_desc.uFlags & D3D10_SVF_USED)
+									if (var_desc.uFlags & D3D_SVF_USED)
 									{
 										RenderEffectParameterPtr const & p = effect.ParameterByName(var_desc.Name);
 										if (p)
@@ -1142,21 +1142,21 @@ namespace KlayGE
 
 								switch (si_desc.Type)
 								{
-								case D3D10_SIT_SAMPLER:
+								case D3D_SIT_SAMPLER:
 									num_samplers = std::max(num_samplers, static_cast<int>(si_desc.BindPoint));
 									break;
 
-								case D3D10_SIT_TEXTURE:
-								case D3D11_SIT_STRUCTURED:
-								case D3D11_SIT_BYTEADDRESS:
+								case D3D_SIT_TEXTURE:
+								case D3D_SIT_STRUCTURED:
+								case D3D_SIT_BYTEADDRESS:
 									num_srvs = std::max(num_srvs, static_cast<int>(si_desc.BindPoint));
 									break;
 
-								case D3D11_SIT_UAV_RWTYPED:
-								case D3D11_SIT_UAV_RWSTRUCTURED:
-								case D3D11_SIT_UAV_RWBYTEADDRESS:
-								case D3D11_SIT_UAV_APPEND_STRUCTURED:
-								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
+								case D3D_SIT_UAV_RWTYPED:
+								case D3D_SIT_UAV_RWSTRUCTURED:
+								case D3D_SIT_UAV_RWBYTEADDRESS:
+								case D3D_SIT_UAV_APPEND_STRUCTURED:
+								case D3D_SIT_UAV_CONSUME_STRUCTURED:
 									num_uavs = std::max(num_uavs, static_cast<int>(si_desc.BindPoint));
 									break;
 
@@ -1176,36 +1176,37 @@ namespace KlayGE
 
 								switch (si_desc.Type)
 								{
-								case D3D10_SIT_TEXTURE:
-								case D3D10_SIT_SAMPLER:
-								case D3D11_SIT_STRUCTURED:
-								case D3D11_SIT_BYTEADDRESS:
-								case D3D11_SIT_UAV_RWTYPED:
-								case D3D11_SIT_UAV_RWSTRUCTURED:
-								case D3D11_SIT_UAV_RWBYTEADDRESS:
-								case D3D11_SIT_UAV_APPEND_STRUCTURED:
-								case D3D11_SIT_UAV_CONSUME_STRUCTURED:
+								case D3D_SIT_TEXTURE:
+								case D3D_SIT_SAMPLER:
+								case D3D_SIT_STRUCTURED:
+								case D3D_SIT_BYTEADDRESS:
+								case D3D_SIT_UAV_RWTYPED:
+								case D3D_SIT_UAV_RWSTRUCTURED:
+								case D3D_SIT_UAV_RWBYTEADDRESS:
+								case D3D_SIT_UAV_APPEND_STRUCTURED:
+								case D3D_SIT_UAV_CONSUME_STRUCTURED:
 									{
 										RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
 										if (p)
 										{
 											D3D11ShaderParameterHandle p_handle;
 											p_handle.shader_type = static_cast<uint8_t>(type);
-											if (D3D10_SIT_SAMPLER == si_desc.Type)
+											if (D3D_SIT_SAMPLER == si_desc.Type)
 											{
-												p_handle.param_type = D3D10_SVT_SAMPLER;
+												p_handle.param_type = D3D_SVT_SAMPLER;
 											}
 											else
 											{
-												if (D3D10_SRV_DIMENSION_BUFFER == si_desc.Dimension)
+												if (D3D_SRV_DIMENSION_BUFFER == si_desc.Dimension)
 												{
-													p_handle.param_type = D3D10_SVT_BUFFER;
+													p_handle.param_type = D3D_SVT_BUFFER;
 												}
 												else
 												{
-													p_handle.param_type = D3D10_SVT_TEXTURE;
+													p_handle.param_type = D3D_SVT_TEXTURE;
 												}
 											}
+											p_handle.cbuff = 0;
 											p_handle.offset = si_desc.BindPoint;
 											p_handle.elements = 1;
 											p_handle.rows = 0;
@@ -1294,7 +1295,7 @@ namespace KlayGE
 	{
 		parameter_bind_t ret;
 		ret.param = param;
-		ret.p_handle = p_handle;
+		memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
 
 		switch (param->type())
 		{
@@ -1303,19 +1304,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<bool*, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<bool*, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<bool*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<bool*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
@@ -1328,19 +1329,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<bool, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<bool, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<bool, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<bool, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
@@ -1356,19 +1357,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<uint32_t*, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<uint32_t*, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<uint32_t*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<uint32_t*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
@@ -1381,19 +1382,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<uint32_t, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<uint32_t, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<uint32_t, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<uint32_t, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
@@ -1409,19 +1410,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<int32_t*, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<int32_t*, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<int32_t*, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<int32_t*, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], p_handle.elements, param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
@@ -1434,19 +1435,19 @@ namespace KlayGE
 			{
 				switch (p_handle.param_type)
 				{
-				case D3D10_SVT_BOOL:
+				case D3D_SVT_BOOL:
 					ret.func = SetD3D11ShaderParameter<int32_t, BOOL>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_UINT:
+				case D3D_SVT_UINT:
 					ret.func = SetD3D11ShaderParameter<int32_t, uint32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_INT:
+				case D3D_SVT_INT:
 					ret.func = SetD3D11ShaderParameter<int32_t, int32_t>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 
-				case D3D10_SVT_FLOAT:
+				case D3D_SVT_FLOAT:
 					ret.func = SetD3D11ShaderParameter<int32_t, float>(&cbufs_[p_handle.shader_type][p_handle.cbuff][p_handle.offset], param, &dirty_[p_handle.shader_type][p_handle.cbuff]);
 					break;
 

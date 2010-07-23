@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 		uint32_t shader_type;
 
-		D3D10_SHADER_VARIABLE_TYPE param_type;
+		D3D_SHADER_VARIABLE_TYPE param_type;
 
 		uint32_t cbuff;
 
@@ -61,7 +61,7 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
-		ID3D10BlobPtr const & VSCode() const
+		ID3DBlobPtr const & VSCode() const
 		{
 			return vs_code_;
 		}
@@ -92,7 +92,7 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		ID3D10BlobPtr vs_code_;
+		ID3DBlobPtr vs_code_;
 
 		boost::array<std::vector<ID3D11SamplerState*>, ST_NumShaderTypes> samplers_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ST_NumShaderTypes> srvs_;

@@ -50,7 +50,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<ID3D11BlendState>				ID3D11BlendStatePtr;
 	typedef boost::shared_ptr<ID3D11SamplerState>			ID3D11SamplerStatePtr;
 	typedef boost::shared_ptr<ID3D11ShaderResourceView>		ID3D11ShaderResourceViewPtr;
-	typedef boost::shared_ptr<ID3D10Blob>					ID3D10BlobPtr;
+	typedef boost::shared_ptr<ID3DBlob>						ID3DBlobPtr;
 }
 
 #endif		// _D3D11TYPEDEFS_HPP

@@ -204,7 +204,7 @@ namespace KlayGE
 							{
 								float3 const t = aabbs_center_in_ws[obj_index] - new_node.bb_center;
 								float3 const e = aabbs_half_size_in_ws[obj_index] + new_node.bb_half_size;
-								if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.z()) <= e.z()))
+								if ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z()))
 								{
 									new_node_obj_indices.push_back(obj_index);
 								}
@@ -316,7 +316,7 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		float3 const t = bb_center - node.bb_center;
 		float3 const e = bb_half_size + node.bb_half_size;
-		if ((abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.z()) <= e.z()))
+		if ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z()))
 		{
 			Frustum::VIS const vis = node.visible;
 			switch (vis)

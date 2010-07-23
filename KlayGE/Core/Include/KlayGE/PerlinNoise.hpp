@@ -143,7 +143,7 @@ namespace KlayGE
 				T freq(1), amp(1);
 				for (int i = 0; i < octaves; ++ i)
 				{
-					sum += abs(this->noise(freq * x, freq * y)) * amp;
+					sum += MathLib::abs(this->noise(freq * x, freq * y)) * amp;
 					freq *= lacunarity;
 					amp *= gain;
 				}
@@ -156,7 +156,7 @@ namespace KlayGE
 				T freq(1), amp(1);
 				for (int i = 0; i < octaves; ++ i)
 				{
-					sum += abs(this->noise(freq * x, freq * y, freq * z)) * amp;
+					sum += MathLib::abs(this->noise(freq * x, freq * y, freq * z)) * amp;
 					freq *= lacunarity;
 					amp *= gain;
 				}
@@ -226,7 +226,7 @@ namespace KlayGE
 				T freq(1), amp(1);
 				for (int i = 0; i < octaves; ++ i)
 				{
-					sum += abs(this->tileable_noise(freq * x, freq * y, w * freq, h * freq)) * amp;
+					sum += MathLib::abs(this->tileable_noise(freq * x, freq * y, w * freq, h * freq)) * amp;
 					freq *= lacunarity;
 					amp *= gain;
 				}
@@ -240,7 +240,7 @@ namespace KlayGE
 				T freq(1), amp(1);
 				for (int i = 0; i < octaves; ++ i)
 				{
-					sum += abs(this->tileable_noise(freq * x, freq * y, freq * z, w * freq, h * freq, d * freq)) * amp;
+					sum += MathLib::abs(this->tileable_noise(freq * x, freq * y, freq * z, w * freq, h * freq, d * freq)) * amp;
 					freq *= lacunarity;
 					amp *= gain;
 				}

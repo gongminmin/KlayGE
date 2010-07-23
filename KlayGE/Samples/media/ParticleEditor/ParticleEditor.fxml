@@ -155,6 +155,14 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 	float spin = input[0].spin;
 #endif
 	PS_IN gs_out;
+	
+	float life_factor = (init_life - CenterView_Life.w) / init_life;
+	gs_out.CenterView = float4(CenterView_Life.xyz, 1);
+	float cz = cos(spin);
+	float sz = sin(spin);
+	gs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
+	gs_out.clr.a = GetTransparencyOverLife(init_life - CenterView_Life.w);
+	gs_out.view_dir.w = radius;
 
 	for (int i = 0; i < 4; ++ i)
 	{
@@ -175,21 +183,13 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		{
 			tex = float2(1, -1);
 		}
-
-		float life_factor = (init_life - CenterView_Life.w) / init_life;
 		
-		float4 view_pos = float4(CenterView_Life.xyz, 1);
-		gs_out.CenterView = view_pos;
 		float2 offset = tex * radius;
-		float cz = cos(spin);
-		float sz = sin(spin);
+		float4 view_pos = gs_out.CenterView;
 		view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
-		gs_out.clr.a = GetTransparencyOverLife(init_life - CenterView_Life.w);
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
 		gs_out.view_dir.xyz = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
-		gs_out.view_dir.w = radius;
 		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
 #ifdef KLAYGE_OPENGL

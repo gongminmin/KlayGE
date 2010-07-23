@@ -39,7 +39,7 @@ namespace KlayGE
 	inline uint32_t
 	float_to_uint32(float v)
 	{
-		union
+		union FNU
 		{
 			float f;
 			uint32_t u;
@@ -50,7 +50,7 @@ namespace KlayGE
 	inline float
 	uint32_to_float(uint32_t v)
 	{
-		union
+		union FNU
 		{
 			uint32_t u;
 			float f;

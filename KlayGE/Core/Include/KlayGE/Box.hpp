@@ -213,7 +213,7 @@ namespace KlayGE
 		{
 			float3 const t = rhs.Center() - this->Center();
 			float3 const e = this->HalfSize() + rhs.HalfSize();
-			return (abs(t.x()) <= e.x()) && (abs(t.y()) <= e.y()) && (abs(t.z()) <= e.z());
+			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
 		}
 
 	private:

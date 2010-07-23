@@ -307,7 +307,14 @@ namespace KlayGE
 		inline float
 		abs(float x)
 		{
-			return std::abs(x);
+			union FNI
+			{
+				float f;
+				int32_t i;
+			} fni;
+			fni.f = x;
+			fni.i &= 0x7FFFFFFF;
+			return fni.f;
 		}
 		inline float
 		sqrt(float x)
@@ -321,17 +328,17 @@ namespace KlayGE
 			float const threehalfs = 1.5f;
 
 			float x2 = number * 0.5f;
-			union
+			union FNI
 			{
-				float y;
-				long i;
-			} fnl;
-			fnl.y = number;											// evil floating point bit level hacking
-			fnl.i = 0x5f375a86 - (fnl.i >> 1);						// what the fuck?
-			fnl.y = fnl.y * (threehalfs - (x2 * fnl.y * fnl.y));	// 1st iteration
-			//fnl.y = y * (threehalfs - (x2 * fnl.y * fnl.y));		// 2nd iteration, this can be removed
+				float f;
+				int32_t i;
+			} fni;
+			fni.f = number;											// evil floating point bit level hacking
+			fni.i = 0x5f375a86 - (fni.i >> 1);						// what the fuck?
+			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));	// 1st iteration
+			//fni.f = f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
 
-			return fnl.y;
+			return fni.f;
 		}
 
 		inline float
@@ -1790,7 +1797,7 @@ namespace KlayGE
 
 				T denominator = s1 * t2 - s2 * t1;
 				Vector_T<T, 3> tangent, binormal;
-				if (abs(denominator) < std::numeric_limits<T>::epsilon())
+				if (MathLib::abs(denominator) < std::numeric_limits<T>::epsilon())
 				{
 					tangent = Vector_T<T, 3>(1, 0, 0);
 					binormal = Vector_T<T, 3>(0, 1, 0);
