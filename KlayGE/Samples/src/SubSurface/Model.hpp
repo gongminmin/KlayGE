@@ -18,8 +18,9 @@ public:
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void BackFaceDepthPass(bool dfdp);
-
 	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);
+	void SigmaT(float sigma_t);
+	void MtlThickness(float thickness);
 
 	KlayGE::TexturePtr const & EmptyBumpMap() const
 	{
@@ -41,8 +42,9 @@ public:
 	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void BackFaceDepthPass(bool dfdp);
-
 	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);
+	void SigmaT(float sigma_t);
+	void MtlThickness(float thickness);
 
 	void BuildMeshInfo();
 };

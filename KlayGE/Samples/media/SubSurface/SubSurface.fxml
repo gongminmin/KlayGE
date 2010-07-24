@@ -6,9 +6,9 @@
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float" name="material_thickness" value="0.6"/>
-	<parameter type="float3" name="extinction_coefficient" x="0.8" y="0.2" z="0.12"/>
-	<parameter type="float" name="rim_scalar" value="1"/>
+	<parameter type="float3" name="extinction_coefficient" x="0.2" y="0.8" z="0.12"/>
+	<parameter type="float" name="material_thickness"/>
+	<parameter type="float" name="sigma_t"/>
 
 	<parameter type="float2" name="offset"/>
 	<parameter type="int" name="flip"/>
@@ -130,19 +130,16 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	float2 tex_coord = oPosSS.xy / oPosSS.w - offset;
 	tex_coord.y *= flip;
 	tex_coord = tex_coord * 0.5f + 0.5f;
-	float thickness = back_face_depth_tex.Sample(point_sampler, tex_coord).r - oPosSS.w;
+	float thickness = clamp(back_face_depth_tex.Sample(point_sampler, tex_coord).r - oPosSS.w, 0, 100.0f);
 
 	float indirect_light = material_thickness * (max(0, dot(-N, L)) + max(0, dot(-V, L)));
 	indirect_light *= attenuation;
-	indirect_light *= clamp(exp(1 / max(1e-5f, thickness)) * 0.001f, 0, 5.0f);
-
-	float rim = 1.0f - max(0, dot(N, V));
-	rim *= rim;
+	indirect_light *= exp(-thickness * sigma_t);
 
 	float diffuse_factor = dot(L, N);
 
 	float3 clr = ambient_clr.rgb * 0.2f * diffuse;
-	clr += rim * rim_scalar * indirect_light * extinction_coefficient;
+	clr += indirect_light * extinction_coefficient;
 	if (diffuse_factor > 0)
 	{
 		float specular_factor = pow(max(dot(H, N), 0.0f), shininess);

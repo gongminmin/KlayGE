@@ -57,6 +57,16 @@ namespace
 		{
 			checked_pointer_cast<DetailedModel>(renderable_)->BackFaceDepthTex(tex, flipping);
 		}
+
+		void SigmaT(float sigma_t)
+		{
+			checked_pointer_cast<DetailedModel>(renderable_)->SigmaT(sigma_t);
+		}
+
+		void MtlThickness(float thickness)
+		{
+			checked_pointer_cast<DetailedModel>(renderable_)->MtlThickness(thickness);
+		}
 	};
 
 	enum
@@ -105,12 +115,10 @@ void SubSurfaceApp::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("SubSurface.uiml"));
-
 	model_ = MakeSharedPtr<ModelObject>();
 	model_->AddToSceneManager();
 
-	this->LookAt(float3(-3, 3, -1.8f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
+	this->LookAt(float3(-0.4f, 1, 3.9f), float3(0, 1, 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, 200.0f);
 
 	tbController_.AttachCamera(this->ActiveCamera());
@@ -123,6 +131,19 @@ void SubSurfaceApp::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&SubSurfaceApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("SubSurface.uiml"));
+	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
+	id_sigma_static_ = dialog_params_->IDFromName("SigmaStatic");
+	id_sigma_slider_ = dialog_params_->IDFromName("SigmaSlider");
+	id_mtl_thickness_static_ = dialog_params_->IDFromName("MtlThicknessStatic");
+	id_mtl_thickness_slider_ = dialog_params_->IDFromName("MtlThicknessSlider");
+
+	dialog_params_->Control<UISlider>(id_sigma_slider_)->OnValueChangedEvent().connect(boost::bind(&SubSurfaceApp::SigmaChangedHandler, this, _1));
+	this->SigmaChangedHandler(*dialog_params_->Control<UISlider>(id_sigma_slider_));
+
+	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(boost::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, _1));
+	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
 }
 
 void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
@@ -150,6 +171,26 @@ void SubSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction con
 		this->Quit();
 		break;
 	}
+}
+
+void SubSurfaceApp::SigmaChangedHandler(KlayGE::UISlider const & sender)
+{
+	float sigma_t = sender.GetValue() * 0.2f;
+	checked_pointer_cast<ModelObject>(model_)->SigmaT(sigma_t);
+
+	std::wostringstream stream;
+	stream << L"Sigma_t: " << sigma_t;
+	dialog_params_->Control<UIStatic>(id_sigma_static_)->SetText(stream.str());
+}
+
+void SubSurfaceApp::MtlThicknessChangedHandler(KlayGE::UISlider const & sender)
+{
+	float mtl_thickness = sender.GetValue() * 0.1f;
+	checked_pointer_cast<ModelObject>(model_)->MtlThickness(mtl_thickness);
+
+	std::wostringstream stream;
+	stream << L"Material thickness: " << mtl_thickness;
+	dialog_params_->Control<UIStatic>(id_mtl_thickness_static_)->SetText(stream.str());
 }
 
 void SubSurfaceApp::DoUpdateOverlay()

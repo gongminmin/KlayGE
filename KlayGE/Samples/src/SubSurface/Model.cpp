@@ -120,6 +120,15 @@ void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flippin
 	*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flipping ? -1 : 1);
 }
 
+void DetailedMesh::SigmaT(float sigma_t)
+{
+	*(technique_->Effect().ParameterByName("sigma_t")) = sigma_t;
+}
+
+void DetailedMesh::MtlThickness(float thickness)
+{
+	*(technique_->Effect().ParameterByName("material_thickness")) = thickness;
+}
 
 DetailedModel::DetailedModel(std::wstring const & name)
 		: RenderModel(name)
@@ -173,5 +182,21 @@ void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flippi
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
 		checked_pointer_cast<DetailedMesh>(*iter)->BackFaceDepthTex(tex, flipping);
+	}
+}
+
+void DetailedModel::SigmaT(float sigma_t)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedMesh>(*iter)->SigmaT(sigma_t);
+	}
+}
+
+void DetailedModel::MtlThickness(float thickness)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedMesh>(*iter)->MtlThickness(thickness);
 	}
 }

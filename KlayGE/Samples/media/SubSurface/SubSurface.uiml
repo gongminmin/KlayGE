@@ -1,6 +1,14 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
+	<dialog id="Parameters" caption="Parameters" x="-220" y="150" align_x="right" width="220" height="340">
+		<control type="static" id="SigmaStatic" caption="Sigma_t: 0" x="25" y="30" width="160" height="24" is_default="0"/>
+		<control type="slider" id="SigmaSlider" x="25" y="60" width="180" height="24" min="1" max="100" value="50" is_default="0"/>
+
+		<control type="static" id="MtlThicknessStatic" caption="Material thickness: 0" x="25" y="90" width="160" height="24" is_default="0"/>
+		<control type="slider" id="MtlThicknessSlider" x="25" y="120" width="180" height="24" min="1" max="10" value="6" is_default="0"/>
+	</dialog>
+
 	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" bg_color_a="0">
 		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
 	</dialog>
