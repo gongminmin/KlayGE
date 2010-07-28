@@ -1,0 +1,180 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_robustness" reg_no="105">
+	<tokens>
+		<token name="GL_GUILTY_CONTEXT_RESET_ARB" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET_ARB" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET_ARB" value="0x8255"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY_ARB" value="0x8256"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET_ARB" value="0x8252"/>
+		<token name="GL_NO_RESET_NOTIFICATION_ARB" value="0x8261"/>
+		<token name="GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB" value="0x00000004"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetGraphicsResetStatusARB" return="GLenum"/>
+		<function name="glGetnMapdvARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnMapfvARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnMapivARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapfvARB" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapuivARB" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapusvARB" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPolygonStippleARB" return="void">
+			<params>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLubyte*" name="pattern"/>
+			</params>
+		</function>
+		<function name="glGetnTexImageARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="img"/>
+			</params>
+		</function>
+		<function name="glReadnPixelsARB" return="void">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetnColorTableARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="table"/>
+			</params>
+		</function>
+		<function name="glGetnConvolutionFilterARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="image"/>
+			</params>
+		</function>
+		<function name="glGetnSeparableFilterARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="rowBufSize"/>
+				<param type="GLvoid*" name="row"/>
+				<param type="GLsizei" name="columnBufSize"/>
+				<param type="GLvoid*" name="column"/>
+				<param type="GLvoid*" name="span"/>
+			</params>
+		</function>
+		<function name="glGetnHistogramARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnMinmaxARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnCompressedTexImageARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="lod"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="img"/>
+			</params>
+		</function>
+		<function name="glGetnUniformfvARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformivARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformuivARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformdvARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

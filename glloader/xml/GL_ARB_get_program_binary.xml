@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_get_program_binary" reg_no="96">
+	<tokens>
+		<token name="GL_PROGRAM_BINARY_RETRIEVABLE_HINT" value="0x8257"/>
+		<token name="GL_PROGRAM_BINARY_LENGTH" value="0x8741"/>
+		<token name="GL_NUM_PROGRAM_BINARY_FORMATS" value="0x87FE"/>
+		<token name="GL_PROGRAM_BINARY_FORMATS" value="0x87FF"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetProgramBinary" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLenum*" name="binaryFormat"/>
+				<param type="void*" name="binary"/>
+			</params>
+		</function>
+		<function name="glProgramBinary" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="binaryFormat"/>
+				<param type="const void*" name="binary"/>
+				<param type="GLsizei" name="length"/>
+			</params>
+		</function>
+		<function name="glProgramParameteri" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

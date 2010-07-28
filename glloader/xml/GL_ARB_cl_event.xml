@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_cl_event" reg_no="103" predefined="__OPENCL_CL_H">
+	<tokens>
+		<token name="SYNC_CL_EVENT_ARB" value="0x8240"/>
+		<token name="SYNC_CL_EVENT_COMPLETE_ARB" value="0x8241"/>
+	</tokens>
+
+	<functions>
+		<function name="glCreateSyncFromCLeventARB" return="sync">
+			<params>
+				<param type="cl_context" name="context"/>
+				<param type="cl_event" name="event"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_1">
+	<tokens>
+		<token name="GL_ACTIVE_PROGRAM" value="GL_CURRENT_PROGRAM"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_ARB_ES2_compatibility"/>
+		<ext name="GL_ARB_get_program_binary"/>
+		<ext name="GL_ARB_separate_shader_objects"/>
+		<ext name="GL_ARB_shader_precision"/>
+		<ext name="GL_ARB_vertex_attrib_64bit"/>
+		<ext name="GL_ARB_viewport_array"/>
+	</additionals>
+</gl_extension>

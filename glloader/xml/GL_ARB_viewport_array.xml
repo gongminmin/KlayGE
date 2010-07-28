@@ -1,0 +1,119 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_viewport_array" reg_no="100">
+	<tokens>
+		<token name="GL_MAX_VIEWPORTS" value="0x825B"/>
+		<token name="GL_VIEWPORT_SUBPIXEL_BITS" value="0x825C"/>
+		<token name="GL_VIEWPORT_BOUNDS_RANGE" value="0x825D"/>
+		<token name="GL_LAYER_PROVOKING_VERTEX" value="0x825E"/>
+		<token name="GL_VIEWPORT_INDEX_PROVOKING_VERTEX" value="0x825F"/>
+		<token name="GL_SCISSOR_BOX" value="0x0C10"/>
+		<token name="GL_VIEWPORT" value="0x0BA2"/>
+		<token name="GL_DEPTH_RANGE" value="0x0B70"/>
+		<token name="GL_SCISSOR_TEST" value="0x0C11"/>
+		<token name="GL_FIRST_VERTEX_CONVENTION" value="0x8E4D"/>
+		<token name="GL_LAST_VERTEX_CONVENTION" value="0x8E4E"/>
+		<token name="GL_PROVOKING_VERTEX" value="0x8E4F"/>
+		<token name="GL_UNDEFINED_VERTEX" value="0x8260"/>
+	</tokens>
+
+	<functions>
+		<function name="glViewportArrayv" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedf" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="w"/>
+				<param type="GLfloat" name="h"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedfv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorArrayv" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorIndexed" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="left"/>
+				<param type="GLint" name="bottom"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glScissorIndexedv" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeArrayv" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLclampd*" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeIndexed" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLclampd" name="n"/>
+				<param type="GLclampd" name="f"/>
+			</params>
+		</function>
+		<function name="glGetFloati_v" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetDoublei_v" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetIntegerIndexedivEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glEnableIndexedEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableIndexedEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glIsEnabledIndexedEXT" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

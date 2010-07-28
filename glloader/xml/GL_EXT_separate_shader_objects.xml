@@ -17,7 +17,7 @@
 				<param type="GLuint" name="program"/>
 			</params>
 		</function>
-		<function name="glCreateShaderProgramEXT" return="void">
+		<function name="glCreateShaderProgramEXT" return="GLuint">
 			<params>
 				<param type="GLenum" name="type"/>
 				<param type="const GLchar*" name="string"/>

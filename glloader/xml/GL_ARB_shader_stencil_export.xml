@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_stencil_export" reg_no="106">
+	<additionals>
+		<ext name="GL_AMD_shader_stencil_export"/>
+	</additionals>
+</gl_extension>
