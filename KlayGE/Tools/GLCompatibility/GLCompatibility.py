@@ -179,9 +179,9 @@ features_db = {
 	'4.1' : {
 			'Improved OpenGL ES 2.0 compatibility' : lambda : is_supported('GL_ARB_ES2_compatibility'),
 			'Binary represtation of a program object' : lambda : is_supported('GL_ARB_get_program_binary'),
-			'Separately shader objects for different shader stages' : lambda : is_supported('GL_ARB_separate_shader_objects'),
+			'Separately shader objects for different shader stages' : lambda : support_one(['GL_ARB_separate_shader_objects', 'GL_EXT_separate_shader_objects']),
 			'Precision requirements for shaders' : lambda : is_supported('GL_ARB_shader_precision'),
-			'64-bit fp components for VS inputs' : lambda : is_supported('GL_ARB_vertex_attrib_64bit'),
+			'64-bit fp components for VS inputs' : lambda : support_one(['GL_ARB_vertex_attrib_64bit', 'GL_EXT_vertex_attrib_64bit']),
 			'Multiple viewports' : lambda : is_supported ('GL_ARB_viewport_array'),
 		}
 }
