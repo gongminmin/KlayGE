@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1']
 
 features_db = {
 	'1.1' : {
@@ -174,6 +174,15 @@ features_db = {
 			'Cube map array textures' : lambda : is_supported('GL_ARB_texture_cube_map_array'),
 			'textureGather in shaders' : lambda : support_one(['GL_ARB_texture_gather', 'GL_AMD_texture_texture4']),
 			'Additional transform feedback functionality': lambda : support_one(['GL_ARB_transform_feedback2', 'GL_ARB_transform_feedback3', 'GL_NV_transform_feedback2']),
+		},
+
+	'4.1' : {
+			'Improved OpenGL ES 2.0 compatibility' : lambda : is_supported('GL_ARB_ES2_compatibility'),
+			'Binary represtation of a program object' : lambda : is_supported('GL_ARB_get_program_binary'),
+			'Separately shader objects for different shader stages' : lambda : is_supported('GL_ARB_separate_shader_objects'),
+			'Precision requirements for shaders' : lambda : is_supported('GL_ARB_shader_precision'),
+			'64-bit fp components for VS inputs' : lambda : is_supported('GL_ARB_vertex_attrib_64bit'),
+			'Multiple viewports' : lambda : is_supported ('GL_ARB_viewport_array'),
 		}
 }
 
@@ -237,6 +246,8 @@ class information:
 			is_supported.exts.append('GLSL_3_3')
 		if glsl_ver_index >= 7:
 			is_supported.exts.append('GLSL_4_0')
+		if glsl_ver_index >= 8:
+			is_supported.exts.append('GLSL_4_1')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []

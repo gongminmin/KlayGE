@@ -86,7 +86,7 @@ namespace KlayGE
 
 	void LZMACodec::Encode(std::vector<uint8_t>& output, void const * input, uint64_t len)
 	{
-		SizeT out_len = static_cast<SizeT>(len * 11 / 10);
+		SizeT out_len = static_cast<SizeT>(std::max(len * 11 / 10, static_cast<uint64_t>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
 		int res = LzmaEnc_WriteProperties(lzma_enc_, &output[0], &out_props_size);
