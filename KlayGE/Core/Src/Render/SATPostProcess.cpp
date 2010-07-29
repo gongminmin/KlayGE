@@ -180,7 +180,6 @@ namespace KlayGE
 			pp->Scale((parent_length * 4.0f) / child_length);
 			pp->InputPin(0, inter_tex_y_up[i]);
 			pp->OutputPin(0, inter_tex_y_up[i + 1]);
-			pp->Apply();
 
 			this->Append(pp);
 		}
