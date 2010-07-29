@@ -21,19 +21,15 @@
 #include <KlayGE/Script.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
+#define PYTHON_VER_STR KLAYGE_STRINGIZE(PY_MAJOR_VERSION)KLAYGE_STRINGIZE(PY_MINOR_VERSION)
+
 #ifdef KLAYGE_DEBUG
-	#if PY_MAJOR_VERSION >= 3
-		#pragma comment(lib, "python31_d.lib")
-	#else
-		#pragma comment(lib, "python26_d.lib")
-	#endif
+#define PYTHON_DBG_SUFFIX "_d"
 #else
-	#if PY_MAJOR_VERSION >= 3
-		#pragma comment(lib, "python31.lib")
-	#else
-		#pragma comment(lib, "python26.lib")
-	#endif
+#define PYTHON_DBG_SUFFIX ""
 #endif
+
+#define PYTHON_LIB_STR KLAYGE_STRINGIZE("python")KLAYGE_STRINGIZE(FREETYPE_VER_STR)KLAYGE_STRINGIZE(FREETYPE_DBG_SUFFIX)KLAYGE_STRINGIZE(".lib")
 #endif
 
 namespace KlayGE
