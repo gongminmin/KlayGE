@@ -97,7 +97,8 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 {
 	float3 eye_dir = normalize(eye_dir_fog.xyz);
 	
-	float2 gradient = gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
+	float2 gradient = lerp(gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
+		gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f);
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
