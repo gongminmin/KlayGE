@@ -117,7 +117,7 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GL_VERSION_3_0())
+		if (!re.HackForATI() && glloader_GL_VERSION_3_0())
 		{
 			if (flags & CBM_Color)
 			{

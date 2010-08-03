@@ -1049,5 +1049,15 @@ namespace KlayGE
 			caps_.hs_support = false;
 			caps_.ds_support = false;
 		}
+
+		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		if ((vendor.find("ATI", 0) != std::string::npos) || (vendor.find("AMD", 0) != std::string::npos))
+		{
+			hack_for_ati_ = true;
+		}
+		else
+		{
+			hack_for_ati_ = false;
+		}
 	}
 }

@@ -241,7 +241,8 @@ namespace KlayGE
 		}
 		else
 		{
-			if (!IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
 				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
@@ -258,7 +259,7 @@ namespace KlayGE
 
 				glBlitFramebufferEXT(src_xOffset, 0, src_xOffset + src_width, 1,
 								dst_xOffset, 0, dst_xOffset + dst_width, 1,
-								GL_COLOR_BUFFER_BIT, GL_LINEAR);
+								GL_COLOR_BUFFER_BIT, (src_width == dst_width) ? GL_NEAREST : GL_LINEAR);
 
 				re.BindFramebuffer(old_fbo, true);
 			}

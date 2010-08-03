@@ -100,6 +100,11 @@ namespace KlayGE
 			return cur_fbo_;
 		}
 
+		bool HackForATI() const
+		{
+			return hack_for_ati_;
+		}
+
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
 		void DoBindFrameBuffer(FrameBufferPtr const & fb);
@@ -132,6 +137,8 @@ namespace KlayGE
 
 		GLuint cur_ib_;
 		GLuint restart_index_;
+
+		bool hack_for_ati_;
 	};
 
 	typedef boost::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
