@@ -51,7 +51,7 @@ void Font3DVS(float4 position : POSITION,
 
 float4 FontPS(float2 texCoord : TEXCOORD0, float4 clr : COLOR) : SV_Target0
 {
-	clr.a = distance_tex.Sample(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
+	clr.a *= distance_tex.Sample(distance_sampler, texCoord).r * distance_base_scale.y + distance_base_scale.x;
 	return clr;
 }
 		]]>

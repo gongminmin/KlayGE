@@ -539,7 +539,25 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			for (int i = 0; i < 6; ++ i)
 			{
-				shadow_tex_[i]->CopyToTextureCube(*shadow_cube_tex_, static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i), 0,
+				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i);
+				if (!shadow_buffers_[i]->RequiresFlipping())
+				{
+					switch (i)
+					{
+					case Texture::CF_Positive_Y:
+						face = Texture::CF_Negative_Y;
+						break;
+
+					case Texture::CF_Negative_Y:
+						face = Texture::CF_Positive_Y;
+						break;
+
+					default:
+						break;
+					}
+				}
+
+				shadow_tex_[i]->CopyToTextureCube(*shadow_cube_tex_, face, 0,
 					shadow_cube_tex_->Width(0), shadow_cube_tex_->Width(0), 0, 0,
 					shadow_tex_[i]->Width(0), shadow_tex_[i]->Height(0), 0, 0);
 			}

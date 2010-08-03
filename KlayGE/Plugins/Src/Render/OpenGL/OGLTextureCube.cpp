@@ -85,7 +85,7 @@ namespace KlayGE
 		glBindTexture(target_type_, texture_);
 		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, 0);
+		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, numMipMaps_ - 1);
 
 		for (int face = 0; face < 6; ++ face)
 		{
@@ -257,8 +257,6 @@ namespace KlayGE
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
 
