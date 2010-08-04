@@ -93,6 +93,7 @@ namespace KlayGE
 		int sample_count = 1;
 		int sample_quality = 0;
 		bool full_screen = false;
+		int sync_interval = 0;
 		int motion_frames = 0;
 		bool stereo_mode = 0;
 		float stereo_separation = 0;
@@ -238,6 +239,13 @@ namespace KlayGE
 				sample_quality = attr->ValueInt();
 			}
 
+			XMLNodePtr sync_interval_node = graphics_node->FirstNode("sync_interval");
+			attr = sync_interval_node->Attrib("value");
+			if (attr)
+			{
+				sync_interval = attr->ValueInt();
+			}
+
 			XMLNodePtr motion_blur_node = graphics_node->FirstNode("motion_blur");
 			attr = motion_blur_node->Attrib("frames");
 			if (attr)
@@ -280,6 +288,7 @@ namespace KlayGE
 		settings.sample_count = sample_count;
 		settings.sample_quality = sample_quality;
 		settings.full_screen = full_screen;
+		settings.sync_interval = sync_interval;
 		settings.motion_frames = motion_frames;
 		settings.stereo_mode = stereo_mode;
 		settings.stereo_separation = stereo_separation;

@@ -410,12 +410,12 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		if (glloader_WGL_EXT_swap_control())
 		{
-			wglSwapIntervalEXT(0);
+			wglSwapIntervalEXT(settings.sync_interval);
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (glloader_GLX_SGI_swap_control())
 		{
-			glXSwapIntervalSGI(0);
+			glXSwapIntervalSGI(settings.sync_interval);
 		}
 #endif
 

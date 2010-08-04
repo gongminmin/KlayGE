@@ -94,6 +94,7 @@ namespace KlayGE
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 		bool	isFullScreen_;
+		uint32_t sync_interval_;
 
 		D3D10AdapterPtr			adapter_;
 

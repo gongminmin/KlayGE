@@ -121,7 +121,7 @@ namespace KlayGE
 		d3dpp_.BackBufferHeight			= this->Height();
 		d3dpp_.hDeviceWindow			= hWnd_;
 		d3dpp_.SwapEffect				= D3DSWAPEFFECT_DISCARD;
-		d3dpp_.PresentationInterval		= D3DPRESENT_INTERVAL_IMMEDIATE;
+		d3dpp_.PresentationInterval		= (0 == settings.sync_interval) ? D3DPRESENT_INTERVAL_IMMEDIATE : D3DPRESENT_INTERVAL_ONE;
 
 		if (this->FullScreen())
 		{

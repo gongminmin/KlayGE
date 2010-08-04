@@ -58,6 +58,7 @@ namespace KlayGE
 		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
 		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
+		sync_interval_		= settings.sync_interval;
 
 		// Destroy current window if any
 		if (hWnd_ != NULL)
@@ -582,7 +583,7 @@ namespace KlayGE
 	{
 		if (d3d_device_)
 		{
-			TIF(swap_chain_->Present(0, 0));
+			TIF(swap_chain_->Present(sync_interval_, 0));
 		}
 	}
 

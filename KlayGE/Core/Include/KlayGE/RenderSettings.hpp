@@ -53,6 +53,7 @@ namespace KlayGE
 		ElementFormat depth_stencil_fmt;
 		uint32_t sample_count;
 		uint32_t sample_quality;
+		uint32_t sync_interval;
 		uint32_t motion_frames;
 		bool stereo_mode;
 		float stereo_separation;
