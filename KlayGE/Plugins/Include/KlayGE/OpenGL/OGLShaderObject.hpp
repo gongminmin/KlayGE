@@ -71,6 +71,8 @@ namespace KlayGE
 		boost::shared_ptr<std::string> shader_text_;
 
 		GLuint glsl_program_;
+		boost::shared_ptr<std::vector<GLint> > glsl_bin_formats_;
+		boost::shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
 		boost::shared_ptr<std::vector<std::string> > glsl_srcs_;
 
 		parameter_binds_t param_binds_;

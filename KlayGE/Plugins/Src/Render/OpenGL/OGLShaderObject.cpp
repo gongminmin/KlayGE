@@ -1276,6 +1276,19 @@ namespace KlayGE
 #endif
 			is_validate_ &= validated ? true : false;
 
+			if (is_validate_ && glloader_GL_ARB_get_program_binary())
+			{
+				GLint formats = 0;
+				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
+				glsl_bin_formats_ = MakeSharedPtr<std::vector<GLint> >(formats);
+				glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, &(*glsl_bin_formats_)[0]);
+
+				GLint len = 0;
+				glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
+				glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
+				glGetProgramBinary(glsl_program_, len, NULL, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+			}
+
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
 				CGprogram sub_prog = shaders[type];
@@ -1424,6 +1437,8 @@ namespace KlayGE
 
 		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
+		ret->glsl_bin_formats_ = glsl_bin_formats_;
+		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->glsl_srcs_ = glsl_srcs_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
@@ -1436,77 +1451,96 @@ namespace KlayGE
 
 		ret->glsl_program_ = glCreateProgram();
 
-		ret->is_validate_ = true;
-		for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+		if (glloader_GL_ARB_get_program_binary() && glsl_bin_program_)
 		{
-			ret->is_shader_validate_[type] = is_shader_validate_[type];
-
-			if (is_shader_validate_[type])
+			ret->is_validate_ = is_validate_;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
 			{
-				shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
-				if (!sd.func_name.empty())
-				{
-					GLenum shader_type;
-					switch (type)
-					{
-					case ST_VertexShader:
-						shader_type = GL_VERTEX_SHADER;
-						break;
-
-					case ST_PixelShader:
-						shader_type = GL_FRAGMENT_SHADER;
-						break;
-
-					case ST_GeometryShader:
-						shader_type = GL_GEOMETRY_SHADER_EXT;
-						break;
-
-					default:
-						shader_type = 0;
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					char const * glsl = (*glsl_srcs_)[type].c_str();
-					GLuint object = glCreateShader(shader_type);
-					if (0 == object)
-					{
-						ret->is_shader_validate_[type] = false;
-					}
-
-					glShaderSource(object, 1, &glsl, NULL);
-
-					glCompileShader(object);
-
-					GLint compiled = false;
-					glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
-					if (!compiled)
-					{
-						GLint len = 0;
-						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-						if (len > 0)
-						{
-							std::vector<char> info(len + 1, 0);
-							glGetShaderInfoLog(object, len, &len, &info[0]);
-							std::cerr << &info[0] << std::endl;
-						}
-					}
-#endif
-					ret->is_shader_validate_[type] &= compiled ? true : false;
-
-					glAttachShader(ret->glsl_program_, object);
-					glDeleteShader(object);
-				}
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
 			}
 
-			ret->is_validate_ &= ret->is_shader_validate_[type];
+			if (is_validate_)
+			{
+				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0], glsl_bin_program_->size());
+			}
+		}
+		else
+		{
+			ret->is_validate_ = true;
+			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
+			{
+				ret->is_shader_validate_[type] = is_shader_validate_[type];
+
+				if (is_shader_validate_[type])
+				{
+					shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
+					if (!sd.func_name.empty())
+					{
+						GLenum shader_type;
+						switch (type)
+						{
+						case ST_VertexShader:
+							shader_type = GL_VERTEX_SHADER;
+							break;
+
+						case ST_PixelShader:
+							shader_type = GL_FRAGMENT_SHADER;
+							break;
+
+						case ST_GeometryShader:
+							shader_type = GL_GEOMETRY_SHADER_EXT;
+							break;
+
+						default:
+							shader_type = 0;
+							BOOST_ASSERT(false);
+							break;
+						}
+
+						char const * glsl = (*glsl_srcs_)[type].c_str();
+						GLuint object = glCreateShader(shader_type);
+						if (0 == object)
+						{
+							ret->is_shader_validate_[type] = false;
+						}
+
+						glShaderSource(object, 1, &glsl, NULL);
+
+						glCompileShader(object);
+
+						GLint compiled = false;
+						glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
+	#ifdef KLAYGE_DEBUG
+						if (!compiled)
+						{
+							GLint len = 0;
+							glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
+							if (len > 0)
+							{
+								std::vector<char> info(len + 1, 0);
+								glGetShaderInfoLog(object, len, &len, &info[0]);
+								std::cerr << &info[0] << std::endl;
+							}
+						}
+	#endif
+						ret->is_shader_validate_[type] &= compiled ? true : false;
+
+						glAttachShader(ret->glsl_program_, object);
+						glDeleteShader(object);
+					}
+				}
+
+				ret->is_validate_ &= ret->is_shader_validate_[type];
+			}
+
+			if (ret->is_validate_)
+			{
+				glLinkProgram(ret->glsl_program_);
+			}
 		}
 
 		if (ret->is_validate_)
 		{
-			glLinkProgram(ret->glsl_program_);
-
 			GLint linked = false;
 			glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
 #ifdef KLAYGE_DEBUG
