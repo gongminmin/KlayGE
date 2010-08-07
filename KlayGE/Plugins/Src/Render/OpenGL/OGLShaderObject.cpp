@@ -140,6 +140,31 @@ namespace
 	}\n																	\
 	";
 
+	char const * predefined_attribs = "\n		\
+	attribute vec4 a_gl_Color;\n				\
+	attribute vec4 a_gl_SecondaryColor;\n		\
+	attribute vec3 a_gl_Normal;\n				\
+	attribute vec4 a_gl_Vertex;\n				\
+	attribute vec4 a_gl_MultiTexCoord0;\n		\
+	attribute vec4 a_gl_MultiTexCoord1;\n		\
+	attribute vec4 a_gl_MultiTexCoord2;\n		\
+	attribute vec4 a_gl_MultiTexCoord3;\n		\
+	attribute vec4 a_gl_MultiTexCoord4;\n		\
+	attribute vec4 a_gl_MultiTexCoord5;\n		\
+	attribute vec4 a_gl_MultiTexCoord6;\n		\
+	attribute vec4 a_gl_MultiTexCoord7;\n		\
+	attribute float a_gl_FogCoord;\n			\
+	";
+
+	char const * predefined_varyings = "\n	\
+	varying vec4 v_gl_FrontColor;\n			\
+	varying vec4 v_gl_BackColor;\n			\
+	varying vec4 v_gl_FrontSecondaryColor;\n\
+	varying vec4 v_gl_BackSecondaryColor;\n	\
+    varying vec4 v_gl_TexCoord[8];\n		\
+    varying float v_gl_FogFragCoord;\n		\
+	";
+
 	template <typename SrcType>
 	class SetOGLShaderParameter
 	{
@@ -1101,6 +1126,114 @@ namespace KlayGE
 		return ss.str();
 	}
 
+	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type)
+	{
+		std::stringstream ss;
+		switch (type)
+		{
+		case ST_VertexShader:
+		case ST_GeometryShader:
+			ss << predefined_attribs << std::endl;
+			break;
+
+		case ST_PixelShader:
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		ss << predefined_varyings << std::endl;
+
+		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
+		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
+		std::string this_token;
+		for (BOOST_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+		{
+			this_token = *beg;
+
+			switch (type)
+			{
+			case ST_VertexShader:
+			case ST_GeometryShader:
+				if (("gl_Color" == this_token) || ("gl_Normal" == this_token)
+					|| ("gl_Vertex" == this_token) || ("gl_FogCoord" == this_token)
+					|| (0 == this_token.find("gl_MultiTexCoord")))
+
+				{
+					ss << "a_" << this_token;
+				}
+				else
+				{
+					if (("gl_TexCoord" == this_token)
+						|| ("gl_FogFragCoord" == this_token)
+						|| ("gl_FrontColor" == this_token)
+						|| ("gl_BackColor" == this_token)
+						|| ("gl_FrontSecondaryColor" == this_token)
+						|| ("gl_BackSecondaryColor" == this_token))
+					{
+						ss << "v_" << this_token;
+					}
+					else
+					{
+						if ("gl_PositionIn" == this_token)
+						{
+							ss << "gl_Position";
+						}
+						else
+						{
+							if (("gl_TexCoordIn" == this_token)
+								|| ("gl_FogFragCoordIn" == this_token)
+								|| ("gl_FrontColorIn" == this_token)
+								|| ("gl_BackColorIn" == this_token)
+								|| ("gl_FrontSecondaryColorIn" == this_token)
+								|| ("gl_BackSecondaryColorIn" == this_token))
+							{
+								ss << "v_" << this_token.substr(0, this_token.size() - 2);
+							}
+							else
+							{
+								ss << this_token;
+							}
+						}
+					}
+				}
+				break;
+
+			case ST_PixelShader:
+				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+				{
+					ss << "v_" << this_token;
+				}
+				else
+				{
+					if ("gl_Color" == this_token)
+					{
+						ss << "v_gl_FrontColor";
+					}
+					else
+					{
+						if ("gl_SecondaryColor" == this_token)
+						{
+							ss << "v_gl_FrontSecondaryColor";
+						}
+						else
+						{
+							ss << this_token;
+						}
+					}
+				}
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+
+		return ss.str();
+	}
+
 	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
 		uint32_t /*tech_index*/, uint32_t /*pass_index*/)
 	{
@@ -1198,13 +1331,14 @@ namespace KlayGE
 
 				if (is_shader_validate_[type])
 				{
-					char const * glsl = cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM);
+					(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
+						static_cast<ShaderType>(type));
+					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
 					if (0 == object)
 					{
 						is_shader_validate_[type] = false;
 					}
-					(*glsl_srcs_)[type] = glsl;
 					//printf("%s\n", glsl);
 
 					glShaderSource(object, 1, &glsl, NULL);
@@ -1359,66 +1493,61 @@ namespace KlayGE
 								&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
 							{
 								std::string semantic = cgGetParameterSemantic(cg_param);
-								char const * glsl_param_name = semantic.c_str();//cgGetParameterResourceName(cg_param);
+								std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
 
 								VertexElementUsage usage = VEU_Position;
 								uint8_t usage_index = 0;
-								GLint defalut_attr_loc = 0;
 								if ("POSITION" == semantic)
 								{
 									usage = VEU_Position;
-									defalut_attr_loc = 0;
+									glsl_param_name = "a_gl_Vertex";
 								}
 								else if ("NORMAL" == semantic)
 								{
 									usage = VEU_Normal;
-									defalut_attr_loc = 2;
+									glsl_param_name = "a_gl_Normal";
 								}
 								else if (("COLOR0" == semantic) || ("COLOR" == semantic))
 								{
 									usage = VEU_Diffuse;
-									defalut_attr_loc = 3;
+									glsl_param_name = "a_gl_Color";
 								}
 								else if ("COLOR1" == semantic)
 								{
 									usage = VEU_Specular;
-									defalut_attr_loc = 4;
+									glsl_param_name = "a_gl_SecondaryColor";
 								}
 								else if ("BLENDWEIGHT" == semantic)
 								{
 									usage = VEU_BlendWeight;
-									defalut_attr_loc = 1;
+									glsl_param_name = "BLENDWEIGHT";
 								}
 								else if ("BLENDINDICES" == semantic)
 								{
 									usage = VEU_BlendIndex;
-									defalut_attr_loc = 7;
+									glsl_param_name = "BLENDINDICES";
 								}
 								else if (0 == semantic.find("TEXCOORD"))
 								{
 									usage = VEU_TextureCoord;
 									usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-									defalut_attr_loc = 8 + usage_index;
+									glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
 								}
 								else if ("TANGENT" == semantic)
 								{
 									usage = VEU_Tangent;
-									defalut_attr_loc = 14;
+									glsl_param_name = "TANGENT";
 								}
 								else
 								{
 									BOOST_ASSERT("BINORMAL" == semantic);
 
 									usage = VEU_Binormal;
-									defalut_attr_loc = 15;
+									glsl_param_name = "BINORMAL";
 								}
 
-								GLint attr_loc = glGetAttribLocation(glsl_program_, glsl_param_name);
-								if (-1 == attr_loc)
-								{
-									attr_loc = defalut_attr_loc;
-								}
-								attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index), attr_loc));
+								attrib_locs_.insert(std::make_pair(std::make_pair(usage, usage_index),
+									glGetAttribLocation(glsl_program_, glsl_param_name.c_str())));
 							}
 
 							cg_param = cgGetNextParameter(cg_param);

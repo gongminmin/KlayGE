@@ -33,12 +33,10 @@
 namespace KlayGE
 {
 	OGLRenderLayout::OGLRenderLayout()
-		: dirty_vao_(true), vao_(0)
 	{
 		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_vertex_array_object())
 		{
 			use_vao_ = true;
-			glGenVertexArrays(1, &vao_);
 		}
 		else
 		{
@@ -56,9 +54,61 @@ namespace KlayGE
 
 	OGLRenderLayout::~OGLRenderLayout()
 	{
-		if (use_vao_ && (vao_ != 0))
+		if (use_vao_)
 		{
-			glDeleteVertexArrays(1, &vao_);
+			BOOST_FOREACH(BOOST_TYPEOF(vaos_)::reference vao, vaos_)
+			{
+				glDeleteVertexArrays(1, &vao.second);
+			}
+		}
+	}
+
+	void OGLRenderLayout::BindVertexStreams(ShaderObjectPtr const & so) const
+	{
+		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
+
+		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
+		{
+			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
+			uint32_t const size = this->VertexSize(i);
+			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
+
+			uint8_t* elem_offset = NULL;
+			BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
+			{
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+					GLboolean const normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : GL_FALSE;
+
+					glEnableVertexAttribArray(attr);
+					stream.Active();
+					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
+				}
+
+				elem_offset += vs_elem.element_size();
+			}
+		}
+	}
+
+	void OGLRenderLayout::UnbindVertexStreams(ShaderObjectPtr const & so) const
+	{
+		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
+		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
+		{
+			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
+
+			BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
+			{
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					glDisableVertexAttribArray(attr);
+				}
+			}
 		}
 	}
 
@@ -66,11 +116,25 @@ namespace KlayGE
 	{
 		if (use_vao_)
 		{
-			glBindVertexArray(vao_);
+			GLuint vao;
+			BOOST_TYPEOF(vaos_)::iterator iter = vaos_.find(so);
+			if (iter == vaos_.end())
+			{
+				glGenVertexArrays(1, &vao);
+				vaos_.insert(std::make_pair(so, vao));
+
+				glBindVertexArray(vao);
+				this->BindVertexStreams(so);
+			}
+			else
+			{
+				vao = iter->second;
+				glBindVertexArray(vao);
+			}
 		}
 		else
 		{
-			glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+			this->BindVertexStreams(so);
 		}
 
 		if (use_nv_pri_restart_)
@@ -90,81 +154,13 @@ namespace KlayGE
 				glEnableClientState(GL_PRIMITIVE_RESTART_NV);
 			}
 		}
-
-		if (dirty_vao_ || !use_vao_)
-		{
-			OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
-
-			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
-			{
-				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
-				uint32_t const size = this->VertexSize(i);
-				vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
-
-				uint8_t* elem_offset = NULL;
-				BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
-				{
-					GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-					if (attr != -1)
-					{
-						GLvoid* offset = static_cast<GLvoid*>(elem_offset);
-						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-						GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-
-						switch (vs_elem.usage)
-						{
-						case VEU_Position:
-							glEnableClientState(GL_VERTEX_ARRAY);
-							stream.Active();
-							glVertexPointer(num_components, type, size, offset);
-							break;
-
-						case VEU_Normal:
-							glEnableClientState(GL_NORMAL_ARRAY);
-							stream.Active();
-							glNormalPointer(type, size, offset);
-							break;
-
-						case VEU_Diffuse:
-							glEnableClientState(GL_COLOR_ARRAY);
-							stream.Active();
-							glColorPointer(num_components, type, size, offset);
-							break;
-
-						case VEU_Specular:
-							glEnableClientState(GL_SECONDARY_COLOR_ARRAY);
-							stream.Active();
-							glSecondaryColorPointer(num_components, type, size, offset);
-							break;
-
-						case VEU_TextureCoord:
-							glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-							glClientActiveTexture(GL_TEXTURE0 + vs_elem.usage_index);
-							stream.Active();
-							glTexCoordPointer(num_components, type, size, offset);
-							break;
-
-						default:
-							glEnableVertexAttribArray(attr);
-							stream.Active();
-							glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
-							break;
-						}
-					}
-
-					elem_offset += vs_elem.element_size();
-				}
-			}
-
-			dirty_vao_ = false;
-		}
 	}
 
-	void OGLRenderLayout::Deactive() const
+	void OGLRenderLayout::Deactive(ShaderObjectPtr const & so) const
 	{
 		if (!use_vao_)
 		{
-			glPopClientAttrib();
+			this->UnbindVertexStreams(so);
 		}
 	}
 }

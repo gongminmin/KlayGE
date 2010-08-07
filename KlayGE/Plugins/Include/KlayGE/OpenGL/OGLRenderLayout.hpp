@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <KlayGE/RenderLayout.hpp>
 
 namespace KlayGE
@@ -29,11 +31,14 @@ namespace KlayGE
 		~OGLRenderLayout();
 
 		void Active(ShaderObjectPtr const & so) const;
-		void Deactive() const;
+		void Deactive(ShaderObjectPtr const & so) const;
 
 	private:
-		mutable bool dirty_vao_;
-		GLuint vao_;
+		void BindVertexStreams(ShaderObjectPtr const & so) const;
+		void UnbindVertexStreams(ShaderObjectPtr const & so) const;
+
+	private:
+		mutable std::map<ShaderObjectPtr, GLuint> vaos_;
 
 		bool use_vao_, use_nv_pri_restart_;
 	};

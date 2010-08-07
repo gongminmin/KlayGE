@@ -6,14 +6,15 @@
 	
 	<shader>
 		<![CDATA[
-void MandelbrotVS(float2 texcoord0 : TEXCOORD0,
+void MandelbrotVS(float2 pos : POSITION,
 			out float2 oTexcoord0	: TEXCOORD0,
 			out float4 oPos			: SV_Position)
 {
-	oPos = float4(texcoord0 * 2 - 1, 0.5f, 1);
-	oPos.y *= -flipping;
-	oPos.xy += offset;
-	oTexcoord0 = texcoord0 * 2.4f - float2(1.8f, 1.2f * flipping);
+	oPos = float4(pos + offset, 0.5f, 1);
+	float2 tc = pos / 2;
+	tc.y *= flipping;
+	tc += 0.5f;
+	oTexcoord0 = tc * 2.4f - float2(1.8f, 1.2f);
 }
 
 float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target

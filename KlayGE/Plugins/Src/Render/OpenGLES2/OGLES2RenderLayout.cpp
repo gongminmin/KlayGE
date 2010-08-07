@@ -56,10 +56,11 @@ namespace KlayGE
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+					GLboolean const normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : GL_FALSE;
 
 					glEnableVertexAttribArray(attr);
 					stream.Active();
-					glVertexAttribPointer(attr, num_components, type, GL_FALSE, size, offset);
+					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
 				}
 
 				elem_offset += vs_elem.element_size();

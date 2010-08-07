@@ -41,24 +41,24 @@ namespace
 
 			technique_ = rf.LoadEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
 
-			float2 texs[] =
+			float2 pos[] =
 			{
-				float2(0, 0),
-				float2(1, 0),
-				float2(0, 1),
-				float2(1, 1),
+				float2(-1, +1),
+				float2(+1, +1),
+				float2(-1, -1),
+				float2(+1, -1),
 			};
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			ElementInitData init_data;
-			init_data.row_pitch = sizeof(texs);
+			init_data.row_pitch = sizeof(pos);
 			init_data.slice_pitch = 0;
-			init_data.data = texs;
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			init_data.data = pos;
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 		}
 
 		void OnRenderBegin()
