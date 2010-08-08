@@ -34,10 +34,22 @@
 #include <string>
 #include <boost/assert.hpp>
 
+#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/DllLoader.hpp>
 
 namespace KlayGE
 {
+	struct ContextCfg
+	{
+		std::string render_factory_name;
+		std::string audio_factory_name;
+		std::string input_factory_name;
+		std::string show_factory_name;
+		std::string scene_manager_name;
+
+		RenderSettings graphics_cfg;
+	};
+
 	class KLAYGE_CORE_API Context
 	{
 	public:
@@ -45,13 +57,15 @@ namespace KlayGE
 
 		static Context& Instance();
 
-		RenderSettings LoadCfg(std::string const & cfg_file);
+		ContextCfg LoadCfg(std::string const & cfg_file);
+		void Config(ContextCfg const & cfg);
+		ContextCfg const & Config() const;
 
-		void LoadRenderFactory(std::string const & rf_name, XMLNodePtr const & rf_node);
-		void LoadAudioFactory(std::string const & af_name, XMLNodePtr const & af_node);
-		void LoadInputFactory(std::string const & if_name, XMLNodePtr const & if_node);
-		void LoadShowFactory(std::string const & sf_name, XMLNodePtr const & sf_node);
-		void LoadSceneManager(std::string const & sm_name, XMLNodePtr const & sm_node);
+		void LoadRenderFactory(std::string const & rf_name);
+		void LoadAudioFactory(std::string const & af_name);
+		void LoadInputFactory(std::string const & if_name);
+		void LoadShowFactory(std::string const & sf_name);
+		void LoadSceneManager(std::string const & sm_name);
 
 		void AppInstance(App3DFramework& app)
 		{
@@ -122,6 +136,8 @@ namespace KlayGE
 
 	private:
 		Context();
+
+		ContextCfg cfg_;
 
 		App3DFramework*		app_;
 

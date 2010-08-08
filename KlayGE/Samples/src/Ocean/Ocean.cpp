@@ -710,21 +710,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Ocean");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	OceanApp app("Ocean", settings);
+	Context::Instance().Config(context_cfg);
+
+	OceanApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-OceanApp::OceanApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+OceanApp::OceanApp()
+				: App3DFramework("Ocean")
 {
+	ResLoader::Instance().AddPath("../Samples/media/Ocean");
 }
 
 void OceanApp::InitObjects()

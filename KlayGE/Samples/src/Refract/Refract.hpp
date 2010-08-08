@@ -8,7 +8,7 @@
 class Refract : public KlayGE::App3DFramework
 {
 public:
-	Refract(std::string const & name, KlayGE::RenderSettings const & settings);
+	Refract();
 
 private:
 	void InitObjects();

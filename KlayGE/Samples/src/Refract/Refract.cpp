@@ -166,24 +166,27 @@ namespace
 	}
 }
 
+
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Refract");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	Refract app("Refract", settings);
+	Context::Instance().Config(context_cfg);
+
+	Refract app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Refract::Refract(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+Refract::Refract()
+			: App3DFramework("Refract")
 {
+	ResLoader::Instance().AddPath("../Samples/media/Refract");
 }
 
 void Refract::InitObjects()

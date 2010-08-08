@@ -190,22 +190,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/DepthPeeling");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	DepthPeelingApp app("DepthPeeling", settings);
+	Context::Instance().Config(context_cfg);
+
+	DepthPeelingApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-DepthPeelingApp::DepthPeelingApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
+DepthPeelingApp::DepthPeelingApp()
+			: App3DFramework("DepthPeeling"),
 				num_layers_(0)
 {
+	ResLoader::Instance().AddPath("../Samples/media/DepthPeeling");
 }
 
 void DepthPeelingApp::InitObjects()

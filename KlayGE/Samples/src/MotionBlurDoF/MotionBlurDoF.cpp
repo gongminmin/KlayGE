@@ -485,22 +485,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/MotionBlurDoF");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	MotionBlurDoFApp app("Motion Blur and Depth of field", settings);
+	Context::Instance().Config(context_cfg);
+
+	MotionBlurDoFApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-MotionBlurDoFApp::MotionBlurDoFApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings),
+MotionBlurDoFApp::MotionBlurDoFApp()
+					: App3DFramework("Motion Blur and Depth of field"),
 						num_objs_rendered_(0), num_renderable_rendered_(0), num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
+	ResLoader::Instance().AddPath("../Samples/media/MotionBlurDoF");
 }
 
 void MotionBlurDoFApp::InitObjects()

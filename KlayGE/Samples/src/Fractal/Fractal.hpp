@@ -8,7 +8,7 @@
 class Fractal : public KlayGE::App3DFramework
 {
 public:
-	Fractal(std::string const & name, KlayGE::RenderSettings const & settings);
+	Fractal();
 
 private:
 	void InitObjects();

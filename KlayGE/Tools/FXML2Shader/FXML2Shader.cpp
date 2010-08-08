@@ -28,9 +28,10 @@ namespace
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
-		: App3DFramework(name, settings)
+	EmptyApp()
+		: App3DFramework("FXML2Shader")
 	{
+		ResLoader::Instance().AddPath("../../../media/RenderFX");
 	}
 
 	void InitObjects()
@@ -296,15 +297,12 @@ int main(int argc, char* argv[])
 
 	fxml_name = argv[1];
 
-	using namespace KlayGE;
-
 	ResLoader::Instance().AddPath("../../../bin");
-	ResLoader::Instance().AddPath("D:/KlayGE/media/RenderFX");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	Context::Instance().LoadRenderFactory("D3D11", XMLNodePtr());
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	Context::Instance().Config(context_cfg);
 
-	EmptyApp app("FXML2Shader", settings);
+	EmptyApp app;
 	app.Create();
 
 	return 0;

@@ -110,24 +110,27 @@ namespace
 	}
 }
 
+
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/VertexDisplacement");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	VertexDisplacement app("VertexDisplacement", settings);
+	Context::Instance().Config(context_cfg);
+
+	VertexDisplacement app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-VertexDisplacement::VertexDisplacement(std::string const & name, RenderSettings const & settings)
-						: App3DFramework(name, settings)
+VertexDisplacement::VertexDisplacement()
+						: App3DFramework("VertexDisplacement")
 {
+	ResLoader::Instance().AddPath("../Samples/media/VertexDisplacement");
 }
 
 void VertexDisplacement::InitObjects()

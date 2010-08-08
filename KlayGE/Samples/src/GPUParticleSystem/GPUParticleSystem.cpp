@@ -685,21 +685,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/GPUParticleSystem");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	GPUParticleSystemApp app("GPU Particle System", settings);
+	Context::Instance().Config(context_cfg);
+
+	GPUParticleSystemApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-GPUParticleSystemApp::GPUParticleSystemApp(std::string const & name, RenderSettings const & settings)
-							: App3DFramework(name, settings)
+GPUParticleSystemApp::GPUParticleSystemApp()
+							: App3DFramework("GPU Particle System")
 {
+	ResLoader::Instance().AddPath("../Samples/media/GPUParticleSystem");
 }
 
 void GPUParticleSystemApp::InitObjects()

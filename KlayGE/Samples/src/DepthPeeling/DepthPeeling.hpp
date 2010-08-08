@@ -10,7 +10,7 @@
 class DepthPeelingApp : public KlayGE::App3DFramework
 {
 public:
-	DepthPeelingApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	DepthPeelingApp();
 
 private:
 	void InitObjects();

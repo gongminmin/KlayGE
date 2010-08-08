@@ -9,7 +9,7 @@
 class OceanApp : public KlayGE::App3DFramework
 {
 public:
-	OceanApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	OceanApp();
 
 private:
 	void InitObjects();

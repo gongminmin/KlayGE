@@ -186,21 +186,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/DistanceMapping");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	DistanceMapping app("DistanceMapping", settings);
+	Context::Instance().Config(context_cfg);
+
+	DistanceMapping app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-DistanceMapping::DistanceMapping(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+DistanceMapping::DistanceMapping()
+					: App3DFramework("DistanceMapping")
 {
+	ResLoader::Instance().AddPath("../Samples/media/DistanceMapping");
 }
 
 void DistanceMapping::InitObjects()

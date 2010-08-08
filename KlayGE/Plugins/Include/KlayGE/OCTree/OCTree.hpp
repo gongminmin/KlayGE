@@ -45,7 +45,10 @@ namespace KlayGE
 	class OCTree : public SceneManager
 	{
 	public:
-		explicit OCTree(uint32_t max_tree_depth);
+		OCTree();
+
+		void MaxTreeDepth(uint32_t max_tree_depth);
+		uint32_t MaxTreeDepth() const;
 
 		bool AABBVisible(Box const & box);
 

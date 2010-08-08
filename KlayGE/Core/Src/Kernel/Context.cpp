@@ -25,7 +25,6 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
 #include <KlayGE/ResLoader.hpp>
-#include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/XMLDom.hpp>
 
 #include <fstream>
@@ -34,11 +33,11 @@
 
 namespace KlayGE
 {
-	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr, XMLNodePtr const & extra_param);
-	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr, XMLNodePtr const & extra_param);
-	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr, XMLNodePtr const & extra_param);
-	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr, XMLNodePtr const & extra_param);
-	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr, XMLNodePtr const & extra_param);
+	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
+	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
+	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
+	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr);
+	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr);
 
 	Context::Context()
 	{
@@ -84,7 +83,7 @@ namespace KlayGE
 		return context;
 	}
 
-	RenderSettings Context::LoadCfg(std::string const & cfg_file)
+	ContextCfg Context::LoadCfg(std::string const & cfg_file)
 	{
 		int width = 800;
 		int height = 600;
@@ -274,29 +273,46 @@ namespace KlayGE
 			}
 		}
 
-		this->LoadRenderFactory(rf_name, rf_node);
-		this->LoadAudioFactory(af_name, af_node);
-		this->LoadInputFactory(if_name, if_node);
-		this->LoadShowFactory(sf_name, sf_node);
-		this->LoadSceneManager(sm_name, sm_node);
+		ContextCfg cfg;
 
-		RenderSettings settings;
-		settings.width = width;
-		settings.height = height;
-		settings.color_fmt = color_fmt;
-		settings.depth_stencil_fmt = depth_stencil_fmt;
-		settings.sample_count = sample_count;
-		settings.sample_quality = sample_quality;
-		settings.full_screen = full_screen;
-		settings.sync_interval = sync_interval;
-		settings.motion_frames = motion_frames;
-		settings.stereo_mode = stereo_mode;
-		settings.stereo_separation = stereo_separation;
+		cfg.render_factory_name = rf_name;
+		cfg.audio_factory_name = af_name;
+		cfg.input_factory_name = if_name;
+		cfg.show_factory_name = sf_name;
+		cfg.scene_manager_name = sm_name;
 
-		return settings;
+		cfg.graphics_cfg.width = width;
+		cfg.graphics_cfg.height = height;
+		cfg.graphics_cfg.color_fmt = color_fmt;
+		cfg.graphics_cfg.depth_stencil_fmt = depth_stencil_fmt;
+		cfg.graphics_cfg.sample_count = sample_count;
+		cfg.graphics_cfg.sample_quality = sample_quality;
+		cfg.graphics_cfg.full_screen = full_screen;
+		cfg.graphics_cfg.sync_interval = sync_interval;
+		cfg.graphics_cfg.motion_frames = motion_frames;
+		cfg.graphics_cfg.stereo_mode = stereo_mode;
+		cfg.graphics_cfg.stereo_separation = stereo_separation;
+
+		return cfg;
 	}
 
-	void Context::LoadRenderFactory(std::string const & rf_name, XMLNodePtr const & rf_node)
+	void Context::Config(ContextCfg const & cfg)
+	{
+		cfg_ = cfg;
+
+		this->LoadRenderFactory(cfg.render_factory_name);
+		this->LoadAudioFactory(cfg.audio_factory_name);
+		this->LoadInputFactory(cfg.input_factory_name);
+		this->LoadShowFactory(cfg.show_factory_name);
+		this->LoadSceneManager(cfg.scene_manager_name);
+	}
+
+	ContextCfg const & Context::Config() const
+	{
+		return cfg_;
+	}
+
+	void Context::LoadRenderFactory(std::string const & rf_name)
 	{
 		renderFactory_ = RenderFactory::NullObject();
 		render_loader_.Free();
@@ -308,7 +324,7 @@ namespace KlayGE
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 		if (mrf != NULL)
 		{
-			mrf(renderFactory_, rf_node);
+			mrf(renderFactory_);
 		}
 		else
 		{
@@ -316,7 +332,7 @@ namespace KlayGE
 		}
 	}
 
-	void Context::LoadAudioFactory(std::string const & af_name, XMLNodePtr const & af_node)
+	void Context::LoadAudioFactory(std::string const & af_name)
 	{
 		audioFactory_ = AudioFactory::NullObject();
 		audio_loader_.Free();
@@ -328,7 +344,7 @@ namespace KlayGE
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 		if (maf != NULL)
 		{
-			maf(audioFactory_, af_node);
+			maf(audioFactory_);
 		}
 		else
 		{
@@ -336,7 +352,7 @@ namespace KlayGE
 		}
 	}
 
-	void Context::LoadInputFactory(std::string const & if_name, XMLNodePtr const & if_node)
+	void Context::LoadInputFactory(std::string const & if_name)
 	{
 		inputFactory_ = InputFactory::NullObject();
 		input_loader_.Free();
@@ -348,7 +364,7 @@ namespace KlayGE
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 		if (mif != NULL)
 		{
-			mif(inputFactory_, if_node);
+			mif(inputFactory_);
 		}
 		else
 		{
@@ -356,7 +372,7 @@ namespace KlayGE
 		}
 	}
 
-	void Context::LoadShowFactory(std::string const & sf_name, XMLNodePtr const & sf_node)
+	void Context::LoadShowFactory(std::string const & sf_name)
 	{
 		showFactory_ = ShowFactory::NullObject();
 		show_loader_.Free();
@@ -368,7 +384,7 @@ namespace KlayGE
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 		if (msf != NULL)
 		{
-			msf(showFactory_, sf_node);
+			msf(showFactory_);
 		}
 		else
 		{
@@ -376,7 +392,7 @@ namespace KlayGE
 		}
 	}
 
-	void Context::LoadSceneManager(std::string const & sm_name, XMLNodePtr const & sm_node)
+	void Context::LoadSceneManager(std::string const & sm_name)
 	{
 		sceneMgr_ = SceneManager::NullObject();
 		sm_loader_.Free();
@@ -388,7 +404,7 @@ namespace KlayGE
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 		if (msm != NULL)
 		{
-			msm(sceneMgr_, sm_node);
+			msm(sceneMgr_);
 		}
 		else
 		{

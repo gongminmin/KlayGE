@@ -348,21 +348,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/ShadowCubeMap");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	ShadowCubeMap app("ShadowCubeMap", settings);
+	Context::Instance().Config(context_cfg);
+
+	ShadowCubeMap app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ShadowCubeMap::ShadowCubeMap(std::string const & name, RenderSettings const & settings)
-				: App3DFramework(name, settings)
+ShadowCubeMap::ShadowCubeMap()
+				: App3DFramework("ShadowCubeMap")
 {
+	ResLoader::Instance().AddPath("../Samples/media/ShadowCubeMap");
 }
 
 void ShadowCubeMap::InitObjects()

@@ -32,7 +32,7 @@
 
 extern "C"
 {
-	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr);
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

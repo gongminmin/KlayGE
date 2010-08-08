@@ -164,21 +164,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	PostProcessingApp app("Post Processing", settings);
+	Context::Instance().Config(context_cfg);
+
+	PostProcessingApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-PostProcessingApp::PostProcessingApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+PostProcessingApp::PostProcessingApp()
+			: App3DFramework("Post Processing")
 {
+	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
 }
 
 void PostProcessingApp::InitObjects()

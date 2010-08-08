@@ -24,7 +24,7 @@ struct Particle
 class ParticleEditorApp : public KlayGE::App3DFramework
 {
 public:
-	ParticleEditorApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	ParticleEditorApp();
 
 private:
 	void InitObjects();

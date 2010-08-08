@@ -9,7 +9,7 @@
 class TextApp : public KlayGE::App3DFramework
 {
 public:
-	TextApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	TextApp();
 
 private:
 	void InitObjects();

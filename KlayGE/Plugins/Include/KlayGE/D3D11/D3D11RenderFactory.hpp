@@ -29,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_D3D11_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_D3D11_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr);
 }
 
 #endif			// _D3D11RENDERFACTORY_HPP

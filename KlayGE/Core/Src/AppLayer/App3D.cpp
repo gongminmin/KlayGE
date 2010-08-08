@@ -47,12 +47,13 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	App3DFramework::App3DFramework(std::string const & name, RenderSettings const & settings)
-						: name_(name), settings_(settings),
+	App3DFramework::App3DFramework(std::string const & name)
+						: name_(name),
 							fps_(0), accumulate_time_(0), num_frames_(0)
 	{
 		Context::Instance().AppInstance(*this);
 
+		settings_ = Context::Instance().Config().graphics_cfg;
 		main_wnd_ = this->MakeWindow(name_, settings_);
 		settings_.left = main_wnd_->Left();
 		settings_.top = main_wnd_->Top();

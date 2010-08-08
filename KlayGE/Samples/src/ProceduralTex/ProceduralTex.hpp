@@ -9,7 +9,7 @@
 class ProceduralTexApp : public KlayGE::App3DFramework
 {
 public:
-	ProceduralTexApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	ProceduralTexApp();
 
 private:
 	void InitObjects();

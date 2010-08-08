@@ -832,7 +832,7 @@ namespace KlayGE
 			}
 		}
 
-		checked_cast<OGLRenderLayout const *>(&rl)->Deactive();
+		checked_cast<OGLRenderLayout const *>(&rl)->Deactive(cur_shader);
 	}
 
 	void OGLRenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)

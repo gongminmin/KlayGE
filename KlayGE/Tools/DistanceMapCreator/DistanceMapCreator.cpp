@@ -218,8 +218,8 @@ void ComputeDistanceField(std::vector<uint8_t>& distances, int width, int height
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
-		: App3DFramework(name, settings)
+	EmptyApp()
+		: App3DFramework("DistanceMapCreator")
 	{
 	}
 
@@ -266,10 +266,11 @@ int main(int argc, char* argv[])
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	Context::Instance().Config(context_cfg);
 	RenderFactory& render_factory = Context::Instance().RenderFactoryInstance();
 
-	EmptyApp app("DistanceMapCreator", settings);
+	EmptyApp app;
 	app.Create();
 
 	std::vector<uint8_t> volume(width * height * depth);

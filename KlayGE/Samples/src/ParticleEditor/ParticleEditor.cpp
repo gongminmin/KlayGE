@@ -492,21 +492,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/ParticleEditor");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	ParticleEditorApp app("Particle Editor", settings);
+	Context::Instance().Config(context_cfg);
+
+	ParticleEditorApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ParticleEditorApp::ParticleEditorApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+ParticleEditorApp::ParticleEditorApp()
+					: App3DFramework("Particle Editor")
 {
+	ResLoader::Instance().AddPath("../Samples/media/ParticleEditor");
 }
 
 void ParticleEditorApp::InitObjects()

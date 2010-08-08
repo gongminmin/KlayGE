@@ -8,7 +8,7 @@
 class PNTrianglesApp : public KlayGE::App3DFramework
 {
 public:
-	PNTrianglesApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	PNTrianglesApp();
 
 private:
 	void InitObjects();

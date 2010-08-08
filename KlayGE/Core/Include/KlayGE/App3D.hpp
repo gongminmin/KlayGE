@@ -59,7 +59,7 @@ namespace KlayGE
 		};
 
 	public:
-		App3DFramework(std::string const & name, RenderSettings const & settings);
+		explicit App3DFramework(std::string const & name);
 		virtual ~App3DFramework();
 
 		virtual void Create();

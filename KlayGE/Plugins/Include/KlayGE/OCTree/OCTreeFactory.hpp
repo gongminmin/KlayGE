@@ -29,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_OCTREE_SM_API void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_OCTREE_SM_API void MakeSceneManager(KlayGE::SceneManagerPtr& ptr);
 }
 
 #endif			// _OCTREEFACTORY_HPP

@@ -29,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr);
 }
 
 #endif			// _DSHOWFACTORY_HPP

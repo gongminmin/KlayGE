@@ -102,10 +102,19 @@ namespace
 
 namespace KlayGE
 {
-	OCTree::OCTree(uint32_t max_tree_depth)
-		: max_tree_depth_(std::min<uint32_t>(max_tree_depth, 16UL)),
-			rebuild_tree_(false)
+	OCTree::OCTree()
+		: max_tree_depth_(3), rebuild_tree_(false)
 	{
+	}
+
+	void OCTree::MaxTreeDepth(uint32_t max_tree_depth)
+	{
+		max_tree_depth_ = std::min<uint32_t>(max_tree_depth, 16UL);
+	}
+
+	uint32_t OCTree::MaxTreeDepth() const
+	{
+		return max_tree_depth_;
 	}
 
 	void OCTree::ClipScene()

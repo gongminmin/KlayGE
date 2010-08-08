@@ -14,6 +14,7 @@
 
 namespace KlayGE
 {
+	struct ContextCfg;
 	class Context;
 	class ResIdentifier;
 	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;

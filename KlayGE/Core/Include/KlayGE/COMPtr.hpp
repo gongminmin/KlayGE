@@ -23,9 +23,6 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#ifdef KLAYGE_PLATFORM_WIN32
-#define BOOST_MEM_FN_ENABLE_STDCALL
-#endif
 #include <boost/mem_fn.hpp>
 
 namespace KlayGE

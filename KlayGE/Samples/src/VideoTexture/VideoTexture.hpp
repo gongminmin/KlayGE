@@ -8,7 +8,7 @@
 class VideoTextureApp : public KlayGE::App3DFramework
 {
 public:
-	VideoTextureApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	VideoTextureApp();
 
 private:
 	void InitObjects();

@@ -10,7 +10,7 @@
 class SubSurfaceApp : public KlayGE::App3DFramework
 {
 public:
-	SubSurfaceApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	SubSurfaceApp();
 
 private:
 	void InitObjects();

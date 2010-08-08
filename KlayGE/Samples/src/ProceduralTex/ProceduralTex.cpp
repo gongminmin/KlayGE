@@ -137,22 +137,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/ProceduralTex");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	ProceduralTexApp app("ProceduralTex", settings);
+	Context::Instance().Config(context_cfg);
+
+	ProceduralTexApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ProceduralTexApp::ProceduralTexApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
+ProceduralTexApp::ProceduralTexApp()
+			: App3DFramework("ProceduralTex"),
 				procedural_type_(0), procedural_freq_(10)
 {
+	ResLoader::Instance().AddPath("../Samples/media/ProceduralTex");
 }
 
 void ProceduralTexApp::InitObjects()

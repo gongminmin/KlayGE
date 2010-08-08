@@ -1152,22 +1152,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	DeferredShadingApp app("DeferredShading", settings);
+	Context::Instance().Config(context_cfg);
+
+	DeferredShadingApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-DeferredShadingApp::DeferredShadingApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
+DeferredShadingApp::DeferredShadingApp()
+			: App3DFramework("DeferredShading"),
 				anti_alias_enabled_(true)
 {
+	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
 }
 
 void DeferredShadingApp::InitObjects()

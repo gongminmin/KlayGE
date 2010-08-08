@@ -32,7 +32,7 @@
 
 extern "C"
 {
-	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_DINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr);
 }
 
 #endif			// _DINPUTFACTORY_HPP

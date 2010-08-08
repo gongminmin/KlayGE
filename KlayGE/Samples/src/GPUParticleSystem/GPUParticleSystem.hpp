@@ -9,7 +9,7 @@
 class GPUParticleSystemApp : public KlayGE::App3DFramework
 {
 public:
-	GPUParticleSystemApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	GPUParticleSystemApp();
 
 private:
 	void InitObjects();

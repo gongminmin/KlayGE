@@ -29,7 +29,7 @@
 
 extern "C"
 {
-	KLAYGE_OGLES2_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, KlayGE::XMLNodePtr const & extra_param);
+	KLAYGE_OGLES2_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr);
 }
 
 #endif			// _OGLRENDERFACTORY_HPP

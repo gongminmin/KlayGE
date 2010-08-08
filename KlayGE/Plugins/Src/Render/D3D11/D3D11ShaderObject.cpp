@@ -32,9 +32,6 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-#define BOOST_MEM_FN_ENABLE_STDCALL
-#endif
 #include <boost/mem_fn.hpp>
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>

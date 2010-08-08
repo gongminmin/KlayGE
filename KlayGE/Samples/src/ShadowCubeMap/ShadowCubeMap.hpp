@@ -9,7 +9,7 @@
 class ShadowCubeMap : public KlayGE::App3DFramework
 {
 public:
-	ShadowCubeMap(std::string const & name, KlayGE::RenderSettings const & settings);
+	ShadowCubeMap();
 
 private:
 	void InitObjects();

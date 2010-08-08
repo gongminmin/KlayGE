@@ -60,22 +60,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Text");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	TextApp app("Text", settings);
+	Context::Instance().Config(context_cfg);
+
+	TextApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-TextApp::TextApp(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
+TextApp::TextApp()
+			: App3DFramework("Text"),
 				scale_(1)
 {
+	ResLoader::Instance().AddPath("../Samples/media/Text");
 }
 
 void TextApp::InitObjects()

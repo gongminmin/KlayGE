@@ -1176,25 +1176,18 @@ namespace KlayGE
 					}
 					else
 					{
-						if ("gl_PositionIn" == this_token)
+						if (("gl_TexCoordIn" == this_token)
+							|| ("gl_FogFragCoordIn" == this_token)
+							|| ("gl_FrontColorIn" == this_token)
+							|| ("gl_BackColorIn" == this_token)
+							|| ("gl_FrontSecondaryColorIn" == this_token)
+							|| ("gl_BackSecondaryColorIn" == this_token))
 						{
-							ss << "gl_Position";
+							ss << "v_" << this_token.substr(0, this_token.size() - 2);
 						}
 						else
 						{
-							if (("gl_TexCoordIn" == this_token)
-								|| ("gl_FogFragCoordIn" == this_token)
-								|| ("gl_FrontColorIn" == this_token)
-								|| ("gl_BackColorIn" == this_token)
-								|| ("gl_FrontSecondaryColorIn" == this_token)
-								|| ("gl_BackSecondaryColorIn" == this_token))
-							{
-								ss << "v_" << this_token.substr(0, this_token.size() - 2);
-							}
-							else
-							{
-								ss << this_token;
-							}
+							ss << this_token;
 						}
 					}
 				}
@@ -1350,6 +1343,8 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 					if (!compiled)
 					{
+						printf("%s\n", glsl);
+
 						GLint len = 0;
 						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
 						if (len > 0)
@@ -1590,7 +1585,8 @@ namespace KlayGE
 
 			if (is_validate_)
 			{
-				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0], glsl_bin_program_->size());
+				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
+					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
 			}
 		}
 		else
@@ -1639,7 +1635,7 @@ namespace KlayGE
 
 						GLint compiled = false;
 						glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-	#ifdef KLAYGE_DEBUG
+#ifdef KLAYGE_DEBUG
 						if (!compiled)
 						{
 							GLint len = 0;
@@ -1651,7 +1647,7 @@ namespace KlayGE
 								std::cerr << &info[0] << std::endl;
 							}
 						}
-	#endif
+#endif
 						ret->is_shader_validate_[type] &= compiled ? true : false;
 
 						glAttachShader(ret->glsl_program_, object);

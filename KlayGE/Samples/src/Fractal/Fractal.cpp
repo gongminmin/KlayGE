@@ -101,21 +101,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Fractal");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	Fractal app("Fractal", settings);
+	Context::Instance().Config(context_cfg);
+
+	Fractal app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Fractal::Fractal(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings)
+Fractal::Fractal()
+			: App3DFramework("Fractal")
 {
+	ResLoader::Instance().AddPath("../Samples/media/Fractal");
 }
 
 void Fractal::InitObjects()

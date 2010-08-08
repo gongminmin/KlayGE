@@ -142,22 +142,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/Parallax");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	Parallax app("Parallax", settings);
+	Context::Instance().Config(context_cfg);
+
+	Parallax app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Parallax::Parallax(std::string const & name, RenderSettings const & settings)
-			: App3DFramework(name, settings),
+Parallax::Parallax()
+			: App3DFramework("Parallax"),
 				parallax_scale_(0.06f), parallax_bias_(0.02f)
 {
+	ResLoader::Instance().AddPath("../Samples/media/Parallax");
 }
 
 void Parallax::InitObjects()

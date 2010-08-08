@@ -107,21 +107,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/VideoTexture");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	VideoTextureApp app("Video Texture", settings);
+	Context::Instance().Config(context_cfg);
+
+	VideoTextureApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-VideoTextureApp::VideoTextureApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+VideoTextureApp::VideoTextureApp()
+					: App3DFramework("Video Texture")
 {
+	ResLoader::Instance().AddPath("../Samples/media/VideoTexture");
 }
 
 void VideoTextureApp::InitObjects()

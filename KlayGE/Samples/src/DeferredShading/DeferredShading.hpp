@@ -11,7 +11,7 @@
 class DeferredShadingApp : public KlayGE::App3DFramework
 {
 public:
-	DeferredShadingApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	DeferredShadingApp();
 
 private:
 	void InitObjects();

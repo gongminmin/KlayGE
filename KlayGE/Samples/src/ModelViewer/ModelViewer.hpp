@@ -10,7 +10,7 @@
 class ModelViewerApp : public KlayGE::App3DFramework
 {
 public:
-	ModelViewerApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	ModelViewerApp();
 
 private:
 	void InitObjects();

@@ -114,8 +114,8 @@ namespace
 class EmptyApp : public KlayGE::App3DFramework
 {
 public:
-	EmptyApp(std::string const & name, KlayGE::RenderSettings const & settings)
-		: App3DFramework(name, settings)
+	EmptyApp()
+		: App3DFramework("GL Compatibility")
 	{
 	}
 
@@ -135,10 +135,11 @@ int main()
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	Context::Instance().LoadRenderFactory("OpenGL", XMLNodePtr());
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.render_factory_name = "OpenGL";
+	Context::Instance().Config(context_cfg);
 
-	EmptyApp app("GL Compatibility", settings);
+	EmptyApp app;
 	app.Create();
 
 	std::string const info_file_name("info.xml");

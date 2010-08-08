@@ -94,21 +94,23 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/SubSurface");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	SubSurfaceApp app("SubSurface", settings);
+	Context::Instance().Config(context_cfg);
+
+	SubSurfaceApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-SubSurfaceApp::SubSurfaceApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings)
+SubSurfaceApp::SubSurfaceApp()
+					: App3DFramework("SubSurface")
 {
+	ResLoader::Instance().AddPath("../Samples/media/SubSurface");
 }
 
 void SubSurfaceApp::InitObjects()

@@ -9,7 +9,7 @@
 class PostProcessingApp : public KlayGE::App3DFramework
 {
 public:
-	PostProcessingApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	PostProcessingApp();
 
 private:
 	void InitObjects();

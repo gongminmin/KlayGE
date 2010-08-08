@@ -193,7 +193,7 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr, KlayGE::XMLNodePtr const & /*extra_param*/)
+void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr)
 {
 	ptr = KlayGE::MakeSharedPtr<KlayGE::D3D11RenderFactory>();
 }

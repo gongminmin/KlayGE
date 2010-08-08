@@ -19,17 +19,7 @@
 #include <KlayGE/OCTree/OCTree.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 
-void MakeSceneManager(KlayGE::SceneManagerPtr& ptr, KlayGE::XMLNodePtr const & extra_param)
+void MakeSceneManager(KlayGE::SceneManagerPtr& ptr)
 {
-	int octree_depth = 3;
-	if (extra_param)
-	{
-		KlayGE::XMLAttributePtr attr = extra_param->Attrib("depth");
-		if (attr)
-		{
-			octree_depth = attr->ValueInt();
-		}
-	}
-
-	ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>(octree_depth);
+	ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>();
 }

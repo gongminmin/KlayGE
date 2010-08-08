@@ -296,22 +296,24 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	PNTrianglesApp app("PNTrianglesApp", settings);
+	Context::Instance().Config(context_cfg);
+
+	PNTrianglesApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-PNTrianglesApp::PNTrianglesApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings),
+PNTrianglesApp::PNTrianglesApp()
+					: App3DFramework("PNTrianglesApp"),
 						tess_factor_(5), last_time_(0), frame_(0)
 {
+	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");
 }
 
 void PNTrianglesApp::InitObjects()

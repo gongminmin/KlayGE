@@ -178,23 +178,25 @@ namespace
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
-	ResLoader::Instance().AddPath("../Samples/media/ModelViewer");
 
-	RenderSettings settings = Context::Instance().LoadCfg("KlayGE.cfg");
-	settings.ConfirmDevice = ConfirmDevice;
+	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
+	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
 
-	ModelViewerApp app("Model Viewer", settings);
+	Context::Instance().Config(context_cfg);
+
+	ModelViewerApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-ModelViewerApp::ModelViewerApp(std::string const & name, RenderSettings const & settings)
-					: App3DFramework(name, settings),
+ModelViewerApp::ModelViewerApp()
+					: App3DFramework("Model Viewer"),
 						last_time_(0), frame_(0),
 						skinned_(true), play_(false)
 {
+	ResLoader::Instance().AddPath("../Samples/media/ModelViewer");
 }
 
 void ModelViewerApp::InitObjects()

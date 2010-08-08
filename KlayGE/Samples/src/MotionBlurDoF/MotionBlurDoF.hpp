@@ -9,7 +9,7 @@
 class MotionBlurDoFApp : public KlayGE::App3DFramework
 {
 public:
-	MotionBlurDoFApp(std::string const & name, KlayGE::RenderSettings const & settings);
+	MotionBlurDoFApp();
 
 private:
 	void InitObjects();
