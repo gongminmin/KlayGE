@@ -98,7 +98,7 @@ namespace KlayGE
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
 			clear_depth_(1), clear_stencil_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
-			cur_fbo_(0), cur_ib_(0), restart_index_(0)
+			cur_fbo_(0), restart_index_(0)
 	{
 		clear_clr_.assign(0);
 	}
@@ -479,13 +479,6 @@ namespace KlayGE
 		GLenum index_type = GL_UNSIGNED_SHORT;
 		if (rl.UseIndices())
 		{
-			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(rl.GetIndexStream()));
-			if (cur_ib_ != stream.OGLvbo())
-			{
-				stream.Active();
-				cur_ib_ = stream.OGLvbo();
-			}
-
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
@@ -904,7 +897,8 @@ namespace KlayGE
 
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_gpu_shader5())
 		{
-			caps_.max_shader_model = 5;
+			//caps_.max_shader_model = 5;
+			caps_.max_shader_model = 4;
 		}
 		else
 		{
@@ -987,6 +981,8 @@ namespace KlayGE
 		caps_.max_vertices = temp;
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
 		caps_.max_indices = temp;
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
+		caps_.max_vertex_streams = temp;
 
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;
@@ -1041,8 +1037,11 @@ namespace KlayGE
 		caps_.cs_support = false;
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
 		{
-			caps_.hs_support = true;
-			caps_.ds_support = true;
+			//caps_.hs_support = true;
+			//caps_.ds_support = true;
+			// Cg compiler don't support Cg->GLSL hull/domain shader
+			caps_.hs_support = false;
+			caps_.ds_support = false;
 		}
 		else
 		{

@@ -1,8 +1,11 @@
 // OGLRenderLayout.cpp
 // KlayGE OpenGL渲染分布类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2009-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 完善VAO支持 (2010.8.9)
 //
 // 3.9.0
 // 使用glVertexAttribPointer (2009.3.28)
@@ -67,6 +70,10 @@ namespace KlayGE
 	{
 		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
 
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		uint32_t max_vertex_streams = re.DeviceCaps().max_vertex_streams;
+
+		std::vector<char> used_streams(max_vertex_streams, 0);
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
@@ -84,13 +91,29 @@ namespace KlayGE
 					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
 					GLboolean const normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : GL_FALSE;
 
-					glEnableVertexAttribArray(attr);
 					stream.Active();
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
+					glEnableVertexAttribArray(attr);
+
+					used_streams[attr] = 1;
 				}
 
 				elem_offset += vs_elem.element_size();
 			}
+		}
+
+		for (GLuint i = 0; i < max_vertex_streams; ++ i)
+		{
+			if (!used_streams[i])
+			{
+				glDisableVertexAttribArray(i);
+			}
+		}
+
+		if (this->UseIndices())
+		{
+			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
+			stream.Active();
 		}
 	}
 

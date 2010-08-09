@@ -677,6 +677,7 @@ namespace KlayGE
 			caps_.max_indices = 16777215;
 			caps_.alpha_to_coverage_support = true;
 		}
+		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = 16;
 		caps_.hw_instancing_support = true;
 		caps_.depth_texture_support = true;

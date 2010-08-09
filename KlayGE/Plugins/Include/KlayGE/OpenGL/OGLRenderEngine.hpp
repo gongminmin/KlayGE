@@ -135,7 +135,6 @@ namespace KlayGE
 		std::vector<char const *> so_vars_ptrs_;
 		std::vector<GLuint> so_buffs_;
 
-		GLuint cur_ib_;
 		GLuint restart_index_;
 
 		bool hack_for_ati_;

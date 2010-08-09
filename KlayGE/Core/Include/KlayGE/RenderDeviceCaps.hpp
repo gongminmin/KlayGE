@@ -36,6 +36,7 @@ namespace KlayGE
 
 		uint32_t max_vertices;
 		uint32_t max_indices;
+		uint32_t max_vertex_streams;
 
 		uint8_t max_texture_anisotropy;
 

@@ -473,6 +473,7 @@ namespace KlayGE
 
 		ret.max_vertices = d3d_caps.MaxPrimitiveCount > 0xFFFF ? d3d_caps.MaxPrimitiveCount : d3d_caps.MaxPrimitiveCount * 3;
 		ret.max_indices = d3d_caps.MaxVertexIndex;
+		ret.max_vertex_streams = d3d_caps.MaxStreams;
 
 		if (ret.max_shader_model >= 3)
 		{

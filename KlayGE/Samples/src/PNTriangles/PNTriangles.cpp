@@ -310,7 +310,7 @@ int main()
 }
 
 PNTrianglesApp::PNTrianglesApp()
-					: App3DFramework("PNTrianglesApp"),
+					: App3DFramework("PNTriangles"),
 						tess_factor_(5), last_time_(0), frame_(0)
 {
 	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");

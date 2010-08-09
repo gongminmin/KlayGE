@@ -465,6 +465,8 @@ namespace KlayGE
 		caps_.max_vertices = temp;
 		glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &temp);
 		caps_.max_indices = temp;
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &temp);
+		caps_.max_vertex_streams = temp;
 
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = false;

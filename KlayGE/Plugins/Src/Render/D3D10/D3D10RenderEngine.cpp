@@ -510,6 +510,7 @@ namespace KlayGE
 		caps_.max_simultaneous_rts = 8;
 		caps_.max_vertices = 8388607;
 		caps_.max_indices = 16777215;
+		caps_.max_vertex_streams = 16;
 		caps_.hw_instancing_support = true;
 		caps_.stream_output_support = true;
 		caps_.alpha_to_coverage_support = true;

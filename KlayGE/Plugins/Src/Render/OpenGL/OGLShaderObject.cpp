@@ -1312,7 +1312,11 @@ namespace KlayGE
 							}
 							std::cerr << err_string << std::endl;
 
-							std::cerr << cgGetLastListing(CGContextIniter::Instance().Context()) << std::endl;
+							char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
+							if (listing)
+							{
+								std::cerr << listing << std::endl;
+							}
 						}
 #else
 						UNREF_PARAM(err_string);
