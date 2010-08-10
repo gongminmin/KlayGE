@@ -80,7 +80,13 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 				float4 LightWorldPos : TEXCOORD0) : SV_Target 
 {
 	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos.xyz).rgb;
-	float2 moments = shadow_cube_tex.Sample(shadow_sampler, LightWorldPos.xyz).xy;
+	float3 shadow_dir;
+#ifndef KLAYGE_OPENGL
+	shadow_dir = LightWorldPos.xyz;
+#else
+	shadow_dir = float3(LightWorldPos.x, -LightWorldPos.y, LightWorldPos.z);
+#endif
+	float2 moments = shadow_cube_tex.Sample(shadow_sampler, shadow_dir).xy;
 	
 	LightWorldPos /= LightWorldPos.w;
 	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);

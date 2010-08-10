@@ -1261,8 +1261,7 @@ namespace KlayGE
 					shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
 							CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
 
-					CGerror error;
-					char const * err_string = cgGetLastErrorString(&error);
+					CGerror error = cgGetError();
 					if (error != CG_NO_ERROR)
 					{
 #ifdef KLAYGE_DEBUG
@@ -1277,7 +1276,7 @@ namespace KlayGE
 								std::cerr << line << " " << s << std::endl;
 								++ line;
 							}
-							std::cerr << err_string << std::endl;
+							std::cerr << cgGetErrorString(error) << std::endl;
 
 							char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
 							if (listing)
@@ -1285,8 +1284,6 @@ namespace KlayGE
 								std::cerr << listing << std::endl;
 							}
 						}
-#else
-						UNREF_PARAM(err_string);
 #endif
 
 						is_shader_validate_[type] = false;

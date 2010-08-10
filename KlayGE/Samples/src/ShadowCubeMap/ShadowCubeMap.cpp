@@ -17,6 +17,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -389,27 +390,47 @@ void ShadowCubeMap::InitObjects()
 	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
 
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
-	for (int i = 0; i < 6; ++ i)
+	shadow_buffer_ = rf.MakeFrameBuffer();
+	try
 	{
-		shadow_buffers_[i] = rf.MakeFrameBuffer();
-		try
-		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0, 0));
-		}
-		catch (...)
-		{
-			shadow_tex_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			shadow_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_[i], 0, 0));
-		}
-
-		shadow_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
-
-		CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;
-		camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
+		shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
+	}
+	catch (...)
+	{
+		shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
 	}
 
-	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	shadow_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
+
+	shadow_buffer_->GetViewport().camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
+	
+	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+	for (int i = 0; i < 6; ++ i)
+	{
+		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
+	
+		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
+		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
+		if (!shadow_buffer_->RequiresFlipping())
+		{
+			switch (i)
+			{
+			case Texture::CF_Positive_Y:
+				sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, Texture::CF_Negative_Y);
+				break;
+
+			case Texture::CF_Negative_Y:
+				sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, Texture::CF_Positive_Y);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 
 	fpcController_.Scalers(0.05f, 0.1f);
 
@@ -494,6 +515,11 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
+	if (pass > 0)
+	{
+		sm_filter_pps_[pass - 1]->Apply();
+	}
+
 	switch (pass)
 	{
 	case 0:
@@ -503,21 +529,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 1400.0f)
 				* MathLib::translation(0.1f, 0.4f, 0.2f);
-
-			for (int i = 0; i < 6; ++ i)
-			{
-				CameraPtr camera = shadow_buffers_[i]->GetViewport().camera;
-
-				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i);
-
-				std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
-
-				float3 le = transform_coord(float3(0, 0, 0), light_model_);
-				float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
-				float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
-
-				camera->ViewParams(le, lla, lu);
-			}
 		}
 
 	case 1:
@@ -526,8 +537,20 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case 4:
 	case 5:
 		{
-			renderEngine.BindFrameBuffer(shadow_buffers_[pass]);
+			renderEngine.BindFrameBuffer(shadow_buffer_);
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+
+			{
+				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + pass);
+
+				std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
+
+				float3 le = transform_coord(float3(0, 0, 0), light_model_);
+				float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
+				float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
+
+				shadow_buffer_->GetViewport().camera->ViewParams(le, lla, lu);
+			}
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
@@ -538,31 +561,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-
-			for (int i = 0; i < 6; ++ i)
-			{
-				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + i);
-				if (!shadow_buffers_[i]->RequiresFlipping())
-				{
-					switch (i)
-					{
-					case Texture::CF_Positive_Y:
-						face = Texture::CF_Negative_Y;
-						break;
-
-					case Texture::CF_Negative_Y:
-						face = Texture::CF_Positive_Y;
-						break;
-
-					default:
-						break;
-					}
-				}
-
-				shadow_tex_[i]->CopyToTextureCube(*shadow_cube_tex_, face, 0,
-					shadow_cube_tex_->Width(0), shadow_cube_tex_->Width(0), 0, 0,
-					shadow_tex_[i]->Width(0), shadow_tex_[i]->Height(0), 0, 0);
-			}
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);

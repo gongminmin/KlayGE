@@ -1129,10 +1129,6 @@ namespace
 		{
 			return false;
 		}
-		if (caps.max_simultaneous_rts < 2)
-		{
-			return false;
-		}
 
 		try
 		{
@@ -1155,6 +1151,8 @@ int main()
 
 	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
 	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
+	context_cfg.graphics_cfg.sample_count = 1;
+	context_cfg.graphics_cfg.sample_quality = 0;
 
 	Context::Instance().Config(context_cfg);
 

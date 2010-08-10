@@ -30,9 +30,10 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::FrameBufferPtr shadow_buffers_[6];
-	KlayGE::TexturePtr shadow_tex_[6];
+	KlayGE::FrameBufferPtr shadow_buffer_;
+	KlayGE::TexturePtr shadow_tex_;
 	KlayGE::TexturePtr shadow_cube_tex_;
+	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
 	KlayGE::TexturePtr lamp_tex_;
 
