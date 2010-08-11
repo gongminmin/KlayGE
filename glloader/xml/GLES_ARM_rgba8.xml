@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ARM_rgba8" reg_no="82">
+	<tokens>
+		<token name="GL_RGBA8_OES" value="0x8058"/>
+	</tokens>
+</gl_extension>

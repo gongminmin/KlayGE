@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_texture_max_level" reg_no="80">
+	<tokens>
+		<token name="GL_TEXTURE_MAX_LEVEL_APPLE" value="0x813D"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_texture_format_BGRA8888" reg_no="79" prefer="GLES_EXT_texture_format_BGRA8888">
+	<tokens>
+		<token name="GL_BGRA_APPLE" value="0x80E1"/>
+	</tokens>
+</gl_extension>
