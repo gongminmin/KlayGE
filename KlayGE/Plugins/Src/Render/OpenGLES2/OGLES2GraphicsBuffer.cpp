@@ -28,10 +28,6 @@ namespace KlayGE
 				target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
-		if (glloader_GLES_OES_mapbuffer())
-		{
-			THR(boost::system::posix_error::not_supported);
-		}
 
 		glGenBuffers(1, &vb_);
 
@@ -66,25 +62,20 @@ namespace KlayGE
 
 	void* OGLES2GraphicsBuffer::Map(BufferAccess ba)
 	{
-		GLenum flag = 0;
 		switch (ba)
 		{
 		case BA_Write_Only:
-			flag = GL_WRITE_ONLY_OES;
-			break;
+			if (glloader_GLES_OES_mapbuffer())
+			{
+				glBindBuffer(target_, vb_);
+				return glMapBufferOES(target_, GL_WRITE_ONLY_OES);
+			}
+			else
+			{
+				return &buf_data_[0];
+			}
 
 		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-
-		if (glloader_GLES_OES_mapbuffer())
-		{
-			glBindBuffer(target_, vb_);
-			return glMapBufferOES(target_, flag);
-		}
-		else
-		{
 			return &buf_data_[0];
 		}
 	}
