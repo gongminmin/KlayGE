@@ -75,6 +75,7 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<GLint> > glsl_bin_formats_;
 		boost::shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
 		boost::shared_ptr<std::vector<std::string> > glsl_srcs_;
+		GLint gs_input_type_, gs_output_type_;
 
 		parameter_binds_t param_binds_;
 		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;

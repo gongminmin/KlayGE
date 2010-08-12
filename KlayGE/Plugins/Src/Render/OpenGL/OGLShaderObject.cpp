@@ -1359,6 +1359,65 @@ namespace KlayGE
 					is_shader_validate_[type] &= compiled ? true : false;
 
 					glAttachShader(glsl_program_, object);
+
+					if (ST_GeometryShader == type)
+					{
+						switch (cgGetProgramInput(shaders[type]))
+						{
+						case CG_POINT:
+							gs_input_type_ = GL_POINTS;
+							break;
+						
+						case CG_LINE:
+							gs_input_type_ = GL_LINES;
+							break;
+						
+						case CG_LINE_ADJ:
+							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
+							break;
+						
+						case CG_TRIANGLE:
+							gs_input_type_ = GL_TRIANGLES;
+							break;
+
+						case CG_TRIANGLE_ADJ:
+							gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_input_type_ = 0;
+							break;
+						}
+
+						switch (cgGetProgramOutput(shaders[type]))
+						{
+						case CG_POINT:
+							gs_output_type_ = GL_POINTS;
+							break;
+						
+						case CG_LINE_OUT:
+							gs_output_type_ = GL_LINE_STRIP;
+							break;
+						
+						case CG_TRIANGLE_OUT:
+							gs_output_type_ = GL_TRIANGLE_STRIP;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_output_type_ = 0;
+							break;
+						}
+
+						glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
+						glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+
+						int temp;
+						glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
+						glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
+					}
+
 					glDeleteShader(object);
 				}
 			}
@@ -1588,6 +1647,20 @@ namespace KlayGE
 			{
 				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
 					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+
+				if (ret->is_shader_validate_[ST_GeometryShader])
+				{
+					shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[ST_GeometryShader]);
+					if (!sd.func_name.empty())
+					{
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+
+						int temp;
+						glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
+					}
+				}
 			}
 		}
 		else
@@ -1652,6 +1725,17 @@ namespace KlayGE
 						ret->is_shader_validate_[type] &= compiled ? true : false;
 
 						glAttachShader(ret->glsl_program_, object);
+
+						if (ST_GeometryShader == type)
+						{
+							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
+							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+
+							int temp;
+							glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
+							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
+						}
+
 						glDeleteShader(object);
 					}
 				}
