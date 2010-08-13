@@ -137,33 +137,46 @@ namespace
 	float4 texCUBEBias(samplerCUBE s, float3 location, float lod)\n		\
 	{\n																	\
 		return texCUBEbias(s, float4(location, lod));\n					\
-	}\n																	\
-	";
+	}\n";
 
-	char const * predefined_attribs = "\n		\
-	attribute vec4 a_gl_Color;\n				\
-	attribute vec4 a_gl_SecondaryColor;\n		\
-	attribute vec3 a_gl_Normal;\n				\
-	attribute vec4 a_gl_Vertex;\n				\
-	attribute vec4 a_gl_MultiTexCoord0;\n		\
-	attribute vec4 a_gl_MultiTexCoord1;\n		\
-	attribute vec4 a_gl_MultiTexCoord2;\n		\
-	attribute vec4 a_gl_MultiTexCoord3;\n		\
-	attribute vec4 a_gl_MultiTexCoord4;\n		\
-	attribute vec4 a_gl_MultiTexCoord5;\n		\
-	attribute vec4 a_gl_MultiTexCoord6;\n		\
-	attribute vec4 a_gl_MultiTexCoord7;\n		\
-	attribute float a_gl_FogCoord;\n			\
-	";
+	char const * predefined_attribs = "\n"\
+		"attribute vec4 a_gl_Color;\n"\
+		"attribute vec4 a_gl_SecondaryColor;\n"\
+		"attribute vec3 a_gl_Normal;\n"\
+		"attribute vec4 a_gl_Vertex;\n"\
+		"attribute vec4 a_gl_MultiTexCoord0;\n"\
+		"attribute vec4 a_gl_MultiTexCoord1;\n"\
+		"attribute vec4 a_gl_MultiTexCoord2;\n"\
+		"attribute vec4 a_gl_MultiTexCoord3;\n"\
+		"attribute vec4 a_gl_MultiTexCoord4;\n"\
+		"attribute vec4 a_gl_MultiTexCoord5;\n"\
+		"attribute vec4 a_gl_MultiTexCoord6;\n"\
+		"attribute vec4 a_gl_MultiTexCoord7;\n"\
+		"attribute float a_gl_FogCoord;\n";
 
-	char const * predefined_varyings = "\n	\
-	varying vec4 v_gl_FrontColor;\n			\
-	varying vec4 v_gl_BackColor;\n			\
-	varying vec4 v_gl_FrontSecondaryColor;\n\
-	varying vec4 v_gl_BackSecondaryColor;\n	\
-    varying vec4 v_gl_TexCoord[8];\n		\
-    varying float v_gl_FogFragCoord;\n		\
-	";
+	char const * predefined_varyings = "\n"\
+		"varying vec4 v_gl_FrontColor;\n"\
+		"varying vec4 v_gl_BackColor;\n"\
+		"varying vec4 v_gl_FrontSecondaryColor;\n"\
+		"varying vec4 v_gl_BackSecondaryColor;\n"\
+		"varying vec4 v_gl_TexCoord[8];\n"\
+		"varying float v_gl_FogFragCoord;\n";
+
+	char const * predefined_gs_in_varyings = "\n"\
+		"varying in vec4 v_gl_FrontColorIn[%d];\n"\
+		"varying in vec4 v_gl_BackColorIn[%d];\n"\
+		"varying in vec4 v_gl_FrontSecondaryColorIn[%d];\n"\
+		"varying in vec4 v_gl_BackSecondaryColorIn[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn[%d][8];\n"\
+		"varying in float v_gl_FogFragCoordIn[%d];\n";
+
+	char const * predefined_gs_out_varyings = "\n"\
+		"varying out vec4 v_gl_FrontColor;\n"\
+		"varying out vec4 v_gl_BackColor;\n"\
+		"varying out vec4 v_gl_FrontSecondaryColor;\n"\
+		"varying out vec4 v_gl_BackSecondaryColor;\n"\
+		"varying out vec4 v_gl_TexCoord[8];\n"\
+		"varying out float v_gl_FogFragCoord;\n";
 
 	template <typename SrcType>
 	class SetOGLShaderParameter
@@ -869,6 +882,7 @@ namespace
 namespace KlayGE
 {
 	OGLShaderObject::OGLShaderObject()
+		: gs_input_type_(0), gs_output_type_(0)
 	{
 		is_shader_validate_.assign(true);
 	}
@@ -1126,24 +1140,34 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type)
+	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices)
 	{
+		char predefined_gs_in_varyings_add_num[1024];
+		sprintf(predefined_gs_in_varyings_add_num, predefined_gs_in_varyings,
+			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
+			gs_input_vertices, gs_input_vertices);
+
 		std::stringstream ss;
 		switch (type)
 		{
 		case ST_VertexShader:
-		case ST_GeometryShader:
 			ss << predefined_attribs << std::endl;
+			ss << predefined_varyings << std::endl;
+			break;
+
+		case ST_GeometryShader:
+			ss << predefined_gs_in_varyings_add_num << std::endl;
+			ss << predefined_gs_out_varyings << std::endl;
 			break;
 
 		case ST_PixelShader:
+			ss << predefined_varyings << std::endl;
 			break;
 
 		default:
 			BOOST_ASSERT(false);
 			break;
 		}
-		ss << predefined_varyings << std::endl;
 
 		boost::char_separator<char> sep("", " \t\n.,():;+-*/%&!|^[]{}'\"?");
 		boost::tokenizer<boost::char_separator<char> > tok(glsl, sep);
@@ -1183,7 +1207,7 @@ namespace KlayGE
 							|| ("gl_FrontSecondaryColorIn" == this_token)
 							|| ("gl_BackSecondaryColorIn" == this_token))
 						{
-							ss << "v_" << this_token.substr(0, this_token.size() - 2);
+							ss << "v_" << this_token;
 						}
 						else
 						{
@@ -1325,8 +1349,66 @@ namespace KlayGE
 
 				if (is_shader_validate_[type])
 				{
+					uint32_t gs_input_vertices = 0;
+					if (ST_GeometryShader == type)
+					{
+						switch (cgGetProgramInput(shaders[type]))
+						{
+						case CG_POINT:
+							gs_input_type_ = GL_POINTS;
+							gs_input_vertices = 1;
+							break;
+						
+						case CG_LINE:
+							gs_input_type_ = GL_LINES;
+							gs_input_vertices = 2;
+							break;
+						
+						case CG_LINE_ADJ:
+							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
+							gs_input_vertices = 4;
+							break;
+						
+						case CG_TRIANGLE:
+							gs_input_type_ = GL_TRIANGLES;
+							gs_input_vertices = 3;
+							break;
+
+						case CG_TRIANGLE_ADJ:
+							gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
+							gs_input_vertices = 6;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_input_type_ = 0;
+							gs_input_vertices = 0;
+							break;
+						}
+
+						switch (cgGetProgramOutput(shaders[type]))
+						{
+						case CG_POINT:
+							gs_output_type_ = GL_POINTS;
+							break;
+						
+						case CG_LINE_OUT:
+							gs_output_type_ = GL_LINE_STRIP;
+							break;
+						
+						case CG_TRIANGLE_OUT:
+							gs_output_type_ = GL_TRIANGLE_STRIP;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							gs_output_type_ = 0;
+							break;
+						}
+					}
+
 					(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
-						static_cast<ShaderType>(type));
+						static_cast<ShaderType>(type), gs_input_vertices);
 					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
 					if (0 == object)
@@ -1362,54 +1444,6 @@ namespace KlayGE
 
 					if (ST_GeometryShader == type)
 					{
-						switch (cgGetProgramInput(shaders[type]))
-						{
-						case CG_POINT:
-							gs_input_type_ = GL_POINTS;
-							break;
-						
-						case CG_LINE:
-							gs_input_type_ = GL_LINES;
-							break;
-						
-						case CG_LINE_ADJ:
-							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
-							break;
-						
-						case CG_TRIANGLE:
-							gs_input_type_ = GL_TRIANGLES;
-							break;
-
-						case CG_TRIANGLE_ADJ:
-							gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							gs_input_type_ = 0;
-							break;
-						}
-
-						switch (cgGetProgramOutput(shaders[type]))
-						{
-						case CG_POINT:
-							gs_output_type_ = GL_POINTS;
-							break;
-						
-						case CG_LINE_OUT:
-							gs_output_type_ = GL_LINE_STRIP;
-							break;
-						
-						case CG_TRIANGLE_OUT:
-							gs_output_type_ = GL_TRIANGLE_STRIP;
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							gs_output_type_ = 0;
-							break;
-						}
-
 						glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
 						glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
 
@@ -1624,6 +1658,8 @@ namespace KlayGE
 		ret->glsl_bin_formats_ = glsl_bin_formats_;
 		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->glsl_srcs_ = glsl_srcs_;
+		ret->gs_input_type_ = gs_input_type_;
+		ret->gs_output_type_ = gs_output_type_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
@@ -1653,8 +1689,8 @@ namespace KlayGE
 					shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[ST_GeometryShader]);
 					if (!sd.func_name.empty())
 					{
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, ret->gs_input_type_);
+						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, ret->gs_output_type_);
 
 						int temp;
 						glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
@@ -1728,8 +1764,8 @@ namespace KlayGE
 
 						if (ST_GeometryShader == type)
 						{
-							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
-							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, ret->gs_input_type_);
+							glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, ret->gs_output_type_);
 
 							int temp;
 							glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
