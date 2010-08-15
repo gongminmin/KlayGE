@@ -321,7 +321,7 @@ namespace KlayGE
 					d3dDevice_ = MakeCOMPtr(d3d_device);
 					re.D3DDevice(d3dDevice_);
 
-					if (settings.ConfirmDevice && !settings.ConfirmDevice())
+					if (!Context::Instance().AppInstance().ConfirmDevice())
 					{
 						d3dDevice_.reset();
 					}

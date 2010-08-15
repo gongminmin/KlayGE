@@ -157,33 +157,6 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		if (caps.max_simultaneous_rts < 2)
-		{
-			return false;
-		}
-
-		try
-		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0, 0);
-		}
-		catch (...)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 
@@ -191,10 +164,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	DepthPeelingApp app;
 	app.Create();
@@ -208,6 +178,33 @@ DepthPeelingApp::DepthPeelingApp()
 				num_layers_(0)
 {
 	ResLoader::Instance().AddPath("../Samples/media/DepthPeeling");
+}
+
+bool DepthPeelingApp::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	if (caps.max_simultaneous_rts < 2)
+	{
+		return false;
+	}
+
+	try
+	{
+		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rf.Make2DRenderView(*temp_tex, 0, 0);
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void DepthPeelingApp::InitObjects()

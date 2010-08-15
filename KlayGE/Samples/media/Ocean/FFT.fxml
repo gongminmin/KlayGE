@@ -94,7 +94,7 @@ void TWIDDLE_8(inout float2 D[8], float phase)
 [numthreads(COHERENCY_GRANULARITY, 1, 1)]
 void Radix008ACS(uint3 thread_id : SV_DispatchThreadID)
 {
-    if (thread_id.x < thread_count)
+	if (thread_id.x < thread_count)
 	{
 		// Fetch 8 complex numbers
 		float2 D[8];

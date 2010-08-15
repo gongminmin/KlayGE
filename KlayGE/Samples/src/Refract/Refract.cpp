@@ -140,30 +140,6 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-
-		try
-		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
-		}
-		catch (...)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 
@@ -171,10 +147,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	Refract app;
 	app.Create();
@@ -187,6 +160,30 @@ Refract::Refract()
 			: App3DFramework("Refract")
 {
 	ResLoader::Instance().AddPath("../Samples/media/Refract");
+}
+
+bool Refract::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+
+	try
+	{
+		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rf.Make2DRenderView(*temp_tex, 0, 0);
+		rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void Refract::InitObjects()
@@ -236,26 +233,27 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	ContextCfg const & cfg = Context::Instance().Config();
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, settings_.sample_count, settings_.sample_quality);
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality);
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	try
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 	catch (...)
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, settings_.sample_count, settings_.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	}
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	if (settings_.sample_count > 1)
+	if (cfg.graphics_cfg.sample_count > 1)
 	{
 		render_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, render_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		hdr_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -312,7 +310,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.BindFrameBuffer(hdr_buffer_);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-		if (settings_.sample_count > 1)
+		if (render_tex_->SampleCount() > 1)
 		{
 			// Resolve MSAA texture
 			render_tex_->CopyToTexture(*render_no_aa_tex_);
@@ -325,7 +323,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		return App3DFramework::URV_Need_Flush;
 
 	default:
-		if (settings_.sample_count > 1)
+		if (hdr_tex_->SampleCount() > 1)
 		{
 			// Resolve MSAA texture
 			hdr_tex_->CopyToTexture(*hdr_no_aa_tex_);

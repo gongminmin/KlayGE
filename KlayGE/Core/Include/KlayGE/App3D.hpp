@@ -1,8 +1,11 @@
 // App3D.hpp
 // KlayGE App3D类 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2003-2008
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Add ConfirmDevice() (2010.8.15)
 //
 // 3.8.0
 // 移入Core (2008.10.16)
@@ -71,6 +74,11 @@ namespace KlayGE
 			return main_wnd_;
 		}
 
+		virtual bool ConfirmDevice() const
+		{
+			return true;
+		}
+
 		Camera const & ActiveCamera() const;
 		Camera& ActiveCamera();
 
@@ -108,7 +116,6 @@ namespace KlayGE
 
 	protected:
 		std::string name_;
-		RenderSettings settings_;
 
 		// Stats
 		float	fps_;

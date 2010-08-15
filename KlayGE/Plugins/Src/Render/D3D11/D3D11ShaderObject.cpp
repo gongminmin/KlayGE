@@ -915,28 +915,31 @@ namespace KlayGE
 							{
 								pos = err_str.find("): warning X");
 							}
-							std::string part_err_str = err_str.substr(0, pos);
-							pos = part_err_str.rfind("(");
-							part_err_str = part_err_str.substr(pos + 1);
-							int err_line;
-							std::istringstream iss(part_err_str);
-							iss >> err_line;
-
-							iss.str(shader_text);
-							std::string s;
-							int line = 1;
-							std::cerr << "..." << std::endl;
-							while (iss)
+							if (pos != std::string::npos)
 							{
-								std::getline(iss, s);
-								if ((line - err_line > -3) && (line - err_line < 3))
+								std::string part_err_str = err_str.substr(0, pos);
+								pos = part_err_str.rfind("(");
+								part_err_str = part_err_str.substr(pos + 1);
+								int err_line;
+								std::istringstream iss(part_err_str);
+								iss >> err_line;
+
+								iss.str(shader_text);
+								std::string s;
+								int line = 1;
+								std::cerr << "..." << std::endl;
+								while (iss)
 								{
-									std::cerr << line << " " << s << std::endl;
+									std::getline(iss, s);
+									if ((line - err_line > -3) && (line - err_line < 3))
+									{
+										std::cerr << line << " " << s << std::endl;
+									}
+									++ line;
 								}
-								++ line;
+								std::cerr << "..." << std::endl;
+								std::cerr << err_str.c_str() << std::endl;
 							}
-							std::cerr << "..." << std::endl;
-							std::cerr << err_str.c_str() << std::endl;
 
 							err_msg->Release();
 						}

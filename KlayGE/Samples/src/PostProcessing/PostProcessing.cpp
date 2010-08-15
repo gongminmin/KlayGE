@@ -131,44 +131,13 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		if (caps.max_simultaneous_rts < 2)
-		{
-			return false;
-		}
-
-		try
-		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
-		}
-		catch (...)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	PostProcessingApp app;
 	app.Create();
@@ -181,6 +150,34 @@ PostProcessingApp::PostProcessingApp()
 			: App3DFramework("Post Processing")
 {
 	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
+}
+
+bool PostProcessingApp::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	if (caps.max_simultaneous_rts < 2)
+	{
+		return false;
+	}
+
+	try
+	{
+		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rf.Make2DRenderView(*temp_tex, 0, 0);
+		rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void PostProcessingApp::InitObjects()

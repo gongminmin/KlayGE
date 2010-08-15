@@ -83,29 +83,13 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 		InputActionDefine(FullScreen, KS_Enter),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	Fractal app;
 	app.Create();
@@ -118,6 +102,19 @@ Fractal::Fractal()
 			: App3DFramework("Fractal")
 {
 	ResLoader::Instance().AddPath("../Samples/media/Fractal");
+}
+
+bool Fractal::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void Fractal::InitObjects()

@@ -125,17 +125,6 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 
@@ -143,10 +132,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	Parallax app;
 	app.Create();
@@ -160,6 +146,17 @@ Parallax::Parallax()
 				parallax_scale_(0.06f), parallax_bias_(0.02f)
 {
 	ResLoader::Instance().AddPath("../Samples/media/Parallax");
+}
+
+bool Parallax::ConfirmDevice() const
+{
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	return true;
 }
 
 void Parallax::InitObjects()

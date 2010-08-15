@@ -60,7 +60,9 @@ namespace KlayGE
 
 		static Context& Instance();
 
-		ContextCfg LoadCfg(std::string const & cfg_file);
+		void LoadCfg(std::string const & cfg_file);
+		void SaveCfg(std::string const & cfg_file);
+
 		void Config(ContextCfg const & cfg);
 		ContextCfg const & Config() const;
 

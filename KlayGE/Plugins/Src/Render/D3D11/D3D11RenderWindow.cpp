@@ -189,7 +189,7 @@ namespace KlayGE
 					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx);
 					re.D3DDevice(d3d_device_, d3d_imm_ctx_, out_feature_level);
 
-					if (settings.ConfirmDevice && !settings.ConfirmDevice())
+					if (!Context::Instance().AppInstance().ConfirmDevice())
 					{
 						swap_chain_.reset();
 						d3d_device_.reset();

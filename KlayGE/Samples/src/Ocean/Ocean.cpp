@@ -254,7 +254,7 @@ namespace
 
 			ElementInitData init_data;
 			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = vertices.size() * sizeof(vertices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
@@ -275,7 +275,7 @@ namespace
 			}
 
 			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = indices.size() * sizeof(indices[0]);
+			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R32UI);
@@ -692,18 +692,6 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if ((caps.max_shader_model < 3) || !caps.cs_support)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 
@@ -711,10 +699,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	OceanApp app;
 	app.Create();
@@ -727,6 +712,18 @@ OceanApp::OceanApp()
 				: App3DFramework("Ocean")
 {
 	ResLoader::Instance().AddPath("../Samples/media/Ocean");
+}
+
+bool OceanApp::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if ((caps.max_shader_model < 3) || !caps.cs_support)
+	{
+		return false;
+	}
+	return true;
 }
 
 void OceanApp::InitObjects()

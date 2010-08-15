@@ -90,17 +90,6 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape)
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 1)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 
@@ -108,10 +97,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	VideoTextureApp app;
 	app.Create();
@@ -124,6 +110,17 @@ VideoTextureApp::VideoTextureApp()
 					: App3DFramework("Video Texture")
 {
 	ResLoader::Instance().AddPath("../Samples/media/VideoTexture");
+}
+
+bool VideoTextureApp::ConfirmDevice() const
+{
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 1)
+	{
+		return false;
+	}
+	return true;
 }
 
 void VideoTextureApp::InitObjects()

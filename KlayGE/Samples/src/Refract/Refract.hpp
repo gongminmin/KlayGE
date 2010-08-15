@@ -10,6 +10,8 @@ class Refract : public KlayGE::App3DFramework
 public:
 	Refract();
 
+	bool ConfirmDevice() const;
+
 private:
 	void InitObjects();
 	void DoUpdateOverlay();

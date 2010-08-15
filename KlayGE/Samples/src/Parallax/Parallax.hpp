@@ -11,6 +11,8 @@ class Parallax : public KlayGE::App3DFramework
 public:
 	Parallax();
 
+	bool ConfirmDevice() const;
+
 private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);

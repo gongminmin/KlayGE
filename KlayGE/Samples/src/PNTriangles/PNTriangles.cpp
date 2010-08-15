@@ -280,27 +280,13 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 		InputActionDefine(FullScreen, KS_Enter),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	PNTrianglesApp app;
 	app.Create();
@@ -314,6 +300,17 @@ PNTrianglesApp::PNTrianglesApp()
 						tess_factor_(5), last_time_(0), frame_(0)
 {
 	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");
+}
+
+bool PNTrianglesApp::ConfirmDevice() const
+{
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	return true;
 }
 
 void PNTrianglesApp::InitObjects()

@@ -13,6 +13,8 @@ class DeferredShadingApp : public KlayGE::App3DFramework
 public:
 	DeferredShadingApp();
 
+	bool ConfirmDevice() const;
+
 private:
 	void InitObjects();
 

@@ -266,8 +266,8 @@ int main(int argc, char* argv[])
 
 	ResLoader::Instance().AddPath("../../../bin");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	
 	RenderFactory& render_factory = Context::Instance().RenderFactoryInstance();
 
 	EmptyApp app;

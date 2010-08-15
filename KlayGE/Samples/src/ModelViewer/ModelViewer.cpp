@@ -155,17 +155,6 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 	};
 
-	bool ConfirmDevice()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		return true;
-	}
-
 	struct CreateDetailedModelFactory
 	{
 		RenderModelPtr operator()(std::wstring const & name)
@@ -179,10 +168,7 @@ int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	ModelViewerApp app;
 	app.Create();
@@ -197,6 +183,17 @@ ModelViewerApp::ModelViewerApp()
 						skinned_(true), play_(false)
 {
 	ResLoader::Instance().AddPath("../Samples/media/ModelViewer");
+}
+
+bool ModelViewerApp::ConfirmDevice() const
+{
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	return true;
 }
 
 void ModelViewerApp::InitObjects()

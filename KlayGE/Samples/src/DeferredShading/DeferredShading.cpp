@@ -165,7 +165,7 @@ namespace
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_ = rf.MakeRenderLayout();
 			gbuffer_rl_->TopologyType(rl_->TopologyType());
 			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -173,13 +173,13 @@ namespace
 			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_ = rf.MakeRenderLayout();
 			gen_sm_rl_->TopologyType(rl_->TopologyType());
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_ = rf.MakeRenderLayout();
 			shading_rl_->TopologyType(rl_->TopologyType());
 			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -406,19 +406,19 @@ namespace
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(float2));
 			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_ = rf.MakeRenderLayout();
 			gbuffer_rl_->TopologyType(RenderLayout::TT_TriangleList);
 			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
 			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 
-			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_ = rf.MakeRenderLayout();
 			gen_sm_rl_->TopologyType(RenderLayout::TT_TriangleList);
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_ = rf.MakeRenderLayout();
 			shading_rl_->TopologyType(RenderLayout::TT_TriangleList);
 			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -662,7 +662,7 @@ namespace
 			init_data.data = &tangent[0];
 			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			gbuffer_rl_ = rf.MakeRenderLayout();;
+			gbuffer_rl_ = rf.MakeRenderLayout();
 			gbuffer_rl_->TopologyType(rl_->TopologyType());
 			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -670,13 +670,13 @@ namespace
 			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			gen_sm_rl_ = rf.MakeRenderLayout();;
+			gen_sm_rl_ = rf.MakeRenderLayout();
 			gen_sm_rl_->TopologyType(rl_->TopologyType());
 			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
-			shading_rl_ = rf.MakeRenderLayout();;
+			shading_rl_ = rf.MakeRenderLayout();
 			shading_rl_->TopologyType(rl_->TopologyType());
 			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -1119,42 +1119,13 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-
-		try
-		{
-			TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rf.Make2DRenderView(*temp_tex, 0, 0);
-			rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
-		}
-		catch (...)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-	context_cfg.graphics_cfg.sample_count = 1;
-	context_cfg.graphics_cfg.sample_quality = 0;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	DeferredShadingApp app;
 	app.Create();
@@ -1168,6 +1139,35 @@ DeferredShadingApp::DeferredShadingApp()
 				anti_alias_enabled_(true)
 {
 	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
+
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.sample_count = 1;
+	context_cfg.graphics_cfg.sample_quality = 0;
+	Context::Instance().Config(context_cfg);
+}
+
+bool DeferredShadingApp::ConfirmDevice() const
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+
+	try
+	{
+		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		rf.Make2DRenderView(*temp_tex, 0, 0);
+		rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void DeferredShadingApp::InitObjects()

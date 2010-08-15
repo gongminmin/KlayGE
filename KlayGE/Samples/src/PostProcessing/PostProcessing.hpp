@@ -11,6 +11,8 @@ class PostProcessingApp : public KlayGE::App3DFramework
 public:
 	PostProcessingApp();
 
+	bool ConfirmDevice() const;
+
 private:
 	void InitObjects();
 

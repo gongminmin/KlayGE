@@ -180,7 +180,7 @@ namespace KlayGE
 					d3d_device_ = MakeCOMPtr(d3d_device);
 					re.D3DDevice(d3d_device_);
 
-					if (settings.ConfirmDevice && !settings.ConfirmDevice())
+					if (!Context::Instance().AppInstance().ConfirmDevice())
 					{
 						swap_chain_.reset();
 						d3d_device_.reset();

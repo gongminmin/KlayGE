@@ -219,7 +219,7 @@ namespace KlayGE
 		dxyz_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, &init_data, EF_GR32F);
 		dxyz_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
 
-		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		gradient_tex_->BuildMipSubLevels();
 

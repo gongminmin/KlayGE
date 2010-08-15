@@ -78,27 +78,13 @@ namespace
 	{
 		InputActionDefine(Exit, KS_Escape),
 	};
-
-	bool ConfirmDevice()
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
-		return true;
-	}
 }
 
 int main()
 {
 	ResLoader::Instance().AddPath("../Samples/media/Common");
 
-	ContextCfg context_cfg = Context::Instance().LoadCfg("KlayGE.cfg");
-	context_cfg.graphics_cfg.ConfirmDevice = ConfirmDevice;
-
-	Context::Instance().Config(context_cfg);
+	Context::Instance().LoadCfg("KlayGE.cfg");
 
 	SubSurfaceApp app;
 	app.Create();
@@ -111,6 +97,17 @@ SubSurfaceApp::SubSurfaceApp()
 					: App3DFramework("SubSurface")
 {
 	ResLoader::Instance().AddPath("../Samples/media/SubSurface");
+}
+
+bool SubSurfaceApp::ConfirmDevice() const
+{
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (caps.max_shader_model < 2)
+	{
+		return false;
+	}
+	return true;
 }
 
 void SubSurfaceApp::InitObjects()

@@ -53,12 +53,13 @@ namespace KlayGE
 	{
 		Context::Instance().AppInstance(*this);
 
-		settings_ = Context::Instance().Config().graphics_cfg;
-		main_wnd_ = this->MakeWindow(name_, settings_);
-		settings_.left = main_wnd_->Left();
-		settings_.top = main_wnd_->Top();
-		settings_.width = main_wnd_->Width();
-		settings_.height = main_wnd_->Height();
+		ContextCfg cfg = Context::Instance().Config();
+		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
+		cfg.graphics_cfg.left = main_wnd_->Left();
+		cfg.graphics_cfg.top = main_wnd_->Top();
+		cfg.graphics_cfg.width = main_wnd_->Width();
+		cfg.graphics_cfg.height = main_wnd_->Height();
+		Context::Instance().Config(cfg);
 	}
 
 	App3DFramework::~App3DFramework()
@@ -72,10 +73,12 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::Create()
 	{
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_, settings_);
+		ContextCfg const & cfg = Context::Instance().Config();
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_,
+			cfg.graphics_cfg);
 
 		this->InitObjects();
-		this->OnResize(settings_.width, settings_.height);
+		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 	}
 
 	void App3DFramework::Destroy()

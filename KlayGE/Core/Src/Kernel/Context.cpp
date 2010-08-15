@@ -83,7 +83,7 @@ namespace KlayGE
 		return context;
 	}
 
-	ContextCfg Context::LoadCfg(std::string const & cfg_file)
+	void Context::LoadCfg(std::string const & cfg_file)
 	{
 		int width = 800;
 		int height = 600;
@@ -273,27 +273,132 @@ namespace KlayGE
 			}
 		}
 
-		ContextCfg cfg;
+		cfg_.render_factory_name = rf_name;
+		cfg_.audio_factory_name = af_name;
+		cfg_.input_factory_name = if_name;
+		cfg_.show_factory_name = sf_name;
+		cfg_.scene_manager_name = sm_name;
 
-		cfg.render_factory_name = rf_name;
-		cfg.audio_factory_name = af_name;
-		cfg.input_factory_name = if_name;
-		cfg.show_factory_name = sf_name;
-		cfg.scene_manager_name = sm_name;
+		cfg_.graphics_cfg.left = cfg_.graphics_cfg.top = 0;
+		cfg_.graphics_cfg.width = width;
+		cfg_.graphics_cfg.height = height;
+		cfg_.graphics_cfg.color_fmt = color_fmt;
+		cfg_.graphics_cfg.depth_stencil_fmt = depth_stencil_fmt;
+		cfg_.graphics_cfg.sample_count = sample_count;
+		cfg_.graphics_cfg.sample_quality = sample_quality;
+		cfg_.graphics_cfg.full_screen = full_screen;
+		cfg_.graphics_cfg.sync_interval = sync_interval;
+		cfg_.graphics_cfg.motion_frames = motion_frames;
+		cfg_.graphics_cfg.stereo_mode = stereo_mode;
+		cfg_.graphics_cfg.stereo_separation = stereo_separation;
+	}
 
-		cfg.graphics_cfg.width = width;
-		cfg.graphics_cfg.height = height;
-		cfg.graphics_cfg.color_fmt = color_fmt;
-		cfg.graphics_cfg.depth_stencil_fmt = depth_stencil_fmt;
-		cfg.graphics_cfg.sample_count = sample_count;
-		cfg.graphics_cfg.sample_quality = sample_quality;
-		cfg.graphics_cfg.full_screen = full_screen;
-		cfg.graphics_cfg.sync_interval = sync_interval;
-		cfg.graphics_cfg.motion_frames = motion_frames;
-		cfg.graphics_cfg.stereo_mode = stereo_mode;
-		cfg.graphics_cfg.stereo_separation = stereo_separation;
+	void Context::SaveCfg(std::string const & cfg_file)
+	{
+		XMLDocument cfg_doc;
+		XMLNodePtr root = cfg_doc.AllocNode(XNT_Element, "configure");
+		cfg_doc.RootNode(root);
 
-		return cfg;
+		XMLNodePtr context_node = cfg_doc.AllocNode(XNT_Element, "context");
+		{
+			XMLNodePtr rf_node = cfg_doc.AllocNode(XNT_Element, "render_factory");
+			rf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.render_factory_name));
+			context_node->AppendNode(rf_node);
+
+			XMLNodePtr af_node = cfg_doc.AllocNode(XNT_Element, "audio_factory");
+			af_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_factory_name));
+			context_node->AppendNode(af_node);
+
+			XMLNodePtr if_node = cfg_doc.AllocNode(XNT_Element, "input_factory");
+			if_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.input_factory_name));
+			context_node->AppendNode(if_node);
+
+			XMLNodePtr sm_node = cfg_doc.AllocNode(XNT_Element, "scene_manager");
+			sm_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.scene_manager_name));
+			context_node->AppendNode(sm_node);
+
+			XMLNodePtr sf_node = cfg_doc.AllocNode(XNT_Element, "show_factory");
+			sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
+			context_node->AppendNode(sf_node);
+		}
+		root->AppendNode(context_node);
+
+		XMLNodePtr graphics_node = cfg_doc.AllocNode(XNT_Element, "graphics");
+		{
+			XMLNodePtr frame_node = cfg_doc.AllocNode(XNT_Element, "frame");
+			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("width", cfg_.graphics_cfg.width));
+			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("height", cfg_.graphics_cfg.height));
+
+			std::string color_fmt_str;
+			switch (cfg_.graphics_cfg.color_fmt)
+			{
+			case EF_ARGB8:
+				color_fmt_str = "ARGB8";
+				break;
+
+			case EF_ABGR8:
+				color_fmt_str = "ABGR8";
+				break;
+
+			case EF_A2BGR10:
+				color_fmt_str = "A2BGR10";
+				break;
+
+			default:
+				color_fmt_str = "ARGB8";
+				break;
+			}
+			frame_node->AppendAttrib(cfg_doc.AllocAttribString("color_fmt", color_fmt_str));
+
+			std::string depth_stencil_fmt_str;
+			switch (cfg_.graphics_cfg.depth_stencil_fmt)
+			{
+			case EF_D16:
+				depth_stencil_fmt_str = "D16";
+				break;
+
+			case EF_D24S8:
+				depth_stencil_fmt_str = "D24S8";
+				break;
+
+			case EF_D32F:
+				depth_stencil_fmt_str = "D32F";
+				break;
+
+			default:
+				depth_stencil_fmt_str = "D16";
+				break;
+			}
+			frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));
+
+			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("fullscreen", cfg_.graphics_cfg.full_screen));
+
+			{
+				XMLNodePtr sample_node = cfg_doc.AllocNode(XNT_Element, "sample");
+				sample_node->AppendAttrib(cfg_doc.AllocAttribInt("count", cfg_.graphics_cfg.sample_count));
+				sample_node->AppendAttrib(cfg_doc.AllocAttribInt("quality", cfg_.graphics_cfg.sample_quality));
+				frame_node->AppendNode(sample_node);
+			}
+
+			graphics_node->AppendNode(frame_node);
+
+			XMLNodePtr sync_interval_node = cfg_doc.AllocNode(XNT_Element, "sync_interval");
+			sync_interval_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.sync_interval));
+			graphics_node->AppendNode(sync_interval_node);
+
+			XMLNodePtr motion_blur_node = cfg_doc.AllocNode(XNT_Element, "motion_blur");
+			motion_blur_node->AppendAttrib(cfg_doc.AllocAttribInt("frames", cfg_.graphics_cfg.motion_frames));
+			graphics_node->AppendNode(motion_blur_node);
+
+			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
+			stereo_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.graphics_cfg.stereo_mode));
+			stereo_node->AppendAttrib(cfg_doc.AllocAttribFloat("separation", cfg_.graphics_cfg.stereo_separation));
+			graphics_node->AppendNode(stereo_node);
+		}
+		root->AppendNode(graphics_node);
+
+		std::ofstream ofs(cfg_file.c_str());
+		cfg_doc.Print(ofs);
 	}
 
 	void Context::Config(ContextCfg const & cfg)

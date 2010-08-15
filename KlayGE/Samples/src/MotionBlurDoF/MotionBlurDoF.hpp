@@ -11,6 +11,8 @@ class MotionBlurDoFApp : public KlayGE::App3DFramework
 public:
 	MotionBlurDoFApp();
 
+	bool ConfirmDevice() const;
+
 private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);

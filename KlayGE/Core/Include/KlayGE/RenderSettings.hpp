@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include <boost/function.hpp>
-
 #include <KlayGE/ElementFormat.hpp>
 
 namespace KlayGE
@@ -41,8 +39,6 @@ namespace KlayGE
 				stereo_mode(false), stereo_separation(0)
 		{
 		}
-
-		boost::function<bool()> ConfirmDevice;
 
 		bool	full_screen;
 		int		left;

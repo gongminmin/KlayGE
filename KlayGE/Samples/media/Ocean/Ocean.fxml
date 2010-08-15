@@ -49,7 +49,7 @@
 // Schlick's fresnel approximation
 float schlick_fresnel(float3 incident, float3 normal, float r0)
 {
-    // R0 = ((eta - 1) / (eta + 1)) ^ 2;
+	// R0 = ((eta - 1) / (eta + 1)) ^ 2;
 
 	float e_n = max(dot(incident, normal), 0);
 	return r0 + (1 - r0) * pow(1 - e_n, 5);
