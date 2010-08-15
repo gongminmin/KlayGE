@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_create_context_es2_profile" reg_no="399">
+	<tokens>
+		<token name="GLX_CONTEXT_ES2_PROFILE_BIT_EXT" value="0x00000004"/>
+	</tokens>
+</gl_extension>
