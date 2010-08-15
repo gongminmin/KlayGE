@@ -1,11 +1,14 @@
-GLLoader v3.5.0
+GLLoader v3.6.0
 
-The GLLoader, a subproject of Klay Game Engine, is an OpenGL extension loading library. It supports OpenGL core 1.0 to 4.0, OpenGL ES core 1.0 to 2.0, as well as WGL, GLX, and other GL extensions. There is a automatic code generater. All the things you want to do is to write a xml script if you have to support new extensions.
+The GLLoader, a subproject of Klay Game Engine, is an OpenGL extension loading library. It supports OpenGL core 1.0 to 4.1, OpenGL ES core 1.0 to 2.0, as well as WGL, GLX, and other GL extensions. There is a automatic code generater. All the things you want to do is to write a xml script if you have to support new extensions.
 The GLLoader's primary selling point is that it offers a initializing path of an extension. So if an extension has promoted into the core, the loader will try to load it from the core. If failed, try the extension one.
 After setting include and lib directories, all you need to do is add #include <glloader/glloader.h> into your code.
 The GLLoader is licensed under GPL. See gplv2.txt.
 
 NOTE: Please don't put GLLoader into a folder with non-english name. Or else it's possible that autogen.py can't run normally.
+
+3.6.0
+Support OpenGL 4.1 and new extensions
 
 3.5.0
 Support OpenGL 3.3 & 4.0
