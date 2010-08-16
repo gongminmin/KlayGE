@@ -64,7 +64,7 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		std::string ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices);
+		std::string ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs);
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 
 	private:

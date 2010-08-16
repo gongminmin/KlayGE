@@ -60,30 +60,34 @@ float3 texcoord_to_view(float2 tex)
 
 float GetSizeOverLife(float p)
 {
+	float ret = 0;
 	p /= init_life;
 	for (int i = 0; (i < 7) && (i < num_size_over_life - 1); ++ i)
 	{
 		if (size_over_life[i + 1].x >= p)
 		{
 			float s = (p - size_over_life[i].x) / (size_over_life[i + 1].x - size_over_life[i].x);
-			return 1 - (size_over_life[i].y + (size_over_life[i + 1].y - size_over_life[i].y) * s);
+			ret = 1 - (size_over_life[i].y + (size_over_life[i + 1].y - size_over_life[i].y) * s);
+			break;
 		}
 	}
-	return 0;
+	return ret;
 }
 
 float GetTransparencyOverLife(float p)
 {
+	float ret = 0;
 	p /= init_life;
 	for (int i = 0; (i < 7) && (i < num_transparency_over_life - 1); ++ i)
 	{
 		if (transparency_over_life[i + 1].x >= p)
 		{
 			float s = (p - transparency_over_life[i].x) / (transparency_over_life[i + 1].x - transparency_over_life[i].x);
-			return 1 - (transparency_over_life[i].y + (transparency_over_life[i + 1].y - transparency_over_life[i].y) * s);
+			ret = 1 - (transparency_over_life[i].y + (transparency_over_life[i + 1].y - transparency_over_life[i].y) * s);
+			break;
 		}
 	}
-	return 0;
+	return ret;
 }
 		]]>
 	</shader>
@@ -226,7 +230,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		float2 tex_coord = ps_in.PosSS.xy + offset;
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
-
+		
 		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
 
 		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;

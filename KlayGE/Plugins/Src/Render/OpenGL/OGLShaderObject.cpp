@@ -162,21 +162,51 @@ namespace
 		"varying vec4 v_gl_TexCoord[8];\n"\
 		"varying float v_gl_FogFragCoord;\n";
 
+	char const * predefined_vs_out_varyings_with_gs = "\n"\
+		"varying vec4 v_gl_FrontColorIn;\n"\
+		"varying vec4 v_gl_BackColorIn;\n"\
+		"varying vec4 v_gl_FrontSecondaryColorIn;\n"\
+		"varying vec4 v_gl_BackSecondaryColorIn;\n"\
+		"varying vec4 v_gl_TexCoordIn0;\n"\
+		"varying vec4 v_gl_TexCoordIn1;\n"\
+		"varying vec4 v_gl_TexCoordIn2;\n"\
+		"varying vec4 v_gl_TexCoordIn3;\n"\
+		"varying vec4 v_gl_TexCoordIn4;\n"\
+		"varying vec4 v_gl_TexCoordIn5;\n"\
+		"varying vec4 v_gl_TexCoordIn6;\n"\
+		"varying vec4 v_gl_TexCoordIn7;\n"\
+		"varying float v_gl_FogFragCoordIn;\n";
+
 	char const * predefined_gs_in_varyings = "\n"\
 		"varying in vec4 v_gl_FrontColorIn[%d];\n"\
 		"varying in vec4 v_gl_BackColorIn[%d];\n"\
 		"varying in vec4 v_gl_FrontSecondaryColorIn[%d];\n"\
 		"varying in vec4 v_gl_BackSecondaryColorIn[%d];\n"\
-		"varying in vec4 v_gl_TexCoordIn[%d][8];\n"\
+		"varying in vec4 v_gl_TexCoordIn0[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn1[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn2[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn3[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn4[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn5[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn6[%d];\n"\
+		"varying in vec4 v_gl_TexCoordIn7[%d];\n"\
 		"varying in float v_gl_FogFragCoordIn[%d];\n";
 
 	char const * predefined_gs_out_varyings = "\n"\
-		"varying out vec4 v_gl_FrontColor;\n"\
-		"varying out vec4 v_gl_BackColor;\n"\
-		"varying out vec4 v_gl_FrontSecondaryColor;\n"\
-		"varying out vec4 v_gl_BackSecondaryColor;\n"\
-		"varying out vec4 v_gl_TexCoord[8];\n"\
-		"varying out float v_gl_FogFragCoord;\n";
+		"varying out vec4 v_gl_FrontColorOut;\n"\
+		"varying out vec4 v_gl_BackColorOut;\n"\
+		"varying out vec4 v_gl_FrontSecondaryColorOut;\n"\
+		"varying out vec4 v_gl_BackSecondaryColorOut;\n"\
+		"varying out vec4 v_gl_TexCoordOut[8];\n"\
+		"varying out float v_gl_FogFragCoordOut;\n";
+
+	char const * predefined_ps_in_varyings_with_gs = "\n"\
+		"varying vec4 v_gl_FrontColorOut;\n"\
+		"varying vec4 v_gl_BackColorOut;\n"\
+		"varying vec4 v_gl_FrontSecondaryColorOut;\n"\
+		"varying vec4 v_gl_BackSecondaryColorOut;\n"\
+		"varying vec4 v_gl_TexCoordOut[8];\n"\
+		"varying float v_gl_FogFragCoordOut;\n";
 
 	template <typename SrcType>
 	class SetOGLShaderParameter
@@ -1140,19 +1170,28 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices)
+	std::string OGLShaderObject::ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs)
 	{
 		char predefined_gs_in_varyings_add_num[1024];
 		sprintf(predefined_gs_in_varyings_add_num, predefined_gs_in_varyings,
 			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
-			gs_input_vertices, gs_input_vertices);
+			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
+			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
+			gs_input_vertices);
 
 		std::stringstream ss;
 		switch (type)
 		{
 		case ST_VertexShader:
 			ss << predefined_attribs << std::endl;
-			ss << predefined_varyings << std::endl;
+			if (has_gs)
+			{
+				ss << predefined_vs_out_varyings_with_gs << std::endl;
+			}
+			else
+			{
+				ss << predefined_varyings << std::endl;
+			}
 			break;
 
 		case ST_GeometryShader:
@@ -1161,7 +1200,14 @@ namespace KlayGE
 			break;
 
 		case ST_PixelShader:
-			ss << predefined_varyings << std::endl;
+			if (has_gs)
+			{
+				ss << predefined_ps_in_varyings_with_gs << std::endl;
+			}
+			else
+			{
+				ss << predefined_varyings << std::endl;
+			}
 			break;
 
 		default:
@@ -1189,19 +1235,28 @@ namespace KlayGE
 				}
 				else
 				{
-					if (("gl_TexCoord" == this_token)
-						|| ("gl_FogFragCoord" == this_token)
+					if (("gl_FogFragCoord" == this_token)
 						|| ("gl_FrontColor" == this_token)
 						|| ("gl_BackColor" == this_token)
 						|| ("gl_FrontSecondaryColor" == this_token)
 						|| ("gl_BackSecondaryColor" == this_token))
 					{
 						ss << "v_" << this_token;
+						if ((ST_VertexShader == type) && has_gs)
+						{
+							ss << "In";
+						}
+						else
+						{
+							if (ST_GeometryShader == type)
+							{
+								ss << "Out";
+							}
+						}
 					}
 					else
 					{
-						if (("gl_TexCoordIn" == this_token)
-							|| ("gl_FogFragCoordIn" == this_token)
+						if (("gl_FogFragCoordIn" == this_token)
 							|| ("gl_FrontColorIn" == this_token)
 							|| ("gl_BackColorIn" == this_token)
 							|| ("gl_FrontSecondaryColorIn" == this_token)
@@ -1211,7 +1266,47 @@ namespace KlayGE
 						}
 						else
 						{
-							ss << this_token;
+							if ("gl_TexCoord" == this_token)
+							{
+								if ((ST_VertexShader == type) && has_gs)
+								{
+									std::string tmp_token[3];
+									for (int t = 0; t < 3; ++ t)
+									{
+										++ beg;
+										tmp_token[t] = *beg;
+									}
+
+									ss << "v_" << this_token << "In" << tmp_token[1];
+								}
+								else
+								{
+									ss << "v_" << this_token;
+									if (ST_GeometryShader == type)
+									{
+										ss  << "Out";
+									}
+								}
+							}
+							else
+							{
+								if ("gl_TexCoordIn" == this_token)
+								{
+									std::string tmp_token[6];
+									for (int t = 0; t < 6; ++ t)
+									{
+										++ beg;
+										tmp_token[t] = *beg;
+									}
+
+									ss << "v_" << this_token << tmp_token[4]
+										 << tmp_token[0] << tmp_token[1] << tmp_token[2];
+								}
+								else
+								{
+									ss << this_token;
+								}
+							}
 						}
 					}
 				}
@@ -1221,18 +1316,30 @@ namespace KlayGE
 				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
 				{
 					ss << "v_" << this_token;
+					if (has_gs)
+					{
+						ss << "Out";
+					}
 				}
 				else
 				{
 					if ("gl_Color" == this_token)
 					{
 						ss << "v_gl_FrontColor";
+						if (has_gs)
+						{
+							ss << "Out";
+						}
 					}
 					else
 					{
 						if ("gl_SecondaryColor" == this_token)
 						{
 							ss << "v_gl_FrontSecondaryColor";
+							if (has_gs)
+							{
+								ss << "Out";
+							}
 						}
 						else
 						{
@@ -1276,6 +1383,16 @@ namespace KlayGE
 		glsl_srcs_ = MakeSharedPtr<std::vector<std::string> >(ShaderObject::ST_NumShaderTypes);
 
 		glsl_program_ = glCreateProgram();
+
+		bool has_gs = false;
+		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			if ((ST_GeometryShader == type) && (!sd.profile.empty()))
+			{
+				has_gs = true;
+			}
+		}
 
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
@@ -1408,7 +1525,7 @@ namespace KlayGE
 					}
 
 					(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
-						static_cast<ShaderType>(type), gs_input_vertices);
+						static_cast<ShaderType>(type), gs_input_vertices, has_gs);
 					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
 					if (0 == object)
