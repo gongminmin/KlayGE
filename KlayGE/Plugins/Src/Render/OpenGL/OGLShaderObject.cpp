@@ -1,8 +1,11 @@
 // OGLShaderObject.cpp
 // KlayGE OpenGL shader对象类 实现文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2006-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Geometry shader to GLSL compiler works
 //
 // 3.9.0
 // Cg载入后编译成GLSL使用 (2009.4.26)
@@ -1597,26 +1600,7 @@ namespace KlayGE
 #endif
 			is_validate_ &= linked ? true : false;
 
-			glValidateProgram(glsl_program_);
-
-			GLint validated = false;
-			glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-			if (!validated)
-			{
-				GLint len = 0;
-				glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			is_validate_ &= validated ? true : false;
-
-			if (is_validate_ && glloader_GL_ARB_get_program_binary())
+			if (is_validate_ && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()))
 			{
 				GLint formats = 0;
 				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
@@ -1788,7 +1772,7 @@ namespace KlayGE
 
 		ret->glsl_program_ = glCreateProgram();
 
-		if (glloader_GL_ARB_get_program_binary() && glsl_bin_program_)
+		if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
 		{
 			ret->is_validate_ = is_validate_;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
@@ -1921,24 +1905,6 @@ namespace KlayGE
 #endif
 			ret->is_validate_ &= linked ? true : false;
 
-			glValidateProgram(ret->glsl_program_);
-
-			GLint validated = false;
-			glGetProgramiv(ret->glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-			if (!validated)
-			{
-				GLint len = 0;
-				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			ret->is_validate_ &= validated ? true : false;
 			ret->attrib_locs_ = attrib_locs_;
 
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
@@ -2172,6 +2138,24 @@ namespace KlayGE
 		{
 			pb.func();
 		}
+
+#ifdef KLAYGE_DEBUG
+		glValidateProgram(glsl_program_);
+
+		GLint validated = false;
+		glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
+		if (!validated)
+		{
+			GLint len = 0;
+			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			if (len > 0)
+			{
+				std::vector<char> info(len + 1, 0);
+				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
+				std::cerr << &info[0] << std::endl;
+			}
+		}
+#endif
 	}
 
 	void OGLShaderObject::Unbind()

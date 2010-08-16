@@ -53,6 +53,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration tool", "Configuration tool", "{BEED4A44-7476-4500-B1B2-B1F4D2D158AD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KConfig", "KConfig.vcxproj", "{9AE5A41E-E486-40AC-B7E4-1608D1FBA6AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

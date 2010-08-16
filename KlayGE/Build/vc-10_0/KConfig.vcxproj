@@ -64,25 +64,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>../../lib/$(Platform)/</OutDir>
+    <OutDir>../../bin/</OutDir>
     <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_vc_x86_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>../../lib/$(Platform)/</OutDir>
+    <OutDir>../../bin/</OutDir>
     <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_vc_x64_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../../lib/$(Platform)/</OutDir>
+    <OutDir>../../bin/</OutDir>
     <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_vc_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../../lib/$(Platform)/</OutDir>
+    <OutDir>../../bin/</OutDir>
     <IntDir>../../$(Configuration)/$(Platform)/$(TargetName)/</IntDir>
     <TargetName>$(ProjectName)_vc_x64</TargetName>
   </PropertyGroup>
@@ -106,8 +106,10 @@
       <AdditionalLibraryDirectories>../../lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
-      <Message>Deploying...</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -129,8 +131,10 @@
       <AdditionalLibraryDirectories>../../lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
-      <Message>Deploying...</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,8 +165,10 @@
       <AdditionalLibraryDirectories>../../lib/Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
-      <Message>Deploying...</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -188,8 +194,10 @@
       <AdditionalLibraryDirectories>../../lib/x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\</Command>
-      <Message>Deploying...</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
