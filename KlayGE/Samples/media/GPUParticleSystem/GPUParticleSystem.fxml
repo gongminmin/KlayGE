@@ -56,7 +56,7 @@ float3 texcoord_to_view(float2 tex)
 		<![CDATA[
 struct VS_TO_GS
 {
-	float4 CenterView_Life : TEXCOORD0;
+	float4 CenterView_Life : SV_Position;
 };
 
 struct PS_IN
@@ -277,7 +277,7 @@ void ParticlesVS3(uint vid : SV_VertexID,
 	<shader type="geometry_shader" version="4">
 		<![CDATA[
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticlesGS(AttribArray<float4> input : TEXCOORD0)
+POINT TRIANGLE_OUT void ParticlesGS(AttribArray<float4> input : POSITION)
 {
 	float4 CenterView_Life;
 	CenterView_Life = input[0];
@@ -308,7 +308,7 @@ void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream
 
 #ifdef KLAYGE_OPENGL
 			emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
-				gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2);
+				gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2, gs_out.tex : TEXCOORD3);
 #else
 			out_stream.Append(gs_out);
 #endif

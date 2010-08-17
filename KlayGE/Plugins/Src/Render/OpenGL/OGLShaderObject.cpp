@@ -1508,7 +1508,7 @@ namespace KlayGE
 
 						switch (cgGetProgramOutput(shaders[type]))
 						{
-						case CG_POINT:
+						case CG_POINT_OUT:
 							gs_output_type_ = GL_POINTS;
 							break;
 						
@@ -1581,6 +1581,11 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
+			if (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary())
+			{
+				glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+			}
+
 			glLinkProgram(glsl_program_);
 
 			GLint linked = false;
@@ -1772,7 +1777,7 @@ namespace KlayGE
 
 		ret->glsl_program_ = glCreateProgram();
 
-		if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
+		/*if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
 		{
 			ret->is_validate_ = is_validate_;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
@@ -1800,7 +1805,7 @@ namespace KlayGE
 				}
 			}
 		}
-		else
+		else*/
 		{
 			ret->is_validate_ = true;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
