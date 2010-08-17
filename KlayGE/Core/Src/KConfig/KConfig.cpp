@@ -111,7 +111,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			}
 
 			TCHAR buf[256];
-			int n = SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0);
+			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
 			{
@@ -133,7 +133,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("800x600")));
 
 			TCHAR buf[256];
-			int n = SendMessage(hResCombo, CB_GETCOUNT, 0, 0);
+			int n = static_cast<int>(SendMessage(hResCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
 			{
@@ -330,7 +330,7 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 			}
 
 			TCHAR buf[256];
-			int n = SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0);
+			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
 			{
@@ -367,7 +367,7 @@ INT_PTR CALLBACK Input_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 			}
 
 			TCHAR buf[256];
-			int n = SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0);
+			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
 			{
@@ -399,7 +399,7 @@ INT_PTR CALLBACK Show_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPARA
 			SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DShow")));
 
 			TCHAR buf[256];
-			int n = SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0);
+			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
 			int sel = 0;
 			for (int i = 0; i < n; ++ i)
 			{
@@ -454,7 +454,7 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 	for (int i = 0; i < NTABS; ++ i)
 	{
 		tci.pszText    = const_cast<TCHAR*>(tab_dlg_titles[i].c_str());
-		tci.cchTextMax = tab_dlg_titles[i].size();
+		tci.cchTextMax = static_cast<int>(tab_dlg_titles[i].size());
 		TabCtrl_InsertItem(hTab, i, &tci);
 
 		hTabDlg[i] = CreateDialogParam(hInstance, tab_dlg_ids[i].c_str(), hTab, tab_dlg_procs[i], 0);
@@ -511,14 +511,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				{
 					HWND hFactoryCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_FACTORY_COMBO);
-					int n = SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
 					TCHAR buf[256];
 					SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					Convert(cfg.render_factory_name, buf);
 				}
 				{
 					HWND hResCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_RES_COMBO);
-					int n = SendMessage(hResCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hResCombo, CB_GETCURSEL, 0, 0));
 					TCHAR buf[256];
 					SendMessage(hResCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 					std::string str;
@@ -529,7 +529,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					HWND hClrFmtCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_CLR_FMT_COMBO);
-					int n = SendMessage(hClrFmtCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hClrFmtCombo, CB_GETCURSEL, 0, 0));
 					switch (n)
 					{
 					case 0:
@@ -551,7 +551,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					HWND hDepthFmtCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_DEPTH_FMT_COMBO);
-					int n = SendMessage(hDepthFmtCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hDepthFmtCombo, CB_GETCURSEL, 0, 0));
 					switch (n)
 					{
 					case 0:
@@ -573,7 +573,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					HWND hAACombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_AA_COMBO);
-					int n = SendMessage(hAACombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hAACombo, CB_GETCURSEL, 0, 0));
 					switch (n)
 					{
 					case 0:
@@ -604,12 +604,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					HWND hFSCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_FS_COMBO);
-					int n = SendMessage(hFSCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hFSCombo, CB_GETCURSEL, 0, 0));
 					cfg.graphics_cfg.full_screen = (0 == n) ? 1 : 0;
 				}
 				{
 					HWND hSyncCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_SYNC_COMBO);
-					int n = SendMessage(hSyncCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hSyncCombo, CB_GETCURSEL, 0, 0));
 					switch (n)
 					{
 					case 0:
@@ -635,7 +635,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					HWND hStereoCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_COMBO);
-					int n = SendMessage(hStereoCombo, CB_GETCURSEL, 0, 0);
+					int n = static_cast<int>(SendMessage(hStereoCombo, CB_GETCURSEL, 0, 0));
 					cfg.graphics_cfg.stereo_mode = (0 == n) ? 1 : 0;
 				}
 				{
@@ -653,21 +653,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[AUDIO_TAB], IDC_FACTORY_COMBO);
-				int n = SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0);
+				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
 				TCHAR buf[256];
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.audio_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[INPUT_TAB], IDC_FACTORY_COMBO);
-				int n = SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0);
+				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
 				TCHAR buf[256];
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.input_factory_name, buf);
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[SHOW_TAB], IDC_FACTORY_COMBO);
-				int n = SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0);
+				int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCURSEL, 0, 0));
 				TCHAR buf[256];
 				SendMessage(hFactoryCombo, CB_GETLBTEXT, n, reinterpret_cast<LPARAM>(buf));
 				Convert(cfg.show_factory_name, buf);
@@ -718,12 +718,12 @@ bool UIConfiguration(HINSTANCE hInstance)
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
 	wc.hInstance		= hInstance;
-	wc.hIcon			= NULL;
+	wc.hIcon			= ::LoadIcon(hInstance, TEXT("IDI_KLAYGEICON"));
 	wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground	= reinterpret_cast<HBRUSH>(COLOR_WINDOW);
 	wc.lpszMenuName		= NULL;
 	wc.lpszClassName	= TEXT("KConfig");
-	wc.hIconSm			= NULL;
+	wc.hIconSm			= wc.hIcon;
 	::RegisterClassEx(&wc);
 
 	int cx = ::GetSystemMetrics(SM_CXSCREEN);

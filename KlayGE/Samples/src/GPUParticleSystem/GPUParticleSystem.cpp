@@ -602,10 +602,19 @@ namespace
 
 			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
 
-			TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
-			height_map->CopyToTexture(*height_32f);
+			RenderEngine& re = rf.RenderEngineInstance();
+			RenderDeviceCaps const & caps = re.DeviceCaps();
+			if (caps.max_shader_model < 4)
+			{
+				TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
+				height_map->CopyToTexture(*height_32f);
+				*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
+			}
+			else
+			{
+				*(technique_->Effect().ParameterByName("height_map_tex")) = height_map;
+			}
 
-			*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
 			*(technique_->Effect().ParameterByName("normal_map_tex")) = normal_map;
 
 			*(technique_->Effect().ParameterByName("grass_tex")) = grass();

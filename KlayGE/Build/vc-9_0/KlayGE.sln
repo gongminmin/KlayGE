@@ -72,9 +72,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\bin\KlayGE.cfg = ..\..\bin\KlayGE.cfg
 		..\..\KlayGE.plan = ..\..\KlayGE.plan
 		..\..\readme.chs.html = ..\..\readme.chs.html
+		..\..\readme.en.html = ..\..\readme.en.html
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL ES 2 Rendering System", "OpenGLES2.vcproj", "{7085B540-4ACC-47EF-9A70-52C3255E4107}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration tool", "Configuration tool", "{48735C32-3AB3-4A3B-9F33-7C8676604FB1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KConfig", "KConfig.vcproj", "{9F263B63-2835-4A8A-9F2C-7EA727AAB954}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
 	EndProjectSection
@@ -191,6 +199,14 @@ Global
 		{7085B540-4ACC-47EF-9A70-52C3255E4107}.Release|Win32.Build.0 = Release|Win32
 		{7085B540-4ACC-47EF-9A70-52C3255E4107}.Release|x64.ActiveCfg = Release|x64
 		{7085B540-4ACC-47EF-9A70-52C3255E4107}.Release|x64.Build.0 = Release|x64
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Debug|Win32.Build.0 = Debug|Win32
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Debug|x64.ActiveCfg = Debug|x64
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Debug|x64.Build.0 = Debug|x64
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Release|Win32.ActiveCfg = Release|Win32
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Release|Win32.Build.0 = Release|Win32
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Release|x64.ActiveCfg = Release|x64
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -209,5 +225,6 @@ Global
 		{31837598-9F20-4A23-A9B6-9B590B43321B} = {7140C9A2-413C-4A5B-8F63-E6E69110DDA0}
 		{7085B540-4ACC-47EF-9A70-52C3255E4107} = {7140C9A2-413C-4A5B-8F63-E6E69110DDA0}
 		{6D03BA3A-EDF0-47EF-A008-23A87502AD55} = {1C9E7C31-58D3-4B6C-A3D4-18D3A5A6D8AC}
+		{9F263B63-2835-4A8A-9F2C-7EA727AAB954} = {48735C32-3AB3-4A3B-9F33-7C8676604FB1}
 	EndGlobalSection
 EndGlobal
