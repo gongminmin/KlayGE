@@ -49,7 +49,7 @@
 #include <boost/bind.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 6328)
+#pragma warning(disable: 4127 6328)
 #endif
 #include <boost/tokenizer.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

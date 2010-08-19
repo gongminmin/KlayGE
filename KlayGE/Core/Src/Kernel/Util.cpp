@@ -20,13 +20,20 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244 4512 6328)
+#pragma warning(disable: 4127 4244 4512 6328)
 #endif
 #include <boost/date_time.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
 #include <boost/thread/thread.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
