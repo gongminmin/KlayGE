@@ -193,11 +193,11 @@ namespace KlayGE
 		}
 		Vector_T<T, 3> Center() const
 		{
-			return (min_ + max_) / 2;
+			return (min_ + max_) / 2.0f;
 		}
 		Vector_T<T, 3> HalfSize() const
 		{
-			return (max_ - min_) / 2;
+			return (max_ - min_) / 2.0f;
 		}
 
 		bool VecInBound(Vector_T<T, 3> const & v) const

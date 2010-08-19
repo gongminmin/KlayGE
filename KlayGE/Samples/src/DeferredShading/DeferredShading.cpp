@@ -294,7 +294,7 @@ namespace
 				*specular_level_param_ = mtl.specular_level;
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+					float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
 					float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 					float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 					*texel_to_pixel_offset_param_ = float4(x_offset, y_offset, 0, 0);
@@ -479,7 +479,7 @@ namespace
 		void OnRenderBegin()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
@@ -732,7 +732,7 @@ namespace
 		void OnRenderBegin()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2;
+			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
 			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
 			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
 			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);

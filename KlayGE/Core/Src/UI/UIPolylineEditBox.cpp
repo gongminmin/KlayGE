@@ -400,7 +400,7 @@ namespace KlayGE
 				for (size_t i = 0; i < ctrl_points_.size() - 1; ++ i)
 				{
 					float2 dir = ctrl_points_[i + 1] - ctrl_points_[i + 0];
-					dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2;
+					dir = MathLib::normalize(float2(dir.y(), -dir.x())) / 2.0f;
 					float x0 = bounding_box_.left() + ctrl_points_[i + 1].x() * bounding_box_.Width() - dir.x();
 					float x1 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() - dir.x();
 					float x2 = bounding_box_.left() + ctrl_points_[i + 0].x() * bounding_box_.Width() + dir.x();

@@ -88,7 +88,7 @@ struct font_info
 bool bsf32(uint32_t& index, uint32_t v)
 {
 #ifdef KLAYGE_COMPILER_MSVC
-	return _BitScanForward(&index, v) != 0;
+	return _BitScanForward(reinterpret_cast<unsigned long*>(&index), v) != 0;
 #else
 	if (0 == v)
 	{

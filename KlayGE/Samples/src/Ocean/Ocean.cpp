@@ -536,7 +536,7 @@ namespace
 			// 2D wind direction. No need to be normalized
 			// The bigger the wind speed, the larger scale of wave crest.
 			// But the wave scale can be no larger than patch_length
-			ocean_param_.wind_speed			= float2(0.8f, 0.6f) * 6;
+			ocean_param_.wind_speed			= float2(0.8f, 0.6f) * 6.0f;
 			// Damp out the components opposite to wind direction.
 			// The smaller the value, the higher wind dependency
 			ocean_param_.wind_dependency	= 0.1f;
