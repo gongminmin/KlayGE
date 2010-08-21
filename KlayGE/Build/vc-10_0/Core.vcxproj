@@ -205,7 +205,10 @@
     <ClCompile Include="..\..\Core\Src\Render\FrameBuffer.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\GraphicsBuffer.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\HDRPostProcess.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\HeightMap.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\InfTerrain.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\KMesh.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\LensFlare.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Mesh.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\PostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Query.cpp" />
@@ -291,7 +294,10 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\HDRPostProcess.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Heightmap.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\InfTerrain.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\KMesh.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\PostProcess.hpp" />
@@ -399,7 +405,9 @@
     <None Include="..\..\media\RenderFX\Font.fxml" />
     <None Include="..\..\media\RenderFX\GammaCorrection.fxml" />
     <None Include="..\..\media\RenderFX\GlowMerger.fxml" />
+    <None Include="..\..\media\RenderFX\InfTerrain.fxml" />
     <None Include="..\..\media\RenderFX\KMesh.fxml" />
+    <None Include="..\..\media\RenderFX\LensFlare.fxml" />
     <None Include="..\..\media\RenderFX\Lighting.fxml" />
     <None Include="..\..\media\RenderFX\Noise.fxml" />
     <None Include="..\..\media\RenderFX\PointSprite.fxml" />

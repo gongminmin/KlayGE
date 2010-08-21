@@ -415,10 +415,6 @@
 				RelativePath="..\..\media\Ocean\OceanSimulator.fxml"
 				>
 			</File>
-			<File
-				RelativePath="..\..\media\Ocean\Sun.fxml"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="UI"

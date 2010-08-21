@@ -1,11 +1,11 @@
 // KConfig.cpp
 // KlayGE Configuration tool implement file
-// Ver 3.8.0
+// Ver 3.11.0
 // Copyright(C) Minmin Gong, 2010
 // Homepage: http://www.klayge.org
 //
 // 3.11.0
-// Created (2010.8.15)
+// First release (2010.8.15)
 //
 // CHANGE LIST
 /////////////////////////////////////////////////////////////////////////////////

@@ -48,16 +48,13 @@
     <None Include="..\..\media\Ocean\OceanSimulator.fxml">
       <Filter>Effects</Filter>
     </None>
-    <None Include="..\..\media\Ocean\Sun.fxml">
-      <Filter>Effects</Filter>
-    </None>
     <None Include="..\..\media\Ocean\Ocean.uiml">
       <Filter>UI</Filter>
     </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\media\Ocean\InfTerrain.fxml">
+    <None Include="..\..\media\Ocean\Terrain.fxml">
       <Filter>Effects</Filter>
     </None>
   </ItemGroup>

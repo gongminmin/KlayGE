@@ -357,6 +357,15 @@
     <ClCompile Include="..\..\Core\Src\Scene\Frustum.cpp">
       <Filter>Scene Management\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\HeightMap.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\InfTerrain.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\LensFlare.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -659,6 +668,15 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp">
       <Filter>Scene Management\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\Heightmap.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\InfTerrain.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\media\RenderFX\2D.fxml">
@@ -741,6 +759,12 @@
     </None>
     <None Include="..\..\media\PostProcessors\Copy.ppml">
       <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\LensFlare.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\InfTerrain.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

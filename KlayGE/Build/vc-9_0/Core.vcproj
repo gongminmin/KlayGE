@@ -374,7 +374,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\HeightMap.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Render\InfTerrain.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Src\Render\LensFlare.cpp"
 					>
 				</File>
 				<File
@@ -470,7 +482,19 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\Heightmap.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\InfTerrain.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\KMesh.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\LensFlare.hpp"
 					>
 				</File>
 				<File
@@ -590,7 +614,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\InfTerrain.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\KMesh.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\LensFlare.fxml"
 					>
 				</File>
 				<File

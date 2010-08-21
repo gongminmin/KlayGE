@@ -1,8 +1,11 @@
 // HeightMap.hpp
 // KlayGE HeightMap地形生成类 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003-2006
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 合并入Core (2010.8.21)
 //
 // 3.4.0
 // 使用boost::function (2006.7.23)
@@ -18,8 +21,10 @@
 
 #pragma once
 
-#define KLAYGE_LIB_NAME KlayGE_Terrain_HeightMap
+#ifndef KLAYGE_CORE_SOURCE
+#define KLAYGE_LIB_NAME KlayGE_Core
 #include <KlayGE/config/auto_link.hpp>
+#endif
 
 #include <vector>
 #include <boost/function.hpp>

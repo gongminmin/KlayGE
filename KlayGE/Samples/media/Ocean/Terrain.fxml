@@ -3,19 +3,10 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="InfTerrain.fxml"/>
 
 	<parameter type="float3" name="sun_dir"/>
 	<parameter type="float4" name="fog_color" x="0.807843" y="0.858824" z="0.839216" w="1"/>
-
-	<parameter type="float" name="stretch"/>
-	<parameter type="float" name="base_level"/>
-
-	<cbuffer name="per_frame">
-		<parameter type="float3" name="eye_pos"/>
-		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4x4" name="inv_virtual_view"/>
-		<parameter type="float" name="offset_y"/>
-	</cbuffer>
 
 	<parameter type="texture2D" name="ground_tex_detail">
 		<annotation type="string" name="SasResourceAddress" value="RealSand38BoH.dds"/>
@@ -41,9 +32,7 @@ void TerrainVS(float2 pos : POSITION,
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
-	pos *= 1 + (eye_pos.y - 20) / 80;
-	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y, 1);
-	float4 pos_os = mul(pos_es, inv_virtual_view);
+	float4 pos_os = GetInfTerrainPosOS(pos, 0);
 
 	float fog_scale = saturate(length(pos_os.xz - eye_pos.xz) / 1200.0f);
 	float height_scale = 1 - fog_scale;

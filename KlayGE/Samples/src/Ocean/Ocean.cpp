@@ -18,6 +18,8 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGe/Timer.hpp>
+#include <KlayGe/InfTerrain.hpp>
+#include <KlayGe/LensFlare.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -38,392 +40,17 @@ using namespace KlayGE;
 
 namespace
 {
-	int const SUN_FLARENUM = 6;
-
-	class RenderSun : public RenderableHelper
+	class RenderTerrain : public InfTerrainRenderable
 	{
 	public:
-		RenderSun()
-			: RenderableHelper(L"Sun")
+		RenderTerrain(float base_level, float strength)
+			: InfTerrainRenderable(L"Terrain")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			technique_ = rf.LoadEffect("Terrain.fxml")->TechniqueByName("Terrain");
 
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			std::vector<float3> vertices;
-			for (int i = 0; i < SUN_FLARENUM; ++ i)
-			{
-				vertices.push_back(float3(-1, +1, i + 0.1f));
-				vertices.push_back(float3(+1, +1, i + 0.1f));
-				vertices.push_back(float3(-1, -1, i + 0.1f));
-				vertices.push_back(float3(+1, -1, i + 0.1f));
-			}
-
-			ElementInitData init_data;
-			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
-
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-
-			std::vector<uint32_t> indices;
-			for (int i = 0; i < SUN_FLARENUM; ++ i)
-			{
-				indices.push_back(i * 4 + 2);
-				indices.push_back(i * 4 + 0);
-				indices.push_back(i * 4 + 1);
-
-				indices.push_back(i * 4 + 1);
-				indices.push_back(i * 4 + 3);
-				indices.push_back(i * 4 + 2);
-			}
-
-			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R32UI);
-
-			technique_ = rf.LoadEffect("Sun.fxml")->TechniqueByName("SunFlare");
-		}
-
-		void Direction(float3 const & dir)
-		{
-			*(technique_->Effect().ParameterByName("sun_dir")) = -dir;
-		}
-
-		void FlareParam(std::vector<float3> const & param, float alpha_fac)
-		{
-			*(technique_->Effect().ParameterByName("flare_param")) = param;
-			*(technique_->Effect().ParameterByName("alpha_fac")) = alpha_fac;
-		}
-
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-			
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("scale")) = static_cast<float>(re.CurFrameBuffer()->Width()) / re.CurFrameBuffer()->Height();
-		}
-	};
-	
-	class SunObject : public SceneObjectHelper
-	{
-	public:
-		SunObject()
-			: SceneObjectHelper(0)
-		{
-			renderable_.reset(new RenderSun);
-			this->Direction(float3(0.286024f, 0.75062f, 0.592772f));
-		}
-
-		void Direction(float3 const & dir)
-		{
-			dir_ = dir;
-			checked_pointer_cast<RenderSun>(renderable_)->Direction(dir_);
-		}
-
-		float3 const & Direction() const
-		{
-			return dir_;
-		}
-
-		void Update()
-		{
-			float const FLARE_RENDERANGLE = 0.9f;
-			float const FLARE_SCALEAMOUNT = 0.2f;
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float3 sun_vec = MathLib::normalize(dir_);
-			float3 const & view_vec = camera.ViewVec();
-
-			float angle = MathLib::dot(view_vec, sun_vec);
-
-			// update flare
-			if (angle > FLARE_RENDERANGLE)
-			{
-				this->Visible(true);
-
-				// get angle amount by current angle
-				float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE);	// convert angle to percent 
-				float inv_angle_amount = std::max(0.85f, (1 - angle) / (1 - FLARE_RENDERANGLE));
-
-				float alpha_fac;
-				if (angle_amount < 0.5f)
-				{
-					alpha_fac = angle_amount;
-				}
-				else
-				{
-					alpha_fac = 1 - angle_amount;
-				}
-
-				// calculate flare pos
-				float2 center_pos(0, 0);
-				float3 sun_vec_es = MathLib::transform_normal(dir_, view);
-				float3 sun_pos_es = camera.FarPlane() / sun_vec_es.z() * sun_vec_es;
-				float2 axis_vec = MathLib::transform_coord(sun_pos_es, proj);
-
-				// update flare pos and scale matrix by pos and angle amount
-				std::vector<float3> flare_param(SUN_FLARENUM);
-				for (int flare = 0; flare < SUN_FLARENUM; ++ flare)
-				{
-					float2 flare_pos = center_pos + (flare - SUN_FLARENUM * 0.2f) / ((SUN_FLARENUM - 1.0f) * 1.5f) * axis_vec;
-					float scale_fac = FLARE_SCALEAMOUNT * inv_angle_amount * ((SUN_FLARENUM - flare) / (SUN_FLARENUM - 1.0f));
-
-					flare_param[flare] = float3(flare_pos.x(), flare_pos.y(), scale_fac);
-				}
-
-				checked_pointer_cast<RenderSun>(renderable_)->FlareParam(flare_param, alpha_fac);
-			}
-			else
-			{
-				this->Visible(false);
-			}
-		}
-
-	private:
-		float3 dir_;
-	};
-
-	class RenderInfFlatObject : public RenderableHelper
-	{
-	public:
-		RenderInfFlatObject(std::wstring const & name)
-			: RenderableHelper(name)
-		{
-			int const NX = 256;
-			int const NY = 256;
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float angle = atan(tan(camera.FOV() / 2) * camera.Aspect());
-			x_dir_ = float2(-sin(angle), cos(angle));
-			y_dir_ = float2(-x_dir_.x(), x_dir_.y());
-
-			float2 addr(0, 0);
-			float2 increment(1, 1);
-			std::vector<float2> vertices;
-			for (int y = 0; y < NY - 1; ++ y, addr.y() += increment.y())
-			{
-				increment.x() = 1;
-				addr.x() = 0;
-				for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
-				{
-					float2 p(addr.x() * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
-					vertices.push_back(p);
-					increment.x() *= 1.012f;
-				}
-				{
-					float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
-					vertices.push_back(p);
-				}
-
-				increment.y() *= 1.012f;
-			}
-			{
-				increment.x() = 1;
-				addr.x() = 0;
-				for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
-				{
-					float2 p(addr.x() * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
-					vertices.push_back(p);
-
-					increment.x() *= 1.012f;
-				}
-				{
-					float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
-					vertices.push_back(p);
-				}
-			}
-
-			ElementInitData init_data;
-			init_data.data = &vertices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
-
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-			std::vector<uint32_t> indices;
-			for (uint32_t y = 0; y < NY - 1; ++ y)
-			{
-				for (uint32_t x = 0; x < NX - 1; ++ x)
-				{
-					indices.push_back((y + 0) * NX + (x + 0));
-					indices.push_back((y + 0) * NX + (x + 1));
-					indices.push_back((y + 1) * NX + (x + 0));
-
-					indices.push_back((y + 1) * NX + (x + 0));
-					indices.push_back((y + 0) * NX + (x + 1));
-					indices.push_back((y + 1) * NX + (x + 1));
-				}
-			}
-
-			init_data.data = &indices[0];
-			init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R32UI);
-		}
-
-		virtual ~RenderInfFlatObject()
-		{
-		}
-
-		float2 const & XDir() const
-		{
-			return x_dir_;
-		}
-
-		float2 const & YDir() const
-		{
-			return y_dir_;
-		}
-
-		void SetStretch(float stretch)
-		{
-			*(technique_->Effect().ParameterByName("stretch")) = stretch;
-		}
-
-		void SetBaseLevel(float base_level)
-		{
-			*(technique_->Effect().ParameterByName("base_level")) = base_level;
-		}
-
-		void OffsetY(float y)
-		{
-			*(technique_->Effect().ParameterByName("offset_y")) = y;
-		}
-
-		void OnRenderBegin()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
-			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
-			{
-				look_at_vec = float3(0, 0, 1);
-			}
-			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
-			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
-
-			float4x4 vp = view * proj;
-			*(technique_->Effect().ParameterByName("mvp")) = vp;
-			*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
-		}
-
-	protected:
-		float2 x_dir_, y_dir_;
-	};
-
-	class InfFlatObject : public SceneObjectHelper
-	{
-	public:
-		InfFlatObject()
-			: SceneObjectHelper(SOA_Moveable)
-		{
-		}
-
-		virtual ~InfFlatObject()
-		{
-		}
-
-		void Update()
-		{
-			App3DFramework const & app = Context::Instance().AppInstance();
-			Camera const & camera = app.ActiveCamera();
-
-			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
-			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
-			{
-				look_at_vec = float3(0, 0, 1);
-			}
-			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
-			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-			float4x4 proj_to_virtual_view = MathLib::inverse(view * proj) * virtual_view;
-
-			float2 const & x_dir_2d = checked_pointer_cast<RenderInfFlatObject>(renderable_)->XDir();
-			float2 const & y_dir_2d = checked_pointer_cast<RenderInfFlatObject>(renderable_)->YDir();
-			float3 x_dir(x_dir_2d.x(), -camera.EyePos().y(), x_dir_2d.y());
-			float3 y_dir(y_dir_2d.x(), -camera.EyePos().y(), y_dir_2d.y());
-
-			float3 const frustum[8] = 
-			{
-				MathLib::transform_coord(float3(-1, +1, 1), proj_to_virtual_view),
-				MathLib::transform_coord(float3(+1, +1, 1), proj_to_virtual_view),
-				MathLib::transform_coord(float3(-1, -1, 1), proj_to_virtual_view),
-				MathLib::transform_coord(float3(+1, -1, 1), proj_to_virtual_view),
-				MathLib::transform_coord(float3(-1, +1, 0), proj_to_virtual_view),
-				MathLib::transform_coord(float3(+1, +1, 0), proj_to_virtual_view),
-				MathLib::transform_coord(float3(-1, -1, 0), proj_to_virtual_view),
-				MathLib::transform_coord(float3(+1, -1, 0), proj_to_virtual_view)
-			};
-
-			int const view_cube[24] =
-			{
-				0, 1, 1, 3, 3, 2, 2, 0,
-				4, 5, 5, 7, 7, 6, 6, 4,
-				0, 4, 1, 5, 3, 7, 2, 6
-			};
-
-			Plane const lower_bound = MathLib::from_point_normal(float3(0, base_level_ - camera.EyePos().y() - strength_, 0), float3(0, 1, 0));
-
-			bool intersect = false;
-			float sy = 0;
-			for (int i = 0; i < 12; ++ i)
-			{
-				int src = view_cube[i * 2 + 0];
-				int dst = view_cube[i * 2 + 1];
-				if (MathLib::dot_coord(lower_bound, frustum[src]) / MathLib::dot_coord(lower_bound, frustum[dst]) < 0)
-				{
-					float t = MathLib::intersect_ray(lower_bound, frustum[src], frustum[dst] - frustum[src]);
-					float3 p = MathLib::lerp(frustum[src], frustum[dst], t);
-					sy = std::max(sy, std::max((x_dir.z() * p.x() - x_dir.x() * p.z()) / x_dir.x(),
-						(y_dir.z() * p.x() - y_dir.x() * p.z()) / y_dir.x()));
-					intersect = true;
-				}
-			}
-			checked_pointer_cast<RenderInfFlatObject>(renderable_)->OffsetY(sy);
-
-			this->Visible(intersect);
-		}
-
-	protected:
-		float base_level_;
-		float strength_;
-	};
-
-	class RenderTerrain : public RenderInfFlatObject
-	{
-	public:
-		RenderTerrain()
-			: RenderInfFlatObject(L"Terrain")
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("InfTerrain.fxml")->TechniqueByName("Terrain");
+			this->SetStretch(strength);
+			this->SetBaseLevel(base_level);
 		}
 
 		void SunDirection(float3 const & dir)
@@ -444,7 +71,7 @@ namespace
 		}
 	};
 
-	class TerrainObject : public InfFlatObject
+	class TerrainObject : public InfTerrainSceneObject
 	{
 	public:
 		TerrainObject()
@@ -452,9 +79,7 @@ namespace
 			base_level_ = -10;
 			strength_ = 50;
 
-			renderable_.reset(new RenderTerrain);
-			checked_pointer_cast<RenderTerrain>(renderable_)->SetStretch(strength_);
-			checked_pointer_cast<RenderTerrain>(renderable_)->SetBaseLevel(base_level_);
+			renderable_ = MakeSharedPtr<RenderTerrain>(base_level_, strength_);
 		}
 
 		void SunDirection(float3 const & dir)
@@ -468,14 +93,17 @@ namespace
 		}
 	};
 
-	class RenderOcean : public RenderInfFlatObject
+	class RenderOcean : public InfTerrainRenderable
 	{
 	public:
-		RenderOcean()
-			: RenderInfFlatObject(L"Ocean")
+		RenderOcean(float base_level, float strength)
+			: InfTerrainRenderable(L"Ocean")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
+
+			this->SetStretch(strength);
+			this->SetBaseLevel(base_level);
 		}
 
 		void SunDirection(float3 const & dir)
@@ -509,7 +137,7 @@ namespace
 		}
 	};
 
-	class OceanObject : public InfFlatObject
+	class OceanObject : public InfTerrainSceneObject
 	{
 	public:
 		OceanObject()
@@ -517,9 +145,7 @@ namespace
 			base_level_ = 0;
 			strength_ = 10;
 
-			renderable_.reset(new RenderOcean);
-			checked_pointer_cast<RenderOcean>(renderable_)->SetStretch(strength_);
-			checked_pointer_cast<RenderOcean>(renderable_)->SetBaseLevel(base_level_);
+			renderable_ = MakeSharedPtr<RenderOcean>(base_level_, strength_);
 
 			Plane ocean_plane;
 			ocean_plane = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
@@ -546,7 +172,7 @@ namespace
 
 			dirty_ = true;
 
-			ocean_simulator_.reset(new OceanSimulator);
+			ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
 		}
 
 		void SunDirection(float3 const & dir)
@@ -566,7 +192,7 @@ namespace
 				dirty_ = false;
 			}
 
-			InfFlatObject::Update();
+			InfTerrainSceneObject::Update();
 
 			if (this->Visible())
 			{
@@ -736,15 +362,16 @@ void OceanApp::InitObjects()
 
 	TexturePtr skybox_tex = LoadTexture("Langholmen.dds", EAH_GPU_Read)();
 
-	terrain_.reset(new TerrainObject);
+	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
-	ocean_.reset(new OceanObject);
+	ocean_ = MakeSharedPtr<OceanObject>();
 	ocean_->AddToSceneManager();
-	sun_flare_.reset(new SunObject);
+	sun_flare_ = MakeSharedPtr<LensFlareSceneObject>();
+	checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction(float3(0.286024f, 0.75062f, 0.592772f));
 	sun_flare_->AddToSceneManager();
 
-	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<SunObject>(sun_flare_)->Direction());
-	checked_pointer_cast<OceanObject>(ocean_)->SunDirection(checked_pointer_cast<SunObject>(sun_flare_)->Direction());
+	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
+	checked_pointer_cast<OceanObject>(ocean_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -759,7 +386,7 @@ void OceanApp::InitObjects()
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
-	action_handler_t input_handler(new input_signal);
+	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&OceanApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 

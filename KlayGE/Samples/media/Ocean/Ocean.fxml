@@ -3,6 +3,7 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="Noise.fxml"/>
+	<include name="InfTerrain.fxml"/>
 
 	<macro name="BLEND_FACTOR" value="0.6"/>
 	
@@ -12,16 +13,6 @@
 	<parameter type="float3" name="fog_color" x="0.807843" y="0.858824" z="0.839216"/>
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
 	<parameter type="float" name="patch_length"/>
-
-	<parameter type="float" name="stretch"/>
-	<parameter type="float" name="base_level"/>
-
-	<cbuffer name="per_frame">
-		<parameter type="float3" name="eye_pos"/>
-		<parameter type="float4x4" name="mvp"/>
-		<parameter type="float4x4" name="inv_virtual_view"/>
-		<parameter type="float" name="offset_y"/>
-	</cbuffer>
 
 	<parameter type="texture2D" name="displacement_tex"/>
 	<parameter type="texture2D" name="gradient_tex"/>
@@ -64,9 +55,7 @@ void OceanVS(float2 pos : POSITION,
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
-	pos *= 1 + (eye_pos.y - 20) / 80;
-	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y - 10, 1);
-	float4 pos_os = mul(pos_es, inv_virtual_view);
+	float4 pos_os = GetInfTerrainPosOS(pos, 10);
 
 	eye_dir_fog.xyz = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir_fog.xz) / 1200.0f);

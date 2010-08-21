@@ -1,8 +1,11 @@
 // HeightMap.cpp
 // KlayGE HeightMap地形生成类 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2006
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 合并入Core (2010.8.21)
 //
 // 3.4.0
 // 初次建立 (2006.7.23)
@@ -13,7 +16,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Vector.hpp>
 
-#include <KlayGE/Heightmap/Heightmap.hpp>
+#include <KlayGE/Heightmap.hpp>
 
 namespace KlayGE
 {

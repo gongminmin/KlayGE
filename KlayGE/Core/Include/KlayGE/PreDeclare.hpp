@@ -186,6 +186,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<SummedAreaTablePostProcess> SummedAreaTablePostProcessPtr;
 	template <typename ParticleType>
 	class ParticleSystem;
+	class InfTerrainRenderable;
+	class InfTerrainSceneObject;
+	class LensFlareRenderable;
+	class LensFlareSceneObject;
 
 	class UIManager;
 	typedef boost::shared_ptr<UIManager> UIManagerPtr;
