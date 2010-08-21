@@ -171,7 +171,7 @@ namespace KlayGE
 					if (obj_indices[i].size() > 1)
 					{
 						float3 const parent_center = octree_[i].bb_center;
-						float3 const new_half_size = octree_[i].bb_half_size / 2;
+						float3 const new_half_size = octree_[i].bb_half_size / 2.0f;
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
 
 						for (size_t j = 0; j < 8; ++ j)

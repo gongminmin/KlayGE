@@ -59,7 +59,7 @@ void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
 	if (oDepth.r <= last_depth)
 	{
 		oClr = 0;
-		clip(-1);
+		discard;
 	}
 	else
 	{

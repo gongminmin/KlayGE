@@ -223,7 +223,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	float disc = ps_in.view_dir.w * ps_in.view_dir.w - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
 	if (disc < 0)
 	{
-		clip(-1);
+		discard;
 	}
 	else
 	{

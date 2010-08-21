@@ -224,8 +224,6 @@ float4 DeferredShadingPointPS(
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 
-	float2 ds = 0;
-
 	view_dir = normalize(-view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
@@ -238,14 +236,9 @@ float4 DeferredShadingPointPS(
 		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 		float shadow = VSM_Omnidirectional(dir_ws, len);
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		ds = float2(diff, spec) * atten;
+		float2 ds = float2(diff, spec) * atten;
+		final_clr = CalcColor(ds);
 	}
-	else
-	{
-		clip(-1);
-	}
-
-	final_clr = CalcColor(ds);
 
 	return final_clr;
 }
@@ -270,8 +263,6 @@ float4 DeferredShadingSpotPS(
 	float4 ndc = nd_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
-	float2 ds = 0;
-
 	view_dir = normalize(-view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
@@ -288,19 +279,10 @@ float4 DeferredShadingSpotPS(
 			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
 			float shadow = VSM_Directional(pos_es, len);
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			ds = float2(diff, spec) * atten;
-		}
-		else
-		{
-			clip(-1);
+			float2 ds = float2(diff, spec) * atten;
+			final_clr = CalcColor(ds);
 		}
 	}
-	else
-	{
-		clip(-1);
-	}
-
-	final_clr = CalcColor(ds);
 
 	return final_clr;
 }
@@ -327,22 +309,15 @@ float4 DeferredShadingDirectionalPS(
 	
 	view_dir = normalize(-view_dir);
 
-	float2 ds = 0;
-
 	float3 dir = light_dir_es.xyz;
 	float3 normal = GetNormal(ndc);
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
 		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
-		ds = float2(diff, spec);
+		float2 ds = float2(diff, spec);
+		final_clr = CalcColor(ds);
 	}
-	else
-	{
-		clip(-1);
-	}
-
-	final_clr = CalcColor(ds);
 
 	return final_clr;
 }

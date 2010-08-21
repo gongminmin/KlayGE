@@ -59,7 +59,6 @@ float4 SunFlarePS(float3 tex_coord : TEXCOORD0) : SV_Target0
 {
 	float3 clr = flare_tex.Sample(linear_sampler, tex_coord.xy).rgb;
 	float alpha = alpha_fac * dot(clr, 1);
-	//clip(alpha - 0.2f);
 	return float4(clr * alpha_fac * flare_clr[int(tex_coord.z)].rgb, alpha);
 }
 		]]>

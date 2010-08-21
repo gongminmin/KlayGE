@@ -63,7 +63,7 @@ float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
 	{
-		clip(-1);
+		discard;
 	}
 
 	float2 dx = ddx(texCoord0.xy);
@@ -92,7 +92,7 @@ float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 	
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
 	{
-		clip(-1);
+		discard;
 	}
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
