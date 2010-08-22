@@ -366,10 +366,10 @@ public:
 					std::vector<float> distances(char_size_ * char_size_);
 					ComputeDistanceField(distances, char_size_, char_size_, dmap);
 
-					ci.left = static_cast<int16_t>((raster_user.bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * (char_size_ - 2) + 1);
-					ci.top = static_cast<int16_t>((3 / 4.0f - (raster_user.bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * (char_size_ - 2) + 1);
-					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 1);
-					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 1);
+					ci.left = static_cast<int16_t>((raster_user.bbox.xMin - x_offset) / INTERNAL_CHAR_SIZE * char_size_ + 0.5f);
+					ci.top = static_cast<int16_t>((3 / 4.0f - (raster_user.bbox.yMax + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+					ci.width = static_cast<uint16_t>(std::min<float>(1.0f, (buf_width + x_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
+					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / INTERNAL_CHAR_SIZE) * char_size_ + 0.5f);
 
 					for (uint32_t y = 0; y < char_size_; ++ y)
 					{
@@ -799,11 +799,11 @@ int main(int argc, char* argv[])
 	desc.add_options()
 		("help,H", "Produce help message")
 		("input-name,I", boost::program_options::value<std::string>(), "Input font name.")
-		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Optional.")
-		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code.")
-		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65535), "End code.")
-		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size.")
-		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads.")
+		("output-name,O", boost::program_options::value<std::string>(), "Output font name. Default is input-name.kfont.")
+		("start-code,S", boost::program_options::value<int>(&start_code)->default_value(0), "Start code. Default is 0.")
+		("end-code,E", boost::program_options::value<int>(&end_code)->default_value(65535), "End code. Default is 65535.")
+		("char-size,C", boost::program_options::value<uint32_t>(&header.char_size)->default_value(32), "Character size. Default is 32.")
+		("threads,T", boost::program_options::value<int>(&num_threads)->default_value(cpu.NumHWThreads()), "Number of Threads. Default is the number of CPU threads.")
 		("version,v", "Version.");
 
 	boost::program_options::variables_map vm;
@@ -851,64 +851,59 @@ int main(int argc, char* argv[])
 		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(kfont_name);
 		if (kfont_input)
 		{
-			kfont_input->read(&header, sizeof(header));
+			kfont_header header2;
+			kfont_input->read(&header2, sizeof(header2));
 
-			if (header.fourcc != MakeFourCC<'K', 'F', 'N', 'T'>::value)
+			if ((MakeFourCC<'K', 'F', 'N', 'T'>::value == header2.fourcc)
+				&& (2 == header2.version)
+				&& (header2.char_size == header.char_size))
 			{
-				cout << "Wrong font file." << endl;
-				return 1;
-			}
-			if (header.version != 2)
-			{
-				cout << "Wrong version." << endl;
-				return 1;
-			}
+				kfont_input->seekg(header2.start_ptr, ios_base::beg);
 
-			kfont_input->seekg(header.start_ptr, ios_base::beg);
+				char_index.resize(header2.non_empty_chars);
+				kfont_input->read(reinterpret_cast<char*>(&char_index[0]),
+					static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
 
-			char_index.resize(header.non_empty_chars);
-			kfont_input->read(reinterpret_cast<char*>(&char_index[0]),
-				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
-
-			std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance(header.validate_chars);
-			kfont_input->read(reinterpret_cast<char*>(&advance[0]),
-				static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
-			for (size_t i = 0; i < advance.size(); ++ i)
-			{
-				int const ch = advance[i].first;
-
-				char_info[ch].advance_x = advance[i].second.first;
-				char_info[ch].advance_y = advance[i].second.second;
-			}
-
-			for (size_t i = 0; i < char_index.size(); ++ i)
-			{
-				int const ch = char_index[i].first;
-
-				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
-				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
-				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
-				kfont_input->read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
-			}
-
-			LZMACodec lzma_dec;
-			char_dist_data.resize(char_index.size() * header.char_size * header.char_size);
-			for (size_t i = 0; i < char_index.size(); ++ i)
-			{
-				int const ch = char_index[i].first;
-
-				uint64_t len;
-				kfont_input->read(&len, sizeof(len));
-
-				std::vector<uint8_t> uint8_dist;
-				lzma_dec.Decode(uint8_dist, kfont_input, len, header.char_size * header.char_size);
-				BOOST_ASSERT(uint8_dist.size() == header.char_size * header.char_size);
-
-				char_info[ch].dist_index = static_cast<uint32_t>(i * header.char_size * header.char_size);
-				for (size_t j = 0; j < uint8_dist.size(); ++ j)
+				std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance(header2.validate_chars);
+				kfont_input->read(reinterpret_cast<char*>(&advance[0]),
+					static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
+				for (size_t i = 0; i < advance.size(); ++ i)
 				{
-					char_dist_data[char_info[ch].dist_index + j]
-						= uint8_dist[j] / 255.0f * (header.scale / 32768.0f + 1) + header.base / 32768.0f;
+					int const ch = advance[i].first;
+
+					char_info[ch].advance_x = advance[i].second.first;
+					char_info[ch].advance_y = advance[i].second.second;
+				}
+
+				for (size_t i = 0; i < char_index.size(); ++ i)
+				{
+					int const ch = char_index[i].first;
+
+					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
+					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
+					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
+					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
+				}
+
+				LZMACodec lzma_dec;
+				char_dist_data.resize(char_index.size() * header.char_size * header.char_size);
+				for (size_t i = 0; i < char_index.size(); ++ i)
+				{
+					int const ch = char_index[i].first;
+
+					uint64_t len;
+					kfont_input->read(&len, sizeof(len));
+
+					std::vector<uint8_t> uint8_dist;
+					lzma_dec.Decode(uint8_dist, kfont_input, len, header.char_size * header.char_size);
+					BOOST_ASSERT(uint8_dist.size() == header.char_size * header.char_size);
+
+					char_info[ch].dist_index = static_cast<uint32_t>(i * header.char_size * header.char_size);
+					for (size_t j = 0; j < uint8_dist.size(); ++ j)
+					{
+						char_dist_data[char_info[ch].dist_index + j]
+							= uint8_dist[j] / 255.0f * (header2.scale / 32768.0f + 1) + header2.base / 32768.0f;
+					}
 				}
 			}
 		}
@@ -936,12 +931,20 @@ int main(int argc, char* argv[])
 
 	std::vector<uint8_t> ttf;
 	{
-		ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
-		ttf_input.seekg(0, ios_base::end);
-		ttf.resize(static_cast<size_t>(ttf_input.tellg()));
-		ttf_input.seekg(0, ios_base::beg);
-		ttf_input.read(reinterpret_cast<char*>(&ttf[0]),
-			static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
+		std::ifstream ttf_input(ttf_name.c_str(), ios_base::binary);
+		if (ttf_input)
+		{
+			ttf_input.seekg(0, ios_base::end);
+			ttf.resize(static_cast<size_t>(ttf_input.tellg()));
+			ttf_input.seekg(0, ios_base::beg);
+			ttf_input.read(reinterpret_cast<char*>(&ttf[0]),
+				static_cast<std::streamsize>(ttf.size() * sizeof(ttf[0])));
+		}
+		else
+		{
+			cout << "Can't find " << ttf_name << endl;
+			return 1;
+		}
 	}
 
 	Timer timer_total;
