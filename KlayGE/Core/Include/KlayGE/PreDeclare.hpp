@@ -225,6 +225,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<AudioDataSource> AudioDataSourcePtr;
 	class AudioFactory;
 	typedef boost::shared_ptr<AudioFactory> AudioFactoryPtr;
+	class AudioDataSourceFactory;
+	typedef boost::shared_ptr<AudioDataSourceFactory> AudioDataSourceFactoryPtr;
 
 	class App3DFramework;
 	class Window;

@@ -14,9 +14,15 @@
     <ClCompile Include="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSourceFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSourceFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

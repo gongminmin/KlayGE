@@ -6,6 +6,7 @@
 //
 // 3.11.0
 // 增加了ContextCfg (2010.8.9)
+// 增加了AudioDataSourceFactoryInstance (2010.8.22)
 //
 // 3.8.0
 // 增加了LoadCfg (2008.10.12)
@@ -49,6 +50,7 @@ namespace KlayGE
 		std::string input_factory_name;
 		std::string show_factory_name;
 		std::string scene_manager_name;
+		std::string audio_data_source_factory_name;
 
 		RenderSettings graphics_cfg;
 	};
@@ -71,6 +73,7 @@ namespace KlayGE
 		void LoadInputFactory(std::string const & if_name);
 		void LoadShowFactory(std::string const & sf_name);
 		void LoadSceneManager(std::string const & sm_name);
+		void LoadAudioDataSourceFactory(std::string const & adsf_name);
 
 		void AppInstance(App3DFramework& app)
 		{
@@ -91,52 +94,62 @@ namespace KlayGE
 
 		void SceneManagerInstance(SceneManagerPtr const & mgr)
 		{
-			sceneMgr_ = mgr;
+			scene_mgr_ = mgr;
 		}
 		SceneManager& SceneManagerInstance()
 		{
-			BOOST_ASSERT(sceneMgr_);
-			return *sceneMgr_;
+			BOOST_ASSERT(scene_mgr_);
+			return *scene_mgr_;
 		}
 
 		void RenderFactoryInstance(RenderFactoryPtr const & factory)
 		{
-			renderFactory_ = factory;
+			render_factory_ = factory;
 		}
 		RenderFactory& RenderFactoryInstance()
 		{
-			BOOST_ASSERT(renderFactory_);
-			return *renderFactory_;
+			BOOST_ASSERT(render_factory_);
+			return *render_factory_;
 		}
 
 		void AudioFactoryInstance(AudioFactoryPtr const & factory)
 		{
-			audioFactory_ = factory;
+			audio_factory_ = factory;
 		}
 		AudioFactory& AudioFactoryInstance()
 		{
-			BOOST_ASSERT(audioFactory_);
-			return *audioFactory_;
+			BOOST_ASSERT(audio_factory_);
+			return *audio_factory_;
 		}
 
 		void InputFactoryInstance(InputFactoryPtr const & factory)
 		{
-			inputFactory_ = factory;
+			input_factory_ = factory;
 		}
 		InputFactory& InputFactoryInstance()
 		{
-			BOOST_ASSERT(inputFactory_);
-			return *inputFactory_;
+			BOOST_ASSERT(input_factory_);
+			return *input_factory_;
 		}
 
 		void ShowFactoryInstance(ShowFactoryPtr const & factory)
 		{
-			showFactory_ = factory;
+			show_factory_ = factory;
 		}
 		ShowFactory& ShowFactoryInstance()
 		{
-			BOOST_ASSERT(showFactory_);
-			return *showFactory_;
+			BOOST_ASSERT(show_factory_);
+			return *show_factory_;
+		}
+
+		void AudioDataSourceFactoryInstance(AudioDataSourceFactoryPtr const & factory)
+		{
+			audio_data_src_factory_ = factory;
+		}
+		AudioDataSourceFactory& AudioDataSourceFactoryInstance()
+		{
+			BOOST_ASSERT(audio_data_src_factory_);
+			return *audio_data_src_factory_;
 		}
 
 	private:
@@ -146,18 +159,20 @@ namespace KlayGE
 
 		App3DFramework*		app_;
 
-		SceneManagerPtr		sceneMgr_;
+		SceneManagerPtr		scene_mgr_;
 
-		RenderFactoryPtr	renderFactory_;
-		AudioFactoryPtr		audioFactory_;
-		InputFactoryPtr		inputFactory_;
-		ShowFactoryPtr		showFactory_;
+		RenderFactoryPtr	render_factory_;
+		AudioFactoryPtr		audio_factory_;
+		InputFactoryPtr		input_factory_;
+		ShowFactoryPtr		show_factory_;
+		AudioDataSourceFactoryPtr audio_data_src_factory_;
 
 		DllLoader render_loader_;
 		DllLoader audio_loader_;
 		DllLoader input_loader_;
 		DllLoader show_loader_;
 		DllLoader sm_loader_;
+		DllLoader ads_loader_;
 
 		std::string dll_suffix_;
 	};

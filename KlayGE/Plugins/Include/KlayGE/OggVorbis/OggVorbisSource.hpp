@@ -18,9 +18,6 @@
 
 #pragma once
 
-#define KLAYGE_LIB_NAME KlayGE_AudioDataSource_OggVorbis
-#include <KlayGE/config/auto_link.hpp>
-
 #include <KlayGE/PreDeclare.hpp>
 
 #include <KlayGE/AudioDataSource.hpp>
@@ -41,8 +38,11 @@ namespace KlayGE
 	class OggVorbisSource : public AudioDataSource
 	{
 	public:
-		explicit OggVorbisSource(ResIdentifierPtr const & file);
+		OggVorbisSource();
 		~OggVorbisSource();
+
+		void Open(ResIdentifierPtr const & file);
+		void Close();
 
 		size_t Size();
 

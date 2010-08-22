@@ -1,8 +1,11 @@
 // Context.cpp
 // KlayGE 引擎场景类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2007-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2007-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 增加了AudioDataSourceFactoryInstance (2010.8.22)
 //
 // 3.9.0
 // XML格式的配置文件 (2009.4.26)
@@ -24,6 +27,7 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ShowFactory.hpp>
+#include <KlayGE/AudioDataSource.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/XMLDom.hpp>
 
@@ -38,6 +42,7 @@ namespace KlayGE
 	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
 	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr);
 	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr);
+	typedef void (*MakeAudioDataSourceFactoryFunc)(AudioDataSourceFactoryPtr& ptr);
 
 	Context::Context()
 	{
@@ -47,12 +52,13 @@ namespace KlayGE
 #endif
 #endif
 
-		sceneMgr_ = SceneManager::NullObject();
+		scene_mgr_ = SceneManager::NullObject();
 
-		renderFactory_ = RenderFactory::NullObject();
-		audioFactory_ = AudioFactory::NullObject();
-		inputFactory_ = InputFactory::NullObject();
-		showFactory_ = ShowFactory::NullObject();
+		render_factory_ = RenderFactory::NullObject();
+		audio_factory_ = AudioFactory::NullObject();
+		input_factory_ = InputFactory::NullObject();
+		show_factory_ = ShowFactory::NullObject();
+		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
 
 		dll_suffix_ = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
 		dll_suffix_ += "_";
@@ -69,12 +75,13 @@ namespace KlayGE
 
 	Context::~Context()
 	{
-		sceneMgr_.reset();
+		scene_mgr_.reset();
 
-		renderFactory_.reset();
-		audioFactory_.reset();
-		inputFactory_.reset();
-		showFactory_.reset();
+		render_factory_.reset();
+		audio_factory_.reset();
+		input_factory_.reset();
+		show_factory_.reset();
+		audio_data_src_factory_.reset();
 	}
 
 	Context& Context::Instance()
@@ -114,6 +121,7 @@ namespace KlayGE
 		std::string sf_name;
 #endif
 		std::string sm_name;
+		std::string adsf_name;
 
 		XMLDocument cfg_doc;
 		XMLNodePtr rf_node;
@@ -121,6 +129,7 @@ namespace KlayGE
 		XMLNodePtr if_node;
 		XMLNodePtr sf_node;
 		XMLNodePtr sm_node;
+		XMLNodePtr adsf_node;
 
 		ResIdentifierPtr file = ResLoader::Instance().Load(cfg_file);
 		if (file)
@@ -160,6 +169,12 @@ namespace KlayGE
 			if (sm_node)
 			{
 				sm_name = sm_node->Attrib("name")->ValueString();
+			}
+
+			adsf_node = context_node->FirstNode("audio_data_source_factory");
+			if (adsf_node)
+			{
+				adsf_name = adsf_node->Attrib("name")->ValueString();
 			}
 
 			XMLNodePtr frame_node = graphics_node->FirstNode("frame");
@@ -278,6 +293,7 @@ namespace KlayGE
 		cfg_.input_factory_name = if_name;
 		cfg_.show_factory_name = sf_name;
 		cfg_.scene_manager_name = sm_name;
+		cfg_.audio_data_source_factory_name = adsf_name;
 
 		cfg_.graphics_cfg.left = cfg_.graphics_cfg.top = 0;
 		cfg_.graphics_cfg.width = width;
@@ -320,6 +336,10 @@ namespace KlayGE
 			XMLNodePtr sf_node = cfg_doc.AllocNode(XNT_Element, "show_factory");
 			sf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.show_factory_name));
 			context_node->AppendNode(sf_node);
+
+			XMLNodePtr adsf_node = cfg_doc.AllocNode(XNT_Element, "audio_data_source_factory");
+			adsf_node->AppendAttrib(cfg_doc.AllocAttribString("name", cfg_.audio_data_source_factory_name));
+			context_node->AppendNode(adsf_node);
 		}
 		root->AppendNode(context_node);
 
@@ -403,13 +423,32 @@ namespace KlayGE
 
 	void Context::Config(ContextCfg const & cfg)
 	{
-		cfg_ = cfg;
+		if ((cfg_.render_factory_name != cfg.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
+		{
+			this->LoadRenderFactory(cfg.render_factory_name);
+		}
+		if ((cfg_.audio_factory_name != cfg.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
+		{
+			this->LoadAudioFactory(cfg.audio_factory_name);
+		}
+		if ((cfg_.input_factory_name != cfg.input_factory_name) || (InputFactory::NullObject() == input_factory_))
+		{
+			this->LoadInputFactory(cfg.input_factory_name);
+		}
+		if ((cfg_.show_factory_name != cfg.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
+		{
+			this->LoadShowFactory(cfg.show_factory_name);
+		}
+		if ((cfg_.scene_manager_name != cfg.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
+		{
+			this->LoadSceneManager(cfg.scene_manager_name);
+		}
+		if ((cfg_.audio_data_source_factory_name != cfg.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
+		{
+			this->LoadAudioDataSourceFactory(cfg.audio_data_source_factory_name);
+		}
 
-		this->LoadRenderFactory(cfg.render_factory_name);
-		this->LoadAudioFactory(cfg.audio_factory_name);
-		this->LoadInputFactory(cfg.input_factory_name);
-		this->LoadShowFactory(cfg.show_factory_name);
-		this->LoadSceneManager(cfg.scene_manager_name);
+		cfg_ = cfg;
 	}
 
 	ContextCfg const & Context::Config() const
@@ -419,7 +458,7 @@ namespace KlayGE
 
 	void Context::LoadRenderFactory(std::string const & rf_name)
 	{
-		renderFactory_ = RenderFactory::NullObject();
+		render_factory_ = RenderFactory::NullObject();
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
@@ -429,7 +468,7 @@ namespace KlayGE
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 		if (mrf != NULL)
 		{
-			mrf(renderFactory_);
+			mrf(render_factory_);
 		}
 		else
 		{
@@ -439,7 +478,7 @@ namespace KlayGE
 
 	void Context::LoadAudioFactory(std::string const & af_name)
 	{
-		audioFactory_ = AudioFactory::NullObject();
+		audio_factory_ = AudioFactory::NullObject();
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
@@ -449,7 +488,7 @@ namespace KlayGE
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 		if (maf != NULL)
 		{
-			maf(audioFactory_);
+			maf(audio_factory_);
 		}
 		else
 		{
@@ -459,7 +498,7 @@ namespace KlayGE
 
 	void Context::LoadInputFactory(std::string const & if_name)
 	{
-		inputFactory_ = InputFactory::NullObject();
+		input_factory_ = InputFactory::NullObject();
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
@@ -469,7 +508,7 @@ namespace KlayGE
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 		if (mif != NULL)
 		{
-			mif(inputFactory_);
+			mif(input_factory_);
 		}
 		else
 		{
@@ -479,7 +518,7 @@ namespace KlayGE
 
 	void Context::LoadShowFactory(std::string const & sf_name)
 	{
-		showFactory_ = ShowFactory::NullObject();
+		show_factory_ = ShowFactory::NullObject();
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
@@ -489,7 +528,7 @@ namespace KlayGE
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 		if (msf != NULL)
 		{
-			msf(showFactory_);
+			msf(show_factory_);
 		}
 		else
 		{
@@ -499,7 +538,7 @@ namespace KlayGE
 
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
-		sceneMgr_ = SceneManager::NullObject();
+		scene_mgr_ = SceneManager::NullObject();
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
@@ -509,11 +548,31 @@ namespace KlayGE
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 		if (msm != NULL)
 		{
-			msm(sceneMgr_);
+			msm(scene_mgr_);
 		}
 		else
 		{
 			sm_loader_.Free();
+		}
+	}
+
+	void Context::LoadAudioDataSourceFactory(std::string const & adsf_name)
+	{
+		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
+		ads_loader_.Free();
+
+		std::string adsf_path = ResLoader::Instance().Locate("Audio");
+		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
+		ads_loader_.Load(adsf_path + "/" + fn);
+
+		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
+		if (madsf != NULL)
+		{
+			madsf(audio_data_src_factory_);
+		}
+		else
+		{
+			ads_loader_.Free();
 		}
 	}
 }

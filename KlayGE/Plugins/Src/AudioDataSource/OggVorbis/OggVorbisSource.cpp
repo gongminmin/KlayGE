@@ -40,9 +40,21 @@ namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
-	OggVorbisSource::OggVorbisSource(ResIdentifierPtr const & file)
-				: oggFile_(file)
+	OggVorbisSource::OggVorbisSource()
 	{
+	}
+
+	// 析构函数
+	/////////////////////////////////////////////////////////////////////////////////
+	OggVorbisSource::~OggVorbisSource()
+	{
+		ov_clear(&vf_);
+	}
+
+	void OggVorbisSource::Open(ResIdentifierPtr const & file)
+	{
+		oggFile_ = file;
+
 		oggFile_->seekg(0, std::ios_base::end);
 		length_ = oggFile_->tellg();
 		oggFile_->seekg(0, std::ios_base::beg);
@@ -62,11 +74,10 @@ namespace KlayGE
 		this->Reset();
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	OggVorbisSource::~OggVorbisSource()
+	void OggVorbisSource::Close()
 	{
-		ov_clear(&vf_);
+		oggFile_.reset();
+		this->Reset();
 	}
 
 	// 读取Ogg数据

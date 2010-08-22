@@ -20,6 +20,13 @@ namespace KlayGE
 	class NullAudioDataSource : public AudioDataSource
 	{
 	public:
+		void Open(ResIdentifierPtr const & /*file*/)
+		{
+		}
+		void Close()
+		{
+		}
+
 		AudioFormat Format() const
 			{ return AF_Unknown; }
 		uint32_t Freq() const
@@ -52,5 +59,27 @@ namespace KlayGE
 	uint32_t AudioDataSource::Freq() const
 	{
 		return this->freq_;
+	}
+
+	
+	class NullAudioDataSourceFactory : public AudioDataSourceFactory
+	{
+	public:
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"Null Audio Data Source Factory");
+			return name;
+		}
+
+		AudioDataSourcePtr MakeAudioDataSource()
+		{
+			return AudioDataSource::NullObject();
+		}
+	};
+
+	AudioDataSourceFactoryPtr AudioDataSourceFactory::NullObject()
+	{
+		static AudioDataSourceFactoryPtr obj = MakeSharedPtr<NullAudioDataSourceFactory>();
+		return obj;
 	}
 }

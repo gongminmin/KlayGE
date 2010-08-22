@@ -128,7 +128,12 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		}
 		{
 			HWND hResCombo = GetDlgItem(hDlg, IDC_RES_COMBO);
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1080")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1680x1050")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x1024")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x960")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x800")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x720")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1024x768")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("800x600")));
 

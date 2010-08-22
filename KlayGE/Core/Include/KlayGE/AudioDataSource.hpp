@@ -37,6 +37,9 @@ namespace KlayGE
 	public:
 		static AudioDataSourcePtr NullObject();
 
+		virtual void Open(ResIdentifierPtr const & file) = 0;
+		virtual void Close() = 0;
+
 		AudioFormat Format() const;
 		uint32_t Freq() const;
 
@@ -50,6 +53,20 @@ namespace KlayGE
 	protected:
 		AudioFormat		format_;
 		uint32_t				freq_;
+	};
+
+	class KLAYGE_CORE_API AudioDataSourceFactory
+	{
+	public:
+		virtual ~AudioDataSourceFactory()
+		{
+		}
+
+		static AudioDataSourceFactoryPtr NullObject();
+
+		virtual std::wstring const & Name() const = 0;
+
+		virtual AudioDataSourcePtr MakeAudioDataSource() = 0;
 	};
 }
 
