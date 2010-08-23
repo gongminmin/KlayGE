@@ -100,13 +100,6 @@
 		#define BOOST_ALL_DYN_LINK
 	#endif
 
-	// For boost/mem_fn.hpp
-	#ifdef KLAYGE_PLATFORM_WIN32
-		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-			#define BOOST_MEM_FN_ENABLE_STDCALL
-		#endif
-	#endif
-
 	// Shut min/max in windows.h
 	#ifndef NOMINMAX
 		#define NOMINMAX

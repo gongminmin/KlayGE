@@ -23,7 +23,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OV_ADS_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -65,11 +65,15 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86_d.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86_d.dll"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -81,14 +85,19 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -111,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
-				PreprocessorDefinitions="WIN64;_DEBUG;_LIB;KLAYGE_BUILD_DLL"
+				PreprocessorDefinitions="WIN64;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OV_ADS_SOURCE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -130,11 +139,15 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64_d.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64_d.dll"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -146,14 +159,19 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
@@ -180,7 +198,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OV_ADS_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
@@ -198,11 +216,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86.dll"
+				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -214,14 +238,19 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="../../lib/$(PlatformName)"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
 			>
@@ -245,7 +274,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				AdditionalIncludeDirectories="../../Core/Include;../../Plugins/Include"
-				PreprocessorDefinitions="WIN64;NDEBUG;_LIB;KLAYGE_BUILD_DLL"
+				PreprocessorDefinitions="WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_OV_ADS_SOURCE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				FloatingPointModel="2"
@@ -263,11 +292,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64.dll"
+				GenerateDebugInformation="true"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -279,7 +314,12 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
 			/>
 		</Configuration>
 	</Configurations>
@@ -294,6 +334,10 @@
 				RelativePath="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSource.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\Plugins\Src\AudioDataSource\OggVorbis\OggVorbisSourceFactory.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -301,6 +345,10 @@
 			>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSource.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OggVorbis\OggVorbisSourceFactory.hpp"
 				>
 			</File>
 		</Filter>
