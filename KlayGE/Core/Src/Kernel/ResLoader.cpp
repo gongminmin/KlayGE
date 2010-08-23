@@ -18,6 +18,7 @@
 #include <sstream>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS
