@@ -29,6 +29,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
+#include <cstdio>
 #include <string>
 #include <algorithm>
 #include <sstream>
@@ -928,7 +929,7 @@ namespace KlayGE
 	std::string OGLShaderObject::GenShaderText(RenderEffect const & effect)
 	{
 		std::stringstream shader_ss;
-		
+
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		bool sample_helper = false;
 		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
@@ -1478,17 +1479,17 @@ namespace KlayGE
 							gs_input_type_ = GL_POINTS;
 							gs_input_vertices = 1;
 							break;
-						
+
 						case CG_LINE:
 							gs_input_type_ = GL_LINES;
 							gs_input_vertices = 2;
 							break;
-						
+
 						case CG_LINE_ADJ:
 							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
 							gs_input_vertices = 4;
 							break;
-						
+
 						case CG_TRIANGLE:
 							gs_input_type_ = GL_TRIANGLES;
 							gs_input_vertices = 3;
@@ -1511,11 +1512,11 @@ namespace KlayGE
 						case CG_POINT_OUT:
 							gs_output_type_ = GL_POINTS;
 							break;
-						
+
 						case CG_LINE_OUT:
 							gs_output_type_ = GL_LINE_STRIP;
 							break;
-						
+
 						case CG_TRIANGLE_OUT:
 							gs_output_type_ = GL_TRIANGLE_STRIP;
 							break;
@@ -1667,7 +1668,7 @@ namespace KlayGE
 												index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
 
 											param_binds_.push_back(pb);
-										
+
 											break;
 										}
 									}

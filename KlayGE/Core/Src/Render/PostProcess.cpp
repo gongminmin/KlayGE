@@ -55,8 +55,8 @@ namespace KlayGE
 				input_pins_(input_pin_names.size()),
 				output_pins_(output_pin_names.size()),
 				num_bind_output_(0),
-				input_pins_ep_(input_pin_names.size()),
-				params_(param_names.size())
+				params_(param_names.size()),
+				input_pins_ep_(input_pin_names.size())
 	{
 		this->CreateVB();
 

@@ -13,6 +13,5 @@
 		<Project filename="OpenGL.cbp" />
 		<Project filename="OpenGLES2.cbp" />
 		<Project filename="OCTree.cbp" />
-		<Project filename="Heightmap.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

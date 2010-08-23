@@ -23,6 +23,7 @@
 	#define __out_ecount(size)
 	#define __out_bcount(size)
 	#define __inout
+	#define __in_bcount(size)
 	#define __in_opt
 	#define __in_ecount_opt(size)
 	#define __in_bcount_opt(size)
@@ -30,6 +31,7 @@
 	#define __out_ecount_opt(size)
 	#define __out_bcount_opt(size)
 	#define __inout_opt
+	#define __out_ecount_part_opt(size,length)
 
 	#define WINAPI_INLINE  WINAPI
 

@@ -33,7 +33,7 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -66,7 +66,7 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -91,7 +91,7 @@
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -119,7 +119,7 @@
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -146,7 +146,7 @@
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -176,7 +176,7 @@
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>

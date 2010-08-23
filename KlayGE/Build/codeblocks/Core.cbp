@@ -37,7 +37,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="win32" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -73,7 +73,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="win32" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -103,7 +103,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="elf32" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -134,7 +134,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="elf32" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -166,7 +166,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="elf64" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -199,7 +199,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="YASM_OBJFMT" value="elf64" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -242,13 +242,17 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Extract7z.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Font.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\FrameBuffer.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\Frustum.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\GraphicsBuffer.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\HDRPostProcess.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\Heightmap.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\InfTerrain.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Input.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\InputFactory.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\KMesh.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\KlayGE.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\LZMACodec.hpp" />
+		<Unit filename="..\..\Core\Include\KlayGE\LensFlare.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Lobby.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\MapVector.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\Math.hpp" />
@@ -275,7 +279,6 @@
 		<Unit filename="..\..\Core\Include\KlayGE\Renderable.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\RenderableHelper.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\ResLoader.hpp" />
-		<Unit filename="..\..\Core\Include\KlayGE\Frustum.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneManager.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneNode.hpp" />
 		<Unit filename="..\..\Core\Include\KlayGE\SceneObject.hpp" />
@@ -362,7 +365,10 @@
 		<Unit filename="..\..\Core\Src\Render\FrameBuffer.cpp" />
 		<Unit filename="..\..\Core\Src\Render\GraphicsBuffer.cpp" />
 		<Unit filename="..\..\Core\Src\Render\HDRPostProcess.cpp" />
+		<Unit filename="..\..\Core\Src\Render\HeightMap.cpp" />
+		<Unit filename="..\..\Core\Src\Render\InfTerrain.cpp" />
 		<Unit filename="..\..\Core\Src\Render\KMesh.cpp" />
+		<Unit filename="..\..\Core\Src\Render\LensFlare.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Mesh.cpp" />
 		<Unit filename="..\..\Core\Src\Render\PostProcess.cpp" />
 		<Unit filename="..\..\Core\Src\Render\Query.cpp" />

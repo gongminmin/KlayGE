@@ -38,7 +38,7 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -76,7 +76,7 @@
 					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Render\&quot;' />
 				</ExtraCommands>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -107,7 +107,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -138,7 +138,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -170,7 +170,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -203,7 +203,7 @@
 				</ExtraCommands>
 				<Environment>
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>

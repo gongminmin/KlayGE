@@ -38,7 +38,7 @@ namespace KlayGE
 	{
 		module_	= MakePyObjectPtr(PyImport_ImportModule(name.c_str()));
 		dict_	= MakePyObjectPtr(PyModule_GetDict(module_.get()));
-		Py_INCREF(dict_.get());
+		Py_IncRef(dict_.get());
 	}
 
 	ScriptModule::~ScriptModule()
@@ -50,7 +50,7 @@ namespace KlayGE
 	PyObjectPtr ScriptModule::Value(std::string const & name)
 	{
 		PyObject* p = PyDict_GetItemString(dict_.get(), name.c_str());
-		Py_INCREF(p);
+		Py_IncRef(p);
 		return MakePyObjectPtr(p);
 	}
 
