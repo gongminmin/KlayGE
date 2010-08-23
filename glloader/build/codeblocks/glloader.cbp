@@ -164,6 +164,45 @@
 					<Add library="X11" />
 				</Linker>
 			</Target>
+			<Target title="Debug_ES_Win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win_x86\glloader_es_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win_x86" />
+				<Option object_output="..\..\Debug\objs\win_x86" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DGLLOADER_SOURCE" />
+					<Add option="-DGLLOADER_GLES_SUPPORT" />
+				</Compiler>
+				<Linker>
+					<Add library="EGL" />
+				</Linker>
+			</Target>
+			<Target title="Release_ES_Win_x86">
+				<Option platforms="Windows;" />
+				<Option output="..\..\lib\win_x86\glloader_es_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="..\..\lib\win_x86" />
+				<Option object_output="..\..\Release\objs\win_x86" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
+				<Option projectResourceIncludeDirsRelation="2" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-DGLLOADER_SOURCE" />
+					<Add option="-DGLLOADER_GLES_SUPPORT" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="EGL" />
+				</Linker>
+			</Target>
 		</Build>
 		<VirtualTargets>
 			<Add alias="All_Win" targets="Debug_Win_x86;Release_Win_x86;Debug_Win_x64;Release_Win_x64;" />
@@ -173,11 +212,18 @@
 			<Add option="-DGLLOADER_SOURCE" />
 			<Add directory="..\..\include" />
 		</Compiler>
+		<Linker>
+			<Add option="-enable-auto-import" />
+		</Linker>
 		<Unit filename="..\..\include\glloader\glloader.h" />
+		<Unit filename="..\..\include\glloader\glloader_egl.h" />
 		<Unit filename="..\..\include\glloader\glloader_gl.h" />
 		<Unit filename="..\..\include\glloader\glloader_gles.h" />
 		<Unit filename="..\..\include\glloader\glloader_glx.h" />
 		<Unit filename="..\..\include\glloader\glloader_wgl.h" />
+		<Unit filename="..\..\src\glloader_egl.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="..\..\src\glloader_gl.c">
 			<Option compilerVar="CC" />
 		</Unit>
