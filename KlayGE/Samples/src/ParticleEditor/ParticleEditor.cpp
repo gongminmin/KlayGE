@@ -824,7 +824,7 @@ void ParticleEditorApp::ChangeParticleColorFromHandler(KlayGE::UITexButton const
 	occ.rgbResult = particle_color_from_.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
-	occ.lCustData = NULL;
+	occ.lCustData = 0;
 	occ.lpfnHook = NULL;
 	occ.lpTemplateName = NULL;
 
@@ -855,7 +855,7 @@ void ParticleEditorApp::ChangeParticleColorToHandler(KlayGE::UITexButton const &
 	occ.rgbResult = particle_color_to_.ABGR();
 	occ.lpCustColors = cust_clrs;
 	occ.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
-	occ.lCustData = NULL;
+	occ.lCustData = 0;
 	occ.lpfnHook = NULL;
 	occ.lpTemplateName = NULL;
 
@@ -953,7 +953,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	}
 
 	TexturePtr tex_for_button;
-	
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	uint32_t data;

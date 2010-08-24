@@ -2,14 +2,14 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="PNTriangles" />
+		<Option title="FXML2Shader" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\..\bin\PNTriangles_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\Win32\FXML2Shader_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\Win32" />
 				<Option object_output="..\..\Debug\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -23,7 +23,9 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="comdlg32" />
+					<Add library="python31_d" />
+					<Add library="glloader_x86_d" />
+					<Add library="opengl32" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
@@ -34,8 +36,8 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\..\bin\PNTriangles" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\Win32\FXML2Shader" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\Win32" />
 				<Option object_output="..\..\Release\Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -50,7 +52,9 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="comdlg32" />
+					<Add library="python31" />
+					<Add library="glloader_x86" />
+					<Add library="opengl32" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
@@ -61,8 +65,8 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\PNTriangles_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\linux_x86\FXML2Shader_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x86" />
 				<Option object_output="..\..\Debug\linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -75,18 +79,21 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add library="glloader_x86_d" />
 					<Add library="KlayGE_Core_gcc_x86_d" />
+					<Add library="python31_d" />
+					<Add library="GL" />
 				</Linker>
 				<Environment>
-					<Variable name="DEBUG_STR" value="-d" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\PNTriangles" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\linux_x86\FXML2Shader" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x86" />
 				<Option object_output="..\..\Release\linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -100,23 +107,25 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="glloader_x86" />
 					<Add library="KlayGE_Core_gcc_x86" />
+					<Add library="python31" />
+					<Add library="GL" />
 				</Linker>
 				<Environment>
-					<Variable name="DEBUG_STR" value="" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\PNTriangles_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\linux_x64\FXML2Shader_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x64" />
 				<Option object_output="..\..\Debug\linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=nocona" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-O0" />
@@ -125,23 +134,25 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add library="glloader_x64_d" />
 					<Add library="KlayGE_Core_gcc_x64_d" />
+					<Add library="python31_d" />
+					<Add library="GL" />
 				</Linker>
 				<Environment>
-					<Variable name="DEBUG_STR" value="-d" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\PNTriangles" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
+				<Option output="..\..\bin\linux_x64\FXML2Shader" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="..\..\bin\linux_x64" />
 				<Option object_output="..\..\Release\linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=nocona" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
@@ -150,13 +161,15 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
+					<Add library="glloader_x64" />
 					<Add library="KlayGE_Core_gcc_x64" />
+					<Add library="python31" />
+					<Add library="GL" />
 				</Linker>
 				<Environment>
-					<Variable name="DEBUG_STR" value="" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
+					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 		</Build>
@@ -168,16 +181,13 @@
 		</Compiler>
 		<Linker>
 			<Add option="-enable-auto-import" />
-			<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 		</Linker>
-		<Unit filename="..\..\media\PNTriangles\PNTriangles.fxml" />
-		<Unit filename="..\..\media\PNTriangles\PNTriangles.uiml" />
-		<Unit filename="..\..\src\PNTriangles\PNTriangles.cpp" />
-		<Unit filename="..\..\src\PNTriangles\PNTriangles.hpp" />
+		<Unit filename="..\..\FXML2Shader\FXML2Shader.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

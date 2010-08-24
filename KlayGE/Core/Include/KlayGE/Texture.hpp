@@ -327,6 +327,7 @@ namespace KlayGE
 			break;
 
 		case Texture::CF_Negative_Z:
+		default:
 			look_dir	= Vector_T<T, 3>(0, 0, -1);
 			up_dir		= Vector_T<T, 3>(0, 1, 0);
 			break;

@@ -191,7 +191,7 @@ namespace KlayGE
 
 			for (ForwardIterator iter = first; iter != last; ++ iter)
 			{
-				Py_INCREF(iter->get());
+				Py_IncRef(iter->get());
 				PyTuple_SetItem(args.get(), iter - first, iter->get());
 			}
 

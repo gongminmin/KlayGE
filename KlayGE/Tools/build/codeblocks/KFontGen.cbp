@@ -23,11 +23,11 @@
 				</Compiler>
 				<Linker>
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add library="freetype2312" />
+					<Add library="freetype242" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -51,11 +51,11 @@
 				<Linker>
 					<Add option="-s" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add library="freetype2312" />
+					<Add library="freetype242" />
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -80,7 +80,7 @@
 					<Add library="freetype" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -107,7 +107,7 @@
 					<Add library="freetype" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -132,7 +132,7 @@
 					<Add library="freetype" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -159,7 +159,7 @@
 					<Add library="freetype" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>

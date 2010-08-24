@@ -26,7 +26,7 @@
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -52,7 +52,7 @@
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -76,7 +76,7 @@
 					<Add library="KlayGE_Core_gcc_x86_d" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -101,7 +101,7 @@
 					<Add library="KlayGE_Core_gcc_x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -126,7 +126,7 @@
 					<Add library="KlayGE_Core_gcc_x64_d" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -152,7 +152,7 @@
 					<Add library="KlayGE_Core_gcc_x64" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_43" />
+					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>

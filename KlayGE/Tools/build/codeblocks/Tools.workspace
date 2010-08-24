@@ -2,6 +2,7 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="Tools workspace">
 		<Project filename="DistanceMapCreator.cbp" />
+		<Project filename="FXML2Shader.cbp" />
 		<Project filename="GLCompatibility.cbp" />
 		<Project filename="HDRCompressor.cbp" />
 		<Project filename="KFontGen.cbp" active="1" />
