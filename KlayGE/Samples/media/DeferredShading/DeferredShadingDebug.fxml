@@ -35,7 +35,7 @@ float linstep(float min, float max, float v)
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="nd_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="ssao_tex"/>
 
@@ -53,7 +53,7 @@ void ShowQuadVS(float4 pos : POSITION,
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y);
@@ -63,7 +63,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	float3 normal = GetNormal(ndc);
 	
 	return float4(normal / 2 + 0.5f, 1);
@@ -71,13 +71,13 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	return float4(GetDepth(ndc).xxx * 10, 1);
 }
 
 float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ndc = nd_tex.Sample(point_sampler, tc0);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 
 	float4 color = ssao_tex.Sample(point_sampler, tc0).xxxx;
 	return color;

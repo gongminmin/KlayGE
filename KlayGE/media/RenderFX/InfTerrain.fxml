@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="float" name="stretch"/>
+	<parameter type="float" name="base_level"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="inv_virtual_view"/>
+		<parameter type="float" name="offset_y"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+float4 GetInfTerrainPosOS(float2 pos, float strength)
+{
+	pos *= 1 + (eye_pos.y - 20) / 80;
+	float4 pos_es = float4(pos.x, -eye_pos.y, pos.y - offset_y - strength, 1);
+	return mul(pos_es, inv_virtual_view);
+}
+		]]>
+	</shader>
+</effect>

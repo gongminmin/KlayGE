@@ -286,7 +286,6 @@ namespace KlayGE
 
 
 	DeferredShadingLayer::DeferredShadingLayer()
-			: RenderableHelper(L"DeferredShadingLayer")
 	{
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
@@ -297,10 +296,9 @@ namespace KlayGE
 		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
 
 		g_buffer_ = rf.MakeFrameBuffer();
+		shadowing_buffer_ = rf.MakeFrameBuffer();
 		lighting_buffer_ = rf.MakeFrameBuffer();
 		shading_buffer_ = rf.MakeFrameBuffer();
-
-		box_ = Box(float3(-1, -1, -1), float3(1, 1, 1));
 
 		{
 			rl_cone_ = rf.MakeRenderLayout();
@@ -382,18 +380,20 @@ namespace KlayGE
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		RenderEffectPtr effect = rf.LoadEffect("DeferredShading.fxml");
+		effect_ = rf.LoadEffect("DeferredShading.fxml");
 
-		technique_lights_[LT_Ambient] = effect->TechniqueByName("DeferredShadingAmbient");
-		technique_lights_[LT_Directional] = effect->TechniqueByName("DeferredShadingDirectional");
-		technique_lights_[LT_Point] = effect->TechniqueByName("DeferredShadingPoint");
-		technique_lights_[LT_Spot] = effect->TechniqueByName("DeferredShadingSpot");
-		technique_light_depth_only_ = effect->TechniqueByName("DeferredShadingLightDepthOnly");
-		technique_light_stencil_eiv_ = effect->TechniqueByName("DeferredShadingLightStencilEIV");
-		technique_light_stencil_eov_ = effect->TechniqueByName("DeferredShadingLightStencilEOV");
-		technique_clear_stencil_ = effect->TechniqueByName("ClearStencil");
-
-		technique_ = technique_light_depth_only_;
+		technique_shadows_[LT_Ambient] = effect_->TechniqueByName("DeferredShadowingAmbient");
+		technique_shadows_[LT_Directional] = effect_->TechniqueByName("DeferredShadowingDirectional");
+		technique_shadows_[LT_Point] = effect_->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LT_Spot] = effect_->TechniqueByName("DeferredShadowingSpot");
+		technique_lights_[LT_Ambient] = effect_->TechniqueByName("DeferredShadingAmbient");
+		technique_lights_[LT_Directional] = effect_->TechniqueByName("DeferredShadingDirectional");
+		technique_lights_[LT_Point] = effect_->TechniqueByName("DeferredShadingPoint");
+		technique_lights_[LT_Spot] = effect_->TechniqueByName("DeferredShadingSpot");
+		technique_light_depth_only_ = effect_->TechniqueByName("DeferredShadingLightDepthOnly");
+		technique_light_stencil_eiv_ = effect_->TechniqueByName("DeferredShadingLightStencilEIV");
+		technique_light_stencil_eov_ = effect_->TechniqueByName("DeferredShadingLightStencilEOV");
+		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		/*try
@@ -450,23 +450,23 @@ namespace KlayGE
 			}
 		}
 
-		*(technique_->Effect().ParameterByName("shadow_map_tex")) = blur_sm_tex_;
-		*(technique_->Effect().ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
+		*(effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
+		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
-		texel_to_pixel_offset_param_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
-		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-		upper_left_param_ = technique_->Effect().ParameterByName("upper_left");
-		upper_right_param_ = technique_->Effect().ParameterByName("upper_right");
-		lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
-		lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
-		inv_view_param_ = technique_->Effect().ParameterByName("inv_view");
-		light_attrib_param_ = technique_->Effect().ParameterByName("light_attrib");
-		light_color_param_ = technique_->Effect().ParameterByName("light_color");
-		light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
-		light_view_proj_param_ = technique_->Effect().ParameterByName("light_view_proj");
-		light_volume_mvp_param_ = technique_->Effect().ParameterByName("light_volume_mvp");
-		light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
-		light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
+		texel_to_pixel_offset_param_ = effect_->ParameterByName("texel_to_pixel_offset");
+		depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
+		upper_left_param_ = effect_->ParameterByName("upper_left");
+		upper_right_param_ = effect_->ParameterByName("upper_right");
+		lower_left_param_ = effect_->ParameterByName("lower_left");
+		lower_right_param_ = effect_->ParameterByName("lower_right");
+		inv_view_param_ = effect_->ParameterByName("inv_view");
+		light_attrib_param_ = effect_->ParameterByName("light_attrib");
+		light_color_param_ = effect_->ParameterByName("light_color");
+		light_falloff_param_ = effect_->ParameterByName("light_falloff");
+		light_view_proj_param_ = effect_->ParameterByName("light_view_proj");
+		light_volume_mvp_param_ = effect_->ParameterByName("light_volume_mvp");
+		light_pos_es_param_ = effect_->ParameterByName("light_pos_es");
+		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
 
 	DeferredAmbientLightSourcePtr DeferredShadingLayer::AddAmbientLight(float3 const & clr)
@@ -542,14 +542,26 @@ namespace KlayGE
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		shadowing_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
-		normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*normal_depth_tex_, 0, 0));
+		g_buffer_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+		try
+		{
+			shadowing_tex_ = rf.MakeTexture2D(width * 4 / 5, height * 4 / 5, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 0));
+		}
+		catch (...)
+		{
+			shadowing_tex_ = rf.MakeTexture2D(width * 4 / 5, height * 4 / 5, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 0));
+		}
 
 		lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 0));
@@ -567,13 +579,14 @@ namespace KlayGE
 		}
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		if (normal_depth_tex_)
+		if (g_buffer_tex_)
 		{
-			*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
+			*(effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
 		}
 
-		*(technique_->Effect().ParameterByName("nd_tex")) = normal_depth_tex_;
-		*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(effect_->ParameterByName("g_buffer_tex")) = g_buffer_tex_;
+		*(effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
+		*(effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 	}
 
 	uint32_t DeferredShadingLayer::Update(uint32_t pass)
@@ -822,6 +835,7 @@ namespace KlayGE
 				float3 loc_es = MathLib::transform_coord(p, view_);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
+				RenderLayoutPtr rl;
 				float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
 				switch (type)
 				{
@@ -830,7 +844,7 @@ namespace KlayGE
 						light_pos_es_actived.w() = light->CosOuterInner().x();
 						light_dir_es_actived.w() = light->CosOuterInner().y();
 
-						rl_ = rl_cone_;
+						rl = rl_cone_;
 						float const scale = light->CosOuterInner().w();
 						*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
 					}
@@ -839,19 +853,19 @@ namespace KlayGE
 				case LT_Point:
 					if (PT_Lighting == pass_type)
 					{
-						rl_ = rl_box_;
+						rl = rl_box_;
 						float4x4 light_model = MathLib::translation(p);
 						*light_volume_mvp_param_ = light_model * view_ * proj_;
 					}
 					else
 					{
-						rl_ = rl_pyramid_;
+						rl = rl_pyramid_;
 						*light_volume_mvp_param_ = mat;
 					}
 					break;
 
 				default:
-					rl_ = rl_quad_;
+					rl = rl_quad_;
 					*light_volume_mvp_param_ = float4x4::Identity();
 					break;
 				}
@@ -893,17 +907,33 @@ namespace KlayGE
 				}
 				else //if (PT_Lighting == pass_type)
 				{
+					// Shadowing
+
+					re.BindFrameBuffer(shadowing_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(1, 1, 1, 1), 1.0f, 0);
+
+					*light_attrib_param_ = attr;
+					*light_color_param_ = light->Color();
+					*light_falloff_param_ = light->Falloff();
+
+					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+					{
+						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
+					}
+
+					re.Render(*technique_shadows_[type], *rl);
+
+					if ((type != LT_Ambient) && (type != LT_Directional))
+					{
+						light_crs_[org_no][index_in_pass]->EndConditionalRender();
+					}
+
+
 					// Lighting
 
 					re.BindFrameBuffer(lighting_buffer_);
 					// Clear stencil to 0 with write mask
 					re.Render(*technique_clear_stencil_, *rl_quad_);
-
-					technique_ = technique_lights_[type];
-
-					*light_attrib_param_ = attr;
-					*light_color_param_ = light->Color();
-					*light_falloff_param_ = light->Falloff();
 
 					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
 					{
@@ -942,15 +972,15 @@ namespace KlayGE
 
 						if (eye_in_volume)
 						{
-							re.Render(*technique_light_stencil_eiv_, *rl_);
+							re.Render(*technique_light_stencil_eiv_, *rl);
 						}
 						else
 						{
-							re.Render(*technique_light_stencil_eov_, *rl_);
+							re.Render(*technique_light_stencil_eov_, *rl);
 						}
 					}
 
-					re.Render(*technique_, *rl_);
+					re.Render(*technique_lights_[type], *rl);
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{

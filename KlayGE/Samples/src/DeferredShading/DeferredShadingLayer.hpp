@@ -364,7 +364,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<DeferredSceneObject> DeferredSceneObjectPtr;
 
 
-	class DeferredShadingLayer : public RenderableHelper
+	class DeferredShadingLayer
 	{
 	public:
 		DeferredShadingLayer();
@@ -380,9 +380,9 @@ namespace KlayGE
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
 
-		TexturePtr const & NormalDepthTex() const
+		TexturePtr const & GBufferTex() const
 		{
-			return normal_depth_tex_;
+			return g_buffer_tex_;
 		}
 		TexturePtr const & LightingTex() const
 		{
@@ -394,8 +394,13 @@ namespace KlayGE
 		}
 
 	private:
+		RenderEffectPtr effect_;
+
 		FrameBufferPtr g_buffer_;
-		TexturePtr normal_depth_tex_;
+		TexturePtr g_buffer_tex_;
+
+		FrameBufferPtr shadowing_buffer_;
+		TexturePtr shadowing_tex_;
 
 		FrameBufferPtr lighting_buffer_;
 		TexturePtr lighting_tex_;
@@ -419,6 +424,7 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
+		RenderTechniquePtr technique_shadows_[LT_NumLightTypes];
 		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_eiv_;

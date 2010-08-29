@@ -1051,7 +1051,7 @@ namespace
 		DeferredShadingDebug()
 			: PostProcess(L"DeferredShadingDebug")
 		{
-			input_pins_.push_back(std::make_pair("nd_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("ssao_tex", TexturePtr()));
 
@@ -1279,16 +1279,16 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 
 	deferred_shading_->SSAOTex(ssao_tex_);
 
-	edge_anti_alias_->InputPin(0, deferred_shading_->NormalDepthTex());
+	edge_anti_alias_->InputPin(0, deferred_shading_->GBufferTex());
 	edge_anti_alias_->InputPin(1, deferred_shading_->ShadingTex());
 	edge_anti_alias_->OutputPin(0, hdr_tex_);
 
 	hdr_pp_->InputPin(0, hdr_tex_);
 
-	ssao_pp_->InputPin(0, deferred_shading_->NormalDepthTex());
+	ssao_pp_->InputPin(0, deferred_shading_->GBufferTex());
 	ssao_pp_->OutputPin(0, ssao_tex_);
 
-	debug_pp_->InputPin(0, deferred_shading_->NormalDepthTex());
+	debug_pp_->InputPin(0, deferred_shading_->GBufferTex());
 	debug_pp_->InputPin(1, deferred_shading_->LightingTex());
 	debug_pp_->InputPin(2, ssao_tex_);
 

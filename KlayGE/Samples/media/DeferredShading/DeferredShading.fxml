@@ -44,6 +44,8 @@
 	<parameter type="texture2D" name="shadow_map_tex"/>
 	<parameter type="textureCUBE" name="shadow_map_cube_tex"/>
 
+	<parameter type="texture2D" name="shadowing_tex"/>
+
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -79,7 +81,7 @@ float linstep(float min, float max, float v)
 	</parameter>
 
 	<parameter type="float2" name="inv_width_height"/>
-	<parameter type="texture2D" name="nd_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -221,20 +223,18 @@ float4 DeferredShadingPointPS(
 	tc += 0.5;
 #endif
 
-	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 
 	view_dir = normalize(-view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
-	float3 dir = light_pos_es.xyz - pos_es;
-	float len = length(dir);
-	float3 dir_ws = mul(-dir, (float3x3)inv_view);
+	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
-	float diff = diffuse_term(dir / len, normal);
+	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
 		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
-		float shadow = VSM_Omnidirectional(dir_ws, len);
+		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		float2 ds = float2(diff, spec) * atten;
 		final_clr = CalcColor(ds);
@@ -260,7 +260,7 @@ float4 DeferredShadingSpotPS(
 	tc += 0.5;
 #endif
 
-	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
 	view_dir = normalize(-view_dir);
@@ -269,15 +269,13 @@ float4 DeferredShadingSpotPS(
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
 	{
-		float3 dir = light_pos_es.xyz - pos_es;
-		float len = length(dir);
-		dir /= len;
+		float3 dir = normalize(light_pos_es.xyz - pos_es);
 		float3 normal = GetNormal(ndc);
 		float diff = diffuse_term(dir, normal);
 		if (diff > 0)
 		{
 			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
-			float shadow = VSM_Directional(pos_es, len);
+			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			float2 ds = float2(diff, spec) * atten;
 			final_clr = CalcColor(ds);
@@ -304,7 +302,7 @@ float4 DeferredShadingDirectionalPS(
 	tc += 0.5;
 #endif
 	
-	float4 ndc = nd_tex.Sample(point_sampler, tc);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
 	view_dir = normalize(-view_dir);
@@ -331,6 +329,80 @@ float4 DeferredShadingAmbientPS(
 	) : SV_Target
 {
 	return CalcColor(float2(0.1f, 0));
+}
+
+float4 DeferredShadowingPointPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+#else
+	float4 pos_ss : TEXCOORD0
+#endif
+	) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	pos_ss.xy /= pos_ss.w;
+
+	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
+	tc.y *= flipping;
+	tc += 0.5;
+#endif
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+
+	view_dir = normalize(-view_dir);
+	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 dir = light_pos_es.xyz - pos_es;
+	float len = length(dir);
+	float3 dir_ws = mul(-dir, (float3x3)inv_view);
+	return VSM_Omnidirectional(dir_ws, len);
+}
+
+float4 DeferredShadowingSpotPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+#else
+	float4 pos_ss : TEXCOORD0
+#endif
+	) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	pos_ss.xy /= pos_ss.w;
+
+	float2 tc = pos_ss.xy * 0.5f;
+	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
+	tc.y *= flipping;
+	tc += 0.5;
+#endif
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+
+	view_dir = normalize(-view_dir);
+	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float len = length(light_pos_es.xyz - pos_es);
+	return VSM_Directional(pos_es, len);
+}
+
+float4 DeferredShadowingDirectionalPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+#else
+	float4 pos_ss : TEXCOORD0
+#endif
+	) : SV_Target
+{
+	return 1;
+}
+
+float4 DeferredShadowingAmbientPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+#else
+	float4 pos_ss : TEXCOORD0
+#endif
+	) : SV_Target
+{
+	return 1;
 }
 		]]>
 	</shader>
@@ -522,6 +594,62 @@ float4 DeferredShadingAmbientPS(
 
 			<state name="vertex_shader" value="DeferredShadingVS()"/>
 			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredShadowingPoint">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadowingPointPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredShadowingSpot">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadowingSpotPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredShadowingDirectional">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadowingDirectionalPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredShadowingAmbient">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="pixel_shader" value="DeferredShadowingAmbientPS()"/>
 		</pass>
 	</technique>
 
