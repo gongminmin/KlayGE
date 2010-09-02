@@ -1778,7 +1778,19 @@ namespace KlayGE
 
 		ret->glsl_program_ = glCreateProgram();
 
-		/*if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
+		bool use_bin_program = true;
+
+		// Binary program can't work with GS in current NVIDIA's drivers
+		if (is_shader_validate_[ST_GeometryShader])
+		{
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
+			if (!sd.func_name.empty())
+			{
+				use_bin_program = false;
+			}
+		}
+
+		if (use_bin_program && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
 		{
 			ret->is_validate_ = is_validate_;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
@@ -1806,7 +1818,7 @@ namespace KlayGE
 				}
 			}
 		}
-		else*/
+		else
 		{
 			ret->is_validate_ = true;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
