@@ -1901,28 +1901,28 @@ namespace KlayGE
 			if (ret->is_validate_)
 			{
 				glLinkProgram(ret->glsl_program_);
+
+				GLint linked = false;
+				glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
+#ifdef KLAYGE_DEBUG
+				if (!linked)
+				{
+					GLint len = 0;
+					glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+					if (len > 0)
+					{
+						std::vector<char> info(len + 1, 0);
+						glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+						std::cerr << &info[0] << std::endl;
+					}
+				}
+#endif
+				ret->is_validate_ &= linked ? true : false;
 			}
 		}
 
 		if (ret->is_validate_)
 		{
-			GLint linked = false;
-			glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
-#ifdef KLAYGE_DEBUG
-			if (!linked)
-			{
-				GLint len = 0;
-				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			ret->is_validate_ &= linked ? true : false;
-
 			ret->attrib_locs_ = attrib_locs_;
 
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
