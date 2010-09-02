@@ -8,7 +8,6 @@
 		<Project filename="DSound.cbp" />
 		<Project filename="DInput.cbp" />
 		<Project filename="D3D9.cbp" />
-		<Project filename="D3D10.cbp" />
 		<Project filename="D3D11.cbp" />
 		<Project filename="OpenGL.cbp" />
 		<Project filename="OpenGLES2.cbp" />

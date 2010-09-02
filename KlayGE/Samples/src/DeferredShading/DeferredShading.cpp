@@ -83,108 +83,6 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			
-			std::vector<float3> pos(rl_->NumVertices());
-			std::vector<float3> normal(rl_->NumVertices());
-			std::vector<float2> texcoord(rl_->NumVertices());
-			std::vector<float3> tangent(rl_->NumVertices());
-			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
-			{
-				GraphicsBufferPtr vb = rl_->GetVertexStream(i);
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				uint8_t const * p = mapper.Pointer<uint8_t>();
-
-				uint32_t offset = 0;
-				vertex_elements_type const & ves = rl_->VertexStreamFormat(i);
-				for (uint32_t j = 0; j < ves.size(); ++ j)
-				{
-					if ((VEU_Position == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&pos[k], p, sizeof(pos[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_Normal == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&normal[k], p, sizeof(normal[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_TextureCoord == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&texcoord[k], p, sizeof(texcoord[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_Tangent == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&tangent[k], p, sizeof(tangent[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-
-					offset += ves[j].element_size();
-				}
-			}
-
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &pos[0];
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &normal[0];
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(texcoord.size() * sizeof(texcoord[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &texcoord[0];
-			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(tangent.size() * sizeof(tangent[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &tangent[0];
-			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			gbuffer_rl_ = rf.MakeRenderLayout();
-			gbuffer_rl_->TopologyType(rl_->TopologyType());
-			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-
-			gen_sm_rl_ = rf.MakeRenderLayout();
-			gen_sm_rl_->TopologyType(rl_->TopologyType());
-			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-
-			shading_rl_ = rf.MakeRenderLayout();
-			shading_rl_->TopologyType(rl_->TopologyType());
-			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			shading_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-
 			std::map<std::string, TexturePtr> tex_pool;
 
 			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
@@ -223,23 +121,6 @@ namespace
 		{
 			type_ = type;
 			technique_ = DeferredRenderable::Pass(type);
-			switch (type)
-			{
-			case PT_GBuffer:
-				rl_ = gbuffer_rl_;
-				break;
-
-			case PT_GenShadowMap:
-				rl_ = gen_sm_rl_;
-				break;
-
-			case PT_Shading:
-				rl_ = shading_rl_;
-				break;
-
-			default:
-				break;
-			}
 		}
 
 		void LightingTex(TexturePtr const & tex)
@@ -326,10 +207,6 @@ namespace
 		RenderEffectParameterPtr texel_to_pixel_offset_param_;
 		RenderEffectParameterPtr flipping_param_;
 
-		RenderLayoutPtr gbuffer_rl_;
-		RenderLayoutPtr gen_sm_rl_;
-		RenderLayoutPtr shading_rl_;
-
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;
 		TexturePtr bump_tex_;
@@ -406,31 +283,19 @@ namespace
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(float2));
 			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			gbuffer_rl_ = rf.MakeRenderLayout();
-			gbuffer_rl_->TopologyType(RenderLayout::TT_TriangleList);
-			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-
-			gen_sm_rl_ = rf.MakeRenderLayout();
-			gen_sm_rl_->TopologyType(RenderLayout::TT_TriangleList);
-			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			shading_rl_ = rf.MakeRenderLayout();
-			shading_rl_->TopologyType(RenderLayout::TT_TriangleList);
-			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &index[0];
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			gbuffer_rl_->BindIndexStream(ib, EF_R16UI);
-			gen_sm_rl_->BindIndexStream(ib, EF_R16UI);
-			shading_rl_->BindIndexStream(ib, EF_R16UI);
+			rl_->BindIndexStream(ib, EF_R16UI);
 
 			box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
 		}
@@ -443,23 +308,6 @@ namespace
 		void Pass(PassType type)
 		{
 			technique_ = DeferredRenderable::Pass(type);
-			switch (type)
-			{
-			case PT_GBuffer:
-				rl_ = gbuffer_rl_;
-				break;
-
-			case PT_GenShadowMap:
-				rl_ = gen_sm_rl_;
-				break;
-
-			case PT_Shading:
-				rl_ = shading_rl_;
-				break;
-
-			default:
-				break;
-			}
 		}
 
 		void Update()
@@ -492,10 +340,6 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-
-		RenderLayoutPtr gbuffer_rl_;
-		RenderLayoutPtr gen_sm_rl_;
-		RenderLayoutPtr shading_rl_;
 	};
 
 	class ConeObject : public SceneObjectHelper, public DeferredSceneObject
@@ -580,107 +424,6 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			
-			std::vector<float3> pos(rl_->NumVertices());
-			std::vector<float3> normal(rl_->NumVertices());
-			std::vector<float2> texcoord(rl_->NumVertices());
-			std::vector<float3> tangent(rl_->NumVertices());
-			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
-			{
-				GraphicsBufferPtr vb = rl_->GetVertexStream(i);
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				uint8_t const * p = mapper.Pointer<uint8_t>();
-
-				uint32_t offset = 0;
-				vertex_elements_type const & ves = rl_->VertexStreamFormat(i);
-				for (uint32_t j = 0; j < ves.size(); ++ j)
-				{
-					if ((VEU_Position == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&pos[k], p, sizeof(pos[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_Normal == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&normal[k], p, sizeof(normal[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_TextureCoord == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&texcoord[k], p, sizeof(texcoord[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-					else if ((VEU_Tangent == ves[j].usage) && (0 == ves[j].usage_index))
-					{
-						p += offset;
-						for (uint32_t k = 0; k < rl_->NumVertices(); ++ k)
-						{
-							memcpy(&tangent[k], p, sizeof(tangent[k]));
-							p += rl_->VertexSize(i);
-						}
-					}
-
-					offset += ves[j].element_size();
-				}
-			}
-
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &pos[0];
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &normal[0];
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(texcoord.size() * sizeof(texcoord[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &texcoord[0];
-			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(tangent.size() * sizeof(tangent[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &tangent[0];
-			GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			gbuffer_rl_ = rf.MakeRenderLayout();
-			gbuffer_rl_->TopologyType(rl_->TopologyType());
-			gbuffer_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			gbuffer_rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			gbuffer_rl_->BindVertexStream(tangent_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			gbuffer_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-
-			gen_sm_rl_ = rf.MakeRenderLayout();
-			gen_sm_rl_->TopologyType(rl_->TopologyType());
-			gen_sm_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			gen_sm_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			gen_sm_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-
-			shading_rl_ = rf.MakeRenderLayout();
-			shading_rl_->TopologyType(rl_->TopologyType());
-			shading_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			shading_rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			shading_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 		}
 
 		void SetModelMatrix(float4x4 const & mat)
@@ -696,23 +439,6 @@ namespace
 		void Pass(PassType type)
 		{
 			technique_ = DeferredRenderable::Pass(type);
-			switch (type)
-			{
-			case PT_GBuffer:
-				rl_ = gbuffer_rl_;
-				break;
-
-			case PT_GenShadowMap:
-				rl_ = gen_sm_rl_;
-				break;
-
-			case PT_Shading:
-				rl_ = shading_rl_;
-				break;
-
-			default:
-				break;
-			}
 		}
 
 		void Update()
@@ -745,10 +471,6 @@ namespace
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-
-		RenderLayoutPtr gbuffer_rl_;
-		RenderLayoutPtr gen_sm_rl_;
-		RenderLayoutPtr shading_rl_;
 	};
 
 	class SphereObject : public SceneObjectHelper, public DeferredSceneObject
