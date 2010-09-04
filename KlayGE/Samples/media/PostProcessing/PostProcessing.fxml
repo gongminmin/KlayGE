@@ -77,15 +77,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 po
 	float specular = 0;
 	if (diffuse > 0)
 	{
-		specular = dot(normalize(light_dir + view_dir), normal.xyz);
-		if (specular > 0)
-		{
-			specular = pow(specular, 10.0f);
-		}
-		else
-		{
-			specular = 0;
-		}
+		specular = pow(max(0.0f, dot(normalize(light_dir + view_dir), normal.xyz)), 10.0f);
 	}
 	else
 	{
