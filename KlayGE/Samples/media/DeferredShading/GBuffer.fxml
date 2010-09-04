@@ -93,7 +93,7 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 	{
 		normal = normalize(normal);
 	}
-	return StoreNormalDepthMtl(normal, texcoord_depth_2x.z, 1, shininess);
+	return StoreGBuffer(normal, texcoord_depth_2x.z, shininess);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -195,9 +195,6 @@ float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 	
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D10
-#define NOPERSPECTIVE_SUPPORT
-#endif
 #ifdef KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
 #endif

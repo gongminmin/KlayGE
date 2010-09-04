@@ -132,11 +132,11 @@ namespace KlayGE
 			switch (format_)
 			{
 			case EF_D16:
-				sr_desc.Format = DXGI_FORMAT_R16_FLOAT;
+				sr_desc.Format = DXGI_FORMAT_R16_UNORM;
 				break;
 
 			case EF_D24S8:
-				sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+				sr_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 				break;
 
 			case EF_D32F:

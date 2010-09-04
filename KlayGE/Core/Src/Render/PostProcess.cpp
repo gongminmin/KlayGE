@@ -547,6 +547,7 @@ namespace KlayGE
 		rl_->BindVertexStream(pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		frame_buffer_ = rf.MakeFrameBuffer();
+		frame_buffer_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
 	}
 
 

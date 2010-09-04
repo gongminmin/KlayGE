@@ -120,9 +120,6 @@
 
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D10
-#define OFFSET_SUPPORT
-#endif
 #ifdef KLAYGE_D3D11
 #define OFFSET_SUPPORT
 #endif

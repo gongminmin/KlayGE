@@ -85,10 +85,6 @@ float linstep(float min, float max, float v)
 
 	<shader>
 		<![CDATA[
-#ifdef KLAYGE_D3D10
-#define NOPERSPECTIVE_SUPPORT
-#define INTEGER_SUPPORT
-#endif
 #ifdef KLAYGE_D3D11
 #define NOPERSPECTIVE_SUPPORT
 #define INTEGER_SUPPORT
