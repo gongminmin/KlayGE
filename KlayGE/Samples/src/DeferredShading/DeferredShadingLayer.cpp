@@ -281,7 +281,7 @@ namespace KlayGE
 
 	void DeferredRenderable::SSAOEnabled(bool ssao)
 	{
-		*(effect_->ParameterByName("ssao_enabled")) = ssao;
+		*(effect_->ParameterByName("ssao_enabled")) = static_cast<int32_t>(ssao);
 	}
 
 

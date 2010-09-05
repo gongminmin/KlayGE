@@ -58,7 +58,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y);
 
-	return float4(pos_es, 1);
+	return float4(pos_es * 0.05f, 1);
 }
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

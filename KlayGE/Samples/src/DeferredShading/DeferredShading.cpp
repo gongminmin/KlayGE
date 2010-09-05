@@ -135,7 +135,7 @@ namespace
 
 		void SSAOEnabled(bool ssao)
 		{
-			*(effect_->ParameterByName("ssao_enabled")) = ssao;
+			*(effect_->ParameterByName("ssao_enabled")) = static_cast<int32_t>(ssao);
 		}
 
 		void OnRenderBegin()
@@ -154,23 +154,23 @@ namespace
 			case PT_GBuffer:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
-				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
-				*bump_map_enabled_param_ = !!bump_tex_;
+				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
 				*bump_tex_param_ = bump_tex_;
 				break;
 
 			case PT_GenShadowMap:
-				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				break;
 
 			case PT_Shading:
-				*diffuse_map_enabled_param_ = !!diffuse_tex_;
+				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-				*specular_map_enabled_param_ = !!specular_tex_;
+				*specular_map_enabled_param_ = static_cast<int32_t>(!!specular_tex_);
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = mtl.specular_level;
 				{
@@ -253,8 +253,8 @@ namespace
 
 			technique_ = gbuffer_technique_;
 
-			*(effect_->ParameterByName("bump_map_enabled")) = false;
-			*(effect_->ParameterByName("diffuse_map_enabled")) = false;
+			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
+			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
@@ -412,8 +412,8 @@ namespace
 		{
 			technique_ = gbuffer_technique_;
 
-			*(effect_->ParameterByName("bump_map_enabled")) = false;
-			*(effect_->ParameterByName("diffuse_map_enabled")) = false;
+			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
+			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
 
 			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
 

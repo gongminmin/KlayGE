@@ -22,11 +22,11 @@
 	</cbuffer>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="bool" name="diffuse_map_enabled"/>
+	<parameter type="int" name="diffuse_map_enabled"/>
 	<parameter type="texture2D" name="specular_tex"/>
-	<parameter type="bool" name="specular_map_enabled"/>
+	<parameter type="int" name="specular_map_enabled"/>
 	<parameter type="texture2D" name="bump_tex"/>
-	<parameter type="bool" name="bump_map_enabled"/>
+	<parameter type="int" name="bump_map_enabled"/>
 
 	<parameter type="sampler" name="aniso_sampler">
 		<state name="filtering" value="anisotropic"/>
@@ -191,7 +191,7 @@ float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 	</cbuffer>
 
 	<parameter type="texture2D" name="ssao_tex"/>
-	<parameter type="bool" name="ssao_enabled"/>
+	<parameter type="int" name="ssao_enabled"/>
 	
 	<shader>
 		<![CDATA[
