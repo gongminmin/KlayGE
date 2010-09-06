@@ -134,7 +134,6 @@ float VSM_Omnidirectional(float3 dir_ws, float len)
 	if (0 == (light_attrib & LSA_NoShadow))
 #endif
 	{
-
 		float2 moments = shadow_map_cube_tex.SampleLevel(linear_sampler,
 #ifndef KLAYGE_OPENGL
 			dir_ws,
@@ -186,19 +185,23 @@ void DeferredShadingVS(float4 pos : POSITION,
 				out noperspective float2 oTc : TEXCOORD0,
 				out noperspective float3 oViewDir : TEXCOORD1,
 #else
-				out float4 oPosSS : TEXCOORD0,
+				out float2 oTc : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float oW : TEXCOORD2,
 #endif
 				out float4 oPos : SV_Position)
 {
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
 
-#ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPos.xy / oPos.w * 0.5f;
 	oViewDir = texcoord_to_view(float2(oTc.x, -oTc.y) + 0.5f);
 	oTc.y *= flipping;
 	oTc += 0.5;
-#else
-	oPosSS = oPos;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oW = oPos.w;
+	oTc *= oW;
+	oViewDir *= oW;
 #endif
 
 	oPos += texel_to_pixel_offset;
@@ -208,17 +211,13 @@ float4 DeferredShadingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
+	tc /= w;
+	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -245,17 +244,13 @@ float4 DeferredShadingSpotPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
+	tc /= w;
+	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -287,17 +282,13 @@ float4 DeferredShadingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
+	tc /= w;
+	view_dir /= w;
 #endif
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -322,7 +313,7 @@ float4 DeferredShadingAmbientPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
@@ -333,17 +324,13 @@ float4 DeferredShadowingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
+	tc /= w;
+	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -360,17 +347,13 @@ float4 DeferredShadowingSpotPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	pos_ss.xy /= pos_ss.w;
-
-	float2 tc = pos_ss.xy * 0.5f;
-	float3 view_dir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
-	tc.y *= flipping;
-	tc += 0.5;
+	tc /= w;
+	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -385,7 +368,7 @@ float4 DeferredShadowingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
@@ -396,7 +379,7 @@ float4 DeferredShadowingAmbientPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
 #else
-	float4 pos_ss : TEXCOORD0
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
