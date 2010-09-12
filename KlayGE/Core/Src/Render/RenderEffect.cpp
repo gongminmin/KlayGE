@@ -1770,6 +1770,8 @@ namespace KlayGE
 		NullRenderTechnique()
 			: RenderTechnique(*RenderEffect::NullObject())
 		{
+			weight_ = 0;
+			transparent_ = false;
 			is_validate_ = true;
 		}
 
@@ -1814,7 +1816,7 @@ namespace KlayGE
 
 		is_validate_ = true;
 
-		bool blend = false;
+		transparent_ = false;
 		weight_ = 1;
 		uint32_t index = 0;
 		for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
@@ -1836,12 +1838,12 @@ namespace KlayGE
 					std::string value_str = state_node->Attrib("value")->ValueString();
 					if (bool_from_str(value_str))
 					{
-						blend = true;
+						transparent_ = true;
 					}
 				}
 			}
 		}
-		if (blend)
+		if (transparent_)
 		{
 			weight_ += 10000;
 		}
@@ -1855,6 +1857,7 @@ namespace KlayGE
 
 		ret->annotations_ = annotations_;
 		ret->weight_ = weight_;
+		ret->transparent_ = transparent_;
 		ret->is_validate_ = is_validate_;
 
 		ret->passes_.resize(passes_.size());

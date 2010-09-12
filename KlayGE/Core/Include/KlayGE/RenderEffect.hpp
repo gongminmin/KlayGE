@@ -1,8 +1,11 @@
 // RenderEffect.hpp
 // KlayGE 渲染效果脚本类 头文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Add RenderTechnique::Transparent() (2010.9.12)
 //
 // 3.9.0
 // 直接从fxml文件读取特效脚本 (2009.4.21)
@@ -574,6 +577,11 @@ namespace KlayGE
 			return weight_;
 		}
 
+		bool Transparent() const
+		{
+			return transparent_;
+		}
+
 	protected:
 		RenderEffect& effect_;
 		boost::shared_ptr<std::string> name_;
@@ -582,6 +590,7 @@ namespace KlayGE
 		boost::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 
 		float weight_;
+		bool transparent_;
 
 		bool is_validate_;
 	};

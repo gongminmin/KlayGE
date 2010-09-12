@@ -65,6 +65,15 @@ namespace KlayGE
 		}
 		void AddInstance(SceneObjectPtr const & obj);
 
+		uint32_t NumInstances() const
+		{
+			return static_cast<uint32_t>(instances_.size());
+		}
+		SceneObjectPtr GetInstance(uint32_t index) const
+		{
+			return instances_[index].lock();
+		}
+
 	protected:
 		virtual void UpdateInstanceStream();
 

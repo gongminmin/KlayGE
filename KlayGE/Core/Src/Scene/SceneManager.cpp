@@ -64,6 +64,8 @@
 
 namespace
 {
+	using namespace KlayGE;
+
 	template <typename T>
 	bool cmp_weight(T const & lhs, T const & rhs)
 	{
@@ -83,6 +85,55 @@ namespace
 			}
 		}
 	}
+
+	class cmp_depth
+	{
+	public:
+		cmp_depth(float4x4 const & view_mat)
+			: view_mat_(view_mat)
+		{
+		}
+
+		bool operator()(RenderablePtr const & lhs, RenderablePtr const & rhs)
+		{
+			if (!lhs)
+			{
+				return true;
+			}
+			else
+			{
+				if (!rhs)
+				{
+					return false;
+				}
+				else
+				{
+					float min_depth[2] = { 1e10f, 1e10f };
+					RenderablePtr lr[2] = { lhs, rhs };
+					for (int k = 0; k < 2; ++ k)
+					{
+						Box const & box = lr[k]->GetBound();
+						uint32_t num = lr[k]->NumInstances();
+						for (uint32_t i = 0; i < num; ++ i)
+						{
+							float4x4 mat = lhs->GetInstance(i)->GetModelMatrix() * view_mat_;
+							for (int j = 0; j < 8; ++ j)
+							{
+								float3 v3 = box[j];
+								float4 v4(v3.x(), v3.y(), v3.z(), 1);
+								min_depth[k] = std::min(min_depth[k], MathLib::dot(v4, mat.Col(2)) / MathLib::dot(v4, mat.Col(3)));
+							}
+						}
+					}
+
+					return min_depth[0] < min_depth[1];
+				}
+			}
+		}
+
+	private:
+		float4x4 view_mat_;
+	};
 }
 
 namespace KlayGE
@@ -278,10 +329,11 @@ namespace KlayGE
 		numPrimitivesRendered_ = 0;
 		numVerticesRendered_ = 0;
 
+		Camera& camera = app.ActiveCamera();
+		
 		visible_marks_.resize(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
 		{
-			Camera& camera = app.ActiveCamera();
 			frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
 
 			this->ClipScene();
@@ -339,6 +391,11 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
+			if (!items.first->Transparent())
+			{
+				std::sort(items.second.begin(), items.second.end(), cmp_depth(camera.ViewMatrix()));
+			}
+
 			BOOST_FOREACH(BOOST_TYPEOF(items.second)::reference item, items.second)
 			{
 				item->Render();

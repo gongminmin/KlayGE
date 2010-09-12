@@ -341,12 +341,12 @@ namespace KlayGE
 			for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
 			{
 				Texmap* tex_map = max_mtl->GetSubTexmap(j);
-				if (tex_map != NULL)
+				if ((tex_map != NULL) && (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID()))
 				{
-					if (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID())
+					BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
+					std::string map_name = tstr_to_str(bitmap_tex->GetMapName());
+					if (!map_name.empty())
 					{
-						BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
-
 						Matrix3 uv_mat;
 						tex_map->GetUVTransform(uv_mat);
 
@@ -374,8 +374,7 @@ namespace KlayGE
 						int channel = bitmap_tex->GetMapChannel();
 						uv_transs[channel] = std::make_pair(uv_mat, tex_u);
 
-						mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()),
-							tstr_to_str(bitmap_tex->GetMapName())));
+						mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()), map_name));
 					}
 				}
 			}
@@ -433,118 +432,120 @@ namespace KlayGE
 			}
 
 			Mesh& mesh = tri->GetMesh();
-
-			face_sm_group.resize(mesh.getNumFaces());
-			face_mtl_id.resize(mesh.getNumFaces());
-
-			obj_triangles.resize(mesh.getNumFaces());
-
-			for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
+			if (mesh.getNumFaces() > 0)
 			{
-				if (mesh.mapSupport(channel))
-				{
-					const int num_map_verts = mesh.getNumMapVerts(channel);
-					if (num_map_verts > 0)
-					{
-						texs[channel].resize(num_map_verts);
+				face_sm_group.resize(mesh.getNumFaces());
+				face_mtl_id.resize(mesh.getNumFaces());
 
-						Matrix3 tex_mat;
-						tex_mat.IdentityMatrix();
-						int tex_u = 0;
-						for (size_t j = 0; j < uv_transs.size(); ++ j)
+				obj_triangles.resize(mesh.getNumFaces());
+
+				for (int channel = 1; channel < MAX_MESHMAPS; channel ++)
+				{
+					if (mesh.mapSupport(channel))
+					{
+						const int num_map_verts = mesh.getNumMapVerts(channel);
+						if (num_map_verts > 0)
 						{
-							if (uv_transs[j].find(channel) == uv_transs[j].end())
+							texs[channel].resize(num_map_verts);
+
+							Matrix3 tex_mat;
+							tex_mat.IdentityMatrix();
+							int tex_u = 0;
+							for (size_t j = 0; j < uv_transs.size(); ++ j)
 							{
-								uv_transs[j][channel] = std::make_pair(tex_mat, tex_u);
-								break;
+								if (uv_transs[j].find(channel) == uv_transs[j].end())
+								{
+									uv_transs[j][channel] = std::make_pair(tex_mat, tex_u);
+									break;
+								}
 							}
-						}
 
-						UVVert* uv_verts = mesh.mapVerts(channel);
-						TVFace* tv_faces = mesh.mapFaces(channel);
-						for (size_t i = 0; i < obj_triangles.size(); ++ i)
-						{
-							int mtl_id = mesh.getFaceMtlIndex(static_cast<int>(i)) % (objs_mtl_.size() - mtl_base_index);
-
-							tex_mat = uv_transs[mtl_id][channel].first;
-							tex_u = uv_transs[mtl_id][channel].second;
-
-							for (int j = 2; j >= 0; -- j)
+							UVVert* uv_verts = mesh.mapVerts(channel);
+							TVFace* tv_faces = mesh.mapFaces(channel);
+							for (size_t i = 0; i < obj_triangles.size(); ++ i)
 							{
-								int ti = tv_faces[i].t[j];
-								tex_indices[channel].push_back(ti);
+								int mtl_id = mesh.getFaceMtlIndex(static_cast<int>(i)) % (objs_mtl_.size() - mtl_base_index);
 
-								Point3 uvw = uv_verts[ti] * tex_mat;
-								texs[channel][ti].x = uvw[tex_u];
-								texs[channel][ti].y = uvw[(tex_u + 1) % 3];
-							}
-						}
-					}
-				}
-			}
+								tex_mat = uv_transs[mtl_id][channel].first;
+								tex_u = uv_transs[mtl_id][channel].second;
 
-			// Combine texture coordinates
-			BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
-			{
-				std::map<Point2, int, less_Point2> tex_index_set;
-				for (size_t i = 0; i < tex_index.second.size(); ++ i)
-				{
-					Point2 tex = texs[tex_index.first][tex_index.second[i]];
-					BOOST_AUTO(iter, tex_index_set.find(tex));
-					if (iter != tex_index_set.end())
-					{
-						tex_index.second[i] = iter->second;
-					}
-					else
-					{
-						tex_index_set.insert(std::make_pair(tex, tex_index.second[i]));
-					}
-				}
-			}
+								for (int j = 2; j >= 0; -- j)
+								{
+									int ti = tv_faces[i].t[j];
+									tex_indices[channel].push_back(ti);
 
-			for (int i = 0; i < mesh.getNumFaces(); ++ i)
-			{
-				face_sm_group[i] = mesh.faces[i].getSmGroup();
-				face_mtl_id[i] = mesh.faces[i].getMatID();
-				if (objs_mtl_.size() != mtl_base_index)
-				{
-					face_mtl_id[i] = static_cast<unsigned int>(mtl_base_index + face_mtl_id[i] % (objs_mtl_.size() - mtl_base_index));
-				}
-				for (int j = 2; j >= 0; -- j)
-				{
-					pos_indices.push_back(mesh.faces[i].v[j]);
-				}
-			}
-
-			positions.resize(mesh.getNumVerts());
-			vertex_sm_group.resize(mesh.getNumVerts());
-			for (int i = 0; i < mesh.getNumVerts(); ++ i)
-			{
-				positions[i] = std::make_pair(mesh.getVert(i), binds_t());
-			}
-			for (int i = 0; i < mesh.getNumFaces(); ++ i)
-			{
-				unsigned int sm = face_sm_group[i];
-				for (int j = 2; j >= 0; -- j)
-				{
-					int index = mesh.faces[i].v[j];
-					bool found = false;
-					for (size_t k = 0; k < vertex_sm_group[index].size() && !found; ++ k)
-					{
-						for (size_t l = 0; l < vertex_sm_group[index][k].size(); ++ l)
-						{
-							if (face_sm_group[vertex_sm_group[index][k][l]] & sm)
-							{
-								vertex_sm_group[index][k].push_back(i);
-								found = true;
-								break;
+									Point3 uvw = uv_verts[ti] * tex_mat;
+									texs[channel][ti].x = uvw[tex_u];
+									texs[channel][ti].y = uvw[(tex_u + 1) % 3];
+								}
 							}
 						}
 					}
+				}
 
-					if (!found)
+				// Combine texture coordinates
+				BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
+				{
+					std::map<Point2, int, less_Point2> tex_index_set;
+					for (size_t i = 0; i < tex_index.second.size(); ++ i)
 					{
-						vertex_sm_group[index].push_back(std::vector<unsigned int>(1, i));
+						Point2 tex = texs[tex_index.first][tex_index.second[i]];
+						BOOST_AUTO(iter, tex_index_set.find(tex));
+						if (iter != tex_index_set.end())
+						{
+							tex_index.second[i] = iter->second;
+						}
+						else
+						{
+							tex_index_set.insert(std::make_pair(tex, tex_index.second[i]));
+						}
+					}
+				}
+
+				for (int i = 0; i < mesh.getNumFaces(); ++ i)
+				{
+					face_sm_group[i] = mesh.faces[i].getSmGroup();
+					face_mtl_id[i] = mesh.faces[i].getMatID();
+					if (objs_mtl_.size() != mtl_base_index)
+					{
+						face_mtl_id[i] = static_cast<unsigned int>(mtl_base_index + face_mtl_id[i] % (objs_mtl_.size() - mtl_base_index));
+					}
+					for (int j = 2; j >= 0; -- j)
+					{
+						pos_indices.push_back(mesh.faces[i].v[j]);
+					}
+				}
+
+				positions.resize(mesh.getNumVerts());
+				vertex_sm_group.resize(mesh.getNumVerts());
+				for (int i = 0; i < mesh.getNumVerts(); ++ i)
+				{
+					positions[i] = std::make_pair(mesh.getVert(i), binds_t());
+				}
+				for (int i = 0; i < mesh.getNumFaces(); ++ i)
+				{
+					unsigned int sm = face_sm_group[i];
+					for (int j = 2; j >= 0; -- j)
+					{
+						int index = mesh.faces[i].v[j];
+						bool found = false;
+						for (size_t k = 0; k < vertex_sm_group[index].size() && !found; ++ k)
+						{
+							for (size_t l = 0; l < vertex_sm_group[index][k].size(); ++ l)
+							{
+								if (face_sm_group[vertex_sm_group[index][k][l]] & sm)
+								{
+									vertex_sm_group[index][k].push_back(i);
+									found = true;
+									break;
+								}
+							}
+						}
+
+						if (!found)
+						{
+							vertex_sm_group[index].push_back(std::vector<unsigned int>(1, i));
+						}
 					}
 				}
 			}
@@ -555,262 +556,265 @@ namespace KlayGE
 			}
 		}
 
-		if (tex_indices.empty())
+		if (!obj_triangles.empty())
 		{
-			tex_indices[1] = pos_indices;
-			texs[1].resize(positions.size(), Point2(0.0f, 0.0f));
-		}
-
-		std::set<vertex_index_t> vertex_indices;
-		for (size_t i = 0; i < obj_triangles.size(); ++ i)
-		{
-			for (size_t j = 0; j < 3; ++ j)
+			if (tex_indices.empty())
 			{
-				vertex_index_t vertex_index;
-
-				size_t offset;
-				if (!flip_normals)
-				{
-					offset = i * 3 + j;
-				}
-				else
-				{
-					offset = i * 3 + (2 - j);
-				}
-
-				vertex_index.pos_index = pos_indices[offset];
-				BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::const_reference tex_index, tex_indices)
-				{
-					vertex_index.tex_indices.push_back(tex_index.second[offset]);
-				}
-
-				for (size_t k = 0; k < vertex_sm_group[vertex_index.pos_index].size(); ++ k)
-				{
-					for (size_t l = 0; l < vertex_sm_group[vertex_index.pos_index][k].size(); ++ l)
-					{
-						if (vertex_sm_group[vertex_index.pos_index][k][l] == static_cast<unsigned int>(i))
-						{
-							vertex_index.sm_index = static_cast<int>(k);
-							break;
-						}
-					}
-				}
-
-				std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
-				if (v_iter != vertex_indices.end())
-				{
-					// Respect set Immutability in C++0x
-					vertex_index.ref_triangle = v_iter->ref_triangle;
-					vertex_indices.erase(v_iter);
-				}
-				vertex_index.ref_triangle.push_back(i * 3 + j);
-				vertex_indices.insert(vertex_index);
+				tex_indices[1] = pos_indices;
+				texs[1].resize(positions.size(), Point2(0.0f, 0.0f));
 			}
-		}
 
-		if (joints_per_ver_ > 0)
-		{
-			Object* obj_ref = node->GetObjectRef();
-			while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
+			std::set<vertex_index_t> vertex_indices;
+			for (size_t i = 0; i < obj_triangles.size(); ++ i)
 			{
-				IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
-
-				// Iterate over all entries of the modifier stack.
-				for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
+				for (size_t j = 0; j < 3; ++ j)
 				{
-					Modifier* mod = derived_obj->GetModifier(mod_stack_index);
-					if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+					vertex_index_t vertex_index;
+
+					size_t offset;
+					if (!flip_normals)
 					{
-						this->physique_modifier(mod, node, positions);
+						offset = i * 3 + j;
 					}
 					else
 					{
-						if (SKIN_CLASSID == mod->ClassID())
+						offset = i * 3 + (2 - j);
+					}
+
+					vertex_index.pos_index = pos_indices[offset];
+					BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::const_reference tex_index, tex_indices)
+					{
+						vertex_index.tex_indices.push_back(tex_index.second[offset]);
+					}
+
+					for (size_t k = 0; k < vertex_sm_group[vertex_index.pos_index].size(); ++ k)
+					{
+						for (size_t l = 0; l < vertex_sm_group[vertex_index.pos_index][k].size(); ++ l)
 						{
-							this->skin_modifier(mod, node, positions);
+							if (vertex_sm_group[vertex_index.pos_index][k][l] == static_cast<unsigned int>(i))
+							{
+								vertex_index.sm_index = static_cast<int>(k);
+								break;
+							}
+						}
+					}
+
+					std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
+					if (v_iter != vertex_indices.end())
+					{
+						// Respect set Immutability in C++0x
+						vertex_index.ref_triangle = v_iter->ref_triangle;
+						vertex_indices.erase(v_iter);
+					}
+					vertex_index.ref_triangle.push_back(i * 3 + j);
+					vertex_indices.insert(vertex_index);
+				}
+			}
+
+			if (joints_per_ver_ > 0)
+			{
+				Object* obj_ref = node->GetObjectRef();
+				while ((obj_ref != NULL) && (GEN_DERIVOB_CLASS_ID == obj_ref->SuperClassID()))
+				{
+					IDerivedObject* derived_obj = static_cast<IDerivedObject*>(obj_ref);
+
+					// Iterate over all entries of the modifier stack.
+					for (int mod_stack_index = 0; mod_stack_index < derived_obj->NumModifiers(); ++ mod_stack_index)
+					{
+						Modifier* mod = derived_obj->GetModifier(mod_stack_index);
+						if (Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B) == mod->ClassID())
+						{
+							this->physique_modifier(mod, node, positions);
+						}
+						else
+						{
+							if (SKIN_CLASSID == mod->ClassID())
+							{
+								this->skin_modifier(mod, node, positions);
+							}
+						}
+					}
+
+					obj_ref = derived_obj->GetObjRef();
+				}
+
+				Matrix3 tm = node->GetObjTMAfterWSM(0);
+				BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
+				{
+					if (pos_binds.second.empty())
+					{
+						INode* parent_node = node->GetParentNode();
+						while ((parent_node != root_node_) && !is_bone(parent_node))
+						{
+							parent_node = parent_node->GetParentNode();
+						}
+
+						pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1.0f));
+					}
+
+					Point3 v0 = pos_binds.first * tm;
+					pos_binds.first = Point3(0, 0, 0);
+					for (size_t i = 0 ; i < pos_binds.second.size(); ++ i)
+					{
+						assert(joints_.find(pos_binds.second[i].first) != joints_.end());
+
+						pos_binds.first += pos_binds.second[i].second
+							* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
+					}
+
+					if (pos_binds.second.size() > static_cast<size_t>(joints_per_ver_))
+					{
+						std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_, pos_binds.second.end(), bind_cmp);
+						pos_binds.second.resize(joints_per_ver_);
+
+						float sum_weight = 0;
+						for (int j = 0; j < joints_per_ver_; ++ j)
+						{
+							sum_weight += pos_binds.second[j].second;
+						}
+						assert(sum_weight > 0);
+
+						for (int j = 0; j < joints_per_ver_; ++ j)
+						{
+							pos_binds.second[j].second /= sum_weight;
+						}
+					}
+					else
+					{
+						for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
+						{
+							pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0.0f));
 						}
 					}
 				}
-
-				obj_ref = derived_obj->GetObjRef();
+			}
+			else
+			{
+				BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
+				{
+					pos_binds.first = pos_binds.first * obj_matrix;
+				}
 			}
 
-			Matrix3 tm = node->GetObjTMAfterWSM(0);
-			BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
+			std::vector<Point3> face_normals(obj_triangles.size());
+			std::vector<Point3> face_tangents(obj_triangles.size());
+			for (size_t i = 0; i < face_normals.size(); ++ i)
 			{
-				if (pos_binds.second.empty())
+				face_normals[i] = compute_normal(positions[pos_indices[i * 3 + 2]].first,
+					positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first);
+
+				face_tangents[i] = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
+					positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
+					texs[1][tex_indices[1][i * 3 + 2]], texs[1][tex_indices[1][i * 3 + 1]], texs[1][tex_indices[1][i * 3 + 0]],
+					face_normals[i]);
+			}
+
+			obj_vertices.resize(vertex_indices.size());
+			int ver_index = 0;
+			BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::const_reference vertex_index, vertex_indices)
+			{
+				vertex_t& vertex = obj_vertices[ver_index];
+
+				vertex.pos = positions[vertex_index.pos_index].first;
+				std::swap(vertex.pos.y, vertex.pos.z);
+
+				Point3 normal(0, 0, 0);
+				Point3 tangent(0, 0, 0);
+				for (size_t i = 0; i < vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index].size(); ++ i)
 				{
-					INode* parent_node = node->GetParentNode();
-					while ((parent_node != root_node_) && !is_bone(parent_node))
+					unsigned int tri_id = vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index][i];
+					normal += face_normals[tri_id];
+					tangent += face_tangents[tri_id];
+				}
+				if (flip_normals)
+				{
+					normal = -normal;
+					tangent = -tangent;
+				}
+				vertex.normal = Point3(normal.x, normal.z, normal.y).Normalize();
+				vertex.tangent = Point3(tangent.x, tangent.z, tangent.y).Normalize();
+				vertex.binormal = vertex.normal ^ vertex.tangent;
+
+				int uv_layer = 0;
+				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
+					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
+				{
+					Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
+					obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
+				}
+
+				for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
+				{
+					obj_triangles[vertex_index.ref_triangle[i] / 3].vertex_index[vertex_index.ref_triangle[i] % 3] = ver_index;
+				}
+
+				vertex.binds = positions[vertex_index.pos_index].second;
+
+				++ ver_index;
+			}
+
+			obj_vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
+			obj_vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
+			for (size_t i = 0; i < obj_vertices[0].tex.size(); ++ i)
+			{
+				obj_vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
+			}
+			if (!obj_vertices[0].binds.empty())
+			{
+				obj_vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
+				obj_vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
+			}
+
+			object_info_t obj_info;
+			obj_info.vertex_elements = obj_vertex_elements;
+			for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
+			{
+				obj_info.vertices.resize(0);
+				obj_info.triangles.resize(0);
+
+				std::set<int> index_set;
+				for (size_t j = 0; j < obj_triangles.size(); ++ j)
+				{
+					if (face_mtl_id[j] == i)
 					{
-						parent_node = parent_node->GetParentNode();
+						index_set.insert(obj_triangles[j].vertex_index[0]);
+						index_set.insert(obj_triangles[j].vertex_index[1]);
+						index_set.insert(obj_triangles[j].vertex_index[2]);
+
+						obj_info.triangles.push_back(obj_triangles[j]);
 					}
-
-					pos_binds.second.push_back(std::make_pair(tstr_to_str(parent_node->GetName()), 1.0f));
+				}
+				std::map<int, int> mapping;
+				int new_index = 0;
+				for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+				{
+					obj_info.vertices.push_back(obj_vertices[*iter]);
+					mapping.insert(std::make_pair(*iter, new_index));
+				}
+				for (size_t j = 0; j < obj_info.triangles.size(); ++ j)
+				{
+					obj_info.triangles[j].vertex_index[0] = mapping[obj_info.triangles[j].vertex_index[0]];
+					obj_info.triangles[j].vertex_index[1] = mapping[obj_info.triangles[j].vertex_index[1]];
+					obj_info.triangles[j].vertex_index[2] = mapping[obj_info.triangles[j].vertex_index[2]];
 				}
 
-				Point3 v0 = pos_binds.first * tm;
-				pos_binds.first = Point3(0, 0, 0);
-				for (size_t i = 0 ; i < pos_binds.second.size(); ++ i)
+				if (!obj_info.triangles.empty())
 				{
-					assert(joints_.find(pos_binds.second[i].first) != joints_.end());
-
-					pos_binds.first += pos_binds.second[i].second
-						* (v0 * joint_nodes_[pos_binds.second[i].first].mesh_init_matrix);
-				}
-
-				if (pos_binds.second.size() > static_cast<size_t>(joints_per_ver_))
-				{
-					std::nth_element(pos_binds.second.begin(), pos_binds.second.begin() + joints_per_ver_, pos_binds.second.end(), bind_cmp);
-					pos_binds.second.resize(joints_per_ver_);
-
-					float sum_weight = 0;
-					for (int j = 0; j < joints_per_ver_; ++ j)
+					if (objs_mtl_.size() - mtl_base_index <= 1)
 					{
-						sum_weight += pos_binds.second[j].second;
+						obj_info.name = obj_name;
 					}
-					assert(sum_weight > 0);
-
-					for (int j = 0; j < joints_per_ver_; ++ j)
+					else
 					{
-						pos_binds.second[j].second /= sum_weight;
+						std::ostringstream oss;
+						oss << obj_name << "__mat_" << (i - mtl_base_index);
+						obj_info.name = oss.str();
 					}
+					obj_info.mtl_id = i;
+					objs_info_.push_back(obj_info);
 				}
-				else
-				{
-					for (int j = static_cast<int>(pos_binds.second.size()); j < joints_per_ver_; ++ j)
-					{
-						pos_binds.second.push_back(std::make_pair(tstr_to_str(root_node_->GetName()), 0.0f));
-					}
-				}
-			}
-		}
-		else
-		{
-			BOOST_FOREACH(BOOST_TYPEOF(positions)::reference pos_binds, positions)
-			{
-				pos_binds.first = pos_binds.first * obj_matrix;
-			}
-		}
-
-		std::vector<Point3> face_normals(obj_triangles.size());
-		std::vector<Point3> face_tangents(obj_triangles.size());
-		for (size_t i = 0; i < face_normals.size(); ++ i)
-		{
-			face_normals[i] = compute_normal(positions[pos_indices[i * 3 + 2]].first,
-				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first);
-
-			face_tangents[i] = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
-				positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
-				texs[1][tex_indices[1][i * 3 + 2]], texs[1][tex_indices[1][i * 3 + 1]], texs[1][tex_indices[1][i * 3 + 0]],
-				face_normals[i]);
-		}
-
-		obj_vertices.resize(vertex_indices.size());
-		int ver_index = 0;
-		BOOST_FOREACH(BOOST_TYPEOF(vertex_indices)::const_reference vertex_index, vertex_indices)
-		{
-			vertex_t& vertex = obj_vertices[ver_index];
-
-			vertex.pos = positions[vertex_index.pos_index].first;
-			std::swap(vertex.pos.y, vertex.pos.z);
-
-			Point3 normal(0, 0, 0);
-			Point3 tangent(0, 0, 0);
-			for (size_t i = 0; i < vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index].size(); ++ i)
-			{
-				unsigned int tri_id = vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index][i];
-				normal += face_normals[tri_id];
-				tangent += face_tangents[tri_id];
-			}
-			if (flip_normals)
-			{
-				normal = -normal;
-				tangent = -tangent;
-			}
-			vertex.normal = Point3(normal.x, normal.z, normal.y).Normalize();
-			vertex.tangent = Point3(tangent.x, tangent.z, tangent.y).Normalize();
-			vertex.binormal = vertex.normal ^ vertex.tangent;
-
-			int uv_layer = 0;
-			for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
-				uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
-			{
-				Point2 tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
-				obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
-			}
-
-			for (size_t i = 0; i < vertex_index.ref_triangle.size(); ++ i)
-			{
-				obj_triangles[vertex_index.ref_triangle[i] / 3].vertex_index[vertex_index.ref_triangle[i] % 3] = ver_index;
-			}
-
-			vertex.binds = positions[vertex_index.pos_index].second;
-
-			++ ver_index;
-		}
-
-		obj_vertex_elements.push_back(vertex_element_t(VEU_Position, 0, 3));
-		obj_vertex_elements.push_back(vertex_element_t(VEU_Normal, 0, 3));
-		obj_vertex_elements.push_back(vertex_element_t(VEU_Tangent, 0, 3));
-		obj_vertex_elements.push_back(vertex_element_t(VEU_Binormal, 0, 3));
-		for (size_t i = 0; i < obj_vertices[0].tex.size(); ++ i)
-		{
-			obj_vertex_elements.push_back(vertex_element_t(VEU_TextureCoord, static_cast<unsigned char>(i), 2));
-		}
-		if (!obj_vertices[0].binds.empty())
-		{
-			obj_vertex_elements.push_back(vertex_element_t(VEU_BlendWeight, 0, 4));
-			obj_vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
-		}
-
-		object_info_t obj_info;
-		obj_info.vertex_elements = obj_vertex_elements;
-		for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
-		{
-			obj_info.vertices.resize(0);
-			obj_info.triangles.resize(0);
-
-			std::set<int> index_set;
-			for (size_t j = 0; j < obj_triangles.size(); ++ j)
-			{
-				if (face_mtl_id[j] == i)
-				{
-					index_set.insert(obj_triangles[j].vertex_index[0]);
-					index_set.insert(obj_triangles[j].vertex_index[1]);
-					index_set.insert(obj_triangles[j].vertex_index[2]);
-
-					obj_info.triangles.push_back(obj_triangles[j]);
-				}
-			}
-			std::map<int, int> mapping;
-			int new_index = 0;
-			for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
-			{
-				obj_info.vertices.push_back(obj_vertices[*iter]);
-				mapping.insert(std::make_pair(*iter, new_index));
-			}
-			for (size_t j = 0; j < obj_info.triangles.size(); ++ j)
-			{
-				obj_info.triangles[j].vertex_index[0] = mapping[obj_info.triangles[j].vertex_index[0]];
-				obj_info.triangles[j].vertex_index[1] = mapping[obj_info.triangles[j].vertex_index[1]];
-				obj_info.triangles[j].vertex_index[2] = mapping[obj_info.triangles[j].vertex_index[2]];
-			}
-
-			if (!obj_info.triangles.empty())
-			{
-				if (objs_mtl_.size() - mtl_base_index <= 1)
-				{
-					obj_info.name = obj_name;
-				}
-				else
-				{
-					std::ostringstream oss;
-					oss << obj_name << "__mat_" << (i - mtl_base_index);
-					obj_info.name = oss.str();
-				}
-				obj_info.mtl_id = i;
-				objs_info_.push_back(obj_info);
 			}
 		}
 	}
