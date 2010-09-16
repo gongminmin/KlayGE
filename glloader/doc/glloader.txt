@@ -29,5 +29,5 @@ Because writting the loading code is very boring, I developed a automatic code g
 Python 2.6 and up is required to run "autogen.py".
 
 
-SVN
-https://klayge.svn.sourceforge.net/svnroot/klayge/trunk/glloader
+Mercurial
+http://klayge.hg.sourceforge.net:8000/hgroot/klayge/klayge

@@ -28,5 +28,5 @@ const char* glloader_get_feature_name(int index);
 需要Python 2.6以上来运行autogen.py。
 
 
-SVN
-https://klayge.svn.sourceforge.net/svnroot/klayge/trunk/glloader
+Mercurial
+http://klayge.hg.sourceforge.net:8000/hgroot/klayge/klayge
