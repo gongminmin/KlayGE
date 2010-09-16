@@ -1611,12 +1611,15 @@ namespace KlayGE
 				GLint formats = 0;
 				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &formats);
 				glsl_bin_formats_ = MakeSharedPtr<std::vector<GLint> >(formats);
-				glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, &(*glsl_bin_formats_)[0]);
+				if (formats > 0)
+				{
+					glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, &(*glsl_bin_formats_)[0]);
 
-				GLint len = 0;
-				glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
-				glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
-				glGetProgramBinary(glsl_program_, len, NULL, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+					GLint len = 0;
+					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
+					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
+					glGetProgramBinary(glsl_program_, len, NULL, reinterpret_cast<GLenum*>(&(*glsl_bin_formats_)[0]), &(*glsl_bin_program_)[0]);
+				}
 			}
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
