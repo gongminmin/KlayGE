@@ -391,7 +391,7 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
-			if (!items.first->Transparent())
+			if (!items.first->Transparent() && !items.first->HasDiscard())
 			{
 				std::sort(items.second.begin(), items.second.end(), cmp_depth(camera.ViewMatrix()));
 			}

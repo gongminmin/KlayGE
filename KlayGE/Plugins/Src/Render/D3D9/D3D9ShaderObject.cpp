@@ -808,6 +808,7 @@ namespace KlayGE
 {
 	D3D9ShaderObject::D3D9ShaderObject()
 	{
+		has_discard_ = true;
 		is_shader_validate_.assign(true);
 	}
 

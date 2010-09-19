@@ -453,6 +453,7 @@ namespace KlayGE
 {
 	D3D11ShaderObject::D3D11ShaderObject()
 	{
+		has_discard_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -1234,6 +1235,10 @@ namespace KlayGE
 								{
 									reflection->GetInputParameterDesc(i, &vs_signature_[i]);
 								}
+							}
+							if (ST_PixelShader == type)
+							{
+								has_discard_ = desc.CutInstructionCount > 0;
 							}
 
 							reflection->Release();

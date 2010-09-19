@@ -1772,6 +1772,7 @@ namespace KlayGE
 		{
 			weight_ = 0;
 			transparent_ = false;
+			has_discard_ = false;
 			is_validate_ = true;
 		}
 
@@ -1816,6 +1817,7 @@ namespace KlayGE
 
 		is_validate_ = true;
 
+		has_discard_ = false;
 		transparent_ = false;
 		weight_ = 1;
 		uint32_t index = 0;
@@ -1842,6 +1844,8 @@ namespace KlayGE
 					}
 				}
 			}
+
+			has_discard_ |= pass->GetShaderObject()->HasDiscard();
 		}
 		if (transparent_)
 		{

@@ -582,6 +582,11 @@ namespace KlayGE
 			return transparent_;
 		}
 
+		bool HasDiscard() const
+		{
+			return has_discard_;
+		}
+
 	protected:
 		RenderEffect& effect_;
 		boost::shared_ptr<std::string> name_;
@@ -593,6 +598,7 @@ namespace KlayGE
 		bool transparent_;
 
 		bool is_validate_;
+		bool has_discard_;
 	};
 
 	class KLAYGE_CORE_API RenderPass : boost::noncopyable

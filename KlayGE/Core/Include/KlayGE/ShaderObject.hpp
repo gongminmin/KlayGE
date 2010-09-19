@@ -101,8 +101,14 @@ namespace KlayGE
 			return is_validate_;
 		}
 
+		bool HasDiscard() const
+		{
+			return has_discard_;
+		}
+
 	protected:
 		bool is_validate_;
+		bool has_discard_;
 	};
 }
 

@@ -860,6 +860,7 @@ namespace KlayGE
 {
 	OGLES2ShaderObject::OGLES2ShaderObject()
 	{
+		has_discard_ = true;
 		is_shader_validate_.assign(true);
 	}
 

@@ -918,6 +918,7 @@ namespace KlayGE
 	OGLShaderObject::OGLShaderObject()
 		: gs_input_type_(0), gs_output_type_(0)
 	{
+		has_discard_ = true;
 		is_shader_validate_.assign(true);
 	}
 
