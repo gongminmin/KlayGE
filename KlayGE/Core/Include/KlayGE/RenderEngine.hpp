@@ -175,11 +175,11 @@ namespace KlayGE
 			return cur_sample_mask_;
 		}
 
-		bool StereoMode() const
+		StereoMethod Stereo() const
 		{
-			return stereo_mode_;
+			return stereo_method_;
 		}
-		void StereoMode(bool stereo);
+		void Stereo(StereoMethod method);
 		uint32_t StereoActiveEye() const
 		{
 			return stereo_active_eye_;
@@ -207,6 +207,7 @@ namespace KlayGE
 
 	private:
 		void CreateStereoscopicVB();
+		virtual void StereoscopicForLCDShutter();
 
 	protected:
 		RenderSettings render_settings_;
@@ -233,15 +234,13 @@ namespace KlayGE
 
 		uint32_t motion_frames_;
 
-		bool stereo_mode_;
+		StereoMethod stereo_method_;
 		float stereo_separation_;
 		uint32_t stereo_active_eye_;
 		RenderLayoutPtr stereoscopic_rl_;
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
 		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
-		RenderEffectParameterPtr left_tex_ep_;
-		RenderEffectParameterPtr right_tex_ep_;
 	};
 }
 

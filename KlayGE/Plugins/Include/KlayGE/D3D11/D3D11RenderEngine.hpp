@@ -144,6 +144,8 @@ namespace KlayGE
 
 		void FillRenderDeviceCaps();
 
+		void StereoscopicForLCDShutter();
+
 	private:
 		D3D11AdapterList const & D3DAdapters() const;
 		D3D11AdapterPtr const & ActiveAdapter() const;
@@ -205,6 +207,8 @@ namespace KlayGE
 		std::vector<std::pair<InputElementTag, ID3D11InputLayoutPtr> > input_layout_bank_;
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+
+		TexturePtr stereo_lr_tex_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

@@ -282,10 +282,16 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		}
 		{
 			HWND hStereoCombo = GetDlgItem(hDlg, IDC_STEREO_COMBO);
-			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Yes")));
-			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("No")));
-			SendMessage(hStereoCombo, CB_SETCURSEL, 1, 0);
-			SendMessage(hStereoCombo, CB_SETCURSEL, cfg.graphics_cfg.stereo_mode ? 0 : 1, 0);
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Color anaglyph: Red Cyan")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Color anaglyph: Yellow Blue")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Color anaglyph: Green Red")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("LCD shutter")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Horizontal interlacing")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Vertical interlacing")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Horizontal")));
+			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Vertical")));
+			SendMessage(hStereoCombo, CB_SETCURSEL, cfg.graphics_cfg.stereo_method, 0);
 		}
 		{
 			HWND hMBFramesEdit = GetDlgItem(hDlg, IDC_MB_FRAMES_EDIT);
@@ -641,7 +647,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					HWND hStereoCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_COMBO);
 					int n = static_cast<int>(SendMessage(hStereoCombo, CB_GETCURSEL, 0, 0));
-					cfg.graphics_cfg.stereo_mode = (0 == n) ? 1 : 0;
+					cfg.graphics_cfg.stereo_method = static_cast<StereoMethod>(n);
 				}
 				{
 					HWND hMBFramesEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_MB_FRAMES_EDIT);

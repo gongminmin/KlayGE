@@ -3,6 +3,7 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
+	<parameter type="float2" name="tex_size"/>
 	<parameter type="texture2D" name="left_tex"/>
 	<parameter type="texture2D" name="right_tex"/>
 	<parameter type="sampler" name="point_sampler">
@@ -18,6 +19,77 @@ float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 	return float4(dot(left_tex.Sample(point_sampler, tex).gb, float2(0.7f, 0.3f)),
 		right_tex.Sample(point_sampler, tex).gb, 1);
 }
+
+float4 YellowBluePS(float2 tex : TEXCOORD0) : SV_Target
+{
+	return float4(left_tex.Sample(point_sampler, tex).rg,
+		right_tex.Sample(point_sampler, tex).b, 1);
+}
+
+float4 GreenRedPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	return float4(right_tex.Sample(point_sampler, tex).r,
+		left_tex.Sample(point_sampler, tex).gb, 1);
+}
+
+
+float4 HorInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 clr;
+	uint u = tex.x * tex_size.x;
+	if (u % 2)
+	{
+		clr = left_tex.Sample(point_sampler, tex);
+	}
+	else
+	{
+		clr = right_tex.Sample(point_sampler, tex);
+	}
+	return clr;
+}
+
+float4 VerInterlacingPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 clr;
+	uint v = tex.y * tex_size.y;
+	if (v % 2)
+	{
+		clr = left_tex.Sample(point_sampler, tex);
+	}
+	else
+	{
+		clr = right_tex.Sample(point_sampler, tex);
+	}
+	return clr;
+}
+
+float4 HorizontalPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 clr;
+	if (tex.x < 0.5f)
+	{
+		clr = left_tex.Sample(point_sampler, float2(tex.x * 2, tex.y));
+	}
+	else
+	{
+		clr = right_tex.Sample(point_sampler, float2((tex.x - 0.5f) * 2, tex.y));
+	}
+	return clr;
+}
+
+float4 VerticalPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	float4 clr;
+	if (tex.y < 0.5f)
+	{
+		clr = left_tex.Sample(point_sampler, float2(tex.x, tex.y * 2));
+	}
+	else
+	{
+		clr = right_tex.Sample(point_sampler, float2(tex.x, (tex.y - 0.5f) * 2));
+	}
+	return clr;
+}
 		]]>
 	</shader>
 	
@@ -28,6 +100,66 @@ float4 RedCyanPS(float2 tex : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="RedCyanPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="YellowBlue">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="YellowBluePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GreenRed">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="GreenRedPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="HorInterlacing">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="HorInterlacingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VerInterlacing">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="VerInterlacingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="Horizontal">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="HorizontalPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="Vertical">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="VerticalPS()"/>
 		</pass>
 	</technique>
 </effect>

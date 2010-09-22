@@ -101,7 +101,7 @@ namespace KlayGE
 		bool full_screen = false;
 		int sync_interval = 0;
 		int motion_frames = 0;
-		bool stereo_mode = 0;
+		int stereo_method = 0;
 		float stereo_separation = 0;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
@@ -268,18 +268,54 @@ namespace KlayGE
 			}
 
 			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
-			attr = stereo_node->Attrib("enabled");
+			attr = stereo_node->Attrib("method");
 			if (attr)
 			{
-				std::string stereo_str = attr->ValueString();
-				if (("1" == stereo_str) || ("true" == stereo_str))
+				std::string method_str = attr->ValueString();
+				if ("none" == method_str)
 				{
-					stereo_mode = true;
+					stereo_method = STM_None;
+				}
+				else if ("red_cyan" == method_str)
+				{
+					stereo_method = STM_ColorAnaglyph_RedCyan;
+				}
+				else if ("yellow_blue" == method_str)
+				{
+					stereo_method = STM_ColorAnaglyph_YellowBlue;
+				}
+				else if ("green_red" == method_str)
+				{
+					stereo_method = STM_ColorAnaglyph_GreenRed;
+				}
+				else if ("lcd_shutter" == method_str)
+				{
+					stereo_method = STM_LCDShutter;
+				}
+				else if ("hor_interlacing" == method_str)
+				{
+					stereo_method = STM_HorizontalInterlacing;
+				}
+				else if ("ver_interlacing" == method_str)
+				{
+					stereo_method = STM_VerticalInterlacing;
+				}
+				else if ("horizontal" == method_str)
+				{
+					stereo_method = STM_Horizontal;
+				}
+				else if ("vertical" == method_str)
+				{
+					stereo_method = STM_Vertical;
 				}
 				else
 				{
-					stereo_mode = false;
+					stereo_method = STM_ColorAnaglyph_RedCyan;
 				}
+			}
+			else
+			{
+				stereo_method = STM_None;
 			}
 			attr = stereo_node->Attrib("separation");
 			if (attr)
@@ -305,7 +341,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.full_screen = full_screen;
 		cfg_.graphics_cfg.sync_interval = sync_interval;
 		cfg_.graphics_cfg.motion_frames = motion_frames;
-		cfg_.graphics_cfg.stereo_mode = stereo_mode;
+		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 	}
 
@@ -411,8 +447,48 @@ namespace KlayGE
 			graphics_node->AppendNode(motion_blur_node);
 
 			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
-			stereo_node->AppendAttrib(cfg_doc.AllocAttribInt("enabled", cfg_.graphics_cfg.stereo_mode));
+			std::string method_str;
+			switch (cfg_.graphics_cfg.stereo_method)
+			{
+			case STM_None:
+				method_str = "none";
+				break;
+
+			case STM_ColorAnaglyph_RedCyan:
+				method_str = "red_cyan";
+				break;
+
+			case STM_ColorAnaglyph_YellowBlue:
+				method_str = "yellow_blue";
+				break;
+
+			case STM_ColorAnaglyph_GreenRed:
+				method_str = "green_red";
+				break;
+
+			case STM_LCDShutter:
+				method_str = "lcd_shutter";
+				break;
+
+			case STM_HorizontalInterlacing:
+				method_str = "hor_interlacing";
+				break;
+
+			case STM_VerticalInterlacing:
+				method_str = "ver_interlacing";
+				break;
+
+			case STM_Horizontal:
+				method_str = "horizontal";
+				break;
+
+			case STM_Vertical:
+				method_str = "vertical";
+				break;
+			}
+			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
 			stereo_node->AppendAttrib(cfg_doc.AllocAttribFloat("separation", cfg_.graphics_cfg.stereo_separation));
+
 			graphics_node->AppendNode(stereo_node);
 		}
 		root->AppendNode(graphics_node);

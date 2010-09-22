@@ -47,6 +47,7 @@ glob:KlayGE/Build/vc-10_0/*.sdf
 glob:KlayGE/Build/vc-10_0/*.suo
 glob:KlayGE/Build/vc-10_0/*.user
 glob:KlayGE/Build/vc-10_0/ipch/
+glob:KlayGE/Core/Src/KConfig/*.aps
 glob:KlayGE/Exporters/3DSMax/MeshML/Debug/
 glob:KlayGE/Exporters/3DSMax/MeshML/Release/
 glob:KlayGE/Exporters/3DSMax/MeshML/*.aps

@@ -46,6 +46,22 @@
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 
+// Stereo Blit defines
+#define NVSTEREO_IMAGE_SIGNATURE 0x4433564E		//NV3D
+
+struct NVSTEREOIMAGEHEADER
+{
+	unsigned int dwSignature;
+	unsigned int dwWidth;
+	unsigned int dwHeight;
+	unsigned int dwBPP;
+	unsigned int dwFlags;
+};
+
+// Flags in the dwFlags fiels of the _Nv_Stereo_Image_Header structure above
+#define     SIH_SWAP_EYES               0x00000001
+#define     SIH_SCALE_TO_FIT            0x00000002
+
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
@@ -252,6 +268,30 @@ namespace KlayGE
 
 		this->ResetRenderStates();
 		this->BindFrameBuffer(win);
+
+		if (STM_LCDShutter == render_settings_.stereo_method)
+		{
+			uint32_t const w = win->Width();
+			uint32_t const h = win->Height();
+			stereo_lr_tex_ = Context::Instance().RenderFactoryInstance().MakeTexture2D(w * 2, h + 1, 1, 1,
+				win->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+			NVSTEREOIMAGEHEADER sih;
+			sih.dwSignature = NVSTEREO_IMAGE_SIGNATURE;
+			sih.dwBPP = NumFormatBits(win->Format());
+			sih.dwFlags = SIH_SWAP_EYES;
+			sih.dwWidth = w * 2; 
+			sih.dwHeight = h;
+
+			ElementInitData init_data;
+			init_data.data = &sih;
+			init_data.row_pitch = sizeof(sih);
+			init_data.slice_pitch = init_data.row_pitch;
+			TexturePtr sih_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(sizeof(sih) / NumFormatBytes(win->Format()),
+				1, 1, 1, win->Format(), 1, 0, EAH_GPU_Read, &init_data);
+
+			sih_tex->CopyToTexture2D(*stereo_lr_tex_, 0, sih_tex->Width(0), 1, 0, h, sih_tex->Width(0), 1, 0, 0);
+		}
 	}
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
@@ -748,6 +788,26 @@ namespace KlayGE
 			caps_.ds_support = false;
 			break;
 		}
+	}
+
+	void D3D11RenderEngine::StereoscopicForLCDShutter()
+	{
+		uint32_t const w = stereo_colors_[0]->Width(0);
+		uint32_t const h = stereo_colors_[0]->Height(0);
+		stereo_colors_[0]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, 0, 0, w, h, 0, 0);
+		stereo_colors_[1]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, w, 0, w, h, 0, 0);
+
+		ID3D11Texture2DPtr back = checked_pointer_cast<D3D11RenderWindow>(this->ScreenFrameBuffer())->D3DBackBuffer();
+		ID3D11Texture2DPtr stereo = checked_pointer_cast<D3D11Texture2D>(stereo_lr_tex_)->D3DTexture();
+
+		D3D11_BOX box;
+		box.left = 0;
+		box.right = w;
+		box.top = 0;
+		box.bottom = h;
+		box.front = 0;
+		box.back = 1;
+		d3d_imm_ctx_->CopySubresourceRegion(back.get(), 0, 0, 0, 0, stereo.get(), 0, &box);
 	}
 
 	void D3D11RenderEngine::RSSetState(ID3D11RasterizerStatePtr const & ras)

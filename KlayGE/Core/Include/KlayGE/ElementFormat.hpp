@@ -609,6 +609,20 @@ namespace KlayGE
 		uint32_t row_pitch;
 		uint32_t slice_pitch;
 	};
+
+
+	enum StereoMethod
+	{
+		STM_None,
+		STM_ColorAnaglyph_RedCyan,
+		STM_ColorAnaglyph_YellowBlue,
+		STM_ColorAnaglyph_GreenRed,
+		STM_LCDShutter,
+		STM_HorizontalInterlacing,
+		STM_VerticalInterlacing,
+		STM_Horizontal,
+		STM_Vertical
+	};
 }
 
 #endif			// _ELEMENTFORMAT_HPP

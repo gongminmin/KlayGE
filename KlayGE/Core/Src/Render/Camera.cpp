@@ -56,7 +56,7 @@ namespace KlayGE
 		if (this->StereoMode())
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float separation = re.StereoSeparation();
+			float separation = re.StereoSeparation() / 2;
 			viewMat_[0] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
 			viewMat_[1] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
 		}
@@ -80,7 +80,7 @@ namespace KlayGE
 		if (this->StereoMode())
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float separation = re.StereoSeparation() * 0.005f;
+			float separation = nearPlane * re.StereoSeparation() / 2;
 			float height = 2 * nearPlane * tan(FOV / 2);
 			float width = height * aspect;
 			projMat_[0] = MathLib::perspective_off_center_lh(-width / 2 + separation, width / 2 + separation, -height / 2, height / 2, nearPlane, farPlane);

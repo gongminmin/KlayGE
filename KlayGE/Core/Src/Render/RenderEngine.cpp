@@ -141,7 +141,7 @@ namespace KlayGE
 			cur_blend_factor_(1, 1, 1, 1),
 			cur_sample_mask_(0xFFFFFFFF),
 			motion_frames_(0),
-			stereo_mode_(false), stereo_separation_(0), stereo_active_eye_(0)
+			stereo_method_(STM_None), stereo_separation_(0), stereo_active_eye_(0)
 	{
 	}
 
@@ -167,7 +167,7 @@ namespace KlayGE
 		stereo_separation_ = settings.stereo_separation;
 		this->DoCreateRenderWindow(name, settings);
 		screen_frame_buffer_ = cur_frame_buffer_;
-		this->StereoMode(settings.stereo_mode);
+		this->Stereo(settings.stereo_method);
 	}
 
 	// 设置当前渲染状态对象
@@ -212,7 +212,7 @@ namespace KlayGE
 
 			if (!fb)
 			{
-				if (stereo_mode_)
+				if (stereo_method_ != STM_None)
 				{
 					cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
 				}
@@ -243,7 +243,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
-		if (stereo_mode_)
+		if (stereo_method_ != STM_None)
 		{
 			return stereo_frame_buffers_[stereo_active_eye_];
 		}
@@ -307,7 +307,7 @@ namespace KlayGE
 	{
 		this->DoResize(width, height);
 
-		if (stereo_mode_)
+		if (stereo_method_ != STM_None)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			for (int i = 0; i < 2; ++ i)
@@ -327,19 +327,16 @@ namespace KlayGE
 
 	void RenderEngine::Stereoscopic()
 	{
-		if (stereo_mode_)
+		BOOST_ASSERT(stereo_method_ != STM_None);
+
+		this->BindFrameBuffer(screen_frame_buffer_);
+		if (stereo_method_ != STM_LCDShutter)
 		{
-			this->BindFrameBuffer(screen_frame_buffer_);
-
-			float4 texel_to_pixel = this->TexelToPixelOffset();
-			texel_to_pixel.x() /= screen_frame_buffer_->Width() / 2.0f;
-			texel_to_pixel.y() /= screen_frame_buffer_->Height() / 2.0f;
-			*texel_to_pixel_offset_ep_ = texel_to_pixel;
-
-			*left_tex_ep_ = stereo_colors_[0];
-			*right_tex_ep_ = stereo_colors_[1];
-
 			this->Render(*stereoscopic_tech_, *stereoscopic_rl_);
+		}
+		else
+		{
+			this->StereoscopicForLCDShutter();
 		}
 	}
 
@@ -364,20 +361,60 @@ namespace KlayGE
 		stereoscopic_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		stereoscopic_effect_ = rf.LoadEffect("Stereoscopic.fxml");
-		stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("RedCyan");
-		texel_to_pixel_offset_ep_ = stereoscopic_effect_->ParameterByName("texel_to_pixel_offset");
-		left_tex_ep_ = stereoscopic_effect_->ParameterByName("left_tex");
-		right_tex_ep_ = stereoscopic_effect_->ParameterByName("right_tex");
-		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(stereo_frame_buffers_[0]->RequiresFlipping() ? -1 : +1);;
+		switch (stereo_method_)
+		{
+		case STM_ColorAnaglyph_RedCyan:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("RedCyan");
+			break;
+
+		case STM_ColorAnaglyph_YellowBlue:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("YellowBlue");
+			break;
+
+		case STM_ColorAnaglyph_GreenRed:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("GreenRed");
+			break;
+
+		case STM_HorizontalInterlacing:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("HorInterlacing");
+			break;
+
+		case STM_VerticalInterlacing:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("VerInterlacing");
+			break;
+
+		case STM_Horizontal:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("Horizontal");
+			break;
+
+		case STM_Vertical:
+			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("Vertical");
+			break;
+		}
+		
+		*(stereoscopic_effect_->ParameterByName("tex_size")) = float2(static_cast<float>(screen_frame_buffer_->Width()),
+			static_cast<float>(screen_frame_buffer_->Height()));
+		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_colors_[0];
+		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_colors_[1];
+		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(stereo_frame_buffers_[0]->RequiresFlipping() ? -1 : +1);
+
+		float4 texel_to_pixel = this->TexelToPixelOffset();
+		texel_to_pixel.x() /= screen_frame_buffer_->Width() / 2.0f;
+		texel_to_pixel.y() /= screen_frame_buffer_->Height() / 2.0f;
+		*(stereoscopic_effect_->ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 	}
 
-	void RenderEngine::StereoMode(bool stereo)
+	void RenderEngine::StereoscopicForLCDShutter()
 	{
-		stereo_mode_ = stereo;
+	}
+
+	void RenderEngine::Stereo(StereoMethod method)
+	{
+		stereo_method_ = method;
 		stereo_active_eye_ = 0;
-		if (stereo_mode_)
+		if (stereo_method_ != STM_None)
 		{
-			screen_frame_buffer_->GetViewport().camera->StereoMode(stereo_mode_);
+			screen_frame_buffer_->GetViewport().camera->StereoMode(true);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			for (int i = 0; i < 2; ++ i)

@@ -261,7 +261,7 @@ namespace KlayGE
 			scene_obj->Update();
 		}
 
-		if (re.StereoMode())
+		if (re.Stereo() != STM_None)
 		{
 			for (uint32_t i = 0; i < 2; ++ i)
 			{
