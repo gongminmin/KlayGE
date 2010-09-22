@@ -20,6 +20,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 
+#include <cstdio>
 #include <string>
 #include <algorithm>
 #include <sstream>
@@ -860,7 +861,7 @@ namespace KlayGE
 {
 	OGLES2ShaderObject::OGLES2ShaderObject()
 	{
-		has_discard_ = true;
+		has_discard_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -1186,6 +1187,11 @@ namespace KlayGE
 					}
 					else
 					{
+						if ("discard" == this_token)
+						{
+							has_discard_ = true;
+						}
+
 						ss << this_token;
 					}
 				}
@@ -1312,6 +1318,8 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 					if (!compiled)
 					{
+						printf("%s\n", glsl);
+
 						GLint len = 0;
 						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
 						if (len > 0)
@@ -1352,25 +1360,6 @@ namespace KlayGE
 			}
 #endif
 			is_validate_ &= linked ? true : false;
-
-			glValidateProgram(glsl_program_);
-
-			GLint validated = false;
-			glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-			if (!validated)
-			{
-				GLint len = 0;
-				glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			is_validate_ &= validated ? true : false;
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
@@ -1513,6 +1502,7 @@ namespace KlayGE
 	{
 		OGLES2ShaderObjectPtr ret = MakeSharedPtr<OGLES2ShaderObject>();
 
+		ret->has_discard_ = has_discard_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
 		ret->glsl_srcs_ = glsl_srcs_;
@@ -1611,24 +1601,6 @@ namespace KlayGE
 #endif
 			ret->is_validate_ &= linked ? true : false;
 
-			glValidateProgram(ret->glsl_program_);
-
-			GLint validated = false;
-			glGetProgramiv(ret->glsl_program_, GL_VALIDATE_STATUS, &validated);
-#ifdef KLAYGE_DEBUG
-			if (!validated)
-			{
-				GLint len = 0;
-				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			ret->is_validate_ &= validated ? true : false;
 			ret->attrib_locs_ = attrib_locs_;
 
 			BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
@@ -1862,6 +1834,24 @@ namespace KlayGE
 		{
 			pb.func();
 		}
+
+#ifdef KLAYGE_DEBUG
+		glValidateProgram(glsl_program_);
+
+		GLint validated = false;
+		glGetProgramiv(glsl_program_, GL_VALIDATE_STATUS, &validated);
+		if (!validated)
+		{
+			GLint len = 0;
+			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			if (len > 0)
+			{
+				std::vector<char> info(len + 1, 0);
+				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
+				std::cerr << &info[0] << std::endl;
+			}
+		}
+#endif
 	}
 
 	void OGLES2ShaderObject::Unbind()

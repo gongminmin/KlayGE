@@ -918,7 +918,7 @@ namespace KlayGE
 	OGLShaderObject::OGLShaderObject()
 		: gs_input_type_(0), gs_output_type_(0)
 	{
-		has_discard_ = true;
+		has_discard_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -1348,6 +1348,11 @@ namespace KlayGE
 						}
 						else
 						{
+							if ("discard" == this_token)
+							{
+								has_discard_ = true;
+							}
+
 							ss << this_token;
 						}
 					}
@@ -1764,6 +1769,7 @@ namespace KlayGE
 	{
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>();
 
+		ret->has_discard_ = has_discard_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
 		ret->glsl_bin_formats_ = glsl_bin_formats_;

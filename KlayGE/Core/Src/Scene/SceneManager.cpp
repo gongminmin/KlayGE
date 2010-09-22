@@ -85,55 +85,6 @@ namespace
 			}
 		}
 	}
-
-	class cmp_depth
-	{
-	public:
-		cmp_depth(float4x4 const & view_mat)
-			: view_mat_(view_mat)
-		{
-		}
-
-		bool operator()(RenderablePtr const & lhs, RenderablePtr const & rhs)
-		{
-			if (!lhs)
-			{
-				return true;
-			}
-			else
-			{
-				if (!rhs)
-				{
-					return false;
-				}
-				else
-				{
-					float min_depth[2] = { 1e10f, 1e10f };
-					RenderablePtr lr[2] = { lhs, rhs };
-					for (int k = 0; k < 2; ++ k)
-					{
-						Box const & box = lr[k]->GetBound();
-						uint32_t num = lr[k]->NumInstances();
-						for (uint32_t i = 0; i < num; ++ i)
-						{
-							float4x4 mat = lhs->GetInstance(i)->GetModelMatrix() * view_mat_;
-							for (int j = 0; j < 8; ++ j)
-							{
-								float3 v3 = box[j];
-								float4 v4(v3.x(), v3.y(), v3.z(), 1);
-								min_depth[k] = std::min(min_depth[k], MathLib::dot(v4, mat.Col(2)) / MathLib::dot(v4, mat.Col(3)));
-							}
-						}
-					}
-
-					return min_depth[0] < min_depth[1];
-				}
-			}
-		}
-
-	private:
-		float4x4 view_mat_;
-	};
 }
 
 namespace KlayGE
@@ -148,10 +99,24 @@ namespace KlayGE
 		void DoAddSceneObject(SceneObjectPtr const & obj)
 		{
 			scene_objs_.push_back(obj);
+
+			Box const & box = obj->GetBound();
+			float4x4 const & mat = obj->GetModelMatrix();
+
+			float3 min, max;
+			min = max = MathLib::transform_coord(box[0], mat);
+			for (size_t j = 1; j < 8; ++ j)
+			{
+				float3 vec = MathLib::transform_coord(box[j], mat);
+				min = MathLib::minimize(min, vec);
+				max = MathLib::maximize(max, vec);
+			}
+			scene_obj_bbs_.push_back(Box(min, max));
 		}
 
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter)
 		{
+			scene_obj_bbs_.erase(scene_obj_bbs_.begin() + (iter - scene_objs_.begin()));
 			return scene_objs_.erase(iter);
 		}
 
@@ -198,19 +163,29 @@ namespace KlayGE
 			{
 				if (obj->Cullable())
 				{
-					Box const & box = obj->GetBound();
-					float4x4 const & mat = obj->GetModelMatrix();
-
-					float3 min, max;
-					min = max = MathLib::transform_coord(box[0], mat);
-					for (size_t j = 1; j < 8; ++ j)
+					Box bb_ws;
+					if (obj->Moveable())
 					{
-						float3 vec = MathLib::transform_coord(box[j], mat);
-						min = MathLib::minimize(min, vec);
-						max = MathLib::maximize(max, vec);
+						Box const & box = obj->GetBound();
+						float4x4 const & mat = obj->GetModelMatrix();
+
+						float3 min, max;
+						min = max = MathLib::transform_coord(box[0], mat);
+						for (size_t j = 1; j < 8; ++ j)
+						{
+							float3 vec = MathLib::transform_coord(box[j], mat);
+							min = MathLib::minimize(min, vec);
+							max = MathLib::maximize(max, vec);
+						}
+
+						bb_ws = Box(min, max);
+					}
+					else
+					{
+						bb_ws = scene_obj_bbs_[i];
 					}
 
-					visible = this->AABBVisible(Box(min, max));
+					visible = this->AABBVisible(bb_ws);
 				}
 				else
 				{
@@ -268,6 +243,7 @@ namespace KlayGE
 	void SceneManager::Clear()
 	{
 		scene_objs_.resize(0);
+		scene_obj_bbs_.resize(0);
 	}
 
 	// 更新场景管理器
@@ -389,11 +365,39 @@ namespace KlayGE
 
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
+		float4x4 const & view_mat = camera.ViewMatrix();
 		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
-			if (!items.first->Transparent() && !items.first->HasDiscard())
+			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
-				std::sort(items.second.begin(), items.second.end(), cmp_depth(camera.ViewMatrix()));
+				std::vector<std::pair<float, uint32_t> > min_depthes(items.second.size());
+				for (size_t j = 0; j < min_depthes.size(); ++ j)
+				{
+					RenderablePtr const & renderable = items.second[j];
+					Box const & box = renderable->GetBound();
+					uint32_t const num = renderable->NumInstances();
+					float md = 1e10f;
+					for (uint32_t i = 0; i < num; ++ i)
+					{
+						float4x4 const mat = renderable->GetInstance(i)->GetModelMatrix() * view_mat;
+						for (int k = 0; k < 8; ++ k)
+						{
+							float3 const v = box[k];
+							md = std::min(min_depthes[j].first, v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2));
+						}
+					}
+
+					min_depthes[j] = std::make_pair(md, static_cast<uint32_t>(j));
+				}
+
+				std::sort(min_depthes.begin(), min_depthes.end());
+
+				RenderItemsType sorted_items(min_depthes.size());
+				for (size_t j = 0; j < min_depthes.size(); ++ j)
+				{
+					sorted_items[j] = items.second[min_depthes[j].second];
+				}
+				items.second.swap(sorted_items);
 			}
 
 			BOOST_FOREACH(BOOST_TYPEOF(items.second)::reference item, items.second)

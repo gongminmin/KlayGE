@@ -77,6 +77,7 @@ namespace KlayGE
 	protected:
 		Frustum frustum_;
 		SceneObjectsType scene_objs_;
+		std::vector<Box> scene_obj_bbs_;
 		std::vector<char> visible_marks_;
 		uint32_t urt_;
 
