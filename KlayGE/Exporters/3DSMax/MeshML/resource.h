@@ -9,7 +9,7 @@
 #define IDC_LIST_IGNORED_VERTEX_ATTRS   1021
 #define IDC_BUTTON_ADD                  1022
 #define IDC_BUTTON_DEL                  1023
-#define IDC_MESH_OPTIMIZE               1024
+#define IDC_COMBINE_MESHES              1024
 
 // Next default values for new objects
 // 

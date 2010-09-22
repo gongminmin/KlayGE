@@ -155,7 +155,7 @@ namespace KlayGE
 	class meshml_extractor
 	{
 	public:
-		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool mesh_opt);
+		meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool combine_meshes);
 
 		void export_objects(std::vector<INode*> const & nodes);
 		void write_xml(std::string const & file_name, export_vertex_attrs const & eva);
@@ -165,7 +165,8 @@ namespace KlayGE
 		void extract_bone(INode* node);
 		void remove_redundant_joints();
 		void remove_redundant_mtls();
-		void mesh_optimize();
+		void combine_meshes_with_same_mtl();
+		void sort_meshes_by_mtl();
 
 		Point3 point_from_matrix(Matrix3 const & mat);
 		Quat quat_from_matrix(Matrix3 const & mat);
@@ -190,7 +191,7 @@ namespace KlayGE
 
 		joints_t joints_;
 		int joints_per_ver_;
-		bool mesh_opt_;
+		bool combine_meshes_;
 
 		std::map<std::string, joint_and_mat_t> joint_nodes_;
 

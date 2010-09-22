@@ -175,13 +175,13 @@ namespace
 
 namespace KlayGE
 {
-	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool mesh_opt)
+	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool combine_meshes)
 						: root_node_(root_node),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
 							frame_rate_(GetFrameRate()),
-							mesh_opt_(mesh_opt)
+							combine_meshes_(combine_meshes)
 	{
 	}
 
@@ -316,74 +316,77 @@ namespace KlayGE
 
 	void meshml_extractor::get_material(materials_t& mtls, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
 	{
-		if (0 == max_mtl->NumSubMtls())
+		if (max_mtl)
 		{
-			mtls.push_back(material_t());
-			material_t& mtl = mtls.back();
-			uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
-			std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
+			if (0 == max_mtl->NumSubMtls())
+			{
+				mtls.push_back(material_t());
+				material_t& mtl = mtls.back();
+				uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
+				std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
 
-			mtl.ambient = max_mtl->GetAmbient();
-			mtl.diffuse = max_mtl->GetDiffuse();
-			mtl.specular = max_mtl->GetSpecular();
-			if (max_mtl->GetSelfIllumColorOn())
-			{
-				mtl.emit = max_mtl->GetSelfIllumColor();
-			}
-			else
-			{
-				mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
-			}
-			mtl.opacity = 1 - max_mtl->GetXParency();
-			mtl.specular_level = max_mtl->GetShinStr();
-			mtl.shininess = max_mtl->GetShininess() * 100;
-
-			for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
-			{
-				Texmap* tex_map = max_mtl->GetSubTexmap(j);
-				if ((tex_map != NULL) && (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID()))
+				mtl.ambient = max_mtl->GetAmbient();
+				mtl.diffuse = max_mtl->GetDiffuse();
+				mtl.specular = max_mtl->GetSpecular();
+				if (max_mtl->GetSelfIllumColorOn())
 				{
-					BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
-					std::string map_name = tstr_to_str(bitmap_tex->GetMapName());
-					if (!map_name.empty())
+					mtl.emit = max_mtl->GetSelfIllumColor();
+				}
+				else
+				{
+					mtl.emit = max_mtl->GetDiffuse() * max_mtl->GetSelfIllum();
+				}
+				mtl.opacity = 1 - max_mtl->GetXParency();
+				mtl.specular_level = max_mtl->GetShinStr();
+				mtl.shininess = max_mtl->GetShininess() * 100;
+
+				for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
+				{
+					Texmap* tex_map = max_mtl->GetSubTexmap(j);
+					if ((tex_map != NULL) && (Class_ID(BMTEX_CLASS_ID, 0) == tex_map->ClassID()))
 					{
-						Matrix3 uv_mat;
-						tex_map->GetUVTransform(uv_mat);
-
-						int tex_u = 0;
-						UVGen* uv_gen = tex_map->GetTheUVGen();
-						if (uv_gen != NULL)
+						BitmapTex* bitmap_tex = static_cast<BitmapTex*>(tex_map);
+						std::string map_name = tstr_to_str(bitmap_tex->GetMapName());
+						if (!map_name.empty())
 						{
-							int axis = uv_gen->GetAxis();
-							switch (axis)
+							Matrix3 uv_mat;
+							tex_map->GetUVTransform(uv_mat);
+
+							int tex_u = 0;
+							UVGen* uv_gen = tex_map->GetTheUVGen();
+							if (uv_gen != NULL)
 							{
-							case AXIS_UV:
-								tex_u = 0;
-								break;
+								int axis = uv_gen->GetAxis();
+								switch (axis)
+								{
+								case AXIS_UV:
+									tex_u = 0;
+									break;
 						
-							case AXIS_VW:
-								tex_u = 1;
-								break;
+								case AXIS_VW:
+									tex_u = 1;
+									break;
 
-							case AXIS_WU:
-								tex_u = 2;
-								break;
+								case AXIS_WU:
+									tex_u = 2;
+									break;
+								}
 							}
+
+							int channel = bitmap_tex->GetMapChannel();
+							uv_transs[channel] = std::make_pair(uv_mat, tex_u);
+
+							mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()), map_name));
 						}
-
-						int channel = bitmap_tex->GetMapChannel();
-						uv_transs[channel] = std::make_pair(uv_mat, tex_u);
-
-						mtl.texture_slots.push_back(texture_slot_t(tstr_to_str(max_mtl->GetSubTexmapSlotName(j).data()), map_name));
 					}
 				}
 			}
-		}
-		else
-		{
-			for (int i = 0; i < max_mtl->NumSubMtls(); ++ i)
+			else
 			{
-				this->get_material(mtls, uv_transss, max_mtl->GetSubMtl(i));
+				for (int i = 0; i < max_mtl->NumSubMtls(); ++ i)
+				{
+					this->get_material(mtls, uv_transss, max_mtl->GetSubMtl(i));
+				}
 			}
 		}
 	}
@@ -767,13 +770,9 @@ namespace KlayGE
 				obj_vertex_elements.push_back(vertex_element_t(VEU_BlendIndex, 0, 4));
 			}
 
-			object_info_t obj_info;
-			obj_info.vertex_elements = obj_vertex_elements;
 			for (size_t i = mtl_base_index; i < objs_mtl_.size(); ++ i)
 			{
-				obj_info.vertices.resize(0);
-				obj_info.triangles.resize(0);
-
+				triangles_t obj_info_tris;
 				std::set<int> index_set;
 				for (size_t j = 0; j < obj_triangles.size(); ++ j)
 				{
@@ -783,25 +782,33 @@ namespace KlayGE
 						index_set.insert(obj_triangles[j].vertex_index[1]);
 						index_set.insert(obj_triangles[j].vertex_index[2]);
 
-						obj_info.triangles.push_back(obj_triangles[j]);
+						obj_info_tris.push_back(obj_triangles[j]);
 					}
 				}
-				std::map<int, int> mapping;
-				int new_index = 0;
-				for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
-				{
-					obj_info.vertices.push_back(obj_vertices[*iter]);
-					mapping.insert(std::make_pair(*iter, new_index));
-				}
-				for (size_t j = 0; j < obj_info.triangles.size(); ++ j)
-				{
-					obj_info.triangles[j].vertex_index[0] = mapping[obj_info.triangles[j].vertex_index[0]];
-					obj_info.triangles[j].vertex_index[1] = mapping[obj_info.triangles[j].vertex_index[1]];
-					obj_info.triangles[j].vertex_index[2] = mapping[obj_info.triangles[j].vertex_index[2]];
-				}
 
-				if (!obj_info.triangles.empty())
+				if (!obj_info_tris.empty())
 				{
+					objs_info_.push_back(object_info_t());
+
+					object_info_t& obj_info = objs_info_.back();
+					obj_info.vertex_elements = obj_vertex_elements;
+
+					obj_info.triangles.resize(obj_info_tris.size());
+
+					std::map<int, int> mapping;
+					int new_index = 0;
+					for (std::set<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+					{
+						obj_info.vertices.push_back(obj_vertices[*iter]);
+						mapping.insert(std::make_pair(*iter, new_index));
+					}
+					for (size_t j = 0; j < obj_info_tris.size(); ++ j)
+					{
+						obj_info.triangles[j].vertex_index[0] = mapping[obj_info_tris[j].vertex_index[0]];
+						obj_info.triangles[j].vertex_index[1] = mapping[obj_info_tris[j].vertex_index[1]];
+						obj_info.triangles[j].vertex_index[2] = mapping[obj_info_tris[j].vertex_index[2]];
+					}
+				
 					if (objs_mtl_.size() - mtl_base_index <= 1)
 					{
 						obj_info.name = obj_name;
@@ -813,7 +820,6 @@ namespace KlayGE
 						obj_info.name = oss.str();
 					}
 					obj_info.mtl_id = i;
-					objs_info_.push_back(obj_info);
 				}
 			}
 		}
@@ -1102,7 +1108,7 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::mesh_optimize()
+	void meshml_extractor::combine_meshes_with_same_mtl()
 	{
 		objects_info_t opt_objs_info;
 		for (size_t i = 0; i < objs_mtl_.size(); ++ i)
@@ -1168,6 +1174,26 @@ namespace KlayGE
 		objs_info_ = opt_objs_info;
 	}
 
+	void meshml_extractor::sort_meshes_by_mtl()
+	{
+		std::vector<std::pair<size_t, size_t> > mtl_ids(objs_info_.size());
+		for (size_t i = 0; i < objs_info_.size(); ++ i)
+		{
+			mtl_ids[i].first = objs_info_[i].mtl_id;
+			mtl_ids[i].second = i;
+		}
+
+		std::sort(mtl_ids.begin(), mtl_ids.end());
+
+		objects_info_t opt_objs_info;
+		for (size_t i = 0; i < mtl_ids.size(); ++ i)
+		{
+			opt_objs_info.push_back(objs_info_[mtl_ids[i].second]);
+		}
+
+		objs_info_ = opt_objs_info;
+	}
+
 	void meshml_extractor::write_xml(std::string const & file_name, export_vertex_attrs const & eva)
 	{
 		std::ofstream ofs(file_name.c_str());
@@ -1178,9 +1204,13 @@ namespace KlayGE
 
 		this->remove_redundant_joints();
 		this->remove_redundant_mtls();
-		if (mesh_opt_)
+		if (combine_meshes_)
 		{
-			this->mesh_optimize();
+			this->combine_meshes_with_same_mtl();
+		}
+		else
+		{
+			this->sort_meshes_by_mtl();
 		}
 
 		std::map<std::string, int> joints_name_to_id;
