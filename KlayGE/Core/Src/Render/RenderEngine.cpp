@@ -417,6 +417,8 @@ namespace KlayGE
 			screen_frame_buffer_->GetViewport().camera->StereoMode(true);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
+					render_settings_.depth_stencil_fmt, render_settings_.sample_count, render_settings_.sample_quality);
 			for (int i = 0; i < 2; ++ i)
 			{
 				stereo_frame_buffers_[i] = rf.MakeFrameBuffer();
@@ -427,8 +429,6 @@ namespace KlayGE
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
 
-				RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
-					render_settings_.depth_stencil_fmt, render_settings_.sample_count, render_settings_.sample_quality);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 			}
 

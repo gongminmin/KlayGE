@@ -1,8 +1,11 @@
 // SceneManager.cpp
 // KlayGE 场景管理器类 实现文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Sort objects by depth (2010.9.21)
 //
 // 3.9.0
 // 处理Overlay物体 (2009.5.13)
@@ -383,7 +386,7 @@ namespace KlayGE
 						for (int k = 0; k < 8; ++ k)
 						{
 							float3 const v = box[k];
-							md = std::min(min_depthes[j].first, v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2));
+							md = std::min(md, v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2));
 						}
 					}
 
