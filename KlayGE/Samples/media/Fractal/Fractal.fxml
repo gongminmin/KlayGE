@@ -1,7 +1,6 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float2" name="offset"/>
 	<parameter type="int" name="flipping"/>
 	
 	<shader>
@@ -10,7 +9,7 @@ void MandelbrotVS(float2 pos : POSITION,
 			out float2 oTexcoord0	: TEXCOORD0,
 			out float4 oPos			: SV_Position)
 {
-	oPos = float4(pos + offset, 0.5f, 1);
+	oPos = float4(pos, 0.5f, 1);
 	float2 tc = pos / 2;
 	tc.y *= flipping;
 	tc += 0.5f;

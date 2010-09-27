@@ -22,7 +22,7 @@ void BlurXVS(float4 pos : POSITION,
 					out float4 oTex3 : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
-	oPos = AdjustPos(pos);
+	oPos = pos;
 	
 	float2 Tex0 = TexCoordFromPos(pos);
 	float4 tex[4];
@@ -43,7 +43,7 @@ void BlurYVS(float4 pos : POSITION,
 					out float4 oTex3 : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
-	oPos = AdjustPos(pos);
+	oPos = pos;
 
 	float2 Tex0 = TexCoordFromPos(pos);
 	float4 tex[4];

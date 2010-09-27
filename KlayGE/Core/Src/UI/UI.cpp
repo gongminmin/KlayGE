@@ -114,7 +114,6 @@ namespace KlayGE
 			}
 
 			half_width_height_ep_ = technique_->Effect().ParameterByName("half_width_height");
-			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 		}
 
 		void Clear()
@@ -179,11 +178,6 @@ namespace KlayGE
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
 			*half_width_height_ep_ = float2(half_width, half_height);
-
-			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= half_width;
-			texel_to_pixel.y() /= half_height;
-			*texel_to_pixel_offset_ep_ = texel_to_pixel;
 		}
 
 		void Render()
@@ -200,7 +194,6 @@ namespace KlayGE
 		bool dirty_;
 
 		RenderEffectParameterPtr half_width_height_ep_;
-		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 
 		TexturePtr texture_;
 

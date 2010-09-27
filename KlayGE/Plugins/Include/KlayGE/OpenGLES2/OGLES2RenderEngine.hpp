@@ -1,8 +1,11 @@
 // OGLES2RenderEngine.hpp
 // KlayGE OpenGL ES 2渲染引擎类 头文件
-// Ver 3.10.0
+// Ver 3.11.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Remove TexelToPixelOffset (2010.9.26)
 //
 // 3.10.0
 // 初次建立 (2010.1.22)
@@ -55,11 +58,6 @@ namespace KlayGE
 		uint16_t StencilBufferBitDepth();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-
-		float4 TexelToPixelOffset() const
-		{
-			return float4(0, 0, 0, 0);
-		}
 
 		bool FullScreen() const;
 		void FullScreen(bool fs);

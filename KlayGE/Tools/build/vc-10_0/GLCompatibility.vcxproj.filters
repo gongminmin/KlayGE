@@ -20,13 +20,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\GLCompatibility\report.xsl">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="..\..\GLCompatibility\GLCompatibility.py">
       <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\GLCompatibility\report.xsl">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

@@ -453,7 +453,6 @@ namespace KlayGE
 		*(effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
-		texel_to_pixel_offset_param_ = effect_->ParameterByName("texel_to_pixel_offset");
 		depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
 		upper_left_param_ = effect_->ParameterByName("upper_left");
 		upper_right_param_ = effect_->ParameterByName("upper_right");
@@ -638,11 +637,6 @@ namespace KlayGE
 				*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 
 				*inv_view_param_ = inv_view_;
-
-				float4 texel_to_pixel = re.TexelToPixelOffset();
-				texel_to_pixel.x() /= g_buffer_->Width() / 2.0f;
-				texel_to_pixel.y() /= g_buffer_->Height() / 2.0f;
-				*texel_to_pixel_offset_param_ = texel_to_pixel;
 
 				re.BindFrameBuffer(g_buffer_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);

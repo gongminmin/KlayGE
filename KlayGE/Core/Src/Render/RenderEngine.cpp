@@ -397,11 +397,6 @@ namespace KlayGE
 		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_colors_[0];
 		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_colors_[1];
 		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(stereo_frame_buffers_[0]->RequiresFlipping() ? -1 : +1);
-
-		float4 texel_to_pixel = this->TexelToPixelOffset();
-		texel_to_pixel.x() /= screen_frame_buffer_->Width() / 2.0f;
-		texel_to_pixel.y() /= screen_frame_buffer_->Height() / 2.0f;
-		*(stereoscopic_effect_->ParameterByName("texel_to_pixel_offset")) = texel_to_pixel;
 	}
 
 	void RenderEngine::StereoscopicForLCDShutter()

@@ -442,7 +442,6 @@ namespace KlayGE
 		float4x4 view_, proj_;
 		float4x4 inv_view_;
 
-		RenderEffectParameterPtr texel_to_pixel_offset_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr upper_left_param_;
 		RenderEffectParameterPtr upper_right_param_;

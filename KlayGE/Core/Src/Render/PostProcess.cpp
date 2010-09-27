@@ -85,7 +85,6 @@ namespace KlayGE
 	{
 		if (technique_)
 		{
-			texel_to_pixel_offset_ep_ = technique_->Effect().ParameterByName("texel_to_pixel_offset");
 			flipping_ep_ = technique_->Effect().ParameterByName("flipping");
 			*flipping_ep_ = static_cast<int32_t>(frame_buffer_->RequiresFlipping() ? -1 : +1);
 
@@ -516,13 +515,6 @@ namespace KlayGE
 
 	void PostProcess::OnRenderBegin()
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		FrameBufferPtr const & fb = (0 == num_bind_output_) ? re.DefaultFrameBuffer() : frame_buffer_;
-
-		float4 texel_to_pixel = re.TexelToPixelOffset();
-		texel_to_pixel.x() /= fb->Width() / 2.0f;
-		texel_to_pixel.y() /= fb->Height() / 2.0f;
-		*texel_to_pixel_offset_ep_ = texel_to_pixel;
 	}
 
 	void PostProcess::CreateVB()

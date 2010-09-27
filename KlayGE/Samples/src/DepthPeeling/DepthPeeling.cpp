@@ -84,12 +84,6 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / app.ActiveCamera().FarPlane();
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
-			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-			*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
 		}
 
 		void LightPos(float3 const & light_pos)

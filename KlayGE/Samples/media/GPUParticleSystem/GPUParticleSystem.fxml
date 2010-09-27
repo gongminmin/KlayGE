@@ -34,7 +34,6 @@
 		<parameter type="float3" name="lower_left"/>
 		<parameter type="float3" name="lower_right"/>
 
-		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
 
@@ -113,7 +112,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	float life = ps_in.clr.a;
 	float4 clr = particle_tex.Sample(bilinear_sampler, ps_in.tex);
 	
-	float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w + offset;
+	float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w;
 	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 

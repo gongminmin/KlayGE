@@ -28,7 +28,6 @@
 		<parameter type="float" name="depth_min"/>
 		<parameter type="float" name="inv_depth_range"/>
 
-		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
 
@@ -227,7 +226,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	}
 	else
 	{
-		float2 tex_coord = ps_in.PosSS.xy + offset;
+		float2 tex_coord = ps_in.PosSS.xy;
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 		

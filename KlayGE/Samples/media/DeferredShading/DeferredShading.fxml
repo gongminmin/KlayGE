@@ -23,7 +23,6 @@
 
 		<parameter type="float4x4" name="inv_view"/>
 
-		<parameter type='float4' name='texel_to_pixel_offset'/>
 		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
@@ -172,7 +171,6 @@ void DeferredShadingDepthOnlyVS(float4 pos : POSITION,
 				out float4 oPos : SV_Position)
 {
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
-	oPos += texel_to_pixel_offset;
 }
 
 float4 DeferredShadingDepthOnlyPS() : SV_Target
@@ -203,8 +201,6 @@ void DeferredShadingVS(float4 pos : POSITION,
 	oTc *= oW;
 	oViewDir *= oW;
 #endif
-
-	oPos += texel_to_pixel_offset;
 }
 
 float4 DeferredShadingPointPS(

@@ -5,7 +5,6 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float2" name="half_width_height"/>
-		<parameter type='float4' name='texel_to_pixel_offset'/>
 	</cbuffer>
 
 	<parameter type="float4x4" name="mvp"/>
@@ -29,7 +28,6 @@ void Font2DVS(float4 position : POSITION,
 			out float4 oPosition : SV_Position)
 {
 	oPosition = Transform2D(position, half_width_height);
-	oPosition += texel_to_pixel_offset;
 
 	oColor = color;
 	oTexCoord = texCoord;

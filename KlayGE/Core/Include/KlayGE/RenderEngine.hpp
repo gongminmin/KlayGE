@@ -5,7 +5,8 @@
 // Homepage: http://www.klayge.org
 //
 // 3.11.0
-// 增加了ForceFlush (2010.7.20)
+// Add ForceFlush (2010.7.20)
+// Remove TexelToPixelOffset (2010.9.26)
 //
 // 3.10.0
 // 增加了Dispatch (2009.12.22)
@@ -132,9 +133,6 @@ namespace KlayGE
 		// Scissor support
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
-		// Return the appropiate offsets as full coordinates in the texture values.
-		virtual float4 TexelToPixelOffset() const = 0;
-
 		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
@@ -240,7 +238,6 @@ namespace KlayGE
 		RenderLayoutPtr stereoscopic_rl_;
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
-		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 	};
 }
 

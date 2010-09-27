@@ -51,7 +51,7 @@ void ToneMapping30VS(float4 pos : POSITION,
 					out float3 oTex : TEXCOORD0,
 					out float4 oPos : SV_Position)
 {
-	oPos = AdjustPos(pos);
+	oPos = pos;
 
 	oTex.xy = TexCoordFromPos(pos);
 	oTex.z = max(0.001f, lum_tex.SampleLevel(point_sampler, 0.5f.xx, 0).r);

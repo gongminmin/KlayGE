@@ -186,7 +186,6 @@ float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 	</parameter>
 
 	<cbuffer name="per_frame2">
-		<parameter type='float4' name='texel_to_pixel_offset'/>
 		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
@@ -213,7 +212,7 @@ void ShadingVS(float4 pos : POSITION,
 	oTexCoord = texcoord;
 
 #ifdef NOPERSPECTIVE_SUPPORT
-	oTc = oPos.xy / oPos.w - texel_to_pixel_offset.xy;
+	oTc = oPos.xy / oPos.w;
 	oTc.y *= flipping;
 	oTc = oTc * 0.5f + 0.5f;
 #else
@@ -242,7 +241,7 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = pos_ss.xy / pos_ss.w - texel_to_pixel_offset.xy;
+	float2 tc = pos_ss.xy / pos_ss.w;
 	tc.y *= flipping;
 	tc = tc * 0.5f + 0.5f;
 #endif

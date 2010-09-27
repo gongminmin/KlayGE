@@ -10,7 +10,6 @@
 	<parameter type="float" name="material_thickness"/>
 	<parameter type="float" name="sigma_t"/>
 
-	<parameter type="float2" name="offset"/>
 	<parameter type="int" name="flip"/>
 
 	<parameter type="sampler" name="linear_sampler">
@@ -127,7 +126,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 		specular = specular_clr.rgb;
 	}
 
-	float2 tex_coord = oPosSS.xy / oPosSS.w - offset;
+	float2 tex_coord = oPosSS.xy / oPosSS.w;
 	tex_coord.y *= flip;
 	tex_coord = tex_coord * 0.5f + 0.5f;
 	float thickness = clamp(back_face_depth_tex.Sample(point_sampler, tex_coord).r - oPosSS.w, 0, 100.0f);

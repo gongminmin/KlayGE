@@ -77,7 +77,6 @@ namespace
 			specular_tex_param_ = effect_->ParameterByName("specular_tex");
 			emit_clr_param_ = effect_->ParameterByName("emit_clr");
 			specular_level_param_ = effect_->ParameterByName("specular_level");
-			texel_to_pixel_offset_param_ = effect_->ParameterByName("texel_to_pixel_offset");
 			flipping_param_ = effect_->ParameterByName("flipping");
 		}
 
@@ -175,10 +174,6 @@ namespace
 				*specular_level_param_ = mtl.specular_level;
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
-					float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-					float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-					*texel_to_pixel_offset_param_ = float4(x_offset, y_offset, 0, 0);
 					*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				}
 				break;
@@ -204,7 +199,6 @@ namespace
 		RenderEffectParameterPtr diffuse_clr_param_;
 		RenderEffectParameterPtr emit_clr_param_;
 		RenderEffectParameterPtr specular_level_param_;
-		RenderEffectParameterPtr texel_to_pixel_offset_param_;
 		RenderEffectParameterPtr flipping_param_;
 
 		TexturePtr diffuse_tex_;
@@ -327,10 +321,6 @@ namespace
 		void OnRenderBegin()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
-			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
 			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 		}
 
@@ -458,10 +448,6 @@ namespace
 		void OnRenderBegin()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
-			float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-			float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-			*(technique_->Effect().ParameterByName("texel_to_pixel_offset")) = float4(x_offset, y_offset, 0, 0);
 			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 		}
 

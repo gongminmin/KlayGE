@@ -253,7 +253,6 @@ namespace KlayGE
 		*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_.DistBase() / 32768.0f * 32 + 1, (kfont_loader_.DistScale() / 32768.0f + 1.0f) * 32);
 
 		half_width_height_ep_ = effect_->ParameterByName("half_width_height");
-		texel_to_pixel_offset_ep_ = effect_->ParameterByName("texel_to_pixel_offset");
 		mvp_ep_ = effect_->ParameterByName("mvp");
 
 		vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, NULL);
@@ -311,11 +310,6 @@ namespace KlayGE
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
 			*half_width_height_ep_ = float2(half_width, half_height);
-
-			float4 texel_to_pixel = re.TexelToPixelOffset();
-			texel_to_pixel.x() /= half_width;
-			texel_to_pixel.y() /= half_height;
-			*texel_to_pixel_offset_ep_ = texel_to_pixel;
 		}
 	}
 

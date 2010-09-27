@@ -37,7 +37,7 @@ void SumLumVS(float4 pos : POSITION,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oPos : SV_Position)
 {
-	oPos = AdjustPos(pos);
+	oPos = pos;
 
 	float2 tex = TexCoordFromPos(pos);
 	oTex0 = tex.xyxy + tex_coord_offset[0];

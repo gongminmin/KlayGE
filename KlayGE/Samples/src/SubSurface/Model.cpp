@@ -84,12 +84,6 @@ void DetailedMesh::OnRenderBegin()
 	float4x4 const & view = app.ActiveCamera().ViewMatrix();
 	float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 	*(technique_->Effect().ParameterByName("worldviewproj")) = view * proj;
-
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	float4 const & texel_to_pixel = re.TexelToPixelOffset() * 2.0f;
-	float const x_offset = texel_to_pixel.x() / re.CurFrameBuffer()->Width();
-	float const y_offset = texel_to_pixel.y() / re.CurFrameBuffer()->Height();
-	*(technique_->Effect().ParameterByName("offset")) = float2(x_offset, y_offset);
 }
 
 void DetailedMesh::SetLightPos(KlayGE::float3 const & light_pos)

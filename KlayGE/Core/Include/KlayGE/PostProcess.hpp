@@ -148,7 +148,6 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb_;
 
-		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 		RenderEffectParameterPtr flipping_ep_;
 		std::vector<RenderEffectParameterPtr> input_pins_ep_;
 		std::vector<RenderEffectParameterPtr> output_pins_ep_;

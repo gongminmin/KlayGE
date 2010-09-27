@@ -1,8 +1,11 @@
 // D3D11RenderEngine.hpp
 // KlayGE D3D11渲染引擎类 头文件
-// Ver 3.10.0
+// Ver 3.11.0
 // 版权所有(C) 龚敏敏, 2009-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Remove TexelToPixelOffset (2010.9.26)
 //
 // 3.10.0
 // 升级到DXGI 1.1 (2010.2.8)
@@ -75,13 +78,6 @@ namespace KlayGE
 		uint16_t StencilBufferBitDepth();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-
-		// Directly mapping texels to pixels by offset by 0.5
-		// For more info see the doc page titled "Directly Mapping Texels to Pixels"
-		float4 TexelToPixelOffset() const
-		{
-			return float4(0, 0, 0, 0);
-		}
 
 		bool FullScreen() const;
 		void FullScreen(bool fs);

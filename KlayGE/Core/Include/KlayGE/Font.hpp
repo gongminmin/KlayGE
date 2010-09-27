@@ -192,7 +192,6 @@ namespace KlayGE
 		RenderEffectPtr	effect_;
 
 		RenderEffectParameterPtr half_width_height_ep_;
-		RenderEffectParameterPtr texel_to_pixel_offset_ep_;
 		RenderEffectParameterPtr mvp_ep_;
 
 		KFontLoader kfont_loader_;

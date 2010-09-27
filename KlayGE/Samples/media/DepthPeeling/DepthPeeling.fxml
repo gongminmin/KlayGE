@@ -10,7 +10,6 @@
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float" name="inv_depth_range"/>
 
-		<parameter type="float2" name="offset"/>
 		<parameter type="int" name="flip"/>
 	</cbuffer>
 
@@ -51,7 +50,7 @@ void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
 {
 	oDepth = pos_ss.w * inv_depth_range;
   
-	float2 tex_coord = pos_ss.xy / pos_ss.w - offset;
+	float2 tex_coord = pos_ss.xy / pos_ss.w;
 	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 

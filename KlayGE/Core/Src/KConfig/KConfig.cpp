@@ -85,18 +85,6 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D11")));
 				FreeLibrary(mod_d3d11);
 			}
-			HMODULE mod_d3d10 = LoadLibrary(TEXT("D3D10.dll"));
-			if (mod_d3d10)
-			{
-				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D10")));
-				FreeLibrary(mod_d3d10);
-			}
-			HMODULE mod_d3d9 = LoadLibrary(TEXT("D3D9.dll"));
-			if (mod_d3d9)
-			{
-				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D9")));
-				FreeLibrary(mod_d3d10);
-			}
 			HMODULE mod_gl = LoadLibrary(TEXT("OpenGL32.dll"));
 			if (mod_gl)
 			{
