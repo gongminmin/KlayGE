@@ -1,8 +1,11 @@
 // OGLES2ShaderObject.cpp
 // KlayGE OpenGL ES2 shader对象类 实现文件
-// Ver 3.10.0
+// Ver 3.11.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Reuse generated GLSL between passes (2010.9.30)
 //
 // 3.10.0
 // 初次建立 (2010.1.22)
@@ -1207,7 +1210,7 @@ namespace KlayGE
 	}
 
 	void OGLES2ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-		uint32_t /*tech_index*/, uint32_t /*pass_index*/)
+		uint32_t tech_index, uint32_t pass_index)
 	{
 		OGLES2RenderFactory& rf = *checked_cast<OGLES2RenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -1263,44 +1266,68 @@ namespace KlayGE
 					break;
 				}
 
-				if (is_shader_validate_[type])
+				if (sd.tech_pass != 0xFFFFFFFF)
 				{
-					shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
-							CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+					OGLES2ShaderObjectPtr so = checked_pointer_cast<OGLES2ShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
-					CGerror error = cgGetError();
-					if (error != CG_NO_ERROR)
+					if (is_shader_validate_[type])
 					{
-#ifdef KLAYGE_DEBUG
-						if (CG_COMPILER_ERROR == error)
-						{
-							std::istringstream iss(*shader_text_);
-							std::string s;
-							int line = 1;
-							while (iss)
-							{
-								std::getline(iss, s);
-								std::cerr << line << " " << s << std::endl;
-								++ line;
-							}
-							std::cerr << cgGetErrorString(error) << std::endl;
+						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
+								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+					}
 
-							char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
-							if (listing)
+					is_shader_validate_[type] = so->is_shader_validate_[type];
+
+					if (is_shader_validate_[type])
+					{
+						(*glsl_srcs_)[type] = (*so->glsl_srcs_)[type];
+					}
+				}
+				else
+				{
+					if (is_shader_validate_[type])
+					{
+						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
+								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+
+						CGerror error = cgGetError();
+						if (error != CG_NO_ERROR)
+						{
+#ifdef KLAYGE_DEBUG
+							if (CG_COMPILER_ERROR == error)
 							{
-								std::cerr << listing << std::endl;
+								std::istringstream iss(*shader_text_);
+								std::string s;
+								int line = 1;
+								while (iss)
+								{
+									std::getline(iss, s);
+									std::cerr << line << " " << s << std::endl;
+									++ line;
+								}
+								std::cerr << cgGetErrorString(error) << std::endl;
+
+								char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
+								if (listing)
+								{
+									std::cerr << listing << std::endl;
+								}
 							}
-						}
 #endif
 
-						is_shader_validate_[type] = false;
+							is_shader_validate_[type] = false;
+						}
+					}
+
+					if (is_shader_validate_[type])
+					{
+						(*glsl_srcs_)[type] = this->ConvertToELSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
+							static_cast<ShaderType>(type));
 					}
 				}
 
 				if (is_shader_validate_[type])
 				{
-					(*glsl_srcs_)[type] = this->ConvertToELSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
-						static_cast<ShaderType>(type));
 					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
 					if (0 == object)
@@ -1337,6 +1364,7 @@ namespace KlayGE
 				}
 			}
 
+			sd.tech_pass = (tech_index << 16) + pass_index;
 			is_validate_ &= is_shader_validate_[type];
 		}
 

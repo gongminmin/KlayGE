@@ -204,23 +204,25 @@ void ShadingVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
 #else
-			out float4 oPosSS : TEXCOORD1,
+			out float2 oTc : TEXCOORD1,
+			out float oW : TEXCOORD2,
 #endif
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
 
-#ifdef NOPERSPECTIVE_SUPPORT
 	oTc = oPos.xy / oPos.w;
 	oTc.y *= flipping;
 	oTc = oTc * 0.5f + 0.5f;
-#else
-	oPosSS = oPos;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oW = oPos.w;
+	oTc *= oW;
 #endif
 }
 
-float4 Shading(float2 tc, float3 diffuse, float3 emit, float3 specular)
+float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 {
 	float ssao = 1;
 	if (ssao_enabled)
@@ -236,36 +238,17 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 #ifdef NOPERSPECTIVE_SUPPORT
 	, noperspective float2 tc : TEXCOORD1
 #else
-	, float4 pos_ss : TEXCOORD1
+	, float2 tc : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = pos_ss.xy / pos_ss.w;
-	tc.y *= flipping;
-	tc = tc * 0.5f + 0.5f;
+	tc /= w;
 #endif
 
-	float3 diffuse;
-	if (diffuse_map_enabled)
-	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-	float3 specular;
-	if (specular_map_enabled)
-	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		specular = specular_level;
-	}
-
-	return Shading(tc, diffuse, emit_clr.rgb, specular);
+	float3 diffuse = diffuse_map_enabled ? diffuse_tex.Sample(aniso_sampler, texcoord).rgb : diffuse_clr.rgb;
+	float3 specular = specular_map_enabled ? specular_tex.Sample(aniso_sampler, texcoord).rgb : specular_level;
+	return CalcShading(tc, diffuse, emit_clr.rgb, specular);
 }
 
 void ShadingSkyBoxVS(float4 pos : POSITION,

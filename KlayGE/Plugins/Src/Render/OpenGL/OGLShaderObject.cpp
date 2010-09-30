@@ -5,7 +5,8 @@
 // Homepage: http://www.klayge.org
 //
 // 3.11.0
-// Geometry shader to GLSL compiler works
+// Geometry shader to GLSL compiler works (2010.8.16)
+// Reuse generated GLSL between passes (2010.9.30)
 //
 // 3.9.0
 // Cg载入后编译成GLSL使用 (2009.4.26)
@@ -1369,7 +1370,7 @@ namespace KlayGE
 	}
 
 	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-		uint32_t /*tech_index*/, uint32_t /*pass_index*/)
+		uint32_t tech_index, uint32_t pass_index)
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -1440,102 +1441,128 @@ namespace KlayGE
 					break;
 				}
 
-				if (is_shader_validate_[type])
+				if (sd.tech_pass != 0xFFFFFFFF)
 				{
-					shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
-							CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+					OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
-					CGerror error = cgGetError();
-					if (error != CG_NO_ERROR)
+					if (is_shader_validate_[type])
 					{
-#ifdef KLAYGE_DEBUG
-						if (CG_COMPILER_ERROR == error)
-						{
-							std::istringstream iss(*shader_text_);
-							std::string s;
-							int line = 1;
-							while (iss)
-							{
-								std::getline(iss, s);
-								std::cerr << line << " " << s << std::endl;
-								++ line;
-							}
-							std::cerr << cgGetErrorString(error) << std::endl;
+						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
+								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+					}
 
-							char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
-							if (listing)
+					is_shader_validate_[type] = so->is_shader_validate_[type];
+
+					if (is_shader_validate_[type])
+					{
+						gs_input_type_ = so->gs_input_type_;
+						gs_output_type_ = so->gs_output_type_;
+						(*glsl_srcs_)[type] = (*so->glsl_srcs_)[type];
+					}
+				}
+				else
+				{
+					if (is_shader_validate_[type])
+					{
+						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
+								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
+
+						CGerror error = cgGetError();
+						if (error != CG_NO_ERROR)
+						{
+#ifdef KLAYGE_DEBUG
+							if (CG_COMPILER_ERROR == error)
 							{
-								std::cerr << listing << std::endl;
+								std::istringstream iss(*shader_text_);
+								std::string s;
+								int line = 1;
+								while (iss)
+								{
+									std::getline(iss, s);
+									std::cerr << line << " " << s << std::endl;
+									++ line;
+								}
+								std::cerr << cgGetErrorString(error) << std::endl;
+
+								char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
+								if (listing)
+								{
+									std::cerr << listing << std::endl;
+								}
 							}
-						}
 #endif
 
-						is_shader_validate_[type] = false;
+							is_shader_validate_[type] = false;
+						}
+					}
+
+					if (is_shader_validate_[type])
+					{
+						uint32_t gs_input_vertices = 0;
+						if (ST_GeometryShader == type)
+						{
+							switch (cgGetProgramInput(shaders[type]))
+							{
+							case CG_POINT:
+								gs_input_type_ = GL_POINTS;
+								gs_input_vertices = 1;
+								break;
+
+							case CG_LINE:
+								gs_input_type_ = GL_LINES;
+								gs_input_vertices = 2;
+								break;
+
+							case CG_LINE_ADJ:
+								gs_input_type_ = GL_LINES_ADJACENCY_EXT;
+								gs_input_vertices = 4;
+								break;
+
+							case CG_TRIANGLE:
+								gs_input_type_ = GL_TRIANGLES;
+								gs_input_vertices = 3;
+								break;
+
+							case CG_TRIANGLE_ADJ:
+								gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
+								gs_input_vertices = 6;
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								gs_input_type_ = 0;
+								gs_input_vertices = 0;
+								break;
+							}
+
+							switch (cgGetProgramOutput(shaders[type]))
+							{
+							case CG_POINT_OUT:
+								gs_output_type_ = GL_POINTS;
+								break;
+
+							case CG_LINE_OUT:
+								gs_output_type_ = GL_LINE_STRIP;
+								break;
+
+							case CG_TRIANGLE_OUT:
+								gs_output_type_ = GL_TRIANGLE_STRIP;
+								break;
+
+							default:
+								BOOST_ASSERT(false);
+								gs_output_type_ = 0;
+								break;
+							}
+						}
+
+						(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
+							static_cast<ShaderType>(type), gs_input_vertices, has_gs);
 					}
 				}
 
 				if (is_shader_validate_[type])
 				{
-					uint32_t gs_input_vertices = 0;
-					if (ST_GeometryShader == type)
-					{
-						switch (cgGetProgramInput(shaders[type]))
-						{
-						case CG_POINT:
-							gs_input_type_ = GL_POINTS;
-							gs_input_vertices = 1;
-							break;
-
-						case CG_LINE:
-							gs_input_type_ = GL_LINES;
-							gs_input_vertices = 2;
-							break;
-
-						case CG_LINE_ADJ:
-							gs_input_type_ = GL_LINES_ADJACENCY_EXT;
-							gs_input_vertices = 4;
-							break;
-
-						case CG_TRIANGLE:
-							gs_input_type_ = GL_TRIANGLES;
-							gs_input_vertices = 3;
-							break;
-
-						case CG_TRIANGLE_ADJ:
-							gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
-							gs_input_vertices = 6;
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							gs_input_type_ = 0;
-							gs_input_vertices = 0;
-							break;
-						}
-
-						switch (cgGetProgramOutput(shaders[type]))
-						{
-						case CG_POINT_OUT:
-							gs_output_type_ = GL_POINTS;
-							break;
-
-						case CG_LINE_OUT:
-							gs_output_type_ = GL_LINE_STRIP;
-							break;
-
-						case CG_TRIANGLE_OUT:
-							gs_output_type_ = GL_TRIANGLE_STRIP;
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							gs_output_type_ = 0;
-							break;
-						}
-					}
-
-					(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(shaders[type], CG_COMPILED_PROGRAM),
-						static_cast<ShaderType>(type), gs_input_vertices, has_gs);
 					char const * glsl = (*glsl_srcs_)[type].c_str();
 					GLuint object = glCreateShader(shader_type);
 					if (0 == object)
@@ -1583,6 +1610,7 @@ namespace KlayGE
 				}
 			}
 
+			sd.tech_pass = (tech_index << 16) + pass_index;
 			is_validate_ &= is_shader_validate_[type];
 		}
 
