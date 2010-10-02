@@ -22,8 +22,6 @@
 #include <d3d9.h>
 #include <boost/assert.hpp>
 
-#include <KlayGE/D3D9/D3D9Mapping.hpp>
-#include <KlayGE/D3D9/D3D9Texture.hpp>
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC

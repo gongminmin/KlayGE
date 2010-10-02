@@ -32,8 +32,6 @@
 #pragma warning(pop)
 #endif
 
-#include <KlayGE/D3D9/D3D9Typedefs.hpp>
-
 namespace KlayGE
 {
 	class DShowVMR9Allocator : public IVMRSurfaceAllocator9, IVMRImagePresenter9
@@ -98,14 +96,14 @@ namespace KlayGE
 		HWND			wnd_;
 		atomic<int32_t>	ref_count_;
 
-		ID3D9Ptr			d3d_;
-		ID3D9DevicePtr		d3d_device_;
+		boost::shared_ptr<IDirect3D9> d3d_;
+		boost::shared_ptr<IDirect3DDevice9> d3d_device_;
 
 		boost::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
 		std::vector<IDirect3DSurface9*>	surfaces_;
 		uint32_t cur_surf_index_;
 
-		ID3D9SurfacePtr		cache_surf_;
+		boost::shared_ptr<IDirect3DSurface9> cache_surf_;
 		TexturePtr			present_tex_;
 
 		D3DPRESENT_PARAMETERS d3dpp_;

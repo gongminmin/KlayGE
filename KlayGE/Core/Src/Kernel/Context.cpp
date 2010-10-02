@@ -105,7 +105,7 @@ namespace KlayGE
 		float stereo_separation = 0;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
-		std::string rf_name = "D3D9";
+		std::string rf_name = "D3D11";
 #else
 		std::string rf_name = "OpenGL";
 #endif
