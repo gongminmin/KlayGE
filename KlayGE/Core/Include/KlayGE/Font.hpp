@@ -46,7 +46,6 @@
 #include <KlayGE/Rect.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
-#include <KlayGE/ClosedHashMap.hpp>
 
 #include <list>
 #include <map>
@@ -55,6 +54,7 @@
 #pragma warning(push)
 #pragma warning(disable: 6334)
 #endif
+#include <boost/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
@@ -106,8 +106,8 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		closed_hash_map<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> >, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::pool_allocator<std::pair<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> > > > > char_index_advance_;
+		boost::unordered_map<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> >, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> > > > > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;
@@ -174,8 +174,8 @@ namespace KlayGE
 		bool restart_;
 		bool dirty_;
 
-		closed_hash_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
-			boost::pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
+		boost::unordered_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
+			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
 
 		uint32_t curX_, curY_;
 

@@ -15,12 +15,13 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE
 {
-	UIRadioButton::UIRadioButton(UIDialogPtr dialog)
+	UIRadioButton::UIRadioButton(UIDialogPtr const & dialog)
 						: UIControl(UIRadioButton::Type, dialog),
 							checked_(false), pressed_(false)
 	{
@@ -29,7 +30,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIRadioButton::UIRadioButton(uint32_t type, UIDialogPtr dialog)
+	UIRadioButton::UIRadioButton(uint32_t type, UIDialogPtr const & dialog)
 						: UIControl(type, dialog),
 							checked_(false), pressed_(false)
 	{
@@ -38,7 +39,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIRadioButton::UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
+	UIRadioButton::UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIRadioButton::Type, dialog),
 							button_group_(nButtonGroup),
 							checked_(bChecked), pressed_(false), text_(strText)

@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	UITexButton::UITexButton(UIDialogPtr dialog)
+	UITexButton::UITexButton(UIDialogPtr const & dialog)
 					: UIControl(UITexButton::Type, dialog),
 						pressed_(false)
 	{
@@ -30,7 +30,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UITexButton::UITexButton(uint32_t type, UIDialogPtr dialog)
+	UITexButton::UITexButton(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						pressed_(false)
 	{
@@ -39,7 +39,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UITexButton::UITexButton(UIDialogPtr dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UITexButton::Type, dialog),
 						pressed_(false)
 	{

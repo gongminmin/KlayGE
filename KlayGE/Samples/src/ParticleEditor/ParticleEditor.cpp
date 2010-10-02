@@ -243,8 +243,6 @@ namespace
 			*(technique_->Effect().ParameterByName("View")) = view;
 			*(technique_->Effect().ParameterByName("Proj")) = proj;
 
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
 			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
 			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);

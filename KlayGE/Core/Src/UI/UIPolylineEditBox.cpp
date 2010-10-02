@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr dialog)
+	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog)
 					: UIControl(UIPolylineEditBox::Type, dialog),
 						active_pt_(-1),
 						move_point_(false)
@@ -30,7 +30,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIPolylineEditBox::UIPolylineEditBox(uint32_t type, UIDialogPtr dialog)
+	UIPolylineEditBox::UIPolylineEditBox(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						active_pt_(-1),
 						move_point_(false)
@@ -40,7 +40,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UIPolylineEditBox::Type, dialog),
 						active_pt_(-1),
 						move_point_(false)

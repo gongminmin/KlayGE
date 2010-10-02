@@ -30,6 +30,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/XMLDom.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/Input.hpp>
 
@@ -246,8 +247,17 @@ namespace KlayGE
 		texture_color_.Init(default_texture_color);
 	}
 
-	void UIElement::SetFont(uint32_t font_index, Color const & default_font_color,
-		uint32_t text_align)
+	void UIElement::SetFont(uint32_t font_index)
+	{
+		this->SetFont(font_index, Color(1, 1, 1, 1));
+	}
+
+	void UIElement::SetFont(uint32_t font_index, Color const & default_font_color)
+	{
+		this->SetFont(font_index, default_font_color, Font::FA_Hor_Center | Font::FA_Ver_Middle);
+	}
+
+	void UIElement::SetFont(uint32_t font_index, Color const & default_font_color, uint32_t text_align)
 	{
 		font_index_ = font_index;
 		text_align_ = text_align;
@@ -698,7 +708,57 @@ namespace KlayGE
 		return ret;
 	}
 
-	bool UIManager::RegisterDialog(UIDialogPtr dialog)
+	size_t UIManager::AddTexture(TexturePtr const & texture)
+	{
+		texture_cache_.push_back(texture);
+		return texture_cache_.size() - 1;
+	}
+
+	size_t UIManager::AddFont(FontPtr const & font, uint32_t font_size)
+	{
+		font_cache_.push_back(std::make_pair(font, font_size));
+		return font_cache_.size() - 1;
+	}
+
+	TexturePtr const & UIManager::GetTexture(size_t index) const
+	{
+		if (index < texture_cache_.size())
+		{
+			return texture_cache_[index];
+		}
+		else
+		{
+			static TexturePtr empty = TexturePtr();
+			return empty;
+		}
+	}
+
+	FontPtr const & UIManager::GetFont(size_t index) const
+	{
+		if (index < font_cache_.size())
+		{
+			return font_cache_[index].first;
+		}
+		else
+		{
+			static FontPtr empty = FontPtr();
+			return empty;
+		}
+	}
+
+	uint32_t UIManager::GetFontSize(size_t index) const
+	{
+		if (index < font_cache_.size())
+		{
+			return font_cache_[index].second;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	bool UIManager::RegisterDialog(UIDialogPtr const & dialog)
 	{
 		// Check that the dialog isn't already registered.
 		for (size_t i = 0; i < dialogs_.size(); ++ i)
@@ -714,7 +774,7 @@ namespace KlayGE
 		return true;
 	}
 
-	void UIManager::UnregisterDialog(UIDialogPtr dialog)
+	void UIManager::UnregisterDialog(UIDialogPtr const & dialog)
 	{
 		// Search for the dialog in the list.
 		for (size_t i = 0; i < dialogs_.size(); ++ i)

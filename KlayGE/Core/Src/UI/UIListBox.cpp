@@ -17,12 +17,13 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE
 {
-	UIListBox::UIListBox(UIDialogPtr dialog)
+	UIListBox::UIListBox(UIDialogPtr const & dialog)
 						: UIControl(UIListBox::Type, dialog),
 							scroll_bar_(dialog),
 							sb_width_(16), border_(6), margin_(5), text_height_(0),
@@ -35,7 +36,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIListBox::UIListBox(uint32_t type, UIDialogPtr dialog)
+	UIListBox::UIListBox(uint32_t type, UIDialogPtr const & dialog)
 						: UIControl(type, dialog),
 							scroll_bar_(dialog),
 							sb_width_(16), border_(6), margin_(5), text_height_(0),
@@ -48,7 +49,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIListBox::UIListBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, STYLE dwStyle)
+	UIListBox::UIListBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, STYLE dwStyle)
 						: UIControl(UIListBox::Type, dialog),
 							scroll_bar_(dialog),
 							sb_width_(16), border_(6), margin_(5), text_height_(0),

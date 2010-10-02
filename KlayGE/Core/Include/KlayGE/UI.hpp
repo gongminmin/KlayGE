@@ -25,7 +25,6 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Font.hpp>
 #include <KlayGE/Timer.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -86,8 +85,9 @@ namespace KlayGE
 	public:
 		void SetTexture(uint32_t tex_index, Rect_T<int32_t> const & tex_rect, Color const & default_texture_color = Color(1, 1, 1, 1));
 
-		void SetFont(uint32_t font_index, Color const & default_font_color = Color(1, 1, 1, 1),
-			uint32_t text_align = Font::FA_Hor_Center | Font::FA_Ver_Middle);
+		void SetFont(uint32_t font_index);
+		void SetFont(uint32_t font_index, Color const & default_font_color);
+		void SetFont(uint32_t font_index, Color const & default_font_color, uint32_t text_align);
 
 		void Refresh();
 
@@ -143,7 +143,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API UIControl : public boost::enable_shared_from_this<UIControl>
 	{
 	public:
-		UIControl(uint32_t type, UIDialogPtr dialog)
+		UIControl(uint32_t type, UIDialogPtr const & dialog)
 			: visible_(true),
 					is_mouse_over_(false), has_focus_(false), is_default_(false),
 					x_(0), y_(0), width_(0), height_(0),
@@ -263,14 +263,13 @@ namespace KlayGE
 
 		virtual void SetTextColor(Color const & color)
 		{
-			UIElementPtr element = elements_[0];
-
+			UIElementPtr const & element = elements_[0];
 			if (element)
 			{
 				element->FontColor().States[UICS_Normal] = color;
 			}
 		}
-		UIElementPtr GetElement(uint32_t iElement) const
+		UIElementPtr const & GetElement(uint32_t iElement) const
 		{
 			return elements_[iElement];
 		}
@@ -384,55 +383,15 @@ namespace KlayGE
 
 		UIDialogPtr MakeDialog(TexturePtr const & control_tex = TexturePtr());
 
-		size_t AddTexture(TexturePtr const & texture)
-		{
-			texture_cache_.push_back(texture);
-			return texture_cache_.size() - 1;
-		}
-		size_t AddFont(FontPtr const & font, uint32_t font_size)
-		{
-			font_cache_.push_back(std::make_pair(font, font_size));
-			return font_cache_.size() - 1;
-		}
+		size_t AddTexture(TexturePtr const & texture);
+		size_t AddFont(FontPtr const & font, uint32_t font_size);
 
-		TexturePtr const & GetTexture(size_t index) const
-		{
-			if (index < texture_cache_.size())
-			{
-				return texture_cache_[index];
-			}
-			else
-			{
-				static TexturePtr empty = TexturePtr();
-				return empty;
-			}
-		}
-		FontPtr const & GetFont(size_t index) const
-		{
-			if (index < font_cache_.size())
-			{
-				return font_cache_[index].first;
-			}
-			else
-			{
-				static FontPtr empty = FontPtr();
-				return empty;
-			}
-		}
-		uint32_t GetFontSize(size_t index) const
-		{
-			if (index < font_cache_.size())
-			{
-				return font_cache_[index].second;
-			}
-			else
-			{
-				return 0;
-			}
-		}
+		TexturePtr const & GetTexture(size_t index) const;
+		FontPtr const & GetFont(size_t index) const;
+		uint32_t GetFontSize(size_t index) const;
 
-		bool RegisterDialog(UIDialogPtr dialog);
-		void UnregisterDialog(UIDialogPtr dialog);
+		bool RegisterDialog(UIDialogPtr const & dialog);
+		void UnregisterDialog(UIDialogPtr const & dialog);
 		void EnableKeyboardInputForAllDialogs();
 
 		RenderEffectPtr GetEffect() const
@@ -732,9 +691,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIStatic(UIDialogPtr dialog);
-		UIStatic(uint32_t type, UIDialogPtr dialog);
-		UIStatic(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
+		explicit UIStatic(UIDialogPtr const & dialog);
+		UIStatic(uint32_t type, UIDialogPtr const & dialog);
+		UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
 		virtual ~UIStatic() {}
 
 		virtual void Render();
@@ -758,9 +717,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIButton(UIDialogPtr dialog);
-		UIButton(uint32_t type, UIDialogPtr dialog);
-		UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UIButton(UIDialogPtr const & dialog);
+		UIButton(uint32_t type, UIDialogPtr const & dialog);
+		UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIButton() {}
 
 		virtual bool CanHaveFocus() const
@@ -811,9 +770,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UITexButton(UIDialogPtr dialog);
-		UITexButton(uint32_t type, UIDialogPtr dialog);
-		UITexButton(UIDialogPtr dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UITexButton(UIDialogPtr const & dialog);
+		UITexButton(uint32_t type, UIDialogPtr const & dialog);
+		UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UITexButton() {}
 
 		virtual bool CanHaveFocus() const
@@ -864,9 +823,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UICheckBox(UIDialogPtr dialog);
-		UICheckBox(uint32_t type, UIDialogPtr dialog);
-		UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UICheckBox(UIDialogPtr const & dialog);
+		UICheckBox(uint32_t type, UIDialogPtr const & dialog);
+		UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UICheckBox() {}
 
 		virtual bool CanHaveFocus() const
@@ -926,9 +885,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIRadioButton(UIDialogPtr dialog);
-		UIRadioButton(uint32_t type, UIDialogPtr dialog);
-		UIRadioButton(UIDialogPtr dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UIRadioButton(UIDialogPtr const & dialog);
+		UIRadioButton(uint32_t type, UIDialogPtr const & dialog);
+		UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIRadioButton() {}
 
 		void SetChecked(bool bChecked, bool bClearGroup = true) { this->SetCheckedInternal(bChecked, bClearGroup); }
@@ -993,9 +952,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UISlider(UIDialogPtr dialog);
-		UISlider(uint32_t type, UIDialogPtr dialog);
-		UISlider(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
+		explicit UISlider(UIDialogPtr const & dialog);
+		UISlider(uint32_t type, UIDialogPtr const & dialog);
+		UISlider(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
 		virtual ~UISlider() {}
 
 		virtual bool CanHaveFocus() const
@@ -1064,9 +1023,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIScrollBar(UIDialogPtr dialog);
-		UIScrollBar(uint32_t type, UIDialogPtr dialog);
-		UIScrollBar(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int nTrackStart = 0, int nTrackEnd = 1, int nTrackPos = 0, int nPageSize = 1);
+		explicit UIScrollBar(UIDialogPtr const & dialog);
+		UIScrollBar(uint32_t type, UIDialogPtr const & dialog);
+		UIScrollBar(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int nTrackStart = 0, int nTrackEnd = 1, int nTrackPos = 0, int nPageSize = 1);
 		virtual ~UIScrollBar();
 
 		virtual void OnFocusOut()
@@ -1149,9 +1108,9 @@ namespace KlayGE
 			MULTI_SELECTION = 1
 		};
 
-		explicit UIListBox(UIDialogPtr dialog);
-		UIListBox(uint32_t type, UIDialogPtr dialog);
-		UIListBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, STYLE dwStyle = SINGLE_SELECTION);
+		explicit UIListBox(UIDialogPtr const & dialog);
+		UIListBox(uint32_t type, UIDialogPtr const & dialog);
+		UIListBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, STYLE dwStyle = SINGLE_SELECTION);
 		virtual ~UIListBox();
 
 		virtual bool CanHaveFocus() const
@@ -1243,9 +1202,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIComboBox(UIDialogPtr dialog);
-		UIComboBox(uint32_t type, UIDialogPtr dialog);
-		UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UIComboBox(UIDialogPtr const & dialog);
+		UIComboBox(uint32_t type, UIDialogPtr const & dialog);
+		UIComboBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIComboBox();
 
 		virtual void SetTextColor(Color const & color);
@@ -1403,9 +1362,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIEditBox(UIDialogPtr dialog);
-		UIEditBox(uint32_t type, UIDialogPtr dialog);
-		UIEditBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
+		explicit UIEditBox(UIDialogPtr const & dialog);
+		UIEditBox(uint32_t type, UIDialogPtr const & dialog);
+		UIEditBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
 		virtual ~UIEditBox();
 
 		virtual void UpdateRects();
@@ -1494,9 +1453,9 @@ namespace KlayGE
 		};
 
 	public:
-		explicit UIPolylineEditBox(UIDialogPtr dialog);
-		UIPolylineEditBox(uint32_t type, UIDialogPtr dialog);
-		UIPolylineEditBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		explicit UIPolylineEditBox(UIDialogPtr const & dialog);
+		UIPolylineEditBox(uint32_t type, UIDialogPtr const & dialog);
+		UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
 		virtual ~UIPolylineEditBox() {}
 
 		virtual bool CanHaveFocus() const

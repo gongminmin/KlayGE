@@ -20,14 +20,14 @@
 
 namespace KlayGE
 {
-	UISlider::UISlider(UIDialogPtr dialog)
+	UISlider::UISlider(UIDialogPtr const & dialog)
 					: UIControl(UISlider::Type, dialog),
                         value_(50), min_(0), max_(100),
 						pressed_(false)
 	{
 	}
 
-	UISlider::UISlider(uint32_t type, UIDialogPtr dialog)
+	UISlider::UISlider(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
                         value_(50), min_(0), max_(100),
 						pressed_(false)
@@ -35,7 +35,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UISlider::UISlider(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int min, int max, int value, bool bIsDefault)
+	UISlider::UISlider(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int min, int max, int value, bool bIsDefault)
 					: UIControl(UISlider::Type, dialog),
 						value_(value), min_(min), max_(max),
 						pressed_(false)

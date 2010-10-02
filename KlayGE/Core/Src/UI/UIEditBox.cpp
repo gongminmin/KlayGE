@@ -6,6 +6,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <boost/bind.hpp>
 
@@ -171,7 +172,7 @@ namespace KlayGE
 	// If EDITBOX_SCROLLEXTENT = 4, then we scroll 1/4 of the control each time.
 	int const EDITBOX_SCROLLEXTENT = 4;
 
-	UIEditBox::UIEditBox(UIDialogPtr dialog)
+	UIEditBox::UIEditBox(UIDialogPtr const & dialog)
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
@@ -197,7 +198,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIEditBox::UIEditBox(uint32_t type, UIDialogPtr dialog)
+	UIEditBox::UIEditBox(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing
@@ -223,7 +224,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIEditBox::UIEditBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
+	UIEditBox::UIEditBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
 						spacing_(4),	// Default spacing

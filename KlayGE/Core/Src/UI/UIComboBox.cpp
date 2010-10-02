@@ -15,12 +15,13 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE
 {
-	UIComboBox::UIComboBox(UIDialogPtr dialog)
+	UIComboBox::UIComboBox(UIDialogPtr const & dialog)
 						: UIControl(UIComboBox::Type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),
@@ -32,7 +33,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIComboBox::UIComboBox(uint32_t type, UIDialogPtr dialog)
+	UIComboBox::UIComboBox(uint32_t type, UIDialogPtr const & dialog)
 						: UIControl(type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),
@@ -44,7 +45,7 @@ namespace KlayGE
 		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
-	UIComboBox::UIComboBox(UIDialogPtr dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIComboBox::UIComboBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 						: UIControl(UIComboBox::Type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),

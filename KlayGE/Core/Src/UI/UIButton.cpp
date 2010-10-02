@@ -20,7 +20,7 @@
 
 namespace KlayGE
 {
-	UIButton::UIButton(UIDialogPtr dialog)
+	UIButton::UIButton(UIDialogPtr const & dialog)
 					: UIControl(UIButton::Type, dialog),
 						pressed_(false)
 	{
@@ -29,7 +29,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIButton::UIButton(uint32_t type, UIDialogPtr dialog)
+	UIButton::UIButton(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						pressed_(false)
 	{
@@ -38,7 +38,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIButton::UIButton(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
+	UIButton::UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UIButton::Type, dialog),
 						pressed_(false),
 						text_(strText)

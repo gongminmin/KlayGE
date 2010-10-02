@@ -29,7 +29,7 @@ namespace KlayGE
 	Timer UIScrollBar::timer_;
 
 
-	UIScrollBar::UIScrollBar(UIDialogPtr dialog)
+	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog)
 					: UIControl(UIScrollBar::Type, dialog),
 						show_thumb_(true), drag_(false),
 						position_(0), page_size_(1),
@@ -44,7 +44,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UIScrollBar::UIScrollBar(UIDialogPtr dialog, int ID, int x, int y, int width, int height, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
+	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
 					: UIControl(UIScrollBar::Type, dialog),
 						show_thumb_(true), drag_(false),
 						position_(nTrackPos), page_size_(nPageSize),
@@ -64,7 +64,7 @@ namespace KlayGE
 		this->SetSize(width, height);
 	}
 
-	UIScrollBar::UIScrollBar(uint32_t type, UIDialogPtr dialog)
+	UIScrollBar::UIScrollBar(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						show_thumb_(true), drag_(false),
 						position_(0), page_size_(1),

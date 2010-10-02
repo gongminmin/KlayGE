@@ -18,19 +18,19 @@
 
 namespace KlayGE
 {
-	UIStatic::UIStatic(UIDialogPtr dialog)
+	UIStatic::UIStatic(UIDialogPtr const & dialog)
 					: UIControl(UIStatic::Type, dialog)
 	{
 		this->InitDefaultElements();
 	}
 
-	UIStatic::UIStatic(uint32_t type, UIDialogPtr dialog)
+	UIStatic::UIStatic(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog)
 	{
 		this->InitDefaultElements();
 	}
 
-	UIStatic::UIStatic(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
+	UIStatic::UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault)
 					: UIControl(UIStatic::Type, dialog),
 						text_(strText)
 	{

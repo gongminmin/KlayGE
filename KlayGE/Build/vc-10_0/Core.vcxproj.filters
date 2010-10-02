@@ -458,15 +458,6 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\config\auto_link.hpp">
       <Filter>Kernel\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashMap.hpp">
-      <Filter>Kernel\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashSet.hpp">
-      <Filter>Kernel\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashTable.hpp">
-      <Filter>Kernel\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\COMPtr.hpp">
       <Filter>Kernel\Header Files</Filter>
     </ClInclude>

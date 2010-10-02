@@ -319,9 +319,6 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\aligned_allocator.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\atomic.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\config\auto_link.hpp" />
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashMap.hpp" />
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashSet.hpp" />
-    <ClInclude Include="..\..\Core\Include\KlayGE\ClosedHashTable.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\COMPtr.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Config.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Context.hpp" />

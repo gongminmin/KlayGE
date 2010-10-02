@@ -15,12 +15,13 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/UI.hpp>
 
 namespace KlayGE
 {
-	UICheckBox::UICheckBox(UIDialogPtr dialog)
+	UICheckBox::UICheckBox(UIDialogPtr const & dialog)
 					: UIControl(UICheckBox::Type, dialog),
 						checked_(false), pressed_(false)
 	{
@@ -29,7 +30,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UICheckBox::UICheckBox(uint32_t type, UIDialogPtr dialog)
+	UICheckBox::UICheckBox(uint32_t type, UIDialogPtr const & dialog)
 					: UIControl(type, dialog),
 						checked_(false), pressed_(false)
 	{
@@ -38,7 +39,7 @@ namespace KlayGE
 		this->InitDefaultElements();
 	}
 
-	UICheckBox::UICheckBox(UIDialogPtr dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
+	UICheckBox::UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked, uint8_t hotkey, bool bIsDefault)
 					: UIControl(UICheckBox::Type, dialog),
 						checked_(bChecked), pressed_(false),
 						text_(strText)
