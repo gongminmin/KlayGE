@@ -174,6 +174,25 @@ namespace KlayGE
 		{
 			return vertex_streams_[index].stream;
 		}
+		void SetVertexStream(uint32_t index, GraphicsBufferPtr const & gb)
+		{
+			vertex_streams_[index].stream = gb;
+		}
+		template <typename tuple_type>
+		void VertexStreamFormat(uint32_t index, tuple_type const & vertex_elems)
+		{
+			this->VertexStreamFormat(index, Tuple2Vector(vertex_elems));
+		}
+		void VertexStreamFormat(uint32_t index, vertex_elements_type const & vet)
+		{
+			vertex_streams_[index].format = vet;
+			uint32_t size = 0;
+			for (size_t i = 0; i < vet.size(); ++ i)
+			{
+				size += vet[i].element_size();
+			}
+			vertex_streams_[index].vertex_size = size;
+		}
 		vertex_elements_type const & VertexStreamFormat(uint32_t index) const
 		{
 			return vertex_streams_[index].format;

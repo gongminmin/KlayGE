@@ -23,6 +23,7 @@
 #include <boost/foreach.hpp>
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGLES2/OGLES2Mapping.hpp>
 #include <KlayGE/OpenGLES2/OGLES2GraphicsBuffer.hpp>
 #include <KlayGE/OpenGLES2/OGLES2ShaderObject.hpp>
 #include <KlayGE/OpenGLES2/OGLES2RenderLayout.hpp>
@@ -55,8 +56,10 @@ namespace KlayGE
 				{
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-					GLboolean const normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : GL_FALSE;
+					GLenum type;
+					GLboolean normalized;
+					OGLES2Mapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
 					glEnableVertexAttribArray(attr);
 					stream.Active();

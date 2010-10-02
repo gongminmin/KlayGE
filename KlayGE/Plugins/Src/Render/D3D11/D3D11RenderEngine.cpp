@@ -457,7 +457,7 @@ namespace KlayGE
 		{
 			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
-			D3D11GraphicsBuffer& d3dvb(*checked_pointer_cast<D3D11GraphicsBuffer>(stream));
+			D3D11GraphicsBuffer const & d3dvb = *checked_pointer_cast<D3D11GraphicsBuffer>(stream);
 			vbs[i] = d3dvb.D3DBuffer().get();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
@@ -467,7 +467,7 @@ namespace KlayGE
 			uint32_t number = rl.NumVertexStreams();
 			GraphicsBufferPtr stream = rl.InstanceStream();
 
-			D3D11GraphicsBuffer& d3dvb(*checked_pointer_cast<D3D11GraphicsBuffer>(stream));
+			D3D11GraphicsBuffer const & d3dvb = *checked_pointer_cast<D3D11GraphicsBuffer>(stream);
 			vbs[number] = d3dvb.D3DBuffer().get();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
@@ -478,8 +478,8 @@ namespace KlayGE
 			d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
 			D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
-			D3D11ShaderObjectPtr shader = checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject());
-			ID3D11InputLayoutPtr layout = d3d_rl.InputLayout(shader->VSSignature(), shader->VSCode());
+			D3D11ShaderObjectPtr const & shader = checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject());
+			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader->VSSignature(), shader->VSCode());
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout.get());
@@ -496,7 +496,7 @@ namespace KlayGE
 			d3d_imm_ctx_->IASetInputLayout(NULL);
 		}
 
-		uint32_t vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
+		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
 		if (topology_type_cache_ != rl.TopologyType())
 		{
@@ -504,49 +504,49 @@ namespace KlayGE
 			topology_type_cache_ = rl.TopologyType();
 		}
 
-		uint32_t primCount;
+		uint32_t prim_count;
 		RenderLayout::topology_type tt = rl.TopologyType();
 		switch (tt)
 		{
 		case RenderLayout::TT_PointList:
-			primCount = vertex_count;
+			prim_count = vertex_count;
 			break;
 
 		case RenderLayout::TT_LineList:
 		case RenderLayout::TT_LineList_Adj:
-			primCount = vertex_count / 2;
+			prim_count = vertex_count / 2;
 			break;
 
 		case RenderLayout::TT_LineStrip:
 		case RenderLayout::TT_LineStrip_Adj:
-			primCount = vertex_count - 1;
+			prim_count = vertex_count - 1;
 			break;
 
 		case RenderLayout::TT_TriangleList:
 		case RenderLayout::TT_TriangleList_Adj:
-			primCount = vertex_count / 3;
+			prim_count = vertex_count / 3;
 			break;
 
 		case RenderLayout::TT_TriangleStrip:
 		case RenderLayout::TT_TriangleStrip_Adj:
-			primCount = vertex_count - 2;
+			prim_count = vertex_count - 2;
 			break;
 
 		default:
 			if ((rl.TopologyType() >= RenderLayout::TT_1_Ctrl_Pt_PatchList)
 				&& (rl.TopologyType() <= RenderLayout::TT_32_Ctrl_Pt_PatchList))
 			{
-				primCount = vertex_count / 3;
+				prim_count = vertex_count / 3;
 			}
 			else
 			{
 				BOOST_ASSERT(false);
-				primCount = 0;
+				prim_count = 0;
 			}
 			break;
 		}
 
-		numPrimitivesJustRendered_ += primCount;
+		numPrimitivesJustRendered_ += prim_count;
 		numVerticesJustRendered_ += vertex_count;
 
 		uint32_t const num_passes = tech.NumPasses();
@@ -557,12 +557,14 @@ namespace KlayGE
 				D3D11GraphicsBuffer& d3dib(*checked_pointer_cast<D3D11GraphicsBuffer>(rl.GetIndexStream()));
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
+				uint32_t const num_indices = rl.NumIndices();
+				uint32_t const num_instances = rl.NumInstance();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexedInstanced(rl.NumIndices(), rl.NumInstance(), 0, 0, 0);
+					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, 0, 0, 0);
 					pass->Unbind();
 				}
 			}
@@ -570,12 +572,14 @@ namespace KlayGE
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
 
+				uint32_t const num_vertices = rl.NumVertices();
+				uint32_t const num_instances = rl.NumInstance();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawInstanced(rl.NumVertices(), rl.NumInstance(), 0, 0);
+					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, 0, 0);
 					pass->Unbind();
 				}
 			}
@@ -587,12 +591,13 @@ namespace KlayGE
 				D3D11GraphicsBuffer& d3dib(*checked_pointer_cast<D3D11GraphicsBuffer>(rl.GetIndexStream()));
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
+				uint32_t const num_indices = rl.NumIndices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexed(rl.NumIndices(), 0, 0);
+					d3d_imm_ctx_->DrawIndexed(num_indices, 0, 0);
 					pass->Unbind();
 				}
 			}
@@ -600,12 +605,13 @@ namespace KlayGE
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
 
+				uint32_t const num_vertices = rl.NumVertices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->Draw(rl.NumVertices(), 0);
+					d3d_imm_ctx_->Draw(num_vertices, 0);
 					pass->Unbind();
 				}
 			}

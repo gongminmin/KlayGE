@@ -105,11 +105,11 @@ namespace
 				{
 					diffuse_tex_ = tex;
 				}
-				if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+				else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 				{
 					specular_tex_ = tex;
 				}
-				if (("Bump" == iter->first) || ("Bump Map" == iter->first))
+				else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
 				{
 					bump_tex_ = tex;
 				}
@@ -844,7 +844,9 @@ int main()
 
 DeferredShadingApp::DeferredShadingApp()
 			: App3DFramework("DeferredShading"),
-				anti_alias_enabled_(true)
+				anti_alias_enabled_(true),
+				num_objs_rendered_(0), num_renderable_rendered_(0),
+				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
 	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
 

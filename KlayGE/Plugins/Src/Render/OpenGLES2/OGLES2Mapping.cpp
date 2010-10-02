@@ -413,4 +413,121 @@ namespace KlayGE
 			THR(boost::system::posix_error::not_supported);
 		}
 	}
+
+	void MappingVertexFormat(GLenum& gltype, GLboolean& normalized, ElementFormat ef)
+	{
+		switch (ef)
+		{
+		case EF_A8:
+		case EF_R8:
+		case EF_GR8:
+		case EF_BGR8:
+		case EF_ARGB8:
+		case EF_ABGR8:
+			gltype = GL_UNSIGNED_BYTE;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_R8UI:
+		case EF_GR8UI:
+		case EF_BGR8UI:
+		case EF_ABGR8UI:
+			gltype = GL_UNSIGNED_BYTE;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_SIGNED_R8:
+		case EF_SIGNED_GR8:
+		case EF_SIGNED_BGR8:
+		case EF_SIGNED_ABGR8:
+			gltype = GL_BYTE;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_R8I:
+		case EF_GR8I:
+		case EF_BGR8I:
+		case EF_ABGR8I:
+			gltype = GL_BYTE;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_A2BGR10:
+			gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_SIGNED_A2BGR10:
+			gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_R16:
+		case EF_GR16:
+		case EF_BGR16:
+		case EF_ABGR16:
+			gltype = GL_UNSIGNED_SHORT;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_R16UI:
+		case EF_GR16UI:
+		case EF_BGR16UI:
+		case EF_ABGR16UI:
+			gltype = GL_UNSIGNED_SHORT;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_SIGNED_R16:
+		case EF_SIGNED_GR16:
+		case EF_SIGNED_BGR16:
+		case EF_SIGNED_ABGR16:
+			gltype = GL_SHORT;
+			normalized = GL_TRUE;
+			break;
+
+		case EF_R16I:
+		case EF_GR16I:
+		case EF_BGR16I:
+		case EF_ABGR16I:
+			gltype = GL_SHORT;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_R32UI:
+		case EF_GR32UI:
+		case EF_BGR32UI:
+		case EF_ABGR32UI:
+			gltype = GL_UNSIGNED_INT;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_R32I:
+		case EF_GR32I:
+		case EF_BGR32I:
+		case EF_ABGR32I:
+			gltype = GL_INT;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_R16F:
+		case EF_GR16F:
+		case EF_BGR16F:
+		case EF_ABGR16F:
+			gltype = GL_HALF_FLOAT_OES;
+			normalized = GL_FALSE;
+			break;
+
+		case EF_R32F:
+		case EF_GR32F:
+		case EF_BGR32F:
+		case EF_ABGR32F:
+			gltype = GL_FLOAT;
+			normalized = GL_FALSE;
+			break;
+
+		default:
+			THR(boost::system::posix_error::not_supported);
+		}
+	}
 }

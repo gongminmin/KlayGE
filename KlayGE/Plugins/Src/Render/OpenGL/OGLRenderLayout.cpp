@@ -29,6 +29,7 @@
 #include <boost/foreach.hpp>
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 #include <KlayGE/OpenGL/OGLRenderLayout.hpp>
@@ -88,8 +89,10 @@ namespace KlayGE
 				{
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-					GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-					GLboolean const normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : GL_FALSE;
+					GLenum type;
+					GLboolean normalized;
+					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
 					stream.Active();
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);

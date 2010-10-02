@@ -41,6 +41,7 @@ namespace KlayGE
 		static void Mapping(GLenum& primType, uint32_t& primCount, RenderLayout const & rl);
 
 		static void MappingFormat(GLint& internalFormat, GLenum& glformat, GLenum& gltype, ElementFormat ef);
+		static void MappingVertexFormat(GLenum& gltype, GLboolean& normalized, ElementFormat ef);
 	};
 }
 
