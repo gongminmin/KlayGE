@@ -15,14 +15,15 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/Timer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #include "DistanceMapping.hpp"
 
@@ -37,6 +38,10 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon")
 		{
+			BOOST_AUTO(diffuse_loader, LoadTexture("diffuse.dds", EAH_GPU_Read));
+			BOOST_AUTO(normal_loader, LoadTexture("normal.dds", EAH_GPU_Read));
+			BOOST_AUTO(dist_loader, LoadTexture("distance.dds", EAH_GPU_Read));
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			RenderEffectPtr effect = rf.LoadEffect("DistanceMapping.fxml");
@@ -47,15 +52,15 @@ namespace
 				technique_ = effect->TechniqueByName("DistanceMapping20");
 			}
 
-			*(technique_->Effect().ParameterByName("diffuse_tex")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("normal_tex")) = LoadTexture("normal.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("distance_tex")) = LoadTexture("distance.dds", EAH_GPU_Read)();
+			*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_loader();
+			*(technique_->Effect().ParameterByName("normal_tex")) = normal_loader();
+			*(technique_->Effect().ParameterByName("distance_tex")) = dist_loader();
 
 			float3 xyzs[] =
 			{
-				float3(-1, 1,  0),
-				float3(1,	1,	0),
-				float3(1,	-1,	0),
+				float3(-1, +1, 0),
+				float3(+1, +1, 0),
+				float3(+1, -1, 0),
 				float3(-1, -1, 0)
 			};
 
@@ -72,15 +77,32 @@ namespace
 				0, 1, 2, 2, 3, 0
 			};
 
-			float3 normal[4];
-			MathLib::compute_normal<float>(normal,
+			float3 normal_float3[4];
+			MathLib::compute_normal<float>(normal_float3,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
 
-			float3 t[4], b[4];
-			MathLib::compute_tangent<float>(t, b,
+			float3 tangent_float3[4], binormal_float3[4];
+			MathLib::compute_tangent<float>(tangent_float3, binormal_float3,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal);
+				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal_float3);
+
+			uint32_t normal[4];
+			for (uint32_t j = 0; j < 4; ++ j)
+			{
+				normal_float3[j] = MathLib::normalize(normal_float3[j]) * 0.5f + 0.5f;
+				normal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 1023), 0, 1023) << 20);
+			}
+			uint32_t tangent[4];
+			for (uint32_t j = 0; j < 4; ++ j)
+			{
+				tangent_float3[j] = MathLib::normalize(tangent_float3[j]) * 0.5f + 0.5f;
+				tangent[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].z() * 1023), 0, 1023) << 20);
+			}
 
 			rl_ = rf.MakeRenderLayout();
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
@@ -96,20 +118,20 @@ namespace
 			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = sizeof(t);
+			init_data.row_pitch = sizeof(normal);
 			init_data.slice_pitch = 0;
-			init_data.data = t;
-			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			init_data.data = normal;
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			
-			init_data.row_pitch = sizeof(b);
+			init_data.row_pitch = sizeof(tangent);
 			init_data.slice_pitch = 0;
-			init_data.data = b;
-			GraphicsBufferPtr binormal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			init_data.data = tangent;
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			rl_->BindVertexStream(binormal_vb, boost::make_tuple(vertex_element(VEU_Binormal, 0, EF_BGR32F)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
@@ -148,14 +170,17 @@ namespace
 
 		void Update()
 		{
-			float degree(std::clock() / 700.0f);
-			float4x4 matRot(MathLib::rotation_z(degree));
+			float degree = static_cast<float>(timer_.current_time());
+			float4x4 matRot = MathLib::rotation_z(degree);
 
 			float3 light_pos(2, 0, -2);
 			light_pos = MathLib::transform_coord(light_pos, matRot);
 
 			checked_pointer_cast<RenderPolygon>(renderable_)->SetLightPos(light_pos);
 		}
+
+	private:
+		Timer timer_;
 	};
 
 

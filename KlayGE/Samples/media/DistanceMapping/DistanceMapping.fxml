@@ -23,42 +23,59 @@
 		<![CDATA[
 void DistanceMappingVS(float4 pos		: POSITION,
 					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,	// in object space
 					float3 T			: TANGENT,	// in object space
-					float3 B			: BINORMAL,	// in object space
 					
-					out float3 oTexcoord0	: TEXCOORD0,
-					out float3 oL			: TEXCOORD1,	// in tangent space
-					out float3 oV			: TEXCOORD2,	// in tangent space
-					out float4 oPos			: SV_Position)
+					out float4 oL		: TEXCOORD0,	// in tangent space
+					out float4 oV		: TEXCOORD1,	// in tangent space
+					out float3 oH		: TEXCOORD2,	// in tangent space
+					out float4 oPos		: SV_Position)
 {
 	oPos = mul(pos, worldviewproj);
-	oTexcoord0 = float3(texcoord0, 1);
+
+	N = N * 2 - 1;
+	T = T * 2 - 1;
 
 	float3x3 matObjToTangentSpace;
 	matObjToTangentSpace[0] = T;
-	matObjToTangentSpace[1] = B;
-	matObjToTangentSpace[2] = cross(T, B);
+	matObjToTangentSpace[1] = cross(N, T);
+	matObjToTangentSpace[2] = N;
 
 	float3 vLight = light_pos - pos.xyz;
-	float3 vView = pos.xyz - eye_pos;
+	float3 vView = eye_pos - pos.xyz;
+	float3 vHalf = vLight + vView;
 
-	float3 vTanLight = mul(matObjToTangentSpace, vLight);
-	float3 vTanView = mul(matObjToTangentSpace, vView);
-
-	oL = vTanLight;
-	oV = vTanView;
+	oL.xyz = mul(matObjToTangentSpace, vLight);
+	oV.xyz = mul(matObjToTangentSpace, vView);
+	oH = mul(matObjToTangentSpace, vHalf);
+	
+	oL.w = texcoord0.x;
+	oV.w = texcoord0.y;
 }
 
-float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
-						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2) : SV_Target
+float4 DistanceMappingShading(float3 L, float3 H, float3 diffuse, float3 normal)
 {
-	float3 view = normalize(V) * float3(1, 1, 16) * 0.06;
+	float3 light_vec = normalize(L);
+	float diffuse_factor = diffuse_term(light_vec, normal);
+
+	float3 halfway = normalize(H);
+	float specular_factor = specular_term(halfway, normal, 16);
+
+	return float4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
+}
+
+float4 DistanceMappingPS(float4 L	: TEXCOORD0,
+						float4 V	: TEXCOORD1,
+						float3 H	: TEXCOORD2) : SV_Target
+{
+	float3 texCoord0 = float3(L.w, V.w, 1);
+	
+	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 8; ++ i)
 	{
-		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
+		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
 	}
 
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
@@ -70,24 +87,22 @@ float4 DistanceMappingPS(float3 texCoord0	: TEXCOORD0,
 	float2 dy = ddy(texCoord0.xy);
 
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
-
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
-	float3 light_vec = normalize(L);
-	float diffuse_factor = diffuse_term(light_vec, bump_normal);
-
-	return float4(diffuse * diffuse_factor, 1);
+	return DistanceMappingShading(L.xyz, H, diffuse, bump_normal);
 }
 
-float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
-						float3 L		: TEXCOORD1,
-						float3 V		: TEXCOORD2) : SV_Target
+float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
+						float4 V		: TEXCOORD1,
+						float3 H		: TEXCOORD2) : SV_Target
 {
-	float3 view = normalize(V) * float3(1, 1, 16) * 0.06;
+	float3 texCoord0 = float3(L.w, V.w, 1);
+
+	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
 
 	float3 texUV = texCoord0;
 	for (int i = 0; i < 2; ++ i)
 	{
-		texUV += view * distance_tex.Sample(linear_sampler, texUV).r;
+		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
 	}
 	
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
@@ -96,12 +111,8 @@ float4 DistanceMappingPS_20(float3 texCoord0	: TEXCOORD0,
 	}
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
-
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
-	float3 light_vec = normalize(L);
-	float diffuse_factor = diffuse_term(light_vec, bump_normal);
-
-	return float4(diffuse * diffuse_factor, 1);
+	return DistanceMappingShading(L.xyz, H, diffuse, bump_normal);
 }
 		]]>
 	</shader>

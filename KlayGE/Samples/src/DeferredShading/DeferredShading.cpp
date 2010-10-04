@@ -17,12 +17,12 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
+#include <KlayGE/Timer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 
@@ -344,7 +344,9 @@ namespace
 
 		void Update()
 		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_ * MathLib::rotation_y(std::clock() * rot_speed_) * MathLib::translation(0.0f, height_, 0.0f);
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
+				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
+				* MathLib::translation(0.0f, height_, 0.0f);
 			checked_pointer_cast<RenderCone>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderCone>(renderable_)->Update();
 
@@ -391,6 +393,8 @@ namespace
 		float rot_speed_, height_;
 
 		DeferredSpotLightSourcePtr light_;
+
+		Timer timer_;
 	};
 
 	class RenderSphere : public KMesh, public DeferredRenderable
@@ -471,7 +475,9 @@ namespace
 
 		void Update()
 		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * MathLib::translation(sin(std::clock() * move_speed_), 0.0f, 0.0f) * MathLib::translation(pos_);
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f)
+				* MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
+				* MathLib::translation(pos_);
 			checked_pointer_cast<RenderSphere>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderSphere>(renderable_)->Update();
 
@@ -516,6 +522,8 @@ namespace
 		float3 pos_;
 
 		DeferredPointLightSourcePtr light_;
+
+		Timer timer_;
 	};
 
 	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox, public DeferredRenderable

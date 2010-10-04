@@ -27,37 +27,42 @@
 		<![CDATA[
 void ParallaxVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,
 					float3 T			: TANGENT,
-					float3 B			: BINORMAL,
-					out float2 oTexcoord0	: TEXCOORD0,
-					out float3 oL			: TEXCOORD1,	// in tangent space
-					out float3 oV			: TEXCOORD2,	// in tangent space
-					out float3 oH			: TEXCOORD3,	// in tangent space
+					out float4 oL			: TEXCOORD0,	// in tangent space
+					out float4 oV			: TEXCOORD1,	// in tangent space
+					out float3 oH			: TEXCOORD2,	// in tangent space
 					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oTexcoord0 = texcoord0;
+	
+	N = N * 2 - 1;
+	T = T * 2 - 1;
 
 	float3x3 objToTangentSpace;
 	objToTangentSpace[0] = T;
-	objToTangentSpace[1] = B;
-	objToTangentSpace[2] = cross(T, B);
+	objToTangentSpace[1] = cross(N, T);
+	objToTangentSpace[2] = N;
 
 	float3 lightVec = light_pos - pos.xyz;
 	float3 viewVec = eye_pos - pos.xyz;
 	float3 halfVec = lightVec + viewVec;
 
-	oL = mul(objToTangentSpace, lightVec);
-	oV = mul(objToTangentSpace, viewVec);
+	oL.xyz = mul(objToTangentSpace, lightVec);
+	oV.xyz = mul(objToTangentSpace, viewVec);
 	oH = mul(objToTangentSpace, halfVec);
+	
+	oL.w = texcoord0.x;
+	oV.w = texcoord0.y;
 }
 
-float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
-					float3 L		: TEXCOORD1,
-					float3 V		: TEXCOORD2,
-					float3 H		: TEXCOORD3) : SV_Target
+float4 ParallaxPS(float4 L		: TEXCOORD0,
+					float4 V		: TEXCOORD1,
+					float3 H		: TEXCOORD2) : SV_Target
 {
-	float3 view = normalize(V);
+	float2 texCoord0 = float2(L.w, V.w);
+	
+	float3 view = normalize(V.xyz);
 
 	float height = height_tex.Sample(linear_sampler, texCoord0).r * parallax_scale - parallax_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
@@ -65,7 +70,7 @@ float4 ParallaxPS(float2 texCoord0	: TEXCOORD0,
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV).rgb;
 
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV));
-	float3 light_vec = normalize(L);
+	float3 light_vec = normalize(L.xyz);
 	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
 	float4 clr;

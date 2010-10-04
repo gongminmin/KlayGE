@@ -1270,17 +1270,22 @@ namespace KlayGE
 				{
 					OGLES2ShaderObjectPtr so = checked_pointer_cast<OGLES2ShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
+					is_shader_validate_[type] = so->is_shader_validate_[type];
+
 					if (is_shader_validate_[type])
 					{
 						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
 					}
 
-					is_shader_validate_[type] = so->is_shader_validate_[type];
-
 					if (is_shader_validate_[type])
 					{
 						(*glsl_srcs_)[type] = (*so->glsl_srcs_)[type];
+
+						if (ST_PixelShader == type)
+						{
+							has_discard_ = so->has_discard_;
+						}
 					}
 				}
 				else
@@ -1361,10 +1366,11 @@ namespace KlayGE
 
 					glAttachShader(glsl_program_, object);
 					glDeleteShader(object);
+
+					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 
-			sd.tech_pass = (tech_index << 16) + pass_index;
 			is_validate_ &= is_shader_validate_[type];
 		}
 

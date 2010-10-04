@@ -198,20 +198,12 @@ namespace
 		"varying in float v_gl_FogFragCoordIn[%d];\n";
 
 	char const * predefined_gs_out_varyings = "\n"\
-		"varying out vec4 v_gl_FrontColorOut;\n"\
-		"varying out vec4 v_gl_BackColorOut;\n"\
-		"varying out vec4 v_gl_FrontSecondaryColorOut;\n"\
-		"varying out vec4 v_gl_BackSecondaryColorOut;\n"\
-		"varying out vec4 v_gl_TexCoordOut[8];\n"\
-		"varying out float v_gl_FogFragCoordOut;\n";
-
-	char const * predefined_ps_in_varyings_with_gs = "\n"\
-		"varying vec4 v_gl_FrontColorOut;\n"\
-		"varying vec4 v_gl_BackColorOut;\n"\
-		"varying vec4 v_gl_FrontSecondaryColorOut;\n"\
-		"varying vec4 v_gl_BackSecondaryColorOut;\n"\
-		"varying vec4 v_gl_TexCoordOut[8];\n"\
-		"varying float v_gl_FogFragCoordOut;\n";
+		"varying out vec4 v_gl_FrontColor;\n"\
+		"varying out vec4 v_gl_BackColor;\n"\
+		"varying out vec4 v_gl_FrontSecondaryColor;\n"\
+		"varying out vec4 v_gl_BackSecondaryColor;\n"\
+		"varying out vec4 v_gl_TexCoord[8];\n"\
+		"varying out float v_gl_FogFragCoord;\n";
 
 	template <typename SrcType>
 	class SetOGLShaderParameter
@@ -1206,14 +1198,7 @@ namespace KlayGE
 			break;
 
 		case ST_PixelShader:
-			if (has_gs)
-			{
-				ss << predefined_ps_in_varyings_with_gs << std::endl;
-			}
-			else
-			{
-				ss << predefined_varyings << std::endl;
-			}
+			ss << predefined_varyings << std::endl;
 			break;
 
 		default:
@@ -1252,13 +1237,6 @@ namespace KlayGE
 						{
 							ss << "In";
 						}
-						else
-						{
-							if (ST_GeometryShader == type)
-							{
-								ss << "Out";
-							}
-						}
 					}
 					else
 					{
@@ -1288,10 +1266,6 @@ namespace KlayGE
 								else
 								{
 									ss << "v_" << this_token;
-									if (ST_GeometryShader == type)
-									{
-										ss  << "Out";
-									}
 								}
 							}
 							else
@@ -1322,30 +1296,18 @@ namespace KlayGE
 				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
 				{
 					ss << "v_" << this_token;
-					if (has_gs)
-					{
-						ss << "Out";
-					}
 				}
 				else
 				{
 					if ("gl_Color" == this_token)
 					{
 						ss << "v_gl_FrontColor";
-						if (has_gs)
-						{
-							ss << "Out";
-						}
 					}
 					else
 					{
 						if ("gl_SecondaryColor" == this_token)
 						{
 							ss << "v_gl_FrontSecondaryColor";
-							if (has_gs)
-							{
-								ss << "Out";
-							}
 						}
 						else
 						{
@@ -1445,19 +1407,30 @@ namespace KlayGE
 				{
 					OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
 
+					is_shader_validate_[type] = so->is_shader_validate_[type];
+
 					if (is_shader_validate_[type])
 					{
 						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
 					}
 
-					is_shader_validate_[type] = so->is_shader_validate_[type];
-
 					if (is_shader_validate_[type])
 					{
-						gs_input_type_ = so->gs_input_type_;
-						gs_output_type_ = so->gs_output_type_;
 						(*glsl_srcs_)[type] = (*so->glsl_srcs_)[type];
+
+						if (ST_GeometryShader == type)
+						{
+							gs_input_type_ = so->gs_input_type_;
+							gs_output_type_ = so->gs_output_type_;
+						}
+						else
+						{
+							if (ST_PixelShader == type)
+							{
+								has_discard_ = so->has_discard_;
+							}
+						}
 					}
 				}
 				else
@@ -1607,10 +1580,11 @@ namespace KlayGE
 					}
 
 					glDeleteShader(object);
+
+					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 
-			sd.tech_pass = (tech_index << 16) + pass_index;
 			is_validate_ &= is_shader_validate_[type];
 		}
 

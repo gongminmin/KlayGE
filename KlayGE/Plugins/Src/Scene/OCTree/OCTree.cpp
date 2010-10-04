@@ -133,7 +133,7 @@ namespace KlayGE
 				SceneObjectPtr const & obj = scene_objs_[i];
 				if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 				{
-					Box const & aabb_in_ws = scene_obj_bbs_[i];
+					Box const & aabb_in_ws = *scene_obj_bbs_[i];
 
 					bb_root |= aabb_in_ws;
 					obj_indices[0].push_back(i);
@@ -249,18 +249,25 @@ namespace KlayGE
 	{
 		scene_objs_.push_back(obj);
 
-		Box const & box = obj->GetBound();
-		float4x4 const & mat = obj->GetModelMatrix();
-
-		float3 min, max;
-		min = max = MathLib::transform_coord(box[0], mat);
-		for (size_t j = 1; j < 8; ++ j)
+		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 		{
-			float3 vec = MathLib::transform_coord(box[j], mat);
-			min = MathLib::minimize(min, vec);
-			max = MathLib::maximize(max, vec);
+			Box const & box = obj->GetBound();
+			float4x4 const & mat = obj->GetModelMatrix();
+
+			float3 min, max;
+			min = max = MathLib::transform_coord(box[0], mat);
+			for (size_t j = 1; j < 8; ++ j)
+			{
+				float3 vec = MathLib::transform_coord(box[j], mat);
+				min = MathLib::minimize(min, vec);
+				max = MathLib::maximize(max, vec);
+			}
+			scene_obj_bbs_.push_back(MakeSharedPtr<Box>(min, max));
 		}
-		scene_obj_bbs_.push_back(Box(min, max));
+		else
+		{
+			scene_obj_bbs_.push_back(boost::shared_ptr<Box>());
+		}
 
 		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 		{

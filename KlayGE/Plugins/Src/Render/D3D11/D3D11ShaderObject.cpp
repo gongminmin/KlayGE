@@ -1666,6 +1666,7 @@ namespace KlayGE
 			}
 		}
 
+		std::vector<ID3D11Buffer*> cb;
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
 			if (!srvs_[st].empty())
@@ -1680,7 +1681,7 @@ namespace KlayGE
 
 			if (!d3d_cbufs_[st].empty())
 			{
-				std::vector<ID3D11Buffer*> cb(d3d_cbufs_[st].size());
+				cb.resize(d3d_cbufs_[st].size());
 				for (size_t i = 0; i < cb.size(); ++ i)
 				{
 					cb[i] = d3d_cbufs_[st][i].get();

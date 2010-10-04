@@ -13,7 +13,10 @@ void MandelbrotVS(float2 pos : POSITION,
 	float2 tc = pos / 2;
 	tc.y *= flipping;
 	tc += 0.5f;
-	oTexcoord0 = tc * 2.4f - float2(1.8f, 1.2f);
+	
+	float scale = 2.4f;
+	float2 center = float2(-1.8f, -1.2f);
+	oTexcoord0 = tc * scale + center;
 }
 
 float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target

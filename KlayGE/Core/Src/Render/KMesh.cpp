@@ -507,19 +507,19 @@ namespace KlayGE
 							switch (num_components)
 							{
 							case 1:
-								ve.format = EF_R8;
+								ve.format = EF_R8UI;
 								break;
 
 							case 2:
-								ve.format = EF_GR8;
+								ve.format = EF_GR8UI;
 								break;
 
 							case 3:
-								ve.format = EF_BGR8;
+								ve.format = EF_BGR8UI;
 								break;
 
 							case 4:
-								ve.format = EF_ABGR8;
+								ve.format = EF_ABGR8UI;
 								break;
 							}
 						}

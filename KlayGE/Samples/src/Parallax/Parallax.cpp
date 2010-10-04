@@ -48,6 +48,83 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
+				switch (rl_->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Normal:
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						std::vector<float3> normals_float3(rl_->NumVertices());
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals_float3.size(), normals_float3.begin());
+
+							std::copy(normals_float3.begin(), normals_float3.end(), mapper.Pointer<float3>());
+						}
+
+						std::vector<uint32_t> normals(normals_float3.size());
+						for (uint32_t j = 0; j < normals_float3.size(); ++ j)
+						{
+							normals_float3[j] = MathLib::normalize(normals_float3[j]) * 0.5f + 0.5f;
+							normals[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals_float3[j].x() * 1023), 0, 1023)
+								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals_float3[j].y() * 1023), 0, 1023) << 10)
+								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals_float3[j].z() * 1023), 0, 1023) << 20);
+						}
+
+						ElementInitData init_data;
+						init_data.data = &normals[0];
+						init_data.row_pitch = normals.size() * sizeof(normals[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+						rl_->SetVertexStream(i, normal_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+					}
+					break;
+
+				case VEU_Tangent:
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						std::vector<float3> tangents_float3(rl_->NumVertices());
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents_float3.size(), tangents_float3.begin());
+
+							std::copy(tangents_float3.begin(), tangents_float3.end(), mapper.Pointer<float3>());
+						}
+
+						std::vector<uint32_t> tangents(tangents_float3.size());
+						for (uint32_t j = 0; j < tangents_float3.size(); ++ j)
+						{
+							tangents_float3[j] = MathLib::normalize(tangents_float3[j]) * 0.5f + 0.5f;
+							tangents[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents_float3[j].x() * 1023), 0, 1023)
+								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents_float3[j].y() * 1023), 0, 1023) << 10)
+								| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents_float3[j].z() * 1023), 0, 1023) << 20);
+						}
+
+						ElementInitData init_data;
+						init_data.data = &tangents[0];
+						init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+						rl_->SetVertexStream(i, tangent_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
 		}
 
 		void OnRenderBegin()
@@ -254,7 +331,8 @@ void Parallax::DoUpdateOverlay()
 	UIManager::Instance().Render();
 
 	std::wostringstream stream;
-	stream << this->FPS();
+	stream.precision(2);
+	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax Mapping", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
