@@ -10,6 +10,7 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
+	<parameter type="float2" name="src_tex_size"/>
 	<parameter type="float" name="color_weight" array_size="8"/>
 	<parameter type="float" name="tex_coord_offset" array_size="8"/>
 
@@ -20,6 +21,7 @@ void BlurXVS(float4 pos : POSITION,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
 					out float4 oTex3 : TEXCOORD3,
+					out float2 oOriTex : TEXCOORD4,
 					out float4 oPos : SV_Position)
 {
 	oPos = pos;
@@ -34,6 +36,7 @@ void BlurXVS(float4 pos : POSITION,
 	oTex1 = tex[1];
 	oTex2 = tex[2];
 	oTex3 = tex[3];
+	oOriTex = Tex0;
 }
 
 void BlurYVS(float4 pos : POSITION,
@@ -41,6 +44,7 @@ void BlurYVS(float4 pos : POSITION,
 					out float4 oTex1 : TEXCOORD1,
 					out float4 oTex2 : TEXCOORD2,
 					out float4 oTex3 : TEXCOORD3,
+					out float2 oOriTex : TEXCOORD4,
 					out float4 oPos : SV_Position)
 {
 	oPos = pos;
@@ -55,18 +59,44 @@ void BlurYVS(float4 pos : POSITION,
 	oTex1 = tex[1];
 	oTex2 = tex[2];
 	oTex3 = tex[3];
+	oOriTex = Tex0;
 }
 
-float4 BlurPS(float4 iTex0 : TEXCOORD0,
+float4 BlurXPS(float4 iTex0 : TEXCOORD0,
 				float4 iTex1 : TEXCOORD1,
 				float4 iTex2 : TEXCOORD2,
-				float4 iTex3 : TEXCOORD3) : SV_Target0
+				float4 iTex3 : TEXCOORD3,
+				float2 iOriTex : TEXCOORD4) : SV_Target0
 {
 	float4 color = float4(0, 0, 0, 1);
 	float4 tex[4] = { iTex0, iTex1, iTex2, iTex3 };
+	
+	float2 offset = float2((floor(iOriTex.x * src_tex_size.x) + 0.5f) * src_tex_size.y - iOriTex.x, 0);
 
 	for (int i = 0; i < 4; ++ i)
 	{
+		tex[i] += offset.xyxy;
+		color.rgb += src_tex.Sample(src_sampler, tex[i].xy).rgb * color_weight[i * 2 + 0];
+		color.rgb += src_tex.Sample(src_sampler, tex[i].zw).rgb * color_weight[i * 2 + 1];
+	}
+
+	return color;
+}
+
+float4 BlurYPS(float4 iTex0 : TEXCOORD0,
+				float4 iTex1 : TEXCOORD1,
+				float4 iTex2 : TEXCOORD2,
+				float4 iTex3 : TEXCOORD3,
+				float2 iOriTex : TEXCOORD4) : SV_Target0
+{
+	float4 color = float4(0, 0, 0, 1);
+	float4 tex[4] = { iTex0, iTex1, iTex2, iTex3 };
+	
+	float2 offset = float2(0, (floor(iOriTex.y * src_tex_size.x) + 0.5f) * src_tex_size.y - iOriTex.y);
+
+	for (int i = 0; i < 4; ++ i)
+	{
+		tex[i] += offset.xyxy;
 		color.rgb += src_tex.Sample(src_sampler, tex[i].xy).rgb * color_weight[i * 2 + 0];
 		color.rgb += src_tex.Sample(src_sampler, tex[i].zw).rgb * color_weight[i * 2 + 1];
 	}
@@ -82,7 +112,7 @@ float4 BlurPS(float4 iTex0 : TEXCOORD0,
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="BlurXVS()"/>
-			<state name="pixel_shader" value="BlurPS()"/>
+			<state name="pixel_shader" value="BlurXPS()"/>
 		</pass>
 	</technique>
 
@@ -92,7 +122,7 @@ float4 BlurPS(float4 iTex0 : TEXCOORD0,
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="BlurYVS()"/>
-			<state name="pixel_shader" value="BlurPS()"/>
+			<state name="pixel_shader" value="BlurYPS()"/>
 		</pass>
 	</technique>
 </effect>

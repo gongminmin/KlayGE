@@ -48,7 +48,8 @@ void ShowQuadVS(float4 pos : POSITION,
 {
 	PostProcessVS(pos, oTc0, oPos);
 	
-	oViewDir = texcoord_to_view(float2(oPos.x, -oPos.y) + 0.5f);
+	float2 tc = oPos.xy / oPos.w * 0.5f;
+	oViewDir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
 }
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -56,12 +57,12 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y);
+	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y / view_dir.z);
 
-	return float4(pos_es * 0.05f, 1);
+	return float4(pos_es * 0.03f, 1);
 }
 
-float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 ShowNormalPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	float3 normal = GetNormal(ndc);
@@ -69,13 +70,13 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 	return float4(normal / 2 + 0.5f, 1);
 }
 
-float4 ShowDepthPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 ShowDepthPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	return float4(GetDepth(ndc).xxx * 10, 1);
 }
 
-float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 ShowSSAOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 
@@ -83,7 +84,7 @@ float4 ShowSSAOPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	return color;
 }
 
-float4 ShowLightingPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 ShowLightingPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	return lighting_tex.Sample(point_sampler, tc0);
 }

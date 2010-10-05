@@ -256,8 +256,10 @@ namespace KlayGE
 		SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~SeparableBoxFilterPostProcess();
 
+		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+
 	protected:
-		void CalSampleOffsets(uint32_t tex_size, float deviation);
+		void CalSampleOffsets(uint32_t tex_size);
 
 	protected:
 		int kernel_radius_;
@@ -273,6 +275,8 @@ namespace KlayGE
 		SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
 		virtual ~SeparableGaussianFilterPostProcess();
 
+		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
 		void CalSampleOffsets(uint32_t tex_size, float deviation);
@@ -281,6 +285,7 @@ namespace KlayGE
 		int kernel_radius_;
 		float multiplier_;
 
+		RenderEffectParameterPtr src_tex_size_ep_;
 		RenderEffectParameterPtr color_weight_ep_;
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
@@ -296,8 +301,7 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			T::InputPin(index, tex);
-			this->CalSampleOffsets(tex->Width(0), 3);
+			T::SeparableInputPin(index, tex, true);
 		}
 	};
 
@@ -312,8 +316,7 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
 		{
-			T::InputPin(index, tex);
-			this->CalSampleOffsets(tex->Height(0), 3);
+			T::SeparableInputPin(index, tex, false);
 		}
 	};
 
@@ -332,11 +335,18 @@ namespace KlayGE
 		{
 			pp_chain_[0]->InputPin(index, tex);
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			pp_chain_[0]->OutputPin(0, blur_x);
-			pp_chain_[1]->InputPin(0, blur_x);
+			if (0 == index)
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
+						1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				pp_chain_[0]->OutputPin(0, blur_x);
+				pp_chain_[1]->InputPin(0, blur_x);
+			}
+			else
+			{
+				pp_chain_[1]->InputPin(index, tex);
+			}
 		}
 	};
 }

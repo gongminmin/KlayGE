@@ -989,8 +989,17 @@ namespace KlayGE
 	SeparableBoxFilterPostProcess::~SeparableBoxFilterPostProcess()
 	{
 	}
+	
+	void SeparableBoxFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	{
+		PostProcess::InputPin(index, tex);
+		if (0 == index)
+		{
+			this->CalSampleOffsets(x_dir ? tex->Width(0) : tex->Height(0));
+		}
+	}
 
-	void SeparableBoxFilterPostProcess::CalSampleOffsets(uint32_t tex_size, float /*deviation*/)
+	void SeparableBoxFilterPostProcess::CalSampleOffsets(uint32_t tex_size)
 	{
 		std::vector<float> color_weight(kernel_radius_ + 1, multiplier_ / (2 * kernel_radius_ + 1));
 		std::vector<float> tex_coord_offset(kernel_radius_ + 1, 0);
@@ -1019,12 +1028,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
 
+		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");
 		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
 
 	SeparableGaussianFilterPostProcess::~SeparableGaussianFilterPostProcess()
 	{
+	}
+
+	void SeparableGaussianFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	{
+		PostProcess::InputPin(index, tex);
+		if (0 == index)
+		{
+			this->CalSampleOffsets(x_dir ? tex->Width(0) : tex->Height(0), 3.0f);
+		}
 	}
 
 	float SeparableGaussianFilterPostProcess::GaussianDistribution(float x, float y, float rho)
@@ -1074,6 +1093,7 @@ namespace KlayGE
 			color_weight[i] = multiplier_ * scale;
 		}
 
+		*src_tex_size_ep_ = float2(static_cast<float>(tex_size), 1.0f / tex_size);
 		*color_weight_ep_ = color_weight;
 		*tex_coord_offset_ep_ = tex_coord_offset;
 	}
