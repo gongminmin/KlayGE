@@ -93,7 +93,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float3" name="depth_near_far_invfar"/>
-		<parameter type="float2" name="inv_tex_width_height"/>
+		<parameter type="float4" name="tex_wh_inv_wh"/>
 	</cbuffer>
 
 	<cbuffer name="hdao_params">
@@ -110,12 +110,6 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="sampler" name="bilinear_wrap_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
-
 	<parameter type="texture2D" name="src_tex"/>
 
 	<shader>
@@ -129,9 +123,9 @@ float NormalRejectionTest(float2 tc)
 	float summed_dot = 0;
 	for (int i = 0; i < 4; ++ i)
 	{
-		float2 pattern_offset = normal_load_pattern[i] * inv_tex_width_height;
+		float2 pattern_offset = normal_load_pattern[i] * tex_wh_inv_wh.zw;
 		float2 offset_tc = tc + pattern_offset;
-		float2 mirror_offset_tc = tc - pattern_offset - inv_tex_width_height;
+		float2 mirror_offset_tc = tc - pattern_offset - tex_wh_inv_wh.zw;
 
 		float3 n1 = GetNormal(src_tex.Sample(point_sampler, offset_tc));
 		float3 n2 = GetNormal(src_tex.Sample(point_sampler, mirror_offset_tc));
@@ -150,7 +144,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 #ifdef OFFSET_SUPPORT
 	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(0, 1));
 #else
-	texel = src_tex.SampleLevel(point_sampler, tc + float2(0, inv_tex_width_height.y), 0);
+	texel = src_tex.SampleLevel(point_sampler, tc + float2(0, tex_wh_inv_wh.w), 0);
 #endif
 	z_samples.x = GetDepth(texel);
 	nz_samples.x = GetNormal(texel).z;
@@ -158,7 +152,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 #ifdef OFFSET_SUPPORT
 	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(1, 1));
 #else
-	texel = src_tex.SampleLevel(point_sampler, tc + inv_tex_width_height, 0);
+	texel = src_tex.SampleLevel(point_sampler, tc + tex_wh_inv_wh.zw, 0);
 #endif
 	z_samples.y = GetDepth(texel);
 	nz_samples.y = GetNormal(texel).z;
@@ -166,7 +160,7 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 #ifdef OFFSET_SUPPORT
 	texel = src_tex.SampleLevel(point_sampler, tc, 0, int2(1, 0));
 #else
-	texel = src_tex.SampleLevel(point_sampler, tc + float2(inv_tex_width_height.x, 0), 0);
+	texel = src_tex.SampleLevel(point_sampler, tc + float2(tex_wh_inv_wh.z, 0), 0);
 #endif
 	z_samples.z = GetDepth(texel);
 	nz_samples.z = GetNormal(texel).z;
@@ -180,7 +174,9 @@ void GatherSamples(float2 tc, out float4 z_samples, out float4 nz_samples)
 
 float4 SSAO(float2 tc0, int num_rings)
 {
-	int num_ring_gathers = (1 + num_rings) * num_rings;
+	tc0 = (floor(tc0 * tex_wh_inv_wh.xy) + 0.5f) * tex_wh_inv_wh.zw;
+	
+	const int num_ring_gathers = (1 + num_rings) * num_rings;
 
 	float4 sampled_z[2];
 	float4 sampled_nz[2];
@@ -199,9 +195,9 @@ float4 SSAO(float2 tc0, int num_rings)
 
 		for (int i = 0; i < num_ring_gathers; ++ i)
 		{
-			float2 pattern_offset = hdao_ring_pattern[i] * inv_tex_width_height;
+			float2 pattern_offset = hdao_ring_pattern[i] * tex_wh_inv_wh.zw;
 			float2 offset_tc = tc0 + pattern_offset;
-			float2 mirror_offset_tc = tc0 - pattern_offset - inv_tex_width_height;
+			float2 mirror_offset_tc = tc0 - pattern_offset - tex_wh_inv_wh.zw;
 
 			GatherSamples(offset_tc, sampled_z[0], sampled_nz[0]);
 			GatherSamples(mirror_offset_tc, sampled_z[1], sampled_nz[1]);
