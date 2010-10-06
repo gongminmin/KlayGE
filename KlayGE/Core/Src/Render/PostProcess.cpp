@@ -982,6 +982,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
 
+		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");
 		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");
 		tex_coord_offset_ep_ = technique_->Effect().ParameterByName("tex_coord_offset");
 	}
@@ -1013,6 +1014,7 @@ namespace KlayGE
 		}
 		tex_coord_offset[kernel_radius_] = kernel_radius_ * tu;
 
+		*src_tex_size_ep_ = float2(static_cast<float>(tex_size), 1.0f / tex_size);
 		*color_weight_ep_ = color_weight;
 		*tex_coord_offset_ep_ = tex_coord_offset;
 	}

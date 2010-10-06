@@ -265,6 +265,7 @@ namespace KlayGE
 		int kernel_radius_;
 		float multiplier_;
 
+		RenderEffectParameterPtr src_tex_size_ep_;
 		RenderEffectParameterPtr color_weight_ep_;
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};

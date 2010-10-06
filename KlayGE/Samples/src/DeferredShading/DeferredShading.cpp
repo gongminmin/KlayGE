@@ -704,7 +704,8 @@ namespace
 			PostProcess::InputPin(index, tex);
 			if ((0 == index) && tex)
 			{
-				*(technique_->Effect().ParameterByName("inv_tex_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
+				*(technique_->Effect().ParameterByName("tex_wh_inv_wh")) = float4(static_cast<float>(tex->Width(0)),
+					static_cast<float>(tex->Height(0)), 1.0f / tex->Width(0), 1.0f / tex->Height(0));
 			}
 		}
 
@@ -1122,20 +1123,35 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	switch (pass)
+	if (1 == pass)
 	{
-	case 1:
 		num_objs_rendered_ = sceneMgr.NumObjectsRendered();
 		num_renderable_rendered_ = sceneMgr.NumRenderablesRendered();
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 
-		if ((0 == buffer_type_) || (5 == buffer_type_) || (6 == buffer_type_))
+		if ((0 == buffer_type_) || (5 == buffer_type_))
 		{
 			ssao_pp_->Apply();
 		}
 
-		break;
+		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_) || (5 == buffer_type_))
+		{
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			debug_pp_->Apply();
+			return App3DFramework::URV_Finished;
+		}
+		else
+		{
+			if (4 == buffer_type_)
+			{
+				renderEngine.BindFrameBuffer(FrameBufferPtr());
+				renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+				edge_anti_alias_->Apply();
+				return App3DFramework::URV_Finished;
+			}
+		}
 	}
 
 	uint32_t ret = deferred_shading_->Update(pass);
@@ -1143,19 +1159,19 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-		if ((buffer_type_ > 0) && (buffer_type_ != 4))
+		if (0 == buffer_type_)
 		{
-			debug_pp_->Apply();
-		}
-		else
-		{
-			if (((0 == buffer_type_) && anti_alias_enabled_) || (4 == buffer_type_))
+			if (anti_alias_enabled_)
 			{
 				edge_anti_alias_->Apply();
 			}
-			if (0 == buffer_type_)
+			hdr_pp_->Apply();
+		}
+		else
+		{
+			if (6 == buffer_type_)
 			{
-				hdr_pp_->Apply();
+				debug_pp_->Apply();
 			}
 		}
 	}
