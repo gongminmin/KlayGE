@@ -278,22 +278,7 @@ namespace KlayGE
 	{
 		if (d3d_sr_view_)
 		{
-			if (!(desc_.MiscFlags & D3D11_RESOURCE_MISC_GENERATE_MIPS))
-			{
-				desc_.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-				ID3D11Texture2D* d3d_tex;
-				TIF(d3d_device_->CreateTexture2D(&desc_, NULL, &d3d_tex));
-
-				d3d_imm_ctx_->CopyResource(d3d_tex, d3dTextureCube_.get());
-
-				d3dTextureCube_ = MakeCOMPtr(d3d_tex);
-
-				ID3D11ShaderResourceView* d3d_sr_view;
-				d3d_device_->CreateShaderResourceView(d3dTextureCube_.get(), NULL, &d3d_sr_view);
-				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-			}
-
+			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
 			d3d_imm_ctx_->GenerateMips(d3d_sr_view_.get());
 		}
 		else

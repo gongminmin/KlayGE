@@ -156,6 +156,10 @@ namespace KlayGE
 		}
 
 		misc_flags = 0;
+		if (access_hint_ & EAH_Generate_Mips)
+		{
+			misc_flags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
+		}
 	}
 
 	void D3D11Texture::Map1D(int /*level*/, TextureMapAccess /*tma*/,

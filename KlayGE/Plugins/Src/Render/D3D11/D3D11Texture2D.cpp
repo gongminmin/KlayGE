@@ -429,71 +429,7 @@ namespace KlayGE
 	{
 		if (d3d_sr_view_)
 		{
-			if (!(desc_.MiscFlags & D3D11_RESOURCE_MISC_GENERATE_MIPS))
-			{
-				desc_.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-				ID3D11Texture2D* d3d_tex;
-				TIF(d3d_device_->CreateTexture2D(&desc_, NULL, &d3d_tex));
-
-				d3d_imm_ctx_->CopyResource(d3d_tex, d3dTexture2D_.get());
-
-				d3dTexture2D_ = MakeCOMPtr(d3d_tex);
-
-				D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
-				switch (format_)
-				{
-				case EF_D16:
-					sr_desc.Format = DXGI_FORMAT_R16_FLOAT;
-					break;
-
-				case EF_D24S8:
-					sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
-					break;
-
-				case EF_D32F:
-					sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
-					break;
-
-				default:
-					sr_desc.Format = desc_.Format;
-					break;
-				}
-
-				if (array_size_ > 1)
-				{
-					if (desc_.SampleDesc.Count > 1)
-					{
-						sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
-					}
-					else
-					{
-						sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-					}
-					sr_desc.Texture2DArray.MostDetailedMip = 0;
-					sr_desc.Texture2DArray.MipLevels = numMipMaps_;
-					sr_desc.Texture2DArray.ArraySize = array_size_;
-					sr_desc.Texture2DArray.FirstArraySlice = 0;
-				}
-				else
-				{
-					if (desc_.SampleDesc.Count > 1)
-					{
-						sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
-					}
-					else
-					{
-						sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-					}
-					sr_desc.Texture2D.MostDetailedMip = 0;
-					sr_desc.Texture2D.MipLevels = numMipMaps_;
-				}
-
-				ID3D11ShaderResourceView* d3d_sr_view;
-				d3d_device_->CreateShaderResourceView(d3dTexture2D_.get(), &sr_desc, &d3d_sr_view);
-				d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-			}
-
+			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
 			d3d_imm_ctx_->GenerateMips(d3d_sr_view_.get());
 		}
 		else
