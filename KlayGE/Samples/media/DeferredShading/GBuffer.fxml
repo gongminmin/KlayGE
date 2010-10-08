@@ -28,6 +28,11 @@
 	<parameter type="texture2D" name="bump_tex"/>
 	<parameter type="int" name="bump_map_enabled"/>
 
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
 	<parameter type="sampler" name="aniso_sampler">
 		<state name="filtering" value="anisotropic"/>
 		<state name="address_u" value="wrap"/>
@@ -72,7 +77,7 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 {
 	if (diffuse_map_enabled)
 	{
-		clip(diffuse_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
+		clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
 	}
 
 	float3 normal;
@@ -82,7 +87,7 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 		ts_to_view[0] = ts_to_view0_2y.xyz;
 		ts_to_view[1] = ts_to_view1_2z.xyz;
 		ts_to_view[2] = float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w);
-		normal = mul(bump_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).xyz, ts_to_view);
+		normal = mul(bump_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).xyz * 2 - 1, ts_to_view);
 	}
 	else
 	{
@@ -154,7 +159,7 @@ float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 {
 	if (diffuse_map_enabled)
 	{
-		clip(diffuse_tex.Sample(aniso_sampler, tc_dist.xy).a - ALPHA_TEST_THRESHOLD);
+		clip(diffuse_tex.Sample(bilinear_sampler, tc_dist.xy).a - ALPHA_TEST_THRESHOLD);
 	}
 
 	float dist = tc_dist.z;
@@ -246,8 +251,24 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	tc /= w;
 #endif
 
-	float3 diffuse = diffuse_map_enabled ? diffuse_tex.Sample(aniso_sampler, texcoord).rgb : diffuse_clr.rgb;
-	float3 specular = specular_map_enabled ? specular_tex.Sample(aniso_sampler, texcoord).rgb : specular_level;
+	float3 diffuse;
+	if (diffuse_map_enabled)
+	{
+		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	float3 specular;
+	if (specular_map_enabled)
+	{
+		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		specular = specular_level;
+	}
 	return CalcShading(tc, diffuse, emit_clr.rgb, specular);
 }
 

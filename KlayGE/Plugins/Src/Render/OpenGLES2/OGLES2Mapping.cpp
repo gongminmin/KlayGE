@@ -414,7 +414,7 @@ namespace KlayGE
 		}
 	}
 
-	void MappingVertexFormat(GLenum& gltype, GLboolean& normalized, ElementFormat ef)
+	void OGLES2Mapping::MappingVertexFormat(GLenum& gltype, GLboolean& normalized, ElementFormat ef)
 	{
 		switch (ef)
 		{

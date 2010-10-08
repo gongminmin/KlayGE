@@ -232,7 +232,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
 		iter != texture_slots.end(); ++ iter)
 	{
-		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first))
+		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
@@ -241,7 +241,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 		else
 		{
-			if (("NormalMap" == iter->first) || ("Bump" == iter->first))
+			if (("NormalMap" == iter->first) || ("Bump" == iter->first) || ("Bump Map" == iter->first))
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
@@ -250,7 +250,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			}
 			else
 			{
-				if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
+				if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
