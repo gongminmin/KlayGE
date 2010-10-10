@@ -675,28 +675,18 @@ namespace
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSAOHigh")),
-				ssao_level_(4)
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSVOHigh")),
+				ssao_level_(2)
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
+			upper_left_param_ = technique_->Effect().ParameterByName("upper_left");
+			upper_right_param_ = technique_->Effect().ParameterByName("upper_right");
+			lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
+			lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
+			proj_param_ = technique_->Effect().ParameterByName("proj");
 			
-			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			if (caps.cs_support && (5 == caps.max_shader_model))
-			{
-				ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLowCS");
-				ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddleCS");
-				ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHighCS");
-				cs_pp_ = true;
-			}
-			else
-			{
-				ssao_techs_[0] = technique_->Effect().TechniqueByName("SSAOLow");
-				ssao_techs_[1] = technique_->Effect().TechniqueByName("SSAOMiddle");
-				ssao_techs_[2] = technique_->Effect().TechniqueByName("SSAOHigh");
-				cs_pp_ = false;
-			}
-
-			this->Technique(ssao_techs_[2]);
+			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSVOLow");
+			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSVOHigh");
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
@@ -704,8 +694,7 @@ namespace
 			PostProcess::InputPin(index, tex);
 			if ((0 == index) && tex)
 			{
-				*(technique_->Effect().ParameterByName("tex_wh_inv_wh")) = float4(static_cast<float>(tex->Width(0)),
-					static_cast<float>(tex->Height(0)), 1.0f / tex->Width(0), 1.0f / tex->Height(0));
+				*(technique_->Effect().ParameterByName("inv_tex_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
 			}
 		}
 
@@ -713,6 +702,8 @@ namespace
 
 		void SSAOLevel(int level)
 		{
+			level = std::min(2, level);
+
 			ssao_level_ = level;
 			if (level > 0)
 			{
@@ -724,24 +715,7 @@ namespace
 		{
 			if (ssao_level_ > 0)
 			{
-				if (cs_pp_)
-				{
-					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-					TexturePtr const & tex = this->InputPin(0);
-
-					int const BLOCK_SIZE_X = 16;
-					int const BLOCK_SIZE_Y = 16;
-
-					this->OnRenderBegin();
-					re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
-					this->OnRenderEnd();
-				}
-				else
-				{
-					PostProcess::Apply();
-				}
+				PostProcess::Apply();
 			}
 		}
 
@@ -751,15 +725,26 @@ namespace
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+
+			float4x4 const & proj = camera.ProjMatrix();
+			float4x4 const inv_proj = MathLib::inverse(proj);
+			*upper_left_param_ = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
+			*upper_right_param_ = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
+			*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
+			*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+			*proj_param_ = proj;
 		}
 
 	protected:
-		bool cs_pp_;
-
 		int ssao_level_;
-		RenderTechniquePtr ssao_techs_[4];
+		RenderTechniquePtr ssao_techs_[2];
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
+		RenderEffectParameterPtr upper_left_param_;
+		RenderEffectParameterPtr upper_right_param_;
+		RenderEffectParameterPtr lower_left_param_;
+		RenderEffectParameterPtr lower_right_param_;
+		RenderEffectParameterPtr proj_param_;
 	};
 
 	class DeferredShadingDebug : public PostProcess
