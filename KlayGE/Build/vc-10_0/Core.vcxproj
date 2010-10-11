@@ -391,6 +391,7 @@
     <None Include="..\..\media\PostProcessors\GammaCorrection.ppml" />
     <None Include="..\..\media\PostProcessors\GlowMerger.ppml" />
     <None Include="..\..\media\RenderFX\2D.fxml" />
+    <None Include="..\..\media\RenderFX\BilateralBlur.fxml" />
     <None Include="..\..\media\RenderFX\Blur.fxml" />
     <None Include="..\..\media\RenderFX\Bone.fxml" />
     <None Include="..\..\media\RenderFX\Copy.fxml" />

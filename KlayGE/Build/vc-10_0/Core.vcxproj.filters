@@ -757,6 +757,9 @@
     <None Include="..\..\media\RenderFX\InfTerrain.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
+    <None Include="..\..\media\RenderFX\BilateralBlur.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">

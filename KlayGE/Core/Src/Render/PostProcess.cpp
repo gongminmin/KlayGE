@@ -1099,4 +1099,41 @@ namespace KlayGE
 		*color_weight_ep_ = color_weight;
 		*tex_coord_offset_ep_ = tex_coord_offset;
 	}
+
+
+	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+		: PostProcess(L"SeparableBilateral",
+				std::vector<std::string>(),
+				std::vector<std::string>(1, "src_tex"),
+				std::vector<std::string>(1, "out_tex"),
+				Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(tech)),
+			kernel_radius_(kernel_radius), multiplier_(multiplier)
+	{
+		kernel_radius_ep_ = technique_->Effect().ParameterByName("kernel_radius");
+		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");
+		init_g_ep_ = technique_->Effect().ParameterByName("init_g");
+		blur_factor_ep_ = technique_->Effect().ParameterByName("blur_factor");
+		sharpness_factor_ep_ = technique_->Effect().ParameterByName("sharpness_factor");
+	}
+
+	SeparableBilateralFilterPostProcess::~SeparableBilateralFilterPostProcess()
+	{
+	}
+
+	void SeparableBilateralFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	{
+		PostProcess::InputPin(index, tex);
+		if (0 == index)
+		{
+			*kernel_radius_ep_ = static_cast<int32_t>(kernel_radius_);
+			float tex_size = static_cast<float>(x_dir ? tex->Width(0) : tex->Height(0));
+			*src_tex_size_ep_ = float2(tex_size, 1.0f / tex_size);
+			
+			float rho = kernel_radius_ / 4.0f;
+			*init_g_ep_ = multiplier_ / sqrt(2.0f * PI * rho * rho);
+			float f = 1 / (2 * rho * rho);
+			*blur_factor_ep_ = f;
+			*sharpness_factor_ep_ = f;
+		}
+	}
 }

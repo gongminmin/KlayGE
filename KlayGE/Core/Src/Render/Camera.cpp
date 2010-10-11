@@ -57,8 +57,8 @@ namespace KlayGE
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float separation = re.StereoSeparation() / 2;
-			viewMat_[0] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
-			viewMat_[1] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
+			viewMat_[0] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
+			viewMat_[1] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
 		}
 		else
 		{

@@ -291,6 +291,25 @@ namespace KlayGE
 		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
+	class KLAYGE_CORE_API SeparableBilateralFilterPostProcess : public PostProcess
+	{
+	public:
+		SeparableBilateralFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		virtual ~SeparableBilateralFilterPostProcess();
+
+		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+
+	protected:
+		int kernel_radius_;
+		float multiplier_;
+
+		RenderEffectParameterPtr kernel_radius_ep_;
+		RenderEffectParameterPtr src_tex_size_ep_;
+		RenderEffectParameterPtr init_g_ep_;
+		RenderEffectParameterPtr blur_factor_ep_;
+		RenderEffectParameterPtr sharpness_factor_ep_;
+	};
+
 	template <typename T>
 	class BlurXPostProcess : public T
 	{
