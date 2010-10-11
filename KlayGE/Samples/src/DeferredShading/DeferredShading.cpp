@@ -152,7 +152,7 @@ namespace
 			{
 			case PT_GBuffer:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 0.0f, 1.0f);
+				*shininess_param_ = max(1e-6f, mtl.shininess);
 				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);

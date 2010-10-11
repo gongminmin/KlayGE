@@ -79,8 +79,9 @@ float4 WoodPS(float3 pos_os : TEXCOORD0,
 	float3 bump = perlin_noise_gradient(tex_coord * 100, 0.1f);
 	float3 normal = normalize(normal_os + bump * 0.1f);
 
-	return wood(tex_coord) * diffuse_term(light_os, normal) * 0.7f
-		+ specular_term(halfway_os, normal, 32) * 0.6f;
+	float diffuse_factor = diffuse_term(light_os, normal);
+	return float4((wood(tex_coord).xyz * 0.7f
+		+ specular_term(0.6f, light_os, view_os, halfway_os, normal, 32)) * diffuse_factor, 1);
 }
 
 float4 MarblePS(float3 pos_os : TEXCOORD0,
@@ -96,9 +97,10 @@ float4 MarblePS(float3 pos_os : TEXCOORD0,
 	halfway_os = normalize(halfway_os);
 	
 	normal_os = normalize(normal_os);
-	
-	return marble(tex_coord) * diffuse_term(light_os, normal_os) * 0.7f
-		+ specular_term(halfway_os, normal_os, 32) * 0.6f;
+
+	float diffuse_factor = diffuse_term(light_os, normal_os);
+	return float4((marble(tex_coord).xyz * 0.7f
+		+ specular_term(0.6f, light_os, view_os, halfway_os, normal_os, 16)) * diffuse_factor, 1);
 }
 
 float4 CloudPS(float3 pos_os : TEXCOORD0,

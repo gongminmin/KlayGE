@@ -32,7 +32,7 @@ float GetDepth(float4 ndc)
 
 float GetShininess(float4 ndc)
 {
-	return max(1.0f, frac(ndc.w) * 256);
+	return ndc.w;
 }
 		]]>
 	</shader>

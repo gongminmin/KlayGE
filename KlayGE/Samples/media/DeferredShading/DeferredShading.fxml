@@ -222,7 +222,7 @@ float4 DeferredShadingPointPS(
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
 		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		float2 ds = float2(diff, spec) * atten;
@@ -259,7 +259,7 @@ float4 DeferredShadingSpotPS(
 		float diff = diffuse_term(dir, normal);
 		if (diff > 0)
 		{
-			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			float2 ds = float2(diff, spec) * atten;
@@ -293,7 +293,7 @@ float4 DeferredShadingDirectionalPS(
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc));
+		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
 		float2 ds = float2(diff, spec);
 		final_clr = CalcColor(ds);
 	}

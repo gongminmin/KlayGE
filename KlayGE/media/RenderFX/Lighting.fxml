@@ -24,6 +24,13 @@ float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 
 }
 
 
+float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 specular_clr)
+{
+	float e_n = max(dot(light_vec, halfway_vec), 0);
+	return specular_clr + (1 - specular_clr) * pow(1 - e_n, 5);
+}
+
+
 float diffuse_term(float3 light_vec, float3 normal)
 {
 	return dot(light_vec, normal);
@@ -31,12 +38,24 @@ float diffuse_term(float3 light_vec, float3 normal)
 
 float specular_term(float3 halfway_vec, float3 normal, float power)
 {
-	return pow(max(dot(halfway_vec, normal), 0.0f), power);
+	const float PI = 3.141592f;
+	return (power + 2) / (2 * PI) * pow(max(dot(halfway_vec, normal), 0.0f), power);
 }
 
 float specular_term(float3 light_vec, float3 eye_vec, float3 normal, float power)
 {
 	return specular_term(normalize(light_vec + eye_vec), normal, power);
+}
+
+float3 specular_term(float3 specular_clr, float3 light_vec, float3 eye_vec, float3 halfway_vec, float3 normal, float power)
+{
+	return (power + 2) / 8 * pow(max(dot(halfway_vec, normal), 0.0f), power) * fresnel_term_schlick(light_vec, halfway_vec, specular_clr);
+}
+
+float3 specular_term(float3 specular_clr, float3 light_vec, float3 eye_vec, float3 normal, float power)
+{
+	float3 halfway_vec = normalize(light_vec + eye_vec);
+	return specular_term(specular_clr, light_vec, eye_vec, halfway_vec, normal, power);
 }
 
 float attenuation_term(float3 light_pos, float3 pos, float3 atten)

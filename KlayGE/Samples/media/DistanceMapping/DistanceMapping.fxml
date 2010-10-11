@@ -53,15 +53,16 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	oV.w = texcoord0.y;
 }
 
-float4 DistanceMappingShading(float3 L, float3 H, float3 diffuse, float3 normal)
+float4 DistanceMappingShading(float3 L, float3 V, float3 H, float3 diffuse, float3 normal)
 {
 	float3 light_vec = normalize(L);
 	float diffuse_factor = diffuse_term(light_vec, normal);
 
-	float3 halfway = normalize(H);
-	float specular_factor = specular_term(halfway, normal, 16);
+	float3 view_vec = normalize(V);
+	float3 halfway_vec = normalize(H);
+	float3 specular = specular_term(0.3f, light_vec, view_vec, halfway_vec, normal, 16);
 
-	return float4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
+	return float4((diffuse + specular) * diffuse_factor, 1);
 }
 
 float4 DistanceMappingPS(float4 L	: TEXCOORD0,
@@ -88,7 +89,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
-	return DistanceMappingShading(L.xyz, H, diffuse, bump_normal);
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal);
 }
 
 float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
@@ -112,7 +113,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
-	return DistanceMappingShading(L.xyz, H, diffuse, bump_normal);
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal);
 }
 		]]>
 	</shader>

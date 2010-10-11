@@ -73,19 +73,9 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	float3 light_vec = normalize(L.xyz);
 	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
-	float4 clr;
-	if (diffuse_factor > 0)
-	{
-		float3 halfway = normalize(H);
-		float specular_factor = specular_term(halfway, bump_normal, 4);
-		clr = float4(diffuse * diffuse_factor + 0.3f * specular_factor, 1);
-	}
-	else
-	{
-		clr = float4(0, 0, 0, 1);
-	}
-
-	return clr;
+	float3 halfway = normalize(H);
+	float3 specular = specular_term(0.3f, light_vec, view, halfway, bump_normal, 32);
+	return float4((diffuse + specular) * diffuse_factor, 1);
 }
 		]]>
 	</shader>
