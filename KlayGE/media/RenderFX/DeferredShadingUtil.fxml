@@ -5,23 +5,14 @@
 		<![CDATA[
 float4 StoreGBuffer(float3 normal, float depth, float shininess)
 {
-	if (dot(normal.xy, normal.xy) > 1e-6f)
-	{
-		normal.xy = normalize(normal.xy);
-	}
-	return float4(normal.xy * sqrt(normal.z * 0.5 + 0.5), depth, shininess);
+	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5), depth, shininess);
 }
 
 float3 GetNormal(float4 ndc)
 {
 	float3 normal;
-	float len2 = dot(ndc.xy, ndc.xy);
-	normal.z = len2 * 2 - 1;
-	if (len2 > 1e-6f)
-	{
-		ndc.xy = normalize(ndc.xy);
-	}
-	normal.xy = ndc.xy * sqrt(1 - normal.z * normal.z);
+	normal.z = dot(ndc.xy, ndc.xy) * 2 - 1;
+	normal.xy = normalize(ndc.xy) * sqrt(1 - normal.z * normal.z);
 	return normal;
 }
 

@@ -787,7 +787,11 @@ namespace
 				break;
 
 			case 6:
-				technique_ = technique_->Effect().TechniqueByName("ShowLighting");
+				technique_ = technique_->Effect().TechniqueByName("ShowDiffuseLighting");
+				break;
+
+			case 7:
+				technique_ = technique_->Effect().TechniqueByName("ShowSpecularLighting");
 				break;
 
 			default:
@@ -1154,7 +1158,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		}
 		else
 		{
-			if (6 == buffer_type_)
+			if ((6 == buffer_type_) || (7 == buffer_type_))
 			{
 				debug_pp_->Apply();
 			}
