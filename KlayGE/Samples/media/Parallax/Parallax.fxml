@@ -46,7 +46,7 @@ void ParallaxVS(float4 pos				: POSITION,
 
 	float3 lightVec = light_pos - pos.xyz;
 	float3 viewVec = eye_pos - pos.xyz;
-	float3 halfVec = lightVec + viewVec;
+	float3 halfVec = normalize(lightVec) + normalize(viewVec);
 
 	oL.xyz = mul(objToTangentSpace, lightVec);
 	oV.xyz = mul(objToTangentSpace, viewVec);
@@ -74,7 +74,7 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	float diffuse_factor = diffuse_term(light_vec, bump_normal);
 
 	float3 halfway = normalize(H);
-	float3 specular = specular_term(0.3f, light_vec, view, halfway, bump_normal, 32);
+	float3 specular = specular_term(0.04f, light_vec, view, halfway, bump_normal, 32);
 	return float4((diffuse + specular) * diffuse_factor, 1);
 }
 		]]>

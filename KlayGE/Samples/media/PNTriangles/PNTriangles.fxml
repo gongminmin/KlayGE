@@ -83,7 +83,7 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : T
 	float3 e = normalize(eye_pos - pos_es);
 
 	float diff = diffuse_term(l, n);
-	float spec = specular_term(l, e, n, 20.0f);
+	float spec = specular_term(l, e, n, 20.0f) * diff;
 	return diffuse_tex.Sample(linear_sampler, oTex0) * (diff + 0.2f) * 0.7f + spec * 0.3f;
 }
 		]]>

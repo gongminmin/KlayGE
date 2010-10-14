@@ -68,52 +68,40 @@ float4 WoodPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	float3 light_os = light_pos - pos_os;
-	float3 view_os = eye_pos - pos_os;
-	float3 halfway_os = light_pos + view_os;
-	
-	light_os = normalize(light_os);
-	view_os = normalize(view_os);
-	halfway_os = normalize(halfway_os);
-	
+	float3 light_os = normalize(light_pos - pos_os);
+	float3 view_os = normalize(eye_pos - pos_os);
+	float3 halfway_os = normalize(light_pos + view_os);
+
 	float3 bump = perlin_noise_gradient(tex_coord * 100, 0.1f);
 	float3 normal = normalize(normal_os + bump * 0.1f);
 
 	float diffuse_factor = diffuse_term(light_os, normal);
 	return float4((wood(tex_coord).xyz * 0.7f
-		+ specular_term(0.6f, light_os, view_os, halfway_os, normal, 32)) * diffuse_factor, 1);
+		+ specular_term(0.06f, light_os, view_os, halfway_os, normal, 32)) * diffuse_factor, 1);
 }
 
 float4 MarblePS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	float3 light_os = light_pos - pos_os;
-	float3 view_os = eye_pos - pos_os;
-	float3 halfway_os = light_pos + view_os;
-	
-	light_os = normalize(light_os);
-	view_os = normalize(view_os);
-	halfway_os = normalize(halfway_os);
+	float3 light_os = normalize(light_pos - pos_os);
+	float3 view_os = normalize(eye_pos - pos_os);
+	float3 halfway_os = normalize(light_pos + view_os);
 	
 	normal_os = normalize(normal_os);
 
 	float diffuse_factor = diffuse_term(light_os, normal_os);
 	return float4((marble(tex_coord).xyz * 0.7f
-		+ specular_term(0.6f, light_os, view_os, halfway_os, normal_os, 16)) * diffuse_factor, 1);
+		+ specular_term(0.06f, light_os, view_os, halfway_os, normal_os, 16)) * diffuse_factor, 1);
 }
 
 float4 CloudPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	float3 light_os = light_pos - pos_os;
-	float3 view_os = eye_pos - pos_os;
-	float3 halfway_os = light_pos + view_os;
-	
-	light_os = normalize(light_os);
-	view_os = normalize(view_os);
-	halfway_os = normalize(halfway_os);
+	float3 light_os = normalize(light_pos - pos_os);
+	float3 view_os = normalize(eye_pos - pos_os);
+	float3 halfway_os = normalize(light_pos + view_os);
 	
 	normal_os = normalize(normal_os);
 	
@@ -124,13 +112,9 @@ float4 ElectroPS(float3 pos_os : TEXCOORD0,
 					float3 normal_os : TEXCOORD1,
 					float3 tex_coord : TEXCOORD2) : SV_Target
 {
-	float3 light_os = light_pos - pos_os;
-	float3 view_os = eye_pos - pos_os;
-	float3 halfway_os = light_pos + view_os;
-	
-	light_os = normalize(light_os);
-	view_os = normalize(view_os);
-	halfway_os = normalize(halfway_os);
+	float3 light_os = normalize(light_pos - pos_os);
+	float3 view_os = normalize(eye_pos - pos_os);
+	float3 halfway_os = normalize(light_pos + view_os);
 	
 	normal_os = normalize(normal_os);
 	

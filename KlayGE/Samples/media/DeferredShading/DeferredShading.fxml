@@ -215,14 +215,14 @@ float4 DeferredShadingPointPS(
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 
-	view_dir = normalize(-view_dir);
+	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
+		float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
 		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		float2 ds = float2(diff, spec) * atten;
@@ -248,7 +248,7 @@ float4 DeferredShadingSpotPS(
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
-	view_dir = normalize(-view_dir);
+	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
@@ -259,7 +259,7 @@ float4 DeferredShadingSpotPS(
 		float diff = diffuse_term(dir, normal);
 		if (diff > 0)
 		{
-			float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
+			float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			float2 ds = float2(diff, spec) * atten;
@@ -286,14 +286,14 @@ float4 DeferredShadingDirectionalPS(
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float4 final_clr = 0;
 	
-	view_dir = normalize(-view_dir);
+	view_dir = normalize(view_dir);
 
 	float3 dir = light_dir_es.xyz;
 	float3 normal = GetNormal(ndc);
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(normalize(dir + view_dir), normal, GetShininess(ndc)) * diff;
+		float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
 		float2 ds = float2(diff, spec);
 		final_clr = CalcColor(ds);
 	}
@@ -327,7 +327,7 @@ float4 DeferredShadowingPointPS(
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 
-	view_dir = normalize(-view_dir);
+	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
@@ -350,7 +350,7 @@ float4 DeferredShadowingSpotPS(
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 
-	view_dir = normalize(-view_dir);
+	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float len = length(light_pos_es.xyz - pos_es);
 	return VSM_Directional(pos_es, len);
