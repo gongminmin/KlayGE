@@ -79,7 +79,7 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 		float4 ndc_sample = src_tex.SampleLevel(bilinear_sampler, tc_sample, 0);
 		float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
 
-		float3 view_dir_sample = normalize(texcoord_to_view(tc_sample));
+		float3 view_dir_sample = normalize(texcoord_to_view(float2(tc_sample.x, (flipping < 0) ? tc_sample.y : 1 - tc_sample.y)));
 		float v = dot(pos_es, view_dir_sample);
 		float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
 		float intersect_t = v - sqrt(disc);
@@ -112,7 +112,7 @@ float4 SSVO(float2 tc0, float radius, int start, int end)
 	float depth = GetDepth(ndc) * depth_near_far_invfar.y;
 	float3 normal = GetNormal(ndc);
 	
-	float3 view_dir = normalize(texcoord_to_view(tc0));
+	float3 view_dir = normalize(texcoord_to_view(float2(tc0.x, (flipping < 0) ? tc0.y : 1 - tc0.y)));
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
 	float3 y_dir = cross(normal, float3(0, 0, 1));
