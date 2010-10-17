@@ -239,7 +239,7 @@ namespace KlayGE
 		bool Enabled() const;
 		void Enabled(bool enabled);
 
-		float3 const & Color() const;
+		float4 const & Color() const;
 		void Color(float3 const & clr);
 
 		virtual float3 const & Position() const;
@@ -253,7 +253,7 @@ namespace KlayGE
 		LightType type_;
 		int32_t attrib_;
 		bool enabled_;
-		float3 color_;
+		float4 color_;
 	};
 	typedef boost::shared_ptr<DeferredLightSource> DeferredLightSourcePtr;
 

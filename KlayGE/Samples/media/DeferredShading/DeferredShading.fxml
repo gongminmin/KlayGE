@@ -31,7 +31,7 @@
 
 	<cbuffer name="light_sources">
 		<parameter type="int" name="light_attrib"/>
-		<parameter type="float3" name="light_color"/>
+		<parameter type="float4" name="light_color"/>
 		<parameter type="float3" name="light_falloff"/>
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_dir_es"/>
@@ -109,7 +109,8 @@ float4 CalcColor(float diff, float spec, float atten)
 		ds.y = 0;
 	}
 
-	return float4(ds.x * light_color, ds.y);
+	ds = max(ds, 0);
+	return float4(ds.x * light_color.xyz, ds.y * light_color.w);
 }
 
 float Calc_VSM(float2 moments, float len)

@@ -25,7 +25,7 @@ namespace KlayGE
 
 	DeferredLightSource::DeferredLightSource(LightType type)
 		: type_(type), attrib_(0), enabled_(true),
-			color_(0, 0, 0)
+			color_(0, 0, 0, 0)
 	{
 	}
 
@@ -58,14 +58,15 @@ namespace KlayGE
 		enabled_ = enabled;
 	}
 
-	float3 const & DeferredLightSource::Color() const
+	float4 const & DeferredLightSource::Color() const
 	{
 		return color_;
 	}
 
 	void DeferredLightSource::Color(float3 const & clr)
 	{
-		color_ = clr;
+		color_ = float4(clr.x(), clr.y(), clr.z(),
+			MathLib::dot(clr, float3(0.27f, 0.67f, 0.06f)));
 	}
 
 	float3 const & DeferredLightSource::Position() const
@@ -103,7 +104,7 @@ namespace KlayGE
 		: DeferredLightSource(LT_Ambient)
 	{
 		attrib_ = LSA_NoShadow;
-		color_ = float3(0, 0, 0);
+		color_ = float4(0, 0, 0, 0);
 	}
 
 	DeferredAmbientLightSource::~DeferredAmbientLightSource()
@@ -471,7 +472,7 @@ namespace KlayGE
 	DeferredAmbientLightSourcePtr DeferredShadingLayer::AddAmbientLight(float3 const & clr)
 	{
 		DeferredAmbientLightSourcePtr ambient = checked_pointer_cast<DeferredAmbientLightSource>(lights_[0]);
-		ambient->Color(ambient->Color() + clr);
+		ambient->Color(float3(ambient->Color()) + clr);
 		return ambient;
 	}
 

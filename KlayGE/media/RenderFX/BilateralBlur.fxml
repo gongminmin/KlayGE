@@ -2,7 +2,6 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
-	<include name="DeferredShadingUtil.fxml"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	
@@ -34,7 +33,7 @@ float4 CalcBlur(float2 tc0, bool x_dir)
 {
 	float color = 0;
 
-	float center_d = GetDepth(src_tex.Sample(point_sampler, tc0).g);
+	float center_d = src_tex.Sample(point_sampler, tc0).y;
 
 	float total_weight = 0;
 	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
@@ -42,7 +41,7 @@ float4 CalcBlur(float2 tc0, bool x_dir)
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
 		float2 src = src_tex.Sample(point_sampler, tc).rg;
-		float ddiff = GetDepth(src.y) - center_d;
+		float ddiff = src.y - center_d;
 		float weight = BilateralDistribution(i, ddiff);
 		color += src.x * weight;
 		total_weight += weight;
