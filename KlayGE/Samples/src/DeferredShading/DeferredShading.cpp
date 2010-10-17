@@ -165,6 +165,7 @@ namespace
 				break;
 
 			case PT_Shading:
+				*shininess_param_ = max(1e-6f, mtl.shininess);
 				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);

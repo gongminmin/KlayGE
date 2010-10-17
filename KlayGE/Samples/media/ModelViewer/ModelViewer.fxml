@@ -154,8 +154,8 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 
 	float3 clr = (ambient_clr.rgb + emit) * diffuse;
 	
-	float3 half_way = normalize(H);
-	clr += (diffuse.rgb + specular_level * specular * specular_term(0.04f, light_vec, eye_vec, half_way, normal, shininess)) * diffuse_factor;
+	float3 halfway = normalize(H);
+	clr += calc_brdf(diffuse.rgb, specular_level * specular, shininess, 0.04f, light_vec, halfway, normal);
 
 	return float4(clr, opacity);
 }

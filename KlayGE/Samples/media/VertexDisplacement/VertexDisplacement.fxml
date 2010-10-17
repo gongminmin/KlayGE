@@ -23,8 +23,8 @@
 		<![CDATA[
 void VertexDisplacementVS(float4 pos			: POSITION,
 								float2 texcoord0	: TEXCOORD0,
-								out float4 oClr			: COLOR0,
 								out float2 oTexcoord0	: TEXCOORD0,
+								out float3 oNormal		: TEXCOORD1,
 								out float4 oPos			: SV_Position)
 {
 	float4 v = pos;
@@ -33,24 +33,25 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 
 	float3 x_dir = float3(0.5f, 0, -sin(pos.x + currentAngle) * 0.2f);
 	float3 y_dir = float3(0, 0.5f, cos(pos.y + currentAngle) * pos.x * 0.2f);
-	float3 normal = mul(normalize(cross(x_dir, y_dir)), (float3x3)modelviewIT);
+	float3 normal = mul(cross(x_dir, y_dir), (float3x3)modelviewIT);
 
 	oPos = mul(mul(v, modelview), proj);
-	oClr = float4(directional_lighting(lightDir, normal).xxx, 1);
+	oNormal = normal;
 	oTexcoord0 = texcoord0;
 }
 
-float4 VertexDisplacementPS(float4 clr : COLOR0,
-							float2 texCoord : TEXCOORD0) : SV_Target
+float4 VertexDisplacementPS(float2 texCoord : TEXCOORD0, float3 normal : TEXCOORD1) : SV_Target
 {
-	return clr * flag_tex.Sample(flagSampler, texCoord);
+	float3 l = -lightDir;
+	float3 n = normalize(normal);
+	return float4(calc_brdf(flag_tex.Sample(flagSampler, texCoord).rgb, l, n), 1);
 }
 		]]>
 	</shader>
 
 	<technique name="VertexDisplacement">
 		<pass name="p0">
-      <state name="vertex_shader" value="VertexDisplacementVS()"/>
+			<state name="vertex_shader" value="VertexDisplacementVS()"/>
 			<state name="pixel_shader" value="VertexDisplacementPS()"/>
 		</pass>
 	</technique>

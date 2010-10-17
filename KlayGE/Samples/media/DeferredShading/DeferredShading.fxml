@@ -89,8 +89,9 @@ float linstep(float min, float max, float v)
 #define INTEGER_SUPPORT
 #endif
 
-float4 CalcColor(float2 ds)
+float4 CalcColor(float diff, float spec, float atten)
 {
+	float2 ds = diff * atten * float2(1, spec);
 #ifndef INTEGER_SUPPORT
 	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
 #else
@@ -222,11 +223,10 @@ float4 DeferredShadingPointPS(
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
+		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
 		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		float2 ds = float2(diff, spec) * atten;
-		final_clr = CalcColor(ds);
+		final_clr = CalcColor(diff, spec, atten);
 	}
 
 	return final_clr;
@@ -259,11 +259,10 @@ float4 DeferredShadingSpotPS(
 		float diff = diffuse_term(dir, normal);
 		if (diff > 0)
 		{
-			float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
+			float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)) * diff;
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			float2 ds = float2(diff, spec) * atten;
-			final_clr = CalcColor(ds);
+			final_clr = CalcColor(diff, spec, atten);
 		}
 	}
 
@@ -293,9 +292,8 @@ float4 DeferredShadingDirectionalPS(
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = specular_term(0.04f, dir, -view_dir, normal, GetShininess(ndc)) * diff;
-		float2 ds = float2(diff, spec);
-		final_clr = CalcColor(ds);
+		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)) * diff;
+		final_clr = CalcColor(diff, spec, 1);
 	}
 
 	return final_clr;
@@ -309,7 +307,7 @@ float4 DeferredShadingAmbientPS(
 #endif
 	) : SV_Target
 {
-	return CalcColor(float2(0.1f, 0));
+	return CalcColor(0.1f, 0, 1);
 }
 
 float4 DeferredShadowingPointPS(

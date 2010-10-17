@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="DeferredShadingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 
 	<macro name="ALPHA_TEST_THRESHOLD" value="0.05"/>
@@ -233,7 +234,7 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(emit + (lighting.rgb * diffuse + lighting.a * specular) * ssao, 1);
+	return float4(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess, 0.04f) * lighting.a * specular) * ssao, 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0
