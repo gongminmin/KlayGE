@@ -68,7 +68,7 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
 		
 			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float4 ndc_sample = src_tex.SampleLevel(bilinear_sampler, tc_sample, 0);
+			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
 			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
 
 			float3 view_dir_sample = normalize(texcoord_to_view(tc_sample));

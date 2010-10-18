@@ -548,7 +548,7 @@ namespace KlayGE
 
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
-		g_buffer_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		g_buffer_tex_ = rf.MakeTexture2D(width, height, 2, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -645,6 +645,8 @@ namespace KlayGE
 			}
 			else
 			{
+				g_buffer_tex_->BuildMipSubLevels();
+
 				// Light depth only
 
 				float4x4 vp = view_ * proj_;

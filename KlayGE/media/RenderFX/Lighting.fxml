@@ -38,13 +38,13 @@ float diffuse_term(float3 light_vec, float3 normal)
 
 float specular_normalize_factor(float roughness)
 {
-	const float PI = 3.141592f;
-	return (roughness + 2) / (2 * PI);
+	return (roughness + 2) / 2;
 }
 
 float specular_normalize_factor(float roughness, float fresnel)
 {
-	return (roughness + 2) / 8;
+	const float PI = 3.141592f;
+	return (roughness + 2) * PI / 8;
 }
 
 float roughness_term(float3 halfway_vec, float3 normal, float roughness)
