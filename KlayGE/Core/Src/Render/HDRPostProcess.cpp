@@ -198,6 +198,8 @@ namespace KlayGE
 		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
 		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
+
+		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
 		
 		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("ToneMapping.fxml");
 		technique_ = effect->TechniqueByName("ToneMapping30");

@@ -83,7 +83,7 @@ float4 ShowDiffuseLightingPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 float4 ShowSpecularLightingPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return lighting_tex.Sample(point_sampler, tc0).a;
+	return lighting_tex.Sample(point_sampler, tc0).a * 10;
 }
 		]]>
 	</shader>

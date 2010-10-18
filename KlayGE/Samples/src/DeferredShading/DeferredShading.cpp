@@ -165,6 +165,7 @@ namespace
 				break;
 
 			case PT_Shading:
+				*shininess_param_ = max(1e-6f, mtl.shininess);
 				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
@@ -675,8 +676,7 @@ namespace
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSVOHigh")),
-				ssao_level_(2)
+					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSVO"))
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 			upper_left_param_ = technique_->Effect().ParameterByName("upper_left");
@@ -684,9 +684,6 @@ namespace
 			lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
 			lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
 			proj_param_ = technique_->Effect().ParameterByName("proj");
-			
-			ssao_techs_[0] = technique_->Effect().TechniqueByName("SSVOLow");
-			ssao_techs_[1] = technique_->Effect().TechniqueByName("SSVOHigh");
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex)
@@ -699,25 +696,6 @@ namespace
 		}
 
 		using PostProcess::InputPin;
-
-		void SSAOLevel(int level)
-		{
-			level = std::min(2, level);
-
-			ssao_level_ = level;
-			if (level > 0)
-			{
-				technique_ = ssao_techs_[level - 1];
-			}
-		}
-
-		void Apply()
-		{
-			if (ssao_level_ > 0)
-			{
-				PostProcess::Apply();
-			}
-		}
 
 		void OnRenderBegin()
 		{
@@ -736,9 +714,6 @@ namespace
 		}
 
 	protected:
-		int ssao_level_;
-		RenderTechniquePtr ssao_techs_[2];
-
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr upper_left_param_;
 		RenderEffectParameterPtr upper_right_param_;
@@ -891,9 +866,9 @@ void DeferredShadingApp::InitObjects()
 
 	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
 	ambient_light_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
-	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(1, 1, 1), float3(0, 0.2f, 0));
-	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(1, 0, 0), float3(0, 0.2f, 0));
-	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 1, 0), float3(0, 0.2f, 0));
+	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(3, 3, 3), float3(0, 0.2f, 0));
+	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(2, 0, 0), float3(0, 0.2f, 0));
+	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 2, 0), float3(0, 0.2f, 0));
 
 	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
 	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
@@ -918,6 +893,7 @@ void DeferredShadingApp::InitObjects()
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
+	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 
 	debug_pp_ = MakeSharedPtr<DeferredShadingDebug>();
@@ -927,7 +903,7 @@ void DeferredShadingApp::InitObjects()
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
 	id_anti_alias_ = dialog_->IDFromName("AntiAlias");
-	id_ssao_combo_ = dialog_->IDFromName("SSAOCombo");
+	id_ssao_ = dialog_->IDFromName("SSAO");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::BufferChangedHandler, this, _1));
@@ -935,8 +911,8 @@ void DeferredShadingApp::InitObjects()
 
 	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::AntiAliasHandler, this, _1));
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
-	dialog_->Control<UIComboBox>(id_ssao_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::SSAOChangedHandler, this, _1));
-	this->SSAOChangedHandler(*dialog_->Control<UIComboBox>(id_ssao_combo_));
+	dialog_->Control<UICheckBox>(id_ssao_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::SSAOHandler, this, _1));
+	this->SSAOHandler(*dialog_->Control<UICheckBox>(id_ssao_));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
@@ -962,17 +938,13 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 
 	try
 	{
-		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.cs_support && (5 == caps.max_shader_model))
-		{
-			access_hint |= EAH_GPU_Unordered;
-		}
-		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, access_hint, NULL);
+		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 	catch (...)
 	{
-		ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		blur_ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 
 	{
@@ -985,7 +957,7 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadingTex()->Format(), 1, 0, access_hint, NULL);
 	}
 
-	deferred_shading_->SSAOTex(ssao_tex_);
+	deferred_shading_->SSAOTex(blur_ssao_tex_);
 
 	edge_anti_alias_->InputPin(0, deferred_shading_->GBufferTex());
 	edge_anti_alias_->InputPin(1, deferred_shading_->ShadingTex());
@@ -996,9 +968,12 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	ssao_pp_->InputPin(0, deferred_shading_->GBufferTex());
 	ssao_pp_->OutputPin(0, ssao_tex_);
 
+	blur_pp_->InputPin(0, ssao_tex_);
+	blur_pp_->OutputPin(0, blur_ssao_tex_);
+
 	debug_pp_->InputPin(0, deferred_shading_->GBufferTex());
 	debug_pp_->InputPin(1, deferred_shading_->LightingTex());
-	debug_pp_->InputPin(2, ssao_tex_);
+	debug_pp_->InputPin(2, blur_ssao_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -1061,13 +1036,12 @@ void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 	}
 }
 
-void DeferredShadingApp::SSAOChangedHandler(UIComboBox const & sender)
+void DeferredShadingApp::SSAOHandler(UICheckBox const & sender)
 {
 	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
-		int ssao_level = sender.GetNumItems() - 1 - sender.GetSelectedIndex();
-		checked_pointer_cast<SSAOPostProcess>(ssao_pp_)->SSAOLevel(ssao_level);
-		deferred_shading_->SSAOEnabled(ssao_level != 0);
+		ssao_enabled_ = sender.GetChecked();
+		deferred_shading_->SSAOEnabled(ssao_enabled_);
 	}
 }
 
@@ -1121,7 +1095,11 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 
 		if ((0 == buffer_type_) || (5 == buffer_type_))
 		{
-			ssao_pp_->Apply();
+			if (ssao_enabled_)
+			{
+				ssao_pp_->Apply();
+				blur_pp_->Apply();
+			}
 		}
 
 		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_) || (5 == buffer_type_))

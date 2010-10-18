@@ -5,22 +5,11 @@
 	<include name="DeferredShadingUtil.fxml"/>
 
 	<cbuffer name="never_changes">
-		<parameter type="float2" name="sphere_xy" array_size="12">
+		<parameter type="float2" name="sphere_xy" array_size="2">
 			<value>
 				<![CDATA[
-					0.00393088, 0.499985,
-					-0.135392, -0.48132,
-					0.48296, 0.129421,
-					-0.463939, 0.186442,
-
-					0.00221673, 0.281953,
-					-0.0763507, -0.271428,
-					0.272352, 0.0729836,
-					-0.261626, 0.105139,
-					0.197926, -0.200817,
-					-0.35696, -0.243844,
-					0.105313, -0.487068,
-					0.485581, -0.111505
+					0.66667, 0,
+					0, 0.33333
 				]]>
 			</value>
 		</parameter>
@@ -64,47 +53,53 @@ float3 texcoord_to_view(float2 tex)
 				tex.y);
 }
 
-float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius, int start, int end)
+float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius)
 {
 	float sqr_radius = radius * radius;
 	float obscurance = 0;
 	float total_weight = 0;
-	for (int i = start; i < end; ++ i)
+	for (int i = 0; i < 2; ++ i)
 	{
-		float3 sample_point_offset = (sphere_xy[i].x * x_dir + sphere_xy[i].y * y_dir) * radius;
-		float3 sample_point = pos_es + sample_point_offset;
-		float4 sample_point_ss = mul(float4(sample_point, 1), proj);
+		float2 sxy = sphere_xy[i];
+		for (int j = 0; j < 2; ++ j)
+		{
+			float3 sample_point_offset = (sxy.x * x_dir + sxy.y * y_dir) * radius;
+			float3 sample_point = pos_es + sample_point_offset;
+			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
 		
-		float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-		float4 ndc_sample = src_tex.SampleLevel(bilinear_sampler, tc_sample, 0);
-		float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
+			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
+			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
+			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
 
-		float3 view_dir_sample = normalize(texcoord_to_view(float2(tc_sample.x, (flipping < 0) ? tc_sample.y : 1 - tc_sample.y)));
-		float v = dot(pos_es, view_dir_sample);
-		float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
-		float intersect_t = v - sqrt(disc);
+			float3 view_dir_sample = normalize(texcoord_to_view(float2(tc_sample.x, (flipping < 0) ? tc_sample.y : 1 - tc_sample.y)));
+			float v = dot(pos_es, view_dir_sample);
+			float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
+			float intersect_t = v - sqrt(disc);
 
-		float zs;
-		if (depth_sample <= intersect_t * view_dir_sample.z)
-		{
-			float3 pos_es_sample = view_dir_sample * intersect_t;
-			zs = dot(pos_es_sample - pos_es, normal);
-			obscurance += zs;
+			float zs;
+			if (depth_sample <= intersect_t * view_dir_sample.z)
+			{
+				float3 pos_es_sample = view_dir_sample * intersect_t;
+				zs = dot(pos_es_sample - pos_es, normal);
+				obscurance += zs;
+			}
+			else
+			{
+				float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
+				float3 pos_sphere_sample = mul(float3x3(x_dir, y_dir, normal), pos_es_sample - pos_es);
+				zs = sqrt(sqr_radius - dot(pos_sphere_sample.xy, pos_sphere_sample.xy));
+				obscurance += clamp(pos_sphere_sample.z, 0, zs);
+			}
+			total_weight += zs;
+
+			sxy = -sxy;
 		}
-		else
-		{
-			float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
-			float3 pos_sphere_sample = mul(float3x3(x_dir, y_dir, normal), pos_es_sample - pos_es);
-			zs = sqrt(sqr_radius - dot(pos_sphere_sample.xy, pos_sphere_sample.xy));
-			obscurance += clamp(pos_sphere_sample.z, 0, zs);
-		}
-		total_weight += zs;
 	}
 	
 	return obscurance / total_weight;
 }
 
-float4 SSVO(float2 tc0, float radius, int start, int end)
+float4 SSVO(float2 tc0, float radius)
 {
 	float obscurance = 1;
 	
@@ -118,36 +113,23 @@ float4 SSVO(float2 tc0, float radius, int start, int end)
 	float3 y_dir = cross(normal, float3(0, 0, 1));
 	float3 x_dir = cross(y_dir, normal);
 
-	obscurance = CalcObscurance(tc0, pos_es, x_dir, y_dir, normal, radius, start, end);
-	return 1 - saturate(vo_intensity * obscurance);
+	obscurance = CalcObscurance(tc0, pos_es, x_dir, y_dir, normal, radius);
+	return float4(1 - saturate(vo_intensity * obscurance), depth, 0, 0);
 }
 
-float4 SSVOLowPS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 SSVOPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return SSVO(tc0, 0.5f, 0, 4);
-}
-
-float4 SSVOHighPS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	return SSVO(tc0, 1.0f, 4, 12);
+	return SSVO(tc0, 0.5f);
 }
 		]]>
 	</shader>
 
-	<technique name="SSVOLow">
+	<technique name="SSVO">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="SSVOLowPS()"/>
-		</pass>
-	</technique>
-	<technique name="SSVOHigh">
-		<pass name="p0">
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="SSVOHighPS()"/>
+			<state name="pixel_shader" value="SSVOPS()"/>
 		</pass>
 	</technique>
 </effect>

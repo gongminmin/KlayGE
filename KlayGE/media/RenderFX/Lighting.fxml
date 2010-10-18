@@ -36,27 +36,44 @@ float diffuse_term(float3 light_vec, float3 normal)
 	return dot(light_vec, normal);
 }
 
-float specular_term(float3 halfway_vec, float3 normal, float power)
+float specular_normalize_factor(float roughness)
+{
+	return (roughness + 2) / 2;
+}
+
+float specular_normalize_factor(float roughness, float fresnel)
 {
 	const float PI = 3.141592f;
-	return (power + 2) / (2 * PI) * pow(max(dot(halfway_vec, normal), 0.0f), power);
+	return (roughness + 2) * PI / 8;
 }
 
-float specular_term(float3 light_vec, float3 eye_vec, float3 normal, float power)
+float roughness_term(float3 halfway_vec, float3 normal, float roughness)
 {
-	return specular_term(normalize(light_vec + eye_vec), normal, power);
+	return pow(max(dot(halfway_vec, normal), 0.0f), roughness);
 }
 
-float specular_term(float f0, float3 light_vec, float3 eye_vec, float3 halfway_vec, float3 normal, float power)
+float roughness_term(float f0, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
 {
-	return (power + 2) / 8 * pow(max(dot(halfway_vec, normal), 0.0f), power) * fresnel_term_schlick(light_vec, halfway_vec, f0);
+	return pow(max(dot(halfway_vec, normal), 0.0f), roughness) * fresnel_term_schlick(light_vec, halfway_vec, f0);
 }
 
-float specular_term(float f0, float3 light_vec, float3 eye_vec, float3 normal, float power)
+
+// diffuse only
+float3 calc_brdf(float3 c_diff, float3 l, float3 n)
 {
-	float3 halfway_vec = normalize(light_vec + eye_vec);
-	return specular_term(f0, light_vec, eye_vec, halfway_vec, normal, power);
+	return max(c_diff * dot(n, l), 0);
 }
+// with out fresnel
+float3 calc_brdf(float3 c_diff, float3 c_specular, float roughness, float3 l, float3 h, float3 n)
+{
+	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(h, n, roughness) * c_specular) * dot(n, l), 0);
+}
+// with fresnel
+float3 calc_brdf(float3 c_diff, float3 c_specular, float roughness, float fresnel, float3 l, float3 h, float3 n)
+{
+	return max((c_diff + specular_normalize_factor(roughness, fresnel) * roughness_term(fresnel, l, h, n, roughness) * c_specular) * dot(n, l), 0);
+}
+
 
 float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 {

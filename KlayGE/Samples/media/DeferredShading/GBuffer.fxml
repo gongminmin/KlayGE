@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="DeferredShadingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 
 	<macro name="ALPHA_TEST_THRESHOLD" value="0.05"/>
@@ -233,7 +234,7 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(max(emit + (lighting.rgb * diffuse + lighting.a * specular) * ssao, 0), 1);
+	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess, 0.04f) * lighting.a * specular) * ssao, 0), 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0
@@ -295,7 +296,28 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="ShadingPS()"/>
 		</pass>
-	</technique>
+	</technique>KlayGE: Sample: DeferredShading: VO works in OpenGL
+
+=== (+3,-3) KlayGE/Samples/media/DeferredShading/SSAOPP.fxml ===
+@@ -79,7 +79,7 @@
+ 		float4 ndc_sample = src_tex.SampleLevel(bilinear_sampler, tc_sample, 0);
+ 		float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
+ 
+-		float3 view_dir_sample = normalize(texcoord_to_view(tc_sample));
++		float3 view_dir_sample = normalize(texcoord_to_view(float2(tc_sample.x, (flipping < 0) ? tc_sample.y : 1 - tc_sample.y)));
+ 		float v = dot(pos_es, view_dir_sample);
+ 		float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
+ 		float intersect_t = v - sqrt(disc);
+@@ -112,7 +112,7 @@
+ 	float depth = GetDepth(ndc) * depth_near_far_invfar.y;
+ 	float3 normal = GetNormal(ndc);
+ 	
+-	float3 view_dir = normalize(texcoord_to_view(tc0));
++	float3 view_dir = normalize(texcoord_to_view(float2(tc0.x, (flipping < 0) ? tc0.y : 1 - tc0.y)));
+ 	float3 pos_es = view_dir * (depth / view_dir.z);
+ 
+ 	float3 y_dir = cross(normal, float3(0, 0, 1));
+
 
 	<technique name="ShadingSkyBox">
 		<pass name="p0">

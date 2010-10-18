@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
@@ -135,15 +136,9 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	indirect_light *= attenuation;
 	indirect_light *= exp(-thickness * sigma_t);
 
-	float diffuse_factor = dot(L, N);
-
 	float3 clr = ambient_clr.rgb * 0.2f * diffuse;
 	clr += indirect_light * extinction_coefficient;
-	if (diffuse_factor > 0)
-	{
-		float specular_factor = pow(max(dot(H, N), 0.0f), shininess);
-		clr.rgb += diffuse_factor * diffuse + specular_level * specular_factor * specular;
-	}
+	clr.rgb += calc_brdf(diffuse, specular_level * specular, shininess, L, H, N);
 
 	return float4(clr.rgb, 1);
 }

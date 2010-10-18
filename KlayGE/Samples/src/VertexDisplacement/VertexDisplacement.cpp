@@ -134,7 +134,7 @@ void VertexDisplacement::InitObjects()
 {
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	flag_ = MakeSharedPtr<FlagObject>(8 * 2, 6 * 2);
+	flag_ = MakeSharedPtr<FlagObject>(8, 6);
 	flag_->AddToSceneManager();
 
 	this->LookAt(float3(0, 0, -10), float3(0, 0, 0));

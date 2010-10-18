@@ -1,6 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 
 	<cbuffer name="per_frame">
@@ -39,15 +40,6 @@
 
 	<shader>
 		<![CDATA[
-// fresnel approximation
-float fast_fresnel(float3 eye, float3 normal, float R0)
-{
-	// R0 = pow(1.0 - refractionIndexRatio, 2.0) / pow(1.0 + refractionIndexRatio, 2.0);
-
-	float edn = max(0.0f, dot(eye, normal));
-	return R0 + (1.0f - R0) * pow(1.0f - edn, 5);
-}
-
 float3x3 my_refract3(float3 i, float3 n, float3 eta)
 {
 	float cosi = dot(i, n);
@@ -80,7 +72,7 @@ void RefractVS(float4 pos			: POSITION,
 	float3 n_incident = normalize(incident.xyz);
 	float3 n_normal = normalize(out_normal);
 	refract_vec.xyz = refract(n_incident, n_normal, eta_ratio.g);
-	refract_vec.w = fast_fresnel(-n_incident, n_normal, 0.0977f);
+	refract_vec.w = fresnel_term_schlick(-n_incident, n_normal, 0.0977f);
 	dir_ss = mul(float4(refract_vec.xyz, 0), proj);
 }
 

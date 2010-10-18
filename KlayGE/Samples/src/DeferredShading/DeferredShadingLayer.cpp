@@ -25,7 +25,7 @@ namespace KlayGE
 
 	DeferredLightSource::DeferredLightSource(LightType type)
 		: type_(type), attrib_(0), enabled_(true),
-			color_(0, 0, 0)
+			color_(0, 0, 0, 0)
 	{
 	}
 
@@ -58,14 +58,15 @@ namespace KlayGE
 		enabled_ = enabled;
 	}
 
-	float3 const & DeferredLightSource::Color() const
+	float4 const & DeferredLightSource::Color() const
 	{
 		return color_;
 	}
 
 	void DeferredLightSource::Color(float3 const & clr)
 	{
-		color_ = clr;
+		color_ = float4(clr.x(), clr.y(), clr.z(),
+			MathLib::dot(clr, float3(0.27f, 0.67f, 0.06f)));
 	}
 
 	float3 const & DeferredLightSource::Position() const
@@ -103,7 +104,7 @@ namespace KlayGE
 		: DeferredLightSource(LT_Ambient)
 	{
 		attrib_ = LSA_NoShadow;
-		color_ = float3(0, 0, 0);
+		color_ = float4(0, 0, 0, 0);
 	}
 
 	DeferredAmbientLightSource::~DeferredAmbientLightSource()
@@ -471,7 +472,7 @@ namespace KlayGE
 	DeferredAmbientLightSourcePtr DeferredShadingLayer::AddAmbientLight(float3 const & clr)
 	{
 		DeferredAmbientLightSourcePtr ambient = checked_pointer_cast<DeferredAmbientLightSource>(lights_[0]);
-		ambient->Color(ambient->Color() + clr);
+		ambient->Color(float3(ambient->Color()) + clr);
 		return ambient;
 	}
 
@@ -547,7 +548,7 @@ namespace KlayGE
 
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
-		g_buffer_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		g_buffer_tex_ = rf.MakeTexture2D(width, height, 2, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 0));
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -644,6 +645,8 @@ namespace KlayGE
 			}
 			else
 			{
+				g_buffer_tex_->BuildMipSubLevels();
+
 				// Light depth only
 
 				float4x4 vp = view_ * proj_;
