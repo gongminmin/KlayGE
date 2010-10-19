@@ -1130,7 +1130,7 @@ namespace KlayGE
 			*src_tex_size_ep_ = float2(tex_size, 1.0f / tex_size);
 			
 			float rho = kernel_radius_ / 4.0f;
-			*init_g_ep_ = multiplier_ / sqrt(2.0f * PI * rho * rho);
+			*init_g_ep_ = multiplier_ / std::sqrt(2.0f * PI * rho * rho);
 			float f = 1 / (2 * rho * rho);
 			*blur_factor_ep_ = f;
 			*sharpness_factor_ep_ = f;

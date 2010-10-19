@@ -45,25 +45,25 @@ namespace KlayGE
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
-	　　	char line[1024] = { 0 };
-			void* symbol = static_cast<void*>("");
+			char line[1024];
+			void const * symbol = "";
 			FILE* fp = fopen("/proc/self/maps", "r");
 			if (fp != NULL)
 			{
 				while (!feof(fp))
 				{
 					unsigned long start, end;
-					if (!fgets(sLine, sizeof(sLine), fp))
+					if (!fgets(line, sizeof(line), fp))
 					{
 						continue;
 					}
-					if (!strstr (sLine, " r-xp ") || !strchr (sLine, '/'))
+					if (!strstr(line, " r-xp ") || !strchr(line, '/'))
 					{
 						continue;
 					}
 
-					sscanf (line, "%lx-%lx ", &start, &end);
-					if ((symbol >= static_cast<void*>(start)) && (symbol < static_cast<void*>(end)))
+					sscanf(line, "%lx-%lx ", &start, &end);
+					if ((symbol >= reinterpret_cast<void const *>(start)) && (symbol < reinterpret_cast<void const *>(end)))
 					{
 						exe_path_ = strchr(line, '/');
 						exe_path_ = exe_path_.substr(0, exe_path_.rfind("/"));
@@ -71,7 +71,7 @@ namespace KlayGE
 				}
 				fclose(fp);
 			}
-　　	}
+		}
 #endif
 
 		pathes_.push_back("");

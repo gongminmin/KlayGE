@@ -75,7 +75,7 @@ global get_cpuid
 	.startfunc
 	%assign unwindcount 0
 	%assign framereg 0
-	
+
 	db 0x48
 	push rbx
 	%assign unwindcount unwindcount+1
@@ -83,7 +83,7 @@ global get_cpuid
 %elifdef KLAYGE_PLATFORM_LINUX
 	align 16
 	get_cpuid
-	
+
 	push rbx
 %endif
 	endprolog

@@ -29,7 +29,9 @@ glob:KlayGE/Debug/
 glob:KlayGE/Release/
 glob:KlayGE/lib/
 glob:KlayGE/bin/*/*.dll
+glob:KlayGE/bin/*/*.so
 glob:KlayGE/bin/*.dll
+glob:KlayGE/bin/*.so
 glob:KlayGE/bin/*.exe
 glob:KlayGE/bin/*.ilk
 glob:KlayGE/bin/*.pdb

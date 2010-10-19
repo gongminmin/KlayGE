@@ -8,74 +8,55 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_Scene_OCTree_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\win\x86" />
-				<Option object_output="..\..\Debug\win\x86" />
+				<Option output="../../lib/win/x86/KlayGE_Scene_OCTree_mgw_x86_d.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win/x86" />
+				<Option object_output="../../Debug/win/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-Wall" />
-					<Add option="-g" />
-					<Add option="-O0" />
-					<Add option="-DWIN32" />
-					<Add option="-D_DEBUG" />
-					<Add option="-D_USRDLL" />
-					<Add option="-DKLAYGE_BUILD_DLL" />
-					<Add option="-DKLAYGE_OCTREE_SM_SOURCE" />
+					<Add directory="../../Core/Include" />
+					<Add directory="../../Plugins/Include" />
 				</Compiler>
 				<Linker>
-					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add directory="..\..\lib\win\x86" />
+					<Add option="-enable-auto-import" />
+					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 				</Linker>
-				<ExtraCommands>
-					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
-				</ExtraCommands>
 				<Environment>
+					<Variable name="DEBUG_STR" value="-d" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
-					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\lib\win\x86\KlayGE_Scene_OCTree_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\win\x86" />
-				<Option object_output="..\..\Release\win\x86" />
+				<Option output="../../lib/win/x86/KlayGE_Scene_OCTree_mgw_x86.dll" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/win/x86" />
+				<Option object_output="../../Release/win/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
-					<Add option="-fexpensive-optimizations" />
-					<Add option="-O2" />
-					<Add option="-Wall" />
-					<Add option="-DWIN32" />
-					<Add option="-DNDEBUG" />
-					<Add option="-D_USRDLL" />
-					<Add option="-DKLAYGE_BUILD_DLL" />
-					<Add option="-DKLAYGE_OCTREE_SM_SOURCE" />
+					<Add directory="../../Core/Include" />
+					<Add directory="../../Plugins/Include" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
-					<Add library="KlayGE_Core_mgw_x86" />
-					<Add directory="..\..\lib\win\x86" />
+					<Add option="-enable-auto-import" />
+					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 				</Linker>
-				<ExtraCommands>
-					<Add after='cmd /c copy &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;$(PROJECT_DIR)..\..\bin\Scene\&quot;' />
-				</ExtraCommands>
 				<Environment>
+					<Variable name="DEBUG_STR" value="" />
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
-					<Variable name="DEBUG_STR" value="" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\libKlayGE_Scene_OCTree_d_gcc_x86.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x86" />
-				<Option object_output="..\..\Debug\linux\x86" />
+				<Option output="../../lib/linux/x86/libKlayGE_Scene_OCTree_d_gcc_x86.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x86" />
+				<Option object_output="../../Debug/linux/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -87,6 +68,10 @@
 					<Add option="-m32" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
+				<Linker>
+					<Add option="--enable-auto-import" />
+					<Add library="boost_system" />
+				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
@@ -98,14 +83,15 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x86\libKlayGE_Scene_OCTree_gcc_x86.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x86" />
-				<Option object_output="..\..\Release\linux\x86" />
+				<Option output="../../lib/linux/x86/libKlayGE_Scene_OCTree_gcc_x86.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x86" />
+				<Option object_output="../../Release/linux/x86" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
+					<Add option="-march=core2" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
@@ -114,6 +100,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="--enable-auto-import" />
+					<Add library="boost_system" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
@@ -126,9 +114,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\libKlayGE_Scene_OCTree_gcc_x64_d.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x64" />
-				<Option object_output="..\..\Debug\linux\x64" />
+				<Option output="../../lib/linux/x64/libKlayGE_Scene_OCTree_gcc_x64_d.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x64" />
+				<Option object_output="../../Debug/linux/x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -142,6 +130,10 @@
 					<Add option="-fPIC" />
 					<Add option="-D_DEBUG" />
 				</Compiler>
+				<Linker>
+					<Add option="--enable-auto-import" />
+					<Add library="boost_system" />
+				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
 				</ExtraCommands>
@@ -153,9 +145,9 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\lib\linux\x64\libKlayGE_Scene_OCTree_gcc_x64.so" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="..\..\lib\linux\x64" />
-				<Option object_output="..\..\Release\linux\x64" />
+				<Option output="../../lib/linux/x64/libKlayGE_Scene_OCTree_gcc_x64.so" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../lib/linux/x64" />
+				<Option object_output="../../Release/linux/x64" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createStaticLib="1" />
@@ -171,6 +163,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="--enable-auto-import" />
+					<Add library="boost_system" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='cp &quot;$(PROJECT_DIR)$(TARGET_OUTPUT_FILE)&quot; &quot;%KLAYGE_HOME%/bin/Scene/&quot;' />
@@ -187,17 +181,13 @@
 			<Add alias="All_Win" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
 		<Compiler>
-			<Add directory="..\..\Core\Include" />
-			<Add directory="..\..\Plugins\Include" />
+			<Add directory="../../Core/Include" />
+			<Add directory="../../Plugins/Include" />
 		</Compiler>
-		<Linker>
-			<Add option="-enable-auto-import" />
-			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
-		</Linker>
-		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTree.hpp" />
-		<Unit filename="..\..\Plugins\Include\KlayGE\OCTree\OCTreeFactory.hpp" />
-		<Unit filename="..\..\Plugins\Src\Scene\OCTree\OCTree.cpp" />
-		<Unit filename="..\..\Plugins\Src\Scene\OCTree\OCTreeFactory.cpp" />
+		<Unit filename="../../Plugins/Include/KlayGE/OCTree/OCTree.hpp" />
+		<Unit filename="../../Plugins/Include/KlayGE/OCTree/OCTreeFactory.hpp" />
+		<Unit filename="../../Plugins/Src/Scene/OCTree/OCTree.cpp" />
+		<Unit filename="../../Plugins/Src/Scene/OCTree/OCTreeFactory.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

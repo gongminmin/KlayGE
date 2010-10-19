@@ -390,6 +390,9 @@ namespace KlayGE
 		case STM_Vertical:
 			stereoscopic_tech_ = stereoscopic_effect_->TechniqueByName("Vertical");
 			break;
+
+		default:
+			break;
 		}
 		
 		*(stereoscopic_effect_->ParameterByName("tex_size")) = float2(static_cast<float>(screen_frame_buffer_->Width()),

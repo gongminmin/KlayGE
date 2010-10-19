@@ -14,6 +14,8 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/ResLoader.hpp>
 
+#include <cstring>
+
 #include "LzTypes.hpp"
 #include "LzmaEnc.hpp"
 #include "LzmaDec.hpp"
@@ -31,7 +33,7 @@ namespace
 	{
 		free(address);
 	}
-	
+
 	ISzAlloc lzma_alloc = { SzAlloc, SzFree };
 }
 
@@ -135,7 +137,7 @@ namespace KlayGE
 		uint8_t const * p = static_cast<uint8_t const *>(input);
 
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
-		memcpy(&in_data[0], p, static_cast<std::streamsize>(in_data.size()));
+		std::memcpy(&in_data[0], p, static_cast<std::streamsize>(in_data.size()));
 
 		SizeT s_out_len = static_cast<SizeT>(original_len);
 		output.resize(s_out_len);
