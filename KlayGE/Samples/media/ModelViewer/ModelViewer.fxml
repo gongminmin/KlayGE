@@ -98,7 +98,7 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 
 	float3 L = light_pos - result_pos.xyz;
 	float3 V = eye_pos - result_pos.xyz;
-	float3 H = L + V;
+	float3 H = normalize(L) + normalize(V);
 
 	oL = mul(obj2tan, L);
 	oV = mul(obj2tan, V);

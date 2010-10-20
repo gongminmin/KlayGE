@@ -52,27 +52,28 @@ void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			out float2 oTexCoord : TEXCOORD0,
 			out float4 oNormal : TEXCOORD1,
-			out float3 oPosES : TEXCOORD2,
+			out float3 oLightDir : TEXCOORD2,
+			out float3 oHalfway : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos_es, proj);
-	oNormal.xyz = normal;
+	oNormal.xyz = mul(normal, (float3x3)model_view);
 	oNormal.w = pos_es.z * depth_near_far_invfar.z;
-	oPosES = pos_es.xyz;
+	oLightDir = light_in_eye - pos_es.xyz;
+	oHalfway = normalize(oLightDir) + normalize(-pos_es.xyz);
 	
 	oTexCoord = texcoord;
 }
 
-void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 pos_es : TEXCOORD2,
+void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 light_dir : TEXCOORD2, float3 halfway : TEXCOORD3,
 			out float4 oClr : SV_Target0, out float4 oNormalDepth : SV_Target1)
 {
-	normal.xyz = normalize(mul(normal.xyz, (float3x3)model_view));
+	normal.xyz = normalize(normal.xyz);
 	oNormalDepth = StoreNormalDepthMat(normal.xyz, normal.w, 0);
 	
-	float3 view_dir = normalize(-pos_es);
-	float3 light_dir = normalize(light_in_eye - pos_es);
-	float3 halfway = normalize(light_dir + view_dir);
+	light_dir = normalize(light_dir);
+	halfway = normalize(halfway);
 	
 	float3 diffuse_clr = 1;//diffuse_tex.Sample(linear_sampler, texcoord).rgb;
 	float3 specular_clr = 1;

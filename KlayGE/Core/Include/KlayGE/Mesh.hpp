@@ -226,22 +226,13 @@ namespace KlayGE
 		int16_t parent;
 	};
 
-	struct KeyFrames
+	struct KLAYGE_CORE_API KeyFrames
 	{
 		std::vector<float3> bind_pos;
 		std::vector<Quaternion> bind_quat;
 
-		float3 const & FramePos(int frame) const
-		{
-			const int lframe(static_cast<int>(frame % bind_pos.size()));
-			return bind_pos[lframe];
-		}
-
-		Quaternion const & FrameQuat(int frame) const
-		{
-			const int lframe(static_cast<int>(frame % bind_quat.size()));
-			return bind_quat[lframe];
-		}
+		float3 FramePos(float frame) const;
+		Quaternion FrameQuat(float frame) const;
 	};
 	typedef MapVector<std::string, KeyFrames> KeyFramesType;
 
@@ -321,14 +312,14 @@ namespace KlayGE
 			frame_rate_ = fr;
 		}
 
-		uint32_t GetFrame() const;
-		void SetFrame(uint32_t frame);
+		float GetFrame() const;
+		void SetFrame(float frame);
 
 		void RebindJoints();
 		void UnbindJoints();
 
 	protected:
-		void BuildBones(uint32_t frame);
+		void BuildBones(float frame);
 		void UpdateBinds();
 
 	protected:
@@ -337,7 +328,7 @@ namespace KlayGE
 		PositionsType bind_poss_;
 
 		boost::shared_ptr<KeyFramesType> key_frames_;
-		uint32_t last_frame_;
+		float last_frame_;
 
 		uint32_t start_frame_;
 		uint32_t end_frame_;

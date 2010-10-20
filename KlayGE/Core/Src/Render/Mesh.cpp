@@ -138,14 +138,31 @@ namespace KlayGE
 	}
 
 
+	float3 KeyFrames::FramePos(float frame) const
+	{
+		frame = std::fmod(frame, static_cast<float>(bind_pos.size()));
+		int frame0 = static_cast<int>(frame);
+		int frame1 = (frame0 + 1) % bind_pos.size();
+		return MathLib::lerp(bind_pos[frame0], bind_pos[frame1], frame - frame0);
+	}
+
+	Quaternion KeyFrames::FrameQuat(float frame) const
+	{
+		frame = std::fmod(frame, static_cast<float>(bind_quat.size()));
+		int frame0 = static_cast<int>(frame);
+		int frame1 = (frame0 + 1) % bind_quat.size();
+		return MathLib::slerp(bind_quat[frame0], bind_quat[frame1], frame - frame0);
+	}
+
+
 	SkinnedModel::SkinnedModel(std::wstring const & name)
 		: RenderModel(name),
-			last_frame_(0xFFFFFFFF),
+			last_frame_(-1),
 			start_frame_(0), end_frame_(1), frame_rate_(0)
 	{
 	}
 	
-	void SkinnedModel::BuildBones(uint32_t frame)
+	void SkinnedModel::BuildBones(float frame)
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(joints_)::reference joint, joints_)
 		{
@@ -194,12 +211,12 @@ namespace KlayGE
 		key_frames_ = key_frames;
 	}
 
-	uint32_t SkinnedModel::GetFrame() const
+	float SkinnedModel::GetFrame() const
 	{
 		return last_frame_;
 	}
 
-	void SkinnedModel::SetFrame(uint32_t frame)
+	void SkinnedModel::SetFrame(float frame)
 	{
 		if (last_frame_ != frame)
 		{

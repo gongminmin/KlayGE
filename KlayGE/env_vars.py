@@ -69,7 +69,7 @@ else:
 print('Set %%KLAYGE_HOME%% to %s' % klayge_path)
 print('Add %KLAYGE_HOME%\\bin to %PATH%')
 
-if not has_pywin32:
+if ('nt' == os.name) and (not has_pywin32):
 	print("WM_SETTINGCHANGE can't be delivered because PyWin32 is not installed. Please reboot your computer to update the environment variables.")
 
 print("Please press any key to exit...")

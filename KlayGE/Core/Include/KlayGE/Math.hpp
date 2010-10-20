@@ -1428,48 +1428,35 @@ namespace KlayGE
 		slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T const & slerp)
 		{
 			T scale0, scale1;
-			Quaternion_T<T> q2;
 
 			// DOT the quats to get the cosine of the angle between them
-			T const cosom(dot(lhs, rhs));
+			T cosom = dot(lhs, rhs);
 
-			// Two special cases:
-			// Quats are exactly opposite, within DELTA?
-			if (cosom > std::numeric_limits<T>::epsilon() - T(1))
+			T dir = T(1);
+			if (cosom < 0)
 			{
-				// make sure they are different enough to avoid a divide by 0
-				if (cosom < T(1) - std::numeric_limits<T>::epsilon())
-				{
-					// SLERP away
-					T const omega(acos(cosom));
-					T const isinom(T(1) / sin(omega));
-					scale0 = sin((T(1) - slerp) * omega) * isinom;
-					scale1 = sin(slerp * omega) * isinom;
-				}
-				else
-				{
-					// LERP is good enough at this distance
-					scale0 = T(1)- slerp;
-					scale1 = slerp;
-				}
+				dir = T(-1);
+				cosom = -cosom;
+			}
 
-				q2 = rhs * scale1;
+			// make sure they are different enough to avoid a divide by 0
+			if (cosom < T(1) - std::numeric_limits<T>::epsilon())
+			{
+				// SLERP away
+				T const omega = acos(cosom);
+				T const isinom = T(1) / sin(omega);
+				scale0 = sin((T(1) - slerp) * omega) * isinom;
+				scale1 = sin(slerp * omega) * isinom;
 			}
 			else
 			{
-				// SLERP towards a perpendicular quat
-				// Set slerp parameters
-				scale0 = sin((T(1) - slerp) * PIdiv2);
-				scale1 = sin(slerp * PIdiv2);
-
-				q2.x() = -rhs.y() * scale1;
-				q2.y() = +rhs.x() * scale1;
-				q2.z() = -rhs.w() * scale1;
-				q2.w() = +rhs.z() * scale1;
+				// LERP is good enough at this distance
+				scale0 = T(1) - slerp;
+				scale1 = slerp;
 			}
 
 			// Compute the result
-			return scale0 * lhs + q2;
+			return scale0 * lhs + dir * scale1 * rhs;
 		}
 
 		template <typename T>

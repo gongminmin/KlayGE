@@ -418,14 +418,14 @@ namespace KlayGE
 				sm_aa_tex_ = sm_tex_;
 			}
 		}
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality()));
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D24S8, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality()));
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		for (int i = 0; i < 7; ++ i)
 		{
-			sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
+			sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		}
 		sm_filter_pps_[0]->InputPin(0, sm_tex_);
 		sm_filter_pps_[0]->OutputPin(0, blur_sm_tex_);
@@ -554,12 +554,12 @@ namespace KlayGE
 
 		try
 		{
-			shadowing_tex_ = rf.MakeTexture2D(width * 4 / 5, height * 4 / 5, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 0));
 		}
 		catch (...)
 		{
-			shadowing_tex_ = rf.MakeTexture2D(width * 4 / 5, height * 4 / 5, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 0));
 		}
 

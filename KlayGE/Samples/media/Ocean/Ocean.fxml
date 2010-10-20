@@ -82,9 +82,6 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
-	float3 light_dir = normalize(-sun_dir);
-	float3 halfway = normalize(light_dir + eye_dir);
-	float3 specular = sun_color * specular_normalize_factor(sun_shineness, 0.027) * roughness_term(halfway, normal, sun_shineness);
 
 	pos_ss.xyz /= pos_ss.w;
 	float2 bump = normal.xz / pos_ss.z;
@@ -111,9 +108,14 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float fresnel = fresnel_term_schlick(reflect_vec, normal, 0.027f);
 	float3 water_color = lerp(lerp(waterbody_color, refraction, saturate(10 / pos_ss.w)), reflection, fresnel);
 
-	float3 diffuse = water_color * (directional_lighting(sun_dir, normal) + 0.1f);
+	float3 ambient = water_color * 0.1f;
+	float3 diffuse = water_color;
+	float3 light_dir = normalize(-sun_dir);
+	float3 halfway = normalize(light_dir + eye_dir);
+	float3 specular = sun_color * specular_normalize_factor(sun_shineness, 0.027) * roughness_term(halfway, normal, sun_shineness);
 
-	return float4(lerp(diffuse + specular, fog_color, eye_dir_fog.w), water_depth);
+	float n_dot_l = directional_lighting(sun_dir, normal);
+	return float4(lerp(ambient + (diffuse + specular) * n_dot_l, fog_color, eye_dir_fog.w), water_depth);
 }
 		]]>
 	</shader>

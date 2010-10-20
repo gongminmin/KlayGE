@@ -29,8 +29,6 @@ private:
 
 	int tess_factor_;
 	bool animation_;
-	float last_time_;
-	int frame_;
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;

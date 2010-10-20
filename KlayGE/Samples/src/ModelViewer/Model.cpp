@@ -429,7 +429,7 @@ void DetailedSkinnedModel::SetEyePos(KlayGE::float3 const & eye_pos)
 
 void DetailedSkinnedModel::SetTime(float time)
 {
-	this->SetFrame(static_cast<int>(time * frame_rate_));
+	this->SetFrame(time * frame_rate_);
 }
 
 void DetailedSkinnedModel::VisualizeLighting()

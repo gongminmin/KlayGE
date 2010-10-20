@@ -244,7 +244,7 @@ namespace
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->EnablePNTriangles(pn);
 		}
 
-		void SetFrame(uint32_t frame)
+		void SetFrame(float frame)
 		{
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->SetFrame(frame);
 		}
@@ -297,7 +297,7 @@ int main()
 
 PNTrianglesApp::PNTrianglesApp()
 					: App3DFramework("PNTriangles"),
-						tess_factor_(5), last_time_(0), frame_(0)
+						tess_factor_(5)
 {
 	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");
 }
@@ -464,15 +464,7 @@ uint32_t PNTrianglesApp::DoUpdate(uint32_t /*pass*/)
 	if (animation_)
 	{
 		float this_time = clock() / 1000.0f;
-		if (this_time - last_time_ > 1.0f / obj->FrameRate())
-		{
-			++ frame_;
-			frame_ = frame_ % (obj->EndFrame() - obj->StartFrame()) + obj->StartFrame();
-
-			obj->SetFrame(frame_);
-
-			last_time_ = this_time;
-		}
+		obj->SetFrame(this_time * obj->FrameRate());
 	}
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
