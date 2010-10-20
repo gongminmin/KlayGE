@@ -6,6 +6,9 @@ glob:glloader/build/codeblocks/*.layout
 glob:glloader/build/codeblocks/*.depend
 glob:glloader/build/codeblocks/*.bmarks
 glob:glloader/build/codeblocks/*.backup
+glob:glloader/build/codelite/*.mk
+glob:glloader/build/codelite/*.tags
+glob:glloader/build/codelite/*.session
 glob:glloader/build/vc-9_0/*.ncb
 glob:glloader/build/vc-9_0/*.user
 glob:glloader/build/vc-9_0/*.suo

@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Project Name="glloader">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00210001N0005Debug0000000000000001N0010Debug-GLES0000000000000001N0020Debug-GLES_linux_x640000000000000001N0020Debug-GLES_linux_x860000000000000001N0014Debug-GLES_x640000000000000001N0014Debug-GLES_x860000000000000001N0015Debug_linux_x640000000000000001N0015Debug_linux_x860000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0009Debug_x640000000000000001N0009Debug_x860000000000000001N0007Release0000000000000001N0012Release-GLES0000000000000001N0016Release-GLES_x640000000000000001N0016Release-GLES_x860000000000000001N0017Release_linux_x640000000000000001N0017Release_linux_x860000000000000001N0015Release_win_x860000000000000001N0011Release_x640000000000000001N0011Release_x86000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <VirtualDirectory Name="include">
+    <File Name="../../include/glloader/glloader.h"/>
+    <File Name="../../include/glloader/glloader_egl.h"/>
+    <File Name="../../include/glloader/glloader_gl.h"/>
+    <File Name="../../include/glloader/glloader_gles.h"/>
+    <File Name="../../include/glloader/glloader_glx.h"/>
+    <File Name="../../include/glloader/glloader_wgl.h"/>
+  </VirtualDirectory>
+  <Dependencies/>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/glloader_egl.c"/>
+    <File Name="../../src/glloader_gl.c"/>
+    <File Name="../../src/glloader_gles.c"/>
+    <File Name="../../src/glloader_glx.c"/>
+    <File Name="../../src/glloader_wgl.c"/>
+    <File Name="../../src/utils.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Header Files">
+    <File Name="../../src/utils.h"/>
+  </VirtualDirectory>
+  <Settings Type="Dynamic Library">
+    <Configuration Name="Debug-GLES_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug-GLES_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug-GLES_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug-GLES_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="GL"/>
+        <Library Value="X11"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_x64_d.dll" IntermediateDirectory="../../Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="GL"/>
+        <Library Value="X11"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_x86_d.dll" IntermediateDirectory="../../Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="opengl32"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_x64_d.dll" IntermediateDirectory="../../Debug/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -g" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <Library Value="opengl32"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_x86_d.dll" IntermediateDirectory="../../Debug/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release-GLES_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release-GLES_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release-GLES_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release-GLES_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="EGL"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="GL"/>
+        <Library Value="X11"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_x64.dll" IntermediateDirectory="../../Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="GL"/>
+        <Library Value="X11"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_x86.dll" IntermediateDirectory="../../Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="opengl32"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x64/glloader_x64.dll" IntermediateDirectory="../../Release/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_USRDLL"/>
+        <Preprocessor Value="GLLOADER_SOURCE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <Library Value="opengl32"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../lib/x86/glloader_x86.dll" IntermediateDirectory="../../Release/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <GlobalSettings>
+      <Compiler Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+  </Settings>
+</CodeLite_Project>
