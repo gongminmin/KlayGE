@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Workspace Name="Tools" Database="./Tools.tags">
+  <Project Name="NormalMapCompressor" Path="NormalMapCompressor.project" Active="No"/>
+  <Project Name="NoiseTexGen" Path="NoiseTexGen.project"/>
+  <Project Name="KFontGen" Path="KFontGen.project" Active="Yes"/>
+  <Project Name="NormalMapGen" Path="NormalMapGen.project"/>
+  <Project Name="HDRCompressor" Path="HDRCompressor.project"/>
+  <Project Name="FXML2Shader" Path="FXML2Shader.project"/>
+  <Project Name="GLCompatibility" Path="GLCompatibility.project"/>
+  <Project Name="DistanceMapCreator" Path="DistanceMapCreator.project"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
+      <Project Name="NormalMapGen" ConfigName="Debug_win_x86"/>
+      <Project Name="NormalMapCompressor" ConfigName="Debug_win_x86"/>
+      <Project Name="NoiseTexGen" ConfigName="Debug_win_x86"/>
+      <Project Name="KFontGen" ConfigName="Debug_win_x86"/>
+      <Project Name="HDRCompressor" ConfigName="Debug_win_x86"/>
+      <Project Name="GLCompatibility" ConfigName="Debug_win_x86"/>
+      <Project Name="FXML2Shader" ConfigName="Debug_win_x86"/>
+      <Project Name="DistanceMapCreator" ConfigName="Debug_win_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
+      <Project Name="NormalMapGen" ConfigName="Release_win_x86"/>
+      <Project Name="NormalMapCompressor" ConfigName="Release_win_x86"/>
+      <Project Name="NoiseTexGen" ConfigName="Release_win_x86"/>
+      <Project Name="KFontGen" ConfigName="Release_win_x86"/>
+      <Project Name="HDRCompressor" ConfigName="Release_win_x86"/>
+      <Project Name="GLCompatibility" ConfigName="Release_win_x86"/>
+      <Project Name="FXML2Shader" ConfigName="Release_win_x86"/>
+      <Project Name="DistanceMapCreator" ConfigName="Release_win_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
+      <Project Name="NormalMapGen" ConfigName="Debug_win_x64"/>
+      <Project Name="NormalMapCompressor" ConfigName="Debug_win_x64"/>
+      <Project Name="NoiseTexGen" ConfigName="Debug_win_x64"/>
+      <Project Name="KFontGen" ConfigName="Debug_win_x64"/>
+      <Project Name="HDRCompressor" ConfigName="Debug_win_x64"/>
+      <Project Name="GLCompatibility" ConfigName="Debug_win_x64"/>
+      <Project Name="FXML2Shader" ConfigName="Debug_win_x64"/>
+      <Project Name="DistanceMapCreator" ConfigName="Debug_win_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
+      <Project Name="NormalMapGen" ConfigName="Release_win_x64"/>
+      <Project Name="NormalMapCompressor" ConfigName="Release_win_x64"/>
+      <Project Name="NoiseTexGen" ConfigName="Release_win_x64"/>
+      <Project Name="KFontGen" ConfigName="Release_win_x64"/>
+      <Project Name="HDRCompressor" ConfigName="Release_win_x64"/>
+      <Project Name="GLCompatibility" ConfigName="Release_win_x64"/>
+      <Project Name="FXML2Shader" ConfigName="Release_win_x64"/>
+      <Project Name="DistanceMapCreator" ConfigName="Release_win_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
+      <Project Name="NormalMapGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="NormalMapCompressor" ConfigName="Debug_linux_x86"/>
+      <Project Name="NoiseTexGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="KFontGen" ConfigName="Debug_linux_x86"/>
+      <Project Name="HDRCompressor" ConfigName="Debug_linux_x86"/>
+      <Project Name="GLCompatibility" ConfigName="Debug_linux_x86"/>
+      <Project Name="FXML2Shader" ConfigName="Debug_linux_x86"/>
+      <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
+      <Project Name="NormalMapGen" ConfigName="Release_linux_x86"/>
+      <Project Name="NormalMapCompressor" ConfigName="Release_linux_x86"/>
+      <Project Name="NoiseTexGen" ConfigName="Release_linux_x86"/>
+      <Project Name="KFontGen" ConfigName="Release_linux_x86"/>
+      <Project Name="HDRCompressor" ConfigName="Release_linux_x86"/>
+      <Project Name="GLCompatibility" ConfigName="Release_linux_x86"/>
+      <Project Name="FXML2Shader" ConfigName="Release_linux_x86"/>
+      <Project Name="DistanceMapCreator" ConfigName="Release_linux_x86"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
+      <Project Name="NormalMapGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="NormalMapCompressor" ConfigName="Debug_linux_x64"/>
+      <Project Name="NoiseTexGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="KFontGen" ConfigName="Debug_linux_x64"/>
+      <Project Name="HDRCompressor" ConfigName="Debug_linux_x64"/>
+      <Project Name="GLCompatibility" ConfigName="Debug_linux_x64"/>
+      <Project Name="FXML2Shader" ConfigName="Debug_linux_x64"/>
+      <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x64"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
+      <Project Name="NormalMapGen" ConfigName="Release_linux_x64"/>
+      <Project Name="NormalMapCompressor" ConfigName="Release_linux_x64"/>
+      <Project Name="NoiseTexGen" ConfigName="Release_linux_x64"/>
+      <Project Name="KFontGen" ConfigName="Release_linux_x64"/>
+      <Project Name="HDRCompressor" ConfigName="Release_linux_x64"/>
+      <Project Name="GLCompatibility" ConfigName="Release_linux_x64"/>
+      <Project Name="FXML2Shader" ConfigName="Release_linux_x64"/>
+      <Project Name="DistanceMapCreator" ConfigName="Release_linux_x64"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

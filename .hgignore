@@ -44,6 +44,9 @@ glob:KlayGE/Build/codeblocks/*.layout
 glob:KlayGE/Build/codeblocks/*.depend
 glob:KlayGE/Build/codeblocks/*.bmarks
 glob:KlayGE/Build/codeblocks/*.backup
+glob:KlayGE/Build/codelite/*.mk
+glob:KlayGE/Build/codelite/*.tags
+glob:KlayGE/Build/codelite/*.session
 glob:KlayGE/Build/vc-9_0/*.ncb
 glob:KlayGE/Build/vc-9_0/*.user
 glob:KlayGE/Build/vc-9_0/*.suo
@@ -53,6 +56,7 @@ glob:KlayGE/Build/vc-10_0/*.suo
 glob:KlayGE/Build/vc-10_0/*.user
 glob:KlayGE/Build/vc-10_0/ipch/
 glob:KlayGE/Core/Src/KConfig/*.aps
+glob:KlayGE/Core/Include/KlayGE/*.gch
 glob:KlayGE/Exporters/3DSMax/MeshML/Debug/
 glob:KlayGE/Exporters/3DSMax/MeshML/Release/
 glob:KlayGE/Exporters/3DSMax/MeshML/*.aps
@@ -71,6 +75,9 @@ glob:KlayGE/Samples/build/codeblocks/*.layout
 glob:KlayGE/Samples/build/codeblocks/*.depend
 glob:KlayGE/Samples/build/codeblocks/*.bmarks
 glob:KlayGE/Samples/build/codeblocks/*.backup
+glob:KlayGE/Samples/build/codelite/*.mk
+glob:KlayGE/Samples/build/codelite/*.tags
+glob:KlayGE/Samples/build/codelite/*.session
 glob:KlayGE/Samples/build/vc-9_0/*.ncb
 glob:KlayGE/Samples/build/vc-9_0/*.user
 glob:KlayGE/Samples/build/vc-9_0/*.suo
@@ -87,6 +94,9 @@ glob:KlayGE/Tools/build/codeblocks/*.layout
 glob:KlayGE/Tools/build/codeblocks/*.depend
 glob:KlayGE/Tools/build/codeblocks/*.bmarks
 glob:KlayGE/Tools/build/codeblocks/*.backup
+glob:KlayGE/Tools/build/codelite/*.mk
+glob:KlayGE/Tools/build/codelite/*.tags
+glob:KlayGE/Tools/build/codelite/*.session
 glob:KlayGE/Tools/build/vc-9_0/*.ncb
 glob:KlayGE/Tools/build/vc-9_0/*.user
 glob:KlayGE/Tools/build/vc-9_0/*.suo

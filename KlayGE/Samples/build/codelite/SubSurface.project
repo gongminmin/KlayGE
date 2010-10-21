@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Project Name="SubSurface">
+  <Description/>
+  <VirtualDirectory Name="src"/>
+  <VirtualDirectory Name="include"/>
+  <Dependencies/>
+  <Settings Type="Executable">
+    <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/linux_x64"/>
+        <Library Value="KlayGE_Core_gcc_x64_d"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/linux_x86"/>
+        <Library Value="KlayGE_Core_gcc_x86_d"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN64"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/win_x64"/>
+        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/win_x86"/>
+        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/linux_x64"/>
+        <Library Value="KlayGE_Core_gcc_x64"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/linux_x86"/>
+        <Library Value="KlayGE_Core_gcc_x86"/>
+        <Library Value="boost_system"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN64"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/win_x64"/>
+        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="boost_system-mgw45-mt-1_44"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../Core/Include"/>
+        <Preprocessor Value="WIN32"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="_CONSOLE"/>
+      </Compiler>
+      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../lib/win_x86"/>
+        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="boost_system-mgw45-mt-1_44"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+    </Configuration>
+    <GlobalSettings>
+      <Compiler Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+  </Settings>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/SubSurface/Model.cpp"/>
+    <File Name="../../src/SubSurface/SubSurface.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Header Files">
+    <File Name="../../src/SubSurface/Model.hpp"/>
+    <File Name="../../src/SubSurface/SubSurface.hpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Effects">
+    <File Name="../../media/SubSurface/SubSurface.fxml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="UI">
+    <File Name="../../media/SubSurface/SubSurface.uiml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Resource Files">
+    <File Name="../../../klayge_logo.ico"/>
+    <File Name="../../media/Common/KlayGESample.rc"/>
+  </VirtualDirectory>
+</CodeLite_Project>
