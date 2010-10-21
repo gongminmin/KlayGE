@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Project Name="ProceduralTex">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0015Release_win_x86000000000000]]>
+    </Plugin>
+  </Plugins>
   <Description/>
-  <VirtualDirectory Name="src"/>
-  <VirtualDirectory Name="include"/>
   <Dependencies/>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/ProceduralTex/ProceduralTex.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Header Files">
+    <File Name="../../src/ProceduralTex/ProceduralTex.hpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Effects">
+    <File Name="../../media/ProceduralTex/ProceduralTex.fxml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="UI">
+    <File Name="../../media/ProceduralTex/ProceduralTex.uiml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Resource Files">
+    <File Name="../../../klayge_logo.ico"/>
+    <File Name="../../media/Common/KlayGESample.rc"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
@@ -85,7 +104,7 @@
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -120,7 +139,7 @@
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -223,7 +242,7 @@
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -258,7 +277,7 @@
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -291,20 +310,4 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
   </Settings>
-  <VirtualDirectory Name="Source Files">
-    <File Name="../../src/ProceduralTex/ProceduralTex.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Header Files">
-    <File Name="../../src/ProceduralTex/ProceduralTex.hpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Effects">
-    <File Name="../../media/ProceduralTex/ProceduralTex.fxml"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="UI">
-    <File Name="../../media/ProceduralTex/ProceduralTex.uiml"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Resource Files">
-    <File Name="../../../klayge_logo.ico"/>
-    <File Name="../../media/Common/KlayGESample.rc"/>
-  </VirtualDirectory>
 </CodeLite_Project>

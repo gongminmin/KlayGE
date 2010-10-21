@@ -6,8 +6,6 @@
     </Plugin>
   </Plugins>
   <Description/>
-  <VirtualDirectory Name="src"/>
-  <VirtualDirectory Name="include"/>
   <Dependencies/>
   <VirtualDirectory Name="Source Files">
     <File Name="../../src/ModelViewer/Model.cpp"/>
@@ -109,7 +107,7 @@
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
         <Library Value="commdlg32"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -145,7 +143,7 @@
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
         <Library Value="commdlg32"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -249,7 +247,7 @@
         <Library Value="boost_system-mgw45-mt-1_44"/>
         <Library Value="commdlg32"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -285,7 +283,7 @@
         <Library Value="boost_system-mgw45-mt-1_44"/>
         <Library Value="commdlg32"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
