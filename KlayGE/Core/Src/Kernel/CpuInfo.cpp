@@ -1,8 +1,11 @@
 // CpuInfo.cpp
 // KlayGE CPU信息类 实现文件
-// Ver 3.7.0
-// 版权所有(C) 龚敏敏, 2008
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2008-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Use inline asm version of cpuid (2010.10.21)
 //
 // 3.7.0
 // 初次建立 (2008.2.16)
@@ -15,6 +18,9 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#include <intrin.h>
+#endif
 #endif
 #include <vector>
 #include <boost/assert.hpp>

@@ -61,14 +61,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244 4512 4267 6011)
-#endif
-#include <boost/thread.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+#include <boost/thread/mutex.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
