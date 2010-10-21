@@ -578,6 +578,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\BilateralBlur.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\Blur.fxml"
 					>
 				</File>
@@ -765,54 +769,6 @@
 					RelativePath="..\..\Core\Src\Kernel\XMLDom.cpp"
 					>
 				</File>
-				<Filter
-					Name="asm"
-					>
-					<File
-						RelativePath="..\..\Core\Src\Kernel\asm\CpuID.asm"
-						>
-						<FileConfiguration
-							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCustomBuildTool"
-								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin32 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-								Outputs="$(IntDir)\$(InputName).obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug|x64"
-							>
-							<Tool
-								Name="VCCustomBuildTool"
-								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCustomBuildTool"
-								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin32 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-								Outputs="$(IntDir)\$(InputName).obj"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|x64"
-							>
-							<Tool
-								Name="VCCustomBuildTool"
-								Description="Assembly $(InputPath)"
-								CommandLine="yasm -Xvc -fwin64 -o &quot;$(IntDir)\$(InputName)&quot;.obj &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-								Outputs="&quot;$(IntDir)\$(InputName)&quot;.obj"
-							/>
-						</FileConfiguration>
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="Header Files"

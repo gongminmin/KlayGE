@@ -44,7 +44,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="YASM_OBJFMT" value="win32" />
 				</Environment>
 			</Target>
 			<Target title="Release_win_x86">
@@ -85,7 +84,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="YASM_OBJFMT" value="win32" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x86">
@@ -120,7 +118,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="YASM_OBJFMT" value="elf32" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x86">
@@ -157,7 +154,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="YASM_OBJFMT" value="elf32" />
 				</Environment>
 			</Target>
 			<Target title="Debug_linux_x64">
@@ -194,7 +190,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="YASM_OBJFMT" value="elf64" />
 				</Environment>
 			</Target>
 			<Target title="Release_linux_x64">
@@ -232,7 +227,6 @@
 					<Variable name="BOOST_VER" value="1_44" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="YASM_OBJFMT" value="elf64" />
 				</Environment>
 			</Target>
 		</Build>
@@ -353,9 +347,6 @@
 		<Unit filename="../../Core/Src/Kernel/Timer.cpp" />
 		<Unit filename="../../Core/Src/Kernel/Util.cpp" />
 		<Unit filename="../../Core/Src/Kernel/XMLDom.cpp" />
-		<Unit filename="../../Core/Src/Kernel/asm/CpuID.asm">
-			<Option compiler="gcc" use="1" buildCommand="yasm -Xgnu -f$(YASM_OBJFMT) -o $object $file\n" />
-		</Unit>
 		<Unit filename="../../Core/Src/Net/Lobby.cpp" />
 		<Unit filename="../../Core/Src/Net/Player.cpp" />
 		<Unit filename="../../Core/Src/Net/Socket.cpp" />
@@ -427,6 +418,7 @@
 		<Unit filename="../../Core/Src/UI/UIStatic.cpp" />
 		<Unit filename="../../Core/Src/UI/UITexButton.cpp" />
 		<Unit filename="../../media/RenderFX/2D.fxml" />
+		<Unit filename="../../media/RenderFX/BilateralBlur.fxml" />
 		<Unit filename="../../media/RenderFX/Blur.fxml" />
 		<Unit filename="../../media/RenderFX/Bone.fxml" />
 		<Unit filename="../../media/RenderFX/DownSample.fxml" />

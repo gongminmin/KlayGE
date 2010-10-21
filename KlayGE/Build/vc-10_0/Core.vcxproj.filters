@@ -22,9 +22,6 @@
     <Filter Include="Kernel\Source Files">
       <UniqueIdentifier>{15e82907-5770-47d5-b91a-c8dc3909c4f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Kernel\Source Files\asm">
-      <UniqueIdentifier>{ac6bc6b4-ef5e-4639-a0a9-96df3f561795}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Kernel\Header Files">
       <UniqueIdentifier>{a2f76b36-a519-43c9-b1c4-2bb9dcaac28a}</UniqueIdentifier>
     </Filter>
@@ -760,10 +757,5 @@
     <None Include="..\..\media\RenderFX\BilateralBlur.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\Core\Src\Kernel\asm\CpuID.asm">
-      <Filter>Kernel\Source Files\asm</Filter>
-    </CustomBuild>
   </ItemGroup>
 </Project>

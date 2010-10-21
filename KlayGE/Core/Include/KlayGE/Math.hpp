@@ -518,6 +518,13 @@ namespace KlayGE
 		{
 			return rhs * recip_sqrt(length_sq(rhs));
 		}
+		template <typename T>
+		inline Plane_T<T>
+		normalize(Plane_T<T> const & rhs)
+		{
+			T const inv(T(1) / length(rhs));
+			return Plane_T<T>(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
+		}
 
 		template <typename T>
 		inline T
@@ -1242,7 +1249,7 @@ namespace KlayGE
 		ln(Quaternion_T<T> const & rhs)
 		{
 			T const theta_2(acos(rhs.w()));
-			return Quaternion_T<T>(Normalize(rhs.v()) * (theta_2 + theta_2), 0);
+			return Quaternion_T<T>(normalize(rhs.v()) * (theta_2 + theta_2), 0);
 		}
 
 		template <typename T>
@@ -1488,13 +1495,6 @@ namespace KlayGE
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z();
 		}
 
-		template <typename T>
-		inline Plane_T<T>
-		normalize(Plane_T<T> const & rhs)
-		{
-			T const inv(T(1) / length(rhs));
-			return Plane_T<T>(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
-		}
 		template <typename T>
 		inline Plane_T<T>
 		from_point_normal(Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal)

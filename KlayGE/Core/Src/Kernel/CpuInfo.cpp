@@ -29,15 +29,54 @@
 
 #include <KlayGE/CpuInfo.hpp>
 
-// from CpuID.asm
-extern "C"
-{
-	extern KlayGE::uint32_t get_cpuid(int op, KlayGE::uint32_t* eax, KlayGE::uint32_t* ebx, KlayGE::uint32_t* ecx, KlayGE::uint32_t* edx);
-}
-
 namespace
 {
 	using namespace KlayGE;
+
+
+	void get_cpuid(int op, uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
+	{	
+#ifdef KLAYGE_COMPILER_MSVC
+	#if KLAYGE_COMPILER_VERSION >= 80 
+		int CPUInfo[4];
+		__cpuid(CPUInfo, op);
+		*peax = CPUInfo[0];
+		*pebx = CPUInfo[1];
+		*pecx = CPUInfo[2];
+		*pedx = CPUInfo[3];
+	#else
+		__asm
+		{
+			mov		eax, op
+			cpuid
+			mov		[peax], eax
+			mov		[pebx], ebx
+			mov		[pedx], ecx
+			mov		[pecx], edx
+		}
+	#endif
+#elif defined KLAYGE_COMPILER_GCC
+	#ifdef KLAYGE_CPU_X64
+		__asm__
+		(
+			"cpuid": "=a" (*peax), "=b" (*pebx), "=c" (*pecx), "=d" (*pedx) : "a" (op)
+		);
+	#else
+		__asm__
+		(
+			"pushl  %%ebx			\n\t"
+			"cpuid					\n\t"
+			"movl   %%ebx, %%edi	\n\t"
+			"popl   %%ebx			\n\t"
+			: "=a" (*peax), "=D" (*pebx), "=c" (*pecx), "=d" (*pedx)
+			: "a" (op)
+		);
+	#endif
+#else
+        // TODO: Supports other compiler
+#endif
+	}
+
 
 #if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)
 	enum CPUIDFeatureMask
