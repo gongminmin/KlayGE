@@ -2,7 +2,7 @@
 <CodeLite_Project Name="DSound Audio System">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0015Release_win_x86000000000000]]>
+      <![CDATA[00040001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x86000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -32,6 +32,8 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/KlayGE_AudioEngine_DSound_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -50,7 +52,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -72,6 +74,8 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/KlayGE_AudioEngine_DSound_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -90,7 +94,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -112,6 +116,8 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/KlayGE_AudioEngine_DSound_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -130,7 +136,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -152,6 +158,8 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/KlayGE_AudioEngine_DSound_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

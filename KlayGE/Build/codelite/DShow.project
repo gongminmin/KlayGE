@@ -2,7 +2,7 @@
 <CodeLite_Project Name="DShow Show System">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0015Release_win_x86000000000000]]>
+      <![CDATA[00040001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x86000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -32,6 +32,10 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="strmiids"/>
+        <Library Value="ole32"/>
+        <Library Value="uuid"/>
+        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/KlayGE_ShowEngine_DShow_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -50,7 +54,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -72,9 +76,13 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="strmiids"/>
+        <Library Value="ole32"/>
+        <Library Value="uuid"/>
+        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -90,7 +98,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -112,6 +120,10 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="strmiids"/>
+        <Library Value="ole32"/>
+        <Library Value="uuid"/>
+        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/KlayGE_ShowEngine_DShow_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -130,7 +142,7 @@
         <PreprocessFileCommand/>
         <SingleFileCommand/>
         <MakefileGenerationCommand/>
-        <ThirdPartyToolName/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
         <WorkingDirectory/>
       </CustomBuild>
       <AdditionalRules>
@@ -152,9 +164,13 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="strmiids"/>
+        <Library Value="ole32"/>
+        <Library Value="uuid"/>
+        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x64.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
