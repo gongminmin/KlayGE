@@ -384,7 +384,7 @@ void ModelViewerApp::FrameChangedHandler(KlayGE::UISlider const & sender)
 	frame_ = sender.GetValue();
 	if (skinned_)
 	{
-		model_->SetFrame(frame_);
+		model_->SetFrame(static_cast<float>(frame_));
 	}
 
 	std::wostringstream stream;

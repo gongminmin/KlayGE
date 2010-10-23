@@ -93,7 +93,7 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 		ts_to_view[0] = normalize(ts_to_view0_2y.xyz);
 		ts_to_view[1] = normalize(ts_to_view1_2z.xyz);
 		ts_to_view[2] = normal;
-		normal = normalize(mul(bump_tex.Sample(trilinear_sampler, texcoord_depth_2x.xy).xyz * 2 - 1, ts_to_view));
+		normal = normalize(mul(decompress_normal(bump_tex.Sample(trilinear_sampler, texcoord_depth_2x.xy)), ts_to_view));
 	}
 
 	return StoreGBuffer(normal, texcoord_depth_2x.z, shininess);

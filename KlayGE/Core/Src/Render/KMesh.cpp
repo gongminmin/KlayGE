@@ -847,7 +847,7 @@ namespace KlayGE
 			size_t offset = full_meshml_name.rfind("//");
 			if (offset != std::string::npos)
 			{
-				no_packing_name = full_meshml_name.substr(offset);
+				no_packing_name = full_meshml_name.substr(offset + 2);
 			}
 			else
 			{
