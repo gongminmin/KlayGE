@@ -56,11 +56,13 @@
 				<Option createStaticLib="1" />
 				<Option projectResourceIncludeDirsRelation="2" />
 				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O2" />
 					<Add option="-Wall" />
-					<Add option="-g" />
-					<Add option="-O0" />
+					<Add option="-m32" />
 					<Add option="-DWIN32" />
-					<Add option="-D_DEBUG" />
+					<Add option="-DNDEBUG" />
 					<Add option="-D_USRDLL" />
 					<Add option="-DKLAYGE_BUILD_DLL" />
 					<Add option="-DKLAYGE_CORE_SOURCE" />
