@@ -8,9 +8,9 @@
 		<Build>
 			<Target title="Debug_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\..\bin\VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Debug\Win32" />
+				<Option output="../../../bin/VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -22,8 +22,11 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add option="-enable-auto-import" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
-					<Add directory="..\..\..\lib\win\x86" />
+					<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+					<Add directory="../../../lib/win/x86" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -33,23 +36,26 @@
 			</Target>
 			<Target title="Release_win_x86">
 				<Option platforms="Windows;" />
-				<Option output="..\..\..\bin\VertexDisplacement" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Release\Win32" />
+				<Option output="../../../bin/VertexDisplacement" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/Win32" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=nocona" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
-					<Add option="-DWIN32" />
+					<Add option="-m64" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-enable-auto-import" />
 					<Add library="KlayGE_Core_mgw_x86" />
-					<Add directory="..\..\..\lib\win\x86" />
+					<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
+					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -59,9 +65,9 @@
 			</Target>
 			<Target title="Debug_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Debug\linux_x86" />
+				<Option output="../../../bin/VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -73,7 +79,11 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add option="--enable-auto-import" />
 					<Add library="KlayGE_Core_gcc_x86_d" />
+					<Add library="boost_signals" />
+					<Add library="boost_system" />
+					<Add directory="../../../lib/linux/x86" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -83,9 +93,9 @@
 			</Target>
 			<Target title="Release_linux_x86">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\VertexDisplacement" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Release\linux_x86" />
+				<Option output="../../../bin/VertexDisplacement" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/linux_x86" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -98,7 +108,11 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="--enable-auto-import" />
 					<Add library="KlayGE_Core_gcc_x86" />
+					<Add library="boost_signals" />
+					<Add library="boost_system" />
+					<Add directory="../../../lib/linux/x86" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -108,9 +122,9 @@
 			</Target>
 			<Target title="Debug_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Debug\linux_x64" />
+				<Option output="../../../bin/VertexDisplacement_d" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Debug/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -123,7 +137,11 @@
 					<Add option="-D_CONSOLE" />
 				</Compiler>
 				<Linker>
+					<Add option="--enable-auto-import" />
 					<Add library="KlayGE_Core_gcc_x64_d" />
+					<Add library="boost_signals" />
+					<Add library="boost_system" />
+					<Add directory="../../../lib/linux/x64" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -133,9 +151,9 @@
 			</Target>
 			<Target title="Release_linux_x64">
 				<Option platforms="Unix;" />
-				<Option output="..\..\..\bin\VertexDisplacement" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="..\..\..\bin\" />
-				<Option object_output="..\..\Release\linux_x64" />
+				<Option output="../../../bin/VertexDisplacement" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../../bin/" />
+				<Option object_output="../../Release/linux_x64" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -149,7 +167,11 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="--enable-auto-import" />
 					<Add library="KlayGE_Core_gcc_x64" />
+					<Add library="boost_signals" />
+					<Add library="boost_system" />
+					<Add directory="../../../lib/linux/x64" />
 				</Linker>
 				<Environment>
 					<Variable name="BOOST_VER" value="1_44" />
@@ -162,16 +184,11 @@
 			<Add alias="All" targets="Debug_win_x86;Release_win_x86;" />
 		</VirtualTargets>
 		<Compiler>
-			<Add directory="..\..\..\Core\Include" />
+			<Add directory="../../../Core/Include" />
 		</Compiler>
-		<Linker>
-			<Add option="-enable-auto-import" />
-			<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
-			<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
-		</Linker>
-		<Unit filename="..\..\media\VertexDisplacement\VertexDisplacement.fxml" />
-		<Unit filename="..\..\src\VertexDisplacement\VertexDisplacement.cpp" />
-		<Unit filename="..\..\src\VertexDisplacement\VertexDisplacement.hpp" />
+		<Unit filename="../../media/VertexDisplacement/VertexDisplacement.fxml" />
+		<Unit filename="../../src/VertexDisplacement/VertexDisplacement.cpp" />
+		<Unit filename="../../src/VertexDisplacement/VertexDisplacement.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

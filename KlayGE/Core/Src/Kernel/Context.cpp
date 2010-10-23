@@ -147,23 +147,29 @@ namespace KlayGE
 			}
 #endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			af_node = context_node->FirstNode("audio_factory");
 			if (af_node)
 			{
 				af_name = af_node->Attrib("name")->ValueString();
 			}
+#endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			if_node = context_node->FirstNode("input_factory");
 			if (if_node)
 			{
 				if_name = if_node->Attrib("name")->ValueString();
 			}
+#endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 			sf_node = context_node->FirstNode("show_factory");
 			if (sf_node)
 			{
 				sf_name = sf_node->Attrib("name")->ValueString();
 			}
+#endif
 
 			sm_node = context_node->FirstNode("scene_manager");
 			if (sm_node)
@@ -539,6 +545,9 @@ namespace KlayGE
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		render_loader_.Load(render_path + "/" + fn);
 
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
@@ -559,6 +568,9 @@ namespace KlayGE
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioEngine_") + af_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		audio_loader_.Load(audio_path + "/" + fn);
 
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
@@ -579,6 +591,9 @@ namespace KlayGE
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_InputEngine_") + if_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		input_loader_.Load(input_path + "/" + fn);
 
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
@@ -599,6 +614,9 @@ namespace KlayGE
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_ShowEngine_") + sf_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		show_loader_.Load(show_path + "/" + fn);
 
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
@@ -619,6 +637,9 @@ namespace KlayGE
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_Scene_") + sm_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		sm_loader_.Load(sm_path + "/" + fn);
 
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
@@ -639,6 +660,9 @@ namespace KlayGE
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_AudioDataSource_") + adsf_name + "_" + dll_suffix_;
+#ifdef KLAYGE_PLATFORM_LINUX
+		fn = "lib" + fn;
+#endif
 		ads_loader_.Load(adsf_path + "/" + fn);
 
 		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");

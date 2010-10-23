@@ -112,36 +112,51 @@ namespace KlayGE
 
 	std::string ResLoader::Locate(std::string const & name)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
+		if (('/' == name[0]) || ('\\' == name[0]))
 		{
-			std::string const res_name(path + name);
-
-			if (boost::filesystem::exists(res_name))
+			if (boost::filesystem::exists(name))
 			{
-				return res_name;
+				return name;
 			}
-			else
+		}
+		else
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 			{
-				std::string::size_type const pkt_offset(res_name.find("//"));
-				if (pkt_offset != std::string::npos)
-				{
-					std::string pkt_name = res_name.substr(0, pkt_offset);
-					std::string::size_type const password_offset = pkt_name.find("|");
-					std::string password;
-					if (password_offset != std::string::npos)
-					{
-						password = pkt_name.substr(password_offset + 1);
-						pkt_name = pkt_name.substr(0, password_offset - 1);
-					}
-					std::string const file_name = res_name.substr(pkt_offset + 2);
+				std::string const res_name(path + name);
 
-					ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
-						MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-					if (*pkt_file)
+				if (boost::filesystem::exists(res_name))
+				{
+					return res_name;
+				}
+				else
+				{
+					std::string::size_type const pkt_offset(res_name.find("//"));
+					if (pkt_offset != std::string::npos)
 					{
-						if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
+						std::string pkt_name = res_name.substr(0, pkt_offset);
+						if (boost::filesystem::exists(pkt_name)
+								&& (boost::filesystem::is_regular_file(pkt_name)
+										|| boost::filesystem::is_symlink(pkt_name)))
 						{
-							return res_name;
+							std::string::size_type const password_offset = pkt_name.find("|");
+							std::string password;
+							if (password_offset != std::string::npos)
+							{
+								password = pkt_name.substr(password_offset + 1);
+								pkt_name = pkt_name.substr(0, password_offset - 1);
+							}
+							std::string const file_name = res_name.substr(pkt_offset + 2);
+
+							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
+								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+							if (*pkt_file)
+							{
+								if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
+								{
+									return res_name;
+								}
+							}
 						}
 					}
 				}
@@ -153,37 +168,53 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Load(std::string const & name)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
+		if (('/' == name[0]) || ('\\' == name[0]))
 		{
-			std::string const res_name(path + name);
-
-			if (boost::filesystem::exists(res_name))
+			if (boost::filesystem::exists(name))
 			{
 				return MakeSharedPtr<ResIdentifier>(name,
-					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+					MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
 			}
-			else
+		}
+		else
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(pathes_)::const_reference path, pathes_)
 			{
-				std::string::size_type const pkt_offset(res_name.find("//"));
-				if (pkt_offset != std::string::npos)
-				{
-					std::string pkt_name = res_name.substr(0, pkt_offset);
-					std::string::size_type const password_offset = pkt_name.find("|");
-					std::string password;
-					if (password_offset != std::string::npos)
-					{
-						password = pkt_name.substr(password_offset + 1);
-						pkt_name = pkt_name.substr(0, password_offset - 1);
-					}
-					std::string const file_name = res_name.substr(pkt_offset + 2);
+				std::string const res_name(path + name);
 
-					ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
-						MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-					if (*pkt_file)
+				if (boost::filesystem::exists(res_name))
+				{
+					return MakeSharedPtr<ResIdentifier>(name,
+						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+				}
+				else
+				{
+					std::string::size_type const pkt_offset(res_name.find("//"));
+					if (pkt_offset != std::string::npos)
 					{
-						boost::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
-						Extract7z(pkt_file, password, file_name, packet_file);
-						return MakeSharedPtr<ResIdentifier>(name, packet_file);
+						std::string pkt_name = res_name.substr(0, pkt_offset);
+						if (boost::filesystem::exists(pkt_name)
+								&& (boost::filesystem::is_regular_file(pkt_name)
+										|| boost::filesystem::is_symlink(pkt_name)))
+						{
+							std::string::size_type const password_offset = pkt_name.find("|");
+							std::string password;
+							if (password_offset != std::string::npos)
+							{
+								password = pkt_name.substr(password_offset + 1);
+								pkt_name = pkt_name.substr(0, password_offset - 1);
+							}
+							std::string const file_name = res_name.substr(pkt_offset + 2);
+
+							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
+								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+							if (*pkt_file)
+							{
+								boost::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+								Extract7z(pkt_file, password, file_name, packet_file);
+								return MakeSharedPtr<ResIdentifier>(name, packet_file);
+							}
+						}
 					}
 				}
 			}

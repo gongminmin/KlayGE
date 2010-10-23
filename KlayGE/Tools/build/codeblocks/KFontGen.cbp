@@ -76,7 +76,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=pentium4" />
+					<Add option="-march=core2" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-m32" />
@@ -107,7 +107,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=pentium4" />
+					<Add option="-march=core2" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
 					<Add option="-Wall" />
@@ -204,7 +204,6 @@
 			<Add directory="../../../Core/Include" />
 		</Compiler>
 		<Unit filename="../../KFontGen/KFontGen.cpp" />
-		<Unit filename="../../KFontGen/kdtree.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

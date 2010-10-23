@@ -160,14 +160,21 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			if (!dll_loader_.Load("7z.dll"))
 			{
-#if defined KLAYGE_PLATFORM_WIN32
+#if defined KLAYGE_CPU_X86
 				dll_loader_.Load("7z_x86.dll");
-#elif defined KLAYGE_PLATFORM_WIN64
+#elif defined KLAYGE_CPU_X64
 				dll_loader_.Load("7z_x64.dll");
 #endif
 			}
 #elif defined KLAYGE_PLATFORM_LINUX
-			dll_loader_.Load("7z.so");
+			if (!dll_loader_.Load("7z.so"))
+			{
+#if defined KLAYGE_CPU_X86
+				dll_loader_.Load("7z_x86.so");
+#elif defined KLAYGE_CPU_X64
+				dll_loader_.Load("7z_x64.so");
+#endif
+			}
 #endif
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 
