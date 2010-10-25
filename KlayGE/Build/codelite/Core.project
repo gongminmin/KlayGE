@@ -69,7 +69,7 @@
     </VirtualDirectory>
     <VirtualDirectory Name="Effect Files">
       <File Name="../../media/RenderFX/2D.fxml"/>
-	  <File Name="../../media/RenderFX/BilateralBlur.fxml"/>
+      <File Name="../../media/RenderFX/BilateralBlur.fxml"/>
       <File Name="../../media/RenderFX/Blur.fxml"/>
       <File Name="../../media/RenderFX/Bone.fxml"/>
       <File Name="../../media/RenderFX/Copy.fxml"/>
@@ -307,7 +307,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
@@ -317,14 +317,14 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/KlayGE_Core_gcc_x64_d.dll" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/KlayGE_Core_gcc_x64_d.dll" "%KLAYGE_HOME%/bin"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_Core_gcc_x64_d.so" "../../bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -348,7 +348,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
@@ -358,14 +358,14 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/KlayGE_Core_gcc_x86_d.dll" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/KlayGE_Core_gcc_x86_d.dll" "%KLAYGE_HOME%/bin"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_Core_gcc_x86_d.so" "../../bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -403,14 +403,14 @@
         <Library Value="python31_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_Core_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_Core_mgw_x64_d.dll" "%KLAYGE_HOME%\bin"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_Core_mgw_x64_d.dll" "..\..\bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -448,14 +448,14 @@
         <Library Value="python31_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_Core_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_Core_mgw_x86_d.dll" "%KLAYGE_HOME%\bin"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_Core_mgw_x86_d.dll" "..\..\bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -479,7 +479,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
@@ -489,14 +489,14 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/KlayGE_Core_gcc_x64.dll" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/KlayGE_Core_gcc_x64.dll" "%KLAYGE_HOME%/bin"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_Core_gcc_x64.so" "../../bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -520,7 +520,7 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_CORE_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
@@ -530,14 +530,14 @@
         <Library Value="X11"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/KlayGE_Core_gcc_x86.dll" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/KlayGE_Core_gcc_x86.dll" "%KLAYGE_HOME%/bin"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_Core_gcc_x86.so" "../../bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -575,14 +575,14 @@
         <Library Value="python31"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_Core_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_Core_mgw_x64.dll" "%KLAYGE_HOME%\bin"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_Core_mgw_x64.dll" "..\..\bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -620,14 +620,14 @@
         <Library Value="python31"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_Core_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_Core_mgw_x86.dll" "%KLAYGE_HOME%\bin"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_Core_mgw_x86.dll" "..\..\bin"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

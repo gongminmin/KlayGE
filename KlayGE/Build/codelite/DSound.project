@@ -36,14 +36,14 @@
         <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_AudioEngine_DSound_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_AudioEngine_DSound_mgw_x64_d.dll" "%KLAYGE_HOME%\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_DSound_mgw_x64_d.dll" "..\..\bin\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -78,14 +78,14 @@
         <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_AudioEngine_DSound_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_AudioEngine_DSound_mgw_x86_d.dll" "%KLAYGE_HOME%\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_DSound_mgw_x86_d.dll" "..\..\bin\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -120,14 +120,14 @@
         <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_AudioEngine_DSound_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_DSound_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_AudioEngine_DSound_mgw_x64.dll" "%KLAYGE_HOME%\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_DSound_mgw_x64.dll" "..\..\bin\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -162,14 +162,14 @@
         <Library Value="dsound"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_AudioEngine_DSound_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_DSound_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DSound" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_AudioEngine_DSound_mgw_x86.dll" "%KLAYGE_HOME%\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_DSound_mgw_x86.dll" "..\..\bin\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

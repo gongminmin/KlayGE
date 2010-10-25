@@ -34,13 +34,13 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -68,13 +68,13 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -172,13 +172,13 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -206,13 +206,13 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

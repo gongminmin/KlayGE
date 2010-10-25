@@ -38,14 +38,14 @@
         <Library Value="dinput8"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_InputEngine_DInput_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_InputEngine_DInput_mgw_x64_d.dll" "%KLAYGE_HOME%\bin\Input"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_InputEngine_DInput_mgw_x64_d.dll" "..\..\bin\Input"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -79,14 +79,14 @@
         <Library Value="dinput8"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_InputEngine_DInput_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_InputEngine_DInput_mgw_x86_d.dll" "%KLAYGE_HOME%\bin\Input"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_InputEngine_DInput_mgw_x86_d.dll" "..\..\bin\Input"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -120,14 +120,14 @@
         <Library Value="dinput8"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_InputEngine_DInput_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_InputEngine_DInput_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_InputEngine_DInput_mgw_x64.dll" "%KLAYGE_HOME%\bin\Input"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_InputEngine_DInput_mgw_x64.dll" "..\..\bin\Input"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -161,14 +161,14 @@
         <Library Value="dinput8"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_InputEngine_DInput_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_InputEngine_DInput_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DInput" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_InputEngine_DInput_mgw_x86.dll" "%KLAYGE_HOME%\bin\Input"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_InputEngine_DInput_mgw_x86.dll" "..\..\bin\Input"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

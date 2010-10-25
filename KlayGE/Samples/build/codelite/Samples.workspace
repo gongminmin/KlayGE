@@ -41,7 +41,7 @@
       <Project Name="DepthPeeling" ConfigName="Debug_win_x86"/>
       <Project Name="DeferredShading" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
+    <WorkspaceConfiguration Name="Release_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x86"/>
       <Project Name="Text" ConfigName="Release_win_x86"/>
@@ -125,7 +125,7 @@
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x86"/>
       <Project Name="DeferredShading" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_linux_x86" Selected="no">
+    <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x86"/>
       <Project Name="Text" ConfigName="Release_linux_x86"/>

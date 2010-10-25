@@ -24,20 +24,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OCTREE_SM_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/KlayGE_Scene_OCTree_gcc_x64_d.dll" IntermediateDirectory="../../Debug/linux_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_Scene_OCTree_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/KlayGE_Scene_OCTree_gcc_x64_d.dll" "%KLAYGE_HOME%/bin/Scene"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_Scene_OCTree_gcc_x64_d.so" "../../bin/Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -62,20 +62,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OCTREE_SM_SOURCE"/>
       </Compiler>
-      <Linker Options="-Wl,--enable-auto-import" Required="yes">
+      <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/KlayGE_Scene_OCTree_gcc_x86_d.dll" IntermediateDirectory="../../Debug/linux_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_Scene_OCTree_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/KlayGE_Scene_OCTree_gcc_x86_d.dll" "%KLAYGE_HOME%/bin/Scene"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_Scene_OCTree_gcc_x86_d.so" "../../bin/Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -108,14 +108,14 @@
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_Scene_OCTree_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_Scene_OCTree_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_Scene_OCTree_mgw_x64_d.dll" "%KLAYGE_HOME%\bin\Scene"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_Scene_OCTree_mgw_x64_d.dll" "..\..\bin\Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -148,14 +148,14 @@
         <Library Value="boost_system-mgw45-mt-d-1_44"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_Scene_OCTree_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_Scene_OCTree_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_Scene_OCTree_mgw_x86_d.dll" "%KLAYGE_HOME%\bin\Scene"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_Scene_OCTree_mgw_x86_d.dll" "..\..\bin\Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -180,20 +180,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OCTREE_SM_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/KlayGE_Scene_OCTree_gcc_x64.dll" IntermediateDirectory="../../Release/linux_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_Scene_OCTree_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/KlayGE_Scene_OCTree_gcc_x64.dll" "%KLAYGE_HOME%/bin/Scene"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_Scene_OCTree_gcc_x64.so" "../../bin/Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -218,20 +218,20 @@
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OCTREE_SM_SOURCE"/>
       </Compiler>
-      <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+      <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/KlayGE_Scene_OCTree_gcc_x86.dll" IntermediateDirectory="../../Release/linux_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_Scene_OCTree_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/KlayGE_Scene_OCTree_gcc_x86.dll" "%KLAYGE_HOME%/bin/Scene"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_Scene_OCTree_gcc_x86.so" "../../bin/Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -264,14 +264,14 @@
         <Library Value="boost_system-mgw45-mt-1_44"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_Scene_OCTree_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_Scene_OCTree_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_Scene_OCTree_mgw_x64.dll" "%KLAYGE_HOME%\bin\Scene"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_Scene_OCTree_mgw_x64.dll" "..\..\bin\Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -304,14 +304,14 @@
         <Library Value="boost_system-mgw45-mt-1_44"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_Scene_OCTree_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_Scene_OCTree_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_Scene_OCTree_mgw_x86.dll" "%KLAYGE_HOME%\bin\Scene"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_Scene_OCTree_mgw_x86.dll" "..\..\bin\Scene"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

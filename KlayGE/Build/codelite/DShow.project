@@ -38,14 +38,14 @@
         <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_ShowEngine_DShow_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_ShowEngine_DShow_mgw_x64_d.dll" "%KLAYGE_HOME%\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw_x64_d.dll" "..\..\bin\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -82,14 +82,14 @@
         <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_ShowEngine_DShow_mgw_x86_d.dll" "%KLAYGE_HOME%\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw_x86_d.dll" "..\..\bin\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -126,14 +126,14 @@
         <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/KlayGE_ShowEngine_DShow_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\KlayGE_ShowEngine_DShow_mgw_x64.dll" "%KLAYGE_HOME%\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw_x64.dll" "..\..\bin\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -170,14 +170,14 @@
         <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/KlayGE_ShowEngine_DShow_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\KlayGE_ShowEngine_DShow_mgw_x86.dll" "%KLAYGE_HOME%\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw_x86.dll" "..\..\bin\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
