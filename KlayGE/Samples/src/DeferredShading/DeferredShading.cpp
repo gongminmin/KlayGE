@@ -1093,16 +1093,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		num_primitives_rendered_ = sceneMgr.NumPrimitivesRendered();
 		num_vertices_rendered_ = sceneMgr.NumVerticesRendered();
 
-		if ((0 == buffer_type_) || (5 == buffer_type_))
-		{
-			if (ssao_enabled_)
-			{
-				ssao_pp_->Apply();
-				blur_pp_->Apply();
-			}
-		}
-
-		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_) || (5 == buffer_type_))
+		if ((1 == buffer_type_) || (2 == buffer_type_) || (3 == buffer_type_))
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -1117,6 +1108,25 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 				renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				edge_anti_alias_->Apply();
 				return App3DFramework::URV_Finished;
+			}
+		}
+	}
+	else if (2 == pass)
+	{
+		if ((0 == buffer_type_) || (5 == buffer_type_))
+		{
+			if (ssao_enabled_)
+			{
+				ssao_pp_->Apply();
+				blur_pp_->Apply();
+
+				if (5 == buffer_type_)
+				{
+					renderEngine.BindFrameBuffer(FrameBufferPtr());
+					renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+					debug_pp_->Apply();
+					return App3DFramework::URV_Finished;
+				}
 			}
 		}
 	}

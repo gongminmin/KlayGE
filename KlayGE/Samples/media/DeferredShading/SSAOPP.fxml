@@ -95,8 +95,8 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 			sxy = -sxy;
 		}
 	}
-	
-	return obscurance / total_weight;
+
+	return (total_weight > 1e-6f) ? obscurance / total_weight : 0;
 }
 
 float4 SSVO(float2 tc0, float radius)

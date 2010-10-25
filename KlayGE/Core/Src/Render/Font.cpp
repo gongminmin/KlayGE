@@ -118,12 +118,12 @@ namespace KlayGE
 
 		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
 		kfont_input->read(&temp_char_index[0], static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-		std::vector<std::pair<int32_t, Vector_T<uint16_t, 2> > > temp_char_advance(header.validate_chars);
+		std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
 		kfont_input->read(&temp_char_advance[0], static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
 
 		BOOST_FOREACH(BOOST_TYPEOF(temp_char_index)::reference ci, temp_char_index)
 		{
-			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, Vector_T<uint16_t, 2>(0, 0))));
+			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
 		}
 		BOOST_FOREACH(BOOST_TYPEOF(temp_char_advance)::reference ca, temp_char_advance)
 		{
@@ -173,7 +173,7 @@ namespace KlayGE
 		return dist_scale_;
 	}
 
-	std::pair<int32_t, Vector_T<uint16_t, 2> > KFontLoader::CharIndexAdvance(wchar_t ch) const
+	std::pair<int32_t, uint32_t> const & KFontLoader::CharIndexAdvance(wchar_t ch) const
 	{
 		BOOST_AUTO(iter, char_index_advance_.find(ch));
 		if (iter != char_index_advance_.end())
@@ -182,18 +182,19 @@ namespace KlayGE
 		}
 		else
 		{
-			return std::make_pair(-1, Vector_T<uint16_t, 2>(0, 0));
+			static std::pair<int32_t, uint32_t> ret(-1, 0);
+			return ret;
 		}
 	}
 
 	int32_t KFontLoader::CharIndex(wchar_t ch) const
 	{
-		return CharIndexAdvance(ch).first;
+		return this->CharIndexAdvance(ch).first;
 	}
 
-	Vector_T<uint16_t, 2> KFontLoader::CharAdvance(wchar_t ch) const
+	uint32_t KFontLoader::CharAdvance(wchar_t ch) const
 	{
-		return CharIndexAdvance(ch).second;
+		return this->CharIndexAdvance(ch).second;
 	}
 
 	KFontLoader::font_info const & KFontLoader::CharInfo(int32_t offset) const
@@ -344,8 +345,8 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				Vector_T<uint16_t, 2> advance = kl.CharAdvance(ch);
-				lines.back() += static_cast<uint32_t>(advance.x() * rel_size);
+				uint32_t advance = kl.CharAdvance(ch);
+				lines.back() += static_cast<uint32_t>((advance & 0xFFFF) * rel_size);
 			}
 			else
 			{
@@ -402,8 +403,8 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				Vector_T<uint16_t, 2> advance = kl.CharAdvance(ch);
-				lines.back().first += advance.x() * rel_size * xScale;
+				uint32_t advance = kl.CharAdvance(ch);
+				lines.back().first += (advance & 0xFFFF) * rel_size * xScale;
 				lines.back().second.push_back(ch);
 			}
 			else
@@ -492,7 +493,7 @@ namespace KlayGE
 
 			BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
 			{
-				std::pair<int32_t, Vector_T<uint16_t, 2> > offset_adv = kl.CharIndexAdvance(ch);
+				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
 				{
 					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
@@ -541,8 +542,8 @@ namespace KlayGE
 					}
 				}
 
-				x += offset_adv.second.x() * rel_size_x;
-				y += offset_adv.second.y() * rel_size_y;
+				x += (offset_adv.second & 0xFFFF) * rel_size_x;
+				y += (offset_adv.second >> 16) * rel_size_y;
 			}
 
 			box_ |= Box(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
@@ -589,7 +590,7 @@ namespace KlayGE
 		{
 			if (ch != L'\n')
 			{
-				std::pair<int32_t, Vector_T<uint16_t, 2> > offset_adv = kl.CharIndexAdvance(ch);
+				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
 				{
 					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
@@ -634,8 +635,8 @@ namespace KlayGE
 					lastIndex += 4;
 				}
 
-				x += offset_adv.second.x() * rel_size_x;
-				y += offset_adv.second.y() * rel_size_y;
+				x += (offset_adv.second & 0xFFFF) * rel_size_x;
+				y += (offset_adv.second >> 16) * rel_size_y;
 
 				if (x > maxx)
 				{

@@ -95,9 +95,9 @@ namespace KlayGE
 		int16_t DistBase() const;
 		int16_t DistScale() const;
 
-		std::pair<int32_t, Vector_T<uint16_t, 2> > CharIndexAdvance(wchar_t ch) const;
+		std::pair<int32_t, uint32_t> const & CharIndexAdvance(wchar_t ch) const;
 		int32_t CharIndex(wchar_t ch) const;
-		Vector_T<uint16_t, 2> CharAdvance(wchar_t ch) const;
+		uint32_t CharAdvance(wchar_t ch) const;
 
 		font_info const & CharInfo(int32_t offset) const;
 		void DistanceData(uint8_t* p, uint32_t pitch, int32_t offset) const;
@@ -106,8 +106,8 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		boost::unordered_map<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> >, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, Vector_T<uint16_t, 2> > > > > char_index_advance_;
+		boost::unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
+			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;
