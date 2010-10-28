@@ -939,13 +939,12 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 	try
 	{
 		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
 	catch (...)
 	{
 		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		blur_ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	}
+	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	{
 		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
@@ -1063,10 +1062,8 @@ void DeferredShadingApp::DoUpdateOverlay()
 
 	UIManager::Instance().Render();
 
-	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
-
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Shading", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;
 	stream.precision(2);

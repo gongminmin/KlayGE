@@ -202,10 +202,7 @@ void SubSurfaceApp::DoUpdateOverlay()
 	stream << this->FPS();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name(), 16);
-
-	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
-
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 }
 

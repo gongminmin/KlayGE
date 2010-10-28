@@ -217,27 +217,27 @@ namespace KlayGE
 						switch (out_feature_level)
 						{
 						case D3D_FEATURE_LEVEL_11_0:
-							oss << " Full D3D11";
+							oss << L" Full D3D11";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_1:
-							oss << " D3D11 Level 10.1";
+							oss << L" D3D11 Level 10.1";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_0:
-							oss << " D3D11 Level 10";
+							oss << L" D3D11 Level 10";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_3:
-							oss << " D3D11 Level 9.3";
+							oss << L" D3D11 Level 9.3";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_2:
-							oss << " D3D11 Level 9.2";
+							oss << L" D3D11 Level 9.2";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_1:
-							oss << " D3D11 Level 9.1";
+							oss << L" D3D11 Level 9.1";
 							break;
 						}
 						if (settings.sample_count > 1)

@@ -138,12 +138,8 @@ void TextApp::DoUpdateOverlay()
 	stream << fixed << this->FPS() << L" FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
-
-	FrameBuffer& rw(*checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer()));
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
-
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
-
 	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
 
 	UIManager::Instance().Render();

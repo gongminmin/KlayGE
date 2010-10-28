@@ -10,11 +10,6 @@
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
-	<parameter type="sampler" name="point_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
 
 	<parameter type="int" name="kernel_radius"/>
 	<parameter type="float2" name="src_tex_size"/>
@@ -33,14 +28,14 @@ float4 CalcBlur(float2 tc0, bool x_dir)
 {
 	float color = 0;
 
-	float center_d = src_tex.Sample(point_sampler, tc0).y;
+	float center_d = src_tex.Sample(linear_sampler, tc0).y;
 
 	float total_weight = 0;
 	for (int i = -kernel_radius; i <= kernel_radius; ++ i)
 	{
 		float2 offset = float2(i * src_tex_size.y, 0);
 		float2 tc = tc0 + (x_dir ? offset.xy : offset.yx);
-		float2 src = src_tex.Sample(point_sampler, tc).rg;
+		float2 src = src_tex.Sample(linear_sampler, tc).rg;
 		float ddiff = src.y - center_d;
 		float weight = BilateralDistribution(i, ddiff);
 		color += src.x * weight;

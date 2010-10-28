@@ -354,13 +354,13 @@ void PostProcessingApp::DoUpdateOverlay()
 
 	UIManager::Instance().Render();
 
-	FrameBuffer& rw = *checked_pointer_cast<FrameBuffer>(renderEngine.CurFrameBuffer());
+	FrameBufferPtr const & fb = renderEngine.CurFrameBuffer();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Post Processing", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), fb->Description(), 16);
 
 	std::wostringstream stream;
-	stream << rw.DepthBits() << " bits depth " << rw.StencilBits() << " bits stencil";
+	stream << fb->DepthBits() << " bits depth " << fb->StencilBits() << " bits stencil";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
 	stream.str(L"");
