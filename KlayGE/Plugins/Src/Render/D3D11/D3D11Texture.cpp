@@ -31,7 +31,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "d3dx11.lib")
+	#pragma comment(lib, "d3dx11d.lib")
 #else
 	#pragma comment(lib, "d3dx11.lib")
 #endif
@@ -90,6 +90,48 @@ namespace KlayGE
 			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
 	{
 		BOOST_ASSERT(false);
+	}
+
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(int /*array_index*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11RenderTargetViewPtr ret;
+		return ret;
+	}
+
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11RenderTargetViewPtr ret;
+		return ret;
+	}
+
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11RenderTargetViewPtr ret;
+		return ret;
+	}
+
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(int /*array_index*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11DepthStencilViewPtr ret;
+		return ret;
+	}
+
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11DepthStencilViewPtr ret;
+		return ret;
+	}
+
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	{
+		BOOST_ASSERT(false);
+		static ID3D11DepthStencilViewPtr ret;
+		return ret;
 	}
 
 	void D3D11Texture::GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags)

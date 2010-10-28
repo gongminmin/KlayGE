@@ -260,6 +260,83 @@ namespace KlayGE
 		}
 	}
 
+	ID3D11RenderTargetViewPtr const & D3D11Texture1D::RetriveD3DRenderTargetView(int array_index, int level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+
+		RTVDSVCreation rtv_creation;
+		memset(&rtv_creation, 0, sizeof(rtv_creation));
+		rtv_creation.array_index = array_index;
+		rtv_creation.level = level;
+		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
+		{
+			if (0 == memcmp(&d3d_rt_views_[i].first, &rtv_creation, sizeof(rtv_creation)))
+			{
+				return d3d_rt_views_[i].second;
+			}
+		}
+
+		D3D11_RENDER_TARGET_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(this->Format());
+
+		if (this->ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1DARRAY;
+			desc.Texture1DArray.MipSlice = level;
+			desc.Texture1DArray.ArraySize = 1;
+			desc.Texture1DArray.FirstArraySlice = array_index;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1D;
+			desc.Texture1D.MipSlice = level;
+		}
+
+		ID3D11RenderTargetView* rt_view;
+		TIF(d3d_device_->CreateRenderTargetView(this->D3DTexture().get(), &desc, &rt_view));
+		d3d_rt_views_.push_back(std::make_pair(rtv_creation, MakeCOMPtr(rt_view)));
+		return d3d_rt_views_.back().second;
+	}
+
+	ID3D11DepthStencilViewPtr const & D3D11Texture1D::RetriveD3DDepthStencilView(int array_index, int level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+
+		RTVDSVCreation dsv_creation;
+		memset(&dsv_creation, 0, sizeof(dsv_creation));
+		dsv_creation.array_index = array_index;
+		dsv_creation.level = level;
+		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
+		{
+			if (0 == memcmp(&d3d_ds_views_[i].first, &dsv_creation, sizeof(dsv_creation)))
+			{
+				return d3d_ds_views_[i].second;
+			}
+		}
+
+		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
+		desc.Format = D3D11Mapping::MappingFormat(this->Format());
+		desc.Flags = 0;
+
+		if (this->ArraySize() > 1)
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE1DARRAY;
+			desc.Texture1DArray.MipSlice = level;
+			desc.Texture1DArray.ArraySize = 1;
+			desc.Texture1DArray.FirstArraySlice = array_index;
+		}
+		else
+		{
+			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE1D;
+			desc.Texture1D.MipSlice = level;
+		}
+
+		ID3D11DepthStencilView* ds_view;
+		TIF(d3d_device_->CreateDepthStencilView(this->D3DTexture().get(), &desc, &ds_view));
+		d3d_ds_views_.push_back(std::make_pair(dsv_creation, MakeCOMPtr(ds_view)));
+		return d3d_ds_views_.back().second;
+	}
+
 	void D3D11Texture1D::Map1D(int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t /*width*/,
 			void*& data)
