@@ -260,7 +260,7 @@ float4 DeferredShadingSpotPS(
 		float diff = diffuse_term(dir, normal);
 		if (diff > 0)
 		{
-			float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)) * diff;
+			float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			final_clr = CalcColor(diff, spec, atten);
@@ -293,7 +293,7 @@ float4 DeferredShadingDirectionalPS(
 	float diff = diffuse_term(dir, normal);
 	if (diff > 0)
 	{
-		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)) * diff;
+		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
 		final_clr = CalcColor(diff, spec, 1);
 	}
 
@@ -625,6 +625,22 @@ float4 DeferredShadowingAmbientPS(
 		</pass>
 	</technique>
 
+
+	<shader>
+		<![CDATA[
+void ClearStencilVS(float4 pos : POSITION,
+				out float4 oPos : SV_Position)
+{
+	oPos = float4(pos.xyz, 1);
+}
+
+float4 ClearStencilPS() : SV_Target
+{
+	return 1;
+}
+		]]>
+	</shader>
+
 	<technique name="ClearStencil">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -645,8 +661,8 @@ float4 DeferredShadowingAmbientPS(
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="127"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>
+			<state name="vertex_shader" value="ClearStencilVS()"/>
+			<state name="pixel_shader" value="ClearStencilPS()"/>
 		</pass>
 	</technique>
 </effect>
