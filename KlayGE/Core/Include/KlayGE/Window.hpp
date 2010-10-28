@@ -41,6 +41,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+
+#include <glloader/glloader.h>
 #endif
 #include <string>
 
@@ -76,6 +78,11 @@ namespace KlayGE
 		::Display* XDisplay() const
 		{
 			return x_display_;
+		}
+
+		::XVisualInfo* VisualInfo() const
+		{
+			return vi_;
 		}
 
 		::Window XWindow() const
@@ -218,6 +225,8 @@ namespace KlayGE
 		HWND wnd_;
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
+		::GLXFBConfig* fbc_;
+		::XVisualInfo* vi_;
 		::Window x_window_;
 		::Atom wm_delete_window_;
 #endif
