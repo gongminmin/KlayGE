@@ -5,24 +5,9 @@
 	<include name="PostProcess.fxml"/>
 	
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="upper_left"/>
-		<parameter type="float3" name="upper_right"/>
-		<parameter type="float3" name="lower_left"/>
-		<parameter type="float3" name="lower_right"/>
-
+		<parameter type="float4x4" name="inv_proj"/>
 		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
-
-	<shader>
-		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-		]]>
-	</shader>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -42,9 +27,7 @@ void ShowQuadVS(float4 pos : POSITION,
 				out float4 oPos : SV_Position)
 {
 	PostProcessVS(pos, oTc0, oPos);
-	
-	float2 tc = oPos.xy / oPos.w * 0.5f;
-	oViewDir = texcoord_to_view(float2(tc.x, -tc.y) + 0.5f);
+	oViewDir = mul(oPos, inv_proj).xyz;
 }
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target

@@ -625,7 +625,7 @@ namespace KlayGE
 			Vector_T<T, 3> ret;
 			ret.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
 			ret.y() = (-temp.y() + 1) * viewport[3] / 2 + viewport[1];
-			ret.z() = (temp.z() + 1) * (farPlane - nearPlane) / 2 + nearPlane;
+			ret.z() = temp.z() * (farPlane - nearPlane) + nearPlane;
 			return ret;
 		}
 
@@ -638,7 +638,7 @@ namespace KlayGE
 			Vector_T<T, 4> temp;
 			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
 			temp.y() = -(2 * (winVec.y() - viewport[1]) / viewport[3] - 1);
-			temp.z() = 2 * (winVec.z() - nearPlane) / (farPlane - nearPlane) - 1;
+			temp.z() = (winVec.z() - nearPlane) / (farPlane - nearPlane);
 			temp.w() = clipW;
 
 			Matrix4_T<T> mat(inverse(world * view * proj));

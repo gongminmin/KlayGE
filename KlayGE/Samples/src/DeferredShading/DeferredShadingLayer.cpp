@@ -476,15 +476,12 @@ namespace KlayGE
 		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
 		depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-		upper_left_param_ = effect_->ParameterByName("upper_left");
-		upper_right_param_ = effect_->ParameterByName("upper_right");
-		lower_left_param_ = effect_->ParameterByName("lower_left");
-		lower_right_param_ = effect_->ParameterByName("lower_right");
 		inv_view_param_ = effect_->ParameterByName("inv_view");
 		light_attrib_param_ = effect_->ParameterByName("light_attrib");
 		light_color_param_ = effect_->ParameterByName("light_color");
 		light_falloff_param_ = effect_->ParameterByName("light_falloff");
 		light_view_proj_param_ = effect_->ParameterByName("light_view_proj");
+		light_volume_mv_param_ = effect_->ParameterByName("light_volume_mv");
 		light_volume_mvp_param_ = effect_->ParameterByName("light_volume_mvp");
 		light_pos_es_param_ = effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
@@ -649,15 +646,9 @@ namespace KlayGE
 				view_ = camera.ViewMatrix();
 				proj_ = camera.ProjMatrix();
 				inv_view_ = MathLib::inverse(view_);
-				float4x4 const inv_proj = MathLib::inverse(proj_);
+				inv_proj_ = MathLib::inverse(proj_);
 
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-				*upper_left_param_ = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-				*upper_right_param_ = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-				*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-				*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
-
 				*inv_view_param_ = inv_view_;
 
 				re.BindFrameBuffer(g_buffer_);
@@ -695,6 +686,7 @@ namespace KlayGE
 								float const scale = light->CosOuterInner().w();
 								float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
 								float4x4 light_model = mat * MathLib::inverse(light_view);
+								*light_volume_mv_param_ = light_model * view_;
 								*light_volume_mvp_param_ = light_model * vp;
 
 								float3 min, max;
@@ -732,6 +724,7 @@ namespace KlayGE
 
 									float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
 									float4x4 light_model = MathLib::inverse(light_view);
+									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
 									float3 min, max;
@@ -757,6 +750,7 @@ namespace KlayGE
 								}
 								{
 									float4x4 light_model = MathLib::translation(p);
+									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
 
 									float3 min, max;
@@ -850,10 +844,7 @@ namespace KlayGE
 					float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
 					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
 					depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
-					depth_to_vsm_pp_->SetParam(1, MathLib::transform_coord(float3(-1, 1, 1), inv_sm_proj));
-					depth_to_vsm_pp_->SetParam(2, MathLib::transform_coord(float3(1, 1, 1), inv_sm_proj));
-					depth_to_vsm_pp_->SetParam(3, MathLib::transform_coord(float3(-1, -1, 1), inv_sm_proj));
-					depth_to_vsm_pp_->SetParam(4, MathLib::transform_coord(float3(1, -1, 1), inv_sm_proj));
+					depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
 				}
 
 				float3 dir_es = MathLib::transform_normal(d, view_);
@@ -865,7 +856,8 @@ namespace KlayGE
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
 				RenderLayoutPtr rl;
-				float4x4 mat = MathLib::inverse(sm_camera->ViewMatrix()) * view_ * proj_;
+				float4x4 mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
+				float4x4 mat_vp = mat_v * proj_;
 				switch (type)
 				{
 				case LT_Spot:
@@ -875,7 +867,9 @@ namespace KlayGE
 
 						rl = rl_cone_;
 						float const scale = light->CosOuterInner().w();
-						*light_volume_mvp_param_ = MathLib::scaling(scale, scale, 1.0f) * mat;
+						float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
+						*light_volume_mv_param_ = light_model * mat_v;
+						*light_volume_mvp_param_ = light_model * mat_vp;
 					}
 					break;
 
@@ -884,17 +878,20 @@ namespace KlayGE
 					{
 						rl = rl_box_;
 						float4x4 light_model = MathLib::translation(p);
+						*light_volume_mv_param_ = light_model * view_;
 						*light_volume_mvp_param_ = light_model * view_ * proj_;
 					}
 					else
 					{
 						rl = rl_pyramid_;
-						*light_volume_mvp_param_ = mat;
+						*light_volume_mv_param_ = mat_v;
+						*light_volume_mvp_param_ = mat_vp;
 					}
 					break;
 
 				default:
 					rl = rl_quad_;
+					*light_volume_mv_param_ = inv_proj_;
 					*light_volume_mvp_param_ = float4x4::Identity();
 					break;
 				}
@@ -932,7 +929,7 @@ namespace KlayGE
 					// Shadow map generation
 
 					re.BindFrameBuffer(sm_buffer_);
-					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 					return App3DFramework::URV_Need_Flush;
 				}
@@ -941,7 +938,7 @@ namespace KlayGE
 					// Shadowing
 
 					re.BindFrameBuffer(shadowing_buffer_);
-					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(1, 1, 1, 1), 1.0f, 0);
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
 					*light_attrib_param_ = attr;
 					*light_color_param_ = light->Color();

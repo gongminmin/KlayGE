@@ -16,15 +16,9 @@
 	</cbuffer>
 
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="upper_left"/>
-		<parameter type="float3" name="upper_right"/>
-		<parameter type="float3" name="lower_left"/>
-		<parameter type="float3" name="lower_right"/>
-
 		<parameter type="float4x4" name="proj"/>
-
+		<parameter type="float4x4" name="inv_proj"/>
 		<parameter type="float3" name="depth_near_far_invfar"/>
-		<parameter type="float2" name="inv_tex_width_height"/>
 	</cbuffer>
 
 	<cbuffer name="vo_params">
@@ -46,13 +40,6 @@
 
 	<shader>
 		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-
 float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius)
 {
 	float sqr_radius = radius * radius;
@@ -71,7 +58,7 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
 			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
 
-			float3 view_dir_sample = normalize(texcoord_to_view(float2(tc_sample.x, (flipping < 0) ? tc_sample.y : 1 - tc_sample.y)));
+			float3 view_dir_sample = normalize(sample_point);
 			float v = dot(pos_es, view_dir_sample);
 			float disc = sqr_radius - (dot(pos_es, pos_es) - v * v);
 			float intersect_t = v - sqrt(disc);
@@ -99,27 +86,33 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 	return (total_weight > 1e-6f) ? obscurance / total_weight : 0;
 }
 
-float4 SSVO(float2 tc0, float radius)
+void SSVOVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float3 oViewDir : TEXCOORD1,
+					out float4 oPos : SV_Position)
 {
+	oTex = TexCoordFromPos(pos);
+	oPos = pos;
+	oViewDir = mul(pos, inv_proj).xyz;
+}
+
+float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float radius = 0.5f;
 	float obscurance = 1;
 	
-	float4 ndc = src_tex.Sample(point_sampler, tc0);
+	float4 ndc = src_tex.Sample(point_sampler, tc);
 	float depth = GetDepth(ndc) * depth_near_far_invfar.y;
 	float3 normal = GetNormal(ndc);
 	
-	float3 view_dir = normalize(texcoord_to_view(float2(tc0.x, (flipping < 0) ? tc0.y : 1 - tc0.y)));
+	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);
 
 	float3 y_dir = cross(normal, float3(0, 0, 1));
 	float3 x_dir = cross(y_dir, normal);
 
-	obscurance = CalcObscurance(tc0, pos_es, x_dir, y_dir, normal, radius);
+	obscurance = CalcObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
 	return float4(1 - saturate(vo_intensity * obscurance), depth, 0, 0);
-}
-
-float4 SSVOPS(float2 tc0 : TEXCOORD0) : SV_Target
-{
-	return SSVO(tc0, 0.5f);
 }
 		]]>
 	</shader>
@@ -128,7 +121,7 @@ float4 SSVOPS(float2 tc0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="SSVOVS()"/>
 			<state name="pixel_shader" value="SSVOPS()"/>
 		</pass>
 	</technique>

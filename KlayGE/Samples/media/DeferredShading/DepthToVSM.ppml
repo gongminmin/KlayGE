@@ -4,10 +4,7 @@
 	<post_processor name="DepthToVSM">
 		<params>
 			<param name="near_q"/>
-			<param name="upper_left"/>
-			<param name="upper_right"/>
-			<param name="lower_left"/>
-			<param name="lower_right"/>
+			<param name="inv_proj"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>

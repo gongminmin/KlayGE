@@ -682,23 +682,9 @@ namespace
 					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSVO"))
 		{
 			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-			upper_left_param_ = technique_->Effect().ParameterByName("upper_left");
-			upper_right_param_ = technique_->Effect().ParameterByName("upper_right");
-			lower_left_param_ = technique_->Effect().ParameterByName("lower_left");
-			lower_right_param_ = technique_->Effect().ParameterByName("lower_right");
 			proj_param_ = technique_->Effect().ParameterByName("proj");
+			inv_proj_param_ = technique_->Effect().ParameterByName("inv_proj");
 		}
-
-		void InputPin(uint32_t index, TexturePtr const & tex)
-		{
-			PostProcess::InputPin(index, tex);
-			if ((0 == index) && tex)
-			{
-				*(technique_->Effect().ParameterByName("inv_tex_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
-			}
-		}
-
-		using PostProcess::InputPin;
 
 		void OnRenderBegin()
 		{
@@ -708,21 +694,14 @@ namespace
 			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
 			float4x4 const & proj = camera.ProjMatrix();
-			float4x4 const inv_proj = MathLib::inverse(proj);
-			*upper_left_param_ = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*upper_right_param_ = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*lower_left_param_ = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*lower_right_param_ = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 			*proj_param_ = proj;
+			*inv_proj_param_ = MathLib::inverse(proj);
 		}
 
 	protected:
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr upper_left_param_;
-		RenderEffectParameterPtr upper_right_param_;
-		RenderEffectParameterPtr lower_left_param_;
-		RenderEffectParameterPtr lower_right_param_;
 		RenderEffectParameterPtr proj_param_;
+		RenderEffectParameterPtr inv_proj_param_;
+		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
 	class DeferredShadingDebug : public PostProcess
@@ -782,14 +761,8 @@ namespace
 			PostProcess::OnRenderBegin();
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			float4x4 const inv_proj = MathLib::inverse(camera.ProjMatrix());
-
+			*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(camera.ProjMatrix());
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
 		}
 	};
 

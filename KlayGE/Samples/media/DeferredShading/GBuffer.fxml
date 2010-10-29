@@ -79,7 +79,7 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView1_2z.w = ts_to_view[2].z;
 }
 
-float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
+float4 ConstructGBuffer(float4 texcoord_depth_2x, float4 ts_to_view0_2y, float4 ts_to_view1_2z)
 {
 	float3 normal = normalize(float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w));
 	if (bump_map_enabled)
@@ -94,6 +94,11 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 	return StoreGBuffer(normal, texcoord_depth_2x.z, shininess);
 }
 
+float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
+{
+	return ConstructGBuffer(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
+}
+
 float4 GBufferAlphaPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
 {
 	if (diffuse_map_enabled)
@@ -101,7 +106,7 @@ float4 GBufferAlphaPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2
 		clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
 	}
 
-	return GBufferPS(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
+	return ConstructGBuffer(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -176,7 +181,7 @@ float4 GenShadowMapAlphaPS(float2 tc : TEXCOORD0) : SV_Target
 	{
 		clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
 	}
-
+	
 	return 0;
 }
 		]]>

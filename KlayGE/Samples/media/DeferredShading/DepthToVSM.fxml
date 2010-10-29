@@ -10,23 +10,12 @@
 	</parameter>
 
 	<parameter type="float2" name="near_q"/>
-
-	<parameter type="float3" name="upper_left"/>
-	<parameter type="float3" name="upper_right"/>
-	<parameter type="float3" name="lower_left"/>
-	<parameter type="float3" name="lower_right"/>
+	<parameter type="float4x4" name="inv_proj"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 
 	<shader>
 		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-
 void DepthToVSMVS(float4 pos : POSITION,
 					out float2 oTex : TEXCOORD0,
 					out float3 oViewDir : TEXCOORD1,
@@ -34,12 +23,17 @@ void DepthToVSMVS(float4 pos : POSITION,
 {
 	oTex = TexCoordFromPos(pos);
 	oPos = pos;
-	oViewDir = texcoord_to_view(oTex);
+	oViewDir = mul(pos, inv_proj).xyz;
 }
 
 float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float dist = near_q.x / (near_q.y - src_tex.Sample(point_sampler, tc).r);
+	float dist = src_tex.Sample(point_sampler, tc).r;
+#ifdef KLAYGE_OPENGL
+	dist = dist * 2 - 1;	// [0, 1]->[-1, 1]
+#endif
+
+	dist = near_q.x / (near_q.y - dist);
 	dist *= length(view_dir) / view_dir.z;
 
 	float2 dxdy = float2(ddx(dist), ddy(dist));

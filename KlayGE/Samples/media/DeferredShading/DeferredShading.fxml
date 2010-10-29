@@ -14,15 +14,8 @@
 	<macro name="LSA_NoSpecular" value="4"/>
 	
 	<cbuffer name="per_frame">
-		<parameter type="float3" name="upper_left"/>
-		<parameter type="float3" name="upper_right"/>
-		<parameter type="float3" name="lower_left"/>
-		<parameter type="float3" name="lower_right"/>
-
-		<parameter type="float3" name="depth_near_far_invfar"/>
-
 		<parameter type="float4x4" name="inv_view"/>
-
+		<parameter type="float3" name="depth_near_far_invfar"/>
 		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
@@ -36,6 +29,7 @@
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_dir_es"/>
 		<parameter type="float4x4" name="light_view_proj"/>
+		<parameter type="float4x4" name="light_volume_mv"/>
 		<parameter type="float4x4" name="light_volume_mvp"/>
 		<parameter type="float4x4" name="view_to_light_model"/>
 	</cbuffer>
@@ -53,13 +47,6 @@
 	
 	<shader>
 		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-
 float linstep(float min, float max, float v)
 {
 	return saturate((v - min) / (max - min));
@@ -179,7 +166,7 @@ float4 DeferredShadingDepthOnlyPS() : SV_Target
 void DeferredShadingVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
-				out noperspective float3 oViewDir : TEXCOORD1,
+				out float3 oViewDir : TEXCOORD1,
 #else
 				out float2 oTc : TEXCOORD0,
 				out float3 oViewDir : TEXCOORD1,
@@ -189,21 +176,20 @@ void DeferredShadingVS(float4 pos : POSITION,
 {
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
 
+	oViewDir = mul(float4(pos.xyz, 1), light_volume_mv).xyz;
 	oTc = oPos.xy / oPos.w * 0.5f;
-	oViewDir = texcoord_to_view(float2(oTc.x, -oTc.y) + 0.5f);
 	oTc.y *= flipping;
-	oTc += 0.5;
+	oTc += 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
 	oW = oPos.w;
 	oTc *= oW;
-	oViewDir *= oW;
 #endif
 }
 
 float4 DeferredShadingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -211,7 +197,6 @@ float4 DeferredShadingPointPS(
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	tc /= w;
-	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -235,7 +220,7 @@ float4 DeferredShadingPointPS(
 
 float4 DeferredShadingSpotPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -243,7 +228,6 @@ float4 DeferredShadingSpotPS(
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	tc /= w;
-	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -272,7 +256,7 @@ float4 DeferredShadingSpotPS(
 
 float4 DeferredShadingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -280,7 +264,6 @@ float4 DeferredShadingDirectionalPS(
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	tc /= w;
-	view_dir /= w;
 #endif
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -302,7 +285,7 @@ float4 DeferredShadingDirectionalPS(
 
 float4 DeferredShadingAmbientPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -313,7 +296,7 @@ float4 DeferredShadingAmbientPS(
 
 float4 DeferredShadowingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -321,7 +304,6 @@ float4 DeferredShadowingPointPS(
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	tc /= w;
-	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -336,7 +318,7 @@ float4 DeferredShadowingPointPS(
 
 float4 DeferredShadowingSpotPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -344,7 +326,6 @@ float4 DeferredShadowingSpotPS(
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	tc /= w;
-	view_dir /= w;
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -357,7 +338,7 @@ float4 DeferredShadowingSpotPS(
 
 float4 DeferredShadowingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
@@ -368,7 +349,7 @@ float4 DeferredShadowingDirectionalPS(
 
 float4 DeferredShadowingAmbientPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, noperspective float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
 	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
