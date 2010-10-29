@@ -60,10 +60,6 @@ namespace
 			: KMesh(model, name),
 				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect())
 		{
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
-			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			shading_technique_ = effect_->TechniqueByName("Shading");
-
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
@@ -82,6 +78,8 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			alpha_ = false;
+
 			std::map<std::string, TexturePtr> tex_pool;
 
 			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
@@ -113,13 +111,17 @@ namespace
 				{
 					bump_tex_ = tex;
 				}
+				else if ("Opacity" == iter->first)
+				{
+					alpha_ = true;
+				}
 			}
 		}
 
 		void Pass(PassType type)
 		{
 			type_ = type;
-			technique_ = DeferredRenderable::Pass(type);
+			technique_ = DeferredRenderable::Pass(type, alpha_);
 		}
 
 		void LightingTex(TexturePtr const & tex)
@@ -186,6 +188,7 @@ namespace
 
 	private:
 		PassType type_;
+		bool alpha_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
@@ -246,7 +249,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = gbuffer_technique_;
+			technique_ = gbuffer_tech_;
 
 			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
 			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
@@ -302,7 +305,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			technique_ = DeferredRenderable::Pass(type);
+			technique_ = DeferredRenderable::Pass(type, false);
 		}
 
 		void Update()
@@ -405,7 +408,7 @@ namespace
 			: KMesh(model, name),
 				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
-			technique_ = gbuffer_technique_;
+			technique_ = gbuffer_tech_;
 
 			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
 			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
@@ -433,7 +436,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			technique_ = DeferredRenderable::Pass(type);
+			technique_ = DeferredRenderable::Pass(type, false);
 		}
 
 		void Update()
@@ -533,9 +536,9 @@ namespace
 		RenderableDeferredHDRSkyBox()
 			: DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferSkyBoxTech");
-			shading_technique_ = effect_->TechniqueByName("ShadingSkyBox");
-			this->Technique(gbuffer_technique_);
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferSkyBoxTech");
+			shading_tech_ = effect_->TechniqueByName("ShadingSkyBox");
+			this->Technique(gbuffer_tech_);
 
 			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
 			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
@@ -547,11 +550,11 @@ namespace
 			switch (type)
 			{
 			case PT_GBuffer:
-				technique_ = gbuffer_technique_;
+				technique_ = gbuffer_tech_;
 				break;
 
 			case PT_Shading:
-				technique_ = shading_technique_;
+				technique_ = shading_tech_;
 				break;
 
 			default:

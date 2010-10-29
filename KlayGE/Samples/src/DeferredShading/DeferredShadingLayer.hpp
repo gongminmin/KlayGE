@@ -341,16 +341,21 @@ namespace KlayGE
 		{
 		}
 
-		virtual RenderTechniquePtr const & Pass(PassType type) const;
+		virtual void Pass(PassType type) = 0;
 		virtual void LightingTex(TexturePtr const & tex);
 		virtual void SSAOTex(TexturePtr const & tex);
 		virtual void SSAOEnabled(bool ssao);
 
 	protected:
+		virtual RenderTechniquePtr const & Pass(PassType type, bool alpha) const;
+
+	protected:
 		RenderEffectPtr effect_;
-		RenderTechniquePtr gbuffer_technique_;
-		RenderTechniquePtr gen_sm_technique_;
-		RenderTechniquePtr shading_technique_;
+		RenderTechniquePtr gbuffer_tech_;
+		RenderTechniquePtr gbuffer_alpha_tech_;
+		RenderTechniquePtr gen_sm_tech_;
+		RenderTechniquePtr gen_sm_alpha_tech_;
+		RenderTechniquePtr shading_tech_;
 	};
 
 	class DeferredSceneObject
@@ -434,10 +439,12 @@ namespace KlayGE
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_aa_tex_;
 		TexturePtr sm_tex_;
+		TexturePtr sm_depth_tex_;
 		TexturePtr blur_sm_tex_;
 		TexturePtr sm_cube_tex_;
 
 		PostProcessPtr sm_filter_pps_[7];
+		PostProcessPtr depth_to_vsm_pp_;
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_;

@@ -81,11 +81,6 @@ void GBufferVS(float4 pos : POSITION,
 
 float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
 {
-	if (diffuse_map_enabled)
-	{
-		clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
-	}
-
 	float3 normal = normalize(float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w));
 	if (bump_map_enabled)
 	{
@@ -99,6 +94,16 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 	return StoreGBuffer(normal, texcoord_depth_2x.z, shininess);
 }
 
+float4 GBufferAlphaPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
+{
+	if (diffuse_map_enabled)
+	{
+		clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
+	}
+
+	return GBufferPS(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
+}
+
 void GBufferSkyBoxVS(float4 pos : POSITION,
 			out float4 oPos : SV_Position)
 {
@@ -110,59 +115,69 @@ float4 GBufferSkyBoxPS() : SV_Target
 	return 0;
 }
 		]]>
-</shader>
+	</shader>
 
-<technique name="GBufferTech">
-	<pass name="p0">
-		<state name="cull_mode" value="back"/>
+	<technique name="GBufferTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
 
-		<state name="vertex_shader" value="GBufferVS()"/>
-		<state name="pixel_shader" value="GBufferPS()"/>
-	</pass>
-</technique>
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
 
-<technique name="GBufferSkyBoxTech">
-	<pass name="p0">
-		<state name="cull_mode" value="none"/>
-		<state name="depth_func" value="equal"/>
-		<state name="depth_write_mask" value="false"/>
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferAlphaPS()"/>
+		</pass>
+	</technique>
 
-		<state name="front_stencil_enable" value="true"/>
-		<state name="front_stencil_func" value="always_pass"/>
-		<state name="front_stencil_ref" value="128"/>
-		<state name="front_stencil_pass" value="replace"/>
-		<state name="back_stencil_enable" value="true"/>
-		<state name="back_stencil_func" value="always_pass"/>
-		<state name="back_stencil_ref" value="128"/>
-		<state name="back_stencil_pass" value="replace"/>
+	<technique name="GBufferSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
 
-		<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-		<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
-	</pass>
-</technique>
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
 
-<shader>
-	<![CDATA[
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
 void GenShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
-						out float3 oTcDist : TEXCOORD0,
+						out float2 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos, mvp);
-	oTcDist = float3(texcoord, length(pos_es.xyz));
+	oTc = texcoord;
 }
 
-float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
+float4 GenShadowMapPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return 0;
+}
+
+float4 GenShadowMapAlphaPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	if (diffuse_map_enabled)
 	{
-		clip(diffuse_tex.Sample(bilinear_sampler, tc_dist.xy).a - ALPHA_TEST_THRESHOLD);
+		clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
 	}
 
-	float dist = tc_dist.z;
-	float2 dxdy = float2(ddx(dist), ddy(dist));
-	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+	return 0;
 }
 		]]>
 	</shader>
@@ -170,9 +185,19 @@ float4 GenShadowMapPS(float3 tc_dist : TEXCOORD0) : SV_Target
 	<technique name="GenShadowMap">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
+			<state name="color_write_mask" value="0"/>
 			
 			<state name="vertex_shader" value="GenShadowMapVS()"/>
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
+		</pass>
+	</technique>
+	<technique name="GenShadowMapAlpha">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GenShadowMapVS()"/>
+			<state name="pixel_shader" value="GenShadowMapAlphaPS()"/>
 		</pass>
 	</technique>
 

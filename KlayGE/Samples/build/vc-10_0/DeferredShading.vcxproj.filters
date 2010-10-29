@@ -18,6 +18,9 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{34f8f412-3d3b-4ae3-84a9-f488c53c0cc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Post Processors">
+      <UniqueIdentifier>{81bea7fd-71ba-4d75-b035-d82047aa268a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\DeferredShading\DeferredShading.cpp">
@@ -56,6 +59,12 @@
     </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\media\DeferredShading\DepthToVSM.ppml">
+      <Filter>Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\DeferredShading\DepthToVSM.fxml">
+      <Filter>Effects</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="DepthToVSM">
+		<params>
+			<param name="near_q"/>
+			<param name="upper_left"/>
+			<param name="upper_right"/>
+			<param name="lower_left"/>
+			<param name="lower_right"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="DepthToVSM.fxml" tech="DepthToVSM"/>
+	</post_processor>
+</post_processors>

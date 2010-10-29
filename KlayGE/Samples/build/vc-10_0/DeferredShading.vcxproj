@@ -210,6 +210,8 @@
     <None Include="..\..\media\DeferredShading\AdaptiveAntiAliasPP.fxml" />
     <None Include="..\..\media\DeferredShading\DeferredShading.fxml" />
     <None Include="..\..\media\DeferredShading\DeferredShadingDebug.fxml" />
+    <None Include="..\..\media\DeferredShading\DepthToVSM.fxml" />
+    <None Include="..\..\media\DeferredShading\DepthToVSM.ppml" />
     <None Include="..\..\media\DeferredShading\GBuffer.fxml" />
     <None Include="..\..\media\DeferredShading\SSAOPP.fxml" />
     <None Include="..\..\media\DeferredShading\DeferredShading.uiml" />

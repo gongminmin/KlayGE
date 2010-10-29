@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -245,28 +246,44 @@ namespace KlayGE
 	{
 		if (effect_)
 		{
-			gbuffer_technique_ = effect_->TechniqueByName("GBufferTech");
-			gen_sm_technique_ = effect_->TechniqueByName("GenShadowMap");
-			shading_technique_ = effect_->TechniqueByName("Shading");
+			gbuffer_tech_ = effect_->TechniqueByName("GBufferTech");
+			gbuffer_alpha_tech_ = effect_->TechniqueByName("GBufferAlphaTech");
+			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMap");
+			gen_sm_alpha_tech_ = effect_->TechniqueByName("GenShadowMapAlpha");
+			shading_tech_ = effect_->TechniqueByName("Shading");
 		}
 	}
 
-	RenderTechniquePtr const & DeferredRenderable::Pass(PassType type) const
+	RenderTechniquePtr const & DeferredRenderable::Pass(PassType type, bool alpha) const
 	{
 		switch (type)
 		{
 		case PT_GBuffer:
-			return gbuffer_technique_;
+			if (alpha)
+			{
+				return gbuffer_alpha_tech_;
+			}
+			else
+			{
+				return gbuffer_tech_;
+			}
 
 		case PT_GenShadowMap:
-			return gen_sm_technique_;
+			if (alpha)
+			{
+				return gen_sm_alpha_tech_;
+			}
+			else
+			{
+				return gen_sm_tech_;
+			}
 
 		case PT_Shading:
-			return shading_technique_;
+			return shading_tech_;
 
 		default:
 			BOOST_ASSERT(false);
-			return gbuffer_technique_;
+			return gbuffer_tech_;
 		}
 	}
 
@@ -418,7 +435,8 @@ namespace KlayGE
 				sm_aa_tex_ = sm_tex_;
 			}
 		}
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D24S8, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality()));
+		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0));
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -450,6 +468,9 @@ namespace KlayGE
 				}
 			}
 		}
+		depth_to_vsm_pp_ = LoadPostProcess(ResLoader::Instance().Load("DepthToVSM.ppml"), "DepthToVSM");
+		depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
+		depth_to_vsm_pp_->OutputPin(0, sm_tex_);
 
 		*(effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
@@ -820,20 +841,31 @@ namespace KlayGE
 				}
 
 				float3 const & p = light->Position();
-				sm_buffer_->GetViewport().camera->ViewParams(p, p + d, u);
-				sm_buffer_->GetViewport().camera->ProjParams(fov, 1, 0.1f, 100.0f);
+				CameraPtr const & sm_camera = sm_buffer_->GetViewport().camera;
+				sm_camera->ViewParams(p, p + d, u);
+				sm_camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+				if (PT_GenShadowMap == pass_type)
+				{
+					float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
+					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
+					depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
+					depth_to_vsm_pp_->SetParam(1, MathLib::transform_coord(float3(-1, 1, 1), inv_sm_proj));
+					depth_to_vsm_pp_->SetParam(2, MathLib::transform_coord(float3(1, 1, 1), inv_sm_proj));
+					depth_to_vsm_pp_->SetParam(3, MathLib::transform_coord(float3(-1, -1, 1), inv_sm_proj));
+					depth_to_vsm_pp_->SetParam(4, MathLib::transform_coord(float3(1, -1, 1), inv_sm_proj));
+				}
 
 				float3 dir_es = MathLib::transform_normal(d, view_);
 				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-				*light_view_proj_param_ = inv_view_ * sm_buffer_->GetViewport().camera->ViewMatrix()
-					* sm_buffer_->GetViewport().camera->ProjMatrix();
+				*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
 
 				float3 loc_es = MathLib::transform_coord(p, view_);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
 				RenderLayoutPtr rl;
-				float4x4 mat = MathLib::inverse(sm_buffer_->GetViewport().camera->ViewMatrix()) * view_ * proj_;
+				float4x4 mat = MathLib::inverse(sm_camera->ViewMatrix()) * view_ * proj_;
 				switch (type)
 				{
 				case LT_Spot:
@@ -878,6 +910,8 @@ namespace KlayGE
 						{
 							sm_aa_tex_->CopyToTexture(*sm_tex_);
 						}
+
+						depth_to_vsm_pp_->Apply();
 
 						if (LT_Point == type)
 						{
