@@ -20,13 +20,7 @@
 		<parameter type="float4x4" name="View"/>
 		<parameter type="float4x4" name="Proj"/>
 
-		<parameter type="float3" name="upper_left"/>
-		<parameter type="float3" name="upper_right"/>
-		<parameter type="float3" name="lower_left"/>
-		<parameter type="float3" name="lower_right"/>
-
-		<parameter type="float" name="depth_min"/>
-		<parameter type="float" name="inv_depth_range"/>
+		<parameter type="float3" name="depth_near_far_invfar"/>
 
 		<parameter type="int" name="flip"/>
 	</cbuffer>
@@ -50,13 +44,6 @@
 
 	<shader>
 		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-
 float GetSizeOverLife(float p)
 {
 	float ret = 0;
@@ -129,7 +116,7 @@ void ParticleVS(float4 pos : TEXCOORD0,
 	vs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
 	vs_out.clr.a = GetTransparencyOverLife(init_life - pos.w);
 	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
-	vs_out.view_dir.xyz = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+	vs_out.view_dir.xyz = view_pos.xyz;
 	vs_out.view_dir.w = radius;
 	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 }
@@ -192,7 +179,7 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 		gs_out.pos = mul(view_pos, Proj);
 		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
-		gs_out.view_dir.xyz = texcoord_to_view(float2(gs_out.PosSS.x, -gs_out.PosSS.y) / 2 + 0.5f);
+		gs_out.view_dir.xyz = view_pos.xyz;
 		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
 #ifdef KLAYGE_OPENGL
@@ -213,7 +200,6 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 float4 ParticlePS(PS_IN ps_in) : SV_Target
 {
 	ps_in.CenterView /= ps_in.CenterView.w;
-	float dir = ps_in.view_dir.z;
 	ps_in.view_dir.xyz = normalize(ps_in.view_dir.xyz);
 	
 	float4 clr = ps_in.clr;
@@ -230,13 +216,13 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
-		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a;
+		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a * depth_near_far_invfar.y;
 
-		float3 intersect = (v - sqrt(disc)) * ps_in.view_dir.xyz;
 		clr.a *= lerp(particle_alpha_from_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
 						particle_alpha_to_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
 						ps_in.tex.z);
-		clr.a *= saturate((dir * depth - intersect.z) * 5);
+		float intersect_z = (v - sqrt(disc)) * ps_in.view_dir.z;
+		clr.a *= saturate((depth - intersect_z) * 5);
 		clip(clr.a - 0.03f);
 	}
 
@@ -311,7 +297,7 @@ float4 TerrainPS(float4 tex0 : TEXCOORD0,
 {
 	float4 logo = logo_tex.Sample(grass_sampler, tex0.zw);
 	float4 clr = float4(grass_tex.Sample(grass_sampler, tex0.xy).rgb * dot(normalize(LightPos - pos_os), normal),
-				(depth.x / depth.y - depth_min) * inv_depth_range);
+				depth.x / depth.y * depth_near_far_invfar.z);
 	return float4(lerp(clr.rgb, logo.rgb, 0.3f), 1);
 }
 		]]>

@@ -5,7 +5,7 @@
 	<include name="Lighting.fxml"/>
 	<include name="util.fxml"/>
 
-	<macro name="ALPHA_TEST_THRESHOLD" value="0.05"/>
+	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -101,11 +101,7 @@ float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : T
 
 float4 GBufferAlphaPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
 {
-	if (diffuse_map_enabled)
-	{
-		clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
-	}
-
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
 	return ConstructGBuffer(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
 }
 
@@ -177,11 +173,7 @@ float4 GenShadowMapPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 GenShadowMapAlphaPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	if (diffuse_map_enabled)
-	{
-		clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
-	}
-	
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);	
 	return 0;
 }
 		]]>

@@ -29,10 +29,7 @@
 		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float4x4" name="inv_proj"/>
 
-		<parameter type="float3" name="upper_left"/>
-		<parameter type="float3" name="upper_right"/>
-		<parameter type="float3" name="lower_left"/>
-		<parameter type="float3" name="lower_right"/>
+		<parameter type="float" name="far_plane"/>
 
 		<parameter type="int" name="flip"/>
 	</cbuffer>
@@ -40,17 +37,6 @@
 	<parameter type="texture2D" name="particle_tex"/>
 	<parameter type="texture2D" name="scene_tex"/>
 
-	<shader>
-		<![CDATA[
-float3 texcoord_to_view(float2 tex)
-{
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
-}
-		]]>
-	</shader>
-	
 	<shader>
 		<![CDATA[
 struct VS_TO_GS
@@ -97,7 +83,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 		vs_out.clr = float4(1, 1, 1, pos.w);
 		vs_out.PosSS = vs_out.pos / vs_out.pos.w;
 		
-		vs_out.view_dir = texcoord_to_view(float2(vs_out.PosSS.x, -vs_out.PosSS.y) / 2 + 0.5f);
+		vs_out.view_dir = view_pos.xyz;
 		
 		vs_out.tex = tex * 0.5f + 0.5f;
 	}
@@ -106,8 +92,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 float4 ParticlesPS(PS_IN ps_in) : SV_Target
 {
 	ps_in.CenterView /= ps_in.CenterView.w;
-	float dir = ps_in.view_dir.z;
-	ps_in.view_dir = normalize(ps_in.view_dir);
+	float3 intersect = ps_in.view_dir;
 	
 	float life = ps_in.clr.a;
 	float4 clr = particle_tex.Sample(bilinear_sampler, ps_in.tex);
@@ -116,10 +101,8 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 
-	float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a;
-	float4 intersect4 = mul(ps_in.PosSS, inv_proj);
-	float3 intersect = intersect4.xyz / intersect4.w;
-	float optical_depth = dir * depth - intersect.z;
+	float depth = scene_tex.SampleLevel(point_sampler, tex_coord, 0).a * far_plane;
+	float optical_depth = depth - intersect.z;
 		
 	if (optical_depth < 0)
 	{
@@ -130,7 +113,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 		optical_depth = min(optical_depth, clr.w);
 		float4 intersect_ws = mul(float4(intersect, 1), inv_view);
 		float3 normal = clr.xyz * 2 - 1;
-		float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.rgb, 0);
+		float4 n = noise_vol_tex.SampleLevel(bilinear_sampler, intersect_ws.xyz, 0);
 		normal = lerp(normal, n.xyz * 2 - 1, 0.2f);
 		clr = float4(normal.xyz, optical_depth * clr.w * saturate(life / init_pos_life.w));
 	}
@@ -302,7 +285,7 @@ void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream
 			gs_out.pos = mul(view_pos, Proj);
 			gs_out.clr = float4(1, 1, 1, CenterView_Life.w);
 			gs_out.PosSS = gs_out.pos;
-			gs_out.view_dir = texcoord_to_view(float2(gs_out.pos.x, -gs_out.pos.y) / gs_out.pos.w / 2 + 0.5f);
+			gs_out.view_dir = view_pos.xyz;
 			gs_out.tex = tex * 0.5f + 0.5f;
 
 #ifdef KLAYGE_OPENGL

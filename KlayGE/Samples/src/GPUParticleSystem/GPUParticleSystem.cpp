@@ -251,10 +251,7 @@ namespace
 			*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(view);
 			*(technique_->Effect().ParameterByName("inv_proj")) = MathLib::inverse(proj);
 
-			*(technique_->Effect().ParameterByName("upper_left")) = MathLib::transform_coord(float3(-1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("upper_right")) = MathLib::transform_coord(float3(1, 1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_left")) = MathLib::transform_coord(float3(-1, -1, 1), inv_proj);
-			*(technique_->Effect().ParameterByName("lower_right")) = MathLib::transform_coord(float3(1, -1, 1), inv_proj);
+			*(technique_->Effect().ParameterByName("far_plane")) = app.ActiveCamera().FarPlane();
 		}
 
 		void PosTexture(TexturePtr const & particle_pos_tex)

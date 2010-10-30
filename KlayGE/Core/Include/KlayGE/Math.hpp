@@ -1129,6 +1129,26 @@ namespace KlayGE
 			return m1 * m2 * m3 * m4 * m5 * m6 * m7;
 		}
 
+		// From Game Programming Gems 5, Section 2.6.
+		template <typename T>
+		inline void
+		oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane)
+		{
+			Vector_T<T, 4> q;
+			q.x() = (MathLib::sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
+			q.y() = (MathLib::sgn(clip_plane.b()) - proj(2, 1)) / proj(1, 1);
+			q.z() = T(1);
+			q.w() = (T(1) - proj(2, 2)) / proj(3, 2);
+
+			T c = T(1) / MathLib::dot(clip_plane, q);
+
+			proj(0, 2) = clip_plane.a() * c;
+			proj(1, 2) = clip_plane.b() * c;
+			proj(2, 2) = clip_plane.c() * c;
+			proj(3, 2) = clip_plane.d() * c;
+		}
+
+
 		template <typename T>
 		inline Matrix4_T<T>
 		ortho_rh(T const & width, T const & height, T const & nearPlane, T const & farPlane)

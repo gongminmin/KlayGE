@@ -59,13 +59,6 @@ float4 TerrainPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1,
 		* (ground_tex_detail.Sample(linear_sampler, tex_coord) + ground_tex_base.Sample(linear_sampler, tex_coord / 16)) / 2;
 	return float4(lerp(saturate(color), fog_color, normal_os_fog.z).rgb, pos_os_y_pos_ss_w.y);
 }
-
-float4 TerrainReflectionPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1, float2 pos_os_y_pos_ss_w : TEXCOORD2) : SV_Target0
-{
-	clip(pos_os_y_pos_ss_w.x);
-
-	return TerrainPS(normal_os_fog, tex_coord, pos_os_y_pos_ss_w);
-}
 		]]>
 	</shader>
 	
@@ -75,15 +68,6 @@ float4 TerrainReflectionPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : 
 			
 			<state name="vertex_shader" value="TerrainVS()"/>
 			<state name="pixel_shader" value="TerrainPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="TerrainReflection">
-		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-
-			<state name="vertex_shader" value="TerrainVS()"/>
-			<state name="pixel_shader" value="TerrainReflectionPS()"/>
 		</pass>
 	</technique>
 </effect>

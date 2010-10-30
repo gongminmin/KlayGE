@@ -60,15 +60,45 @@ namespace
 
 		void ReflectionPass(bool ref)
 		{
-			if (ref)
-			{
-				technique_ = technique_->Effect().TechniqueByName("TerrainReflection");
-			}
-			else
-			{
-				technique_ = technique_->Effect().TechniqueByName("Terrain");
-			}
+			ref_ = ref;
 		}
+
+		void ReflectionPlane(Plane const & plane)
+		{
+			plane_ = plane;
+		}
+
+		void OnRenderBegin()
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 proj = camera.ProjMatrix();
+
+			float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
+			if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
+			{
+				look_at_vec = float3(0, 0, 1);
+			}
+			float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
+			float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
+
+			if (ref_)
+			{
+				MathLib::oblique_clipping(proj, 
+					MathLib::mul(plane_, MathLib::transpose(MathLib::inverse(view))));
+			}
+
+			float4x4 vp = view * proj;
+			*(technique_->Effect().ParameterByName("mvp")) = vp;
+			*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
+			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+		}
+
+	private:
+		bool ref_;
+		Plane plane_;
 	};
 
 	class TerrainObject : public InfTerrainSceneObject
@@ -90,6 +120,11 @@ namespace
 		void ReflectionPass(bool ref)
 		{
 			checked_pointer_cast<RenderTerrain>(renderable_)->ReflectionPass(ref);
+		}
+
+		void ReflectionPlane(Plane const & plane)
+		{
+			checked_pointer_cast<RenderTerrain>(renderable_)->ReflectionPlane(plane);
 		}
 	};
 
@@ -147,9 +182,8 @@ namespace
 
 			renderable_ = MakeSharedPtr<RenderOcean>(base_level_, strength_);
 
-			Plane ocean_plane;
-			ocean_plane = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
-			reflect_mat_ = MathLib::reflect(ocean_plane);
+			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
+			reflect_mat_ = MathLib::reflect(ocean_plane_);
 
 			// The size of displacement map. In this sample, it's fixed to 512.
 			ocean_param_.dmap_dim			= 512;
@@ -178,6 +212,11 @@ namespace
 		void SunDirection(float3 const & dir)
 		{
 			checked_pointer_cast<RenderOcean>(renderable_)->SunDirection(dir);
+		}
+
+		Plane const & OceanPlane() const
+		{
+			return ocean_plane_;
 		}
 
 		void Update()
@@ -303,6 +342,7 @@ namespace
 		OceanParameter ocean_param_;
 		bool dirty_;
 
+		Plane ocean_plane_;
 		float4x4 reflect_mat_;
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
@@ -372,6 +412,8 @@ void OceanApp::InitObjects()
 
 	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
 	checked_pointer_cast<OceanObject>(ocean_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
+
+	checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

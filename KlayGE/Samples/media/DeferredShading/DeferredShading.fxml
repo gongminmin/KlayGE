@@ -97,7 +97,7 @@ float4 CalcColor(float diff, float spec, float atten)
 	}
 
 	ds = max(ds, 0);
-	return float4(ds.x * light_color.xyz, ds.y * light_color.w);
+	return ds.xxxy * light_color;
 }
 
 float Calc_VSM(float2 moments, float len)
@@ -336,24 +336,12 @@ float4 DeferredShadowingSpotPS(
 	return VSM_Directional(pos_es, len);
 }
 
-float4 DeferredShadowingDirectionalPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
-#else
-	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
-#endif
-	) : SV_Target
+float4 DeferredShadowingDirectionalPS() : SV_Target
 {
 	return 1;
 }
 
-float4 DeferredShadowingAmbientPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
-#else
-	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
-#endif
-	) : SV_Target
+float4 DeferredShadowingAmbientPS() : SV_Target
 {
 	return 1;
 }
