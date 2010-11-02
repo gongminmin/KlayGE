@@ -79,6 +79,8 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
+		void AdjustPerspectiveMatrix(float4x4& pers_mat);
+
 		void TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param);
 		void TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param);
 		void TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param);

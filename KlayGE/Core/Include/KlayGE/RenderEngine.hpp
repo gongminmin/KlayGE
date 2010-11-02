@@ -7,6 +7,7 @@
 // 3.11.0
 // Add ForceFlush (2010.7.20)
 // Remove TexelToPixelOffset (2010.9.26)
+// Add AdjustPerspectiveMatrix (2010.11.2)
 //
 // 3.10.0
 // ‘ˆº”¡ÀDispatch (2009.12.22)
@@ -136,6 +137,10 @@ namespace KlayGE
 		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
+
+		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
+		{
+		}
 
 		void Stereoscopic();
 

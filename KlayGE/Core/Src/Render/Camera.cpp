@@ -77,18 +77,21 @@ namespace KlayGE
 		nearPlane_	= nearPlane;
 		farPlane_	= farPlane;
 
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (this->StereoMode())
 		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			float separation = nearPlane * re.StereoSeparation() / 2;
 			float height = 2 * nearPlane * tan(FOV / 2);
 			float width = height * aspect;
 			projMat_[0] = MathLib::perspective_off_center_lh(-width / 2 + separation, width / 2 + separation, -height / 2, height / 2, nearPlane, farPlane);
 			projMat_[1] = MathLib::perspective_off_center_lh(-width / 2 - separation, width / 2 - separation, -height / 2, height / 2, nearPlane, farPlane);
+			re.AdjustPerspectiveMatrix(projMat_[0]);
+			re.AdjustPerspectiveMatrix(projMat_[1]);
 		}
 		else
 		{
 			projMat_[0] = MathLib::perspective_fov_lh(FOV, aspect, nearPlane, farPlane);
+			re.AdjustPerspectiveMatrix(projMat_[0]);
 		}
 	}
 

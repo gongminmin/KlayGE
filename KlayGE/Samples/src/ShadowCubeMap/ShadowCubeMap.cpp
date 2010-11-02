@@ -96,6 +96,9 @@ namespace
 				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				*(effect->ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+
 				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
 			}

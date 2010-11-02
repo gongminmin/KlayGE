@@ -406,6 +406,11 @@ namespace KlayGE
 		checked_pointer_cast<OGLES2RenderWindow>(screen_frame_buffer_)->FullScreen(fs);
 	}
 
+	void OGLES2RenderEngine::AdjustPerspectiveMatrix(float4x4& pers_mat)
+	{
+		pers_mat *= MathLib::scaling(1.0f, 1.0f, 2.0f) * MathLib::translation(0.0f, 0.0f, -1.0f);
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLES2RenderEngine::FillRenderDeviceCaps()

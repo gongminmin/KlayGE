@@ -38,6 +38,7 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>
+	<parameter type="int" name="flipping"/>
 
 	<parameter type="textureCUBE" name="lamp_tex"/>
 	<parameter type="sampler" name="lamp_sampler">
@@ -80,12 +81,7 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 				float4 LightWorldPos : TEXCOORD0) : SV_Target 
 {
 	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos.xyz).rgb;
-	float3 shadow_dir;
-#ifndef KLAYGE_OPENGL
-	shadow_dir = LightWorldPos.xyz;
-#else
-	shadow_dir = float3(LightWorldPos.x, -LightWorldPos.y, LightWorldPos.z);
-#endif
+	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
 	float2 moments = shadow_cube_tex.Sample(shadow_sampler, shadow_dir).xy;
 	
 	LightWorldPos /= LightWorldPos.w;

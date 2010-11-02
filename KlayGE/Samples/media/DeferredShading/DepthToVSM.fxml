@@ -28,12 +28,7 @@ void DepthToVSMVS(float4 pos : POSITION,
 
 float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float dist = src_tex.Sample(point_sampler, tc).r;
-#ifdef KLAYGE_OPENGL
-	dist = dist * 2 - 1;	// [0, 1]->[-1, 1]
-#endif
-
-	dist = near_q.x / (near_q.y - dist);
+	float dist = near_q.x / (near_q.y - src_tex.Sample(point_sampler, tc).r);
 	dist *= length(view_dir) / view_dir.z;
 
 	float2 dxdy = float2(ddx(dist), ddy(dist));
