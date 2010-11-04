@@ -14,10 +14,14 @@
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
 	<parameter type="float" name="patch_length"/>
 
-	<parameter type="texture2D" name="displacement_tex"/>
-	<parameter type="texture2D" name="gradient_tex"/>
+	<parameter type="texture2D" name="displacement_tex_0"/>
+	<parameter type="texture2D" name="displacement_tex_1"/>
+	<parameter type="texture2D" name="gradient_tex_0"/>
+	<parameter type="texture2D" name="gradient_tex_1"/>
 	<parameter type="texture2D" name="refraction_tex"/>
 	<parameter type="texture2D" name="reflection_tex"/>
+
+	<parameter type="float" name="interpolate_frac"/>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -54,7 +58,8 @@ void OceanVS(float2 pos : POSITION,
 	eye_dir_fog.w = fog_scale;
 	
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
-	float3 disp = displacement_tex.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
+	float3 disp = lerp(displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz,
+		displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz, interpolate_frac);
 
 	pos_os.xz += disp.xy;
 	
@@ -77,8 +82,11 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 {
 	float3 eye_dir = normalize(eye_dir_fog.xyz);
 	
-	float2 gradient = lerp(gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-		gradient_tex.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f);
+	float2 gradient = lerp(
+		lerp(gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
+			gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), 
+		lerp(gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
+			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac);
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
@@ -104,15 +112,14 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 
 	float water_depth = saturate((no_water_depth - pos_ss.w) * 0.1f);
 
-	float3 reflect_vec = reflect(-eye_dir, normal);
-	float fresnel = fresnel_term_schlick(reflect_vec, normal, 0.027f);
+	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f);
 	float3 water_color = lerp(lerp(waterbody_color, refraction, saturate(10 / pos_ss.w)), reflection, fresnel);
 
 	float3 ambient = water_color * 0.1f;
 	float3 diffuse = water_color;
 	float3 light_dir = normalize(-sun_dir);
 	float3 halfway = normalize(light_dir + eye_dir);
-	float3 specular = sun_color * specular_normalize_factor(sun_shineness, 0.027) * roughness_term(halfway, normal, sun_shineness);
+	float3 specular = sun_color * specular_normalize_factor(sun_shineness, 0.027f) * roughness_term(halfway, normal, sun_shineness);
 
 	float n_dot_l = directional_lighting(sun_dir, normal);
 	return float4(lerp(ambient + (diffuse + specular) * n_dot_l, fog_color, eye_dir_fog.w), water_depth);

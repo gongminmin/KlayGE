@@ -151,14 +151,21 @@ namespace
 			*(technique_->Effect().ParameterByName("patch_length")) = patch_length;
 		}
 
-		void DisplacementMap(TexturePtr const & tex)
+		void DisplacementMap(TexturePtr const & tex0, TexturePtr const & tex1)
 		{
-			*(technique_->Effect().ParameterByName("displacement_tex")) = tex;
+			*(technique_->Effect().ParameterByName("displacement_tex_0")) = tex0;
+			*(technique_->Effect().ParameterByName("displacement_tex_1")) = tex1;
 		}
 
-		void GradientMap(TexturePtr const & tex)
+		void GradientMap(TexturePtr const & tex0, TexturePtr const & tex1)
 		{
-			*(technique_->Effect().ParameterByName("gradient_tex")) = tex;
+			*(technique_->Effect().ParameterByName("gradient_tex_0")) = tex0;
+			*(technique_->Effect().ParameterByName("gradient_tex_1")) = tex1;
+		}
+
+		void InterpolateFrac(float frac)
+		{
+			*(technique_->Effect().ParameterByName("interpolate_frac")) = frac;
 		}
 
 		void RefractionTex(TexturePtr const & tex)
@@ -185,10 +192,14 @@ namespace
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
 			reflect_mat_ = MathLib::reflect(ocean_plane_);
 
-			// The size of displacement map. In this sample, it's fixed to 512.
+			// The size of displacement map.
 			ocean_param_.dmap_dim			= 512;
 			// The side length (world space) of square sized patch
 			ocean_param_.patch_length		= 42;
+
+			ocean_param_.time_peroid		= 5;
+			ocean_param_.num_frames			= 40;
+
 			// Adjust this parameter to control the simulation speed
 			ocean_param_.time_scale			= 0.8f;
 			// A scale to control the amplitude. Not the world space height
@@ -207,6 +218,15 @@ namespace
 			dirty_ = true;
 
 			ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
+
+			displacement_tex_.resize(ocean_param_.num_frames);
+			gradient_tex_.resize(ocean_param_.num_frames);
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+			{
+				displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			}
 		}
 
 		void SunDirection(float3 const & dir)
@@ -224,19 +244,30 @@ namespace
 			if (dirty_)
 			{
 				ocean_simulator_->Parameters(ocean_param_);
-				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(ocean_simulator_->DisplacementTex());
-				checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(ocean_simulator_->GradientTex());
 				checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
+
+				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+				{
+					ocean_simulator_->Update(i);
+
+					ocean_simulator_->DisplacementTex()->CopyToTexture(*displacement_tex_[i]);
+					ocean_simulator_->GradientTex()->CopyToTexture(*gradient_tex_[i]);
+				}
 
 				dirty_ = false;
 			}
 
 			InfTerrainSceneObject::Update();
 
-			if (this->Visible())
-			{
-				ocean_simulator_->Update();
-			}
+			float t = static_cast<float>(timer_.elapsed() * ocean_param_.time_scale) / ocean_param_.time_peroid;
+			float frame = (t - floor(t)) * ocean_param_.num_frames;
+			int frame0 = static_cast<int>(frame);
+			int frame1 = frame0 + 1;
+			frame0 %= ocean_param_.num_frames;
+			frame1 %= ocean_param_.num_frames;
+			checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
+			checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
+			checked_pointer_cast<RenderOcean>(renderable_)->InterpolateFrac(frame - frame0);
 		}
 
 		void RefractionTex(TexturePtr const & tex)
@@ -346,6 +377,11 @@ namespace
 		float4x4 reflect_mat_;
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
+
+		std::vector<TexturePtr> displacement_tex_;
+		std::vector<TexturePtr> gradient_tex_;
+
+		Timer timer_;
 	};
 
 

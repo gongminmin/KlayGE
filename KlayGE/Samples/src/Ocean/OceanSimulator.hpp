@@ -16,6 +16,10 @@ namespace KlayGE
 		// Typical value is 10 ~ 20
 		float patch_length;
 
+		// Typical value is 5
+		float time_peroid;
+		uint32_t num_frames;
+
 		// Adjust the time interval for simulation.
 		float time_scale;
 		// Amplitude for transverse wave. Around 1.0
@@ -36,7 +40,7 @@ namespace KlayGE
 		~OceanSimulator();
 
 		// Update ocean wave when tick arrives.
-		void Update();
+		void Update(uint32_t frame);
 
 		// Texture access
 		TexturePtr const & DisplacementTex() const;
@@ -87,8 +91,6 @@ namespace KlayGE
 
 		// FFT wrap-up
 		CSFFT_Plan fft_plan_;
-
-		Timer timer_;
 	};
 }
 

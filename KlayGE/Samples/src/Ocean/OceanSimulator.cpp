@@ -102,7 +102,8 @@ namespace KlayGE
 
 		// initialize random generator.
 		srand(0);
-
+		
+		float interval = 2 * PI / param_.time_peroid;
 		for (int i = 0; i <= param_.dmap_dim; i++)
 		{
 			// K is wave-vector, range [-|DX/W, |DX/W], [-|DY/H, |DY/H]
@@ -123,18 +124,18 @@ namespace KlayGE
 				// Gerstner wave shows that a point on a simple sinusoid wave is doing a uniform circular
 				// motion with the center at (x0, y0, z0), radius at A, and the circular plane is parallel
 				// to vector K.
-				out_omega[i * (param_.dmap_dim + 4) + j] = sqrt(GRAV_ACCEL * MathLib::length(K));
+				out_omega[i * (param_.dmap_dim + 4) + j] = static_cast<int>(sqrt(GRAV_ACCEL * MathLib::length(K)) / interval) * interval;
 			}
 		}
 	}
 
-	void OceanSimulator::Update()
+	void OceanSimulator::Update(uint32_t frame)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		// ---------------------------- H(0) -> H(t), D(x, t), D(y, t) --------------------------------
 
-		*time_param_ = static_cast<float>(timer_.elapsed() * param_.time_scale);
+		*time_param_ = frame * param_.time_peroid / param_.num_frames;
 
 		uint32_t group_count_x = (param_.dmap_dim + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X;
 		uint32_t group_count_y = (param_.dmap_dim + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y;
