@@ -899,7 +899,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 
 		std::vector<uint8_t> data(tex->Width(0) * tex->Height(0) * 4);
 		{
-			Texture::Mapper mapper(*cpu_tex, 0, TMA_Read_Only, 0, 0, tex->Width(0), tex->Height(0));
+			Texture::Mapper mapper(*cpu_tex, 0, 0, TMA_Read_Only, 0, 0, tex->Width(0), tex->Height(0));
 			uint8_t const * p = mapper.Pointer<uint8_t>();
 			for (uint32_t y = 0; y < tex->Height(0); ++ y)
 			{

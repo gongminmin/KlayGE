@@ -407,21 +407,21 @@ namespace KlayGE
 		return d3d_ds_views_.back().second;
 	}
 
-	void D3D11TextureCube::MapCube(CubeFaces face, int level, TextureMapAccess tma,
+	void D3D11TextureCube::MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,
 			void*& data, uint32_t& row_pitch)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, numMipMaps_),
+		TIF(d3d_imm_ctx_->Map(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + (face - Texture::CF_Positive_X), numMipMaps_),
 			D3D11Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + (y_offset * mapped.RowPitch + x_offset) * NumFormatBytes(format_);
 		row_pitch = mapped.RowPitch;
 	}
 
-	void D3D11TextureCube::UnmapCube(CubeFaces face, int level)
+	void D3D11TextureCube::UnmapCube(int array_index, CubeFaces face, int level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, face - Texture::CF_Positive_X, numMipMaps_));
+		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + (face - Texture::CF_Positive_X), numMipMaps_));
 	}
 
 	void D3D11TextureCube::BuildMipSubLevels()

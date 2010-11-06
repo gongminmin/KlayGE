@@ -337,18 +337,18 @@ namespace KlayGE
 		return d3d_ds_views_.back().second;
 	}
 
-	void D3D11Texture1D::Map1D(int level, TextureMapAccess tma,
+	void D3D11Texture1D::Map1D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t /*width*/,
 			void*& data)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, numMipMaps_), D3D11Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
+		TIF(d3d_imm_ctx_->Map(d3dTexture1D_.get(), D3D11CalcSubresource(level, array_index, numMipMaps_), D3D11Mapping::Mapping(tma, type_, access_hint_, numMipMaps_), 0, &mapped));
 		data = static_cast<uint8_t*>(mapped.pData) + x_offset * NumFormatBytes(format_);
 	}
 
-	void D3D11Texture1D::Unmap1D(int level)
+	void D3D11Texture1D::Unmap1D(int array_index, int level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTexture1D_.get(), D3D11CalcSubresource(level, 0, numMipMaps_));
+		d3d_imm_ctx_->Unmap(d3dTexture1D_.get(), D3D11CalcSubresource(level, array_index, numMipMaps_));
 	}
 
 	void D3D11Texture1D::BuildMipSubLevels()

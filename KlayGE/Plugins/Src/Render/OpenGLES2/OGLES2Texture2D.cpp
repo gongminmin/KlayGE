@@ -230,8 +230,8 @@ namespace KlayGE
 			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
 			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-			Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-			Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+			Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 
 			int block_size;
 			if (EF_BC1 == format_)
@@ -258,7 +258,7 @@ namespace KlayGE
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
 				{
-					Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
 					uint8_t const * s = mapper.Pointer<uint8_t>();
 					uint8_t* d = &data_in[0];
 					for (uint32_t y = 0; y < src_height; ++ y)
@@ -274,7 +274,7 @@ namespace KlayGE
 					dst_width, dst_height, gl_target_type, &data_out[0]);
 
 				{
-					Texture::Mapper mapper(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					Texture::Mapper mapper(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 					uint8_t const * s = &data_out[0];
 					uint8_t* d = mapper.Pointer<uint8_t>();
 					for (uint32_t y = 0; y < dst_height; ++ y)
@@ -288,8 +288,8 @@ namespace KlayGE
 			}
 			else
 			{
-				Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)
@@ -325,8 +325,8 @@ namespace KlayGE
 			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
 			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-			Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-			Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+			Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 
 			int block_size;
 			if (EF_BC1 == format_)
@@ -353,7 +353,7 @@ namespace KlayGE
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
 				{
-					Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
 					uint8_t const * s = mapper.Pointer<uint8_t>();
 					uint8_t* d = &data_in[0];
 					for (uint32_t y = 0; y < src_height; ++ y)
@@ -369,7 +369,7 @@ namespace KlayGE
 					dst_width, dst_height, gl_target_type, &data_out[0]);
 
 				{
-					Texture::Mapper mapper(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					Texture::Mapper mapper(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 					uint8_t const * s = &data_out[0];
 					uint8_t* d = mapper.Pointer<uint8_t>();
 					for (uint32_t y = 0; y < dst_height; ++ y)
@@ -383,8 +383,8 @@ namespace KlayGE
 			}
 			else
 			{
-				Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)

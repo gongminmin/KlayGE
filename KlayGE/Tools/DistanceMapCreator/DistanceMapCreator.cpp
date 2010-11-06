@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
 
 		std::vector<uint8_t> height_map(height * width);
 		{
-			Texture::Mapper mapper(*height_map_texture, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper(*height_map_texture, 0, 0, TMA_Read_Only, 0, 0, width, height);
 			uint8_t* data = mapper.Pointer<uint8_t>();
 			for (int y = 0; y < height; ++ y)
 			{
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
 		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*vol_map_texture);
 
-		Texture::Mapper mapper(*vol_map_texture, 0, TMA_Read_Only, 0, 0, 0, width, height, depth);
+		Texture::Mapper mapper(*vol_map_texture, 0, 0, TMA_Read_Only, 0, 0, 0, width, height, depth);
 		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (int z = 0; z < depth; ++ z)
 		{
@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 
 	{
-		Texture::Mapper mapper(*distance_map_texture, 0, TMA_Write_Only, 0, 0, 0, width, height, depth);
+		Texture::Mapper mapper(*distance_map_texture, 0, 0, TMA_Write_Only, 0, 0, 0, width, height, depth);
 		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (int z = 0; z < depth; ++ z)
 		{

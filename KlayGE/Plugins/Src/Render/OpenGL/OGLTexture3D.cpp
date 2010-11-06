@@ -294,7 +294,7 @@ namespace KlayGE
 				for (uint32_t z = 0; z < src_depth; ++ z)
 				{
 					{
-						Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_yOffset, src_zOffset + z,
+						Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_zOffset + z,
 							src_width, src_height, 1);
 						uint8_t const * s = mapper.Pointer<uint8_t>();
 						uint8_t* d = &data_in[0];
@@ -311,7 +311,7 @@ namespace KlayGE
 						dst_width, dst_height, gl_target_type, &data_out[0]);
 
 					{
-						Texture::Mapper mapper(target, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_zOffset + z,
+						Texture::Mapper mapper(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_zOffset + z,
 							dst_width, dst_height, 1);
 						uint8_t const * s = &data_out[0];
 						uint8_t* d = mapper.Pointer<uint8_t>();

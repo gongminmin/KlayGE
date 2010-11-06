@@ -1,8 +1,11 @@
 // Texture.hpp
 // KlayGE 纹理类 头文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// Add CopyToTextureArray (2010.11.6)
 //
 // 3.9.0
 // 隐藏了TextureLoader (2009.4.9)
@@ -108,39 +111,43 @@ namespace KlayGE
 			friend class Texture;
 
 		public:
-			Mapper(Texture& tex, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t width)
 				: tex_(tex),
+					mapped_array_index_(array_index),
 					mapped_level_(level)
 			{
-				tex_.Map1D(level, tma, x_offset, width, data_);
+				tex_.Map1D(array_index, level, tma, x_offset, width, data_);
 				row_pitch_ = slice_pitch_ = width * tex.Bpp() / 8;
 			}
-			Mapper(Texture& tex, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset,
 						uint32_t width, uint32_t height)
 				: tex_(tex),
+					mapped_array_index_(array_index),
 					mapped_level_(level)
 			{
-				tex_.Map2D(level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
+				tex_.Map2D(array_index, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
 				slice_pitch_ = row_pitch_ * height;
 			}
-			Mapper(Texture& tex, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 						uint32_t width, uint32_t height, uint32_t depth)
 				: tex_(tex),
+					mapped_array_index_(array_index),
 					mapped_level_(level)
 			{
-				tex_.Map3D(level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
+				tex_.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
 			}
-			Mapper(Texture& tex, CubeFaces face, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, int array_index, CubeFaces face, int level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset,
 						uint32_t width, uint32_t height)
 				: tex_(tex),
+					mapped_array_index_(array_index),
 					mapped_face_(face),
 					mapped_level_(level)
 			{
-				tex_.MapCube(face, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
+				tex_.MapCube(array_index, face, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
 				slice_pitch_ = row_pitch_ * height;
 			}
 
@@ -149,19 +156,19 @@ namespace KlayGE
 				switch (tex_.Type())
 				{
 				case TT_1D:
-					tex_.Unmap1D(mapped_level_);
+					tex_.Unmap1D(mapped_array_index_, mapped_level_);
 					break;
 
 				case TT_2D:
-					tex_.Unmap2D(mapped_level_);
+					tex_.Unmap2D(mapped_array_index_, mapped_level_);
 					break;
 
 				case TT_3D:
-					tex_.Unmap3D(mapped_level_);
+					tex_.Unmap3D(mapped_array_index_, mapped_level_);
 					break;
 
 				case TT_Cube:
-					tex_.UnmapCube(mapped_face_, mapped_level_);
+					tex_.UnmapCube(mapped_array_index_, mapped_face_, mapped_level_);
 					break;
 				}
 			}
@@ -193,6 +200,7 @@ namespace KlayGE
 			void* data_;
 			uint32_t row_pitch_, slice_pitch_;
 
+			int mapped_array_index_;
 			CubeFaces mapped_face_;
 			int mapped_level_;
 		};
@@ -246,27 +254,30 @@ namespace KlayGE
 		virtual void CopyToTextureCube(Texture& target, CubeFaces face, int level,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
+		virtual void CopyToTextureArray(Texture& target, int array_index, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset) = 0;
 
 		virtual void BuildMipSubLevels() = 0;
 
-		virtual void Map1D(int level, TextureMapAccess tma,
+		virtual void Map1D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
 			void*& data) = 0;
-		virtual void Map2D(int level, TextureMapAccess tma,
+		virtual void Map2D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch) = 0;
-		virtual void Map3D(int level, TextureMapAccess tma,
+		virtual void Map3D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) = 0;
-		virtual void MapCube(CubeFaces face, int level, TextureMapAccess tma,
+		virtual void MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch) = 0;
 
-		virtual void Unmap1D(int level) = 0;
-		virtual void Unmap2D(int level) = 0;
-		virtual void Unmap3D(int level) = 0;
-		virtual void UnmapCube(CubeFaces face, int level) = 0;
+		virtual void Unmap1D(int array_index, int level) = 0;
+		virtual void Unmap2D(int array_index, int level) = 0;
+		virtual void Unmap3D(int array_index, int level) = 0;
+		virtual void UnmapCube(int array_index, CubeFaces face, int level) = 0;
 
 	protected:
 		uint32_t		bpp_;

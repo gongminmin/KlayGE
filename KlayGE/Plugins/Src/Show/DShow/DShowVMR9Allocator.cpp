@@ -367,7 +367,7 @@ namespace KlayGE
 
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
 			{
-				Texture::Mapper mapper(*present_tex_, 0, TMA_Write_Only, 0, 0, width, height);
+				Texture::Mapper mapper(*present_tex_, 0, 0, TMA_Write_Only, 0, 0, width, height);
 				uint8_t* dst = mapper.Pointer<uint8_t>();
 				if (EF_ARGB8 == present_tex_->Format())
 				{

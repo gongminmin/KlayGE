@@ -734,7 +734,7 @@ namespace KlayGE
 					charInfo.tick			= tick_;
 
 					{
-						Texture::Mapper mapper(*a_char_texture_, 0, TMA_Write_Only,
+						Texture::Mapper mapper(*a_char_texture_, 0, 0, TMA_Write_Only,
 							0, 0, kfont_char_size, kfont_char_size);
 						kl.DistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
 					}

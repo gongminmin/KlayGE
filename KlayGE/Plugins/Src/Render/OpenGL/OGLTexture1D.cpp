@@ -282,8 +282,8 @@ namespace KlayGE
 					BOOST_ASSERT((0 == src_xOffset) && (0 == dst_xOffset));
 					BOOST_ASSERT((src_width == dst_width));
 
-					Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
-					Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+					Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_width);
+					Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_width);
 
 					int block_size;
 					if (EF_BC1 == format_)
@@ -310,7 +310,7 @@ namespace KlayGE
 						std::vector<uint8_t> data_out(dst_width * dst_format_size);
 
 						{
-							Texture::Mapper mapper(*this, level, TMA_Read_Only, src_xOffset, src_width);
+							Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_width);
 							memcpy(&data_in[0], mapper.Pointer<uint8_t*>(), data_in.size() * sizeof(data_in[0]));
 						}
 
@@ -318,14 +318,14 @@ namespace KlayGE
 							dst_width, 1, gl_target_type, &data_out[0]);
 
 						{
-							Texture::Mapper mapper(other, level, TMA_Write_Only, dst_xOffset, dst_width);
+							Texture::Mapper mapper(other, 0, level, TMA_Write_Only, dst_xOffset, dst_width);
 							memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
 						}
 					}
 					else
 					{
-						Texture::Mapper mapper_src(*this, level, TMA_Read_Only, src_xOffset, src_width);
-						Texture::Mapper mapper_dst(target, level, TMA_Write_Only, dst_xOffset, dst_width);
+						Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_width);
+						Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_width);
 						uint8_t const * s = mapper_src.Pointer<uint8_t>();
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 						

@@ -92,6 +92,13 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
+	void D3D11Texture::CopyToTextureArray(Texture& /*target*/, int /*array_index*/, int /*level*/,
+			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
+			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
 	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(int /*array_index*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
@@ -204,21 +211,21 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture::Map1D(int /*level*/, TextureMapAccess /*tma*/,
+	void D3D11Texture::Map1D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*width*/,
 			void*& /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::Map2D(int /*level*/, TextureMapAccess /*tma*/,
+	void D3D11Texture::Map2D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::Map3D(int /*level*/, TextureMapAccess /*tma*/,
+	void D3D11Texture::Map3D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
 			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
@@ -226,29 +233,29 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::MapCube(CubeFaces /*face*/, int /*level*/, TextureMapAccess /*tma*/,
+	void D3D11Texture::MapCube(int /*array_index*/, CubeFaces /*face*/, int /*level*/, TextureMapAccess /*tma*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::Unmap1D(int /*level*/)
+	void D3D11Texture::Unmap1D(int /*array_index*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::Unmap2D(int /*level*/)
+	void D3D11Texture::Unmap2D(int /*array_index*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::Unmap3D(int /*level*/)
+	void D3D11Texture::Unmap3D(int /*array_index*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void D3D11Texture::UnmapCube(CubeFaces /*face*/, int /*level*/)
+	void D3D11Texture::UnmapCube(int /*array_index*/, CubeFaces /*face*/, int /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}

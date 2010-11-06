@@ -2193,35 +2193,40 @@ namespace KlayGE
 		{
 		case Texture::TT_1D:
 			{
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
-					uint32_t image_size;
-					if (IsCompressedFormat(format))
+					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
-						int block_size;
-						if (EF_BC1 == format)
+						size_t const index = array_index * numMipMaps + level;
+
+						uint32_t image_size;
+						if (IsCompressedFormat(format))
 						{
-							block_size = 8;
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							image_size = ((texture_sys_mem->Width(level) + 3) / 4) * block_size;
 						}
 						else
 						{
-							block_size = 16;
+							image_size = main_image_size / (1UL << (level * 2));
 						}
 
-						image_size = ((texture_sys_mem->Width(level) + 3) / 4) * block_size;
-					}
-					else
-					{
-						image_size = main_image_size / (1UL << (level * 2));
-					}
-
-					{
-						Texture::Mapper mapper(*texture_sys_mem, level, TMA_Read_Only, 0, texture_sys_mem->Width(level));
-						base[level] = data_block.size();
-						data_block.resize(data_block.size() + image_size);
-						memcpy(&data_block[base[level]], mapper.Pointer<char>(), image_size);
+						{
+							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, texture_sys_mem->Width(level));
+							base[index] = data_block.size();
+							data_block.resize(data_block.size() + image_size);
+							memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+						}
 					}
 				}
 			}
@@ -2229,116 +2234,17 @@ namespace KlayGE
 
 		case Texture::TT_2D:
 			{
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
-				{
-					uint32_t width = texture_sys_mem->Width(level);
-					uint32_t height = texture_sys_mem->Height(level);
-
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
-
-						{
-							Texture::Mapper mapper(*texture_sys_mem, level, TMA_Read_Only, 0, 0, width, height);
-							base[level] = data_block.size();
-							data_block.resize(data_block.size() + image_size);
-							memcpy(&data_block[base[level]], mapper.Pointer<char>(), image_size);
-						}
-					}
-					else
-					{
-						Texture::Mapper mapper(*texture_sys_mem, level, TMA_Read_Only, 0, 0, width, height);
-						char* data = mapper.Pointer<char>();
-
-						base[level] = data_block.size();
-						data_block.resize(data_block.size() + width * height * format_size);
-						for (uint32_t y = 0; y < height; ++ y)
-						{
-							memcpy(&data_block[base[level] + y * width * format_size], data, width * format_size);
-							data += mapper.RowPitch();
-						}
-					}
-				}
-			}
-			break;
-
-		case Texture::TT_3D:
-			{
-				init_data.resize(numMipMaps);
-				base.resize(numMipMaps);
-				for (uint32_t level = 0; level < numMipMaps; ++ level)
-				{
-					uint32_t width = texture_sys_mem->Width(level);
-					uint32_t height = texture_sys_mem->Height(level);
-					uint32_t depth = texture_sys_mem->Depth(level);
-
-					if (IsCompressedFormat(format))
-					{
-						int block_size;
-						if (EF_BC1 == format)
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
-						uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
-
-						{
-							Texture::Mapper mapper(*texture_sys_mem, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
-							base[level] = data_block.size();
-							data_block.resize(data_block.size() + image_size);
-							memcpy(&data_block[base[level]], mapper.Pointer<char>(), image_size);
-						}
-					}
-					else
-					{
-						Texture::Mapper mapper(*texture_sys_mem, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
-						char* data = mapper.Pointer<char>();
-
-						base[level] = data_block.size();
-						data_block.resize(data_block.size() + width * height * depth * format_size);
-						for (uint32_t z = 0; z < depth; ++ z)
-						{
-							for (uint32_t y = 0; y < height; ++ y)
-							{
-								memcpy(&data_block[base[level] + (z * height + y) * width * format_size], data, width * format_size);
-								data += mapper.RowPitch();
-							}
-
-							data += mapper.SlicePitch() - mapper.RowPitch() * height;
-						}
-					}
-				}
-			}
-			break;
-
-		case Texture::TT_Cube:
-			{
-				init_data.resize(6 * numMipMaps);
-				base.resize(6 * numMipMaps);
-				for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 				{
 					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
-						size_t const index = (face - Texture::CF_Positive_X) * numMipMaps + level;
+						size_t const index = array_index * numMipMaps + level;
 
 						uint32_t width = texture_sys_mem->Width(level);
 						uint32_t height = texture_sys_mem->Height(level);
+
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
@@ -2354,7 +2260,7 @@ namespace KlayGE
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 							{
-								Texture::Mapper mapper(*texture_sys_mem, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + image_size);
 								memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
@@ -2362,7 +2268,7 @@ namespace KlayGE
 						}
 						else
 						{
-							Texture::Mapper mapper(*texture_sys_mem, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
 							char* data = mapper.Pointer<char>();
 
 							base[index] = data_block.size();
@@ -2371,6 +2277,118 @@ namespace KlayGE
 							{
 								memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
 								data += mapper.RowPitch();
+							}
+						}
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_3D:
+			{
+				init_data.resize(array_size * numMipMaps);
+				base.resize(array_size * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					for (uint32_t level = 0; level < numMipMaps; ++ level)
+					{
+						size_t const index = array_index * numMipMaps + level;
+
+						uint32_t width = texture_sys_mem->Width(level);
+						uint32_t height = texture_sys_mem->Height(level);
+						uint32_t depth = texture_sys_mem->Depth(level);
+
+						if (IsCompressedFormat(format))
+						{
+							int block_size;
+							if (EF_BC1 == format)
+							{
+								block_size = 8;
+							}
+							else
+							{
+								block_size = 16;
+							}
+
+							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
+
+							{
+								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
+								base[index] = data_block.size();
+								data_block.resize(data_block.size() + image_size);
+								memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+							}
+						}
+						else
+						{
+							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
+							char* data = mapper.Pointer<char>();
+
+							base[index] = data_block.size();
+							data_block.resize(data_block.size() + width * height * depth * format_size);
+							for (uint32_t z = 0; z < depth; ++ z)
+							{
+								for (uint32_t y = 0; y < height; ++ y)
+								{
+									memcpy(&data_block[base[index] + (z * height + y) * width * format_size], data, width * format_size);
+									data += mapper.RowPitch();
+								}
+
+								data += mapper.SlicePitch() - mapper.RowPitch() * height;
+							}
+						}
+					}
+				}
+			}
+			break;
+
+		case Texture::TT_Cube:
+			{
+				init_data.resize(array_size * 6 * numMipMaps);
+				base.resize(array_size * 6 * numMipMaps);
+				for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+				{
+					for (uint32_t face = Texture::CF_Positive_X; face <= Texture::CF_Negative_Z; ++ face)
+					{
+						for (uint32_t level = 0; level < numMipMaps; ++ level)
+						{
+							size_t const index = (array_index * 6 + (face - Texture::CF_Positive_X)) * numMipMaps + level;
+
+							uint32_t width = texture_sys_mem->Width(level);
+							uint32_t height = texture_sys_mem->Height(level);
+							if (IsCompressedFormat(format))
+							{
+								int block_size;
+								if (EF_BC1 == format)
+								{
+									block_size = 8;
+								}
+								else
+								{
+									block_size = 16;
+								}
+
+								uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
+
+								{
+									Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+									base[index] = data_block.size();
+									data_block.resize(data_block.size() + image_size);
+									memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+								}
+							}
+							else
+							{
+								Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+								char* data = mapper.Pointer<char>();
+
+								base[index] = data_block.size();
+								data_block.resize(data_block.size() + width * height * format_size);
+								for (uint32_t y = 0; y < height; ++ y)
+								{
+									memcpy(&data_block[base[index] + y * width * format_size], data, width * format_size);
+									data += mapper.RowPitch();
+								}
 							}
 						}
 					}
@@ -2386,8 +2404,7 @@ namespace KlayGE
 
 		SaveTexture(tex_name, texture_sys_mem->Type(),
 			texture_sys_mem->Width(0), texture_sys_mem->Height(0), texture_sys_mem->Depth(0),
-			numMipMaps, array_size,
-			format, init_data);
+			numMipMaps, array_size, format, init_data);
 	}
 
 
@@ -2447,38 +2464,44 @@ namespace KlayGE
 		{
 		}
 
-		void Map1D(int /*level*/, TextureMapAccess /*level*/,
+		void CopyToTextureArray(Texture& /*target*/, int /*array_index*/, int /*level*/,
+				uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
+				uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+		{
+		}
+
+		void Map1D(int /*array_index*/, int /*level*/, TextureMapAccess /*level*/,
 			uint32_t /*x_offset*/, uint32_t /*width*/,
 			void*& /*data*/)
 		{
 		}
-		void Map2D(int /*level*/, TextureMapAccess /*level*/,
+		void Map2D(int /*array_index*/, int /*level*/, TextureMapAccess /*level*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/)
 		{
 		}
-		void Map3D(int /*level*/, TextureMapAccess /*level*/,
+		void Map3D(int /*array_index*/, int /*level*/, TextureMapAccess /*level*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
 			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
 		{
 		}
-		void MapCube(CubeFaces /*level*/, int /*level*/, TextureMapAccess /*level*/,
+		void MapCube(int /*array_index*/, CubeFaces /*level*/, int /*level*/, TextureMapAccess /*level*/,
 			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 			void*& /*data*/, uint32_t& /*row_pitch*/)
 		{
 		}
 
-		void Unmap1D(int /*level*/)
+		void Unmap1D(int /*array_index*/, int /*level*/)
 		{
 		}
-		void Unmap2D(int /*level*/)
+		void Unmap2D(int /*array_index*/, int /*level*/)
 		{
 		}
-		void Unmap3D(int /*level*/)
+		void Unmap3D(int /*array_index*/, int /*level*/)
 		{
 		}
-		void UnmapCube(CubeFaces /*face*/, int /*level*/)
+		void UnmapCube(int /*array_index*/, CubeFaces /*face*/, int /*level*/)
 		{
 		}
 
