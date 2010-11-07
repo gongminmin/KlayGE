@@ -142,7 +142,7 @@ float4 OceanPS3(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TE
 		lerp(gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
 			gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), 
 		lerp(gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac);
+			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac) * 2 - 1;
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	return ShadingOcean(eye_dir_fog, gradient, pos_ss);
@@ -172,7 +172,7 @@ float4 OceanPS4(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TE
 		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy,
 			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy, 0.3f), 
 		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy,
-			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy, 0.3f), interpolate_frac);
+			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy, 0.3f), interpolate_frac) * 2 - 1;
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	return ShadingOcean(eye_dir_fog, gradient, pos_ss);

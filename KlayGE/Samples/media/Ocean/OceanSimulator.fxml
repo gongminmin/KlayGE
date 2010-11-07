@@ -152,7 +152,7 @@ float4 GenGradientFoldingPS(float2 tc : TEXCOORD0) : SV_Target
 	float fold = max(1.0f - J, 0);
 
 	// Output
-	return float4(gradient, 0, fold);
+	return float4(gradient * 0.5f + 0.5f, 0, fold);
 }
 		]]>
 	</shader>
