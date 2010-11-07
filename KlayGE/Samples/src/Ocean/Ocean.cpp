@@ -88,6 +88,7 @@ namespace
 			{
 				MathLib::oblique_clipping(proj, 
 					MathLib::mul(plane_, MathLib::transpose(MathLib::inverse(view))));
+				Context::Instance().RenderFactoryInstance().RenderEngineInstance().AdjustPerspectiveMatrix(proj);
 			}
 
 			float4x4 vp = view * proj;
@@ -135,7 +136,20 @@ namespace
 			: InfTerrainRenderable(L"Ocean")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
+			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
+
+			if (rf.RenderEngineInstance().DeviceCaps().max_texture_array_length > 1)
+			{
+				technique_ = effect->TechniqueByName("Ocean4");
+				if (!technique_->Validate())
+				{
+					technique_ = effect->TechniqueByName("Ocean3");
+				}
+			}
+			else
+			{
+				technique_ = effect->TechniqueByName("Ocean3");
+			}
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
@@ -163,6 +177,21 @@ namespace
 			*(technique_->Effect().ParameterByName("gradient_tex_1")) = tex1;
 		}
 
+		void DisplacementMapArray(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("displacement_tex_array")) = tex;
+		}
+
+		void GradientMapArray(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("gradient_tex_array")) = tex;
+		}
+
+		void Frames(int2 const & frames)
+		{
+			*(technique_->Effect().ParameterByName("frames")) = frames;
+		}
+
 		void InterpolateFrac(float frac)
 		{
 			*(technique_->Effect().ParameterByName("interpolate_frac")) = frac;
@@ -177,6 +206,14 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("reflection_tex")) = tex;
 		}
+
+		void OnRenderBegin()
+		{
+			InfTerrainRenderable::OnRenderBegin();
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+		}
 	};
 
 	class OceanObject : public InfTerrainSceneObject
@@ -184,6 +221,12 @@ namespace
 	public:
 		OceanObject()
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderEngine& re = rf.RenderEngineInstance();
+
+			RenderDeviceCaps const & caps = re.DeviceCaps();
+			cs_simulate_ = caps.cs_support;
+
 			base_level_ = 0;
 			strength_ = 10;
 
@@ -197,8 +240,8 @@ namespace
 			// The side length (world space) of square sized patch
 			ocean_param_.patch_length		= 42;
 
-			ocean_param_.time_peroid		= 5;
-			ocean_param_.num_frames			= 40;
+			ocean_param_.time_peroid		= 3;
+			ocean_param_.num_frames			= 24;
 
 			// Adjust this parameter to control the simulation speed
 			ocean_param_.time_scale			= 0.8f;
@@ -215,17 +258,76 @@ namespace
 			// pointy crests.
 			ocean_param_.choppy_scale		= 1.1f;
 
-			dirty_ = true;
-
-			ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
-
-			displacement_tex_.resize(ocean_param_.num_frames);
-			gradient_tex_.resize(ocean_param_.num_frames);
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+			if (cs_simulate_)
 			{
-				displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+				ocean_simulator_ = MakeSharedPtr<OceanSimulator>();
+			}
+
+			use_tex_array_ = re.DeviceCaps().max_texture_array_length >= ocean_param_.num_frames;
+
+			Texture::TextureType disp_type;
+			uint32_t disp_width, disp_height, disp_depth;
+			uint32_t disp_num_mipmaps;
+			uint32_t disp_array_size;
+			ElementFormat disp_format;
+			std::vector<ElementInitData> disp_init_data;
+			std::vector<uint8_t> disp_data_block;
+			LoadTexture("OceanDisplacement.dds", disp_type, disp_width, disp_height, disp_depth, disp_num_mipmaps, disp_array_size,
+				disp_format, disp_init_data, disp_data_block);
+
+			Texture::TextureType grad_type;
+			uint32_t grad_width, grad_height, grad_depth;
+			uint32_t grad_num_mipmaps;
+			uint32_t grad_array_size;
+			ElementFormat grad_format;
+			std::vector<ElementInitData> grad_init_data;
+			std::vector<uint8_t> grad_data_block;
+			LoadTexture("OceanGradient.dds", grad_type, grad_width, grad_height, grad_depth, grad_num_mipmaps, grad_array_size,
+				grad_format, grad_init_data, grad_data_block);
+
+			bool use_load_tex;
+			if ((disp_array_size == ocean_param_.num_frames) && (disp_width == static_cast<uint32_t>(ocean_param_.dmap_dim)) && (disp_height == disp_width)
+				&& (grad_array_size == ocean_param_.num_frames) && (grad_width == static_cast<uint32_t>(ocean_param_.dmap_dim)) && (grad_height == grad_width))
+			{
+				use_load_tex = true;
+				dirty_ = false;
+			}
+			else
+			{
+				use_load_tex = false;
+				dirty_ = true;
+			}
+
+			if (use_tex_array_)
+			{
+				ElementInitData* did = NULL;
+				ElementInitData* gid = NULL;
+				if (use_load_tex)
+				{
+					did = &disp_init_data[0];
+					gid = &grad_init_data[0];
+				}
+
+				displacement_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, ocean_param_.num_frames, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, did);
+				gradient_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, ocean_param_.num_frames, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, gid);
+			}
+			else
+			{
+				displacement_tex_.resize(ocean_param_.num_frames);
+				gradient_tex_.resize(ocean_param_.num_frames);
+				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+				{
+					ElementInitData* did = NULL;
+					ElementInitData* gid = NULL;
+					if (use_load_tex)
+					{
+						did = &disp_init_data[i * disp_num_mipmaps];
+						gid = &grad_init_data[i * grad_num_mipmaps];
+					}
+
+					displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, did);
+					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, gid);
+				}
 			}
 		}
 
@@ -243,15 +345,43 @@ namespace
 		{
 			if (dirty_)
 			{
-				ocean_simulator_->Parameters(ocean_param_);
 				checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
 
-				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+				if (cs_simulate_)
 				{
-					ocean_simulator_->Update(i);
+					ocean_simulator_->Parameters(ocean_param_);
 
-					ocean_simulator_->DisplacementTex()->CopyToTexture(*displacement_tex_[i]);
-					ocean_simulator_->GradientTex()->CopyToTexture(*gradient_tex_[i]);
+					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
+					{
+						ocean_simulator_->Update(i);
+
+						TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
+						TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
+
+						if (use_tex_array_)
+						{
+							sim_disp_tex->CopyToTextureArray(*displacement_tex_array_, i, 0,
+								sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0,
+								sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0);
+							for (uint32_t l = 0; l < gradient_tex_array_->NumMipMaps(); ++ l)
+							{
+								sim_grad_tex->CopyToTextureArray(*gradient_tex_array_, i, l,
+									sim_grad_tex->Width(l), sim_grad_tex->Height(l), 0, 0,
+									sim_grad_tex->Width(l), sim_grad_tex->Height(l), 0, 0);
+							}
+						}
+						else
+						{
+							sim_disp_tex->CopyToTexture(*displacement_tex_[i]);
+							sim_grad_tex->CopyToTexture(*gradient_tex_[i]);
+						}
+					}
+
+					/*if (use_tex_array_)
+					{
+						SaveTexture(displacement_tex_array_, "OceanDisplacement.dds");
+						SaveTexture(gradient_tex_array_, "OceanGradient.dds");
+					}*/
 				}
 
 				dirty_ = false;
@@ -263,11 +393,20 @@ namespace
 			float frame = (t - floor(t)) * ocean_param_.num_frames;
 			int frame0 = static_cast<int>(frame);
 			int frame1 = frame0 + 1;
+			checked_pointer_cast<RenderOcean>(renderable_)->InterpolateFrac(frame - frame0);
 			frame0 %= ocean_param_.num_frames;
 			frame1 %= ocean_param_.num_frames;
-			checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
-			checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
-			checked_pointer_cast<RenderOcean>(renderable_)->InterpolateFrac(frame - frame0);
+			if (use_tex_array_)
+			{
+				checked_pointer_cast<RenderOcean>(renderable_)->Frames(int2(frame0, frame1));
+				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMapArray(displacement_tex_array_);
+				checked_pointer_cast<RenderOcean>(renderable_)->GradientMapArray(gradient_tex_array_);
+			}
+			else
+			{
+				checked_pointer_cast<RenderOcean>(renderable_)->DisplacementMap(displacement_tex_[frame0], displacement_tex_[frame1]);
+				checked_pointer_cast<RenderOcean>(renderable_)->GradientMap(gradient_tex_[frame0], gradient_tex_[frame1]);
+			}
 		}
 
 		void RefractionTex(TexturePtr const & tex)
@@ -370,6 +509,8 @@ namespace
 		}
 
 	private:
+		bool cs_simulate_;
+
 		OceanParameter ocean_param_;
 		bool dirty_;
 
@@ -378,8 +519,11 @@ namespace
 
 		boost::shared_ptr<OceanSimulator> ocean_simulator_;
 
+		bool use_tex_array_;
 		std::vector<TexturePtr> displacement_tex_;
 		std::vector<TexturePtr> gradient_tex_;
+		TexturePtr displacement_tex_array_;
+		TexturePtr gradient_tex_array_;
 
 		Timer timer_;
 	};
@@ -421,7 +565,7 @@ bool OceanApp::ConfirmDevice() const
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if ((caps.max_shader_model < 3) || !caps.cs_support)
+	if (caps.max_shader_model < 3)
 	{
 		return false;
 	}
@@ -469,6 +613,7 @@ void OceanApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	final_copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
 	refraction_fb_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
@@ -479,6 +624,9 @@ void OceanApp::InitObjects()
 			scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	blur_y_ = MakeSharedPtr<BlurYPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+
+	final_fb_ = rf.MakeFrameBuffer();
+	final_fb_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -533,10 +681,11 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
+
 	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 0));
-	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.RenderEngineInstance().CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil));
-	copy_pp_->InputPin(0, refraction_tex_);
+	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -549,6 +698,14 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 	blur_y_->InputPin(0, reflection_tex_);
 	blur_y_->OutputPin(0, reflection_blur_tex_);
+
+	final_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	final_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*final_tex_, 0, 0));
+	final_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+	copy_pp_->InputPin(0, refraction_tex_);
+	copy_pp_->OutputPin(0, final_tex_);
+	final_copy_pp_->InputPin(0, final_tex_);
 
 	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
 	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
@@ -693,7 +850,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		re.BindFrameBuffer(refraction_fb_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
 		checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(false);
 		terrain_->Visible(true);
 		sky_box_->Visible(true);
@@ -705,7 +862,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 			Camera& scene_camera = this->ActiveCamera();
 
 			re.BindFrameBuffer(reflection_fb_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1, 0);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
 			checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(true);
 			terrain_->Visible(true);
 			sky_box_->Visible(true);
@@ -719,14 +876,21 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 
 		return App3DFramework::URV_Need_Flush;
 
-	default:
+	case 2:
 		blur_y_->Apply();
-		re.BindFrameBuffer(FrameBufferPtr());
+		re.BindFrameBuffer(final_fb_);
 		copy_pp_->Apply();
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
 		ocean_->Visible(true);
 
-		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Need_Flush;
+
+	default:
+		re.BindFrameBuffer(FrameBufferPtr());
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
+		final_copy_pp_->Apply();
+
+		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 	}
 }

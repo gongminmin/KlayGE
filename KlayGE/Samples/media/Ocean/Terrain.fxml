@@ -35,15 +35,14 @@ void TerrainVS(float2 pos : POSITION,
 	float4 pos_os = GetInfTerrainPosOS(pos, 0);
 
 	float fog_scale = saturate(length(pos_os.xz - eye_pos.xz) / 1200.0f);
-	float height_scale = 1 - fog_scale;
 
-	pos_os.y = fBm(pos_os.xz / 128, 4, lacunarity, gain);
+	pos_os.y = fBm(pos_os.xz / 128, 5, lacunarity, gain);
 	
 	float d = 1.0f;
-	float fx = fBm((pos_os.xz + float2(d, 0)) / 128, 4, lacunarity, gain);
-	float fy = fBm((pos_os.xz + float2(0, d)) / 128, 4, lacunarity, gain);
-	normal_os_fog.xy = (float2(fx, fy) - pos_os.y) * stretch * height_scale;
-	pos_os.y *= stretch * height_scale;
+	float fx = fBm((pos_os.xz + float2(d, 0)) / 128, 5, lacunarity, gain);
+	float fy = fBm((pos_os.xz + float2(0, d)) / 128, 5, lacunarity, gain);
+	normal_os_fog.xy = (float2(fx, fy) - pos_os.y) * stretch;
+	pos_os.y *= stretch;
 	pos_os.y += base_level;
 
 	oPos = mul(pos_os, mvp);

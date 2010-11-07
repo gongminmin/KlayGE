@@ -20,18 +20,18 @@
 	</cbuffer>
 
 	<parameter type="float" name="min_variance" value="0.3"/>
-	<parameter type="float" name="bleeding_reduce" value="0.55"/>
+	<parameter type="float" name="bleeding_reduce" value="0.75"/>
 
 	<cbuffer name="light_sources">
-		<parameter type="int" name="light_attrib"/>
-		<parameter type="float4" name="light_color"/>
-		<parameter type="float3" name="light_falloff"/>
-		<parameter type="float4" name="light_pos_es"/>
-		<parameter type="float4" name="light_dir_es"/>
 		<parameter type="float4x4" name="light_view_proj"/>
 		<parameter type="float4x4" name="light_volume_mv"/>
 		<parameter type="float4x4" name="light_volume_mvp"/>
 		<parameter type="float4x4" name="view_to_light_model"/>
+		<parameter type="float4" name="light_color"/>
+		<parameter type="float4" name="light_pos_es"/>
+		<parameter type="float4" name="light_dir_es"/>
+		<parameter type="float3" name="light_falloff"/>
+		<parameter type="int" name="light_attrib"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_map_tex"/>
@@ -122,9 +122,8 @@ float VSM_Omnidirectional(float3 dir_ws, float len)
 	if (0 == (light_attrib & LSA_NoShadow))
 #endif
 	{
-		float2 moments = shadow_map_cube_tex.SampleLevel(linear_sampler,
-			float3(dir_ws.x, -flipping * dir_ws.y, dir_ws.z),
-			0).xy;
+		float2 moments = shadow_map_cube_tex.Sample(linear_sampler,
+			float3(dir_ws.x, -flipping * dir_ws.y, dir_ws.z)).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
@@ -145,7 +144,7 @@ float VSM_Directional(float3 pos_es, float len)
 		light_proj_pos.y *= flipping;
 		light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
 	
-		float2 moments = shadow_map_tex.SampleLevel(linear_sampler, light_proj_pos.xy, 0).xy;
+		float2 moments = shadow_map_tex.Sample(linear_sampler, light_proj_pos.xy).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
