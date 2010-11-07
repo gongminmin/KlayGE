@@ -107,9 +107,9 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::CopyToTextureArray(Texture& /*target*/, int /*array_index*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+	void OGLES2Texture::CopyToTextureArray(Texture& /*target*/, int /*level*/,
+			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_array_index*/,
+			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_array_index*/)
 	{
 		BOOST_ASSERT(false);
 	}

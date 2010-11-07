@@ -48,9 +48,9 @@ namespace KlayGE
 		virtual void CopyToTextureCube(Texture& target, CubeFaces face, int level,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		virtual void CopyToTextureArray(Texture& target, int array_index, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+		virtual void CopyToTextureArray(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index);
 
 		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
 		{
@@ -175,9 +175,9 @@ namespace KlayGE
 		void CopyToTextureCube(Texture& target, CubeFaces face, int level,
 			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		void CopyToTextureArray(Texture& target, int array_index, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+		void CopyToTextureArray(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index);
 
 		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(int array_index, int level);
 		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(int array_index, int level);

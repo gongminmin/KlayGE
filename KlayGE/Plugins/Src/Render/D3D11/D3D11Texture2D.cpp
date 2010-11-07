@@ -409,9 +409,9 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture2D::CopyToTextureArray(Texture& target, int array_index, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	void D3D11Texture2D::CopyToTextureArray(Texture& target, int level,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
+			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index)
 	{
 		BOOST_ASSERT(TT_2D == target.Type());
 
@@ -427,8 +427,8 @@ namespace KlayGE
 			src_box.bottom = src_yOffset + src_height;
 			src_box.back = 1;
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, array_index, other.NumMipMaps()),
-				dst_xOffset, dst_yOffset, 0, d3dTexture2D_.get(), D3D11CalcSubresource(level, 0, this->NumMipMaps()), &src_box);
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(level, dst_array_index, other.NumMipMaps()),
+				dst_xOffset, dst_yOffset, 0, d3dTexture2D_.get(), D3D11CalcSubresource(level, src_array_index, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -452,11 +452,11 @@ namespace KlayGE
 			info.pSrcBox = &src_box;
 			info.pDstBox = &dst_box;
 			info.SrcFirstMip = D3D11CalcSubresource(level, 0, this->NumMipMaps());
-			info.DstFirstMip = D3D11CalcSubresource(level, array_index, other.NumMipMaps());
+			info.DstFirstMip = D3D11CalcSubresource(level, 0, other.NumMipMaps());
 			info.NumMips = 1;
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
+			info.SrcFirstElement = src_array_index;
+			info.DstFirstElement = dst_array_index;
+			info.NumElements = 1;
 			info.Filter = D3DX11_FILTER_LINEAR;
 			info.MipFilter = D3DX11_FILTER_LINEAR;
 			if (IsSRGB(format_))
