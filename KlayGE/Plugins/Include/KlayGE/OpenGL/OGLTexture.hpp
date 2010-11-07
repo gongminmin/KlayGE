@@ -118,9 +118,9 @@ namespace KlayGE
 			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
 
 	private:
-		void Map1D(int level, TextureMapAccess tma,
+		void Map1D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width, void*& data);
-		void Unmap1D(int level);
+		void Unmap1D(int array_index, int level);
 
 	private:
 		void UpdateParams();
@@ -154,10 +154,10 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 	private:
-		void Map2D(int level, TextureMapAccess tma,
+		void Map2D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
-		void Unmap2D(int level);
+		void Unmap2D(int array_index, int level);
 
 	private:
 		void UpdateParams();
@@ -188,11 +188,11 @@ namespace KlayGE
 			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
 
 	private:
-		void Map3D(int level, TextureMapAccess tma,
+		void Map3D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		void Unmap3D(int level);
+		void Unmap3D(int array_index, int level);
 
 	private:
 		void UpdateParams();
@@ -222,10 +222,10 @@ namespace KlayGE
 			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
 
 	private:
-		void MapCube(CubeFaces face, int level, TextureMapAccess tma,
+		void MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
-		void UnmapCube(CubeFaces face, int level);
+		void UnmapCube(int array_index, CubeFaces face, int level);
 
 	private:
 		void UpdateParams();

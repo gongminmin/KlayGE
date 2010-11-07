@@ -45,6 +45,8 @@ namespace KlayGE
 	OGLTexture::OGLTexture(TextureType type, uint32_t array_size, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: Texture(type, sample_count, sample_quality, access_hint)
 	{
+		array_size_ = array_size;
+
 		if ((array_size > 1) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
 		{
 			THR(boost::system::posix_error::not_supported);

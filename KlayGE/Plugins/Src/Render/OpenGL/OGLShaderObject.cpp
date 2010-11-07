@@ -142,6 +142,48 @@ namespace
 	float4 texCUBEBias(samplerCUBE s, float3 location, float lod)\n		\
 	{\n																	\
 		return texCUBEbias(s, float4(location, lod));\n					\
+	}\n																	\
+	\n																	\
+	\n																	\
+	float4 tex1DARRAYLevel(sampler1D s, float2 location, float lod)\n	\
+	{\n																	\
+		return tex1DARRAYlod(s, float4(location, 0, lod));\n			\
+	}\n																	\
+	\n																	\
+	float4 tex2DARRAYLevel(sampler2D s, float3 location, float lod)\n	\
+	{\n																	\
+		return tex2DARRAYlod(s, float4(location, lod));\n			\
+	}\n																	\
+	\n																	\
+	float4 tex3DARRAYLevel(sampler3D s, float3 location, float lod)\n	\
+	{\n																	\
+		return tex3DARRAYlod(s, float4(location, lod));\n				\
+	}\n																	\
+	\n																	\
+	float4 texCUBEARRAYLevel(samplerCUBE s, float3 location, float lod)\n\
+	{\n																	\
+		return texCUBEARRAYlod(s, float4(location, lod));\n				\
+	}\n																	\
+	\n																	\
+	\n																	\
+	float4 tex1DARRAYBias(sampler1D s, float2 location, float lod)\n	\
+	{\n																	\
+		return tex1DARRAYbias(s, float4(location, 0, lod));\n			\
+	}\n																	\
+	\n																	\
+	float4 tex2DARRAYBias(sampler2D s, float3 location, float lod)\n	\
+	{\n																	\
+		return tex2DARRAYbias(s, float4(location, lod));\n				\
+	}\n																	\
+	\n																	\
+	float4 tex3DARRAYBias(sampler3D s, float3 location, float lod)\n	\
+	{\n																	\
+		return tex3DARRAYbias(s, float4(location, lod));\n				\
+	}\n																	\
+	\n																	\
+	float4 texCUBEARRAYBias(samplerCUBE s, float3 location, float lod)\n\
+	{\n																	\
+		return texCUBEARRAYbias(s, float4(location, lod));\n			\
 	}\n";
 
 	char const * predefined_attribs = "\n"\
@@ -944,7 +986,9 @@ namespace KlayGE
 					RenderEffectParameterPtr const & param = effect.ParameterByName(this_token);
 					if (param &&
 						((REDT_texture1D == param->type()) || (REDT_texture2D == param->type()) || (REDT_texture3D == param->type())
-							|| (REDT_textureCUBE == param->type())))
+							|| (REDT_textureCUBE == param->type())
+							|| (REDT_texture1DArray == param->type()) || (REDT_texture2DArray == param->type()) || (REDT_texture3DArray == param->type())
+							|| (REDT_textureCUBEArray == param->type())))
 					{
 						std::vector<std::string> sample_tokens;
 						sample_tokens.push_back(this_token);
@@ -987,6 +1031,10 @@ namespace KlayGE
 							case REDT_texture2D:
 							case REDT_texture3D:
 							case REDT_textureCUBE:
+							case REDT_texture1DArray:
+							case REDT_texture2DArray:
+							case REDT_texture3DArray:
+							case REDT_textureCUBEArray:
 								shader_ss << "tex";
 
 								switch (param->type())
@@ -994,7 +1042,6 @@ namespace KlayGE
 								case REDT_texture1D:
 									shader_ss << "1D";
 									break;
-
 								case REDT_texture2D:
 									shader_ss << "2D";
 									break;
@@ -1005,6 +1052,25 @@ namespace KlayGE
 
 								case REDT_textureCUBE:
 									shader_ss << "CUBE";
+									break;
+
+								case REDT_texture1DArray:
+									shader_ss << "1DARRAY";
+									break;
+
+								case REDT_texture2DArray:
+									shader_ss << "2DARRAY";
+									break;
+
+								case REDT_texture3DArray:
+									shader_ss << "3DARRAY";
+									break;
+
+								case REDT_textureCUBEArray:
+									shader_ss << "CUBEARRAY";
+									break;
+
+								default:
 									break;
 								}
 

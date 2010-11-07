@@ -52,11 +52,13 @@ namespace KlayGE
 		{
 			format = this->SRGBToRGB(format);
 		}
+		BOOST_ASSERT(1 == array_size);
 
 		format_ = format;
 
 		if (0 == numMipMaps)
 		{
+			numMipMaps_ = 1;
 			uint32_t w = width;
 			uint32_t h = height;
 			uint32_t d = depth;
@@ -73,7 +75,6 @@ namespace KlayGE
 		{
 			numMipMaps_ = numMipMaps;
 		}
-		array_size_ = 1;
 
 		bpp_ = NumFormatBits(format_);
 
@@ -328,11 +329,14 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3D::Map3D(int level, TextureMapAccess tma,
+	void OGLTexture3D::Map3D(int array_index, int level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		last_tma_ = tma;
 		last_x_offset_ = x_offset;
 		last_y_offset_ = y_offset;
@@ -399,8 +403,11 @@ namespace KlayGE
 		slice_pitch = row_pitch * height;
 	}
 
-	void OGLTexture3D::Unmap3D(int level)
+	void OGLTexture3D::Unmap3D(int array_index, int level)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:

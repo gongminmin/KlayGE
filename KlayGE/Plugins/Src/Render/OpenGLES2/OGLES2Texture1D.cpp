@@ -49,6 +49,7 @@ namespace KlayGE
 
 		if (0 == numMipMaps)
 		{
+			numMipMaps_ = 1;
 			uint32_t w = width;
 			while (w > 1)
 			{
@@ -278,16 +279,22 @@ namespace KlayGE
 		}
 	}
 
-	void OGLES2Texture1D::Map1D(int level, TextureMapAccess tma, uint32_t x_offset, uint32_t /*width*/, void*& data)
+	void OGLES2Texture1D::Map1D(int array_index, int level, TextureMapAccess tma, uint32_t x_offset, uint32_t /*width*/, void*& data)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		last_tma_ = tma;
 
 		uint32_t const size_fmt = NumFormatBytes(format_);
 		data = &tex_data_[level][x_offset * size_fmt];
 	}
 
-	void OGLES2Texture1D::Unmap1D(int level)
+	void OGLES2Texture1D::Unmap1D(int array_index, int level)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:

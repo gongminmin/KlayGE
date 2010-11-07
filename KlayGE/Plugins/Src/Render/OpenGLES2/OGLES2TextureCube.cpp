@@ -49,6 +49,7 @@ namespace KlayGE
 
 		if (0 == numMipMaps)
 		{
+			numMipMaps_ = 1;
 			uint32_t s = size;
 			while (s > 1)
 			{
@@ -308,10 +309,13 @@ namespace KlayGE
 		}
 	}
 
-	void OGLES2TextureCube::MapCube(CubeFaces face, int level, TextureMapAccess tma,
+	void OGLES2TextureCube::MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
 					uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,
 					void*& data, uint32_t& row_pitch)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		last_tma_ = tma;
 
 		uint32_t const size_fmt = NumFormatBytes(format_);
@@ -319,8 +323,11 @@ namespace KlayGE
 		row_pitch = widthes_[level] * size_fmt;
 	}
 
-	void OGLES2TextureCube::UnmapCube(CubeFaces face, int level)
+	void OGLES2TextureCube::UnmapCube(int array_index, CubeFaces face, int level)
 	{
+		BOOST_ASSERT(0 == array_index);
+		UNREF_PARAM(array_index);
+
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
