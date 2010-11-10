@@ -22,12 +22,9 @@
 
 namespace KlayGE
 {
-	InfTerrainRenderable::InfTerrainRenderable(std::wstring const & name)
+	InfTerrainRenderable::InfTerrainRenderable(std::wstring const & name, uint32_t num_grids, float stride, float increate_rate)
 		: RenderableHelper(name)
 	{
-		int const NX = 256;
-		int const NY = 256;
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		rl_ = rf.MakeRenderLayout();
@@ -36,42 +33,44 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
+		float far_plane = camera.FarPlane();
+
 		float angle = atan(tan(camera.FOV() / 2) * camera.Aspect());
 		x_dir_ = float2(-sin(angle), cos(angle));
 		y_dir_ = float2(-x_dir_.x(), x_dir_.y());
 
 		float2 addr(0, 0);
-		float2 increment(1, 1);
+		float2 increment(stride, stride);
 		std::vector<float2> vertices;
-		for (int y = 0; y < NY - 1; ++ y, addr.y() += increment.y())
+		for (uint32_t y = 0; y < num_grids - 1; ++ y, addr.y() += increment.y())
 		{
-			increment.x() = 1;
+			increment.x() = stride;
 			addr.x() = 0;
-			for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
+			for (uint32_t x = 0; x < num_grids - 1; ++ x, addr.x() += increment.x())
 			{
 				float2 p(addr.x() * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
 				vertices.push_back(p);
-				increment.x() *= 1.012f;
+				increment.x() *= increate_rate;
 			}
 			{
-				float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
+				float2 p((addr.x() + far_plane) * x_dir_ * 0.5f + addr.y() * y_dir_ * 0.5f);
 				vertices.push_back(p);
 			}
 
-			increment.y() *= 1.012f;
+			increment.y() *= increate_rate;
 		}
 		{
-			increment.x() = 1;
+			increment.x() = stride;
 			addr.x() = 0;
-			for (int x = 0; x < NX - 1; ++ x, addr.x() += increment.x())
+			for (uint32_t x = 0; x < num_grids - 1; ++ x, addr.x() += increment.x())
 			{
-				float2 p(addr.x() * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
+				float2 p(addr.x() * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
 				vertices.push_back(p);
 
-				increment.x() *= 1.012f;
+				increment.x() *= increate_rate;
 			}
 			{
-				float2 p((addr.x() + 1000.0f) * x_dir_ * 0.5f + (addr.y() + 1000.0f) * y_dir_ * 0.5f);
+				float2 p((addr.x() + far_plane) * x_dir_ * 0.5f + (addr.y() + far_plane) * y_dir_ * 0.5f);
 				vertices.push_back(p);
 			}
 		}
@@ -84,17 +83,17 @@ namespace KlayGE
 		rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		std::vector<uint32_t> indices;
-		for (uint32_t y = 0; y < NY - 1; ++ y)
+		for (uint32_t y = 0; y < num_grids - 1; ++ y)
 		{
-			for (uint32_t x = 0; x < NX - 1; ++ x)
+			for (uint32_t x = 0; x < num_grids - 1; ++ x)
 			{
-				indices.push_back((y + 0) * NX + (x + 0));
-				indices.push_back((y + 0) * NX + (x + 1));
-				indices.push_back((y + 1) * NX + (x + 0));
+				indices.push_back((y + 0) * num_grids + (x + 0));
+				indices.push_back((y + 0) * num_grids + (x + 1));
+				indices.push_back((y + 1) * num_grids + (x + 0));
 
-				indices.push_back((y + 1) * NX + (x + 0));
-				indices.push_back((y + 0) * NX + (x + 1));
-				indices.push_back((y + 1) * NX + (x + 1));
+				indices.push_back((y + 1) * num_grids + (x + 0));
+				indices.push_back((y + 0) * num_grids + (x + 1));
+				indices.push_back((y + 1) * num_grids + (x + 1));
 			}
 		}
 

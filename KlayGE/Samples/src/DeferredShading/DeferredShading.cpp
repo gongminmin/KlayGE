@@ -616,6 +616,7 @@ namespace
 				cs_pp_ = false;
 			}
 			show_edge_tech_ = effect->TechniqueByName("AdaptiveAntiAliasShowEdge");
+			show_edge_ = false;
 
 			this->Technique(adaptive_aa_tech_);
 		}
@@ -633,6 +634,7 @@ namespace
 
 		void ShowEdge(bool se)
 		{
+			show_edge_ = se;
 			if (se)
 			{
 				technique_ = show_edge_tech_;
@@ -645,7 +647,7 @@ namespace
 
 		void Apply()
 		{
-			if (cs_pp_)
+			if (cs_pp_ && !show_edge_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				re.BindFrameBuffer(re.DefaultFrameBuffer());
@@ -667,6 +669,7 @@ namespace
 
 	protected:
 		bool cs_pp_;
+		bool show_edge_;
 		RenderTechniquePtr adaptive_aa_tech_;
 		RenderTechniquePtr show_edge_tech_;
 	};
