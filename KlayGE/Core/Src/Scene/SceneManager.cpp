@@ -375,7 +375,7 @@ namespace KlayGE
 
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
-		float4x4 const & view_mat = camera.ViewMatrix();
+		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
 		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
@@ -389,11 +389,14 @@ namespace KlayGE
 					float md = 1e10f;
 					for (uint32_t i = 0; i < num; ++ i)
 					{
-						float4x4 const mat = renderable->GetInstance(i)->GetModelMatrix() * view_mat;
+						float4x4 const & mat = renderable->GetInstance(i)->GetModelMatrix();
+						float4 const zvec(MathLib::dot(mat.Row(0), view_mat_z),
+							MathLib::dot(mat.Row(1), view_mat_z), MathLib::dot(mat.Row(2), view_mat_z),
+							MathLib::dot(mat.Row(3), view_mat_z));
 						for (int k = 0; k < 8; ++ k)
 						{
 							float3 const v = box[k];
-							md = std::min(md, v.x() * mat(0, 2) + v.y() * mat(1, 2) + v.z() * mat(2, 2) + mat(3, 2));
+							md = std::min(md, v.x() * zvec.x() + v.y() * zvec.y() + v.z() * zvec.z() + zvec.w());
 						}
 					}
 

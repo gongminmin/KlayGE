@@ -49,8 +49,14 @@ namespace
 			return effect_;
 		}
 
+		std::map<std::string, TexturePtr>& TexPool()
+		{
+			return tex_pool_;
+		}
+
 	private:
 		RenderEffectPtr effect_;
+		std::map<std::string, TexturePtr> tex_pool_;
 	};
 
 	class RenderTorus : public KMesh, public DeferredRenderable
@@ -80,9 +86,11 @@ namespace
 		{
 			alpha_ = false;
 
-			std::map<std::string, TexturePtr> tex_pool;
+			boost::shared_ptr<RenderModelTorus> model = checked_pointer_cast<RenderModelTorus>(model_.lock());
 
-			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+			std::map<std::string, TexturePtr>& tex_pool = model->TexPool();
+
+			RenderModel::Material const & mtl = model->GetMaterial(this->MaterialID());
 			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
 			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
 				iter != texture_slots.end(); ++ iter)
