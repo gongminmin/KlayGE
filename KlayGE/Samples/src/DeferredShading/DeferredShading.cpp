@@ -132,21 +132,6 @@ namespace
 			technique_ = DeferredRenderable::Pass(type, alpha_);
 		}
 
-		void LightingTex(TexturePtr const & tex)
-		{
-			*(effect_->ParameterByName("lighting_tex")) = tex;
-		}
-
-		void SSAOTex(TexturePtr const & tex)
-		{
-			*(effect_->ParameterByName("ssao_tex")) = tex;
-		}
-
-		void SSAOEnabled(bool ssao)
-		{
-			*(effect_->ParameterByName("ssao_enabled")) = static_cast<int32_t>(ssao);
-		}
-
 		void OnRenderBegin()
 		{
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
@@ -224,26 +209,12 @@ namespace
 		TorusObject(RenderablePtr const & mesh)
 			: SceneObjectHelper(mesh, SOA_Cullable)
 		{
+			this->AttachRenderable(checked_cast<RenderTorus*>(renderable_.get()));
 		}
 
 		void Pass(PassType type)
 		{
 			checked_pointer_cast<RenderTorus>(renderable_)->Pass(type);
-		}
-
-		void LightingTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderTorus>(renderable_)->LightingTex(tex);
-		}
-
-		void SSAOTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderTorus>(renderable_)->SSAOTex(tex);
-		}
-
-		void SSAOEnabled(bool ssao)
-		{
-			checked_pointer_cast<RenderTorus>(renderable_)->SSAOEnabled(ssao);
 		}
 	};
 
@@ -348,10 +319,13 @@ namespace
 	{
 	public:
 		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable), rot_speed_(rot_speed), height_(height)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+				rot_speed_(rot_speed), height_(height)
 		{
 			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height, clr);
 			model_org_ = MathLib::rotation_x(org_angle);
+
+			this->AttachRenderable(checked_cast<RenderCone*>(renderable_.get()));
 		}
 
 		void Update()
@@ -377,21 +351,6 @@ namespace
 		{
 			checked_pointer_cast<RenderCone>(renderable_)->Pass(type);
 			this->Visible(PT_GenShadowMap != type);
-		}
-
-		void LightingTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderCone>(renderable_)->LightingTex(tex);
-		}
-
-		void SSAOTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderCone>(renderable_)->SSAOTex(tex);
-		}
-
-		void SSAOEnabled(bool ssao)
-		{
-			checked_pointer_cast<RenderCone>(renderable_)->SSAOEnabled(ssao);
 		}
 
 		void AttachLightSrc(DeferredLightSourcePtr const & light)
@@ -479,10 +438,13 @@ namespace
 	{
 	public:
 		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable), move_speed_(move_speed), pos_(pos)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+				move_speed_(move_speed), pos_(pos)
 		{
 			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())()->Mesh(0);
 			checked_pointer_cast<RenderSphere>(renderable_)->EmitClr(clr);
+
+			this->AttachRenderable(checked_cast<RenderSphere*>(renderable_.get()));
 		}
 
 		void Update()
@@ -506,21 +468,6 @@ namespace
 		{
 			checked_pointer_cast<RenderSphere>(renderable_)->Pass(type);
 			this->Visible(PT_GenShadowMap != type);
-		}
-
-		void LightingTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderSphere>(renderable_)->LightingTex(tex);
-		}
-
-		void SSAOTex(TexturePtr const & tex)
-		{
-			checked_pointer_cast<RenderSphere>(renderable_)->SSAOTex(tex);
-		}
-
-		void SSAOEnabled(bool ssao)
-		{
-			checked_pointer_cast<RenderSphere>(renderable_)->SSAOEnabled(ssao);
 		}
 
 		void AttachLightSrc(DeferredLightSourcePtr const & light)
@@ -577,24 +524,13 @@ namespace
 		SceneObjectDeferredHDRSkyBox()
 		{
 			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
+			this->AttachRenderable(checked_cast<RenderableDeferredHDRSkyBox*>(renderable_.get()));
 		}
 
 		void Pass(PassType type)
 		{
 			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->Pass(type);
 			this->Visible(PT_GenShadowMap != type);
-		}
-
-		void LightingTex(TexturePtr const & /*tex*/)
-		{
-		}
-
-		void SSAOTex(TexturePtr const & /*tex*/)
-		{
-		}
-
-		void SSAOEnabled(bool /*ssao*/)
-		{
 		}
 	};
 

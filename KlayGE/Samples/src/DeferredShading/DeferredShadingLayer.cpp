@@ -251,6 +251,10 @@ namespace KlayGE
 			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMap");
 			gen_sm_alpha_tech_ = effect_->TechniqueByName("GenShadowMapAlpha");
 			shading_tech_ = effect_->TechniqueByName("Shading");
+
+			lighting_tex_param_ = effect_->ParameterByName("lighting_tex");
+			ssao_tex_param_ = effect_->ParameterByName("ssao_tex");
+			ssao_enabled_param_ = effect_->ParameterByName("ssao_enabled");
 		}
 	}
 
@@ -289,17 +293,38 @@ namespace KlayGE
 
 	void DeferredRenderable::LightingTex(TexturePtr const & tex)
 	{
-		*(effect_->ParameterByName("lighting_tex")) = tex;
+		*lighting_tex_param_ = tex;
 	}
 
 	void DeferredRenderable::SSAOTex(TexturePtr const & tex)
 	{
-		*(effect_->ParameterByName("ssao_tex")) = tex;
+		*ssao_tex_param_ = tex;
 	}
 
 	void DeferredRenderable::SSAOEnabled(bool ssao)
 	{
-		*(effect_->ParameterByName("ssao_enabled")) = static_cast<int32_t>(ssao);
+		*ssao_enabled_param_ = static_cast<int32_t>(ssao);
+	}
+
+
+	void DeferredSceneObject::AttachRenderable(DeferredRenderable* dr)
+	{
+		dr_ = dr;
+	}
+
+	void DeferredSceneObject::LightingTex(TexturePtr const & tex)
+	{
+		dr_->LightingTex(tex);
+	}
+
+	void DeferredSceneObject::SSAOTex(TexturePtr const & tex)
+	{
+		dr_->SSAOTex(tex);
+	}
+
+	void DeferredSceneObject::SSAOEnabled(bool ssao)
+	{
+		dr_->SSAOEnabled(ssao);
 	}
 
 

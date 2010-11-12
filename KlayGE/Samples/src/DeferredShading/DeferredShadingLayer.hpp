@@ -351,20 +351,34 @@ namespace KlayGE
 
 	protected:
 		RenderEffectPtr effect_;
+
 		RenderTechniquePtr gbuffer_tech_;
 		RenderTechniquePtr gbuffer_alpha_tech_;
 		RenderTechniquePtr gen_sm_tech_;
 		RenderTechniquePtr gen_sm_alpha_tech_;
 		RenderTechniquePtr shading_tech_;
+
+		RenderEffectParameterPtr lighting_tex_param_;
+		RenderEffectParameterPtr ssao_tex_param_;
+		RenderEffectParameterPtr ssao_enabled_param_;
 	};
 
 	class DeferredSceneObject
 	{
 	public:
+		virtual ~DeferredSceneObject()
+		{
+		}
+
+		void AttachRenderable(DeferredRenderable* dr);
+
 		virtual void Pass(PassType type) = 0;
-		virtual void LightingTex(TexturePtr const & tex) = 0;
-		virtual void SSAOTex(TexturePtr const & tex) = 0;
-		virtual void SSAOEnabled(bool ssao) = 0;
+		virtual void LightingTex(TexturePtr const & tex);
+		virtual void SSAOTex(TexturePtr const & tex);
+		virtual void SSAOEnabled(bool ssao);
+
+	private:
+		DeferredRenderable* dr_;
 	};
 	typedef boost::shared_ptr<DeferredSceneObject> DeferredSceneObjectPtr;
 
