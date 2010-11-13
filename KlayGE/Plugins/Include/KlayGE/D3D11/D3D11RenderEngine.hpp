@@ -125,10 +125,14 @@ namespace KlayGE
 		void CSSetShader(ID3D11ComputeShaderPtr const & shader);
 		void HSSetShader(ID3D11HullShaderPtr const & shader);
 		void DSSetShader(ID3D11DomainShaderPtr const & shader);
+		void SetShaderResources(ShaderObject::ShaderType st, std::vector<ID3D11ShaderResourceView*> const & srvs);
+		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers);
+		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs);
 		
 		void ResetRenderStates();
+		void DetachTextureByRTV(ID3D11RenderTargetView* rtv);
 
-		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code);
+		ID3D11InputLayoutPtr CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code);
 
 	private:
 		void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings);
@@ -186,16 +190,19 @@ namespace KlayGE
 		RenderLayout::topology_type topology_type_cache_;
 		ID3D11InputLayoutPtr input_layout_cache_;
 
+		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
+		boost::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
+		boost::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
+
 		struct InputElementTag
 		{
 			std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems;
-			std::vector<D3D11_SIGNATURE_PARAMETER_DESC> signature;
+			size_t signature;
 
 			InputElementTag()
 			{
 			}
-			InputElementTag(std::vector<D3D11_INPUT_ELEMENT_DESC> const & ie,
-					std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & sig)
+			InputElementTag(std::vector<D3D11_INPUT_ELEMENT_DESC> const & ie, size_t sig)
 				: input_elems(ie), signature(sig)
 			{
 			}

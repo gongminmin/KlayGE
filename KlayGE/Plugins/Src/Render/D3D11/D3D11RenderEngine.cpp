@@ -46,6 +46,41 @@
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 
+namespace
+{
+	using namespace KlayGE;
+
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
+	{
+		boost::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
+	};
+	
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
+	{
+		boost::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
+	};
+
+	boost::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
+	{
+		boost::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
+		boost::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
+	};
+}
+
 // Stereo Blit defines
 #define NVSTEREO_IMAGE_SIGNATURE 0x4433564E		//NV3D
 
@@ -322,10 +357,10 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
 		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 
-		rasterizer_state_cache_ = checked_pointer_cast<D3D11RasterizerStateObject>(cur_rs_obj_)->D3DRasterizerState();
-		depth_stencil_state_cache_ = checked_pointer_cast<D3D11DepthStencilStateObject>(cur_dss_obj_)->D3DDepthStencilState();
+		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState();
+		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = checked_pointer_cast<D3D11BlendStateObject>(cur_bs_obj_)->D3DBlendState();
+		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
@@ -338,13 +373,30 @@ namespace KlayGE
 
 		input_layout_cache_.reset();
 		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_.get());
+
+		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
+		{
+			if (!shader_sampler_cache_[i].empty())
+			{
+				std::fill(shader_sampler_cache_[i].begin(), shader_sampler_cache_[i].end(), static_cast<ID3D11SamplerState*>(NULL));
+				ShaderSetSamplers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_cache_[i].size()), &shader_sampler_cache_[i][0]);
+				shader_sampler_cache_[i].clear();
+			}
+
+			if (!shader_cb_cache_[i].empty())
+			{
+				std::fill(shader_cb_cache_[i].begin(), shader_cb_cache_[i].end(), static_cast<ID3D11Buffer*>(NULL));
+				ShaderSetConstantBuffers[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_cache_[i].size()), &shader_cb_cache_[i][0]);
+				shader_cb_cache_[i].clear();
+			}
+		}
 	}
 
-	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code)
+	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code)
 	{
 		for (BOOST_AUTO(iter, input_layout_bank_.begin()); iter != input_layout_bank_.end(); ++ iter)
 		{
-			if ((iter->first.input_elems.size() == elems.size()) && (iter->first.signature.size() == signature.size()))
+			if ((iter->first.input_elems.size() == elems.size()) && (iter->first.signature == signature))
 			{
 				bool match = true;
 				for (size_t i = 0; i < elems.size(); ++ i)
@@ -361,26 +413,6 @@ namespace KlayGE
 					{
 						match = false;
 						break;
-					}
-				}
-				if (match)
-				{
-					for (size_t i = 0; i < signature.size(); ++ i)
-					{
-						D3D11_SIGNATURE_PARAMETER_DESC const & lhs = iter->first.signature[i];
-						D3D11_SIGNATURE_PARAMETER_DESC const & rhs = signature[i];
-						if ((std::string(lhs.SemanticName) != std::string(rhs.SemanticName))
-							|| (lhs.SemanticIndex != rhs.SemanticIndex)
-							|| (lhs.Register != rhs.Register)
-							|| (lhs.SystemValueType != rhs.SystemValueType)
-							|| (lhs.ComponentType != rhs.ComponentType)
-							|| (lhs.Mask != rhs.Mask)
-							|| (lhs.ReadWriteMask != rhs.ReadWriteMask)
-							|| (lhs.Stream != rhs.Stream))
-						{
-							match = false;
-							break;
-						}
 					}
 				}
 
@@ -421,7 +453,7 @@ namespace KlayGE
 			std::vector<UINT> d3d11_buff_offsets(num_buffs, 0);
 			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				d3d11_buffs[i] = checked_pointer_cast<D3D11GraphicsBuffer>(rl->GetVertexStream(i))->D3DBuffer().get();
+				d3d11_buffs[i] = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get())->D3DBuffer().get();
 			}
 
 			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
@@ -448,38 +480,39 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t this_num_vertex_stream = rl.NumVertexStreams() + (rl.InstanceStream() ? 1 : 0);
+		uint32_t const num_vertex_streams = rl.NumVertexStreams();
+		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
 
-		std::vector<ID3D11Buffer*> vbs(this_num_vertex_stream);
-		std::vector<UINT> strides(this_num_vertex_stream);
-		std::vector<UINT> offsets(this_num_vertex_stream);
-		for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
+		std::vector<ID3D11Buffer*> vbs(all_num_vertex_stream);
+		std::vector<UINT> strides(all_num_vertex_stream);
+		std::vector<UINT> offsets(all_num_vertex_stream);
+		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
 			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
-			D3D11GraphicsBuffer const & d3dvb = *checked_pointer_cast<D3D11GraphicsBuffer>(stream);
+			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer*>(stream.get());
 			vbs[i] = d3dvb.D3DBuffer().get();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
 		}
 		if (rl.InstanceStream())
 		{
-			uint32_t number = rl.NumVertexStreams();
+			uint32_t number = num_vertex_streams;
 			GraphicsBufferPtr stream = rl.InstanceStream();
 
-			D3D11GraphicsBuffer const & d3dvb = *checked_pointer_cast<D3D11GraphicsBuffer>(stream);
+			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer*>(stream.get());
 			vbs[number] = d3dvb.D3DBuffer().get();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
 		}
 
-		if (this_num_vertex_stream != 0)
+		if (all_num_vertex_stream != 0)
 		{
-			d3d_imm_ctx_->IASetVertexBuffers(0, this_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+			d3d_imm_ctx_->IASetVertexBuffers(0, all_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
 
-			D3D11RenderLayout const & d3d_rl(*checked_cast<D3D11RenderLayout const *>(&rl));
-			D3D11ShaderObjectPtr const & shader = checked_pointer_cast<D3D11ShaderObject>(tech.Pass(0)->GetShaderObject());
-			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader->VSSignature(), shader->VSCode());
+			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
+			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0)->GetShaderObject().get());
+			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader.VSSignature(), shader.VSCode());
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout.get());
@@ -554,7 +587,7 @@ namespace KlayGE
 		{
 			if (rl.UseIndices())
 			{
-				D3D11GraphicsBuffer& d3dib(*checked_pointer_cast<D3D11GraphicsBuffer>(rl.GetIndexStream()));
+				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
 				uint32_t const num_indices = rl.NumIndices();
@@ -588,7 +621,7 @@ namespace KlayGE
 		{
 			if (rl.UseIndices())
 			{
-				D3D11GraphicsBuffer& d3dib(*checked_pointer_cast<D3D11GraphicsBuffer>(rl.GetIndexStream()));
+				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
 				uint32_t const num_indices = rl.NumIndices();
@@ -680,17 +713,17 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
-		checked_pointer_cast<D3D11RenderWindow>(screen_frame_buffer_)->Resize(width, height);
+		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->Resize(width, height);
 	}
 
 	bool D3D11RenderEngine::FullScreen() const
 	{
-		return checked_pointer_cast<D3D11RenderWindow>(screen_frame_buffer_)->FullScreen();
+		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen();
 	}
 
 	void D3D11RenderEngine::FullScreen(bool fs)
 	{
-		checked_pointer_cast<D3D11RenderWindow>(screen_frame_buffer_)->FullScreen(fs);
+		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen(fs);
 	}
 
 	// 填充设备能力
@@ -803,8 +836,8 @@ namespace KlayGE
 		stereo_colors_[0]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, 0, 0, w, h, 0, 0);
 		stereo_colors_[1]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, w, 0, w, h, 0, 0);
 
-		ID3D11Texture2DPtr back = checked_pointer_cast<D3D11RenderWindow>(this->ScreenFrameBuffer())->D3DBackBuffer();
-		ID3D11Texture2DPtr stereo = checked_pointer_cast<D3D11Texture2D>(stereo_lr_tex_)->D3DTexture();
+		ID3D11Texture2DPtr back = checked_cast<D3D11RenderWindow*>(this->ScreenFrameBuffer().get())->D3DBackBuffer();
+		ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_tex_.get())->D3DTexture();
 
 		D3D11_BOX box;
 		box.left = 0;
@@ -898,5 +931,71 @@ namespace KlayGE
 			d3d_imm_ctx_->DSSetShader(shader.get(), NULL, 0);
 			domain_shader_cache_ = shader;
 		}
+	}
+
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<ID3D11ShaderResourceView*> const & srvs)
+	{
+		if (shader_srv_cache_[st] != srvs)
+		{
+			if (shader_srv_cache_[st].size() > srvs.size())
+			{
+				std::vector<ID3D11ShaderResourceView*> resized_srvs(shader_srv_cache_[st].size(), NULL);
+				std::copy(srvs.begin(), srvs.end(), resized_srvs.begin());
+				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(resized_srvs.size()), &resized_srvs[0]);
+			}
+			else
+			{
+				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
+			}
+
+			shader_srv_cache_[st] = srvs;
+		}
+	}
+
+	void D3D11RenderEngine::SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers)
+	{
+		if (shader_sampler_cache_[st] != samplers)
+		{
+			ShaderSetSamplers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(samplers.size()), &samplers[0]);
+			shader_sampler_cache_[st] = samplers;
+		}
+	}
+
+	void D3D11RenderEngine::SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs)
+	{
+		if (shader_cb_cache_[st] != cbs)
+		{
+			ShaderSetConstantBuffers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
+			shader_cb_cache_[st] = cbs;
+		}
+	}
+
+	void D3D11RenderEngine::DetachTextureByRTV(ID3D11RenderTargetView* rtv)
+	{
+		ID3D11Resource* rtv_tex;
+		rtv->GetResource(&rtv_tex);
+
+		ID3D11Resource* srv_tex;
+		for (uint32_t st = 0; st < ShaderObject::ST_NumShaderTypes; ++ st)
+		{
+			bool cleared = false;
+			for (uint32_t i = 0; i < shader_srv_cache_[st].size(); ++ i)
+			{
+				shader_srv_cache_[st][i]->GetResource(&srv_tex);
+				if (srv_tex == rtv_tex)
+				{
+					shader_srv_cache_[st][i] = NULL;
+					cleared = true;
+				}
+				srv_tex->Release();
+			}
+
+			if (cleared)
+			{
+				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_cache_[st].size()), &shader_srv_cache_[st][0]);
+			}
+		}
+
+		rtv_tex->Release();
 	}
 }

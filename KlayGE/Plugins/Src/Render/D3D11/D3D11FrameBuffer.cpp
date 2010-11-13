@@ -89,7 +89,7 @@ namespace KlayGE
 
 	void D3D11FrameBuffer::OnBind()
 	{
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		std::vector<ID3D11RenderTargetView*> rt_view(clr_views_.size());
@@ -105,6 +105,14 @@ namespace KlayGE
 			}
 		}
 
+		for (uint32_t i = 0; i < rt_view.size(); ++ i)
+		{
+			if (rt_view[i] != NULL)
+			{
+				re.DetachTextureByRTV(rt_view[i]);
+			}
+		}
+
 		d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
 		
 		d3d_viewport_.Width = static_cast<float>(viewport_.width);
@@ -114,10 +122,6 @@ namespace KlayGE
 
 	void D3D11FrameBuffer::OnUnbind()
 	{
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
-
-		d3d_imm_ctx->OMSetRenderTargets(0, NULL, NULL);
 	}
 
 	void D3D11FrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)

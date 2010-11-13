@@ -66,7 +66,7 @@ namespace KlayGE
 			return vs_code_;
 		}
 
-		std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & VSSignature() const
+		size_t VSSignature() const
 		{
 			return vs_signature_;
 		}
@@ -97,12 +97,13 @@ namespace KlayGE
 		boost::array<std::vector<ID3D11SamplerState*>, ST_NumShaderTypes> samplers_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ST_NumShaderTypes> srvs_;
 		boost::array<std::vector<ID3D11UnorderedAccessView*>, ST_NumShaderTypes> uavs_;
+		boost::array<std::vector<ID3D11Buffer*>, ST_NumShaderTypes> cbufs_;
 
 		boost::array<std::vector<char>, ST_NumShaderTypes> dirty_;
-		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> cbufs_;
+		boost::array<std::vector<std::vector<uint8_t> >, ST_NumShaderTypes> mem_cbufs_;
 		boost::array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> d3d_cbufs_;
 
-		std::vector<D3D11_SIGNATURE_PARAMETER_DESC> vs_signature_;
+		size_t vs_signature_;
 	};
 
 	typedef boost::shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;

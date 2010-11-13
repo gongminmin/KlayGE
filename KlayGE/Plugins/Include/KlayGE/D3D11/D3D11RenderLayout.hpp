@@ -32,14 +32,13 @@ namespace KlayGE
 	public:
 		D3D11RenderLayout();
 
-		ID3D11InputLayoutPtr const & InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code) const;
+		ID3D11InputLayoutPtr const & InputLayout(size_t signature, ID3DBlobPtr const & vs_code) const;
 
 	private:
 		typedef std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems_type;
 		input_elems_type vertex_elems_;
 
-		mutable bool dirty_decl_;
-		mutable ID3D11InputLayoutPtr input_layout_;
+		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr> > input_layouts_;
 	};
 }
 

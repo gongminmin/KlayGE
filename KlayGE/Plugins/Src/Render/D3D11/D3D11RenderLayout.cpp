@@ -30,36 +30,39 @@
 namespace KlayGE
 {
 	D3D11RenderLayout::D3D11RenderLayout()
-		: dirty_decl_(true)
 	{
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(std::vector<D3D11_SIGNATURE_PARAMETER_DESC> const & signature, ID3DBlobPtr const & vs_code) const
+	ID3D11InputLayoutPtr const & D3D11RenderLayout::InputLayout(size_t signature, ID3DBlobPtr const & vs_code) const
 	{
-		if (dirty_decl_)
+		for (size_t i = 0; i < input_layouts_.size(); ++ i)
 		{
-			input_elems_type elems;
-			elems.reserve(vertex_streams_.size());
-
-			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
+			if (input_layouts_[i].first == signature)
 			{
-				input_elems_type stream_elems;
-				D3D11Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i), vertex_streams_[i].type, vertex_streams_[i].freq);
-				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
+				return input_layouts_[i].second;
 			}
-			if (instance_stream_.stream)
-			{
-				input_elems_type stream_elems;
-				D3D11Mapping::Mapping(stream_elems, this->NumVertexStreams(), this->InstanceStreamFormat(), instance_stream_.type, instance_stream_.freq);
-				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
-			}
-
-			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			input_layout_ = re.CreateD3D11InputLayout(elems, signature, vs_code);
-
-			dirty_decl_ = false;
 		}
 
-		return input_layout_;
+		input_elems_type elems;
+		elems.reserve(vertex_streams_.size());
+
+		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
+		{
+			input_elems_type stream_elems;
+			D3D11Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i), vertex_streams_[i].type, vertex_streams_[i].freq);
+			elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
+		}
+		if (instance_stream_.stream)
+		{
+			input_elems_type stream_elems;
+			D3D11Mapping::Mapping(stream_elems, this->NumVertexStreams(), this->InstanceStreamFormat(), instance_stream_.type, instance_stream_.freq);
+			elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
+		}
+
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11InputLayoutPtr ret = re.CreateD3D11InputLayout(elems, signature, vs_code);
+		input_layouts_.push_back(std::make_pair(signature, ret));
+
+		return input_layouts_.back().second;
 	}
 }
