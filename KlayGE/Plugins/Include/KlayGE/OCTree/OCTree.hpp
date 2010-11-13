@@ -60,7 +60,7 @@ namespace KlayGE
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
-		bool BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size);
+		bool BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size) const;
 
 	private:
 		OCTree(OCTree const & rhs);

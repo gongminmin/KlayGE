@@ -36,7 +36,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/SceneObjectHelper.hpp>
 #endif
 
 #include <algorithm>
@@ -99,7 +98,6 @@ namespace
 }
 #endif
 
-
 namespace KlayGE
 {
 	OCTree::OCTree()
@@ -143,10 +141,8 @@ namespace KlayGE
 				}
 			}
 			{
-				float3 const & size = bb_root.Max() - bb_root.Min();
-				float max_dim = std::max(std::max(size.x(), size.y()), size.z()) / 2;
 				octree_[0].bb_center = bb_root.Center();
-				octree_[0].bb_half_size = float3(max_dim, max_dim, max_dim);
+				octree_[0].bb_half_size = bb_root.HalfSize();
 			}
 			base_address_.push_back(0);
 			base_address_.push_back(1);
@@ -327,7 +323,7 @@ namespace KlayGE
 		return visible;
 	}
 
-	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size)
+	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size) const
 	{
 		BOOST_ASSERT(index < octree_.size());
 
