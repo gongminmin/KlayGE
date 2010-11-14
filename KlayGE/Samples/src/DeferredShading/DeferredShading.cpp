@@ -18,6 +18,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Timer.hpp>
+#include <KlayGE/half.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -122,6 +123,80 @@ namespace
 				else if ("Opacity" == iter->first)
 				{
 					alpha_ = true;
+				}
+			}
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
+				switch (rl_->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Normal:
+					{
+						std::vector<uint32_t> normals(this->NumVertices());
+			
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							float3 const * p = mapper.Pointer<float3>();
+							for (size_t j = 0; j < normals.size(); ++ j)
+							{
+								float3 normal_float3 = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+								normals[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.x() * 1023), 0, 1023)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.y() * 1023), 0, 1023) << 10)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.z() * 1023), 0, 1023) << 20);
+							}
+						}
+
+						ElementInitData init_data;
+						init_data.data = &normals[0];
+						init_data.row_pitch = normals.size() * sizeof(normals[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+						rl_->SetVertexStream(i, new_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+					}
+					break;
+
+				case VEU_Tangent:
+					{
+						std::vector<uint32_t> tangents(this->NumVertices());
+
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							float3 const * p = mapper.Pointer<float3>();
+							for (size_t j = 0; j < tangents.size(); ++ j)
+							{
+								float3 tangent_float3 = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+								tangents[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.x() * 1023), 0, 1023)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.y() * 1023), 0, 1023) << 10)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.z() * 1023), 0, 1023) << 20);
+							}
+						}
+
+						ElementInitData init_data;
+						init_data.data = &tangents[0];
+						init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+						rl_->SetVertexStream(i, new_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
+					}
+					break;
+
+				default:
+					break;
 				}
 			}
 		}
@@ -244,8 +319,17 @@ namespace
 			std::vector<uint16_t> index;
 			CreateConeMesh(pos, index, 0, cone_radius, cone_height, 12);
 
-			std::vector<float3> normal(pos.size());
-			MathLib::compute_normal<float>(normal.begin(), index.begin(), index.end(), pos.begin(), pos.end());
+			std::vector<float3> normal_float3(pos.size());
+			MathLib::compute_normal<float>(normal_float3.begin(), index.begin(), index.end(), pos.begin(), pos.end());
+
+			std::vector<uint32_t> normal(pos.size());
+			for (size_t j = 0; j < normal_float3.size(); ++ j)
+			{
+				normal_float3[j] = MathLib::normalize(normal_float3[j]) * 0.5f + 0.5f;
+				normal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 1023), 0, 1023) << 20);
+			}
 
 			ElementInitData init_data;
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
@@ -264,8 +348,8 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.slice_pitch = 0;
@@ -389,6 +473,79 @@ namespace
 
 		void BuildMeshInfo()
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
+				switch (rl_->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Normal:
+					{
+						std::vector<uint32_t> normals(this->NumVertices());
+			
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							float3 const * p = mapper.Pointer<float3>();
+							for (size_t j = 0; j < normals.size(); ++ j)
+							{
+								float3 normal_float3 = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+								normals[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.x() * 1023), 0, 1023)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.y() * 1023), 0, 1023) << 10)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3.z() * 1023), 0, 1023) << 20);
+							}
+						}
+
+						ElementInitData init_data;
+						init_data.data = &normals[0];
+						init_data.row_pitch = normals.size() * sizeof(normals[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+						rl_->SetVertexStream(i, new_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+					}
+					break;
+
+				case VEU_Tangent:
+					{
+						std::vector<uint32_t> tangents(this->NumVertices());
+
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							float3 const * p = mapper.Pointer<float3>();
+							for (size_t j = 0; j < tangents.size(); ++ j)
+							{
+								float3 tangent_float3 = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+								tangents[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.x() * 1023), 0, 1023)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.y() * 1023), 0, 1023) << 10)
+									| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3.z() * 1023), 0, 1023) << 20);
+							}
+						}
+
+						ElementInitData init_data;
+						init_data.data = &tangents[0];
+						init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+						init_data.slice_pitch = init_data.row_pitch;
+						GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+						rl_->SetVertexStream(i, new_vb);
+						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
 		}
 
 		void SetModelMatrix(float4x4 const & mat)

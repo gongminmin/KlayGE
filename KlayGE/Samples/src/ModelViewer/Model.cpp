@@ -78,8 +78,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				{
 					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
-
-					std::copy(positions.begin(), positions.end(), mapper.Pointer<float3>());
 				}
 			}
 			break;
@@ -107,8 +105,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
-
-						std::copy(normals.begin(), normals.end(), mapper.Pointer<float3>());
 					}
 				}
 			}
@@ -126,8 +122,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
-
-						std::copy(tangents.begin(), tangents.end(), mapper.Pointer<float3>());
 					}
 				}
 			}
@@ -145,8 +139,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
-
-						std::copy(binormals.begin(), binormals.end(), mapper.Pointer<float3>());
 					}
 				}
 			}

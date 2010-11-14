@@ -67,6 +67,9 @@ void GBufferVS(float4 pos : POSITION,
 	oPos = mul(pos, mvp);
 	oTexCoordDepth_2x.xyz = float3(texcoord, oPos.w * depth_near_far_invfar.z);
 
+	normal = normal * 2 - 1;
+	tangent = tangent * 2 - 1;
+
 	float3x3 obj_to_ts;
 	obj_to_ts[0] = tangent;
 	obj_to_ts[1] = cross(normal, tangent);

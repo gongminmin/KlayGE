@@ -641,22 +641,29 @@ namespace KlayGE
 		int32_t org_no = (pass_scaned_[pass] >> 16) & 0xFFF;
 		int32_t index_in_pass = pass_scaned_[pass] & 0xFFFF;
 
-		SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-		BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+		if (0 == pass)
 		{
-			DeferredSceneObjectPtr deo = boost::dynamic_pointer_cast<DeferredSceneObject>(so);
-			if (deo)
+			deferred_scene_objs_.resize(0);
+			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 			{
-				if (pass_type != PT_Lighting)
+				DeferredSceneObjectPtr deo = boost::dynamic_pointer_cast<DeferredSceneObject>(so);
+				if (deo)
 				{
-					deo->Pass(static_cast<PassType>(pass_type));
-				}
-				if (0 == pass)
-				{
+					deferred_scene_objs_.push_back(deo);
+
 					deo->LightingTex(lighting_tex_);
 					deo->SSAOTex(ssao_tex_);
 					deo->SSAOEnabled(ssao_enabled_);
 				}
+			}
+		}
+
+		if (pass_type != PT_Lighting)
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(deferred_scene_objs_)::reference deo, deferred_scene_objs_)
+			{
+				deo->Pass(static_cast<PassType>(pass_type));
 			}
 		}
 
@@ -943,6 +950,7 @@ namespace KlayGE
 						else
 						{
 							sm_filter_pps_[0]->Apply();
+							light_crs_[org_no][index_in_pass]->EndConditionalRender();
 						}
 					}
 				}
@@ -969,7 +977,7 @@ namespace KlayGE
 					*light_color_param_ = light->Color();
 					*light_falloff_param_ = light->Falloff();
 
-					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
 						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
 					}
@@ -988,7 +996,7 @@ namespace KlayGE
 					// Clear stencil to 0 with write mask
 					re.Render(*technique_clear_stencil_, *rl_quad_);
 
-					if ((attr & LSA_NoShadow) && (type != LT_Ambient) && (type != LT_Directional))
+					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
 						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
 					}

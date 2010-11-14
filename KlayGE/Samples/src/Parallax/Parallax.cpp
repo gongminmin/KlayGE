@@ -65,8 +65,6 @@ namespace
 						{
 							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals_float3.size(), normals_float3.begin());
-
-							std::copy(normals_float3.begin(), normals_float3.end(), mapper.Pointer<float3>());
 						}
 
 						std::vector<uint32_t> normals(normals_float3.size());
@@ -98,8 +96,6 @@ namespace
 						{
 							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents_float3.size(), tangents_float3.begin());
-
-							std::copy(tangents_float3.begin(), tangents_float3.end(), mapper.Pointer<float3>());
 						}
 
 						std::vector<uint32_t> tangents(tangents_float3.size());
