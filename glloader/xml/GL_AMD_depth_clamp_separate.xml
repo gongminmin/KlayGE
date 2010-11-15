@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_depth_clamp_separate" reg_no="401">
+	<tokens>
+		<token name="GL_DEPTH_CLAMP_NEAR_AMD" value="0x901E"/>
+		<token name="GL_DEPTH_CLAMP_FAR_AMD" value="0x901F"/>
+	</tokens>
+</gl_extension>

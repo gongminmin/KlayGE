@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_VIV_shader_binary" reg_no="85">
+	<tokens>
+		<token name="GL_SHADER_BINARY_VIV" value="0x8FC4"/>
+	</tokens>
+</gl_extension>

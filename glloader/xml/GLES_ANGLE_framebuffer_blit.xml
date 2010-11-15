@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_framebuffer_blit" reg_no="83">
+	<tokens>
+		<token name="GL_READ_FRAMEBUFFER_ANGLE" value="0x8CA8"/>
+		<token name="GL_DRAW_FRAMEBUFFER_ANGLE" value="0x8CA9"/>
+		<token name="GL_DRAW_FRAMEBUFFER_BINDING_ANGLE" value="0x8CA6"/>
+		<token name="GL_READ_FRAMEBUFFER_BINDING_ANGLE" value="0x8CAA"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlitFramebufferANGLE" return="void">
+			<params>
+				<param type="GLint" name="srcX0"/>
+				<param type="GLint" name="srcY0"/>
+				<param type="GLint" name="srcX1"/>
+				<param type="GLint" name="srcY1"/>
+				<param type="GLint" name="dstX0"/>
+				<param type="GLint" name="dstY0"/>
+				<param type="GLint" name="dstX1"/>
+				<param type="GLint" name="dstY1"/>
+				<param type="GLbitfield" name="mask"/>
+				<param type="GLenum" name="filter"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
