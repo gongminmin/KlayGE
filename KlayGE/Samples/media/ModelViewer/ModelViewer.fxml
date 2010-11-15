@@ -49,7 +49,11 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGL
 				float4 blend_indices_f : BLENDINDICES,
 #else
+#ifdef KLAYGE_OPENGLES2
+				float4 blend_indices_f : BLENDINDICES,
+#else
 				int4 blend_indices : BLENDINDICES,
+#endif
 #endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
@@ -62,6 +66,10 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 {
 #ifdef KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
+#else
+#ifdef KLAYGE_OPENGLES2
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
 #endif
 	
 	float4 result_pos;
@@ -166,7 +174,11 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGL
 				float4 blend_indices : BLENDINDICES,
 #else
+#ifdef KLAYGE_OPENGLES2
+				float4 blend_indices : BLENDINDICES,
+#else
 				int4 blend_indices : BLENDINDICES,
+#endif
 #endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space
@@ -220,7 +232,11 @@ void VisualizeTextureVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGL
 				float4 blend_indices : BLENDINDICES,
 #else
+#ifdef KLAYGE_OPENGLES2
+				float4 blend_indices : BLENDINDICES,
+#else
 				int4 blend_indices : BLENDINDICES,
+#endif
 #endif
 				float3 N	: NORMAL,	// in object space
 				float3 T	: TANGENT,	// in object space

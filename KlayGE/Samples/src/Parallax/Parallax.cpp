@@ -77,12 +77,24 @@ namespace
 						}
 
 						ElementInitData init_data;
-						init_data.data = &normals[0];
-						init_data.row_pitch = normals.size() * sizeof(normals[0]);
-						init_data.slice_pitch = init_data.row_pitch;
-						GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-						rl_->SetVertexStream(i, normal_vb);
-						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						{
+							init_data.data = &normals[0];
+							init_data.row_pitch = normals.size() * sizeof(normals[0]);
+							init_data.slice_pitch = init_data.row_pitch;
+							GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+							rl_->SetVertexStream(i, normal_vb);
+							rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
+						}
+						else
+						{
+							init_data.data = &normals_float3[0];
+							init_data.row_pitch = normals_float3.size() * sizeof(normals_float3[0]);
+							init_data.slice_pitch = init_data.row_pitch;
+							GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+							rl_->SetVertexStream(i, normal_vb);
+							rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+						}
 					}
 					break;
 
@@ -108,12 +120,24 @@ namespace
 						}
 
 						ElementInitData init_data;
-						init_data.data = &tangents[0];
-						init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
-						init_data.slice_pitch = init_data.row_pitch;
-						GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-						rl_->SetVertexStream(i, tangent_vb);
-						rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
+						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						{
+							init_data.data = &tangents[0];
+							init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+							init_data.slice_pitch = init_data.row_pitch;
+							GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+							rl_->SetVertexStream(i, tangent_vb);
+							rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
+						}
+						else
+						{
+							init_data.data = &tangents_float3[0];
+							init_data.row_pitch = tangents_float3.size() * sizeof(tangents_float3[0]);
+							init_data.slice_pitch = init_data.row_pitch;
+							GraphicsBufferPtr tangent_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+							rl_->SetVertexStream(i, tangent_vb);
+							rl_->VertexStreamFormat(i, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+						}
 					}
 					break;
 

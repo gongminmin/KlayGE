@@ -54,7 +54,11 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 #ifdef KLAYGE_OPENGL
 					float4 blend_indices_f : BLENDINDICES,
 #else
+#ifdef KLAYGE_OPENGLES2
+					float4 blend_indices_f : BLENDINDICES,
+#else
 					int4 blend_indices : BLENDINDICES,
+#endif
 #endif
 
 					out float2 oTex0 : TEXCOORD0,
@@ -64,6 +68,10 @@ void NoPNTrianglesVS(float3 pos : POSITION,
 {
 #ifdef KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
+#else
+#ifdef KLAYGE_OPENGLES2
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
 #endif
 
 	float3 result_pos, result_normal;
@@ -127,7 +135,11 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 #ifdef KLAYGE_OPENGL
 					float4 blend_indices_f : BLENDINDICES
 #else
+#ifdef KLAYGE_OPENGLES2
+					float4 blend_indices_f : BLENDINDICES
+#else
 					int4 blend_indices : BLENDINDICES
+#endif
 #endif
 					)
 {
@@ -135,6 +147,10 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 	
 #ifdef KLAYGE_OPENGL
 	int4 blend_indices = (int4)blend_indices_f;
+#else
+#ifdef KLAYGE_OPENGLES2
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
 #endif
 
 	float3 result_pos, result_normal;

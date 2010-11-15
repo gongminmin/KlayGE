@@ -1012,6 +1012,14 @@ namespace KlayGE
 		}
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
+		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
+		{
+			caps_.a2bgr10_vertex_support = true;
+		}
+		else
+		{
+			caps_.a2bgr10_vertex_support = false;
+		}
 		caps_.argb8_support = true;
 		caps_.bc1_support = true;
 		caps_.bc2_support = true;

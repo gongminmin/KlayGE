@@ -777,6 +777,7 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
+			caps_.a2bgr10_vertex_support = true;
 			caps_.argb8_support = true;
 			caps_.bc4_support = true;
 			caps_.bc5_support = true;
@@ -795,6 +796,7 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
+			caps_.a2bgr10_vertex_support = true;
 			caps_.argb8_support = false;
 			caps_.bc4_support = true;
 			caps_.bc5_support = true;
@@ -816,6 +818,7 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
+			caps_.a2bgr10_vertex_support = false;
 			caps_.argb8_support = true;
 			caps_.bc4_support = false;
 			caps_.bc5_support = false;
