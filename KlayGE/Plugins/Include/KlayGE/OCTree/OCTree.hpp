@@ -60,7 +60,7 @@ namespace KlayGE
 		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
-		bool BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size) const;
+		bool BBVisible(size_t index, Box const & box) const;
 
 	private:
 		OCTree(OCTree const & rhs);
@@ -69,11 +69,8 @@ namespace KlayGE
 	private:
 		struct octree_node_t
 		{
-			float3 bb_center;
-			float3 bb_half_size;
-
+			Box bb;
 			int first_child_index;
-
 			Frustum::VIS visible;
 		};
 

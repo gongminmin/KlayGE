@@ -694,7 +694,7 @@ namespace KlayGE
 
 					Vector_T<int32_t, 2> char_pos;
 					CharInfo charInfo;
-					if (curX_ + kfont_char_size >= tex_width)
+					if (curX_ + kfont_char_size > tex_width)
 					{
 						curX_ = 0;
 						curY_ += kfont_char_size;

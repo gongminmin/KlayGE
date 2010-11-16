@@ -101,7 +101,7 @@ namespace
 namespace KlayGE
 {
 	OCTree::OCTree()
-		: max_tree_depth_(3), rebuild_tree_(false)
+		: max_tree_depth_(4), rebuild_tree_(false)
 	{
 	}
 
@@ -124,8 +124,6 @@ namespace KlayGE
 			octree_.resize(1);
 			Box bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
-			std::vector<float3> aabbs_center_in_ws(scene_objs_.size());
-			std::vector<float3> aabbs_half_size_in_ws(scene_objs_.size());
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
@@ -135,14 +133,10 @@ namespace KlayGE
 
 					bb_root |= aabb_in_ws;
 					obj_indices[0].push_back(i);
-
-					aabbs_center_in_ws[i] = aabb_in_ws.Center();
-					aabbs_half_size_in_ws[i] = aabb_in_ws.HalfSize();
 				}
 			}
 			{
-				octree_[0].bb_center = bb_root.Center();
-				octree_[0].bb_half_size = bb_root.HalfSize();
+				octree_[0].bb = bb_root;
 			}
 			base_address_.push_back(0);
 			base_address_.push_back(1);
@@ -154,8 +148,8 @@ namespace KlayGE
 				{
 					if (obj_indices[i].size() > 1)
 					{
-						float3 const parent_center = octree_[i].bb_center;
-						float3 const new_half_size = octree_[i].bb_half_size / 2.0f;
+						float3 const parent_center = octree_[i].bb.Center();
+						float3 const new_half_size = octree_[i].bb.HalfSize() / 2.0f;
 						octree_[i].first_child_index = static_cast<int>(base_address_[d] + octree_.size() - original_size);
 
 						for (size_t j = 0; j < 8; ++ j)
@@ -163,41 +157,43 @@ namespace KlayGE
 							octree_.push_back(octree_node_t());
 							octree_node_t& new_node = octree_.back();
 							new_node.first_child_index = -1;
-							new_node.bb_half_size = new_half_size;
 							obj_indices.push_back(ObjIndicesTypes());
 							ObjIndicesTypes& new_node_obj_indices = obj_indices.back();
 							ObjIndicesTypes& parent_obj_indices = obj_indices[i];
 
+							float3 bb_center;
 							if (j & 1)
 							{
-								new_node.bb_center.x() = parent_center.x() + new_half_size.x();
+								bb_center.x() = parent_center.x() + new_half_size.x();
 							}
 							else
 							{
-								new_node.bb_center.x() = parent_center.x() - new_half_size.x();
+								bb_center.x() = parent_center.x() - new_half_size.x();
 							}
 							if (j & 2)
 							{
-								new_node.bb_center.y() = parent_center.y() + new_half_size.y();
+								bb_center.y() = parent_center.y() + new_half_size.y();
 							}
 							else
 							{
-								new_node.bb_center.y() = parent_center.y() - new_half_size.y();
+								bb_center.y() = parent_center.y() - new_half_size.y();
 							}
 							if (j & 4)
 							{
-								new_node.bb_center.z() = parent_center.z() + new_half_size.z();
+								bb_center.z() = parent_center.z() + new_half_size.z();
 							}
 							else
 							{
-								new_node.bb_center.z() = parent_center.z() - new_half_size.z();
+								bb_center.z() = parent_center.z() - new_half_size.z();
 							}
+							new_node.bb = Box(bb_center - new_half_size, bb_center + new_half_size);
 
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								float3 const t = aabbs_center_in_ws[obj_index] - new_node.bb_center;
-								float3 const e = aabbs_half_size_in_ws[obj_index] + new_node.bb_half_size;
-								if ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z()))
+								Box const & aabb_in_ws = *scene_obj_bbs_[obj_index];
+								if (((aabb_in_ws.Min().x() <= new_node.bb.Max().x()) && (aabb_in_ws.Max().x() >= new_node.bb.Min().x()))
+									&& ((aabb_in_ws.Min().y() <= new_node.bb.Max().y()) && (aabb_in_ws.Max().y() >= new_node.bb.Min().y()))
+									&& ((aabb_in_ws.Min().z() <= new_node.bb.Max().z()) && (aabb_in_ws.Max().z() >= new_node.bb.Min().z())))
 								{
 									new_node_obj_indices.push_back(obj_index);
 								}
@@ -285,7 +281,7 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		Frustum::VIS const vis = frustum_.Visiable(Box(node.bb_center - node.bb_half_size, node.bb_center + node.bb_half_size));
+		Frustum::VIS const vis = frustum_.Visiable(node.bb);
 		node.visible = vis;
 		if (Frustum::VIS_PART == vis)
 		{
@@ -312,7 +308,7 @@ namespace KlayGE
 		bool visible = true;
 		if (!octree_.empty())
 		{
-			visible = this->BBVisible(0, box.Center(), box.HalfSize());
+			visible = this->BBVisible(0, box);
 		}
 		if (visible)
 		{
@@ -323,14 +319,14 @@ namespace KlayGE
 		return visible;
 	}
 
-	bool OCTree::BBVisible(size_t index, float3 const & bb_center, float3 const & bb_half_size) const
+	bool OCTree::BBVisible(size_t index, Box const & box) const
 	{
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t const & node = octree_[index];
-		float3 const t = bb_center - node.bb_center;
-		float3 const e = bb_half_size + node.bb_half_size;
-		if ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z()))
+		if (((box.Min().x() <= node.bb.Max().x()) && (box.Max().x() >= node.bb.Min().x()))
+			&& ((box.Min().y() <= node.bb.Max().y()) && (box.Max().y() >= node.bb.Min().y()))
+			&& ((box.Min().z() <= node.bb.Max().z()) && (box.Max().z() >= node.bb.Min().z())))
 		{
 			Frustum::VIS const vis = node.visible;
 			switch (vis)
@@ -344,13 +340,79 @@ namespace KlayGE
 			case Frustum::VIS_PART:
 				if (node.first_child_index != -1)
 				{
-					for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
+					float3 const center = node.bb.Center();
+					bool mark[6];
+					mark[0] = box.Min().x() < center.x();
+					mark[1] = box.Min().y() < center.y();
+					mark[2] = box.Min().z() < center.z();
+					mark[3] = box.Max().x() > center.x();
+					mark[4] = box.Max().y() > center.y();
+					mark[5] = box.Max().z() > center.z();
+
+					if (mark[0] && mark[1] && mark[2])
 					{
-						if (this->BBVisible(i, bb_center, bb_half_size))
+						if (this->BBVisible(node.first_child_index + 0, box))
 						{
 							return true;
 						}
 					}
+					if (mark[3] && mark[1] && mark[2])
+					{
+						if (this->BBVisible(node.first_child_index + 1, box))
+						{
+							return true;
+						}
+					}
+					if (mark[0] && mark[4] && mark[2])
+					{
+						if (this->BBVisible(node.first_child_index + 2, box))
+						{
+							return true;
+						}
+					}
+					if (mark[3] && mark[4] && mark[2])
+					{
+						if (this->BBVisible(node.first_child_index + 3, box))
+						{
+							return true;
+						}
+					}
+					if (mark[0] && mark[1] && mark[5])
+					{
+						if (this->BBVisible(node.first_child_index + 4, box))
+						{
+							return true;
+						}
+					}
+					if (mark[3] && mark[1] && mark[5])
+					{
+						if (this->BBVisible(node.first_child_index + 5, box))
+						{
+							return true;
+						}
+					}
+					if (mark[0] && mark[4] && mark[5])
+					{
+						if (this->BBVisible(node.first_child_index + 6, box))
+						{
+							return true;
+						}
+					}
+					if (mark[3] && mark[4] && mark[5])
+					{
+						if (this->BBVisible(node.first_child_index + 7, box))
+						{
+							return true;
+						}
+					}
+
+					/*for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
+					{
+						if (this->BBVisible(i, box))
+						{
+							return true;
+						}
+					}*/
 					return false;
 				}
 				else
