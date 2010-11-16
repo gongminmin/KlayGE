@@ -232,48 +232,26 @@ namespace KlayGE
 
 	void OCTree::Clear()
 	{
+		scene_obj_bbs_.resize(0);
 		scene_objs_.resize(0);
 		octree_.clear();
 		rebuild_tree_ = true;
 	}
 
-	void OCTree::DoAddSceneObject(SceneObjectPtr const & obj)
+	void OCTree::OnAddSceneObject(SceneObjectPtr const & obj)
 	{
-		scene_objs_.push_back(obj);
-
-		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
-		{
-			Box const & box = obj->GetBound();
-			float4x4 const & mat = obj->GetModelMatrix();
-
-			float3 min, max;
-			min = max = MathLib::transform_coord(box[0], mat);
-			for (size_t j = 1; j < 8; ++ j)
-			{
-				float3 vec = MathLib::transform_coord(box[j], mat);
-				min = MathLib::minimize(min, vec);
-				max = MathLib::maximize(max, vec);
-			}
-			scene_obj_bbs_.push_back(MakeSharedPtr<Box>(min, max));
-		}
-		else
-		{
-			scene_obj_bbs_.push_back(boost::shared_ptr<Box>());
-		}
-
 		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
 	}
 
-	SceneManager::SceneObjectsType::iterator OCTree::DoDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
+	void OCTree::OnDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
 		if ((*iter)->Cullable() && !(*iter)->Overlay() && !(*iter)->Moveable())
 		{
 			rebuild_tree_ = true;
 		}
-		return scene_objs_.erase(iter);
 	}
 
 	void OCTree::NodeVisible(size_t index)
@@ -297,7 +275,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
 		{
-			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb_half_size) * MathLib::translation(node.bb_center));
+			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));
 		}
 #endif
 	}
@@ -406,13 +384,6 @@ namespace KlayGE
 						}
 					}
 
-					/*for (int i = node.first_child_index, i_end = node.first_child_index + 8; i < i_end; ++ i)
-					{
-						if (this->BBVisible(i, box))
-						{
-							return true;
-						}
-					}*/
 					return false;
 				}
 				else

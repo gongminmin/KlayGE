@@ -1,8 +1,11 @@
 // SceneManager.hpp
 // KlayGE 场景管理器类 头文件
-// Ver 3.9.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.11.0
+// 版权所有(C) 龚敏敏, 2003-2010
 // Homepage: http://www.klayge.org
+//
+// 3.11.0
+// 把DoAddSceneObject/DoDelSceneObject改为OnAddSceneObject/OnDelSceneObject (2010.11.16)
 //
 // 3.9.0
 // 增加了SceneObjects (2009.7.30)
@@ -52,6 +55,7 @@ namespace KlayGE
 
 		virtual void ClipScene();
 		void AddSceneObject(SceneObjectPtr const & obj);
+		SceneObjectsType::iterator DelSceneObject(SceneObjectsType::iterator iter);
 		void AddRenderable(RenderablePtr const & obj);
 
 		SceneObjectsType& SceneObjects();
@@ -71,8 +75,8 @@ namespace KlayGE
 	protected:
 		void Flush();
 
-		virtual void DoAddSceneObject(SceneObjectPtr const & obj) = 0;
-		virtual SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter) = 0;
+		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
+		virtual void OnDelSceneObject(SceneObjectsType::iterator iter) = 0;
 
 	protected:
 		Frustum frustum_;

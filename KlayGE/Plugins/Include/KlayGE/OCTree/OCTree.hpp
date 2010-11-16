@@ -56,8 +56,8 @@ namespace KlayGE
 		void ClipScene();
 		void Clear();
 
-		void DoAddSceneObject(SceneObjectPtr const & obj);
-		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter);
+		void OnAddSceneObject(SceneObjectPtr const & obj);
+		void OnDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
 		bool BBVisible(size_t index, Box const & box) const;

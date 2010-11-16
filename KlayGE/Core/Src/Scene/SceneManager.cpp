@@ -99,35 +99,12 @@ namespace KlayGE
 		{
 		}
 
-		void DoAddSceneObject(SceneObjectPtr const & obj)
+		void OnAddSceneObject(SceneObjectPtr const & /*obj*/)
 		{
-			scene_objs_.push_back(obj);
-
-			if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
-			{
-				Box const & box = obj->GetBound();
-				float4x4 const & mat = obj->GetModelMatrix();
-
-				float3 min, max;
-				min = max = MathLib::transform_coord(box[0], mat);
-				for (size_t j = 1; j < 8; ++ j)
-				{
-					float3 vec = MathLib::transform_coord(box[j], mat);
-					min = MathLib::minimize(min, vec);
-					max = MathLib::maximize(max, vec);
-				}
-				scene_obj_bbs_.push_back(MakeSharedPtr<Box>(min, max));
-			}
-			else
-			{
-				scene_obj_bbs_.push_back(boost::shared_ptr<Box>());
-			}
 		}
 
-		SceneObjectsType::iterator DoDelSceneObject(SceneObjectsType::iterator iter)
+		void OnDelSceneObject(SceneObjectsType::iterator /*iter*/)
 		{
-			scene_obj_bbs_.erase(scene_obj_bbs_.begin() + (iter - scene_objs_.begin()));
-			return scene_objs_.erase(iter);
 		}
 
 	private:
@@ -215,7 +192,39 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		this->DoAddSceneObject(obj);
+		scene_objs_.push_back(obj);
+
+		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
+		{
+			Box const & box = obj->GetBound();
+			float4x4 const & mat = obj->GetModelMatrix();
+
+			float3 min, max;
+			min = max = MathLib::transform_coord(box[0], mat);
+			for (size_t j = 1; j < 8; ++ j)
+			{
+				float3 vec = MathLib::transform_coord(box[j], mat);
+				min = MathLib::minimize(min, vec);
+				max = MathLib::maximize(max, vec);
+			}
+			scene_obj_bbs_.push_back(MakeSharedPtr<Box>(min, max));
+		}
+		else
+		{
+			scene_obj_bbs_.push_back(boost::shared_ptr<Box>());
+		}
+
+		this->OnAddSceneObject(obj);
+	}
+
+	// 删除渲染物体
+	/////////////////////////////////////////////////////////////////////////////////
+	SceneManager::SceneObjectsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjectsType::iterator iter)
+	{
+		this->OnDelSceneObject(iter);
+
+		scene_obj_bbs_.erase(scene_obj_bbs_.begin() + (iter - scene_objs_.begin()));
+		return scene_objs_.erase(iter);
 	}
 
 	// 加入渲染队列
@@ -292,7 +301,7 @@ namespace KlayGE
 		{
 			if ((*iter)->Overlay())
 			{
-				iter = this->DoDelSceneObject(iter);
+				iter = this->DelSceneObject(iter);
 			}
 			else
 			{
