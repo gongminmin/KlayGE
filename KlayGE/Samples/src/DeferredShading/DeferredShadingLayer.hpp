@@ -363,6 +363,10 @@ namespace KlayGE
 		RenderEffectParameterPtr ssao_enabled_param_;
 	};
 
+	enum
+	{
+		SOA_Deferred = 1UL << 4
+	};
 	class DeferredSceneObject
 	{
 	public:
@@ -474,7 +478,7 @@ namespace KlayGE
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
 
-		std::vector<DeferredSceneObjectPtr> deferred_scene_objs_;
+		std::vector<DeferredSceneObject*> deferred_scene_objs_;
 	};
 
 	typedef boost::shared_ptr<DeferredShadingLayer> DeferredShadingLayerPtr;

@@ -349,6 +349,7 @@
 		<Unit filename="../../Core/Src/Kernel/Timer.cpp" />
 		<Unit filename="../../Core/Src/Kernel/Util.cpp" />
 		<Unit filename="../../Core/Src/Kernel/XMLDom.cpp" />
+		<Unit filename="../../Core/Src/Math/Frustum.cpp" />
 		<Unit filename="../../Core/Src/Net/Lobby.cpp" />
 		<Unit filename="../../Core/Src/Net/Player.cpp" />
 		<Unit filename="../../Core/Src/Net/Socket.cpp" />
@@ -400,7 +401,6 @@
 		<Unit filename="../../Core/Src/Render/SATPostProcess.cpp" />
 		<Unit filename="../../Core/Src/Render/ShaderObject.cpp" />
 		<Unit filename="../../Core/Src/Render/Texture.cpp" />
-		<Unit filename="../../Core/Src/Scene/Frustum.cpp" />
 		<Unit filename="../../Core/Src/Scene/SceneManager.cpp" />
 		<Unit filename="../../Core/Src/Scene/SceneObject.cpp" />
 		<Unit filename="../../Core/Src/Scene/SceneObjectHelper.cpp" />

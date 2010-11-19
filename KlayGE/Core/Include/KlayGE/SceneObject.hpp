@@ -62,9 +62,7 @@ namespace KlayGE
 
 		virtual void Update();
 
-		bool Cullable() const;
-		bool Overlay() const;
-		bool Moveable() const;
+		uint32_t Attrib() const;
 		bool Visible() const;
 		void Visible(bool vis);
 

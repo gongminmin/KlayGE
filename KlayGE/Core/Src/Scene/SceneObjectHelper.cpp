@@ -47,8 +47,8 @@ namespace KlayGE
 		renderable_ = renderable;
 	}
 
-	SceneObjectSkyBox::SceneObjectSkyBox()
-		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), 0)
+	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)
+		: SceneObjectHelper(MakeSharedPtr<RenderableSkyBox>(), attrib)
 	{
 	}
 
@@ -62,7 +62,8 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 
-	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox()
+	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox(uint32_t attrib)
+		: SceneObjectSkyBox(attrib)
 	{
 		renderable_ = MakeSharedPtr<RenderableHDRSkyBox>();
 	}

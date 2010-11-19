@@ -27,7 +27,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: stereo_mode_(false)
+		: stereo_mode_(false), frustum_dirty_(true)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
@@ -59,10 +59,13 @@ namespace KlayGE
 			float separation = re.StereoSeparation() / 2;
 			viewMat_[0] = view_mat * MathLib::translation(+separation, 0.0f, 0.0f);
 			viewMat_[1] = view_mat * MathLib::translation(-separation, 0.0f, 0.0f);
+			frustum_dirty_ = true;
+			frustum_dirty_ = true;
 		}
 		else
 		{
 			viewMat_[0] = view_mat;
+			frustum_dirty_ = true;
 		}
 	}
 
@@ -87,11 +90,13 @@ namespace KlayGE
 			projMat_[1] = MathLib::perspective_off_center_lh(-width / 2 - separation, width / 2 - separation, -height / 2, height / 2, nearPlane, farPlane);
 			re.AdjustPerspectiveMatrix(projMat_[0]);
 			re.AdjustPerspectiveMatrix(projMat_[1]);
+			frustum_dirty_ = true;
 		}
 		else
 		{
 			projMat_[0] = MathLib::perspective_fov_lh(FOV, aspect, nearPlane, farPlane);
 			re.AdjustPerspectiveMatrix(projMat_[0]);
+			frustum_dirty_ = true;
 		}
 	}
 
@@ -148,6 +153,23 @@ namespace KlayGE
 			eye = re.StereoActiveEye();
 		}
 		return prev_proj_mats_[eye].front();
+	}
+
+	Frustum const & Camera::ViewFrustum() const
+	{
+		uint32_t eye = 0;
+		if (this->StereoMode())
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			eye = re.StereoActiveEye();
+		}
+		if (frustum_dirty_)
+		{
+			frustum_[0].ClipMatrix(viewMat_[0] * projMat_[0]);
+			frustum_[1].ClipMatrix(viewMat_[1] * projMat_[1]);
+			frustum_dirty_ = false;
+		}
+		return frustum_[eye];
 	}
 
 	void Camera::StereoMode(bool stereo)

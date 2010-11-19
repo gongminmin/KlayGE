@@ -146,12 +146,12 @@ namespace KlayGE
 			bool visible;
 
 			SceneObjectPtr const & obj = scene_objs_[i];
-			if (!obj->Overlay() && obj->Visible())
+			if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
 			{
-				if (obj->Cullable())
+				if (obj->Attrib() & SceneObject::SOA_Cullable)
 				{
 					Box bb_ws;
-					if (obj->Moveable())
+					if (obj->Attrib() & SceneObject::SOA_Moveable)
 					{
 						Box const & box = obj->GetBound();
 						float4x4 const & mat = obj->GetModelMatrix();
@@ -194,7 +194,10 @@ namespace KlayGE
 	{
 		scene_objs_.push_back(obj);
 
-		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
+		uint32_t const attr = obj->Attrib();
+		if ((attr & SceneObject::SOA_Cullable)
+			&& !(attr & SceneObject::SOA_Overlay)
+			&& !(attr & SceneObject::SOA_Moveable))
 		{
 			Box const & box = obj->GetBound();
 			float4x4 const & mat = obj->GetModelMatrix();
@@ -246,7 +249,7 @@ namespace KlayGE
 
 	bool SceneManager::AABBVisible(Box const & box)
 	{
-		return frustum_.Visiable(box) != Frustum::VIS_NO;
+		return frustum_->Visiable(box) != Frustum::VIS_NO;
 	}
 
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
@@ -299,7 +302,7 @@ namespace KlayGE
 
 		for (BOOST_AUTO(iter, scene_objs_.begin()); iter != scene_objs_.end();)
 		{
-			if ((*iter)->Overlay())
+			if ((*iter)->Attrib() & SceneObject::SOA_Overlay)
 			{
 				iter = this->DelSceneObject(iter);
 			}
@@ -329,7 +332,7 @@ namespace KlayGE
 		visible_marks_.resize(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
 		{
-			frustum_.ClipMatrix(camera.ViewMatrix() * camera.ProjMatrix());
+			frustum_ = &camera.ViewFrustum();
 
 			this->ClipScene();
 		}
@@ -341,7 +344,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
-				if (scene_objs_[i]->Overlay())
+				if (scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay)
 				{
 					scene_objs_[i]->Update();
 					visible_marks_[i] = scene_objs_[i]->Visible();

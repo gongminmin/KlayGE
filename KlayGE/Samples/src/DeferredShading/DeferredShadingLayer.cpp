@@ -647,9 +647,10 @@ namespace KlayGE
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
 			{
-				DeferredSceneObjectPtr deo = boost::dynamic_pointer_cast<DeferredSceneObject>(so);
-				if (deo)
+				if (so->Attrib() & SOA_Deferred)
 				{
+					DeferredSceneObject* deo = dynamic_cast<DeferredSceneObject*>(so.get());
+
 					deferred_scene_objs_.push_back(deo);
 
 					deo->LightingTex(lighting_tex_);

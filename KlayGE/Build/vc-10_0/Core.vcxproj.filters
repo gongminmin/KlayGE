@@ -351,9 +351,6 @@
     <ClCompile Include="..\..\Core\Src\AppLayer\Window.cpp">
       <Filter>App Layer\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Scene\Frustum.cpp">
-      <Filter>Scene Management\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Core\Src\Render\HeightMap.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
@@ -362,6 +359,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Core\Src\Render\LensFlare.cpp">
       <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Math\Frustum.cpp">
+      <Filter>Math Library\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -653,9 +653,6 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Window.hpp">
       <Filter>App Layer\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp">
-      <Filter>Scene Management\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Heightmap.hpp">
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
@@ -664,6 +661,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp">
       <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp">
+      <Filter>Math Library\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

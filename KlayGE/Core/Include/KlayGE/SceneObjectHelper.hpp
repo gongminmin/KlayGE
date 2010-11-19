@@ -40,7 +40,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
 	{
 	public:
-		SceneObjectSkyBox();
+		SceneObjectSkyBox(uint32_t attrib = 0);
 		virtual ~SceneObjectSkyBox()
 		{
 		}
@@ -52,7 +52,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectHDRSkyBox : public SceneObjectSkyBox
 	{
 	public:
-		SceneObjectHDRSkyBox();
+		SceneObjectHDRSkyBox(uint32_t attrib = 0);
 		virtual ~SceneObjectHDRSkyBox()
 		{
 		}

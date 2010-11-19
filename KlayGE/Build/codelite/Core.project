@@ -155,7 +155,9 @@
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="Math Library">
-    <VirtualDirectory Name="Source Files"/>
+    <VirtualDirectory Name="Source Files">
+      <File Name="../../Core/Src/Math/Frustum.cpp"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Include/KlayGE/Bound.hpp"/>
       <File Name="../../Core/Include/KlayGE/Box.hpp"/>
@@ -173,6 +175,7 @@
       <VirtualDirectory Name="detail">
         <File Name="../../Core/Include/KlayGE/Detail/MathHelper.hpp"/>
       </VirtualDirectory>
+      <File Name="../../Core/Include/Frustum.hpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="Network System">
@@ -223,13 +226,11 @@
   </VirtualDirectory>
   <VirtualDirectory Name="Scene Management">
     <VirtualDirectory Name="Source Files">
-      <File Name="../../Core/Src/Scene/Frustum.cpp"/>
       <File Name="../../Core/Src/Scene/SceneManager.cpp"/>
       <File Name="../../Core/Src/Scene/SceneObject.cpp"/>
       <File Name="../../Core/Src/Scene/SceneObjectHelper.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
-      <File Name="../../Core/Include/Frustum.hpp"/>
       <File Name="../../Core/Include/KlayGE/SceneManager.hpp"/>
       <File Name="../../Core/Include/KlayGE/SceneNode.hpp"/>
       <File Name="../../Core/Include/KlayGE/SceneObject.hpp"/>

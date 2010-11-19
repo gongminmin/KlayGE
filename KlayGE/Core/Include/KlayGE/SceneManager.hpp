@@ -79,7 +79,7 @@ namespace KlayGE
 		virtual void OnDelSceneObject(SceneObjectsType::iterator iter) = 0;
 
 	protected:
-		Frustum frustum_;
+		Frustum const * frustum_;
 		SceneObjectsType scene_objs_;
 		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
 		std::vector<char> visible_marks_;

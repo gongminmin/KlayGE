@@ -33,6 +33,7 @@
 #pragma warning(pop)
 #endif
 
+#include <KlayGE/Frustum.hpp>
 #include <KlayGE/Vector.hpp>
 #include <KlayGE/Matrix.hpp>
 
@@ -74,6 +75,8 @@ namespace KlayGE
 		float4x4 const & PrevViewMatrix() const;
 		float4x4 const & PrevProjMatrix() const;
 
+		Frustum const & ViewFrustum() const;
+
 		bool StereoMode() const
 		{
 			return stereo_mode_;
@@ -95,6 +98,9 @@ namespace KlayGE
 
 		boost::circular_buffer<float4x4> prev_view_mats_[2];
 		boost::circular_buffer<float4x4> prev_proj_mats_[2];
+
+		mutable Frustum	frustum_[2];
+		mutable bool	frustum_dirty_;
 
 		bool		stereo_mode_;
 	};

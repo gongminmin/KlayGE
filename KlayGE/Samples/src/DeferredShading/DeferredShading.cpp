@@ -310,7 +310,7 @@ namespace
 	{
 	public:
 		TorusObject(RenderablePtr const & mesh)
-			: SceneObjectHelper(mesh, SOA_Cullable)
+			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Deferred)
 		{
 			this->AttachRenderable(checked_cast<RenderTorus*>(renderable_.get()));
 		}
@@ -446,7 +446,7 @@ namespace
 	{
 	public:
 		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				rot_speed_(rot_speed), height_(height)
 		{
 			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height, clr);
@@ -666,7 +666,7 @@ namespace
 	{
 	public:
 		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				move_speed_(move_speed), pos_(pos)
 		{
 			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())()->Mesh(0);
@@ -750,6 +750,7 @@ namespace
 	{
 	public:
 		SceneObjectDeferredHDRSkyBox()
+			: SceneObjectHDRSkyBox(SOA_Deferred)
 		{
 			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
 			this->AttachRenderable(checked_cast<RenderableDeferredHDRSkyBox*>(renderable_.get()));

@@ -127,7 +127,10 @@ namespace KlayGE
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
 				SceneObjectPtr const & obj = scene_objs_[i];
-				if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
+				uint32_t const attr = obj->Attrib();
+				if ((attr & SceneObject::SOA_Cullable)
+					&& !(attr & SceneObject::SOA_Overlay)
+					&& !(attr & SceneObject::SOA_Moveable))
 				{
 					Box const & aabb_in_ws = *scene_obj_bbs_[i];
 
@@ -240,7 +243,10 @@ namespace KlayGE
 
 	void OCTree::OnAddSceneObject(SceneObjectPtr const & obj)
 	{
-		if (obj->Cullable() && !obj->Overlay() && !obj->Moveable())
+		uint32_t const attr = obj->Attrib();
+		if ((attr & SceneObject::SOA_Cullable)
+			&& !(attr & SceneObject::SOA_Overlay)
+			&& !(attr & SceneObject::SOA_Moveable))
 		{
 			rebuild_tree_ = true;
 		}
@@ -248,7 +254,10 @@ namespace KlayGE
 
 	void OCTree::OnDelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
-		if ((*iter)->Cullable() && !(*iter)->Overlay() && !(*iter)->Moveable())
+		uint32_t const attr = (*iter)->Attrib();
+		if ((attr & SceneObject::SOA_Cullable)
+			&& !(attr & SceneObject::SOA_Overlay)
+			&& !(attr & SceneObject::SOA_Moveable))
 		{
 			rebuild_tree_ = true;
 		}
@@ -259,7 +268,7 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		Frustum::VIS const vis = frustum_.Visiable(node.bb);
+		Frustum::VIS const vis = frustum_->Visiable(node.bb);
 		node.visible = vis;
 		if (Frustum::VIS_PART == vis)
 		{
@@ -291,7 +300,7 @@ namespace KlayGE
 		if (visible)
 		{
 			// Frustum VS AABB
-			Frustum::VIS const vis = frustum_.Visiable(box);
+			Frustum::VIS const vis = frustum_->Visiable(box);
 			visible = (vis != Frustum::VIS_NO);
 		}
 		return visible;

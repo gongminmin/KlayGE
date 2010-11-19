@@ -61,19 +61,9 @@ namespace KlayGE
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
 	}
 
-	bool SceneObject::Cullable() const
+	uint32_t SceneObject::Attrib() const
 	{
-		return ((attrib_ & SOA_Cullable) != 0);
-	}
-
-	bool SceneObject::Overlay() const
-	{
-		return ((attrib_ & SOA_Overlay) != 0);
-	}
-
-	bool SceneObject::Moveable() const
-	{
-		return ((attrib_ & SOA_Moveable) != 0);
+		return attrib_;
 	}
 
 	bool SceneObject::Visible() const
