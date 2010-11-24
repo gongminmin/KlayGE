@@ -96,7 +96,8 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					int block_size;
-					if (EF_BC1 == format_)
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 					{
 						block_size = 8;
 					}
@@ -228,7 +229,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format_))
 						{
 							int block_size;
-							if (EF_BC1 == format_)
+							if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+								|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 							{
 								block_size = 8;
 							}
@@ -336,7 +338,8 @@ namespace KlayGE
 					Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_width);
 
 					int block_size;
-					if (EF_BC1 == format_)
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 					{
 						block_size = 8;
 					}
@@ -397,7 +400,8 @@ namespace KlayGE
 		if (IsCompressedFormat(format_))
 		{
 			int block_size;
-			if (EF_BC1 == format_)
+			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+				|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 			{
 				block_size = 8;
 			}
@@ -508,7 +512,8 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					int block_size;
-					if (EF_BC1 == format_)
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 					{
 						block_size = 8;
 					}
@@ -563,7 +568,8 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					int block_size;
-					if (EF_BC1 == format_)
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 					{
 						block_size = 8;
 					}

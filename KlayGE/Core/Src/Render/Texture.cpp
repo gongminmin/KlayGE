@@ -1056,6 +1056,7 @@ namespace KlayGE
 		format = EF_ARGB8;
 		if ((desc.pixel_format.flags & DDSPF_FOURCC) != 0)
 		{
+			// From "Programming Guide for DDS", http://msdn.microsoft.com/en-us/library/bb943991.aspx
 			switch (desc.pixel_format.four_cc)
 			{
 			case 36:
@@ -1102,12 +1103,21 @@ namespace KlayGE
 				format = EF_BC3;
 				break;
 
+			case MakeFourCC<'B', 'C', '4', 'U'>::value:
 			case MakeFourCC<'A', 'T', 'I', '1'>::value:
 				format = EF_BC4;
 				break;
 
+			case MakeFourCC<'B', 'C', '4', 'S'>::value:
+				format = EF_SIGNED_BC4;
+				break;
+
 			case MakeFourCC<'A', 'T', 'I', '2'>::value:
 				format = EF_BC5;
+				break;
+
+			case MakeFourCC<'B', 'C', '5', 'S'>::value:
+				format = EF_SIGNED_BC5;
 				break;
 
 			case MakeFourCC<'D', 'X', '1', '0'>::value:
@@ -1413,7 +1423,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -1457,7 +1468,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -1516,7 +1528,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -1578,7 +1591,8 @@ namespace KlayGE
 							if (IsCompressedFormat(format))
 							{
 								int block_size;
-								if (EF_BC1 == format)
+								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 								{
 									block_size = 8;
 								}
@@ -1731,12 +1745,20 @@ namespace KlayGE
 
 				case EF_BC4:
 				case EF_BC4_SRGB:
-					desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '1'>::value;
+					desc.pixel_format.four_cc = MakeFourCC<'B', 'C', '4', 'U'>::value;
+					break;
+
+				case EF_SIGNED_BC4:
+					desc.pixel_format.four_cc = MakeFourCC<'B', 'C', '4', 'S'>::value;
 					break;
 
 				case EF_BC5:
 				case EF_BC5_SRGB:
 					desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '2'>::value;
+					break;
+
+				case EF_SIGNED_BC5:
+					desc.pixel_format.four_cc = MakeFourCC<'B', 'C', '5', 'S'>::value;
 					break;
 
 				case EF_B10G11R11F:
@@ -1930,7 +1952,8 @@ namespace KlayGE
 		uint32_t main_image_size = width * height * format_size;
 		if (IsCompressedFormat(format))
 		{
-			if (EF_BC1 == format)
+			if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+				|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 			{
 				main_image_size = width * height / 2;
 			}
@@ -1994,7 +2017,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2030,7 +2054,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2068,7 +2093,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2107,7 +2133,8 @@ namespace KlayGE
 							if (IsCompressedFormat(format))
 							{
 								int block_size;
-								if (EF_BC1 == format)
+								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 								{
 									block_size = 8;
 								}
@@ -2176,7 +2203,8 @@ namespace KlayGE
 		uint32_t main_image_size = texture_sys_mem->Width(0) * texture_sys_mem->Height(0) * format_size;
 		if (IsCompressedFormat(format))
 		{
-			if (EF_BC1 == format)
+			if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+				|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 			{
 				main_image_size = texture_sys_mem->Width(0) * texture_sys_mem->Height(0) / 2;
 			}
@@ -2205,7 +2233,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2248,7 +2277,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2301,7 +2331,8 @@ namespace KlayGE
 						if (IsCompressedFormat(format))
 						{
 							int block_size;
-							if (EF_BC1 == format)
+							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 							{
 								block_size = 8;
 							}
@@ -2359,7 +2390,8 @@ namespace KlayGE
 							if (IsCompressedFormat(format))
 							{
 								int block_size;
-								if (EF_BC1 == format)
+								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
 								{
 									block_size = 8;
 								}
