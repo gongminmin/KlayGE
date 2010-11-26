@@ -1,8 +1,8 @@
 /*  LzmaEnc.h -- LZMA Encoder
-2008-10-04 : Igor Pavlov : Public domain */
+2009-02-07 : Igor Pavlov : Public domain */
 
-#ifndef __LZMAENC_H
-#define __LZMAENC_H
+#ifndef __LZMA_ENC_H
+#define __LZMA_ENC_H
 
 #include "LzTypes.hpp"
 
