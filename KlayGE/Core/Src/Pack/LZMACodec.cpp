@@ -134,20 +134,25 @@ namespace KlayGE
 
 	void LZMACodec::Decode(std::vector<uint8_t>& output, void const * input, uint64_t len, uint64_t original_len)
 	{
+		output.resize(static_cast<uint32_t>(original_len));
+		this->Decode(&output[0], input, len, original_len);
+	}
+
+	void LZMACodec::Decode(void* output, void const * input, uint64_t len, uint64_t original_len)
+	{
 		uint8_t const * p = static_cast<uint8_t const *>(input);
 
 		std::vector<uint8_t> in_data(static_cast<size_t>(len));
 		std::memcpy(&in_data[0], p, static_cast<std::streamsize>(in_data.size()));
 
 		SizeT s_out_len = static_cast<SizeT>(original_len);
-		output.resize(s_out_len);
 
 		CLzmaDec dec;
 		LzmaDec_Construct(&dec);
 		int res = LzmaDec_AllocateProbs(&dec, &in_data[0], LZMA_PROPS_SIZE, &lzma_alloc);
 		Verify(0 == res);
 
-		dec.dic = &output[0];
+		dec.dic = static_cast<uint8_t*>(output);
 		dec.dicBufSize = s_out_len;
 		LzmaDec_Init(&dec);
 
@@ -156,8 +161,8 @@ namespace KlayGE
 		res = LzmaDec_DecodeToDic(&dec, s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len, LZMA_FINISH_ANY, &status);
 		Verify(0 == res);
 		Verify(status != LZMA_STATUS_NEEDS_MORE_INPUT);
+		Verify(dec.dicPos == original_len);
 
-		output.resize(dec.dicPos);
 		LzmaDec_FreeProbs(&dec, &lzma_alloc);
 	}
 }

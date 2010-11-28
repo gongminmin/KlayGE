@@ -23,13 +23,6 @@ namespace KlayGE
 	class NullFrameBuffer : public FrameBuffer
 	{
 	public:
-		void Attach(uint32_t /*att*/, RenderViewPtr /*view*/)
-		{
-		}
-		void Detach(uint32_t /*att*/)
-		{
-		}
-
 		std::wstring const & Description() const
 		{
 			static std::wstring const desc(L"Null Frame Buffer");
@@ -243,6 +236,7 @@ namespace KlayGE
 		view->OnAttached(*this, att);
 
 		active_ = true;
+		views_dirty_ = true;
 	}
 
 	void FrameBuffer::Detach(uint32_t att)
@@ -282,6 +276,8 @@ namespace KlayGE
 			}
 			break;
 		}
+
+		views_dirty_ = true;
 	}
 
 	RenderViewPtr FrameBuffer::Attached(uint32_t att) const
@@ -319,6 +315,7 @@ namespace KlayGE
 		{
 			rs_view_->OnBind(*this, ATT_DepthStencil);
 		}
+		views_dirty_ = false;
 	}
 
 	void FrameBuffer::OnUnbind()

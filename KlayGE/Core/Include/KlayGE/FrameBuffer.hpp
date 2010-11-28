@@ -103,6 +103,11 @@ namespace KlayGE
 		{
 		}
 
+		bool Dirty() const
+		{
+			return views_dirty_;
+		}
+
 	protected:
 		uint32_t	left_;
 		uint32_t	top_;
@@ -121,6 +126,7 @@ namespace KlayGE
 
 		std::vector<RenderViewPtr> clr_views_;
 		RenderViewPtr rs_view_;
+		bool views_dirty_;
 	};
 }
 

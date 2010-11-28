@@ -48,7 +48,6 @@
 #include <KlayGE/RenderableHelper.hpp>
 
 #include <list>
-#include <map>
 #include <vector>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -175,9 +174,8 @@ namespace KlayGE
 		bool dirty_;
 
 		boost::unordered_map<wchar_t, CharInfo, boost::hash<wchar_t>, std::equal_to<wchar_t>,
-			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > charInfoMap_;
-
-		uint32_t curX_, curY_;
+			boost::fast_pool_allocator<std::pair<wchar_t, CharInfo> > > char_info_map_;
+		std::list<std::pair<uint32_t, uint32_t> > char_free_list_;
 
 		bool three_dim_;
 

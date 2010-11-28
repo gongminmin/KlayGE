@@ -41,6 +41,7 @@ namespace KlayGE
 		uint64_t Decode(std::ostream& os, void const * input, uint64_t len, uint64_t original_len);
 		void Decode(std::vector<uint8_t>& output, ResIdentifierPtr const & res, uint64_t len, uint64_t original_len);
 		void Decode(std::vector<uint8_t>& output, void const * input, uint64_t len, uint64_t original_len);
+		void Decode(void* output, void const * input, uint64_t len, uint64_t original_len);
 
 	private:
 		void* lzma_enc_;

@@ -203,7 +203,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::BindFrameBuffer(FrameBufferPtr const & fb)
 	{
-		if (fb != cur_frame_buffer_)
+		if ((fb != cur_frame_buffer_) || (fb && fb->Dirty()))
 		{
 			if (cur_frame_buffer_)
 			{
