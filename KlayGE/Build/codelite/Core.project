@@ -394,10 +394,10 @@
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_44"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_44"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_44"/>
+        <Library Value="boost_filesystem-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_signals-mgw45-mt-d-1_45"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_45"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -439,10 +439,10 @@
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_44"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_44"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_44"/>
+        <Library Value="boost_filesystem-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_signals-mgw45-mt-d-1_45"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_45"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -566,10 +566,10 @@
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_44"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
-        <Library Value="boost_signals-mgw45-mt-1_44"/>
-        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="boost_filesystem-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_signals-mgw45-mt-1_45"/>
+        <Library Value="boost_thread-mgw45-mt-1_45"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -611,10 +611,10 @@
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_44"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
-        <Library Value="boost_signals-mgw45-mt-1_44"/>
-        <Library Value="boost_thread-mgw45-mt-1_44"/>
+        <Library Value="boost_filesystem-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_signals-mgw45-mt-1_45"/>
+        <Library Value="boost_thread-mgw45-mt-1_45"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
