@@ -208,6 +208,7 @@
     <ClCompile Include="..\..\Core\Src\Render\HDRPostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\HeightMap.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\InfTerrain.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\JudaTexture.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\KMesh.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\LensFlare.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Mesh.cpp" />
@@ -296,6 +297,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\HDRPostProcess.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Heightmap.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\InfTerrain.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\JudaTexture.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\KMesh.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp" />
@@ -404,6 +406,7 @@
     <None Include="..\..\media\RenderFX\GammaCorrection.fxml" />
     <None Include="..\..\media\RenderFX\GlowMerger.fxml" />
     <None Include="..\..\media\RenderFX\InfTerrain.fxml" />
+    <None Include="..\..\media\RenderFX\JudaTexture.fxml" />
     <None Include="..\..\media\RenderFX\KMesh.fxml" />
     <None Include="..\..\media\RenderFX\LensFlare.fxml" />
     <None Include="..\..\media\RenderFX\Lighting.fxml" />

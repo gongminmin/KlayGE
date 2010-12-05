@@ -382,6 +382,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\JudaTexture.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
 					>
 				</File>
@@ -487,6 +491,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\InfTerrain.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\JudaTexture.hpp"
 					>
 				</File>
 				<File
@@ -619,6 +627,10 @@
 				</File>
 				<File
 					RelativePath="..\..\media\RenderFX\InfTerrain.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\JudaTexture.fxml"
 					>
 				</File>
 				<File

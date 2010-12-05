@@ -38,6 +38,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SubSurface", "SubSurface.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PNTriangles", "PNTriangles.vcxproj", "{E75DC914-514F-4BDE-8EB3-40754ADDF87B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JudaTexViewer", "JudaTexViewer.vcxproj", "{AB22B649-B1A2-4010-83C0-01034595F1C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -198,6 +200,14 @@ Global
 		{E75DC914-514F-4BDE-8EB3-40754ADDF87B}.Release|Win32.Build.0 = Release|Win32
 		{E75DC914-514F-4BDE-8EB3-40754ADDF87B}.Release|x64.ActiveCfg = Release|x64
 		{E75DC914-514F-4BDE-8EB3-40754ADDF87B}.Release|x64.Build.0 = Release|x64
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Debug|Win32.Build.0 = Debug|Win32
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Debug|x64.ActiveCfg = Debug|x64
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Debug|x64.Build.0 = Debug|x64
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|Win32.ActiveCfg = Release|Win32
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|Win32.Build.0 = Release|Win32
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|x64.ActiveCfg = Release|x64
+		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

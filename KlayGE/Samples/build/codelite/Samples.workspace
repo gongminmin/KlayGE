@@ -19,6 +19,7 @@
   <Project Name="PNTriangles" Path="PNTriangles.project"/>
   <Project Name="GPUParticleSystem" Path="GPUParticleSystem.project"/>
   <Project Name="Fractal" Path="Fractal.project"/>
+  <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x86"/>
@@ -40,6 +41,7 @@
       <Project Name="DistanceMapping" ConfigName="Debug_win_x86"/>
       <Project Name="DepthPeeling" ConfigName="Debug_win_x86"/>
       <Project Name="DeferredShading" ConfigName="Debug_win_x86"/>
+      <Project Name="JudaTexViewer" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
@@ -61,6 +63,7 @@
       <Project Name="DistanceMapping" ConfigName="Release_win_x86"/>
       <Project Name="DepthPeeling" ConfigName="Release_win_x86"/>
       <Project Name="DeferredShading" ConfigName="Release_win_x86"/>
+      <Project Name="JudaTexViewer" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x64"/>
@@ -82,6 +85,7 @@
       <Project Name="DistanceMapping" ConfigName="Debug_win_x64"/>
       <Project Name="DepthPeeling" ConfigName="Debug_win_x64"/>
       <Project Name="DeferredShading" ConfigName="Debug_win_x64"/>
+      <Project Name="JudaTexViewer" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="no">
       <Project Name="VideoTexture" ConfigName="Release_win_x64"/>
@@ -103,6 +107,7 @@
       <Project Name="DistanceMapping" ConfigName="Release_win_x64"/>
       <Project Name="DepthPeeling" ConfigName="Release_win_x64"/>
       <Project Name="DeferredShading" ConfigName="Release_win_x64"/>
+      <Project Name="JudaTexViewer" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x86"/>
@@ -124,6 +129,7 @@
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x86"/>
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x86"/>
       <Project Name="DeferredShading" ConfigName="Debug_linux_x86"/>
+      <Project Name="JudaTexViewer" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
@@ -145,6 +151,7 @@
       <Project Name="DistanceMapping" ConfigName="Release_linux_x86"/>
       <Project Name="DepthPeeling" ConfigName="Release_linux_x86"/>
       <Project Name="DeferredShading" ConfigName="Release_linux_x86"/>
+      <Project Name="JudaTexViewer" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x64"/>
@@ -166,6 +173,7 @@
       <Project Name="DistanceMapping" ConfigName="Debug_linux_x64"/>
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x64"/>
       <Project Name="DeferredShading" ConfigName="Debug_linux_x64"/>
+      <Project Name="JudaTexViewer" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="no">
       <Project Name="VideoTexture" ConfigName="Release_linux_x64"/>
@@ -187,6 +195,7 @@
       <Project Name="DistanceMapping" ConfigName="Release_linux_x64"/>
       <Project Name="DepthPeeling" ConfigName="Release_linux_x64"/>
       <Project Name="DeferredShading" ConfigName="Release_linux_x64"/>
+      <Project Name="JudaTexViewer" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

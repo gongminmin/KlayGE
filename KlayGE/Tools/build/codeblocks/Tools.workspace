@@ -5,6 +5,7 @@
 		<Project filename="FXML2Shader.cbp" />
 		<Project filename="GLCompatibility.cbp" />
 		<Project filename="HDRCompressor.cbp" />
+		<Project filename="JudaTexPacker.cbp" />
 		<Project filename="KFontGen.cbp" active="1" />
 		<Project filename="NoiseTexGen.cbp" />
 		<Project filename="NormalMapCompressor.cbp" />

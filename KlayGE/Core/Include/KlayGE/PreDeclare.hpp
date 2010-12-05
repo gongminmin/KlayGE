@@ -120,6 +120,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<ShaderObject> ShaderObjectPtr;
 	class Texture;
 	typedef boost::shared_ptr<Texture> TexturePtr;
+	class JudaTexture;
+	typedef boost::shared_ptr<JudaTexture> JudaTexturePtr;
 	class FrameBuffer;
 	typedef boost::shared_ptr<FrameBuffer> FrameBufferPtr;
 	class RenderView;

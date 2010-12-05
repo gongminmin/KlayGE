@@ -8,6 +8,7 @@
   <Project Name="FXML2Shader" Path="FXML2Shader.project"/>
   <Project Name="GLCompatibility" Path="GLCompatibility.project"/>
   <Project Name="DistanceMapCreator" Path="DistanceMapCreator.project"/>
+  <Project Name="JudaTexPacker" Path="JudaTexPacker.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="NormalMapGen" ConfigName="Debug_win_x86"/>
@@ -18,6 +19,7 @@
       <Project Name="GLCompatibility" ConfigName="Debug_win_x86"/>
       <Project Name="FXML2Shader" ConfigName="Debug_win_x86"/>
       <Project Name="DistanceMapCreator" ConfigName="Debug_win_x86"/>
+      <Project Name="JudaTexPacker" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_win_x86"/>
@@ -28,6 +30,7 @@
       <Project Name="GLCompatibility" ConfigName="Release_win_x86"/>
       <Project Name="FXML2Shader" ConfigName="Release_win_x86"/>
       <Project Name="DistanceMapCreator" ConfigName="Release_win_x86"/>
+      <Project Name="JudaTexPacker" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
       <Project Name="NormalMapGen" ConfigName="Debug_win_x64"/>
@@ -38,6 +41,7 @@
       <Project Name="GLCompatibility" ConfigName="Debug_win_x64"/>
       <Project Name="FXML2Shader" ConfigName="Debug_win_x64"/>
       <Project Name="DistanceMapCreator" ConfigName="Debug_win_x64"/>
+      <Project Name="JudaTexPacker" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_win_x64"/>
@@ -48,6 +52,7 @@
       <Project Name="GLCompatibility" ConfigName="Release_win_x64"/>
       <Project Name="FXML2Shader" ConfigName="Release_win_x64"/>
       <Project Name="DistanceMapCreator" ConfigName="Release_win_x64"/>
+      <Project Name="JudaTexPacker" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
       <Project Name="NormalMapGen" ConfigName="Debug_linux_x86"/>
@@ -58,6 +63,7 @@
       <Project Name="GLCompatibility" ConfigName="Debug_linux_x86"/>
       <Project Name="FXML2Shader" ConfigName="Debug_linux_x86"/>
       <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x86"/>
+      <Project Name="JudaTexPacker" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_linux_x86"/>
@@ -68,6 +74,7 @@
       <Project Name="GLCompatibility" ConfigName="Release_linux_x86"/>
       <Project Name="FXML2Shader" ConfigName="Release_linux_x86"/>
       <Project Name="DistanceMapCreator" ConfigName="Release_linux_x86"/>
+      <Project Name="JudaTexPacker" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
       <Project Name="NormalMapGen" ConfigName="Debug_linux_x64"/>
@@ -78,6 +85,7 @@
       <Project Name="GLCompatibility" ConfigName="Debug_linux_x64"/>
       <Project Name="FXML2Shader" ConfigName="Debug_linux_x64"/>
       <Project Name="DistanceMapCreator" ConfigName="Debug_linux_x64"/>
+      <Project Name="JudaTexPacker" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="NormalMapGen" ConfigName="Release_linux_x64"/>
@@ -88,6 +96,7 @@
       <Project Name="GLCompatibility" ConfigName="Release_linux_x64"/>
       <Project Name="FXML2Shader" ConfigName="Release_linux_x64"/>
       <Project Name="DistanceMapCreator" ConfigName="Release_linux_x64"/>
+      <Project Name="JudaTexPacker" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

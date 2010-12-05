@@ -1,0 +1,69 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="JudaTexture.fxml"/>
+
+	<parameter type="float4x4" name="world_mat"/>
+
+	<shader>
+		<![CDATA[
+void GridBorderVS(float2 pos		: POSITION,
+				float2 start		: TEXCOORD0,
+				out float4 oPos		: SV_Position)
+{
+	oPos = mul(float4(start + pos, 0, 1), world_mat) + float4(-1, 1, 0, 0);
+}
+
+float4 GridBorderPS() : SV_Target
+{
+	return float4(1, 0, 0, 0.5f);
+}
+		]]>
+	</shader>
+	
+	<technique name="GridBorder">
+		<pass name="p0">
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
+
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GridBorderVS()"/>
+			<state name="pixel_shader" value="GridBorderPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void RenderVS(float2 pos				: POSITION,
+				float2 start		: TEXCOORD0,
+				float4 tile_id		: COLOR0,
+				out float2 oTexcoord : TEXCOORD0,
+				out float4 oTileID	: COLOR0,
+				out float4 oPos		: SV_Position)
+{
+	oPos = mul(float4(start + pos, 0, 1), world_mat) + float4(-1, 1, 0, 0);
+	oPos.z = 0.5f;
+	oTexcoord = pos;
+	oTileID = tile_id;
+}
+
+float4 RenderPS(float2 texcoord : TEXCOORD0, float4 tile_id : COLOR0) : SV_Target
+{
+	int2 tile_xy;
+	decode_tile_id(tile_xy, tile_id);
+	return judatex2d(tile_xy, texcoord);
+}
+		]]>
+	</shader>
+
+	<technique name="Render">
+		<pass name="p0">
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="RenderVS()"/>
+			<state name="pixel_shader" value="RenderPS()"/>
+		</pass>
+	</technique>
+</effect>

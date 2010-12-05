@@ -15,6 +15,7 @@
 #include <KlayGE/KMesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/JudaTexture.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -41,9 +42,35 @@ namespace
 
 			technique_ = rf.LoadEffect("Parallax.fxml")->TechniqueByName("Parallax");
 
-			*(technique_->Effect().ParameterByName("diffuse_tex")) = LoadTexture("diffuse.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("normal_tex")) = LoadTexture("normal.dds", EAH_GPU_Read)();
-			*(technique_->Effect().ParameterByName("height_tex")) = LoadTexture("height.dds", EAH_GPU_Read)();
+			int4 tile_bb[3] = 
+			{
+				int4(0, 0, 4, 4),
+				int4(4, 0, 4, 4),
+				int4(0, 4, 4, 4)
+			};
+
+			*(technique_->Effect().ParameterByName("diffuse_tex_bb")) = tile_bb[0];
+			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb[1];
+			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb[2];
+
+			uint32_t const BORDER_SIZE = 4;
+			JudaTexturePtr juda_tex = LoadJudaTexture("Parallax.jdt");
+			juda_tex->CacheProperty(1024, EF_ARGB8, BORDER_SIZE);
+			juda_tex->SetParams(technique_);
+
+			uint32_t level = juda_tex->TreeLevels() - 1;
+			std::vector<uint32_t> tile_ids;
+			for (size_t i = 0; i < sizeof(tile_bb) / sizeof(tile_bb[0]); ++ i)
+			{
+				for (int32_t y = 0; y < tile_bb[i].w(); ++ y)
+				{
+					for (int32_t x = 0; x < tile_bb[i].z(); ++ x)
+					{
+						tile_ids.push_back(juda_tex->EncodeTileID(level, tile_bb[i].x() + x, tile_bb[i].y() + y));
+					}
+				}
+			}
+			juda_tex->UpdateCache(tile_ids);
 		}
 
 		void BuildMeshInfo()

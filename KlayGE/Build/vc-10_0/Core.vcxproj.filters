@@ -363,6 +363,9 @@
     <ClCompile Include="..\..\Core\Src\Math\Frustum.cpp">
       <Filter>Math Library\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\JudaTexture.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -665,6 +668,9 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Frustum.hpp">
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\JudaTexture.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\media\RenderFX\2D.fxml">
@@ -755,6 +761,9 @@
       <Filter>Rendering System\Effect Files</Filter>
     </None>
     <None Include="..\..\media\RenderFX\BilateralBlur.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\JudaTexture.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
   </ItemGroup>

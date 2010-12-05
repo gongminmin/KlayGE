@@ -753,14 +753,7 @@ namespace KlayGE
 								{
 									++ freeiter;
 								}
-								if (freeiter == char_free_list_.end())
-								{
-									char_free_list_.push_back(std::make_pair(id, id + 1));
-								}
-								else
-								{
-									char_free_list_.insert(freeiter, std::make_pair(id, id + 1));
-								}
+								char_free_list_.insert(freeiter, std::make_pair(id, id + 1));
 							}
 						}
 						for (BOOST_AUTO(freeiter, char_free_list_.begin()); freeiter != char_free_list_.end();)

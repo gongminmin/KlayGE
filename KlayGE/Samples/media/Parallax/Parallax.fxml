@@ -3,6 +3,7 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="JudaTexture.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
@@ -13,15 +14,9 @@
 	<parameter type="float" name="parallax_scale"/>
 	<parameter type="float" name="parallax_bias"/>
 
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
-	<parameter type="texture2D" name="height_tex"/>
-
-	<parameter type="sampler" name="linear_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
-	</parameter>
+	<parameter type="int4" name="diffuse_tex_bb"/>
+	<parameter type="int4" name="normal_tex_bb"/>
+	<parameter type="int4" name="height_tex_bb"/>
 
 	<shader>
 		<![CDATA[
@@ -64,12 +59,12 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	
 	float3 view = normalize(V.xyz);
 
-	float height = height_tex.Sample(linear_sampler, texCoord0).r * parallax_scale - parallax_bias;
+	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * parallax_scale - parallax_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV).rgb;
+	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, texUV).rgb;
 
-	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV));
+	float3 bump_normal = normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1);
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H);
 

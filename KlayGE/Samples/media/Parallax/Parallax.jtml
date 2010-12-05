@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<juda_tex num_tiles="8" tile_size="128" format="ARGB8">
+	<image name="diffuse.dds" x="0" y="0" w="4" h="4"/>
+	<image name="normal.dds" x="4" y="0" w="4" h="4"/>
+	<image name="height.dds" x="0" y="4" w="4" h="4"/>
+</juda_tex>

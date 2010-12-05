@@ -82,6 +82,7 @@ namespace KlayGE
 		this->AddPath("../media/Textures/2D/");
 		this->AddPath("../media/Textures/3D/");
 		this->AddPath("../media/Textures/Cube/");
+		this->AddPath("../media/Textures/Juda/");
 		this->AddPath("../media/Fonts/");
 		this->AddPath("../media/PostProcessors/");
 	}

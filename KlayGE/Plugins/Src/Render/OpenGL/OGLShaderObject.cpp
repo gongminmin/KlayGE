@@ -1225,6 +1225,26 @@ namespace KlayGE
 			case REDT_textureCUBE:
 				ss << "CUBE";
 				break;
+
+			case REDT_texture1DArray:
+				ss << "1DARRAY";
+				break;
+
+			case REDT_texture2DArray:
+				ss << "2DARRAY";
+				break;
+
+			case REDT_texture3DArray:
+				ss << "3DARRAY";
+				break;
+
+			case REDT_textureCUBEArray:
+				ss << "CUBEARRAY";
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
 			}
 			ss << " " << tex_sampler_binds_[i].first << ";" << std::endl;
 		}
@@ -1402,12 +1422,26 @@ namespace KlayGE
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
+		std::string max_sm_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_SHADER_MODEL=" << static_cast<int>(re.DeviceCaps().max_shader_model);
+			max_sm_str = ss.str();
+		}
+		std::string max_tex_array_str;
+		{
+			std::stringstream ss;
+			ss << "-DKLAYGE_MAX_TEX_ARRAY_LEN=" << re.DeviceCaps().max_texture_array_length;
+			max_tex_array_str = ss.str();
+		}
 
 		shader_desc_ids_ = shader_desc_ids;
 		shader_text_ = MakeSharedPtr<std::string>(this->GenShaderText(effect));
 
 		std::vector<char const *> args;
 		args.push_back("-DKLAYGE_OPENGL=1");
+		args.push_back(max_sm_str.c_str());
+		args.push_back(max_tex_array_str.c_str());
 		if (!re.DeviceCaps().bc5_support)
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
@@ -1416,6 +1450,7 @@ namespace KlayGE
 		{
 			args.push_back("-DKLAYGE_BC5_AS_GA");
 		}
+						
 		args.push_back(NULL);
 
 		boost::array<CGprogram, ST_NumShaderTypes> shaders;

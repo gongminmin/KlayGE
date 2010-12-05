@@ -374,7 +374,7 @@ namespace KlayGE
 		case EF_ABGR8:
 			internalFormat = GL_RGBA8;
 			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT_8_8_8_8;
+			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_SIGNED_ABGR8:

@@ -704,6 +704,20 @@ namespace KlayGE
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
 		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
+		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
+
+		std::string max_sm_str;
+		{
+			std::stringstream ss;
+			ss << static_cast<int>(caps.max_shader_model);
+			max_sm_str = ss.str();
+		}
+		std::string max_tex_array_str;
+		{
+			std::stringstream ss;
+			ss << caps.max_texture_array_length;
+			max_tex_array_str = ss.str();
+		}
 
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
@@ -785,7 +799,6 @@ namespace KlayGE
 
 					is_shader_validate_[type] = true;
 
-					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 					std::string shader_profile = sd.profile;
 					switch (type)
 					{
@@ -879,6 +892,14 @@ namespace KlayGE
 						}
 						{
 							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" };
+							macros.push_back(macro_d3d11);
+						}
+						{
+							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
+							macros.push_back(macro_d3d11);
+						}
+						{
+							D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
 							macros.push_back(macro_d3d11);
 						}
 						if (feature_level <= D3D_FEATURE_LEVEL_9_3)
