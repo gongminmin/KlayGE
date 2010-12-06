@@ -53,7 +53,7 @@ float4 RenderPS(float2 texcoord : TEXCOORD0, float4 tile_id : COLOR0) : SV_Targe
 {
 	int2 tile_xy;
 	decode_tile_id(tile_xy, tile_id);
-	return judatex2d(tile_xy, texcoord);
+	return judatex2d_internal(tile_xy, texcoord);
 }
 		]]>
 	</shader>

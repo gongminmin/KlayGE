@@ -44,9 +44,9 @@ namespace
 
 			int4 tile_bb[3] = 
 			{
-				int4(0, 0, 4, 4),
-				int4(4, 0, 4, 4),
-				int4(0, 4, 4, 4)
+				int4(1, 1, 4, 4),
+				int4(7, 1, 4, 4),
+				int4(1, 7, 4, 4)
 			};
 
 			*(technique_->Effect().ParameterByName("diffuse_tex_bb")) = tile_bb[0];
