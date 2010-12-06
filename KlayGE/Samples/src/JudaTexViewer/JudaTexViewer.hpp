@@ -38,7 +38,7 @@ private:
 
 	KlayGE::uint32_t num_tiles_;
 	KlayGE::uint32_t tile_size_;
-	uint32_t sx_, sy_, ex_, ey_;
+	KlayGE::uint32_t sx_, sy_, ex_, ey_;
 
 	KlayGE::int32_t last_mouse_x_, last_mouse_y_;
 	KlayGE::float2 position_;

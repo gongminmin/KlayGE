@@ -16,6 +16,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoiseTexGen", "NoiseTexGen.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FXML2Shader", "FXML2Shader.vcproj", "{95248844-4E14-4043-99DD-50858D0699EA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JudaTexPacker", "JudaTexPacker.vcproj", "{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -88,6 +90,14 @@ Global
 		{95248844-4E14-4043-99DD-50858D0699EA}.Release|Win32.Build.0 = Release|Win32
 		{95248844-4E14-4043-99DD-50858D0699EA}.Release|x64.ActiveCfg = Release|x64
 		{95248844-4E14-4043-99DD-50858D0699EA}.Release|x64.Build.0 = Release|x64
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Debug|Win32.ActiveCfg = Debug|Win32
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Debug|Win32.Build.0 = Debug|Win32
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Debug|x64.ActiveCfg = Debug|x64
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Debug|x64.Build.0 = Debug|x64
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Release|Win32.ActiveCfg = Release|Win32
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Release|Win32.Build.0 = Release|Win32
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Release|x64.ActiveCfg = Release|x64
+		{178E8D60-A1A7-449C-AF5F-2DBCA6211F92}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

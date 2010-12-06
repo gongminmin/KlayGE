@@ -24,6 +24,8 @@
 
 namespace
 {
+	using namespace KlayGE;
+
 	void u8_copy_1(uint8_t* output, uint8_t const * rhs)
 	{
 		*output = *rhs;
