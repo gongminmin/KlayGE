@@ -950,7 +950,7 @@ namespace KlayGE
 
 			uint32_t tile_with_border_size = tile_size_ + cache_tile_border_size_ * 2;
 			uint32_t mipmap = 0;
-			while (cache_tile_border_size_ >= (1UL << mipmap))
+			while (cache_tile_border_size_ > (1UL << mipmap))
 			{
 				++ mipmap;
 			}

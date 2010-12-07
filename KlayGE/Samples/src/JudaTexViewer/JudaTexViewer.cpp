@@ -401,7 +401,7 @@ void JudaTexViewer::InputHandler(InputEngine const & sender, InputAction const &
 void JudaTexViewer::OpenJudaTex(std::string const & name)
 {
 	juda_tex_ = LoadJudaTexture(name);
-	juda_tex_->CacheProperty(1024, EF_BC3, BORDER_SIZE);
+	juda_tex_->CacheProperty(1024, EF_ARGB8, BORDER_SIZE);
 
 	num_tiles_ = juda_tex_->NumTiles();
 	tile_size_ = juda_tex_->TileSize();
@@ -457,7 +457,8 @@ void JudaTexViewer::DoUpdateOverlay()
 	UIManager::Instance().Render();
 
 	std::wostringstream stream;
-	stream << this->FPS();
+	stream.precision(2);
+	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Juda Texture Viewer", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);

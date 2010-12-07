@@ -521,16 +521,23 @@ namespace KlayGE
 			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
 				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-				GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-				GLenum const type = IsFloatFormat(vs_elem.format) ? GL_FLOAT : GL_UNSIGNED_BYTE;
-				GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 
 				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				glEnableVertexAttribArray(attr);
-				stream.Active();
-				glVertexAttribPointer(attr, num_components, type, GL_FALSE, instance_size, offset);
+				if (attr != -1)
+				{
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum type;
+					GLboolean normalized;
+					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
 
-				glVertexAttribDivisor(attr, 1);
+					stream.Active();
+					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+					glEnableVertexAttribArray(attr);
+
+					glVertexAttribDivisor(attr, 1);
+				}
 
 				elem_offset += vs_elem.element_size();
 			}
@@ -618,149 +625,57 @@ namespace KlayGE
 						BOOST_ASSERT(elem_offset < instance_size);
 
 						vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-						void const * addr = &buffer[instance * instance_size + elem_offset];
-						GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
-						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 
-						switch (vs_elem.usage)
+						GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+						if (attr != -1)
 						{
-						case VEU_Position:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							BOOST_ASSERT(elem_offset + num_components * sizeof(float) <= instance_size);
+							void const * addr = &buffer[instance * instance_size + elem_offset];
+							GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+							GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+							GLenum type;
+							GLboolean normalized;
+							OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+							normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+
 							switch (num_components)
 							{
+							case 1:
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib1fv(attr, float_addr);
+								break;
+
 							case 2:
-								glVertex2fv(float_addr);
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib2fv(attr, float_addr);
 								break;
 
 							case 3:
-								glVertex3fv(float_addr);
+								BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+								glVertexAttrib3fv(attr, float_addr);
 								break;
 
 							case 4:
-								glVertex4fv(float_addr);
+								if (IsFloatFormat(vs_elem.format))
+								{
+									glVertexAttrib4fv(attr, float_addr);
+								}
+								else
+								{
+									if (normalized)
+									{
+										glVertexAttrib4Nubv(attr, static_cast<GLubyte const *>(addr));
+									}
+									else
+									{
+										glVertexAttrib4ubv(attr, static_cast<GLubyte const *>(addr));
+									}
+								}
 								break;
 
 							default:
 								BOOST_ASSERT(false);
 								break;
 							}
-							break;
-
-						case VEU_Normal:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							switch (num_components)
-							{
-							case 3:
-								glNormal3fv(float_addr);
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								break;
-							}
-							break;
-
-						case VEU_Diffuse:
-							if (IsFloatFormat(vs_elem.format))
-							{
-								switch (num_components)
-								{
-								case 3:
-									glColor3fv(float_addr);
-									break;
-
-								case 4:
-									glColor4fv(float_addr);
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
-							}
-							else
-							{
-								switch (num_components)
-								{
-								case 3:
-									glColor3ubv(static_cast<GLubyte const *>(addr));
-									break;
-
-								case 4:
-									glColor4ubv(static_cast<GLubyte const *>(addr));
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
-							}
-							break;
-
-						case VEU_Specular:
-							if (IsFloatFormat(vs_elem.format))
-							{
-								switch (num_components)
-								{
-								case 3:
-									glSecondaryColor3fv(float_addr);
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
-							}
-							else
-							{
-								switch (num_components)
-								{
-								case 3:
-									glSecondaryColor3ubv(static_cast<GLubyte const *>(addr));
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
-							}
-							break;
-
-						case VEU_TextureCoord:
-							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
-							{
-								GLenum target = GL_TEXTURE0 + vs_elem.usage_index;
-								glActiveTexture(target);
-
-								switch (num_components)
-								{
-								case 1:
-									glMultiTexCoord1fv(target, float_addr);
-									break;
-
-								case 2:
-									glMultiTexCoord2fv(target, float_addr);
-									break;
-
-								case 3:
-									glMultiTexCoord3fv(target, float_addr);
-									break;
-
-								case 4:
-									glMultiTexCoord4fv(target, float_addr);
-									break;
-
-								default:
-									BOOST_ASSERT(false);
-									break;
-								}
-							}
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
 						}
 
 						elem_offset += vs_elem.element_size();
