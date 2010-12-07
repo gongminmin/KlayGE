@@ -65,6 +65,14 @@ void calc_mirror(out int2 real_tile_xy, out float2 in_tile_coord, int4 tile_bb, 
 	in_tile_coord = frac(part_coord);
 }
 
+void calc_border(out int2 real_tile_xy, out float2 in_tile_coord, int4 tile_bb, float2 texcoord)
+{
+	texcoord = texcoord < 0 ? -1 : (texcoord > 1 ? 1 : texcoord);
+	float2 part_coord = texcoord * tile_bb.zw;
+	real_tile_xy = tile_bb.xy + int2(part_coord);
+	in_tile_coord = frac(part_coord);
+}
+
 
 void decode_tile_id(out int2 tile_xy, float4 tile_id)
 {
@@ -421,6 +429,13 @@ float4 judatex2d_mirror(int4 tile_bb, float2 texcoord)
 	calc_mirror(tile_xy, in_tile_coord, tile_bb, texcoord);
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
 }
+float4 judatex2d_border(int4 tile_bb, float2 texcoord)
+{
+	int2 tile_xy;
+	float2 in_tile_coord;
+	calc_border(tile_xy, in_tile_coord, tile_bb, texcoord);
+	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
+}
 
 float4 judatex2d_bias_clamp(int4 tile_bb, float2 texcoord, float bias)
 {
@@ -441,6 +456,13 @@ float4 judatex2d_bias_mirror(int4 tile_bb, float2 texcoord, float bias)
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_mirror(tile_xy, in_tile_coord, tile_bb, texcoord);
+	return judatex2d_bias_internal(tile_xy, in_tile_coord, bias);
+}
+float4 judatex2d_bias_border(int4 tile_bb, float2 texcoord, float bias)
+{
+	int2 tile_xy;
+	float2 in_tile_coord;
+	calc_border(tile_xy, in_tile_coord, tile_bb, texcoord);
 	return judatex2d_bias_internal(tile_xy, in_tile_coord, bias);
 }
 
@@ -465,6 +487,13 @@ float4 judatex2d_level_mirror(int4 tile_bb, float2 texcoord, float lod)
 	calc_mirror(tile_xy, in_tile_coord, tile_bb, texcoord);
 	return judatex2d_level_internal(tile_xy, in_tile_coord, lod);
 }
+float4 judatex2d_level_border(int4 tile_bb, float2 texcoord, float lod)
+{
+	int2 tile_xy;
+	float2 in_tile_coord;
+	calc_border(tile_xy, in_tile_coord, tile_bb, texcoord);
+	return judatex2d_level_internal(tile_xy, in_tile_coord, lod);
+}
 
 float4 judatex2d_grad_clamp(int4 tile_bb, float2 texcoord, float2 dx, float2 dy)
 {
@@ -485,6 +514,13 @@ float4 judatex2d_grad_mirror(int4 tile_bb, float2 texcoord, float2 dx, float2 dy
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_mirror(tile_xy, in_tile_coord, tile_bb, texcoord);
+	return judatex2d_grad_internal(tile_xy, in_tile_coord, dx, dy);
+}
+float4 judatex2d_grad_border(int4 tile_bb, float2 texcoord, float2 dx, float2 dy)
+{
+	int2 tile_xy;
+	float2 in_tile_coord;
+	calc_border(tile_xy, in_tile_coord, tile_bb, texcoord);
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, dx, dy);
 }
 		]]>
