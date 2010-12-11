@@ -956,17 +956,27 @@ namespace KlayGE
 			}
 			++ mipmap;
 
-			uint32_t array_size = (pages + 63) / 64;
-			if (rf.RenderEngineInstance().DeviceCaps().max_texture_array_length > array_size)
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			uint32_t s = 0;
+			while ((tile_with_border_size * (s + 1) < caps.max_texture_width)
+				&& (tile_with_border_size * (s + 1) < caps.max_texture_height)
+				&& (s < 8))
 			{
-				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * 8, tile_with_border_size * 8, mipmap, array_size, format, 1, 0, EAH_GPU_Read, NULL);
+				++ s;
+			}
+
+			uint32_t array_size = std::min((pages + s * s - 1) / (s * s), static_cast<uint32_t>(caps.max_pixel_texture_units));
+			if (caps.max_texture_array_length > array_size)
+			{
+				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, array_size, format, 1, 0, EAH_GPU_Read, NULL);
 			}
 			else
 			{
 				tex_cache_array_.resize(array_size);
 				for (uint32_t i = 0; i < array_size; ++ i)
 				{
-					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * 8, tile_with_border_size * 8, mipmap, 1, format, 1, 0, EAH_GPU_Read, NULL);
+					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, 1, format, 1, 0, EAH_GPU_Read, NULL);
 				}
 			}
 

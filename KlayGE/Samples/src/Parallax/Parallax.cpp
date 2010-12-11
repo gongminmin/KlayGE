@@ -55,7 +55,7 @@ namespace
 
 			uint32_t const BORDER_SIZE = 4;
 			JudaTexturePtr juda_tex = LoadJudaTexture("Parallax.jdt");
-			juda_tex->CacheProperty(1024, EF_ARGB8, BORDER_SIZE);
+			juda_tex->CacheProperty(1024, rf.RenderEngineInstance().DeviceCaps().argb8_support ? EF_ARGB8 : EF_ABGR8, BORDER_SIZE);
 			juda_tex->SetParams(technique_);
 
 			uint32_t level = juda_tex->TreeLevels() - 1;

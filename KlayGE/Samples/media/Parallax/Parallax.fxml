@@ -68,7 +68,7 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H);
 
-	return float4(calc_brdf(diffuse, 1, 32, 0.04f, light_vec, halfway, bump_normal), 1);
+	return float4(0.2f * diffuse + 0.8f * calc_brdf(diffuse, 1, 32, 0.04f, light_vec, halfway, bump_normal), 1);
 }
 		]]>
 	</shader>

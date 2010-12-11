@@ -83,8 +83,8 @@ struct calc_border : public address_calculator
 boost::shared_ptr<address_calculator> address_calculators[4] = 
 {
 	boost::shared_ptr<address_calculator>(new calc_wrap),
-	boost::shared_ptr<address_calculator>(new calc_clamp),
 	boost::shared_ptr<address_calculator>(new calc_mirror),
+	boost::shared_ptr<address_calculator>(new calc_clamp),
 	boost::shared_ptr<address_calculator>(new calc_border)
 };
 
@@ -99,9 +99,9 @@ void PackJTML(std::string const & jtml_name)
 
 	uint32_t n = root->AttribInt("num_tiles", 2048);
 	uint32_t num_tiles = 1;
-	while (num_tiles < n)
+	while (num_tiles * 2 <= n)
 	{
-		num_tiles *= 4;
+		num_tiles *= 2;
 	}
 
 	uint32_t tile_size = root->AttribInt("tile_size", 256);
@@ -159,15 +159,15 @@ void PackJTML(std::string const & jtml_name)
 		}
 		else
 		{
-			if ("clamp" == address_u_str)
+			if ("mirror" == address_u_str)
 			{
-				calc_u = address_calculators[TAM_Clamp];
+				calc_u = address_calculators[TAM_Mirror];
 			}
 			else
 			{
-				if ("mirror" == address_u_str)
+				if ("clamp" == address_u_str)
 				{
-					calc_u = address_calculators[TAM_Mirror];
+					calc_u = address_calculators[TAM_Clamp];
 				}
 				else
 				{
@@ -188,15 +188,15 @@ void PackJTML(std::string const & jtml_name)
 		}
 		else
 		{
-			if ("clamp" == address_v_str)
+			if ("mirror" == address_v_str)
 			{
-				calc_v = address_calculators[TAM_Clamp];
+				calc_v = address_calculators[TAM_Mirror];
 			}
 			else
 			{
-				if ("mirror" == address_v_str)
+				if ("clamp" == address_v_str)
 				{
-					calc_v = address_calculators[TAM_Mirror];
+					calc_v = address_calculators[TAM_Clamp];
 				}
 				else
 				{
@@ -246,6 +246,8 @@ void PackJTML(std::string const & jtml_name)
 			tile_ids.clear();
 			for (int32_t bx = beg_tile_x; bx < end_tile_x; ++ bx)
 			{
+				uint32_t xindex = bx - beg_tile_x;
+
 				tiles.push_back(std::vector<uint8_t>(tile_size * tile_size * pixel_size, 0));
 				tile_ids.push_back(juda_tex->EncodeTileID(level, bx + x, by + y));
 				for (size_t dy = 0; dy < tile_size; ++ dy)
@@ -258,13 +260,13 @@ void PackJTML(std::string const & jtml_name)
 							int32_t tex_x = (*calc_u)(bx * tile_size + dx, in_width);
 							if (tex_x >= 0)
 							{
-								memcpy(&tiles[bx + 1][(dy * tile_size + dx) * pixel_size],
+								memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 									&in_data_p[tex_y * mapper.RowPitch() + tex_x * pixel_size],
 									pixel_size);
 							}
 							else
 							{
-								memcpy(&tiles[bx + 1][(dy * tile_size + dx) * pixel_size],
+								memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 									&border_clr_u8,
 									pixel_size);
 							}
@@ -274,7 +276,7 @@ void PackJTML(std::string const & jtml_name)
 					{
 						for (size_t dx = 0; dx < tile_size; ++ dx)
 						{
-							memcpy(&tiles[bx + 1][(dy * tile_size + dx) * pixel_size],
+							memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
 								&border_clr_u8,
 								pixel_size);
 						}

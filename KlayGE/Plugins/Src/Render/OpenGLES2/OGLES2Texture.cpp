@@ -165,15 +165,8 @@ namespace KlayGE
 
 	void OGLES2Texture::BuildMipSubLevels()
 	{
-		if (glloader_GLES_OES_framebuffer_object())
-		{
-			this->GLBindTexture();
-			glGenerateMipmapOES(target_type_);
-		}
-		else
-		{
-			THR(boost::system::posix_error::not_supported);
-		}
+		this->GLBindTexture();
+		glGenerateMipmap(target_type_);
 	}
 
 	void OGLES2Texture::GLBindTexture()
