@@ -1226,7 +1226,10 @@ namespace KlayGE
 				ss << "CUBE";
 				break;
 
-			case REDT_texture1DArray:
+			default:
+				break;
+
+			/*case REDT_texture1DArray:
 				ss << "1DARRAY";
 				break;
 
@@ -1244,7 +1247,7 @@ namespace KlayGE
 
 			default:
 				BOOST_ASSERT(false);
-				break;
+				break;*/
 			}
 			ss << " " << tex_sampler_binds_[i].first << ";" << std::endl;
 		}

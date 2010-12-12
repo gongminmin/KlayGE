@@ -47,12 +47,23 @@
 
 	<shader>
 		<![CDATA[
-void DisplaceOcean(float4 pos_os, float2 tex_coord, float3 disp,
-					out float4 eye_dir_fog,
-					out float4 tex_coord_noise_grad,
-					out float4 pos_ss,
-					out float4 oPos)
+void OceanVS(float2 pos : POSITION,
+					out float4 eye_dir_fog : TEXCOORD0,
+					out float4 tex_coord_noise_grad : TEXCOORD1,
+					out float4 pos_ss : TEXCOORD2,
+					out float4 oPos : SV_Position)
 {
+	float4 pos_os = GetInfTerrainPosOS(pos, 10);
+	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
+
+#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
+	float3 disp = lerp(displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.x), 0).xyz,
+		displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.y), 0).xyz, interpolate_frac);
+#else
+	float3 disp = lerp(displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz,
+		displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz, interpolate_frac);
+#endif
+
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
 
@@ -78,8 +89,23 @@ void DisplaceOcean(float4 pos_os, float2 tex_coord, float3 disp,
 	pos_ss = oPos;
 }
 
-float4 ShadingOcean(float4 eye_dir_fog, float2 gradient, float4 pos_ss)
+float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
 {
+#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
+	float2 gradient = lerp(
+		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy,
+			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy, 0.3f), 
+		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy,
+			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy, 0.3f), interpolate_frac) * 2 - 1;
+#else
+	float2 gradient = lerp(
+		lerp(gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
+			gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), 
+		lerp(gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
+			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac) * 2 - 1;
+#endif
+	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
+	
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
 
 	pos_ss.xyz /= pos_ss.w;
@@ -124,80 +150,7 @@ float4 ShadingOcean(float4 eye_dir_fog, float2 gradient, float4 pos_ss)
 		]]>
 	</shader>
 
-	<shader version="3">
-		<![CDATA[
-void OceanVS3(float2 pos : POSITION,
-					out float4 eye_dir_fog : TEXCOORD0,
-					out float4 tex_coord_noise_grad : TEXCOORD1,
-					out float4 pos_ss : TEXCOORD2,
-					out float4 oPos : SV_Position)
-{
-	float4 pos_os = GetInfTerrainPosOS(pos, 10);
-	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
-	float3 disp = lerp(displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz,
-		displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz, interpolate_frac);
-
-	DisplaceOcean(pos_os, tex_coord, disp, eye_dir_fog, tex_coord_noise_grad, pos_ss, oPos);
-}
-
-float4 OceanPS3(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
-{
-	float2 gradient = lerp(
-		lerp(gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-			gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), 
-		lerp(gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac) * 2 - 1;
-	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
-	
-	return ShadingOcean(eye_dir_fog, gradient, pos_ss);
-}
-		]]>
-	</shader>
-
-	<shader version="4">
-		<![CDATA[
-void OceanVS4(float2 pos : POSITION,
-					out float4 eye_dir_fog : TEXCOORD0,
-					out float4 tex_coord_noise_grad : TEXCOORD1,
-					out float4 pos_ss : TEXCOORD2,
-					out float4 oPos : SV_Position)
-{
-	float4 pos_os = GetInfTerrainPosOS(pos, 10);
-	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
-	float3 disp = lerp(displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.x), 0).xyz,
-		displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.y), 0).xyz, interpolate_frac);
-
-	DisplaceOcean(pos_os, tex_coord, disp, eye_dir_fog, tex_coord_noise_grad, pos_ss, oPos);
-}
-
-float4 OceanPS4(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
-{
-	float2 gradient = lerp(
-		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy,
-			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy, 0.3f), 
-		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy,
-			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy, 0.3f), interpolate_frac) * 2 - 1;
-	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
-	
-	return ShadingOcean(eye_dir_fog, gradient, pos_ss);
-}
-		]]>
-	</shader>
-
-	<technique name="Ocean3">
-		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
-
-			<state name="vertex_shader" value="OceanVS3()"/>
-			<state name="pixel_shader" value="OceanPS3()"/>
-		</pass>
-	</technique>
-
-	<technique name="Ocean4">
+	<technique name="Ocean">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
 
@@ -205,8 +158,8 @@ float4 OceanPS4(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TE
 			<state name="src_blend" value="src_alpha"/>
 			<state name="dest_blend" value="inv_src_alpha"/>
 			
-			<state name="vertex_shader" value="OceanVS4()"/>
-			<state name="pixel_shader" value="OceanPS4()"/>
+			<state name="vertex_shader" value="OceanVS()"/>
+			<state name="pixel_shader" value="OceanPS()"/>
 		</pass>
 	</technique>
 

@@ -156,20 +156,7 @@ namespace
 			: InfTerrainRenderable(L"Ocean")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("Ocean.fxml");
-
-			if (rf.RenderEngineInstance().DeviceCaps().max_texture_array_length > 1)
-			{
-				technique_ = effect->TechniqueByName("Ocean4");
-				if (!technique_->Validate())
-				{
-					technique_ = effect->TechniqueByName("Ocean3");
-				}
-			}
-			else
-			{
-				technique_ = effect->TechniqueByName("Ocean3");
-			}
+			technique_ = rf.LoadEffect("Ocean.fxml")->TechniqueByName("Ocean");
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
@@ -954,11 +941,6 @@ void OceanApp::DoUpdateOverlay()
 		<< sceneMgr.NumPrimitivesRendered() << " Primitives "
 		<< sceneMgr.NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-	Camera& scene_camera = this->ActiveCamera();
-	stream.str(L"");
-	stream << scene_camera.ViewVec().x() << ' ' << scene_camera.ViewVec().y() << ' ' << scene_camera.ViewVec().z();
-	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
