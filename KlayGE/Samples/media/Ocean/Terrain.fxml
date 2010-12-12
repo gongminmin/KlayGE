@@ -6,7 +6,8 @@
 	<include name="InfTerrain.fxml"/>
 
 	<parameter type="float3" name="sun_dir"/>
-	<parameter type="float4" name="fog_color" x="0.807843" y="0.858824" z="0.839216" w="1"/>
+	<parameter type="float3" name="sun_color"/>
+	<parameter type="float3" name="fog_color"/>
 
 	<parameter type="texture2D" name="ground_tex_detail">
 		<annotation type="string" name="SasResourceAddress" value="RealSand38BoH.dds"/>
@@ -54,9 +55,9 @@ void TerrainVS(float2 pos : POSITION,
 
 float4 TerrainPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1, float2 pos_os_y_pos_ss_w : TEXCOORD2) : SV_Target0
 {
-	float4 color = (directional_lighting(sun_dir, normalize(float3(normal_os_fog.x, 1, normal_os_fog.y))) + 0.1f)
-		* (ground_tex_detail.Sample(linear_sampler, tex_coord) + ground_tex_base.Sample(linear_sampler, tex_coord / 16)) / 2;
-	return float4(lerp(saturate(color), fog_color, normal_os_fog.z).rgb, pos_os_y_pos_ss_w.y);
+	float3 color = (sun_color * directional_lighting(-sun_dir, normalize(float3(normal_os_fog.x, 1, normal_os_fog.y))) + 0.1f)
+		* (ground_tex_detail.Sample(linear_sampler, tex_coord).rgb + ground_tex_base.Sample(linear_sampler, tex_coord / 16).rgb) / 2;
+	return float4(lerp(saturate(color), fog_color, normal_os_fog.z), pos_os_y_pos_ss_w.y);
 }
 		]]>
 	</shader>

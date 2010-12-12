@@ -37,7 +37,7 @@ private:
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr sun_flare_;
 	KlayGE::PostProcessPtr copy_pp_;
-	KlayGE::PostProcessPtr final_copy_pp_;
+	KlayGE::PostProcessPtr hdr_pp_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
