@@ -505,7 +505,8 @@ void ShadowCubeMap::DoUpdateOverlay()
 	UIManager::Instance().Render();
 
 	std::wostringstream stream;
-	stream << this->FPS();
+	stream.precision(2);
+	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"ShadowCubeMap", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);

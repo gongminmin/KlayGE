@@ -727,7 +727,8 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
 
 	std::wostringstream stream;
-	stream << this->FPS() << " FPS";
+	stream.precision(2);
+	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 
 	stream.str(L"");

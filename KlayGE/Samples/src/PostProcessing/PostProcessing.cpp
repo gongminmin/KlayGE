@@ -365,7 +365,7 @@ void PostProcessingApp::DoUpdateOverlay()
 
 	stream.str(L"");
 	stream.precision(2);
-	stream << fixed << this->FPS() << " FPS";
+	stream << std::fixed << this->FPS() << " FPS";
 	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
