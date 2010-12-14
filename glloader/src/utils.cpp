@@ -456,7 +456,7 @@ void glloader_init()
 
 void* glloader_get_gl_proc_address(const char* name)
 {
-	void* ret;
+	void* ret = NULL;
 
 #ifdef GLLOADER_GLES
 	ret = (void*)(::eglGetProcAddress(name));

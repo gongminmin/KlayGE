@@ -78,7 +78,7 @@ namespace KlayGE
 
 			Size_T<uint32_t> size;
 
-			for (size_t i = 0; i <= buffer_.size(); ++ i)
+			for (size_t i = 0; i < char_width_.size(); ++ i)
 			{
 				std::wstring str = buffer_.substr(0, i);
 				char_width_[i] = font_->CalcSize(str, font_size_).cx();
