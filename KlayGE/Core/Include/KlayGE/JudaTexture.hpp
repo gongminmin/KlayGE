@@ -159,6 +159,8 @@ namespace KlayGE
 			typedef void (*copy_array_func)(uint8_t* output, uint8_t const * rhs, uint32_t num);
 			typedef void (*add_func)(uint8_t* output, uint8_t const * lhs, uint8_t const * rhs);
 			typedef void (*sub_func)(uint8_t* output, uint8_t const * lhs, uint8_t const * rhs);
+			typedef void (*to_float4_func)(float* output, uint8_t const * rhs);
+			typedef void (*from_float4_func)(uint8_t* output, float const * rhs);
 			typedef int (*mse_func)(uint8_t const * rhs);
 			typedef int (*bias_func)(int bias, uint8_t const * rhs);
 
@@ -166,6 +168,8 @@ namespace KlayGE
 			copy_array_func copy_array;
 			add_func add;
 			sub_func sub;
+			to_float4_func to_float4;
+			from_float4_func from_float4;
 			mse_func mse;
 			bias_func bias;
 		};

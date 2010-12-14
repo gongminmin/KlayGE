@@ -64,6 +64,24 @@ namespace
 	}
 
 	template <int N>
+	void u8_to_float4(float* output, uint8_t const * rhs)
+	{
+		for (int i = 0; i < N; ++ i)
+		{
+			output[i] = rhs[i] / 255.0f;
+		}
+	}
+
+	template <int N>
+	void u8_from_float4(uint8_t* output, float const * rhs)
+	{
+		for (int i = 0; i < N; ++ i)
+		{
+			output[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(rhs[i] * 255 + 0.5f), 0, 255));
+		}
+	}
+
+	template <int N>
 	int u8_mse(uint8_t const * rhs)
 	{
 		int ret = 0;
@@ -109,6 +127,8 @@ namespace KlayGE
 			texel_op_.copy_array = u8_copy_array<1>;
 			texel_op_.add = u8_add<1>;
 			texel_op_.sub = u8_sub<1>;
+			texel_op_.to_float4 = u8_to_float4<1>;
+			texel_op_.from_float4 = u8_from_float4<1>;
 			texel_op_.mse = u8_mse<1>;
 			texel_op_.bias = u8_bias<1>;
 			break;
@@ -118,6 +138,8 @@ namespace KlayGE
 			texel_op_.copy_array = u8_copy_array<2>;
 			texel_op_.add = u8_add<2>;
 			texel_op_.sub = u8_sub<2>;
+			texel_op_.to_float4 = u8_to_float4<2>;
+			texel_op_.from_float4 = u8_from_float4<2>;
 			texel_op_.mse = u8_mse<2>;
 			texel_op_.bias = u8_bias<2>;
 			break;
@@ -128,6 +150,8 @@ namespace KlayGE
 			texel_op_.copy_array = u8_copy_array<4>;
 			texel_op_.add = u8_add<4>;
 			texel_op_.sub = u8_sub<4>;
+			texel_op_.to_float4 = u8_to_float4<4>;
+			texel_op_.from_float4 = u8_from_float4<4>;
 			texel_op_.mse = u8_mse<4>;
 			texel_op_.bias = u8_bias<4>;
 			break;
@@ -704,12 +728,20 @@ namespace KlayGE
 		uint32_t const out_width = in_width / 2;
 		uint32_t const out_height = in_height / 2;
 
+		float4 temp[4];
 		output.resize(out_width * out_height * texel_size_);
 		for (uint32_t y = 0; y < out_height; ++ y)
 		{
 			for (uint32_t x = 0; x < out_width; ++ x)
 			{
-				texel_op_.copy(&output[(y * out_width + x) * texel_size_], &input[y * in_pitch * 2 + x * 2 * texel_size_]);
+				texel_op_.to_float4(&temp[0].x(), &input[(y * 2 + 0) * in_pitch + (x * 2 + 0) * texel_size_]);
+				texel_op_.to_float4(&temp[1].x(), &input[(y * 2 + 0) * in_pitch + (x * 2 + 1) * texel_size_]);
+				texel_op_.to_float4(&temp[2].x(), &input[(y * 2 + 1) * in_pitch + (x * 2 + 0) * texel_size_]);
+				texel_op_.to_float4(&temp[3].x(), &input[(y * 2 + 1) * in_pitch + (x * 2 + 1) * texel_size_]);
+
+				temp[0] = (temp[0] + temp[1] + temp[2] + temp[3]) * 0.25f;
+
+				texel_op_.from_float4(&output[(y * out_width + x) * texel_size_], &temp[0].x());
 			}
 		}
 	}
@@ -1126,8 +1158,9 @@ namespace KlayGE
 			}
 		}
 
+		uint32_t mipmaps = tex_a_tile_cache_->NumMipMaps();
 		std::vector<std::vector<uint8_t> > neighbor_data;
-		this->DecodeTiles(neighbor_data, neighbor_ids, 1);
+		this->DecodeTiles(neighbor_data, neighbor_ids, mipmaps);
 
 		TileInfo tile_info;
 		tile_info.tick = tile_tick_;
@@ -1218,13 +1251,14 @@ namespace KlayGE
 			uint32_t mip_tile_size = tile_size_;
 			uint32_t mip_tile_with_border_size = tile_with_border_size;
 			uint32_t mip_border_size = cache_tile_border_size_;
+			for (uint32_t l = 0; l < mipmaps; ++ l)
 			{
 				boost::array<uint8_t const *, 9> neighbor_data_ptr;
 				for (uint32_t j = 0; j < neighbor_data_ptr.size(); ++ j)
 				{
 					if (index_with_neighbors[j] != 0xFFFFFFFF)
 					{
-						neighbor_data_ptr[j] = &neighbor_data[index_with_neighbors[j]][0];
+						neighbor_data_ptr[j] = &neighbor_data[index_with_neighbors[j] * mipmaps + l][0];
 					}
 					else
 					{
@@ -1232,7 +1266,7 @@ namespace KlayGE
 					}
 				}
 
-				Texture::Mapper mapper(*tex_a_tile_cache_, 0, 0, TMA_Write_Only,
+				Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
 					0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
 				uint8_t* data_with_border = mapper.Pointer<uint8_t>();
 				
@@ -1391,19 +1425,7 @@ namespace KlayGE
 						}
 					}
 				}
-			}
-			{
-				Texture::Mapper mapper(*tex_a_tile_indirect_, 0, 0, TMA_Write_Only, 0, 0, 1, 1);
-				uint8_t* p = mapper.Pointer<uint8_t>();
-				p[0] = static_cast<uint8_t>(tile_info.x);
-				p[1] = static_cast<uint8_t>(tile_info.y);
-				p[2] = static_cast<uint8_t>(tile_info.z);
-			}
 
-			uint32_t mipmaps = tex_a_tile_cache_->NumMipMaps();
-			tex_a_tile_cache_->BuildMipSubLevels();
-			for (uint32_t l = 0; l < mipmaps; ++ l)
-			{
 				if (tex_cache_)
 				{
 					tex_a_tile_cache_->CopyToTextureArray(*tex_cache_, l, mip_tile_with_border_size, mip_tile_with_border_size,
@@ -1420,6 +1442,13 @@ namespace KlayGE
 				mip_tile_size /= 2;
 				mip_tile_with_border_size /= 2;
 				mip_border_size /= 2;
+			}
+			{
+				Texture::Mapper mapper(*tex_a_tile_indirect_, 0, 0, TMA_Write_Only, 0, 0, 1, 1);
+				uint8_t* p = mapper.Pointer<uint8_t>();
+				p[0] = static_cast<uint8_t>(tile_info.x);
+				p[1] = static_cast<uint8_t>(tile_info.y);
+				p[2] = static_cast<uint8_t>(tile_info.z);
 			}
 
 			uint32_t level, tile_x, tile_y;
