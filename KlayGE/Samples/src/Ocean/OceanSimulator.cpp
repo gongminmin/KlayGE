@@ -160,8 +160,6 @@ namespace KlayGE
 
 		// Pop RT
 		re.BindFrameBuffer(old_fb);
-
-		gradient_tex_->BuildMipSubLevels();
 	}
 
 	TexturePtr const & OceanSimulator::DisplacementTex() const
@@ -221,7 +219,7 @@ namespace KlayGE
 		dxyz_buffer_->Resize(3 * params.dmap_dim * params.dmap_dim * sizeof(float) * 2);
 
 		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		displacement_fb_ = rf.MakeFrameBuffer();
 		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 0));

@@ -25,6 +25,10 @@
 	<parameter type="texture2D" name="reflection_tex"/>
 
 	<parameter type="int2" name="frames"/>
+	<parameter type="float3" name="min_disp0"/>
+	<parameter type="float3" name="min_disp1"/>
+	<parameter type="float3" name="disp_range0"/>
+	<parameter type="float3" name="disp_range1"/>
 	<parameter type="float" name="interpolate_frac"/>
 	<parameter type="int" name="flipping"/>
 
@@ -57,12 +61,14 @@ void OceanVS(float2 pos : POSITION,
 	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
 
 #if KLAYGE_MAX_TEX_ARRAY_LEN > 1
-	float3 disp = lerp(displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.x), 0).xyz,
-		displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.y), 0).xyz, interpolate_frac);
+	float3 disp0 = displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.x), 0).xyz;
+	float3 disp1 = displacement_tex_array.SampleLevel(linear_wrap_sampler, float3(tex_coord, frames.y), 0).xyz;
 #else
-	float3 disp = lerp(displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz,
-		displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz, interpolate_frac);
+	float3 disp0 = displacement_tex_0.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
+	float3 disp1 = displacement_tex_1.SampleLevel(linear_wrap_sampler, tex_coord, 0).xyz;
 #endif
+
+	float3 disp = lerp(min_disp0 + disp0 * disp_range0, min_disp1 + disp1 * disp_range1, interpolate_frac);
 
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
@@ -92,18 +98,18 @@ void OceanVS(float2 pos : POSITION,
 float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2) : SV_Target0
 {
 #if KLAYGE_MAX_TEX_ARRAY_LEN > 1
-	float2 gradient = lerp(
-		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy,
-			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy, 0.3f), 
-		lerp(gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy,
-			gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy, 0.3f), interpolate_frac) * 2 - 1;
+	float2 gradient0 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.x)).xy;
+	float2 gradient1 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.x)).xy;
+	float2 gradient2 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy, frames.y)).xy;
+	float2 gradient3 = gradient_tex_array.Sample(linear_wrap_sampler, float3(tex_coord_noise_grad.xy * 6.4f, frames.y)).xy;
 #else
-	float2 gradient = lerp(
-		lerp(gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-			gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), 
-		lerp(gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy,
-			gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy, 0.3f), interpolate_frac) * 2 - 1;
+	float2 gradient0 = gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
+	float2 gradient1 = gradient_tex_0.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy;
+	float2 gradient2 = gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy).xy;
+	float2 gradient3 = gradient_tex_1.Sample(linear_wrap_sampler, tex_coord_noise_grad.xy * 6.4f).xy;
 #endif
+
+	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
 	gradient = lerp(tex_coord_noise_grad.zw, gradient, BLEND_FACTOR);
 	
 	float3 normal = normalize(float3(gradient.x, 1, gradient.y));
