@@ -189,7 +189,7 @@ namespace KlayGE
 			static void DoDiv(T out[N], T const lhs[N], T const rhs[N])
 			{
 				out[0] = lhs[0] / rhs[0];
-				vector_helper<T, N - 1>::DoMul(out + 1, lhs + 1, rhs + 1);
+				vector_helper<T, N - 1>::DoDiv(out + 1, lhs + 1, rhs + 1);
 			}
 
 			static void DoNegate(T out[N], T const rhs[N])
