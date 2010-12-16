@@ -790,8 +790,11 @@ void OceanApp::InitObjects()
 	this->LookAt(float3(0, 20, 0), float3(0, 19.8f, 1));
 	this->Proj(0.01f, 3000);
 
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+
 	// ½¨Á¢×ÖÌå
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	TexturePtr skybox_y_tex = LoadTexture("DH001cross_y.dds", EAH_GPU_Read)();
 	TexturePtr skybox_c_tex = LoadTexture("DH001cross_c.dds", EAH_GPU_Read)();
@@ -834,9 +837,8 @@ void OceanApp::InitObjects()
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	refraction_fb_ = rf.MakeFrameBuffer();
-	refraction_fb_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
+	refraction_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	Camera& scene_camera = this->ActiveCamera();
 	reflection_fb_ = rf.MakeFrameBuffer();
@@ -845,8 +847,8 @@ void OceanApp::InitObjects()
 
 	blur_y_ = MakeSharedPtr<BlurYPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
-	final_fb_ = rf.MakeFrameBuffer();
-	final_fb_->GetViewport().camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport().camera;
+	hdr_fb_ = rf.MakeFrameBuffer();
+	hdr_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -893,6 +895,27 @@ void OceanApp::InitObjects()
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
 	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&OceanApp::FPSCameraHandler, this, _1));
+
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+	if (!caps.cs_support)
+	{
+		dialog_params_->GetControl(id_dmap_dim_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_dmap_dim_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_patch_length_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_patch_length_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_time_scale_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_time_scale_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wave_amplitude_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wave_amplitude_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_speed_x_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_speed_x_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_speed_y_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_speed_y_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_dependency_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_wind_dependency_slider_)->SetEnabled(false);
+		dialog_params_->GetControl(id_choppy_scale_static_)->SetEnabled(false);
+		dialog_params_->GetControl(id_choppy_scale_slider_)->SetEnabled(false);
+	}
 }
 
 void OceanApp::OnResize(uint32_t width, uint32_t height)
@@ -907,9 +930,17 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 0));
 	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+	try
+	{
+		reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+	}
+	catch (...)
+	{
+		reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+	}
+	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, refraction_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
 	reflection_fb_->GetViewport().left = 0;
 	reflection_fb_->GetViewport().top = 0;
@@ -919,21 +950,13 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	blur_y_->InputPin(0, reflection_tex_);
 	blur_y_->OutputPin(0, reflection_blur_tex_);
 
-	try
-	{
-		final_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		final_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*final_tex_, 0, 0));
-	}
-	catch (...)
-	{
-		final_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		final_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*final_tex_, 0, 0));
-	}
-	final_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, reflection_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
+	hdr_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	copy_pp_->InputPin(0, refraction_tex_);
-	copy_pp_->OutputPin(0, final_tex_);
-	hdr_pp_->InputPin(0, final_tex_);
+	copy_pp_->OutputPin(0, hdr_tex_);
+	hdr_pp_->InputPin(0, hdr_tex_);
 
 	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
 	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
@@ -1104,18 +1127,16 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 				scene_camera.EyePos(), scene_camera.LookAt(), scene_camera.UpVec());
 			reflection_fb_->GetViewport().camera->ViewParams(reflect_eye, reflect_at, reflect_up);
 		}
-
 		return App3DFramework::URV_Need_Flush;
 
 	case 2:
 		blur_y_->Apply();
-		re.BindFrameBuffer(final_fb_);
+		re.BindFrameBuffer(hdr_fb_);
 		copy_pp_->Apply();
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
 		ocean_->Visible(true);
 		sun_flare_->Visible(true);
-
 		return App3DFramework::URV_Need_Flush;
 
 	default:

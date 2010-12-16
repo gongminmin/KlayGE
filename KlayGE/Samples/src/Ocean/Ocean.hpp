@@ -47,8 +47,8 @@ private:
 	KlayGE::TexturePtr reflection_blur_tex_;
 	KlayGE::FrameBufferPtr reflection_fb_;
 	KlayGE::PostProcessPtr blur_y_;
-	KlayGE::TexturePtr final_tex_;
-	KlayGE::FrameBufferPtr final_fb_;
+	KlayGE::TexturePtr hdr_tex_;
+	KlayGE::FrameBufferPtr hdr_fb_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;

@@ -24,13 +24,15 @@
 	<parameter type="texture2D" name="refraction_tex"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
-	<parameter type="int2" name="frames"/>
-	<parameter type="float3" name="min_disp0"/>
-	<parameter type="float3" name="min_disp1"/>
-	<parameter type="float3" name="disp_range0"/>
-	<parameter type="float3" name="disp_range1"/>
-	<parameter type="float" name="interpolate_frac"/>
-	<parameter type="int" name="flipping"/>
+	<cbuffer name="per_frame">
+		<parameter type="int2" name="frames"/>
+		<parameter type="float3" name="min_disp0"/>
+		<parameter type="float3" name="min_disp1"/>
+		<parameter type="float3" name="disp_range0"/>
+		<parameter type="float3" name="disp_range1"/>
+		<parameter type="float" name="interpolate_frac"/>
+		<parameter type="int" name="flipping"/>
+	</cbuffer>
 
 	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
