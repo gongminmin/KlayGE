@@ -1266,177 +1266,179 @@ namespace KlayGE
 					}
 				}
 
-				Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
-					0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
-				uint8_t* data_with_border = mapper.Pointer<uint8_t>();
+				{
+					Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
+						0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
+					uint8_t* data_with_border = mapper.Pointer<uint8_t>();
 				
-				for (uint32_t y = 0; y < mip_tile_size; ++ y)
-				{
-					texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + mip_border_size * texel_size_,
-						neighbor_data_ptr[0] + y * mip_tile_size * texel_size_, mip_tile_size);
-				}
+					for (uint32_t y = 0; y < mip_tile_size; ++ y)
+					{
+						texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+							neighbor_data_ptr[0] + y * mip_tile_size * texel_size_, mip_tile_size);
+					}
 
-				if (neighbor_data_ptr[1] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
+					if (neighbor_data_ptr[1] != NULL)
 					{
-						texel_op_.copy_array(data_with_border + y * mapper.RowPitch(),
-							neighbor_data_ptr[1] + ((y + mip_tile_size - mip_border_size) * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_,
-							mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + y * mapper.RowPitch() + x * texel_size_,
-								neighbor_data_ptr[0]);
+							texel_op_.copy_array(data_with_border + y * mapper.RowPitch(),
+								neighbor_data_ptr[1] + ((y + mip_tile_size - mip_border_size) * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_,
+								mip_border_size);
 						}
 					}
-				}
-				if (neighbor_data_ptr[2] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
+					else
 					{
-						texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
-							neighbor_data_ptr[2] + ((y + mip_tile_size - mip_border_size) * mip_tile_size) * texel_size_, mip_tile_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
-							neighbor_data_ptr[0], mip_tile_size);
-					}
-				}
-				if (neighbor_data_ptr[3] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
-							neighbor_data_ptr[3] + (y + mip_tile_size - mip_border_size) * mip_tile_size * texel_size_, mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + y * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
-								neighbor_data_ptr[0] + (mip_tile_size - 1) * texel_size_);
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + y * mapper.RowPitch() + x * texel_size_,
+									neighbor_data_ptr[0]);
+							}
 						}
 					}
-				}
+					if (neighbor_data_ptr[2] != NULL)
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
+								neighbor_data_ptr[2] + ((y + mip_tile_size - mip_border_size) * mip_tile_size) * texel_size_, mip_tile_size);
+						}
+					}
+					else
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
+								neighbor_data_ptr[0], mip_tile_size);
+						}
+					}
+					if (neighbor_data_ptr[3] != NULL)
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+								neighbor_data_ptr[3] + (y + mip_tile_size - mip_border_size) * mip_tile_size * texel_size_, mip_border_size);
+						}
+					}
+					else
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + y * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+									neighbor_data_ptr[0] + (mip_tile_size - 1) * texel_size_);
+							}
+						}
+					}
 
-				if (neighbor_data_ptr[4] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_tile_size; ++ y)
+					if (neighbor_data_ptr[4] != NULL)
 					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch(),
-							neighbor_data_ptr[4] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_tile_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + x * texel_size_,
-								neighbor_data_ptr[0] + y * mip_tile_size * texel_size_);
+							texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch(),
+								neighbor_data_ptr[4] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
 						}
 					}
-				}
-				if (neighbor_data_ptr[5] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_tile_size; ++ y)
+					else
 					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
-							neighbor_data_ptr[5] + y * mip_tile_size * texel_size_, mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_tile_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
-								neighbor_data_ptr[0] + (y * mip_tile_size + mip_tile_size - 1) * texel_size_);
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + x * texel_size_,
+									neighbor_data_ptr[0] + y * mip_tile_size * texel_size_);
+							}
 						}
 					}
-				}
+					if (neighbor_data_ptr[5] != NULL)
+					{
+						for (uint32_t y = 0; y < mip_tile_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+								neighbor_data_ptr[5] + y * mip_tile_size * texel_size_, mip_border_size);
+						}
+					}
+					else
+					{
+						for (uint32_t y = 0; y < mip_tile_size; ++ y)
+						{
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+									neighbor_data_ptr[0] + (y * mip_tile_size + mip_tile_size - 1) * texel_size_);
+							}
+						}
+					}
 
-				if (neighbor_data_ptr[6] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
+					if (neighbor_data_ptr[6] != NULL)
 					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch(),
-							neighbor_data_ptr[6] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + x * texel_size_,
-								neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch(),
+								neighbor_data_ptr[6] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
 						}
 					}
-				}
-				if (neighbor_data_ptr[7] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
+					else
 					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
-							neighbor_data_ptr[7] + y * mip_tile_size * texel_size_, mip_tile_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
-							neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_, mip_tile_size);
-					}
-				}			
-				if (neighbor_data_ptr[8] != NULL)
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
-							neighbor_data_ptr[8] + y * mip_tile_size * texel_size_, mip_border_size);
-					}
-				}
-				else
-				{
-					for (uint32_t y = 0; y < mip_border_size; ++ y)
-					{
-						for (uint32_t x = 0; x < mip_border_size; ++ x)
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
-								neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + x * texel_size_,
+									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							}
+						}
+					}
+					if (neighbor_data_ptr[7] != NULL)
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+								neighbor_data_ptr[7] + y * mip_tile_size * texel_size_, mip_tile_size);
+						}
+					}
+					else
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+								neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_, mip_tile_size);
+						}
+					}			
+					if (neighbor_data_ptr[8] != NULL)
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+								neighbor_data_ptr[8] + y * mip_tile_size * texel_size_, mip_border_size);
+						}
+					}
+					else
+					{
+						for (uint32_t y = 0; y < mip_border_size; ++ y)
+						{
+							for (uint32_t x = 0; x < mip_border_size; ++ x)
+							{
+								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
+							}
 						}
 					}
 				}
 
 				if (tex_cache_)
 				{
-					tex_a_tile_cache_->CopyToTextureArray(*tex_cache_, l, mip_tile_with_border_size, mip_tile_with_border_size,
-						tile_info.x * mip_tile_with_border_size, tile_info.y * mip_tile_with_border_size, tile_info.z,
-						mip_tile_with_border_size, mip_tile_with_border_size, 0, 0, 0);
+					tex_a_tile_cache_->CopyToSubTexture2D(*tex_cache_,
+						tile_info.z, l, tile_info.x * mip_tile_with_border_size, tile_info.y * mip_tile_with_border_size, mip_tile_with_border_size, mip_tile_with_border_size,
+						0, l, 0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
 				}
 				else
 				{
-					tex_a_tile_cache_->CopyToTexture2D(*tex_cache_array_[tile_info.z], l, mip_tile_with_border_size, mip_tile_with_border_size,
-						tile_info.x * mip_tile_with_border_size, tile_info.y * mip_tile_with_border_size,
-						mip_tile_with_border_size, mip_tile_with_border_size, 0, 0);
+					tex_a_tile_cache_->CopyToSubTexture2D(*tex_cache_array_[tile_info.z],
+						0, l, tile_info.x * mip_tile_with_border_size, tile_info.y * mip_tile_with_border_size, mip_tile_with_border_size, mip_tile_with_border_size,
+						0, l, 0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
 				}
 
 				mip_tile_size /= 2;
@@ -1453,7 +1455,9 @@ namespace KlayGE
 
 			uint32_t level, tile_x, tile_y;
 			this->DecodeTileID(level, tile_x, tile_y, all_neighbor_ids[i]);
-			tex_a_tile_indirect_->CopyToTexture2D(*tex_indirect_, 0, 1, 1, tile_x, tile_y, 1, 1, 0, 0);
+			tex_a_tile_indirect_->CopyToSubTexture2D(*tex_indirect_,
+				0, 0, tile_x, tile_y, 1, 1,
+				0, 0, 0, 0, 1, 1);
 
 			tim.insert(std::make_pair(all_neighbor_ids[i], tile_info));
 		}

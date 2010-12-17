@@ -36,22 +36,18 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		virtual void CopyToTexture1D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
-		virtual void CopyToTexture2D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		virtual void CopyToTexture3D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
-		virtual void CopyToTextureCube(Texture& target, CubeFaces face, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		virtual void CopyToTextureArray(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index);
+		virtual void CopyToSubTexture1D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
+		virtual void CopyToSubTexture2D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
+		virtual void CopyToSubTexture3D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
+		virtual void CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
 		void BuildMipSubLevels();
 
@@ -65,30 +61,30 @@ namespace KlayGE
 			return target_type_;
 		}
 
-		GLuint GLPbo(int level) const
+		GLuint GLPbo(uint32_t level) const
 		{
 			return pbos_[level];
 		}
 
 	private:
-		virtual void Map1D(int array_index, int level, TextureMapAccess tma,
+		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
 			void*& data);
-		virtual void Map2D(int array_index, int level, TextureMapAccess tma,
+		virtual void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t x_offset, uint32_t y_offset,
 			void*& data, uint32_t& row_pitch);
-		virtual void Map3D(int array_index, int level, TextureMapAccess tma,
+		virtual void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t depth,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		virtual void MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
+		virtual void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t x_offset, uint32_t y_offset,
 			void*& data, uint32_t& row_pitch);
 
-		virtual void Unmap1D(int array_index, int level);
-		virtual void Unmap2D(int array_index, int level);
-		virtual void Unmap3D(int array_index, int level);
-		virtual void UnmapCube(int array_index, CubeFaces face, int level);
+		virtual void Unmap1D(uint32_t array_index, uint32_t level);
+		virtual void Unmap2D(uint32_t array_index, uint32_t level);
+		virtual void Unmap3D(uint32_t array_index, uint32_t level);
+		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 	protected:
 		ElementFormat SRGBToRGB(ElementFormat pf);
@@ -114,13 +110,14 @@ namespace KlayGE
 		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
-		void CopyToTexture1D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_xOffset, uint32_t src_width, uint32_t src_xOffset);
+		void CopyToSubTexture1D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
 
 	private:
-		void Map1D(int array_index, int level, TextureMapAccess tma,
+		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width, void*& data);
-		void Unmap1D(int array_index, int level);
+		void Unmap1D(uint32_t array_index, uint32_t level);
 
 	private:
 		void UpdateParams();
@@ -143,21 +140,18 @@ namespace KlayGE
 		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
-		void CopyToTexture2D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		void CopyToTextureCube(Texture& target, CubeFaces face, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
-		void CopyToTextureArray(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index);
+		void CopyToSubTexture2D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
+		void CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
 	private:
-		void Map2D(int array_index, int level, TextureMapAccess tma,
+		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
-		void Unmap2D(int array_index, int level);
+		void Unmap2D(uint32_t array_index, uint32_t level);
 
 	private:
 		void UpdateParams();
@@ -181,18 +175,16 @@ namespace KlayGE
 		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
-		void CopyToTexture3D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
-			uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_zOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_depth,
-			uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_zOffset);
+		void CopyToSubTexture3D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
 	private:
-		void Map3D(int array_index, int level, TextureMapAccess tma,
+		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			uint32_t width, uint32_t height, uint32_t depth,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
-		void Unmap3D(int array_index, int level);
+		void Unmap3D(uint32_t array_index, uint32_t level);
 
 	private:
 		void UpdateParams();
@@ -217,15 +209,15 @@ namespace KlayGE
 		uint32_t Depth(int level) const;
 
 		void CopyToTexture(Texture& target);
-		void CopyToTextureCube(Texture& target, CubeFaces face, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset);
+		void CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
 	private:
-		void MapCube(int array_index, CubeFaces face, int level, TextureMapAccess tma,
+		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
-		void UnmapCube(int array_index, CubeFaces face, int level);
+		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 	private:
 		void UpdateParams();

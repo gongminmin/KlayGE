@@ -783,9 +783,9 @@ namespace KlayGE
 						kl.DistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
 					}
 
-					a_char_texture_->CopyToTexture2D(*dist_texture_, 0,
-						kfont_char_size, kfont_char_size, char_pos.x(), char_pos.y(),
-						kfont_char_size, kfont_char_size, 0, 0);
+					a_char_texture_->CopyToSubTexture2D(*dist_texture_,
+						0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
+						0, 0, 0, 0, kfont_char_size, kfont_char_size);
 
 					cim.insert(std::make_pair(ch, charInfo));
 				}

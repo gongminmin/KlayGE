@@ -325,7 +325,9 @@ namespace KlayGE
 			TexturePtr sih_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(sizeof(sih) / NumFormatBytes(win->Format()),
 				1, 1, 1, win->Format(), 1, 0, EAH_GPU_Read, &init_data);
 
-			sih_tex->CopyToTexture2D(*stereo_lr_tex_, 0, sih_tex->Width(0), 1, 0, h, sih_tex->Width(0), 1, 0, 0);
+			sih_tex->CopyToSubTexture2D(*stereo_lr_tex_,
+				0, 0, 0, h, sih_tex->Width(0), 1,
+				0, 0, 0, 0, sih_tex->Width(0), 1);
 		}
 	}
 
@@ -836,8 +838,8 @@ namespace KlayGE
 	{
 		uint32_t const w = stereo_colors_[0]->Width(0);
 		uint32_t const h = stereo_colors_[0]->Height(0);
-		stereo_colors_[0]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, 0, 0, w, h, 0, 0);
-		stereo_colors_[1]->CopyToTexture2D(*stereo_lr_tex_, 0, w, h, w, 0, w, h, 0, 0);
+		stereo_colors_[0]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
+		stereo_colors_[1]->CopyToSubTexture2D(*stereo_lr_tex_, 0, 0, w, 0, w, h, 0, 0, 0, 0, w, h);
 
 		ID3D11Texture2DPtr back = checked_cast<D3D11RenderWindow*>(this->ScreenFrameBuffer().get())->D3DBackBuffer();
 		ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_lr_tex_.get())->D3DTexture();

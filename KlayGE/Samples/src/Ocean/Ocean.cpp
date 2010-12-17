@@ -364,8 +364,9 @@ namespace
 					0, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					gta->CopyToTextureArray(*gradient_tex_array_, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, i,
-						ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, i);
+					gta->CopyToSubTexture2D(*gradient_tex_array_,
+						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 				}
 				gradient_tex_array_->BuildMipSubLevels();
 			}
@@ -390,8 +391,9 @@ namespace
 						1, 1, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, gid);
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 						0, 1, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-					gta->CopyToTexture2D(*gradient_tex_[i], 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0);
+					gta->CopyToSubTexture2D(*gradient_tex_[i],
+						0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+						0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 					gradient_tex_[i]->BuildMipSubLevels();
 				}
 			}
@@ -441,9 +443,9 @@ namespace
 						TexturePtr const & sim_disp_tex = ocean_simulator_->DisplacementTex();
 						TexturePtr const & sim_grad_tex = ocean_simulator_->GradientTex();
 
-						sim_disp_tex->CopyToTexture2D(*disp_32f, 0,
-							sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0,
-							sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0);
+						sim_disp_tex->CopyToSubTexture2D(*disp_32f,
+							0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
+							0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
 
 						{
 							float4 max_disp = float4(-1e10f, -1e10f, -1e10f, -1e10f);
@@ -481,20 +483,20 @@ namespace
 
 						if (use_tex_array_)
 						{
-							disp_8->CopyToTextureArray(*displacement_tex_array_, 0,
-								sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0, i,
-								sim_disp_tex->Width(0), sim_disp_tex->Height(0), 0, 0, 0);
+							disp_8->CopyToSubTexture2D(*displacement_tex_array_,
+								i, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0),
+								0, 0, 0, 0, sim_disp_tex->Width(0), sim_disp_tex->Height(0));
 							
-							sim_grad_tex->CopyToTextureArray(*gradient_tex_array_, 0,
-									sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0, 0, i,
-									sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0, 0, 0);
+							sim_grad_tex->CopyToSubTexture2D(*gradient_tex_array_,
+								i, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
+								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
 						}
 						else
 						{
 							disp_8->CopyToTexture(*displacement_tex_[i]);
-							sim_grad_tex->CopyToTexture2D(*gradient_tex_[i], 0,
-								sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0, 0,
-								sim_grad_tex->Width(0), sim_grad_tex->Height(0), 0, 0);
+							sim_grad_tex->CopyToSubTexture2D(*gradient_tex_[i],
+								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0),
+								0, 0, 0, 0, sim_grad_tex->Width(0), sim_grad_tex->Height(0));
 							gradient_tex_[i]->BuildMipSubLevels();
 						}
 					}
@@ -532,8 +534,9 @@ namespace
 							1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 						for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 						{
-							gradient_tex_array_->CopyToTextureArray(*gta, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, i,
-								ocean_param_.dmap_dim, ocean_param_.dmap_dim, 0, 0, i);
+							gradient_tex_array_->CopyToSubTexture2D(*gta,
+								i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+								i, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 						}
 						SaveTexture(gta, "OceanGradient.dds");
 					}*/

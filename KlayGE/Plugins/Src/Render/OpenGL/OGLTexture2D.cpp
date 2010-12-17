@@ -57,12 +57,12 @@ namespace KlayGE
 
 		if (0 == numMipMaps)
 		{
-			numMipMaps_ = 1;
+			num_mip_maps_ = 1;
 			uint32_t w = width;
 			uint32_t h = height;
 			while ((w != 1) || (h != 1))
 			{
-				++ numMipMaps_;
+				++ num_mip_maps_;
 
 				w = std::max(static_cast<uint32_t>(1), w / 2);
 				h = std::max(static_cast<uint32_t>(1), h / 2);
@@ -70,32 +70,32 @@ namespace KlayGE
 		}
 		else
 		{
-			numMipMaps_ = numMipMaps;
+			num_mip_maps_ = numMipMaps;
 		}
 
-		bpp_ = NumFormatBits(format_);
+		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
 		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		pbos_.resize(array_size * numMipMaps_);
+		pbos_.resize(array_size * num_mip_maps_);
 		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 
 		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
 		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, numMipMaps_ - 1);
+		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 
 		for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 		{
 			uint32_t w = width;
 			uint32_t h = height;
-			for (uint32_t level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				if (IsCompressedFormat(format_))
 				{
 					int block_size;
@@ -123,17 +123,17 @@ namespace KlayGE
 						}
 					
 						glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * numMipMaps_ + level].data);
+							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
 					}
 					else
 					{
 						glCompressedTexImage2D(target_type_, level, glinternalFormat,
-							w, h, 0, image_size, (NULL == init_data) ? NULL : init_data[array_index * numMipMaps_ + level].data);
+							w, h, 0, image_size, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
 					}
 				}
 				else
 				{
-					GLsizei const image_size = w * h * bpp_ / 8;
+					GLsizei const image_size = w * h * texel_size;
 
 					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -146,12 +146,12 @@ namespace KlayGE
 						}
 
 						glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * numMipMaps_ + level].data);
+							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
 					}
 					else
 					{
 						glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype,
-							(NULL == init_data) ? NULL : init_data[array_index * numMipMaps_ + level].data);
+							(NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
 					}
 				}
 
@@ -165,14 +165,14 @@ namespace KlayGE
 
 	uint32_t OGLTexture2D::Width(int level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
 	uint32_t OGLTexture2D::Height(int level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return heights_[level];
 	}
@@ -180,7 +180,7 @@ namespace KlayGE
 	uint32_t OGLTexture2D::Depth(int level) const
 	{
 		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return 1;
 	}
@@ -194,7 +194,7 @@ namespace KlayGE
 			if (glloader_GL_NV_copy_image())
 			{
 				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-				for (uint32_t level = 0; level < numMipMaps_; ++ level)
+				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 				{
 					glCopyImageSubDataNV(
 						texture_, target_type_, level,
@@ -212,9 +212,9 @@ namespace KlayGE
 
 				for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
 				{
-					for (uint32_t level = 0; level < numMipMaps_; ++ level)
+					for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 					{
-						glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+						glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 
 						glBindTexture(target_type_, texture_);
 						if (IsCompressedFormat(format_))
@@ -226,7 +226,7 @@ namespace KlayGE
 							glGetTexImage(target_type_, level, gl_format, gl_type, NULL);
 						}
 
-						glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+						glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 						glBindTexture(target_type_, checked_cast<OGLTexture*>(&target)->GLTexture());
 
 						if (IsCompressedFormat(format_))
@@ -274,17 +274,21 @@ namespace KlayGE
 		}
 		else
 		{
-			for (uint32_t level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
 			{
-				this->CopyToTexture2D(target, level, target.Width(level), target.Height(level), 0, 0,
-					this->Width(level), this->Height(level), 0, 0);
+				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+				{
+					this->CopyToSubTexture2D(target,
+						array_index, level, 0, 0, target.Width(level), target.Height(level),
+						array_index, level, 0, 0, this->Width(level), this->Height(level));
+				}
 			}
 		}
 	}
 
-	void OGLTexture2D::CopyToTexture2D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	void OGLTexture2D::CopyToSubTexture2D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
@@ -292,274 +296,10 @@ namespace KlayGE
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
 			glCopyImageSubDataNV(
-				texture_, target_type_, level,
-				src_xOffset, src_yOffset, 0,
-				ogl_target.GLTexture(), ogl_target.GLType(), level,
-				dst_xOffset, dst_yOffset, 0, src_width, src_height, 1);
-		}
-		else
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
-			{
-				GLuint fbo_src, fbo_dst;
-				re.GetFBOForBlit(fbo_src, fbo_dst);
-
-				GLuint old_fbo = re.BindFramebuffer();
-
-				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
-				glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, level);
-
-				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
-				glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), level);
-
-				glBlitFramebufferEXT(src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
-								dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
-								GL_COLOR_BUFFER_BIT, ((src_width == dst_width) && (src_height == dst_height)) ? GL_NEAREST : GL_LINEAR);
-
-				re.BindFramebuffer(old_fbo, true);
-			}
-			else
-			{
-				BOOST_ASSERT(format_ == target.Format());
-
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLint gl_target_internal_format;
-				GLenum gl_target_format;
-				GLenum gl_target_type;
-				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-				if (IsCompressedFormat(format_))
-				{
-					BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
-					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
-
-					Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-					Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
-					GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
-
-					memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
-				}
-				else
-				{
-					size_t const src_format_size = NumFormatBytes(format_);
-					size_t const dst_format_size = NumFormatBytes(target.Format());
-
-					if ((src_width != dst_width) || (src_height != dst_height))
-					{
-						std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-						std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-						{
-							Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-							uint8_t const * s = mapper.Pointer<uint8_t>();
-							uint8_t* d = &data_in[0];
-							for (uint32_t y = 0; y < src_height; ++ y)
-							{
-								memcpy(d, s, src_width * src_format_size);
-
-								s += mapper.RowPitch();
-								d += src_width * src_format_size;
-							}
-						}
-
-						gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-							dst_width, dst_height, gl_target_type, &data_out[0]);
-
-						{
-							Texture::Mapper mapper(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-							uint8_t const * s = &data_out[0];
-							uint8_t* d = mapper.Pointer<uint8_t>();
-							for (uint32_t y = 0; y < dst_height; ++ y)
-							{
-								memcpy(d, s, dst_width * dst_format_size);
-
-								s += dst_width * src_format_size;
-								d += mapper.RowPitch();
-							}
-						}
-					}
-					else
-					{
-						Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-						Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-						uint8_t const * s = mapper_src.Pointer<uint8_t>();
-						uint8_t* d = mapper_dst.Pointer<uint8_t>();
-						for (uint32_t y = 0; y < src_height; ++ y)
-						{
-							memcpy(d, s, src_width * src_format_size);
-
-							s += mapper_src.RowPitch();
-							d += mapper_dst.RowPitch();
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void OGLTexture2D::CopyToTextureCube(Texture& target, CubeFaces face, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
-	{
-		BOOST_ASSERT(TT_Cube == target.Type());
-
-		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height))
-		{
-			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-			glCopyImageSubDataNV(
-				texture_, target_type_, level,
-				src_xOffset, src_yOffset, 0,
-				ogl_target.GLTexture(), ogl_target.GLType(), level,
-				dst_xOffset, dst_yOffset, face - CF_Positive_X, src_width, src_height, 1);
-		}
-		else
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
-			{
-				GLuint fbo_src, fbo_dst;
-				re.GetFBOForBlit(fbo_src, fbo_dst);
-
-				GLuint old_fbo = re.BindFramebuffer();
-
-				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
-				glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, level);
-
-				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
-				glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, checked_cast<OGLTexture*>(&target)->GLTexture(), level);
-
-				glBlitFramebufferEXT(src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
-								dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
-								GL_COLOR_BUFFER_BIT, ((src_width == dst_width) && (src_height == dst_height)) ? GL_NEAREST : GL_LINEAR);
-
-				re.BindFramebuffer(old_fbo, true);
-			}
-			else
-			{
-				BOOST_ASSERT(format_ == target.Format());
-
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLint gl_target_internal_format;
-				GLenum gl_target_format;
-				GLenum gl_target_type;
-				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
-				if (IsCompressedFormat(format_))
-				{
-					BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
-					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
-
-					Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-					Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
-					GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
-
-					memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
-				}
-				else
-				{
-					size_t const src_format_size = NumFormatBytes(format_);
-					size_t const dst_format_size = NumFormatBytes(target.Format());
-
-					if ((src_width != dst_width) || (src_height != dst_height))
-					{
-						std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
-						std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
-
-						{
-							Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-							uint8_t const * s = mapper.Pointer<uint8_t>();
-							uint8_t* d = &data_in[0];
-							for (uint32_t y = 0; y < src_height; ++ y)
-							{
-								memcpy(d, s, src_width * src_format_size);
-
-								s += mapper.RowPitch();
-								d += src_width * src_format_size;
-							}
-						}
-
-						gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
-							dst_width, dst_height, gl_target_type, &data_out[0]);
-
-						{
-							Texture::Mapper mapper(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-							uint8_t const * s = &data_out[0];
-							uint8_t* d = mapper.Pointer<uint8_t>();
-							for (uint32_t y = 0; y < dst_height; ++ y)
-							{
-								memcpy(d, s, dst_width * dst_format_size);
-
-								s += dst_width * src_format_size;
-								d += mapper.RowPitch();
-							}
-						}
-					}
-					else
-					{
-						Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-						Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
-						uint8_t const * s = mapper_src.Pointer<uint8_t>();
-						uint8_t* d = mapper_dst.Pointer<uint8_t>();
-						for (uint32_t y = 0; y < src_height; ++ y)
-						{
-							memcpy(d, s, src_width * src_format_size);
-
-							s += mapper_src.RowPitch();
-							d += mapper_dst.RowPitch();
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void OGLTexture2D::CopyToTextureArray(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset, uint32_t dst_array_index, 
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset, uint32_t src_array_index)
-	{
-		BOOST_ASSERT(TT_2D == target.Type());
-
-		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height))
-		{
-			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-			glCopyImageSubDataNV(
-				texture_, target_type_, level,
-				src_xOffset, src_yOffset, src_array_index,
-				ogl_target.GLTexture(), ogl_target.GLType(), level,
-				dst_xOffset, dst_yOffset, dst_array_index, src_width, src_height, 1);
+				texture_, target_type_, src_level,
+				src_x_offset, src_y_offset, src_array_index,
+				ogl_target.GLTexture(), ogl_target.GLType(), dst_level,
+				dst_x_offset, dst_y_offset, dst_array_index, src_width, src_height, 1);
 		}
 		else
 		{
@@ -574,18 +314,25 @@ namespace KlayGE
 				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
 				if (array_size_ > 1)
 				{
-					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, level, src_array_index);
+					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, src_level, src_array_index);
 				}
 				else
 				{
-					glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, level);
+					glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
 				}
 
 				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
-				glFramebufferTextureLayerEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, checked_cast<OGLTexture*>(&target)->GLTexture(), level, dst_array_index);
+				if (array_size_ > 1)
+				{
+					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, checked_cast<OGLTexture*>(&target)->GLTexture(), src_level, src_array_index);
+				}
+				else
+				{
+					glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), dst_level);
+				}
 
-				glBlitFramebufferEXT(src_xOffset, src_yOffset, src_xOffset + src_width, src_yOffset + src_height,
-								dst_xOffset, dst_yOffset, dst_xOffset + dst_width, dst_yOffset + dst_height,
+				glBlitFramebufferEXT(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
+								dst_x_offset, dst_y_offset, dst_x_offset + dst_width, dst_y_offset + dst_height,
 								GL_COLOR_BUFFER_BIT, ((src_width == dst_width) && (src_height == dst_height)) ? GL_NEAREST : GL_LINEAR);
 
 				re.BindFramebuffer(old_fbo, true);
@@ -606,11 +353,11 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format_))
 				{
-					BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
+					BOOST_ASSERT((0 == src_x_offset) && (0 == src_y_offset) && (0 == dst_x_offset) && (0 == dst_y_offset));
 					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-					Texture::Mapper mapper_src(*this, src_array_index, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-					Texture::Mapper mapper_dst(target, dst_array_index, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+					Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 
 					int block_size;
 					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
@@ -638,7 +385,7 @@ namespace KlayGE
 						std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
 						{
-							Texture::Mapper mapper(*this, src_array_index, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+							Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
 							uint8_t const * s = mapper.Pointer<uint8_t>();
 							uint8_t* d = &data_in[0];
 							for (uint32_t y = 0; y < src_height; ++ y)
@@ -654,7 +401,7 @@ namespace KlayGE
 							dst_width, dst_height, gl_target_type, &data_out[0]);
 
 						{
-							Texture::Mapper mapper(target, dst_array_index, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+							Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 							uint8_t const * s = &data_out[0];
 							uint8_t* d = mapper.Pointer<uint8_t>();
 							for (uint32_t y = 0; y < dst_height; ++ y)
@@ -668,8 +415,8 @@ namespace KlayGE
 					}
 					else
 					{
-						Texture::Mapper mapper_src(*this, src_array_index, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-						Texture::Mapper mapper_dst(target, dst_array_index, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+						Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+						Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 						uint8_t const * s = mapper_src.Pointer<uint8_t>();
 						uint8_t* d = mapper_dst.Pointer<uint8_t>();
 						for (uint32_t y = 0; y < src_height; ++ y)
@@ -685,7 +432,154 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture2D::Map2D(int array_index, int level, TextureMapAccess tma,
+	void OGLTexture2D::CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	{
+		UNREF_PARAM(src_face);
+		BOOST_ASSERT(TT_Cube == target.Type());
+
+		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height))
+		{
+			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
+			glCopyImageSubDataNV(
+				texture_, target_type_, src_level,
+				src_x_offset, src_y_offset, src_array_index,
+				ogl_target.GLTexture(), ogl_target.GLType(), dst_level,
+				dst_x_offset, dst_y_offset, dst_array_index * 6 + dst_face - CF_Positive_X, src_width, src_height, 1);
+		}
+		else
+		{
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			{
+				GLuint fbo_src, fbo_dst;
+				re.GetFBOForBlit(fbo_src, fbo_dst);
+
+				GLuint old_fbo = re.BindFramebuffer();
+
+				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
+				if (array_size_ > 1)
+				{
+					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, src_level, src_array_index);
+				}
+				else
+				{
+					glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+				}
+
+				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
+				if (target.ArraySize() > 1)
+				{
+					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
+				}
+				else
+				{
+					glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + dst_face, checked_cast<OGLTexture*>(&target)->GLTexture(), dst_level);
+				}
+
+				glBlitFramebufferEXT(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
+								dst_x_offset, dst_y_offset, dst_x_offset + dst_width, dst_y_offset + dst_height,
+								GL_COLOR_BUFFER_BIT, ((src_width == dst_width) && (src_height == dst_height)) ? GL_NEAREST : GL_LINEAR);
+
+				re.BindFramebuffer(old_fbo, true);
+			}
+			else
+			{
+				BOOST_ASSERT(format_ == target.Format());
+
+				GLint gl_internalFormat;
+				GLenum gl_format;
+				GLenum gl_type;
+				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+				GLint gl_target_internal_format;
+				GLenum gl_target_format;
+				GLenum gl_target_type;
+				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
+
+				if (IsCompressedFormat(format_))
+				{
+					BOOST_ASSERT((0 == src_x_offset) && (0 == src_y_offset) && (0 == dst_x_offset) && (0 == dst_y_offset));
+					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
+
+					Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+					Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+
+					int block_size;
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+					{
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
+					}
+
+					GLsizei const image_size = ((dst_width + 3) / 4) * ((dst_height + 3) / 4) * block_size;
+
+					memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
+				}
+				else
+				{
+					size_t const src_format_size = NumFormatBytes(format_);
+					size_t const dst_format_size = NumFormatBytes(target.Format());
+
+					if ((src_width != dst_width) || (src_height != dst_height))
+					{
+						std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
+						std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
+
+						{
+							Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+							uint8_t const * s = mapper.Pointer<uint8_t>();
+							uint8_t* d = &data_in[0];
+							for (uint32_t y = 0; y < src_height; ++ y)
+							{
+								memcpy(d, s, src_width * src_format_size);
+
+								s += mapper.RowPitch();
+								d += src_width * src_format_size;
+							}
+						}
+
+						gluScaleImage(gl_format, src_width, src_height, gl_type, &data_in[0],
+							dst_width, dst_height, gl_target_type, &data_out[0]);
+
+						{
+							Texture::Mapper mapper(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+							uint8_t const * s = &data_out[0];
+							uint8_t* d = mapper.Pointer<uint8_t>();
+							for (uint32_t y = 0; y < dst_height; ++ y)
+							{
+								memcpy(d, s, dst_width * dst_format_size);
+
+								s += dst_width * src_format_size;
+								d += mapper.RowPitch();
+							}
+						}
+					}
+					else
+					{
+						Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+						Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+						uint8_t const * s = mapper_src.Pointer<uint8_t>();
+						uint8_t* d = mapper_dst.Pointer<uint8_t>();
+						for (uint32_t y = 0; y < src_height; ++ y)
+						{
+							memcpy(d, s, src_width * src_format_size);
+
+							s += mapper_src.RowPitch();
+							d += mapper_dst.RowPitch();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void OGLTexture2D::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 					uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 					void*& data, uint32_t& row_pitch)
 	{
@@ -727,7 +621,7 @@ namespace KlayGE
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(target_type_, texture_);
@@ -747,7 +641,7 @@ namespace KlayGE
 		case TMA_Write_Only:
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -761,7 +655,7 @@ namespace KlayGE
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, image_size, NULL, GL_STREAM_READ);
 
 				glBindTexture(target_type_, texture_);
@@ -786,14 +680,14 @@ namespace KlayGE
 		row_pitch = width * size_fmt;
 	}
 
-	void OGLTexture2D::Unmap2D(int array_index, int level)
+	void OGLTexture2D::Unmap2D(uint32_t array_index, uint32_t level)
 	{
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
 			{
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 			}
 			break;
@@ -801,7 +695,7 @@ namespace KlayGE
 		case TMA_Write_Only:
 			{
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				GLint gl_internalFormat;
@@ -855,10 +749,10 @@ namespace KlayGE
 
 		case TMA_Read_Write:
 			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * numMipMaps_ + level]);
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 
 				GLint gl_internalFormat;
 				GLenum gl_format;
@@ -919,11 +813,11 @@ namespace KlayGE
 	{
 		GLint w, h;
 
-		widthes_.resize(numMipMaps_);
-		heights_.resize(numMipMaps_);
+		widthes_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
 
 		glBindTexture(target_type_, texture_);
-		for (uint32_t level = 0; level < numMipMaps_; ++ level)
+		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
 			glGetTexLevelParameteriv(target_type_, level, GL_TEXTURE_WIDTH, &w);
 			widthes_[level] = w;

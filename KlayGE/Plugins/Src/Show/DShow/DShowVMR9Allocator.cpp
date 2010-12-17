@@ -364,6 +364,7 @@ namespace KlayGE
 
 			uint32_t const width = present_tex_->Width(0);
 			uint32_t const height = present_tex_->Height(0);
+			uint32_t const texel_size = NumFormatBytes(present_tex_->Format());
 
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
 			{
@@ -373,7 +374,7 @@ namespace KlayGE
 				{
 					for (uint32_t y = 0; y < height; ++ y)
 					{
-						memcpy(dst, src, width * present_tex_->Bpp() / 8);
+						memcpy(dst, src, width * texel_size);
 						dst += mapper.RowPitch();
 						src += d3dlocked_rc.Pitch;
 					}

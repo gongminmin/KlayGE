@@ -78,49 +78,41 @@ namespace KlayGE
 		return name;
 	}
 
-	void OGLES2Texture::CopyToTexture1D(Texture& /*target*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_xOffset*/, uint32_t /*src_width*/, uint32_t /*src_xOffset*/)
+	void OGLES2Texture::CopyToSubTexture1D(Texture& /*target*/,
+			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
+			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::CopyToTexture2D(Texture& /*target*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+	void OGLES2Texture::CopyToSubTexture2D(Texture& /*target*/,
+			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::CopyToTexture3D(Texture& /*target*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_zOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/,
-			uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_zOffset*/)
+	void OGLES2Texture::CopyToSubTexture3D(Texture& /*target*/,
+			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
+			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::CopyToTextureCube(Texture& /*target*/, CubeFaces /*face*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/)
+	void OGLES2Texture::CopyToSubTextureCube(Texture& /*target*/,
+			uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
+			uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::CopyToTextureArray(Texture& /*target*/, int /*level*/,
-			uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_xOffset*/, uint32_t /*dst_yOffset*/, uint32_t /*dst_array_index*/,
-			uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_xOffset*/, uint32_t /*src_yOffset*/, uint32_t /*src_array_index*/)
-	{
-		BOOST_ASSERT(false);
-	}
-
-	void OGLES2Texture::Map1D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
+	void OGLES2Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
 		uint32_t /*x_offset*/, uint32_t /*width*/, void*& /*data*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::Map2D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
+	void OGLES2Texture::Map2D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
 		uint32_t /*x_offset*/, uint32_t /*y_offset*/,
 		uint32_t /*width*/, uint32_t /*height*/,
 		void*& /*data*/, uint32_t& /*row_pitch*/)
@@ -128,7 +120,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::Map3D(int /*array_index*/, int /*level*/, TextureMapAccess /*tma*/,
+	void OGLES2Texture::Map3D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
 		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
 		uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
 		void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
@@ -136,29 +128,29 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::MapCube(int /*array_index*/, CubeFaces /*face*/, int /*level*/, TextureMapAccess /*tma*/,
+	void OGLES2Texture::MapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
 		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
 		void*& /*data*/, uint32_t& /*row_pitch*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::Unmap1D(int /*array_index*/, int /*level*/)
+	void OGLES2Texture::Unmap1D(uint32_t /*array_index*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::Unmap2D(int /*array_index*/, int /*level*/)
+	void OGLES2Texture::Unmap2D(uint32_t /*array_index*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::Unmap3D(int /*array_index*/, int /*level*/)
+	void OGLES2Texture::Unmap3D(uint32_t /*array_index*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}
 
-	void OGLES2Texture::UnmapCube(int /*array_index*/, CubeFaces /*face*/, int /*level*/)
+	void OGLES2Texture::UnmapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 	}

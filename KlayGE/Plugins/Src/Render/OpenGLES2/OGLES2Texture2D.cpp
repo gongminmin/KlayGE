@@ -49,12 +49,12 @@ namespace KlayGE
 
 		if (0 == numMipMaps)
 		{
-			numMipMaps_ = 1;
+			num_mip_maps_ = 1;
 			uint32_t w = width;
 			uint32_t h = height;
 			while ((w != 1) || (h != 1))
 			{
-				++ numMipMaps_;
+				++ num_mip_maps_;
 
 				w = std::max(static_cast<uint32_t>(1), w / 2);
 				h = std::max(static_cast<uint32_t>(1), h / 2);
@@ -62,11 +62,11 @@ namespace KlayGE
 		}
 		else
 		{
-			numMipMaps_ = numMipMaps;
+			num_mip_maps_ = numMipMaps;
 		}
 		array_size_ = 1;
 
-		bpp_ = NumFormatBits(format_);
+		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -78,10 +78,10 @@ namespace KlayGE
 		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		tex_data_.resize(numMipMaps_);
-		widthes_.resize(numMipMaps_);
-		heights_.resize(numMipMaps_);
-		for (uint32_t level = 0; level < numMipMaps_; ++ level)
+		tex_data_.resize(num_mip_maps_);
+		widthes_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
+		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
 			widthes_[level] = width;
 			heights_[level] = height;
@@ -115,7 +115,7 @@ namespace KlayGE
 			}
 			else
 			{
-				GLsizei const image_size = width * height * bpp_ / 8;
+				GLsizei const image_size = width * height * texel_size;
 
 				if (NULL == init_data)
 				{
@@ -136,14 +136,14 @@ namespace KlayGE
 
 	uint32_t OGLES2Texture2D::Width(int level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
 	uint32_t OGLES2Texture2D::Height(int level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return heights_[level];
 	}
@@ -151,7 +151,7 @@ namespace KlayGE
 	uint32_t OGLES2Texture2D::Depth(int level) const
 	{
 		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < numMipMaps_);
+		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
 
 		return 1;
 	}
@@ -162,13 +162,15 @@ namespace KlayGE
 
 		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)) && (heights_[0] == target.Height(0)))
 		{
+			uint32_t texel_size = NumFormatBytes(format_);
+
 			GLint gl_internalFormat;
 			GLenum gl_format;
 			GLenum gl_type;
 			OGLES2Mapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 			OGLES2Texture2D& gles_target = *checked_cast<OGLES2Texture2D*>(&target);
-			for (uint32_t level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
 				glBindTexture(target_type_, gles_target.GLTexture());
 
@@ -193,7 +195,7 @@ namespace KlayGE
 				}
 				else
 				{
-					GLsizei const image_size = target.Width(level) * target.Height(level) * bpp_ / 8;
+					GLsizei const image_size = target.Width(level) * target.Height(level) * texel_size;
 
 					memcpy(&gles_target.tex_data_[level][0], &tex_data_[level][0], image_size);
 					glTexSubImage2D(target_type_, level, 0, 0, target.Width(level), target.Height(level),
@@ -203,17 +205,21 @@ namespace KlayGE
 		}
 		else
 		{
-			for (uint32_t level = 0; level < numMipMaps_; ++ level)
+			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
 			{
-				this->CopyToTexture2D(target, level, target.Width(level), target.Height(level), 0, 0,
-					this->Width(level), this->Height(level), 0, 0);
+				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+				{
+					this->CopyToSubTexture2D(target,
+						array_index, level, 0, 0, target.Width(level), target.Height(level),
+						array_index, level, 0, 0, this->Width(level), this->Height(level));
+				}
 			}
 		}
 	}
 
-	void OGLES2Texture2D::CopyToTexture2D(Texture& target, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	void OGLES2Texture2D::CopyToSubTexture2D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
 		BOOST_ASSERT(type_ == target.Type());
 		BOOST_ASSERT(format_ == target.Format());
@@ -230,11 +236,11 @@ namespace KlayGE
 
 		if (IsCompressedFormat(format_))
 		{
-			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
+			BOOST_ASSERT((0 == src_x_offset) && (0 == src_y_offset) && (0 == dst_x_offset) && (0 == dst_y_offset));
 			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-			Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-			Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+			Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 
 			int block_size;
 			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
@@ -262,7 +268,7 @@ namespace KlayGE
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
 				{
-					Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
 					uint8_t const * s = mapper.Pointer<uint8_t>();
 					uint8_t* d = &data_in[0];
 					for (uint32_t y = 0; y < src_height; ++ y)
@@ -278,7 +284,7 @@ namespace KlayGE
 					dst_width, dst_height, gl_target_type, &data_out[0]);
 
 				{
-					Texture::Mapper mapper(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					Texture::Mapper mapper(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 					uint8_t const * s = &data_out[0];
 					uint8_t* d = mapper.Pointer<uint8_t>();
 					for (uint32_t y = 0; y < dst_height; ++ y)
@@ -292,8 +298,8 @@ namespace KlayGE
 			}
 			else
 			{
-				Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, 0, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)
@@ -307,10 +313,11 @@ namespace KlayGE
 		}
 	}
 	
-	void OGLES2Texture2D::CopyToTextureCube(Texture& target, CubeFaces face, int level,
-			uint32_t dst_width, uint32_t dst_height, uint32_t dst_xOffset, uint32_t dst_yOffset,
-			uint32_t src_width, uint32_t src_height, uint32_t src_xOffset, uint32_t src_yOffset)
+	void OGLES2Texture2D::CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
 	{
+		UNREF_PARAM(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 		BOOST_ASSERT(format_ == target.Format());
 
@@ -326,11 +333,11 @@ namespace KlayGE
 
 		if (IsCompressedFormat(format_))
 		{
-			BOOST_ASSERT((0 == src_xOffset) && (0 == src_yOffset) && (0 == dst_xOffset) && (0 == dst_yOffset));
+			BOOST_ASSERT((0 == src_x_offset) && (0 == src_y_offset) && (0 == dst_x_offset) && (0 == dst_y_offset));
 			BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
 
-			Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-			Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+			Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+			Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 
 			int block_size;
 			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
@@ -358,7 +365,7 @@ namespace KlayGE
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
 				{
-					Texture::Mapper mapper(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
+					Texture::Mapper mapper(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
 					uint8_t const * s = mapper.Pointer<uint8_t>();
 					uint8_t* d = &data_in[0];
 					for (uint32_t y = 0; y < src_height; ++ y)
@@ -374,7 +381,7 @@ namespace KlayGE
 					dst_width, dst_height, gl_target_type, &data_out[0]);
 
 				{
-					Texture::Mapper mapper(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+					Texture::Mapper mapper(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 					uint8_t const * s = &data_out[0];
 					uint8_t* d = mapper.Pointer<uint8_t>();
 					for (uint32_t y = 0; y < dst_height; ++ y)
@@ -388,8 +395,8 @@ namespace KlayGE
 			}
 			else
 			{
-				Texture::Mapper mapper_src(*this, 0, level, TMA_Read_Only, src_xOffset, src_yOffset, src_width, src_height);
-				Texture::Mapper mapper_dst(target, 0, face, level, TMA_Write_Only, dst_xOffset, dst_yOffset, dst_width, dst_height);
+				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+				Texture::Mapper mapper_dst(target, dst_array_index, dst_face, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				for (uint32_t y = 0; y < src_height; ++ y)
@@ -403,7 +410,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLES2Texture2D::Map2D(int array_index, int level, TextureMapAccess tma,
+	void OGLES2Texture2D::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 					uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,
 					void*& data, uint32_t& row_pitch)
 	{
@@ -417,7 +424,7 @@ namespace KlayGE
 		row_pitch = widthes_[level] * size_fmt;
 	}
 
-	void OGLES2Texture2D::Unmap2D(int array_index, int level)
+	void OGLES2Texture2D::Unmap2D(uint32_t array_index, uint32_t level)
 	{
 		BOOST_ASSERT(0 == array_index);
 		UNREF_PARAM(array_index);
