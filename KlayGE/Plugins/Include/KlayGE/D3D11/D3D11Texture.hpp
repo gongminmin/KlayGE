@@ -35,6 +35,10 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
+		uint32_t Depth(uint32_t level) const;
+
 		virtual void CopyToSubTexture1D(Texture& target,
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
@@ -48,6 +52,7 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
+		virtual ID3D11ResourcePtr D3DResource() const = 0;
 		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
 		{
 			return d3d_sr_view_;
@@ -66,6 +71,9 @@ namespace KlayGE
 
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
+		void CopyToSubTexture(Texture& target,
+			uint32_t dst_sub_res, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t src_sub_res, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -122,9 +130,7 @@ namespace KlayGE
 	public:
 		D3D11Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture1D(Texture& target,
@@ -136,6 +142,10 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		ID3D11ResourcePtr D3DResource() const
+		{
+			return d3dTexture1D_;
+		}
 		ID3D11Texture1DPtr const & D3DTexture() const
 		{
 			return d3dTexture1D_;
@@ -161,9 +171,8 @@ namespace KlayGE
 	public:
 		D3D11Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture2D(Texture& target,
@@ -178,6 +187,10 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		ID3D11ResourcePtr D3DResource() const
+		{
+			return d3dTexture2D_;
+		}
 		ID3D11Texture2DPtr const & D3DTexture() const
 		{
 			return d3dTexture2D_;
@@ -204,9 +217,9 @@ namespace KlayGE
 	public:
 		D3D11Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
+		uint32_t Depth(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture3D(Texture& target,
@@ -218,6 +231,10 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		ID3D11ResourcePtr D3DResource() const
+		{
+			return d3dTexture3D_;
+		}
 		ID3D11Texture3DPtr const & D3DTexture() const
 		{
 			return d3dTexture3D_;
@@ -247,9 +264,8 @@ namespace KlayGE
 		D3D11TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTextureCube(Texture& target,
@@ -263,6 +279,10 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
+		ID3D11ResourcePtr D3DResource() const
+		{
+			return d3dTextureCube_;
+		}
 		ID3D11TextureCubePtr const & D3DTexture() const
 		{
 			return d3dTextureCube_;

@@ -63,7 +63,7 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				s /= 2;
+				s = std::max(1U, s / 2);
 			}
 		}
 		else
@@ -154,7 +154,7 @@ namespace KlayGE
 						}
 					}
 
-					s /= 2;
+					s = std::max(1U, s / 2);
 				}
 			}
 		}
@@ -162,24 +162,16 @@ namespace KlayGE
 		this->UpdateParams();
 	}
 
-	uint32_t OGLTextureCube::Width(int level) const
+	uint32_t OGLTextureCube::Width(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
-	uint32_t OGLTextureCube::Height(int level) const
+	uint32_t OGLTextureCube::Height(uint32_t level) const
 	{
 		return this->Width(level);
-	}
-
-	uint32_t OGLTextureCube::Depth(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
 	}
 
 	void OGLTextureCube::CopyToTexture(Texture& target)

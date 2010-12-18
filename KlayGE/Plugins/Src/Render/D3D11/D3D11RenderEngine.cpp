@@ -986,13 +986,16 @@ namespace KlayGE
 			bool cleared = false;
 			for (uint32_t i = 0; i < shader_srv_cache_[st].size(); ++ i)
 			{
-				shader_srv_cache_[st][i]->GetResource(&srv_tex);
-				if (srv_tex == rtv_tex)
+				if (shader_srv_cache_[st][i])
 				{
-					shader_srv_cache_[st][i] = NULL;
-					cleared = true;
+					shader_srv_cache_[st][i]->GetResource(&srv_tex);
+					if (srv_tex == rtv_tex)
+					{
+						shader_srv_cache_[st][i] = NULL;
+						cleared = true;
+					}
+					srv_tex->Release();
 				}
-				srv_tex->Release();
 			}
 
 			if (cleared)

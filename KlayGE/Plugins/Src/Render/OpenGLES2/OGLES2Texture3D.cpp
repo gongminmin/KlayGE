@@ -62,9 +62,9 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(static_cast<uint32_t>(1), w / 2);
-				h = std::max(static_cast<uint32_t>(1), h / 2);
-				d = std::max(static_cast<uint32_t>(1), d / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
+				d = std::max(1U, d / 2);
 			}
 		}
 		else
@@ -138,23 +138,23 @@ namespace KlayGE
 				glTexImage3DOES(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype, &tex_data_[level][0]);
 			}
 
-			width = std::max(static_cast<uint32_t>(1), width / 2);
-			height = std::max(static_cast<uint32_t>(1), height / 2);
-			depth = std::max(static_cast<uint32_t>(1), depth / 2);
+			width = std::max(1U, width / 2);
+			height = std::max(1U, height / 2);
+			depth = std::max(1U, depth / 2);
 		}
 	}
 
-	uint32_t OGLES2Texture3D::Width(int level) const
+	uint32_t OGLES2Texture3D::Width(uint32_t level) const
 	{
 		return widthes_[level];
 	}
 
-	uint32_t OGLES2Texture3D::Height(int level) const
+	uint32_t OGLES2Texture3D::Height(uint32_t level) const
 	{
 		return heights_[level];
 	}
 
-	uint32_t OGLES2Texture3D::Depth(int level) const
+	uint32_t OGLES2Texture3D::Depth(uint32_t level) const
 	{
 		return depthes_[level];
 	}

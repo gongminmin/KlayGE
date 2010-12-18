@@ -78,6 +78,30 @@ namespace KlayGE
 		return name;
 	}
 
+	uint32_t OGLES2Texture::Width(uint32_t level) const
+	{
+		UNREF_PARAM(level);
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return 1;
+	}
+
+	uint32_t OGLES2Texture::Height(uint32_t level) const
+	{
+		UNREF_PARAM(level);
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return 1;
+	}
+
+	uint32_t OGLES2Texture::Depth(uint32_t level) const
+	{
+		UNREF_PARAM(level);
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return 1;
+	}
+
 	void OGLES2Texture::CopyToSubTexture1D(Texture& /*target*/,
 			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
 			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)

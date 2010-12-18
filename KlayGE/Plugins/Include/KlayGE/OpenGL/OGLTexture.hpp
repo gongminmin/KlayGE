@@ -36,6 +36,10 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
+		uint32_t Depth(uint32_t level) const;
+
 		virtual void CopyToSubTexture1D(Texture& target,
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
@@ -105,9 +109,7 @@ namespace KlayGE
 		OGLTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture1D(Texture& target,
@@ -135,9 +137,8 @@ namespace KlayGE
 		OGLTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture2D(Texture& target,
@@ -170,9 +171,9 @@ namespace KlayGE
 		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
+		uint32_t Depth(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTexture3D(Texture& target,
@@ -204,9 +205,8 @@ namespace KlayGE
 		OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
 			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 
-		uint32_t Width(int level) const;
-		uint32_t Height(int level) const;
-		uint32_t Depth(int level) const;
+		uint32_t Width(uint32_t level) const;
+		uint32_t Height(uint32_t level) const;
 
 		void CopyToTexture(Texture& target);
 		void CopyToSubTextureCube(Texture& target,

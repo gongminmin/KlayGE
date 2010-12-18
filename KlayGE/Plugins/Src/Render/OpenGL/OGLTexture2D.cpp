@@ -64,8 +64,8 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(static_cast<uint32_t>(1), w / 2);
-				h = std::max(static_cast<uint32_t>(1), h / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
 			}
 		}
 		else
@@ -155,34 +155,26 @@ namespace KlayGE
 					}
 				}
 
-				w = std::max(static_cast<uint32_t>(1), w / 2);
-				h = std::max(static_cast<uint32_t>(1), h / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
 			}
 		}
 
 		this->UpdateParams();
 	}
 
-	uint32_t OGLTexture2D::Width(int level) const
+	uint32_t OGLTexture2D::Width(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
-	uint32_t OGLTexture2D::Height(int level) const
+	uint32_t OGLTexture2D::Height(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return heights_[level];
-	}
-
-	uint32_t OGLTexture2D::Depth(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
 	}
 
 	void OGLTexture2D::CopyToTexture(Texture& target)

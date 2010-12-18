@@ -55,7 +55,7 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w /= 2;
+				w = std::max(1U, w / 2);
 			}
 		}
 		else
@@ -125,31 +125,15 @@ namespace KlayGE
 				glTexImage2D(target_type_, level, glinternalFormat, width, 1, 0, glformat, gltype, &tex_data_[level][0]);
 			}
 
-			width = std::max(static_cast<uint32_t>(1), width / 2);
+			width = std::max(1U, width / 2);
 		}
 	}
 
-	uint32_t OGLES2Texture1D::Width(int level) const
+	uint32_t OGLES2Texture1D::Width(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return widthes_[level];
-	}
-
-	uint32_t OGLES2Texture1D::Height(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
-	}
-
-	uint32_t OGLES2Texture1D::Depth(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
 	}
 
 	void OGLES2Texture1D::CopyToTexture(Texture& target)

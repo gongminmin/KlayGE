@@ -34,7 +34,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "d3dx11.lib")
+	#pragma comment(lib, "d3dx11d.lib")
 #else
 	#pragma comment(lib, "d3dx11.lib")
 #endif
@@ -55,8 +55,8 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(static_cast<uint32_t>(1), w / 2);
-				h = std::max(static_cast<uint32_t>(1), h / 2);
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
 			}
 		}
 		else
@@ -205,26 +205,18 @@ namespace KlayGE
 		this->UpdateParams();
 	}
 
-	uint32_t D3D11Texture2D::Width(int level) const
+	uint32_t D3D11Texture2D::Width(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
-	uint32_t D3D11Texture2D::Height(int level) const
+	uint32_t D3D11Texture2D::Height(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return heights_[level];
-	}
-
-	uint32_t D3D11Texture2D::Depth(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
 	}
 
 	void D3D11Texture2D::CopyToTexture(Texture& target)
@@ -236,7 +228,7 @@ namespace KlayGE
 		if ((this->Width(0) == target.Width(0)) && (this->Height(0) == target.Height(0)) && (this->Format() == target.Format())
 			&& (this->NumMipMaps() == target.NumMipMaps()))
 		{
-			if ((this->SampleCount() > 1) && target.SampleCount() == 1)
+			if ((this->SampleCount() > 1) && (1 == target.SampleCount()))
 			{
 				for (uint32_t l = 0; l < this->NumMipMaps(); ++ l)
 				{
@@ -283,63 +275,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D11Texture2D& other(*checked_cast<D3D11Texture2D*>(&target));
-
-		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
-		{
-			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(dst_level, dst_array_index, other.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, d3dTexture2D_.get(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
-		}
-		else
-		{
-			D3D11_BOX src_box, dst_box;
-
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			dst_box.left = dst_x_offset;
-			dst_box.top = dst_y_offset;
-			dst_box.front = 0;
-			dst_box.right = dst_x_offset + dst_width;
-			dst_box.bottom = dst_y_offset + dst_height;
-			dst_box.back = 1;
-
-			D3DX11_TEXTURE_LOAD_INFO info;
-			info.pSrcBox = &src_box;
-			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps());
-			info.DstFirstMip = D3D11CalcSubresource(dst_level, dst_array_index, other.NumMipMaps());
-			info.NumMips = 1;
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
-			info.Filter = D3DX11_FILTER_LINEAR;
-			info.MipFilter = D3DX11_FILTER_LINEAR;
-			if (IsSRGB(format_))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_IN;
-				info.MipFilter |= D3DX11_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(target.Format()))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_OUT;
-				info.MipFilter |= D3DX11_FILTER_SRGB_OUT;
-			}
-
-			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), d3dTexture2D_.get(), &info, other.D3DTexture().get());
-		}
+		this->CopyToSubTexture(target,
+			D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()), dst_x_offset, dst_y_offset, 0, dst_width, dst_height, 1,
+			D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), src_x_offset, src_y_offset, 0, src_width, src_height, 1);
 	}
 
 	void D3D11Texture2D::CopyToSubTextureCube(Texture& target,
@@ -349,63 +287,9 @@ namespace KlayGE
 		UNREF_PARAM(src_face);
 		BOOST_ASSERT(TT_Cube == target.Type());
 
-		D3D11TextureCube& other(*checked_cast<D3D11TextureCube*>(&target));
-
-		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
-		{
-			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face, other.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, d3dTexture2D_.get(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
-		}
-		else
-		{
-			D3D11_BOX src_box, dst_box;
-
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			dst_box.left = dst_x_offset;
-			dst_box.top = dst_y_offset;
-			dst_box.front = 0;
-			dst_box.right = dst_x_offset + dst_width;
-			dst_box.bottom = dst_y_offset + dst_height;
-			dst_box.back = 1;
-
-			D3DX11_TEXTURE_LOAD_INFO info;
-			info.pSrcBox = &src_box;
-			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps());
-			info.DstFirstMip = D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face, other.NumMipMaps());
-			info.NumMips = 1;
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
-			info.Filter = D3DX11_FILTER_LINEAR;
-			info.MipFilter = D3DX11_FILTER_LINEAR;
-			if (IsSRGB(format_))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_IN;
-				info.MipFilter |= D3DX11_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(target.Format()))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_OUT;
-				info.MipFilter |= D3DX11_FILTER_SRGB_OUT;
-			}
-
-			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), d3dTexture2D_.get(), &info, other.D3DTexture().get());
-		}
+		this->CopyToSubTexture(target,
+			D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - CF_Positive_X, target.NumMipMaps()), dst_x_offset, dst_y_offset, 0, dst_width, dst_height, 1,
+			D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), src_x_offset, src_y_offset, 0, src_width, src_height, 1);
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture2D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t level)
@@ -568,8 +452,8 @@ namespace KlayGE
 		heights_[0] = desc_.Height;
 		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = widthes_[level - 1] / 2;
-			heights_[level] = heights_[level - 1] / 2;
+			widthes_[level] = std::max(1U, widthes_[level - 1] / 2);
+			heights_[level] = std::max(1U, heights_[level - 1] / 2);
 		}
 
 		switch (desc_.Format)

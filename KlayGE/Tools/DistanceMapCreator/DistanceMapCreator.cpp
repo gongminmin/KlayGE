@@ -280,13 +280,15 @@ int main(int argc, char* argv[])
 		TexturePtr height_map_texture = render_factory.MakeTexture2D(width, height, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*height_map_texture);
 
+		uint32_t texel_size = NumFormatBytes(height_map_texture->Format());
+
 		std::vector<uint8_t> height_map(height * width);
 		{
 			Texture::Mapper mapper(*height_map_texture, 0, 0, TMA_Read_Only, 0, 0, width, height);
 			uint8_t* data = mapper.Pointer<uint8_t>();
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(&height_map[y * width], data, width * height_map_texture->Bpp() / 8);
+				memcpy(&height_map[y * width], data, width * texel_size);
 				data += mapper.RowPitch();
 			}
 		}
@@ -316,13 +318,15 @@ int main(int argc, char* argv[])
 		TexturePtr vol_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 		src_texture->CopyToTexture(*vol_map_texture);
 
+		uint32_t texel_size = NumFormatBytes(vol_map_texture->Format());
+
 		Texture::Mapper mapper(*vol_map_texture, 0, 0, TMA_Read_Only, 0, 0, 0, width, height, depth);
 		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (int z = 0; z < depth; ++ z)
 		{
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(&volume[z * width * height + y * width], data, width * vol_map_texture->Bpp() / 8);
+				memcpy(&volume[z * width * height + y * width], data, width * texel_size);
 				data += mapper.RowPitch();
 			}
 			data += mapper.SlicePitch() - mapper.RowPitch() * height;
@@ -339,13 +343,15 @@ int main(int argc, char* argv[])
 	TexturePtr distance_map_texture = render_factory.MakeTexture3D(width, height, depth, 1, 1, EF_R8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
 
 	{
+		uint32_t texel_size = NumFormatBytes(distance_map_texture->Format());
+
 		Texture::Mapper mapper(*distance_map_texture, 0, 0, TMA_Write_Only, 0, 0, 0, width, height, depth);
 		uint8_t* data = mapper.Pointer<uint8_t>();
 		for (int z = 0; z < depth; ++ z)
 		{
 			for (int y = 0; y < height; ++ y)
 			{
-				memcpy(data, &distances[z * width * height + y * width], width * distance_map_texture->Bpp() / 8);
+				memcpy(data, &distances[z * width * height + y * width], width * texel_size);
 				data += mapper.RowPitch();
 			}
 			data += mapper.SlicePitch() - mapper.RowPitch() * height;

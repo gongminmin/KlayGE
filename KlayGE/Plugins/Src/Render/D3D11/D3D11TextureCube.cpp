@@ -34,7 +34,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #ifdef KLAYGE_DEBUG
-	#pragma comment(lib, "d3dx11.lib")
+	#pragma comment(lib, "d3dx11d.lib")
 #else
 	#pragma comment(lib, "d3dx11.lib")
 #endif
@@ -54,7 +54,7 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(static_cast<uint32_t>(1), w / 2);
+				w = std::max(1U, w / 2);
 			}
 		}
 		else
@@ -129,24 +129,16 @@ namespace KlayGE
 		this->UpdateParams();
 	}
 
-	uint32_t D3D11TextureCube::Width(int level) const
+	uint32_t D3D11TextureCube::Width(uint32_t level) const
 	{
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
+		BOOST_ASSERT(level < num_mip_maps_);
 
 		return widthes_[level];
 	}
 
-	uint32_t D3D11TextureCube::Height(int level) const
+	uint32_t D3D11TextureCube::Height(uint32_t level) const
 	{
 		return this->Width(level);
-	}
-
-	uint32_t D3D11TextureCube::Depth(int level) const
-	{
-		UNREF_PARAM(level);
-		BOOST_ASSERT(static_cast<uint32_t>(level) < num_mip_maps_);
-
-		return 1;
 	}
 
 	void D3D11TextureCube::CopyToTexture(Texture& target)
@@ -196,63 +188,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		D3D11TextureCube& other(*checked_cast<D3D11TextureCube*>(&target));
-
-		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
-		{
-			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DTexture().get(), D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - Texture::CF_Positive_X, other.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, d3dTextureCube_.get(), D3D11CalcSubresource(src_level, src_array_index * 6 + src_face - Texture::CF_Positive_X, this->NumMipMaps()), &src_box);
-		}
-		else
-		{
-			D3D11_BOX src_box, dst_box;
-
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
-
-			dst_box.left = dst_x_offset;
-			dst_box.top = dst_y_offset;
-			dst_box.front = 0;
-			dst_box.right = dst_x_offset + dst_width;
-			dst_box.bottom = dst_y_offset + dst_height;
-			dst_box.back = 1;
-
-			D3DX11_TEXTURE_LOAD_INFO info;
-			info.pSrcBox = &src_box;
-			info.pDstBox = &dst_box;
-			info.SrcFirstMip = D3D11CalcSubresource(src_level, src_array_index * 6 + src_face - Texture::CF_Positive_X, this->NumMipMaps());
-			info.DstFirstMip = D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - Texture::CF_Positive_X, other.NumMipMaps());
-			info.NumMips = 1;
-			info.SrcFirstElement = 0;
-			info.DstFirstElement = 0;
-			info.NumElements = 0;
-			info.Filter = D3DX11_FILTER_LINEAR;
-			info.MipFilter = D3DX11_FILTER_LINEAR;
-			if (IsSRGB(format_))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_IN;
-				info.MipFilter |= D3DX11_FILTER_SRGB_IN;
-			}
-			if (IsSRGB(target.Format()))
-			{
-				info.Filter |= D3DX11_FILTER_SRGB_OUT;
-				info.MipFilter |= D3DX11_FILTER_SRGB_OUT;
-			}
-
-			D3DX11LoadTextureFromTexture(d3d_imm_ctx_.get(), d3dTextureCube_.get(), &info, other.D3DTexture().get());
-		}
+		this->CopyToSubTexture(target,
+			D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - CF_Positive_X, target.NumMipMaps()), dst_x_offset, dst_y_offset, 0, dst_width, dst_height, 1,
+			D3D11CalcSubresource(src_level, src_array_index * 6 + src_face - CF_Positive_X, this->NumMipMaps()), src_x_offset, src_y_offset, 0, src_width, src_height, 1);
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11TextureCube::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t level)
@@ -320,7 +258,7 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - Texture::CF_Positive_X;
+		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
 		desc.Texture2DArray.ArraySize = 1;
 
 		ID3D11RenderTargetView* rt_view;
@@ -396,7 +334,7 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_index * 6 + face - Texture::CF_Positive_X;;
+		desc.Texture2DArray.ArraySize = array_index * 6 + face - CF_Positive_X;;
 		desc.Texture2DArray.FirstArraySlice = 1;
 
 		ID3D11DepthStencilView* ds_view;
@@ -410,7 +348,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + (face - Texture::CF_Positive_X), num_mip_maps_),
+		TIF(d3d_imm_ctx_->Map(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_),
 			D3D11Mapping::Mapping(tma, type_, access_hint_, num_mip_maps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + (y_offset * mapped.RowPitch + x_offset) * NumFormatBytes(format_);
@@ -419,7 +357,7 @@ namespace KlayGE
 
 	void D3D11TextureCube::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + (face - Texture::CF_Positive_X), num_mip_maps_));
+		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_));
 	}
 
 	void D3D11TextureCube::BuildMipSubLevels()
@@ -447,7 +385,7 @@ namespace KlayGE
 		widthes_[0] = desc_.Width;
 		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = widthes_[level - 1] / 2;
+			widthes_[level] = std::max(1U, widthes_[level - 1] / 2);
 		}
 
 		format_ = D3D11Mapping::MappingFormat(desc_.Format);

@@ -112,7 +112,7 @@ namespace KlayGE
 			friend class Texture;
 
 		public:
-			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t width)
 				: tex_(tex),
 					mapped_array_index_(array_index),
@@ -121,7 +121,7 @@ namespace KlayGE
 				tex_.Map1D(array_index, level, tma, x_offset, width, data_);
 				row_pitch_ = slice_pitch_ = width * NumFormatBytes(tex.Format());
 			}
-			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset,
 						uint32_t width, uint32_t height)
 				: tex_(tex),
@@ -131,7 +131,7 @@ namespace KlayGE
 				tex_.Map2D(array_index, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
 				slice_pitch_ = row_pitch_ * height;
 			}
-			Mapper(Texture& tex, int array_index, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 						uint32_t width, uint32_t height, uint32_t depth)
 				: tex_(tex),
@@ -140,7 +140,7 @@ namespace KlayGE
 			{
 				tex_.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
 			}
-			Mapper(Texture& tex, int array_index, CubeFaces face, int level, TextureMapAccess tma,
+			Mapper(Texture& tex, uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
 						uint32_t x_offset, uint32_t y_offset,
 						uint32_t width, uint32_t height)
 				: tex_(tex),
@@ -201,9 +201,9 @@ namespace KlayGE
 			void* data_;
 			uint32_t row_pitch_, slice_pitch_;
 
-			int mapped_array_index_;
+			uint32_t mapped_array_index_;
 			CubeFaces mapped_face_;
-			int mapped_level_;
+			uint32_t mapped_level_;
 		};
 
 	public:
@@ -221,11 +221,11 @@ namespace KlayGE
 		uint32_t ArraySize() const;
 
 		// Returns the width of the texture.
-		virtual uint32_t Width(int level) const = 0;
+		virtual uint32_t Width(uint32_t level) const = 0;
 		// Returns the height of the texture.
-		virtual uint32_t Height(int level) const = 0;
+		virtual uint32_t Height(uint32_t level) const = 0;
 		// Returns the depth of the texture (only for 3D texture).
-		virtual uint32_t Depth(int level) const = 0;
+		virtual uint32_t Depth(uint32_t level) const = 0;
 
 		// Returns the pixel format for the texture surface.
 		ElementFormat Format() const;

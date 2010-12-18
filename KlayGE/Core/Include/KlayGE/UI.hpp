@@ -694,12 +694,20 @@ namespace KlayGE
 		explicit UIStatic(UIDialogPtr const & dialog);
 		UIStatic(uint32_t type, UIDialogPtr const & dialog);
 		UIStatic(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bIsDefault = false);
-		virtual ~UIStatic() {}
+		virtual ~UIStatic()
+		{
+		}
 
 		virtual void Render();
-		virtual bool ContainsPoint(Vector_T<int32_t, 2> const & /*pt*/) const { return false; }
+		virtual bool ContainsPoint(Vector_T<int32_t, 2> const & /*pt*/) const
+		{
+			return false;
+		}
 
-		std::wstring const & GetText() const { return text_; }
+		std::wstring const & GetText() const
+		{
+			return text_;
+		}
 		void SetText(std::wstring const & strText);
 
 	protected:
@@ -720,7 +728,9 @@ namespace KlayGE
 		explicit UIButton(UIDialogPtr const & dialog);
 		UIButton(uint32_t type, UIDialogPtr const & dialog);
 		UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIButton() {}
+		virtual ~UIButton()
+		{
+		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -773,7 +783,9 @@ namespace KlayGE
 		explicit UITexButton(UIDialogPtr const & dialog);
 		UITexButton(uint32_t type, UIDialogPtr const & dialog);
 		UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UITexButton() {}
+		virtual ~UITexButton()
+		{
+		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -826,7 +838,9 @@ namespace KlayGE
 		explicit UICheckBox(UIDialogPtr const & dialog);
 		UICheckBox(uint32_t type, UIDialogPtr const & dialog);
 		UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UICheckBox() {}
+		virtual ~UICheckBox()
+		{
+		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -842,8 +856,14 @@ namespace KlayGE
 
 		virtual void Render();
 
-		bool GetChecked() const { return checked_; }
-		void SetChecked(bool bChecked) { this->SetCheckedInternal(bChecked); }
+		bool GetChecked() const
+		{
+			return checked_;
+		}
+		void SetChecked(bool bChecked)
+		{
+			this->SetCheckedInternal(bChecked);
+		}
 
 		std::wstring const & GetText() const;
 		void SetText(std::wstring const & strText);
@@ -888,11 +908,22 @@ namespace KlayGE
 		explicit UIRadioButton(UIDialogPtr const & dialog);
 		UIRadioButton(uint32_t type, UIDialogPtr const & dialog);
 		UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int x, int y, int width, int height, bool bChecked = false, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIRadioButton() {}
+		virtual ~UIRadioButton()
+		{
+		}
 
-		void SetChecked(bool bChecked, bool bClearGroup = true) { this->SetCheckedInternal(bChecked, bClearGroup); }
-		void SetButtonGroup(uint32_t nButtonGroup) { button_group_ = nButtonGroup; }
-		uint32_t GetButtonGroup() const { return button_group_; }
+		void SetChecked(bool bChecked, bool bClearGroup = true)
+		{
+			this->SetCheckedInternal(bChecked, bClearGroup);
+		}
+		void SetButtonGroup(uint32_t nButtonGroup)
+		{
+			button_group_ = nButtonGroup;
+		}
+		uint32_t GetButtonGroup() const
+		{
+			return button_group_;
+		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -908,7 +939,10 @@ namespace KlayGE
 
 		virtual void Render();
 
-		bool GetChecked() const { return checked_; }
+		bool GetChecked() const
+		{
+			return checked_;
+		}
 
 		std::wstring const & GetText() const;
 		void SetText(std::wstring const & strText);
@@ -955,7 +989,9 @@ namespace KlayGE
 		explicit UISlider(UIDialogPtr const & dialog);
 		UISlider(uint32_t type, UIDialogPtr const & dialog);
 		UISlider(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, int min = 0, int max = 100, int value = 50, bool bIsDefault = false);
-		virtual ~UISlider() {}
+		virtual ~UISlider()
+		{
+		}
 
 		virtual bool CanHaveFocus() const
 		{
@@ -971,10 +1007,20 @@ namespace KlayGE
 
 		virtual void Render();
 
-		void SetValue(int nValue) { this->SetValueInternal(nValue); }
-		int  GetValue() const { return value_; };
+		void SetValue(int nValue)
+		{
+			this->SetValueInternal(nValue);
+		}
+		int GetValue() const
+		{
+			return value_;
+		};
 
-		void GetRange(int &nMin, int &nMax) const { nMin = min_; nMax = max_; }
+		void GetRange(int &nMin, int &nMax) const
+		{
+			nMin = min_;
+			nMax = max_;
+		}
 		void SetRange(int nMin, int nMax);
 
 	public:
@@ -1038,10 +1084,26 @@ namespace KlayGE
 		virtual void UpdateRects();
 
 		void SetTrackRange(size_t nStart, size_t nEnd);
-		size_t GetTrackPos() const { return position_; }
-		void SetTrackPos(size_t nPosition) { position_ = nPosition; this->Cap(); this->UpdateThumbRect(); }
-		size_t GetPageSize() const { return page_size_; }
-		void SetPageSize(size_t nPageSize) { page_size_ = nPageSize; this->Cap(); this->UpdateThumbRect(); }
+		size_t GetTrackPos() const
+		{
+			return position_;
+		}
+		void SetTrackPos(size_t nPosition)
+		{
+			position_ = nPosition;
+			this->Cap();
+			this->UpdateThumbRect();
+		}
+		size_t GetPageSize() const
+		{
+			return page_size_;
+		}
+		void SetPageSize(size_t nPageSize)
+		{
+			page_size_ = nPageSize;
+			this->Cap();
+			this->UpdateThumbRect();
+		}
 
 		void Scroll(int nDelta);    // Scroll by nDelta items (plus or minus)
 		void ShowItem(size_t nIndex);  // Ensure that item nIndex is displayed, scroll if necessary
@@ -1126,12 +1188,32 @@ namespace KlayGE
 		virtual void    Render();
 		virtual void    UpdateRects();
 
-		STYLE GetStyle() const { return style_; }
-		uint32_t GetSize() const { return static_cast<uint32_t>(items_.size()); }
-		void SetStyle(STYLE dwStyle) { style_ = dwStyle; }
-		int  GetScrollBarWidth() const { return sb_width_; }
-		void SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
-		void SetBorder(int nBorder, int nMargin) { border_ = nBorder; margin_ = nMargin; }
+		STYLE GetStyle() const
+		{
+			return style_;
+		}
+		uint32_t GetSize() const
+		{
+			return static_cast<uint32_t>(items_.size());
+		}
+		void SetStyle(STYLE style)
+		{
+			style_ = style;
+		}
+		int  GetScrollBarWidth() const
+		{
+			return sb_width_;
+		}
+		void SetScrollBarWidth(int width)
+		{
+			sb_width_ = width;
+			this->UpdateRects();
+		}
+		void SetBorder(int border, int margin)
+		{
+			border_ = border;
+			margin_ = margin;
+		}
 		int AddItem(std::wstring const & strText);
 		void SetItemData(int nIndex, boost::any const & data);
 		int AddItem(std::wstring const & strText, boost::any const & data);
@@ -1141,7 +1223,10 @@ namespace KlayGE
 
 		boost::shared_ptr<UIListBoxItem> GetItem(int nIndex) const;
 		int GetSelectedIndex(int nPreviousSelected = -1) const;
-		boost::shared_ptr<UIListBoxItem> GetSelectedItem(int nPreviousSelected = -1) const { return this->GetItem(this->GetSelectedIndex(nPreviousSelected)); }
+		boost::shared_ptr<UIListBoxItem> GetSelectedItem(int nPreviousSelected = -1) const
+		{
+			return this->GetItem(this->GetSelectedIndex(nPreviousSelected));
+		}
 		void SelectItem(int nNewIndex);
 
 	public:
@@ -1228,16 +1313,33 @@ namespace KlayGE
 		int FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		boost::any const GetItemData(std::wstring const & strText) const;
 		boost::any const GetItemData(int nIndex) const;
-		void    SetDropHeight(uint32_t nHeight) { drop_height_ = nHeight; this->UpdateRects(); }
-		int     GetScrollBarWidth() const { return sb_width_; }
-		void    SetScrollBarWidth(int nWidth) { sb_width_ = nWidth; this->UpdateRects(); }
+		void    SetDropHeight(uint32_t nHeight)
+		{
+			drop_height_ = nHeight;
+			this->UpdateRects();
+		}
+		int     GetScrollBarWidth() const
+		{
+			return sb_width_;
+		}
+		void    SetScrollBarWidth(int nWidth)
+		{
+			sb_width_ = nWidth;
+			this->UpdateRects();
+		}
 
 		boost::any const GetSelectedData() const;
 		boost::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
 		int GetSelectedIndex() const;
 
-		uint32_t GetNumItems() const { return static_cast<uint32_t>(items_.size()); }
-		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const { return items_[index]; }
+		uint32_t GetNumItems() const
+		{
+			return static_cast<uint32_t>(items_.size());
+		}
+		boost::shared_ptr<UIComboBoxItem> GetItem(uint32_t index) const
+		{
+			return items_[index];
+		}
 
 		void SetSelectedByIndex(uint32_t index);
 		void SetSelectedByText(std::wstring const & strText);
@@ -1368,7 +1470,10 @@ namespace KlayGE
 		virtual ~UIEditBox();
 
 		virtual void UpdateRects();
-		virtual bool CanHaveFocus() const { return visible_ && enabled_; }
+		virtual bool CanHaveFocus() const
+		{
+			return visible_ && enabled_;
+		}
 		virtual void OnFocusIn();
 		virtual void OnFocusOut()
 		{
@@ -1378,15 +1483,42 @@ namespace KlayGE
 		virtual void Render();
 
 		void SetText(std::wstring const & wszText, bool bSelected = false);
-		std::wstring const & GetText() const { return buffer_.GetBuffer(); }
-		int GetTextLength() const { return buffer_.GetTextSize(); }  // Returns text length in chars excluding NULL.
+		std::wstring const & GetText() const
+		{
+			return buffer_.GetBuffer();
+		}
+		int GetTextLength() const
+		{
+			return buffer_.GetTextSize();	// Returns text length in chars excluding NULL.
+		}
 		void ClearText();
-		virtual void SetTextColor(Color const & Color) { text_color_ = Color; }  // Text color
-		void SetSelectedTextColor(Color const & Color) { sel_text_color_ = Color; }  // Selected text color
-		void SetSelectedBackColor(Color const & Color) { sel_bk_color_ = Color; }  // Selected background color
-		void SetCaretColor(Color const & Color) { caret_color_ = Color; }  // Caret color
-		void SetBorderWidth(int nBorder) { border_ = nBorder; UpdateRects(); }  // Border of the window
-		void SetSpacing(int nSpacing) { spacing_ = nSpacing; UpdateRects(); }
+		virtual void SetTextColor(Color const & Color)
+		{
+			text_color_ = Color;	// Text color
+		}
+		void SetSelectedTextColor(Color const & Color)
+		{
+			sel_text_color_ = Color;	// Selected text color
+		}
+		void SetSelectedBackColor(Color const & Color)
+		{
+			sel_bk_color_ = Color;	// Selected background color
+		}
+		void SetCaretColor(Color const & Color)
+		{
+			caret_color_ = Color;	// Caret color
+		}
+		void SetBorderWidth(int nBorder)
+		{
+			// Border of the window
+			border_ = nBorder;
+			this->UpdateRects();
+		}
+		void SetSpacing(int nSpacing)
+		{
+			spacing_ = nSpacing;
+			this->UpdateRects();
+		}
 
 	public:
 		typedef boost::signals2::signal<void(UIEditBox const &)> EditBoxEvent;
@@ -1456,7 +1588,9 @@ namespace KlayGE
 		explicit UIPolylineEditBox(UIDialogPtr const & dialog);
 		UIPolylineEditBox(uint32_t type, UIDialogPtr const & dialog);
 		UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
-		virtual ~UIPolylineEditBox() {}
+		virtual ~UIPolylineEditBox()
+		{
+		}
 
 		virtual bool CanHaveFocus() const
 		{

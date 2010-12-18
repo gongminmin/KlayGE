@@ -28,6 +28,7 @@ namespace KlayGE
 	typedef boost::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef boost::shared_ptr<ID3D11Device>					ID3D11DevicePtr;
 	typedef boost::shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;
+	typedef boost::shared_ptr<ID3D11Resource>				ID3D11ResourcePtr;
 	typedef boost::shared_ptr<ID3D11Texture1D>				ID3D11Texture1DPtr;
 	typedef boost::shared_ptr<ID3D11Texture2D>				ID3D11Texture2DPtr;
 	typedef boost::shared_ptr<ID3D11Texture3D>				ID3D11Texture3DPtr;
