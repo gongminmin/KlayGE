@@ -99,7 +99,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
 	{
 	public:
-		explicit ToneMappingPostProcess();
+		ToneMappingPostProcess();
 	};
 
 

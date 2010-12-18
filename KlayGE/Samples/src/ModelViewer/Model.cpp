@@ -34,6 +34,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	bool has_tc = false;
 	bool has_normal = false;
 	bool has_tangent = false;
 	bool has_binormal = false;
@@ -41,6 +42,10 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	{
 		switch (rl_->VertexStreamFormat(i)[0].usage)
 		{
+		case VEU_TextureCoord:
+			has_tc = true;
+			break;
+
 		case VEU_Normal:
 			has_normal = true;
 			break;
@@ -162,6 +167,18 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
 		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
+	}
+
+	if (!has_tc)
+	{
+		texcoords.resize(this->NumVertices());
+		for (size_t i = 0; i < texcoords.size(); ++ i)
+		{
+			texcoords[i] = float2(positions[i].x(), positions[i].y());
+		}
+
+		this->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
+			vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
 	}
 
 	if (!has_normal)
@@ -292,7 +309,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	*(effect_->ParameterByName("opacity_clr")) = float4(mtl.opacity, mtl.opacity, mtl.opacity, bool(om));
 
 	*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
-	*(effect_->ParameterByName("shininess")) = mtl.shininess;
+	*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl.shininess);
 
 	this->UpdateTech();
 }

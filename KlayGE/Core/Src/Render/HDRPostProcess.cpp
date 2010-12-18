@@ -325,20 +325,28 @@ namespace KlayGE
 		TexturePtr downsample_texs[3];
 		TexturePtr glow_texs[3];
 
-		downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, NULL);
+		try
+		{
+			downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_B10G11R11F, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
+		catch (...)
+		{
+			downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, NULL);
+		}
 		{
 			bright_pass_downsampler_->InputPin(index, tex);
 			bright_pass_downsampler_->OutputPin(index, downsample_texs[0]);
 		}
 		for (size_t i = 1; i < 3; ++ i)
 		{
-			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, EF_ABGR16F, 1, 0,
+			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, downsample_texs[0]->Format(), 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		for (size_t i = 0; i < 3; ++ i)
 		{
-			glow_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, EF_ABGR16F, 1, 0,
+			glow_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, downsample_texs[0]->Format(), 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		
@@ -353,7 +361,7 @@ namespace KlayGE
 			blurs_[i]->OutputPin(0, glow_texs[i]);
 		}
 
-		TexturePtr glow_merged_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
+		TexturePtr glow_merged_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, downsample_texs[0]->Format(), 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		glow_merger_->InputPin(0, glow_texs[0]);
 		glow_merger_->InputPin(1, glow_texs[1]);

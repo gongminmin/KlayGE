@@ -60,8 +60,7 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 				
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,	// in tangent space
-				out float3 oV	: TEXCOORD2,	// in tangent space
-				out float3 oH	: TEXCOORD3,	// in tangent space
+				out float3 oH	: TEXCOORD2,	// in tangent space
 				out float4 oPos : SV_Position)
 {
 #ifdef KLAYGE_OPENGL
@@ -109,14 +108,12 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 	float3 H = normalize(L) + normalize(V);
 
 	oL = mul(obj2tan, L);
-	oV = mul(obj2tan, V);
 	oH = mul(obj2tan, H);
 }
 
 float4 LightingPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
-				float3 V	: TEXCOORD2,
-				float3 H	: TEXCOORD3) : SV_Target
+				float3 H	: TEXCOORD2) : SV_Target
 {
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
 
@@ -136,7 +133,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	}
 	else
 	{
-		specular = specular_clr.rgb;
+		specular = specular_level * specular_clr.rgb;
 	}
 	if (emit_clr.a > 0.5f)
 	{
@@ -155,15 +152,11 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		opacity = opacity_clr.r;
 	}
 	
-	float3 light_vec = normalize(L);
-	float diffuse_factor = diffuse_term(light_vec, normal);
-	
-	float3 eye_vec = normalize(V);
-
 	float3 clr = (ambient_clr.rgb + emit) * diffuse;
-	
+
+	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
-	clr += calc_brdf(diffuse.rgb, specular_level * specular, shininess, 0.04f, light_vec, halfway, normal);
+	clr += calc_brdf(diffuse, specular, shininess, 0.04f, light_vec, halfway, normal);
 
 	return float4(clr, opacity);
 }
@@ -187,9 +180,9 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
 	float2 oTex0;
-	float3 oL, oV, oH;
+	float3 oL, oH;
 	MeshVS(tex0, pos, blend_weights, blend_indices, N, T,
-				oTex0, oL, oV, oH, oPos);
+				oTex0, oL, oH, oPos);
 
 	if (0 == vertex_usage)
 	{
@@ -244,9 +237,9 @@ void VisualizeTextureVS(float2 tex0 : TEXCOORD0,
 				out float2 oTex0 : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
-	float3 oL, oV, oH;
+	float3 oL, oH;
 	MeshVS(tex0, pos, blend_weights, blend_indices, N, T,
-				oTex0, oL, oV, oH, oPos);
+				oTex0, oL, oH, oPos);
 }
 
 float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
