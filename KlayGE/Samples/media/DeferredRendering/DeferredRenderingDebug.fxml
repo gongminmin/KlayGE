@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredShadingUtil.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="PostProcess.fxml"/>
 	
 	<cbuffer name="per_frame">

@@ -1,17 +1,17 @@
-#ifndef _CARTOON_HPP
-#define _CARTOON_HPP
+#ifndef _DEFERREDRENDERING_HPP
+#define _DEFERREDRENDERING_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
-#include "DeferredShadingLayer.hpp"
+#include "DeferredRenderingLayer.hpp"
 
-class DeferredShadingApp : public KlayGE::App3DFramework
+class DeferredRenderingApp : public KlayGE::App3DFramework
 {
 public:
-	DeferredShadingApp();
+	DeferredRenderingApp();
 
 	bool ConfirmDevice() const;
 
@@ -39,7 +39,7 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::DeferredShadingLayerPtr deferred_shading_;
+	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
 	KlayGE::PostProcessPtr edge_anti_alias_;
 
@@ -74,4 +74,4 @@ private:
 	size_t num_vertices_rendered_;
 };
 
-#endif		// _CARTOON_HPP
+#endif		// _DEFERREDRENDERING_HPP

@@ -397,7 +397,7 @@
     <None Include="..\..\media\RenderFX\Blur.fxml" />
     <None Include="..\..\media\RenderFX\Bone.fxml" />
     <None Include="..\..\media\RenderFX\Copy.fxml" />
-    <None Include="..\..\media\RenderFX\DeferredShadingUtil.fxml" />
+    <None Include="..\..\media\RenderFX\DeferredRenderingUtil.fxml" />
     <None Include="..\..\media\RenderFX\DownSample.fxml">
       <SubType>Designer</SubType>
     </None>

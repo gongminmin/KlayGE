@@ -24,7 +24,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Text", "Text.vcxproj", "{1E
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProceduralTex", "ProceduralTex.vcxproj", "{127F4D49-C643-4F02-B743-89051E027652}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredShading", "DeferredShading.vcxproj", "{0724FDC0-38E1-4976-8177-6E4DF22D5C89}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredRendering", "DeferredRendering.vcxproj", "{0724FDC0-38E1-4976-8177-6E4DF22D5C89}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleEditor", "ParticleEditor.vcxproj", "{5C4C47D9-FDDB-40B1-AF5E-385A815DA14D}"
 EndProject

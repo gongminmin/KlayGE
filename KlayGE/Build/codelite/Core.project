@@ -75,7 +75,7 @@
       <File Name="../../media/RenderFX/Blur.fxml"/>
       <File Name="../../media/RenderFX/Bone.fxml"/>
       <File Name="../../media/RenderFX/Copy.fxml"/>
-      <File Name="../../media/RenderFX/DeferredShadingUtil.fxml"/>
+      <File Name="../../media/RenderFX/DeferredRenderingUtil.fxml"/>
       <File Name="../../media/RenderFX/DownSample.fxml"/>
       <File Name="../../media/RenderFX/Fog.fxml"/>
       <File Name="../../media/RenderFX/Font.fxml"/>

@@ -18,7 +18,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
-#include "DeferredShadingLayer.hpp"
+#include "DeferredRenderingLayer.hpp"
 
 namespace KlayGE
 {
@@ -328,7 +328,7 @@ namespace KlayGE
 	}
 
 
-	DeferredShadingLayer::DeferredShadingLayer()
+	DeferredRenderingLayer::DeferredRenderingLayer()
 	{
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
 		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
@@ -423,19 +423,19 @@ namespace KlayGE
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		effect_ = rf.LoadEffect("DeferredShading.fxml");
+		effect_ = rf.LoadEffect("DeferredRendering.fxml");
 
 		technique_shadows_[LT_Ambient] = effect_->TechniqueByName("DeferredShadowingAmbient");
 		technique_shadows_[LT_Directional] = effect_->TechniqueByName("DeferredShadowingDirectional");
 		technique_shadows_[LT_Point] = effect_->TechniqueByName("DeferredShadowingPoint");
 		technique_shadows_[LT_Spot] = effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_lights_[LT_Ambient] = effect_->TechniqueByName("DeferredShadingAmbient");
-		technique_lights_[LT_Directional] = effect_->TechniqueByName("DeferredShadingDirectional");
-		technique_lights_[LT_Point] = effect_->TechniqueByName("DeferredShadingPoint");
-		technique_lights_[LT_Spot] = effect_->TechniqueByName("DeferredShadingSpot");
-		technique_light_depth_only_ = effect_->TechniqueByName("DeferredShadingLightDepthOnly");
-		technique_light_stencil_eiv_ = effect_->TechniqueByName("DeferredShadingLightStencilEIV");
-		technique_light_stencil_eov_ = effect_->TechniqueByName("DeferredShadingLightStencilEOV");
+		technique_lights_[LT_Ambient] = effect_->TechniqueByName("DeferredRenderingAmbient");
+		technique_lights_[LT_Directional] = effect_->TechniqueByName("DeferredRenderingDirectional");
+		technique_lights_[LT_Point] = effect_->TechniqueByName("DeferredRenderingPoint");
+		technique_lights_[LT_Spot] = effect_->TechniqueByName("DeferredRenderingSpot");
+		technique_light_depth_only_ = effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
+		technique_light_stencil_eiv_ = effect_->TechniqueByName("DeferredRenderingLightStencilEIV");
+		technique_light_stencil_eov_ = effect_->TechniqueByName("DeferredRenderingLightStencilEOV");
 		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
@@ -512,14 +512,14 @@ namespace KlayGE
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
 
-	DeferredAmbientLightSourcePtr DeferredShadingLayer::AddAmbientLight(float3 const & clr)
+	DeferredAmbientLightSourcePtr DeferredRenderingLayer::AddAmbientLight(float3 const & clr)
 	{
 		DeferredAmbientLightSourcePtr ambient = checked_pointer_cast<DeferredAmbientLightSource>(lights_[0]);
 		ambient->Color(float3(ambient->Color()) + clr);
 		return ambient;
 	}
 
-	DeferredPointLightSourcePtr DeferredShadingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
+	DeferredPointLightSourcePtr DeferredRenderingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
 	{
 		DeferredPointLightSourcePtr point = MakeSharedPtr<DeferredPointLightSource>();
 		point->Attrib(attr);
@@ -538,7 +538,7 @@ namespace KlayGE
 		return point;
 	}
 
-	DeferredDirectionalLightSourcePtr DeferredShadingLayer::AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
+	DeferredDirectionalLightSourcePtr DeferredRenderingLayer::AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
 	{
 		DeferredDirectionalLightSourcePtr directional = MakeSharedPtr<DeferredDirectionalLightSource>();
 		directional->Attrib(attr);
@@ -550,7 +550,7 @@ namespace KlayGE
 		return directional;
 	}
 
-	DeferredSpotLightSourcePtr DeferredShadingLayer::AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff)
+	DeferredSpotLightSourcePtr DeferredRenderingLayer::AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff)
 	{
 		DeferredSpotLightSourcePtr spot = MakeSharedPtr<DeferredSpotLightSource>();
 		spot->Attrib(attr);
@@ -569,17 +569,17 @@ namespace KlayGE
 		return spot;
 	}
 
-	void DeferredShadingLayer::SSAOTex(TexturePtr const & tex)
+	void DeferredRenderingLayer::SSAOTex(TexturePtr const & tex)
 	{
 		ssao_tex_ = tex;
 	}
 
-	void DeferredShadingLayer::SSAOEnabled(bool ssao)
+	void DeferredRenderingLayer::SSAOEnabled(bool ssao)
 	{
 		ssao_enabled_ = ssao;
 	}
 
-	void DeferredShadingLayer::OnResize(uint32_t width, uint32_t height)
+	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -632,7 +632,7 @@ namespace KlayGE
 		*(effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 	}
 
-	uint32_t DeferredShadingLayer::Update(uint32_t pass)
+	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
 	{
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();

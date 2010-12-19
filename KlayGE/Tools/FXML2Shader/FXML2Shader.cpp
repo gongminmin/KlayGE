@@ -40,7 +40,10 @@ public:
 		RenderEffectPtr effect = rf.LoadEffect(fxml_name);
 
 		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
-		ofs << "#define KLAYGE_D3D11" << "\r\n\r\n";
+		ofs << "#define CONSTANT_BUFFER" << "\r\n";
+		ofs << "#define KLAYGE_D3D11" << "\r\n";
+		ofs << "#define KLAYGE_SHADER_MODEL 5" << "\r\n";
+		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n\r\n";
 
 		for (uint32_t i = 0; i < effect->NumMacros(); ++ i)
 		{

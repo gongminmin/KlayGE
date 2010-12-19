@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="DeferredShading" caption="Deferred Shading" x="-140" y="200" align_x="right" width="140" height="250">
+	<dialog id="DeferredRendering" caption="Deferred Rendering" x="-140" y="200" align_x="right" width="140" height="250">
 		<control type="static" id="BufferStatic" caption="Buffer:" x="20" y="20" width="100" height="24" is_default="0"/>
 		<control type="combo_box" id="BufferCombo" x="20" y="40" width="100" height="24" hotkey="0" is_default="0">
 			<item name="Final"/>

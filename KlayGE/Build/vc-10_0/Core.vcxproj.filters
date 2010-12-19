@@ -682,7 +682,7 @@
     <None Include="..\..\media\RenderFX\Bone.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
-    <None Include="..\..\media\RenderFX\DeferredShadingUtil.fxml">
+    <None Include="..\..\media\RenderFX\DeferredRenderingUtil.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
     <None Include="..\..\media\RenderFX\DownSample.fxml">

@@ -1,5 +1,5 @@
-#ifndef _DEFERREDSHADINGLAYER_HPP
-#define _DEFERREDSHADINGLAYER_HPP
+#ifndef _DEFERREDRENDERINGLAYER_HPP
+#define _DEFERREDRENDERINGLAYER_HPP
 
 #include <KlayGE/PreDeclare.hpp>
 
@@ -387,10 +387,10 @@ namespace KlayGE
 	typedef boost::shared_ptr<DeferredSceneObject> DeferredSceneObjectPtr;
 
 
-	class DeferredShadingLayer
+	class DeferredRenderingLayer
 	{
 	public:
-		DeferredShadingLayer();
+		DeferredRenderingLayer();
 
 		DeferredAmbientLightSourcePtr AddAmbientLight(float3 const & clr);
 		DeferredPointLightSourcePtr AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
@@ -481,7 +481,7 @@ namespace KlayGE
 		std::vector<DeferredSceneObject*> deferred_scene_objs_;
 	};
 
-	typedef boost::shared_ptr<DeferredShadingLayer> DeferredShadingLayerPtr;
+	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
 }
 
-#endif		// _DEFERREDSHADINGLAYER_HPP
+#endif		// _DEFERREDRENDERINGLAYER_HPP

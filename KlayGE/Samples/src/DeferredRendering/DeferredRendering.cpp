@@ -27,8 +27,8 @@
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 
-#include "DeferredShadingLayer.hpp"
-#include "DeferredShading.hpp"
+#include "DeferredRenderingLayer.hpp"
+#include "DeferredRendering.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -880,17 +880,17 @@ namespace
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class DeferredShadingDebug : public PostProcess
+	class DeferredRenderingDebug : public PostProcess
 	{
 	public:
-		DeferredShadingDebug()
-			: PostProcess(L"DeferredShadingDebug")
+		DeferredRenderingDebug()
+			: PostProcess(L"DeferredRenderingDebug")
 		{
 			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("ssao_tex", TexturePtr()));
 
-			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredShadingDebug.fxml")->TechniqueByName("ShowPosition"));
+			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
 		}
 
 		void ShowType(int show_type)
@@ -960,20 +960,20 @@ int main()
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
-	DeferredShadingApp app;
+	DeferredRenderingApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-DeferredShadingApp::DeferredShadingApp()
-			: App3DFramework("DeferredShading"),
+DeferredRenderingApp::DeferredRenderingApp()
+			: App3DFramework("DeferredRendering"),
 				anti_alias_enabled_(true),
 				num_objs_rendered_(0), num_renderable_rendered_(0),
 				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
-	ResLoader::Instance().AddPath("../Samples/media/DeferredShading");
+	ResLoader::Instance().AddPath("../Samples/media/DeferredRendering");
 
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.graphics_cfg.sample_count = 1;
@@ -981,7 +981,7 @@ DeferredShadingApp::DeferredShadingApp()
 	Context::Instance().Config(context_cfg);
 }
 
-bool DeferredShadingApp::ConfirmDevice() const
+bool DeferredRenderingApp::ConfirmDevice() const
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -1005,7 +1005,7 @@ bool DeferredShadingApp::ConfirmDevice() const
 	return true;
 }
 
-void DeferredShadingApp::InitObjects()
+void DeferredRenderingApp::InitObjects()
 {
 	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
 	this->Proj(0.1f, 500.0f);
@@ -1016,11 +1016,11 @@ void DeferredShadingApp::InitObjects()
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	deferred_shading_ = MakeSharedPtr<DeferredShadingLayer>();
-	ambient_light_ = deferred_shading_->AddAmbientLight(float3(1, 1, 1));
-	point_light_ = deferred_shading_->AddPointLight(0, float3(0, 0, 0), float3(3, 3, 3), float3(0, 0.2f, 0));
-	spot_light_[0] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(2, 0, 0), float3(0, 0.2f, 0));
-	spot_light_[1] = deferred_shading_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 2, 0), float3(0, 0.2f, 0));
+	deferred_rendering_ = MakeSharedPtr<DeferredRenderingLayer>();
+	ambient_light_ = deferred_rendering_->AddAmbientLight(float3(1, 1, 1));
+	point_light_ = deferred_rendering_->AddPointLight(0, float3(0, 0, 0), float3(3, 3, 3), float3(0, 0.2f, 0));
+	spot_light_[0] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(2, 0, 0), float3(0, 0.2f, 0));
+	spot_light_[1] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 2, 0), float3(0, 0.2f, 0));
 
 	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
 	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
@@ -1040,7 +1040,7 @@ void DeferredShadingApp::InitObjects()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(boost::bind(&DeferredShadingApp::InputHandler, this, _1, _2));
+	input_handler->connect(boost::bind(&DeferredRenderingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
@@ -1048,9 +1048,9 @@ void DeferredShadingApp::InitObjects()
 	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 
-	debug_pp_ = MakeSharedPtr<DeferredShadingDebug>();
+	debug_pp_ = MakeSharedPtr<DeferredRenderingDebug>();
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredShading.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
@@ -1058,14 +1058,14 @@ void DeferredShadingApp::InitObjects()
 	id_ssao_ = dialog_->IDFromName("SSAO");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredShadingApp::BufferChangedHandler, this, _1));
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredRenderingApp::BufferChangedHandler, this, _1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
-	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::AntiAliasHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::AntiAliasHandler, this, _1));
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
-	dialog_->Control<UICheckBox>(id_ssao_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::SSAOHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ssao_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::SSAOHandler, this, _1));
 	this->SSAOHandler(*dialog_->Control<UICheckBox>(id_ssao_));
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredShadingApp::CtrlCameraHandler, this, _1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	scene_model_ = model_ml();
@@ -1081,10 +1081,10 @@ void DeferredShadingApp::InitObjects()
 	sky_box_->AddToSceneManager();
 }
 
-void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
+void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-	deferred_shading_->OnResize(width, height);
+	deferred_rendering_->OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -1105,31 +1105,31 @@ void DeferredShadingApp::OnResize(uint32_t width, uint32_t height)
 		{
 			access_hint |= EAH_GPU_Unordered;
 		}
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_shading_->ShadingTex()->Format(), 1, 0, access_hint, NULL);
+		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_rendering_->ShadingTex()->Format(), 1, 0, access_hint, NULL);
 	}
 
-	deferred_shading_->SSAOTex(blur_ssao_tex_);
+	deferred_rendering_->SSAOTex(blur_ssao_tex_);
 
-	edge_anti_alias_->InputPin(0, deferred_shading_->GBufferTex());
-	edge_anti_alias_->InputPin(1, deferred_shading_->ShadingTex());
+	edge_anti_alias_->InputPin(0, deferred_rendering_->GBufferTex());
+	edge_anti_alias_->InputPin(1, deferred_rendering_->ShadingTex());
 	edge_anti_alias_->OutputPin(0, hdr_tex_);
 
 	hdr_pp_->InputPin(0, hdr_tex_);
 
-	ssao_pp_->InputPin(0, deferred_shading_->GBufferTex());
+	ssao_pp_->InputPin(0, deferred_rendering_->GBufferTex());
 	ssao_pp_->OutputPin(0, ssao_tex_);
 
 	blur_pp_->InputPin(0, ssao_tex_);
 	blur_pp_->OutputPin(0, blur_ssao_tex_);
 
-	debug_pp_->InputPin(0, deferred_shading_->GBufferTex());
-	debug_pp_->InputPin(1, deferred_shading_->LightingTex());
+	debug_pp_->InputPin(0, deferred_rendering_->GBufferTex());
+	debug_pp_->InputPin(1, deferred_rendering_->LightingTex());
 	debug_pp_->InputPin(2, blur_ssao_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void DeferredRenderingApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -1139,10 +1139,10 @@ void DeferredShadingApp::InputHandler(InputEngine const & /*sender*/, InputActio
 	}
 }
 
-void DeferredShadingApp::BufferChangedHandler(UIComboBox const & sender)
+void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 {
 	buffer_type_ = sender.GetSelectedIndex();
-	checked_pointer_cast<DeferredShadingDebug>(debug_pp_)->ShowType(buffer_type_);
+	checked_pointer_cast<DeferredRenderingDebug>(debug_pp_)->ShowType(buffer_type_);
 
 	if (buffer_type_ != 0)
 	{
@@ -1166,7 +1166,7 @@ void DeferredShadingApp::BufferChangedHandler(UIComboBox const & sender)
 	}
 }
 
-void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
+void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 {
 	if (0 == buffer_type_)
 	{
@@ -1182,21 +1182,21 @@ void DeferredShadingApp::AntiAliasHandler(UICheckBox const & sender)
 		}
 		else
 		{
-			hdr_pp_->InputPin(0, deferred_shading_->ShadingTex());
+			hdr_pp_->InputPin(0, deferred_rendering_->ShadingTex());
 		}
 	}
 }
 
-void DeferredShadingApp::SSAOHandler(UICheckBox const & sender)
+void DeferredRenderingApp::SSAOHandler(UICheckBox const & sender)
 {
 	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
 		ssao_enabled_ = sender.GetChecked();
-		deferred_shading_->SSAOEnabled(ssao_enabled_);
+		deferred_rendering_->SSAOEnabled(ssao_enabled_);
 	}
 }
 
-void DeferredShadingApp::CtrlCameraHandler(UICheckBox const & sender)
+void DeferredRenderingApp::CtrlCameraHandler(UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{
@@ -1208,13 +1208,13 @@ void DeferredShadingApp::CtrlCameraHandler(UICheckBox const & sender)
 	}
 }
 
-void DeferredShadingApp::DoUpdateOverlay()
+void DeferredRenderingApp::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 	UIManager::Instance().Render();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Shading", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Rendering", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;
@@ -1230,7 +1230,7 @@ void DeferredShadingApp::DoUpdateOverlay()
 	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
-uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
+uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -1280,7 +1280,7 @@ uint32_t DeferredShadingApp::DoUpdate(uint32_t pass)
 		}
 	}
 
-	uint32_t ret = deferred_shading_->Update(pass);
+	uint32_t ret = deferred_rendering_->Update(pass);
 	if (App3DFramework::URV_Finished == ret)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());

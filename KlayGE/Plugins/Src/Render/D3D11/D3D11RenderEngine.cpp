@@ -740,7 +740,7 @@ namespace KlayGE
 			caps_.max_texture_height = caps_.max_texture_width = 4096;
 			caps_.max_texture_depth = 256;
 			caps_.max_texture_cube_size = 512;
-			caps_.max_texture_array_length = 0;
+			caps_.max_texture_array_length = 1;
 			caps_.max_simultaneous_rts = 4;
 			caps_.max_vertices = 1048575;
 			caps_.max_indices = 1048575;

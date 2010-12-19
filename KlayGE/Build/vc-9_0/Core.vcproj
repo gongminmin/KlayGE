@@ -602,7 +602,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\media\RenderFX\DeferredShadingUtil.fxml"
+					RelativePath="..\..\media\RenderFX\DeferredRenderingUtil.fxml"
 					>
 				</File>
 				<File

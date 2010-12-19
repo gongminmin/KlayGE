@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="DeferredShadingUtil.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 
 	<macro name="LT_Ambient" value="0"/>
@@ -151,18 +151,18 @@ float VSM_Directional(float3 pos_es, float len)
 	return shadow;
 }
 
-void DeferredShadingDepthOnlyVS(float4 pos : POSITION,
+void DeferredRenderingDepthOnlyVS(float4 pos : POSITION,
 				out float4 oPos : SV_Position)
 {
 	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
 }
 
-float4 DeferredShadingDepthOnlyPS() : SV_Target
+float4 DeferredRenderingDepthOnlyPS() : SV_Target
 {
 	return 0;
 }
 
-void DeferredShadingVS(float4 pos : POSITION,
+void DeferredRenderingVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
 				out float3 oViewDir : TEXCOORD1,
@@ -186,7 +186,7 @@ void DeferredShadingVS(float4 pos : POSITION,
 #endif
 }
 
-float4 DeferredShadingPointPS(
+float4 DeferredRenderingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
@@ -217,7 +217,7 @@ float4 DeferredShadingPointPS(
 	return final_clr;
 }
 
-float4 DeferredShadingSpotPS(
+float4 DeferredRenderingSpotPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
@@ -253,7 +253,7 @@ float4 DeferredShadingSpotPS(
 	return final_clr;
 }
 
-float4 DeferredShadingDirectionalPS(
+float4 DeferredRenderingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
@@ -282,7 +282,7 @@ float4 DeferredShadingDirectionalPS(
 	return final_clr;
 }
 
-float4 DeferredShadingAmbientPS(
+float4 DeferredRenderingAmbientPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
 #else
@@ -347,7 +347,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 		]]>
 	</shader>
 
-	<technique name="DeferredShadingLightDepthOnly">
+	<technique name="DeferredRenderingLightDepthOnly">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -358,12 +358,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
-			<state name="pixel_shader" value="DeferredShadingDepthOnlyPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingDepthOnlyPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="DeferredShadingLightStencilEOV">
+	<technique name="DeferredRenderingLightStencilEOV">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="less"/>
@@ -383,12 +383,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="decrement"/>
 
-			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
-			<state name="pixel_shader" value="DeferredShadingDepthOnlyPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingDepthOnlyPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="DeferredShadingLightStencilEIV">
+	<technique name="DeferredRenderingLightStencilEIV">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -408,12 +408,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="increment"/>
 
-			<state name="vertex_shader" value="DeferredShadingDepthOnlyVS()"/>
-			<state name="pixel_shader" value="DeferredShadingDepthOnlyPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingDepthOnlyPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="DeferredShadingPoint">
+	<technique name="DeferredRenderingPoint">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -441,12 +441,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingPointPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingPointPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="DeferredShadingSpot">
+	<technique name="DeferredRenderingSpot">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -474,12 +474,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingSpotPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingSpotPS()"/>
 		</pass>
 	</technique>
 				
-	<technique name="DeferredShadingDirectional">
+	<technique name="DeferredRenderingDirectional">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -507,12 +507,12 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingDirectionalPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingDirectionalPS()"/>
 		</pass>
 	</technique>
 			
-	<technique name="DeferredShadingAmbient">
+	<technique name="DeferredRenderingAmbient">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -532,8 +532,8 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="back_stencil_pass" value="keep"/>
 			<state name="back_stencil_read_mask" value="127"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
-			<state name="pixel_shader" value="DeferredShadingAmbientPS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
+			<state name="pixel_shader" value="DeferredRenderingAmbientPS()"/>
 		</pass>
 	</technique>
 
@@ -546,7 +546,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
 			<state name="pixel_shader" value="DeferredShadowingPointPS()"/>
 		</pass>
 	</technique>
@@ -560,7 +560,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
 			<state name="pixel_shader" value="DeferredShadowingSpotPS()"/>
 		</pass>
 	</technique>
@@ -574,7 +574,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
 			<state name="pixel_shader" value="DeferredShadowingDirectionalPS()"/>
 		</pass>
 	</technique>
@@ -588,7 +588,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="depth_clip_enable" value="false"/>
 			<state name="cull_mode" value="front"/>
 
-			<state name="vertex_shader" value="DeferredShadingVS()"/>
+			<state name="vertex_shader" value="DeferredRenderingVS()"/>
 			<state name="pixel_shader" value="DeferredShadowingAmbientPS()"/>
 		</pass>
 	</technique>

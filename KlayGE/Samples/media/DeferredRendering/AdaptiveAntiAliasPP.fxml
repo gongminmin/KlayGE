@@ -2,7 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
-	<include name="DeferredShadingUtil.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>

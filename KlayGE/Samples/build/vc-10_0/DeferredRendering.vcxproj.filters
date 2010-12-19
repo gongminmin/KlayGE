@@ -23,47 +23,47 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\DeferredShading\DeferredShading.cpp">
+    <ClCompile Include="..\..\src\DeferredRendering\DeferredRendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\DeferredShading\DeferredShadingLayer.cpp">
+    <ClCompile Include="..\..\src\DeferredRendering\DeferredRenderingLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\DeferredShading\DeferredShading.hpp">
+    <ClInclude Include="..\..\src\DeferredRendering\DeferredRendering.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\DeferredShading\DeferredShadingLayer.hpp">
+    <ClInclude Include="..\..\src\DeferredRendering\DeferredRenderingLayer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\media\DeferredShading\AdaptiveAntiAliasPP.fxml">
+    <None Include="..\..\media\DeferredRendering\AdaptiveAntiAliasPP.fxml">
       <Filter>Effects</Filter>
     </None>
-    <None Include="..\..\media\DeferredShading\DeferredShading.fxml">
+    <None Include="..\..\media\DeferredRendering\GBuffer.fxml">
       <Filter>Effects</Filter>
     </None>
-    <None Include="..\..\media\DeferredShading\DeferredShadingDebug.fxml">
+    <None Include="..\..\media\DeferredRendering\SSAOPP.fxml">
       <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\DeferredShading\GBuffer.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\DeferredShading\SSAOPP.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\DeferredShading\DeferredShading.uiml">
-      <Filter>UI</Filter>
     </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\media\DeferredShading\DepthToVSM.ppml">
+    <None Include="..\..\media\DeferredRendering\DepthToVSM.ppml">
       <Filter>Post Processors</Filter>
     </None>
-    <None Include="..\..\media\DeferredShading\DepthToVSM.fxml">
+    <None Include="..\..\media\DeferredRendering\DepthToVSM.fxml">
+      <Filter>Effects</Filter>
+    </None>
+    <None Include="..\..\media\DeferredRendering\DeferredRendering.uiml">
+      <Filter>UI</Filter>
+    </None>
+    <None Include="..\..\media\DeferredRendering\DeferredRendering.fxml">
+      <Filter>Effects</Filter>
+    </None>
+    <None Include="..\..\media\DeferredRendering\DeferredRenderingDebug.fxml">
       <Filter>Effects</Filter>
     </None>
   </ItemGroup>
