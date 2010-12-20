@@ -158,7 +158,7 @@ namespace
 						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
 						{
 							init_data.data = &normals[0];
-							init_data.row_pitch = normals.size() * sizeof(normals[0]);
+							init_data.row_pitch = static_cast<uint32_t>(normals.size() * sizeof(normals[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -168,7 +168,7 @@ namespace
 						else
 						{
 							init_data.data = &normals_float3[0];
-							init_data.row_pitch = normals_float3.size() * sizeof(normals_float3[0]);
+							init_data.row_pitch = static_cast<uint32_t>(normals_float3.size() * sizeof(normals_float3[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -203,7 +203,7 @@ namespace
 						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
 						{
 							init_data.data = &tangents[0];
-							init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+							init_data.row_pitch = static_cast<uint32_t>(tangents.size() * sizeof(tangents[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -213,7 +213,7 @@ namespace
 						else
 						{
 							init_data.data = &tangents_float3[0];
-							init_data.row_pitch = tangents_float3.size() * sizeof(tangents_float3[0]);
+							init_data.row_pitch = static_cast<uint32_t>(tangents_float3.size() * sizeof(tangents_float3[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -548,7 +548,7 @@ namespace
 						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
 						{
 							init_data.data = &normals[0];
-							init_data.row_pitch = normals.size() * sizeof(normals[0]);
+							init_data.row_pitch = static_cast<uint32_t>(normals.size() * sizeof(normals[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -558,7 +558,7 @@ namespace
 						else
 						{
 							init_data.data = &normals_float3[0];
-							init_data.row_pitch = normals_float3.size() * sizeof(normals_float3[0]);
+							init_data.row_pitch = static_cast<uint32_t>(normals_float3.size() * sizeof(normals_float3[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -593,7 +593,7 @@ namespace
 						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
 						{
 							init_data.data = &tangents[0];
-							init_data.row_pitch = tangents.size() * sizeof(tangents[0]);
+							init_data.row_pitch = static_cast<uint32_t>(tangents.size() * sizeof(tangents[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
@@ -603,7 +603,7 @@ namespace
 						else
 						{
 							init_data.data = &tangents_float3[0];
-							init_data.row_pitch = tangents_float3.size() * sizeof(tangents_float3[0]);
+							init_data.row_pitch = static_cast<uint32_t>(tangents_float3.size() * sizeof(tangents_float3[0]));
 							init_data.slice_pitch = init_data.row_pitch;
 							GraphicsBufferPtr new_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 

@@ -750,7 +750,7 @@ namespace KlayGE
 	{
 		if (data_block_free_list_.empty())
 		{
-			data_block_free_list_.push_back(data_blocks_.size());
+			data_block_free_list_.push_back(static_cast<uint32_t>(data_blocks_.size()));
 			data_blocks_.push_back(std::vector<uint8_t>());
 		}
 
@@ -897,7 +897,7 @@ namespace KlayGE
 		this_level.push_back(juda_tex->root_);
 		for (size_t i = 0; i < juda_tex->TreeLevels(); ++ i)
 		{
-			uint32_t size = this_level.size();
+			uint32_t size = static_cast<uint32_t>(this_level.size());
 			ofs->write(reinterpret_cast<char const *>(&size), sizeof(size));
 
 			uint32_t num_nodes = 0;
