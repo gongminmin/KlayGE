@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CodeLite_Project Name="DeferredShading">
+<CodeLite_Project Name="DeferredRendering">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00100001N0005Debug0000000000000001N0015Debug_linux_x640000000000000001N0015Debug_linux_x860000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0007Release0000000000000001N0017Release_linux_x640000000000000001N0017Release_linux_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x86000000000000]]>
@@ -8,22 +8,22 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="Source Files">
-    <File Name="../../src/DeferredShading/DeferredShading.cpp"/>
-    <File Name="../../src/DeferredShading/DeferredShadingLayer.cpp"/>
+    <File Name="../../src/DeferredRendering/DeferredRendering.cpp"/>
+    <File Name="../../src/DeferredRendering/DeferredRenderingLayer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files">
-    <File Name="../../src/DeferredShading/DeferredShading.hpp"/>
-    <File Name="../../src/DeferredShading/DeferredShadingLayer.hpp"/>
+    <File Name="../../src/DeferredRendering/DeferredRendering.hpp"/>
+    <File Name="../../src/DeferredRendering/DeferredRenderingLayer.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
-    <File Name="../../media/DeferredShading/AdaptiveAntiAliasPP.fxml"/>
-    <File Name="../../media/DeferredShading/DeferredShading.fxml"/>
-    <File Name="../../media/DeferredShading/DeferredShadingDebug.fxml"/>
-    <File Name="../../media/DeferredShading/GBuffer.fxml"/>
-    <File Name="../../media/DeferredShading/SSAOPP.fxml"/>
+    <File Name="../../media/DeferredRendering/AdaptiveAntiAliasPP.fxml"/>
+    <File Name="../../media/DeferredRendering/DeferredRendering.fxml"/>
+    <File Name="../../media/DeferredRendering/DeferredRenderingDebug.fxml"/>
+    <File Name="../../media/DeferredRendering/GBuffer.fxml"/>
+    <File Name="../../media/DeferredRendering/SSAOPP.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
-    <File Name="../../media/DeferredShading/DeferredShading.uiml"/>
+    <File Name="../../media/DeferredRendering/DeferredRendering.uiml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Resource Files">
     <File Name="../../../klayge_logo.ico"/>
@@ -108,7 +108,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -143,7 +143,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -246,7 +246,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -281,7 +281,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

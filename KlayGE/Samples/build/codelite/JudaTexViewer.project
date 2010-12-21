@@ -2,7 +2,7 @@
 <CodeLite_Project Name="JudaTexViewer">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0015Release_win_x86000000000000]]>
+      <![CDATA[00050001N0015Debug_linux_x640000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x86000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -37,6 +37,7 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -71,6 +72,7 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -102,10 +104,12 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="comdlg32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -137,10 +141,12 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_44"/>
+        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="comdlg32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -175,6 +181,7 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -209,6 +216,7 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -240,10 +248,12 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="comdlg32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -275,10 +285,12 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_44"/>
+        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="comdlg32"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

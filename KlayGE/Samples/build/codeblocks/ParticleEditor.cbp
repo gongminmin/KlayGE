@@ -27,7 +27,7 @@
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -54,7 +54,7 @@
 					<Add directory="..\..\..\lib\win\x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -79,7 +79,7 @@
 				</Linker>
 				<Environment>
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -104,7 +104,7 @@
 				</Linker>
 				<Environment>
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -129,7 +129,7 @@
 				</Linker>
 				<Environment>
 					<Variable name="DEBUG_STR" value="-d" />
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>
@@ -155,7 +155,7 @@
 				</Linker>
 				<Environment>
 					<Variable name="DEBUG_STR" value="" />
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 				</Environment>
 			</Target>

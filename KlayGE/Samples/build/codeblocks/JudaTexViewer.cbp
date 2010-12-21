@@ -24,12 +24,13 @@
 				<Linker>
 					<Add option="-enable-auto-import" />
 					<Add library="KlayGE_Core_mgw_x86_d" />
+					<Add library="comdlg32" />
 					<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 					<Add directory="../../../lib/win/x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -53,12 +54,13 @@
 					<Add option="-s" />
 					<Add option="-enable-auto-import" />
 					<Add library="KlayGE_Core_mgw_x86" />
+					<Add library="comdlg32" />
 					<Add library="boost_signals-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 					<Add library="boost_system-$(TOOLSET)-mt$(DEBUG_STR)-$(BOOST_VER)" />
 					<Add directory="../../../lib/win/x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="mgw45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -86,7 +88,7 @@
 					<Add directory="../../../lib/linux/x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -115,7 +117,7 @@
 					<Add directory="../../../lib/linux/x86" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>
@@ -144,7 +146,7 @@
 					<Add directory="../../../lib/linux/x64" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="-d" />
 				</Environment>
@@ -174,7 +176,7 @@
 					<Add directory="../../../lib/linux/x64" />
 				</Linker>
 				<Environment>
-					<Variable name="BOOST_VER" value="1_44" />
+					<Variable name="BOOST_VER" value="1_45" />
 					<Variable name="TOOLSET" value="gcc45" />
 					<Variable name="DEBUG_STR" value="" />
 				</Environment>

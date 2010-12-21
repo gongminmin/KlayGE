@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="DeferredShading"
+	Name="DeferredRendering"
 	ProjectGUID="{0724FDC0-38E1-4976-8177-6E4DF22D5C89}"
-	RootNamespace="DeferredShading"
+	RootNamespace="DeferredRendering"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -350,11 +350,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\DeferredShading\DeferredShading.cpp"
+				RelativePath="..\..\src\DeferredRendering\DeferredRendering.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\DeferredShading\DeferredShadingLayer.cpp"
+				RelativePath="..\..\src\DeferredRendering\DeferredRenderingLayer.cpp"
 				>
 			</File>
 		</Filter>
@@ -364,11 +364,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\DeferredShading\DeferredShading.hpp"
+				RelativePath="..\..\src\DeferredRendering\DeferredRendering.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\DeferredShading\DeferredShadingLayer.hpp"
+				RelativePath="..\..\src\DeferredRendering\DeferredRenderingLayer.hpp"
 				>
 			</File>
 		</Filter>
@@ -376,23 +376,23 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\DeferredShading\AdaptiveAntiAliasPP.fxml"
+				RelativePath="..\..\media\DeferredRendering\AdaptiveAntiAliasPP.fxml"
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\DeferredShading\DeferredShading.fxml"
+				RelativePath="..\..\media\DeferredRendering\DeferredRendering.fxml"
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\DeferredShading\DeferredShadingDebug.fxml"
+				RelativePath="..\..\media\DeferredRendering\DeferredRenderingDebug.fxml"
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\DeferredShading\GBuffer.fxml"
+				RelativePath="..\..\media\DeferredRendering\GBuffer.fxml"
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\DeferredShading\SSAOPP.fxml"
+				RelativePath="..\..\media\DeferredRendering\SSAOPP.fxml"
 				>
 			</File>
 		</Filter>
@@ -400,7 +400,7 @@
 			Name="UI"
 			>
 			<File
-				RelativePath="..\..\media\DeferredShading\DeferredShading.uiml"
+				RelativePath="..\..\media\DeferredRendering\DeferredRendering.uiml"
 				>
 			</File>
 		</Filter>
