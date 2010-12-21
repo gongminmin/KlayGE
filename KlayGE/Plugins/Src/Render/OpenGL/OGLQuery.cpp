@@ -90,39 +90,30 @@ namespace KlayGE
 
 	void OGLConditionalRender::BeginConditionalRender()
 	{
-		// AMD Catalyst 10.7 driver can cause the system freeze when calling ConditionalRender
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (!re.HackForATI())
+		if (glloader_GL_VERSION_3_0())
 		{
-			if (glloader_GL_VERSION_3_0())
+			glBeginConditionalRender(query_, GL_QUERY_WAIT);
+		}
+		else
+		{
+			if (glloader_GL_NV_conditional_render())
 			{
-				glBeginConditionalRender(query_, GL_QUERY_WAIT);
-			}
-			else
-			{
-				if (glloader_GL_NV_conditional_render())
-				{
-					glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
-				}
+				glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
 			}
 		}
 	}
 
 	void OGLConditionalRender::EndConditionalRender()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (!re.HackForATI())
+		if (glloader_GL_VERSION_3_0())
 		{
-			if (glloader_GL_VERSION_3_0())
+			glEndConditionalRender();
+		}
+		else
+		{
+			if (glloader_GL_NV_conditional_render())
 			{
-				glEndConditionalRender();
-			}
-			else
-			{
-				if (glloader_GL_NV_conditional_render())
-				{
-					glEndConditionalRenderNV();
-				}
+				glEndConditionalRenderNV();
 			}
 		}
 	}
