@@ -394,44 +394,39 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11InputLayoutPtr D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code)
+	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code)
 	{
-		for (BOOST_AUTO(iter, input_layout_bank_.begin()); iter != input_layout_bank_.end(); ++ iter)
+		size_t elems_signature = 0;
+		BOOST_FOREACH(BOOST_TYPEOF(elems)::const_reference elem, elems)
 		{
-			if ((iter->first.input_elems.size() == elems.size()) && (iter->first.signature == signature))
-			{
-				bool match = true;
-				for (size_t i = 0; i < elems.size(); ++ i)
-				{
-					D3D11_INPUT_ELEMENT_DESC const & lhs = iter->first.input_elems[i];
-					D3D11_INPUT_ELEMENT_DESC const & rhs = elems[i];
-					if ((std::string(lhs.SemanticName) != std::string(rhs.SemanticName))
-						|| (lhs.SemanticIndex != rhs.SemanticIndex)
-						|| (lhs.Format != rhs.Format)
-						|| (lhs.InputSlot != rhs.InputSlot)
-						|| (lhs.AlignedByteOffset != rhs.AlignedByteOffset)
-						|| (lhs.InputSlotClass != rhs.InputSlotClass)
-						|| (lhs.InstanceDataStepRate != rhs.InstanceDataStepRate))
-					{
-						match = false;
-						break;
-					}
-				}
+			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
+			boost::hash_combine(seed, elem.SemanticIndex);
+			boost::hash_combine(seed, elem.Format);
+			boost::hash_combine(seed, elem.InputSlot);
+			boost::hash_combine(seed, elem.AlignedByteOffset);
+			boost::hash_combine(seed, elem.InputSlotClass);
+			boost::hash_combine(seed, elem.InstanceDataStepRate);
 
-				if (match)
-				{
-					return iter->second;
-				}
-			}
+			boost::hash_combine(elems_signature, seed);
 		}
 
-		ID3D11InputLayout* ia;
-		TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &ia));
-		ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
+		boost::hash_combine(signature, elems_signature);
 
-		input_layout_bank_.push_back(std::make_pair(InputElementTag(elems, signature), ret));
+		BOOST_AUTO(iter, input_layout_bank_.find(signature));
+		if (iter != input_layout_bank_.end())
+		{
+			return iter->second;
+		}
+		else
+		{
+			ID3D11InputLayout* ia;
+			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), vs_code->GetBufferPointer(), vs_code->GetBufferSize(), &ia));
+			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
-		return ret;
+			BOOST_AUTO(in, input_layout_bank_.insert(std::make_pair(signature, ret)));
+
+			return in.first->second;
+		}
 	}
 
 	// 设置当前渲染目标
