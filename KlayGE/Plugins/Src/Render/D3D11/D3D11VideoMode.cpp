@@ -49,6 +49,9 @@ namespace KlayGE
 	{
 		uint32_t colorDepth;
 		if ((format_ == DXGI_FORMAT_R8G8B8A8_UNORM)
+			|| (format_ == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB)
+			|| (format_ == DXGI_FORMAT_B8G8R8A8_UNORM)
+			|| (format_ == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB)
 			|| (format_ == DXGI_FORMAT_R10G10B10A2_UNORM))
 		{
 			colorDepth = 32;

@@ -225,9 +225,17 @@ namespace KlayGE
 			{
 				color_fmt = EF_ARGB8;
 			}
+			else if ("ARGB8_SRGB" == color_fmt_str)
+			{
+				color_fmt = EF_ARGB8_SRGB;
+			}
 			else if ("ABGR8" == color_fmt_str)
 			{
 				color_fmt = EF_ABGR8;
+			}
+			else if ("ABGR8_SRGB" == color_fmt_str)
+			{
+				color_fmt = EF_ABGR8_SRGB;
 			}
 			else if ("A2BGR10" == color_fmt_str)
 			{

@@ -631,7 +631,6 @@ namespace KlayGE
 			return DXGI_FORMAT_R8G8_SNORM;
 
 		case EF_ARGB8:
-		case EF_ARGB8_SRGB:
 			return DXGI_FORMAT_B8G8R8A8_UNORM;
 
 		case EF_ABGR8:
@@ -786,6 +785,9 @@ namespace KlayGE
 
 		case EF_D32F:
 			return DXGI_FORMAT_D32_FLOAT;
+			
+		case EF_ARGB8_SRGB:
+			return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
 		case EF_ABGR8_SRGB:
 			return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -985,6 +987,9 @@ namespace KlayGE
 
 		case DXGI_FORMAT_D32_FLOAT:
 			return EF_D32F;
+
+		case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			return EF_ARGB8_SRGB;
 
 		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
 			return EF_ABGR8_SRGB;

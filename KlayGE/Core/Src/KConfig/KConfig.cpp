@@ -147,7 +147,9 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			HWND hClrFmtCombo = GetDlgItem(hDlg, IDC_CLR_FMT_COMBO);
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ARGB8")));
+			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ARGB8_SRGB")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR8")));
+			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR8_SRGB")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("A2BGR10")));
 
 			int sel = 0;

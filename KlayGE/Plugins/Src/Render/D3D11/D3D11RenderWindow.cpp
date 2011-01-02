@@ -94,14 +94,7 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
-		if (this->FullScreen())
-		{
-			back_buffer_format_ = DXGI_FORMAT_R8G8B8A8_UNORM;
-		}
-		else
-		{
-			back_buffer_format_ = adapter_->DesktopFormat();
-		}
+		back_buffer_format_ = D3D11Mapping::MappingFormat(format_);
 
 		std::memset(&sc_desc_, 0, sizeof(sc_desc_));
 		sc_desc_.BufferCount = 1;
@@ -438,8 +431,6 @@ namespace KlayGE
 			if (fs)
 			{
 				colorDepth_ = fs_color_depth_;
-				back_buffer_format_ = DXGI_FORMAT_R8G8B8A8_UNORM;
-
 				style = WS_POPUP;
 			}
 			else
@@ -448,8 +439,6 @@ namespace KlayGE
 				HDC hdc(::GetDC(hWnd_));
 				colorDepth_ = ::GetDeviceCaps(hdc, BITSPIXEL);
 				::ReleaseDC(hWnd_, hdc);
-
-				back_buffer_format_	= adapter_->DesktopFormat();
 
 				style = WS_OVERLAPPEDWINDOW;
 			}
@@ -571,7 +560,7 @@ namespace KlayGE
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
 		this->Attach(ATT_Color0, MakeSharedPtr<D3D11RenderTargetRenderView>(render_target_view_,
-			this->Width(), this->Height(), D3D11Mapping::MappingFormat(back_buffer_format_)));
+			this->Width(), this->Height(), format_));
 		if (depth_stencil_view_)
 		{
 			this->Attach(ATT_DepthStencil, MakeSharedPtr<D3D11DepthStencilRenderView>(depth_stencil_view_,
