@@ -58,6 +58,8 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = view * proj;
+			*(technique_->Effect().ParameterByName("mv")) = view;
+			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 		}
 
 		void VideoTexture(TexturePtr video_tex)

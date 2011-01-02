@@ -259,7 +259,7 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess, 0.04f) * lighting.a * specular) * ssao, 0), 1);
+	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess) * lighting.a * specular) * ssao, 0), 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0

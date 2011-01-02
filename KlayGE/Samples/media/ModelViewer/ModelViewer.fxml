@@ -117,23 +117,25 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 {
 	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
 
-	float3 diffuse, specular, emit;
+	float3 c_diff, c_spec, emit, spec_level;
 	float opacity;
 	if (diffuse_clr.a > 0.5f)
 	{
-		diffuse = diffuse_tex.Sample(linear_sampler, uv).rgb;
+		c_diff = diffuse_tex.Sample(linear_sampler, uv).rgb;
 	}
 	else
 	{
-		diffuse = diffuse_clr.rgb;
+		c_diff = diffuse_clr.rgb;
 	}
 	if (specular_clr.a > 0.5f)
 	{
-		specular = specular_tex.Sample(linear_sampler, uv).rgb;
+		c_spec = specular_clr.rgb;
+		spec_level = specular_tex.Sample(linear_sampler, uv).rgb;
 	}
 	else
 	{
-		specular = specular_level * specular_clr.rgb;
+		c_spec = specular_clr.rgb;
+		spec_level = specular_level;
 	}
 	if (emit_clr.a > 0.5f)
 	{
@@ -152,11 +154,11 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		opacity = opacity_clr.r;
 	}
 	
-	float3 clr = (ambient_clr.rgb + emit) * diffuse;
+	float3 clr = (ambient_clr.rgb + emit) * c_diff;
 
 	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
-	clr += calc_brdf(diffuse, specular, shininess, 0.04f, light_vec, halfway, normal);
+	clr += calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal, spec_level);
 
 	return float4(clr, opacity);
 }

@@ -76,9 +76,9 @@ float linstep(float min, float max, float v)
 #define INTEGER_SUPPORT
 #endif
 
-float4 CalcColor(float diff, float spec, float atten)
+float4 CalcColor(float n_dot_l, float spec, float atten)
 {
-	float2 ds = diff * atten * float2(1, spec);
+	float2 ds = n_dot_l * atten * float2(1, spec);
 #ifndef INTEGER_SUPPORT
 	if (((light_attrib / LSA_NoDiffuse) % 2) != 0)
 #else
@@ -205,13 +205,13 @@ float4 DeferredRenderingPointPS(
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
-	float diff = diffuse_term(dir, normal);
-	if (diff > 0)
+	float n_dot_l = dot(normal, dir);
+	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
+		float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		final_clr = CalcColor(diff, spec, atten);
+		final_clr = CalcColor(n_dot_l, spec, atten);
 	}
 
 	return final_clr;
@@ -240,13 +240,13 @@ float4 DeferredRenderingSpotPS(
 	{
 		float3 dir = normalize(light_pos_es.xyz - pos_es);
 		float3 normal = GetNormal(ndc);
-		float diff = diffuse_term(dir, normal);
-		if (diff > 0)
+		float n_dot_l = dot(normal, dir);
+		if (n_dot_l > 0)
 		{
-			float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
+			float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			final_clr = CalcColor(diff, spec, atten);
+			final_clr = CalcColor(n_dot_l, spec, atten);
 		}
 	}
 
@@ -272,11 +272,11 @@ float4 DeferredRenderingDirectionalPS(
 
 	float3 dir = light_dir_es.xyz;
 	float3 normal = GetNormal(ndc);
-	float diff = diffuse_term(dir, normal);
-	if (diff > 0)
+	float n_dot_l = dot(normal, dir);
+	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(0.04f, dir, normalize(dir - view_dir), normal, GetShininess(ndc));
-		final_clr = CalcColor(diff, spec, 1);
+		float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		final_clr = CalcColor(n_dot_l, spec, 1);
 	}
 
 	return final_clr;

@@ -140,14 +140,14 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float water_depth = clamp(no_water_depth - pos_ss.w, 0, 100.0f);
 
 	float3 eye_dir = normalize(eye_dir_fog.xyz);
-	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f);
+	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f).x;
 
 	float3 ambient = waterbody_color * 0.1f;
 	float3 diffuse = waterbody_color;
 
 	float3 light_dir = normalize(-sun_dir);
 	float3 halfway = normalize(light_dir + eye_dir);
-	float3 specular = sun_color * specular_normalize_factor(sun_shineness, 0.027f) * roughness_term(halfway, normal, sun_shineness);
+	float3 specular = sun_color * specular_normalize_factor(sun_shineness) * roughness_term(halfway, normal, sun_shineness);
 
 	float n_dot_l = max(0.0f, directional_lighting(-light_dir, normal));
 	float3 water_color = ambient + (diffuse + specular) * n_dot_l;

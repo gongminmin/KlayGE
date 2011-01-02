@@ -75,7 +75,7 @@ float4 WoodPS(float3 pos_os : TEXCOORD0,
 	float3 bump = perlin_noise_gradient(tex_coord * 100, 0.1f);
 	float3 normal = normalize(normal_os + bump * 0.1f);
 
-	return float4(calc_brdf(wood(tex_coord).xyz * 0.7f, 1, 32, 0.04f, light_os, halfway_os, normal), 1);
+	return float4(calc_brdf(wood(tex_coord).xyz * 0.7f, 0.1f, 32, light_os, halfway_os, normal, 1), 1);
 }
 
 float4 MarblePS(float3 pos_os : TEXCOORD0,
@@ -88,8 +88,7 @@ float4 MarblePS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 
-	float diffuse_factor = diffuse_term(light_os, normal_os);
-	return float4(calc_brdf(marble(tex_coord).xyz * 0.7f, 1, 16, 0.08f, light_os, halfway_os, normal_os), 1);
+	return float4(calc_brdf(marble(tex_coord).xyz * 0.7f, 0.4f, 16, light_os, halfway_os, normal_os, 1), 1);
 }
 
 float4 CloudPS(float3 pos_os : TEXCOORD0,
@@ -102,7 +101,7 @@ float4 CloudPS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 	
-	return cloud(tex_coord) * diffuse_term(light_os, normal_os);
+	return cloud(tex_coord) * dot(normal_os, light_os);
 }
 
 float4 ElectroPS(float3 pos_os : TEXCOORD0,
@@ -115,7 +114,7 @@ float4 ElectroPS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 	
-	return electro(tex_coord) * diffuse_term(light_os, normal_os);
+	return electro(tex_coord) * dot(normal_os, light_os);
 }
 		]]>
 	</shader>

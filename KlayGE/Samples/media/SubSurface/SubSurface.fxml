@@ -138,7 +138,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 
 	float3 clr = ambient_clr.rgb * 0.2f * diffuse;
 	clr += indirect_light * extinction_coefficient;
-	clr.rgb += calc_brdf(diffuse, specular_level * specular, shininess, L, H, N);
+	clr.rgb += calc_brdf(diffuse, specular, shininess, L, H, N, specular_level);
 
 	return float4(clr.rgb, 1);
 }

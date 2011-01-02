@@ -77,7 +77,7 @@ void GBufferPS(float2 texcoord : TEXCOORD0, float4 normal : TEXCOORD1, float3 li
 	
 	float3 diffuse_clr = 1;//diffuse_tex.Sample(linear_sampler, texcoord).rgb;
 	float3 specular_clr = 1;
-	float3 color = 0.1f + calc_brdf(diffuse_clr * 0.6f, specular_clr * 0.3f, 30.0f, 0.04f, light_dir, halfway, normal.xyz);
+	float3 color = 0.1f + calc_brdf(diffuse_clr * 0.6f, specular_clr * 0.3f, 30.0f, light_dir, halfway, normal.xyz, 1);
 	oClr = StoreDiffuseSpecular(color, 0);
 }
 

@@ -24,37 +24,25 @@ float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 
 }
 
 
-float fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float f0)
+float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
 {
 	float e_n = max(dot(light_vec, halfway_vec), 0);
-	return f0 + (1 - f0) * pow(1 - e_n, 5);
-}
-
-
-float diffuse_term(float3 light_vec, float3 normal)
-{
-	return dot(light_vec, normal);
+	return c_spec + (1 - c_spec) * pow(1 - e_n, 5);
 }
 
 float specular_normalize_factor(float roughness)
 {
-	return (roughness + 2) / 2;
+	return (roughness + 2) / 8;
 }
 
-float specular_normalize_factor(float roughness, float fresnel)
-{
-	const float PI = 3.141592f;
-	return (roughness + 2) * PI / 8;
-}
-
-float roughness_term(float3 halfway_vec, float3 normal, float roughness)
+float3 roughness_term(float3 halfway_vec, float3 normal, float roughness)
 {
 	return pow(max(dot(halfway_vec, normal), 0.0f), roughness);
 }
 
-float roughness_term(float f0, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
+float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
 {
-	return pow(max(dot(halfway_vec, normal), 0.0f), roughness) * fresnel_term_schlick(light_vec, halfway_vec, f0);
+	return pow(max(dot(halfway_vec, normal), 0.0f), roughness) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
 }
 
 
@@ -63,15 +51,10 @@ float3 calc_brdf(float3 c_diff, float3 l, float3 n)
 {
 	return max(c_diff * dot(n, l), 0);
 }
-// with out fresnel
-float3 calc_brdf(float3 c_diff, float3 c_specular, float roughness, float3 l, float3 h, float3 n)
+// diffuse + specular
+float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3 h, float3 n, float3 specular_level)
 {
-	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(h, n, roughness) * c_specular) * dot(n, l), 0);
-}
-// with fresnel
-float3 calc_brdf(float3 c_diff, float3 c_specular, float roughness, float fresnel, float3 l, float3 h, float3 n)
-{
-	return max((c_diff + specular_normalize_factor(roughness, fresnel) * roughness_term(fresnel, l, h, n, roughness) * c_specular) * dot(n, l), 0);
+	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(c_spec, l, h, n, roughness) * specular_level) * dot(n, l), 0);
 }
 
 
