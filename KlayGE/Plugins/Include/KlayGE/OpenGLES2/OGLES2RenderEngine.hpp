@@ -1,6 +1,6 @@
 // OGLES2RenderEngine.hpp
 // KlayGE OpenGL ES 2渲染引擎类 头文件
-// Ver 3.11.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
 //
@@ -64,8 +64,8 @@ namespace KlayGE
 
 		void AdjustPerspectiveMatrix(float4x4& pers_mat);
 
-		void TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param);
-		void TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param);
+		void ActiveTexture(GLenum tex_unit);
+
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);
 		void ClearStencil(GLuint stencil);
@@ -96,6 +96,8 @@ namespace KlayGE
 		GLsizei vp_width_, vp_height_;
 
 		GLuint cur_fbo_;
+
+		GLenum active_tex_unit_;
 	};
 
 	typedef boost::shared_ptr<OGLES2RenderEngine> OGLES2RenderEnginePtr;

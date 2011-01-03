@@ -1,6 +1,6 @@
 // OGLES2Texture.hpp
 // KlayGE OpenGL ES 2纹理类 头文件
-// Ver 3.10.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
 //
@@ -16,6 +16,8 @@
 #pragma once
 
 #include <KlayGE/Texture.hpp>
+
+#include <map>
 
 #include <glloader/glloader.h>
 
@@ -58,6 +60,9 @@ namespace KlayGE
 			return target_type_;
 		}
 
+		void TexParameteri(GLenum pname, GLint param);
+		void TexParameterf(GLenum pname, GLfloat param);
+
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
@@ -86,6 +91,9 @@ namespace KlayGE
 		GLenum target_type_;
 		TextureMapAccess last_tma_;
 		std::vector<std::vector<uint8_t> > tex_data_;
+
+		std::map<GLenum, GLint> tex_param_i_;
+		std::map<GLenum, GLfloat> tex_param_f_;
 	};
 
 	typedef boost::shared_ptr<OGLES2Texture> OGLES2TexturePtr;

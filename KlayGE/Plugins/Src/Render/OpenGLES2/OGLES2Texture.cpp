@@ -1,6 +1,6 @@
 // OGLES2Texture.cpp
 // KlayGE OpenGL ES 2 纹理类 实现文件
-// Ver 3.10.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
 //
@@ -18,6 +18,8 @@
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
+
+#include <boost/typeof/typeof.hpp>
 
 #include <glloader/glloader.h>
 #include <GL/glu.h>
@@ -188,6 +190,30 @@ namespace KlayGE
 	void OGLES2Texture::GLBindTexture()
 	{
 		glBindTexture(target_type_, texture_);
+	}
+
+	void OGLES2Texture::TexParameteri(GLenum pname, GLint param)
+	{
+		BOOST_AUTO(iter, tex_param_i_.find(pname));
+		if ((iter == tex_param_i_.end()) || (iter->second != param))
+		{
+			glBindTexture(target_type_, texture_);
+			glTexParameteri(target_type_, pname, param);
+
+			tex_param_i_[pname] = param;
+		}
+	}
+
+	void OGLES2Texture::TexParameterf(GLenum pname, GLfloat param)
+	{
+		BOOST_AUTO(iter, tex_param_f_.find(pname));
+		if ((iter == tex_param_f_.end()) || (iter->second != param))
+		{
+			glBindTexture(target_type_, texture_);
+			glTexParameterf(target_type_, pname, param);
+
+			tex_param_f_[pname] = param;
+		}
 	}
 
 	ElementFormat OGLES2Texture::SRGBToRGB(ElementFormat pf)

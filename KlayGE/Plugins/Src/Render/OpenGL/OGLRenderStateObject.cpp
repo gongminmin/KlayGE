@@ -1,6 +1,6 @@
 // OGLRenderStateObject.cpp
 // KlayGE OpenGL渲染状态对象类 实现文件
-// Ver 3.9.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2008-2009
 // Homepage: http://www.klayge.org
 //
@@ -504,59 +504,30 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		OGLTexture& tex = *checked_pointer_cast<OGLTexture>(texture);
-		GLuint const gl_tex = tex.GLTexture();
-		GLenum tex_type = tex.GLType();
+		OGLTexture& tex = *checked_cast<OGLTexture*>(texture.get());
 
-		if (!glloader_GL_EXT_direct_state_access())
-		{
-			glBindTexture(tex_type, gl_tex);
-		}
+		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
+		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
+		tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
+		tex.TexParameterfv(GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
 
-		if (glloader_GL_EXT_direct_state_access())
-		{
-			float tmp[4];
-			glGetTextureParameterfvEXT(gl_tex, tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
-			if ((tmp[0] != desc_.border_clr.r())
-				|| (tmp[1] != desc_.border_clr.g())
-				|| (tmp[2] != desc_.border_clr.b())
-				|| (tmp[3] != desc_.border_clr.a()))
-			{
-				glTextureParameterfvEXT(gl_tex, tex_type, GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
-			}
-		}
-		else
-		{
-			float tmp[4];
-			glGetTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, tmp);
-			if ((tmp[0] != desc_.border_clr.r())
-				|| (tmp[1] != desc_.border_clr.g())
-				|| (tmp[2] != desc_.border_clr.b())
-				|| (tmp[3] != desc_.border_clr.a()))
-			{
-				glTexParameterfv(tex_type, GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
-			}
-		}
+		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
+		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
-
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
-		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MIN_LOD, desc_.min_lod);
-		re.TexParameterf(gl_tex, tex_type, GL_TEXTURE_MAX_LOD, desc_.max_lod);
+		tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+		tex.TexParameterf(GL_TEXTURE_MIN_LOD, desc_.min_lod);
+		tex.TexParameterf(GL_TEXTURE_MAX_LOD, desc_.max_lod);
 		if (desc_.cmp_func != CF_AlwaysFail)
 		{
-			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+			tex.TexParameteri(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 		}
 		else
 		{
-			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+			tex.TexParameteri(GL_TEXTURE_COMPARE_MODE, GL_NONE);
 		}
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
-		re.TexEnv(GL_TEXTURE0 + stage, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
+		tex.TexParameteri(GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
+
+		re.MipMapLodBias(stage, desc_.mip_map_lod_bias);
 	}
 }

@@ -412,25 +412,21 @@ namespace KlayGE
 
 	void OGLES2SamplerStateObject::Active(uint32_t /*stage*/, TexturePtr const & texture)
 	{
-		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
 		OGLES2Texture& tex = *checked_pointer_cast<OGLES2Texture>(texture);
-		GLuint const gl_tex = tex.GLTexture();
-		GLenum tex_type = tex.GLType();
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
+		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
+		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
 		if (glloader_GLES_OES_texture_3D())
 		{
-			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_WRAP_R_OES, ogl_addr_mode_w_);
+			tex.TexParameteri(GL_TEXTURE_WRAP_R_OES, ogl_addr_mode_w_);
 		}
 
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
-		re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
+		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
+		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
 
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
-			re.TexParameter(gl_tex, tex_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+			tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
 		}
 	}
 }

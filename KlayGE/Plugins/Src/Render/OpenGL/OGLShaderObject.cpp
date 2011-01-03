@@ -1,6 +1,6 @@
 // OGLShaderObject.cpp
 // KlayGE OpenGL shader对象类 实现文件
-// Ver 3.11.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2006-2010
 // Homepage: http://www.klayge.org
 //
@@ -929,7 +929,9 @@ namespace
 
 			if ((*samplers_)[stage_].first)
 			{
-				glActiveTexture(GL_TEXTURE0 + stage_);
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				checked_pointer_cast<OGLSamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLTexture>((*samplers_)[stage_].first)->GLTexture();

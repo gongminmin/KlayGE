@@ -1,6 +1,6 @@
 // OGLES2RenderEngine.cpp
 // KlayGE OpenGL ES 2渲染引擎类 实现文件
-// Ver 3.10.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2010
 // Homepage: http://www.klayge.org
 //
@@ -187,29 +187,17 @@ namespace KlayGE
 		checked_pointer_cast<OGLES2BlendStateObject>(cur_bs_obj_)->ForceDefaultState();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
+
+		active_tex_unit_ = GL_TEXTURE0;
+		glActiveTexture(active_tex_unit_);
 	}
 
-	void OGLES2RenderEngine::TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param)
+	void OGLES2RenderEngine::ActiveTexture(GLenum tex_unit)
 	{
-		glBindTexture(target, tex);
-
-		GLint tmp;
-		glGetTexParameteriv(target, pname, &tmp);
-		if (tmp != param)
+		if (tex_unit != active_tex_unit_)
 		{
-			glTexParameteri(target, pname, param);
-		}
-	}
-
-	void OGLES2RenderEngine::TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param)
-	{
-		glBindTexture(target, tex);
-
-		GLfloat tmp;
-		glGetTexParameterfv(target, pname, &tmp);
-		if (tmp != param)
-		{
-			glTexParameterf(target, pname, param);
+			glActiveTexture(tex_unit);
+			active_tex_unit_ = tex_unit;
 		}
 	}
 

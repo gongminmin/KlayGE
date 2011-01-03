@@ -1,6 +1,6 @@
 // OGLRenderEngine.cpp
 // KlayGE OpenGL渲染引擎类 实现文件
-// Ver 3.7.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2004-2008
 // Homepage: http://www.klayge.org
 //
@@ -229,77 +229,52 @@ namespace KlayGE
 		{
 			glEnable(GL_PRIMITIVE_RESTART);
 		}
+
+		mip_map_lod_bias_.resize(std::max(std::max(caps_.max_vertex_texture_units, caps_.max_pixel_texture_units), caps_.max_geometry_texture_units), 0);
+		for (uint32_t stage = 0; stage < mip_map_lod_bias_.size(); ++ stage)
+		{
+			float bias = mip_map_lod_bias_[stage];
+			GLenum tex_unit = GL_TEXTURE0 + stage;
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glMultiTexEnvfEXT(tex_unit, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+			}
+			else
+			{
+				this->ActiveTexture(tex_unit);
+				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+			}
+		}
+
+		active_tex_unit_ = GL_TEXTURE0;
+		glActiveTexture(active_tex_unit_);
 	}
 
-	void OGLRenderEngine::TexParameter(GLuint tex, GLenum target, GLenum pname, GLint param)
+	void OGLRenderEngine::MipMapLodBias(uint32_t stage, float bias)
 	{
-		if (glloader_GL_EXT_direct_state_access())
+		if (mip_map_lod_bias_[stage] != bias)
 		{
-			GLint tmp;
-			glGetTextureParameterivEXT(tex, target, pname, &tmp);
-			if (tmp != param)
+			GLenum tex_unit = GL_TEXTURE0 + stage;
+			if (glloader_GL_EXT_direct_state_access())
 			{
-				glTextureParameteriEXT(tex, target, pname, param);
+				glMultiTexEnvfEXT(tex_unit, GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
 			}
-		}
-		else
-		{
-			glBindTexture(target, tex);
+			else
+			{
+				this->ActiveTexture(tex_unit);
+				glTexEnvf(GL_TEXTURE_FILTER_CONTROL, GL_TEXTURE_LOD_BIAS, bias);
+			}
 
-			GLint tmp;
-			glGetTexParameteriv(target, pname, &tmp);
-			if (tmp != param)
-			{
-				glTexParameteri(target, pname, param);
-			}
-		}
-	}
-
-	void OGLRenderEngine::TexParameterf(GLuint tex, GLenum target, GLenum pname, GLfloat param)
-	{
-		if (glloader_GL_EXT_direct_state_access())
-		{
-			GLfloat tmp;
-			glGetTextureParameterfvEXT(tex, target, pname, &tmp);
-			if (tmp != param)
-			{
-				glTextureParameterfEXT(tex, target, pname, param);
-			}
-		}
-		else
-		{
-			glBindTexture(target, tex);
-
-			GLfloat tmp;
-			glGetTexParameterfv(target, pname, &tmp);
-			if (tmp != param)
-			{
-				glTexParameterf(target, pname, param);
-			}
+			mip_map_lod_bias_[stage] = bias;
 		}
 	}
 
-	void OGLRenderEngine::TexEnv(GLenum tex_unit, GLenum target, GLenum pname, GLfloat param)
+	void OGLRenderEngine::ActiveTexture(GLenum tex_unit)
 	{
-		if (glloader_GL_EXT_direct_state_access())
-		{
-			GLfloat tmp;
-			glGetMultiTexEnvfvEXT(tex_unit, target, pname, &tmp);
-			if (tmp != param)
-			{
-				glMultiTexEnvfEXT(tex_unit, target, pname, param);
-			}
-		}
-		else
+		if (tex_unit != active_tex_unit_)
 		{
 			glActiveTexture(tex_unit);
-
-			GLfloat tmp;
-			glGetTexEnvfv(target, pname, &tmp);
-			if (tmp != param)
-			{
-				glTexEnvf(target, pname, param);
-			}
+			active_tex_unit_ = tex_unit;
 		}
 	}
 

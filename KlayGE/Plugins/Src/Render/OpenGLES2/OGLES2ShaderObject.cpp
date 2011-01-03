@@ -841,7 +841,9 @@ namespace
 
 			if ((*samplers_)[stage_].first)
 			{
-				glActiveTexture(GL_TEXTURE0 + stage_);
+				OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+				re.ActiveTexture(GL_TEXTURE0 + stage_);
 				checked_pointer_cast<OGLES2SamplerStateObject>((*samplers_)[stage_].second)->Active(stage_, (*samplers_)[stage_].first);
 				GLuint const tex_type = checked_pointer_cast<OGLES2Texture>((*samplers_)[stage_].first)->GLType();
 				GLuint const gl_tex = checked_pointer_cast<OGLES2Texture>((*samplers_)[stage_].first)->GLTexture();

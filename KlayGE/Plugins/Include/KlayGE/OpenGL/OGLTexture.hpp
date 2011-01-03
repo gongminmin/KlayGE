@@ -1,6 +1,6 @@
 // OGLTexture.hpp
 // KlayGE OpenGL纹理类 头文件
-// Ver 3.6.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://www.klayge.org
 //
@@ -23,6 +23,8 @@
 #pragma once
 
 #include <KlayGE/Texture.hpp>
+
+#include <map>
 
 #include <glloader/glloader.h>
 
@@ -70,6 +72,10 @@ namespace KlayGE
 			return pbos_[level];
 		}
 
+		void TexParameteri(GLenum pname, GLint param);
+		void TexParameterf(GLenum pname, GLfloat param);
+		void TexParameterfv(GLenum pname, GLfloat const * param);
+
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
@@ -98,6 +104,10 @@ namespace KlayGE
 		GLenum target_type_;
 		std::vector<GLuint> pbos_;
 		TextureMapAccess last_tma_;
+
+		std::map<GLenum, GLint> tex_param_i_;
+		std::map<GLenum, GLfloat> tex_param_f_;
+		std::map<GLenum, float4> tex_param_fv_;
 	};
 
 	typedef boost::shared_ptr<OGLTexture> OGLTexturePtr;

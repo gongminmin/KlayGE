@@ -1,6 +1,6 @@
 // OGLTexture.cpp
 // KlayGE OpenGL纹理类 实现文件
-// Ver 3.9.0
+// Ver 3.12.0
 // 版权所有(C) 龚敏敏, 2003-2007
 // Homepage: http://www.klayge.org
 //
@@ -28,6 +28,8 @@
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
+
+#include <boost/typeof/typeof.hpp>
 
 #include <glloader/glloader.h>
 #include <GL/glu.h>
@@ -223,6 +225,64 @@ namespace KlayGE
 	void OGLTexture::GLBindTexture()
 	{
 		glBindTexture(target_type_, texture_);
+	}
+
+	void OGLTexture::TexParameteri(GLenum pname, GLint param)
+	{
+		BOOST_AUTO(iter, tex_param_i_.find(pname));
+		if ((iter == tex_param_i_.end()) || (iter->second != param))
+		{
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glTextureParameteriEXT(texture_, target_type_, pname, param);
+			}
+			else
+			{
+				glBindTexture(target_type_, texture_);
+				glTexParameteri(target_type_, pname, param);
+			}
+
+			tex_param_i_[pname] = param;
+		}
+	}
+
+	void OGLTexture::TexParameterf(GLenum pname, GLfloat param)
+	{
+		BOOST_AUTO(iter, tex_param_f_.find(pname));
+		if ((iter == tex_param_f_.end()) || (iter->second != param))
+		{
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glTextureParameterfEXT(texture_, target_type_, pname, param);
+			}
+			else
+			{
+				glBindTexture(target_type_, texture_);
+				glTexParameterf(target_type_, pname, param);
+			}
+
+			tex_param_f_[pname] = param;
+		}
+	}
+
+	void OGLTexture::TexParameterfv(GLenum pname, GLfloat const * param)
+	{
+		float4 const f4_param(param);
+		BOOST_AUTO(iter, tex_param_fv_.find(pname));
+		if ((iter == tex_param_fv_.end()) || (iter->second != f4_param))
+		{
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				glTextureParameterfvEXT(texture_, target_type_, pname, param);
+			}
+			else
+			{
+				glBindTexture(target_type_, texture_);
+				glTexParameterfv(target_type_, pname, param);
+			}
+
+			tex_param_fv_[pname] = f4_param;
+		}
 	}
 
 	ElementFormat OGLTexture::SRGBToRGB(ElementFormat pf)
