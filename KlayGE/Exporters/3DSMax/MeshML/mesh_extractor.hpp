@@ -189,6 +189,8 @@ namespace KlayGE
 
 		INode* root_node_;
 
+		float unit_scale_;
+
 		joints_t joints_;
 		int joints_per_ver_;
 		bool combine_meshes_;

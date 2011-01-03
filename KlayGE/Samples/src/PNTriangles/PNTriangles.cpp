@@ -215,7 +215,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = LoadModel("archer_attacking.meshml", EAH_GPU_Read, CreateKModelFactory<PNTrianglesSkinnedModel>(), CreateKMeshFactory<PNTrianglesSkinnedMesh>())();
-			model_matrix_ = MathLib::scaling(0.01f, 0.01f, 0.01f);
+			model_matrix_ = float4x4::Identity();
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->SetModelMatrix(model_matrix_);
 		}
 

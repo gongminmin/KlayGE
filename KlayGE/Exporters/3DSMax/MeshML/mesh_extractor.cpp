@@ -177,6 +177,7 @@ namespace KlayGE
 {
 	meshml_extractor::meshml_extractor(INode* root_node, int joints_per_ver, int cur_time, int start_frame, int end_frame, bool combine_meshes)
 						: root_node_(root_node),
+							unit_scale_(static_cast<float>(GetMasterScale(UNITS_METERS))),
 							joints_per_ver_(joints_per_ver),
 							cur_time_(cur_time),
 							start_frame_(start_frame), end_frame_(end_frame),
@@ -718,7 +719,7 @@ namespace KlayGE
 			{
 				vertex_t& vertex = obj_vertices[ver_index];
 
-				vertex.pos = positions[vertex_index.pos_index].first;
+				vertex.pos = positions[vertex_index.pos_index].first * unit_scale_;
 				std::swap(vertex.pos.y, vertex.pos.z);
 
 				Point3 normal(0, 0, 0);
@@ -847,7 +848,7 @@ namespace KlayGE
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
-			kf.positions.push_back(this->point_from_matrix(local_tm));
+			kf.positions.push_back(this->point_from_matrix(local_tm) * unit_scale_);
 			kf.quaternions.push_back(this->quat_from_matrix(local_tm));
 		}
 
@@ -916,7 +917,7 @@ namespace KlayGE
 
 			jn.second.mesh_init_matrix = Inverse(jn.second.joint_node->GetNodeTM(0)) * skin_init_tm;
 
-			joint.pos = this->point_from_matrix(skin_init_tm);
+			joint.pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
 			joint.quat = this->quat_from_matrix(skin_init_tm);
 
 			joints_[jn.first] = joint;
