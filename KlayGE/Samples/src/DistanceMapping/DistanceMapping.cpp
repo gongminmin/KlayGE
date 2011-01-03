@@ -288,7 +288,8 @@ void DistanceMapping::InputHandler(InputEngine const & /*sender*/, InputAction c
 		{
 			RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			renderEngine.EndFrame();
-			renderEngine.Resize(800, 600);
+			ContextCfg const & cfg = Context::Instance().Config();
+			renderEngine.Resize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 			renderEngine.FullScreen(!renderEngine.FullScreen());
 			renderEngine.BeginFrame();
 		}
