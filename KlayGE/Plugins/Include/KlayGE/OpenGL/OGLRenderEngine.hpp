@@ -83,6 +83,7 @@ namespace KlayGE
 
 		void MipMapLodBias(uint32_t stage, float bias);
 		void ActiveTexture(GLenum tex_unit);
+		void BindBuffer(GLenum target, GLuint buffer);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);
@@ -137,6 +138,7 @@ namespace KlayGE
 
 		std::vector<GLfloat> mip_map_lod_bias_;
 		GLenum active_tex_unit_;
+		std::map<GLenum, GLuint> binded_buffer_;
 
 		GLuint restart_index_;
 

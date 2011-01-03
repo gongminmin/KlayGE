@@ -529,7 +529,8 @@ namespace KlayGE
 				if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
 				{
 					glGenTextures(1, &tex_2d_);
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+					OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTextureImage2DEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB,
                                0, GL_RGBA32F_ARB,
                                width_, height_, 0,
@@ -577,7 +578,7 @@ namespace KlayGE
 				{
 					glGenTextures(1, &tex_2d_);
 					glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_2d_);
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 						0, GL_RGBA, GL_FLOAT, NULL);
 					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -789,7 +790,8 @@ namespace KlayGE
 
 		glGenTextures(1, &tex_);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 			0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -895,7 +897,8 @@ namespace KlayGE
 		glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0);
 
 		OGLGraphicsBuffer* ogl_gb = checked_cast<OGLGraphicsBuffer*>(&gbuffer_);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, ogl_gb->OGLvbo());
 		glReadPixels(0, 0, width_, height_, glformat, gltype, 0);
 	}
 

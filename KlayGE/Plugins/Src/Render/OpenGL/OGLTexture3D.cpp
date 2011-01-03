@@ -92,9 +92,10 @@ namespace KlayGE
 		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 			if (IsCompressedFormat(format_))
 			{
 				int block_size;
@@ -111,7 +112,7 @@ namespace KlayGE
 				GLsizei const image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 				glCompressedTexImage3D(target_type_, level, glinternalFormat,
 					width, height, depth, 0, image_size, (NULL == init_data) ? NULL : init_data[level].data);
@@ -121,7 +122,7 @@ namespace KlayGE
 				GLsizei const image_size = width * height * depth * texel_size;
 
 				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 				glTexImage3D(target_type_, level, glinternalFormat, width, height, depth, 0, glformat, gltype,
 					(NULL == init_data) ? NULL : init_data[level].data);
@@ -175,9 +176,10 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 				{
-					glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+					re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 
 					glBindTexture(target_type_, texture_);
 					if (IsCompressedFormat(format_))
@@ -189,7 +191,7 @@ namespace KlayGE
 						glGetTexImage(target_type_, level, gl_format, gl_type, NULL);
 					}
 
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 					glBindTexture(target_type_, checked_cast<OGLTexture*>(&target)->GLTexture());
 
 					if (IsCompressedFormat(format_))
@@ -350,6 +352,7 @@ namespace KlayGE
 
 		uint32_t const size_fmt = NumFormatBytes(format_);
 
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (tma)
 		{
 		case TMA_Read_Only:
@@ -359,8 +362,8 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
 
 				glBindTexture(target_type_, texture_);
@@ -372,8 +375,8 @@ namespace KlayGE
 
 		case TMA_Write_Only:
 			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 			}
 			break;
@@ -386,8 +389,8 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				//glBufferData(GL_PIXEL_PACK_BUFFER, width * height * depth * size_fmt, NULL, GL_STREAM_READ);
 
 				glBindTexture(target_type_, texture_);
@@ -411,20 +414,21 @@ namespace KlayGE
 		BOOST_ASSERT(0 == array_index);
 		UNREF_PARAM(array_index);
 
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
 			{
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 			}
 			break;
 
 		case TMA_Write_Only:
 			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 				GLint gl_internalFormat;
@@ -463,10 +467,10 @@ namespace KlayGE
 
 		case TMA_Read_Write:
 			{
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 
 				GLint gl_internalFormat;
 				GLenum gl_format;

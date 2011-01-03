@@ -248,6 +248,8 @@ namespace KlayGE
 
 		active_tex_unit_ = GL_TEXTURE0;
 		glActiveTexture(active_tex_unit_);
+
+		binded_buffer_.clear();
 	}
 
 	void OGLRenderEngine::MipMapLodBias(uint32_t stage, float bias)
@@ -275,6 +277,16 @@ namespace KlayGE
 		{
 			glActiveTexture(tex_unit);
 			active_tex_unit_ = tex_unit;
+		}
+	}
+
+	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer)
+	{
+		BOOST_AUTO(iter, binded_buffer_.find(target));
+		if ((iter == binded_buffer_.end()) || (iter->second != buffer))
+		{
+			glBindBuffer(target, buffer);
+			binded_buffer_[target] = buffer;
 		}
 	}
 

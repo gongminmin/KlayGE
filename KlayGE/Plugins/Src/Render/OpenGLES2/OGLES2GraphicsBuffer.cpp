@@ -19,6 +19,7 @@
 
 #include <algorithm>
 
+#include <KlayGE/OpenGLES2/OGLES2RenderEngine.hpp>
 #include <KlayGE/OpenGLES2/OGLES2GraphicsBuffer.hpp>
 
 namespace KlayGE
@@ -35,7 +36,8 @@ namespace KlayGE
 		{
 			size_in_byte_ = init_data->row_pitch;
 
-			glBindBuffer(target_, vb_);
+			OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindBuffer(target_, vb_);
 			glBufferData(target_,
 					static_cast<GLsizeiptr>(size_in_byte_), init_data->data,
 					(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
@@ -53,7 +55,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
-		glBindBuffer(target_, vb_);
+		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(target_, vb_);
 		glBufferData(target_,
 				static_cast<GLsizeiptr>(size_in_byte_), NULL,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
@@ -67,7 +70,8 @@ namespace KlayGE
 		case BA_Write_Only:
 			if (glloader_GLES_OES_mapbuffer())
 			{
-				glBindBuffer(target_, vb_);
+				OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindBuffer(target_, vb_);
 				return glMapBufferOES(target_, GL_WRITE_ONLY_OES);
 			}
 			else
@@ -82,7 +86,8 @@ namespace KlayGE
 
 	void OGLES2GraphicsBuffer::Unmap()
 	{
-		glBindBuffer(target_, vb_);
+		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(target_, vb_);
 		if (glloader_GLES_OES_mapbuffer())
 		{
 			glUnmapBufferOES(target_);
@@ -95,7 +100,8 @@ namespace KlayGE
 
 	void OGLES2GraphicsBuffer::Active()
 	{
-		glBindBuffer(target_, vb_);
+		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(target_, vb_);
 	}
 
 	void OGLES2GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)

@@ -65,6 +65,7 @@ namespace KlayGE
 		void AdjustPerspectiveMatrix(float4x4& pers_mat);
 
 		void ActiveTexture(GLenum tex_unit);
+		void BindBuffer(GLenum target, GLuint buffer);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);
@@ -98,6 +99,7 @@ namespace KlayGE
 		GLuint cur_fbo_;
 
 		GLenum active_tex_unit_;
+		std::map<GLenum, GLuint> binded_buffer_;
 	};
 
 	typedef boost::shared_ptr<OGLES2RenderEngine> OGLES2RenderEnginePtr;
