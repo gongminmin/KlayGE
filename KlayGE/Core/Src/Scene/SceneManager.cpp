@@ -54,14 +54,6 @@
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/pool/pool_alloc.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -184,7 +176,7 @@ namespace KlayGE
 				visible = false;
 			}
 
-			visible_marks_[i] = visible;
+			(*visible_marks_)[i] = visible;
 		}
 	}
 
@@ -280,7 +272,10 @@ namespace KlayGE
 
 		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
 		{
-			scene_obj->Update();
+			if (!(scene_obj->Attrib() & SceneObject::SOA_Overlay))
+			{
+				scene_obj->Update();
+			}
 		}
 
 		if (re.Stereo() != STM_None)
@@ -328,17 +323,38 @@ namespace KlayGE
 		numVerticesRendered_ = 0;
 
 		Camera& camera = app.ActiveCamera();
-		
-		visible_marks_.resize(scene_objs_.size());
+
+		visible_marks_ = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
 		if (urt_ & App3DFramework::URV_Need_Flush)
 		{
 			frustum_ = &camera.ViewFrustum();
 
-			this->ClipScene();
+			std::vector<uint32_t> visible_list((scene_objs_.size() + 31) / 32, 0);
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				if (!(scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay) && scene_objs_[i]->Visible())
+				{
+					visible_list[i / 32] |= (1UL << (i & 31));
+				}
+			}
+			size_t seed = 0;
+			boost::hash_range(seed, visible_list.begin(), visible_list.end());
+			boost::hash_combine(seed, &camera);
+
+			BOOST_AUTO(vmiter, visible_marks_map_.find(seed));
+			if (vmiter == visible_marks_map_.end())
+			{
+				this->ClipScene();
+				visible_marks_map_.insert(std::make_pair(seed, visible_marks_));
+			}
+			else
+			{
+				std::copy(vmiter->second->begin(), vmiter->second->end(), visible_marks_->begin());
+			}
 		}
 		else
 		{
-			std::fill(visible_marks_.begin(), visible_marks_.end(), false);
+			std::fill(visible_marks_->begin(), visible_marks_->end(), false);
 		}
 		if (urt_ & App3DFramework::URV_Finished)
 		{
@@ -347,7 +363,7 @@ namespace KlayGE
 				if (scene_objs_[i]->Attrib() & SceneObject::SOA_Overlay)
 				{
 					scene_objs_[i]->Update();
-					visible_marks_[i] = scene_objs_[i]->Visible();
+					(*visible_marks_)[i] = scene_objs_[i]->Visible();
 				}
 			}
 		}
@@ -356,9 +372,9 @@ namespace KlayGE
 			boost::pool_allocator<std::pair<RenderablePtr, SceneObjectsType> > > renderables;
 		std::map<RenderablePtr, size_t, std::less<RenderablePtr>,
 			boost::fast_pool_allocator<std::pair<RenderablePtr const, size_t> > > renderables_map;
-		for (size_t i = 0; i < visible_marks_.size(); ++ i)
+		for (size_t i = 0; i < visible_marks_->size(); ++ i)
 		{
-			if (visible_marks_[i])
+			if ((*visible_marks_)[i])
 			{
 				SceneObjectPtr const & so = scene_objs_[i];
 				RenderablePtr const & renderable = so->GetRenderable();
@@ -469,6 +485,8 @@ namespace KlayGE
 
 	void SceneManager::FlushScene()
 	{
+		visible_marks_map_.clear();
+
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)

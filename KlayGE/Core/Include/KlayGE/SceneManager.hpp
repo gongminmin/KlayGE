@@ -1,7 +1,7 @@
 // SceneManager.hpp
 // KlayGE 场景管理器类 头文件
-// Ver 3.11.0
-// 版权所有(C) 龚敏敏, 2003-2010
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2003-2011
 // Homepage: http://www.klayge.org
 //
 // 3.11.0
@@ -35,6 +35,23 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011 6334)
+#endif
+#include <boost/unordered_map.hpp>
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4127)
+#endif
+#include <boost/pool/pool_alloc.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {
@@ -82,8 +99,11 @@ namespace KlayGE
 		Frustum const * frustum_;
 		SceneObjectsType scene_objs_;
 		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
-		std::vector<char> visible_marks_;
+		boost::shared_ptr<std::vector<char> > visible_marks_;
 		uint32_t urt_;
+
+		boost::unordered_map<size_t, boost::shared_ptr<std::vector<char> >, boost::hash<size_t>, std::equal_to<size_t>,
+			boost::fast_pool_allocator<std::pair<size_t, boost::shared_ptr<std::vector<char> > > > > visible_marks_map_;
 
 	private:
 		void FlushScene();

@@ -249,6 +249,9 @@ namespace KlayGE
 		virtual float CosOuterAngle() const;
 		virtual float4 const & CosOuterInner() const;
 
+		virtual ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		virtual CameraPtr SMCamera(uint32_t index) const;
+
 	protected:
 		LightType type_;
 		int32_t attrib_;
@@ -277,9 +280,15 @@ namespace KlayGE
 		float3 const & Falloff() const;
 		void Falloff(float3 const & fall_off);
 
+		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr SMCamera(uint32_t index) const;
+
 	protected:
 		float3 pos_;
 		float3 falloff_;
+
+		std::vector<ConditionalRenderPtr> crs_;
+		std::vector<CameraPtr> sm_cameras_;
 	};
 	typedef boost::shared_ptr<DeferredPointLightSource> DeferredPointLightSourcePtr;
 
@@ -306,11 +315,17 @@ namespace KlayGE
 
 		float4 const & CosOuterInner() const;
 
+		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr SMCamera(uint32_t index) const;
+
 	protected:
 		float3 pos_;
 		float3 dir_;
 		float3 falloff_;
 		float4 cos_outer_inner_;
+
+		ConditionalRenderPtr cr_;
+		CameraPtr sm_camera_;
 	};
 	typedef boost::shared_ptr<DeferredSpotLightSource> DeferredSpotLightSourcePtr;
 
@@ -443,7 +458,6 @@ namespace KlayGE
 		Box box_bbox_;
 
 		std::vector<DeferredLightSourcePtr> lights_;
-		std::vector<std::vector<ConditionalRenderPtr> > light_crs_;
 
 		std::vector<uint32_t> pass_scaned_;
 

@@ -100,6 +100,16 @@ namespace KlayGE
 		return float4::Zero();
 	}
 
+	ConditionalRenderPtr DeferredLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	{
+		return ConditionalRenderPtr();
+	}
+
+	CameraPtr DeferredLightSource::SMCamera(uint32_t /*index*/) const
+	{
+		return CameraPtr();
+	}
+
 
 	DeferredAmbientLightSource::DeferredAmbientLightSource()
 		: DeferredLightSource(LT_Ambient)
@@ -116,6 +126,16 @@ namespace KlayGE
 	DeferredPointLightSource::DeferredPointLightSource()
 		: DeferredLightSource(LT_Point)
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		for (int i = 0; i < 7; ++ i)
+		{
+			crs_.push_back(checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender()));
+		}
+
+		for (int i = 0; i < 6; ++ i)
+		{
+			sm_cameras_.push_back(MakeSharedPtr<Camera>());
+		}
 	}
 
 	DeferredPointLightSource::~DeferredPointLightSource()
@@ -142,10 +162,25 @@ namespace KlayGE
 		falloff_ = falloff;
 	}
 
+	ConditionalRenderPtr DeferredPointLightSource::ConditionalRenderQuery(uint32_t index) const
+	{
+		BOOST_ASSERT(index < crs_.size());
+		return crs_[index];
+	}
+
+	CameraPtr DeferredPointLightSource::SMCamera(uint32_t index) const
+	{
+		BOOST_ASSERT(index < sm_cameras_.size());
+		return sm_cameras_[index];
+	}
+
 
 	DeferredSpotLightSource::DeferredSpotLightSource()
-		: DeferredLightSource(LT_Spot)
+		: DeferredLightSource(LT_Spot),
+			sm_camera_(MakeSharedPtr<Camera>())
 	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		cr_ = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
 	DeferredSpotLightSource::~DeferredSpotLightSource()
@@ -207,6 +242,16 @@ namespace KlayGE
 	float4 const & DeferredSpotLightSource::CosOuterInner() const
 	{
 		return cos_outer_inner_;
+	}
+
+	ConditionalRenderPtr DeferredSpotLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	{
+		return cr_;
+	}
+
+	CameraPtr DeferredSpotLightSource::SMCamera(uint32_t /*index*/) const
+	{
+		return sm_camera_;
 	}
 
 
@@ -336,7 +381,6 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		lights_.push_back(MakeSharedPtr<DeferredAmbientLightSource>());
-		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
 
 		g_buffer_ = rf.MakeFrameBuffer();
 		shadowing_buffer_ = rf.MakeFrameBuffer();
@@ -528,13 +572,6 @@ namespace KlayGE
 		point->Falloff(falloff);
 		lights_.push_back(point);
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
-		for (int i = 0; i < 7; ++ i)
-		{
-			light_crs_.back().push_back(checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender()));
-		}
-
 		return point;
 	}
 
@@ -546,7 +583,6 @@ namespace KlayGE
 		directional->Direction(MathLib::normalize(dir));
 		directional->Falloff(falloff);
 		lights_.push_back(directional);
-		light_crs_.push_back(std::vector<ConditionalRenderPtr>());
 		return directional;
 	}
 
@@ -561,11 +597,6 @@ namespace KlayGE
 		spot->OuterAngle(outer);
 		spot->InnerAngle(inner);
 		lights_.push_back(spot);
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		light_crs_.push_back(std::vector<ConditionalRenderPtr>(1,
-			checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender())));
-
 		return spot;
 	}
 
@@ -739,9 +770,9 @@ namespace KlayGE
 									}
 									pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
 
-									light_crs_[i][0]->Begin();
+									light->ConditionalRenderQuery(0)->Begin();
 									re.Render(*technique_light_depth_only_, *rl_cone_);
-									light_crs_[i][0]->End();
+									light->ConditionalRenderQuery(0)->End();
 								}
 							}
 							break;
@@ -776,9 +807,9 @@ namespace KlayGE
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
 										}
 
-										light_crs_[i][j]->Begin();
+										light->ConditionalRenderQuery(j)->Begin();
 										re.Render(*technique_light_depth_only_, *rl_pyramid_);
-										light_crs_[i][j]->End();
+										light->ConditionalRenderQuery(j)->End();
 									}
 								}
 								{
@@ -799,9 +830,9 @@ namespace KlayGE
 									{
 										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
 
-										light_crs_[i][6]->Begin();
+										light->ConditionalRenderQuery(6)->Begin();
 										re.Render(*technique_light_depth_only_, *rl_box_);
-										light_crs_[i][6]->End();
+										light->ConditionalRenderQuery(6)->End();
 									}
 								}
 							}
@@ -844,93 +875,115 @@ namespace KlayGE
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();
 
-				float3 d, u;
-				if (type != LT_Point)
-				{
-					d = light->Direction();
-					u = float3(0, 1, 0);
-				}
-				else
-				{
-					std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-					d = ad.first;
-					u = ad.second;
-				}
-
-				float fov;
-				if (type != LT_Spot)
-				{
-					fov = PI / 2;
-				}
-				else
-				{
-					fov = light->CosOuterInner().z();
-				}
-
-				float3 const & p = light->Position();
-				CameraPtr const & sm_camera = sm_buffer_->GetViewport().camera;
-				sm_camera->ViewParams(p, p + d, u);
-				sm_camera->ProjParams(fov, 1, 0.1f, 100.0f);
-
-				if (PT_GenShadowMap == pass_type)
-				{
-					float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
-					float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-					depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
-					depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
-				}
-
-				float3 dir_es = MathLib::transform_normal(d, view_);
-				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
-
-				*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
-
-				float3 loc_es = MathLib::transform_coord(p, view_);
-				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
 				RenderLayoutPtr rl;
-				float4x4 mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
-				float4x4 mat_vp = mat_v * proj_;
-				switch (type)
+				if (type != LT_Ambient)
 				{
-				case LT_Spot:
+					CameraPtr sm_camera;
+					float3 d, u;
+					if (type != LT_Point)
 					{
-						light_pos_es_actived.w() = light->CosOuterInner().x();
-						light_dir_es_actived.w() = light->CosOuterInner().y();
+						d = light->Direction();
+						u = float3(0, 1, 0);
 
-						rl = rl_cone_;
-						float const scale = light->CosOuterInner().w();
-						float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
-						*light_volume_mv_param_ = light_model * mat_v;
-						*light_volume_mvp_param_ = light_model * mat_vp;
-					}
-					break;
-
-				case LT_Point:
-					if (PT_Lighting == pass_type)
-					{
-						rl = rl_box_;
-						float4x4 light_model = MathLib::translation(p);
-						*light_volume_mv_param_ = light_model * view_;
-						*light_volume_mvp_param_ = light_model * view_ * proj_;
+						sm_camera = light->SMCamera(0);
 					}
 					else
 					{
-						rl = rl_pyramid_;
-						*light_volume_mv_param_ = mat_v;
-						*light_volume_mvp_param_ = mat_vp;
-					}
-					break;
+						if (index_in_pass < 6)
+						{
+							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
+							d = ad.first;
+							u = ad.second;
 
-				default:
+							sm_camera = light->SMCamera(index_in_pass);
+						}
+					}
+
+					float fov;
+					if (type != LT_Spot)
+					{
+						fov = PI / 2;
+					}
+					else
+					{
+						fov = light->CosOuterInner().z();
+					}
+
+					float3 const & p = light->Position();
+					float4x4 mat_v, mat_vp;
+					if (sm_camera)
+					{
+						sm_buffer_->GetViewport().camera = sm_camera;
+						sm_camera->ViewParams(p, p + d, u);
+						sm_camera->ProjParams(fov, 1, 0.1f, 100.0f);
+
+						*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
+
+						mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
+						mat_vp = mat_v * proj_;
+					}
+
+					if (PT_GenShadowMap == pass_type)
+					{
+						float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
+						float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
+						depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
+						depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+					}
+
+					float3 dir_es = MathLib::transform_normal(d, view_);
+					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+
+					float3 loc_es = MathLib::transform_coord(p, view_);
+					float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+					switch (type)
+					{
+					case LT_Spot:
+						{
+							light_pos_es_actived.w() = light->CosOuterInner().x();
+							light_dir_es_actived.w() = light->CosOuterInner().y();
+
+							rl = rl_cone_;
+							float const scale = light->CosOuterInner().w();
+							float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
+							*light_volume_mv_param_ = light_model * mat_v;
+							*light_volume_mvp_param_ = light_model * mat_vp;
+						}
+						break;
+
+					case LT_Point:
+						if (PT_Lighting == pass_type)
+						{
+							rl = rl_box_;
+							float4x4 light_model = MathLib::translation(p);
+							*light_volume_mv_param_ = light_model * view_;
+							*light_volume_mvp_param_ = light_model * view_ * proj_;
+						}
+						else
+						{
+							rl = rl_pyramid_;
+							*light_volume_mv_param_ = mat_v;
+							*light_volume_mvp_param_ = mat_vp;
+						}
+						break;
+
+					default:
+						rl = rl_quad_;
+						*light_volume_mv_param_ = inv_proj_;
+						*light_volume_mvp_param_ = float4x4::Identity();
+						break;
+					}
+
+					*light_pos_es_param_ = light_pos_es_actived;
+					*light_dir_es_param_ = light_dir_es_actived;
+				}
+				else
+				{
 					rl = rl_quad_;
 					*light_volume_mv_param_ = inv_proj_;
 					*light_volume_mvp_param_ = float4x4::Identity();
-					break;
 				}
-
-				*light_pos_es_param_ = light_pos_es_actived;
-				*light_dir_es_param_ = light_dir_es_actived;
 
 				if ((index_in_pass > 0) || (PT_Lighting == pass_type))
 				{
@@ -946,19 +999,19 @@ namespace KlayGE
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();
-							light_crs_[org_no][index_in_pass - 1]->EndConditionalRender();
+							light->ConditionalRenderQuery(index_in_pass - 1)->EndConditionalRender();
 						}
 						else
 						{
 							sm_filter_pps_[0]->Apply();
-							light_crs_[org_no][index_in_pass]->EndConditionalRender();
+							light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
 						}
 					}
 				}
 
 				if (PT_GenShadowMap == pass_type)
 				{
-					light_crs_[org_no][index_in_pass]->BeginConditionalRender();
+					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 
 					// Shadow map generation
 
@@ -980,14 +1033,14 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
+						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 					}
 
 					re.Render(*technique_shadows_[type], *rl);
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light_crs_[org_no][index_in_pass]->EndConditionalRender();
+						light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
 					}
 
 
@@ -999,7 +1052,7 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light_crs_[org_no][index_in_pass]->BeginConditionalRender();
+						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 					}
 
 					if ((LT_Point == type) || (LT_Spot == type))
@@ -1009,9 +1062,11 @@ namespace KlayGE
 
 						bool eye_in_volume = false;
 
+						float3 const & p = light->Position();
 						if (LT_Spot == type)
 						{
 							float3 v = MathLib::normalize(eye - p);
+							float3 const & d = light->Direction();
 							float cos_direction = MathLib::dot(v, d);
 							if (light->CosOuterInner().x() < cos_direction * 1.01f)
 							{
@@ -1046,7 +1101,7 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light_crs_[org_no][index_in_pass]->EndConditionalRender();
+						light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
 					}
 
 					return App3DFramework::URV_Flushed;
