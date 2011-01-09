@@ -155,7 +155,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &normals[0];
 							init_data.row_pitch = static_cast<uint32_t>(normals.size() * sizeof(normals[0]));
@@ -200,7 +200,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &tangents[0];
 							init_data.row_pitch = static_cast<uint32_t>(tangents.size() * sizeof(tangents[0]));
@@ -373,7 +373,7 @@ namespace
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 			{
 				init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
 				init_data.slice_pitch = 0;
@@ -545,7 +545,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &normals[0];
 							init_data.row_pitch = static_cast<uint32_t>(normals.size() * sizeof(normals[0]));
@@ -590,7 +590,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &tangents[0];
 							init_data.row_pitch = static_cast<uint32_t>(tangents.size() * sizeof(tangents[0]));

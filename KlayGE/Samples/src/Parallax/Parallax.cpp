@@ -55,7 +55,7 @@ namespace
 
 			uint32_t const BORDER_SIZE = 4;
 			JudaTexturePtr juda_tex = LoadJudaTexture("Parallax.jdt");
-			juda_tex->CacheProperty(1024, rf.RenderEngineInstance().DeviceCaps().argb8_support ? EF_ARGB8 : EF_ABGR8, BORDER_SIZE);
+			juda_tex->CacheProperty(1024, rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8, BORDER_SIZE);
 			juda_tex->SetParams(technique_);
 
 			uint32_t level = juda_tex->TreeLevels() - 1;
@@ -104,7 +104,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &normals[0];
 							init_data.row_pitch = static_cast<uint32_t>(normals.size() * sizeof(normals[0]));
@@ -147,7 +147,7 @@ namespace
 						}
 
 						ElementInitData init_data;
-						if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+						if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 						{
 							init_data.data = &tangents[0];
 							init_data.row_pitch = static_cast<uint32_t>(tangents.size() * sizeof(tangents[0]));

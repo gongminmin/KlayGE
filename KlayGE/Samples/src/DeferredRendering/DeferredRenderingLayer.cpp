@@ -149,6 +149,16 @@ namespace KlayGE
 
 	void DeferredPointLightSource::Position(float3 const & pos)
 	{
+		for (int j = 0; j < 6; ++ j)
+		{
+			std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+			float3 const & d = ad.first;
+			float3 const & u = ad.second;
+
+			sm_cameras_[j]->ViewParams(pos, pos + d, u);
+			sm_cameras_[j]->ProjParams(PI / 2, 1, 0.1f, 100.0f);
+		}
+
 		pos_ = pos;
 	}
 
@@ -194,6 +204,9 @@ namespace KlayGE
 
 	void DeferredSpotLightSource::Position(float3 const & pos)
 	{
+		sm_camera_->ViewParams(pos, pos + dir_, float3(0, 1, 0));
+		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, 0.1f, 100.0f);
+
 		pos_ = pos;
 	}
 
@@ -483,28 +496,17 @@ namespace KlayGE
 		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
-		/*try
+		try
 		{
-			sm_aa_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 4, 0, EAH_GPU_Write, NULL);
-			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_aa_tex_, 0, 0));
 			sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		}
-		catch (...)*/
+		catch (...)
 		{
-			try
-			{
-				sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
-				sm_aa_tex_ = sm_tex_;
-			}
-			catch (...)
-			{
-				sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
-				sm_aa_tex_ = sm_tex_;
-			}
+			sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		}
-		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, sm_aa_tex_->SampleCount(), sm_aa_tex_->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0));
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -741,11 +743,7 @@ namespace KlayGE
 						{
 						case LT_Spot:
 							{
-								float3 const & d = light->Direction();
-								float3 const & u = float3(0, 1, 0);
-
-								float3 const & p = light->Position();
-								float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+								float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
 
 								float const scale = light->CosOuterInner().w();
 								float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
@@ -782,11 +780,7 @@ namespace KlayGE
 								float3 const & p = light->Position();
 								for (int j = 0; j < 6; ++ j)
 								{
-									std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
-									float3 const & d = ad.first;
-									float3 const & u = ad.second;
-
-									float4x4 light_view = MathLib::look_at_lh(p, p + d, u);
+									float4x4 const & light_view = light->SMCamera(j)->ViewMatrix();
 									float4x4 light_model = MathLib::inverse(light_view);
 									*light_volume_mv_param_ = light_model * view_;
 									*light_volume_mvp_param_ = light_model * vp;
@@ -879,12 +873,10 @@ namespace KlayGE
 				if (type != LT_Ambient)
 				{
 					CameraPtr sm_camera;
-					float3 d, u;
+					float3 dir_es;
 					if (type != LT_Point)
 					{
-						d = light->Direction();
-						u = float3(0, 1, 0);
-
+						dir_es = MathLib::transform_normal(light->Direction(), view_);					
 						sm_camera = light->SMCamera(0);
 					}
 					else
@@ -892,30 +884,17 @@ namespace KlayGE
 						if (index_in_pass < 6)
 						{
 							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-							d = ad.first;
-							u = ad.second;
-
+							dir_es = MathLib::transform_normal(ad.first, view_);
 							sm_camera = light->SMCamera(index_in_pass);
 						}
 					}
-
-					float fov;
-					if (type != LT_Spot)
-					{
-						fov = PI / 2;
-					}
-					else
-					{
-						fov = light->CosOuterInner().z();
-					}
+					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
 					float3 const & p = light->Position();
 					float4x4 mat_v, mat_vp;
 					if (sm_camera)
 					{
 						sm_buffer_->GetViewport().camera = sm_camera;
-						sm_camera->ViewParams(p, p + d, u);
-						sm_camera->ProjParams(fov, 1, 0.1f, 100.0f);
 
 						*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
 
@@ -930,9 +909,6 @@ namespace KlayGE
 						depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
 						depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
 					}
-
-					float3 dir_es = MathLib::transform_normal(d, view_);
-					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
 					float3 loc_es = MathLib::transform_coord(p, view_);
 					float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
@@ -989,11 +965,6 @@ namespace KlayGE
 				{
 					if (0 == (attr & LSA_NoShadow))
 					{
-						if (sm_aa_tex_->SampleCount() > 1)
-						{
-							sm_aa_tex_->CopyToTexture(*sm_tex_);
-						}
-
 						depth_to_vsm_pp_->Apply();
 
 						if (LT_Point == type)

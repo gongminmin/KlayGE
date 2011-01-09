@@ -410,7 +410,7 @@ namespace KlayGE
 			break;
 
 		case EF_R8UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R8UI;
 				glformat = GL_RED_INTEGER_EXT;
@@ -423,7 +423,7 @@ namespace KlayGE
 			break;
 
 		case EF_R8I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R8I;
 				glformat = GL_RED_INTEGER_EXT;
@@ -436,7 +436,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR8UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG8UI;
 				glformat = GL_RG_INTEGER;
@@ -449,7 +449,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR8I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG8I;
 				glformat = GL_RG_INTEGER;
@@ -594,7 +594,7 @@ namespace KlayGE
 			break;
 
 		case EF_R16UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R16UI;
 				glformat = GL_RED_INTEGER_EXT;
@@ -607,7 +607,7 @@ namespace KlayGE
 			break;
 
 		case EF_R16I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R16I;
 				glformat = GL_RED_INTEGER_EXT;
@@ -620,7 +620,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR16UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG16UI;
 				glformat = GL_RG_INTEGER;
@@ -633,7 +633,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR16I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG16I;
 				glformat = GL_RG_INTEGER;
@@ -698,7 +698,7 @@ namespace KlayGE
 			break;
 
 		case EF_R32UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R32UI;
 				glformat = GL_RED_INTEGER_EXT;
@@ -711,7 +711,7 @@ namespace KlayGE
 			break;
 
 		case EF_R32I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_R32I;
 				glformat = GL_RED_INTEGER_EXT;
@@ -724,7 +724,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR32UI:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG32UI;
 				glformat = GL_RG_INTEGER;
@@ -737,7 +737,7 @@ namespace KlayGE
 			break;
 
 		case EF_GR32I:
-			if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+			if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
 			{
 				internalFormat = GL_RG32I;
 				glformat = GL_RG_INTEGER;

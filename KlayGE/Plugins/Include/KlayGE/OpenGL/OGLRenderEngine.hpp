@@ -39,6 +39,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6385)
@@ -47,6 +48,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/tuple/tuple.hpp>
 
 #include <glloader/glloader.h>
 
@@ -117,6 +119,9 @@ namespace KlayGE
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
 
+		bool VertexFormatSupport(ElementFormat elem_fmt);
+		bool TextureFormatSupport(ElementFormat elem_fmt);
+
 	private:
 		GLuint fbo_blit_src_;
 		GLuint fbo_blit_dst_;
@@ -141,6 +146,9 @@ namespace KlayGE
 		std::map<GLenum, GLuint> binded_buffer_;
 
 		GLuint restart_index_;
+
+		std::set<ElementFormat> vertex_format_;
+		std::set<ElementFormat> texture_format_;
 
 		bool hack_for_ati_;
 	};

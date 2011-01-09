@@ -41,6 +41,7 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
@@ -723,6 +724,20 @@ namespace KlayGE
 		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen(fs);
 	}
 
+	bool D3D11RenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
+	{
+		UINT s;
+		d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		return s != 0;
+	}
+
+	bool D3D11RenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
+	{
+		UINT s;
+		d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		return s != 0;
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::FillRenderDeviceCaps()
@@ -756,10 +771,6 @@ namespace KlayGE
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = 16;
 		caps_.hw_instancing_support = true;
-		caps_.depth_texture_support = true;
-		caps_.bc1_support = true;
-		caps_.bc2_support = true;
-		caps_.bc3_support = true;
 		{
 			D3D11_FEATURE_DATA_THREADING mt_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
@@ -774,12 +785,6 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
-			caps_.a2bgr10_vertex_support = true;
-			caps_.argb8_support = true;
-			caps_.bc4_support = true;
-			caps_.bc5_support = true;
-			caps_.bc6_support = true;
-			caps_.bc7_support = true;
 			caps_.gs_support = true;
 			caps_.cs_support = true;
 			caps_.hs_support = true;
@@ -793,12 +798,6 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 32;
 			caps_.max_geometry_texture_units = 32;
 			caps_.primitive_restart_support = true;
-			caps_.a2bgr10_vertex_support = true;
-			caps_.argb8_support = false;
-			caps_.bc4_support = true;
-			caps_.bc5_support = true;
-			caps_.bc6_support = false;
-			caps_.bc7_support = false;
 			caps_.gs_support = true;
 			caps_.hs_support = false;
 			caps_.ds_support = false;
@@ -815,18 +814,15 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.primitive_restart_support = false;
-			caps_.a2bgr10_vertex_support = false;
-			caps_.argb8_support = true;
-			caps_.bc4_support = false;
-			caps_.bc5_support = false;
-			caps_.bc6_support = false;
-			caps_.bc7_support = false;
 			caps_.gs_support = false;
 			caps_.cs_support = false;
 			caps_.hs_support = false;
 			caps_.ds_support = false;
 			break;
 		}
+
+		caps_.vertex_format_support = boost::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this, _1);
+		caps_.texture_format_support = boost::bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this, _1);
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter()

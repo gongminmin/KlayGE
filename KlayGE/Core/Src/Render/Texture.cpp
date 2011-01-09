@@ -744,7 +744,7 @@ namespace
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
 
-			if ((EF_BC5 == tex_desc->format) && !caps.bc5_support)
+			if ((EF_BC5 == tex_desc->format) && !caps.texture_format_support(EF_BC5))
 			{
 				BC1_layout tmp;
 				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
@@ -760,7 +760,7 @@ namespace
 
 				tex_desc->format = EF_BC3;
 			}
-			if ((EF_BC1 == tex_desc->format) && !caps.bc1_support)
+			if ((EF_BC1 == tex_desc->format) && !caps.texture_format_support(EF_BC1))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -819,7 +819,7 @@ namespace
 					}
 				}
 			}
-			if ((EF_BC2 == tex_desc->format) && !caps.bc2_support)
+			if ((EF_BC2 == tex_desc->format) && !caps.texture_format_support(EF_BC2))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -878,7 +878,7 @@ namespace
 					}
 				}
 			}
-			if ((EF_BC3 == tex_desc->format) && !caps.bc3_support)
+			if ((EF_BC3 == tex_desc->format) && !caps.texture_format_support(EF_BC3))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
@@ -937,7 +937,7 @@ namespace
 					}
 				}
 			}
-			if ((EF_ARGB8 == tex_desc->format) && !caps.argb8_support)
+			if ((EF_ARGB8 == tex_desc->format) && !caps.texture_format_support(EF_ARGB8))
 			{
 				for (size_t index = 0; index < tex_desc->array_size; ++ index)
 				{

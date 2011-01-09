@@ -32,12 +32,6 @@
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_PLATFORM_WIN32
-	#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-		#define BOOST_MEM_FN_ENABLE_STDCALL
-	#endif
-#endif
-#include <boost/mem_fn.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6011 6334)

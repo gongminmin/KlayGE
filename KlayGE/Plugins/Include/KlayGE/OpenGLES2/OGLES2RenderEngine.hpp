@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6385)
@@ -88,6 +89,9 @@ namespace KlayGE
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
 
+		bool VertexFormatSupport(ElementFormat elem_fmt);
+		bool TextureFormatSupport(ElementFormat elem_fmt);
+
 	private:
 		boost::array<GLfloat, 4> clear_clr_;
 		GLfloat clear_depth_;
@@ -100,6 +104,9 @@ namespace KlayGE
 
 		GLenum active_tex_unit_;
 		std::map<GLenum, GLuint> binded_buffer_;
+
+		std::set<ElementFormat> vertex_format_;
+		std::set<ElementFormat> texture_format_;
 	};
 
 	typedef boost::shared_ptr<OGLES2RenderEngine> OGLES2RenderEnginePtr;

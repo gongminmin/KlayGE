@@ -409,7 +409,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
 
 	ElementFormat format;
-	if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
 	{
 		format = EF_ARGB8;
 	}

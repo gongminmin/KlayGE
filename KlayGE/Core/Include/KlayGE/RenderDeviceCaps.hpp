@@ -16,6 +16,9 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/ElementFormat.hpp>
+
+#include <boost/function.hpp>
 
 namespace KlayGE
 {
@@ -43,26 +46,17 @@ namespace KlayGE
 		bool hw_instancing_support;
 		bool stream_output_support;
 		bool alpha_to_coverage_support;
-		bool depth_texture_support;
 		bool primitive_restart_support;
 		bool multithread_rendering_support;
 		bool multithread_res_creating_support;
-
-		bool a2bgr10_vertex_support;
-
-		bool argb8_support;
-		bool bc1_support;
-		bool bc2_support;
-		bool bc3_support;
-		bool bc4_support;
-		bool bc5_support;
-		bool bc6_support;
-		bool bc7_support;
 
 		bool gs_support;
 		bool cs_support;
 		bool hs_support;
 		bool ds_support;
+
+		boost::function<bool(ElementFormat)> vertex_format_support;
+		boost::function<bool(ElementFormat)> texture_format_support;
 	};
 }
 

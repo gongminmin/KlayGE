@@ -278,7 +278,7 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	{
 		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0, 0);
-		if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
 		{
 			peel_format = EF_ARGB8;
 		}

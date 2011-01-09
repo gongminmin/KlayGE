@@ -163,6 +163,9 @@ namespace KlayGE
 
 		void StereoscopicForLCDShutter();
 
+		bool VertexFormatSupport(ElementFormat elem_fmt);
+		bool TextureFormatSupport(ElementFormat elem_fmt);
+
 	private:
 		D3D11AdapterList const & D3DAdapters() const;
 		D3D11AdapterPtr const & ActiveAdapter() const;

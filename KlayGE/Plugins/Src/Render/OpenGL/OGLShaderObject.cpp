@@ -1447,7 +1447,7 @@ namespace KlayGE
 		args.push_back("-DKLAYGE_OPENGL=1");
 		args.push_back(max_sm_str.c_str());
 		args.push_back(max_tex_array_str.c_str());
-		if (!re.DeviceCaps().bc5_support)
+		if (!re.DeviceCaps().texture_format_support(EF_BC5))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
 		}

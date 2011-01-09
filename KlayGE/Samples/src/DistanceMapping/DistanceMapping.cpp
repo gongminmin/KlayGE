@@ -110,7 +110,7 @@ namespace
 				tangent_float3[j] = MathLib::normalize(tangent_float3[j]) * 0.5f + 0.5f;
 			}
 
-			if (rf.RenderEngineInstance().DeviceCaps().a2bgr10_vertex_support)
+			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 			{
 				uint32_t normal[4];
 				for (uint32_t j = 0; j < 4; ++ j)

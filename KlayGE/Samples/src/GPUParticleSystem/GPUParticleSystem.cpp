@@ -112,7 +112,7 @@ namespace
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr ret;
-		if (rf.RenderEngineInstance().DeviceCaps().argb8_support)
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
 		{
 			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
 		}
