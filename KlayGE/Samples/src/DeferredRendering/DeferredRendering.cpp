@@ -255,6 +255,10 @@ namespace
 				*diffuse_tex_param_ = diffuse_tex_;
 				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
 				*bump_tex_param_ = bump_tex_;
+				*specular_map_enabled_param_ = static_cast<int32_t>(!!specular_tex_);
+				*specular_tex_param_ = specular_tex_;
+				*specular_level_param_ = mtl.specular_level;
+				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 1e-6f, 0.999f);
 				break;
 
 			case PT_GenShadowMap:
@@ -268,9 +272,6 @@ namespace
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-				*specular_map_enabled_param_ = static_cast<int32_t>(!!specular_tex_);
-				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = mtl.specular_level;
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 					*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);

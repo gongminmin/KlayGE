@@ -94,7 +94,18 @@ float4 ConstructGBuffer(float4 texcoord_depth_2x, float4 ts_to_view0_2y, float4 
 		normal = normalize(mul(decompress_normal(bump_tex.Sample(trilinear_sampler, texcoord_depth_2x.xy)), ts_to_view));
 	}
 
-	return StoreGBuffer(normal, texcoord_depth_2x.z, shininess);
+	float specular;
+	if (specular_map_enabled)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).rgb, 0.333f);
+	}
+	else
+	{
+		specular = specular_level;
+	}
+	specular *= 100.0f;
+
+	return StoreGBuffer(normal, texcoord_depth_2x.z, specular, shininess);
 }
 
 float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
@@ -250,7 +261,7 @@ void ShadingVS(float4 pos : POSITION,
 #endif
 }
 
-float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
+float4 CalcShading(float2 tc, float3 diffuse, float3 emit)
 {
 	float ssao = 1;
 	if (ssao_enabled)
@@ -259,7 +270,7 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float3 specular)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess) * lighting.a * specular) * ssao, 0), 1);
+	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess) * lighting.a) * ssao, 0), 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0
@@ -283,16 +294,7 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	{
 		diffuse = diffuse_clr.rgb;
 	}
-	float3 specular;
-	if (specular_map_enabled)
-	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		specular = specular_level;
-	}
-	return CalcShading(tc, diffuse, emit_clr.rgb, specular);
+	return CalcShading(tc, diffuse, emit_clr.rgb);
 }
 
 void ShadingSkyBoxVS(float4 pos : POSITION,

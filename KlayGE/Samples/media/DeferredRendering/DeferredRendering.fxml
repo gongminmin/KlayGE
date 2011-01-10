@@ -208,7 +208,7 @@ float4 DeferredRenderingPointPS(
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 		float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		final_clr = CalcColor(n_dot_l, spec, atten);
@@ -243,7 +243,7 @@ float4 DeferredRenderingSpotPS(
 		float n_dot_l = dot(normal, dir);
 		if (n_dot_l > 0)
 		{
-			float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+			float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 			float shadow = shadowing_tex.Sample(linear_sampler, tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			final_clr = CalcColor(n_dot_l, spec, atten);
@@ -275,7 +275,7 @@ float4 DeferredRenderingDirectionalPS(
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(0.2f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 		final_clr = CalcColor(n_dot_l, spec, 1);
 	}
 

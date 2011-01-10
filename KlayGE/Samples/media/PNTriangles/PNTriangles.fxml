@@ -91,7 +91,7 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : T
 	float3 e = normalize(eye_pos - pos_es);
 
 	float3 diff_clr = diffuse_tex.Sample(linear_sampler, oTex0).rgb;
-	return float4(0.2f * diff_clr + calc_brdf(diff_clr * 0.7f, 0.1f, 20, l, normalize(l + e), n, 1), 1);
+	return float4(0.2f * diff_clr + calc_brdf(diff_clr * 0.7f, 0.1f, 20, l, normalize(l + e), n), 1);
 }
 		]]>
 	</shader>
