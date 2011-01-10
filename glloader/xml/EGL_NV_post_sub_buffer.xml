@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_post_sub_buffer" reg_no="27">
+	<tokens>
+		<token name="EGL_POST_SUB_BUFFER_SUPPORTED_NV" value="0x30BE"/>
+	</tokens>
+
+	<functions>
+		<function name="eglPostSubBufferNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint" name="x"/>
+				<param type="EGLint" name="y"/>
+				<param type="EGLint" name="width"/>
+				<param type="EGLint" name="height"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

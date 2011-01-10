@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_HI_clientpixmap" reg_no="24">
+	<typedefs>
+		<typedef type="struct _EGLClientPixmapHI { void* pData; int iWidth; int iHeight; int iStride; }" synonym="EGLClientPixmapHI"/>
+	</typedefs>
+
+	<functions>
+		<function name="eglCreatePixmapSurfaceHI" return="void">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="EGLClientPixmapHI*" name="pixmap"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_EGL_image_external" reg_no="87">
+	<typedefs>
+		<typedef type="void*" synonym="GLeglImageOES"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GL_TEXTURE_EXTERNAL_OES" value="0x8D65"/>
+		<token name="GL_SAMPLER_EXTERNAL_OES" value="0x8D66"/>
+		<token name="GL_TEXTURE_BINDING_EXTERNAL_OES" value="0x8D67"/>
+		<token name="GL_REQUIRED_TEXTURE_IMAGE_UNITS_OES" value="0x8D68"/>
+	</tokens>
+</gl_extension>

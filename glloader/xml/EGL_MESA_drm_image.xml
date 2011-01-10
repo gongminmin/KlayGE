@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_MESA_drm_image" reg_no="25">
+	<typedefs>
+		<typedef type="void*" synonym="EGLSyncKHR"/>
+		<typedef type="GLuint64" synonym="EGLTimeKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_DRM_BUFFER_FORMAT_MESA" value="0x31D0"/>
+		<token name="EGL_DRM_BUFFER_USE_MESA" value="0x31D1"/>
+		<token name="EGL_DRM_BUFFER_FORMAT_ARGB32_MESA" value="0x31D2"/>
+		<token name="EGL_DRM_BUFFER_USE_SCANOUT_MESA" value="0x0001"/>
+		<token name="EGL_DRM_BUFFER_USE_SHARE_MESA" value="0x0002"/>
+		<token name="EGL_DRM_BUFFER_MESA" value="0x31D3"/>
+		<token name="EGL_DRM_BUFFER_STRIDE_MESA" value="0x31D4"/>
+		<token name="EGL_DRM_BUFFER_FORMAT_MESA" value="0x31D0"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateDRMImageMESA" return="EGLImageKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglExportDRMImageMESA" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLImageKHR" name="image"/>
+				<param type="EGLint*" name="name"/>
+				<param type="EGLint*" name="handle"/>
+				<param type="EGLint*" name="stride"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
