@@ -52,9 +52,9 @@ float3 calc_brdf(float3 c_diff, float3 l, float3 n)
 	return max(c_diff * dot(n, l), 0);
 }
 // diffuse + specular
-float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3 h, float3 n, float3 specular_level)
+float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3 h, float3 n)
 {
-	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(c_spec, l, h, n, roughness) * specular_level) * dot(n, l), 0);
+	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(c_spec, l, h, n, roughness)) * dot(n, l), 0);
 }
 
 

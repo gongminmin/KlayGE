@@ -3,9 +3,9 @@
 <effect>
 	<shader>
 		<![CDATA[
-float4 StoreGBuffer(float3 normal, float depth, float shininess)
+float4 StoreGBuffer(float3 normal, float depth, float specular_level, float shininess)
 {
-	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5), depth, shininess);
+	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5 + 0.5), depth, floor(specular_level) + shininess);
 }
 
 float3 GetNormal(float4 ndc)
@@ -21,9 +21,14 @@ float GetDepth(float4 ndc)
 	return ndc.z;
 }
 
+float GetSpecular(float4 ndc)
+{
+	return floor(ndc.w);
+}
+
 float GetShininess(float4 ndc)
 {
-	return ndc.w;
+	return frac(ndc.w) * 256.0f;
 }
 		]]>
 	</shader>
