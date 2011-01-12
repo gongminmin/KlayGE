@@ -24,6 +24,281 @@ namespace KlayGE
 {
 	int const SM_SIZE = 512;
 
+	DeferredLightSource::DeferredLightSource(LightType type)
+		: type_(type), attrib_(0), enabled_(true),
+			color_(0, 0, 0, 0)
+	{
+	}
+
+	DeferredLightSource::~DeferredLightSource()
+	{
+	}
+
+	LightType DeferredLightSource::Type() const
+	{
+		return type_;
+	}
+
+	int32_t DeferredLightSource::Attrib() const
+	{
+		return attrib_;
+	}
+
+	void DeferredLightSource::Attrib(int32_t attrib)
+	{
+		attrib_ = attrib;
+	}
+
+	bool DeferredLightSource::Enabled() const
+	{
+		return enabled_;
+	}
+
+	void DeferredLightSource::Enabled(bool enabled)
+	{
+		enabled_ = enabled;
+	}
+
+	float4 const & DeferredLightSource::Color() const
+	{
+		return color_;
+	}
+
+	void DeferredLightSource::Color(float3 const & clr)
+	{
+		color_ = float4(clr.x(), clr.y(), clr.z(),
+			MathLib::dot(clr, float3(0.27f, 0.67f, 0.06f)));
+	}
+
+	float3 const & DeferredLightSource::Position() const
+	{
+		return float3::Zero();
+	}
+
+	float3 const & DeferredLightSource::Direction() const
+	{
+		return float3::Zero();
+	}
+
+	float3 const & DeferredLightSource::Falloff() const
+	{
+		return float3::Zero();
+	}
+
+	float DeferredLightSource::CosInnerAngle() const
+	{
+		return 0;
+	}
+
+	float DeferredLightSource::CosOuterAngle() const
+	{
+		return 0;
+	}
+
+	float4 const & DeferredLightSource::CosOuterInner() const
+	{
+		return float4::Zero();
+	}
+
+	ConditionalRenderPtr DeferredLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	{
+		return ConditionalRenderPtr();
+	}
+
+	CameraPtr DeferredLightSource::SMCamera(uint32_t /*index*/) const
+	{
+		return CameraPtr();
+	}
+
+
+	DeferredAmbientLightSource::DeferredAmbientLightSource()
+		: DeferredLightSource(LT_Ambient)
+	{
+		attrib_ = LSA_NoShadow;
+		color_ = float4(0, 0, 0, 0);
+	}
+
+	DeferredAmbientLightSource::~DeferredAmbientLightSource()
+	{
+	}
+
+
+	DeferredPointLightSource::DeferredPointLightSource()
+		: DeferredLightSource(LT_Point)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		for (int i = 0; i < 7; ++ i)
+		{
+			crs_.push_back(checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender()));
+		}
+
+		for (int i = 0; i < 6; ++ i)
+		{
+			sm_cameras_.push_back(MakeSharedPtr<Camera>());
+		}
+	}
+
+	DeferredPointLightSource::~DeferredPointLightSource()
+	{
+	}
+
+	float3 const & DeferredPointLightSource::Position() const
+	{
+		return pos_;
+	}
+
+	void DeferredPointLightSource::Position(float3 const & pos)
+	{
+		for (int j = 0; j < 6; ++ j)
+		{
+			std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
+			float3 const & d = ad.first;
+			float3 const & u = ad.second;
+
+			sm_cameras_[j]->ViewParams(pos, pos + d, u);
+			sm_cameras_[j]->ProjParams(PI / 2, 1, 0.1f, 100.0f);
+		}
+
+		pos_ = pos;
+	}
+
+	float3 const & DeferredPointLightSource::Falloff() const
+	{
+		return falloff_;
+	}
+
+	void DeferredPointLightSource::Falloff(float3 const & falloff)
+	{
+		falloff_ = falloff;
+	}
+
+	ConditionalRenderPtr DeferredPointLightSource::ConditionalRenderQuery(uint32_t index) const
+	{
+		BOOST_ASSERT(index < crs_.size());
+		return crs_[index];
+	}
+
+	CameraPtr DeferredPointLightSource::SMCamera(uint32_t index) const
+	{
+		BOOST_ASSERT(index < sm_cameras_.size());
+		return sm_cameras_[index];
+	}
+
+
+	DeferredSpotLightSource::DeferredSpotLightSource()
+		: DeferredLightSource(LT_Spot),
+			sm_camera_(MakeSharedPtr<Camera>())
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		cr_ = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
+	}
+
+	DeferredSpotLightSource::~DeferredSpotLightSource()
+	{
+	}
+
+	float3 const & DeferredSpotLightSource::Position() const
+	{
+		return pos_;
+	}
+
+	void DeferredSpotLightSource::Position(float3 const & pos)
+	{
+		sm_camera_->ViewParams(pos, pos + dir_, float3(0, 1, 0));
+		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, 0.1f, 100.0f);
+
+		pos_ = pos;
+	}
+
+	float3 const & DeferredSpotLightSource::Direction() const
+	{
+		return dir_;
+	}
+
+	void DeferredSpotLightSource::Direction(float3 const & dir)
+	{
+		dir_ = dir;
+	}
+
+	float3 const & DeferredSpotLightSource::Falloff() const
+	{
+		return falloff_;
+	}
+
+	void DeferredSpotLightSource::Falloff(float3 const & falloff)
+	{
+		falloff_ = falloff;
+	}
+
+	float DeferredSpotLightSource::CosInnerAngle() const
+	{
+		return cos_outer_inner_.y();
+	}
+
+	void DeferredSpotLightSource::InnerAngle(float angle)
+	{
+		cos_outer_inner_.y() = cos(angle);
+	}
+
+	float DeferredSpotLightSource::CosOuterAngle() const
+	{
+		return cos_outer_inner_.x();
+	}
+
+	void DeferredSpotLightSource::OuterAngle(float angle)
+	{
+		cos_outer_inner_.x() = cos(angle);
+		cos_outer_inner_.z() = angle * 2;
+		cos_outer_inner_.w() = tan(angle);
+	}
+
+	float4 const & DeferredSpotLightSource::CosOuterInner() const
+	{
+		return cos_outer_inner_;
+	}
+
+	ConditionalRenderPtr DeferredSpotLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	{
+		return cr_;
+	}
+
+	CameraPtr DeferredSpotLightSource::SMCamera(uint32_t /*index*/) const
+	{
+		return sm_camera_;
+	}
+
+
+	DeferredDirectionalLightSource::DeferredDirectionalLightSource()
+		: DeferredLightSource(LT_Directional)
+	{
+		attrib_ = LSA_NoShadow;
+	}
+
+	DeferredDirectionalLightSource::~DeferredDirectionalLightSource()
+	{
+	}
+
+	float3 const & DeferredDirectionalLightSource::Direction() const
+	{
+		return dir_;
+	}
+
+	void DeferredDirectionalLightSource::Direction(float3 const & dir)
+	{
+		dir_ = dir;
+	}
+
+	float3 const & DeferredDirectionalLightSource::Falloff() const
+	{
+		return falloff_;
+	}
+
+	void DeferredDirectionalLightSource::Falloff(float3 const & falloff)
+	{
+		falloff_ = falloff;
+	}
+
+
 	DeferredRenderable::DeferredRenderable(RenderEffectPtr const & effect)
 		: effect_(effect)
 	{
@@ -118,7 +393,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		lights_.push_back(MakeSharedPtr<AmbientLightSource>());
+		lights_.push_back(MakeSharedPtr<DeferredAmbientLightSource>());
 
 		g_buffer_ = rf.MakeFrameBuffer();
 		shadowing_buffer_ = rf.MakeFrameBuffer();
@@ -283,16 +558,16 @@ namespace KlayGE
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
 
-	AmbientLightSourcePtr DeferredRenderingLayer::AddAmbientLight(float3 const & clr)
+	DeferredAmbientLightSourcePtr DeferredRenderingLayer::AddAmbientLight(float3 const & clr)
 	{
-		AmbientLightSourcePtr ambient = checked_pointer_cast<AmbientLightSource>(lights_[0]);
+		DeferredAmbientLightSourcePtr ambient = checked_pointer_cast<DeferredAmbientLightSource>(lights_[0]);
 		ambient->Color(float3(ambient->Color()) + clr);
 		return ambient;
 	}
 
-	PointLightSourcePtr DeferredRenderingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
+	DeferredPointLightSourcePtr DeferredRenderingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
 	{
-		PointLightSourcePtr point = MakeSharedPtr<PointLightSource>();
+		DeferredPointLightSourcePtr point = MakeSharedPtr<DeferredPointLightSource>();
 		point->Attrib(attr);
 		point->Color(clr);
 		point->Position(pos);
@@ -302,9 +577,9 @@ namespace KlayGE
 		return point;
 	}
 
-	DirectionalLightSourcePtr DeferredRenderingLayer::AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
+	DeferredDirectionalLightSourcePtr DeferredRenderingLayer::AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
 	{
-		DirectionalLightSourcePtr directional = MakeSharedPtr<DirectionalLightSource>();
+		DeferredDirectionalLightSourcePtr directional = MakeSharedPtr<DeferredDirectionalLightSource>();
 		directional->Attrib(attr);
 		directional->Color(clr);
 		directional->Direction(MathLib::normalize(dir));
@@ -313,9 +588,9 @@ namespace KlayGE
 		return directional;
 	}
 
-	SpotLightSourcePtr DeferredRenderingLayer::AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff)
+	DeferredSpotLightSourcePtr DeferredRenderingLayer::AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff)
 	{
-		SpotLightSourcePtr spot = MakeSharedPtr<SpotLightSource>();
+		DeferredSpotLightSourcePtr spot = MakeSharedPtr<DeferredSpotLightSource>();
 		spot->Attrib(attr);
 		spot->Color(clr);
 		spot->Position(pos);
@@ -459,7 +734,7 @@ namespace KlayGE
 				pass_scaned_.resize(2);
 				for (size_t i = 0; i < lights_.size(); ++ i)
 				{
-					LightSourcePtr const & light = lights_[i];
+					DeferredLightSourcePtr const & light = lights_[i];
 					if (light->Enabled())
 					{
 						int type = light->Type();
@@ -589,7 +864,7 @@ namespace KlayGE
 			}
 			else
 			{
-				LightSourcePtr const & light = lights_[org_no];
+				DeferredLightSourcePtr const & light = lights_[org_no];
 
 				LightType type = light->Type();
 				int32_t attr = light->Attrib();

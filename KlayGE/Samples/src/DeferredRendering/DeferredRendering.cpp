@@ -481,9 +481,9 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void AttachLightSrc(LightSourcePtr const & light)
+		void AttachLightSrc(DeferredLightSourcePtr const & light)
 		{
-			light_ = light;
+			light_ = checked_pointer_cast<DeferredSpotLightSource>(light);
 		}
 
 	private:
@@ -491,7 +491,7 @@ namespace
 		float4x4 model_org_;
 		float rot_speed_, height_;
 
-		LightSourcePtr light_;
+		DeferredSpotLightSourcePtr light_;
 
 		Timer timer_;
 	};
@@ -699,9 +699,9 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void AttachLightSrc(LightSourcePtr const & light)
+		void AttachLightSrc(DeferredLightSourcePtr const & light)
 		{
-			light_ = light;
+			light_ = checked_pointer_cast<DeferredPointLightSource>(light);
 		}
 
 	private:
@@ -709,7 +709,7 @@ namespace
 		float move_speed_;
 		float3 pos_;
 
-		LightSourcePtr light_;
+		DeferredPointLightSourcePtr light_;
 
 		Timer timer_;
 	};

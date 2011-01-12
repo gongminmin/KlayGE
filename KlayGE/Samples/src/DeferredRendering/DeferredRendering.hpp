@@ -64,9 +64,9 @@ private:
 	int id_ssao_;
 	int id_ctrl_camera_;
 
-	KlayGE::AmbientLightSourcePtr ambient_light_;
-	KlayGE::PointLightSourcePtr point_light_;
-	KlayGE::SpotLightSourcePtr spot_light_[2];
+	KlayGE::DeferredAmbientLightSourcePtr ambient_light_;
+	KlayGE::DeferredPointLightSourcePtr point_light_;
+	KlayGE::DeferredSpotLightSourcePtr spot_light_[2];
 
 	size_t num_objs_rendered_;
 	size_t num_renderable_rendered_;

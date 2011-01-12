@@ -366,9 +366,6 @@
     <ClCompile Include="..\..\Core\Src\Render\JudaTexture.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Render\Light.cpp">
-      <Filter>Rendering System\Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -672,9 +669,6 @@
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\JudaTexture.hpp">
-      <Filter>Rendering System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\Light.hpp">
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,6 @@
 #define _DEFERREDRENDERINGLAYER_HPP
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Light.hpp>
 
 namespace KlayGE
 {
@@ -200,6 +199,23 @@ namespace KlayGE
 		ib.push_back(vertex_base + 4);
 	}
 
+	enum LightType
+	{
+		LT_Ambient = 0,
+		LT_Point,
+		LT_Directional,
+		LT_Spot,
+
+		LT_NumLightTypes
+	};
+
+	enum LightSrcAttrib
+	{
+		LSA_NoShadow = 1UL << 0,
+		LSA_NoDiffuse = 1UL << 1,
+		LSA_NoSpecular = 1UL << 2
+	};
+
 	enum PassType
 	{
 		PT_GBuffer,
@@ -207,6 +223,129 @@ namespace KlayGE
 		PT_Lighting,
 		PT_Shading
 	};
+
+	
+	class DeferredLightSource
+	{
+	public:
+		explicit DeferredLightSource(LightType type);
+		virtual ~DeferredLightSource();
+
+		LightType Type() const;
+
+		int32_t Attrib() const;
+		void Attrib(int32_t attrib);
+
+		bool Enabled() const;
+		void Enabled(bool enabled);
+
+		float4 const & Color() const;
+		void Color(float3 const & clr);
+
+		virtual float3 const & Position() const;
+		virtual float3 const & Direction() const;
+		virtual float3 const & Falloff() const;
+		virtual float CosInnerAngle() const;
+		virtual float CosOuterAngle() const;
+		virtual float4 const & CosOuterInner() const;
+
+		virtual ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		virtual CameraPtr SMCamera(uint32_t index) const;
+
+	protected:
+		LightType type_;
+		int32_t attrib_;
+		bool enabled_;
+		float4 color_;
+	};
+	typedef boost::shared_ptr<DeferredLightSource> DeferredLightSourcePtr;
+
+	class DeferredAmbientLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredAmbientLightSource();
+		virtual ~DeferredAmbientLightSource();
+	};
+	typedef boost::shared_ptr<DeferredAmbientLightSource> DeferredAmbientLightSourcePtr;
+
+	class DeferredPointLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredPointLightSource();
+		virtual ~DeferredPointLightSource();
+
+		float3 const & Position() const;
+		void Position(float3 const & pos);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & fall_off);
+
+		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr SMCamera(uint32_t index) const;
+
+	protected:
+		float3 pos_;
+		float3 falloff_;
+
+		std::vector<ConditionalRenderPtr> crs_;
+		std::vector<CameraPtr> sm_cameras_;
+	};
+	typedef boost::shared_ptr<DeferredPointLightSource> DeferredPointLightSourcePtr;
+
+	class DeferredSpotLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredSpotLightSource();
+		virtual ~DeferredSpotLightSource();
+
+		float3 const & Position() const;
+		void Position(float3 const & pos);
+
+		float3 const & Direction() const;
+		void Direction(float3 const & dir);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & falloff);
+
+		float CosInnerAngle() const;
+		void InnerAngle(float angle);
+
+		float CosOuterAngle() const;
+		void OuterAngle(float angle);
+
+		float4 const & CosOuterInner() const;
+
+		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr SMCamera(uint32_t index) const;
+
+	protected:
+		float3 pos_;
+		float3 dir_;
+		float3 falloff_;
+		float4 cos_outer_inner_;
+
+		ConditionalRenderPtr cr_;
+		CameraPtr sm_camera_;
+	};
+	typedef boost::shared_ptr<DeferredSpotLightSource> DeferredSpotLightSourcePtr;
+
+	class DeferredDirectionalLightSource : public DeferredLightSource
+	{
+	public:
+		DeferredDirectionalLightSource();
+		virtual ~DeferredDirectionalLightSource();
+
+		float3 const & Direction() const;
+		void Direction(float3 const & dir);
+
+		float3 const & Falloff() const;
+		void Falloff(float3 const & falloff);
+
+	protected:
+		float3 dir_;
+		float3 falloff_;
+	};
+	typedef boost::shared_ptr<DeferredDirectionalLightSource> DeferredDirectionalLightSourcePtr;
 
 
 	class DeferredRenderable
@@ -268,10 +407,10 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
-		AmbientLightSourcePtr AddAmbientLight(float3 const & clr);
-		PointLightSourcePtr AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
-		DirectionalLightSourcePtr AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
-		SpotLightSourcePtr AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
+		DeferredAmbientLightSourcePtr AddAmbientLight(float3 const & clr);
+		DeferredPointLightSourcePtr AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
+		DeferredDirectionalLightSourcePtr AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
+		DeferredSpotLightSourcePtr AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
 
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
@@ -318,7 +457,7 @@ namespace KlayGE
 		Box pyramid_bbox_;
 		Box box_bbox_;
 
-		std::vector<LightSourcePtr> lights_;
+		std::vector<DeferredLightSourcePtr> lights_;
 
 		std::vector<uint32_t> pass_scaned_;
 

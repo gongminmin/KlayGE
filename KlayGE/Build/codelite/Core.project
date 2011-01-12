@@ -21,7 +21,6 @@
       <File Name="../../Core/Src/Render/JudaTexture.cpp"/>
       <File Name="../../Core/Src/Render/KMesh.cpp"/>
       <File Name="../../Core/Src/Render/LensFlare.cpp"/>
-      <File Name="../../Core/Src/Render/Light.cpp"/>
       <File Name="../../Core/Src/Render/Mesh.cpp"/>
       <File Name="../../Core/Src/Render/PostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Query.cpp"/>
@@ -51,7 +50,6 @@
       <File Name="../../Core/Include/KlayGE/JudaTexture.hpp"/>
       <File Name="../../Core/Include/KlayGE/KMesh.hpp"/>
       <File Name="../../Core/Include/KlayGE/LensFlare.hpp"/>
-      <File Name="../../Core/Include/KlayGE/Light.hpp"/>
       <File Name="../../Core/Include/KlayGE/Mesh.hpp"/>
       <File Name="../../Core/Include/KlayGE/ParticleSystem.hpp"/>
       <File Name="../../Core/Include/KlayGE/PostProcess.hpp"/>

@@ -394,10 +394,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\Light.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\Mesh.cpp"
 					>
 				</File>
@@ -507,10 +503,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\LensFlare.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\Light.hpp"
 					>
 				</File>
 				<File
