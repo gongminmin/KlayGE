@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9AE5A41E-E486-40AC-B7E4-1608D1FBA6AD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>KConfig</RootNamespace>
+    <RootNamespace>KGEConfig</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -201,13 +201,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Core\Src\KConfig\KConfig.cpp" />
+    <ClCompile Include="..\..\Core\Src\KGEConfig\KGEConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\Core\Src\KConfig\KConfig.rc" />
+    <ResourceCompile Include="..\..\Core\Src\KGEConfig\KGEConfig.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Core\Src\KConfig\resource.h" />
+    <ClInclude Include="..\..\Core\Src\KGEConfig\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\klayge_logo.ico" />

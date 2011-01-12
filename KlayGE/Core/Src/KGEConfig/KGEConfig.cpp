@@ -1,4 +1,4 @@
-// KConfig.cpp
+// KGEConfig.cpp
 // KlayGE Configuration tool implement file
 // Ver 3.11.0
 // Copyright(C) Minmin Gong, 2010
@@ -723,7 +723,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	wc.hCursor			= ::LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground	= reinterpret_cast<HBRUSH>(COLOR_WINDOW);
 	wc.lpszMenuName		= NULL;
-	wc.lpszClassName	= TEXT("KConfig");
+	wc.lpszClassName	= TEXT("KGEConfig");
 	wc.hIconSm			= wc.hIcon;
 	::RegisterClassEx(&wc);
 

@@ -69,7 +69,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL ES 2 Rendering Syste
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration tool", "Configuration tool", "{48735C32-3AB3-4A3B-9F33-7C8676604FB1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KConfig", "KConfig.vcproj", "{9F263B63-2835-4A8A-9F2C-7EA727AAB954}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KGEConfig", "KGEConfig.vcproj", "{9F263B63-2835-4A8A-9F2C-7EA727AAB954}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6683CE2B-0296-477C-AB39-C32AA8F659D5} = {6683CE2B-0296-477C-AB39-C32AA8F659D5}
 	EndProjectSection

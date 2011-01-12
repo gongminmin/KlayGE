@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by KConfig.rc
+// Used by KGEConfig.rc
 //
 #define IDC_RES_COMBO                   1008
 #define IDC_MB_FRAMES_EDIT              1013

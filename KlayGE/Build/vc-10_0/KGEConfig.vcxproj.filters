@@ -15,17 +15,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Core\Src\KConfig\KConfig.cpp">
+    <ClCompile Include="..\..\Core\Src\KGEConfig\KGEConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\Core\Src\KConfig\KConfig.rc">
+    <ResourceCompile Include="..\..\Core\Src\KGEConfig\KGEConfig.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Core\Src\KConfig\resource.h">
+    <ClInclude Include="..\..\Core\Src\KGEConfig\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

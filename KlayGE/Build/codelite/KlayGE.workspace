@@ -8,7 +8,7 @@
   <Project Name="OCTree Scene Management" Path="OCTree.project"/>
   <Project Name="OpenGL ES 2 Rendering System" Path="OpenGLES2.project" Active="No"/>
   <Project Name="DShow Show System" Path="DShow.project"/>
-  <Project Name="KConfig" Path="KConfig.project" Active="Yes"/>
+  <Project Name="KGEConfig" Path="KGEConfig.project" Active="Yes"/>
   <Project Name="OpenGL Rendering System" Path="OpenGL.project"/>
   <Project Name="DInput Input System" Path="DInput.project"/>
   <BuildMatrix>
@@ -18,7 +18,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Debug_win_x86"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Debug_win_x86"/>
       <Project Name="OCTree Scene Management" ConfigName="Debug_win_x86"/>
-      <Project Name="KConfig" ConfigName="Debug_win_x86"/>
+      <Project Name="KGEConfig" ConfigName="Debug_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x86"/>
       <Project Name="DInput Input System" ConfigName="Debug_win_x86"/>
@@ -31,7 +31,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Release_win_x86"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Release_win_x86"/>
       <Project Name="OCTree Scene Management" ConfigName="Release_win_x86"/>
-      <Project Name="KConfig" ConfigName="Release_win_x86"/>
+      <Project Name="KGEConfig" ConfigName="Release_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x86"/>
       <Project Name="DInput Input System" ConfigName="Release_win_x86"/>
@@ -44,7 +44,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Debug_win_x64"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Debug_win_x64"/>
       <Project Name="OCTree Scene Management" ConfigName="Debug_win_x64"/>
-      <Project Name="KConfig" ConfigName="Debug_win_x64"/>
+      <Project Name="KGEConfig" ConfigName="Debug_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x64"/>
       <Project Name="DInput Input System" ConfigName="Debug_win_x64"/>
@@ -57,7 +57,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Release_win_x64"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Release_win_x64"/>
       <Project Name="OCTree Scene Management" ConfigName="Release_win_x64"/>
-      <Project Name="KConfig" ConfigName="Release_win_x64"/>
+      <Project Name="KGEConfig" ConfigName="Release_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x64"/>
       <Project Name="DInput Input System" ConfigName="Release_win_x64"/>
@@ -70,7 +70,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Debug_linux_x86"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Debug_linux_x86"/>
       <Project Name="OCTree Scene Management" ConfigName="Debug_linux_x86"/>
-      <Project Name="KConfig" ConfigName="Debug_win_x86"/>
+      <Project Name="KGEConfig" ConfigName="Debug_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x86"/>
       <Project Name="DInput Input System" ConfigName="Debug_win_x86"/>
@@ -83,7 +83,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Release_linux_x86"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Release_linux_x86"/>
       <Project Name="OCTree Scene Management" ConfigName="Release_linux_x86"/>
-      <Project Name="KConfig" ConfigName="Release_win_x86"/>
+      <Project Name="KGEConfig" ConfigName="Release_win_x86"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x86"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x86"/>
       <Project Name="DInput Input System" ConfigName="Release_win_x86"/>
@@ -96,7 +96,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Debug_linux_x64"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Debug_linux_x64"/>
       <Project Name="OCTree Scene Management" ConfigName="Debug_linux_x64"/>
-      <Project Name="KConfig" ConfigName="Debug_win_x64"/>
+      <Project Name="KGEConfig" ConfigName="Debug_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Debug_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Debug_win_x64"/>
       <Project Name="DInput Input System" ConfigName="Debug_win_x64"/>
@@ -109,7 +109,7 @@
       <Project Name="OpenAL Audio System" ConfigName="Release_linux_x64"/>
       <Project Name="OggVorbis Audio Datasource" ConfigName="Release_linux_x64"/>
       <Project Name="OCTree Scene Management" ConfigName="Release_linux_x64"/>
-      <Project Name="KConfig" ConfigName="Release_win_x64"/>
+      <Project Name="KGEConfig" ConfigName="Release_win_x64"/>
       <Project Name="DSound Audio System" ConfigName="Release_win_x64"/>
       <Project Name="DShow Show System" ConfigName="Release_win_x64"/>
       <Project Name="DInput Input System" ConfigName="Release_win_x64"/>

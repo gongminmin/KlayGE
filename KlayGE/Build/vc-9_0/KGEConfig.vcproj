@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="KConfig"
+	Name="KGEConfig"
 	ProjectGUID="{9F263B63-2835-4A8A-9F2C-7EA727AAB954}"
-	RootNamespace="KConfig"
+	RootNamespace="KGEConfig"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -337,7 +337,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\Core\Src\KConfig\KConfig.cpp"
+				RelativePath="..\..\Core\Src\KGEConfig\KGEConfig.cpp"
 				>
 			</File>
 		</Filter>
@@ -347,7 +347,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\Core\Src\KConfig\resource.h"
+				RelativePath="..\..\Core\Src\KGEConfig\resource.h"
 				>
 			</File>
 		</Filter>
@@ -357,7 +357,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\..\Core\Src\KConfig\KConfig.rc"
+				RelativePath="..\..\Core\Src\KGEConfig\KGEConfig.rc"
 				>
 			</File>
 			<File
