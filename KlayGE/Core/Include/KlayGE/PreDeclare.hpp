@@ -145,6 +145,16 @@ namespace KlayGE
 	typedef boost::shared_ptr<SkinnedMesh> SkinnedMeshPtr;
 	class KMesh;
 	typedef boost::shared_ptr<KMesh> KMeshPtr;
+	class LightSource;
+	typedef boost::shared_ptr<LightSource> LightSourcePtr;
+	class AmbientLightSource;
+	typedef boost::shared_ptr<AmbientLightSource> AmbientLightSourcePtr;
+	class PointLightSource;	
+	typedef boost::shared_ptr<PointLightSource> PointLightSourcePtr;
+	class SpotLightSource;
+	typedef boost::shared_ptr<SpotLightSource> SpotLightSourcePtr;
+	class DirectionalLightSource;
+	typedef boost::shared_ptr<DirectionalLightSource> DirectionalLightSourcePtr;
 	struct RenderDeviceCaps;
 	class Query;
 	typedef boost::shared_ptr<Query> QueryPtr;
