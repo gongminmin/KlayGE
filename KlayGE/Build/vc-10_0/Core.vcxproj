@@ -211,6 +211,7 @@
     <ClCompile Include="..\..\Core\Src\Render\JudaTexture.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\KMesh.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\LensFlare.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Light.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Mesh.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\PostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Query.cpp" />
@@ -300,6 +301,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\JudaTexture.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\KMesh.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Light.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\PostProcess.hpp" />

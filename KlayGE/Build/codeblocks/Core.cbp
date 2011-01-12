@@ -274,6 +274,7 @@
 		<Unit filename="../../Core/Include/KlayGE/KlayGE.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/LZMACodec.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/LensFlare.hpp" />
+		<Unit filename="../../Core/Include/KlayGE/Light.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/Lobby.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/MapVector.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/Math.hpp" />
@@ -389,6 +390,7 @@
 		<Unit filename="../../Core/Src/Render/JudaTexture.cpp" />
 		<Unit filename="../../Core/Src/Render/KMesh.cpp" />
 		<Unit filename="../../Core/Src/Render/LensFlare.cpp" />
+		<Unit filename="../../Core/Src/Render/Light.cpp" />
 		<Unit filename="../../Core/Src/Render/Mesh.cpp" />
 		<Unit filename="../../Core/Src/Render/PostProcess.cpp" />
 		<Unit filename="../../Core/Src/Render/Query.cpp" />
