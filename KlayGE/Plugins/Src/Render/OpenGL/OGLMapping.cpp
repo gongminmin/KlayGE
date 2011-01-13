@@ -899,45 +899,94 @@ namespace KlayGE
 			break;
 
 		case EF_BC1:
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_dxt1())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC2:
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			glformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_s3tc())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC3:
-			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			glformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_s3tc())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC4:
-			internalFormat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
-			glformat = GL_COMPRESSED_LUMINANCE;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC5:
-			internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
-			glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_SIGNED_BC4:
-			internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT;
-			glformat = GL_COMPRESSED_LUMINANCE;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_SIGNED_BC5:
-			internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
-			glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_D16:
@@ -947,9 +996,16 @@ namespace KlayGE
 			break;
 
 		case EF_D24S8:
-			internalFormat = GL_DEPTH24_STENCIL8_EXT;
-			glformat = GL_DEPTH_STENCIL_EXT;
-			gltype = GL_UNSIGNED_INT_24_8_EXT;
+			if (glloader_GL_EXT_packed_depth_stencil())
+			{
+				internalFormat = GL_DEPTH24_STENCIL8_EXT;
+				glformat = GL_DEPTH_STENCIL_EXT;
+				gltype = GL_UNSIGNED_INT_24_8_EXT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_D32F:
@@ -959,39 +1015,94 @@ namespace KlayGE
 			break;
 
 		case EF_ARGB8_SRGB:
-			internalFormat = GL_SRGB8_ALPHA8_EXT;
-			glformat = GL_BGRA;
-			gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_SRGB8_ALPHA8_EXT;
+				glformat = GL_BGRA;
+				gltype = GL_UNSIGNED_INT_8_8_8_8_REV;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_ABGR8_SRGB:
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_SRGB8_ALPHA8_EXT;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC1_SRGB:
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-			glformat = GL_BGRA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
+				glformat = GL_BGRA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC2_SRGB:
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-			glformat = GL_BGRA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+				glformat = GL_BGRA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC3_SRGB:
-			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-			glformat = GL_BGRA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+				glformat = GL_BGRA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC4_SRGB:
-			internalFormat = GL_COMPRESSED_SLUMINANCE_EXT;
-			glformat = GL_LUMINANCE;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_COMPRESSED_SLUMINANCE_EXT;
+				glformat = GL_LUMINANCE;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC5_SRGB:
-			internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA_EXT;
-			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_UNSIGNED_BYTE;
+			if (glloader_GL_EXT_texture_sRGB())
+			{
+				internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA_EXT;
+				glformat = GL_LUMINANCE_ALPHA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		default:

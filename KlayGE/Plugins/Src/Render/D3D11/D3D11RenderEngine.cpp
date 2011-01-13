@@ -726,44 +726,25 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
 	{
-		UINT s;
-		try
-		{
-			d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
-		}
-		catch (...)
-		{
-			s = 0;
-		}
-		return s != 0;
+		return vertex_format_.find(elem_fmt) != vertex_format_.end();
 	}
 
 	bool D3D11RenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
 	{
-		UINT s;
-		try
-		{
-			d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
-		}
-		catch (...)
-		{
-			s = 0;
-		}
-		return s != 0;
+		return texture_format_.find(elem_fmt) != texture_format_.end();
 	}
 
 	bool D3D11RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
 	{
-		UINT quality;
-		try
+		BOOST_AUTO(iter, rendertarget_format_.find(elem_fmt));
+		if (iter != rendertarget_format_.end())
 		{
-			d3d_device_->CheckMultisampleQualityLevels(D3D11Mapping::MappingFormat(elem_fmt), sample_count, &quality);
+			return (sample_count <= iter->second.first) && (sample_quality < iter->second.second);
 		}
-		catch (...)
+		else
 		{
-			quality = 0;
+			return false;
 		}
-		return sample_quality <= quality;
 	}
 
 	// 填充设备能力
@@ -847,6 +828,101 @@ namespace KlayGE
 			caps_.hs_support = false;
 			caps_.ds_support = false;
 			break;
+		}
+
+		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
+		{
+			std::make_pair(EF_A8, DXGI_FORMAT_A8_UNORM),
+			std::make_pair(EF_R8, DXGI_FORMAT_R8_UNORM),
+			std::make_pair(EF_SIGNED_R8, DXGI_FORMAT_R8_SNORM),
+			std::make_pair(EF_GR8, DXGI_FORMAT_R8G8_UNORM),
+			std::make_pair(EF_SIGNED_GR8, DXGI_FORMAT_R8G8_SNORM),
+			std::make_pair(EF_ARGB8, DXGI_FORMAT_B8G8R8A8_UNORM),
+			std::make_pair(EF_ABGR8, DXGI_FORMAT_R8G8B8A8_UNORM),
+			std::make_pair(EF_SIGNED_ABGR8, DXGI_FORMAT_R8G8B8A8_SNORM),
+			std::make_pair(EF_A2BGR10, DXGI_FORMAT_R10G10B10A2_UNORM),
+			std::make_pair(EF_R8UI, DXGI_FORMAT_R8_UINT),
+			std::make_pair(EF_R8I, DXGI_FORMAT_R8_SINT),
+			std::make_pair(EF_GR8UI, DXGI_FORMAT_R8G8_UINT),
+			std::make_pair(EF_GR8I, DXGI_FORMAT_R8G8_SINT),
+			std::make_pair(EF_ABGR8UI, DXGI_FORMAT_R8G8B8A8_UINT),
+			std::make_pair(EF_ABGR8I, DXGI_FORMAT_R8G8B8A8_SINT),
+			std::make_pair(EF_A2BGR10UI, DXGI_FORMAT_R10G10B10A2_UINT),
+			std::make_pair(EF_R16, DXGI_FORMAT_R16_UNORM),
+			std::make_pair(EF_SIGNED_R16, DXGI_FORMAT_R16_SNORM),
+			std::make_pair(EF_GR16, DXGI_FORMAT_R16G16_UNORM),
+			std::make_pair(EF_SIGNED_GR16, DXGI_FORMAT_R16G16_SNORM),
+			std::make_pair(EF_ABGR16, DXGI_FORMAT_R16G16B16A16_UNORM),
+			std::make_pair(EF_SIGNED_ABGR16, DXGI_FORMAT_R16G16B16A16_SNORM),
+			std::make_pair(EF_R16UI, DXGI_FORMAT_R16_UINT),
+			std::make_pair(EF_R16I, DXGI_FORMAT_R16_SINT),
+			std::make_pair(EF_GR16UI, DXGI_FORMAT_R16G16_UINT),
+			std::make_pair(EF_GR16I, DXGI_FORMAT_R16G16_SINT),
+			std::make_pair(EF_ABGR16UI, DXGI_FORMAT_R16G16B16A16_UINT),
+			std::make_pair(EF_ABGR16I, DXGI_FORMAT_R16G16B16A16_SINT),
+			std::make_pair(EF_R32UI, DXGI_FORMAT_R32_UINT),
+			std::make_pair(EF_R32I, DXGI_FORMAT_R32_SINT),
+			std::make_pair(EF_GR32UI, DXGI_FORMAT_R32G32_UINT),
+			std::make_pair(EF_GR32I, DXGI_FORMAT_R32G32_SINT),
+			std::make_pair(EF_BGR32UI, DXGI_FORMAT_R32G32B32_UINT),
+			std::make_pair(EF_BGR32I, DXGI_FORMAT_R32G32B32_SINT),
+			std::make_pair(EF_ABGR32UI, DXGI_FORMAT_R32G32B32A32_UINT),
+			std::make_pair(EF_ABGR32I, DXGI_FORMAT_R32G32B32A32_SINT),
+			std::make_pair(EF_R16F, DXGI_FORMAT_R16_FLOAT),
+			std::make_pair(EF_GR16F, DXGI_FORMAT_R16G16_FLOAT),
+			std::make_pair(EF_B10G11R11F, DXGI_FORMAT_R11G11B10_FLOAT),
+			std::make_pair(EF_ABGR16F, DXGI_FORMAT_R16G16B16A16_FLOAT),
+			std::make_pair(EF_R32F, DXGI_FORMAT_R32_FLOAT),
+			std::make_pair(EF_GR32F, DXGI_FORMAT_R32G32_FLOAT),
+			std::make_pair(EF_BGR32F, DXGI_FORMAT_R32G32B32_FLOAT),
+			std::make_pair(EF_ABGR32F, DXGI_FORMAT_R32G32B32A32_FLOAT),
+			std::make_pair(EF_BC1, DXGI_FORMAT_BC1_UNORM),
+			std::make_pair(EF_BC2, DXGI_FORMAT_BC2_UNORM),
+			std::make_pair(EF_BC3, DXGI_FORMAT_BC3_UNORM),
+			std::make_pair(EF_BC4, DXGI_FORMAT_BC4_UNORM),
+			std::make_pair(EF_SIGNED_BC4, DXGI_FORMAT_BC4_SNORM),
+			std::make_pair(EF_BC5, DXGI_FORMAT_BC5_UNORM),
+			std::make_pair(EF_SIGNED_BC5, DXGI_FORMAT_BC5_SNORM),
+			std::make_pair(EF_BC6, DXGI_FORMAT_BC6H_UF16),
+			std::make_pair(EF_SIGNED_BC6, DXGI_FORMAT_BC6H_SF16),
+			std::make_pair(EF_BC7, DXGI_FORMAT_BC7_UNORM),
+			std::make_pair(EF_D16, DXGI_FORMAT_D16_UNORM),
+			std::make_pair(EF_D24S8, DXGI_FORMAT_D24_UNORM_S8_UINT),
+			std::make_pair(EF_D32F, DXGI_FORMAT_D32_FLOAT),
+			std::make_pair(EF_ARGB8_SRGB, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB),
+			std::make_pair(EF_ABGR8_SRGB, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB),
+			std::make_pair(EF_BC1_SRGB, DXGI_FORMAT_BC1_UNORM_SRGB),
+			std::make_pair(EF_BC2_SRGB, DXGI_FORMAT_BC2_UNORM_SRGB),
+			std::make_pair(EF_BC3_SRGB, DXGI_FORMAT_BC3_UNORM_SRGB),
+			std::make_pair(EF_BC7_SRGB, DXGI_FORMAT_BC7_UNORM_SRGB)
+		};
+
+		UINT s;
+		for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++ i)
+		{
+			d3d_device_->CheckFormatSupport(fmts[i].second, &s);
+			if (s != 0)
+			{
+				vertex_format_.insert(fmts[i].first);
+				texture_format_.insert(fmts[i].first);
+
+				UINT count = 1;
+				UINT quality;
+				while (count <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT)
+				{
+					UINT q;
+					if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmts[i].second, count, &q)))
+					{
+						quality = q;
+						count <<= 1;
+					}
+					else
+					{
+						break;
+					}
+				}
+				rendertarget_format_.insert(std::make_pair(fmts[i].first, std::make_pair(count, quality)));
+			}
 		}
 
 		caps_.vertex_format_support = boost::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this, _1);

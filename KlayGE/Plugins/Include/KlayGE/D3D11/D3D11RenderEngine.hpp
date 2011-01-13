@@ -30,6 +30,8 @@
 #include <D3D11Shader.h>
 
 #include <vector>
+#include <set>
+#include <map>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 6385)
@@ -221,6 +223,10 @@ namespace KlayGE
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 
 		TexturePtr stereo_lr_tex_;
+
+		std::set<ElementFormat> vertex_format_;
+		std::set<ElementFormat> texture_format_;
+		std::map<ElementFormat, std::pair<uint32_t, uint32_t> > rendertarget_format_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
