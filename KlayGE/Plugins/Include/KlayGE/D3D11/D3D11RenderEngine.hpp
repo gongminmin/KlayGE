@@ -226,7 +226,7 @@ namespace KlayGE
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
-		std::map<ElementFormat, std::pair<uint32_t, uint32_t> > rendertarget_format_;
+		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t> > > rendertarget_format_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;

@@ -984,21 +984,12 @@ DeferredRenderingApp::DeferredRenderingApp()
 
 bool DeferredRenderingApp::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}
-
-	try
-	{
-		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		rf.Make2DRenderView(*temp_tex, 0, 0);
-		rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
-	}
-	catch (...)
+	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
 	{
 		return false;
 	}
@@ -1089,15 +1080,19 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	try
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 	{
-		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		fmt = EF_GR16F;
 	}
-	catch (...)
+	else
 	{
-		ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+		fmt = EF_ABGR16F;
 	}
-	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, ssao_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	{
 		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;

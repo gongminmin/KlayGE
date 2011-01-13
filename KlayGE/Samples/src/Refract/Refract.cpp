@@ -164,21 +164,12 @@ Refract::Refract()
 
 bool Refract::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}
-
-	try
-	{
-		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		rf.Make2DRenderView(*temp_tex, 0, 0);
-		rf.Make2DDepthStencilRenderView(800, 600, EF_D16, 1, 0);
-	}
-	catch (...)
+	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
 	{
 		return false;
 	}
@@ -241,16 +232,19 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	try
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality))
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_B10G11R11F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
+		fmt = EF_B10G11R11F;
 	}
-	catch (...)
+	else
 	{
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality));
+
+		fmt = EF_ABGR16F;
 	}
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	if (cfg.graphics_cfg.sample_count > 1)

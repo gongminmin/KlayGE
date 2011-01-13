@@ -126,19 +126,21 @@ namespace KlayGE
 		init_data.row_pitch = sizeof(float);
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
-		try
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
 		{
-			adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			this->OutputPin(0, adapted_textures_[last_index_]);
+			fmt = EF_R32F;
 		}
-		catch (...)
+		else
 		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0));
+
 			init_data.row_pitch = 4 * sizeof(float);
-			adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
-			this->OutputPin(0, adapted_textures_[last_index_]);
+			fmt = EF_ABGR32F;
 		}
+		adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+		adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
+		this->OutputPin(0, adapted_textures_[last_index_]);
 
 		last_lum_tex_ep_ = technique_->Effect().ParameterByName("last_lum_tex");
 		frame_delta_ep_ = technique_->Effect().ParameterByName("frame_delta");
@@ -276,45 +278,33 @@ namespace KlayGE
 		else
 		{
 			std::vector<TexturePtr> lum_texs(sum_lums_.size() + 1);
-			try
+			ElementFormat fmt;
+			if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
 			{
-				int len = 1;
-				for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
-				{
-					lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_R16F, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write, NULL);
-					len *= 4;
-				}
-
-				{
-					sum_lums_1st_->InputPin(index, tex);
-					sum_lums_1st_->OutputPin(index, lum_texs[0]);
-				}
-				for (size_t i = 0; i < sum_lums_.size(); ++ i)
-				{
-					sum_lums_[i]->InputPin(index, lum_texs[i]);
-					sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
-				}
+				fmt = EF_R16F;
 			}
-			catch (...)
+			else
 			{
-				int len = 1;
-				for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
-				{
-					lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, EF_ABGR16F, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write, NULL);
-					len *= 4;
-				}
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+				fmt = EF_ABGR16F;
+			}
+			
+			int len = 1;
+			for (size_t i = 0; i < sum_lums_.size() + 1; ++ i)
+			{
+				lum_texs[sum_lums_.size() - i] = rf.MakeTexture2D(len, len, 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, NULL);
+				len *= 4;
+			}
 
-				{
-					sum_lums_1st_->InputPin(index, tex);
-					sum_lums_1st_->OutputPin(index, lum_texs[0]);
-				}
-				for (size_t i = 0; i < sum_lums_.size(); ++ i)
-				{
-					sum_lums_[i]->InputPin(index, lum_texs[i]);
-					sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
-				}
+			{
+				sum_lums_1st_->InputPin(index, tex);
+				sum_lums_1st_->OutputPin(index, lum_texs[0]);
+			}
+			for (size_t i = 0; i < sum_lums_.size(); ++ i)
+			{
+				sum_lums_[i]->InputPin(index, lum_texs[i]);
+				sum_lums_[i]->OutputPin(index, lum_texs[i + 1]);
 			}
 
 			{
@@ -325,16 +315,18 @@ namespace KlayGE
 		TexturePtr downsample_texs[3];
 		TexturePtr glow_texs[3];
 
-		try
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
-			downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_B10G11R11F, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+			fmt = EF_B10G11R11F;
 		}
-		catch (...)
+		else
 		{
-			downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, NULL);
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			fmt = EF_ABGR16F;
 		}
+		downsample_texs[0] = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write, NULL);
 		{
 			bright_pass_downsampler_->InputPin(index, tex);
 			bright_pass_downsampler_->OutputPin(index, downsample_texs[0]);

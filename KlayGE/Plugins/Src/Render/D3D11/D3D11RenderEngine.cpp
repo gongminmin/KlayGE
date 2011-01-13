@@ -739,12 +739,15 @@ namespace KlayGE
 		BOOST_AUTO(iter, rendertarget_format_.find(elem_fmt));
 		if (iter != rendertarget_format_.end())
 		{
-			return (sample_count <= iter->second.first) && (sample_quality < iter->second.second);
+			BOOST_FOREACH(BOOST_TYPEOF(iter->second)::const_reference p, iter->second)
+			{
+				if ((sample_count == p.first) && (sample_quality < p.second))
+				{
+					return true;
+				}
+			}
 		}
-		else
-		{
-			return false;
-		}
+		return false;
 	}
 
 	// 填充设备能力
@@ -910,18 +913,23 @@ namespace KlayGE
 				UINT quality;
 				while (count <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT)
 				{
-					UINT q;
-					if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmts[i].second, count, &q)))
+					if (SUCCEEDED(d3d_device_->CheckMultisampleQualityLevels(fmts[i].second, count, &quality)))
 					{
-						quality = q;
-						count <<= 1;
+						if (quality > 0)
+						{
+							rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, quality));
+							count <<= 1;
+						}
+						else
+						{
+							break;
+						}
 					}
 					else
 					{
 						break;
 					}
 				}
-				rendertarget_format_.insert(std::make_pair(fmts[i].first, std::make_pair(count, quality)));
 			}
 		}
 

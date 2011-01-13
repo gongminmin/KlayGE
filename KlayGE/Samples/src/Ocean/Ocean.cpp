@@ -933,16 +933,17 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 0));
 	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	try
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
-		reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+		fmt = EF_B10G11R11F;
 	}
-	catch (...)
+	else
 	{
-		reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+		fmt = EF_ABGR16F;
 	}
+	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
 	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, refraction_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
 	reflection_fb_->GetViewport().left = 0;

@@ -474,20 +474,12 @@ ParticleEditorApp::ParticleEditorApp()
 
 bool ParticleEditorApp::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}
-
-	try
-	{
-		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		rf.Make2DRenderView(*temp_tex, 0, 0);
-	}
-	catch (...)
+	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
 	{
 		return false;
 	}

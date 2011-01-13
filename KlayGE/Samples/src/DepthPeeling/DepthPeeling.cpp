@@ -176,9 +176,7 @@ DepthPeelingApp::DepthPeelingApp()
 
 bool DepthPeelingApp::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
 	{
 		return false;
@@ -187,13 +185,7 @@ bool DepthPeelingApp::ConfirmDevice() const
 	{
 		return false;
 	}
-
-	try
-	{
-		TexturePtr temp_tex = rf.MakeTexture2D(800, 600, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		rf.Make2DRenderView(*temp_tex, 0, 0);
-	}
-	catch (...)
+	if (!(caps.rendertarget_format_support(EF_R32F, 1, 0) || caps.rendertarget_format_support(EF_ABGR32F, 1, 0)))
 	{
 		return false;
 	}
@@ -273,11 +265,11 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+	ElementFormat depth_format;
 	ElementFormat peel_format;
-	try
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
 	{
-		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0, 0);
+		depth_format = EF_R32F;
 		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
 		{
 			peel_format = EF_ARGB8;
@@ -287,13 +279,15 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 			peel_format = EF_ABGR8;
 		}
 	}
-	catch (...)
+	else
 	{
-		depth_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0, 0);
-		peel_format = EF_ABGR32F;
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0));
+
+		depth_format = peel_format = EF_ABGR32F;
 	}
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, depth_texs_[0]->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0, 0);
+	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	depth_view_[1] = rf.Make2DRenderView(*depth_texs_[1], 0, 0);
 
 	peeled_depth_view_ = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);

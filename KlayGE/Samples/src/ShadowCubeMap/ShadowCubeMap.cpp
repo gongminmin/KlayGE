@@ -332,37 +332,15 @@ ShadowCubeMap::ShadowCubeMap()
 
 bool ShadowCubeMap::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}
-
-	try
-	{
-		rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
-	}
-	catch (...)
+	if (!(caps.rendertarget_format_support(EF_D16, 1, 0)
+		&& (caps.rendertarget_format_support(EF_GR16F, 1, 0) || caps.rendertarget_format_support(EF_ABGR16F, 1, 0))))
 	{
 		return false;
-	}
-
-	try
-	{
-		rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	}
-	catch (...)
-	{
-		try
-		{
-			rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		}
-		catch (...)
-		{
-			return false;
-		}
 	}
 
 	return true;
@@ -391,17 +369,19 @@ void ShadowCubeMap::InitObjects()
 
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
 	shadow_buffer_ = rf.MakeFrameBuffer();
-	try
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 	{
-		shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
+		fmt = EF_GR16F;
 	}
-	catch (...)
+	else
 	{
-		shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
-	}
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
 
+		fmt = EF_ABGR16F;
+	}
+	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
 	shadow_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
 	shadow_buffer_->GetViewport().camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);

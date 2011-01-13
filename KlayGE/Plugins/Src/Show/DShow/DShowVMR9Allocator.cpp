@@ -18,6 +18,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #include <d3d9.h>
 #include <boost/assert.hpp>
@@ -140,13 +141,15 @@ namespace KlayGE
 
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		try
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0))
 		{
-			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			fmt = EF_ARGB8;
 		}
-		catch (...)
+		else
 		{
-			present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0));
+			fmt = EF_ABGR8;
 		}
 
 		IDirect3DSurface9* surf;
