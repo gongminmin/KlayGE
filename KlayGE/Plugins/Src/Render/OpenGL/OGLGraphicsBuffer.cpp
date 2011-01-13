@@ -137,17 +137,22 @@ namespace KlayGE
 
 	void OGLGraphicsBuffer::Active()
 	{
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindBuffer(target_, vb_);
+		// TODO: fix me
+		//OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		//re.BindBuffer(target_, vb_);
+		glBindBuffer(target_, vb_);
 	}
 
 	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
 		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_copy_buffer())
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
-			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
+			// TODO: fix me
+			glBindBuffer(GL_COPY_READ_BUFFER, vb_);
+			glBindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
+			//OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			//re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
+			//re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
 			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
                           0, 0, size_in_byte_);
 		}

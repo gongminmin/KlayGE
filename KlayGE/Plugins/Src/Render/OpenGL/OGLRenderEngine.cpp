@@ -796,6 +796,11 @@ namespace KlayGE
 		return texture_format_.find(elem_fmt) != texture_format_.end();
 	}
 
+	bool OGLRenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t /*sample_quality*/)
+	{
+		return (rendertarget_format_.find(elem_fmt) != rendertarget_format_.end()) && (sample_count <= max_samples_);
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::FillRenderDeviceCaps()
@@ -959,378 +964,244 @@ namespace KlayGE
 			hack_for_ati_ = false;
 		}
 
-		ElementFormat const all_elem_fmts[] = 
+		vertex_format_.insert(EF_A8);
+		vertex_format_.insert(EF_R8);
+		vertex_format_.insert(EF_GR8);
+		vertex_format_.insert(EF_BGR8);
+		vertex_format_.insert(EF_ARGB8);
+		vertex_format_.insert(EF_ABGR8);
+		vertex_format_.insert(EF_R8UI);
+		vertex_format_.insert(EF_GR8UI);
+		vertex_format_.insert(EF_BGR8UI);
+		vertex_format_.insert(EF_ABGR8UI);
+		vertex_format_.insert(EF_SIGNED_R8);
+		vertex_format_.insert(EF_SIGNED_GR8);
+		vertex_format_.insert(EF_SIGNED_BGR8);
+		vertex_format_.insert(EF_SIGNED_ABGR8);
+		vertex_format_.insert(EF_R8I);
+		vertex_format_.insert(EF_GR8I);
+		vertex_format_.insert(EF_BGR8I);
+		vertex_format_.insert(EF_ABGR8I);
+		vertex_format_.insert(EF_A2BGR10);
+		vertex_format_.insert(EF_R16);
+		vertex_format_.insert(EF_GR16);
+		vertex_format_.insert(EF_BGR16);
+		vertex_format_.insert(EF_ABGR16);
+		vertex_format_.insert(EF_R16UI);
+		vertex_format_.insert(EF_GR16UI);
+		vertex_format_.insert(EF_BGR16UI);
+		vertex_format_.insert(EF_ABGR16UI);
+		vertex_format_.insert(EF_SIGNED_R16);
+		vertex_format_.insert(EF_SIGNED_GR16);
+		vertex_format_.insert(EF_SIGNED_BGR16);
+		vertex_format_.insert(EF_SIGNED_ABGR16);
+		vertex_format_.insert(EF_R16I);
+		vertex_format_.insert(EF_GR16I);
+		vertex_format_.insert(EF_BGR16I);
+		vertex_format_.insert(EF_ABGR16I);
+		vertex_format_.insert(EF_R32UI);
+		vertex_format_.insert(EF_GR32UI);
+		vertex_format_.insert(EF_BGR32UI);
+		vertex_format_.insert(EF_ABGR32UI);
+		vertex_format_.insert(EF_R32I);
+		vertex_format_.insert(EF_GR32I);
+		vertex_format_.insert(EF_BGR32I);
+		vertex_format_.insert(EF_ABGR32I);
+		vertex_format_.insert(EF_R32F);
+		vertex_format_.insert(EF_GR32F);
+		vertex_format_.insert(EF_BGR32F);
+		vertex_format_.insert(EF_ABGR32F);
+		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
 		{
-			EF_Unknown,
-			EF_A8,
-
-			EF_ARGB4,
-
-			EF_R8,
-			EF_SIGNED_R8,
-			EF_GR8,
-			EF_SIGNED_GR8,
-			EF_BGR8,
-			EF_SIGNED_BGR8,
-			EF_ARGB8,
-			EF_ABGR8,
-			EF_SIGNED_ABGR8,
-			EF_A2BGR10,
-			EF_SIGNED_A2BGR10,
-
-			EF_R8UI,
-			EF_R8I,
-			EF_GR8UI,
-			EF_GR8I,
-			EF_BGR8UI,
-			EF_BGR8I,
-			EF_ABGR8UI,
-			EF_ABGR8I,
-			EF_A2BGR10UI,
-			EF_A2BGR10I,
-
-			EF_R16,
-			EF_SIGNED_R16,
-			EF_GR16,
-			EF_SIGNED_GR16,
-			EF_BGR16,
-			EF_SIGNED_BGR16,
-			EF_ABGR16,
-			EF_SIGNED_ABGR16,
-			EF_R32,
-			EF_SIGNED_R32,
-			EF_GR32,
-			EF_SIGNED_GR32,
-			EF_BGR32,
-			EF_SIGNED_BGR32,
-			EF_ABGR32,
-			EF_SIGNED_ABGR32,
-
-			EF_R16UI,
-			EF_R16I,
-			EF_GR16UI,
-			EF_GR16I,
-			EF_BGR16UI,
-			EF_BGR16I,
-			EF_ABGR16UI,
-			EF_ABGR16I,
-			EF_R32UI,
-			EF_R32I,
-			EF_GR32UI,
-			EF_GR32I,
-			EF_BGR32UI,
-			EF_BGR32I,
-			EF_ABGR32UI,
-			EF_ABGR32I,
-
-			EF_R16F,
-			EF_GR16F,
-			EF_B10G11R11F,
-			EF_BGR16F,
-			EF_ABGR16F,
-			EF_R32F,
-			EF_GR32F,
-			EF_BGR32F,
-			EF_ABGR32F,
-
-			EF_BC1,
-			EF_SIGNED_BC1,
-			EF_BC2,
-			EF_SIGNED_BC2,
-			EF_BC3,
-			EF_SIGNED_BC3,
-			EF_BC4,
-			EF_SIGNED_BC4,
-			EF_BC5,
-			EF_SIGNED_BC5,
-			EF_BC6,
-			EF_SIGNED_BC6,
-			EF_BC7,
-
-			EF_D16,
-			EF_D24S8,
-			EF_D32F,
-
-			EF_ARGB8_SRGB,
-			EF_ABGR8_SRGB,
-			EF_BC1_SRGB,
-			EF_BC2_SRGB,
-			EF_BC3_SRGB,
-			EF_BC4_SRGB,
-			EF_BC5_SRGB,
-			EF_BC7_SRGB
-		};
-		for (int i = 0; i < sizeof(all_elem_fmts) / sizeof(all_elem_fmts[0]); ++ i)
+			vertex_format_.insert(EF_SIGNED_A2BGR10);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
 		{
-			ElementFormat const elem_fmt = all_elem_fmts[i];
-			switch (elem_fmt)
-			{
-			case EF_A8:
-			case EF_R8:
-			case EF_GR8:
-			case EF_BGR8:
-			case EF_ARGB8:
-			case EF_ABGR8:
-			case EF_R8UI:
-			case EF_GR8UI:
-			case EF_BGR8UI:
-			case EF_ABGR8UI:
-			case EF_SIGNED_R8:
-			case EF_SIGNED_GR8:
-			case EF_SIGNED_BGR8:
-			case EF_SIGNED_ABGR8:
-			case EF_R8I:
-			case EF_GR8I:
-			case EF_BGR8I:
-			case EF_ABGR8I:
-			case EF_A2BGR10:
-			case EF_R16:
-			case EF_GR16:
-			case EF_BGR16:
-			case EF_ABGR16:
-			case EF_R16UI:
-			case EF_GR16UI:
-			case EF_BGR16UI:
-			case EF_ABGR16UI:
-			case EF_SIGNED_R16:
-			case EF_SIGNED_GR16:
-			case EF_SIGNED_BGR16:
-			case EF_SIGNED_ABGR16:
-			case EF_R16I:
-			case EF_GR16I:
-			case EF_BGR16I:
-			case EF_ABGR16I:
-			case EF_R32UI:
-			case EF_GR32UI:
-			case EF_BGR32UI:
-			case EF_ABGR32UI:
-			case EF_R32I:
-			case EF_GR32I:
-			case EF_BGR32I:
-			case EF_ABGR32I:
-			case EF_R32F:
-			case EF_GR32F:
-			case EF_BGR32F:
-			case EF_ABGR32F:
-				vertex_format_.insert(elem_fmt);
-				break;
+			vertex_format_.insert(EF_R16F);
+			vertex_format_.insert(EF_GR16F);
+			vertex_format_.insert(EF_BGR16F);
+			vertex_format_.insert(EF_ABGR16F);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
+		{
+			vertex_format_.insert(EF_B10G11R11F);
+		}
+		
+		texture_format_.insert(EF_A8);
+		texture_format_.insert(EF_ARGB4);
+		texture_format_.insert(EF_R8);
+		texture_format_.insert(EF_SIGNED_R8);
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+		{
+			texture_format_.insert(EF_GR8);
+			texture_format_.insert(EF_SIGNED_GR8);
+			texture_format_.insert(EF_GR16);
+			texture_format_.insert(EF_SIGNED_GR16);
+		}
+		texture_format_.insert(EF_BGR8);
+		if (glloader_GL_NV_texture_shader())
+		{
+			texture_format_.insert(EF_SIGNED_BGR8);
+			texture_format_.insert(EF_SIGNED_ABGR8);
+		}
+		texture_format_.insert(EF_ARGB8);
+		texture_format_.insert(EF_ABGR8);
+		texture_format_.insert(EF_A2BGR10);
+		texture_format_.insert(EF_SIGNED_A2BGR10);
+		texture_format_.insert(EF_R16);
+		texture_format_.insert(EF_SIGNED_R16);
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
+		{
+			texture_format_.insert(EF_R8UI);
+			texture_format_.insert(EF_R8I);
+			texture_format_.insert(EF_GR8UI);
+			texture_format_.insert(EF_GR8I);
+			texture_format_.insert(EF_BGR8UI);
+			texture_format_.insert(EF_BGR8I);
+			texture_format_.insert(EF_ABGR8UI);
+			texture_format_.insert(EF_ABGR8I);
+			texture_format_.insert(EF_R16UI);
+			texture_format_.insert(EF_R16I);
+			texture_format_.insert(EF_GR16UI);
+			texture_format_.insert(EF_GR16I);
+			texture_format_.insert(EF_BGR16UI);
+			texture_format_.insert(EF_BGR16I);
+			texture_format_.insert(EF_ABGR16UI);
+			texture_format_.insert(EF_ABGR16I);
+			texture_format_.insert(EF_R32UI);
+			texture_format_.insert(EF_R32I);
+			texture_format_.insert(EF_GR32UI);
+			texture_format_.insert(EF_GR32I);
+			texture_format_.insert(EF_BGR32UI);
+			texture_format_.insert(EF_BGR32I);
+			texture_format_.insert(EF_ABGR32UI);
+			texture_format_.insert(EF_ABGR32I);
+		}
+		texture_format_.insert(EF_BGR16);
+		texture_format_.insert(EF_SIGNED_BGR16);
+		texture_format_.insert(EF_ABGR16);
+		texture_format_.insert(EF_SIGNED_ABGR16);
+		texture_format_.insert(EF_R16F);
+		texture_format_.insert(EF_GR16F);
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
+		{
+			texture_format_.insert(EF_B10G11R11F);
+		}
+		texture_format_.insert(EF_BGR16F);
+		texture_format_.insert(EF_ABGR16F);
+		texture_format_.insert(EF_R32F);
+		texture_format_.insert(EF_GR32F);
+		texture_format_.insert(EF_BGR32F);
+		texture_format_.insert(EF_ABGR32F);
+		if (glloader_GL_EXT_texture_compression_dxt1())
+		{
+			texture_format_.insert(EF_BC1);
+		}
+		if (glloader_GL_EXT_texture_compression_s3tc())
+		{
+			texture_format_.insert(EF_BC2);
+			texture_format_.insert(EF_BC3);
+		}
+		if (glloader_GL_EXT_texture_compression_latc())
+		{
+			texture_format_.insert(EF_BC4);
+			texture_format_.insert(EF_BC5);
+			texture_format_.insert(EF_SIGNED_BC4);
+			texture_format_.insert(EF_SIGNED_BC5);
+		}
+		if (glloader_GL_ARB_texture_compression_bptc())
+		{
+			texture_format_.insert(EF_BC6);
+			texture_format_.insert(EF_BC7);
+		}
+		texture_format_.insert(EF_D16);
+		if (glloader_GL_EXT_packed_depth_stencil())
+		{
+			texture_format_.insert(EF_D24S8);
+		}
+		texture_format_.insert(EF_D32F);
+		if (glloader_GL_EXT_texture_sRGB())
+		{
+			texture_format_.insert(EF_ARGB8_SRGB);
+			texture_format_.insert(EF_ABGR8_SRGB);
+			texture_format_.insert(EF_BC1_SRGB);
+			texture_format_.insert(EF_BC2_SRGB);
+			texture_format_.insert(EF_BC3_SRGB);
+			texture_format_.insert(EF_BC4_SRGB);
+			texture_format_.insert(EF_BC5_SRGB);
+		}
 
-			case EF_SIGNED_A2BGR10:
-				if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
-				{
-					vertex_format_.insert(elem_fmt);
-				}
-				break;
+		GLint max_samples;
+		glGetIntegerv(GL_MAX_SAMPLES_EXT, &max_samples);
+		max_samples_ = static_cast<uint32_t>(max_samples);
 
-			case EF_R16F:
-			case EF_GR16F:
-			case EF_BGR16F:
-			case EF_ABGR16F:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
-				{
-					vertex_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_B10G11R11F:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
-				{
-					vertex_format_.insert(elem_fmt);
-				}
-				break;
-
-			default:
-				break;
-			}
-
-			switch (elem_fmt)
-			{
-			case EF_A8:
-			case EF_ARGB4:
-			case EF_R8:
-			case EF_SIGNED_R8:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_GR8:
-			case EF_SIGNED_GR8:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BGR8:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_SIGNED_BGR8:
-				if (glloader_GL_NV_texture_shader())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_ARGB8:
-			case EF_ABGR8:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_SIGNED_ABGR8:
-				if (glloader_GL_NV_texture_shader())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_A2BGR10:
-			case EF_SIGNED_A2BGR10:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_R8UI:
-			case EF_R8I:
-			case EF_GR8UI:
-			case EF_GR8I:
-			case EF_BGR8UI:
-			case EF_BGR8I:
-			case EF_ABGR8UI:
-			case EF_ABGR8I:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_R16:
-			case EF_SIGNED_R16:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_GR16:
-			case EF_SIGNED_GR16:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BGR16:
-			case EF_SIGNED_BGR16:
-			case EF_ABGR16:
-			case EF_SIGNED_ABGR16:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_R16UI:
-			case EF_R16I:
-			case EF_GR16UI:
-			case EF_GR16I:
-			case EF_BGR16UI:
-			case EF_BGR16I:
-			case EF_ABGR16UI:
-			case EF_ABGR16I:
-			case EF_R32UI:
-			case EF_R32I:
-			case EF_GR32UI:
-			case EF_GR32I:
-			case EF_BGR32UI:
-			case EF_BGR32I:
-			case EF_ABGR32UI:
-			case EF_ABGR32I:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_R16F:
-			case EF_GR16F:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_B10G11R11F:
-				if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BGR16F:
-			case EF_ABGR16F:
-			case EF_R32F:
-			case EF_GR32F:
-			case EF_BGR32F:
-			case EF_ABGR32F:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_BC1:
-				if (glloader_GL_EXT_texture_compression_dxt1())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BC2:
-			case EF_BC3:
-				if (glloader_GL_EXT_texture_compression_s3tc())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BC4:
-			case EF_BC5:
-			case EF_SIGNED_BC4:
-			case EF_SIGNED_BC5:
-				if (glloader_GL_EXT_texture_compression_latc())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_BC6:
-			case EF_BC7:
-				if (glloader_GL_ARB_texture_compression_bptc())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_D16:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_D24S8:
-				if (glloader_GL_EXT_packed_depth_stencil())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			case EF_D32F:
-				texture_format_.insert(elem_fmt);
-				break;
-
-			case EF_ARGB8_SRGB:
-			case EF_BC1_SRGB:
-			case EF_BC2_SRGB:
-			case EF_BC3_SRGB:
-			case EF_BC4_SRGB:
-			case EF_BC5_SRGB:
-				if (glloader_GL_EXT_texture_sRGB())
-				{
-					texture_format_.insert(elem_fmt);
-				}
-				break;
-
-			default:
-				break;
-			}
+		rendertarget_format_.insert(EF_ARGB8);
+		rendertarget_format_.insert(EF_ABGR8);
+		if (glloader_GL_NV_texture_shader())
+		{
+			rendertarget_format_.insert(EF_SIGNED_ABGR8);
+		}
+		rendertarget_format_.insert(EF_A2BGR10);
+		rendertarget_format_.insert(EF_SIGNED_A2BGR10);
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())
+		{
+			rendertarget_format_.insert(EF_ABGR8UI);
+			rendertarget_format_.insert(EF_ABGR8I);
+			rendertarget_format_.insert(EF_R16);
+			rendertarget_format_.insert(EF_SIGNED_R16);
+			rendertarget_format_.insert(EF_GR16);
+			rendertarget_format_.insert(EF_SIGNED_GR16);
+		}
+		rendertarget_format_.insert(EF_ABGR16);
+		rendertarget_format_.insert(EF_SIGNED_ABGR16);
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_integer())
+		{
+			rendertarget_format_.insert(EF_R16UI);
+			rendertarget_format_.insert(EF_R16I);
+			rendertarget_format_.insert(EF_GR16UI);
+			rendertarget_format_.insert(EF_GR16I);
+			rendertarget_format_.insert(EF_ABGR16UI);
+			rendertarget_format_.insert(EF_ABGR16I);
+			rendertarget_format_.insert(EF_R32UI);
+			rendertarget_format_.insert(EF_R32I);
+			rendertarget_format_.insert(EF_GR32UI);
+			rendertarget_format_.insert(EF_GR32I);
+			rendertarget_format_.insert(EF_ABGR32UI);
+			rendertarget_format_.insert(EF_ABGR32I);
+		}
+		if (glloader_GL_VERSION_3_0() || (glloader_GL_ARB_half_float_pixel && glloader_GL_ARB_texture_rg()))
+		{
+			rendertarget_format_.insert(EF_R16F);
+			rendertarget_format_.insert(EF_GR16F);
+			rendertarget_format_.insert(EF_R32F);
+			rendertarget_format_.insert(EF_GR32F);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_half_float_pixel())
+		{
+			rendertarget_format_.insert(EF_ABGR16F);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_packed_float())
+		{
+			rendertarget_format_.insert(EF_B10G11R11F);
+		}
+		if (glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_float())
+		{
+			rendertarget_format_.insert(EF_ABGR32F);
+		}
+		rendertarget_format_.insert(EF_D16);
+		if (glloader_GL_EXT_packed_depth_stencil())
+		{
+			rendertarget_format_.insert(EF_D24S8);
+		}
+		rendertarget_format_.insert(EF_D32F);
+		if (glloader_GL_EXT_texture_sRGB() && glloader_GL_EXT_framebuffer_sRGB())
+		{
+			rendertarget_format_.insert(EF_ARGB8_SRGB);
+			rendertarget_format_.insert(EF_ABGR8_SRGB);
 		}
 
 		caps_.vertex_format_support = boost::bind<bool>(&OGLRenderEngine::VertexFormatSupport, this, _1);
 		caps_.texture_format_support = boost::bind<bool>(&OGLRenderEngine::TextureFormatSupport, this, _1);
+		caps_.rendertarget_format_support = boost::bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this, _1, _2, _3);
 	}
 }

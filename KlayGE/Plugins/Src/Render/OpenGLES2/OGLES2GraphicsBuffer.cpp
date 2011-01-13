@@ -100,8 +100,10 @@ namespace KlayGE
 
 	void OGLES2GraphicsBuffer::Active()
 	{
-		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindBuffer(target_, vb_);
+		// TODO: fix me
+		glBindBuffer(target_, vb_);
+		//OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		//re.BindBuffer(target_, vb_);
 	}
 
 	void OGLES2GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)

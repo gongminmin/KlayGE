@@ -165,6 +165,7 @@ namespace KlayGE
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
+		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
 	private:
 		D3D11AdapterList const & D3DAdapters() const;

@@ -57,6 +57,7 @@ namespace KlayGE
 
 		boost::function<bool(ElementFormat)> vertex_format_support;
 		boost::function<bool(ElementFormat)> texture_format_support;
+		boost::function<bool(ElementFormat, uint32_t, uint32_t)> rendertarget_format_support;
 	};
 }
 

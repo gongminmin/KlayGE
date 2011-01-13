@@ -727,15 +727,43 @@ namespace KlayGE
 	bool D3D11RenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
 	{
 		UINT s;
-		d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		try
+		{
+			d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		}
+		catch (...)
+		{
+			s = 0;
+		}
 		return s != 0;
 	}
 
 	bool D3D11RenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
 	{
 		UINT s;
-		d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		try
+		{
+			d3d_device_->CheckFormatSupport(D3D11Mapping::MappingFormat(elem_fmt), &s);
+		}
+		catch (...)
+		{
+			s = 0;
+		}
 		return s != 0;
+	}
+
+	bool D3D11RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
+	{
+		UINT quality;
+		try
+		{
+			d3d_device_->CheckMultisampleQualityLevels(D3D11Mapping::MappingFormat(elem_fmt), sample_count, &quality);
+		}
+		catch (...)
+		{
+			quality = 0;
+		}
+		return sample_quality <= quality;
 	}
 
 	// 填充设备能力
@@ -823,6 +851,7 @@ namespace KlayGE
 
 		caps_.vertex_format_support = boost::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this, _1);
 		caps_.texture_format_support = boost::bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this, _1);
+		caps_.rendertarget_format_support = boost::bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this, _1, _2, _3);
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter()

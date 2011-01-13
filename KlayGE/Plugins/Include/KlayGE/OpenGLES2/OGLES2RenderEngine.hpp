@@ -91,6 +91,7 @@ namespace KlayGE
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
+		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
 	private:
 		boost::array<GLfloat, 4> clear_clr_;
@@ -107,6 +108,7 @@ namespace KlayGE
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
+		std::set<ElementFormat> rendertarget_format_;
 	};
 
 	typedef boost::shared_ptr<OGLES2RenderEngine> OGLES2RenderEnginePtr;

@@ -121,6 +121,7 @@ namespace KlayGE
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
+		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
 	private:
 		GLuint fbo_blit_src_;
@@ -149,6 +150,8 @@ namespace KlayGE
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
+		std::set<ElementFormat> rendertarget_format_;
+		uint32_t max_samples_;
 
 		bool hack_for_ati_;
 	};
