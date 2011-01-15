@@ -295,7 +295,18 @@ namespace KlayGE
 		bool visible = true;
 		if (!octree_.empty())
 		{
-			visible = this->BBVisible(0, box);
+			octree_node_t const & node = octree_[0];
+			if (((box.Min().x() <= node.bb.Max().x()) && (box.Max().x() >= node.bb.Min().x()))
+				&& ((box.Min().y() <= node.bb.Max().y()) && (box.Max().y() >= node.bb.Min().y()))
+				&& ((box.Min().z() <= node.bb.Max().z()) && (box.Max().z() >= node.bb.Min().z())))
+			{
+				visible = this->BBVisible(0, box);
+			}
+			else
+			{
+				// Out of scene
+				visible = true;
+			}
 		}
 		if (visible)
 		{

@@ -171,7 +171,7 @@ namespace
 	{
 	public:
 		OccluderObject()
-			: SceneObjectHelper(SOA_Cullable)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
@@ -183,6 +183,11 @@ namespace
 		{
 			model_ = MathLib::translation(0.2f, 0.1f, 0.0f) * MathLib::rotation_y(-std::clock() / 1500.0f);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
 		}
 
 	private:
@@ -293,6 +298,11 @@ namespace
 			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
 			checked_pointer_cast<GroundRenderable>(renderable_)->SetModelMatrix(model_);
 		}
+		
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
 
 	private:
 		float4x4 model_;
@@ -384,12 +394,13 @@ void ShadowCubeMap::InitObjects()
 	shadow_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
 	shadow_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
-	shadow_buffer_->GetViewport().camera->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
-	
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	for (int i = 0; i < 6; ++ i)
 	{
+		light_camera_[i] = MakeSharedPtr<Camera>();
+		light_camera_[i]->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
+
 		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
 	
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
@@ -530,7 +541,9 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 				float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
 				float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
 
-				shadow_buffer_->GetViewport().camera->ViewParams(le, lla, lu);
+				light_camera_[pass]->ViewParams(le, lla, lu);
+
+				shadow_buffer_->GetViewport().camera = light_camera_[pass];
 			}
 
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
