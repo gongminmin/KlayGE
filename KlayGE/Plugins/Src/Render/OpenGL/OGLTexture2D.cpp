@@ -73,6 +73,21 @@ namespace KlayGE
 			num_mip_maps_ = numMipMaps;
 		}
 
+		widthes_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
+		{
+			uint32_t w = width;
+			uint32_t h = height;
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+			{
+				widthes_[level] = w;
+				heights_[level] = h;
+
+				w = std::max(1U, w / 2);
+				h = std::max(1U, h / 2);
+			}
+		}
+
 		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;
@@ -83,85 +98,90 @@ namespace KlayGE
 		pbos_.resize(array_size * num_mip_maps_);
 		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 
-		glGenTextures(1, &texture_);
-		glBindTexture(target_type_, texture_);
-		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+		if (sample_count <= 1)
 		{
-			uint32_t w = width;
-			uint32_t h = height;
-			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+			glGenTextures(1, &texture_);
+			glBindTexture(target_type_, texture_);
+			glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
 			{
-				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
-				if (IsCompressedFormat(format_))
+				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
+					uint32_t const w = widthes_[level];
+					uint32_t const h = heights_[level];
 
-					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
-
-					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-					if (array_size > 1)
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
+					if (IsCompressedFormat(format_))
 					{
-						if (0 == array_index)
+						int block_size;
+						if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+							|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
 						{
-							glCompressedTexImage3D(target_type_, level, glinternalFormat,
-								w, h, array_size, 0, image_size, NULL);
+							block_size = 8;
 						}
+						else
+						{
+							block_size = 16;
+						}
+
+						GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+
+						glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
+						re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+						if (array_size > 1)
+						{
+							if (0 == array_index)
+							{
+								glCompressedTexImage3D(target_type_, level, glinternalFormat,
+									w, h, array_size, 0, image_size, NULL);
+							}
 					
-						glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
-					}
-					else
-					{
-						glCompressedTexImage2D(target_type_, level, glinternalFormat,
-							w, h, 0, image_size, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
-					}
-				}
-				else
-				{
-					GLsizei const image_size = w * h * texel_size;
-
-					glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
-					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-					if (array_size > 1)
-					{
-						if (0 == array_index)
-						{
-							glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size, 0, glformat, gltype, NULL);
+							glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+								glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
 						}
-
-						glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-							glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+						else
+						{
+							glCompressedTexImage2D(target_type_, level, glinternalFormat,
+								w, h, 0, image_size, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+						}
 					}
 					else
 					{
-						glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype,
-							(NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+						GLsizei const image_size = w * h * texel_size;
+
+						glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, NULL, GL_STREAM_DRAW);
+						re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+						if (array_size > 1)
+						{
+							if (0 == array_index)
+							{
+								glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size, 0, glformat, gltype, NULL);
+							}
+
+							glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+								glformat, gltype, (NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+						}
+						else
+						{
+							glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype,
+								(NULL == init_data) ? NULL : init_data[array_index * num_mip_maps_ + level].data);
+						}
 					}
 				}
-
-				w = std::max(1U, w / 2);
-				h = std::max(1U, h / 2);
 			}
 		}
-
-		this->UpdateParams();
+		else
+		{
+			glGenRenderbuffersEXT(1, &texture_);
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, texture_);
+			glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, sample_count, glinternalFormat, width, height);
+		}
 	}
 
 	uint32_t OGLTexture2D::Width(uint32_t level) const
@@ -182,7 +202,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)) && (heights_[0] == target.Height(0)))
+		if ((format_ == target.Format()) && (widthes_[0] == target.Width(0)) && (heights_[0] == target.Height(0)) && (1 == sample_count_))
 		{
 			if (glloader_GL_NV_copy_image())
 			{
@@ -286,7 +306,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(type_ == target.Type());
 
-		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height))
+		if ((format_ == target.Format()) && glloader_GL_NV_copy_image() && (src_width == dst_width) && (src_height == dst_height) && (1 == sample_count_))
 		{
 			OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
 			glCopyImageSubDataNV(
@@ -298,7 +318,7 @@ namespace KlayGE
 		else
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -312,17 +332,27 @@ namespace KlayGE
 				}
 				else
 				{
-					glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+					if (sample_count_ <= 1)
+					{
+						glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+					}
+					else
+					{
+						glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT,
+											GL_COLOR_ATTACHMENT0_EXT,
+											GL_RENDERBUFFER_EXT, texture_);
+					}
 				}
 
+				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
 				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
 				if (array_size_ > 1)
 				{
-					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, checked_cast<OGLTexture*>(&target)->GLTexture(), src_level, src_array_index);
+					glFramebufferTextureLayerEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, ogl_target.GLTexture(), dst_level, dst_array_index);
 				}
 				else
 				{
-					glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, checked_cast<OGLTexture*>(&target)->GLTexture(), dst_level);
+					glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, ogl_target.GLType(), ogl_target.GLTexture(), dst_level);
 				}
 
 				glBlitFramebufferEXT(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
@@ -445,7 +475,7 @@ namespace KlayGE
 		else
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (!re.HackForATI() && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
 			{
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
@@ -459,13 +489,22 @@ namespace KlayGE
 				}
 				else
 				{
-					glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+					if (sample_count_ <= 1)
+					{
+						glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+					}
+					else
+					{
+						glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT,
+											GL_COLOR_ATTACHMENT0_EXT,
+											GL_RENDERBUFFER_EXT, texture_);
+					}
 				}
 
 				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
 				if (target.ArraySize() > 1)
 				{
-					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
+					glFramebufferTextureLayerEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, dst_level, dst_array_index * 6 + dst_face - CF_Positive_X);
 				}
 				else
 				{

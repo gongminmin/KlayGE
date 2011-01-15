@@ -124,7 +124,6 @@ namespace KlayGE
 		BOOST_ASSERT(pixelFormat != 0);
 
 		::SetPixelFormat(hDC_, pixelFormat, &pfd);
-		::DescribePixelFormat(hDC_, pixelFormat, sizeof(pfd), &pfd);
 
 		hRC_ = ::wglCreateContext(hDC_);
 		::wglMakeCurrent(hDC_, hRC_);
@@ -161,6 +160,10 @@ namespace KlayGE
 
 			if (valid && (sample_count > 1))
 			{
+				::wglMakeCurrent(hDC_, NULL);
+				::wglDeleteContext(hRC_);
+				::ReleaseDC(hWnd_, hDC_);
+
 				main_wnd->Recreate();
 
 				hWnd_ = main_wnd->HWnd();
@@ -171,8 +174,6 @@ namespace KlayGE
 					SWP_SHOWWINDOW | SWP_NOZORDER);
 
 				::SetPixelFormat(hDC_, pixelFormat, &pfd);
-
-				::wglDeleteContext(hRC_);
 
 				hRC_ = ::wglCreateContext(hDC_);
 				::wglMakeCurrent(hDC_, hRC_);
@@ -207,6 +208,7 @@ namespace KlayGE
 				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, NULL, attribs);
 				if (hRC_new != NULL)
 				{
+					::wglMakeCurrent(hDC_, NULL);
 					::wglDeleteContext(hRC_);
 					hRC_ = hRC_new;
 
@@ -269,6 +271,7 @@ namespace KlayGE
 				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], NULL, GL_TRUE, attribs);
 				if (x_context_new != NULL)
 				{
+					glXMakeCurrent(x_display_, x_window_, NULL);
 					glXDestroyContext(x_display_, x_context_);
 					x_context_ = x_context_new;
 
@@ -483,9 +486,17 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 		if (hWnd_ != NULL)
 		{
-			::wglMakeCurrent(NULL, NULL);
-			::wglDeleteContext(hRC_);
-			::ReleaseDC(hWnd_, hDC_);
+			if (hDC_ != NULL)
+			{
+				::wglMakeCurrent(hDC_, NULL);
+				if (hRC_ != NULL)
+				{
+					::wglDeleteContext(hRC_);
+					hRC_ = NULL;
+				}
+				::ReleaseDC(hWnd_, hDC_);
+				hDC_ = NULL;
+			}
 
 			if (isFullScreen_)
 			{

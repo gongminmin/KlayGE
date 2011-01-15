@@ -99,7 +99,14 @@ namespace KlayGE
 		{
 			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 		}
-		glDeleteTextures(1, &texture_);
+		if (sample_count_ <= 1)
+		{
+			glDeleteTextures(1, &texture_);
+		}
+		else
+		{
+			glDeleteRenderbuffersEXT(1, &texture_);
+		}
 	}
 
 	std::wstring const & OGLTexture::Name() const
