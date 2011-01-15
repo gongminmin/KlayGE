@@ -319,9 +319,9 @@ namespace KlayGE
 
 		last_tma_ = tma;
 
-		uint32_t const size_fmt = NumFormatBytes(format_);
-		data = &tex_data_[face * num_mip_maps_ + level][(y_offset * widthes_[level] + x_offset) * size_fmt];
-		row_pitch = widthes_[level] * size_fmt;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		data = &tex_data_[face * num_mip_maps_ + level][(y_offset * widthes_[level] + x_offset) * texel_size];
+		row_pitch = widthes_[level] * texel_size;
 	}
 
 	void OGLES2TextureCube::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)

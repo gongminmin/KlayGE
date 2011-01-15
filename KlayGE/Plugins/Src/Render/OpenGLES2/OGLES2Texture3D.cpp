@@ -292,9 +292,9 @@ namespace KlayGE
 
 		last_tma_ = tma;
 
-		uint32_t const size_fmt = NumFormatBytes(format_);
-		data = &tex_data_[level][((z_offset * heights_[level] + y_offset) * widthes_[level] + x_offset) * size_fmt];
-		row_pitch = widthes_[level] * size_fmt;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		data = &tex_data_[level][((z_offset * heights_[level] + y_offset) * widthes_[level] + x_offset) * texel_size];
+		row_pitch = widthes_[level] * texel_size;
 		slice_pitch = row_pitch * heights_[level];
 	}
 

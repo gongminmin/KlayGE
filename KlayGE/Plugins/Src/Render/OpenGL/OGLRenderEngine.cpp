@@ -378,7 +378,7 @@ namespace KlayGE
 			so_vars_.resize(0);
 			for (uint32_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
 			{
-				so_buffs_.push_back(checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->OGLvbo());
+				so_buffs_.push_back(checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->GLvbo());
 
 				vertex_element const & ve = so_rl_->VertexStreamFormat(i)[0];
 				switch (ve.usage)
@@ -1093,12 +1093,9 @@ namespace KlayGE
 		texture_format_.insert(EF_GR32F);
 		texture_format_.insert(EF_BGR32F);
 		texture_format_.insert(EF_ABGR32F);
-		if (glloader_GL_EXT_texture_compression_dxt1())
-		{
-			texture_format_.insert(EF_BC1);
-		}
 		if (glloader_GL_EXT_texture_compression_s3tc())
 		{
+			texture_format_.insert(EF_BC1);
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}

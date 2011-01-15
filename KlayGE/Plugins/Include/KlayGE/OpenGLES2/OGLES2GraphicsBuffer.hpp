@@ -32,9 +32,13 @@ namespace KlayGE
 
 		void Active();
 
-		GLuint OGLvbo() const
+		GLuint GLvbo() const
 		{
 			return vb_;
+		}
+		GLuint GLType() const
+		{
+			return target_;
 		}
 
 	private:

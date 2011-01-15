@@ -899,7 +899,7 @@ namespace KlayGE
 			break;
 
 		case EF_BC1:
-			if (glloader_GL_EXT_texture_compression_dxt1())
+			if (glloader_GL_EXT_texture_compression_s3tc())
 			{
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;

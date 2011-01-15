@@ -283,6 +283,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ABGR16F;
 	}
+	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	hdr_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
 	hdr_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
 

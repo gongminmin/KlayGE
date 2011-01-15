@@ -286,8 +286,7 @@ namespace KlayGE
 		}
 #endif
 
-		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object()
-			|| !glloader_GL_ARB_pixel_buffer_object())
+		if (!glloader_GL_VERSION_2_0() || !glloader_GL_EXT_framebuffer_object())
 		{
 			THR(boost::system::posix_error::not_supported);
 		}

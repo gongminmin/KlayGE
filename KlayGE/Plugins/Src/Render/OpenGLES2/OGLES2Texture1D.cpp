@@ -281,8 +281,8 @@ namespace KlayGE
 
 		last_tma_ = tma;
 
-		uint32_t const size_fmt = NumFormatBytes(format_);
-		data = &tex_data_[level][x_offset * size_fmt];
+		uint32_t const texel_size = NumFormatBytes(format_);
+		data = &tex_data_[level][x_offset * texel_size];
 	}
 
 	void OGLES2Texture1D::Unmap1D(uint32_t array_index, uint32_t level)

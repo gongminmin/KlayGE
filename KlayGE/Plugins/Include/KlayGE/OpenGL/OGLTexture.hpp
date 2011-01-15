@@ -103,6 +103,7 @@ namespace KlayGE
 		GLuint texture_;
 		GLenum target_type_;
 		std::vector<GLuint> pbos_;
+		std::vector<std::vector<uint8_t> > tex_data_;
 		TextureMapAccess last_tma_;
 
 		std::map<GLenum, GLint> tex_param_i_;
@@ -130,9 +131,6 @@ namespace KlayGE
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width, void*& data);
 		void Unmap1D(uint32_t array_index, uint32_t level);
-
-	private:
-		void UpdateParams();
 
 	private:
 		std::vector<uint32_t> widthes_;
@@ -165,9 +163,6 @@ namespace KlayGE
 		void Unmap2D(uint32_t array_index, uint32_t level);
 
 	private:
-		void UpdateParams();
-
-	private:
 		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
 
@@ -198,9 +193,6 @@ namespace KlayGE
 		void Unmap3D(uint32_t array_index, uint32_t level);
 
 	private:
-		void UpdateParams();
-
-	private:
 		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
 		std::vector<uint32_t> depthes_;
@@ -228,9 +220,6 @@ namespace KlayGE
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void*& data, uint32_t& row_pitch);
 		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
-
-	private:
-		void UpdateParams();
 
 	private:
 		std::vector<uint32_t> widthes_;
