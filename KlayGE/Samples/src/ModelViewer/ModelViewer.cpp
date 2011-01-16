@@ -230,7 +230,7 @@ void ModelViewerApp::InitObjects()
 	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
 	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
 	
-	this->OpenModel("felhound.meshml");
+	this->OpenModel("monster.meshml");
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
