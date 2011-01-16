@@ -603,95 +603,118 @@ namespace KlayGE
 				int32_t attr = light->Attrib();
 
 				RenderLayoutPtr rl;
-				if (type != LT_Ambient)
+				switch (type)
 				{
-					CameraPtr sm_camera;
-					float3 dir_es;
-					if (type != LT_Point)
+				case LT_Point:
+				case LT_Spot:
 					{
-						dir_es = MathLib::transform_normal(light->Direction(), view_);					
-						sm_camera = light->SMCamera(0);
-					}
-					else
-					{
-						if (index_in_pass < 6)
+						CameraPtr sm_camera;
+						float3 dir_es;
+						if (LT_Spot == type)
 						{
-							std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
-							dir_es = MathLib::transform_normal(ad.first, view_);
-							sm_camera = light->SMCamera(index_in_pass);
-						}
-					}
-					float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
-
-					float3 const & p = light->Position();
-					float4x4 mat_v, mat_vp;
-					if (sm_camera)
-					{
-						sm_buffer_->GetViewport().camera = sm_camera;
-
-						*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
-
-						mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
-						mat_vp = mat_v * proj_;
-					}
-
-					if (PT_GenShadowMap == pass_type)
-					{
-						float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
-						float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-						depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
-						depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
-					}
-
-					float3 loc_es = MathLib::transform_coord(p, view_);
-					float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-					switch (type)
-					{
-					case LT_Spot:
-						{
-							light_pos_es_actived.w() = light->CosOuterInner().x();
-							light_dir_es_actived.w() = light->CosOuterInner().y();
-
-							rl = rl_cone_;
-							float const scale = light->CosOuterInner().w();
-							float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
-							*light_volume_mv_param_ = light_model * mat_v;
-							*light_volume_mvp_param_ = light_model * mat_vp;
-						}
-						break;
-
-					case LT_Point:
-						if (PT_Lighting == pass_type)
-						{
-							rl = rl_box_;
-							float4x4 light_model = MathLib::translation(p);
-							*light_volume_mv_param_ = light_model * view_;
-							*light_volume_mvp_param_ = light_model * view_ * proj_;
+							dir_es = MathLib::transform_normal(light->Direction(), view_);
+							if (0 == (attr & LSA_NoShadow))
+							{
+								sm_camera = light->SMCamera(0);
+							}
 						}
 						else
 						{
-							rl = rl_pyramid_;
-							*light_volume_mv_param_ = mat_v;
-							*light_volume_mvp_param_ = mat_vp;
+							if (index_in_pass < 6)
+							{
+								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
+								dir_es = MathLib::transform_normal(ad.first, view_);
+								if (0 == (attr & LSA_NoShadow))
+								{
+									sm_camera = light->SMCamera(index_in_pass);
+								}
+							}
 						}
-						break;
+						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-					default:
-						rl = rl_quad_;
-						*light_volume_mv_param_ = inv_proj_;
-						*light_volume_mvp_param_ = float4x4::Identity();
-						break;
+						float4x4 mat_v, mat_vp;
+						if (sm_camera)
+						{
+							sm_buffer_->GetViewport().camera = sm_camera;
+
+							*light_view_proj_param_ = inv_view_ * sm_camera->ViewMatrix() * sm_camera->ProjMatrix();
+
+							mat_v = MathLib::inverse(sm_camera->ViewMatrix()) * view_;
+							mat_vp = mat_v * proj_;
+						}
+
+						if (PT_GenShadowMap == pass_type)
+						{
+							float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
+							float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
+							depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
+							depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+						}
+
+						float3 const & p = light->Position();
+						float3 loc_es = MathLib::transform_coord(p, view_);
+						float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+						switch (type)
+						{
+						case LT_Spot:
+							{
+								light_pos_es_actived.w() = light->CosOuterInner().x();
+								light_dir_es_actived.w() = light->CosOuterInner().y();
+
+								rl = rl_cone_;
+								float const scale = light->CosOuterInner().w();
+								float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
+								*light_volume_mv_param_ = light_model * mat_v;
+								*light_volume_mvp_param_ = light_model * mat_vp;
+							}
+							break;
+
+						case LT_Point:
+							if (PT_Lighting == pass_type)
+							{
+								rl = rl_box_;
+								float4x4 light_model = MathLib::translation(p);
+								*light_volume_mv_param_ = light_model * view_;
+								*light_volume_mvp_param_ = light_model * view_ * proj_;
+							}
+							else
+							{
+								rl = rl_pyramid_;
+								*light_volume_mv_param_ = mat_v;
+								*light_volume_mvp_param_ = mat_vp;
+							}
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+					
+						*light_pos_es_param_ = light_pos_es_actived;
+						*light_dir_es_param_ = light_dir_es_actived;
 					}
+					break;
 
-					*light_pos_es_param_ = light_pos_es_actived;
-					*light_dir_es_param_ = light_dir_es_actived;
-				}
-				else
-				{
+				case LT_Directional:
+					{
+						float3 dir_es = MathLib::transform_normal(light->Direction(), view_);
+						*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+					}
 					rl = rl_quad_;
 					*light_volume_mv_param_ = inv_proj_;
 					*light_volume_mvp_param_ = float4x4::Identity();
+					break;
+
+				case LT_Ambient:
+					rl = rl_quad_;
+					*light_volume_mv_param_ = inv_proj_;
+					*light_volume_mvp_param_ = float4x4::Identity();
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
 				}
 
 				if ((index_in_pass > 0) || (PT_Lighting == pass_type))

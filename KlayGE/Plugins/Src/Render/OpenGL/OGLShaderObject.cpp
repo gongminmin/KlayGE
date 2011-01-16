@@ -1519,10 +1519,7 @@ namespace KlayGE
 					{
 						shaders[type] = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text_->c_str(), profile, sd.func_name.c_str(), &args[0]);
-					}
 
-					if (is_shader_validate_[type])
-					{
 						(*glsl_srcs_)[type] = (*so->glsl_srcs_)[type];
 
 						if (ST_GeometryShader == type)

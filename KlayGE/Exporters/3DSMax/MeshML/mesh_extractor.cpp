@@ -161,14 +161,6 @@ namespace
 			binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 		}
 
-		// Gram-Schmidt orthogonalize
-		tangent = (tangent - normal * (tangent % normal)).Normalize();
-		// Calculate handedness
-		if ((normal ^ tangent) % binormal < 0)
-		{
-			tangent = -tangent;
-		}
-
 		return tangent;
 	}
 }
@@ -483,25 +475,6 @@ namespace KlayGE
 									texs[channel][ti].y = uvw[(tex_u + 1) % 3];
 								}
 							}
-						}
-					}
-				}
-
-				// Combine texture coordinates
-				BOOST_FOREACH(BOOST_TYPEOF(tex_indices)::reference tex_index, tex_indices)
-				{
-					std::map<Point2, int, less_Point2> tex_index_set;
-					for (size_t i = 0; i < tex_index.second.size(); ++ i)
-					{
-						Point2 tex = texs[tex_index.first][tex_index.second[i]];
-						BOOST_AUTO(iter, tex_index_set.find(tex));
-						if (iter != tex_index_set.end())
-						{
-							tex_index.second[i] = iter->second;
-						}
-						else
-						{
-							tex_index_set.insert(std::make_pair(tex, tex_index.second[i]));
 						}
 					}
 				}
