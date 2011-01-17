@@ -14,7 +14,6 @@
 	<macro name="LSA_NoSpecular" value="4"/>
 	
 	<cbuffer name="per_frame">
-		<parameter type="float4x4" name="inv_view"/>
 		<parameter type="float3" name="depth_near_far_invfar"/>
 		<parameter type='int' name='flipping'/>
 	</cbuffer>
@@ -113,7 +112,7 @@ float Calc_VSM(float2 moments, float len)
 	return max(p, p_max);
 }
 
-float VSM_Omnidirectional(float3 dir_ws, float len)
+float VSM_Omnidirectional(float3 dir_ls, float len)
 {
 	float shadow = 1;
 #ifndef INTEGER_SUPPORT
@@ -123,7 +122,7 @@ float VSM_Omnidirectional(float3 dir_ws, float len)
 #endif
 	{
 		float2 moments = shadow_map_cube_tex.Sample(linear_sampler,
-			float3(dir_ws.x, -flipping * dir_ws.y, dir_ws.z)).xy;
+			float3(dir_ls.x, -flipping * dir_ls.y, dir_ls.z)).xy;
 		shadow = Calc_VSM(moments, len);
 	}
 	
@@ -311,8 +310,8 @@ float4 DeferredShadowingPointPS(
 	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
-	float3 dir_ws = mul(-dir, (float3x3)inv_view);
-	return VSM_Omnidirectional(dir_ws, len);
+	float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
+	return VSM_Omnidirectional(dir_ls, len);
 }
 
 float4 DeferredShadowingSpotPS(

@@ -62,8 +62,9 @@ namespace KlayGE
 
 		virtual float3 const & Position() const;
 		virtual void Position(float3 const & pos);
-		virtual float3 const & Direction() const;
-		virtual void Direction(float3 const & dir);
+		virtual Quaternion const & Rotation() const;
+		virtual void Rotation(Quaternion const & quat);
+		virtual void ModelMatrix(float4x4 const & model);
 		virtual float3 const & Falloff() const;
 		virtual void Falloff(float3 const & fall_off);
 		virtual float CosInnerAngle() const;
@@ -97,6 +98,9 @@ namespace KlayGE
 
 		float3 const & Position() const;
 		void Position(float3 const & pos);
+		Quaternion const & Rotation() const;
+		void Rotation(Quaternion const & quat);
+		void ModelMatrix(float4x4 const & model);
 
 		float3 const & Falloff() const;
 		void Falloff(float3 const & fall_off);
@@ -105,6 +109,10 @@ namespace KlayGE
 		CameraPtr SMCamera(uint32_t index) const;
 
 	protected:
+		void UpdateCameras();
+
+	protected:
+		Quaternion quat_;
 		float3 pos_;
 		float3 falloff_;
 
@@ -120,9 +128,9 @@ namespace KlayGE
 
 		float3 const & Position() const;
 		void Position(float3 const & pos);
-
-		float3 const & Direction() const;
-		void Direction(float3 const & dir);
+		Quaternion const & Rotation() const;
+		void Rotation(Quaternion const & quat);
+		void ModelMatrix(float4x4 const & model);
 
 		float3 const & Falloff() const;
 		void Falloff(float3 const & falloff);
@@ -139,8 +147,11 @@ namespace KlayGE
 		CameraPtr SMCamera(uint32_t index) const;
 
 	protected:
+		void UpdateCamera();
+
+	protected:
+		Quaternion quat_;
 		float3 pos_;
-		float3 dir_;
 		float3 falloff_;
 		float4 cos_outer_inner_;
 
@@ -154,14 +165,15 @@ namespace KlayGE
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
 
-		float3 const & Direction() const;
-		void Direction(float3 const & dir);
+		Quaternion const & Rotation() const;
+		void Rotation(Quaternion const & quat);
+		void ModelMatrix(float4x4 const & model);
 
 		float3 const & Falloff() const;
 		void Falloff(float3 const & falloff);
 
 	protected:
-		float3 dir_;
+		Quaternion quat_;
 		float3 falloff_;
 	};
 }

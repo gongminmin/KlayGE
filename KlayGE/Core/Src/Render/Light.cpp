@@ -74,12 +74,16 @@ namespace KlayGE
 	{
 	}
 
-	float3 const & LightSource::Direction() const
+	Quaternion const & LightSource::Rotation() const
 	{
-		return float3::Zero();
+		return Quaternion::Identity();
 	}
 
-	void LightSource::Direction(float3 const & /*dir*/)
+	void LightSource::Rotation(Quaternion const & /*quat*/)
+	{
+	}
+
+	void LightSource::ModelMatrix(float4x4 const & /*model*/)
 	{
 	}
 
@@ -164,17 +168,42 @@ namespace KlayGE
 
 	void PointLightSource::Position(float3 const & pos)
 	{
+		pos_ = pos;
+		this->UpdateCameras();
+	}
+
+	Quaternion const & PointLightSource::Rotation() const
+	{
+		return quat_;
+	}
+
+	void PointLightSource::Rotation(Quaternion const & quat)
+	{
+		quat_ = quat;
+		this->UpdateCameras();
+	}
+	
+	void PointLightSource::ModelMatrix(float4x4 const & model)
+	{
+		float3 scale;
+		MathLib::decompose(scale, quat_, pos_, model);
+		this->UpdateCameras();
+	}
+
+	void PointLightSource::UpdateCameras()
+	{
 		for (int j = 0; j < 6; ++ j)
 		{
 			std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
 			float3 const & d = ad.first;
 			float3 const & u = ad.second;
 
-			sm_cameras_[j]->ViewParams(pos, pos + d, u);
+			float3 lookat = MathLib::transform_quat(d, quat_);
+			float3 up = MathLib::transform_quat(u, quat_);
+
+			sm_cameras_[j]->ViewParams(pos_, pos_ + lookat, up);
 			sm_cameras_[j]->ProjParams(PI / 2, 1, 0.1f, 100.0f);
 		}
-
-		pos_ = pos;
 	}
 
 	float3 const & PointLightSource::Falloff() const
@@ -219,20 +248,35 @@ namespace KlayGE
 
 	void SpotLightSource::Position(float3 const & pos)
 	{
-		sm_camera_->ViewParams(pos, pos + dir_, float3(0, 1, 0));
-		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, 0.1f, 100.0f);
-
 		pos_ = pos;
+		this->UpdateCamera();
 	}
 
-	float3 const & SpotLightSource::Direction() const
+	Quaternion const & SpotLightSource::Rotation() const
 	{
-		return dir_;
+		return quat_;
 	}
 
-	void SpotLightSource::Direction(float3 const & dir)
+	void SpotLightSource::Rotation(Quaternion const & quat)
 	{
-		dir_ = dir;
+		quat_ = quat;
+		this->UpdateCamera();
+	}
+
+	void SpotLightSource::ModelMatrix(float4x4 const & model)
+	{
+		float3 scale;
+		MathLib::decompose(scale, quat_, pos_, model);
+		this->UpdateCamera();
+	}
+
+	void SpotLightSource::UpdateCamera()
+	{
+		float3 lookat = MathLib::transform_quat(float3(0, 0, 1), quat_);
+		float3 up = MathLib::transform_quat(float3(0, 1, 0), quat_);
+
+		sm_camera_->ViewParams(pos_, pos_ + lookat, up);
+		sm_camera_->ProjParams(cos_outer_inner_.z(), 1, 0.1f, 100.0f);
 	}
 
 	float3 const & SpotLightSource::Falloff() const
@@ -293,14 +337,20 @@ namespace KlayGE
 	{
 	}
 
-	float3 const & DirectionalLightSource::Direction() const
+	Quaternion const & DirectionalLightSource::Rotation() const
 	{
-		return dir_;
+		return quat_;
 	}
 
-	void DirectionalLightSource::Direction(float3 const & dir)
+	void DirectionalLightSource::Rotation(Quaternion const & quat)
 	{
-		dir_ = dir;
+		quat_ = quat;
+	}
+
+	void DirectionalLightSource::ModelMatrix(float4x4 const & model)
+	{
+		float3 scale, pos;
+		MathLib::decompose(scale, quat_, pos, model);
 	}
 
 	float3 const & DirectionalLightSource::Falloff() const

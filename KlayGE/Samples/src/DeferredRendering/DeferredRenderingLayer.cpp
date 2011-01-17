@@ -275,13 +275,13 @@ namespace KlayGE
 		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
 		depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-		inv_view_param_ = effect_->ParameterByName("inv_view");
 		light_attrib_param_ = effect_->ParameterByName("light_attrib");
 		light_color_param_ = effect_->ParameterByName("light_color");
 		light_falloff_param_ = effect_->ParameterByName("light_falloff");
 		light_view_proj_param_ = effect_->ParameterByName("light_view_proj");
 		light_volume_mv_param_ = effect_->ParameterByName("light_volume_mv");
 		light_volume_mvp_param_ = effect_->ParameterByName("light_volume_mvp");
+		view_to_light_model_param_ = effect_->ParameterByName("view_to_light_model");
 		light_pos_es_param_ = effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
@@ -310,7 +310,7 @@ namespace KlayGE
 		DirectionalLightSourcePtr directional = MakeSharedPtr<DirectionalLightSource>();
 		directional->Attrib(attr);
 		directional->Color(clr);
-		directional->Direction(MathLib::normalize(dir));
+		directional->ModelMatrix(MathLib::inverse(MathLib::look_at_lh(float3(0, 0, 0), MathLib::normalize(dir))));
 		directional->Falloff(falloff);
 		lights_.push_back(directional);
 		return directional;
@@ -321,8 +321,7 @@ namespace KlayGE
 		SpotLightSourcePtr spot = MakeSharedPtr<SpotLightSource>();
 		spot->Attrib(attr);
 		spot->Color(clr);
-		spot->Position(pos);
-		spot->Direction(MathLib::normalize(dir));
+		spot->ModelMatrix(MathLib::inverse(MathLib::look_at_lh(pos, pos + MathLib::normalize(dir))));
 		spot->Falloff(falloff);
 		spot->OuterAngle(outer);
 		spot->InnerAngle(inner);
@@ -448,7 +447,6 @@ namespace KlayGE
 				inv_proj_ = MathLib::inverse(proj_);
 
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-				*inv_view_param_ = inv_view_;
 
 				re.BindFrameBuffer(g_buffer_);
 				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
@@ -612,7 +610,7 @@ namespace KlayGE
 						float3 dir_es;
 						if (LT_Spot == type)
 						{
-							dir_es = MathLib::transform_normal(light->Direction(), view_);
+							dir_es = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light->Rotation()), view_);
 							if (0 == (attr & LSA_NoShadow))
 							{
 								sm_camera = light->SMCamera(0);
@@ -667,6 +665,7 @@ namespace KlayGE
 								float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
 								*light_volume_mv_param_ = light_model * mat_v;
 								*light_volume_mvp_param_ = light_model * mat_vp;
+								*view_to_light_model_param_ = MathLib::inverse(mat_v);
 							}
 							break;
 
@@ -677,12 +676,14 @@ namespace KlayGE
 								float4x4 light_model = MathLib::translation(p);
 								*light_volume_mv_param_ = light_model * view_;
 								*light_volume_mvp_param_ = light_model * view_ * proj_;
+								*view_to_light_model_param_ = MathLib::inverse(light_model * view_);
 							}
 							else
 							{
 								rl = rl_pyramid_;
 								*light_volume_mv_param_ = mat_v;
 								*light_volume_mvp_param_ = mat_vp;
+								*view_to_light_model_param_ = MathLib::inverse(mat_v);
 							}
 							break;
 
@@ -698,7 +699,7 @@ namespace KlayGE
 
 				case LT_Directional:
 					{
-						float3 dir_es = MathLib::transform_normal(light->Direction(), view_);
+						float3 dir_es = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light->Rotation()), view_);
 						*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 					}
 					rl = rl_quad_;
@@ -793,7 +794,7 @@ namespace KlayGE
 						if (LT_Spot == type)
 						{
 							float3 v = MathLib::normalize(eye - p);
-							float3 const & d = light->Direction();
+							float3 const d = MathLib::transform_quat(float3(0, 0, 1), light->Rotation());
 							float cos_direction = MathLib::dot(v, d);
 							if (light->CosOuterInner().x() < cos_direction * 1.01f)
 							{

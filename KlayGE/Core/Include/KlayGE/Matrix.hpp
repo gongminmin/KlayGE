@@ -80,7 +80,7 @@ namespace KlayGE
 		static size_t size()
 			{ return elem_num; }
 
-		static Matrix4_T Zero()
+		static Matrix4_T const & Zero()
 		{
 			static Matrix4_T out(
 				0, 0, 0, 0,
@@ -90,7 +90,7 @@ namespace KlayGE
 			return out;
 		}
 
-		static Matrix4_T Identity()
+		static Matrix4_T const & Identity()
 		{
 			static Matrix4_T out(
 				1, 0, 0, 0,

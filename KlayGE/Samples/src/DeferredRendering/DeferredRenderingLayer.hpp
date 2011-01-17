@@ -342,13 +342,13 @@ namespace KlayGE
 		float4x4 inv_view_, inv_proj_;
 
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr inv_view_param_;
 		RenderEffectParameterPtr light_attrib_param_;
 		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_volume_mv_param_;
 		RenderEffectParameterPtr light_volume_mvp_param_;
+		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
 

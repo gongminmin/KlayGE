@@ -461,13 +461,11 @@ namespace
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
 				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
 				* MathLib::translation(0.0f, height_, 0.0f);
+
 			checked_pointer_cast<RenderCone>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderCone>(renderable_)->Update();
 
-			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_);
-			float3 d = MathLib::normalize(MathLib::transform_normal(float3(0, 0, 1), model_));
-			light_->Position(p);
-			light_->Direction(d);
+			light_->ModelMatrix(model_);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -681,11 +679,11 @@ namespace
 			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f)
 				* MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
 				* MathLib::translation(pos_);
+
 			checked_pointer_cast<RenderSphere>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderSphere>(renderable_)->Update();
 
-			float3 p = MathLib::transform_coord(float3(0, 0, 0), model_);
-			light_->Position(p);
+			light_->ModelMatrix(model_);
 		}
 
 		float4x4 const & GetModelMatrix() const
