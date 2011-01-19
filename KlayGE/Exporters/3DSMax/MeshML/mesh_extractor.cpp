@@ -1304,27 +1304,6 @@ namespace KlayGE
 		{
 			ofs << "\t\t<mesh name=\"" << obj_info.name << "\" mtl_id=\"" << obj_info.mtl_id << "\">" << endl;
 
-			ofs << "\t\t\t<vertex_elements_chunk>" << endl;
-			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertex_elements)::const_reference ve, obj_info.vertex_elements)
-			{
-				bool export_ve = true;
-				if (((VEU_Normal == ve.usage) && !eva.normal)
-					|| ((VEU_Tangent == ve.usage) && !eva.tangent)
-					|| ((VEU_Binormal == ve.usage) && !eva.binormal)
-					|| ((VEU_TextureCoord == ve.usage) && !eva.tex))
-				{
-					export_ve = false;
-				}
-
-				if (export_ve)
-				{
-					ofs << "\t\t\t\t<vertex_element usage=\"" << ve.usage
-						<< "\" usage_index=\"" << int(ve.usage_index)
-						<< "\" num_components=\"" << int(ve.num_components) << "\"/>" << endl;
-				}
-			}
-			ofs << "\t\t\t</vertex_elements_chunk>" << endl << endl;
-
 			ofs << "\t\t\t<vertices_chunk>" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(obj_info.vertices)::const_reference vertex, obj_info.vertices)
 			{
