@@ -63,11 +63,11 @@ glob:KlayGE/Exporters/3DSMax/MeshML/*.aps
 glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.ncb
 glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.user
 glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.suo
-glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.opensdf
-glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.sdf
-glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.suo
-glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/*.user
-glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-9_0/ipch/
+glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.opensdf
+glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.sdf
+glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.suo
+glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.user
+glob:KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/ipch/
 glob:KlayGE/media/Models/*.model_bin
 glob:KlayGE/Samples/Debug/
 glob:KlayGE/Samples/Release/
