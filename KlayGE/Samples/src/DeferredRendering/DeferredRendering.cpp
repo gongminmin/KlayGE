@@ -323,181 +323,10 @@ namespace
 	};
 
 
-	class RenderCone : public RenderableHelper, public DeferredRenderable
+	class RenderPointSpotLightProxy : public KMesh, public DeferredRenderable
 	{
 	public:
-		RenderCone(float cone_radius, float cone_height, float3 const & clr)
-			: RenderableHelper(L"Cone"),
-				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = gbuffer_tech_;
-
-			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
-			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
-
-			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
-			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
-
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_view_param_ = effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-
-			std::vector<float3> pos;
-			std::vector<uint16_t> index;
-			CreateConeMesh(pos, index, 0, cone_radius, cone_height, 12);
-
-			std::vector<float3> normal_float3(pos.size());
-			MathLib::compute_normal<float>(normal_float3.begin(), index.begin(), index.end(), pos.begin(), pos.end());
-
-			std::vector<uint32_t> normal(pos.size());
-			for (size_t j = 0; j < normal_float3.size(); ++ j)
-			{
-				normal_float3[j] = MathLib::normalize(normal_float3[j]) * 0.5f + 0.5f;
-				normal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 1023), 0, 1023)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 1023), 0, 1023) << 10)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 1023), 0, 1023) << 20);
-			}
-
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &pos[0];
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(float2));
-			GraphicsBufferPtr texcoord_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			rl_->BindVertexStream(texcoord_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-			{
-				init_data.row_pitch = static_cast<uint32_t>(normal.size() * sizeof(normal[0]));
-				init_data.slice_pitch = 0;
-				init_data.data = &normal[0];
-				GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
-			}
-			else
-			{
-				init_data.row_pitch = static_cast<uint32_t>(normal_float3.size() * sizeof(normal_float3[0]));
-				init_data.slice_pitch = 0;
-				init_data.data = &normal_float3[0];
-				GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
-			}
-
-			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &index[0];
-
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16UI);
-
-			box_ = MathLib::compute_bounding_box<float>(pos.begin(), pos.end());
-		}
-
-		void SetModelMatrix(float4x4 const & mat)
-		{
-			model_ = mat;
-		}
-
-		void Pass(PassType type)
-		{
-			technique_ = DeferredRenderable::Pass(type, false);
-		}
-
-		void Update()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 mv = model_ * view;
-			*mvp_param_ = mv * proj;
-			*model_view_param_ = mv;
-
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-		}
-
-		void OnRenderBegin()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
-		}
-
-	private:
-		float4x4 model_;
-
-		RenderEffectParameterPtr mvp_param_;
-		RenderEffectParameterPtr model_view_param_;
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
-	};
-
-	class ConeObject : public SceneObjectHelper, public DeferredSceneObject
-	{
-	public:
-		ConeObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
-				rot_speed_(rot_speed), height_(height)
-		{
-			renderable_ = MakeSharedPtr<RenderCone>(cone_radius, cone_height, clr);
-			model_org_ = MathLib::rotation_x(org_angle);
-
-			this->AttachRenderable(checked_cast<RenderCone*>(renderable_.get()));
-		}
-
-		void Update()
-		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
-				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
-				* MathLib::translation(0.0f, height_, 0.0f);
-
-			checked_pointer_cast<RenderCone>(renderable_)->SetModelMatrix(model_);
-			checked_pointer_cast<RenderCone>(renderable_)->Update();
-
-			light_->ModelMatrix(model_);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-		void Pass(PassType type)
-		{
-			checked_pointer_cast<RenderCone>(renderable_)->Pass(type);
-			this->Visible(PT_GenShadowMap != type);
-		}
-
-		void AttachLightSrc(LightSourcePtr const & light)
-		{
-			light_ = light;
-		}
-
-	private:
-		float4x4 model_;
-		float4x4 model_org_;
-		float rot_speed_, height_;
-
-		LightSourcePtr light_;
-
-		Timer timer_;
-	};
-
-	class RenderSphere : public KMesh, public DeferredRenderable
-	{
-	public:
-		RenderSphere(RenderModelPtr const & model, std::wstring const & name)
+		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
 			: KMesh(model, name),
 				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
@@ -661,27 +490,28 @@ namespace
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 	};
 
-	class SphereObject : public SceneObjectHelper, public DeferredSceneObject
+	class SpotLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
 	{
 	public:
-		SphereObject(std::string const & model_name, float move_speed, float3 const & pos, float3 const & clr)
+		SpotLightProxyObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
-				move_speed_(move_speed), pos_(pos)
+				rot_speed_(rot_speed), height_(height)
 		{
-			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderSphere>())()->Mesh(0);
-			checked_pointer_cast<RenderSphere>(renderable_)->EmitClr(clr);
+			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
+			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 
-			this->AttachRenderable(checked_cast<RenderSphere*>(renderable_.get()));
+			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
 		}
 
 		void Update()
 		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f)
-				* MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
-				* MathLib::translation(pos_);
+			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
+				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
+				* MathLib::translation(0.0f, height_, 0.0f);
 
-			checked_pointer_cast<RenderSphere>(renderable_)->SetModelMatrix(model_);
-			checked_pointer_cast<RenderSphere>(renderable_)->Update();
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
 
 			light_->ModelMatrix(model_);
 		}
@@ -693,7 +523,7 @@ namespace
 
 		void Pass(PassType type)
 		{
-			checked_pointer_cast<RenderSphere>(renderable_)->Pass(type);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
 			this->Visible(PT_GenShadowMap != type);
 		}
 
@@ -704,6 +534,59 @@ namespace
 
 	private:
 		float4x4 model_;
+		float4x4 model_org_;
+		float rot_speed_, height_;
+
+		LightSourcePtr light_;
+
+		Timer timer_;
+	};
+
+	class PointLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
+	{
+	public:
+		PointLightProxyObject(float move_speed, float3 const & pos, float3 const & clr)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
+				move_speed_(move_speed), pos_(pos)
+		{
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
+			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
+
+			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
+		}
+
+		void Update()
+		{
+			model_ = model_org_
+				* MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
+				* MathLib::translation(pos_);
+
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
+
+			light_->ModelMatrix(model_);
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
+
+		void Pass(PassType type)
+		{
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
+			this->Visible(PT_GenShadowMap != type);
+		}
+
+		void AttachLightSrc(LightSourcePtr const & light)
+		{
+			light_ = light;
+		}
+
+	private:
+		float4x4 model_;
+		float4x4 model_org_;
 		float move_speed_;
 		float3 pos_;
 
@@ -1012,16 +895,16 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[0] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(2, 0, 0), float3(0, 0.2f, 0));
 	spot_light_[1] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 2, 0), float3(0, 0.2f, 0));
 
-	point_light_src_ = MakeSharedPtr<SphereObject>("sphere.meshml", 1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
-	spot_light_src_[0] = MakeSharedPtr<ConeObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
-	spot_light_src_[1] = MakeSharedPtr<ConeObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 3.4f, spot_light_[1]->Color());
+	point_light_src_ = MakeSharedPtr<PointLightProxyObject>(1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
+	spot_light_src_[0] = MakeSharedPtr<SpotLightProxyObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
+	spot_light_src_[1] = MakeSharedPtr<SpotLightProxyObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 3.4f, spot_light_[1]->Color());
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
 
-	checked_pointer_cast<SphereObject>(point_light_src_)->AttachLightSrc(point_light_);
-	checked_pointer_cast<ConeObject>(spot_light_src_[0])->AttachLightSrc(spot_light_[0]);
-	checked_pointer_cast<ConeObject>(spot_light_src_[1])->AttachLightSrc(spot_light_[1]);
+	checked_pointer_cast<PointLightProxyObject>(point_light_src_)->AttachLightSrc(point_light_);
+	checked_pointer_cast<SpotLightProxyObject>(spot_light_src_[0])->AttachLightSrc(spot_light_[0]);
+	checked_pointer_cast<SpotLightProxyObject>(spot_light_src_[1])->AttachLightSrc(spot_light_[1]);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

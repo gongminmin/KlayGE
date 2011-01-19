@@ -1,9 +1,13 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Lighting.fxml"/>
+
 	<parameter type="float4x4" name="model_view_proj"/>
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
+
+	<parameter type="float3" name="light_falloff"/>
 
 	<shader>
 		<![CDATA[
@@ -58,18 +62,13 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		<![CDATA[
 void RenderSceneVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
-					out float3 oDiffuse : COLOR0,
-					out float4 oLightWorldPos : TEXCOORD0,
+					out float3 oLightWorldPos : TEXCOORD0,
+					out float3 oLightWorldNormal : TEXCOORD1,
 					out float4 oPos : SV_Position)
 {
-	float4 world_pos = mul(Position, model);
-	float3 world_normal = normalize(mul(Normal, (float3x3)model));
-
 	oPos = mul(Position, model_view_proj);
-	oLightWorldPos = mul(Position, obj_model_to_light_model);
-
-	world_pos /= world_pos.w;
-	oDiffuse = dot(normalize(light_pos - world_pos.xyz), world_normal);
+	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
+	oLightWorldNormal = mul(Normal, (float3x3)obj_model_to_light_model);
 }
 
 float linstep(float min, float max, float v)
@@ -77,18 +76,17 @@ float linstep(float min, float max, float v)
 	return clamp((v - min) / (max - min), 0, 1);
 }
 
-float4 RenderScenePS(float3 diffuse : COLOR0,
-				float4 LightWorldPos : TEXCOORD0) : SV_Target 
+float4 RenderScenePS(float3 LightWorldPos : TEXCOORD0,
+					float3 LightWorldNormal : TEXCOORD1) : SV_Target 
 {
-	float3 ori_color = diffuse * lamp_tex.Sample(lamp_sampler, LightWorldPos.xyz).rgb;
+	float n_dot_l = dot(-LightWorldPos, LightWorldNormal) / sqrt(dot(LightWorldPos, LightWorldPos) * dot(LightWorldNormal, LightWorldNormal));
+
+	float3 ori_color = n_dot_l * lamp_tex.Sample(lamp_sampler, LightWorldPos).rgb;
 	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
 	float2 moments = shadow_cube_tex.Sample(shadow_sampler, shadow_dir).xy;
 	
-	LightWorldPos /= LightWorldPos.w;
-	float dist_sq = dot(LightWorldPos.xyz, LightWorldPos.xyz);
+	float dist_sq = dot(LightWorldPos, LightWorldPos);
 	float dist = sqrt(dist_sq);
-
-	float f = 1 / (0.01f + 0.5f * dist_sq);
 
 	float p = (dist <= moments.x);
 	// Variance shadow mapping
@@ -98,9 +96,10 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 	float p_max = variance / (variance + m_d * m_d);
 	p_max = linstep(bleeding_reduce, 1, p_max);
 
-	f *= max(p, p_max);
+	float atten = attenuation_term(0, LightWorldPos, light_falloff);
+	atten *= max(p, p_max);
 	
-	return float4(ori_color * f, 1.0);
+	return float4(ori_color * atten, 1.0);
 }
 		]]>
 	</shader>
@@ -111,6 +110,34 @@ float4 RenderScenePS(float3 diffuse : COLOR0,
 
 			<state name="vertex_shader" value="RenderSceneVS()"/>
 			<state name="pixel_shader" value="RenderScenePS()"/>
+		</pass>
+	</technique>
+
+
+	<shader>
+		<![CDATA[
+void PointLightProxyVS(float4 pos : POSITION,
+			out float3 oLightWorldPos : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, model_view_proj);
+	oLightWorldPos = pos.xyz;
+}
+
+float4 PointLightProxyPS(float3 LightWorldPos : TEXCOORD0) : SV_Target
+{
+	float atten = attenuation_term(0, LightWorldPos, light_falloff);	
+	return atten * lamp_tex.Sample(lamp_sampler, LightWorldPos);
+}
+		]]>
+	</shader>
+
+	<technique name="PointLightProxy">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="PointLightProxyVS()"/>
+			<state name="pixel_shader" value="PointLightProxyPS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -39,8 +39,8 @@ private:
 
 	KlayGE::TexturePtr lamp_tex_;
 
-	KlayGE::float4x4 light_model_;
-	KlayGE::CameraPtr light_camera_[6];
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::PointLightSourcePtr light_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_min_variance_static_;

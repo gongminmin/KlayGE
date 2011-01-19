@@ -18,6 +18,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -55,15 +56,18 @@ namespace
 			gen_sm_pass_ = gen_sm;
 		}
 
-		void LightMatrices(float4x4 const & model)
+		void LightSrc(LightSourcePtr const & light_src)
 		{
-			light_pos_ = transform_coord(float3(0, 0, 0), model);
+			light_pos_ = light_src->Position();
 
-			inv_light_model_ = MathLib::inverse(model);
+			float4x4 light_model = MathLib::to_matrix(light_src->Rotation()) * MathLib::translation(light_src->Position());
+			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 			light_view_ = app.ActiveCamera().ViewMatrix();
 			light_proj_ = app.ActiveCamera().ProjMatrix();
+
+			light_falloff_ = light_src->Falloff();
 		}
 
 		void ShadowMapTexture(TexturePtr const & cube_tex)
@@ -101,6 +105,8 @@ namespace
 
 				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
+
+				*(effect->ParameterByName("light_falloff")) = light_falloff_;
 			}
 		}
 
@@ -113,6 +119,7 @@ namespace
 		float3 light_pos_;
 		float4x4 inv_light_model_;
 		float4x4 light_view_, light_proj_;
+		float3 light_falloff_;
 
 		TexturePtr lamp_tex_;
 	};
@@ -309,6 +316,97 @@ namespace
 	};
 
 
+	class RenderPointSpotLightProxy : public KMesh
+	{
+	public:
+		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
+			: KMesh(model, name)
+		{
+			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml")->TechniqueByName("PointLightProxy");
+
+			mvp_param_ = technique_->Effect().ParameterByName("model_view_proj");
+		}
+
+		void BuildMeshInfo()
+		{
+		}
+
+		void SetModelMatrix(float4x4 const & mat)
+		{
+			model_ = mat;
+		}
+
+		void LampTexture(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("lamp_tex")) = tex;
+		}
+
+		void Falloff(float3 const & falloff)
+		{
+			*(technique_->Effect().ParameterByName("light_falloff")) = falloff;
+		}
+
+		void Update()
+		{
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+
+			float4x4 mv = model_ * view;
+			*mvp_param_ = mv * proj;
+		}
+
+	private:
+		float4x4 model_;
+
+		RenderEffectParameterPtr mvp_param_;
+	};
+
+	class PointLightProxyObject : public SceneObjectHelper
+	{
+	public:
+		PointLightProxyObject()
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
+		{
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			model_org_ = MathLib::scaling(0.05f, 0.05f, 0.05f);
+		}
+
+		void Update()
+		{
+			model_ = model_org_ * MathLib::rotation_z(0.4f)
+				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
+				* MathLib::translation(0.1f, 0.6f, 0.2f);
+
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
+
+			light_->ModelMatrix(model_);
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
+
+		void AttachLightSrc(LightSourcePtr const & light)
+		{
+			light_ = light;
+
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Falloff(light_->Falloff());
+		}
+
+	private:
+		float4x4 model_;
+		float4x4 model_org_;
+
+		LightSourcePtr light_;
+
+		Timer timer_;
+	};
+
+
 	enum
 	{
 		Exit,
@@ -396,11 +494,18 @@ void ShadowCubeMap::InitObjects()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
+	light_ = MakeSharedPtr<PointLightSource>();
+	light_->Attrib(0);
+	light_->Color(float3(1, 1, 1));
+	light_->Falloff(float3(0.01f, 0, 0.5f));
+
+	light_proxy_ = MakeSharedPtr<PointLightProxyObject>();
+	checked_pointer_cast<RenderPointSpotLightProxy>(light_proxy_->GetRenderable())->LampTexture(lamp_tex_);
+	light_proxy_->AddToSceneManager();
+	checked_pointer_cast<PointLightProxyObject>(light_proxy_)->AttachLightSrc(light_);
+
 	for (int i = 0; i < 6; ++ i)
 	{
-		light_camera_[i] = MakeSharedPtr<Camera>();
-		light_camera_[i]->ProjParams(PI / 2.0f, 1.0f, 0.01f, 10.0f);
-
 		sm_filter_pps_[i] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(3, 1.0f);
 	
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
@@ -518,9 +623,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(true);
 			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(true);
-
-			light_model_ = MathLib::rotation_z(0.4f) * MathLib::rotation_y(std::clock() / 1400.0f)
-				* MathLib::translation(0.1f, 0.4f, 0.2f);
 		}
 
 	case 1:
@@ -532,22 +634,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(shadow_buffer_);
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			{
-				Texture::CubeFaces face = static_cast<Texture::CubeFaces>(Texture::CF_Positive_X + pass);
+			shadow_buffer_->GetViewport().camera = light_->SMCamera(pass);
 
-				std::pair<float3, float3> lookat_up = CubeMapViewVector<float>(face);
-
-				float3 le = transform_coord(float3(0, 0, 0), light_model_);
-				float3 lla = transform_coord(float3(0, 0, 0) + lookat_up.first, light_model_);
-				float3 lu = transform_normal(float3(0, 0, 0) + lookat_up.second, light_model_);
-
-				light_camera_[pass]->ViewParams(le, lla, lu);
-
-				shadow_buffer_->GetViewport().camera = light_camera_[pass];
-			}
-
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightMatrices(light_model_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightMatrices(light_model_);
+			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightSrc(light_);
+			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightSrc(light_);
 		}
 		return App3DFramework::URV_Need_Flush;
 
