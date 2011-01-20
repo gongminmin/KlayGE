@@ -11,7 +11,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -295,7 +295,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateKMeshFactory<DetailedSkinnedMesh>())());
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>())());
 	model_->SetTime(0);
 
 	frame_ = 0;

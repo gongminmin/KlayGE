@@ -12,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
@@ -35,11 +35,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTorus : public KMesh
+	class RenderTorus : public StaticMesh
 	{
 	public:
 		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Torus"),
+			: StaticMesh(model, L"Torus"),
 				model_(float4x4::Identity())
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -81,7 +81,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable),
 				model_(float4x4::Identity())
 		{
-			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTorus>())()->Mesh(0);
+			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())()->Mesh(0);
 		}
 
 		float4x4 const & GetModelMatrix() const

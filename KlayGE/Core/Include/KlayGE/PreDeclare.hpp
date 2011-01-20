@@ -143,8 +143,6 @@ namespace KlayGE
 	typedef boost::shared_ptr<SkinnedModel> SkinnedModelPtr;
 	class SkinnedMesh;
 	typedef boost::shared_ptr<SkinnedMesh> SkinnedMeshPtr;
-	class KMesh;
-	typedef boost::shared_ptr<KMesh> KMeshPtr;
 	class LightSource;
 	typedef boost::shared_ptr<LightSource> LightSourcePtr;
 	class AmbientLightSource;

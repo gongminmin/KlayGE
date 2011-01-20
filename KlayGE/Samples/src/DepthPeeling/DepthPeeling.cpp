@@ -12,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Query.hpp>
@@ -33,11 +33,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderPolygon : public KMesh
+	class RenderPolygon : public StaticMesh
 	{
 	public:
 		RenderPolygon(RenderModelPtr model, std::wstring const & name)
-			: KMesh(model, name)
+			: StaticMesh(model, name)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -101,7 +101,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPolygon>())();
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>())();
 		}
 
 		void LightPos(float3 const & light_pos)

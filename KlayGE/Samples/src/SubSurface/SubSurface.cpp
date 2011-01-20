@@ -11,7 +11,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Window.hpp>
 
@@ -35,7 +35,7 @@ namespace
 		ModelObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read, CreateKModelFactory<DetailedModel>(), CreateKMeshFactory<DetailedMesh>())();
+			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>())();
 		}
 
 		void SetLightPos(float3 const & light_pos)

@@ -144,9 +144,6 @@
     <ClCompile Include="..\..\Core\Src\Render\HDRPostProcess.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Render\KMesh.cpp">
-      <Filter>Rendering System\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Core\Src\Render\Mesh.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
@@ -393,9 +390,6 @@
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\HDRPostProcess.hpp">
-      <Filter>Rendering System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\KMesh.hpp">
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp">
@@ -701,9 +695,6 @@
       <Filter>Rendering System\Effect Files</Filter>
     </None>
     <None Include="..\..\media\RenderFX\GammaCorrection.fxml">
-      <Filter>Rendering System\Effect Files</Filter>
-    </None>
-    <None Include="..\..\media\RenderFX\KMesh.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
     <None Include="..\..\media\RenderFX\Lighting.fxml">

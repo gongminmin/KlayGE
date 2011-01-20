@@ -13,7 +13,7 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/UI.hpp>
@@ -33,11 +33,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RefractorRenderable : public KMesh
+	class RefractorRenderable : public StaticMesh
 	{
 	public:
 		RefractorRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Refractor")
+			: StaticMesh(model, L"Refractor")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -116,7 +116,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RefractorRenderable>())()->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())()->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 

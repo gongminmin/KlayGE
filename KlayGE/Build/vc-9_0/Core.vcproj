@@ -386,10 +386,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Render\KMesh.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Render\LensFlare.cpp"
 					>
 				</File>
@@ -499,10 +495,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\JudaTexture.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Include\KlayGE\KMesh.hpp"
 					>
 				</File>
 				<File
@@ -639,10 +631,6 @@
 				</File>
 				<File
 					RelativePath="..\..\media\RenderFX\JudaTexture.fxml"
-					>
-				</File>
-				<File
-					RelativePath="..\..\media\RenderFX\KMesh.fxml"
 					>
 				</File>
 				<File

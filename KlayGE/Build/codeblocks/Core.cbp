@@ -270,7 +270,6 @@
 		<Unit filename="../../Core/Include/KlayGE/Input.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/InputFactory.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/JudaTexture.hpp" />
-		<Unit filename="../../Core/Include/KlayGE/KMesh.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/KlayGE.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/LZMACodec.hpp" />
 		<Unit filename="../../Core/Include/KlayGE/LensFlare.hpp" />
@@ -388,7 +387,6 @@
 		<Unit filename="../../Core/Src/Render/HeightMap.cpp" />
 		<Unit filename="../../Core/Src/Render/InfTerrain.cpp" />
 		<Unit filename="../../Core/Src/Render/JudaTexture.cpp" />
-		<Unit filename="../../Core/Src/Render/KMesh.cpp" />
 		<Unit filename="../../Core/Src/Render/LensFlare.cpp" />
 		<Unit filename="../../Core/Src/Render/Light.cpp" />
 		<Unit filename="../../Core/Src/Render/Mesh.cpp" />
@@ -433,7 +431,6 @@
 		<Unit filename="../../media/RenderFX/GammaCorrection.fxml" />
 		<Unit filename="../../media/RenderFX/InfTerrain.fxml" />
 		<Unit filename="../../media/RenderFX/JudaTexture.fxml" />
-		<Unit filename="../../media/RenderFX/KMesh.fxml" />
 		<Unit filename="../../media/RenderFX/Lighting.fxml" />
 		<Unit filename="../../media/RenderFX/Noise.fxml" />
 		<Unit filename="../../media/RenderFX/PointSprite.fxml" />

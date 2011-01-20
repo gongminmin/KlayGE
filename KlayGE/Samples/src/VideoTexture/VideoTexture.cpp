@@ -12,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Show.hpp>
@@ -35,11 +35,11 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTeapot : public KMesh
+	class RenderTeapot : public StaticMesh
 	{
 	public:
 		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Teapot")
+			: StaticMesh(model, L"Teapot")
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -74,7 +74,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderTeapot>())()->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())()->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr video_tex)

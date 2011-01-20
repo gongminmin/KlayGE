@@ -13,7 +13,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
 
@@ -214,7 +214,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("archer_attacking.meshml", EAH_GPU_Read, CreateKModelFactory<PNTrianglesSkinnedModel>(), CreateKMeshFactory<PNTrianglesSkinnedMesh>())();
+			renderable_ = LoadModel("archer_attacking.meshml", EAH_GPU_Read, CreateModelFactory<PNTrianglesSkinnedModel>(), CreateMeshFactory<PNTrianglesSkinnedMesh>())();
 			model_matrix_ = float4x4::Identity();
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->SetModelMatrix(model_matrix_);
 		}

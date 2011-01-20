@@ -14,7 +14,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -124,11 +124,11 @@ namespace
 		TexturePtr lamp_tex_;
 	};
 
-	class OccluderRenderable : public KMesh, public ShadowMapped
+	class OccluderRenderable : public StaticMesh, public ShadowMapped
 	{
 	public:
 		OccluderRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: KMesh(model, L"Occluder"),
+			: StaticMesh(model, L"Occluder"),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml");
@@ -182,7 +182,7 @@ namespace
 		{
 			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
 
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<OccluderRenderable>())()->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderRenderable>())()->Mesh(0);
 			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -316,11 +316,11 @@ namespace
 	};
 
 
-	class RenderPointSpotLightProxy : public KMesh
+	class RenderPointSpotLightProxy : public StaticMesh
 	{
 	public:
 		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name)
+			: StaticMesh(model, name)
 		{
 			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml")->TechniqueByName("PointLightProxy");
 
@@ -369,7 +369,7 @@ namespace
 		PointLightProxyObject()
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
-			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			model_org_ = MathLib::scaling(0.05f, 0.05f, 0.05f);
 		}
 

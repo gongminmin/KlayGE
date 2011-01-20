@@ -13,7 +13,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
@@ -60,11 +60,11 @@ namespace
 		std::map<std::string, TexturePtr> tex_pool_;
 	};
 
-	class RenderTorus : public KMesh, public DeferredRenderable
+	class RenderTorus : public StaticMesh, public DeferredRenderable
 	{
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name),
+			: StaticMesh(model, name),
 				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect())
 		{
 			mvp_param_ = effect_->ParameterByName("mvp");
@@ -323,11 +323,11 @@ namespace
 	};
 
 
-	class RenderPointSpotLightProxy : public KMesh, public DeferredRenderable
+	class RenderPointSpotLightProxy : public StaticMesh, public DeferredRenderable
 	{
 	public:
 		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name),
+			: StaticMesh(model, name),
 				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBuffer.fxml"))
 		{
 			technique_ = gbuffer_tech_;
@@ -497,7 +497,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				rot_speed_(rot_speed), height_(height)
 		{
-			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
 			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
 
@@ -549,7 +549,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				move_speed_(move_speed), pos_(pos)
 		{
-			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
 			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
 
@@ -883,7 +883,7 @@ void DeferredRenderingApp::InitObjects()
 	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModelTorus>(), CreateKMeshFactory<RenderTorus>());
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
 	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
 	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
 

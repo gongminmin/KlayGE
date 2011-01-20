@@ -12,7 +12,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderSettings.hpp>
-#include <KlayGE/KMesh.hpp>
+#include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
@@ -46,11 +46,11 @@ namespace
 
 	int const MOTION_FRAMES = 5;
 
-	class MotionBlurRenderMesh : public KMesh
+	class MotionBlurRenderMesh : public StaticMesh
 	{
 	public:
 		MotionBlurRenderMesh(RenderModelPtr const & model, std::wstring const & name)
-			: KMesh(model, name)
+			: StaticMesh(model, name)
 		{
 		}
 
@@ -495,8 +495,8 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 
 void MotionBlurDoFApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderInstanceMesh>());
-	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateKModelFactory<RenderModel>(), CreateKMeshFactory<RenderNonInstancedMesh>());
+	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

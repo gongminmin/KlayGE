@@ -19,7 +19,6 @@
       <File Name="../../Core/Src/Render/HeightMap.cpp"/>
       <File Name="../../Core/Src/Render/InfTerrain.cpp"/>
       <File Name="../../Core/Src/Render/JudaTexture.cpp"/>
-      <File Name="../../Core/Src/Render/KMesh.cpp"/>
       <File Name="../../Core/Src/Render/LensFlare.cpp"/>
       <File Name="../../Core/Src/Render/Light.cpp"/>
       <File Name="../../Core/Src/Render/Mesh.cpp"/>
@@ -49,7 +48,6 @@
       <File Name="../../Core/Include/KlayGE/Heightmap.hpp"/>
       <File Name="../../Core/Include/KlayGE/InfTerrain.hpp"/>
       <File Name="../../Core/Include/KlayGE/JudaTexture.hpp"/>
-      <File Name="../../Core/Include/KlayGE/KMesh.hpp"/>
       <File Name="../../Core/Include/KlayGE/LensFlare.hpp"/>
       <File Name="../../Core/Include/KlayGE/Light.hpp"/>
       <File Name="../../Core/Include/KlayGE/Mesh.hpp"/>
@@ -85,7 +83,6 @@
       <File Name="../../media/RenderFX/GlowMerger.fxml"/>
       <File Name="../../media/RenderFX/InfTerrain.fxml"/>
       <File Name="../../media/RenderFX/JudaTexture.fxml"/>
-      <File Name="../../media/RenderFX/KMesh.fxml"/>
       <File Name="../../media/RenderFX/LensFlare.fxml"/>
       <File Name="../../media/RenderFX/Lighting.fxml"/>
       <File Name="../../media/RenderFX/Noise.fxml"/>
