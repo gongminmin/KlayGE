@@ -73,8 +73,11 @@ namespace KlayGE
 		virtual void OuterAngle(float angle);
 		virtual float4 const & CosOuterInner() const;
 
-		virtual ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
-		virtual CameraPtr SMCamera(uint32_t index) const;
+		virtual TexturePtr const & ProjectiveTexture() const;
+		virtual void ProjectiveTexture(TexturePtr const & tex);
+
+		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
+		virtual CameraPtr const & SMCamera(uint32_t index) const;
 
 	protected:
 		LightType type_;
@@ -105,8 +108,11 @@ namespace KlayGE
 		float3 const & Falloff() const;
 		void Falloff(float3 const & fall_off);
 
-		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
-		CameraPtr SMCamera(uint32_t index) const;
+		TexturePtr const & ProjectiveTexture() const;
+		void ProjectiveTexture(TexturePtr const & tex);
+
+		ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr const & SMCamera(uint32_t index) const;
 
 	protected:
 		void UpdateCameras();
@@ -115,6 +121,8 @@ namespace KlayGE
 		Quaternion quat_;
 		float3 pos_;
 		float3 falloff_;
+
+		TexturePtr projective_tex_;
 
 		std::vector<ConditionalRenderPtr> crs_;
 		std::vector<CameraPtr> sm_cameras_;
@@ -143,8 +151,11 @@ namespace KlayGE
 
 		float4 const & CosOuterInner() const;
 
-		ConditionalRenderPtr ConditionalRenderQuery(uint32_t index) const;
-		CameraPtr SMCamera(uint32_t index) const;
+		TexturePtr const & ProjectiveTexture() const;
+		void ProjectiveTexture(TexturePtr const & tex);
+
+		ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
+		CameraPtr const & SMCamera(uint32_t index) const;
 
 	protected:
 		void UpdateCamera();
@@ -154,6 +165,8 @@ namespace KlayGE
 		float3 pos_;
 		float3 falloff_;
 		float4 cos_outer_inner_;
+
+		TexturePtr projective_tex_;
 
 		ConditionalRenderPtr cr_;
 		CameraPtr sm_camera_;

@@ -1,7 +1,7 @@
 // SceneObjectHelper.hpp
 // KlayGE 一些常用的场景对象 头文件
-// Ver 3.10.0
-// 版权所有(C) 龚敏敏, 2005-2010
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2005-2011
 // Homepage: http://www.klayge.org
 //
 // 3.10.0
@@ -59,6 +59,21 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
+	};
+
+	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
+	{
+	public:
+		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
+
+		void SetModelMatrix(float4x4 const & mat);
+		float4x4 const & GetModelMatrix() const;
+
+	protected:
+		float4x4 model_;
+		float4x4 model_org_;
+
+		LightSourcePtr light_;
 	};
 }
 

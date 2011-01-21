@@ -1,7 +1,7 @@
 // Mesh.cpp
 // KlayGE Mesh类 实现文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2004-2006
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2004-2011
 // Homepage: http://www.klayge.org
 //
 // 3.4.0
@@ -31,6 +31,7 @@
 #include <KlayGE/XMLDom.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/thread.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -1770,5 +1771,78 @@ namespace KlayGE
 		}
 
 		SaveModel(meshml_name, mtls, mesh_names, mtl_ids, ves, buffs, is_index_16_bit, indices, joints, kfs, start_frame, end_frame, frame_rate);
+	}
+
+
+	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name)
+	{
+	}
+
+	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
+	{
+		technique_ = tech;
+		if (tech)
+		{
+			mvp_param_ = technique_->Effect().ParameterByName("mvp");
+
+			light_pos_param_ = technique_->Effect().ParameterByName("light_pos");
+			light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
+			light_dir_param_ = technique_->Effect().ParameterByName("light_dir");
+			light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
+			light_color_param_ = technique_->Effect().ParameterByName("light_color");
+			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
+			light_projective_tex_param_ = technique_->Effect().ParameterByName("light_projective_tex");
+		}
+	}
+
+	void RenderableLightSourceProxy::SetModelMatrix(float4x4 const & mat)
+	{
+		model_ = mat;
+	}
+
+	void RenderableLightSourceProxy::OnRenderBegin()
+	{
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+		float4x4 const & view = camera.ViewMatrix();
+		float4x4 const & proj = camera.ProjMatrix();
+
+		float4x4 mv = model_ * view;
+		*mvp_param_ = mv * proj;
+
+		if (light_pos_param_)
+		{
+			*light_pos_param_ = light_->Position();
+		}
+		if (light_pos_es_param_)
+		{
+			*light_pos_es_param_ = MathLib::transform_coord(light_->Position(), view);
+		}
+		if (light_dir_param_)
+		{
+			*light_dir_param_ = MathLib::transform_quat(float3(0, 0, 1), light_->Rotation());
+		}
+		if (light_dir_es_param_)
+		{
+			*light_dir_es_param_ = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light_->Rotation()), view);
+		}
+		if (light_color_param_)
+		{
+			*light_color_param_ = light_->Color();
+		}
+		if (light_falloff_param_)
+		{
+			*light_falloff_param_ = light_->Falloff();
+		}
+		if (light_projective_tex_param_)
+		{
+			*light_projective_tex_param_ = light_->ProjectiveTexture();
+		}
+	}
+
+	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)
+	{
+		light_ = light;
 	}
 }

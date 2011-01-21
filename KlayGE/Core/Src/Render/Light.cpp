@@ -119,14 +119,26 @@ namespace KlayGE
 	{
 	}
 
-	ConditionalRenderPtr LightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	TexturePtr const & LightSource::ProjectiveTexture() const
 	{
-		return ConditionalRenderPtr();
+		static const TexturePtr ret;
+		return ret;
 	}
 
-	CameraPtr LightSource::SMCamera(uint32_t /*index*/) const
+	void LightSource::ProjectiveTexture(TexturePtr const & /*tex*/)
 	{
-		return CameraPtr();
+	}
+
+	ConditionalRenderPtr const & LightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	{
+		static const ConditionalRenderPtr ret;
+		return ret;
+	}
+
+	CameraPtr const & LightSource::SMCamera(uint32_t /*index*/) const
+	{
+		static const CameraPtr ret;
+		return ret;
 	}
 
 
@@ -216,13 +228,23 @@ namespace KlayGE
 		falloff_ = falloff;
 	}
 
-	ConditionalRenderPtr PointLightSource::ConditionalRenderQuery(uint32_t index) const
+	TexturePtr const & PointLightSource::ProjectiveTexture() const
+	{
+		return projective_tex_;
+	}
+
+	void PointLightSource::ProjectiveTexture(TexturePtr const & tex)
+	{
+		projective_tex_ = tex;
+	}
+
+	ConditionalRenderPtr const & PointLightSource::ConditionalRenderQuery(uint32_t index) const
 	{
 		BOOST_ASSERT(index < crs_.size());
 		return crs_[index];
 	}
 
-	CameraPtr PointLightSource::SMCamera(uint32_t index) const
+	CameraPtr const & PointLightSource::SMCamera(uint32_t index) const
 	{
 		BOOST_ASSERT(index < sm_cameras_.size());
 		return sm_cameras_[index];
@@ -316,12 +338,22 @@ namespace KlayGE
 		return cos_outer_inner_;
 	}
 
-	ConditionalRenderPtr SpotLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
+	TexturePtr const & SpotLightSource::ProjectiveTexture() const
+	{
+		return projective_tex_;
+	}
+
+	void SpotLightSource::ProjectiveTexture(TexturePtr const & tex)
+	{
+		projective_tex_ = tex;
+	}
+
+	ConditionalRenderPtr const & SpotLightSource::ConditionalRenderQuery(uint32_t /*index*/) const
 	{
 		return cr_;
 	}
 
-	CameraPtr SpotLightSource::SMCamera(uint32_t /*index*/) const
+	CameraPtr const & SpotLightSource::SMCamera(uint32_t /*index*/) const
 	{
 		return sm_camera_;
 	}

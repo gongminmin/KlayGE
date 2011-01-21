@@ -80,6 +80,14 @@ namespace KlayGE
 	typedef boost::shared_ptr<SceneNode> SceneNodePtr;
 	class SceneObject;
 	typedef boost::shared_ptr<SceneObject> SceneObjectPtr;
+	class SceneObjectHelper;
+	typedef boost::shared_ptr<SceneObjectHelper> SceneObjectHelperPtr;
+	class SceneObjectSkyBox;
+	typedef boost::shared_ptr<SceneObjectSkyBox> SceneObjectSkyBoxPtr;
+	class SceneObjectHDRSkyBox;
+	typedef boost::shared_ptr<SceneObjectHDRSkyBox> SceneObjectHDRSkyBoxPtr;
+	class SceneObjectLightSourceProxy;
+	typedef boost::shared_ptr<SceneObjectLightSourceProxy> SceneObjectLightSourceProxyPtr;
 
 	struct ElementInitData;
 	class Camera;
@@ -92,6 +100,24 @@ namespace KlayGE
 	struct RenderSettings;
 	class Renderable;
 	typedef boost::shared_ptr<Renderable> RenderablePtr;
+	class RenderableHelper;
+	typedef boost::shared_ptr<RenderableHelper> RenderableHelperPtr;
+	class RenderablePoint;
+	typedef boost::shared_ptr<RenderablePoint> RenderablePointPtr;
+	class RenderableLine;
+	typedef boost::shared_ptr<RenderableLine> RenderableLinePtr;
+	class RenderableTriangle;
+	typedef boost::shared_ptr<RenderableTriangle> RenderableTrianglePtr;
+	class RenderableTriBox;
+	typedef boost::shared_ptr<RenderableTriBox> RenderableTriBoxPtr;
+	class RenderableLineBox;
+	typedef boost::shared_ptr<RenderableLineBox> RenderableLineBoxPtr;
+	class RenderableSkyBox;
+	typedef boost::shared_ptr<RenderableSkyBox> RenderableSkyBoxPtr;
+	class RenderableHDRSkyBox;
+	typedef boost::shared_ptr<RenderableHDRSkyBox> RenderableHDRSkyBoxPtr;
+	class RenderablePlane;
+	typedef boost::shared_ptr<RenderablePlane> RenderablePlanePtr;
 	class RenderEffect;
 	typedef boost::shared_ptr<RenderEffect> RenderEffectPtr;
 	class RenderTechnique;
@@ -143,6 +169,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<SkinnedModel> SkinnedModelPtr;
 	class SkinnedMesh;
 	typedef boost::shared_ptr<SkinnedMesh> SkinnedMeshPtr;
+	class RenderableLightSourceProxy;
+	typedef boost::shared_ptr<RenderableLightSourceProxy> RenderableLightSourceProxyPtr;
 	class LightSource;
 	typedef boost::shared_ptr<LightSource> LightSourcePtr;
 	class AmbientLightSource;

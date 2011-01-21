@@ -3,7 +3,7 @@
 <effect>
 	<include name="Lighting.fxml"/>
 
-	<parameter type="float4x4" name="model_view_proj"/>
+	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 
@@ -16,7 +16,7 @@ void GenShadowMapVS(float4 Position : POSITION,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-    oPos = mul(Position, model_view_proj);
+    oPos = mul(Position, mvp);
     float4 LightWorldPos = mul(Position, obj_model_to_light_model);
     LightWorldPos /= LightWorldPos.w;
 	oDist = length(LightWorldPos.xyz);
@@ -44,15 +44,9 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="int" name="flipping"/>
 
-	<parameter type="textureCUBE" name="lamp_tex"/>
-	<parameter type="sampler" name="lamp_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-	
+	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
-	<parameter type="sampler" name="shadow_sampler">
+	<parameter type="sampler" name="cube_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
@@ -66,7 +60,7 @@ void RenderSceneVS(float4 Position : POSITION,
 					out float3 oLightWorldNormal : TEXCOORD1,
 					out float4 oPos : SV_Position)
 {
-	oPos = mul(Position, model_view_proj);
+	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(Normal, (float3x3)obj_model_to_light_model);
 }
@@ -81,9 +75,9 @@ float4 RenderScenePS(float3 LightWorldPos : TEXCOORD0,
 {
 	float n_dot_l = dot(-LightWorldPos, LightWorldNormal) / sqrt(dot(LightWorldPos, LightWorldPos) * dot(LightWorldNormal, LightWorldNormal));
 
-	float3 ori_color = n_dot_l * lamp_tex.Sample(lamp_sampler, LightWorldPos).rgb;
+	float3 ori_color = n_dot_l * light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
 	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
-	float2 moments = shadow_cube_tex.Sample(shadow_sampler, shadow_dir).xy;
+	float2 moments = shadow_cube_tex.Sample(cube_sampler, shadow_dir).xy;
 	
 	float dist_sq = dot(LightWorldPos, LightWorldPos);
 	float dist = sqrt(dist_sq);
@@ -120,14 +114,14 @@ void PointLightProxyVS(float4 pos : POSITION,
 			out float3 oLightWorldPos : TEXCOORD0,
 			out float4 oPos : SV_Position)
 {
-	oPos = mul(pos, model_view_proj);
+	oPos = mul(pos, mvp);
 	oLightWorldPos = pos.xyz;
 }
 
 float4 PointLightProxyPS(float3 LightWorldPos : TEXCOORD0) : SV_Target
 {
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);	
-	return atten * lamp_tex.Sample(lamp_sampler, LightWorldPos);
+	return atten * light_projective_tex.Sample(cube_sampler, LightWorldPos);
 }
 		]]>
 	</shader>

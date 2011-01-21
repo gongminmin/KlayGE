@@ -1,7 +1,7 @@
 // Mesh.hpp
 // KlayGE Mesh类 头文件
-// Ver 3.4.0
-// 版权所有(C) 龚敏敏, 2004-2006
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2004-2011
 // Homepage: http://www.klayge.org
 //
 // 3.4.0
@@ -382,6 +382,33 @@ namespace KlayGE
 		std::vector<Joint> const & joints, boost::shared_ptr<KeyFramesType> const & kfs,
 		int32_t start_frame, int32_t end_frame, int32_t frame_rate);
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
+
+
+	class KLAYGE_CORE_API RenderableLightSourceProxy : public StaticMesh
+	{
+	public:
+		RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name);
+		virtual void Technique(RenderTechniquePtr const & tech);
+
+		virtual void SetModelMatrix(float4x4 const & mat);
+
+		virtual void OnRenderBegin();
+
+		virtual void AttachLightSrc(LightSourcePtr const & light);
+
+	private:
+		float4x4 model_;
+		LightSourcePtr light_;
+
+		RenderEffectParameterPtr mvp_param_;
+		RenderEffectParameterPtr light_pos_param_;
+		RenderEffectParameterPtr light_pos_es_param_;
+		RenderEffectParameterPtr light_dir_param_;
+		RenderEffectParameterPtr light_dir_es_param_;
+		RenderEffectParameterPtr light_color_param_;
+		RenderEffectParameterPtr light_falloff_param_;
+		RenderEffectParameterPtr light_projective_tex_param_;
+	};
 }
 
 #endif			// _MESH_HPP

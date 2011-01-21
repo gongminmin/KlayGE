@@ -90,20 +90,20 @@ namespace
 
 			if (gen_sm_pass_)
 			{
-				*(effect->ParameterByName("model_view_proj")) = model * this->LightViewProj();
+				*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
 			}
 			else
 			{
 				float4x4 const & view = app.ActiveCamera().ViewMatrix();
 				float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-				*(effect->ParameterByName("model_view_proj")) = model * view * proj;
+				*(effect->ParameterByName("mvp")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				*(effect->ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 
-				*(effect->ParameterByName("lamp_tex")) = lamp_tex_;
+				*(effect->ParameterByName("light_projective_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
 
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
@@ -316,93 +316,24 @@ namespace
 	};
 
 
-	class RenderPointSpotLightProxy : public StaticMesh
+	class PointLightSourceProxyObject : public SceneObjectLightSourceProxy
 	{
 	public:
-		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+		PointLightSourceProxyObject(LightSourcePtr const & light)
+			: SceneObjectLightSourceProxy(light)
 		{
-			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml")->TechniqueByName("PointLightProxy");
-
-			mvp_param_ = technique_->Effect().ParameterByName("model_view_proj");
-		}
-
-		void BuildMeshInfo()
-		{
-		}
-
-		void SetModelMatrix(float4x4 const & mat)
-		{
-			model_ = mat;
-		}
-
-		void LampTexture(TexturePtr const & tex)
-		{
-			*(technique_->Effect().ParameterByName("lamp_tex")) = tex;
-		}
-
-		void Falloff(float3 const & falloff)
-		{
-			*(technique_->Effect().ParameterByName("light_falloff")) = falloff;
-		}
-
-		void Update()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 mv = model_ * view;
-			*mvp_param_ = mv * proj;
-		}
-
-	private:
-		float4x4 model_;
-
-		RenderEffectParameterPtr mvp_param_;
-	};
-
-	class PointLightProxyObject : public SceneObjectHelper
-	{
-	public:
-		PointLightProxyObject()
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
-		{
-			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml")->TechniqueByName("PointLightProxy"));
 			model_org_ = MathLib::scaling(0.05f, 0.05f, 0.05f);
 		}
 
 		void Update()
 		{
-			model_ = model_org_ * MathLib::rotation_z(0.4f)
+			this->SetModelMatrix(MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
-				* MathLib::translation(0.1f, 0.6f, 0.2f);
-
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
-
-			light_->ModelMatrix(model_);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-		void AttachLightSrc(LightSourcePtr const & light)
-		{
-			light_ = light;
-
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Falloff(light_->Falloff());
+				* MathLib::translation(0.1f, 0.6f, 0.2f));
 		}
 
 	private:
-		float4x4 model_;
-		float4x4 model_org_;
-
-		LightSourcePtr light_;
-
 		Timer timer_;
 	};
 
@@ -498,11 +429,10 @@ void ShadowCubeMap::InitObjects()
 	light_->Attrib(0);
 	light_->Color(float3(1, 1, 1));
 	light_->Falloff(float3(0.01f, 0, 0.5f));
+	light_->ProjectiveTexture(lamp_tex_);
 
-	light_proxy_ = MakeSharedPtr<PointLightProxyObject>();
-	checked_pointer_cast<RenderPointSpotLightProxy>(light_proxy_->GetRenderable())->LampTexture(lamp_tex_);
+	light_proxy_ = MakeSharedPtr<PointLightSourceProxyObject>(light_);
 	light_proxy_->AddToSceneManager();
-	checked_pointer_cast<PointLightProxyObject>(light_proxy_)->AttachLightSrc(light_);
 
 	for (int i = 0; i < 6; ++ i)
 	{

@@ -1,7 +1,7 @@
 // SceneObjectHelper.cpp
 // KlayGE 一些常用的可渲染对象 实现文件
-// Ver 3.10.0
-// 版权所有(C) 龚敏敏, 2005-2010
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2005-2011
 // Homepage: http://www.klayge.org
 //
 // 3.10.0
@@ -29,6 +29,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/Mesh.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <boost/tuple/tuple.hpp>
 
@@ -76,5 +78,42 @@ namespace KlayGE
 	void SceneObjectHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
 		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
+	}
+
+
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+			light_(light)
+	{
+		std::string mesh_name;
+		switch (light->Type())
+		{
+		case LT_Point:
+			mesh_name = "point_light_proxy.meshml";
+			break;
+
+		case LT_Spot:
+			mesh_name = "spot_light_proxy.meshml";
+			break;
+
+		default:
+			break;
+		}
+		renderable_ = LoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())()->Mesh(0);
+		model_org_ = float4x4::Identity();
+
+		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
+	}
+
+	void SceneObjectLightSourceProxy::SetModelMatrix(float4x4 const & mat)
+	{
+		model_ = model_org_ * mat;
+		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
+		light_->ModelMatrix(model_);
+	}
+
+	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const
+	{
+		return model_;
 	}
 }
