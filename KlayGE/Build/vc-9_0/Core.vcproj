@@ -642,6 +642,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\LightSourceProxy.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\Noise.fxml"
 					>
 				</File>

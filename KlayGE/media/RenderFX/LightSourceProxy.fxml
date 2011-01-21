@@ -1,0 +1,58 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	
+	<parameter type="float4x4" name="mvp"/>
+	<parameter type="float4" name="light_color"/>
+	<parameter type="float3" name="light_falloff"/>
+
+	<parameter type="textureCUBE" name="light_projective_tex"/>
+	<parameter type="sampler" name="cube_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void LightSourceProxyVS(float4 pos : POSITION,
+			out float3 oModelPos : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oModelPos = pos.xyz;
+}
+
+float4 LightSourceProxyPS(float3 model_pos : TEXCOORD0) : SV_Target
+{
+	float atten = attenuation_term(0, model_pos, light_falloff);	
+	return atten * light_color;
+}
+
+float4 LightSourceProxyProjectivePS(float3 model_pos : TEXCOORD0) : SV_Target
+{
+	float atten = attenuation_term(0, model_pos, light_falloff);	
+	return atten * light_color * light_projective_tex.Sample(cube_sampler, model_pos);
+}
+		]]>
+	</shader>
+
+	<technique name="LightSourceProxy">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="LightSourceProxyVS()"/>
+			<state name="pixel_shader" value="LightSourceProxyPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightSourceProxyProjective">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="LightSourceProxyVS()"/>
+			<state name="pixel_shader" value="LightSourceProxyProjectivePS()"/>
+		</pass>
+	</technique>
+</effect>

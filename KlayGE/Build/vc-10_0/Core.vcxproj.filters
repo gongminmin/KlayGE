@@ -763,5 +763,8 @@
     <None Include="..\..\media\RenderFX\JudaTexture.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
+    <None Include="..\..\media\RenderFX\LightSourceProxy.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

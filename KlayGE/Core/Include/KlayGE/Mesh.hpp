@@ -392,6 +392,8 @@ namespace KlayGE
 
 		virtual void SetModelMatrix(float4x4 const & mat);
 
+		virtual void Update();
+
 		virtual void OnRenderBegin();
 
 		virtual void AttachLightSrc(LightSourcePtr const & light);
@@ -401,10 +403,6 @@ namespace KlayGE
 		LightSourcePtr light_;
 
 		RenderEffectParameterPtr mvp_param_;
-		RenderEffectParameterPtr light_pos_param_;
-		RenderEffectParameterPtr light_pos_es_param_;
-		RenderEffectParameterPtr light_dir_param_;
-		RenderEffectParameterPtr light_dir_es_param_;
 		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
 		RenderEffectParameterPtr light_projective_tex_param_;

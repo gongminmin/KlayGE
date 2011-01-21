@@ -106,32 +106,4 @@ float4 RenderScenePS(float3 LightWorldPos : TEXCOORD0,
 			<state name="pixel_shader" value="RenderScenePS()"/>
 		</pass>
 	</technique>
-
-
-	<shader>
-		<![CDATA[
-void PointLightProxyVS(float4 pos : POSITION,
-			out float3 oLightWorldPos : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	oPos = mul(pos, mvp);
-	oLightWorldPos = pos.xyz;
-}
-
-float4 PointLightProxyPS(float3 LightWorldPos : TEXCOORD0) : SV_Target
-{
-	float atten = attenuation_term(0, LightWorldPos, light_falloff);	
-	return atten * light_projective_tex.Sample(cube_sampler, LightWorldPos);
-}
-		]]>
-	</shader>
-
-	<technique name="PointLightProxy">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="PointLightProxyVS()"/>
-			<state name="pixel_shader" value="PointLightProxyPS()"/>
-		</pass>
-	</technique>
 </effect>

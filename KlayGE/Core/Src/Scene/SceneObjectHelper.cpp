@@ -32,6 +32,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Light.hpp>
 
+#include <boost/assert.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/SceneObjectHelper.hpp>
@@ -81,15 +82,24 @@ namespace KlayGE
 	}
 
 
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale,
+			boost::function<void(float4x4&)> update_matrix_func)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
-			light_(light)
+			light_(light), update_matrix_func_(update_matrix_func)
 	{
 		std::string mesh_name;
 		switch (light->Type())
 		{
+		case LT_Ambient:
+			mesh_name = "ambient_light_proxy.meshml";
+			break;
+
 		case LT_Point:
 			mesh_name = "point_light_proxy.meshml";
+			break;
+		
+		case LT_Directional:
+			mesh_name = "directional_light_proxy.meshml";
 			break;
 
 		case LT_Spot:
@@ -97,12 +107,24 @@ namespace KlayGE
 			break;
 
 		default:
+			BOOST_ASSERT(false);
 			break;
 		}
 		renderable_ = LoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())()->Mesh(0);
-		model_org_ = float4x4::Identity();
+		model_org_ = MathLib::scaling(scale, scale, scale);
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
+	}
+
+	void SceneObjectLightSourceProxy::Update()
+	{
+		if (update_matrix_func_)
+		{
+			update_matrix_func_(model_);
+			this->SetModelMatrix(model_);
+		}
+
+		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
 	}
 
 	void SceneObjectLightSourceProxy::SetModelMatrix(float4x4 const & mat)

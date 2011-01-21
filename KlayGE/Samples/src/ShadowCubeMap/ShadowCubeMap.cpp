@@ -316,21 +316,14 @@ namespace
 	};
 
 
-	class PointLightSourceProxyObject : public SceneObjectLightSourceProxy
+	class PointLightSourceUpdate
 	{
 	public:
-		PointLightSourceProxyObject(LightSourcePtr const & light)
-			: SceneObjectLightSourceProxy(light)
+		void operator()(float4x4& model)
 		{
-			checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml")->TechniqueByName("PointLightProxy"));
-			model_org_ = MathLib::scaling(0.05f, 0.05f, 0.05f);
-		}
-
-		void Update()
-		{
-			this->SetModelMatrix(MathLib::rotation_z(0.4f)
+			model = MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
-				* MathLib::translation(0.1f, 0.6f, 0.2f));
+				* MathLib::translation(0.1f, 0.6f, 0.2f);
 		}
 
 	private:
@@ -431,7 +424,7 @@ void ShadowCubeMap::InitObjects()
 	light_->Falloff(float3(0.01f, 0, 0.5f));
 	light_->ProjectiveTexture(lamp_tex_);
 
-	light_proxy_ = MakeSharedPtr<PointLightSourceProxyObject>(light_);
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_, 0.05f, PointLightSourceUpdate());
 	light_proxy_->AddToSceneManager();
 
 	for (int i = 0; i < 6; ++ i)

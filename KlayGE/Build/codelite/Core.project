@@ -85,6 +85,7 @@
       <File Name="../../media/RenderFX/JudaTexture.fxml"/>
       <File Name="../../media/RenderFX/LensFlare.fxml"/>
       <File Name="../../media/RenderFX/Lighting.fxml"/>
+      <File Name="../../media/RenderFX/LightSourceProxy.fxml"/>
       <File Name="../../media/RenderFX/Noise.fxml"/>
       <File Name="../../media/RenderFX/PointSprite.fxml"/>
       <File Name="../../media/RenderFX/PostProcess.fxml"/>

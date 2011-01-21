@@ -1777,6 +1777,7 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
+		this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("LightSourceProxy.fxml")->TechniqueByName("LightSourceProxy"));
 	}
 
 	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
@@ -1786,10 +1787,6 @@ namespace KlayGE
 		{
 			mvp_param_ = technique_->Effect().ParameterByName("mvp");
 
-			light_pos_param_ = technique_->Effect().ParameterByName("light_pos");
-			light_pos_es_param_ = technique_->Effect().ParameterByName("light_pos_es");
-			light_dir_param_ = technique_->Effect().ParameterByName("light_dir");
-			light_dir_es_param_ = technique_->Effect().ParameterByName("light_dir_es");
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
 			light_projective_tex_param_ = technique_->Effect().ParameterByName("light_projective_tex");
@@ -1801,32 +1798,17 @@ namespace KlayGE
 		model_ = mat;
 	}
 
-	void RenderableLightSourceProxy::OnRenderBegin()
+	void RenderableLightSourceProxy::Update()
 	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		if (light_->ProjectiveTexture())
+		{
+			this->Technique(technique_->Effect().TechniqueByName("LightSourceProxyProjective"));
+		}
+		else
+		{
+			this->Technique(technique_->Effect().TechniqueByName("LightSourceProxy"));
+		}
 
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
-
-		float4x4 mv = model_ * view;
-		*mvp_param_ = mv * proj;
-
-		if (light_pos_param_)
-		{
-			*light_pos_param_ = light_->Position();
-		}
-		if (light_pos_es_param_)
-		{
-			*light_pos_es_param_ = MathLib::transform_coord(light_->Position(), view);
-		}
-		if (light_dir_param_)
-		{
-			*light_dir_param_ = MathLib::transform_quat(float3(0, 0, 1), light_->Rotation());
-		}
-		if (light_dir_es_param_)
-		{
-			*light_dir_es_param_ = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light_->Rotation()), view);
-		}
 		if (light_color_param_)
 		{
 			*light_color_param_ = light_->Color();
@@ -1839,6 +1821,17 @@ namespace KlayGE
 		{
 			*light_projective_tex_param_ = light_->ProjectiveTexture();
 		}
+	}
+
+	void RenderableLightSourceProxy::OnRenderBegin()
+	{
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+		float4x4 const & view = camera.ViewMatrix();
+		float4x4 const & proj = camera.ProjMatrix();
+
+		float4x4 mv = model_ * view;
+		*mvp_param_ = mv * proj;
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)

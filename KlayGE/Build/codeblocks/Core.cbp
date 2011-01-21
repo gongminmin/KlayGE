@@ -432,6 +432,7 @@
 		<Unit filename="../../media/RenderFX/InfTerrain.fxml" />
 		<Unit filename="../../media/RenderFX/JudaTexture.fxml" />
 		<Unit filename="../../media/RenderFX/Lighting.fxml" />
+		<Unit filename="../../media/RenderFX/LightSourceProxy.fxml" />
 		<Unit filename="../../media/RenderFX/Noise.fxml" />
 		<Unit filename="../../media/RenderFX/PointSprite.fxml" />
 		<Unit filename="../../media/RenderFX/PostProcess.fxml" />
