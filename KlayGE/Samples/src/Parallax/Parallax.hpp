@@ -30,6 +30,9 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::PointLightSourcePtr light_;
+
 	KlayGE::UIDialogPtr dialog_;
 	float parallax_scale_;
 	float parallax_bias_;

@@ -45,6 +45,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/Light.hpp>
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -180,6 +181,17 @@ namespace KlayGE
 		}
 	}
 
+	void SceneManager::AddLight(LightSourcePtr const & light)
+	{
+		lights_.push_back(light);
+	}
+	
+	void SceneManager::DelLight(LightSourcePtr const & light)
+	{
+		BOOST_AUTO(iter, std::find(lights_.begin(), lights_.end(), light));
+		lights_.erase(iter);
+	}
+
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
@@ -269,6 +281,14 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
+
+		BOOST_FOREACH(BOOST_TYPEOF(lights_)::const_reference light, lights_)
+		{
+			if (light->Enabled())
+			{
+				light->Update();
+			}
+		}
 
 		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
 		{

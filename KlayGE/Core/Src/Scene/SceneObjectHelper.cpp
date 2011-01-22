@@ -82,10 +82,9 @@ namespace KlayGE
 	}
 
 
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale,
-			boost::function<void(float4x4&)> update_matrix_func)
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
-			light_(light), update_matrix_func_(update_matrix_func)
+			light_(light)
 	{
 		std::string mesh_name;
 		switch (light->Type())
@@ -118,20 +117,10 @@ namespace KlayGE
 
 	void SceneObjectLightSourceProxy::Update()
 	{
-		if (update_matrix_func_)
-		{
-			update_matrix_func_(model_);
-			this->SetModelMatrix(model_);
-		}
+		model_ = model_org_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
-	}
-
-	void SceneObjectLightSourceProxy::SetModelMatrix(float4x4 const & mat)
-	{
-		model_ = model_org_ * mat;
-		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
-		light_->ModelMatrix(model_);
 	}
 
 	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const

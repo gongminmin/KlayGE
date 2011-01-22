@@ -22,7 +22,23 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
-#include <vector>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif
+#include <boost/smart_ptr.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6385)
+#endif
+#include <boost/array.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#include <boost/function.hpp>
 
 namespace KlayGE
 {
@@ -43,7 +59,7 @@ namespace KlayGE
 		LSA_NoSpecular = 1UL << 2
 	};
 
-	class KLAYGE_CORE_API LightSource
+	class KLAYGE_CORE_API LightSource : public boost::enable_shared_from_this<LightSource>
 	{
 	public:
 		explicit LightSource(LightType type);
@@ -56,6 +72,12 @@ namespace KlayGE
 
 		bool Enabled() const;
 		void Enabled(bool enabled);
+
+		void BindUpdateFunc(boost::function<void(LightSource&)> const & update_func);
+
+		virtual void Update();
+
+		virtual void AddToSceneManager();
 
 		float4 const & Color() const;
 		void Color(float3 const & clr);
@@ -84,6 +106,8 @@ namespace KlayGE
 		int32_t attrib_;
 		bool enabled_;
 		float4 color_;
+
+		boost::function<void(LightSource&)> update_func_;
 	};
 
 	class KLAYGE_CORE_API AmbientLightSource : public LightSource
@@ -124,8 +148,8 @@ namespace KlayGE
 
 		TexturePtr projective_tex_;
 
-		std::vector<ConditionalRenderPtr> crs_;
-		std::vector<CameraPtr> sm_cameras_;
+		boost::array<ConditionalRenderPtr, 7> crs_;
+		boost::array<CameraPtr, 6> sm_cameras_;
 	};
 
 	class KLAYGE_CORE_API SpotLightSource : public LightSource

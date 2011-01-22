@@ -319,11 +319,11 @@ namespace
 	class PointLightSourceUpdate
 	{
 	public:
-		void operator()(float4x4& model)
+		void operator()(LightSource& light)
 		{
-			model = MathLib::rotation_z(0.4f)
+			light.ModelMatrix(MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
-				* MathLib::translation(0.1f, 0.6f, 0.2f);
+				* MathLib::translation(0.1f, 0.6f, 0.2f));
 		}
 
 	private:
@@ -423,8 +423,10 @@ void ShadowCubeMap::InitObjects()
 	light_->Color(float3(1, 1, 1));
 	light_->Falloff(float3(0.01f, 0, 0.5f));
 	light_->ProjectiveTexture(lamp_tex_);
+	light_->BindUpdateFunc(PointLightSourceUpdate());
+	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_, 0.05f, PointLightSourceUpdate());
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_, 0.05f);
 	light_proxy_->AddToSceneManager();
 
 	for (int i = 0; i < 6; ++ i)

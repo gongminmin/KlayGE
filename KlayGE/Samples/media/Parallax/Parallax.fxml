@@ -9,6 +9,7 @@
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float3" name="light_pos"/>
+		<parameter type="float3" name="light_falloff"/>
 	</cbuffer>
 
 	<parameter type="float" name="parallax_scale"/>
@@ -59,6 +60,8 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	
 	float3 view = normalize(V.xyz);
 
+	float atten = attenuation_term(0, -L.xyz, light_falloff);
+
 	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * parallax_scale - parallax_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
 
@@ -68,7 +71,7 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H);
 
-	return float4(0.2f * diffuse + 0.8f * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, bump_normal), 1);
+	return float4(0.2f * diffuse + 0.8f * atten * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, bump_normal), 1);
 }
 		]]>
 	</shader>

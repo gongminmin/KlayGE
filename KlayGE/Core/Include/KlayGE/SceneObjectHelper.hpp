@@ -25,8 +25,6 @@
 #include <KlayGE/SceneObject.hpp>
 #include <KlayGE/Box.hpp>
 
-#include <boost/function.hpp>
-
 namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneObjectHelper : public SceneObject
@@ -66,12 +64,10 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
 	{
 	public:
-		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale,
-			boost::function<void(float4x4&)> update_matrix_func = boost::function<void(float4x4&)>());
+		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale);
 
 		void Update();
 
-		void SetModelMatrix(float4x4 const & mat);
 		float4x4 const & GetModelMatrix() const;
 
 	protected:
@@ -79,8 +75,6 @@ namespace KlayGE
 		float4x4 model_org_;
 
 		LightSourcePtr light_;
-
-		boost::function<void(float4x4&)> update_matrix_func_;
 	};
 }
 

@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Context.hpp>
+#include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
@@ -52,6 +54,24 @@ namespace KlayGE
 	void LightSource::Enabled(bool enabled)
 	{
 		enabled_ = enabled;
+	}
+
+	void LightSource::BindUpdateFunc(boost::function<void(LightSource&)> const & update_func)
+	{
+		update_func_ = update_func;
+	}
+
+	void LightSource::Update()
+	{
+		if (update_func_)
+		{
+			update_func_(*this);
+		}
+	}
+
+	void LightSource::AddToSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().AddLight(this->shared_from_this());
 	}
 
 	float4 const & LightSource::Color() const
@@ -155,17 +175,19 @@ namespace KlayGE
 
 
 	PointLightSource::PointLightSource()
-		: LightSource(LT_Point)
+		: LightSource(LT_Point),
+			quat_(Quaternion::Identity()),
+			pos_(float3::Zero())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		for (int i = 0; i < 7; ++ i)
 		{
-			crs_.push_back(checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender()));
+			crs_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 		}
 
 		for (int i = 0; i < 6; ++ i)
 		{
-			sm_cameras_.push_back(MakeSharedPtr<Camera>());
+			sm_cameras_[i] = MakeSharedPtr<Camera>();
 		}
 	}
 
@@ -253,6 +275,8 @@ namespace KlayGE
 
 	SpotLightSource::SpotLightSource()
 		: LightSource(LT_Spot),
+			quat_(Quaternion::Identity()),
+			pos_(float3::Zero()),
 			sm_camera_(MakeSharedPtr<Camera>())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -360,7 +384,8 @@ namespace KlayGE
 
 
 	DirectionalLightSource::DirectionalLightSource()
-		: LightSource(LT_Directional)
+		: LightSource(LT_Directional),
+			quat_(Quaternion::Identity())
 	{
 		attrib_ = LSA_NoShadow;
 	}

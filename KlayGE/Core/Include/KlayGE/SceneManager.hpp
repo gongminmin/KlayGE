@@ -71,6 +71,10 @@ namespace KlayGE
 		static SceneManagerPtr NullObject();
 
 		virtual void ClipScene();
+
+		void AddLight(LightSourcePtr const & light);
+		void DelLight(LightSourcePtr const & light);
+
 		void AddSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DelSceneObject(SceneObjectsType::iterator iter);
 		void AddRenderable(RenderablePtr const & obj);
@@ -97,6 +101,7 @@ namespace KlayGE
 
 	protected:
 		Frustum const * frustum_;
+		std::vector<LightSourcePtr> lights_;
 		SceneObjectsType scene_objs_;
 		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
 		boost::shared_ptr<std::vector<char> > visible_marks_;
