@@ -82,7 +82,7 @@ namespace KlayGE
 	}
 
 
-	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale)
+	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
 			light_(light)
 	{
@@ -110,17 +110,37 @@ namespace KlayGE
 			break;
 		}
 		renderable_ = LoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())()->Mesh(0);
-		model_org_ = MathLib::scaling(scale, scale, scale);
+		model_scaling_ = model_translation_ = float4x4::Identity();
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);
 	}
 
 	void SceneObjectLightSourceProxy::Update()
 	{
-		model_ = model_org_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
+		model_ = model_scaling_ * MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position()) * model_translation_;
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->SetModelMatrix(model_);
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->Update();
+	}
+
+	void SceneObjectLightSourceProxy::Scaling(float x, float y, float z)
+	{
+		model_scaling_ = MathLib::scaling(x, y, z);
+	}
+
+	void SceneObjectLightSourceProxy::Scaling(float3 const & s)
+	{
+		model_scaling_ = MathLib::scaling(s);
+	}
+	
+	void SceneObjectLightSourceProxy::Translation(float x, float y, float z)
+	{
+		model_translation_ = MathLib::translation(x, y, z);
+	}
+
+	void SceneObjectLightSourceProxy::Translation(float3 const & t)
+	{
+		model_translation_ = MathLib::translation(t);
 	}
 
 	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const

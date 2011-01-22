@@ -14,6 +14,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Window.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -38,14 +39,19 @@ namespace
 			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>())();
 		}
 
-		void SetLightPos(float3 const & light_pos)
+		void EyePos(float3 const & eye_pos)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->SetLightPos(light_pos);
+			checked_pointer_cast<DetailedModel>(renderable_)->EyePos(eye_pos);
 		}
 
-		void SetEyePos(float3 const & eye_pos)
+		void LightPos(float3 const & light_pos)
 		{
-			checked_pointer_cast<DetailedModel>(renderable_)->SetEyePos(eye_pos);
+			checked_pointer_cast<DetailedModel>(renderable_)->LightPos(light_pos);
+		}
+		
+		void LightFalloff(float3 const & light_falloff)
+		{
+			checked_pointer_cast<DetailedModel>(renderable_)->LightFalloff(light_falloff);
 		}
 
 		void BackFaceDepthPass(bool dfdp)
@@ -122,6 +128,17 @@ void SubSurfaceApp::InitObjects()
 
 	tbController_.AttachCamera(this->ActiveCamera());
 	tbController_.Scalers(0.01f, 0.5f);
+
+	light_ = MakeSharedPtr<PointLightSource>();
+	light_->Attrib(0);
+	light_->Color(float3(1, 1, 1));
+	light_->Falloff(float3(0, 0.5f, 0.0f));
+	light_->Position(float3(0, 2, -3));
+	light_->AddToSceneManager();
+
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
+	light_proxy_->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -223,8 +240,9 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-		checked_pointer_cast<ModelObject>(model_)->SetLightPos(float3(0, 2, -3));
-		checked_pointer_cast<ModelObject>(model_)->SetEyePos(this->ActiveCamera().EyePos());
+		checked_pointer_cast<ModelObject>(model_)->LightPos(light_->Position());
+		checked_pointer_cast<ModelObject>(model_)->LightFalloff(light_->Falloff());
+		checked_pointer_cast<ModelObject>(model_)->EyePos(this->ActiveCamera().EyePos());
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(false);
 
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

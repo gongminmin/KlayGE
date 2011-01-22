@@ -30,6 +30,9 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::LightSourcePtr light_;
+
 	KlayGE::UIDialogPtr dialog_;
 	int procedural_type_;
 	float procedural_freq_;

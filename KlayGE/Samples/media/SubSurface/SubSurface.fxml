@@ -5,8 +5,9 @@
 	<include name="util.fxml"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
-	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
+	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="light_falloff"/>
 	<parameter type="float3" name="extinction_coefficient" x="0.2" y="0.8" z="0.12"/>
 	<parameter type="float" name="material_thickness"/>
 	<parameter type="float" name="sigma_t"/>
@@ -102,7 +103,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 				float3 N	: TEXCOORD4,
 				float4 oPosSS : TEXCOORD5) : SV_Target
 {
-	float attenuation = 2.0f / length(L);
+	float attenuation = attenuation_term(0, -L.xyz, light_falloff);
 
 	L = normalize(L);
 	V = normalize(V);
@@ -136,7 +137,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	indirect_light *= attenuation;
 	indirect_light *= exp(-thickness * sigma_t);
 
-	float3 clr = ambient_clr.rgb * 0.2f * diffuse;
+	float3 clr = ambient_clr.rgb * 0.2f * diffuse * attenuation;
 	clr += indirect_light * extinction_coefficient;
 	clr.rgb += calc_brdf(diffuse, specular, shininess, L, H, N);
 

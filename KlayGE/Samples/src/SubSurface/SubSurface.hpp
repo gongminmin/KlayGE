@@ -33,6 +33,9 @@ private:
 	KlayGE::TexturePtr back_face_depth_tex_;
 	KlayGE::FrameBufferPtr back_face_depth_fb_;
 
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::LightSourcePtr light_;
+
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_sigma_static_;
 	int id_sigma_slider_;

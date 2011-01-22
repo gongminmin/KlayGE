@@ -16,6 +16,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Timer.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -165,9 +166,14 @@ namespace
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
 		}
 
-		void SetLightPos(float3 const & light_pos)
+		void LightPos(float3 const & light_pos)
 		{
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;			
+		}
+
+		void LightFalloff(float3 const & light_falloff)
+		{
+			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;			
 		}
 
 		void OnRenderBegin()
@@ -191,15 +197,31 @@ namespace
 		{
 		}
 
-		void Update()
+		void LightPos(float3 const & light_pos)
+		{
+			checked_pointer_cast<RenderPolygon>(renderable_)->LightPos(light_pos);
+		}
+
+		void LightFalloff(float3 const & light_falloff)
+		{
+			checked_pointer_cast<RenderPolygon>(renderable_)->LightFalloff(light_falloff);
+		}
+
+	private:
+		Timer timer_;
+	};
+
+
+	class PointLightSourceUpdate
+	{
+	public:
+		void operator()(LightSource& light)
 		{
 			float degree = static_cast<float>(timer_.current_time());
 			float4x4 matRot = MathLib::rotation_z(degree);
 
-			float3 light_pos(2, 0, -2);
-			light_pos = MathLib::transform_coord(light_pos, matRot);
-
-			checked_pointer_cast<RenderPolygon>(renderable_)->SetLightPos(light_pos);
+			float3 light_pos(1, 0, -1);
+			light.Position(MathLib::transform_coord(light_pos, matRot));
 		}
 
 	private:
@@ -264,6 +286,20 @@ void DistanceMapping::InitObjects()
 	fpcController_.AttachCamera(this->ActiveCamera());
 	fpcController_.Scalers(0.05f, 0.1f);
 
+	light_ = MakeSharedPtr<PointLightSource>();
+	light_->Attrib(0);
+	light_->Color(float3(1, 1, 1));
+	light_->Falloff(float3(0, 0, 1.0f));
+	light_->Position(float3(1, 0, -1));
+	light_->BindUpdateFunc(PointLightSourceUpdate());
+	light_->AddToSceneManager();
+
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
+	light_proxy_->AddToSceneManager();
+
+	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
@@ -320,5 +356,9 @@ uint32_t DistanceMapping::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+
+	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
+	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

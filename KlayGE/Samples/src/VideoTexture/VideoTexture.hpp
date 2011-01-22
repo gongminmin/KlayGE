@@ -27,7 +27,10 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::ShowEnginePtr show_eng_; 
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::LightSourcePtr light_;
+
+	KlayGE::ShowEnginePtr show_eng_;
 };
 
 #endif		// _VIDEOTEXTURE_HPP

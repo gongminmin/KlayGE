@@ -1786,9 +1786,11 @@ namespace KlayGE
 		if (tech)
 		{
 			mvp_param_ = technique_->Effect().ParameterByName("mvp");
+			model_param_ = technique_->Effect().ParameterByName("model");
 
 			light_color_param_ = technique_->Effect().ParameterByName("light_color");
 			light_falloff_param_ = technique_->Effect().ParameterByName("light_falloff");
+			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
 			light_projective_tex_param_ = technique_->Effect().ParameterByName("light_projective_tex");
 		}
 	}
@@ -1800,15 +1802,6 @@ namespace KlayGE
 
 	void RenderableLightSourceProxy::Update()
 	{
-		if (light_->ProjectiveTexture())
-		{
-			this->Technique(technique_->Effect().TechniqueByName("LightSourceProxyProjective"));
-		}
-		else
-		{
-			this->Technique(technique_->Effect().TechniqueByName("LightSourceProxy"));
-		}
-
 		if (light_color_param_)
 		{
 			*light_color_param_ = light_->Color();
@@ -1816,6 +1809,10 @@ namespace KlayGE
 		if (light_falloff_param_)
 		{
 			*light_falloff_param_ = light_->Falloff();
+		}
+		if (light_->ProjectiveTexture() && light_is_projective_param_)
+		{
+			*light_is_projective_param_ = static_cast<int32_t>(light_->ProjectiveTexture() ? 1 : 0);
 		}
 		if (light_projective_tex_param_)
 		{
@@ -1832,6 +1829,7 @@ namespace KlayGE
 
 		float4x4 mv = model_ * view;
 		*mvp_param_ = mv * proj;
+		*model_param_ = model_;
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)

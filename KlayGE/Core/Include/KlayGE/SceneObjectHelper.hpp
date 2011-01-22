@@ -64,15 +64,21 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
 	{
 	public:
-		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light, float scale);
+		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
 
 		void Update();
+
+		void Scaling(float x, float y, float z);
+		void Scaling(float3 const & s);
+		void Translation(float x, float y, float z);
+		void Translation(float3 const & t);
 
 		float4x4 const & GetModelMatrix() const;
 
 	protected:
 		float4x4 model_;
-		float4x4 model_org_;
+		float4x4 model_scaling_;
+		float4x4 model_translation_;
 
 		LightSourcePtr light_;
 	};

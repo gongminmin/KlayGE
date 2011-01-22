@@ -11,7 +11,7 @@
 	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
 	<parameter type="float3" name="eye_pos"/>
-	<parameter type="float3" name="light_dir" x="-1" y="2" z="1"/>
+	<parameter type="float3" name="light_dir"/>
 
 	<parameter type="float4x4" name="world" semantic="WORLD"/>
 	<parameter type="float4x4" name="view" semantic="VIEW"/>

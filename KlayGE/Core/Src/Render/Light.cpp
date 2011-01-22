@@ -94,6 +94,15 @@ namespace KlayGE
 	{
 	}
 
+	float3 LightSource::Direction() const
+	{
+		return float3::Zero();
+	}
+	
+	void LightSource::Direction(float3 const & /*dir*/)
+	{
+	}
+
 	Quaternion const & LightSource::Rotation() const
 	{
 		return Quaternion::Identity();
@@ -206,6 +215,17 @@ namespace KlayGE
 		this->UpdateCameras();
 	}
 
+	float3 PointLightSource::Direction() const
+	{
+		return MathLib::transform_quat(float3(0, 0, 1), quat_);;
+	}
+	
+	void PointLightSource::Direction(float3 const & dir)
+	{
+		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
+		this->UpdateCameras();
+	}
+
 	Quaternion const & PointLightSource::Rotation() const
 	{
 		return quat_;
@@ -295,6 +315,17 @@ namespace KlayGE
 	void SpotLightSource::Position(float3 const & pos)
 	{
 		pos_ = pos;
+		this->UpdateCamera();
+	}
+
+	float3 SpotLightSource::Direction() const
+	{
+		return MathLib::transform_quat(float3(0, 0, 1), quat_);
+	}
+	
+	void SpotLightSource::Direction(float3 const & dir)
+	{
+		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), dir);
 		this->UpdateCamera();
 	}
 
@@ -397,6 +428,16 @@ namespace KlayGE
 	Quaternion const & DirectionalLightSource::Rotation() const
 	{
 		return quat_;
+	}
+
+	float3 DirectionalLightSource::Direction() const
+	{
+		return MathLib::transform_quat(float3(0, 0, 1), quat_);
+	}
+	
+	void DirectionalLightSource::Direction(float3 const & dir)
+	{
+		quat_ = MathLib::unit_axis_to_unit_axis(float3(0, 0, 1), MathLib::normalize(dir));
 	}
 
 	void DirectionalLightSource::Rotation(Quaternion const & quat)

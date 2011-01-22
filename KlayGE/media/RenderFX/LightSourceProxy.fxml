@@ -4,8 +4,10 @@
 	<include name="Lighting.fxml"/>
 	
 	<parameter type="float4x4" name="mvp"/>
+	<parameter type="float4x4" name="model"/>
 	<parameter type="float4" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
+	<parameter type="int" name="light_is_projective"/>
 
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="sampler" name="cube_sampler">
@@ -17,23 +19,29 @@
 	<shader>
 		<![CDATA[
 void LightSourceProxyVS(float4 pos : POSITION,
-			out float3 oModelPos : TEXCOORD0,
+						float3 normal : NORMAL,
+			out float3 oPosOS : TEXCOORD0,
+			out float3 oNormal : TEXCOORD1,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oModelPos = pos.xyz;
+	oPosOS = pos.xyz;
+	oNormal = mul(normal, (float3x3)model);
 }
 
-float4 LightSourceProxyPS(float3 model_pos : TEXCOORD0) : SV_Target
+float4 LightSourceProxyPS(float3 pos_os : TEXCOORD0, float3 normal : TEXCOORD0) : SV_Target
 {
-	float atten = attenuation_term(0, model_pos, light_falloff);	
-	return atten * light_color;
-}
-
-float4 LightSourceProxyProjectivePS(float3 model_pos : TEXCOORD0) : SV_Target
-{
-	float atten = attenuation_term(0, model_pos, light_falloff);	
-	return atten * light_color * light_projective_tex.Sample(cube_sampler, model_pos);
+	float atten = 1;
+	if (dot(light_falloff, light_falloff) > 0)
+	{
+		atten = attenuation_term(0, pos_os, light_falloff);	
+	}
+	float4 clr = light_color;
+	if (light_is_projective)
+	{
+		clr *= light_projective_tex.Sample(cube_sampler, pos_os);
+	}
+	return atten * (saturate(dot(normalize(normal), float3(0, 1, 0))) + 0.2f) * clr;
 }
 		]]>
 	</shader>
@@ -44,15 +52,6 @@ float4 LightSourceProxyProjectivePS(float3 model_pos : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="LightSourceProxyVS()"/>
 			<state name="pixel_shader" value="LightSourceProxyPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="LightSourceProxyProjective">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="LightSourceProxyVS()"/>
-			<state name="pixel_shader" value="LightSourceProxyProjectivePS()"/>
 		</pass>
 	</technique>
 </effect>

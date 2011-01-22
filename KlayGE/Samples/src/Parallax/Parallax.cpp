@@ -318,7 +318,8 @@ void Parallax::InitObjects()
 	light_->Position(float3(0.25f, 0.5f, -1.0f));
 	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_, 0.01f);
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
 	light_proxy_->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());

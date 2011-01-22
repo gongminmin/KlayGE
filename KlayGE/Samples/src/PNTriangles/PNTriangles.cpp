@@ -16,6 +16,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -101,6 +102,11 @@ namespace
 		void EnablePNTriangles(bool pn)
 		{
 			pn_enabled_ = pn;
+		}
+
+		void LightDir(float3 const & dir)
+		{
+			*(technique_->Effect().ParameterByName("light_dir")) = dir;
 		}
 
 		void OnRenderBegin()
@@ -206,6 +212,14 @@ namespace
 				checked_pointer_cast<PNTrianglesSkinnedMesh>(Mesh(i))->EnablePNTriangles(pn);
 			}
 		}
+		
+		void LightDir(float3 const & dir)
+		{
+			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<PNTrianglesSkinnedMesh>(Mesh(i))->LightDir(dir);
+			}
+		}
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -242,6 +256,11 @@ namespace
 		void EnablePNTriangles(bool pn)
 		{
 			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->EnablePNTriangles(pn);
+		}
+
+		void LightDir(float3 const & dir)
+		{
+			checked_pointer_cast<PNTrianglesSkinnedModel>(renderable_)->LightDir(dir);
 		}
 
 		void SetFrame(float frame)
@@ -326,6 +345,17 @@ void PNTrianglesApp::InitObjects()
 	this->Proj(0.1f, 100);
 
 	fpcController_.Scalers(0.05f, 0.1f);
+
+	light_ = MakeSharedPtr<DirectionalLightSource>();
+	light_->Attrib(0);
+	light_->Color(float3(1, 1, 1));
+	light_->Direction(-float3(1, 2, -1));
+	light_->AddToSceneManager();
+
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.5f, 0.5f, 0.5f);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Translation(2.0f, 4.0f, -2.0f);
+	light_proxy_->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -468,6 +498,7 @@ uint32_t PNTrianglesApp::DoUpdate(uint32_t /*pass*/)
 		float this_time = clock() / 1000.0f;
 		obj->SetFrame(this_time * obj->FrameRate());
 	}
+	obj->LightDir(MathLib::transform_coord(light_->Direction(), this->ActiveCamera().ViewMatrix()));
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

@@ -84,6 +84,8 @@ namespace KlayGE
 
 		virtual float3 const & Position() const;
 		virtual void Position(float3 const & pos);
+		virtual float3 Direction() const;
+		virtual void Direction(float3 const & dir);
 		virtual Quaternion const & Rotation() const;
 		virtual void Rotation(Quaternion const & quat);
 		virtual void ModelMatrix(float4x4 const & model);
@@ -125,6 +127,8 @@ namespace KlayGE
 
 		float3 const & Position() const;
 		void Position(float3 const & pos);
+		float3 Direction() const;
+		void Direction(float3 const & dir);
 		Quaternion const & Rotation() const;
 		void Rotation(Quaternion const & quat);
 		void ModelMatrix(float4x4 const & model);
@@ -160,6 +164,8 @@ namespace KlayGE
 
 		float3 const & Position() const;
 		void Position(float3 const & pos);
+		float3 Direction() const;
+		void Direction(float3 const & dir);
 		Quaternion const & Rotation() const;
 		void Rotation(Quaternion const & quat);
 		void ModelMatrix(float4x4 const & model);
@@ -202,6 +208,8 @@ namespace KlayGE
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
 
+		float3 Direction() const;
+		void Direction(float3 const & dir);
 		Quaternion const & Rotation() const;
 		void Rotation(Quaternion const & quat);
 		void ModelMatrix(float4x4 const & model);

@@ -610,7 +610,7 @@ namespace KlayGE
 						float3 dir_es;
 						if (LT_Spot == type)
 						{
-							dir_es = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light->Rotation()), view_);
+							dir_es = MathLib::transform_normal(light->Direction(), view_);
 							if (0 == (attr & LSA_NoShadow))
 							{
 								sm_camera = light->SMCamera(0);
@@ -699,7 +699,7 @@ namespace KlayGE
 
 				case LT_Directional:
 					{
-						float3 dir_es = MathLib::transform_normal(MathLib::transform_quat(float3(0, 0, 1), light->Rotation()), view_);
+						float3 dir_es = MathLib::transform_normal(light->Direction(), view_);
 						*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 					}
 					rl = rl_quad_;
@@ -794,7 +794,7 @@ namespace KlayGE
 						if (LT_Spot == type)
 						{
 							float3 v = MathLib::normalize(eye - p);
-							float3 const d = MathLib::transform_quat(float3(0, 0, 1), light->Rotation());
+							float3 const & d = light->Direction();
 							float cos_direction = MathLib::dot(v, d);
 							if (light->CosOuterInner().x() < cos_direction * 1.01f)
 							{

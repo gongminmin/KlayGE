@@ -14,6 +14,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
+#include <KlayGE/Light.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -62,6 +63,11 @@ namespace
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
 
+		void LightFalloff(float3 const & light_falloff)
+		{
+			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
+		}
+
 		void ProceduralType(int type)
 		{
 			technique_ = technique_->Effect().TechniqueByIndex(type);
@@ -88,6 +94,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+			}
+		}
+
+		void LightFalloff(float3 const & light_falloff)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightFalloff(light_falloff);
 			}
 		}
 
@@ -166,6 +181,17 @@ void ProceduralTexApp::InitObjects()
 	this->Proj(0.01f, 100);
 
 	fpcController_.Scalers(0.05f, 0.01f);
+
+	light_ = MakeSharedPtr<PointLightSource>();
+	light_->Attrib(0);
+	light_->Color(float3(1, 1, 1));
+	light_->Falloff(float3(0, 0, 1.0f));
+	light_->Position(float3(0.25f, 0.5f, -1.0f));
+	light_->AddToSceneManager();
+
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
+	light_proxy_->AddToSceneManager();
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -263,8 +289,8 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-	float3 lightPos(0.5f, 1, -2);
-	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(lightPos);
+	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
+	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

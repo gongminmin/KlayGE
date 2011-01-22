@@ -14,8 +14,9 @@ class DetailedModel : public KlayGE::RenderModel
 public:
 	DetailedModel(std::wstring const & name);
 
-	void SetLightPos(KlayGE::float3 const & light_pos);
-	void SetEyePos(KlayGE::float3 const & eye_pos);
+	void EyePos(KlayGE::float3 const & eye_pos);
+	void LightPos(KlayGE::float3 const & light_pos);
+	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
 	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);
@@ -38,8 +39,9 @@ public:
 
 	void OnRenderBegin();
 
-	void SetLightPos(KlayGE::float3 const & light_pos);
-	void SetEyePos(KlayGE::float3 const & eye_pos);
+	void EyePos(KlayGE::float3 const & eye_pos);
+	void LightPos(KlayGE::float3 const & light_pos);
+	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
 	void BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flipping);

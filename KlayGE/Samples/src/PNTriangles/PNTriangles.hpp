@@ -35,6 +35,9 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
+	KlayGE::SceneObjectPtr light_proxy_;
+	KlayGE::LightSourcePtr light_;
+
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_warning_static_;
 	int id_tess_static_;

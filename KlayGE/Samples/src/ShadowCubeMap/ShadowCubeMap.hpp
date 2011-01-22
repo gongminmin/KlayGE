@@ -40,7 +40,7 @@ private:
 	KlayGE::TexturePtr lamp_tex_;
 
 	KlayGE::SceneObjectPtr light_proxy_;
-	KlayGE::PointLightSourcePtr light_;
+	KlayGE::LightSourcePtr light_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_min_variance_static_;

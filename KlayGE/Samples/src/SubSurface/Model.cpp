@@ -86,14 +86,19 @@ void DetailedMesh::OnRenderBegin()
 	*(technique_->Effect().ParameterByName("worldviewproj")) = view * proj;
 }
 
-void DetailedMesh::SetLightPos(KlayGE::float3 const & light_pos)
+void DetailedMesh::EyePos(KlayGE::float3 const & eye_pos)
+{
+	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos;
+}
+
+void DetailedMesh::LightPos(KlayGE::float3 const & light_pos)
 {
 	*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 }
 
-void DetailedMesh::SetEyePos(KlayGE::float3 const & eye_pos)
+void DetailedMesh::LightFalloff(KlayGE::float3 const & light_falloff)
 {
-	*(technique_->Effect().ParameterByName("eye_pos")) = eye_pos;
+	*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
 }
 
 void DetailedMesh::BackFaceDepthPass(bool dfdp)
@@ -147,19 +152,27 @@ DetailedModel::DetailedModel(std::wstring const & name)
 	empty_bump_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
 }
 
-void DetailedModel::SetLightPos(KlayGE::float3 const & light_pos)
+void DetailedModel::EyePos(KlayGE::float3 const & eye_pos)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->SetLightPos(light_pos);
+		checked_pointer_cast<DetailedMesh>(*iter)->EyePos(eye_pos);
 	}
 }
 
-void DetailedModel::SetEyePos(KlayGE::float3 const & eye_pos)
+void DetailedModel::LightPos(KlayGE::float3 const & light_pos)
 {
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedMesh>(*iter)->SetEyePos(eye_pos);
+		checked_pointer_cast<DetailedMesh>(*iter)->LightPos(light_pos);
+	}
+}
+
+void DetailedModel::LightFalloff(KlayGE::float3 const & light_falloff)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedMesh>(*iter)->LightFalloff(light_falloff);
 	}
 }
 

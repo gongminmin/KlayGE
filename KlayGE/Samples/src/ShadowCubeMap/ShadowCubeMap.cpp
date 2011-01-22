@@ -426,7 +426,8 @@ void ShadowCubeMap::InitObjects()
 	light_->BindUpdateFunc(PointLightSourceUpdate());
 	light_->AddToSceneManager();
 
-	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_, 0.05f);
+	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
 	light_proxy_->AddToSceneManager();
 
 	for (int i = 0; i < 6; ++ i)

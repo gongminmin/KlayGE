@@ -403,8 +403,10 @@ namespace KlayGE
 		LightSourcePtr light_;
 
 		RenderEffectParameterPtr mvp_param_;
+		RenderEffectParameterPtr model_param_;
 		RenderEffectParameterPtr light_color_param_;
 		RenderEffectParameterPtr light_falloff_param_;
+		RenderEffectParameterPtr light_is_projective_param_;
 		RenderEffectParameterPtr light_projective_tex_param_;
 	};
 }

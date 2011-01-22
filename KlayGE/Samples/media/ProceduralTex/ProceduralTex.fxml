@@ -6,8 +6,9 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="light_pos"/>
+		<parameter type="float3" name="light_falloff"/>
 		<parameter type="float" name="t"/>
 	</cbuffer>
 
@@ -75,7 +76,9 @@ float4 WoodPS(float3 pos_os : TEXCOORD0,
 	float3 bump = perlin_noise_gradient(tex_coord * 100, 0.1f);
 	float3 normal = normalize(normal_os + bump * 0.1f);
 
-	return float4(calc_brdf(wood(tex_coord).xyz * 0.7f, 0.1f, 32, light_os, halfway_os, normal), 1);
+	float atten = attenuation_term(light_pos, pos_os, light_falloff);
+
+	return float4(atten * calc_brdf(wood(tex_coord).xyz * 0.7f, 0.1f, 32, light_os, halfway_os, normal), 1);
 }
 
 float4 MarblePS(float3 pos_os : TEXCOORD0,
@@ -88,7 +91,9 @@ float4 MarblePS(float3 pos_os : TEXCOORD0,
 	
 	normal_os = normalize(normal_os);
 
-	return float4(calc_brdf(marble(tex_coord).xyz * 0.7f, 0.4f, 16, light_os, halfway_os, normal_os), 1);
+	float atten = attenuation_term(light_pos, pos_os, light_falloff);
+
+	return float4(atten * calc_brdf(marble(tex_coord).xyz * 0.7f, 0.4f, 16, light_os, halfway_os, normal_os), 1);
 }
 
 float4 CloudPS(float3 pos_os : TEXCOORD0,
