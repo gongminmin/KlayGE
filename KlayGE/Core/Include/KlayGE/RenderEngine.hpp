@@ -82,6 +82,7 @@
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Color.hpp>
+#include <KlayGE/PostProcess.hpp>
 
 #include <vector>
 
@@ -137,6 +138,8 @@ namespace KlayGE
 		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
+
+		void PostProcess();
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
 		{
@@ -217,6 +220,8 @@ namespace KlayGE
 
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
+		FrameBufferPtr before_pp_frame_buffer_;
+		TexturePtr before_pp_tex_;
 		FrameBufferPtr stereo_frame_buffers_[2];
 		TexturePtr stereo_colors_[2];
 
@@ -243,6 +248,8 @@ namespace KlayGE
 		RenderLayoutPtr stereoscopic_rl_;
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
+
+		PostProcessChainPtr pp_chain_;
 	};
 }
 

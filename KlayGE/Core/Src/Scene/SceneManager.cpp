@@ -524,6 +524,7 @@ namespace KlayGE
 
 			if (urt_ & App3DFramework::URV_Finished)
 			{
+				re.PostProcess();
 				break;
 			}
 		}

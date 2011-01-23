@@ -167,6 +167,10 @@ namespace KlayGE
 		stereo_separation_ = settings.stereo_separation;
 		this->DoCreateRenderWindow(name, settings);
 		screen_frame_buffer_ = cur_frame_buffer_;
+		if (!pp_chain_)
+		{
+			before_pp_frame_buffer_ = screen_frame_buffer_;
+		}
 		this->Stereo(settings.stereo_method);
 	}
 
@@ -212,14 +216,18 @@ namespace KlayGE
 
 			if (!fb)
 			{
-				if (stereo_method_ != STM_None)
+				if (!pp_chain_)
 				{
-					cur_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+					if (stereo_method_ != STM_None)
+					{
+						before_pp_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
+					}
+					else
+					{
+						before_pp_frame_buffer_ = screen_frame_buffer_;
+					}
 				}
-				else
-				{
-					cur_frame_buffer_ = screen_frame_buffer_;
-				}
+				cur_frame_buffer_ = before_pp_frame_buffer_;
 			}
 			else
 			{
@@ -306,10 +314,32 @@ namespace KlayGE
 	void RenderEngine::Resize(uint32_t width, uint32_t height)
 	{
 		this->DoResize(width, height);
+		
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		if (pp_chain_)
+		{
+			ElementFormat fmt;
+			if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			{
+				fmt = EF_B10G11R11F;
+			}
+			else
+			{
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+				fmt = EF_ABGR16F;
+			}
+			before_pp_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			if (!before_pp_frame_buffer_)
+			{
+				before_pp_frame_buffer_ = rf.MakeFrameBuffer();
+			}
+			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
+		}
 
 		if (stereo_method_ != STM_None)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			for (int i = 0; i < 2; ++ i)
 			{
 				stereo_colors_[i] = rf.MakeTexture2D(width, height, 1, 1, stereo_colors_[i]->Format(),
@@ -322,6 +352,14 @@ namespace KlayGE
 					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality());
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 			}
+		}
+	}
+
+	void RenderEngine::PostProcess()
+	{
+		if (pp_chain_)
+		{
+			pp_chain_->Apply();
 		}
 	}
 
