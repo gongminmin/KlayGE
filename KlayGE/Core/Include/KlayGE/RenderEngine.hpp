@@ -250,6 +250,7 @@ namespace KlayGE
 		RenderTechniquePtr stereoscopic_tech_;
 
 		PostProcessChainPtr pp_chain_;
+		bool inside_pp_;
 	};
 }
 

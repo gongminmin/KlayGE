@@ -150,6 +150,10 @@ PostProcessingApp::PostProcessingApp()
 			: App3DFramework("Post Processing")
 {
 	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
+
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hdr = false;
+	Context::Instance().Config(context_cfg);
 }
 
 bool PostProcessingApp::ConfirmDevice() const

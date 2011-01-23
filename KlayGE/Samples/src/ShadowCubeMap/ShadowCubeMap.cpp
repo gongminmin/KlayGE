@@ -44,6 +44,8 @@ namespace
 		ShadowMapped(uint32_t shadow_map_size)
 			: shadow_map_size_(shadow_map_size)
 		{
+			FrameBufferPtr fb = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+			flipping_ = static_cast<int32_t>(fb->RequiresFlipping() ? +1 : -1);
 		}
 
 		float4x4 LightViewProj() const
@@ -100,8 +102,7 @@ namespace
 				*(effect->ParameterByName("mvp")) = model * view * proj;
 				*(effect->ParameterByName("light_pos")) = light_pos_;
 
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(effect->ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*(effect->ParameterByName("flipping")) = flipping_;
 
 				*(effect->ParameterByName("light_projective_tex")) = lamp_tex_;
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
@@ -112,6 +113,8 @@ namespace
 
 	protected:
 		uint32_t shadow_map_size_;
+
+		int32_t flipping_;
 
 		bool gen_sm_pass_;
 		TexturePtr sm_cube_tex_;

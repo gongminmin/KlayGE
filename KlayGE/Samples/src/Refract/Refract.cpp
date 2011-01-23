@@ -15,7 +15,6 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
-#include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/UI.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -210,11 +209,8 @@ void Refract::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	render_buffer_ = rf.MakeFrameBuffer();
-	hdr_buffer_ = rf.MakeFrameBuffer();
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-	render_buffer_->GetViewport().camera = hdr_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
-
-	hdr_ = MakeSharedPtr<HDRPostProcess>();
+	render_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Refract.uiml"));
 }
@@ -226,39 +222,11 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	ContextCfg const & cfg = Context::Instance().Config();
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality);
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, cfg.graphics_cfg.depth_stencil_fmt, 1, 0);
 
-	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality))
-	{
-		fmt = EF_B10G11R11F;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality));
-
-		fmt = EF_ABGR16F;
-	}
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, cfg.graphics_cfg.sample_count, cfg.graphics_cfg.sample_quality, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	hdr_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
-	hdr_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-	if (cfg.graphics_cfg.sample_count > 1)
-	{
-		render_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, render_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		hdr_no_aa_tex_ = rf.MakeTexture2D(width, height, 1, 1, hdr_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	}
-	else
-	{
-		render_no_aa_tex_ = render_tex_;
-		hdr_no_aa_tex_ = hdr_tex_;
-	}
-
-	hdr_->InputPin(0, hdr_no_aa_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -300,35 +268,15 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		sky_box_->Visible(false);
 		return App3DFramework::URV_Need_Flush;
 
-	case 1:
-		// 第二遍，渲染正面
-		re.BindFrameBuffer(hdr_buffer_);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-
-		if (render_tex_->SampleCount() > 1)
-		{
-			// Resolve MSAA texture
-			render_tex_->CopyToTexture(*render_no_aa_tex_);
-		}
-
-		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_no_aa_tex_, render_buffer_->RequiresFlipping());
-
-		sky_box_->Visible(true);
-		return App3DFramework::URV_Need_Flush;
-
 	default:
-		if (hdr_tex_->SampleCount() > 1)
-		{
-			// Resolve MSAA texture
-			hdr_tex_->CopyToTexture(*hdr_no_aa_tex_);
-		}
-
-		hdr_->Apply();
-
+		// 第二遍，渲染正面
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-		return App3DFramework::URV_Finished;
+		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_, render_buffer_->RequiresFlipping());
+
+		sky_box_->Visible(true);
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}
 }

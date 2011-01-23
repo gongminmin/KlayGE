@@ -281,6 +281,10 @@ JudaTexViewer::JudaTexViewer()
 				position_(0, 0), scale_(1)
 {
 	ResLoader::Instance().AddPath("../Samples/media/JudaTexViewer");
+
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hdr = false;
+	Context::Instance().Config(context_cfg);
 }
 
 bool JudaTexViewer::ConfirmDevice()

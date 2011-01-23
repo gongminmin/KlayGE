@@ -46,6 +46,7 @@
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/HDRPostProcess.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -141,7 +142,8 @@ namespace KlayGE
 			cur_blend_factor_(1, 1, 1, 1),
 			cur_sample_mask_(0xFFFFFFFF),
 			motion_frames_(0),
-			stereo_method_(STM_None), stereo_separation_(0), stereo_active_eye_(0)
+			stereo_method_(STM_None), stereo_separation_(0), stereo_active_eye_(0),
+			inside_pp_(false)
 	{
 	}
 
@@ -167,11 +169,42 @@ namespace KlayGE
 		stereo_separation_ = settings.stereo_separation;
 		this->DoCreateRenderWindow(name, settings);
 		screen_frame_buffer_ = cur_frame_buffer_;
+		if (render_settings_.hdr)
+		{
+			pp_chain_ = MakeSharedPtr<PostProcessChain>(L"RE");
+			pp_chain_->Append(MakeSharedPtr<HDRPostProcess>());
+		}
 		if (!pp_chain_)
 		{
 			before_pp_frame_buffer_ = screen_frame_buffer_;
 		}
 		this->Stereo(settings.stereo_method);
+
+		if (pp_chain_)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			before_pp_frame_buffer_ = rf.MakeFrameBuffer();
+			before_pp_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
+
+			ElementFormat fmt;
+			if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			{
+				fmt = EF_B10G11R11F;
+			}
+			else
+			{
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+				fmt = EF_ABGR16F;
+			}
+			before_pp_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
+			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, 
+				rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), render_settings_.depth_stencil_fmt, 1, 0));
+
+			pp_chain_->InputPin(0, before_pp_tex_);
+			this->BindFrameBuffer(before_pp_frame_buffer_);
+		}
 	}
 
 	// 设置当前渲染状态对象
@@ -218,14 +251,7 @@ namespace KlayGE
 			{
 				if (!pp_chain_)
 				{
-					if (stereo_method_ != STM_None)
-					{
-						before_pp_frame_buffer_ = stereo_frame_buffers_[stereo_active_eye_];
-					}
-					else
-					{
-						before_pp_frame_buffer_ = screen_frame_buffer_;
-					}
+					before_pp_frame_buffer_ = this->DefaultFrameBuffer();
 				}
 				cur_frame_buffer_ = before_pp_frame_buffer_;
 			}
@@ -251,13 +277,20 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	FrameBufferPtr const & RenderEngine::DefaultFrameBuffer() const
 	{
-		if (stereo_method_ != STM_None)
+		if (inside_pp_)
 		{
-			return stereo_frame_buffers_[stereo_active_eye_];
+			if (stereo_method_ != STM_None)
+			{
+				return stereo_frame_buffers_[stereo_active_eye_];
+			}
+			else
+			{
+				return screen_frame_buffer_;
+			}
 		}
 		else
 		{
-			return screen_frame_buffer_;
+			return before_pp_frame_buffer_;
 		}
 	}
 
@@ -331,11 +364,9 @@ namespace KlayGE
 				fmt = EF_ABGR16F;
 			}
 			before_pp_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			if (!before_pp_frame_buffer_)
-			{
-				before_pp_frame_buffer_ = rf.MakeFrameBuffer();
-			}
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
+
+			pp_chain_->InputPin(0, before_pp_tex_);
 		}
 
 		if (stereo_method_ != STM_None)
@@ -359,7 +390,13 @@ namespace KlayGE
 	{
 		if (pp_chain_)
 		{
+			inside_pp_ = true;
+
+			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+
 			pp_chain_->Apply();
+
+			inside_pp_ = false;
 		}
 	}
 

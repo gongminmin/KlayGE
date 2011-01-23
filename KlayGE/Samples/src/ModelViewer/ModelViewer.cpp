@@ -15,7 +15,6 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PostProcess.hpp>
-#include <KlayGE/HDRPostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -181,7 +180,6 @@ int main()
 
 ModelViewerApp::ModelViewerApp()
 					: App3DFramework("Model Viewer"),
-						use_hdr_(true),
 						last_time_(0), frame_(0),
 						skinned_(true), play_(false)
 {
@@ -202,7 +200,6 @@ bool ModelViewerApp::ConfirmDevice() const
 void ModelViewerApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 	
@@ -232,12 +229,6 @@ void ModelViewerApp::InitObjects()
 	
 	this->OpenModel("monster.meshml");
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
-
-	hdr_fb_ = rf.MakeFrameBuffer();
-	hdr_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-
 	tbController_.AttachCamera(this->ActiveCamera());
 	tbController_.Scalers(0.01f, 0.5f);
 	fpsController_.Scalers(0.01f, 0.5f);
@@ -257,7 +248,6 @@ void ModelViewerApp::InitObjects()
 
 	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
 	dialog_animation_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::FPSCameraHandler, this, _1));
-	dialog_animation_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::HDRHandler, this, _1));
 
 	dialog_model_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::OpenHandler, this, _1));
 	dialog_model_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::SaveAsHandler, this, _1));
@@ -270,25 +260,6 @@ void ModelViewerApp::InitObjects()
 void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
-
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
-	{
-		fmt = EF_B10G11R11F;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-		fmt = EF_ABGR16F;
-	}
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	hdr_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
-	hdr_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
-
-	copy_pp_->InputPin(0, hdr_tex_);
-	hdr_pp_->InputPin(0, hdr_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -444,11 +415,6 @@ void ModelViewerApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-void ModelViewerApp::HDRHandler(KlayGE::UICheckBox const & sender)
-{
-	use_hdr_ = sender.GetChecked();
-}
-
 void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	uint32_t mi = sender.GetSelectedIndex();
@@ -580,67 +546,46 @@ void ModelViewerApp::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
-uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
+uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-	switch (pass)
-	{
-	case 0:
-		{
-			re.BindFrameBuffer(hdr_fb_);
 	
-			/*Box const & bb = model_->GetBound();
-			float near_plane = 1e10f;
-			float far_plane = 1e-10f;
-			for (int i = 0; i < 8; ++ i)
-			{
-				App3DFramework& app = Context::Instance().AppInstance();
-				float4x4 const & view = app.ActiveCamera().ViewMatrix();
+	/*Box const & bb = model_->GetBound();
+	float near_plane = 1e10f;
+	float far_plane = 1e-10f;
+	for (int i = 0; i < 8; ++ i)
+	{
+		App3DFramework& app = Context::Instance().AppInstance();
+		float4x4 const & view = app.ActiveCamera().ViewMatrix();
 
-				float3 v = MathLib::transform_coord(bb[i], view);
-				near_plane = std::min(near_plane, v.z() * 0.8f);
-				near_plane = std::max(0.01f, near_plane);
-				far_plane = std::max(near_plane + 0.1f, std::max(far_plane, v.z() * 1.2f));
-			}
-			this->Proj(near_plane, far_plane);*/
-
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-
-			if (play_)
-			{
-				float this_time = clock() / 1000.0f;
-				if (this_time - last_time_ > 1.0f / model_->FrameRate())
-				{
-					++ frame_;
-					frame_ = frame_ % (model_->EndFrame() - model_->StartFrame()) + model_->StartFrame();
-
-					last_time_ = this_time;
-				}
-
-				dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
-				this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
-			}
-
-			model_->SetLightPos(float3(0, 2, 0));
-			model_->SetEyePos(this->ActiveCamera().EyePos());
-
-			model_->AddToRenderQueue();
-
-			return App3DFramework::URV_Need_Flush;
-		}
-
-	default:
-		re.BindFrameBuffer(FrameBufferPtr());
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-		if (use_hdr_)
-		{
-			hdr_pp_->Apply();
-		}
-		else
-		{
-			copy_pp_->Apply();
-		}
-		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+		float3 v = MathLib::transform_coord(bb[i], view);
+		near_plane = std::min(near_plane, v.z() * 0.8f);
+		near_plane = std::max(0.01f, near_plane);
+		far_plane = std::max(near_plane + 0.1f, std::max(far_plane, v.z() * 1.2f));
 	}
+	this->Proj(near_plane, far_plane);*/
+
+	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+
+	if (play_)
+	{
+		float this_time = clock() / 1000.0f;
+		if (this_time - last_time_ > 1.0f / model_->FrameRate())
+		{
+			++ frame_;
+			frame_ = frame_ % (model_->EndFrame() - model_->StartFrame()) + model_->StartFrame();
+
+			last_time_ = this_time;
+		}
+
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
+		this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
+	}
+
+	model_->SetLightPos(float3(0, 2, 0));
+	model_->SetEyePos(this->ActiveCamera().EyePos());
+
+	model_->AddToRenderQueue();
+
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }

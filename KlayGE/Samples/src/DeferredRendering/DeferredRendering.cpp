@@ -860,6 +860,7 @@ DeferredRenderingApp::DeferredRenderingApp()
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.graphics_cfg.sample_count = 1;
 	context_cfg.graphics_cfg.sample_quality = 0;
+	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 }
 

@@ -774,6 +774,10 @@ OceanApp::OceanApp()
 				: App3DFramework("Ocean")
 {
 	ResLoader::Instance().AddPath("../Samples/media/Ocean");
+
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hdr = false;
+	Context::Instance().Config(context_cfg);
 }
 
 bool OceanApp::ConfirmDevice() const

@@ -376,7 +376,7 @@ namespace KlayGE
 		{
 			std::fill(visible_marks_->begin(), visible_marks_->end(), false);
 		}
-		if (urt_ & App3DFramework::URV_Finished)
+		if (urt_ & App3DFramework::URV_Overlay)
 		{
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
@@ -505,9 +505,11 @@ namespace KlayGE
 
 	void SceneManager::FlushScene()
 	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		FrameBufferPtr fb = re.CurFrameBuffer();
+
 		visible_marks_map_.clear();
 
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)
 		{
@@ -524,9 +526,15 @@ namespace KlayGE
 
 			if (urt_ & App3DFramework::URV_Finished)
 			{
-				re.PostProcess();
 				break;
 			}
 		}
+
+		re.PostProcess();
+
+		urt_ = App3DFramework::URV_Overlay;
+		this->Flush();
+
+		re.BindFrameBuffer(fb);
 	}
 }

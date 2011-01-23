@@ -101,6 +101,7 @@ namespace KlayGE
 		bool full_screen = false;
 		int sync_interval = 0;
 		int motion_frames = 0;
+		bool hdr = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
 
@@ -281,6 +282,21 @@ namespace KlayGE
 				motion_frames = attr->ValueInt();
 			}
 
+			XMLNodePtr hdr_node = graphics_node->FirstNode("hdr");
+			attr = hdr_node->Attrib("value");
+			if (attr)
+			{
+				std::string fs_str = attr->ValueString();
+				if (("1" == fs_str) || ("true" == fs_str))
+				{
+					hdr = true;
+				}
+				else
+				{
+					hdr = false;
+				}
+			}
+
 			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
 			attr = stereo_node->Attrib("method");
 			if (attr)
@@ -355,6 +371,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.full_screen = full_screen;
 		cfg_.graphics_cfg.sync_interval = sync_interval;
 		cfg_.graphics_cfg.motion_frames = motion_frames;
+		cfg_.graphics_cfg.hdr = hdr;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 	}

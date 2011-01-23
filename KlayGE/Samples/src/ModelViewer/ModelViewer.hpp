@@ -29,7 +29,6 @@ private:
 	void FrameChangedHandler(KlayGE::UISlider const & sender);
 	void PlayHandler(KlayGE::UICheckBox const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
-	void HDRHandler(KlayGE::UICheckBox const & sender);
 	void MeshChangedHandler(KlayGE::UIComboBox const & sender);
 	void VisualizeChangedHandler(KlayGE::UIComboBox const & sender);
 	void LineModeChangedHandler(KlayGE::UICheckBox const & sender);
@@ -42,13 +41,6 @@ private:
 
 	KlayGE::FirstPersonCameraController fpsController_;
 	KlayGE::TrackballCameraController tbController_;
-
-	KlayGE::FrameBufferPtr hdr_fb_;
-	KlayGE::TexturePtr hdr_tex_;
-
-	bool use_hdr_;
-	KlayGE::PostProcessPtr copy_pp_;
-	KlayGE::PostProcessPtr hdr_pp_;
 
 	float last_time_;
 	int frame_;
