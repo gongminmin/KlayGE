@@ -974,7 +974,7 @@ namespace KlayGE
 	{
 		if (!tex_cache_ && tex_cache_array_.empty())
 		{
-			pages = std::min(pages, 1024U);
+			pages = std::min<uint32_t>(pages, 1024U);
 
 			cache_tile_border_size_ = border_size;
 
@@ -1105,7 +1105,8 @@ namespace KlayGE
 				this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 
 				boost::array<uint32_t, 9> new_tile_id_with_neighbors;
-				new_tile_id_with_neighbors.fill(0xFFFFFFFF);
+                std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
+                //new_tile_id_with_neighbors.fill(0xFFFFFFFF);
 				new_tile_id_with_neighbors[0] = tile_ids[i];
 
 				if (tile_y > 0)

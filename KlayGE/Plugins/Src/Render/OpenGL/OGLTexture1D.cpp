@@ -63,7 +63,7 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(1U, w / 2);
+				w = std::max<uint32_t>(1U, w / 2);
 			}
 		}
 		else
@@ -78,7 +78,7 @@ namespace KlayGE
 			{
 				widthes_[level] = w;
 
-				w = std::max(1U, w / 2);
+				w = std::max<uint32_t>(1U, w / 2);
 			}
 		}
 
