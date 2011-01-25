@@ -12,16 +12,6 @@ SET(KLAYGE_MINOR_VERSION 11)
 SET(KLAYGE_PATCH_VERSION 0)
 SET(KLAYGE_VERSION ${KLAYGE_MAJOR_VERSION}.${KLAYGE_MINOR_VERSION}.${KLAYGE_PATCH_VERSION})
 
-FIND_PACKAGE(OpenGL)
-FIND_PACKAGE(Boost 1.40.0 COMPONENTS filesystem system thread signals)
-FIND_PACKAGE(PythonLibs)
-FIND_PACKAGE(DirectX)
-FIND_PACKAGE(DirectShow)
-FIND_PACKAGE(Cg)
-FIND_PACKAGE(OpenAL)
-FIND_PACKAGE(OggVorbis)
-FIND_PACKAGE(glloader)
-
 IF(WIN32)
     IF(MSVC)
         OPTION(WIN32_USE_MP "Set to ON to build KlayGE with the /MP option (Visual Studio 2005 and above)." OFF)
@@ -42,6 +32,13 @@ ENDIF(WIN32)
 IF(NOT WIN32)
     SET(CMAKE_CXX_FLAGS "-W -Wall -Wno-unused")
 ENDIF(NOT WIN32)
+
+# Set postfix
+SET(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "add a postfix, usually d on windows")
+SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
+SET(CMAKE_RELWITHDEBINFO_POSTFIX "_rd" CACHE STRING "add a postfix, usually empty on windows")
+SET(CMAKE_MINSIZEREL_POSTFIX "_s" CACHE STRING "add a postfix, usually empty on windows")
+
 
 # On CMake 2.4.x use EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH and later
 # we work around the DLL placement by use of the PREFIX target property hack
@@ -64,9 +61,28 @@ ELSE()
 ENDIF()
 
 
-# Main settings
-FIND_PATH(KLAYGE_PROJECT_DIR klayge_logo.ico PATHS ../../)
+# Main settings and dependencies
 SET(KLAYGE_CORELIB_NAME KlayGE_Core)  # Dependency of all other targets
+FIND_PATH(KLAYGE_PROJECT_DIR klayge_logo.ico PATHS ../../)
+
+SET(3RDPARTY_DIR "$ENV{KLAYGE_HOME}" CACHE PATH "Location of 3rdparty dependencies")
+FIND_PACKAGE(OpenGL)
+FIND_PACKAGE(Boost 1.40.0 COMPONENTS filesystem system thread signals)
+FIND_PACKAGE(PythonLibs)
+FIND_PACKAGE(DirectX)
+FIND_PACKAGE(DirectShow)
+FIND_PACKAGE(Cg)
+FIND_PACKAGE(OpenAL)
+FIND_PACKAGE(OggVorbis)
+FIND_PACKAGE(glloader)
+
+FIND_PATH(RAPIDXML_INCLUDE_DIR rapidxml/rapidxml.hpp
+          PATHS ${3RDPARTY_DIR}/include /usr/include /usr/local/include)
+GET_FILENAME_COMPONENT( GLLOADER_LIBRARY_DIR "${GLLOADER_LIBRARY}" PATH )
+GET_FILENAME_COMPONENT( CG_LIBRARY_DIR "${CG_LIBRARY}" PATH )
+
+INCLUDE_DIRECTORIES(${CMAKE_INCLUDE_PATH} ${RAPIDXML_INCLUDE_DIR})
+LINK_DIRECTORIES(${CMAKE_LIBRARY_PATH})
 
 # Target name postfix
 SET(KLAYGE_NAME_POSTFIX "")
@@ -88,17 +104,6 @@ ELSE(CMAKE_CL_64)
     SET(KLAYGE_NAME_POSTFIX "${KLAYGE_NAME_POSTFIX}_x86")
 ENDIF(CMAKE_CL_64)
 
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-    SET(KLAYGE_NAME_POSTFIX "${KLAYGE_NAME_POSTFIX}_d")
-ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
-
-# Dependency paths
-FIND_PATH(RAPIDXML_INCLUDE_DIR rapidxml/rapidxml.hpp PATHS /usr/include /usr/local/include)
-GET_FILENAME_COMPONENT( GLLOADER_LIBRARY_DIR "${GLLOADER_LIBRARY}" PATH )
-GET_FILENAME_COMPONENT( CG_LIBRARY_DIR "${CG_LIBRARY}" PATH )
-
-INCLUDE_DIRECTORIES(${CMAKE_INCLUDE_PATH} ${RAPIDXML_INCLUDE_DIR})
-LINK_DIRECTORIES(${CMAKE_LIBRARY_PATH})
 
 # Output directories
 SET(KLAYGE_INSTALL_INCDIR include)
