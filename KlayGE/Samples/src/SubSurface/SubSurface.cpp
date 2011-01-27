@@ -48,6 +48,11 @@ namespace
 		{
 			checked_pointer_cast<DetailedModel>(renderable_)->LightPos(light_pos);
 		}
+
+		void LightColor(float3 const & light_color)
+		{
+			checked_pointer_cast<DetailedModel>(renderable_)->LightColor(light_color);
+		}
 		
 		void LightFalloff(float3 const & light_falloff)
 		{
@@ -131,7 +136,7 @@ void SubSurfaceApp::InitObjects()
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
-	light_->Color(float3(1, 1, 1));
+	light_->Color(float3(1.5f, 1.5f, 1.5f));
 	light_->Falloff(float3(0, 0.5f, 0.0f));
 	light_->Position(float3(0, 2, -3));
 	light_->AddToSceneManager();
@@ -241,6 +246,7 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 		checked_pointer_cast<ModelObject>(model_)->LightPos(light_->Position());
+		checked_pointer_cast<ModelObject>(model_)->LightColor(light_->Color());
 		checked_pointer_cast<ModelObject>(model_)->LightFalloff(light_->Falloff());
 		checked_pointer_cast<ModelObject>(model_)->EyePos(this->ActiveCamera().EyePos());
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthPass(false);

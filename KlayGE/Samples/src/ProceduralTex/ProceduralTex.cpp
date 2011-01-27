@@ -63,6 +63,11 @@ namespace
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
 
+		void LightColor(float3 const & light_color)
+		{
+			*(technique_->Effect().ParameterByName("light_color")) = light_color;
+		}
+
 		void LightFalloff(float3 const & light_falloff)
 		{
 			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
@@ -94,6 +99,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightPos(light_pos);
+			}
+		}
+
+		void LightColor(float3 const & light_color)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LightColor(light_color);
 			}
 		}
 
@@ -184,7 +198,7 @@ void ProceduralTexApp::InitObjects()
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
-	light_->Color(float3(1, 1, 1));
+	light_->Color(float3(2, 2, 2));
 	light_->Falloff(float3(0, 0, 1.0f));
 	light_->Position(float3(0.25f, 0.5f, -1.0f));
 	light_->AddToSceneManager();
@@ -290,6 +304,7 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
 	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
+	checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
 	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;

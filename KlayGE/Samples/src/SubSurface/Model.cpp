@@ -96,6 +96,11 @@ void DetailedMesh::LightPos(KlayGE::float3 const & light_pos)
 	*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 }
 
+void DetailedMesh::LightColor(KlayGE::float3 const & light_color)
+{
+	*(technique_->Effect().ParameterByName("light_color")) = light_color;
+}
+
 void DetailedMesh::LightFalloff(KlayGE::float3 const & light_falloff)
 {
 	*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
@@ -165,6 +170,14 @@ void DetailedModel::LightPos(KlayGE::float3 const & light_pos)
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
 		checked_pointer_cast<DetailedMesh>(*iter)->LightPos(light_pos);
+	}
+}
+
+void DetailedModel::LightColor(KlayGE::float3 const & light_color)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedMesh>(*iter)->LightColor(light_color);
 	}
 }
 

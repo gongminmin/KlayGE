@@ -7,6 +7,7 @@
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="eye_pos"/>
 	<parameter type="float3" name="light_pos"/>
+	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
 	<parameter type="float3" name="extinction_coefficient" x="0.2" y="0.8" z="0.12"/>
 	<parameter type="float" name="material_thickness"/>
@@ -141,7 +142,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	clr += indirect_light * extinction_coefficient;
 	clr.rgb += calc_brdf(diffuse, specular, shininess, L, H, N);
 
-	return float4(clr.rgb, 1);
+	return float4(clr.rgb * light_color, 1);
 }
 		]]>
 	</shader>

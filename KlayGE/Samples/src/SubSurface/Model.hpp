@@ -16,6 +16,7 @@ public:
 
 	void EyePos(KlayGE::float3 const & eye_pos);
 	void LightPos(KlayGE::float3 const & light_pos);
+	void LightColor(KlayGE::float3 const & light_color);
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);
@@ -41,6 +42,7 @@ public:
 
 	void EyePos(KlayGE::float3 const & eye_pos);
 	void LightPos(KlayGE::float3 const & light_pos);
+	void LightColor(KlayGE::float3 const & light_color);
 	void LightFalloff(KlayGE::float3 const & light_falloff);
 
 	void BackFaceDepthPass(bool dfdp);

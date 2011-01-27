@@ -73,6 +73,11 @@ namespace
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
 		}
 
+		void LightColor(float3 const & light_color)
+		{
+			*(technique_->Effect().ParameterByName("light_color")) = light_color;
+		}
+
 		void LightFalloff(float3 const & light_falloff)
 		{
 			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
@@ -96,6 +101,11 @@ namespace
 		void LightPos(float3 const & light_pos)
 		{
 			checked_pointer_cast<RenderTeapot>(renderable_)->LightPos(light_pos);
+		}
+
+		void LightColor(float3 const & light_color)
+		{
+			checked_pointer_cast<RenderTeapot>(renderable_)->LightColor(light_color);
 		}
 
 		void LightFalloff(float3 const & light_falloff)
@@ -159,7 +169,7 @@ void VideoTextureApp::InitObjects()
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
-	light_->Color(float3(1, 1, 1));
+	light_->Color(float3(2, 2, 2));
 	light_->Falloff(float3(0, 0, 1.0f));
 	light_->Position(float3(0.25f, 0.5f, -1.0f));
 	light_->AddToSceneManager();
@@ -224,6 +234,7 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 	checked_pointer_cast<TeapotObject>(ground_)->LightPos(light_->Position());
+	checked_pointer_cast<TeapotObject>(ground_)->LightColor(light_->Color());
 	checked_pointer_cast<TeapotObject>(ground_)->LightFalloff(light_->Falloff());
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
