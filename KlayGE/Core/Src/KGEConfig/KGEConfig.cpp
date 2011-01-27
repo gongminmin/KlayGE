@@ -271,6 +271,22 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hSyncCombo, CB_SETCURSEL, sel, 0);
 		}
 		{
+			HWND hMBFramesEdit = GetDlgItem(hDlg, IDC_MB_FRAMES_EDIT);
+
+			std::ostringstream oss;
+			oss << cfg.graphics_cfg.motion_frames;
+			std::basic_string<TCHAR> str;
+			Convert(str, oss.str());
+
+			SetWindowText(hMBFramesEdit, str.c_str());
+		}
+		{
+			HWND hHDRCombo = GetDlgItem(hDlg, IDC_HDR_COMBO);
+			SendMessage(hHDRCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Yes")));
+			SendMessage(hHDRCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("No")));
+			SendMessage(hHDRCombo, CB_SETCURSEL, cfg.graphics_cfg.hdr ? 0 : 1, 0);
+		}
+		{
 			HWND hStereoCombo = GetDlgItem(hDlg, IDC_STEREO_COMBO);
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Color anaglyph: Red Cyan")));
@@ -282,16 +298,6 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Horizontal")));
 			SendMessage(hStereoCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Vertical")));
 			SendMessage(hStereoCombo, CB_SETCURSEL, cfg.graphics_cfg.stereo_method, 0);
-		}
-		{
-			HWND hMBFramesEdit = GetDlgItem(hDlg, IDC_MB_FRAMES_EDIT);
-
-			std::ostringstream oss;
-			oss << cfg.graphics_cfg.motion_frames;
-			std::basic_string<TCHAR> str;
-			Convert(str, oss.str());
-
-			SetWindowText(hMBFramesEdit, str.c_str());
 		}
 		{
 			HWND hStereoSepEdit = GetDlgItem(hDlg, IDC_STEREO_SEP_EDIT);
@@ -635,15 +641,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					}
 				}
 				{
-					HWND hStereoCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_COMBO);
-					int n = static_cast<int>(SendMessage(hStereoCombo, CB_GETCURSEL, 0, 0));
-					cfg.graphics_cfg.stereo_method = static_cast<StereoMethod>(n);
-				}
-				{
 					HWND hMBFramesEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_MB_FRAMES_EDIT);
 					TCHAR buf[256];
 					GetWindowText(hMBFramesEdit, buf, sizeof(buf) / sizeof(buf[0]));
 					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.motion_frames;
+				}
+				{
+					HWND hHDRCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_HDR_COMBO);
+					int n = static_cast<int>(SendMessage(hHDRCombo, CB_GETCURSEL, 0, 0));
+					cfg.graphics_cfg.hdr = (0 == n) ? 1 : 0;
+				}
+				{
+					HWND hStereoCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_COMBO);
+					int n = static_cast<int>(SendMessage(hStereoCombo, CB_GETCURSEL, 0, 0));
+					cfg.graphics_cfg.stereo_method = static_cast<StereoMethod>(n);
 				}
 				{
 					HWND hStereoSepEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_SEP_EDIT);
@@ -730,7 +741,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	int cx = ::GetSystemMetrics(SM_CXSCREEN);
 	int cy = ::GetSystemMetrics(SM_CYSCREEN);
 	int width = 420;
-	int height = 470;
+	int height = 480;
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,

@@ -1105,9 +1105,8 @@ namespace KlayGE
 				this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 
 				boost::array<uint32_t, 9> new_tile_id_with_neighbors;
-                std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
-                //new_tile_id_with_neighbors.fill(0xFFFFFFFF);
-				new_tile_id_with_neighbors[0] = tile_ids[i];
+				std::fill(new_tile_id_with_neighbors.begin(), new_tile_id_with_neighbors.end(), 0xFFFFFFFF);
+                new_tile_id_with_neighbors[0] = tile_ids[i];
 
 				if (tile_y > 0)
 				{

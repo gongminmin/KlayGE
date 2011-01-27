@@ -477,9 +477,9 @@ namespace KlayGE
 			motion_blur_node->AppendAttrib(cfg_doc.AllocAttribInt("frames", cfg_.graphics_cfg.motion_frames));
 			graphics_node->AppendNode(motion_blur_node);
 
-            XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
-            hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
-            graphics_node->AppendNode(hdr_node);
+			XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
+			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
+			graphics_node->AppendNode(hdr_node);
 
 			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
 			std::string method_str;

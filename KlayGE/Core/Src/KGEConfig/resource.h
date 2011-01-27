@@ -7,7 +7,7 @@
 #define IDC_SYNC_COMBO                  1014
 #define IDC_FACTORY_COMBO               1015
 #define IDC_STEREO_SEP_EDIT             1016
-#define IDC_BUTTON1                     1017
+#define IDC_HDR_COMBO                   1017
 #define IDC_STEREO_COMBO                1018
 #define IDC_CLR_FMT_COMBO               1019
 #define IDC_DEPTH_FMT_COMBO             1020

@@ -56,8 +56,8 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(1U, w / 2);
-				h = std::max(1U, h / 2);
+				w = std::max<uint32_t>(1U, w / 2);
+				h = std::max<uint32_t>(1U, h / 2);
 			}
 		}
 		else
