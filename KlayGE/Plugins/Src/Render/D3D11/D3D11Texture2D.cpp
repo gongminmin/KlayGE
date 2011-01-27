@@ -55,8 +55,8 @@ namespace KlayGE
 			{
 				++ num_mip_maps_;
 
-				w = std::max(1U, w / 2);
-				h = std::max(1U, h / 2);
+				w = std::max<uint32_t>(1U, w / 2);
+				h = std::max<uint32_t>(1U, h / 2);
 			}
 		}
 		else
@@ -452,8 +452,8 @@ namespace KlayGE
 		heights_[0] = desc_.Height;
 		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
 		{
-			widthes_[level] = std::max(1U, widthes_[level - 1] / 2);
-			heights_[level] = std::max(1U, heights_[level - 1] / 2);
+			widthes_[level] = std::max<uint32_t>(1U, widthes_[level - 1] / 2);
+			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
 		}
 
 		switch (desc_.Format)

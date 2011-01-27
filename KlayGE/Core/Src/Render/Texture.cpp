@@ -792,8 +792,8 @@ namespace
 							}
 						}
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 
@@ -814,8 +814,8 @@ namespace
 
 						start += tex_desc->tex_data[i].slice_pitch;
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
@@ -851,8 +851,8 @@ namespace
 							}
 						}
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 
@@ -873,8 +873,8 @@ namespace
 
 						start += tex_desc->tex_data[i].slice_pitch;
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
@@ -910,8 +910,8 @@ namespace
 							}
 						}
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 
@@ -932,8 +932,8 @@ namespace
 
 						start += tex_desc->tex_data[i].slice_pitch;
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
@@ -957,8 +957,8 @@ namespace
 							p += tex_desc->tex_data[i].row_pitch;
 						}
 
-						width = std::max(1U, width / 2);
-						height = std::max(1U, height / 2);
+						width = std::max<uint32_t>(1U, width / 2);
+						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 
