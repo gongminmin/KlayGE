@@ -37,7 +37,7 @@ private:
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr sun_flare_;
 	KlayGE::PostProcessPtr copy_pp_;
-	KlayGE::PostProcessPtr hdr_pp_;
+	KlayGE::PostProcessPtr copy2_pp_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -47,8 +47,8 @@ private:
 	KlayGE::TexturePtr reflection_blur_tex_;
 	KlayGE::FrameBufferPtr reflection_fb_;
 	KlayGE::PostProcessPtr blur_y_;
-	KlayGE::TexturePtr hdr_tex_;
-	KlayGE::FrameBufferPtr hdr_fb_;
+	KlayGE::TexturePtr composed_tex_;
+	KlayGE::FrameBufferPtr composed_fb_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;

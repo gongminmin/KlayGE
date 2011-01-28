@@ -20,7 +20,6 @@
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/InfTerrain.hpp>
 #include <KlayGE/LensFlare.hpp>
-#include <KlayGE/HDRPostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -774,10 +773,6 @@ OceanApp::OceanApp()
 				: App3DFramework("Ocean")
 {
 	ResLoader::Instance().AddPath("../Samples/media/Ocean");
-
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
 }
 
 bool OceanApp::ConfirmDevice() const
@@ -842,7 +837,7 @@ void OceanApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
+	copy2_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
 	refraction_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
@@ -854,8 +849,8 @@ void OceanApp::InitObjects()
 
 	blur_y_ = MakeSharedPtr<BlurYPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
-	hdr_fb_ = rf.MakeFrameBuffer();
-	hdr_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+	composed_fb_ = rf.MakeFrameBuffer();
+	composed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
@@ -958,13 +953,13 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	blur_y_->InputPin(0, reflection_tex_);
 	blur_y_->OutputPin(0, reflection_blur_tex_);
 
-	hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, reflection_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	hdr_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 0));
-	hdr_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	composed_tex_ = rf.MakeTexture2D(width, height, 1, 1, reflection_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	composed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*composed_tex_, 0, 0));
+	composed_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	copy_pp_->InputPin(0, refraction_tex_);
-	copy_pp_->OutputPin(0, hdr_tex_);
-	hdr_pp_->InputPin(0, hdr_tex_);
+	copy_pp_->OutputPin(0, composed_tex_);
+	copy2_pp_->InputPin(0, composed_tex_);
 
 	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
 	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
@@ -1139,7 +1134,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 
 	case 2:
 		blur_y_->Apply();
-		re.BindFrameBuffer(hdr_fb_);
+		re.BindFrameBuffer(composed_fb_);
 		copy_pp_->Apply();
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
@@ -1150,7 +1145,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	default:
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-		hdr_pp_->Apply();
+		copy2_pp_->Apply();
 
 		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 	}
