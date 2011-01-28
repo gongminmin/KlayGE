@@ -1065,7 +1065,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<void*> const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
@@ -1080,6 +1080,7 @@ namespace KlayGE
 				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
 			}
 
+			shader_srvsrc_cache_[st] = srvsrcs;
 			shader_srv_cache_[st] = srvs;
 		}
 	}
@@ -1102,26 +1103,20 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::DetachTextureByRTV(ID3D11RenderTargetView* rtv)
+	void D3D11RenderEngine::DetachTextureByRTV(void* rtv_src)
 	{
-		ID3D11Resource* rtv_tex;
-		rtv->GetResource(&rtv_tex);
-
-		ID3D11Resource* srv_tex;
 		for (uint32_t st = 0; st < ShaderObject::ST_NumShaderTypes; ++ st)
 		{
 			bool cleared = false;
-			for (uint32_t i = 0; i < shader_srv_cache_[st].size(); ++ i)
+			for (uint32_t i = 0; i < shader_srvsrc_cache_[st].size(); ++ i)
 			{
-				if (shader_srv_cache_[st][i])
+				if (shader_srvsrc_cache_[st][i])
 				{
-					shader_srv_cache_[st][i]->GetResource(&srv_tex);
-					if (srv_tex == rtv_tex)
+					if (shader_srvsrc_cache_[st][i] == rtv_src)
 					{
 						shader_srv_cache_[st][i] = NULL;
 						cleared = true;
 					}
-					srv_tex->Release();
 				}
 			}
 
@@ -1130,7 +1125,5 @@ namespace KlayGE
 				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_cache_[st].size()), &shader_srv_cache_[st][0]);
 			}
 		}
-
-		rtv_tex->Release();
 	}
 }

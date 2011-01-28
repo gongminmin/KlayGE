@@ -92,24 +92,27 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
+		std::vector<void*> rt_src(clr_views_.size());
 		std::vector<ID3D11RenderTargetView*> rt_view(clr_views_.size());
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{
+				rt_src[i] = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get())->RTSrc();
 				rt_view[i] = this->D3DRTView(i).get();
 			}
 			else
 			{
+				rt_src[i] = NULL;
 				rt_view[i] = NULL;
 			}
 		}
 
 		for (uint32_t i = 0; i < rt_view.size(); ++ i)
 		{
-			if (rt_view[i] != NULL)
+			if (rt_src[i] != NULL)
 			{
-				re.DetachTextureByRTV(rt_view[i]);
+				re.DetachTextureByRTV(rt_src[i]);
 			}
 		}
 
