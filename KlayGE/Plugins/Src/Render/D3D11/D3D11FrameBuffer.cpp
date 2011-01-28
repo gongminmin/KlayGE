@@ -117,7 +117,7 @@ namespace KlayGE
 		
 		d3d_viewport_.Width = static_cast<float>(viewport_.width);
 		d3d_viewport_.Height = static_cast<float>(viewport_.height);
-		d3d_imm_ctx->RSSetViewports(1, &d3d_viewport_);
+		re.RSSetViewports(1, &d3d_viewport_);
 	}
 
 	void D3D11FrameBuffer::OnUnbind()

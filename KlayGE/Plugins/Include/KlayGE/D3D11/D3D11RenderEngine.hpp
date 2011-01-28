@@ -147,6 +147,7 @@ namespace KlayGE
 		void SetShaderResources(ShaderObject::ShaderType st, std::vector<ID3D11ShaderResourceView*> const & srvs);
 		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers);
 		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs);
+		void RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports);
 		
 		void ResetRenderStates();
 		void DetachTextureByRTV(ID3D11RenderTargetView* rtv);
@@ -212,6 +213,7 @@ namespace KlayGE
 		ID3D11DomainShaderPtr domain_shader_cache_;
 		RenderLayout::topology_type topology_type_cache_;
 		ID3D11InputLayoutPtr input_layout_cache_;
+		D3D11_VIEWPORT viewport_cache_;
 
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
 		boost::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;

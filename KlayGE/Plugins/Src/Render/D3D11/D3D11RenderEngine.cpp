@@ -377,6 +377,8 @@ namespace KlayGE
 		input_layout_cache_.reset();
 		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_.get());
 
+		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
+
 		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
 			if (!shader_sampler_cache_[i].empty())
@@ -1039,6 +1041,27 @@ namespace KlayGE
 		{
 			d3d_imm_ctx_->DSSetShader(shader.get(), NULL, 0);
 			domain_shader_cache_ = shader;
+		}
+	}
+
+	void D3D11RenderEngine::RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports)
+	{
+		if (NumViewports > 1)
+		{
+			d3d_imm_ctx_->RSSetViewports(NumViewports, pViewports);
+		}
+		else
+		{
+			if (!(MathLib::equal(pViewports->TopLeftX, viewport_cache_.TopLeftX)
+				&& MathLib::equal(pViewports->TopLeftY, viewport_cache_.TopLeftY)
+				&& MathLib::equal(pViewports->Width, viewport_cache_.Width)
+				&& MathLib::equal(pViewports->Height, viewport_cache_.Height)
+				&& MathLib::equal(pViewports->MinDepth, viewport_cache_.MinDepth)
+				&& MathLib::equal(pViewports->MaxDepth, viewport_cache_.MaxDepth)))
+			{
+				viewport_cache_ = *pViewports;
+				d3d_imm_ctx_->RSSetViewports(NumViewports, pViewports);
+			}
 		}
 	}
 
