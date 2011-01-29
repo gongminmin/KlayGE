@@ -381,6 +381,14 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
+			if (!shader_srv_cache_[i].empty())
+			{
+				std::fill(shader_srv_cache_[i].begin(), shader_srv_cache_[i].end(), static_cast<ID3D11ShaderResourceView*>(NULL));
+				ShaderSetShaderResources[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_cache_[i].size()), &shader_srv_cache_[i][0]);
+				shader_srvsrc_cache_[i].clear();
+				shader_srv_cache_[i].clear();
+			}
+
 			if (!shader_sampler_cache_[i].empty())
 			{
 				std::fill(shader_sampler_cache_[i].begin(), shader_sampler_cache_[i].end(), static_cast<ID3D11SamplerState*>(NULL));
