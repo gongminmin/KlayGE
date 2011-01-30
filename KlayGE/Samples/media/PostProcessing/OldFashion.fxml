@@ -15,7 +15,7 @@
 		<![CDATA[
 float4 OldFashionPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	const float3 to_intensity = float3(0.299f, 0.587f, 0.114f);
+	const float3 to_intensity = float3(0.2126f, 0.7152f, 0.0722f);
 	const float4 sepia = float4(0.191f, -0.054f, -0.221f, 0);
 
 	float3 c = src_tex.Sample(point_sampler, tc0).rgb;

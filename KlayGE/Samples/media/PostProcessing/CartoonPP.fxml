@@ -55,7 +55,7 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	float4 ndc = normal_depth_tex.Sample(point_sampler, tc0);
 	
 	float4 color = color_tex.Sample(point_sampler, tc0);
-	float toon = dot(saturate(color.rgb), float3(0.299f, 0.587f, 0.114f));
+	float toon = dot(saturate(color.rgb), float3(0.2126f, 0.7152f, 0.0722f));
 
 	float4 nd[9];
 	// Retrieve normal and depth data for all neighbors.

@@ -97,7 +97,7 @@ float4 ConstructGBuffer(float4 texcoord_depth_2x, float4 ts_to_view0_2y, float4 
 	float specular;
 	if (specular_map_enabled)
 	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).rgb, 0.333f);
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
 	}
 	else
 	{
@@ -270,7 +270,9 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit)
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	return float4(max(emit + (lighting.rgb * diffuse + specular_normalize_factor(shininess) * lighting.a) * ssao, 0), 1);
+	float3 diff_lighting = lighting.rgb;
+	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
+	return float4(max(emit + (diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting) * ssao, 0), 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0

@@ -47,7 +47,7 @@ void SumLumVS(float4 pos : POSITION,
 float4 SumLum4x4LogPS(float4 iTex0 : TEXCOORD0,
 						float4 iTex1 : TEXCOORD1) : SV_Target
 {
-	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	float4 tex[2] = { iTex0, iTex1 };
 
 	float s = 0;
@@ -129,7 +129,7 @@ void SumLum4x4LogCS(uint3 tid : SV_DispatchThreadID, uint GI : SV_GroupIndex, ui
 {
 	float2 faddr = (tid.xy * 2 + 0.5f) / dst_tex_dim;
 
-	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	
 	shared_l[GI] = log(dot(src_tex.SampleLevel(src_sampler, faddr, 0).rgb, RGB_TO_LUM) + 0.001f);
 	for (uint step = 128; step > 16; step >>= 1)

@@ -122,7 +122,7 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	float3 refracted_clr = y.xyz * float3(refracted_c.x, (1 - refracted_c.z - refracted_c.w), refracted_c.y);
 	float3 reflected_clr = y.w * float3(reflected_c.y, (1 - reflected_c.y - reflected_c.x), reflected_c.x);
 
-	return float4(lerp(refracted_clr, reflected_clr, refract_vec.w) / float3(0.299f, 0.587f, 0.114f), 1);
+	return float4(lerp(refracted_clr, reflected_clr, refract_vec.w) / float3(0.2126f, 0.7152f, 0.0722f), 1);
 }
 		]]>
 	</shader>

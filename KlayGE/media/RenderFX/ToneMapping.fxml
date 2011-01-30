@@ -28,7 +28,7 @@ float EyeAdaption(float lum)
 
 float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 {
-	const float3 RGB_TO_LUM = float3(0.27, 0.67, 0.06);
+	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	const float3 BLUE_SHIFT = float3(0.4f, 0.4f, 0.7f);
 
 	color += blur * 0.25f;

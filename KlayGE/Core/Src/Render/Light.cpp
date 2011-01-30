@@ -82,7 +82,7 @@ namespace KlayGE
 	void LightSource::Color(float3 const & clr)
 	{
 		color_ = float4(clr.x(), clr.y(), clr.z(),
-			MathLib::dot(clr, float3(0.27f, 0.67f, 0.06f)));
+			MathLib::dot(clr, float3(0.2126f, 0.7152f, 0.0722f)));
 	}
 
 	float3 const & LightSource::Position() const
