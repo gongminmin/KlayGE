@@ -66,6 +66,7 @@ SET(KLAYGE_CORELIB_NAME KlayGE_Core)  # Dependency of all other targets
 FIND_PATH(KLAYGE_PROJECT_DIR klayge_logo.ico PATHS ../../)
 
 SET(3RDPARTY_DIR "$ENV{KLAYGE_HOME}" CACHE PATH "Location of 3rdparty dependencies")
+FIND_PACKAGE(Doxygen)
 FIND_PACKAGE(OpenGL)
 FIND_PACKAGE(Boost 1.40.0 COMPONENTS filesystem system thread signals)
 FIND_PACKAGE(PythonLibs)
@@ -193,6 +194,32 @@ OPTION(BUILD_SAMPLES "Build KlayGE samples. " ON)
 IF(BUILD_SAMPLES)
     ADD_SUBDIRECTORY(Samples)
 ENDIF(BUILD_SAMPLES)
+
+
+# Documentation configuration
+OPTION(BUILD_DOCUMENTATION "Build KlayGE API documentation" ON)
+IF(BUILD_DOCUMENTATION)
+    OPTION(BUILD_HTMLHELP "Also build HTML help file (.chm)" OFF)
+    IF(BUILD_HTMLHELP)
+        SET(GENERATE_HTMLHELP YES)
+        FIND_PROGRAM(HHC_FILE hhc.exe PATHS $ENV{PATH})
+    ELSE(BUILD_HTMLHELP)
+        SET(GENERATE_HTMLHELP NO)
+    ENDIF(BUILD_HTMLHELP)
+    
+    IF(DOT)
+        SET(HAVE_DOT YES)
+    ELSE(DOT)
+        SET(HAVE_DOT NO)
+    ENDIF(DOT)
+    
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/Doc/Doxyfiles/doxyfile.cmake
+        ${PROJECT_BINARY_DIR}/Doc/doxyfile
+    )
+    ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN}
+        ${PROJECT_BINARY_DIR}/Doc/doxyfile
+    )
+ENDIF(BUILD_DOCUMENTATION)
 
 
 # Uninstalling configuration
