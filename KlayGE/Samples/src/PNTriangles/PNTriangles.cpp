@@ -33,12 +33,92 @@ using namespace KlayGE;
 
 namespace
 {
+	enum TessMode
+	{
+		TM_HWTess,
+		TM_InstancedTess,
+		TM_No
+	};
+
+	std::vector<GraphicsBufferPtr> tess_pattern_vbs;
+	std::vector<GraphicsBufferPtr> tess_pattern_ibs;
+
+	void InitInstancedTessBuffs()
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		tess_pattern_vbs.resize(32);
+		tess_pattern_ibs.resize(tess_pattern_vbs.size());
+
+		ElementInitData init_data;
+		
+		std::vector<float2> vert;
+		vert.push_back(float2(0, 0));
+		vert.push_back(float2(1, 0));
+		vert.push_back(float2(0, 1));
+		init_data.row_pitch = vert.size() * sizeof(vert[0]);
+		init_data.slice_pitch = 0;
+		init_data.data = &vert[0];
+		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+		std::vector<uint16_t> index;
+		index.push_back(0);
+		index.push_back(1);
+		index.push_back(2);
+		init_data.row_pitch = index.size() * sizeof(index[0]);
+		init_data.slice_pitch = 0;
+		init_data.data = &index[0];
+		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+		for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
+		{
+			for (size_t j = 0; j < vert.size(); ++ j)
+			{
+				float f = i / (i + 1.0f);
+				vert[j] *= f;
+			}
+
+			for (size_t j = 0; j < i + 1; ++ j)
+			{
+				vert.push_back(float2(1 - j / (i + 1.0f), j / (i + 1.0f)));
+			}
+			vert.push_back(float2(0, 1));
+
+			uint16_t last_1_row = static_cast<uint16_t>(vert.size() - (i + 2));
+			uint16_t last_2_row = static_cast<uint16_t>(last_1_row - (i + 1));
+
+			for (size_t j = 0; j < i; ++ j)
+			{
+				index.push_back(static_cast<uint16_t>(last_2_row + j));
+				index.push_back(static_cast<uint16_t>(last_1_row + j));
+				index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
+
+				index.push_back(static_cast<uint16_t>(last_2_row + j));
+				index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
+				index.push_back(static_cast<uint16_t>(last_2_row + j + 1));
+			}
+			index.push_back(static_cast<uint16_t>(last_2_row + i));
+			index.push_back(static_cast<uint16_t>(last_1_row + i));
+			index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
+
+			init_data.row_pitch = vert.size() * sizeof(vert[0]);
+			init_data.slice_pitch = 0;
+			init_data.data = &vert[0];
+			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+			init_data.row_pitch = index.size() * sizeof(index[0]);
+			init_data.slice_pitch = 0;
+			init_data.data = &index[0];
+			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		}
+	}
+
 	class PNTrianglesSkinnedModel;
 
 	class PNTrianglesSkinnedMesh : public SkinnedMesh
 	{
 	public:
-		PNTrianglesSkinnedMesh(RenderModelPtr model, std::wstring const & name)
+		PNTrianglesSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 			: SkinnedMesh(model, name),
 				tess_factor_(5), line_mode_(false)
 		{
@@ -46,7 +126,20 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			RenderEffectPtr effect = rf.LoadEffect("PNTriangles.fxml");
-			if (caps.max_shader_model < 5)
+			if (caps.max_shader_model >= 5)
+			{
+				tess_mode_ = TM_HWTess;
+			}
+			else if (caps.max_shader_model >= 4)
+			{
+				tess_mode_ = TM_InstancedTess;
+			}
+			else
+			{
+				tess_mode_ = TM_No;
+			}
+
+			if (TM_No == tess_mode_)
 			{
 				pn_enabled_ = false;
 				technique_ = effect->TechniqueByName("NoPNTriangles");
@@ -57,6 +150,28 @@ namespace
 				pn_enabled_ = true;
 				technique_ = effect->TechniqueByName("PNTriangles");
 				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+			}
+
+			if (tess_mode_ != TM_No)
+			{
+				tess_pattern_rl_ = rf.MakeRenderLayout();
+				tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+				skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+				skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+				skinned_rl_ = rf.MakeRenderLayout();
+				skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+				point_rl_ = rf.MakeRenderLayout();
+				point_rl_->TopologyType(RenderLayout::TT_PointList);
+
+				bindable_ib_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL, EF_R16UI);
+
+				mesh_rl_ = rl_;
+
+				*(effect->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
+				*(effect->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
+				*(effect->ParameterByName("index_buf")) = bindable_ib_;
 			}
 		}
 
@@ -77,9 +192,26 @@ namespace
 				}
 			}
 			*(technique_->Effect().ParameterByName("diffuse_tex")) = dm;
+
+			if (tess_mode_ != TM_No)
+			{
+				skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
+				skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
+				skinned_rl_->BindVertexStream(skinned_pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				skinned_rl_->BindVertexStream(skinned_normal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+
+				for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+				{
+					point_rl_->BindVertexStream(rl_->GetVertexStream(i), rl_->VertexStreamFormat(i));
+				}
+
+				bindable_ib_->Resize(rl_->GetIndexStream()->Size());
+				rl_->GetIndexStream()->CopyToBuffer(*bindable_ib_);
+			}
 		}
 
-		void SetModelMatrix(float4x4 model_matrix)
+		void SetModelMatrix(float4x4 const & model_matrix)
 		{
 			model_matrix_ = model_matrix;
 		}
@@ -87,6 +219,7 @@ namespace
 		void LineMode(bool line)
 		{
 			line_mode_ = line;
+			this->UpdateTech();
 		}
 
 		void AdaptiveTess(bool adaptive)
@@ -96,12 +229,22 @@ namespace
 
 		void SetTessFactor(int32_t tess_factor)
 		{
+			if (TM_InstancedTess == tess_mode_)
+			{
+				tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
+
+				tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
+				tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
+					RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
+			}
+
 			tess_factor_ = static_cast<float>(tess_factor);
 		}
 
 		void EnablePNTriangles(bool pn)
 		{
 			pn_enabled_ = pn;
+			this->UpdateTech();
 		}
 
 		void LightDir(float3 const & dir)
@@ -109,7 +252,7 @@ namespace
 			*(technique_->Effect().ParameterByName("light_dir")) = dir;
 		}
 
-		void OnRenderBegin()
+		void UpdateTech()
 		{
 			if (pn_enabled_)
 			{
@@ -121,7 +264,8 @@ namespace
 				{
 					technique_ = technique_->Effect().TechniqueByName("PNTriangles");
 				}
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				mesh_rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				rl_ = mesh_rl_;
 			}
 			else
 			{
@@ -133,9 +277,12 @@ namespace
 				{
 					technique_ = technique_->Effect().TechniqueByName("NoPNTriangles");
 				}
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
+				mesh_rl_->TopologyType(RenderLayout::TT_TriangleList);
 			}
+		}
 
+		void OnRenderBegin()
+		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
@@ -158,11 +305,57 @@ namespace
 			}
 		}
 
+		void Render()
+		{
+			if (pn_enabled_)
+			{
+				if (TM_HWTess == tess_mode_)
+				{
+					rl_ = mesh_rl_;
+					SkinnedMesh::Render();
+				}
+				else
+				{
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					re.BindSOBuffers(skinned_rl_);
+					rl_ = point_rl_;
+					technique_ = technique_->Effect().TechniqueByName("SkinnedStreamOut");
+					SkinnedMesh::Render();
+					re.BindSOBuffers(RenderLayoutPtr());
+
+					if (line_mode_)
+					{
+						technique_ = technique_->Effect().TechniqueByName("InstTessPNTrianglesLine");
+					}
+					else
+					{
+						technique_ = technique_->Effect().TechniqueByName("InstTessPNTriangles");
+					}
+					rl_ = tess_pattern_rl_;
+					SkinnedMesh::Render();
+				}
+			}
+			else
+			{
+				rl_ = mesh_rl_;
+				SkinnedMesh::Render();
+			}
+		}
+
 	private:
 		float4x4 model_matrix_;
 		float tess_factor_;
 		bool line_mode_;
 		bool pn_enabled_;
+		TessMode tess_mode_;
+
+		RenderLayoutPtr mesh_rl_;
+		RenderLayoutPtr point_rl_;
+		RenderLayoutPtr skinned_rl_;
+		RenderLayoutPtr tess_pattern_rl_;
+		GraphicsBufferPtr skinned_pos_vb_;
+		GraphicsBufferPtr skinned_normal_vb_;
+		GraphicsBufferPtr bindable_ib_;
 	};
 
 	class PNTrianglesSkinnedModel : public SkinnedModel
@@ -173,7 +366,7 @@ namespace
 		{
 		}
 
-		void SetModelMatrix(float4x4 model_matrix)
+		void SetModelMatrix(float4x4 const & model_matrix)
 		{
 			for (uint32_t i = 0; i < this->NumMeshes(); ++ i)
 			{
@@ -334,6 +527,8 @@ bool PNTrianglesApp::ConfirmDevice() const
 
 void PNTrianglesApp::InitObjects()
 {
+	InitInstancedTessBuffs();
+
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -389,7 +584,7 @@ void PNTrianglesApp::InitObjects()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-	bool tess_support = (caps.max_shader_model >= 5);
+	bool tess_support = (caps.max_shader_model >= 4);
 
 	dialog_params_->Control<UIStatic>(id_warning_static_)->SetVisible(!tess_support);
 

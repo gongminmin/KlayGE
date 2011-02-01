@@ -214,6 +214,7 @@ namespace KlayGE
 		RenderLayout::topology_type topology_type_cache_;
 		ID3D11InputLayoutPtr input_layout_cache_;
 		D3D11_VIEWPORT viewport_cache_;
+		uint32_t num_so_buffs_;
 
 		boost::array<std::vector<void*>, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;

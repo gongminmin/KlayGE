@@ -88,7 +88,7 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : T
 {
 	float3 l = normalize(-light_dir);
 	float3 n = normalize(normal);
-	float3 e = normalize(eye_pos - pos_es);
+	float3 e = normalize(-pos_es);
 
 	float3 diff_clr = diffuse_tex.Sample(linear_sampler, oTex0).rgb;
 	return float4(0.2f * diff_clr + calc_brdf(diff_clr, 0.1f, 20, l, normalize(l + e), n), 1);
@@ -108,6 +108,169 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : T
 			<state name="polygon_mode" value="line"/>
 			
 			<state name="vertex_shader" value="NoPNTrianglesVS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="buffer" elem_type="float4" name="skinned_pos_buf"/>
+	<parameter type="buffer" elem_type="float4" name="skinned_normal_buf"/>
+	<parameter type="buffer" elem_type="uint" name="index_buf"/>
+
+	<shader>
+		<![CDATA[
+void SkinnedStreamOutVS(float3 pos : POSITION,
+					float2 texcoord0 : TEXCOORD0,
+					float3 normal : NORMAL,
+					float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+					float4 blend_indices_f : BLENDINDICES,
+#else
+#ifdef KLAYGE_OPENGLES2
+					float4 blend_indices_f : BLENDINDICES,
+#else
+					int4 blend_indices : BLENDINDICES,
+#endif
+#endif
+
+					out float4 oPosWS : SV_Position,
+					out float4 oNormal : TEXCOORD0)
+{
+#ifdef KLAYGE_OPENGL
+	int4 blend_indices = (int4)blend_indices_f;
+#else
+#ifdef KLAYGE_OPENGLES2
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+#endif
+
+	float3 result_pos, result_normal;
+	Skinned(pos, normal, blend_weights, blend_indices,
+		result_pos, result_normal);
+
+	oPosWS = float4(mul(float4(result_pos, 1), world).xyz, texcoord0.x);
+	oNormal = float4(mul(result_normal, (float3x3)world), texcoord0.y);
+}
+
+void InstTessPNTrianglesVS(float2 barycentric : TEXCOORD1,
+
+					uint instance_id : SV_InstanceID,
+					
+					out float2 oTex0 : TEXCOORD0,
+					out float3 oNormal : TEXCOORD1,
+					out float3 oPosES : TEXCOORD2,
+					out float4 oPos : SV_Position)
+{
+	uint index0 = index_buf.Load(instance_id * 3 + 0);
+	float4 pos_ws0 = skinned_pos_buf.Load(index0);
+	float4 normal0 = skinned_normal_buf.Load(index0);
+	uint index1 = index_buf.Load(instance_id * 3 + 1);
+	float4 pos_ws1 = skinned_pos_buf.Load(index1);
+	float4 normal1 = skinned_normal_buf.Load(index1);
+	uint index2 = index_buf.Load(instance_id * 3 + 2);
+	float4 pos_ws2 = skinned_pos_buf.Load(index2);
+	float4 normal2 = skinned_normal_buf.Load(index2);
+	
+	// Assign Positions
+	float3 b003 = pos_ws0.xyz;
+	float3 b030 = pos_ws1.xyz;
+	float3 b300 = pos_ws2.xyz;
+	// And Normals
+	float3 n002 = normal0.xyz;
+	float3 n020 = normal1.xyz;
+	float3 n200 = normal2.xyz;
+    
+	// Compute the cubic geometry control points
+	// Edge control points
+	float3 b210 = (2 * b003 + b030 - (dot(b030 - b003, n002) * n002)) / 3;
+	float3 b120 = (2 * b030 + b003 - (dot(b003 - b030, n020) * n020)) / 3;
+	float3 b021 = (2 * b030 + b300 - (dot(b300 - b030, n020) * n020)) / 3;
+	float3 b012 = (2 * b300 + b030 - (dot(b030 - b300, n200) * n200)) / 3;
+	float3 b102 = (2 * b300 + b003 - (dot(b003 - b300, n200) * n200)) / 3;
+	float3 b201 = (2 * b003 + b300 - (dot(b300 - b003, n002) * n002)) / 3;
+	// Center control point
+	float3 e = (b210 + b120 + b021 + b012 + b102 + b201) / 6;
+	float3 v = (b003 + b030 + b300) / 3;
+	float3 b111 = lerp(e, v, 0.5f);
+
+	// Compute the quadratic normal control points, and rotate into world space
+	float v12 = 2 * dot(b030 - b003, n002 + n020) / dot(b030 - b003, b030 - b003);
+	float3 n110 = normalize(n002 + n020 - v12 * (b030 - b003));
+	float v23 = 2 * dot(b300 - b030, n020 + n200) / dot(b300 - b030, b300 - b030);
+	float3 n011 = normalize(n020 + n200 - v23 * (b300 - b030));
+	float v31 = 2 * dot(b003 - b300, n200 + n002) / dot(b003 - b300, b003 - b300);
+	float3 n101 = normalize(n200 + n002 - v31 * (b003 - b300));
+
+	float3 world_pos, normal;
+	{
+		// The barycentric coordinates
+		float u = barycentric.x;
+		float v = barycentric.y;
+		float w = 1 - barycentric.x - barycentric.y;
+
+		// Precompute squares and squares * 3 
+		float uu = u * u;
+		float vv = v * v;
+		float ww = w * w;
+		float uu3 = uu * 3;
+		float vv3 = vv * 3;
+		float ww3 = ww * 3;
+
+		// Compute position from cubic control points and barycentric coords
+		world_pos = pos_ws0.xyz * ww * w
+						+ pos_ws1.xyz * uu * u
+						+ pos_ws2.xyz * vv * v
+						+ b210 * ww3 * u
+						+ b120 * w * uu3
+						+ b201 * ww3 * v
+						+ b021 * uu3 * v
+						+ b102 * w * vv3
+						+ b012 * u * vv3
+						+ b111 * 6 * w * u * v;
+
+		// Compute normal from quadratic control points and barycentric coords
+		normal = normal0.xyz * ww
+						+ normal1.xyz * uu
+						+ normal2.xyz * vv
+						+ n110 * w * u
+						+ n011 * u * v
+						+ n101 * w * v;
+		normal = normalize(normal);
+	
+		oTex0 = float2(pos_ws0.w, normal0.w) * w + float2(pos_ws1.w, normal1.w) * u + float2(pos_ws2.w, normal2.w) * v;
+	}
+
+	oPos = mul(float4(world_pos, 1), viewproj);
+	oNormal = mul(normal, (float3x3)view);
+	oPosES = mul(float4(world_pos, 1), view).xyz;
+}
+		]]>
+	</shader>
+
+	<technique name="SkinnedStreamOut">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+			
+			<state name="vertex_shader" value="SkinnedStreamOutVS()">
+				<stream_output>
+					<slot usage="POSITION" component="xyzw"/>
+					<slot usage="TEXCOORD" usage_index="0" component="xyzw"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<technique name="InstTessPNTriangles">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessPNTrianglesVS()"/>
+			<state name="pixel_shader" value="PS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="InstTessPNTrianglesLine">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="InstTessPNTrianglesVS()"/>
 			<state name="pixel_shader" value="PS()"/>
 		</pass>
 	</technique>

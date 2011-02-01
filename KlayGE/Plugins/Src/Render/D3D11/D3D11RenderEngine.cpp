@@ -103,6 +103,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::D3D11RenderEngine()
+		: num_so_buffs_(0)
 	{
 		// Dynamic loading because these dlls can't be loaded on WinXP
 		mod_dxgi_ = ::LoadLibraryW(L"dxgi.dll");
@@ -465,10 +466,16 @@ namespace KlayGE
 			}
 
 			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+
+			num_so_buffs_ = num_buffs;
 		}
 		else
 		{
-			d3d_imm_ctx_->SOSetTargets(0, NULL, NULL);
+			std::vector<ID3D11Buffer*> d3d11_buffs(num_so_buffs_, NULL);
+			std::vector<UINT> d3d11_buff_offsets(num_so_buffs_, 0);
+			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_so_buffs_), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
+
+			num_so_buffs_ = num_buffs;
 		}
 	}
 
@@ -591,7 +598,8 @@ namespace KlayGE
 		numVerticesJustRendered_ += vertex_count;
 
 		uint32_t const num_passes = tech.NumPasses();
-		if (rl.InstanceStream())
+		uint32_t const num_instances = rl.NumInstance();
+		if (num_instances > 1)
 		{
 			if (rl.UseIndices())
 			{
@@ -599,7 +607,6 @@ namespace KlayGE
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
 
 				uint32_t const num_indices = rl.NumIndices();
-				uint32_t const num_instances = rl.NumInstance();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
@@ -614,7 +621,6 @@ namespace KlayGE
 				d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
 
 				uint32_t const num_vertices = rl.NumVertices();
-				uint32_t const num_instances = rl.NumInstance();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
 					RenderPassPtr const & pass = tech.Pass(i);
