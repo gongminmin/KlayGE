@@ -138,7 +138,7 @@ void TextApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Text", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 	font_->RenderText(0, 56, 0.5f, 1, 1, Color(1, 1, 1, 1), text_, static_cast<uint32_t>(32 * scale_));
 

@@ -829,7 +829,7 @@ namespace KlayGE
 								}
 								vertex_elements.push_back(ve);
 
-								tex_coord_buf.back().resize(num_vertices * max_num_tc_components[usage], 0);
+								tex_coord_buf[usage].resize(num_vertices * max_num_tc_components[usage], 0);
 							}
 
 							if (has_tangent)

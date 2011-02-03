@@ -542,7 +542,7 @@ void ModelViewerApp::DoUpdateOverlay()
 	stream << std::fixed << this->FPS() << " FPS";
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), renderEngine.Name(), 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 }
 

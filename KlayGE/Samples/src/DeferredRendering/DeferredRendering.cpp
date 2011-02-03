@@ -1093,7 +1093,7 @@ void DeferredRenderingApp::DoUpdateOverlay()
 	UIManager::Instance().Render();
 
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Rendering", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.CurFrameBuffer()->Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;
 	stream.precision(2);

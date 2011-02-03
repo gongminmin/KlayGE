@@ -349,19 +349,13 @@ void PostProcessingApp::DoUpdateOverlay()
 
 	UIManager::Instance().Render();
 
-	FrameBufferPtr const & fb = renderEngine.CurFrameBuffer();
-
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Post Processing", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), fb->Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;
-	stream << fb->DepthBits() << " bits depth " << fb->StencilBits() << " bits stencil";
-	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
-
-	stream.str(L"");
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
-	font_->RenderText(0, 54, Color(1, 1, 0, 1), stream.str(), 16);
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)

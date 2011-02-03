@@ -782,7 +782,7 @@ void GPUParticleSystemApp::DoUpdateOverlay()
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
-	font_->RenderText(0, 36, Color(1, 1, 0, 1), re.CurFrameBuffer()->Description(), 16);
+	font_->RenderText(0, 36, Color(1, 1, 0, 1), re.ScreenFrameBuffer()->Description(), 16);
 
 	UIManager::Instance().Render();
 }

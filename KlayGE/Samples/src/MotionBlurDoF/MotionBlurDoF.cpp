@@ -712,10 +712,8 @@ void MotionBlurDoFApp::DoUpdateOverlay()
 
 	UIManager::Instance().Render();
 
-	FrameBuffer& rw = *renderEngine.CurFrameBuffer();
-
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Motion Blur and Depth of field", 16);
-	font_->RenderText(0, 18, Color(1, 1, 0, 1), rw.Description(), 16);
+	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;
 	stream.precision(2);
