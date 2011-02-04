@@ -891,10 +891,33 @@ void DeferredRenderingApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = MakeSharedPtr<DeferredRenderingLayer>();
-	ambient_light_ = deferred_rendering_->AddAmbientLight(float3(1, 1, 1));
-	point_light_ = deferred_rendering_->AddPointLight(0, float3(0, 0, 0), float3(3, 3, 3), float3(0, 0.2f, 0));
-	spot_light_[0] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 6, PI / 8, float3(2, 0, 0), float3(0, 0.2f, 0));
-	spot_light_[1] = deferred_rendering_->AddSpotLight(0, float3(0, 0, 0), float3(0, 0, 0), PI / 4, PI / 6, float3(0, 2, 0), float3(0, 0.2f, 0));
+	
+	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
+	ambient_light_->Color(float3(1, 1, 1));
+	ambient_light_->AddToSceneManager();
+
+	point_light_ = MakeSharedPtr<PointLightSource>();
+	point_light_->Attrib(0);
+	point_light_->Color(float3(3, 3, 3));
+	point_light_->Position(float3(0, 0, 0));
+	point_light_->Falloff(float3(0, 0.2f, 0));
+	point_light_->AddToSceneManager();
+
+	spot_light_[0] = MakeSharedPtr<SpotLightSource>();
+	spot_light_[0]->Attrib(0);
+	spot_light_[0]->Color(float3(2, 0, 0));
+	spot_light_[0]->Falloff(float3(0, 0.2f, 0));
+	spot_light_[0]->OuterAngle(PI / 6);
+	spot_light_[0]->InnerAngle(PI / 8);
+	spot_light_[0]->AddToSceneManager();
+
+	spot_light_[1] = MakeSharedPtr<SpotLightSource>();
+	spot_light_[1]->Attrib(0);
+	spot_light_[1]->Color(float3(0, 2, 0));
+	spot_light_[1]->Falloff(float3(0, 0.2f, 0));
+	spot_light_[1]->OuterAngle(PI / 4);
+	spot_light_[1]->InnerAngle(PI / 6);
+	spot_light_[1]->AddToSceneManager();
 
 	point_light_src_ = MakeSharedPtr<PointLightProxyObject>(1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
 	spot_light_src_[0] = MakeSharedPtr<SpotLightProxyObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());

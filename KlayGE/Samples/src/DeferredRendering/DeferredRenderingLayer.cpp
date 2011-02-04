@@ -118,8 +118,6 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		lights_.push_back(MakeSharedPtr<AmbientLightSource>());
-
 		g_buffer_ = rf.MakeFrameBuffer();
 		shadowing_buffer_ = rf.MakeFrameBuffer();
 		lighting_buffer_ = rf.MakeFrameBuffer();
@@ -286,49 +284,6 @@ namespace KlayGE
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
 
-	AmbientLightSourcePtr DeferredRenderingLayer::AddAmbientLight(float3 const & clr)
-	{
-		AmbientLightSourcePtr ambient = checked_pointer_cast<AmbientLightSource>(lights_[0]);
-		ambient->Color(float3(ambient->Color()) + clr);
-		return ambient;
-	}
-
-	PointLightSourcePtr DeferredRenderingLayer::AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff)
-	{
-		PointLightSourcePtr point = MakeSharedPtr<PointLightSource>();
-		point->Attrib(attr);
-		point->Color(clr);
-		point->Position(pos);
-		point->Falloff(falloff);
-		lights_.push_back(point);
-
-		return point;
-	}
-
-	DirectionalLightSourcePtr DeferredRenderingLayer::AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff)
-	{
-		DirectionalLightSourcePtr directional = MakeSharedPtr<DirectionalLightSource>();
-		directional->Attrib(attr);
-		directional->Color(clr);
-		directional->ModelMatrix(MathLib::inverse(MathLib::look_at_lh(float3(0, 0, 0), MathLib::normalize(dir))));
-		directional->Falloff(falloff);
-		lights_.push_back(directional);
-		return directional;
-	}
-
-	SpotLightSourcePtr DeferredRenderingLayer::AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff)
-	{
-		SpotLightSourcePtr spot = MakeSharedPtr<SpotLightSource>();
-		spot->Attrib(attr);
-		spot->Color(clr);
-		spot->ModelMatrix(MathLib::inverse(MathLib::look_at_lh(pos, pos + MathLib::normalize(dir))));
-		spot->Falloff(falloff);
-		spot->OuterAngle(outer);
-		spot->InnerAngle(inner);
-		lights_.push_back(spot);
-		return spot;
-	}
-
 	void DeferredRenderingLayer::SSAOTex(TexturePtr const & tex)
 	{
 		ssao_tex_ = tex;
@@ -408,9 +363,11 @@ namespace KlayGE
 
 		if (0 == pass)
 		{
+			lights_ = scene_mgr.LightSources();
+
 			deferred_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
-			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::reference so, scene_objs)
+			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
 			{
 				if (so->Attrib() & SOA_Deferred)
 				{

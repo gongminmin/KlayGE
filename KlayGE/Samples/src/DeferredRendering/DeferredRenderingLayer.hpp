@@ -268,11 +268,6 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
-		AmbientLightSourcePtr AddAmbientLight(float3 const & clr);
-		PointLightSourcePtr AddPointLight(int32_t attr, float3 const & pos, float3 const & clr, float3 const & falloff);
-		DirectionalLightSourcePtr AddDirectionalLight(int32_t attr, float3 const & dir, float3 const & clr, float3 const & falloff);
-		SpotLightSourcePtr AddSpotLight(int32_t attr, float3 const & pos, float3 const & dir, float outer, float inner, float3 const & clr, float3 const & falloff);
-
 		void SSAOTex(TexturePtr const & tex);
 		void SSAOEnabled(bool ssao);
 

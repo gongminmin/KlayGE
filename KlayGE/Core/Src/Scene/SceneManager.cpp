@@ -192,6 +192,16 @@ namespace KlayGE
 		lights_.erase(iter);
 	}
 
+	SceneManager::LightSourcesType& SceneManager::LightSources()
+	{
+		return lights_;
+	}
+
+	SceneManager::LightSourcesType const & SceneManager::LightSources() const
+	{
+		return lights_;
+	}
+
 	// 加入渲染物体
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)

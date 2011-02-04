@@ -58,6 +58,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable
 	{
 	public:
+		typedef std::vector<LightSourcePtr> LightSourcesType;
 		typedef std::vector<SceneObjectPtr> SceneObjectsType;
 
 	protected:
@@ -74,6 +75,9 @@ namespace KlayGE
 
 		void AddLight(LightSourcePtr const & light);
 		void DelLight(LightSourcePtr const & light);
+
+		LightSourcesType& LightSources();
+		LightSourcesType const & LightSources() const;
 
 		void AddSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DelSceneObject(SceneObjectsType::iterator iter);
@@ -101,7 +105,7 @@ namespace KlayGE
 
 	protected:
 		Frustum const * frustum_;
-		std::vector<LightSourcePtr> lights_;
+		LightSourcesType lights_;
 		SceneObjectsType scene_objs_;
 		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
 		boost::shared_ptr<std::vector<char> > visible_marks_;
