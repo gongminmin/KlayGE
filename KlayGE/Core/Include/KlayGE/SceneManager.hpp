@@ -98,7 +98,7 @@ namespace KlayGE
 		size_t NumVerticesRendered() const;
 
 	protected:
-		void Flush();
+		void Flush(uint32_t urt);
 
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual void OnDelSceneObject(SceneObjectsType::iterator iter) = 0;
@@ -109,7 +109,6 @@ namespace KlayGE
 		SceneObjectsType scene_objs_;
 		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
 		boost::shared_ptr<std::vector<char> > visible_marks_;
-		uint32_t urt_;
 
 		boost::unordered_map<size_t, boost::shared_ptr<std::vector<char> >, boost::hash<size_t>, std::equal_to<size_t>,
 			boost::fast_pool_allocator<std::pair<size_t, boost::shared_ptr<std::vector<char> > > > > visible_marks_map_;

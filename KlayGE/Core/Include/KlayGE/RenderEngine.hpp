@@ -139,7 +139,7 @@ namespace KlayGE
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;
 
-		void PostProcess();
+		void PostProcess(bool skip);
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
 		{
@@ -249,6 +249,7 @@ namespace KlayGE
 		RenderEffectPtr stereoscopic_effect_;
 		RenderTechniquePtr stereoscopic_tech_;
 
+		PostProcessPtr copy_pp_;
 		PostProcessChainPtr pp_chain_;
 		bool inside_pp_;
 	};

@@ -342,7 +342,7 @@ namespace KlayGE
 
 	// 把渲染队列中的物体渲染出来
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::Flush()
+	void SceneManager::Flush(uint32_t urt)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		App3DFramework& app = Context::Instance().AppInstance();
@@ -355,7 +355,7 @@ namespace KlayGE
 		Camera& camera = app.ActiveCamera();
 
 		visible_marks_ = MakeSharedPtr<std::vector<char> >(scene_objs_.size());
-		if (urt_ & App3DFramework::URV_Need_Flush)
+		if (urt & App3DFramework::URV_Need_Flush)
 		{
 			frustum_ = &camera.ViewFrustum();
 
@@ -386,7 +386,7 @@ namespace KlayGE
 		{
 			std::fill(visible_marks_->begin(), visible_marks_->end(), false);
 		}
-		if (urt_ & App3DFramework::URV_Overlay)
+		if (urt & App3DFramework::URV_Overlay)
 		{
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
@@ -520,30 +520,30 @@ namespace KlayGE
 
 		visible_marks_map_.clear();
 
+		uint32_t urt;
 		App3DFramework& app = Context::Instance().AppInstance();
 		for (uint32_t pass = 0;; ++ pass)
 		{
 			re.BeginPass();
 
-			urt_ = app.Update(pass);
+			urt = app.Update(pass);
 
-			if (urt_ & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
+			if (urt & (App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished))
 			{
-				this->Flush();
+				this->Flush(urt);
 			}
 
 			re.EndPass();
 
-			if (urt_ & App3DFramework::URV_Finished)
+			if (urt & App3DFramework::URV_Finished)
 			{
 				break;
 			}
 		}
 
-		re.PostProcess();
+		re.PostProcess(urt & App3DFramework::URV_Skip_Postprocess);
 
-		urt_ = App3DFramework::URV_Overlay;
-		this->Flush();
+		this->Flush(App3DFramework::URV_Overlay);
 
 		re.BindFrameBuffer(fb);
 	}

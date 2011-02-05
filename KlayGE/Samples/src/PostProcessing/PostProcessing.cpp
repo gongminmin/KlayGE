@@ -150,10 +150,6 @@ PostProcessingApp::PostProcessingApp()
 			: App3DFramework("Post Processing")
 {
 	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
-
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
 }
 
 bool PostProcessingApp::ConfirmDevice() const
@@ -374,6 +370,6 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 
-		return App3DFramework::URV_Finished;
+		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 	}
 }

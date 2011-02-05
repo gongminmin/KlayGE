@@ -42,15 +42,13 @@ private:
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
 	KlayGE::PostProcessPtr edge_anti_alias_;
+	KlayGE::PostProcessPtr copy_pp_;
 
 	KlayGE::TexturePtr ssao_tex_;
 	KlayGE::PostProcessPtr ssao_pp_;
 
 	KlayGE::TexturePtr blur_ssao_tex_;
 	KlayGE::PostProcessPtr blur_pp_;
-
-	KlayGE::TexturePtr hdr_tex_;
-	KlayGE::HDRPostProcessPtr hdr_pp_;
 
 	KlayGE::PostProcessPtr debug_pp_;
 

@@ -44,6 +44,7 @@
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
@@ -204,6 +205,9 @@ namespace KlayGE
 
 			pp_chain_->InputPin(0, before_pp_tex_);
 			this->BindFrameBuffer(before_pp_frame_buffer_);
+
+			copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+			copy_pp_->InputPin(0, before_pp_tex_);
 		}
 	}
 
@@ -386,7 +390,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEngine::PostProcess()
+	void RenderEngine::PostProcess(bool skip)
 	{
 		if (pp_chain_)
 		{
@@ -394,7 +398,14 @@ namespace KlayGE
 
 			this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-			pp_chain_->Apply();
+			if (skip)
+			{
+				copy_pp_->Apply();
+			}
+			else
+			{
+				pp_chain_->Apply();
+			}
 
 			inside_pp_ = false;
 		}

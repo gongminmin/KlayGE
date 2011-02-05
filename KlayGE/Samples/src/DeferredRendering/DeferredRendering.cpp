@@ -856,12 +856,6 @@ DeferredRenderingApp::DeferredRenderingApp()
 				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
 	ResLoader::Instance().AddPath("../Samples/media/DeferredRendering");
-
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.sample_count = 1;
-	context_cfg.graphics_cfg.sample_quality = 0;
-	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
 }
 
 bool DeferredRenderingApp::ConfirmDevice() const
@@ -943,7 +937,7 @@ void DeferredRenderingApp::InitObjects()
 	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
-	hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	debug_pp_ = MakeSharedPtr<DeferredRenderingDebug>();
 
@@ -999,23 +993,12 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	{
-		uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.cs_support && (5 == caps.max_shader_model))
-		{
-			access_hint |= EAH_GPU_Unordered;
-		}
-		hdr_tex_ = rf.MakeTexture2D(width, height, 1, 1, deferred_rendering_->ShadingTex()->Format(), 1, 0, access_hint, NULL);
-	}
-
 	deferred_rendering_->SSAOTex(blur_ssao_tex_);
 
 	edge_anti_alias_->InputPin(0, deferred_rendering_->GBufferTex());
 	edge_anti_alias_->InputPin(1, deferred_rendering_->ShadingTex());
-	edge_anti_alias_->OutputPin(0, hdr_tex_);
 
-	hdr_pp_->InputPin(0, hdr_tex_);
+	copy_pp_->InputPin(0, deferred_rendering_->ShadingTex());
 
 	ssao_pp_->InputPin(0, deferred_rendering_->GBufferTex());
 	ssao_pp_->OutputPin(0, ssao_tex_);
@@ -1052,19 +1035,10 @@ void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 	else
 	{
 		anti_alias_enabled_ = true;
-		edge_anti_alias_->OutputPin(0, hdr_tex_);
 	}
 	dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(anti_alias_enabled_);
 
 	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ShowEdge(4 == buffer_type_);
-	if (4 == buffer_type_)
-	{
-		edge_anti_alias_->OutputPin(0, TexturePtr());
-	}
-	else
-	{
-		edge_anti_alias_->OutputPin(0, hdr_tex_);
-	}
 }
 
 void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
@@ -1072,19 +1046,6 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 	if (0 == buffer_type_)
 	{
 		anti_alias_enabled_ = sender.GetChecked();
-		if (anti_alias_enabled_)
-		{
-			edge_anti_alias_->OutputPin(0, hdr_tex_);
-
-			if (hdr_tex_)
-			{
-				hdr_pp_->InputPin(0, hdr_tex_);
-			}
-		}
-		else
-		{
-			hdr_pp_->InputPin(0, deferred_rendering_->ShadingTex());
-		}
 	}
 }
 
@@ -1148,7 +1109,7 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			debug_pp_->Apply();
-			return App3DFramework::URV_Finished;
+			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 		}
 		else
 		{
@@ -1157,7 +1118,7 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 				renderEngine.BindFrameBuffer(FrameBufferPtr());
 				renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 				edge_anti_alias_->Apply();
-				return App3DFramework::URV_Finished;
+				return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 			}
 		}
 	}
@@ -1175,14 +1136,14 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 					renderEngine.BindFrameBuffer(FrameBufferPtr());
 					renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 					debug_pp_->Apply();
-					return App3DFramework::URV_Finished;
+					return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 				}
 			}
 		}
 	}
 
 	uint32_t ret = deferred_rendering_->Update(pass);
-	if (App3DFramework::URV_Finished == ret)
+	if (ret & App3DFramework::URV_Finished)
 	{
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
@@ -1192,7 +1153,10 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			{
 				edge_anti_alias_->Apply();
 			}
-			hdr_pp_->Apply();
+			else
+			{
+				copy_pp_->Apply();
+			}
 		}
 		else
 		{
@@ -1200,6 +1164,7 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			{
 				debug_pp_->Apply();
 			}
+			ret |= App3DFramework::URV_Skip_Postprocess;
 		}
 	}
 

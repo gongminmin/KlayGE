@@ -281,10 +281,6 @@ JudaTexViewer::JudaTexViewer()
 				position_(0, 0), scale_(1)
 {
 	ResLoader::Instance().AddPath("../Samples/media/JudaTexViewer");
-
-	ContextCfg context_cfg = Context::Instance().Config();
-	context_cfg.graphics_cfg.hdr = false;
-	Context::Instance().Config(context_cfg);
 }
 
 bool JudaTexViewer::ConfirmDevice()
@@ -529,5 +525,5 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 	juda_tex_->UpdateCache(tile_ids);
 
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 }
