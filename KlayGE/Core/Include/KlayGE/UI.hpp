@@ -64,6 +64,7 @@ namespace KlayGE
 		UICT_EditBox,
 		UICT_TexButton,
 		UICT_PolylineEditBox,
+		UICT_ProgressBar,
 
 		UICT_Num_Control_Types
 	};
@@ -394,7 +395,7 @@ namespace KlayGE
 		void UnregisterDialog(UIDialogPtr const & dialog);
 		void EnableKeyboardInputForAllDialogs();
 
-		RenderEffectPtr GetEffect() const
+		RenderEffectPtr const & GetEffect() const
 		{
 			return effect_;
 		}
@@ -490,7 +491,7 @@ namespace KlayGE
 
 		void SettleCtrls(uint32_t width, uint32_t height);
 
-		void AddControl(UIControlPtr control);
+		void AddControl(UIControlPtr const & control);
 		void InitControl(UIControl& control);
 
 		// Control retrieval
@@ -500,9 +501,9 @@ namespace KlayGE
 			return checked_pointer_cast<T>(this->GetControl(ID, T::Type));
 		}
 
-		UIControlPtr GetControl(int ID) const;
-		UIControlPtr GetControl(int ID, uint32_t type) const;
-		UIControlPtr GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const;
+		UIControlPtr const & GetControl(int ID) const;
+		UIControlPtr const & GetControl(int ID, uint32_t type) const;
+		UIControlPtr const & GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const;
 
 		bool GetControlEnabled(int ID) const;
 		void SetControlEnabled(int ID, bool enabled);
@@ -1313,16 +1314,16 @@ namespace KlayGE
 		int FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		boost::any const GetItemData(std::wstring const & strText) const;
 		boost::any const GetItemData(int nIndex) const;
-		void    SetDropHeight(uint32_t nHeight)
+		void SetDropHeight(uint32_t nHeight)
 		{
 			drop_height_ = nHeight;
 			this->UpdateRects();
 		}
-		int     GetScrollBarWidth() const
+		int GetScrollBarWidth() const
 		{
 			return sb_width_;
 		}
-		void    SetScrollBarWidth(int nWidth)
+		void SetScrollBarWidth(int nWidth)
 		{
 			sb_width_ = nWidth;
 			this->UpdateRects();
@@ -1639,6 +1640,41 @@ namespace KlayGE
 		int move_over_pt_;
 
 		bool move_point_;
+	};
+
+	class KLAYGE_CORE_API UIProgressBar : public UIControl
+	{
+	public:
+		enum
+		{
+			Type = UICT_ProgressBar
+		};
+
+	public:
+		explicit UIProgressBar(UIDialogPtr const & dialog);
+		UIProgressBar(uint32_t type, UIDialogPtr const & dialog);
+		UIProgressBar(UIDialogPtr const & dialog, int ID, int progress, int x, int y, int width, int height, uint8_t hotkey = 0, bool bIsDefault = false);
+		virtual ~UIProgressBar()
+		{
+		}
+
+		virtual bool CanHaveFocus() const
+		{
+			return false;
+		}
+
+		virtual void Render();
+
+		void SetValue(int value);
+		int GetValue() const;
+
+	protected:
+		virtual void InitDefaultElements();
+		static const int BACKGROUND_INDEX = 0;
+		static const int BAR_INDEX = 1;
+
+	protected:
+		int progress_;
 	};
 }
 

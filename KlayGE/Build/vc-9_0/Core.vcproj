@@ -1338,6 +1338,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\UI\UIProgressBar.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\UI\UIRadioButton.cpp"
 					>
 				</File>

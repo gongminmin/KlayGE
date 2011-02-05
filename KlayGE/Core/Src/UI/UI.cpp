@@ -694,6 +694,12 @@ namespace KlayGE
 							x, y, width, height, is_default));
 						dlg->Control<UIPolylineEditBox>(id)->SetColor(line_clr);
 					}
+					else if ("progress_bar" == type_str)
+					{
+						int32_t progress = ctrl_node->AttribInt("value", 0);
+						dlg->AddControl(MakeSharedPtr<UIProgressBar>(dlg, id, progress,
+							x, y, width, height, is_default));
+					}
 
 					dlg->GetControl(id)->SetVisible(visible);
 				}
@@ -1103,10 +1109,7 @@ namespace KlayGE
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
 		{
-			if (dialog->GetVisible())
-			{
-				dialog->SettleCtrls(width, height);
-			}
+			dialog->SettleCtrls(width, height);
 		}
 	}
 
@@ -1139,7 +1142,7 @@ namespace KlayGE
 		this->RemoveAllControls();
 	}
 
-	void UIDialog::AddControl(UIControlPtr control)
+	void UIDialog::AddControl(UIControlPtr const & control)
 	{
 		this->InitControl(*control);
 
@@ -1152,12 +1155,12 @@ namespace KlayGE
 		control.SetIndex(static_cast<uint32_t>(controls_.size()));
 	}
 
-	UIControlPtr UIDialog::GetControl(int ID) const
+	UIControlPtr const & UIDialog::GetControl(int ID) const
 	{
 		// Try to find the control with the given ID
 		for (size_t i = 0; i < controls_.size(); ++ i)
 		{
-			UIControlPtr control = controls_[i];
+			UIControlPtr const & control = controls_[i];
 			if (control->GetID() == ID)
 			{
 				return control;
@@ -1165,15 +1168,16 @@ namespace KlayGE
 		}
 
 		// Not found
-		return UIControlPtr();
+		static UIControlPtr ret;
+		return ret;
 	}
 
-	UIControlPtr UIDialog::GetControl(int ID, uint32_t type) const
+	UIControlPtr const & UIDialog::GetControl(int ID, uint32_t type) const
 	{
 		// Try to find the control with the given ID
 		for (size_t i = 0; i < controls_.size(); ++ i)
 		{
-			UIControlPtr control = controls_[i];
+			UIControlPtr const & control = controls_[i];
 			if ((control->GetID() == ID) && (control->GetType() == type))
 			{
 				return control;
@@ -1181,16 +1185,17 @@ namespace KlayGE
 		}
 
 		// Not found
-		return UIControlPtr();
+		static UIControlPtr ret;
+		return ret;
 	}
 
-	UIControlPtr UIDialog::GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const
+	UIControlPtr const & UIDialog::GetControlAtPoint(Vector_T<int32_t, 2> const & pt) const
 	{
 		// Search through all child controls for the first one which
 		// contains the mouse point
 		for (size_t i = 0; i < controls_.size(); ++ i)
 		{
-			UIControlPtr control = controls_[i];
+			UIControlPtr const & control = controls_[i];
 
 			if (!control)
 			{
@@ -1206,7 +1211,8 @@ namespace KlayGE
 			}
 		}
 
-		return UIControlPtr();
+		static UIControlPtr ret;
+		return ret;
 	}
 
 	bool UIDialog::GetControlEnabled(int ID) const

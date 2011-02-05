@@ -416,6 +416,7 @@
 		<Unit filename="../../Core/Src/UI/UIEditBox.cpp" />
 		<Unit filename="../../Core/Src/UI/UIListBox.cpp" />
 		<Unit filename="../../Core/Src/UI/UIPolylineEditBox.cpp" />
+		<Unit filename="../../Core/Src/UI/UIProgressBar.cpp" />
 		<Unit filename="../../Core/Src/UI/UIRadioButton.cpp" />
 		<Unit filename="../../Core/Src/UI/UIScrollBar.cpp" />
 		<Unit filename="../../Core/Src/UI/UISlider.cpp" />

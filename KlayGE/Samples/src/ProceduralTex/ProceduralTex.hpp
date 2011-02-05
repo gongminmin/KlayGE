@@ -17,6 +17,8 @@ private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
+	void LoadScene();
+
 	void DoUpdateOverlay();
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 
@@ -42,6 +44,8 @@ private:
 	int id_freq_static_;
 	int id_freq_slider_;
 	int id_ctrl_camera_;
+
+	int loading_percentage_;
 };
 
 #endif		// _PARALLAX_HPP

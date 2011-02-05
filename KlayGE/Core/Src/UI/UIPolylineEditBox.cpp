@@ -434,6 +434,6 @@ namespace KlayGE
 					dlg->DrawRect(Rect_T<int32_t>(x0, y0, x1, y1), 0, (i == this->ActivePoint()) ? clr_active : clr_normal);
 				}
 			}
-			}
+		}
 	}
 }

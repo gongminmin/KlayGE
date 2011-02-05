@@ -304,6 +304,7 @@ SET(UI_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIEditBox.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIListBox.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIPolylineEditBox.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIProgressBar.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIRadioButton.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UIScrollBar.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/UI/UISlider.cpp

@@ -283,6 +283,7 @@
       <File Name="../../Core/Src/UI/UIEditBox.cpp"/>
       <File Name="../../Core/Src/UI/UIListBox.cpp"/>
       <File Name="../../Core/Src/UI/UIPolylineEditBox.cpp"/>
+      <File Name="../../Core/Src/UI/UIProgressBar.cpp"/>
       <File Name="../../Core/Src/UI/UIRadioButton.cpp"/>
       <File Name="../../Core/Src/UI/UIScrollBar.cpp"/>
       <File Name="../../Core/Src/UI/UISlider.cpp"/>

@@ -277,6 +277,7 @@
     <ClCompile Include="..\..\Core\Src\UI\UIEditBox.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UIListBox.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UIPolylineEditBox.cpp" />
+    <ClCompile Include="..\..\Core\Src\UI\UIProgressBar.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UIRadioButton.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UIScrollBar.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UISlider.cpp" />

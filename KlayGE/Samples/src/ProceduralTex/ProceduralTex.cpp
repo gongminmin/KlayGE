@@ -16,6 +16,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/thread.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -188,11 +189,35 @@ void ProceduralTexApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
+	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
+	this->Proj(0.01f, 100);
+
+	UIManager::Instance().Load(ResLoader::Instance().Load("ProceduralTex.uiml"));
+	dialog_ = UIManager::Instance().GetDialogs()[0];
+
+	joiner<void> load_thread = GlobalThreadPool()(boost::bind(&ProceduralTexApp::LoadScene, this));
+}
+
+void ProceduralTexApp::LoadScene()
+{
+	dialog_->SetVisible(false);
+
+	UIDialogPtr dialog_loading = UIManager::Instance().GetDialogs()[1];
+	dialog_loading->SetVisible(true);
+
+	UIStaticPtr const & msg = dialog_loading->Control<UIStatic>(dialog_loading->IDFromName("Msg"));
+	UIProgressBarPtr const & progress_bar = dialog_loading->Control<UIProgressBar>(dialog_loading->IDFromName("Progress"));
+
+	loading_percentage_ = 20;
+	progress_bar->SetValue(loading_percentage_);
+	msg->SetText(L"Loading Geometry");
+
 	polygon_ = MakeSharedPtr<PolygonObject>();
 	polygon_->AddToSceneManager();
 
-	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
-	this->Proj(0.01f, 100);
+	loading_percentage_ = 60;
+	progress_bar->SetValue(loading_percentage_);
+	msg->SetText(L"Loading Light");
 
 	fpcController_.Scalers(0.05f, 0.01f);
 
@@ -207,6 +232,10 @@ void ProceduralTexApp::InitObjects()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.01f, 0.01f, 0.01f);
 	light_proxy_->AddToSceneManager();
 
+	loading_percentage_ = 80;
+	progress_bar->SetValue(loading_percentage_);
+	msg->SetText(L"Initalizing Input System");
+
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
@@ -215,8 +244,9 @@ void ProceduralTexApp::InitObjects()
 	input_handler->connect(boost::bind(&ProceduralTexApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ProceduralTex.uiml"));
-	dialog_ = UIManager::Instance().GetDialogs()[0];
+	loading_percentage_ = 90;
+	progress_bar->SetValue(loading_percentage_);
+	msg->SetText(L"Initalizing UI");
 
 	id_type_static_ = dialog_->IDFromName("TypeStatic");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
@@ -232,6 +262,13 @@ void ProceduralTexApp::InitObjects()
 	this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&ProceduralTexApp::CtrlCameraHandler, this, _1));
+
+	loading_percentage_ = 100;
+	progress_bar->SetValue(loading_percentage_);
+	msg->SetText(L"DONE");
+
+	dialog_->SetVisible(true);
+	dialog_loading->SetVisible(false);
 }
 
 void ProceduralTexApp::OnResize(uint32_t width, uint32_t height)
@@ -301,11 +338,19 @@ void ProceduralTexApp::DoUpdateOverlay()
 uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+	if (loading_percentage_ < 100)
+	{
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
+	}
+	else
+	{
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-	checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
-	checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
+		checked_pointer_cast<PolygonObject>(polygon_)->LightPos(light_->Position());
+		checked_pointer_cast<PolygonObject>(polygon_)->LightColor(light_->Color());
+		checked_pointer_cast<PolygonObject>(polygon_)->LightFalloff(light_->Falloff());
 
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	}
 }
