@@ -33,6 +33,8 @@ private:
 	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
+	KlayGE::JudaTexturePtr juda_tex_;
+
 	KlayGE::UIDialogPtr dialog_;
 	float parallax_scale_;
 	float parallax_bias_;
@@ -42,6 +44,8 @@ private:
 	int id_bias_static_;
 	int id_bias_slider_;
 	int id_ctrl_camera_;
+
+	int loading_percentage_;
 };
 
 #endif		// _PARALLAX_HPP

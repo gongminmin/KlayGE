@@ -17,8 +17,6 @@ private:
 	void InitObjects();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
-	void LoadScene();
-
 	void DoUpdateOverlay();
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 

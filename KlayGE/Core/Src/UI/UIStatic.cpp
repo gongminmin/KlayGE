@@ -13,6 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Font.hpp>
 
 #include <KlayGE/UI.hpp>
 
@@ -48,7 +49,7 @@ namespace KlayGE
 		UIElement Element;
 
 		{
-			Element.SetFont(0);
+			Element.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Top);
 			Element.FontColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 200.0f / 255);
 
 			elements_.push_back(MakeSharedPtr<UIElement>(Element));
