@@ -20,7 +20,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	float3 const lum_weight(0.299f, 0.587f, 0.114f);
+	float3 const lum_weight(0.2126f, 0.7152f, 0.0722f);
 
 	float CalcLum(float r, float g, float b)
 	{
