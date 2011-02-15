@@ -166,8 +166,6 @@ namespace
 			}
 		}
 
-		mse /= width * height;
-
 		return mse;
 	}
 
@@ -202,6 +200,7 @@ namespace
 		SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, new_format, new_data);
 
 		float mse = 0;
+		int n = 0;
 		{
 			for (size_t sub_res = 0; sub_res < in_data.size(); ++ sub_res)
 			{
@@ -209,10 +208,15 @@ namespace
 				uint32_t the_height = in_data[sub_res].slice_pitch / in_data[sub_res].row_pitch;
 
 				mse += MSESubresource(the_width, the_height, in_format, in_data[sub_res], new_format, new_data[sub_res]);
+				n += the_width * the_height;
 			}
 		}
 
+		mse /= n;
+		float psnr = 10 * log10(255 * 255 / std::max(mse, 1e-6f));
+
 		cout << "MSE: " << mse << endl;
+		cout << "PSNR: " << psnr << endl;
 	}
 }
 

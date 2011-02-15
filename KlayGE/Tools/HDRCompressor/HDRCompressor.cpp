@@ -240,6 +240,7 @@ namespace
 		SaveTexture(out_c_file, in_type, in_width / 2, in_height / 2, in_depth, in_num_mipmaps, in_array_size, EF_BC5, c_data);
 
 		float mse = 0;
+		int n = 0;
 		{
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
@@ -264,10 +265,16 @@ namespace
 						mse += diff_r * diff_r + diff_g * diff_g + diff_b * diff_b;
 					}
 				}
+
+				n += width * height;
 			}
 		}
 
+		mse /= n;
+		float psnr = 10 * log10(65504.0f * 65504.0f / std::max(mse, 1e-6f));
+
 		cout << "MSE: " << mse << endl;
+		cout << "PSNR: " << psnr << endl;
 	}
 }
 

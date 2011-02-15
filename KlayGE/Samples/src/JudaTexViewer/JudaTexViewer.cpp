@@ -403,7 +403,23 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	juda_tex_ = LoadJudaTexture(name);
-	juda_tex_->CacheProperty(1024, rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8, BORDER_SIZE);
+
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_BC1))
+	{
+		fmt = EF_BC1;
+	}
+	else if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+		fmt = EF_ARGB8;
+	}
+	juda_tex_->CacheProperty(1024, fmt, BORDER_SIZE);
 
 	num_tiles_ = juda_tex_->NumTiles();
 	tile_size_ = juda_tex_->TileSize();

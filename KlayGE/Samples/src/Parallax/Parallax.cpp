@@ -339,9 +339,20 @@ void Parallax::InitObjects()
 	UIManager::Instance().Load(ResLoader::Instance().Load("Parallax.uiml"));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	uint32_t const BORDER_SIZE = 4;
 	juda_tex_ = LoadJudaTexture("Parallax.jdt");
-	juda_tex_->CacheProperty(1024, rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8, BORDER_SIZE);
+
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+		fmt = EF_ARGB8;
+	}
+	juda_tex_->CacheProperty(1024, fmt, 4);
 
 	loading_percentage_ = 0;
 }
