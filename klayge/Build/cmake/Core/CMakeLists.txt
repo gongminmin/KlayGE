@@ -164,6 +164,7 @@ SOURCE_GROUP( "Audio System\\Header Files" FILES ${AUDIO_HEADER_FILES} )
 
 SET(MATH_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Math/Frustum.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Math/Math.cpp
 )
 
 SET(MATH_HEADER_FILES

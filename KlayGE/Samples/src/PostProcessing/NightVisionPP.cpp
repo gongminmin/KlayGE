@@ -26,6 +26,6 @@ void NightVisionPostProcess::OnRenderBegin()
 	timer_.restart();
 
 	float2 sc;
-	MathLib::sin_cos(elapsed_time * 50000.0f, sc.x(), sc.y());
+	MathLib::sincos(elapsed_time * 50000.0f, sc.x(), sc.y());
 	*(technique_->Effect().ParameterByName("noise_offset")) = 0.2f * sc;
 }

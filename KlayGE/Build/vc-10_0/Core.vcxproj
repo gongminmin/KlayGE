@@ -199,6 +199,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Core\Src\Math\Frustum.cpp" />
+    <ClCompile Include="..\..\Core\Src\Math\Math.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\BlockCompression.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Camera.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\CameraController.cpp" />

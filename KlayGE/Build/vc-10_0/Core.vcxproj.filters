@@ -369,6 +369,9 @@
     <ClCompile Include="..\..\Core\Src\UI\UIProgressBar.cpp">
       <Filter>UI System\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Math\Math.cpp">
+      <Filter>Math Library\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">

@@ -937,6 +937,10 @@
 					RelativePath="..\..\Core\Src\Math\Frustum.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\Core\Src\Math\Math.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Header Files"

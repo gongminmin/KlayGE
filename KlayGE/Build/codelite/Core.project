@@ -160,6 +160,7 @@
   <VirtualDirectory Name="Math Library">
     <VirtualDirectory Name="Source Files">
       <File Name="../../Core/Src/Math/Frustum.cpp"/>
+      <File Name="../../Core/Src/Math/Math.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Include/KlayGE/Bound.hpp"/>

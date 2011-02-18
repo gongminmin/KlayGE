@@ -181,9 +181,9 @@ namespace KlayGE
 			}
 		}
 
-		MathLib::sin_cos(pitch / 2, rot_x_.x(), rot_x_.y());
-		MathLib::sin_cos(yaw / 2, rot_y_.x(), rot_y_.y());
-		MathLib::sin_cos(roll / 2, rot_z_.x(), rot_z_.y());
+		MathLib::sincos(pitch / 2, rot_x_.x(), rot_x_.y());
+		MathLib::sincos(yaw / 2, rot_y_.x(), rot_y_.y());
+		MathLib::sincos(roll / 2, rot_z_.x(), rot_z_.y());
 
 		inv_rot_ = MathLib::inverse(quat);
 
@@ -212,13 +212,13 @@ namespace KlayGE
 			roll *= -rotationScaler_ / 2;
 
 			float2 delta_x, delta_y, delta_z;
-			MathLib::sin_cos(pitch, delta_x.x(), delta_x.y());
-			MathLib::sin_cos(yaw, delta_y.x(), delta_y.y());
-			MathLib::sin_cos(roll, delta_z.x(), delta_z.y());
+			MathLib::sincos(pitch, delta_x.x(), delta_x.y());
+			MathLib::sincos(yaw, delta_y.x(), delta_y.y());
+			MathLib::sincos(roll, delta_z.x(), delta_z.y());
 
-			Quaternion quat_x = Quaternion(rot_x_.x() * delta_x.y() + rot_x_.y() * delta_x.x(), 0, 0, rot_x_.y() * delta_x.y() - rot_x_.x() * delta_x.x());
-			Quaternion quat_y = Quaternion(0, rot_y_.x() * delta_y.y() + rot_y_.y() * delta_y.x(), 0, rot_y_.y() * delta_y.y() - rot_y_.x() * delta_y.x());
-			Quaternion quat_z = Quaternion(0, 0, rot_z_.x() * delta_z.y() + rot_z_.y() * delta_z.x(), rot_z_.y() * delta_z.y() - rot_z_.x() * delta_z.x());
+			Quaternion quat_x(rot_x_.x() * delta_x.y() + rot_x_.y() * delta_x.x(), 0, 0, rot_x_.y() * delta_x.y() - rot_x_.x() * delta_x.x());
+			Quaternion quat_y(0, rot_y_.x() * delta_y.y() + rot_y_.y() * delta_y.x(), 0, rot_y_.y() * delta_y.y() - rot_y_.x() * delta_y.x());
+			Quaternion quat_z(0, 0, rot_z_.x() * delta_z.y() + rot_z_.y() * delta_z.x(), rot_z_.y() * delta_z.y() - rot_z_.x() * delta_z.x());
 
 			rot_x_ = float2(quat_x.x(), quat_x.w());
 			rot_y_ = float2(quat_y.y(), quat_y.w());

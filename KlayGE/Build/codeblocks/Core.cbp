@@ -351,6 +351,7 @@
 		<Unit filename="../../Core/Src/Kernel/Util.cpp" />
 		<Unit filename="../../Core/Src/Kernel/XMLDom.cpp" />
 		<Unit filename="../../Core/Src/Math/Frustum.cpp" />
+		<Unit filename="../../Core/Src/Math/Math.cpp" />
 		<Unit filename="../../Core/Src/Net/Lobby.cpp" />
 		<Unit filename="../../Core/Src/Net/Player.cpp" />
 		<Unit filename="../../Core/Src/Net/Socket.cpp" />

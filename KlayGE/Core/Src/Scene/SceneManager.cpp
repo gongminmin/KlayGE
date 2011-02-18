@@ -541,7 +541,7 @@ namespace KlayGE
 			}
 		}
 
-		re.PostProcess(urt & App3DFramework::URV_Skip_Postprocess);
+		re.PostProcess((urt & App3DFramework::URV_Skip_Postprocess) != 0);
 
 		this->Flush(App3DFramework::URV_Overlay);
 
