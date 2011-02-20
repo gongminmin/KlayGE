@@ -27,7 +27,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: stereo_mode_(false), frustum_dirty_(true)
+		: frustum_dirty_(true), stereo_mode_(false)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();

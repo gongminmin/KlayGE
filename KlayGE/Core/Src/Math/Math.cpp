@@ -324,9 +324,9 @@ namespace KlayGE
 		T refract(T const & incident, T const & normal, typename T::value_type const & refraction_index)
 		{
 			typename T::value_type t = dot(incident, normal);
-			typename T::value_type r = T::value_type(1) - refraction_index * refraction_index * (T::value_type(1) - t * t);
+			typename T::value_type r = typename T::value_type(1) - refraction_index * refraction_index * (typename T::value_type(1) - t * t);
 
-			if (r < T::value_type(0))
+			if (r < typename T::value_type(0))
 			{
 				// Total internal reflection
 				return T::Zero();
