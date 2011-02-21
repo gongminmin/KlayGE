@@ -3,7 +3,7 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<parameter type='float' name='inv_gamma'/>
+	<parameter type='float' name='gamma'/>
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="sampler" name="src_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -15,7 +15,7 @@
 		<![CDATA[
 float4 GammaCorrectionPS(float2 tex : TEXCOORD0) : SV_Target
 {
-	return pow(max(src_tex.Sample(src_sampler, tex), 0), inv_gamma);
+	return pow(max(src_tex.Sample(src_sampler, tex), 0), gamma);
 }
 		]]>
 	</shader>
