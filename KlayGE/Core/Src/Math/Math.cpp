@@ -11,6 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/Detail/MathHelper.hpp>
+
 #include <KlayGE/Math.hpp>
 
 namespace KlayGE

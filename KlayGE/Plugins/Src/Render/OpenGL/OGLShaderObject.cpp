@@ -1895,13 +1895,17 @@ namespace KlayGE
 
 		bool use_bin_program = true;
 
-		// Binary program can't work with GS in current NVIDIA's drivers
-		if (is_shader_validate_[ST_GeometryShader])
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.HackForNV())
 		{
-			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
-			if (!sd.func_name.empty())
+			// Binary program can't work with GS in current NVIDIA's drivers
+			if (is_shader_validate_[ST_GeometryShader])
 			{
-				use_bin_program = false;
+				shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
+				if (!sd.func_name.empty())
+				{
+					use_bin_program = false;
+				}
 			}
 		}
 

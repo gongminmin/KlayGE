@@ -1,8 +1,11 @@
 // Math.hpp
 // KlayGE 数学函数库 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2003-2009
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2003-2011
 // Homepage: http://www.klayge.org
+//
+// 3.12.0
+// Implement moved to Math.cpp (2011.2.15)
 //
 // 3.8.0
 // 增加了decompose (2009.1.24)
@@ -52,8 +55,6 @@
 #include <iterator>
 
 #include <boost/static_assert.hpp>
-
-#include <KlayGE/Detail/MathHelper.hpp>
 
 namespace KlayGE
 {

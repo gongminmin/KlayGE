@@ -103,6 +103,10 @@ namespace KlayGE
 			return cur_fbo_;
 		}
 
+		bool HackForNV() const
+		{
+			return hack_for_nv_;
+		}
 		bool HackForATI() const
 		{
 			return hack_for_ati_;
@@ -153,6 +157,7 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
+		bool hack_for_nv_;
 		bool hack_for_ati_;
 	};
 

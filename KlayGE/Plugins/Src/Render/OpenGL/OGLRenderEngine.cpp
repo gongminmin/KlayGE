@@ -955,6 +955,14 @@ namespace KlayGE
 		}
 
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
+		if (vendor.find("NVIDIA", 0) != std::string::npos)
+		{
+			hack_for_nv_ = true;
+		}
+		else
+		{
+			hack_for_nv_ = false;
+		}
 		if ((vendor.find("ATI", 0) != std::string::npos) || (vendor.find("AMD", 0) != std::string::npos))
 		{
 			hack_for_ati_ = true;
