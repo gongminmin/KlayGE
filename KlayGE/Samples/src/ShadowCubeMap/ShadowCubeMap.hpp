@@ -27,8 +27,7 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	KlayGE::SceneObjectPtr ground_;
-	KlayGE::SceneObjectPtr mesh_;
+	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 

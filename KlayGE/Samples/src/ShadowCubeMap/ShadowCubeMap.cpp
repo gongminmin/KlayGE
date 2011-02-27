@@ -127,14 +127,93 @@ namespace
 		TexturePtr lamp_tex_;
 	};
 
-	class OccluderRenderable : public StaticMesh, public ShadowMapped
+	class OccluderMesh : public StaticMesh, public ShadowMapped
 	{
 	public:
-		OccluderRenderable(RenderModelPtr model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Occluder"),
+		OccluderMesh(RenderModelPtr const & model, std::wstring const & name)
+			: StaticMesh(model, name),
 				ShadowMapped(SHADOW_MAP_SIZE)
 		{
 			effect_ = Context::Instance().RenderFactoryInstance().LoadEffect("ShadowCubeMap.fxml");
+		}
+
+		void BuildMeshInfo()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			std::vector<float3> positions(this->NumVertices());
+			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
+				switch (rl_->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Position:
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						{
+							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+						}
+					}
+					break;
+				}
+			}
+
+			if (!positions.empty())
+			{
+				box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
+			}
+
+			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+
+			// 建立纹理
+			TexturePtr dm, sm, em;
+			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
+			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
+				iter != texture_slots.end(); ++ iter)
+			{
+				if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
+				{
+					if (!ResLoader::Instance().Locate(iter->second).empty())
+					{
+						dm = LoadTexture(iter->second, EAH_GPU_Read)();
+					}
+				}
+				else
+				{
+					if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+					{
+						if (!ResLoader::Instance().Locate(iter->second).empty())
+						{
+							sm = LoadTexture(iter->second, EAH_GPU_Read)();
+						}
+					}
+					else
+					{
+						if (("EmitMap" == iter->first) || ("Self-Illumination" == iter->first))
+						{
+							if (!ResLoader::Instance().Locate(iter->second).empty())
+							{
+								em = LoadTexture(iter->second, EAH_GPU_Read)();
+							}
+						}
+					}
+				}
+			}
+			*(effect_->ParameterByName("diffuse_tex")) = dm;
+			*(effect_->ParameterByName("specular_tex")) = sm;
+			*(effect_->ParameterByName("emit_tex")) = em;
+
+			*(effect_->ParameterByName("ambient_clr")) = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(sm));
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(em));
+
+			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
+			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl.shininess);
 		}
 
 		void MinVariance(float min_variance)
@@ -149,7 +228,7 @@ namespace
 
 		void SetModelMatrix(float4x4 const & model)
 		{
-			model_ = model;
+			model_matrix_ = model;
 		}
 
 		void GenShadowMapPass(bool gen_sm)
@@ -168,11 +247,11 @@ namespace
 
 		void OnRenderBegin()
 		{
-			ShadowMapped::OnRenderBegin(model_, effect_);
+			ShadowMapped::OnRenderBegin(model_matrix_, effect_);
 		}
 
 	private:
-		float4x4 model_;
+		float4x4 model_matrix_;
 	
 		RenderEffectPtr effect_;
 	};
@@ -180,19 +259,17 @@ namespace
 	class OccluderObject : public SceneObjectHelper
 	{
 	public:
-		OccluderObject()
+		explicit OccluderObject(std::string const & model_name)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
-			model_ = MathLib::translation(0.0f, 0.2f, 0.0f);
-
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderRenderable>())()->Mesh(0);
-			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
+			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())()->Mesh(0);
+			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
 		void Update()
 		{
-			model_ = MathLib::translation(0.2f, 0.1f, 0.0f) * MathLib::rotation_y(-std::clock() / 1500.0f);
-			checked_pointer_cast<OccluderRenderable>(renderable_)->SetModelMatrix(model_);
+			model_ = MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-std::clock() / 1500.0f);
+			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -204,111 +281,22 @@ namespace
 		float4x4 model_;
 	};
 
-	class GroundRenderable : public RenderableHelper, public ShadowMapped
+	class RoomObject : public SceneObjectHelper
 	{
 	public:
-		GroundRenderable()
-			: RenderableHelper(L"Ground"),
-				ShadowMapped(SHADOW_MAP_SIZE)
+		explicit RoomObject(StaticMeshPtr const & mesh)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			model_ = float4x4::Identity();
 
-			effect_ = rf.LoadEffect("ShadowCubeMap.fxml");
-			technique_ = effect_->TechniqueByName("RenderScene");
-
-			float3 xyzs[] =
-			{
-				float3(-1, 0, 1),
-				float3(1, 0, 1),
-				float3(1, 0, -1),
-				float3(-1, 0, -1),
-			};
-
-			uint16_t indices[] =
-			{
-				0, 1, 2, 2, 3, 0
-			};
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			ElementInitData init_data;
-			init_data.row_pitch = sizeof(xyzs);
-			init_data.slice_pitch = 0;
-			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-
-			init_data.row_pitch = sizeof(indices);
-			init_data.slice_pitch = 0;
-			init_data.data = indices;
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16UI);
-
-			float3 normal[sizeof(xyzs) / sizeof(xyzs[0])];
-			MathLib::compute_normal<float>(&normal[0],
-				&indices[0], &indices[sizeof(indices) / sizeof(uint16_t)],
-				&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
-
-			init_data.row_pitch = sizeof(normal);
-			init_data.slice_pitch = 0;
-			init_data.data = normal;
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+			renderable_ = mesh;
+			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
-		void MinVariance(float min_variance)
+		void Update()
 		{
-			*(effect_->ParameterByName("min_variance")) = min_variance;
 		}
 
-		void BleedingReduce(float bleeding_reduce)
-		{
-			*(effect_->ParameterByName("bleeding_reduce")) = bleeding_reduce;
-		}
-
-		void GenShadowMapPass(bool gen_sm)
-		{
-			ShadowMapped::GenShadowMapPass(gen_sm);
-
-			if (gen_sm)
-			{
-				technique_ = effect_->TechniqueByName("GenShadowMap");
-			}
-			else
-			{
-				technique_ = effect_->TechniqueByName("RenderScene");
-			}
-		}
-
-		void SetModelMatrix(float4x4 const & model)
-		{
-			model_ = model;
-		}
-
-		void OnRenderBegin()
-		{
-			ShadowMapped::OnRenderBegin(model_, effect_);
-		}
-
-	private:
-		float4x4 model_;
-	
-		RenderEffectPtr effect_;
-	};
-
-	class GroundObject : public SceneObjectHelper
-	{
-	public:
-		GroundObject()
-			: SceneObjectHelper(MakeSharedPtr<GroundRenderable>(), SOA_Cullable)
-		{
-			model_ = MathLib::translation(0.0f, -0.2f, 0.0f);
-			checked_pointer_cast<GroundRenderable>(renderable_)->SetModelMatrix(model_);
-		}
-		
 		float4x4 const & GetModelMatrix() const
 		{
 			return model_;
@@ -326,7 +314,7 @@ namespace
 		{
 			light.ModelMatrix(MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
-				* MathLib::translation(0.1f, 0.6f, 0.2f));
+				* MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 
 	private:
@@ -388,19 +376,26 @@ void ShadowCubeMap::InitObjects()
 	// 建立字体
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	ground_ = MakeSharedPtr<GroundObject>();
-	ground_->AddToSceneManager();
+	boost::function<RenderModelPtr()> model_ml = LoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
-	mesh_ = MakeSharedPtr<OccluderObject>();
-	mesh_->AddToSceneManager();
-
-	this->LookAt(float3(1.3f, 0.5f, -0.7f), float3(0, 0, 0));
-	this->Proj(0.01f, 100);
+	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
+	this->Proj(0.01f, 500);
 
 	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read)();
 
-	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LampTexture(lamp_tex_);
-	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LampTexture(lamp_tex_);
+	RenderModelPtr scene_model = model_ml();
+	scene_objs_.resize(scene_model->NumMeshes() + 1);
+	for (size_t i = 0; i < scene_model->NumMeshes(); ++ i)
+	{
+		scene_objs_[i] = MakeSharedPtr<RoomObject>(scene_model->Mesh(i));
+	}
+	scene_objs_.back() = MakeSharedPtr<OccluderObject>("teapot.meshml");
+
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		scene_objs_[i]->AddToSceneManager();
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LampTexture(lamp_tex_);
+	}
 
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D16, 1, 0);
 	shadow_buffer_ = rf.MakeFrameBuffer();
@@ -420,17 +415,21 @@ void ShadowCubeMap::InitObjects()
 	shadow_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
+	}
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(1, 1, 1));
-	light_->Falloff(float3(0.01f, 0, 0.5f));
+	light_->Falloff(float3(0, 0.05f, 0));
 	light_->ProjectiveTexture(lamp_tex_);
 	light_->BindUpdateFunc(PointLightSourceUpdate());
 	light_->AddToSceneManager();
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.05f, 0.05f, 0.05f);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.5f, 0.5f, 0.5f);
 	light_proxy_->AddToSceneManager();
 
 	for (int i = 0; i < 6; ++ i)
@@ -457,7 +456,7 @@ void ShadowCubeMap::InitObjects()
 		}
 	}
 
-	fpcController_.Scalers(0.05f, 0.1f);
+	fpcController_.Scalers(0.05f, 1.0f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -503,14 +502,20 @@ void ShadowCubeMap::InputHandler(InputEngine const & /*sender*/, InputAction con
 
 void ShadowCubeMap::MinVarianceChangedHandler(KlayGE::UISlider const & sender)
 {
-	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->MinVariance(sender.GetValue() / 2000.0f + 0.001f);
-	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->MinVariance(sender.GetValue() / 2000.0f + 0.001f);
+	float min_var = sender.GetValue() / 2000.0f + 0.001f;
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->MinVariance(min_var);
+	}
 }
 
 void ShadowCubeMap::BleedingReduceChangedHandler(KlayGE::UISlider const & sender)
 {
-	checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->BleedingReduce(sender.GetValue() / 500.0f + 0.45f);
-	checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->BleedingReduce(sender.GetValue() / 500.0f + 0.45f);
+	float bleeding = sender.GetValue() / 500.0f + 0.45f;
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->BleedingReduce(bleeding);
+	}
 }
 
 void ShadowCubeMap::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -550,8 +555,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	{
 	case 0:
 		{
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(true);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(true);
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true);
+			}
 		}
 
 	case 1:
@@ -565,8 +572,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 			shadow_buffer_->GetViewport().camera = light_->SMCamera(pass);
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->LightSrc(light_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->LightSrc(light_);
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+			}
 		}
 		return App3DFramework::URV_Need_Flush;
 
@@ -575,11 +584,10 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
 
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->ShadowMapTexture(shadow_cube_tex_);
-
-			checked_pointer_cast<OccluderRenderable>(mesh_->GetRenderable())->GenShadowMapPass(false);
-			checked_pointer_cast<GroundRenderable>(ground_->GetRenderable())->GenShadowMapPass(false);
+			for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			{
+				checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false);
+			}
 		}
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 	}

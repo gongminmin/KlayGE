@@ -44,6 +44,24 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="int" name="flipping"/>
 
+	<parameter type="float4" name="ambient_clr"/>
+	<parameter type="float4" name="diffuse_clr"/>
+	<parameter type="float4" name="specular_clr"/>
+	<parameter type="float4" name="emit_clr"/>
+
+	<parameter type="float" name="specular_level"/>
+	<parameter type="float" name="shininess"/>
+
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="texture2D" name="emit_tex"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
 	<parameter type="sampler" name="cube_sampler">
@@ -56,10 +74,13 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		<![CDATA[
 void RenderSceneVS(float4 Position : POSITION,
 					float3 Normal   : NORMAL,
-					out float3 oLightWorldPos : TEXCOORD0,
-					out float3 oLightWorldNormal : TEXCOORD1,
+					float2 Texcoord : TEXCOORD0,
+					out float2 oTexcoord : TEXCOORD0,
+					out float3 oLightWorldPos : TEXCOORD1,
+					out float3 oLightWorldNormal : TEXCOORD2,
 					out float4 oPos : SV_Position)
 {
+	oTexcoord = Texcoord;
 	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(Normal, (float3x3)obj_model_to_light_model);
@@ -70,12 +91,10 @@ float linstep(float min, float max, float v)
 	return clamp((v - min) / (max - min), 0, 1);
 }
 
-float4 RenderScenePS(float3 LightWorldPos : TEXCOORD0,
-					float3 LightWorldNormal : TEXCOORD1) : SV_Target 
+float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,
+					float3 LightWorldNormal : TEXCOORD2) : SV_Target 
 {
-	float n_dot_l = dot(-LightWorldPos, LightWorldNormal) / sqrt(dot(LightWorldPos, LightWorldPos) * dot(LightWorldNormal, LightWorldNormal));
-
-	float3 ori_color = n_dot_l * light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
+	float3 ori_color = light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
 	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
 	float2 moments = shadow_cube_tex.Sample(cube_sampler, shadow_dir).xy;
 	
@@ -92,8 +111,42 @@ float4 RenderScenePS(float3 LightWorldPos : TEXCOORD0,
 
 	float atten = attenuation_term(0, LightWorldPos, light_falloff);
 	atten *= max(p, p_max);
+
+	float3 c_diff, c_spec, emit;
+	float opacity;
+	if (diffuse_clr.a > 0.5f)
+	{
+		c_diff = diffuse_tex.Sample(linear_sampler, Texcoord).rgb;
+	}
+	else
+	{
+		c_diff = diffuse_clr.rgb;
+	}
+	if (specular_clr.a > 0.5f)
+	{
+		c_spec = specular_tex.Sample(linear_sampler, Texcoord).rgb;
+	}
+	else
+	{
+		c_spec = specular_level;
+	}
+	if (emit_clr.a > 0.5f)
+	{
+		emit = emit_tex.Sample(linear_sampler, Texcoord).rgb;
+	}
+	else
+	{
+		emit = emit_clr.rgb;
+	}
 	
-	return float4(ori_color * atten, 1.0);
+	float3 clr = ambient_clr.rgb * c_diff + emit;
+
+	float3 light_vec = normalize(-LightWorldPos);
+	float3 normal = normalize(LightWorldNormal);
+	float3 halfway = normalize(light_vec + normal);
+	clr += calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal) * ori_color * atten;
+	
+	return float4(clr, 1.0f);
 }
 		]]>
 	</shader>
