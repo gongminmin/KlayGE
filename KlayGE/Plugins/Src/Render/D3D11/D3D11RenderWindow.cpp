@@ -167,12 +167,14 @@ namespace KlayGE
 				ID3D11Device* d3d_device = NULL;
 				ID3D11DeviceContext* d3d_imm_ctx = NULL;
 				IDXGIAdapter* dx_adapter = NULL;
-				if ((D3D_DRIVER_TYPE_HARDWARE == boost::get<0>(dev_type_beh)) || use_nvperfhud)
+				D3D_DRIVER_TYPE dev_type = boost::get<0>(dev_type_beh);
+				if ((D3D_DRIVER_TYPE_HARDWARE == dev_type) || use_nvperfhud)
 				{
-					dx_adapter = NULL;//adapter_->Adapter().get();
+					dx_adapter = adapter_->Adapter().get();
+					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
 				}
 				D3D_FEATURE_LEVEL out_feature_level;
-				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, boost::get<0>(dev_type_beh), NULL, create_device_flags,
+				if (SUCCEEDED(re.D3D11CreateDeviceAndSwapChain(dx_adapter, dev_type, NULL, create_device_flags,
 					feature_levels, num_feature_levels, D3D11_SDK_VERSION, &sc_desc_, &sc, &d3d_device,
 					&out_feature_level, &d3d_imm_ctx)))
 				{
