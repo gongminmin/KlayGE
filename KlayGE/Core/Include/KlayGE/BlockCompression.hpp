@@ -1,7 +1,7 @@
 // BlockCompression.hpp
 // KlayGE 纹理分块压缩 头文件
-// Ver 3.10.0
-// 版权所有(C) 龚敏敏, 2008-2010
+// Ver 3.12.0
+// 版权所有(C) 龚敏敏, 2008-2011
 // Homepage: http://www.klayge.org
 //
 // 3.10.0
@@ -17,9 +17,6 @@
 #define _BLOCKCOMPRESSION_HPP
 
 #pragma once
-
-#include <vector>
-#include <boost/assert.hpp>
 
 namespace KlayGE
 {
@@ -59,13 +56,49 @@ namespace KlayGE
 	#pragma pack(pop)
 #endif
 
+	enum EBCMethod
+	{
+		EBCM_Quality,
+		EBCM_Balanced,
+		EBCM_Speed
+	};
+
 	KLAYGE_CORE_API void DecodeBC1(uint32_t* argb, uint8_t const * bc1);
 	KLAYGE_CORE_API void DecodeBC2(uint32_t* argb, uint8_t const * bc2);
 	KLAYGE_CORE_API void DecodeBC3(uint32_t* argb, uint8_t const * bc3);
-	KLAYGE_CORE_API void DecodeBC4(uint8_t* alpha_block, uint8_t const * bc4);
-	KLAYGE_CORE_API void DecodeBC5(uint32_t* argb, uint8_t const * bc5);
+	KLAYGE_CORE_API void DecodeBC4(uint8_t* r, uint8_t const * bc4);
+	KLAYGE_CORE_API void DecodeBC5(uint8_t* r, uint8_t* g, uint8_t const * bc5);
 
-	KLAYGE_CORE_API void EncodeBC4(BC4_layout& bc4, uint8_t const * alpha);
+	KLAYGE_CORE_API void DecodeBC1(void* argb, uint32_t pitch, void const * bc1, uint32_t width, uint32_t height);
+	KLAYGE_CORE_API void DecodeBC2(void* argb, uint32_t pitch, void const * bc2, uint32_t width, uint32_t height);
+	KLAYGE_CORE_API void DecodeBC3(void* argb, uint32_t pitch, void const * bc3, uint32_t width, uint32_t height);
+	KLAYGE_CORE_API void DecodeBC4(void* r, uint32_t pitch, void const * bc4, uint32_t width, uint32_t height);
+	KLAYGE_CORE_API void DecodeBC5(void* gr, uint32_t pitch, void const * bc5, uint32_t width, uint32_t height);
+
+	KLAYGE_CORE_API void DecodeBC1(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+	KLAYGE_CORE_API void DecodeBC2(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+	KLAYGE_CORE_API void DecodeBC3(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+	KLAYGE_CORE_API void DecodeBC4(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+	KLAYGE_CORE_API void DecodeBC5(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+
+
+	KLAYGE_CORE_API void EncodeBC1(BC1_layout& bc1, uint32_t const * argb, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC2(BC2_layout& bc2, uint32_t const * argb, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC3(BC3_layout& bc3, uint32_t const * argb, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC4(BC4_layout& bc4, uint8_t const * r);
+	KLAYGE_CORE_API void EncodeBC5(BC5_layout& bc5, uint8_t const * r, uint8_t const * g);
+
+	KLAYGE_CORE_API void EncodeBC1(void* bc1, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC2(void* bc2, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC3(void* bc3, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC4(void* bc4, void const * r, uint32_t width, uint32_t height, uint32_t pitch);
+	KLAYGE_CORE_API void EncodeBC5(void* bc5, void const * gr, uint32_t width, uint32_t height, uint32_t pitch);
+
+	KLAYGE_CORE_API void EncodeBC1(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC2(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC3(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC4(TexturePtr const & bc_tex, TexturePtr const & src_tex);
+	KLAYGE_CORE_API void EncodeBC5(TexturePtr const & bc_tex, TexturePtr const & src_tex);
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1_layout& bc1, BC4_layout const & bc4);
 }
