@@ -357,9 +357,9 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		int32_t pass_type = pass_scaned_[pass] >> 28;
-		int32_t org_no = (pass_scaned_[pass] >> 16) & 0xFFF;
-		int32_t index_in_pass = pass_scaned_[pass] & 0xFFFF;
+		int32_t pass_type = pass_scaned_[pass] >> 28;        //  4 bits, [31 - 28]
+		int32_t org_no = (pass_scaned_[pass] >> 16) & 0xFFF; // 12 bits, [27 - 16]
+		int32_t index_in_pass = pass_scaned_[pass] & 0xFFFF; // 16 bits, [15 -  0]
 
 		if (0 == pass)
 		{

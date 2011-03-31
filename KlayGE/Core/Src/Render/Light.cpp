@@ -217,7 +217,7 @@ namespace KlayGE
 
 	float3 PointLightSource::Direction() const
 	{
-		return MathLib::transform_quat(float3(0, 0, 1), quat_);;
+		return MathLib::transform_quat(float3(0, 0, 1), quat_);
 	}
 	
 	void PointLightSource::Direction(float3 const & dir)
@@ -386,6 +386,8 @@ namespace KlayGE
 		cos_outer_inner_.x() = cos(angle);
 		cos_outer_inner_.z() = angle * 2;
 		cos_outer_inner_.w() = tan(angle);
+
+		this->UpdateCamera();
 	}
 
 	float4 const & SpotLightSource::CosOuterInner() const
