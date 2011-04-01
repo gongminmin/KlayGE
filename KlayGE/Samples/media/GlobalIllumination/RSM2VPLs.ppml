@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<post_processors>
+	<post_processor name="RSM2VPLsSpot">
+		<params>
+			<param name="ls_to_es"/>
+			<param name="mip_level"/>
+			<param name="vpl_params"/>
+			<param name="light_color"/>
+			<param name="light_cos_out_inner"/>
+			<param name="light_falloff"/>
+		</params>
+		<input>
+			<pin name="albedo_tex"/>
+			<pin name="normal_es_tex" />
+			<pin name="pos_es_tex" />
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="RSM2VPLs.fxml" tech="RSM2VPLsSpot"/>
+	</post_processor>
+</post_processors>

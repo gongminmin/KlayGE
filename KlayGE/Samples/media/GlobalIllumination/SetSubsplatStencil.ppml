@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<multires_post_processors>
+	<multires_post_processor name="SetSubsplatStencil">
+		<params>
+			<param name="num_levels"/>
+			<param name="depth_threshold"/>
+			<param name="normal_threshold"/>
+		</params>
+		<input>
+			<pin name="depth_deriv_tex"/>
+			<pin name="normal_cone_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SetSubsplatStencil.fxml" tech="SetSubsplatStencil"/>
+	</multires_post_processor>
+</multires_post_processors>

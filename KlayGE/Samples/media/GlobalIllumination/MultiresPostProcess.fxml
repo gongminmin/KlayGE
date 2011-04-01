@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type='int' name='flipping'/>
+
+	<shader>
+		<![CDATA[
+float2 TexCoordFromPos(float4 pos)   
+{                                    
+	float2 tex = pos.xy / 2;           
+	tex.y *= flipping;                 
+	tex += 0.5;                        
+	return tex;                        
+}
+
+void MultiresPostProcessVS(float4 pos: POSITION,
+      float3 tc : TEXCOORD0,
+      out float3 oTex : TEXCOORD0,
+      out float4 oPos : SV_Position)
+{
+	tc.y = (tc.y - 0.5) * flipping + 0.5;
+  
+	oTex = tc;
+	oPos = pos;
+}
+		]]>
+	</shader>
+</effect>

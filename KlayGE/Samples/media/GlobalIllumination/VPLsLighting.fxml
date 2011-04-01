@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="MultiresPostProcess.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="vpls_tex"/>
+	<parameter type="texture2D" name="gbuffer_tex"/>
+
+	<parameter type="float4x4" name="inv_proj"/>
+	<parameter type="float3" name="depth_near_far_invfar"/>
+	<parameter type="float3" name="vpl_params"/>
+
+	<shader>
+		<![CDATA[
+void VPLsLightingVS(float4 pos: POSITION,
+		float3 tc : TEXCOORD0,
+		out float3 oTex : TEXCOORD0,
+		out float3 oViewDir : TEXCOORD1,
+		out float4 oPos : SV_Position)
+{
+	tc.y = (tc.y - 0.5) * flipping + 0.5;
+	oTex = tc;
+	oPos = pos;
+
+	float4 spos = float4(tc.xy, 1, 1);
+	spos.xy = spos.xy - 0.5f;
+	spos.y = spos.y * flipping;
+	spos.xy = spos.xy * 2;
+	oViewDir = mul(spos, inv_proj).xyz;
+}
+    
+float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float4 ndc = gbuffer_tex.Sample(point_sampler, tc.xy);
+	float3 norm_i = GetNormal(ndc);
+	float3 pos_i = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 color_i = 0;
+  
+	for (float k = vpl_params.z; k < 1; k += vpl_params.y)
+	{
+		float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.166f), 0).xyz;
+		float3 norm_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.5f), 0).xyz;
+		float4 pos_dist = vpls_tex.SampleLevel(point_sampler, float2(k, 0.833f), 0);
+		float3 pos_j = pos_dist.xyz;
+		float dlj_sqr = pos_dist.w;
+
+		float3 vij = pos_j - pos_i;
+		float dij_sqr = max(dot(vij, vij), 0.3f);
+		vij = normalize(vij);
+    
+		float cos_iv = max(0, dot(norm_i, vij));
+		float cos_jv = max(0, dot(norm_j, -vij));
+
+		float numer = dlj_sqr * cos_iv * cos_jv;
+		float denom = dij_sqr * vpl_params.x + dlj_sqr;
+		color_i += (numer / denom) * color_j;
+	}
+
+	return float4(color_i, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="VPLsLighting">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="127"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="127"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
+
+			<state name="vertex_shader" value="VPLsLightingVS()"/>
+			<state name="pixel_shader" value="VPLsLightingPS()"/>
+		</pass>
+	</technique>
+</effect>

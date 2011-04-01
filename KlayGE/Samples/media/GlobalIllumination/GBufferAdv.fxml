@@ -1,0 +1,419 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+
+	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
+	
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp"/>
+		<parameter type="float4x4" name="model_view"/>
+		<parameter type="float4x4" name="inv_mvp"/>
+
+		<parameter type="float3" name="depth_near_far_invfar"/>
+	</cbuffer>
+
+	<cbuffer name="model">
+		<parameter type="float4" name="diffuse_clr"/>
+		<parameter type="float4" name="emit_clr"/>
+		<parameter type="float" name="specular_level"/>
+		<parameter type="float" name="shininess"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="diffuse_tex"/>
+	<parameter type="int" name="diffuse_map_enabled"/>
+	<parameter type="texture2D" name="specular_tex"/>
+	<parameter type="int" name="specular_map_enabled"/>
+	<parameter type="texture2D" name="bump_tex"/>
+	<parameter type="int" name="bump_map_enabled"/>
+
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="trilinear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+	<parameter type="sampler" name="aniso_sampler">
+		<state name="filtering" value="anisotropic"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="max_anisotropy" value="4"/>
+	</parameter>
+
+	<parameter type="sampler" name="skybox_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void GBufferVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float3 normal : NORMAL,
+			float3 tangent : TANGENT,
+			out float4 oTexCoordDepth_2x : TEXCOORD0,
+			out float4 oTsToView0_2y : TEXCOORD1,
+			out float4 oTsToView1_2z : TEXCOORD2,
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTexCoordDepth_2x.xyz = float3(texcoord, oPos.w * depth_near_far_invfar.z);
+
+	normal = normal * 2 - 1;
+	tangent = tangent * 2 - 1;
+
+	float3x3 obj_to_ts;
+	obj_to_ts[0] = tangent;
+	obj_to_ts[1] = cross(normal, tangent);
+	obj_to_ts[2] = normal;
+	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
+	oTsToView0_2y.xyz = ts_to_view[0];
+	oTsToView1_2z.xyz = ts_to_view[1];
+	oTexCoordDepth_2x.w = ts_to_view[2].x;
+	oTsToView0_2y.w = ts_to_view[2].y;
+	oTsToView1_2z.w = ts_to_view[2].z;
+}
+
+float4 ConstructGBuffer(float4 texcoord_depth_2x, float4 ts_to_view0_2y, float4 ts_to_view1_2z)
+{
+	float3 normal = normalize(float3(texcoord_depth_2x.w, ts_to_view0_2y.w, ts_to_view1_2z.w));
+	if (bump_map_enabled)
+	{
+		float3x3 ts_to_view;
+		ts_to_view[0] = normalize(ts_to_view0_2y.xyz);
+		ts_to_view[1] = normalize(ts_to_view1_2z.xyz);
+		ts_to_view[2] = normal;
+		normal = normalize(mul(decompress_normal(bump_tex.Sample(trilinear_sampler, texcoord_depth_2x.xy)), ts_to_view));
+	}
+
+	float specular;
+	if (specular_map_enabled)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_depth_2x.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level;
+	}
+	specular *= 100.0f;
+
+	return StoreGBuffer(normal, texcoord_depth_2x.z, specular, shininess);
+}
+
+float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
+{
+	return ConstructGBuffer(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
+}
+
+float4 GBufferAlphaPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth_2x.xy).a - ALPHA_TEST_THRESHOLD);
+	return ConstructGBuffer(texcoord_depth_2x, ts_to_view0_2y, ts_to_view1_2z);
+}
+
+void GBufferSkyBoxVS(float4 pos : POSITION,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+}
+
+float4 GBufferSkyBoxPS() : SV_Target
+{
+	return 0;
+}
+		]]>
+	</shader>
+
+	<technique name="GBufferTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferPS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferAlphaPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void GenReflectiveShadowMapVS(float4 pos : POSITION,
+						float2 texcoord : TEXCOORD0,
+						float3 normal   : NORMAL,
+						out float2 oTc : TEXCOORD0,
+						out float3 oNorm : TEXCOORD1,
+						out float3 oViewDir : TEXCOORD2,
+						out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTc = texcoord;
+	oNorm = mul(float4(normal, 0), model_view).xyz;
+	oViewDir = mul(pos, model_view).xyz;
+}
+
+void GenReflectiveShadowMapPS(float2 tc : TEXCOORD0,
+						float3 norm : TEXCOORD1,
+						float3 view_dir : TEXCOORD2,
+						out float4 albedo : SV_Target0, 
+						out float4 normal : SV_Target1, 
+						out float4 pos : SV_Target2)
+{
+	if (diffuse_map_enabled)
+	{
+		albedo = diffuse_tex.Sample(bilinear_sampler, tc.xy);
+	}
+	else
+	{
+		albedo = diffuse_clr;
+	}
+  
+	normal = float4(normalize(norm), 0);
+	pos = float4(view_dir, 1);
+}
+
+void GenReflectiveShadowMapAlphaPS(float2 tc : TEXCOORD0,
+						float3 norm : TEXCOORD1,
+						float3 view_dir : TEXCOORD2,
+						out float4 albedo : SV_Target0, 
+						out float4 normal : SV_Target1, 
+						out float4 pos : SV_Target2)
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, tc.xy).a - ALPHA_TEST_THRESHOLD);
+
+	if (diffuse_map_enabled)
+	{
+		albedo = diffuse_tex.Sample(bilinear_sampler, tc.xy);
+	}
+	else
+	{
+		albedo = diffuse_clr;
+	}
+  
+	normal = float4(normalize(norm), 0);
+	pos = float4(view_dir, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="GenReflectiveShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="back" />
+
+			<state name="vertex_shader" value="GenReflectiveShadowMapVS()"/>
+			<state name="pixel_shader" value="GenReflectiveShadowMapPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenReflectiveShadowMapAlpha">
+		<pass name="p0">
+			<state name="cull_mode" value="back" />
+
+			<state name="vertex_shader" value="GenReflectiveShadowMapVS()"/>
+			<state name="pixel_shader" value="GenReflectiveShadowMapAlphaPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void GenShadowMapVS(float4 pos : POSITION,
+						float2 texcoord : TEXCOORD0,
+						out float2 oTc : TEXCOORD0,
+						out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTc = texcoord;
+}
+
+float4 GenShadowMapPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return 0;
+}
+
+float4 GenShadowMapAlphaPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);	
+	return 0;
+}
+		]]>
+	</shader>
+
+	<technique name="GenShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="color_write_mask" value="0"/>
+			
+			<state name="vertex_shader" value="GenShadowMapVS()"/>
+			<state name="pixel_shader" value="GenShadowMapPS()"/>
+		</pass>
+	</technique>
+	<technique name="GenShadowMapAlpha">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GenShadowMapVS()"/>
+			<state name="pixel_shader" value="GenShadowMapAlphaPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="textureCUBE" name="skybox_tex"/>
+	<parameter type="textureCUBE" name="skybox_C_tex"/>
+
+	<parameter type="texture2D" name="lighting_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<cbuffer name="per_frame2">
+		<parameter type='int' name='flipping'/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="ssao_tex"/>
+	<parameter type="int" name="ssao_enabled"/>
+	
+	<shader>
+		<![CDATA[
+#ifdef KLAYGE_D3D11
+#define NOPERSPECTIVE_SUPPORT
+#endif
+
+void ShadingVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			out float2 oTexCoord : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oTc : TEXCOORD1,
+#else
+			out float2 oTc : TEXCOORD1,
+			out float oW : TEXCOORD2,
+#endif
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTexCoord = texcoord;
+
+	oTc = oPos.xy / oPos.w;
+	oTc.y *= flipping;
+	oTc = oTc * 0.5f + 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oW = oPos.w;
+	oTc *= oW;
+#endif
+}
+
+float4 CalcShading(float2 tc, float3 diffuse, float3 emit)
+{
+	float ssao = 1;
+	if (ssao_enabled)
+	{
+		ssao = ssao_tex.Sample(point_sampler, tc).x;
+	}
+	
+	float4 lighting = lighting_tex.Sample(point_sampler, tc);
+	float3 diff_lighting = lighting.rgb;
+	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
+	return float4(max(emit + (diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting) * ssao, 0), 1);
+}
+
+float4 ShadingPS(float2 texcoord : TEXCOORD0
+#ifdef NOPERSPECTIVE_SUPPORT
+	, noperspective float2 tc : TEXCOORD1
+#else
+	, float2 tc : TEXCOORD1, float w : TEXCOORD2
+#endif
+	) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	tc /= w;
+#endif
+
+	float3 diffuse;
+	if (diffuse_map_enabled)
+	{
+		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		diffuse = diffuse_clr.rgb;
+	}
+	return CalcShading(tc, diffuse, emit_clr.rgb);
+}
+
+void ShadingSkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
+float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+{
+	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
+					skybox_C_tex.Sample(skybox_sampler, texcoord));
+}
+		]]>
+	</shader>
+
+	<technique name="Shading">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="ShadingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingSkyBox">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="ShadingSkyBoxPS()"/>
+		</pass>
+	</technique>
+</effect>

@@ -40,6 +40,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PNTriangles", "PNTriangles.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JudaTexViewer", "JudaTexViewer.vcxproj", "{AB22B649-B1A2-4010-83C0-01034595F1C4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlobalIllumination", "GlobalIllumination.vcxproj", "{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -208,6 +210,12 @@ Global
 		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|Win32.Build.0 = Release|Win32
 		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|x64.ActiveCfg = Release|x64
 		{AB22B649-B1A2-4010-83C0-01034595F1C4}.Release|x64.Build.0 = Release|x64
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Debug|Win32.Build.0 = Debug|Win32
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Debug|x64.ActiveCfg = Debug|Win32
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Release|Win32.ActiveCfg = Release|Win32
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Release|Win32.Build.0 = Release|Win32
+		{D88BD457-C3D5-49DE-81EE-CEEE9D23EC51}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

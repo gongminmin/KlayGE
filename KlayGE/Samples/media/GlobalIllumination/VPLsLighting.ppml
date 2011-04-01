@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<multires_post_processors>
+	<multires_post_processor name="VPLsLighting">
+		<params>
+			<param name="inv_proj"/>
+			<param name="depth_near_far_invfar"/>
+			<param name="vpl_params"/>
+		</params>
+		<input>
+			<pin name="vpls_tex"/>
+			<pin name="gbuffer_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="VPLsLighting.fxml" tech="VPLsLighting"/>
+	</multires_post_processor>
+</multires_post_processors>

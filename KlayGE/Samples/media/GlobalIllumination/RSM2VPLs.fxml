@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="Lighting.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="trilinear_sampler">
+		<state name="filtering" value="min_mag_mip_linear"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="float4x4" name="ls_to_es"/>
+	<parameter type="float" name="mip_level"/>
+	<parameter type="float4" name="vpl_params"/>
+	<parameter type="float4" name="light_color"/>
+	<parameter type="float4" name="light_cos_out_inner"/>
+	<parameter type="float3" name="light_falloff"/>
+
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="normal_es_tex"/>
+	<parameter type="texture2D" name="pos_es_tex" />
+
+	<shader>
+		<![CDATA[
+float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float vpl_id = tc.x * vpl_params.x;
+	float i = vpl_params.y * frac(vpl_id / vpl_params.y);
+	float j = floor(vpl_id / vpl_params.y);
+	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.ww;
+
+	float4 albedo = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
+
+	float3 normal_ls = normal_es_tex.Sample(point_sampler, rsm_tc).xyz;
+	float4 normal_es = mul(float4(normal_ls, 0), ls_to_es);
+
+	float4 pos_ls = pos_es_tex.Sample(point_sampler, rsm_tc);
+	float4 pos_es_dist = mul(pos_ls, ls_to_es);
+	pos_es_dist.w = dot(pos_ls.xyz, pos_ls.xyz);
+
+	float4 light = 0;
+	float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls.xyz);
+	if (spot > 0)
+	{
+		float n_dot_l = max(0, dot(float3(0, 0, -1), normal_ls));
+		if (n_dot_l > 0)
+		{
+			float atten = spot * attenuation_term(float3(0, 0, 0), pos_ls.xyz, light_falloff);
+			float diff = max(0, n_dot_l * atten);
+			light = diff * light_color * albedo;
+		}
+	}
+
+	if (tc.y < 1 / 3.0f)
+	{
+		return light;
+	}
+	else if (tc.y < 2 / 3.0f)
+	{
+		return normal_es;
+	}
+	else
+	{
+		return pos_es_dist;
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="RSM2VPLsSpot">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="RSM2VPLsSpotPS()"/>
+		</pass>
+	</technique>
+</effect>

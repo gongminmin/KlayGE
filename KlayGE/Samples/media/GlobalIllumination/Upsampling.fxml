@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+  
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="float3" name="kernel" array_size="9">
+		<value>
+			<![CDATA[
+				0,  0,     1,     -1,  0,   0.5,    -1,  1, 0.25,
+				0,  1,   0.5,      1,  1,  0.25,     1,  0,  0.5,
+				1, -1,  0.25,      0, -1,   0.5,    -1, -1, 0.25
+			]]>
+		</value>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="float4" name="delta"/>
+	<parameter type="float4" name="loc_scale_0"/>
+	<parameter type="float4" name="loc_scale_1"/>
+	<parameter type="float4" name="tc_min_max_0"/>
+	<parameter type="float4" name="tc_min_max_1"/>
+
+	<shader>
+		<![CDATA[
+void UpsamplingVS(float4 pos: POSITION,
+		out float2 oTex0 : TEXCOORD0,
+		out float2 oTex1 : TEXCOORD1,
+		out float4 oPos : SV_Position)
+{
+	float2 coord = (pos.xy + 1) / 2;
+	float4 pos0 = float4(loc_scale_0.xy + coord * loc_scale_0.zw, 0, 1);
+	float4 pos1 = float4(loc_scale_1.xy + coord * loc_scale_1.zw, 0, 1);
+
+	oPos = pos0;
+	oTex0 = TexCoordFromPos(pos0);
+	oTex1 = TexCoordFromPos(pos1);
+}
+        
+float4 UpsamplingPS(float2 tc0 : TEXCOORD0, float2 tc1 : TEXCOORD1) : SV_Target
+{
+	float3 color0 = src_tex.Sample(point_sampler, tc0).xyz;
+	float3 color1 = src_tex.Sample(point_sampler, tc1).xyz;
+  
+	return float4(color0 + color1, 1);
+}
+    
+float4 UpsamplingInterpolatePS(float2 tc0 : TEXCOORD0, float2 tc1 : TEXCOORD1) : SV_Target
+{
+	float4 tc_y_adjust = float4(tc_min_max_0.yw, tc_min_max_1.yw);
+	tc_y_adjust = (tc_y_adjust - 0.5) * flipping + 0.5;
+ 
+	float4 ntc_min_max_0 = tc_min_max_0;
+	ntc_min_max_0.y = min(tc_y_adjust.x, tc_y_adjust.y);
+	ntc_min_max_0.w = max(tc_y_adjust.x, tc_y_adjust.y);
+  
+	float4 ntc_min_max_1 = tc_min_max_1;
+	ntc_min_max_1.y = min(tc_y_adjust.z, tc_y_adjust.w);
+	ntc_min_max_1.w = max(tc_y_adjust.z, tc_y_adjust.w);
+
+	float4 color[9];
+	float weight[9];
+	for (int i = 0; i < 9; ++i)
+	{
+		float2 ntc0 = clamp(tc0 + kernel[i].xy * delta.xy, ntc_min_max_0.xy, ntc_min_max_0.zw);
+		float2 ntc1 = clamp(tc1 + kernel[i].xy * delta.zw, ntc_min_max_1.xy, ntc_min_max_1.zw);
+    
+		float4 color0 = src_tex.Sample(point_sampler, ntc0);
+		float4 color1 = src_tex.Sample(point_sampler, ntc1);
+    
+		color[i] = color0 + (1 - color0.a) * color1;
+		weight[i] = color[i].a * kernel[i].z;
+	}
+
+	weight[2] = weight[2] * color[1].a * color[3].a;
+	weight[4] = weight[4] * color[3].a * color[5].a;
+	weight[6] = weight[6] * color[5].a * color[7].a;
+	weight[8] = weight[8] * color[7].a * color[1].a;
+  
+	float tot_weight = weight[0] + weight[1] + weight[2] 
+					+ weight[3] + weight[4] + weight[5] 
+					+ weight[6] + weight[7] + weight[8] + 0.001;
+  
+	float4 tot_color = color[0] * weight[0] + color[1] * weight[1] + color[2] * weight[2]
+					+ color[3] * weight[3] + color[4] * weight[4] + color[5] * weight[5]
+					+ color[6] * weight[6] + color[7] * weight[7] + color[8] * weight[8];
+  
+	return color[0].a * float4(tot_color.rgb / tot_weight, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Upsampling">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="UpsamplingVS()"/>
+			<state name="pixel_shader" value="UpsamplingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="UpsamplingInterpolate">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="UpsamplingVS()"/>
+			<state name="pixel_shader" value="UpsamplingInterpolatePS()"/>
+		</pass>
+	</technique>
+</effect>
