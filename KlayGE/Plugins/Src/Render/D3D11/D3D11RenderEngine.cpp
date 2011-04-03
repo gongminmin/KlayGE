@@ -775,14 +775,15 @@ namespace KlayGE
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_3)
 		{
 			caps_.max_vertex_texture_units = 0;
-			caps_.max_texture_height = caps_.max_texture_width = 4096;
+			caps_.max_texture_height = caps_.max_texture_width = (D3D_FEATURE_LEVEL_9_3 == d3d_feature_level_) ? 4096 : 2048;
 			caps_.max_texture_depth = 256;
-			caps_.max_texture_cube_size = 512;
+			caps_.max_texture_cube_size = (D3D_FEATURE_LEVEL_9_3 == d3d_feature_level_) ? 4096 : 512;
 			caps_.max_texture_array_length = 1;
-			caps_.max_simultaneous_rts = 4;
-			caps_.max_vertices = 1048575;
-			caps_.max_indices = 1048575;
+			caps_.max_simultaneous_rts = (D3D_FEATURE_LEVEL_9_3 == d3d_feature_level_) ? 4 : 1;
+			caps_.max_vertices = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 65535 : 1048575;
+			caps_.max_indices = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 65535 : 1048575;
 			caps_.alpha_to_coverage_support = false;
+			caps_.mrt_independent_bit_depths_support = false;
 		}
 		else
 		{
@@ -795,10 +796,11 @@ namespace KlayGE
 			caps_.max_vertices = 8388607;
 			caps_.max_indices = 16777215;
 			caps_.alpha_to_coverage_support = true;
+			caps_.mrt_independent_bit_depths_support = true;
 		}
 		caps_.max_vertex_streams = 16;
-		caps_.max_texture_anisotropy = 16;
-		caps_.hw_instancing_support = true;
+		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
+		caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
 		{
 			D3D11_FEATURE_DATA_THREADING mt_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));

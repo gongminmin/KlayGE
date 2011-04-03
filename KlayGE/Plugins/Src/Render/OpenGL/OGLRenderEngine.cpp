@@ -928,6 +928,7 @@ namespace KlayGE
 		}
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
+		caps_.mrt_independent_bit_depths_support = false;
 
 		if (glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()
 			|| glloader_GL_NV_geometry_shader4())
