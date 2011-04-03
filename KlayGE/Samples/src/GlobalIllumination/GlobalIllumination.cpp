@@ -520,7 +520,7 @@ namespace
 		void Pass(PassType type)
 		{
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
-			this->Visible(PT_GenShadowMap != type);
+			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
 		}
 
 		void AttachLightSrc(LightSourcePtr const & light)
@@ -654,7 +654,7 @@ void GlobalIlluminationApp::InitObjects()
 	spot_light_->Attrib(LSA_IndirectLighting);
 	spot_light_->Position(float3(0, 20, 0));
 	spot_light_->Direction(float3(0.3f, -1, 0));
-	spot_light_->Color(float3(3.0f, 2.94f, 2.69f));
+	spot_light_->Color(float3(6.0f, 5.88f, 5.38f));
 	spot_light_->Falloff(float3(0, 0.1f, 0));
 	spot_light_->OuterAngle(PI / 4);
 	spot_light_->InnerAngle(PI / 6);

@@ -23,51 +23,64 @@
 	<parameter type="float4" name="light_cos_out_inner"/>
 	<parameter type="float3" name="light_falloff"/>
 
+	<parameter type="float3" name="upper_left"/>
+	<parameter type="float3" name="upper_right"/>
+	<parameter type="float3" name="lower_left"/>
+	<parameter type="float3" name="lower_right"/>
+
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_es_tex"/>
 	<parameter type="texture2D" name="pos_es_tex" />
 
 	<shader>
 		<![CDATA[
+float3 texcoord_to_view(float2 tex)
+{
+	return lerp(lerp(upper_left, upper_right, tex.x),
+				lerp(lower_left, lower_right, tex.x),
+				tex.y);
+}
+
 float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float vpl_id = tc.x * vpl_params.x;
 	float i = vpl_params.y * frac(vpl_id / vpl_params.y);
 	float j = floor(vpl_id / vpl_params.y);
-	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.ww;
+	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
 
 	float4 albedo = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
+	float3 normal_ls = normal_es_tex.Sample(point_sampler, rsm_tc).xyz * 2 - 1;
+	float depth_ls = pos_es_tex.Sample(point_sampler, rsm_tc).x;
 
-	float3 normal_ls = normal_es_tex.Sample(point_sampler, rsm_tc).xyz;
-	float4 normal_es = mul(float4(normal_ls, 0), ls_to_es);
-
-	float4 pos_ls = pos_es_tex.Sample(point_sampler, rsm_tc);
-	float4 pos_es_dist = mul(pos_ls, ls_to_es);
-	pos_es_dist.w = dot(pos_ls.xyz, pos_ls.xyz);
-
-	float4 light = 0;
-	float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls.xyz);
-	if (spot > 0)
-	{
-		float n_dot_l = max(0, dot(float3(0, 0, -1), normal_ls));
-		if (n_dot_l > 0)
-		{
-			float atten = spot * attenuation_term(float3(0, 0, 0), pos_ls.xyz, light_falloff);
-			float diff = max(0, n_dot_l * atten);
-			light = diff * light_color * albedo;
-		}
-	}
+	float3 view_dir = texcoord_to_view(float2(rsm_tc.x, flipping < 0 ? rsm_tc.y : 1 - rsm_tc.y));
+	float3 pos_ls = view_dir * (depth_ls / view_dir.z);
 
 	if (tc.y < 1 / 3.0f)
 	{
+		float4 light = 0;
+		float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls);
+		if (spot > 0)
+		{
+			float n_dot_l = max(0, dot(float3(0, 0, -1), normal_ls));
+			if (n_dot_l > 0)
+			{
+				float atten = spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
+				float diff = max(0, n_dot_l * atten);
+				light = diff * light_color * albedo;
+			}
+		}
+
 		return light;
 	}
 	else if (tc.y < 2 / 3.0f)
 	{
+		float4 normal_es = mul(float4(normal_ls, 0), ls_to_es);
 		return normal_es;
 	}
 	else
 	{
+		float4 pos_es_dist = mul(float4(pos_ls, 1), ls_to_es);
+		pos_es_dist.w = dot(pos_ls, pos_ls);
 		return pos_es_dist;
 	}
 }

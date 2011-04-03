@@ -9,6 +9,10 @@
 			<param name="light_color"/>
 			<param name="light_cos_out_inner"/>
 			<param name="light_falloff"/>
+			<param name="upper_left"/>
+			<param name="upper_right"/>
+			<param name="lower_left"/>
+			<param name="lower_right"/>
 		</params>
 		<input>
 			<pin name="albedo_tex"/>

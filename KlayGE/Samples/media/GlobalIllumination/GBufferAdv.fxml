@@ -175,56 +175,47 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float3 normal   : NORMAL,
 						out float2 oTc : TEXCOORD0,
-						out float3 oNorm : TEXCOORD1,
-						out float3 oViewDir : TEXCOORD2,
+						out float4 oNormal_Depth : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
-	oNorm = mul(float4(normal, 0), model_view).xyz;
-	oViewDir = mul(pos, model_view).xyz;
+	oNormal_Depth = float4(mul(normal, (float3x3)model_view), oPos.w);
+}
+
+void ConstructRSMBuffer(float2 tc, float4 normal_depth,
+						out float4 oAlbedo, out float4 oNormal, out float oDepth)
+{
+	if (diffuse_map_enabled)
+	{
+		oAlbedo = diffuse_tex.Sample(aniso_sampler, tc.xy);
+	}
+	else
+	{
+		oAlbedo = diffuse_clr;
+	}
+
+	oNormal = float4(normalize(normal_depth.xyz) / 2 + 0.5f, 0);
+	oDepth = normal_depth.w;
 }
 
 void GenReflectiveShadowMapPS(float2 tc : TEXCOORD0,
-						float3 norm : TEXCOORD1,
-						float3 view_dir : TEXCOORD2,
-						out float4 albedo : SV_Target0, 
-						out float4 normal : SV_Target1, 
-						out float4 pos : SV_Target2)
+						float4 normal_depth : TEXCOORD1,
+						out float4 oAlbedo : SV_Target0, 
+						out float4 oNormal : SV_Target1, 
+						out float oDepth : SV_Target2)
 {
-	if (diffuse_map_enabled)
-	{
-		albedo = diffuse_tex.Sample(bilinear_sampler, tc.xy);
-	}
-	else
-	{
-		albedo = diffuse_clr;
-	}
-  
-	normal = float4(normalize(norm), 0);
-	pos = float4(view_dir, 1);
+	ConstructRSMBuffer(tc, normal_depth, oAlbedo, oNormal, oDepth);
 }
 
 void GenReflectiveShadowMapAlphaPS(float2 tc : TEXCOORD0,
-						float3 norm : TEXCOORD1,
-						float3 view_dir : TEXCOORD2,
-						out float4 albedo : SV_Target0, 
-						out float4 normal : SV_Target1, 
-						out float4 pos : SV_Target2)
+						float4 normal_depth : TEXCOORD1,
+						out float4 oAlbedo : SV_Target0, 
+						out float4 oNormal : SV_Target1, 
+						out float oDepth : SV_Target2)
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, tc.xy).a - ALPHA_TEST_THRESHOLD);
-
-	if (diffuse_map_enabled)
-	{
-		albedo = diffuse_tex.Sample(bilinear_sampler, tc.xy);
-	}
-	else
-	{
-		albedo = diffuse_clr;
-	}
-  
-	normal = float4(normalize(norm), 0);
-	pos = float4(view_dir, 1);
+	ConstructRSMBuffer(tc, normal_depth, oAlbedo, oNormal, oDepth);
 }
 		]]>
 	</shader>

@@ -25,7 +25,7 @@ void VPLsLightingVS(float4 pos: POSITION,
 		out float3 oViewDir : TEXCOORD1,
 		out float4 oPos : SV_Position)
 {
-	tc.y = (tc.y - 0.5) * flipping + 0.5;
+	tc.y = (tc.y - 0.5f) * flipping + 0.5f;
 	oTex = tc;
 	oPos = pos;
 

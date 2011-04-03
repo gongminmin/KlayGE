@@ -46,10 +46,6 @@ float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
-#ifdef KLAYGE_D3D11
-	tc = ldexp(tc, prev_level + 1);
-#endif
-
 	tc = tc + delta_offset.zw;
 	float max_depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).r;
 	for (int i = 1; i < 9; ++i)
@@ -78,10 +74,6 @@ float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 NormalConeMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
-#ifdef KLAYGE_D3D11
-	tc = ldexp(tc, prev_level + 1);
-#endif
-
 	tc = tc + delta_offset.zw;  
 	float4 max_min_nxy = normal_cone_tex.SampleLevel(point_sampler, tc, prev_level);
 	for (int i = 1; i < 9; ++i)

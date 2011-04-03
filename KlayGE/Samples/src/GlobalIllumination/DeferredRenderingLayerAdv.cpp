@@ -256,7 +256,8 @@ namespace KlayGE
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
 		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0));
+		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0);
+		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -264,13 +265,13 @@ namespace KlayGE
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
-			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, MAX_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rsm_texs_[2] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, MAX_MIPMAP_LEVELS, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rsm_texs_[2] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 0)); // albedo
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*(rsm_texs_[2]), 0, 0)); // pos (light space)
-			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0));
+			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 3, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
 
@@ -778,10 +779,9 @@ namespace KlayGE
 					break;
 				}
 
-				rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
-
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
+					rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
 					return App3DFramework::URV_Need_Flush;
@@ -797,12 +797,18 @@ namespace KlayGE
 						float mip_level = (MathLib::log(static_cast<float>(RSM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
 						float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
 
+						float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
+
 						rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
 						rsm_to_vpls_pps[type]->SetParam(1, mip_level);
 						rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
 						rsm_to_vpls_pps[type]->SetParam(3, light->Color());
 						rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
 						rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
+						rsm_to_vpls_pps[type]->SetParam(6, MathLib::transform_coord(float3(-1, +1, 1), inv_proj));
+						rsm_to_vpls_pps[type]->SetParam(7, MathLib::transform_coord(float3(+1, +1, 1), inv_proj));
+						rsm_to_vpls_pps[type]->SetParam(8, MathLib::transform_coord(float3(-1, -1, 1), inv_proj));
+						rsm_to_vpls_pps[type]->SetParam(9, MathLib::transform_coord(float3(+1, -1, 1), inv_proj));
 						rsm_to_vpls_pps[type]->Apply();
 					}
 					
@@ -1059,18 +1065,18 @@ namespace KlayGE
 		loc_size[0] = float4(-1, -1, 1, 2);
 		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++i)
 		{
-			loc_size[i].x() = loc_size[i-1].x() + loc_size[i - 1].z();
-			loc_size[i].y() = loc_size[i-1].y();
-			loc_size[i].z() = loc_size[i-1].z() / 2;
-			loc_size[i].w() = loc_size[i-1].w() / 2;
+			loc_size[i].x() = loc_size[i - 1].x() + loc_size[i - 1].z();
+			loc_size[i].y() = loc_size[i - 1].y();
+			loc_size[i].z() = loc_size[i - 1].z() / 2;
+			loc_size[i].w() = loc_size[i - 1].w() / 2;
 		}
 
 		std::vector<float4> tc_min_max(MAX_MIPMAP_LEVELS);
 		tc_min_max[0] = float4(0, 0, 0.5f, 1);
 		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++i)
 		{
-			tc_min_max[i].x() = tc_min_max[i-1].z();
-			tc_min_max[i].y() = tc_min_max[i-1].y();
+			tc_min_max[i].x() = tc_min_max[i - 1].z();
+			tc_min_max[i].y() = tc_min_max[i - 1].y();
 			tc_min_max[i].z() = tc_min_max[i].x() + loc_size[i].z() / 2;
 			tc_min_max[i].w() = 1 - tc_min_max[i].x();
 		}
@@ -1085,10 +1091,10 @@ namespace KlayGE
 		{
 			std::swap(indirect_lighting_tex_, indirect_lighting_pingpong_tex_);
 			
-			upsampling_pp_->SetParam(1, loc_size[i]);
-			upsampling_pp_->SetParam(2, loc_size[i+1]);
-			upsampling_pp_->SetParam(3, tc_min_max[i]);
-			upsampling_pp_->SetParam(4, tc_min_max[i+1]);
+			upsampling_pp_->SetParam(1, loc_size[i + 0]);
+			upsampling_pp_->SetParam(2, loc_size[i + 1]);
+			upsampling_pp_->SetParam(3, tc_min_max[i + 0]);
+			upsampling_pp_->SetParam(4, tc_min_max[i + 1]);
 			
 			upsampling_pp_->InputPin(0, indirect_lighting_pingpong_tex_);
 			upsampling_pp_->OutputPin(0, indirect_lighting_tex_);
