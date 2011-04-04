@@ -492,64 +492,12 @@ namespace
 	class SpotLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
 	{
 	public:
-		SpotLightProxyObject(float cone_radius, float cone_height, float org_angle, float rot_speed, float height, float3 const & clr)
+		SpotLightProxyObject(LightSourcePtr const & light)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
-				rot_speed_(rot_speed), height_(height)
+				light_(light)
 		{
 			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
-			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
-
-			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
-		}
-
-		void Update()
-		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
-				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
-				* MathLib::translation(0.0f, height_, 0.0f);
-
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
-
-			light_->ModelMatrix(model_);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-		void Pass(PassType type)
-		{
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
-			this->Visible(PT_GenShadowMap != type);
-		}
-
-		void AttachLightSrc(LightSourcePtr const & light)
-		{
-			light_ = light;
-		}
-
-	private:
-		float4x4 model_;
-		float4x4 model_org_;
-		float rot_speed_, height_;
-
-		LightSourcePtr light_;
-
-		Timer timer_;
-	};
-
-	class PointLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
-	{
-	public:
-		PointLightProxyObject(float move_speed, float3 const & pos, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
-				move_speed_(move_speed), pos_(pos)
-		{
-			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(light_->Color());
 			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
 
 			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
@@ -557,14 +505,10 @@ namespace
 
 		void Update()
 		{
-			model_ = model_org_
-				* MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
-				* MathLib::translation(pos_);
+			model_ = model_org_ * MathLib::inverse(light_->SMCamera(0)->ViewMatrix());
 
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
-
-			light_->ModelMatrix(model_);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -578,18 +522,93 @@ namespace
 			this->Visible(PT_GenShadowMap != type);
 		}
 
-		void AttachLightSrc(LightSourcePtr const & light)
+	private:
+		float4x4 model_;
+		float4x4 model_org_;
+
+		LightSourcePtr light_;
+	};
+
+	class PointLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
+	{
+	public:
+		PointLightProxyObject(LightSourcePtr const & light)
+			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
+				light_(light)
 		{
-			light_ = light;
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(light_->Color());
+			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
+
+			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
+		}
+
+		void Update()
+		{
+			model_ = model_org_ * MathLib::inverse(light_->SMCamera(0)->ViewMatrix());
+
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
+		}
+
+		float4x4 const & GetModelMatrix() const
+		{
+			return model_;
+		}
+
+		void Pass(PassType type)
+		{
+			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
+			this->Visible(PT_GenShadowMap != type);
 		}
 
 	private:
 		float4x4 model_;
 		float4x4 model_org_;
-		float move_speed_;
-		float3 pos_;
 
 		LightSourcePtr light_;
+	};
+
+	class SpotLightSourceUpdate
+	{
+	public:
+		SpotLightSourceUpdate(float cone_radius, float cone_height, float org_angle, float rot_speed, float3 const & pos)
+			: rot_speed_(rot_speed), pos_(pos)
+		{
+			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
+		}
+
+		void operator()(LightSource& light)
+		{
+			light.ModelMatrix(MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
+				* MathLib::translation(pos_));
+		}
+
+	private:
+		float4x4 model_org_;
+		float rot_speed_;
+		float3 pos_;
+
+		Timer timer_;
+	};
+
+	class PointLightSourceUpdate
+	{
+	public:
+		PointLightSourceUpdate(float move_speed, float3 const & pos)
+			: move_speed_(move_speed), pos_(pos)
+		{
+		}
+
+		void operator()(LightSource& light)
+		{
+			light.ModelMatrix(MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
+				* MathLib::translation(pos_));
+		}
+
+	private:
+		float move_speed_;
+		float3 pos_;
 
 		Timer timer_;
 	};
@@ -894,6 +913,7 @@ void DeferredRenderingApp::InitObjects()
 	point_light_->Color(float3(3, 3, 3));
 	point_light_->Position(float3(0, 0, 0));
 	point_light_->Falloff(float3(0, 0.2f, 0));
+	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
 	point_light_->AddToSceneManager();
 
 	spot_light_[0] = MakeSharedPtr<SpotLightSource>();
@@ -902,6 +922,7 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[0]->Falloff(float3(0, 0.2f, 0));
 	spot_light_[0]->OuterAngle(PI / 6);
 	spot_light_[0]->InnerAngle(PI / 8);
+	spot_light_[0]->BindUpdateFunc(SpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, float3(0.0f, 4.0f, 0.0f)));
 	spot_light_[0]->AddToSceneManager();
 
 	spot_light_[1] = MakeSharedPtr<SpotLightSource>();
@@ -910,18 +931,15 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[1]->Falloff(float3(0, 0.2f, 0));
 	spot_light_[1]->OuterAngle(PI / 4);
 	spot_light_[1]->InnerAngle(PI / 6);
+	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate(1.0f, 1.0f, 0.0f, -1 / 700.0f, float3(0.0f, 3.4f, 0.0f)));
 	spot_light_[1]->AddToSceneManager();
 
-	point_light_src_ = MakeSharedPtr<PointLightProxyObject>(1 / 1000.0f, float3(2, 10, 0), point_light_->Color());
-	spot_light_src_[0] = MakeSharedPtr<SpotLightProxyObject>(sqrt(3.0f) / 3, 1.0f, PI, 1 / 1400.0f, 4.0f, spot_light_[0]->Color());
-	spot_light_src_[1] = MakeSharedPtr<SpotLightProxyObject>(1.0f, 1.0f, 0.0f, -1 / 700.0f, 3.4f, spot_light_[1]->Color());
+	point_light_src_ = MakeSharedPtr<PointLightProxyObject>(point_light_);
+	spot_light_src_[0] = MakeSharedPtr<SpotLightProxyObject>(spot_light_[0]);
+	spot_light_src_[1] = MakeSharedPtr<SpotLightProxyObject>(spot_light_[1]);
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
-
-	checked_pointer_cast<PointLightProxyObject>(point_light_src_)->AttachLightSrc(point_light_);
-	checked_pointer_cast<SpotLightProxyObject>(spot_light_src_[0])->AttachLightSrc(spot_light_[0]);
-	checked_pointer_cast<SpotLightProxyObject>(spot_light_src_[1])->AttachLightSrc(spot_light_[1]);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

@@ -487,9 +487,11 @@ namespace
 			sops_.push_back("keep");
 			sops_.push_back("zero");
 			sops_.push_back("replace");
-			sops_.push_back("increment");
-			sops_.push_back("decrement");
+			sops_.push_back("incr");
+			sops_.push_back("decr");
 			sops_.push_back("invert");
+			sops_.push_back("incr_wrap");
+			sops_.push_back("decr_wrap");
 		}
 
 	private:

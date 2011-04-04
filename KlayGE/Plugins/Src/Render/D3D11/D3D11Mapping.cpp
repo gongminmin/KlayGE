@@ -105,14 +105,20 @@ namespace KlayGE
 		case SOP_Replace:
 			return D3D11_STENCIL_OP_REPLACE;
 
-		case SOP_Increment:
-			return D3D11_STENCIL_OP_INCR;
+		case SOP_Incr:
+			return D3D11_STENCIL_OP_INCR_SAT;
 
-		case SOP_Decrement:
-			return D3D11_STENCIL_OP_DECR;
+		case SOP_Decr:
+			return D3D11_STENCIL_OP_DECR_SAT;
 
 		case SOP_Invert:
 			return D3D11_STENCIL_OP_INVERT;
+
+		case SOP_Incr_Wrap:
+			return D3D11_STENCIL_OP_INCR;
+
+		case SOP_Decr_Wrap:
+			return D3D11_STENCIL_OP_DECR;
 
 		default:
 			BOOST_ASSERT(false);

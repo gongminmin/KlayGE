@@ -140,14 +140,20 @@ namespace KlayGE
 		case SOP_Replace:
 			return GL_REPLACE;
 
-		case SOP_Increment:
+		case SOP_Incr:
 			return GL_INCR;
 
-		case SOP_Decrement:
+		case SOP_Decr:
 			return GL_DECR;
 
 		case SOP_Invert:
 			return GL_INVERT;
+
+		case SOP_Incr_Wrap:
+			return GL_INCR_WRAP;
+
+		case SOP_Decr_Wrap:
+			return GL_DECR_WRAP;
 
 		default:
 			BOOST_ASSERT(false);

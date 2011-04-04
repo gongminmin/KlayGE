@@ -125,11 +125,15 @@ namespace KlayGE
 		// Set the stencil value to the reference value
 		SOP_Replace,
 		// Increase the stencil value by 1, clamping at the maximum value
-		SOP_Increment,
+		SOP_Incr,
 		// Decrease the stencil value by 1, clamping at 0
-		SOP_Decrement,
+		SOP_Decr,
 		// Invert the bits of the stencil buffer
-		SOP_Invert
+		SOP_Invert,
+		// Increase the stencil value by 1, wrap the result if necessary
+		SOP_Incr_Wrap,
+		// Decrease the stencil value by 1, wrap the result if necessary
+		SOP_Decr_Wrap
 	};
 
 	enum ColorMask
