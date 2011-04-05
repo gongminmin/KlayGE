@@ -237,8 +237,7 @@ namespace KlayGE
 		technique_lights_[LT_Point] = effect_->TechniqueByName("DeferredRenderingPoint");
 		technique_lights_[LT_Spot] = effect_->TechniqueByName("DeferredRenderingSpot");
 		technique_light_depth_only_ = effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
-		technique_light_stencil_eiv_ = effect_->TechniqueByName("DeferredRenderingLightStencilEIV");
-		technique_light_stencil_eov_ = effect_->TechniqueByName("DeferredRenderingLightStencilEOV");
+		technique_light_stencil_ = effect_->TechniqueByName("DeferredRenderingLightStencil");
 		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
@@ -907,44 +906,7 @@ namespace KlayGE
 
 					if ((LT_Point == type) || (LT_Spot == type))
 					{
-						Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-						float3 eye = camera.EyePos();
-
-						bool eye_in_volume = false;
-
-						float3 const & p = light->Position();
-						if (LT_Spot == type)
-						{
-							float3 v = MathLib::normalize(eye - p);
-							float3 const & d = light->Direction();
-							float cos_direction = MathLib::dot(v, d);
-							if (light->CosOuterInner().x() < cos_direction * 1.01f)
-							{
-								Plane plane = MathLib::from_point_normal(p, d);
-								float dist = MathLib::dot_coord(plane, eye);
-								if (dist < 100.0f)
-								{
-									eye_in_volume = true;
-								}
-							}
-						}
-						else
-						{
-							float3 v = eye - p;
-							if ((abs(v.x()) < 100.0f) && (abs(v.y()) < 100.0f) && (abs(v.z()) < 100.0f))
-							{
-								eye_in_volume = true;
-							}
-						}
-
-						if (eye_in_volume)
-						{
-							re.Render(*technique_light_stencil_eiv_, *rl);
-						}
-						else
-						{
-							re.Render(*technique_light_stencil_eov_, *rl);
-						}
+						re.Render(*technique_light_stencil_, *rl);
 					}
 
 					re.Render(*technique_lights_[type], *rl);

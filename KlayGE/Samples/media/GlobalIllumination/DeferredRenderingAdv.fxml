@@ -363,7 +363,7 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 		</pass>
 	</technique>
 
-	<technique name="DeferredRenderingLightStencilEOV">
+	<technique name="DeferredRenderingLightStencil">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="less"/>
@@ -377,36 +377,11 @@ float4 DeferredShadowingAmbientPS() : SV_Target
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="equal"/>
 			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="incr_wrap"/>
+			<state name="front_stencil_depth_fail" value="decr_wrap"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="equal"/>
 			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="decr_wrap"/>
-
-			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
-			<state name="pixel_shader" value="DeferredRenderingDepthOnlyPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="DeferredRenderingLightStencilEIV">
-		<pass name="p0">
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="greater_equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="color_write_mask" value="0"/>
-			
-			<state name="depth_clip_enable" value="false"/>
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="incr_wrap"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="equal"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="incr_wrap"/>
+			<state name="back_stencil_depth_fail" value="incr_wrap"/>
 
 			<state name="vertex_shader" value="DeferredRenderingDepthOnlyVS()"/>
 			<state name="pixel_shader" value="DeferredRenderingDepthOnlyPS()"/>

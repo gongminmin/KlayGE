@@ -363,8 +363,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_shadows_[LT_NumLightTypes];
 		RenderTechniquePtr technique_lights_[LT_NumLightTypes];
 		RenderTechniquePtr technique_light_depth_only_;
-		RenderTechniquePtr technique_light_stencil_eiv_;
-		RenderTechniquePtr technique_light_stencil_eov_;
+		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
 
 		FrameBufferPtr sm_buffer_;
