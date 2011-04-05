@@ -63,7 +63,8 @@ namespace
 	public:
 		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name),
-				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect())
+				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect()),
+				special_shading_(false)
 		{
 			mvp_param_ = effect_->ParameterByName("mvp");
 			model_view_param_ = effect_->ParameterByName("model_view");
@@ -122,6 +123,11 @@ namespace
 				{
 					alpha_ = true;
 				}
+			}
+
+			if ((mtl.emit.x() > 0) || (mtl.emit.y() > 0) || (mtl.emit.z() > 0))
+			{
+				special_shading_ = true;
 			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -247,10 +253,12 @@ namespace
 			switch (type_)
 			{
 			case PT_GBuffer:
+			case PT_MRTGBuffer:
 			case PT_GenReflectiveShadowMap:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
+				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
 				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
 				*bump_tex_param_ = bump_tex_;
 				*specular_map_enabled_param_ = static_cast<int32_t>(!!specular_tex_);
@@ -276,9 +284,18 @@ namespace
 				}
 				break;
 
+			case PT_SpecialShading:
+				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
+				break;
+
 			default:
 				break;
 			}
+		}
+
+		bool SpecialShading() const
+		{
+			return special_shading_;
 		}
 
 	private:
@@ -303,6 +320,8 @@ namespace
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;
 		TexturePtr bump_tex_;
+
+		bool special_shading_;
 	};
 
 	class TorusObject : public SceneObjectHelper, public DeferredSceneObject
@@ -317,6 +336,15 @@ namespace
 		void Pass(PassType type)
 		{
 			checked_pointer_cast<RenderTorus>(renderable_)->Pass(type);
+
+			if (PT_SpecialShading == type)
+			{
+				this->Visible(checked_pointer_cast<RenderTorus>(renderable_)->SpecialShading());
+			}
+			else
+			{
+				this->Visible(true);
+			}
 		}
 	};
 
@@ -545,6 +573,7 @@ namespace
 		{
 			gbuffer_tech_ = effect_->TechniqueByName("GBufferSkyBoxTech");
 			shading_tech_ = effect_->TechniqueByName("ShadingSkyBox");
+			special_shading_tech_ = shading_tech_;
 			this->Technique(gbuffer_tech_);
 
 			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
@@ -557,11 +586,16 @@ namespace
 			switch (type)
 			{
 			case PT_GBuffer:
+			case PT_MRTGBuffer:
 				technique_ = gbuffer_tech_;
 				break;
 
 			case PT_Shading:
 				technique_ = shading_tech_;
+				break;
+
+			case PT_SpecialShading:
+				technique_ = special_shading_tech_;
 				break;
 
 			default:

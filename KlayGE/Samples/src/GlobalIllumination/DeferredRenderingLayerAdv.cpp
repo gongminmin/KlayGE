@@ -41,15 +41,19 @@ namespace KlayGE
 		{
 			gbuffer_tech_ = effect_->TechniqueByName("GBufferTech");
 			gbuffer_alpha_tech_ = effect_->TechniqueByName("GBufferAlphaTech");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
+			gbuffer_alpha_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaMRTTech");
 			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMap");
 			gen_rsm_alpha_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlpha");
 			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMap");
 			gen_sm_alpha_tech_ = effect_->TechniqueByName("GenShadowMapAlpha");
 			shading_tech_ = effect_->TechniqueByName("Shading");
+			special_shading_tech_ = effect_->TechniqueByName("SpecialShading");
 
 			lighting_tex_param_ = effect_->ParameterByName("lighting_tex");
 			ssao_tex_param_ = effect_->ParameterByName("ssao_tex");
 			ssao_enabled_param_ = effect_->ParameterByName("ssao_enabled");
+			g_buffer_1_tex_param_ = effect_->ParameterByName("g_buffer_1_tex");
 		}
 	}
 
@@ -65,6 +69,16 @@ namespace KlayGE
 			else
 			{
 				return gbuffer_tech_;
+			}
+
+		case PT_MRTGBuffer:
+			if (alpha)
+			{
+				return gbuffer_alpha_mrt_tech_;
+			}
+			else
+			{
+				return gbuffer_mrt_tech_;
 			}
 
 		case PT_GenReflectiveShadowMap:
@@ -89,6 +103,9 @@ namespace KlayGE
 
 		case PT_Shading:
 			return shading_tech_;
+
+		case PT_SpecialShading:
+			return special_shading_tech_;
 
 		default:
 			BOOST_ASSERT(false);
@@ -136,10 +153,20 @@ namespace KlayGE
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: illum_(0)
 	{
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
-		pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		mrt_g_buffer_ = (rf.RenderEngineInstance().DeviceCaps().max_simultaneous_rts > 1);
+
+		if (mrt_g_buffer_)
+		{
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_MRTGBuffer << 28) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_MRTGBuffer << 28) + 1));
+		}
+		else
+		{
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
+		}
 
 		g_buffer_ = rf.MakeFrameBuffer();
 		shadowing_buffer_ = rf.MakeFrameBuffer();
@@ -239,6 +266,10 @@ namespace KlayGE
 		technique_light_depth_only_ = effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
 		technique_light_stencil_ = effect_->TechniqueByName("DeferredRenderingLightStencil");
 		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
+		if (mrt_g_buffer_)
+		{
+			technique_shading_ = effect_->TechniqueByName("Shading");
+		}
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -337,16 +368,29 @@ namespace KlayGE
 		view_to_light_model_param_ = effect_->ParameterByName("view_to_light_model");
 		light_pos_es_param_ = effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
+		if (mrt_g_buffer_)
+		{
+			ssao_tex_param_ = effect_->ParameterByName("ssao_tex");
+			ssao_enabled_param_ = effect_->ParameterByName("ssao_enabled");
+		}
 	}
 
 	void DeferredRenderingLayer::SSAOTex(TexturePtr const & tex)
 	{
 		ssao_tex_ = tex;
+		if (mrt_g_buffer_)
+		{
+			*ssao_tex_param_ = ssao_tex_;
+		}
 	}
 
 	void DeferredRenderingLayer::SSAOEnabled(bool ssao)
 	{
 		ssao_enabled_ = ssao;
+		if (mrt_g_buffer_)
+		{
+			*ssao_enabled_param_ = static_cast<int32_t>(ssao_enabled_);
+		}
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -363,6 +407,11 @@ namespace KlayGE
 
 		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 0));
+		if (mrt_g_buffer_)
+		{
+			g_buffer_1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*g_buffer_1_tex_, 0, 0));
+		}
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_MIPMAP_LEVELS, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -416,6 +465,9 @@ namespace KlayGE
 		*(effect_->ParameterByName("g_buffer_tex")) = g_buffer_tex_;
 		*(effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
 		*(effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+
+		*(effect_->ParameterByName("lighting_tex")) = lighting_tex_;
+		*(effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
 	}
 
 	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
@@ -461,7 +513,7 @@ namespace KlayGE
 			}
 		}
 
-		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting))
+		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting) && ((mrt_g_buffer_ && (pass_type != PT_Shading)) || !mrt_g_buffer_))
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(deferred_scene_objs_)::reference deo, deferred_scene_objs_)
 			{
@@ -469,7 +521,7 @@ namespace KlayGE
 			}
 		}
 
-		if (PT_GBuffer == pass_type)
+		if ((PT_GBuffer == pass_type) || (PT_MRTGBuffer == pass_type))
 		{
 			if (0 == index_in_pass)
 			{
@@ -624,7 +676,15 @@ namespace KlayGE
 					}
 				}
 				pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 0));
-				pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
+				if (mrt_g_buffer_)
+				{
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 0));
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 1));
+				}
+				else
+				{
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
+				}
 
 				return App3DFramework::URV_Flushed;
 			}
@@ -645,6 +705,27 @@ namespace KlayGE
 						copy_to_light_buffer_pp->Apply();
 					}
 
+					re.BindFrameBuffer(shading_buffer_);
+					if (mrt_g_buffer_)
+					{
+						re.Render(*technique_clear_stencil_, *rl_quad_);
+						re.Render(*technique_shading_, *rl_quad_);
+						return App3DFramework::URV_Flushed;
+					}
+					else
+					{
+						return App3DFramework::URV_Need_Flush;
+					}
+				}
+				else
+				{
+					return App3DFramework::URV_Finished;
+				}
+			}
+			else if (PT_SpecialShading == pass_type)
+			{
+				if (0 == index_in_pass)
+				{
 					re.BindFrameBuffer(shading_buffer_);
 					return App3DFramework::URV_Need_Flush;
 				}

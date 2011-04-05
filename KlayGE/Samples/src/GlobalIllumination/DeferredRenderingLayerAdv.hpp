@@ -204,11 +204,13 @@ namespace KlayGE
 	enum PassType
 	{
 		PT_GBuffer,
+		PT_MRTGBuffer,
 		PT_GenShadowMap,
 		PT_GenReflectiveShadowMap,
 		PT_Lighting,
 		PT_IndirectLighting,
-		PT_Shading
+		PT_Shading,
+		PT_SpecialShading
 	};
 
 
@@ -233,15 +235,19 @@ namespace KlayGE
 
 		RenderTechniquePtr gbuffer_tech_;
 		RenderTechniquePtr gbuffer_alpha_tech_;
+		RenderTechniquePtr gbuffer_mrt_tech_;
+		RenderTechniquePtr gbuffer_alpha_mrt_tech_;
 		RenderTechniquePtr gen_sm_tech_;
 		RenderTechniquePtr gen_sm_alpha_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
 		RenderTechniquePtr gen_rsm_alpha_tech_;
 		RenderTechniquePtr shading_tech_;
+		RenderTechniquePtr special_shading_tech_;
 
 		RenderEffectParameterPtr lighting_tex_param_;
 		RenderEffectParameterPtr ssao_tex_param_;
 		RenderEffectParameterPtr ssao_enabled_param_;
+		RenderEffectParameterPtr g_buffer_1_tex_param_;
 	};
 
 	enum
@@ -301,6 +307,8 @@ namespace KlayGE
 		void UpsampleMultiresLighting();
 
 	private:
+		bool mrt_g_buffer_;
+
 		RenderEffectPtr effect_;
 
 		FrameBufferPtr rsm_buffer_;
@@ -335,6 +343,7 @@ namespace KlayGE
 
 		FrameBufferPtr g_buffer_;
 		TexturePtr g_buffer_tex_;
+		TexturePtr g_buffer_1_tex_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
@@ -365,6 +374,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
+		RenderTechniquePtr technique_shading_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
@@ -389,6 +399,8 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
+		RenderEffectParameterPtr ssao_tex_param_;
+		RenderEffectParameterPtr ssao_enabled_param_;
 
 		std::vector<DeferredSceneObject*> deferred_scene_objs_;
 	};
