@@ -187,18 +187,25 @@ namespace KlayGE
 			before_pp_frame_buffer_ = rf.MakeFrameBuffer();
 			before_pp_frame_buffer_->GetViewport().camera = cur_frame_buffer_->GetViewport().camera;
 
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
 			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+			if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 			{
 				fmt = EF_B10G11R11F;
 			}
 			else
 			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 				fmt = EF_ABGR16F;
 			}
-			before_pp_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write;
+			if (caps.cs_support && (5 == caps.max_shader_model))
+			{
+				access_hint |= EAH_GPU_Unordered;
+			}
+			before_pp_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, access_hint, NULL);
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, 
 				rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), render_settings_.depth_stencil_fmt, 1, 0));
@@ -295,6 +302,26 @@ namespace KlayGE
 		else
 		{
 			return before_pp_frame_buffer_;
+		}
+	}
+
+	TexturePtr const & RenderEngine::DefaultFrameBufferTexture() const
+	{
+		if (inside_pp_)
+		{
+			if (stereo_method_ != STM_None)
+			{
+				return stereo_colors_[stereo_active_eye_];
+			}
+			else
+			{
+				static const TexturePtr null_tex;
+				return null_tex;
+			}
+		}
+		else
+		{
+			return before_pp_tex_;
 		}
 	}
 

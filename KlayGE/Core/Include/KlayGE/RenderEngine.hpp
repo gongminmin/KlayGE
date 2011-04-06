@@ -122,6 +122,7 @@ namespace KlayGE
 		void BindFrameBuffer(FrameBufferPtr const & fb);
 		FrameBufferPtr const & CurFrameBuffer() const;
 		FrameBufferPtr const & DefaultFrameBuffer() const;
+		TexturePtr const & DefaultFrameBufferTexture() const;
 		FrameBufferPtr const & ScreenFrameBuffer() const;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);

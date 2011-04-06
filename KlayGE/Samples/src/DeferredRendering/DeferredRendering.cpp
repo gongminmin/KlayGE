@@ -723,6 +723,12 @@ namespace
 			if (cs_pp_ && !show_edge_)
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+				if (!this->OutputPin(0))
+				{
+					this->OutputPin(0, re.DefaultFrameBufferTexture());
+				}
+
 				re.BindFrameBuffer(re.DefaultFrameBuffer());
 
 				TexturePtr const & tex = this->InputPin(0);
