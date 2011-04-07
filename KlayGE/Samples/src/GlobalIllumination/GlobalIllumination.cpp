@@ -572,6 +572,7 @@ namespace
 			: DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBufferAdv.fxml"))
 		{
 			gbuffer_tech_ = effect_->TechniqueByName("GBufferSkyBoxTech");
+			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferSkyBoxMRTTech");
 			shading_tech_ = effect_->TechniqueByName("ShadingSkyBox");
 			special_shading_tech_ = shading_tech_;
 			this->Technique(gbuffer_tech_);
@@ -586,8 +587,11 @@ namespace
 			switch (type)
 			{
 			case PT_GBuffer:
-			case PT_MRTGBuffer:
 				technique_ = gbuffer_tech_;
+				break;
+
+			case PT_MRTGBuffer:
+				technique_ = gbuffer_mrt_tech_;
 				break;
 
 			case PT_Shading:

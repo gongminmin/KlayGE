@@ -31,7 +31,7 @@ namespace KlayGE
 	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
 	float const VPL_OFFSET = VPL_DELTA / 3;
 
-	int const MAX_MIPMAP_LEVELS = 3;
+	int const MAX_MIPMAP_LEVELS = 4;
 
 
 	DeferredRenderable::DeferredRenderable(RenderEffectPtr const & effect)
@@ -708,7 +708,6 @@ namespace KlayGE
 					re.BindFrameBuffer(shading_buffer_);
 					if (mrt_g_buffer_)
 					{
-						re.Render(*technique_clear_stencil_, *rl_quad_);
 						re.Render(*technique_shading_, *rl_quad_);
 						return App3DFramework::URV_Flushed;
 					}
@@ -1004,7 +1003,7 @@ namespace KlayGE
 	}
 
 	void DeferredRenderingLayer::CreateDepthDerivativeMipMap()
-	{	
+	{
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_tex_);
 		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
 

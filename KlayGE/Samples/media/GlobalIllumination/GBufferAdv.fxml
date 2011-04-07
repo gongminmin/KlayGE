@@ -159,6 +159,11 @@ float4 GBufferSkyBoxPS() : SV_Target
 {
 	return 0;
 }
+
+void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	mrt_0 = mrt_1 = 0;
+}
 		]]>
 	</shader>
 
@@ -213,6 +218,26 @@ float4 GBufferSkyBoxPS() : SV_Target
 
 			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
 			<state name="pixel_shader" value="GBufferSkyBoxPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferSkyBoxMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
 		</pass>
 	</technique>
 

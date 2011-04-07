@@ -45,8 +45,8 @@ namespace KlayGE
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DRenderTargetView(array_index, level);
 
-		width_ = texture.Width(0);
-		height_ = texture.Height(0);
+		width_ = texture.Width(level);
+		height_ = texture.Height(level);
 		pf_ = texture.Format();
 	}
 
@@ -55,8 +55,8 @@ namespace KlayGE
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DRenderTargetView(array_index, first_slice, num_slices, level);
 
-		width_ = texture_3d.Width(0);
-		height_ = texture_3d.Height(0);
+		width_ = texture_3d.Width(level);
+		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
     }
 
@@ -65,8 +65,8 @@ namespace KlayGE
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DRenderTargetView(array_index, face, level);
 
-		width_ = texture_cube.Width(0);
-		height_ = texture_cube.Width(0);
+		width_ = texture_cube.Width(level);
+		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
 	}
 
@@ -131,8 +131,8 @@ namespace KlayGE
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DDepthStencilView(array_index, level);
 
-		width_ = texture.Width(0);
-		height_ = texture.Height(0);
+		width_ = texture.Width(level);
+		height_ = texture.Height(level);
 		pf_ = texture.Format();
 	}
 
@@ -140,8 +140,8 @@ namespace KlayGE
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DDepthStencilView(array_index, first_slice, num_slices, level);
 
-		width_ = texture_3d.Width(0);
-		height_ = texture_3d.Height(0);
+		width_ = texture_3d.Width(level);
+		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
     }
 
@@ -149,8 +149,8 @@ namespace KlayGE
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DDepthStencilView(array_index, face, level);
 
-		width_ = texture_cube.Width(0);
-		height_ = texture_cube.Width(0);
+		width_ = texture_cube.Width(level);
+		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
 	}
 
