@@ -312,7 +312,7 @@ namespace KlayGE
 		RenderEffectPtr effect_;
 
 		FrameBufferPtr rsm_buffer_;
-		TexturePtr rsm_texs_[3];
+		TexturePtr rsm_texs_[2];
 
 		PostProcessPtr rsm_to_vpls_pps[LT_NumLightTypes];
 		TexturePtr vpl_tex_;

@@ -247,16 +247,16 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float3 normal   : NORMAL,
 						out float2 oTc : TEXCOORD0,
-						out float4 oNormal_Depth : TEXCOORD1,
+						out float3 oNormal : TEXCOORD1,
 						out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTc = texcoord;
-	oNormal_Depth = float4(mul(normal, (float3x3)model_view), oPos.w);
+	oNormal = mul(normal, (float3x3)model_view);
 }
 
-void ConstructRSMBuffer(float2 tc, float4 normal_depth,
-						out float4 oAlbedo, out float4 oNormal, out float oDepth)
+void ConstructRSMBuffer(float2 tc, float3 normal,
+						out float4 oAlbedo, out float4 oNormal)
 {
 	if (diffuse_map_enabled)
 	{
@@ -267,27 +267,24 @@ void ConstructRSMBuffer(float2 tc, float4 normal_depth,
 		oAlbedo = diffuse_clr;
 	}
 
-	oNormal = float4(normalize(normal_depth.xyz) / 2 + 0.5f, 0);
-	oDepth = normal_depth.w;
+	oNormal = float4(normalize(normal) / 2 + 0.5f, 0);
 }
 
 void GenReflectiveShadowMapPS(float2 tc : TEXCOORD0,
-						float4 normal_depth : TEXCOORD1,
+						float3 normal : TEXCOORD1,
 						out float4 oAlbedo : SV_Target0, 
-						out float4 oNormal : SV_Target1, 
-						out float oDepth : SV_Target2)
+						out float4 oNormal : SV_Target1)
 {
-	ConstructRSMBuffer(tc, normal_depth, oAlbedo, oNormal, oDepth);
+	ConstructRSMBuffer(tc, normal, oAlbedo, oNormal);
 }
 
 void GenReflectiveShadowMapAlphaPS(float2 tc : TEXCOORD0,
-						float4 normal_depth : TEXCOORD1,
+						float3 normal : TEXCOORD1,
 						out float4 oAlbedo : SV_Target0, 
-						out float4 oNormal : SV_Target1, 
-						out float oDepth : SV_Target2)
+						out float4 oNormal : SV_Target1)
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, tc.xy).a - ALPHA_TEST_THRESHOLD);
-	ConstructRSMBuffer(tc, normal_depth, oAlbedo, oNormal, oDepth);
+	ConstructRSMBuffer(tc, normal, oAlbedo, oNormal);
 }
 		]]>
 	</shader>

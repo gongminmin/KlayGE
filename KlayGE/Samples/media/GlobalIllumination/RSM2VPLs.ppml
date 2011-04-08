@@ -13,11 +13,12 @@
 			<param name="upper_right"/>
 			<param name="lower_left"/>
 			<param name="lower_right"/>
+			<param name="near_q"/>
 		</params>
 		<input>
 			<pin name="albedo_tex"/>
 			<pin name="normal_es_tex" />
-			<pin name="pos_es_tex" />
+			<pin name="depth_tex" />
 		</input>
 		<output>
 			<pin name="output"/>

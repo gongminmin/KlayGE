@@ -297,10 +297,8 @@ namespace KlayGE
 
 			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, MAX_MIPMAP_LEVELS, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			rsm_texs_[2] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 0)); // albedo
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 0)); // normal (light space)
-			rsm_buffer_->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*(rsm_texs_[2]), 0, 0)); // pos (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 3, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
@@ -308,7 +306,7 @@ namespace KlayGE
 			rsm_to_vpls_pps[LT_Spot] = LoadPostProcess(ResLoader::Instance().Load("RSM2VPLs.ppml"), "RSM2VPLsSpot");
 			rsm_to_vpls_pps[LT_Spot]->InputPin(0, rsm_texs_[0]);
 			rsm_to_vpls_pps[LT_Spot]->InputPin(1, rsm_texs_[1]);
-			rsm_to_vpls_pps[LT_Spot]->InputPin(2, rsm_texs_[2]);
+			rsm_to_vpls_pps[LT_Spot]->InputPin(2, sm_depth_tex_);
 			rsm_to_vpls_pps[LT_Spot]->OutputPin(0, vpl_tex_);
 
 			gbuffer_to_depth_derivate_pp_ = LoadPostProcess(ResLoader::Instance().Load("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
@@ -595,7 +593,7 @@ namespace KlayGE
 										pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting) << 28) + (i << 16) + 0);
 									}
 
-									if (0 == (attr & LSA_NoShadow))
+									if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
 									{
 										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
 									}
@@ -781,12 +779,19 @@ namespace KlayGE
 							mat_vp = mat_v * proj_;
 						}
 
-						if (PT_GenShadowMap == pass_type)
+						if ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type))
 						{
-							float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
 							float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-							depth_to_vsm_pp_->SetParam(0, float2(sm_camera->NearPlane() * q, q));
+							float2 near_q(sm_camera->NearPlane() * q, q);
+							depth_to_vsm_pp_->SetParam(0, near_q);
+							
+							float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
 							depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+
+							if (PT_GenReflectiveShadowMap == pass_type)
+							{
+								rsm_to_vpls_pps[type]->SetParam(10, near_q);
+							}
 						}
 
 						float3 const & p = light->Position();

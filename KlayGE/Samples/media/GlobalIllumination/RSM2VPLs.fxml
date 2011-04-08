@@ -28,9 +28,11 @@
 	<parameter type="float3" name="lower_left"/>
 	<parameter type="float3" name="lower_right"/>
 
+	<parameter type="float2" name="near_q"/>
+
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_es_tex"/>
-	<parameter type="texture2D" name="pos_es_tex" />
+	<parameter type="texture2D" name="depth_tex" />
 
 	<shader>
 		<![CDATA[
@@ -50,7 +52,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 
 	float4 albedo = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
 	float3 normal_ls = normal_es_tex.Sample(point_sampler, rsm_tc).xyz * 2 - 1;
-	float depth_ls = pos_es_tex.Sample(point_sampler, rsm_tc).x;
+	float depth_ls = near_q.x / (near_q.y - depth_tex.Sample(point_sampler, rsm_tc).r);
 
 	float3 view_dir = texcoord_to_view(float2(rsm_tc.x, flipping < 0 ? rsm_tc.y : 1 - rsm_tc.y));
 	float3 pos_ls = view_dir * (depth_ls / view_dir.z);
