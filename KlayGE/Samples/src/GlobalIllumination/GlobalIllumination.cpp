@@ -650,7 +650,8 @@ int main()
 }
 
 GlobalIlluminationApp::GlobalIlluminationApp()
-			: App3DFramework("GlobalIllumination")
+			: App3DFramework("GlobalIllumination"),
+				il_scale_(1.5f)
 {
 	ResLoader::Instance().AddPath("../Samples/media/GlobalIllumination");
 }
@@ -719,10 +720,16 @@ void GlobalIlluminationApp::InitObjects()
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_illum_combo_ = dialog_->IDFromName("IllumCombo");
+	id_il_scale_static_ = dialog_->IDFromName("ILScaleStatic");
+	id_il_scale_slider_ = dialog_->IDFromName("ILScaleSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&GlobalIlluminationApp::IllumChangedHandler, this, _1));
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
+
+	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&GlobalIlluminationApp::ILScaleChangedHandler, this, _1));
+	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, _1));
 
@@ -762,6 +769,16 @@ void GlobalIlluminationApp::InputHandler(InputEngine const & /*sender*/, InputAc
 void GlobalIlluminationApp::IllumChangedHandler(UIComboBox const & sender)
 {
 	deferred_rendering_->DisplayIllum(sender.GetSelectedIndex());
+}
+
+void GlobalIlluminationApp::ILScaleChangedHandler(KlayGE::UISlider const & sender)
+{
+	il_scale_ = sender.GetValue() / 10.0f;
+	deferred_rendering_->IndirectScale(il_scale_);
+
+	std::wostringstream stream;
+	stream << L"Indirect Scale: " << il_scale_ << " x";
+	dialog_->Control<UIStatic>(id_il_scale_static_)->SetText(stream.str());
 }
 
 void GlobalIlluminationApp::CtrlCameraHandler(UICheckBox const & sender)

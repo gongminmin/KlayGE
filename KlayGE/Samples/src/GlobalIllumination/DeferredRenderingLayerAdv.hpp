@@ -299,6 +299,7 @@ namespace KlayGE
 		}
 
 		void DisplayIllum(int illum);
+		void IndirectScale(float scale);
 
 	private:
 		void CreateDepthDerivativeMipMap();
@@ -338,6 +339,7 @@ namespace KlayGE
 		PostProcessPtr upsampling_pp_;
 
 		int illum_;
+		float indirect_scale_;
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
 

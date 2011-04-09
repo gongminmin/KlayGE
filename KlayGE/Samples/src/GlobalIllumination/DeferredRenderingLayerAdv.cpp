@@ -151,7 +151,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: illum_(0)
+		: illum_(0), indirect_scale_(1.5f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -543,6 +543,9 @@ namespace KlayGE
 			{
 				g_buffer_tex_->BuildMipSubLevels();
 
+				SaveTexture(g_buffer_tex_, "g_buffer_tex.dds");
+				SaveTexture(g_buffer_1_tex_, "g_buffer_1_tex.dds");
+
 				if (indirect_lighting_enabled_)
 				{
 					this->CreateDepthDerivativeMipMap();
@@ -697,7 +700,7 @@ namespace KlayGE
 					if (indirect_lighting_enabled_ && (illum_ != 1))
 					{
 						PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
-						copy_to_light_buffer_pp->SetParam(0, 1.5f);
+						copy_to_light_buffer_pp->SetParam(0, indirect_scale_);
 						copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
 						copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
 						copy_to_light_buffer_pp->Apply();
@@ -1152,5 +1155,10 @@ namespace KlayGE
 	void DeferredRenderingLayer::DisplayIllum(int illum)
 	{
 		illum_ = illum;
+	}
+
+	void DeferredRenderingLayer::IndirectScale(float scale)
+	{
+		indirect_scale_ = scale;
 	}
 }
