@@ -96,7 +96,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	OGLRenderEngine::OGLRenderEngine()
 		: fbo_blit_src_(0), fbo_blit_dst_(0),
-			clear_depth_(1), clear_stencil_(0),
+			clear_depth_(1), clear_stencil_(0), cur_program_(0),
 			vp_x_(0), vp_y_(0), vp_width_(0), vp_height_(0),
 			cur_fbo_(0), restart_index_(0)
 	{
@@ -317,6 +317,350 @@ namespace KlayGE
 		{
 			glClearStencil(stencil);
 			clear_stencil_ = stencil;
+		}
+	}
+
+	void OGLRenderEngine::UseProgram(GLuint program)
+	{
+		if (program != cur_program_)
+		{
+			glUseProgram(program);
+			cur_program_ = program;
+		}
+	}
+
+	void OGLRenderEngine::Uniform1i(GLint location, GLint value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::vector<int4>())).first;
+		}
+		if (iter_p->second.size() <= static_cast<size_t>(location))
+		{
+			dirty = true;
+			iter_p->second.resize(location + 1);
+		}
+		BOOST_AUTO(iter_v, iter_p->second.begin() + location);
+		if (iter_v->x() != value)
+		{
+			dirty = true;
+			iter_v->x() = value;
+		}
+
+		if (dirty)
+		{
+			glUniform1i(location, value);
+		}
+	}
+		
+	void OGLRenderEngine::Uniform1ui(GLint location, GLuint value)
+	{
+		this->Uniform1i(location, value);
+	}
+
+	void OGLRenderEngine::Uniform1f(GLint location, float value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::vector<float4>())).first;
+		}
+		if (iter_p->second.size() <= static_cast<size_t>(location))
+		{
+			dirty = true;
+			iter_p->second.resize(location + 1);
+		}
+		BOOST_AUTO(iter_v, iter_p->second.begin() + location);
+		if (iter_v->x() != value)
+		{
+			dirty = true;
+			iter_v->x() = value;
+		}
+
+		if (dirty)
+		{
+			glUniform1f(location, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform1iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::vector<int4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if (iter_v->x() != value[i])
+			{
+				dirty = true;
+				iter_v->x() = value[i];
+			}				
+		}
+
+		if (dirty)
+		{
+			glUniform1iv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform1uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform1iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLRenderEngine::Uniform1fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::vector<float4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if (iter_v->x() != value[i])
+			{
+				dirty = true;
+				iter_v->x() = value[i];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform1fv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform2iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::vector<int4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 2 + 0]) || (iter_v->y() != value[i * 2 + 1]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 2 + 0];
+				iter_v->y() = value[i * 2 + 1];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform2iv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform2uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform2iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLRenderEngine::Uniform2fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::vector<float4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 2 + 0]) || (iter_v->y() != value[i * 2 + 1]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 2 + 0];
+				iter_v->y() = value[i * 2 + 1];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform2fv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform3iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::vector<int4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 3 + 0]) || (iter_v->y() != value[i * 3 + 1])
+				 || (iter_v->z() != value[i * 3 + 2]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 3 + 0];
+				iter_v->y() = value[i * 3 + 1];
+				iter_v->z() = value[i * 3 + 2];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform3iv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform3uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform3iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLRenderEngine::Uniform3fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::vector<float4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 3 + 0]) || (iter_v->y() != value[i * 3 + 1])
+				 || (iter_v->z() != value[i * 3 + 2]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 3 + 0];
+				iter_v->y() = value[i * 3 + 1];
+				iter_v->z() = value[i * 3 + 2];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform3fv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform4iv(GLint location, GLsizei count, GLint const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformi_cache_.find(cur_program_));
+		if (iter_p == uniformi_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformi_cache_.insert(std::make_pair(cur_program_, std::vector<int4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 4 + 0]) || (iter_v->y() != value[i * 4 + 1])
+				 || (iter_v->z() != value[i * 4 + 2])|| (iter_v->w() != value[i * 4 + 3]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 4 + 0];
+				iter_v->y() = value[i * 4 + 1];
+				iter_v->z() = value[i * 4 + 2];
+				iter_v->w() = value[i * 4 + 3];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform4iv(location, count, value);
+		}
+	}
+
+	void OGLRenderEngine::Uniform4uiv(GLint location, GLsizei count, GLuint const * value)
+	{
+		this->Uniform4iv(location, count, reinterpret_cast<GLint const *>(value));
+	}
+
+	void OGLRenderEngine::Uniform4fv(GLint location, GLsizei count, GLfloat const * value)
+	{
+		bool dirty = false;
+		BOOST_AUTO(iter_p, uniformf_cache_.find(cur_program_));
+		if (iter_p == uniformf_cache_.end())
+		{
+			dirty = true;
+			iter_p = uniformf_cache_.insert(std::make_pair(cur_program_, std::vector<float4>())).first;
+		}
+		if (iter_p->second.size() < static_cast<size_t>(location + count))
+		{
+			dirty = true;
+			iter_p->second.resize(location + count);
+		}
+		for (GLsizei i = 0; i < count; ++ i)
+		{
+			BOOST_AUTO(iter_v, iter_p->second.begin() + location + i);
+			if ((iter_v->x() != value[i * 4 + 0]) || (iter_v->y() != value[i * 4 + 1])
+				 || (iter_v->z() != value[i * 4 + 2])|| (iter_v->w() != value[i * 4 + 3]))
+			{
+				dirty = true;
+				iter_v->x() = value[i * 4 + 0];
+				iter_v->y() = value[i * 4 + 1];
+				iter_v->z() = value[i * 4 + 2];
+				iter_v->w() = value[i * 4 + 3];
+			}
+		}
+
+		if (dirty)
+		{
+			glUniform4fv(location, count, value);
 		}
 	}
 

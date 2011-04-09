@@ -91,6 +91,24 @@ namespace KlayGE
 		void ClearDepth(GLfloat depth);
 		void ClearStencil(GLuint stencil);
 
+		void UseProgram(GLuint program);
+
+		void Uniform1i(GLint location, GLint value);
+		void Uniform1ui(GLint location, GLuint value);
+		void Uniform1f(GLint location, GLfloat value);
+		void Uniform1iv(GLint location, GLsizei count, GLint const * value);
+		void Uniform1uiv(GLint location, GLsizei count, GLuint const * value);
+		void Uniform1fv(GLint location, GLsizei count, GLfloat const * value);
+		void Uniform2iv(GLint location, GLsizei count, GLint const * value);
+		void Uniform2uiv(GLint location, GLsizei count, GLuint const * value);
+		void Uniform2fv(GLint location, GLsizei count, GLfloat const * value);
+		void Uniform3iv(GLint location, GLsizei count, GLint const * value);
+		void Uniform3uiv(GLint location, GLsizei count, GLuint const * value);
+		void Uniform3fv(GLint location, GLsizei count, GLfloat const * value);
+		void Uniform4iv(GLint location, GLsizei count, GLint const * value);
+		void Uniform4uiv(GLint location, GLsizei count, GLuint const * value);
+		void Uniform4fv(GLint location, GLsizei count, GLfloat const * value);
+
 		void GetFBOForBlit(GLuint& src, GLuint& dst) const
 		{
 			src = fbo_blit_src_;
@@ -135,6 +153,8 @@ namespace KlayGE
 		GLfloat clear_depth_;
 		GLuint clear_stencil_;
 
+		GLuint cur_program_;
+
 		GLint vp_x_, vp_y_;
 		GLsizei vp_width_, vp_height_;
 
@@ -156,6 +176,9 @@ namespace KlayGE
 		std::set<ElementFormat> texture_format_;
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
+
+		std::map<GLuint, std::vector<int4> > uniformi_cache_;
+		std::map<GLuint, std::vector<float4> > uniformf_cache_;
 
 		bool hack_for_nv_;
 		bool hack_for_ati_;

@@ -543,9 +543,6 @@ namespace KlayGE
 			{
 				g_buffer_tex_->BuildMipSubLevels();
 
-				SaveTexture(g_buffer_tex_, "g_buffer_tex.dds");
-				SaveTexture(g_buffer_1_tex_, "g_buffer_1_tex.dds");
-
 				if (indirect_lighting_enabled_)
 				{
 					this->CreateDepthDerivativeMipMap();

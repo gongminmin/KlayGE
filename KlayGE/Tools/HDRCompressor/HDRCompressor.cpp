@@ -143,7 +143,13 @@ namespace
 			for (uint32_t x_base = 0; x_base < width / 2; x_base += 4)
 			{
 				uint32_t argb[16];
-				DecodeBC5(argb, static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16);
+				uint8_t r[16];
+				uint8_t g[16];
+				DecodeBC5(r, g, static_cast<uint8_t const *>(c_data.data) + ((y_base / 4) * width / 2 / 4 + x_base / 4) * 16);
+				for (int i = 0; i < 16; ++ i)
+				{
+					argb[i] = (r[i] << 8) | (g[i] << 24);
+				}
 
 				for (int y = 0; y < 4; ++ y)
 				{

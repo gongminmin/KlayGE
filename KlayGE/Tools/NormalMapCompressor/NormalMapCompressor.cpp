@@ -106,10 +106,12 @@ namespace
 				uint32_t argb[16];
 				if (EF_BC5 == com_format)
 				{
-					DecodeBC5(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+					uint8_t r[16];
+					uint8_t g[16];
+					DecodeBC5(r, g, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 					for (int i = 0; i < 16; ++ i)
 					{
-						argb[i] = ((argb[i] << 8) & 0xFF000000) | (argb[i] & 0x0000FF00);
+						argb[i] = (r[i] << 8) | (g[i] << 24);
 					}
 				}
 				else
