@@ -295,8 +295,8 @@ namespace KlayGE
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
-			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, MAX_MIPMAP_LEVELS, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 0)); // albedo
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
@@ -877,6 +877,7 @@ namespace KlayGE
 					// 1. extract vpls
 					{
 						rsm_texs_[0]->BuildMipSubLevels();
+						rsm_texs_[1]->BuildMipSubLevels();
 						float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
 						float mip_level = (MathLib::log(static_cast<float>(RSM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
 						float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
@@ -941,12 +942,6 @@ namespace KlayGE
 				if (PT_GenShadowMap == pass_type)
 				{
 					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
-
-					// If shadow depth map has been already generated
-					if (attr & LSA_IndirectLighting)
-					{
-						return App3DFramework::URV_Flushed;
-					}
 
 					// Shadow map generation
 					re.BindFrameBuffer(sm_buffer_);
