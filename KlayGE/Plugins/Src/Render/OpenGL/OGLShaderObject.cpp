@@ -1492,10 +1492,9 @@ namespace KlayGE
 		glsl_program_ = glCreateProgram();
 
 		bool has_gs = false;
-		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
-			if ((ST_GeometryShader == type) && (!sd.profile.empty()))
+			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
+			if (!sd.func_name.empty())
 			{
 				has_gs = true;
 			}
