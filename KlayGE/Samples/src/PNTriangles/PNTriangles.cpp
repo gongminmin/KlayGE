@@ -167,12 +167,12 @@ namespace
 
 				bindable_ib_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL, EF_R16UI);
 
-				mesh_rl_ = rl_;
-
 				*(effect->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
 				*(effect->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
 				*(effect->ParameterByName("index_buf")) = bindable_ib_;
 			}
+
+			mesh_rl_ = rl_;
 		}
 
 		void BuildMeshInfo()
@@ -243,7 +243,10 @@ namespace
 
 		void EnablePNTriangles(bool pn)
 		{
-			pn_enabled_ = pn;
+			if (tess_mode_ != TM_No)
+			{
+				pn_enabled_ = pn;
+			}
 			this->UpdateTech();
 		}
 
