@@ -138,6 +138,7 @@ int main()
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
 	context_cfg.render_factory_name = "OpenGL";
+	context_cfg.graphics_cfg.hdr = false;
 	Context::Instance().Config(context_cfg);
 
 	EmptyApp app;

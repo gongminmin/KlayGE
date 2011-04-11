@@ -303,6 +303,9 @@ int main(int argc, char* argv[])
 	ResLoader::Instance().AddPath("../../../bin");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.graphics_cfg.hdr = false;
+	Context::Instance().Config(context_cfg);
 
 	EmptyApp app;
 	app.Create();
