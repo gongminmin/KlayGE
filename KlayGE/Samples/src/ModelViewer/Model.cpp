@@ -23,7 +23,7 @@ using namespace KlayGE;
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
-			effect_(Context::Instance().RenderFactoryInstance().LoadEffect("ModelViewer.fxml")),
+			effect_(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect()),
 			light_pos_(1, 1, -1),
 			line_mode_(false), visualize_("Lighting")
 {
@@ -34,7 +34,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	bool has_skinned = false;
+	has_skinned_ = false;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
@@ -47,7 +47,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 			if (mapper.Pointer<float4>()->x() > 0)
 			{
-				has_skinned = true;
+				has_skinned_ = true;
 			}
 
 			break;
@@ -59,8 +59,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 	// Ω®¡¢Œ∆¿Ì
 	has_opacity_map_ = false;
-	TexturePtr dm, sm, em, om;
-	TexturePtr nm = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
+	normal_map_ = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
 	RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
 	for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
 		iter != texture_slots.end(); ++ iter)
@@ -69,7 +68,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				dm = LoadTexture(iter->second, EAH_GPU_Read)();
+				diffuse_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
 			}
 		}
 		else
@@ -78,7 +77,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
-					nm = LoadTexture(iter->second, EAH_GPU_Read)();
+					normal_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
 				}
 			}
 			else
@@ -87,7 +86,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						sm = LoadTexture(iter->second, EAH_GPU_Read)();
+						specular_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
 					}
 				}
 				else
@@ -96,7 +95,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						if (!ResLoader::Instance().Locate(iter->second).empty())
 						{
-							em = LoadTexture(iter->second, EAH_GPU_Read)();
+							emit_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
 						}
 					}
 					else
@@ -105,9 +104,9 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								om = LoadTexture(iter->second, EAH_GPU_Read)();
+								opacity_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
 
-								if (om)
+								if (opacity_map_)
 								{
 									has_opacity_map_ = true;
 								}
@@ -118,28 +117,37 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			}
 		}
 	}
-	*(effect_->ParameterByName("diffuse_tex")) = dm;
-	*(effect_->ParameterByName("normal_tex")) = nm;
-	*(effect_->ParameterByName("specular_tex")) = sm;
-	*(effect_->ParameterByName("emit_tex")) = em;
-	*(effect_->ParameterByName("opacity_tex")) = om;
 
-	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned);
-
-	*(effect_->ParameterByName("ambient_clr")) = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
-	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));
-	*(effect_->ParameterByName("specular_clr")) = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(sm));
-	*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(em));
-	*(effect_->ParameterByName("opacity_clr")) = float4(mtl.opacity, mtl.opacity, mtl.opacity, bool(om));
-
-	*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
-	*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl.shininess);
+	ambient_clr_ = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
+	diffuse_clr_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(diffuse_map_));
+	specular_clr_ = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(specular_map_));
+	emit_clr_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(emit_map_));
+	opacity_clr_ = float4(mtl.opacity, mtl.opacity, mtl.opacity, bool(opacity_map_));
+	specular_level_ = mtl.specular_level;
+	shininess_ = std::max(1e-6f, mtl.shininess);
 
 	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
 {
+	*(effect_->ParameterByName("diffuse_tex")) = diffuse_map_;
+	*(effect_->ParameterByName("normal_tex")) = normal_map_;
+	*(effect_->ParameterByName("specular_tex")) = specular_map_;
+	*(effect_->ParameterByName("emit_tex")) = emit_map_;
+	*(effect_->ParameterByName("opacity_tex")) = opacity_map_;
+
+	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
+
+	*(effect_->ParameterByName("ambient_clr")) = ambient_clr_;
+	*(effect_->ParameterByName("diffuse_clr")) = diffuse_clr_;
+	*(effect_->ParameterByName("specular_clr")) = specular_clr_;
+	*(effect_->ParameterByName("emit_clr")) = emit_clr_;
+	*(effect_->ParameterByName("opacity_clr")) = opacity_clr_;
+
+	*(effect_->ParameterByName("specular_level")) = specular_level_;
+	*(effect_->ParameterByName("shininess")) = shininess_;
+
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 const & view = app.ActiveCamera().ViewMatrix();
 	float4x4 worldview = world_ * view;
@@ -225,6 +233,8 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		: SkinnedModel(name)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	effect_ = rf.LoadEffect("ModelViewer.fxml");
 
 	uint32_t const empty_nor = 0x80808080;
 
@@ -413,7 +423,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
 			{
-				MathLib::compute_normal<float>(normals.begin() + mesh->BaseVertexLocation(),
+				MathLib::compute_normal(normals.begin() + mesh->BaseVertexLocation(),
 					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
 					positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices());
 			}
@@ -465,7 +475,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		// Compute TBN
 		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
 		{
-			MathLib::compute_tangent<float>(tangents.begin() + mesh->BaseVertexLocation(), binormals.begin() + mesh->BaseVertexLocation(),
+			MathLib::compute_tangent(tangents.begin() + mesh->BaseVertexLocation(), binormals.begin() + mesh->BaseVertexLocation(),
 				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
 				positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices(),
 				texcoords.begin() + mesh->BaseVertexLocation(), normals.begin() + mesh->BaseVertexLocation());
@@ -507,15 +517,29 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	if (!has_skinned)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		GraphicsBufferPtr blend_indices_vb;
+		GraphicsBufferPtr blend_weights_vb;
+
+		ElementInitData init_data;
 		{
 			std::vector<int> blend_indices(total_num_vertices, 0);
-			mesh->AddVertexStream(&blend_indices[0], static_cast<uint32_t>(sizeof(blend_indices[0]) * blend_indices.size()),
-				vertex_element(VEU_BlendIndex, 0, EF_ABGR8), EAH_GPU_Read);
-
+			init_data.data = &blend_indices[0];
+			init_data.row_pitch = total_num_vertices * sizeof(blend_indices[0]);
+			init_data.slice_pitch = 0;
+			blend_indices_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		}
+		{
 			std::vector<float4> blend_weights(total_num_vertices, float4(-1, -1, -1, -1));
-			mesh->AddVertexStream(&blend_weights[0], static_cast<uint32_t>(sizeof(blend_weights[0]) * blend_weights.size()),
-				vertex_element(VEU_BlendWeight, 0, EF_ABGR32F), EAH_GPU_Read);
+			init_data.data = &blend_weights[0];
+			init_data.row_pitch = total_num_vertices * sizeof(blend_weights[0]);
+			init_data.slice_pitch = 0;
+			blend_weights_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		}
+
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			mesh->AddVertexStream(blend_indices_vb,	vertex_element(VEU_BlendIndex, 0, EF_ABGR8));
+			mesh->AddVertexStream(blend_weights_vb, vertex_element(VEU_BlendWeight, 0, EF_ABGR32F));
 		}
 	}
 }

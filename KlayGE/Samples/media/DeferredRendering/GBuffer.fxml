@@ -58,7 +58,7 @@
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float3 normal : NORMAL,
-			float3 tangent : TANGENT,
+			float4 tangent : TANGENT,
 			out float4 oTexCoordDepth_2x : TEXCOORD0,
 			out float4 oTsToView0_2y : TEXCOORD1,
 			out float4 oTsToView1_2z : TEXCOORD2,
@@ -71,8 +71,8 @@ void GBufferVS(float4 pos : POSITION,
 	tangent = tangent * 2 - 1;
 
 	float3x3 obj_to_ts;
-	obj_to_ts[0] = tangent;
-	obj_to_ts[1] = cross(normal, tangent);
+	obj_to_ts[0] = tangent.xyz;
+	obj_to_ts[1] = cross(normal, tangent.xyz) * tangent.w;
 	obj_to_ts[2] = normal;
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
 	oTsToView0_2y.xyz = ts_to_view[0];

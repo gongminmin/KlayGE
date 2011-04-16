@@ -72,6 +72,7 @@ namespace KlayGE
 		Point3 pos;
 		Point3 normal;
 		Point3 tangent;
+		float weight;
 		Point3 binormal;
 		std::vector<Point2> tex;
 

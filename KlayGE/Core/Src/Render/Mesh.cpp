@@ -255,7 +255,6 @@ namespace
 				{
 					void const * buff = &merged_buff[ve_index][buff_starts[mesh_index] * merged_ves[ve_index].element_size()];
 					uint32_t const buff_size = buff_sizes[mesh_index] * merged_ves[ve_index].element_size();
-					//mesh->AddVertexStream(buff, buff_size, merged_ves[ve_index], model_desc->access_hint);
 					mesh->AddVertexStream(merged_vbs[ve_index], merged_ves[ve_index]);
 
 					if (VEU_Position == merged_ves[ve_index].usage)
@@ -281,24 +280,12 @@ namespace
 					}
 				}
 
-				/*mesh->AddIndexStream(&merged_indices[index_starts[mesh_index] * index_elem_size],
-					static_cast<uint32_t>(index_sizes[mesh_index] * index_elem_size),
-					is_index_16_bit ? EF_R16UI : EF_R32UI, model_desc->access_hint);*/
 				mesh->AddIndexStream(merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
 
 				mesh->NumVertices(buff_sizes[mesh_index]);
 				mesh->NumTriangles(index_sizes[mesh_index] / 3);
 				mesh->BaseVertexLocation(buff_starts[mesh_index]);
 				mesh->StartIndexLocation(index_starts[mesh_index]);
-
-				/*for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
-				{
-					std::vector<uint8_t>& buff = model_desc->buffs[mesh_index][ve_index];
-					mesh->AddVertexStream(&buff[0], static_cast<uint32_t>(buff.size() * sizeof(buff[0])), model_desc->ves[mesh_index][ve_index], model_desc->access_hint);
-				}
-
-				mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
-					model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);*/
 			}
 
 			if (model_desc->kfs && !model_desc->kfs->empty())
@@ -614,7 +601,9 @@ namespace KlayGE
 			ResIdentifierPtr lzma_file = ResLoader::Instance().Load(path_name + jit_ext_name);
 			uint32_t fourcc;
 			lzma_file->read(&fourcc, sizeof(fourcc));
-			if (fourcc != MakeFourCC<'K', 'L', 'M', '1'>::value)
+			uint32_t ver;
+			lzma_file->read(&ver, sizeof(ver));
+			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != 2))
 			{
 				jit = true;
 			}
@@ -855,7 +844,7 @@ namespace KlayGE
 						std::vector<float> blend_weight_buf;
 						std::vector<uint8_t> blend_index_buf;
 						std::vector<std::vector<float> > tex_coord_buf;
-						std::vector<float3> tangent_buf;
+						std::vector<float4> tangent_buf;
 						std::vector<float3> binormal_buf;
 
 						std::vector<vertex_element> vertex_elements;
@@ -985,10 +974,10 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Tangent;
 								ve.usage_index = 0;
-								ve.format = EF_BGR32F;
+								ve.format = EF_ABGR32F;
 								vertex_elements.push_back(ve);
 
-								tangent_buf.resize(num_vertices, float3(0, 0, 0));
+								tangent_buf.resize(num_vertices, float4(0, 0, 0, 0));
 							}
 
 							if (has_binormal)
@@ -1062,8 +1051,15 @@ namespace KlayGE
 							XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
 							if (tangent_node)
 							{
-								tangent_buf[index] = float3(tangent_node->Attrib("x")->ValueFloat(),
-									tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
+								float k = 1;
+								XMLAttributePtr attr = tangent_node->Attrib("w");
+								if (attr)
+								{
+									k = attr->ValueFloat();
+								}
+								tangent_buf[index] = float4(tangent_node->Attrib("x")->ValueFloat(),
+									tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat(),
+									k);
 							}
 
 							XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
@@ -1224,8 +1220,11 @@ namespace KlayGE
 
 			std::ofstream ofs((path_name + jit_ext_name).c_str(), std::ios_base::binary);
 			BOOST_ASSERT(ofs);
-			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', '1'>::value;
+			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
 			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+
+			uint32_t ver = 2;
+			ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
 			uint64_t original_len = ss->str().size();
 			ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
@@ -1273,7 +1272,11 @@ namespace KlayGE
 		}
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));
-		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', '1'>::value));
+		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', ' '>::value));
+
+		uint32_t ver;
+		lzma_file->read(&ver, sizeof(ver));
+		BOOST_ASSERT(2 == ver);
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
@@ -1367,9 +1370,12 @@ namespace KlayGE
 				{
 				case VEU_Position:
 				case VEU_Normal:
-				case VEU_Tangent:
 				case VEU_Binormal:
 					buff.resize(num_vertices * sizeof(float3));
+					break;
+
+				case VEU_Tangent:
+					buff.resize(num_vertices * sizeof(float4));
 					break;
 
 				case VEU_Diffuse:
@@ -1395,7 +1401,6 @@ namespace KlayGE
 				switch (ve.usage)
 				{
 				case VEU_Normal:
-				case VEU_Tangent:
 				case VEU_Binormal:
 					if (EF_BGR32F == ve.format)
 					{
@@ -1425,6 +1430,83 @@ namespace KlayGE
 									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
 										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
 										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+								}
+							}
+						}
+
+						buff.resize(compacted.size() * sizeof(compacted[0]));
+						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
+					}
+					break;
+
+				case VEU_Tangent:
+					if (EF_BGR32F == ve.format)
+					{
+						std::vector<uint32_t> compacted(num_vertices);
+
+						{
+							float3 const * p = reinterpret_cast<float3 const *>(&buff[0]);
+							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+							{	
+								ve.format = EF_A2BGR10;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+								}
+							}
+							else
+							{
+								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+								ve.format = EF_ARGB8;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+								}
+							}
+						}
+
+						buff.resize(compacted.size() * sizeof(compacted[0]));
+						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
+					}
+					else
+					{
+						BOOST_ASSERT(EF_ABGR32F == ve.format);
+
+						std::vector<uint32_t> compacted(num_vertices);
+
+						{
+							float4 const * p = reinterpret_cast<float4 const *>(&buff[0]);
+							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+							{	
+								ve.format = EF_A2BGR10;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(float3(p[j].x(), p[j].y(), p[j].z())) * 0.5f + 0.5f;
+									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((p[j].w() * 0.5f + 0.5f) * 3), 0, 3) << 30);
+								}
+							}
+							else
+							{
+								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+								ve.format = EF_ARGB8;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(float3(p[j].x(), p[j].y(), p[j].z())) * 0.5f + 0.5f;
+									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((p[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
 								}
 							}
 						}
@@ -1686,14 +1768,22 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
 								}
-								else
+								else if (EF_BGR32F == ve.format)
 								{
-									BOOST_ASSERT(EF_BGR32F == ve.format);
-
 									float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
+								}
+								else if (EF_BGR32F == ve.format)
+								{
+									BOOST_ASSERT(EF_BGR32F == ve.format);
+
+									float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("w", p[j].w()));
 								}
 							}
 							break;

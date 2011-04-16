@@ -26,12 +26,25 @@ public:
 
 	void LineMode(bool line_mode);
 
+	KlayGE::RenderEffectPtr const & Effect() const
+	{
+		return effect_;
+	}
+
+	std::map<std::string, KlayGE::TexturePtr>& TexPool()
+	{
+		return tex_pool_;
+	}
+
 	KlayGE::TexturePtr const & EmptyNormalMap() const
 	{
 		return empty_normal_map_;
 	}
 
 private:
+	KlayGE::RenderEffectPtr effect_;
+	std::map<std::string, KlayGE::TexturePtr> tex_pool_;
+
 	KlayGE::TexturePtr empty_normal_map_;
 };
 
@@ -71,6 +84,21 @@ private:
 	bool line_mode_;
 	std::string visualize_;
 	bool has_opacity_map_;
+	bool has_skinned_;
+
+	KlayGE::TexturePtr diffuse_map_;
+	KlayGE::TexturePtr specular_map_;
+	KlayGE::TexturePtr emit_map_;
+	KlayGE::TexturePtr opacity_map_;
+	KlayGE::TexturePtr normal_map_;
+
+	KlayGE::float4 ambient_clr_;
+	KlayGE::float4 diffuse_clr_;
+	KlayGE::float4 specular_clr_;
+	KlayGE::float4 emit_clr_;
+	KlayGE::float4 opacity_clr_;
+	float specular_level_;
+	float shininess_;
 };
 
 #endif		// _MODEL_HPP

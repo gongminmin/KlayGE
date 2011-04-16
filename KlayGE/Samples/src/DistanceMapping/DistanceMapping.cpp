@@ -95,67 +95,79 @@ namespace
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
-			float3 normal_float3[4];
-			MathLib::compute_normal<float>(normal_float3,
+			float3 normal_float3[sizeof(xyzs) / sizeof(xyzs[0])];
+			MathLib::compute_normal(normal_float3,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
 
-			float3 tangent_float3[4], binormal_float3[4];
-			MathLib::compute_tangent<float>(tangent_float3, binormal_float3,
+			float4 tangent_float4[sizeof(xyzs) / sizeof(xyzs[0])];
+			float3 binormal_float3[sizeof(xyzs) / sizeof(xyzs[0])];
+			MathLib::compute_tangent(tangent_float4, binormal_float3,
 				indices, indices + sizeof(indices) / sizeof(indices[0]),
 				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal_float3);
 
-			for (uint32_t j = 0; j < 4; ++ j)
+			for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 			{
 				normal_float3[j] = MathLib::normalize(normal_float3[j]) * 0.5f + 0.5f;
-				tangent_float3[j] = MathLib::normalize(tangent_float3[j]) * 0.5f + 0.5f;
+
+				float3 t(tangent_float4[j].x(), tangent_float4[j].y(), tangent_float4[j].z());
+				t = MathLib::normalize(t) * 0.5f + 0.5f;
+				tangent_float4[j] = float4(t.x(), t.y(), t.z(), tangent_float4[j].w() * 0.5f + 0.5f);
 			}
 
+			uint32_t normal[sizeof(xyzs) / sizeof(xyzs[0])];
+			uint32_t tangent[sizeof(xyzs) / sizeof(xyzs[0])];
+			ElementFormat fmt;
 			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
 			{
-				uint32_t normal[4];
-				for (uint32_t j = 0; j < 4; ++ j)
+				fmt = EF_A2BGR10;
+
+				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 				{
 					normal[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 1023), 0, 1023)
 						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 1023), 0, 1023) << 10)
 						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 1023), 0, 1023) << 20);
 				}
-				uint32_t tangent[4];
-				for (uint32_t j = 0; j < 4; ++ j)
+				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
 				{
-					tangent[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].x() * 1023), 0, 1023)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].y() * 1023), 0, 1023) << 10)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float3[j].z() * 1023), 0, 1023) << 20);
+					tangent[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 1023), 0, 1023)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 1023), 0, 1023) << 10)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 1023), 0, 1023) << 20)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 3), 0, 3) << 30);
 				}
-
-				init_data.row_pitch = sizeof(normal);
-				init_data.slice_pitch = 0;
-				init_data.data = normal;
-				GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			
-				init_data.row_pitch = sizeof(tangent);
-				init_data.slice_pitch = 0;
-				init_data.data = tangent;
-				GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_A2BGR10)));
-				rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_A2BGR10)));
 			}
 			else
 			{
-				init_data.row_pitch = sizeof(normal_float3);
-				init_data.slice_pitch = 0;
-				init_data.data = normal_float3;
-				GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			
-				init_data.row_pitch = sizeof(tangent_float3);
-				init_data.slice_pitch = 0;
-				init_data.data = tangent_float3;
-				GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
 
-				rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
-				rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, EF_BGR32F)));
+				fmt = EF_ARGB8;
+
+				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				{
+					normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 0);
+				}
+				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				{
+					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
+				}
 			}
+			
+			init_data.row_pitch = sizeof(normal);
+			init_data.slice_pitch = 0;
+			init_data.data = normal;
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, fmt)));
+			
+			init_data.row_pitch = sizeof(tangent);
+			init_data.slice_pitch = 0;
+			init_data.data = tangent;
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
@@ -163,7 +175,7 @@ namespace
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindIndexStream(ib, EF_R16UI);
 
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
+			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void LightPos(float3 const & light_pos)

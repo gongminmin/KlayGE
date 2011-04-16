@@ -26,7 +26,7 @@
 void DistanceMappingVS(float4 pos		: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float3 N			: NORMAL,	// in object space
-					float3 T			: TANGENT,	// in object space
+					float4 T			: TANGENT,	// in object space
 					
 					out float4 oL		: TEXCOORD0,	// in tangent space
 					out float4 oV		: TEXCOORD1,	// in tangent space
@@ -39,8 +39,8 @@ void DistanceMappingVS(float4 pos		: POSITION,
 	T = T * 2 - 1;
 
 	float3x3 matObjToTangentSpace;
-	matObjToTangentSpace[0] = T;
-	matObjToTangentSpace[1] = cross(N, T);
+	matObjToTangentSpace[0] = T.xyz;
+	matObjToTangentSpace[1] = cross(N, T.xyz) * T.w;
 	matObjToTangentSpace[2] = N;
 
 	float3 vLight = light_pos - pos.xyz;

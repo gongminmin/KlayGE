@@ -37,7 +37,7 @@
 void BackFaceDepthVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float3 N	: NORMAL,	// in object space
-				float3 T	: TANGENT,	// in object space
+				float4 T	: TANGENT,	// in object space
 				
 				out float oDepth : TEXCOORD0,
 				out float4 oPos : SV_Position)
@@ -76,7 +76,7 @@ float4 BackFaceDepthPS(float depth : TEXCOORD0) : SV_Target
 void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float3 N	: NORMAL,	// in object space
-				float3 T	: TANGENT,	// in object space
+				float4 T	: TANGENT,	// in object space
 				
 				out float2 oTex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,

@@ -708,7 +708,7 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 
 		// ¼ÆËãTBN»ù
-		template <typename T, typename TangentIterator, typename BinormIterator,
+		template <typename TangentIterator, typename BinormIterator,
 			typename IndexIterator, typename PositionIterator, typename TexCoordIterator, typename NormalIterator>
 		inline void
 		compute_tangent(TangentIterator targentsBegin, BinormIterator binormsBegin,
@@ -718,16 +718,17 @@ namespace KlayGE
 		{
 			typedef typename std::iterator_traits<PositionIterator>::value_type position_type;
 			typedef typename std::iterator_traits<TexCoordIterator>::value_type texcoord_type;
-			typedef typename std::iterator_traits<TexCoordIterator>::value_type tangent_type;
-			typedef typename std::iterator_traits<TexCoordIterator>::value_type binormal_type;
-			typedef typename std::iterator_traits<TexCoordIterator>::value_type normal_type;
+			typedef typename std::iterator_traits<TangentIterator>::value_type tangent_type;
+			typedef typename std::iterator_traits<BinormIterator>::value_type binormal_type;
+			typedef typename std::iterator_traits<NormalIterator>::value_type normal_type;
+			typedef typename position_type::value_type value_type;
 
 			int const num = static_cast<int>(std::distance(xyzsBegin, xyzsEnd));
 
 			for (int i = 0; i < num; ++ i)
 			{
-				*(targentsBegin + i) = Vector_T<T, 3>::Zero();
-				*(binormsBegin + i) = Vector_T<T, 3>::Zero();
+				*(targentsBegin + i) = tangent_type::Zero();
+				*(binormsBegin + i) = binormal_type::Zero();
 			}
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
@@ -740,25 +741,25 @@ namespace KlayGE
 				position_type const & v1XYZ(*(xyzsBegin + v1Index));
 				position_type const & v2XYZ(*(xyzsBegin + v2Index));
 
-				Vector_T<T, 3> v1v0 = v1XYZ - v0XYZ;
-				Vector_T<T, 3> v2v0 = v2XYZ - v0XYZ;
+				Vector_T<value_type, 3> v1v0 = v1XYZ - v0XYZ;
+				Vector_T<value_type, 3> v2v0 = v2XYZ - v0XYZ;
 
 				texcoord_type const & v0Tex(*(texsBegin + v0Index));
 				texcoord_type const & v1Tex(*(texsBegin + v1Index));
 				texcoord_type const & v2Tex(*(texsBegin + v2Index));
 
-				T s1 = v1Tex.x() - v0Tex.x();
-				T t1 = v1Tex.y() - v0Tex.y();
+				value_type s1 = v1Tex.x() - v0Tex.x();
+				value_type t1 = v1Tex.y() - v0Tex.y();
 
-				T s2 = v2Tex.x() - v0Tex.x();
-				T t2 = v2Tex.y() - v0Tex.y();
+				value_type s2 = v2Tex.x() - v0Tex.x();
+				value_type t2 = v2Tex.y() - v0Tex.y();
 
-				T denominator = s1 * t2 - s2 * t1;
-				Vector_T<T, 3> tangent, binormal;
-				if (MathLib::abs(denominator) < std::numeric_limits<T>::epsilon())
+				value_type denominator = s1 * t2 - s2 * t1;
+				Vector_T<value_type, 3> tangent, binormal;
+				if (MathLib::abs(denominator) < std::numeric_limits<value_type>::epsilon())
 				{
-					tangent = Vector_T<T, 3>(1, 0, 0);
-					binormal = Vector_T<T, 3>(0, 1, 0);
+					tangent = Vector_T<value_type, 3>(1, 0, 0);
+					binormal = Vector_T<value_type, 3>(0, 1, 0);
 				}
 				else
 				{
@@ -766,46 +767,52 @@ namespace KlayGE
 					binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 				}
 
-				*(targentsBegin + v0Index) += tangent;
+				tangent_type t = Vector_T<value_type, 4>(tangent.x(), tangent.y(), tangent.z(), value_type(1));
+
+				*(targentsBegin + v0Index) += t;
 				*(binormsBegin + v0Index) += binormal;
 
-				*(targentsBegin + v1Index) += tangent;
+				*(targentsBegin + v1Index) += t;
 				*(binormsBegin + v1Index) += binormal;
 
-				*(targentsBegin + v2Index) += tangent;
+				*(targentsBegin + v2Index) += t;
 				*(binormsBegin + v2Index) += binormal;
 			}
 
 			for (int i = 0; i < num; ++ i)
 			{
-				Vector_T<T, 3> tangent(*(targentsBegin + i));
-				Vector_T<T, 3> binormal(*(binormsBegin + i));
-				Vector_T<T, 3> normal(*(normalsBegin + i));
+				tangent_type t(*(targentsBegin + i));
+				Vector_T<value_type, 3> tangent(t.x(), t.y(), t.z());
+				binormal_type binormal(*(binormsBegin + i));
+				normal_type normal(*(normalsBegin + i));
 
 				// Gram-Schmidt orthogonalize
 				tangent = normalize(tangent - normal * dot(tangent, normal));
 				// Calculate handedness
+				value_type k = 1;
 				if (dot(cross(normal, tangent), binormal) < 0)
 				{
-					tangent = -tangent;
+					k = -1;
 				}
 
-				*(targentsBegin + i) = tangent;
+				*(targentsBegin + i) = Vector_T<value_type, 4>(tangent.x(), tangent.y(), tangent.z(), k);
 				*(binormsBegin + i) = cross(normal, tangent);
 			}
 		}
 
-		template <typename T, typename NormalIterator, typename IndexIterator, typename PositionIterator>
+		template <typename NormalIterator, typename IndexIterator, typename PositionIterator>
 		inline void
 		compute_normal(NormalIterator normalBegin,
 								IndexIterator indicesBegin, IndexIterator indicesEnd,
 								PositionIterator xyzsBegin, PositionIterator xyzsEnd)
 		{
 			typedef typename std::iterator_traits<PositionIterator>::value_type position_type;
+			typedef typename std::iterator_traits<NormalIterator>::value_type normal_type;
+			typedef typename position_type::value_type value_type;
 
 			NormalIterator normalEnd = normalBegin;
 			std::advance(normalEnd, std::distance(xyzsBegin, xyzsEnd));
-			std::fill(normalBegin, normalEnd, Vector_T<T, 3>::Zero());
+			std::fill(normalBegin, normalEnd, normal_type::Zero());
 
 			for (IndexIterator iter = indicesBegin; iter != indicesEnd; iter += 3)
 			{
@@ -817,11 +824,11 @@ namespace KlayGE
 				position_type const & v1(*(xyzsBegin + v1Index));
 				position_type const & v2(*(xyzsBegin + v2Index));
 
-				Vector_T<T, 3> v03(v0.x(), v0.y(), v0.z());
-				Vector_T<T, 3> v13(v1.x(), v1.y(), v1.z());
-				Vector_T<T, 3> v23(v2.x(), v2.y(), v2.z());
+				Vector_T<value_type, 3> v03(v0.x(), v0.y(), v0.z());
+				Vector_T<value_type, 3> v13(v1.x(), v1.y(), v1.z());
+				Vector_T<value_type, 3> v23(v2.x(), v2.y(), v2.z());
 
-				Vector_T<T, 3> vec(cross(v13 - v03, v23 - v03));
+				Vector_T<value_type, 3> vec(cross(v13 - v03, v23 - v03));
 
 				*(normalBegin + v0Index) += vec;
 				*(normalBegin + v1Index) += vec;

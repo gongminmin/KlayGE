@@ -135,7 +135,7 @@ namespace
 		return CrossProd(v1v0, v2v0);
 	}
 
-	Point3 compute_tangent(Point3 const & v0XYZ, Point3 const & v1XYZ, Point3 const & v2XYZ,
+	void compute_tangent(Point3& tangent, Point3& binormal, Point3 const & v0XYZ, Point3 const & v1XYZ, Point3 const & v2XYZ,
 		Point2 const & v0Tex, Point2 const & v1Tex, Point2 const & v2Tex,
 		Point3 const & normal)
 	{
@@ -149,7 +149,6 @@ namespace
 		float t2 = v2Tex.y - v0Tex.y;
 
 		float denominator = s1 * t2 - s2 * t1;
-		Point3 tangent, binormal;
 		if (abs(denominator) < std::numeric_limits<float>::epsilon())
 		{
 			tangent = Point3(1, 0, 0);
@@ -160,8 +159,6 @@ namespace
 			tangent = (t2 * v1v0 - t1 * v2v0) / denominator;
 			binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 		}
-
-		return tangent;
 	}
 }
 
@@ -675,12 +672,13 @@ namespace KlayGE
 
 			std::vector<Point3> face_normals(obj_triangles.size());
 			std::vector<Point3> face_tangents(obj_triangles.size());
+			std::vector<Point3> face_binormals(obj_triangles.size());
 			for (size_t i = 0; i < face_normals.size(); ++ i)
 			{
 				face_normals[i] = compute_normal(positions[pos_indices[i * 3 + 2]].first,
 					positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first);
 
-				face_tangents[i] = compute_tangent(positions[pos_indices[i * 3 + 2]].first,
+				compute_tangent(face_tangents[i], face_binormals[i], positions[pos_indices[i * 3 + 2]].first,
 					positions[pos_indices[i * 3 + 1]].first, positions[pos_indices[i * 3 + 0]].first,
 					texs[1][tex_indices[1][i * 3 + 2]], texs[1][tex_indices[1][i * 3 + 1]], texs[1][tex_indices[1][i * 3 + 0]],
 					face_normals[i]);
@@ -697,20 +695,34 @@ namespace KlayGE
 
 				Point3 normal(0, 0, 0);
 				Point3 tangent(0, 0, 0);
+				Point3 binormal(0, 0, 0);
 				for (size_t i = 0; i < vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index].size(); ++ i)
 				{
 					unsigned int tri_id = vertex_sm_group[vertex_index.pos_index][vertex_index.sm_index][i];
 					normal += face_normals[tri_id];
 					tangent += face_tangents[tri_id];
+					binormal += face_binormals[tri_id];
 				}
 				if (flip_normals)
 				{
 					normal = -normal;
 					tangent = -tangent;
+					binormal = -binormal;
 				}
-				vertex.normal = Point3(normal.x, normal.z, normal.y).Normalize();
-				vertex.tangent = Point3(tangent.x, tangent.z, tangent.y).Normalize();
+				vertex.normal = normal.Normalize();
+				// Gram-Schmidt orthogonalize
+				vertex.tangent = (tangent - normal * (tangent % normal)).Normalize();
+				// Calculate handedness
+				vertex.weight = 1;
+				if (((normal ^ tangent) % binormal) < 0)
+				{
+					vertex.weight = -1;
+				}
 				vertex.binormal = vertex.normal ^ vertex.tangent;
+
+				std::swap(vertex.normal.y, vertex.normal.z);
+				std::swap(vertex.tangent.y, vertex.tangent.z);
+				std::swap(vertex.binormal.y, vertex.binormal.z);
 
 				int uv_layer = 0;
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
@@ -1321,7 +1333,12 @@ namespace KlayGE
 				{
 					ofs << "\t\t\t\t\t<tangent x=\"" << vertex.tangent.x
 						<< "\" y=\"" << vertex.tangent.y
-						<< "\" z=\"" << vertex.tangent.z << "\"/>" << endl;
+						<< "\" z=\"" << vertex.tangent.z;
+					if (vertex.weight < 0)
+					{
+						ofs << "\" w=\"" << vertex.weight;
+					}
+					ofs << "\"/>" << endl;
 				}
 				if (eva.binormal)
 				{

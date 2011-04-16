@@ -381,14 +381,17 @@ namespace KlayGE
 
 		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
 
-		vb_cache_.assign(vb_cache_.size(), NULL);
-		vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
-		vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
-		d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
-			&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
-		vb_cache_.clear();
-		vb_stride_cache_.clear();
-		vb_offset_cache_.clear();
+		if (!vb_cache_.empty())
+		{
+			vb_cache_.assign(vb_cache_.size(), NULL);
+			vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
+			vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
+			d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
+				&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
+			vb_cache_.clear();
+			vb_stride_cache_.clear();
+			vb_offset_cache_.clear();
+		}
 
 		ib_cache_.reset();
 		d3d_imm_ctx_->IASetIndexBuffer(ib_cache_.get(), DXGI_FORMAT_R16_UINT, 0);
