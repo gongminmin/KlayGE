@@ -34,202 +34,26 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	bool has_tc = false;
-	bool has_normal = false;
-	bool has_tangent = false;
-	bool has_binormal = false;
-	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
-	{
-		switch (rl_->VertexStreamFormat(i)[0].usage)
-		{
-		case VEU_TextureCoord:
-			has_tc = true;
-			break;
-
-		case VEU_Normal:
-			has_normal = true;
-			break;
-
-		case VEU_Tangent:
-			has_tangent = true;
-			break;
-
-		case VEU_Binormal:
-			has_binormal = true;
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	std::vector<float3> positions(this->NumVertices());
-	std::vector<float2> texcoords(this->NumVertices());
-	std::vector<float3> normals;
-	std::vector<float3> tangents;
-	std::vector<float3> binormals;
 	bool has_skinned = false;
 	for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 	{
 		GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
-		switch (rl_->VertexStreamFormat(i)[0].usage)
+		if (VEU_BlendWeight == rl_->VertexStreamFormat(i)[0].usage)
 		{
-		case VEU_Position:
+			GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+			vb_cpu->Resize(vb->Size());
+			vb->CopyToBuffer(*vb_cpu);
+
+			GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+			if (mapper.Pointer<float4>()->x() > 0)
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
-				{
-					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-					std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
-				}
+				has_skinned = true;
 			}
-			break;
 
-		case VEU_TextureCoord:
-			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-				vb_cpu->Resize(vb->Size());
-				vb->CopyToBuffer(*vb_cpu);
-
-				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-				std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
-			}
-			break;
-
-		case VEU_Normal:
-			if (!has_tangent)
-			{
-				normals.resize(this->NumVertices());
-				{
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					vb_cpu->Resize(vb->Size());
-					vb->CopyToBuffer(*vb_cpu);
-
-					{
-						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + normals.size(), normals.begin());
-					}
-				}
-			}
-			break;
-
-		case VEU_Tangent:
-			if (!has_normal)
-			{
-				tangents.resize(this->NumVertices());
-				{
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					vb_cpu->Resize(vb->Size());
-					vb->CopyToBuffer(*vb_cpu);
-
-					{
-						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + tangents.size(), tangents.begin());
-					}
-				}
-			}
-			break;
-
-		case VEU_Binormal:
-			if (!has_normal)
-			{
-				binormals.resize(this->NumVertices());
-				{
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-					vb_cpu->Resize(vb->Size());
-					vb->CopyToBuffer(*vb_cpu);
-
-					{
-						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-						std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + binormals.size(), binormals.begin());
-					}
-				}
-			}
-			break;
-
-		case VEU_BlendIndex:
-		case VEU_BlendWeight:
-			has_skinned = true;
-			break;
-
-		default:
 			break;
 		}
 	}
-	std::vector<uint16_t> indices(this->NumTriangles() * 3);
-	{
-		GraphicsBufferPtr ib = rl_->GetIndexStream();
-		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
-		ib_cpu->Resize(ib->Size());
-		ib->CopyToBuffer(*ib_cpu);
 
-		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
-	}
-
-	if (!has_tc)
-	{
-		texcoords.resize(this->NumVertices());
-		for (size_t i = 0; i < texcoords.size(); ++ i)
-		{
-			texcoords[i] = float2(positions[i].x(), positions[i].y());
-		}
-
-		this->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
-			vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
-	}
-
-	if (!has_normal)
-	{
-		normals.resize(this->NumVertices());
-
-		if (!has_tangent || !has_binormal)
-		{
-			MathLib::compute_normal<float>(normals.begin(),
-				indices.begin(), indices.end(), positions.begin(), positions.end());
-		}
-		else
-		{
-			for (size_t i = 0; i < normals.size(); ++ i)
-			{
-				normals[i] = MathLib::cross(tangents[i], binormals[i]);
-			}
-		}
-
-		this->AddVertexStream(&normals[0], static_cast<uint32_t>(sizeof(normals[0]) * normals.size()),
-			vertex_element(VEU_Normal, 0, EF_BGR32F), EAH_GPU_Read);
-	}
-
-	if (!has_tangent)
-	{
-		tangents.resize(this->NumVertices());
-		binormals.resize(this->NumVertices());
-
-		// º∆À„TBN
-		MathLib::compute_tangent<float>(tangents.begin(), binormals.begin(),
-			indices.begin(), indices.end(),
-			positions.begin(), positions.end(),
-			texcoords.begin(), normals.begin());
-		this->AddVertexStream(&tangents[0], static_cast<uint32_t>(sizeof(tangents[0]) * tangents.size()),
-				vertex_element(VEU_Tangent, 0, EF_BGR32F), EAH_GPU_Read);
-	}
-
-	if (!has_skinned)
-	{
-		std::vector<int> blend_indices(this->NumVertices(), 0);
-		this->AddVertexStream(&blend_indices[0], static_cast<uint32_t>(sizeof(blend_indices[0]) * blend_indices.size()),
-				vertex_element(VEU_BlendIndex, 0, EF_ABGR8), EAH_GPU_Read);
-		std::vector<float4> blend_weights(this->NumVertices(), float4(0, 0, 0, 0));
-		this->AddVertexStream(&blend_weights[0], static_cast<uint32_t>(sizeof(blend_weights[0]) * blend_weights.size()),
-				vertex_element(VEU_BlendWeight, 0, EF_ABGR32F), EAH_GPU_Read);
-	}
-
-	if (!positions.empty())
-	{
-		box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
-	}
 
 	RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
@@ -418,6 +242,282 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		format = EF_ABGR8;
 	}
 	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
+}
+
+void DetailedSkinnedModel::BuildModelInfo()
+{
+	bool has_tc = false;
+	bool has_normal = false;
+	bool has_tangent = false;
+	bool has_binormal = false;
+	bool has_skinned = false;
+	RenderLayoutPtr const & rl = meshes_[0]->GetRenderLayout();
+	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+	{
+		switch (rl->VertexStreamFormat(i)[0].usage)
+		{
+		case VEU_TextureCoord:
+			has_tc = true;
+			break;
+
+		case VEU_Normal:
+			has_normal = true;
+			break;
+
+		case VEU_Tangent:
+			has_tangent = true;
+			break;
+
+		case VEU_Binormal:
+			has_binormal = true;
+			break;
+
+		case VEU_BlendIndex:
+		case VEU_BlendWeight:
+			has_skinned = true;
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	uint32_t total_num_vertices = 0;
+	uint32_t total_num_indices = 0;
+	BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+	{
+		total_num_vertices += mesh->NumVertices();
+		total_num_indices += mesh->NumTriangles() * 3;
+	}
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	std::vector<float3> positions(total_num_vertices);
+	std::vector<float2> texcoords(total_num_vertices);
+	std::vector<float3> normals(total_num_vertices);
+	std::vector<float3> tangents(total_num_vertices);
+	std::vector<float3> binormals(total_num_vertices);
+	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+	{
+		GraphicsBufferPtr const & vb = rl->GetVertexStream(i);
+		switch (rl->VertexStreamFormat(i)[0].usage)
+		{
+		case VEU_Position:
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
+			}
+			break;
+
+		case VEU_TextureCoord:
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+				std::copy(mapper.Pointer<float2>(), mapper.Pointer<float2>() + texcoords.size(), texcoords.begin());
+			}
+			break;
+
+		case VEU_Normal:
+		case VEU_Tangent:
+		case VEU_Binormal:
+			{
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				vb_cpu->Resize(vb->Size());
+				vb->CopyToBuffer(*vb_cpu);
+
+				std::vector<uint32_t> n_32(total_num_vertices);
+				{
+					GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+					std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + n_32.size(), n_32.begin());
+				}
+
+				std::vector<float3>* p;
+				switch (rl->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Normal:
+					p = &normals;
+					break;
+
+				case VEU_Tangent:
+					p = &tangents;
+					break;
+
+				default:
+					p = &binormals;
+					break;
+				}
+
+				if (EF_A2BGR10 == rl->VertexStreamFormat(i)[0].format)
+				{
+					for (uint32_t j = 0; j < total_num_vertices; ++ j)
+					{
+						(*p)[j].x() = ((n_32[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1;
+						(*p)[j].y() = ((n_32[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1;
+						(*p)[j].z() = ((n_32[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1;
+					}
+				}
+				else
+				{
+					BOOST_ASSERT(EF_ARGB8 == rl->VertexStreamFormat(i)[0].format);
+
+					for (uint32_t j = 0; j < total_num_vertices; ++ j)
+					{
+						(*p)[j].x() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
+						(*p)[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						(*p)[j].z() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+					}
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	std::vector<uint16_t> indices(total_num_indices);
+	{
+		GraphicsBufferPtr ib = rl->GetIndexStream();
+		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, NULL);
+		ib_cpu->Resize(ib->Size());
+		ib->CopyToBuffer(*ib_cpu);
+
+		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
+		std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
+	}
+
+	if (!has_tc)
+	{
+		texcoords.resize(total_num_vertices);
+		for (size_t i = 0; i < texcoords.size(); ++ i)
+		{
+			texcoords[i] = float2(positions[i].x(), positions[i].y());
+		}
+
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
+				vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
+		}
+	}
+
+	if (!has_normal)
+	{
+		if (!has_tangent || !has_binormal)
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+			{
+				MathLib::compute_normal<float>(normals.begin() + mesh->BaseVertexLocation(),
+					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+					positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices());
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < normals.size(); ++ i)
+			{
+				normals[i] = MathLib::cross(tangents[i], binormals[i]);
+			}
+		}
+
+		std::vector<uint32_t> compacted(total_num_vertices);
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+		{	
+			fmt = EF_A2BGR10;
+			for (size_t j = 0; j < compacted.size(); ++ j)
+			{
+				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
+				compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+			fmt = EF_ARGB8;
+			for (size_t j = 0; j < compacted.size(); ++ j)
+			{
+				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
+				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+			}
+		}
+
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
+				vertex_element(VEU_Normal, 0, fmt), EAH_GPU_Read);
+		}
+	}
+
+	if (!has_tangent)
+	{
+		// Compute TBN
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			MathLib::compute_tangent<float>(tangents.begin() + mesh->BaseVertexLocation(), binormals.begin() + mesh->BaseVertexLocation(),
+				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+				positions.begin() + mesh->BaseVertexLocation(), positions.begin() + mesh->BaseVertexLocation() + mesh->NumVertices(),
+				texcoords.begin() + mesh->BaseVertexLocation(), normals.begin() + mesh->BaseVertexLocation());
+		}
+
+		std::vector<uint32_t> compacted(total_num_vertices);
+		ElementFormat fmt;
+		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+		{	
+			fmt = EF_A2BGR10;
+			for (size_t j = 0; j < compacted.size(); ++ j)
+			{
+				float3 n = MathLib::normalize(tangents[j]) * 0.5f + 0.5f;
+				compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+			fmt = EF_ARGB8;
+			for (size_t j = 0; j < compacted.size(); ++ j)
+			{
+				float3 n = MathLib::normalize(tangents[j]) * 0.5f + 0.5f;
+				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+			}
+		}
+
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
+				vertex_element(VEU_Tangent, 0, fmt), EAH_GPU_Read);
+		}
+	}
+
+	if (!has_skinned)
+	{
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			std::vector<int> blend_indices(total_num_vertices, 0);
+			mesh->AddVertexStream(&blend_indices[0], static_cast<uint32_t>(sizeof(blend_indices[0]) * blend_indices.size()),
+				vertex_element(VEU_BlendIndex, 0, EF_ABGR8), EAH_GPU_Read);
+
+			std::vector<float4> blend_weights(total_num_vertices, float4(-1, -1, -1, -1));
+			mesh->AddVertexStream(&blend_weights[0], static_cast<uint32_t>(sizeof(blend_weights[0]) * blend_weights.size()),
+				vertex_element(VEU_BlendWeight, 0, EF_ABGR32F), EAH_GPU_Read);
+		}
+	}
 }
 
 void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)

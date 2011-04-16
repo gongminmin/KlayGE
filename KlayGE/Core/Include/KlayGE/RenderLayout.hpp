@@ -154,6 +154,7 @@ namespace KlayGE
 			return topo_type_;
 		}
 
+		void NumVertices(uint32_t n);
 		uint32_t NumVertices() const;
 
 		template <typename tuple_type>
@@ -164,7 +165,6 @@ namespace KlayGE
 		}
 		void BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
-		void BindDummyVertexStream(uint32_t num_vertices);
 
 		uint32_t NumVertexStreams() const
 		{
@@ -216,9 +216,10 @@ namespace KlayGE
 		}
 
 		bool UseIndices() const;
+		void NumIndices(uint32_t n);
 		uint32_t NumIndices() const;
 
-		void BindIndexStream(GraphicsBufferPtr index_stream, ElementFormat format);
+		void BindIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format);
 		GraphicsBufferPtr const & GetIndexStream() const;
 		ElementFormat IndexStreamFormat() const
 		{
@@ -234,7 +235,20 @@ namespace KlayGE
 		{
 			return instance_stream_.vertex_size;
 		}
-		uint32_t NumInstance() const;
+		void NumInstances(uint32_t n);
+		uint32_t NumInstances() const;
+
+		void StartVertexLocation(uint32_t location);
+		uint32_t StartVertexLocation() const;
+
+		void StartIndexLocation(uint32_t location);
+		uint32_t StartIndexLocation() const;
+
+		void BaseVertexLocation(int32_t location);
+		int32_t BaseVertexLocation() const;
+
+		void StartInstanceLocation(uint32_t location);
+		uint32_t StartInstanceLocation() const;
 
 		void ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const;
 
@@ -270,7 +284,14 @@ namespace KlayGE
 		GraphicsBufferPtr index_stream_;
 		ElementFormat index_format_;
 
-		uint32_t dummy_num_vertices_;
+		uint32_t force_num_vertices_;
+		uint32_t force_num_indices_;
+		uint32_t force_num_instances_;
+
+		uint32_t start_vertex_location_;
+		uint32_t start_index_location_;
+		int32_t base_vertex_location_;
+		uint32_t start_instance_location_;
 	};
 
 	template <>

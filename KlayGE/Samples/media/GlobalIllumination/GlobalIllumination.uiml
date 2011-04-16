@@ -10,7 +10,7 @@
 		</control>
 
 		<control type="static" id="ILScaleStatic" caption="Indirect Scale:" x="20" y="78" width="160" height="24" is_default="0"/>
-		<control type="slider" id="ILScaleSlider" x="20" y="98" width="160" height="24" min="0" max="50" value="15" is_default="0"/>
+		<control type="slider" id="ILScaleSlider" x="20" y="98" width="160" height="24" min="0" max="50" value="10" is_default="0"/>
 
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="206" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

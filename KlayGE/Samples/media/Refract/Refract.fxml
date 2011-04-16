@@ -65,7 +65,7 @@ void RefractVS(float4 pos			: POSITION,
 	oPos = mul(pos, mvp);
 	pos_ss = oPos;
 
-	out_normal = mul(normal, (float3x3)modelviewit);
+	out_normal = mul(normal * 2 - 1, (float3x3)modelviewit);
 	incident.xyz = mul(pos, mv).xyz;
 	incident.w = incident.z;
 	
@@ -145,7 +145,7 @@ void RefractBackFaceVS(float4 pos : POSITION,
 							out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	normal_depth.xyz = mul(normal, (float3x3)modelviewit);
+	normal_depth.xyz = mul(normal * 2 - 1, (float3x3)modelviewit);
 	normal_depth.w = oPos.w;
 }
 

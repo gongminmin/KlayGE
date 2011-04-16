@@ -43,7 +43,7 @@ void ColorDepthInstancedVS(float4 pos			: POSITION,
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 
 	float4 pos_ws = mul(model, pos);
-	normal = mul((float3x3)model, normal);
+	normal = mul((float3x3)model, normal * 2 - 1);
 	CalcColorDepth(pos_ws, normal, clr, oClrDepth, oPos);
 }
 
@@ -54,7 +54,7 @@ void ColorDepthNonInstancedVS(float4 pos			: POSITION,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
-	normal = mul(normal, (float3x3)modelmat);
+	normal = mul(normal * 2 - 1, (float3x3)modelmat);
 	CalcColorDepth(pos_ws, normal, color.rgb, oClrDepth, oPos);
 }
 
@@ -137,7 +137,7 @@ void MotionVectorInstancedVS(float4 pos			: POSITION,
 	float4x4 model = { row0, row1, row2, float4(0, 0, 0, 1) };
 	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
 
-	normal = mul(mul((float3x3)model, normal), (float3x3)view);
+	normal = mul(mul((float3x3)model, normal * 2 - 1), (float3x3)view);
 	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oVelocity, oPos);
 }
 
@@ -148,7 +148,7 @@ void MotionVectorNonInstancedVS(float4 pos			: POSITION,
 					out float4 oPos		: SV_Position)
 {
 	float4 pos_ws = mul(pos, modelmat);
-	normal = mul(mul(normal, (float3x3)modelmat), (float3x3)view);
+	normal = mul(mul(normal * 2 - 1, (float3x3)modelmat), (float3x3)view);
 	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oVelocity, oPos);
 }
 

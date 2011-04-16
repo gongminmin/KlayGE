@@ -30,7 +30,7 @@ void DepthPeelingVS(float4 pos				: POSITION,
 					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal), 0.0f).xxx, 0.5f);
+	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal * 2 - 1), 0.0f).xxx, 0.5f);
 	oPosSS = oPos;
 }
 

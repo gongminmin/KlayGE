@@ -171,7 +171,7 @@ namespace
 				if (use_so)
 				{
 					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGSSO");
-					rl_->BindDummyVertexStream(max_num_particles);
+					rl_->NumVertices(max_num_particles);
 				}
 				else
 				{
@@ -308,7 +308,7 @@ namespace
 			{
 				rl_ = rf.MakeRenderLayout();
 				rl_->TopologyType(RenderLayout::TT_PointList);
-				rl_->BindDummyVertexStream(max_num_particles);
+				rl_->NumVertices(max_num_particles);
 
 				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
 

@@ -43,7 +43,7 @@ void Skinned(float3 pos : POSITION,
 		float weight = blend_weights[i];
 
 		result_pos += (mul_quat(pos.xyz, joint_rot) + joint_pos.xyz) * weight;
-		result_normal += mul_quat(normal.xyz, joint_rot) * weight;
+		result_normal += mul_quat(normal.xyz * 2 - 1, joint_rot) * weight;
 	}
 }
 

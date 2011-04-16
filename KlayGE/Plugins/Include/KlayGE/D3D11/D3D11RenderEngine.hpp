@@ -215,6 +215,10 @@ namespace KlayGE
 		ID3D11InputLayoutPtr input_layout_cache_;
 		D3D11_VIEWPORT viewport_cache_;
 		uint32_t num_so_buffs_;
+		std::vector<ID3D11Buffer*> vb_cache_;
+		std::vector<UINT> vb_stride_cache_;
+		std::vector<UINT> vb_offset_cache_;
+		ID3D11BufferPtr ib_cache_;
 
 		boost::array<std::vector<void*>, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;

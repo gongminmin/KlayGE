@@ -139,34 +139,6 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			std::vector<float3> positions(this->NumVertices());
-			for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
-			{
-				GraphicsBufferPtr const & vb = rl_->GetVertexStream(i);
-				switch (rl_->VertexStreamFormat(i)[0].usage)
-				{
-				case VEU_Position:
-					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
-						vb_cpu->Resize(vb->Size());
-						vb->CopyToBuffer(*vb_cpu);
-
-						{
-							GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-							std::copy(mapper.Pointer<float3>(), mapper.Pointer<float3>() + positions.size(), positions.begin());
-						}
-					}
-					break;
-				}
-			}
-
-			if (!positions.empty())
-			{
-				box_ = MathLib::compute_bounding_box<float>(positions.begin(), positions.end());
-			}
-
 			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
 			// Ω®¡¢Œ∆¿Ì

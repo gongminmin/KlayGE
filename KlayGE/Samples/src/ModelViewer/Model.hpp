@@ -12,7 +12,9 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 	friend class DetailedSkinnedMesh;
 
 public:
-	DetailedSkinnedModel(std::wstring const & name);
+	explicit DetailedSkinnedModel(std::wstring const & name);
+
+	void BuildModelInfo();
 
 	void SetTime(float time);
 	void SetLightPos(KlayGE::float3 const & light_pos);
@@ -38,13 +40,13 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
 
+	void BuildMeshInfo();
+
 	void OnRenderBegin();
 
 	void SetWorld(KlayGE::float4x4 const & mat);
 	void SetLightPos(KlayGE::float3 const & light_pos);
 	void SetEyePos(KlayGE::float3 const & eye_pos);
-
-	void BuildMeshInfo();
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);

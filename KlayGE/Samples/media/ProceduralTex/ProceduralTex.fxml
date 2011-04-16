@@ -62,7 +62,7 @@ void ProceduralTexVS(float4 pos			: POSITION,
 {
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
-	oNormalOS = normal;
+	oNormalOS = normal * 2 - 1;
 	oTexCoord = pos.xyz * freq;
 }
 

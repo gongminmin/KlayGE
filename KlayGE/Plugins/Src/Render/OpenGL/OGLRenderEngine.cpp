@@ -793,7 +793,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instance = rl.NumInstance();
+		uint32_t const num_instance = rl.NumInstances();
 		BOOST_ASSERT(num_instance != 0);
 
 		OGLShaderObjectPtr cur_shader = checked_pointer_cast<OGLShaderObject>(tech.Pass(0)->GetShaderObject());
@@ -808,11 +808,13 @@ namespace KlayGE
 		numVerticesJustRendered_ += num_instance * vertexCount;
 
 		GLenum index_type = GL_UNSIGNED_SHORT;
+		uint8_t* index_offset = NULL;
 		if (rl.UseIndices())
 		{
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
+				index_offset += rl.StartIndexLocation() * 2;
 
 				if (restart_index_ != 0xFFFF)
 				{
@@ -826,6 +828,7 @@ namespace KlayGE
 			else
 			{
 				index_type = GL_UNSIGNED_INT;
+				index_offset += rl.StartIndexLocation() * 4;
 
 				if (restart_index_ != 0xFFFFFFFF)
 				{
@@ -861,7 +864,7 @@ namespace KlayGE
 					GLboolean normalized;
 					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
 
 					stream.Active();
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
@@ -897,7 +900,7 @@ namespace KlayGE
 					}
 
 					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, 0, num_instance);
+						index_type, index_offset, num_instance);
 					pass->Unbind();
 				}
 			}
@@ -919,7 +922,7 @@ namespace KlayGE
 						}
 					}
 
-					glDrawArraysInstanced(mode, 0, static_cast<GLsizei>(rl.NumVertices()), num_instance);
+					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instance);
 					pass->Unbind();
 				}
 			}
@@ -939,7 +942,7 @@ namespace KlayGE
 		}
 		else
 		{
-			for (uint32_t instance = 0; instance < num_instance; ++ instance)
+			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
 			{
 				if (rl.InstanceStream())
 				{
@@ -1037,7 +1040,7 @@ namespace KlayGE
 						}
 
 						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
-							index_type, 0);
+							index_type, index_offset);
 						pass->Unbind();
 					}
 				}
@@ -1059,7 +1062,7 @@ namespace KlayGE
 							}
 						}
 
-						glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+						glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
 						pass->Unbind();
 					}
 				}

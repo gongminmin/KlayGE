@@ -292,7 +292,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLES2RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		uint32_t const num_instance = rl.NumInstance();
+		uint32_t const num_instance = rl.NumInstances();
 		BOOST_ASSERT(num_instance != 0);
 
 		checked_cast<OGLES2RenderLayout const *>(&rl)->Active(tech.Pass(0)->GetShaderObject());
@@ -306,6 +306,7 @@ namespace KlayGE
 		numVerticesJustRendered_ += num_instance * vertexCount;
 
 		GLenum index_type = GL_UNSIGNED_SHORT;
+		uint8_t* index_offset = NULL;
 		if (rl.UseIndices())
 		{
 			OGLES2GraphicsBuffer& stream(*checked_pointer_cast<OGLES2GraphicsBuffer>(rl.GetIndexStream()));
@@ -314,16 +315,18 @@ namespace KlayGE
 			if (EF_R16UI == rl.IndexStreamFormat())
 			{
 				index_type = GL_UNSIGNED_SHORT;
+				index_offset += rl.StartIndexLocation() * 2;
 			}
 			else
 			{
 				index_type = GL_UNSIGNED_INT;
+				index_offset += rl.StartIndexLocation() * 4;
 			}
 		}
 
 		uint32_t const num_passes = tech.NumPasses();
 
-		for (uint32_t instance = 0; instance < num_instance; ++ instance)
+			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
 		{
 			BOOST_ASSERT(!rl.InstanceStream());
 
@@ -335,7 +338,7 @@ namespace KlayGE
 
 					pass->Bind();
 					glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
-						index_type, 0);
+						index_type, index_offset);
 					pass->Unbind();
 				}
 			}
@@ -346,7 +349,7 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					glDrawArrays(mode, 0, static_cast<GLsizei>(rl.NumVertices()));
+					glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
 					pass->Unbind();
 				}
 			}

@@ -87,7 +87,7 @@ namespace KlayGE
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset);
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset + this->BaseVertexLocation() * size);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum type;
 					GLboolean normalized;

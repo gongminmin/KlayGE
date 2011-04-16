@@ -153,6 +153,7 @@ namespace KlayGE
 		hull_shader_cache_.reset();
 		domain_shader_cache_.reset();
 		input_layout_cache_.reset();
+		ib_cache_.reset();
 
 		input_layout_bank_.clear();
 
@@ -380,6 +381,18 @@ namespace KlayGE
 
 		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
 
+		vb_cache_.assign(vb_cache_.size(), NULL);
+		vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
+		vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
+		d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
+			&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
+		vb_cache_.clear();
+		vb_stride_cache_.clear();
+		vb_offset_cache_.clear();
+
+		ib_cache_.reset();
+		d3d_imm_ctx_->IASetIndexBuffer(ib_cache_.get(), DXGI_FORMAT_R16_UINT, 0);
+
 		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
 			if (!shader_srv_cache_[i].empty())
@@ -523,7 +536,14 @@ namespace KlayGE
 
 		if (all_num_vertex_stream != 0)
 		{
-			d3d_imm_ctx_->IASetVertexBuffers(0, all_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+			if ((vb_cache_.size() != all_num_vertex_stream) || (vb_cache_ != vbs)
+				|| (vb_stride_cache_ != strides) || (vb_offset_cache_ != offsets))
+			{
+				d3d_imm_ctx_->IASetVertexBuffers(0, all_num_vertex_stream, &vbs[0], &strides[0], &offsets[0]);
+				vb_cache_ = vbs;
+				vb_stride_cache_ = strides;
+				vb_offset_cache_ = offsets;
+			}
 
 			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
 			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0)->GetShaderObject().get());
@@ -536,10 +556,18 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D11Buffer* null_vbs[] = { NULL };
-			UINT stride = 0;
-			UINT offset = 0;
-			d3d_imm_ctx_->IASetVertexBuffers(0, 1, null_vbs, &stride, &offset);
+			if (!vb_cache_.empty())
+			{
+				vb_cache_.assign(vb_cache_.size(), NULL);
+				vb_stride_cache_.assign(vb_stride_cache_.size(), 0);
+				vb_offset_cache_.assign(vb_offset_cache_.size(), 0);
+				d3d_imm_ctx_->IASetVertexBuffers(0, static_cast<UINT>(vb_cache_.size()),
+					&vb_cache_[0], &vb_stride_cache_[0], &vb_offset_cache_[0]);
+				vb_cache_.clear();
+				vb_stride_cache_.clear();
+				vb_offset_cache_.clear();
+			}
+
 			input_layout_cache_.reset();
 			d3d_imm_ctx_->IASetInputLayout(NULL);
 		}
@@ -598,13 +626,17 @@ namespace KlayGE
 		numVerticesJustRendered_ += vertex_count;
 
 		uint32_t const num_passes = tech.NumPasses();
-		uint32_t const num_instances = rl.NumInstance();
+		uint32_t const num_instances = rl.NumInstances();
 		if (num_instances > 1)
 		{
 			if (rl.UseIndices())
 			{
 				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
-				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+				if (ib_cache_ != d3dib.D3DBuffer())
+				{
+					d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+					ib_cache_ = d3dib.D3DBuffer();
+				}
 
 				uint32_t const num_indices = rl.NumIndices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -612,13 +644,17 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, 0, 0, 0);
+					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.BaseVertexLocation(), rl.StartInstanceLocation());
 					pass->Unbind();
 				}
 			}
 			else
 			{
-				d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+				if (ib_cache_)
+				{
+					d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+					ib_cache_.reset();
+				}
 
 				uint32_t const num_vertices = rl.NumVertices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -626,7 +662,7 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, 0, 0);
+					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass->Unbind();
 				}
 			}
@@ -636,7 +672,11 @@ namespace KlayGE
 			if (rl.UseIndices())
 			{
 				D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
-				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+				if (ib_cache_ != d3dib.D3DBuffer())
+				{
+					d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+					ib_cache_ = d3dib.D3DBuffer();
+				}
 
 				uint32_t const num_indices = rl.NumIndices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -644,13 +684,17 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->DrawIndexed(num_indices, 0, 0);
+					d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.BaseVertexLocation());
 					pass->Unbind();
 				}
 			}
 			else
 			{
-				d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+				if (ib_cache_)
+				{
+					d3d_imm_ctx_->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
+					ib_cache_.reset();
+				}
 
 				uint32_t const num_vertices = rl.NumVertices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -658,7 +702,7 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					d3d_imm_ctx_->Draw(num_vertices, 0);
+					d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
 					pass->Unbind();
 				}
 			}

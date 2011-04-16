@@ -29,7 +29,7 @@ void ObjectVS(float4 Position : POSITION,
 					out float4 oPos : SV_Position)
 {
 	oPos = mul(Position, mvp);
-	oNormal = mul(Normal, (float3x3)mv);
+	oNormal = mul(Normal * 2 - 1, (float3x3)mv);
 	oTex0 = Tex0;
 
 	oLightVec = light_pos - Position.xyz;

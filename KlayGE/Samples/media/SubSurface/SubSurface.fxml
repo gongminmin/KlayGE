@@ -91,7 +91,7 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 	oV = eye_pos - pos.xyz;
 	oL = light_pos - pos.xyz;
 	oH = normalize(oL) + normalize(oV);
-	oN = N;
+	oN = N * 2 - 1;
 
 	oPos = mul(pos, worldviewproj);
 	oPosSS = oPos;

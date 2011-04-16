@@ -69,21 +69,68 @@ namespace KlayGE
 		}
 
 		virtual Box const & GetBound() const;
+		void SetBound(Box const & box);
 
 		virtual std::wstring const & Name() const;
 
+		void NumVertices(uint32_t n)
+		{
+			rl_->NumVertices(n);
+		}
 		uint32_t NumVertices() const
 		{
 			return rl_->NumVertices();
 		}
 
+		void NumTriangles(uint32_t n)
+		{
+			rl_->NumIndices(n * 3);
+		}
 		uint32_t NumTriangles() const
 		{
 			return rl_->NumIndices() / 3;
 		}
 
 		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint);
+		void AddVertexStream(GraphicsBufferPtr const & buffer, vertex_element const & ve);
 		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
+		void AddIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format);
+
+		void StartVertexLocation(uint32_t location)
+		{
+			rl_->StartVertexLocation(location);
+		}
+		uint32_t StartVertexLocation() const
+		{
+			return rl_->StartVertexLocation();
+		}
+
+		void StartIndexLocation(uint32_t location)
+		{
+			rl_->StartIndexLocation(location);
+		}
+		uint32_t StartIndexLocation() const
+		{
+			return rl_->StartIndexLocation();
+		}
+
+		void BaseVertexLocation(int32_t location)
+		{
+			rl_->BaseVertexLocation(location);
+		}
+		int32_t BaseVertexLocation() const
+		{
+			return rl_->BaseVertexLocation();
+		}
+
+		void StartInstanceLocation(uint32_t location)
+		{
+			rl_->StartInstanceLocation(location);
+		}
+		uint32_t StartInstanceLocation() const
+		{
+			return rl_->StartInstanceLocation();
+		}
 
 		int32_t MaterialID() const
 		{
@@ -127,6 +174,10 @@ namespace KlayGE
 	public:
 		explicit RenderModel(std::wstring const & name);
 		virtual ~RenderModel()
+		{
+		}
+
+		virtual void BuildModelInfo()
 		{
 		}
 

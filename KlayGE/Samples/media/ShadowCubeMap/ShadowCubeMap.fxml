@@ -83,7 +83,7 @@ void RenderSceneVS(float4 Position : POSITION,
 	oTexcoord = Texcoord;
 	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
-	oLightWorldNormal = mul(Normal, (float3x3)obj_model_to_light_model);
+	oLightWorldNormal = mul(Normal * 2 - 1, (float3x3)obj_model_to_light_model);
 }
 
 float linstep(float min, float max, float v)

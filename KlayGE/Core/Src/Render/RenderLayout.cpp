@@ -32,7 +32,13 @@ namespace KlayGE
 	RenderLayout::RenderLayout()
 			: topo_type_(TT_PointList),
 				index_format_(EF_Unknown),
-				dummy_num_vertices_(0)
+				force_num_vertices_(0xFFFFFFFF),
+				force_num_indices_(0xFFFFFFFF),
+				force_num_instances_(0xFFFFFFFF),
+				start_vertex_location_(0),
+				start_index_location_(0),
+				base_vertex_location_(0),
+				start_instance_location_(0)
 	{
 		vertex_streams_.reserve(4);
 	}
@@ -47,16 +53,23 @@ namespace KlayGE
 		return obj;
 	}
 
+	void RenderLayout::NumVertices(uint32_t n)
+	{
+		force_num_vertices_ = n;
+	}
+
 	uint32_t RenderLayout::NumVertices() const
 	{
-		if (vertex_streams_.empty())
+		uint32_t n;
+		if (0xFFFFFFFF == force_num_vertices_)
 		{
-			return dummy_num_vertices_;
+			n = vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size;
 		}
 		else
 		{
-			return vertex_streams_[0].stream->Size() / vertex_streams_[0].vertex_size;
+			n = force_num_vertices_;
 		}
+		return n;
 	}
 
 	void RenderLayout::BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
@@ -102,29 +115,34 @@ namespace KlayGE
 		}
 	}
 
-	void RenderLayout::BindDummyVertexStream(uint32_t num_vertices)
-	{
-		dummy_num_vertices_ = num_vertices;
-	}
-
 	bool RenderLayout::UseIndices() const
 	{
 		return this->NumIndices() != 0;
 	}
 
-	uint32_t RenderLayout::NumIndices() const
+	void RenderLayout::NumIndices(uint32_t n)
 	{
-		if (index_stream_)
-		{
-			return index_stream_->Size() / NumFormatBytes(index_format_);
-		}
-		else
-		{
-			return 0;
-		}
+		force_num_indices_ = n;
 	}
 
-	void RenderLayout::BindIndexStream(GraphicsBufferPtr buffer, ElementFormat format)
+	uint32_t RenderLayout::NumIndices() const
+	{
+		uint32_t n = 0;
+		if (index_stream_)
+		{
+			if (0xFFFFFFFF == force_num_indices_)
+			{
+				n = index_stream_->Size() / NumFormatBytes(index_format_);
+			}
+			else
+			{
+				n = force_num_indices_;
+			}
+		}
+		return n;
+	}
+
+	void RenderLayout::BindIndexStream(GraphicsBufferPtr const & buffer, ElementFormat format)
 	{
 		BOOST_ASSERT((EF_R16UI == format) || (EF_R32UI == format));
 
@@ -143,15 +161,76 @@ namespace KlayGE
 		return instance_stream_.stream;
 	}
 
-	uint32_t RenderLayout::NumInstance() const
+	void RenderLayout::NumInstances(uint32_t n)
 	{
-		return vertex_streams_[0].freq;
+		force_num_instances_ = n;
+	}
+
+	uint32_t RenderLayout::NumInstances() const
+	{
+		uint32_t n;
+		if (0xFFFFFFFF == force_num_instances_)
+		{
+			if (!vertex_streams_.empty())
+			{
+				n = vertex_streams_[0].freq;
+			}
+			else
+			{
+				n = 1;
+			}
+		}
+		else
+		{
+			n = force_num_instances_;
+		}
+		return n;
+	}
+
+	void RenderLayout::StartVertexLocation(uint32_t location)
+	{
+		start_vertex_location_ = location;
+	}
+
+	uint32_t RenderLayout::StartVertexLocation() const
+	{
+		return start_vertex_location_;
+	}
+
+	void RenderLayout::StartIndexLocation(uint32_t location)
+	{
+		start_index_location_ = location;
+	}
+
+	uint32_t RenderLayout::StartIndexLocation() const
+	{
+		return start_index_location_;
+	}
+
+	void RenderLayout::BaseVertexLocation(int32_t location)
+	{
+		base_vertex_location_ = location;
+	}
+
+	int32_t RenderLayout::BaseVertexLocation() const
+	{
+		return base_vertex_location_;
+	}
+
+	void RenderLayout::StartInstanceLocation(uint32_t location)
+	{
+		start_instance_location_ = location;
+	}
+
+	uint32_t RenderLayout::StartInstanceLocation() const
+	{
+		return start_instance_location_;
 	}
 
 	void RenderLayout::ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const
 	{
 		BOOST_ASSERT(instance_stream_.stream);
-		BOOST_ASSERT(inst_no < this->NumInstance());
+		BOOST_ASSERT(inst_no < this->NumInstances());
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

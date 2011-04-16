@@ -3,6 +3,7 @@
 <effect>
 	<include name="MultiresPostProcess.fxml"/>
 	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -35,7 +36,7 @@ void VPLsLightingVS(float4 pos: POSITION,
 	spos.xy = spos.xy * 2;
 	oViewDir = mul(spos, inv_proj).xyz;
 }
-    
+
 float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float4 ndc = gbuffer_tex.Sample(point_sampler, tc.xy);
@@ -51,16 +52,10 @@ float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 		float3 pos_j = pos_dist.xyz;
 		float dlj_sqr = pos_dist.w;
 
-		float3 vij = pos_j - pos_i;
-		float dij_sqr = max(dot(vij, vij), 0.3f);
-		vij = normalize(vij);
-    
+		float3 vij = normalize(pos_j - pos_i);
 		float cos_iv = max(0, dot(norm_i, vij));
-		float cos_jv = max(0, dot(norm_j, -vij));
-
-		float numer = dlj_sqr * cos_iv * cos_jv;
-		float denom = dij_sqr * vpl_params.x + dlj_sqr;
-		color_i += (numer / denom) * color_j;
+		float atten = attenuation_term(pos_j, pos_i, float3(0.3f, 0, 1));
+		color_i += dlj_sqr * cos_iv * atten / (vpl_params.x + atten * dlj_sqr) * color_j;
 	}
 
 	return float4(color_i, 1);

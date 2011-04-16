@@ -58,7 +58,7 @@ void GBufferVS(float4 pos : POSITION,
 {
 	float4 pos_es = mul(pos, model_view);
 	oPos = mul(pos_es, proj);
-	oNormal.xyz = mul(normal, (float3x3)model_view);
+	oNormal.xyz = mul(normal * 2 - 1, (float3x3)model_view);
 	oNormal.w = pos_es.z * depth_near_far_invfar.z;
 	oLightDir = light_in_eye - pos_es.xyz;
 	oHalfway = normalize(oLightDir) + normalize(-pos_es.xyz);

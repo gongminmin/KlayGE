@@ -95,6 +95,7 @@ namespace
 					model_ = this->CreateModel(model_desc);
 				}
 
+				model_->BuildModelInfo();
 				for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
 				{
 					model_->Mesh(i)->BuildMeshInfo();
@@ -146,6 +147,99 @@ namespace
 				model->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
 			}
 
+			std::vector<vertex_element> merged_ves;
+			std::vector<std::vector<uint32_t> > ves_mapping(model_desc->mesh_names.size());
+			char is_index_16_bit = true;
+			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
+			{
+				ves_mapping[mesh_index].resize(model_desc->ves[mesh_index].size());
+				for (uint32_t ve_index = 0; ve_index < model_desc->ves[mesh_index].size(); ++ ve_index)
+				{
+					bool found = false;
+					for (uint32_t mve_index = 0; mve_index < merged_ves.size(); ++ mve_index)
+					{
+						if (model_desc->ves[mesh_index][ve_index] == merged_ves[mve_index])
+						{
+							ves_mapping[mesh_index][ve_index] = mve_index;
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+					{
+						ves_mapping[mesh_index][ve_index] = static_cast<uint32_t>(merged_ves.size());
+						merged_ves.push_back(model_desc->ves[mesh_index][ve_index]);
+					}
+				}
+
+				is_index_16_bit &= model_desc->is_index_16_bit[mesh_index];
+			}
+
+			int index_elem_size = is_index_16_bit ? 2 : 4;
+
+			std::vector<std::vector<uint8_t> > merged_buff(merged_ves.size());
+			std::vector<uint8_t> merged_indices;
+			std::vector<uint32_t> buff_sizes;
+			std::vector<uint32_t> buff_starts;
+			std::vector<uint32_t> index_sizes;
+			std::vector<uint32_t> index_starts;
+			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
+			{
+				buff_sizes.push_back(model_desc->buffs[mesh_index][0].size() / model_desc->ves[mesh_index][0].element_size());
+				buff_starts.push_back(merged_buff[0].size() / merged_ves[0].element_size());
+
+				std::vector<char> expanded(merged_ves.size(), 0);
+				for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
+				{
+					expanded[ves_mapping[mesh_index][ve_index]] = 1;
+					merged_buff[ves_mapping[mesh_index][ve_index]].insert(merged_buff[ves_mapping[mesh_index][ve_index]].end(),
+						model_desc->buffs[mesh_index][ve_index].begin(), model_desc->buffs[mesh_index][ve_index].end());
+				}
+
+				for (size_t i = 0; i < merged_buff.size(); ++ i)
+				{
+					if (!expanded[i])
+					{
+						merged_buff[i].resize(merged_buff[i].size() + buff_sizes.back() * merged_ves[i].element_size(), 0);
+					}
+				}
+
+				index_sizes.push_back(model_desc->indices[mesh_index].size() / index_elem_size);
+				index_starts.push_back(merged_indices.size() / index_elem_size);
+				if (is_index_16_bit == model_desc->is_index_16_bit[mesh_index])
+				{
+					merged_indices.insert(merged_indices.end(),
+						model_desc->indices[mesh_index].begin(), model_desc->indices[mesh_index].end());
+				}
+				else
+				{
+					for (size_t i = 0; i < model_desc->indices[mesh_index].size(); ++ i)
+					{
+						merged_indices.push_back(model_desc->indices[mesh_index][i]);
+					}
+				}
+			}
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			ElementInitData init_data;
+			std::vector<GraphicsBufferPtr> merged_vbs(merged_buff.size());
+			for (size_t i = 0; i < merged_buff.size(); ++ i)
+			{
+				init_data.data = &merged_buff[i][0];
+				init_data.row_pitch = static_cast<uint32_t>(merged_buff[i].size());
+				init_data.slice_pitch = 0;
+				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc->access_hint, &init_data);
+			}
+
+			GraphicsBufferPtr merged_ib;
+			{
+				init_data.data = &merged_indices[0];
+				init_data.row_pitch = static_cast<uint32_t>(merged_indices.size());
+				init_data.slice_pitch = 0;
+				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc->access_hint, &init_data);
+			}
+
 			std::vector<StaticMeshPtr> meshes(model_desc->mesh_names.size());
 			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
 			{
@@ -157,14 +251,54 @@ namespace
 
 				mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
 
-				for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
+				for (uint32_t ve_index = 0; ve_index < merged_buff.size(); ++ ve_index)
+				{
+					void const * buff = &merged_buff[ve_index][buff_starts[mesh_index] * merged_ves[ve_index].element_size()];
+					uint32_t const buff_size = buff_sizes[mesh_index] * merged_ves[ve_index].element_size();
+					//mesh->AddVertexStream(buff, buff_size, merged_ves[ve_index], model_desc->access_hint);
+					mesh->AddVertexStream(merged_vbs[ve_index], merged_ves[ve_index]);
+
+					if (VEU_Position == merged_ves[ve_index].usage)
+					{
+						Box box;
+						switch (merged_ves[ve_index].format)
+						{
+						case EF_BGR32F:
+							box = MathLib::compute_bounding_box<float>(static_cast<float3 const *>(buff),
+								static_cast<float3 const *>(buff) + buff_size / sizeof(float3));
+							break;
+
+						case EF_ABGR32F:
+							box = MathLib::compute_bounding_box<float>(static_cast<float4 const *>(buff),
+								static_cast<float4 const *>(buff) + buff_size / sizeof(float4));
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+						mesh->SetBound(box);
+					}
+				}
+
+				/*mesh->AddIndexStream(&merged_indices[index_starts[mesh_index] * index_elem_size],
+					static_cast<uint32_t>(index_sizes[mesh_index] * index_elem_size),
+					is_index_16_bit ? EF_R16UI : EF_R32UI, model_desc->access_hint);*/
+				mesh->AddIndexStream(merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
+
+				mesh->NumVertices(buff_sizes[mesh_index]);
+				mesh->NumTriangles(index_sizes[mesh_index] / 3);
+				mesh->BaseVertexLocation(buff_starts[mesh_index]);
+				mesh->StartIndexLocation(index_starts[mesh_index]);
+
+				/*for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
 				{
 					std::vector<uint8_t>& buff = model_desc->buffs[mesh_index][ve_index];
 					mesh->AddVertexStream(&buff[0], static_cast<uint32_t>(buff.size() * sizeof(buff[0])), model_desc->ves[mesh_index][ve_index], model_desc->access_hint);
 				}
 
 				mesh->AddIndexStream(&model_desc->indices[mesh_index][0], static_cast<uint32_t>(model_desc->indices[mesh_index].size() * sizeof(model_desc->indices[mesh_index][0])),
-					model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);
+					model_desc->is_index_16_bit[mesh_index] ? EF_R16UI : EF_R32UI, model_desc->access_hint);*/
 			}
 
 			if (model_desc->kfs && !model_desc->kfs->empty())
@@ -255,16 +389,14 @@ namespace KlayGE
 		return box_;
 	}
 
+	void StaticMesh::SetBound(Box const & box)
+	{
+		box_ = box;
+	}
+
 	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		ElementInitData init_data;
-		init_data.data = buf;
-		init_data.row_pitch = size;
-		init_data.slice_pitch = 0;
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, &init_data);
-		rl_->BindVertexStream(vb, boost::make_tuple(ve));
 
 		if (VEU_Position == ve.usage)
 		{
@@ -285,6 +417,18 @@ namespace KlayGE
 				break;
 			}
 		}
+
+		ElementInitData init_data;
+		init_data.data = buf;
+		init_data.row_pitch = size;
+		init_data.slice_pitch = 0;
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, &init_data);
+		this->AddVertexStream(vb, ve);
+	}
+
+	void StaticMesh::AddVertexStream(GraphicsBufferPtr const & buffer, vertex_element const & ve)
+	{
+		rl_->BindVertexStream(buffer, boost::make_tuple(ve));
 	}
 
 	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)
@@ -296,7 +440,12 @@ namespace KlayGE
 		init_data.row_pitch = size;
 		init_data.slice_pitch = 0;
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, &init_data);
-		rl_->BindIndexStream(ib, format);
+		this->AddIndexStream(ib, format);
+	}
+
+	void StaticMesh::AddIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format)
+	{
+		rl_->BindIndexStream(index_stream, format);
 	}
 
 
@@ -1178,6 +1327,8 @@ namespace KlayGE
 			}
 		}
 
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
 		mesh_names.resize(num_meshes);
 		mtl_ids.resize(num_meshes);
 		ves.resize(num_meshes),
@@ -1211,7 +1362,7 @@ namespace KlayGE
 			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
 			{
 				std::vector<uint8_t>& buff = buffs[mesh_index][ve_index];
-				vertex_element const & ve = vertex_elements[ve_index];
+				vertex_element& ve = vertex_elements[ve_index];
 				switch (ve.usage)
 				{
 				case VEU_Position:
@@ -1240,6 +1391,52 @@ namespace KlayGE
 				}
 
 				decoded->read(&buff[0], buff.size() * sizeof(buff[0]));
+
+				switch (ve.usage)
+				{
+				case VEU_Normal:
+				case VEU_Tangent:
+				case VEU_Binormal:
+					if (EF_BGR32F == ve.format)
+					{
+						std::vector<uint32_t> compacted(num_vertices);
+
+						{
+							float3 const * p = reinterpret_cast<float3 const *>(&buff[0]);
+							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+							{	
+								ve.format = EF_A2BGR10;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
+								}
+							}
+							else
+							{
+								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+								ve.format = EF_ARGB8;
+								for (size_t j = 0; j < compacted.size(); ++ j)
+								{
+									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
+									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
+										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+								}
+							}
+						}
+
+						buff.resize(compacted.size() * sizeof(compacted[0]));
+						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
+					}
+					break;
+
+				default:
+					break;
+				}
 			}
 
 			uint32_t num_triangles;
@@ -1426,25 +1623,7 @@ namespace KlayGE
 					ve_node->AppendAttrib(doc.AllocAttribUInt("usage_index", ve.usage_index));
 					ve_node->AppendAttrib(doc.AllocAttribUInt("num_components", NumComponents(ve.format)));
 
-					switch (ve.usage)
-					{
-					case VEU_Position:
-					case VEU_Normal:
-						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / sizeof(float3));
-						break;
-
-					case VEU_Diffuse:
-					case VEU_Specular:
-						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / sizeof(float4));
-						break;
-
-					case VEU_TextureCoord:
-						num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / NumComponents(ve.format) / sizeof(float));
-						break;
-
-					default:
-						break;
-					}
+					num_vertices = static_cast<uint32_t>(buffs[mesh_index][j].size() / ve.element_size());
 				}
 
 				XMLNodePtr vertices_chunk = doc.AllocNode(XNT_Element, "vertices_chunk");
@@ -1471,40 +1650,77 @@ namespace KlayGE
 							break;
 
 						case VEU_Normal:
+						case VEU_Tangent:
+						case VEU_Binormal:
 							{
-								XMLNodePtr normal_node = doc.AllocNode(XNT_Element, "normal");
-								vertex_node->AppendNode(normal_node);
+								std::string node_name;
+								switch (ve.usage)
+								{
+								case VEU_Normal:
+									node_name = "normal";
+									break;
 
-								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
-								normal_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
-								normal_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
-								normal_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
+								case VEU_Tangent:
+									node_name = "tangent";
+									break;
+
+								default:
+									node_name = "binormal";
+									break;
+								}
+
+								XMLNodePtr sub_node = doc.AllocNode(XNT_Element, node_name);
+								vertex_node->AppendNode(sub_node);
+
+								if (EF_A2BGR10 == ve.format)
+								{
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1));
+								}
+								else if (EF_ARGB8 == ve.format)
+								{
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+								}
+								else
+								{
+									BOOST_ASSERT(EF_BGR32F == ve.format);
+
+									float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
+								}
 							}
 							break;
 
 						case VEU_Diffuse:
-							{
-								XMLNodePtr diffuse_node = doc.AllocNode(XNT_Element, "diffuse");
-								vertex_node->AppendNode(diffuse_node);
-
-								float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
-								diffuse_node->AppendAttrib(doc.AllocAttribFloat("r", p[j].x()));
-								diffuse_node->AppendAttrib(doc.AllocAttribFloat("g", p[j].y()));
-								diffuse_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].z()));
-								diffuse_node->AppendAttrib(doc.AllocAttribFloat("a", p[j].w()));
-							}
-							break;
-
 						case VEU_Specular:
 							{
-								XMLNodePtr specular_node = doc.AllocNode(XNT_Element, "specular");
-								vertex_node->AppendNode(specular_node);
+								std::string node_name;
+								switch (ve.usage)
+								{
+								case VEU_Diffuse:
+									node_name = "diffuse";
+									break;
+
+								default:
+									node_name = "specular";
+									break;
+								}
+
+								XMLNodePtr sub_node = doc.AllocNode(XNT_Element, node_name);
+								vertex_node->AppendNode(sub_node);
 
 								float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
-								specular_node->AppendAttrib(doc.AllocAttribFloat("r", p[j].x()));
-								specular_node->AppendAttrib(doc.AllocAttribFloat("g", p[j].y()));
-								specular_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].z()));
-								specular_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].w()));
+								sub_node->AppendAttrib(doc.AllocAttribFloat("r", p[j].x()));
+								sub_node->AppendAttrib(doc.AllocAttribFloat("g", p[j].y()));
+								sub_node->AppendAttrib(doc.AllocAttribFloat("b", p[j].z()));
+								sub_node->AppendAttrib(doc.AllocAttribFloat("a", p[j].w()));
 							}
 							break;
 
@@ -1565,30 +1781,6 @@ namespace KlayGE
 								{
 									tex_coord_node->AppendAttrib(doc.AllocAttribFloat("w", p[j * num_components + 2]));
 								}
-							}
-							break;
-
-						case VEU_Tangent:
-							{
-								XMLNodePtr tangent_node = doc.AllocNode(XNT_Element, "tangent");
-								vertex_node->AppendNode(tangent_node);
-
-								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
-								tangent_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
-								tangent_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
-								tangent_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
-							}
-							break;
-
-						case VEU_Binormal:
-							{
-								XMLNodePtr binormal_node = doc.AllocNode(XNT_Element, "binormal");
-								vertex_node->AppendNode(binormal_node);
-
-								float3 const * p = reinterpret_cast<float3 const *>(&buffs[mesh_index][k][0]);
-								binormal_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));
-								binormal_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
-								binormal_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
 							}
 							break;
 						}
