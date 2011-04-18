@@ -1,0 +1,82 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_texture_multisample" reg_no="403">
+	<tokens>
+		<token name="GL_TEXTURE_COVERAGE_SAMPLES_NV" value="0x9045"/>
+		<token name="GL_TEXTURE_COLOR_SAMPLES_NV" value="0x9046"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexImage2DMultisampleCoverageNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="coverageSamples"/>
+				<param type="GLsizei" name="colorSamples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+		<function name="glTexImage3DMultisampleCoverageNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="coverageSamples"/>
+				<param type="GLsizei" name="colorSamples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+		<function name="glTextureImage2DMultisampleNV" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+		<function name="glTextureImage3DMultisampleNV" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+		<function name="glTextureImage2DMultisampleCoverageNV" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="coverageSamples"/>
+				<param type="GLsizei" name="colorSamples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+		<function name="glTextureImage3DMultisampleCoverageNV" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="coverageSamples"/>
+				<param type="GLsizei" name="colorSamples"/>
+				<param type="GLint" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

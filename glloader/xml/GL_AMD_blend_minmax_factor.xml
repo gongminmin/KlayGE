@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_blend_minmax_factor" reg_no="404">
+	<tokens>
+		<token name="GL_FACTOR_MIN_AMD" value="0x901C"/>
+		<token name="GL_FACTOR_MAX_AMD" value="0x901D"/>
+	</tokens>
+</gl_extension>

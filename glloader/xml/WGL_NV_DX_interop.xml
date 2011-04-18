@@ -1,0 +1,63 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_NV_DX_interop" reg_no="407">
+	<tokens>
+		<token name="WGL_ACCESS_READ_ONLY_NV" value="0x0000"/>
+		<token name="WGL_ACCESS_READ_WRITE_NV" value="0x0001"/>
+		<token name="WGL_ACCESS_WRITE_DISCARD_NV" value="0x0002"/>
+	</tokens>
+
+	<functions>
+		<function name="wglDXSetResourceShareHandleNV" return="BOOL">
+			<params>
+				<param type="void*" name="dxObject"/>
+				<param type="HANDLE" name="shareHandle"/>
+			</params>
+		</function>
+		<function name="wglDXOpenDeviceNV" return="HANDLE">
+			<params>
+				<param type="void*" name="dxDevice"/>
+			</params>
+		</function>
+		<function name="wglDXCloseDeviceNV" return="BOOL">
+			<params>
+				<param type="HANDLE" name="hDevice"/>
+			</params>
+		</function>
+		<function name="wglDXRegisterObjectNV" return="HANDLE">
+			<params>
+				<param type="HANDLE" name="hDevice"/>
+				<param type="void*" name="dxObject"/>
+				<param type="GLuint" name="name"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="wglDXUnregisterObjectNV" return="BOOL">
+			<params>
+				<param type="HANDLE" name="hDevice"/>
+				<param type="HANDLE" name="hObject"/>
+			</params>
+		</function>
+		<function name="wglDXObjectAccessNV" return="BOOL">
+			<params>
+				<param type="HANDLE" name="hObject"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="wglDXLockObjectsNV" return="BOOL">
+			<params>
+				<param type="HANDLE" name="hDevice"/>
+				<param type="GLint" name="count"/>
+				<param type="HANDLE*" name="hObjects"/>
+			</params>
+		</function>
+		<function name="wglDXUnlockObjectsNV" return="BOOL">
+			<params>
+				<param type="HANDLE" name="hDevice"/>
+				<param type="GLint" name="count"/>
+				<param type="HANDLE*" name="hObjects"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

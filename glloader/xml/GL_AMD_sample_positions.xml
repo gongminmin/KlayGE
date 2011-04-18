@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_sample_positions" reg_no="405">
+	<tokens>
+		<token name="GL_SUBSAMPLE_DISTANCE_AMD" value="0x883F"/>
+	</tokens>
+
+	<functions>
+		<function name="glSetMultisamplefvAMD" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat const *" name="val"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

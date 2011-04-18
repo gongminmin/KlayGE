@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_x11_sync_object" reg_no="406">
+	<tokens>
+		<token name="GL_SYNC_X11_FENCE_EXT" value="0x90E1"/>
+	</tokens>
+
+	<functions>
+		<function name="glImportSyncEXT" return="GLsync">
+			<params>
+				<param type="GLenum" name="external_sync_type"/>
+				<param type="GLintptr" name="external_sync"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
