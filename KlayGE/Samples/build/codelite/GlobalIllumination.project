@@ -1,7 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CodeLite_Project Name="FXML2Shader">
+<CodeLite_Project Name="GlobalIllumination">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00100001N0005Debug0000000000000001N0015Debug_linux_x640000000000000001N0015Debug_linux_x860000000000000001N0013Debug_win_x640000000000000001N0013Debug_win_x860000000000000001N0007Release0000000000000001N0017Release_linux_x640000000000000001N0017Release_linux_x860000000000000001N0015Release_win_x640000000000000001N0015Release_win_x86000000000000]]>
+    </Plugin>
+  </Plugins>
   <Description/>
   <Dependencies/>
+  <VirtualDirectory Name="Source Files">
+    <File Name="../../src/GlobalIllumination/GlobalIllumination.cpp"/>
+    <File Name="../../src/GlobalIllumination/DeferredRenderingLayerAdv.cpp"/>
+    <File Name="../../src/GlobalIllumination/MultiresPostProcess.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Header Files">
+    <File Name="../../src/GlobalIllumination/GlobalIllumination.hpp"/>
+    <File Name="../../src/GlobalIllumination/DeferredRenderingLayerAdv.hpp"/>
+    <File Name="../../src/GlobalIllumination/MultiresPostProcess.hpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Effects">
+    <File Name="../../media/GlobalIllumination/Copy2LightBuffer.fxml"/>
+    <File Name="../../media/GlobalIllumination/CustomMipMap.fxml"/>
+    <File Name="../../media/GlobalIllumination/DeferredRenderingAdv.fxml"/>
+    <File Name="../../media/GlobalIllumination/DepthToVSM.fxml"/>
+    <File Name="../../media/GlobalIllumination/GBufferAdv.fxml"/>
+    <File Name="../../media/GlobalIllumination/MultiresPostProcess.fxml"/>
+    <File Name="../../media/GlobalIllumination/RSM2VPLs.fxml"/>
+    <File Name="../../media/GlobalIllumination/SetSubsplatStencil.fxml"/>
+    <File Name="../../media/GlobalIllumination/Upsampling.fxml"/>
+    <File Name="../../media/GlobalIllumination/VPLsLighting.fxml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Post Processors">
+    <File Name="../../media/GlobalIllumination/Copy2LightBuffer.ppml"/>
+    <File Name="../../media/GlobalIllumination/CustomMipMap.ppml"/>
+    <File Name="../../media/GlobalIllumination/DepthToVSM.ppml"/>
+    <File Name="../../media/GlobalIllumination/RSM2VPLs.ppml"/>
+    <File Name="../../media/GlobalIllumination/SetSubsplatStencil.ppml"/>
+    <File Name="../../media/GlobalIllumination/Upsampling.ppml"/>
+    <File Name="../../media/GlobalIllumination/VPLsLighting.ppml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="UI">
+    <File Name="../../media/GlobalIllumination/GlobalIllumination.uiml"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Resource Files">
+    <File Name="../../../klayge_logo.ico"/>
+    <File Name="../../media/Common/KlayGESample.rc"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
@@ -15,7 +58,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -49,7 +92,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -83,8 +126,8 @@
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -118,8 +161,8 @@
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -153,7 +196,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -187,7 +230,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -221,8 +264,8 @@
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -256,8 +299,8 @@
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <ResourceCompiler Options="" Required="yes"/>
+      <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -289,9 +332,4 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
   </Settings>
-  <VirtualDirectory Name="Source Files">
-    <File Name="../../FXML2Shader/FXML2Shader.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Header Files"/>
-  <VirtualDirectory Name="Resource Files"/>
 </CodeLite_Project>

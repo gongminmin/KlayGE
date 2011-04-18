@@ -9,10 +9,14 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4245)
+#endif
 #include <boost/filesystem.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #include <boost/assert.hpp>
 
 using namespace std;

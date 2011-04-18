@@ -41,16 +41,27 @@
     <File Name="../../Plugins/Include/KlayGE/OpenGL/OGLTexture.hpp"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
+        <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x64_d"/>
@@ -60,7 +71,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -85,15 +97,17 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
+        <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x86_d"/>
@@ -103,7 +117,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -128,9 +143,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -139,8 +155,9 @@
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
+        <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="glloader_x64_d"/>
         <Library Value="opengl32"/>
         <Library Value="glu32"/>
@@ -148,7 +165,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -173,9 +191,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -184,8 +203,9 @@
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
+        <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="glloader_x86_d"/>
         <Library Value="opengl32"/>
         <Library Value="glu32"/>
@@ -193,7 +213,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -218,15 +239,17 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x64"/>
+        <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x64"/>
@@ -236,7 +259,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -261,15 +285,17 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="KLAYGE_BUILD_DLL"/>
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/linux_x86"/>
+        <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x86"/>
@@ -279,7 +305,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -304,9 +331,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -315,8 +343,9 @@
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
+        <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="glloader_x64"/>
         <Library Value="opengl32"/>
         <Library Value="glu32"/>
@@ -324,7 +353,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -349,9 +379,10 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
+        <IncludePath Value="../../../glloader/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_USRDLL"/>
@@ -360,8 +391,9 @@
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
+        <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="glloader_x86"/>
         <Library Value="opengl32"/>
         <Library Value="glu32"/>
@@ -369,7 +401,8 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OpenGL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -393,14 +426,5 @@
         <CustomPreBuild/>
       </AdditionalRules>
     </Configuration>
-    <GlobalSettings>
-      <Compiler Options="">
-        <IncludePath Value="."/>
-      </Compiler>
-      <Linker Options="">
-        <LibraryPath Value="."/>
-      </Linker>
-      <ResourceCompiler Options=""/>
-    </GlobalSettings>
   </Settings>
 </CodeLite_Project>

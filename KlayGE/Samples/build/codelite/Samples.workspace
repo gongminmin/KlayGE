@@ -20,6 +20,7 @@
   <Project Name="GPUParticleSystem" Path="GPUParticleSystem.project"/>
   <Project Name="Fractal" Path="Fractal.project"/>
   <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
+  <Project Name="GlobalIllumination" Path="GlobalIllumination.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x86"/>
@@ -42,6 +43,7 @@
       <Project Name="DepthPeeling" ConfigName="Debug_win_x86"/>
       <Project Name="DeferredRendering" ConfigName="Debug_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x86"/>
+      <Project Name="GlobalIllumination" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
@@ -64,8 +66,9 @@
       <Project Name="DepthPeeling" ConfigName="Release_win_x86"/>
       <Project Name="DeferredRendering" ConfigName="Release_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x86"/>
+      <Project Name="GlobalIllumination" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_win_x64" Selected="no">
+    <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_win_x64"/>
       <Project Name="Text" ConfigName="Debug_win_x64"/>
@@ -86,8 +89,9 @@
       <Project Name="DepthPeeling" ConfigName="Debug_win_x64"/>
       <Project Name="DeferredRendering" ConfigName="Debug_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x64"/>
+      <Project Name="GlobalIllumination" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_win_x64" Selected="no">
+    <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_win_x64"/>
       <Project Name="Text" ConfigName="Release_win_x64"/>
@@ -108,8 +112,9 @@
       <Project Name="DepthPeeling" ConfigName="Release_win_x64"/>
       <Project Name="DeferredRendering" ConfigName="Release_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x64"/>
+      <Project Name="GlobalIllumination" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="no">
+    <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x86"/>
       <Project Name="Text" ConfigName="Debug_linux_x86"/>
@@ -130,8 +135,9 @@
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x86"/>
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x86"/>
+      <Project Name="GlobalIllumination" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_linux_x86" Selected="no">
+    <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x86"/>
       <Project Name="Text" ConfigName="Release_linux_x86"/>
@@ -152,8 +158,9 @@
       <Project Name="DepthPeeling" ConfigName="Release_linux_x86"/>
       <Project Name="DeferredRendering" ConfigName="Release_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x86"/>
+      <Project Name="GlobalIllumination" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="no">
+    <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Debug_linux_x64"/>
       <Project Name="Text" ConfigName="Debug_linux_x64"/>
@@ -174,8 +181,9 @@
       <Project Name="DepthPeeling" ConfigName="Debug_linux_x64"/>
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x64"/>
+      <Project Name="GlobalIllumination" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release_linux_x64" Selected="no">
+    <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x64"/>
       <Project Name="VertexDisplacement" ConfigName="Release_linux_x64"/>
       <Project Name="Text" ConfigName="Release_linux_x64"/>
@@ -196,6 +204,7 @@
       <Project Name="DepthPeeling" ConfigName="Release_linux_x64"/>
       <Project Name="DeferredRendering" ConfigName="Release_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x64"/>
+      <Project Name="GlobalIllumination" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

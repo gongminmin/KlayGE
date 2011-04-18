@@ -31,7 +31,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -75,7 +75,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -119,7 +119,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
@@ -163,7 +163,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>

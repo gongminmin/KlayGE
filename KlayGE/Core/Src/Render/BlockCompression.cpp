@@ -496,7 +496,7 @@ namespace KlayGE
 
 		bc1.clr_0 = max16;
 		bc1.clr_1 = min16;
-		*reinterpret_cast<uint32_t*>(bc1.bitmap) = mask;
+		memcpy(bc1.bitmap, &mask, sizeof(mask));
 	}
 
 	// Alpha block compression (this is easy for a change)

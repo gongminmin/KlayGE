@@ -62,7 +62,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="d3d11"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
@@ -106,7 +106,7 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_45"/>
+        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="d3d11"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
@@ -150,7 +150,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="d3d11"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
@@ -194,7 +194,7 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_45"/>
+        <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="d3d11"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
