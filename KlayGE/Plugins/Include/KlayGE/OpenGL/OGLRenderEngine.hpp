@@ -161,6 +161,7 @@ namespace KlayGE
 		GLuint cur_fbo_;
 
 		RenderLayoutPtr so_rl_;
+		bool use_gl3_tfb_;
 		GLenum so_primitive_mode_;
 		std::vector<std::string> so_vars_;
 		std::vector<char const *> so_vars_ptrs_;

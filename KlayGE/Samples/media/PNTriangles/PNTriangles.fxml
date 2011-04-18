@@ -116,7 +116,7 @@ float4 PS(float2 oTex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 pos_es : T
 	<parameter type="buffer" elem_type="float4" name="skinned_normal_buf"/>
 	<parameter type="buffer" elem_type="uint" name="index_buf"/>
 
-	<shader>
+	<shader type="vertex_shader" version="4">
 		<![CDATA[
 void SkinnedStreamOutVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
@@ -284,13 +284,6 @@ struct VS_CONTROL_POINT_OUTPUT
 	float3 Normal : TEXCOORD1;
 };
 
-struct HS_CONTROL_POINT
-{
-	float3 Pos : WORLDPOS;
-	float2 Texcoord0 : TEXCOORD0;
-	float3 Normal : TEXCOORD1;
-};
-
 VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float3 normal : NORMAL,
@@ -327,6 +320,11 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 	return output;
 }
 
+		]]>
+	</shader>
+
+	<shader type="hull_shader" version="5">
+		<![CDATA[
 struct HS_CONSTANT_DATA_OUTPUT
 {
 	// Tess factor for the FF HW block
@@ -416,6 +414,13 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 	return output;
 }
 
+struct HS_CONTROL_POINT
+{
+	float3 Pos : WORLDPOS;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+};
+
 [domain("tri")]
 [partitioning("fractional_odd")]
 [outputtopology("triangle_cw")]
@@ -430,7 +435,11 @@ HS_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p,
 	output.Normal = p[i].Normal;
 	return output;
 }
+		]]>
+	</shader>
 
+	<shader type="domain_shader" version="5">
+		<![CDATA[
 [domain("tri")]
 void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
 							float3 bc_coords : SV_DomainLocation,

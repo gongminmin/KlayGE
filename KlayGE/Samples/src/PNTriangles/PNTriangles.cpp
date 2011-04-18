@@ -126,7 +126,7 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			RenderEffectPtr effect = rf.LoadEffect("PNTriangles.fxml");
-			if (caps.max_shader_model >= 5)
+			if (caps.hs_support && caps.ds_support)
 			{
 				tess_mode_ = TM_HWTess;
 			}
@@ -148,8 +148,15 @@ namespace
 			else
 			{
 				pn_enabled_ = true;
-				technique_ = effect->TechniqueByName("PNTriangles");
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				if (TM_InstancedTess == tess_mode_)
+				{
+					technique_ = effect->TechniqueByName("InstTessPNTriangles");
+				}
+				else
+				{
+					technique_ = effect->TechniqueByName("PNTriangles");
+					rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				}
 			}
 
 			if (tess_mode_ != TM_No)
