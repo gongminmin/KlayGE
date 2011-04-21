@@ -534,32 +534,33 @@ namespace KlayGE
 
 	void Context::Config(ContextCfg const & cfg)
 	{
-		if ((cfg_.render_factory_name != cfg.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
-		{
-			this->LoadRenderFactory(cfg.render_factory_name);
-		}
-		if ((cfg_.audio_factory_name != cfg.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
-		{
-			this->LoadAudioFactory(cfg.audio_factory_name);
-		}
-		if ((cfg_.input_factory_name != cfg.input_factory_name) || (InputFactory::NullObject() == input_factory_))
-		{
-			this->LoadInputFactory(cfg.input_factory_name);
-		}
-		if ((cfg_.show_factory_name != cfg.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
-		{
-			this->LoadShowFactory(cfg.show_factory_name);
-		}
-		if ((cfg_.scene_manager_name != cfg.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
-		{
-			this->LoadSceneManager(cfg.scene_manager_name);
-		}
-		if ((cfg_.audio_data_source_factory_name != cfg.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
-		{
-			this->LoadAudioDataSourceFactory(cfg.audio_data_source_factory_name);
-		}
-
 		cfg_ = cfg;
+
+		if ((cfg_.render_factory_name != cfg_.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
+		{
+			this->LoadRenderFactory(cfg_.render_factory_name);
+			render_factory_->CheckConfig(cfg_);
+		}
+		if ((cfg_.audio_factory_name != cfg_.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
+		{
+			this->LoadAudioFactory(cfg_.audio_factory_name);
+		}
+		if ((cfg_.input_factory_name != cfg_.input_factory_name) || (InputFactory::NullObject() == input_factory_))
+		{
+			this->LoadInputFactory(cfg_.input_factory_name);
+		}
+		if ((cfg_.show_factory_name != cfg_.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
+		{
+			this->LoadShowFactory(cfg_.show_factory_name);
+		}
+		if ((cfg_.scene_manager_name != cfg_.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
+		{
+			this->LoadSceneManager(cfg_.scene_manager_name);
+		}
+		if ((cfg_.audio_data_source_factory_name != cfg_.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
+		{
+			this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);
+		}
 	}
 
 	ContextCfg const & Context::Config() const
