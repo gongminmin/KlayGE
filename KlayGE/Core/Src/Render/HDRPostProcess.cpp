@@ -121,9 +121,9 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		std::vector<float> data_v(4, 0);
+		std::vector<int> data_v(4, 0);
 		ElementInitData init_data;
-		init_data.row_pitch = sizeof(float);
+		init_data.row_pitch = sizeof(int);
 		init_data.slice_pitch = 0;
 		init_data.data = &data_v[0];
 		ElementFormat fmt;
@@ -131,12 +131,22 @@ namespace KlayGE
 		{
 			fmt = EF_R32F;
 		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0))
+		{
+			init_data.row_pitch = 4 * sizeof(int);
+			fmt = EF_ABGR32F;
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			init_data.row_pitch = sizeof(short);
+			fmt = EF_R16F;
+		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0));
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-			init_data.row_pitch = 4 * sizeof(float);
-			fmt = EF_ABGR32F;
+			init_data.row_pitch = 4 * sizeof(short);
+			fmt = EF_ABGR16F;
 		}
 		adapted_textures_[0] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
 		adapted_textures_[1] = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &init_data);
