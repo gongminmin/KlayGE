@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_texture_half_float" reg_no="36">
+	<tokens>
+		<token name="GL_HALF_FLOAT_OES" value="0x8D61"/>
+	</tokens>
+</gl_extension>

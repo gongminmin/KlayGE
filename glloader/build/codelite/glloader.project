@@ -37,7 +37,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x64/glloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -72,7 +71,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x86/glloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -107,7 +105,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x64/glloader_es_x64_d.dll" IntermediateDirectory="../../Debug-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -142,7 +139,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x86/glloader_es_x86_d.dll" IntermediateDirectory="../../Debug-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -315,7 +311,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x64/glloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -350,7 +345,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x86/glloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -385,7 +379,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x64/glloader_es_x64.dll" IntermediateDirectory="../../Release-GLES/x64" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>
@@ -420,7 +413,6 @@
         <Preprocessor Value="GLLOADER_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <Library Value="EGL"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/x86/glloader_es_x86.dll" IntermediateDirectory="../../Release-GLES/x86" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no"/>

@@ -224,23 +224,16 @@ def create_header(prefix, extensions):
 			if extension.predefined != None:
 				header_str.write("#ifdef %s\n\n" % extension.predefined)
 
-			all_static = True
 			for function in extension.functions:
-				if not function.static_link:
-					if (function.name not in function_set):
-						header_str.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
-						all_static = False
+				if (function.name not in function_set):
+					header_str.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
 
-			if not all_static:
-				header_str.write("\n")
+			header_str.write("\n")
 
 			for function in extension.functions:
-				if function.static_link:
-					header_str.write("extern %s APIENTRY %s(%s);\n" % (function.return_type, function.name, function.params_str()))
-				else:
-					if (function.name not in function_set):
-						header_str.write("extern GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
-						function_set.add(function.name)
+				if (function.name not in function_set):
+					header_str.write("extern GLLOADER_API %sFUNC %s;\n" % (function.name, function.name))
+					function_set.add(function.name)
 
 			header_str.write("\n")
 
@@ -309,11 +302,6 @@ def create_source(prefix, extensions):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n\n" % extension.predefined)
 
-		all_static = True
-		for function in extension.functions:
-			if not function.static_link:
-				all_static = False
-
 		source_str.write("static char APIENTRY _glloader_%s()\n" % extension.name)
 		source_str.write("{\n")
 		source_str.write("\treturn _%s;\n" % extension.name)
@@ -331,32 +319,30 @@ def create_source(prefix, extensions):
 		if (len(extension.functions) != 0):
 			source_str.write("#ifdef %s\n" % extension.name)
 
-			if not all_static:
-				source_str.write("\n")
+			source_str.write("\n")
 
 			for function in extension.functions:
-				if not function.static_link:
-					if (function.name not in function_set):
-						source_str.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
-						source_str.write("{\n")
+				if (function.name not in function_set):
+					source_str.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
+					source_str.write("{\n")
+					if function.static_link:
+						source_str.write("\tLOAD_FUNC1(%s);\n" % function.name)
+					else:
 						source_str.write("\tglloader_init();\n")
-						source_str.write("\t")
-						if (function.return_type != "void") and (function.return_type != "VOID"):
-							source_str.write("return ")
-						source_str.write("%s(%s);\n" % (function.name, function.param_names_str()))
-						source_str.write("}\n")
+					source_str.write("\t")
+					if (function.return_type != "void") and (function.return_type != "VOID"):
+						source_str.write("return ")
+					source_str.write("%s(%s);\n" % (function.name, function.param_names_str()))
+					source_str.write("}\n")
 
-			if not all_static:
-				source_str.write("\n")
+			source_str.write("\n")
 
 			for function in extension.functions:
-				if not function.static_link:
-					if (function.name not in function_set):
-						source_str.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
-						function_set.add(function.name)
+				if (function.name not in function_set):
+					source_str.write("%sFUNC %s = self_init_%s;\n" % (function.name, function.name, function.name))
+					function_set.add(function.name)
 
-			if not all_static:
-				source_str.write("\n")
+			source_str.write("\n")
 
 			source_str.write("#endif\n\n")
 
@@ -367,15 +353,15 @@ def create_source(prefix, extensions):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n" % extension.predefined)
 
-		all_static = True
-		for function in extension.functions:
-			if not function.static_link:
-				all_static = False
-
 		source_str.write("void init_%s()\n" % extension.name)
 		source_str.write("{\n")
 
 		source_str.write("\tglloader_%s = _glloader_%s;\n\n" % (extension.name, extension.name))
+		
+		all_static = True
+		for function in extension.functions:
+			if not function.static_link:
+				all_static = False
 
 		if not all_static:
 			if (len(extension.functions) != 0):
@@ -391,12 +377,10 @@ def create_source(prefix, extensions):
 		source_str.write("\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
 		source_str.write("\t{\n")
 		source_str.write("\t\t_%s = 1;\n" % extension.name)
-		if not all_static:
-			if len(extension.functions) > 0:
-				source_str.write("\n")
-			for function in extension.functions:
-				if not function.static_link:
-					source_str.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
+		if len(extension.functions) > 0:
+			source_str.write("\n")
+		for function in extension.functions:
+			source_str.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
 		source_str.write("\t}\n")
 
 		backup = False
@@ -404,10 +388,9 @@ def create_source(prefix, extensions):
 			backup = True
 		else:
 			for function in extension.functions:
-				if not function.static_link:
-					if function.mappings:
-						backup = True
-						break
+				if function.mappings:
+					backup = True
+					break
 
 		if backup:
 			plans = []

@@ -180,7 +180,6 @@
 					<Add option="-DGLLOADER_GLES_SUPPORT" />
 				</Compiler>
 				<Linker>
-					<Add library="EGL" />
 				</Linker>
 			</Target>
 			<Target title="Release_ES_Win_x86">
@@ -200,7 +199,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="EGL" />
 				</Linker>
 			</Target>
 		</Build>

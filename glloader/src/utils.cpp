@@ -31,12 +31,6 @@
 #include <iostream>
 #endif
 
-#ifdef GLLOADER_GLES
-#ifdef _MSC_VER
-	#pragma comment(lib, "libEGL.lib")
-#endif
-#endif
-
 #include "utils.h"
 
 namespace
@@ -74,6 +68,105 @@ namespace
 
 namespace glloader
 {
+	class gl_dll_container
+	{
+	public:
+		static gl_dll_container& instance()
+		{
+			if (NULL == inst_)
+			{
+				inst_ = new gl_dll_container;
+			}
+			return *inst_;
+		}
+
+		static void delete_instance()
+		{
+			delete inst_;
+			inst_ = NULL;
+		}
+
+		std::vector<void*> const & gl_dlls() const
+		{
+			return gl_dlls_;
+		}
+
+	private:
+		gl_dll_container()
+		{
+			void* ogl_dll;
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#ifdef GLLOADER_GLES
+			ogl_dll = ::LoadLibraryA("libEGL.dll");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::LoadLibraryA("libGLESv2.dll");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::LoadLibraryA("libGLES20.dll");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+#else
+			ogl_dll = ::LoadLibraryA("opengl32.dll");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+#endif
+#endif
+#if defined(__APPLE__) || defined(__APPLE_CC__)
+			// TODO
+#endif
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#ifdef GLLOADER_GLES
+			ogl_dll = ::dlopen("libEGL.so");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::LoadLibraryA("libGLESv2.so");
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+#else
+			ogl_dll = ::dlopen("libGL.so", RTLD_LAZY);
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+#endif
+#endif
+		}
+
+		~gl_dll_container()
+		{
+			for (size_t i = 0; i < gl_dlls_.size(); ++ i)
+			{
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+				::FreeLibrary(static_cast<HMODULE>(gl_dlls_[i]));
+#endif
+#if defined(__APPLE__) || defined(__APPLE_CC__)
+				// TODO
+#endif
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+				::dlclose(gl_dlls_[i]);
+#endif
+			}
+		}
+
+	private:
+		std::vector<void*> gl_dlls_;
+
+		static gl_dll_container* inst_;
+	};
+
 	class gl_features_extractor
 	{
 	public:
@@ -149,7 +242,7 @@ namespace glloader
 
 		void gl_version(int& major, int& minor)
 		{
-			GLubyte const * str = ::glGetString(GL_VERSION);
+			GLubyte const * str = glGetString(GL_VERSION);
 			if (str != NULL)
 			{
 				std::string const ver(reinterpret_cast<char const *>(str));
@@ -177,17 +270,17 @@ namespace glloader
 				{
 					LOAD_FUNC1(glGetStringi);
 					GLint num_exts;
-					::glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
+					glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts);
 					gl_exts.resize(num_exts);
 					for (GLint i = 0; i < num_exts; ++ i)
 					{
-						gl_exts[i] = reinterpret_cast<char const *>(::glGetStringi(GL_EXTENSIONS, i));
+						gl_exts[i] = reinterpret_cast<char const *>(glGetStringi(GL_EXTENSIONS, i));
 					}
 				}
 				else
 #endif
 				{
-					GLubyte const * str = ::glGetString(GL_EXTENSIONS);
+					GLubyte const * str = glGetString(GL_EXTENSIONS);
 					if (str != NULL)
 					{
 						gl_exts = split(reinterpret_cast<char const *>(str));
@@ -285,17 +378,17 @@ namespace glloader
 #ifdef GLLOADER_WGL
 			std::string exts_str;
 
-			::wglGetExtensionsStringARB = (wglGetExtensionsStringARBFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringARB"));
-			if (::wglGetExtensionsStringARB != NULL)
+			LOAD_FUNC1(wglGetExtensionsStringARB);
+			if (wglGetExtensionsStringARB != NULL)
 			{
-				exts_str = ::wglGetExtensionsStringARB(wglGetCurrentDC());
+				exts_str = wglGetExtensionsStringARB(::wglGetCurrentDC());
 			}
 			else
 			{
-				::wglGetExtensionsStringEXT = (wglGetExtensionsStringEXTFUNC)(::glloader_get_gl_proc_address("wglGetExtensionsStringEXT"));
-				if (::wglGetExtensionsStringEXT != NULL)
+				LOAD_FUNC1(wglGetExtensionsStringEXT);
+				if (wglGetExtensionsStringEXT != NULL)
 				{
-					exts_str = ::wglGetExtensionsStringEXT();
+					exts_str = wglGetExtensionsStringEXT();
 				}
 			}
 
@@ -307,7 +400,7 @@ namespace glloader
 		void glx_version(int& major, int& minor)
 		{
 #ifdef GLLOADER_GLX
-			::glXQueryVersion(::glXGetCurrentDisplay(), &major, &minor);
+			glXQueryVersion(glXGetCurrentDisplay(), &major, &minor);
 #else
 			major = minor = 0;
 #endif		// GLLOADER_GLX
@@ -315,9 +408,7 @@ namespace glloader
 		void glx_features()
 		{
 #ifdef GLLOADER_GLX
-			::glXGetCurrentDisplay = (glXGetCurrentDisplayFUNC)(::glloader_get_gl_proc_address("glXGetCurrentDisplay"));
-
-			char const * str = ::glXGetClientString(::glXGetCurrentDisplay(), GLX_EXTENSIONS);
+			char const * str = glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
 			if (str != NULL)
 			{
 				std::vector<std::string> glx_exts = split(str);
@@ -354,7 +445,7 @@ namespace glloader
 		void egl_version(int& major, int& minor)
 		{
 #ifdef GLLOADER_EGL
-			char const * str = ::eglQueryString(::eglGetCurrentDisplay(), EGL_VERSION);
+			char const * str = eglQueryString(eglGetCurrentDisplay(), EGL_VERSION);
 			if (str != NULL)
 			{
 				std::string const ver(reinterpret_cast<char const *>(str));
@@ -375,7 +466,7 @@ namespace glloader
 		void egl_features()
 		{
 #ifdef GLLOADER_EGL
-			char const * str = ::eglQueryString(::eglGetCurrentDisplay(), EGL_EXTENSIONS);
+			char const * str = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
 			if (str != NULL)
 			{
 				std::vector<std::string> egl_exts = split(str);
@@ -416,6 +507,7 @@ namespace glloader
 		static gl_features_extractor* inst_;
 	};
 
+	gl_dll_container* gl_dll_container::inst_ = NULL;
 	gl_features_extractor* gl_features_extractor::inst_ = NULL;
 }
 
@@ -454,12 +546,37 @@ void glloader_init()
 #endif
 }
 
-void* glloader_get_gl_proc_address(const char* name)
+void* get_gl_proc_address_by_dll(const char* name)
+{
+	void* ret = NULL;
+
+	std::vector<void*> const & gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
+
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
+	{
+		ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));
+	}
+#endif
+#if defined(__APPLE__) || defined(__APPLE_CC__)
+	// TODO
+#endif
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
+	{
+		ret = ::dlsym(gl_dlls[i], name);
+	}
+#endif
+
+	return ret;
+}
+
+void* get_gl_proc_address_by_api(const char* name)
 {
 	void* ret = NULL;
 
 #ifdef GLLOADER_GLES
-	ret = (void*)(::eglGetProcAddress(name));
+	ret = (void*)(eglGetProcAddress(name));
 #endif
 #ifdef GLLOADER_WGL
 	ret = (void*)(::wglGetProcAddress(name));
@@ -482,6 +599,17 @@ void* glloader_get_gl_proc_address(const char* name)
 #ifdef GLLOADER_GLX
 	ret = (void*)(glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
 #endif
+
+	return ret;
+}
+
+void* glloader_get_gl_proc_address(const char* name)
+{
+	void* ret = get_gl_proc_address_by_dll(name);
+	if (NULL == ret)
+	{
+		ret = get_gl_proc_address_by_api(name);
+	}
 
 #ifdef GLLOADER_DEBUG
 	if (NULL == ret)
