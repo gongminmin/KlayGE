@@ -168,7 +168,8 @@ namespace KlayGE
 	{
 		render_settings_ = settings;
 		stereo_separation_ = settings.stereo_separation;
-		this->DoCreateRenderWindow(name, settings);
+		this->DoCreateRenderWindow(name, render_settings_);
+		this->CheckConfig();
 		screen_frame_buffer_ = cur_frame_buffer_;
 		if (render_settings_.hdr)
 		{
@@ -216,6 +217,10 @@ namespace KlayGE
 			copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 			copy_pp_->InputPin(0, before_pp_tex_);
 		}
+	}
+
+	void RenderEngine::CheckConfig()
+	{
 	}
 
 	// 设置当前渲染状态对象

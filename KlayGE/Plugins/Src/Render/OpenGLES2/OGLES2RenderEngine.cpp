@@ -176,6 +176,14 @@ namespace KlayGE
 		this->BindFrameBuffer(win);
 	}
 
+	void OGLES2RenderEngine::CheckConfig()
+	{
+		if (!glloader_GLES_OES_texture_half_float() && !glloader_GLES_OES_texture_float())
+		{
+			render_settings_.hdr = false;
+		}
+	}
+
 	void OGLES2RenderEngine::InitRenderStates()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -574,14 +582,20 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_ARGB8);
 		}
-		texture_format_.insert(EF_R16F);
-		texture_format_.insert(EF_GR16F);
-		texture_format_.insert(EF_BGR16F);
-		texture_format_.insert(EF_ABGR16F);
-		texture_format_.insert(EF_R32F);
-		texture_format_.insert(EF_GR32F);
-		texture_format_.insert(EF_BGR32F);
-		texture_format_.insert(EF_ABGR32F);
+		if (glloader_GLES_OES_texture_half_float())
+		{
+			texture_format_.insert(EF_R16F);
+			texture_format_.insert(EF_GR16F);
+			texture_format_.insert(EF_BGR16F);
+			texture_format_.insert(EF_ABGR16F);
+		}
+		if (glloader_GLES_OES_texture_float())
+		{
+			texture_format_.insert(EF_R32F);
+			texture_format_.insert(EF_GR32F);
+			texture_format_.insert(EF_BGR32F);
+			texture_format_.insert(EF_ABGR32F);
+		}
 		if (glloader_GLES_EXT_texture_compression_dxt1())
 		{
 			texture_format_.insert(EF_BC1);
@@ -597,6 +611,20 @@ namespace KlayGE
 		rendertarget_format_.insert(EF_SIGNED_A2BGR10);
 		rendertarget_format_.insert(EF_ABGR16);
 		rendertarget_format_.insert(EF_SIGNED_ABGR16);
+		if (glloader_GLES_OES_texture_half_float())
+		{
+			rendertarget_format_.insert(EF_R16F);
+			rendertarget_format_.insert(EF_GR16F);
+			rendertarget_format_.insert(EF_BGR16F);
+			rendertarget_format_.insert(EF_ABGR16F);
+		}
+		if (glloader_GLES_OES_texture_float())
+		{
+			rendertarget_format_.insert(EF_R32F);
+			rendertarget_format_.insert(EF_GR32F);
+			rendertarget_format_.insert(EF_BGR32F);
+			rendertarget_format_.insert(EF_ABGR32F);
+		}
 		rendertarget_format_.insert(EF_D16);
 		rendertarget_format_.insert(EF_D24S8);
 		rendertarget_format_.insert(EF_D32F);

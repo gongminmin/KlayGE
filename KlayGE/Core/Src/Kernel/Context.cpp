@@ -539,7 +539,6 @@ namespace KlayGE
 		if ((cfg_.render_factory_name != cfg_.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
 		{
 			this->LoadRenderFactory(cfg_.render_factory_name);
-			render_factory_->CheckConfig(cfg_);
 		}
 		if ((cfg_.audio_factory_name != cfg_.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
 		{

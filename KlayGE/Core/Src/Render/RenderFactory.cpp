@@ -235,10 +235,6 @@ namespace KlayGE
 		return obj;
 	}
 
-	void RenderFactory::CheckConfig(ContextCfg& /*cfg*/)
-	{
-	}
-
 	RenderEngine& RenderFactory::RenderEngineInstance()
 	{
 		if (!re_)

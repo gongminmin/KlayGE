@@ -27,8 +27,6 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
-		void CheckConfig(ContextCfg& cfg);
-
 		TexturePtr MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
 		TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,

@@ -29,8 +29,6 @@
 #include <KlayGE/OpenGLES2/OGLES2Texture.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "libEGL.lib")
-#pragma comment(lib, "libGLESv2.lib")
 #pragma comment(lib, "glu32.lib")
 #endif
 

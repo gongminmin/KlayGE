@@ -214,6 +214,14 @@ namespace KlayGE
 		use_gl3_tfb_ = glloader_GL_VERSION_3_0() ? true : false;
 	}
 
+	void OGLRenderEngine::CheckConfig()
+	{
+		if (!glloader_GL_VERSION_3_0() && !glloader_GL_ARB_texture_float())
+		{
+			render_settings_.hdr = false;
+		}
+	}
+
 	void OGLRenderEngine::InitRenderStates()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();

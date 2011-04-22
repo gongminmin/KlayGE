@@ -27,10 +27,10 @@
 
 	<shader>
 		<![CDATA[
-void Skinned(float3 pos : POSITION,
-			float3 normal : NORMAL,
-			float4 blend_weights : BLENDWEIGHT,
-			int4 blend_indices : BLENDINDICES,
+void Skinned(float3 pos,
+			float3 normal,
+			float4 blend_weights,
+			int4 blend_indices,
 			out float3 result_pos,
 			out float3 result_normal)
 {
@@ -319,12 +319,7 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float3 pos : POSITION,
 
 	return output;
 }
-
-		]]>
-	</shader>
-
-	<shader type="hull_shader" version="5">
-		<![CDATA[
+		
 struct HS_CONSTANT_DATA_OUTPUT
 {
 	// Tess factor for the FF HW block
@@ -435,11 +430,7 @@ HS_CONTROL_POINT PNTrianglesHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p,
 	output.Normal = p[i].Normal;
 	return output;
 }
-		]]>
-	</shader>
 
-	<shader type="domain_shader" version="5">
-		<![CDATA[
 [domain("tri")]
 void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
 							float3 bc_coords : SV_DomainLocation,

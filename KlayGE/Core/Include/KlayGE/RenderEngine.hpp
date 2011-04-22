@@ -213,6 +213,7 @@ namespace KlayGE
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 
 	private:
+		virtual void CheckConfig();
 		void CreateStereoscopicVB();
 		virtual void StereoscopicForLCDShutter();
 

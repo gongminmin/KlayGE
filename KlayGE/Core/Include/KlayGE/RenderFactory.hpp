@@ -48,8 +48,6 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
-		virtual void CheckConfig(ContextCfg& cfg);
-
 		RenderEngine& RenderEngineInstance();
 
 		virtual TexturePtr MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,

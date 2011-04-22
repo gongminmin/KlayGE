@@ -39,14 +39,6 @@ namespace KlayGE
 		return name;
 	}
 
-	void OGLRenderFactory::CheckConfig(ContextCfg& cfg)
-	{
-		if (!glloader_GL_VERSION_3_0() && !glloader_GL_ARB_texture_float())
-		{
-			cfg.graphics_cfg.hdr = false;
-		}
-	}
-
 	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
 	{
