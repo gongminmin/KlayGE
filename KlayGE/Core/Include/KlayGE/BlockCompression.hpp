@@ -88,11 +88,11 @@ namespace KlayGE
 	KLAYGE_CORE_API void EncodeBC4(BC4_layout& bc4, uint8_t const * r);
 	KLAYGE_CORE_API void EncodeBC5(BC5_layout& bc5, uint8_t const * r, uint8_t const * g);
 
-	KLAYGE_CORE_API void EncodeBC1(void* bc1, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC2(void* bc2, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC3(void* bc3, void const * argb, uint32_t width, uint32_t height, uint32_t pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC4(void* bc4, void const * r, uint32_t width, uint32_t height, uint32_t pitch);
-	KLAYGE_CORE_API void EncodeBC5(void* bc5, void const * gr, uint32_t width, uint32_t height, uint32_t pitch);
+	KLAYGE_CORE_API void EncodeBC1(void* bc1, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC2(void* bc2, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC3(void* bc3, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
+	KLAYGE_CORE_API void EncodeBC4(void* bc4, uint32_t out_pitch, void const * r, uint32_t width, uint32_t height, uint32_t in_pitch);
+	KLAYGE_CORE_API void EncodeBC5(void* bc5, uint32_t out_pitch, void const * gr, uint32_t width, uint32_t height, uint32_t in_pitch);
 
 	KLAYGE_CORE_API void EncodeBC1(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
 	KLAYGE_CORE_API void EncodeBC2(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);

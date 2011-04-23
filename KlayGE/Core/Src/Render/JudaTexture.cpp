@@ -15,6 +15,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/BlockCompression.hpp>
 
 #include <fstream>
 #include <boost/assert.hpp>
@@ -1012,7 +1013,15 @@ namespace KlayGE
 				}
 			}
 
-			tex_a_tile_cache_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format_, 1, 0, EAH_CPU_Write, NULL);
+			tex_a_tile_cache_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format, 1, 0, EAH_CPU_Write, NULL);
+			if (format != format_)
+			{
+				tex_a_tile_data_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format_, 1, 0, EAH_CPU_Write, NULL);
+			}
+			else
+			{
+				tex_a_tile_data_ = tex_a_tile_cache_;
+			}
 			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, NULL);
 			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, NULL);
 
@@ -1158,7 +1167,7 @@ namespace KlayGE
 			}
 		}
 
-		uint32_t mipmaps = tex_a_tile_cache_->NumMipMaps();
+		uint32_t mipmaps = tex_a_tile_data_->NumMipMaps();
 		std::vector<std::vector<uint8_t> > neighbor_data;
 		this->DecodeTiles(neighbor_data, neighbor_ids, mipmaps);
 
@@ -1267,7 +1276,7 @@ namespace KlayGE
 				}
 
 				{
-					Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
+					Texture::Mapper mapper(*tex_a_tile_data_, 0, l, TMA_Write_Only,
 						0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
 					uint8_t* data_with_border = mapper.Pointer<uint8_t>();
 				
@@ -1426,6 +1435,138 @@ namespace KlayGE
 							}
 						}
 					}
+				}
+
+				ElementFormat format;
+				if (tex_cache_)
+				{
+					format = tex_cache_->Format();
+				}
+				else
+				{
+					format = tex_cache_array_[tile_info.z]->Format();
+				}
+
+				if (IsCompressedFormat(format))
+				{
+					int block_size;
+					if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
+						|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
+					{
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
+					}
+					std::vector<uint8_t> bc(((mip_tile_with_border_size + 3) / 4) * ((mip_tile_with_border_size + 3) / 4) * block_size);
+					{
+						Texture::Mapper mapper(*tex_a_tile_data_, 0, l, TMA_Write_Only,
+							0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
+						uint8_t* data_with_border = mapper.Pointer<uint8_t>();
+						uint32_t data_pitch = mapper.RowPitch();
+
+						uint32_t* p_argb;
+						uint32_t pitch;
+						std::vector<uint32_t> argb_data;
+						switch (format_)
+						{
+						case EF_R8:
+							{
+								argb_data.resize(mip_tile_with_border_size * mip_tile_with_border_size, 0);
+								for (uint32_t y = 0; y < mip_tile_with_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
+									{
+										argb_data[y * mip_tile_with_border_size + x] = data_with_border[y * data_pitch + x] << 16;
+									}
+								}
+								p_argb = &argb_data[0];
+								pitch = mip_tile_with_border_size * 4;
+							}
+							break;
+
+						case EF_GR8:
+							{
+								argb_data.resize(mip_tile_with_border_size * mip_tile_with_border_size, 0);
+								for (uint32_t y = 0; y < mip_tile_with_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
+									{
+										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_pitch + x * 2 + 0] << 16)
+											| (data_with_border[y * data_pitch + x * 2 + 1] << 8);
+									}
+								}
+								p_argb = &argb_data[0];
+								pitch = mip_tile_with_border_size * 4;
+							}
+							break;
+
+						case EF_ABGR8:
+							{
+								argb_data.resize(mip_tile_with_border_size * mip_tile_with_border_size, 0);
+								for (uint32_t y = 0; y < mip_tile_with_border_size; ++ y)
+								{
+									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
+									{
+										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_pitch + x * 4 + 0] << 16)
+											| (data_with_border[y * data_pitch + x * 4 + 1] << 8)
+											| (data_with_border[y * data_pitch + x * 4 + 2] << 0)
+											| (data_with_border[y * data_pitch + x * 4 + 3] << 24);
+									}
+								}
+								p_argb = &argb_data[0];
+								pitch = mip_tile_with_border_size * 4;
+							}
+							break;
+
+						case EF_ARGB8:
+							p_argb = reinterpret_cast<uint32_t*>(data_with_border);
+							pitch = data_pitch;
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							p_argb = NULL;
+							pitch = 0;
+							break;
+						}
+
+						switch (format)
+						{
+						case EF_BC1:
+							EncodeBC1(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
+							break;
+
+						case EF_BC2:
+							EncodeBC2(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
+							break;
+
+						case EF_BC3:
+							EncodeBC3(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+					}
+					{
+						Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
+							0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
+						uint8_t* dst = mapper.Pointer<uint8_t>();
+						uint8_t const * src = &bc[0];
+						for (uint32_t y = 0; y < (mip_tile_with_border_size + 3) / 4; ++ y)
+						{
+							memcpy(dst, src, (mip_tile_with_border_size + 3) / 4 * block_size);
+							src += (mip_tile_with_border_size + 3) / 4 * block_size;
+							dst += mapper.RowPitch();
+						}
+					}
+				}
+				else if (tex_a_tile_cache_ != tex_a_tile_data_)
+				{
+					tex_a_tile_data_->CopyToTexture(*tex_a_tile_cache_);
 				}
 
 				if (tex_cache_)

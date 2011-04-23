@@ -1649,7 +1649,7 @@ namespace KlayGE
 		return TextureLoader(tex_name, access_hint);
 	}
 
-	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
+	void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
 		ElementFormat format, std::vector<ElementInitData> const & init_data)
 	{
@@ -2291,9 +2291,15 @@ namespace KlayGE
 
 							{
 								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
+								char* data = mapper.Pointer<char>();
+
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + image_size);
-								memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+								for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
+								{
+									memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+									data += mapper.RowPitch();
+								}
 							}
 						}
 						else
@@ -2344,10 +2350,21 @@ namespace KlayGE
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
 							{
-								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
+								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
+								char* data = mapper.Pointer<char>();
+
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + image_size);
-								memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+								for (uint32_t z = 0; z < (depth + 3) / 4; ++ z)
+								{
+									for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
+									{
+										memcpy(&data_block[base[index] + (z * ((height + 3) / 4) + y) * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+										data += mapper.RowPitch();
+									}
+
+									data += mapper.SlicePitch() - mapper.RowPitch() * ((height + 3) / 4);
+								}
 							}
 						}
 						else
@@ -2403,10 +2420,16 @@ namespace KlayGE
 								uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 								{
-									Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
+									Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
+									char* data = mapper.Pointer<char>();
+
 									base[index] = data_block.size();
 									data_block.resize(data_block.size() + image_size);
-									memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
+									for (uint32_t y = 0; y < (height + 3) / 4; ++ y)
+									{
+										memcpy(&data_block[base[index] + y * ((width + 3) / 4) * block_size], data, (width + 3) / 4 * block_size);
+										data += mapper.RowPitch();
+									}
 								}
 							}
 							else
