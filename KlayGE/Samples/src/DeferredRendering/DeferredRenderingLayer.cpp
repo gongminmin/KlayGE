@@ -219,7 +219,15 @@ namespace KlayGE
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR32F, 1, 0))
+		{
+			fmt = EF_GR32F;
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0))
+		{
+			fmt = EF_ABGR32F;
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 		{
 			fmt = EF_GR16F;
 		}

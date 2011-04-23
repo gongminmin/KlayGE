@@ -151,7 +151,7 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: illum_(0), indirect_scale_(1.5f)
+		: illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -273,7 +273,15 @@ namespace KlayGE
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR32F, 1, 0))
+		{
+			fmt = EF_GR32F;
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0))
+		{
+			fmt = EF_ABGR32F;
+		}
+		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 		{
 			fmt = EF_GR16F;
 		}
@@ -698,7 +706,10 @@ namespace KlayGE
 					{
 						PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
 						copy_to_light_buffer_pp->SetParam(0, indirect_scale_);
+						copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
+						copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
 						copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
+						copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
 						copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
 						copy_to_light_buffer_pp->Apply();
 					}

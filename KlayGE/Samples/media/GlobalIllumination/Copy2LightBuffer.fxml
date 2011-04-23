@@ -2,15 +2,24 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 
-	<parameter type="sampler" name="bilinear_sampler">
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<parameter type="float" name="scaling_factor"/>
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="float2" name="inv_width_height"/>
+	<parameter type="float3" name="depth_near_far_invfar"/>
+	<parameter type="texture2D" name="indirect_lighting_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -22,10 +31,31 @@ void CopyToLightBufferVS(float4 pos: POSITION,
 	oTex = TexCoordFromPos(pos);
 	oTex.x = oTex.x / 2;
 }
-        
+
+float4 NearestDepthUpsamplingIL(float2 tc)
+{
+	float2 l1_inv_width_height = inv_width_height * 2;
+	float z00 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc, 1));
+	float z10 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc + float2(l1_inv_width_height.x, 0), 1));
+	float z01 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc + float2(0, l1_inv_width_height.y), 1));
+	float z11 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc + l1_inv_width_height, 1));
+	float z_full = GetDepth(g_buffer_tex.Sample(point_sampler, tc));
+	float threshold = 0.25f * depth_near_far_invfar.z;
+
+	float3 ndus = NearestDepthUpsampling(tc, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
+	if (ndus.z > 0)
+	{
+		return indirect_lighting_tex.Sample(linear_sampler, tc);
+	}
+	else
+	{
+		return indirect_lighting_tex.Sample(point_sampler, ndus.xy);
+	}
+}
+
 float4 CopyToLightBufferPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float3 color = src_tex.Sample(bilinear_sampler, tc).xyz;
+	float3 color = NearestDepthUpsamplingIL(tc).xyz;
 	return float4(color * scaling_factor, 0);
 }
     ]]>

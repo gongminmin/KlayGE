@@ -4,9 +4,12 @@
 	<post_processor name="CopyToLightBuffer">
 		<params>
 			<param name="scaling_factor"/>
+			<param name="inv_width_height"/>
+			<param name="depth_near_far_invfar"/>
 		</params>
 		<input>
-			<pin name="src_tex"/>
+			<pin name="indirect_lighting_tex"/>
+			<pin name="g_buffer_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -17,9 +20,12 @@
 	<post_processor name="CopyToLightBufferI">
 		<params>
 			<param name="scaling_factor"/>
+			<param name="inv_width_height"/>
+			<param name="depth_near_far_invfar"/>
 		</params>
 		<input>
-			<pin name="src_tex"/>
+			<pin name="indirect_lighting_tex"/>
+			<pin name="g_buffer_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
