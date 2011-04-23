@@ -129,32 +129,47 @@ namespace
 			if (caps.hs_support && caps.ds_support)
 			{
 				tess_mode_ = TM_HWTess;
+
+				technique_ = effect->TechniqueByName("PNTriangles");
+				if (!technique_->Validate())
+				{
+					tess_mode_ = TM_InstancedTess;
+
+					technique_ = effect->TechniqueByName("InstTessPNTriangles");
+					if (!technique_->Validate())
+					{
+						tess_mode_ = TM_No;
+						technique_ = effect->TechniqueByName("NoPNTriangles");
+					}
+				}
 			}
 			else if (caps.max_shader_model >= 4)
 			{
 				tess_mode_ = TM_InstancedTess;
+				
+				technique_ = effect->TechniqueByName("InstTessPNTriangles");
+				if (!technique_->Validate())
+				{
+					tess_mode_ = TM_No;
+					technique_ = effect->TechniqueByName("NoPNTriangles");
+				}
 			}
 			else
 			{
 				tess_mode_ = TM_No;
+				technique_ = effect->TechniqueByName("NoPNTriangles");
 			}
 
 			if (TM_No == tess_mode_)
 			{
 				pn_enabled_ = false;
-				technique_ = effect->TechniqueByName("NoPNTriangles");
 				rl_->TopologyType(RenderLayout::TT_TriangleList);
 			}
 			else
 			{
 				pn_enabled_ = true;
-				if (TM_InstancedTess == tess_mode_)
+				if (TM_HWTess == tess_mode_)
 				{
-					technique_ = effect->TechniqueByName("InstTessPNTriangles");
-				}
-				else
-				{
-					technique_ = effect->TechniqueByName("PNTriangles");
 					rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 				}
 			}

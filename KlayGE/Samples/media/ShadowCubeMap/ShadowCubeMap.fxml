@@ -94,24 +94,6 @@ float linstep(float min, float max, float v)
 float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,
 					float3 LightWorldNormal : TEXCOORD2) : SV_Target 
 {
-	float3 ori_color = light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
-	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
-	float2 moments = shadow_cube_tex.Sample(cube_sampler, shadow_dir).xy;
-	
-	float dist_sq = dot(LightWorldPos, LightWorldPos);
-	float dist = sqrt(dist_sq);
-
-	float p = (dist <= moments.x);
-	// Variance shadow mapping
-	float variance = moments.y - moments.x * moments.x;
-	variance = max(variance, min_variance);
-	float m_d = moments.x - dist;
-	float p_max = variance / (variance + m_d * m_d);
-	p_max = linstep(bleeding_reduce, 1, p_max);
-
-	float atten = attenuation_term(0, LightWorldPos, light_falloff);
-	atten *= max(p, p_max);
-
 	float3 c_diff, c_spec, emit;
 	float opacity;
 	if (diffuse_clr.a > 0.5f)
@@ -139,13 +121,30 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 		emit = emit_clr.rgb;
 	}
 	
-	float3 clr = ambient_clr.rgb * c_diff + emit;
-
 	float3 light_vec = normalize(-LightWorldPos);
 	float3 normal = normalize(LightWorldNormal);
 	float3 halfway = normalize(light_vec + normal);
-	clr += calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal) * ori_color * atten;
-	
+	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
+
+	float3 ori_color = light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
+	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
+	float2 moments = shadow_cube_tex.Sample(cube_sampler, shadow_dir).xy;
+
+	float dist_sq = dot(LightWorldPos, LightWorldPos);
+	float dist = sqrt(dist_sq);
+
+	float p = (dist <= moments.x);
+	// Variance shadow mapping
+	float variance = moments.y - moments.x * moments.x;
+	variance = max(variance, min_variance);
+	float m_d = moments.x - dist;
+	float p_max = variance / (variance + m_d * m_d);
+	p_max = linstep(bleeding_reduce, 1, p_max);
+
+	float atten = attenuation_term(0, LightWorldPos, light_falloff);
+	atten *= max(p, p_max);
+
+	float3 clr = ambient_clr.rgb * c_diff + emit + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>
