@@ -247,6 +247,9 @@ namespace
 		"varying out vec4 v_gl_TexCoord[8];\n"\
 		"varying out float v_gl_FogFragCoord;\n";
 
+	char const * predefined_ps_out_varyings = "\n"\
+		"varying out vec4 v_gl_FragData[%d];\n";
+
 	template <typename SrcType>
 	class SetOGLShaderParameter
 	{
@@ -1296,6 +1299,10 @@ namespace KlayGE
 			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
 			gs_input_vertices);
 
+		char predefined_ps_out_varyings_add_num[1024];
+		sprintf(predefined_ps_out_varyings_add_num, predefined_ps_out_varyings,
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_simultaneous_rts);
+
 		std::stringstream ss;
 		switch (type)
 		{
@@ -1318,6 +1325,7 @@ namespace KlayGE
 
 		case ST_PixelShader:
 			ss << predefined_varyings << std::endl;
+			ss << predefined_ps_out_varyings_add_num << std::endl;
 			break;
 
 		default:
@@ -1412,7 +1420,7 @@ namespace KlayGE
 				break;
 
 			case ST_PixelShader:
-				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
+				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token) || ("gl_FragData" == this_token))
 				{
 					ss << "v_" << this_token;
 				}
@@ -1430,12 +1438,19 @@ namespace KlayGE
 						}
 						else
 						{
-							if ("discard" == this_token)
+							if ("gl_FragColor" == this_token)
 							{
-								has_discard_ = true;
+								ss << "v_gl_FragData[0]";
 							}
+							else
+							{
+								if ("discard" == this_token)
+								{
+									has_discard_ = true;
+								}
 
-							ss << this_token;
+								ss << this_token;
+							}
 						}
 					}
 				}

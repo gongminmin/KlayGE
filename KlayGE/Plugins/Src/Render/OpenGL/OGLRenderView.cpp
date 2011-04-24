@@ -93,7 +93,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!re.HackForNV() && !re.HackForATI() && glloader_GL_VERSION_3_0())
+		if (!re.HackForATI() && glloader_GL_VERSION_3_0())
 		{
 			if (flags & GL_COLOR_BUFFER_BIT)
 			{
