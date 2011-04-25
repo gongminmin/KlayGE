@@ -79,7 +79,7 @@ namespace KlayGE
 		}
 
 		ElementInitData init_data;
-		init_data.row_pitch = pos_tc.size() * sizeof(pos_tc_type);
+		init_data.row_pitch = static_cast<uint32_t>(pos_tc.size() * sizeof(pos_tc_type));
 		init_data.data = &(pos_tc[0]);
 		pos_tc_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 		rl_->BindVertexStream(pos_tc_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F), vertex_element(VEU_TextureCoord, 0, EF_BGR32F)));

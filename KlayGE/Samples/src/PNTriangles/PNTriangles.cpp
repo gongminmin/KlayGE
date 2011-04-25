@@ -56,7 +56,7 @@ namespace
 		vert.push_back(float2(0, 0));
 		vert.push_back(float2(1, 0));
 		vert.push_back(float2(0, 1));
-		init_data.row_pitch = vert.size() * sizeof(vert[0]);
+		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &vert[0];
 		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
@@ -65,7 +65,7 @@ namespace
 		index.push_back(0);
 		index.push_back(1);
 		index.push_back(2);
-		init_data.row_pitch = index.size() * sizeof(index[0]);
+		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &index[0];
 		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
@@ -101,12 +101,12 @@ namespace
 			index.push_back(static_cast<uint16_t>(last_1_row + i));
 			index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
 
-			init_data.row_pitch = vert.size() * sizeof(vert[0]);
+			init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &vert[0];
 			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 
-			init_data.row_pitch = index.size() * sizeof(index[0]);
+			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &index[0];
 			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
