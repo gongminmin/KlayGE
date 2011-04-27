@@ -34,6 +34,8 @@ void CopyToLightBufferVS(float4 pos: POSITION,
 
 float4 NearestDepthUpsamplingIL(float2 tc)
 {
+	return indirect_lighting_tex.Sample(linear_sampler, tc);
+
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float z00 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc, 1));
 	float z10 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc + float2(l1_inv_width_height.x, 0), 1));

@@ -46,16 +46,22 @@ float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
   
 	for (float k = vpl_params.z; k < 1; k += vpl_params.y)
 	{
-		float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.166f), 0).xyz;
-		float3 norm_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.5f), 0).xyz;
 		float4 pos_dist = vpls_tex.SampleLevel(point_sampler, float2(k, 0.833f), 0);
 		float3 pos_j = pos_dist.xyz;
-		float dlj_sqr = pos_dist.w;
 
-		float3 vij = normalize(pos_j - pos_i);
-		float cos_iv = max(0, dot(norm_i, vij));
-		float atten = attenuation_term(pos_j, pos_i, float3(0.3f, 0, 1));
-		color_i += dlj_sqr * cos_iv * atten / (vpl_params.x + atten * dlj_sqr) * color_j;
+		float3 vij = pos_j - pos_i;
+		float dij_sqr = dot(vij, vij);
+		if (dij_sqr < 200)
+		{
+			float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.166f), 0).xyz;
+			float3 norm_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.5f), 0).xyz;
+			float dlj_sqr = pos_dist.w;
+
+			vij = vij / sqrt(dij_sqr);
+			float cos_iv = max(0, dot(norm_i, vij));
+			float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
+			color_i += dlj_sqr * cos_iv * atten / (vpl_params.x + atten * dlj_sqr) * color_j;
+		}
 	}
 
 	return float4(color_i, 1);

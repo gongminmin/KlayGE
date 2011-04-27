@@ -470,7 +470,7 @@ bool GlobalIlluminationApp::ConfirmDevice() const
 
 void GlobalIlluminationApp::InitObjects()
 {
-	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
+	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
 	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
@@ -574,7 +574,7 @@ void GlobalIlluminationApp::ILScaleChangedHandler(KlayGE::UISlider const & sende
 	deferred_rendering_->IndirectScale(il_scale_);
 
 	std::wostringstream stream;
-	stream << L"Indirect Scale: " << il_scale_ << " x";
+	stream << L"Scale: " << il_scale_ << " x";
 	dialog_->Control<UIStatic>(id_il_scale_static_)->SetText(stream.str());
 }
 
