@@ -55,32 +55,6 @@
 #define GLLOADER_DEBUG
 #endif
 
-#if defined(_MSC_VER)
-	#if _MSC_VER >= 1600
-	#elif _MSC_VER >= 1500
-		#ifndef GLLOADER_DEBUG
-			#define _SECURE_SCL 0
-		#endif
-	#elif _MSC_VER >= 1400
-		#ifndef GLLOADER_DEBUG
-			#define _SECURE_SCL 0
-		#endif
-	#else
-		#error Unknown compiler.
-	#endif
-
-	#if _MSC_VER >= 1400
-		#pragma warning(disable: 4055)
-
-		#ifndef _CRT_SECURE_NO_DEPRECATE
-			#define _CRT_SECURE_NO_DEPRECATE
-		#endif
-		#ifndef _SCL_SECURE_NO_DEPRECATE
-			#define _SCL_SECURE_NO_DEPRECATE
-		#endif
-	#endif
-#endif
-
 #ifndef GLLOADER_GLES_SUPPORT
 #define GLLOADER_GL
 
