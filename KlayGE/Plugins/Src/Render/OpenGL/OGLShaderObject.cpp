@@ -247,8 +247,7 @@ namespace
 		"varying out vec4 v_gl_TexCoord[8];\n"\
 		"varying out float v_gl_FogFragCoord;\n";
 
-	char const * predefined_ps_out_varyings = "\n"\
-		"varying out vec4 v_gl_FragData[%d];\n";
+	char const * predefined_ps_out_varyings = "varying out vec4 v_gl_FragData_%d;\n";
 
 	template <typename SrcType>
 	class SetOGLShaderParameter
@@ -1299,9 +1298,15 @@ namespace KlayGE
 			gs_input_vertices, gs_input_vertices, gs_input_vertices, gs_input_vertices,
 			gs_input_vertices);
 
-		char predefined_ps_out_varyings_add_num[1024];
-		sprintf(predefined_ps_out_varyings_add_num, predefined_ps_out_varyings,
-			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_simultaneous_rts);
+		std::string predefined_ps_out_varyings_add_num;
+		int max_mrt = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().max_simultaneous_rts;
+		for (int i = 0; i < max_mrt; ++ i)
+		{
+			char temp[256];
+			sprintf(temp, predefined_ps_out_varyings, i);
+			predefined_ps_out_varyings_add_num += temp;
+		}
+		predefined_ps_out_varyings_add_num += "\n";
 
 		std::stringstream ss;
 		switch (type)
@@ -1420,7 +1425,7 @@ namespace KlayGE
 				break;
 
 			case ST_PixelShader:
-				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token) || ("gl_FragData" == this_token))
+				if (("gl_TexCoord" == this_token) || ("gl_FogFragCoord" == this_token))
 				{
 					ss << "v_" << this_token;
 				}
@@ -1440,16 +1445,30 @@ namespace KlayGE
 						{
 							if ("gl_FragColor" == this_token)
 							{
-								ss << "v_gl_FragData[0]";
+								ss << "v_gl_FragData_0";
 							}
 							else
 							{
-								if ("discard" == this_token)
+								if ("gl_FragData" == this_token)
 								{
-									has_discard_ = true;
-								}
+									std::string tmp_token[3];
+									for (int t = 0; t < 3; ++ t)
+									{
+										++ beg;
+										tmp_token[t] = *beg;
+									}
 
-								ss << this_token;
+									ss << "v_gl_FragData_" << tmp_token[1];
+								}
+								else
+								{
+									if ("discard" == this_token)
+									{
+										has_discard_ = true;
+									}
+
+									ss << this_token;
+								}
 							}
 						}
 					}
