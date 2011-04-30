@@ -35,56 +35,22 @@ float GetShininess(float4 ndc)
 float3 NearestDepthUpsampling(float2 tc, float4 z_half, float z_full, float2 l1_inv_width_height, float threshold)
 {
 	float4 dist_z = abs(z_half - z_full);
-	float2 nearest_tc;
-	if (dist_z.x < dist_z.y)
+	float nearest_z = dist_z.x;
+	float2 nearest_tc = tc;
+	if (dist_z.y < nearest_z)
 	{
-		if (dist_z.x < dist_z.z)
-		{
-			if (dist_z.x < dist_z.w)
-			{
-				nearest_tc = tc;
-			}
-			else
-			{
-				nearest_tc = tc + l1_inv_width_height;
-			}
-		}
-		else
-		{
-			if (dist_z.z < dist_z.w)
-			{
-				nearest_tc = tc + float2(0, l1_inv_width_height.y);
-			}
-			else
-			{
-				nearest_tc = tc + l1_inv_width_height;
-			}
-		}
+		nearest_z = dist_z.y;
+		nearest_tc = tc + float2(l1_inv_width_height.x, 0);
 	}
-	else
+	if (dist_z.z < nearest_z)
 	{
-		if (dist_z.y < dist_z.z)
-		{
-			if (dist_z.y < dist_z.w)
-			{
-				nearest_tc = tc + float2(l1_inv_width_height.x, 0);
-			}
-			else
-			{
-				nearest_tc = tc + l1_inv_width_height;
-			}
-		}
-		else
-		{
-			if (dist_z.z < dist_z.w)
-			{
-				nearest_tc = tc + float2(0, l1_inv_width_height.y);
-			}
-			else
-			{
-				nearest_tc = tc + l1_inv_width_height;
-			}
-		}
+		nearest_z = dist_z.z;
+		nearest_tc = tc + float2(0, l1_inv_width_height.y);
+	}
+	if (dist_z.w < nearest_z)
+	{
+		nearest_z = dist_z.w;
+		nearest_tc = tc + l1_inv_width_height;
 	}
 
 	return float3(nearest_tc, all(dist_z < threshold) ? 1 : -1);
