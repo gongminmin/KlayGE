@@ -1954,23 +1954,7 @@ namespace KlayGE
 
 		ret->glsl_program_ = glCreateProgram();
 
-		bool use_bin_program = true;
-
-		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.HackForNV())
-		{
-			// Binary program can't work with GS in current NVIDIA's drivers
-			if (is_shader_validate_[ST_GeometryShader])
-			{
-				shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
-				if (!sd.func_name.empty())
-				{
-					use_bin_program = false;
-				}
-			}
-		}
-
-		if (use_bin_program && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
+		if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
 		{
 			ret->is_validate_ = is_validate_;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
@@ -1978,11 +1962,8 @@ namespace KlayGE
 				ret->is_shader_validate_[type] = is_shader_validate_[type];
 			}
 
-			if (is_validate_)
+			if (ret->is_validate_)
 			{
-				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
-					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
-
 				if (ret->is_shader_validate_[ST_GeometryShader])
 				{
 					shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[ST_GeometryShader]);
@@ -1996,6 +1977,28 @@ namespace KlayGE
 						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, temp);
 					}
 				}
+
+				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+
+				glProgramBinary(ret->glsl_program_, static_cast<GLenum>((*glsl_bin_formats_)[0]),
+					&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
+
+				GLint linked = false;
+				glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
+#ifdef KLAYGE_DEBUG
+				if (!linked)
+				{
+					GLint len = 0;
+					glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
+					if (len > 0)
+					{
+						std::vector<char> info(len + 1, 0);
+						glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
+						std::cerr << &info[0] << std::endl;
+					}
+				}
+#endif
+				ret->is_validate_ &= linked ? true : false;
 			}
 		}
 		else
