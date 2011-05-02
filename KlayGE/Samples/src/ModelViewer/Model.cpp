@@ -234,7 +234,15 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	effect_ = rf.LoadEffect("ModelViewer.fxml");
+	std::vector<std::pair<std::string, std::string> > num_joints_macro;
+	num_joints_macro.push_back(std::make_pair("NUM_JOINTS", "128"));
+	num_joints_macro.push_back(std::make_pair("", ""));
+	effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
+	if (!effect_->TechniqueByName("LightingFillTech")->Validate())
+	{
+		num_joints_macro[0].second = "64";
+		effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
+	}
 
 	uint32_t const empty_nor = 0x80808080;
 

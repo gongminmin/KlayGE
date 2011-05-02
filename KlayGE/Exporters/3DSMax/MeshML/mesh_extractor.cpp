@@ -439,7 +439,7 @@ namespace KlayGE
 						const int num_map_verts = mesh.getNumMapVerts(channel);
 						if (num_map_verts > 0)
 						{
-							texs[channel].resize(num_map_verts);
+							texs[channel].resize(num_map_verts, Point2(0.0f, 0.0f));
 
 							Matrix3 tex_mat;
 							tex_mat.IdentityMatrix();
@@ -449,7 +449,6 @@ namespace KlayGE
 								if (uv_transs[j].find(channel) == uv_transs[j].end())
 								{
 									uv_transs[j][channel] = std::make_pair(tex_mat, tex_u);
-									break;
 								}
 							}
 

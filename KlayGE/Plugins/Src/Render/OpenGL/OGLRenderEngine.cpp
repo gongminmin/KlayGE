@@ -982,8 +982,11 @@ namespace KlayGE
 			{
 				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
 				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				glDisableVertexAttribArray(attr);
-				glVertexAttribDivisor(attr, 0);
+				if (attr != -1)
+				{
+					glDisableVertexAttribArray(attr);
+					glVertexAttribDivisor(attr, 0);
+				}
 			}
 		}
 		else

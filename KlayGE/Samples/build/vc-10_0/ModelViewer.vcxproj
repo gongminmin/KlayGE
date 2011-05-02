@@ -210,6 +210,7 @@
     <None Include="..\..\media\ModelViewer\ModelViewer.fxml" />
     <None Include="..\..\media\ModelViewer\ModelViewer.uiml" />
     <None Include="..\..\..\klayge_logo.ico" />
+    <None Include="..\..\media\ModelViewer\MVUtil.fxml" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\media\Common\KlayGESample.rc" />

@@ -38,7 +38,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.fxml");
+			RenderEffectPtr effect = rf.LoadEffect("MVUtil.fxml");
 			technique_ = effect->TechniqueByName("AxisTech");
 
 			float4 xyzs[] =
@@ -97,7 +97,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("ModelViewer.fxml");
+			RenderEffectPtr effect = rf.LoadEffect("MVUtil.fxml");
 			technique_ = effect->TechniqueByName("GridTech");
 
 			float3 xyzs[(21 + 21) * 2];
