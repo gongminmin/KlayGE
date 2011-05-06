@@ -107,4 +107,11 @@ KlayGE/Tools/build/vc-10_0/*.sdf
 KlayGE/Tools/build/vc-10_0/*.suo
 KlayGE/Tools/build/vc-10_0/*.user
 KlayGE/Tools/build/vc-10_0/ipch/
-
+External/boost/bin.v2/
+External/boost/lib_*/
+External/boost/bjam
+External/boost/bjam.exe
+External/boost/project-config.jam
+External/boost/tools/build/bjam.log
+External/boost/tools/build/v2/engine/src/bin.ntx86/
+External/boost/tools/build/v2/engine/src/bootstrap/

@@ -23,15 +23,6 @@
 #include <iosfwd>
 #include <vector>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011 6313)
-#endif
-#include <rapidxml/rapidxml.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 namespace KlayGE
 {
 	enum XMLNodeType
@@ -50,6 +41,7 @@ namespace KlayGE
 	{
 	public:
 		XMLDocument();
+
 		XMLNodePtr Parse(ResIdentifierPtr const & source);
 		void Print(std::ostream& os);
 
@@ -64,7 +56,7 @@ namespace KlayGE
 		void RootNode(XMLNodePtr const & new_node);
 
 	private:
-		boost::shared_ptr<rapidxml::xml_document<> > doc_;
+		boost::shared_ptr<void> doc_;
 		std::vector<char> xml_src_;
 
 		XMLNodePtr root_;
@@ -75,8 +67,8 @@ namespace KlayGE
 		friend class XMLDocument;
 
 	public:
-		explicit XMLNode(rapidxml::xml_node<>* node);
-		XMLNode(rapidxml::xml_document<>* doc, XMLNodeType type, std::string const & name);
+		explicit XMLNode(void* node);
+		XMLNode(void* doc, XMLNodeType type, std::string const & name);
 
 		std::string const & Name() const;
 		XMLNodeType Type() const;
@@ -118,7 +110,7 @@ namespace KlayGE
 		std::string ValueString() const;
 
 	private:
-		rapidxml::xml_node<>* node_;
+		void* node_;
 		std::string name_;
 
 		std::vector<XMLNodePtr> children_;
@@ -131,8 +123,8 @@ namespace KlayGE
 		friend class XMLNode;
 
 	public:
-		explicit XMLAttribute(rapidxml::xml_attribute<>* attr);
-		XMLAttribute(rapidxml::xml_document<>* doc, std::string const & name, std::string const & value);
+		explicit XMLAttribute(void* attr);
+		XMLAttribute(void* doc, std::string const & name, std::string const & value);
 
 		std::string const & Name() const;
 
@@ -145,7 +137,7 @@ namespace KlayGE
 		std::string const & ValueString() const;
 
 	private:
-		rapidxml::xml_attribute<>* attr_;
+		void* attr_;
 		std::string name_;
 		std::string value_;
 	};

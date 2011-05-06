@@ -14,7 +14,6 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/XMLDom.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>

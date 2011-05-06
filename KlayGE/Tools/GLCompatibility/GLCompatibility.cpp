@@ -7,7 +7,6 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
 #include <KlayGE/DllLoader.hpp>
-#include <KlayGE/XMLDom.hpp>
 
 #include <iostream>
 #include <vector>
