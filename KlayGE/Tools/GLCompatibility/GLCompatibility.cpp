@@ -3,6 +3,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
@@ -13,23 +14,7 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
-
-#include <boost/bind.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-#include <boost/algorithm/string/split.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#include <boost/filesystem.hpp>
-
-#include <glloader/glloader.h>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "opengl32.lib")
-#endif
+#include <sstream>
 
 using namespace KlayGE;
 
@@ -40,11 +25,14 @@ namespace
 	public:
 		information()
 		{
-			vendor_ = reinterpret_cast<char const *>(::glGetString(GL_VENDOR));
-			renderer_ = reinterpret_cast<char const *>(::glGetString(GL_RENDERER));
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-			char const * glsl_ver_str = reinterpret_cast<char const *>(::glGetString(GL_SHADING_LANGUAGE_VERSION));
-			if (glsl_ver_str != NULL)
+			re.GetCustomAttrib("VENDOR", &vendor_);
+			re.GetCustomAttrib("RENDERER", &renderer_);
+
+			std::string glsl_ver_str;
+			re.GetCustomAttrib("SHADING_LANGUAGE_VERSION", &glsl_ver_str);
+			if (!glsl_ver_str.empty())
 			{
 				std::string const glsl_ver = glsl_ver_str;
 				std::string::size_type const glsl_dot_pos = glsl_ver.find(".");
@@ -57,10 +45,15 @@ namespace
 				glsl_minor_ver_ = 0;
 			}
 
-			int num_exts = glloader_num_features();
+			int num_exts;
+			re.GetCustomAttrib("NUM_FEATURES", &num_exts);
 			for (int i = 0; i < num_exts; ++ i)
 			{
-				std::string name = glloader_get_feature_name(i);
+				std::ostringstream oss;
+				oss << "FEATURE_NAME_" << i;
+
+				std::string name;
+				re.GetCustomAttrib(oss.str(), &name);
 				std::string::size_type p = name.find("GL_VERSION_");
 				if (std::string::npos == p)
 				{

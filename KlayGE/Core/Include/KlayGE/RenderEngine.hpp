@@ -136,6 +136,9 @@ namespace KlayGE
 		// Scissor support
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
+		virtual void GetCustomAttrib(std::string const & name, void* value);
+		virtual void SetCustomAttrib(std::string const & name, void* value);
+
 		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
 		virtual void FullScreen(bool fs) = 0;

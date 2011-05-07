@@ -380,6 +380,14 @@ namespace KlayGE
 		return caps_;
 	}
 
+	void RenderEngine::GetCustomAttrib(std::string const & /*name*/, void* /*value*/)
+	{
+	}
+
+	void RenderEngine::SetCustomAttrib(std::string const & /*name*/, void* /*value*/)
+	{
+	}
+
 	void RenderEngine::Resize(uint32_t width, uint32_t height)
 	{
 		this->DoResize(width, height);

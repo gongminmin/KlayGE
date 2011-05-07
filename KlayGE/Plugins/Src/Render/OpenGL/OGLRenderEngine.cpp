@@ -1198,6 +1198,69 @@ namespace KlayGE
 		glScissor(x, y, width, height);
 	}
 
+	void OGLRenderEngine::GetCustomAttrib(std::string const & name, void* value)
+	{
+		if ("VENDOR" == name)
+		{
+			char const * str = reinterpret_cast<char const *>(glGetString(GL_VENDOR));
+			if (str)
+			{
+				*static_cast<std::string*>(value) = str;
+			}
+			else
+			{
+				static_cast<std::string*>(value)->clear();
+			}
+		}
+		if ("RENDERER" == name)
+		{
+			char const * str = reinterpret_cast<char const *>(glGetString(GL_RENDERER));
+			if (str)
+			{
+				*static_cast<std::string*>(value) = str;
+			}
+			else
+			{
+				static_cast<std::string*>(value)->clear();
+			}
+		}
+		if ("VERSION" == name)
+		{
+			char const * str = reinterpret_cast<char const *>(glGetString(GL_VERSION));
+			if (str)
+			{
+				*static_cast<std::string*>(value) = str;
+			}
+			else
+			{
+				static_cast<std::string*>(value)->clear();
+			}
+		}
+		if ("SHADING_LANGUAGE_VERSION" == name)
+		{
+			char const * str = reinterpret_cast<char const *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (str)
+			{
+				*static_cast<std::string*>(value) = str;
+			}
+			else
+			{
+				static_cast<std::string*>(value)->clear();
+			}
+		}
+		if ("NUM_FEATURES" == name)
+		{
+			*static_cast<int*>(value) = glloader_num_features();
+		}
+		if (0 == name.find("FEATURE_NAME_"))
+		{
+			std::istringstream iss(name.substr(13));
+			int n;
+			iss >> n;
+			*static_cast<std::string*>(value) = glloader_get_feature_name(n);
+		}
+	}
+
 	void OGLRenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
 		checked_pointer_cast<OGLRenderWindow>(screen_frame_buffer_)->Resize(width, height);
