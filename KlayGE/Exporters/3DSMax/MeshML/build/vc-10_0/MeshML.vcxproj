@@ -95,6 +95,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -122,6 +123,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -147,6 +149,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -175,6 +178,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../../../../../../External/boost</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>core.lib;maxutil.lib;geom.lib;mesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
