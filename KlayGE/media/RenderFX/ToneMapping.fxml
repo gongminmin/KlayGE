@@ -26,6 +26,18 @@ float EyeAdaption(float lum)
 	return lerp(0.2f, lum, 0.5f);
 }
 
+float3 F(float3 x)
+{
+	const float A = 0.22f;
+	const float B = 0.30f;
+	const float C = 0.10f;
+	const float D = 0.20f;
+	const float E = 0.01f;
+	const float F = 0.30f;
+
+	return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+}
+
 float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 {
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
@@ -38,13 +50,11 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	// martin's modified blue shift
 	color = lerp(lum * BLUE_SHIFT, color, saturate(8.0f * lum));
 
-	// tone mapping
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 
-	//color = 1 - exp(-adapted_lum_dest * pow(color, 1.15f)); // better contrast but slower
-	color = 1 - exp(-adapted_lum_dest * color); 
-
-	return color;
+	// Filmic Tonemapping from Unchart 2
+	const float White = 11.2f;
+	return F(1.4f * adapted_lum_dest * color) / F(White * 0.5f);
 }
 
 void ToneMapping30VS(float4 pos : POSITION,
