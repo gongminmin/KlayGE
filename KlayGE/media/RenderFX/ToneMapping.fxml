@@ -54,7 +54,7 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 
 	// Filmic Tonemapping from Unchart 2
 	const float White = 11.2f;
-	return F(1.4f * adapted_lum_dest * color) / F(White * 0.5f);
+	return F(1.6f * adapted_lum_dest * color) / F(White);
 }
 
 void ToneMapping30VS(float4 pos : POSITION,
