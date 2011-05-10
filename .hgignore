@@ -174,7 +174,7 @@ External/libvorbis/libs/x64/*.lib
 External/libvorbis/win32/*/*/Win32
 External/libvorbis/win32/*/*/x64
 External/libvorbis/win32/*/*/*.user
-External/libvorbis/win32/*/*/*.suo
-External/libvorbis/win32/*/*/*.ncb
-External/libvorbis/win32/*/*/*.opensdf
-External/libvorbis/win32/*/*/*.sdf
+External/libvorbis/win32/*/*.suo
+External/libvorbis/win32/*/*.ncb
+External/libvorbis/win32/*/*.opensdf
+External/libvorbis/win32/*/*.sdf
