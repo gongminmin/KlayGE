@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../Core/Include"
+				AdditionalIncludeDirectories="../../../../External/boost;../../../../External/Python/include;../../../Core/Include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,10 +65,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glloader_x86_d.lib"
 				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../../lib/Win32"
+				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x86/lib;../../../../External/Python/libs;../../../lib/Win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
@@ -124,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../Core/Include"
+				AdditionalIncludeDirectories="../../../../External/boost;../../../../External/Python/include;../../../Core/Include"
 				PreprocessorDefinitions="WIN64;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -144,10 +143,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glloader_x64_d.lib"
 				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../../lib/x64"
+				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x64/lib;../../../../External/Python/libs/amd64;../../../lib/x64"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
@@ -206,7 +204,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../../../Core/Include"
+				AdditionalIncludeDirectories="../../../../External/boost;../../../../External/Python/include;../../../Core/Include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -225,10 +223,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glloader_x86.lib"
 				OutputFile="$(OutDir)/$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../../lib/Win32"
+				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x86/lib;../../../../External/Python/libs;../../../lib/Win32"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
@@ -284,7 +281,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
-				AdditionalIncludeDirectories="../../../Core/Include"
+				AdditionalIncludeDirectories="../../../../External/boost;../../../../External/Python/include;../../../Core/Include"
 				PreprocessorDefinitions="WIN64;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -302,10 +299,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glloader_x64.lib"
 				OutputFile="$(OutDir)/$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../../lib/x64"
+				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x64/lib;../../../../External/Python/libs/amd64;../../../lib/x64"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(IntDir)/$(TargetFileName).pdb"
 				SubSystem="1"
