@@ -25,17 +25,24 @@
 
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "d3d9.lib")
-#endif
-
 namespace KlayGE
 {
 	DShowVMR9Allocator::DShowVMR9Allocator(HWND wnd)
 					: wnd_(wnd), ref_count_(1),
 						cur_surf_index_(0xFFFFFFFF)
 	{
-		d3d_ = MakeCOMPtr(Direct3DCreate9(D3D_SDK_VERSION));
+		mod_d3d9_ = ::LoadLibraryW(L"d3d9.dll");
+		if (NULL == mod_d3d9_)
+		{
+			::MessageBoxW(NULL, L"Can't load d3d9.dll", L"Error", MB_OK);
+		}
+
+		if (mod_d3d9_ != NULL)
+		{
+			DynamicDirect3DCreate9_ = reinterpret_cast<Direct3DCreate9Func>(::GetProcAddress(mod_d3d9_, "Direct3DCreate9"));
+		}
+
+		d3d_ = MakeCOMPtr(DynamicDirect3DCreate9_(D3D_SDK_VERSION));
 
 		this->CreateDevice();
 	}
@@ -43,6 +50,9 @@ namespace KlayGE
 	DShowVMR9Allocator::~DShowVMR9Allocator()
 	{
 		this->DeleteSurfaces();
+
+		// Some other resources may still alive, so don't free them
+		//::FreeLibrary(mod_d3d9_);
 	}
 
 	void DShowVMR9Allocator::CreateDevice()

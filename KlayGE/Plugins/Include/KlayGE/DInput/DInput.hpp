@@ -49,6 +49,10 @@ namespace KlayGE
 		boost::shared_ptr<IDirectInput8W> dinput_;
 		HWND hwnd_;
 
+		HMODULE mod_dinput8_;
+		typedef HRESULT (WINAPI *DirectInput8CreateFunc)(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID *ppvOut, LPUNKNOWN punkOuter);
+		DirectInput8CreateFunc DynamicDirectInput8Create_;
+
 	private:
 		static BOOL CALLBACK EnumDevicesCB(LPCDIDEVICEINSTANCEW didi, void* pvRef);
 	};

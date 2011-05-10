@@ -21,19 +21,26 @@
 
 #include <KlayGE/DInput/DInput.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "dinput8.lib")
-#endif
-
 namespace KlayGE
 {
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	DInputEngine::DInputEngine()
 	{
-		// 建立 DirectInput 对象
+		mod_dinput8_ = ::LoadLibraryW(L"dinput8.dll");
+		if (NULL == mod_dinput8_)
+		{
+			::MessageBoxW(NULL, L"Can't load dinput8.dll", L"Error", MB_OK);
+		}
+
+		if (mod_dinput8_ != NULL)
+		{
+			DynamicDirectInput8Create_ = reinterpret_cast<DirectInput8CreateFunc>(::GetProcAddress(mod_dinput8_, "DirectInput8Create"));
+		}
+
+		// Create DirectInput object
 		IDirectInput8W* di;
-		DirectInput8Create(::GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
+		DynamicDirectInput8Create_(::GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
 			IID_IDirectInput8W, reinterpret_cast<void**>(&di), NULL);
 		dinput_ = MakeCOMPtr(di);
 	}
@@ -43,6 +50,9 @@ namespace KlayGE
 	DInputEngine::~DInputEngine()
 	{
 		devices_.clear();
+
+		// Some other resources may still alive, so don't free them
+		//::FreeLibrary(mod_dinput8_);
 	}
 
 	// 获取DirectInput接口

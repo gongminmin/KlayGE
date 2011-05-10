@@ -135,6 +135,10 @@ namespace KlayGE
 	private:
 		boost::shared_ptr<IDirectSound>				dsound_;
 		boost::shared_ptr<IDirectSound3DListener>	ds3dListener_;
+
+		HMODULE mod_dsound_;
+		typedef HRESULT (WINAPI *DirectSoundCreateFunc)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);
+		DirectSoundCreateFunc DynamicDirectSoundCreate_;
 	};
 }
 
