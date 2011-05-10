@@ -29,8 +29,6 @@
 
 #include <glloader/glloader.h>
 
-#include <Cg/cgGL.h>
-
 #include <KlayGE/OpenGLES2/OGLES2RenderWindow.hpp>
 
 namespace KlayGE

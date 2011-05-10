@@ -39,8 +39,6 @@
 
 #include <glloader/glloader.h>
 
-#include <Cg/cgGL.h>
-
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
 
 namespace KlayGE
