@@ -185,8 +185,8 @@ namespace
 			std::vector<uint32_t> index_starts;
 			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
 			{
-				buff_sizes.push_back(model_desc->buffs[mesh_index][0].size() / model_desc->ves[mesh_index][0].element_size());
-				buff_starts.push_back(merged_buff[0].size() / merged_ves[0].element_size());
+				buff_sizes.push_back(static_cast<uint32_t>(model_desc->buffs[mesh_index][0].size() / model_desc->ves[mesh_index][0].element_size()));
+				buff_starts.push_back(static_cast<uint32_t>(merged_buff[0].size() / merged_ves[0].element_size()));
 
 				std::vector<char> expanded(merged_ves.size(), 0);
 				for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
@@ -204,8 +204,8 @@ namespace
 					}
 				}
 
-				index_sizes.push_back(model_desc->indices[mesh_index].size() / index_elem_size);
-				index_starts.push_back(merged_indices.size() / index_elem_size);
+				index_sizes.push_back(static_cast<uint32_t>(model_desc->indices[mesh_index].size() / index_elem_size));
+				index_starts.push_back(static_cast<uint32_t>(merged_indices.size() / index_elem_size));
 				if (is_index_16_bit == model_desc->is_index_16_bit[mesh_index])
 				{
 					merged_indices.insert(merged_indices.end(),

@@ -48,6 +48,7 @@ if ("vc" == compiler_name) and ((8 == compiler_version) or (9 == compiler_versio
 	boost_define_str += " define=_SECURE_SCL=0"
 os.chdir("External/boost")
 os.system("bjam.exe --toolset=%s --stagedir=./lib_%s%d_x86 --builddir=./ address-model=32 --with-date_time --with-filesystem --with-program_options --with-signals --with-system --with-thread link=shared runtime-link=shared threading=multi cxxflags=-wd4819 cxxflags=-wd4910 %s stage debug release" % (boost_toolset_str, compiler_name, compiler_version, boost_define_str))
+os.system("bjam.exe --toolset=%s --stagedir=./lib_%s%d_x64 --builddir=./ address-model=64 --with-date_time --with-filesystem --with-program_options --with-signals --with-system --with-thread link=shared runtime-link=shared threading=multi cxxflags=-wd4819 cxxflags=-wd4910 %s stage debug release" % (boost_toolset_str, compiler_name, compiler_version, boost_define_str))
 os.chdir("../../")
 
 
