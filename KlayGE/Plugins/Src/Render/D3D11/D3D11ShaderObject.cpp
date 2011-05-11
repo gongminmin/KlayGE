@@ -388,8 +388,8 @@ namespace
 	class SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>
 	{
 	public:
-		SetD3D11ShaderParameter(ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
-			: uav_(&uav), param_(param)
+		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
 
@@ -399,11 +399,17 @@ namespace
 			param_->Value(tex);
 			if (tex)
 			{
+				*uavsrc_ = tex.get();
 				*uav_ = checked_cast<D3D11Texture*>(tex.get())->D3DUnorderedAccessView().get();
+			}
+			else
+			{
+				*uavsrc_ = NULL;
 			}
 		}
 
 	private:
+		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
 		RenderEffectParameterPtr param_;
 	};
@@ -412,8 +418,8 @@ namespace
 	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>
 	{
 	public:
-		SetD3D11ShaderParameter(ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
-			: uav_(&uav), param_(param)
+		SetD3D11ShaderParameter(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
 
@@ -423,11 +429,17 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
+				*uavsrc_ = buf.get();
 				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
+			}
+			else
+			{
+				*uavsrc_ = NULL;
 			}
 		}
 
 	private:
+		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
 		RenderEffectParameterPtr param_;
 	};
@@ -771,6 +783,7 @@ namespace KlayGE
 				samplers_[type].resize(so.samplers_[type].size(), NULL);
 				srvsrcs_[type].resize(so.srvs_[type].size(), NULL);
 				srvs_[type].resize(so.srvs_[type].size(), NULL);
+				uavsrcs_[type].resize(so.uavs_[type].size(), NULL);
 				uavs_[type].resize(so.uavs_[type].size(), NULL);
 
 				mem_cbufs_[type] = so.mem_cbufs_[type];
@@ -1184,6 +1197,7 @@ namespace KlayGE
 							samplers_[type].resize(num_samplers + 1, NULL);
 							srvsrcs_[type].resize(num_srvs + 1, NULL);
 							srvs_[type].resize(num_srvs + 1, NULL);
+							uavsrcs_[type].resize(num_uavs + 1, NULL);
 							uavs_[type].resize(num_uavs + 1, NULL);
 
 							for (uint32_t i = 0; i < desc.BoundResources; ++ i)
@@ -1292,6 +1306,7 @@ namespace KlayGE
 			ret->samplers_[i].resize(samplers_[i].size(), NULL);
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), NULL);
 			ret->srvs_[i].resize(srvs_[i].size(), NULL);
+			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), NULL);
 			ret->uavs_[i].resize(uavs_[i].size(), NULL);
 
 			ret->mem_cbufs_[i] = mem_cbufs_[i];
@@ -1639,13 +1654,13 @@ namespace KlayGE
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
-			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>(uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<TexturePtr, ID3D11UnorderedAccessView*>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
-			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>(uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11UnorderedAccessView*>(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		default:
@@ -1712,6 +1727,14 @@ namespace KlayGE
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
+			for (uint32_t i = 0; i < uavs_[ST_ComputeShader].size(); ++ i)
+			{
+				if (uavsrcs_[ST_ComputeShader][i] != NULL)
+				{
+					re.DetachTextureByRTV(uavsrcs_[ST_ComputeShader][i]);
+				}
+			}
+
 			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_[ST_ComputeShader][0],
 				reinterpret_cast<UINT*>(&uavs_[ST_ComputeShader][0]));
 		}

@@ -97,6 +97,7 @@ namespace KlayGE
 		boost::array<std::vector<ID3D11SamplerState*>, ST_NumShaderTypes> samplers_;
 		boost::array<std::vector<void*>, ST_NumShaderTypes> srvsrcs_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ST_NumShaderTypes> srvs_;
+		boost::array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
 		boost::array<std::vector<ID3D11UnorderedAccessView*>, ST_NumShaderTypes> uavs_;
 		boost::array<std::vector<ID3D11Buffer*>, ST_NumShaderTypes> cbufs_;
 
