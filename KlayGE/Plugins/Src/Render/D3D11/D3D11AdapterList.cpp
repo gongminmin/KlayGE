@@ -79,6 +79,7 @@ namespace KlayGE
 				}
 
 				D3D11AdapterPtr adapter = MakeSharedPtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+				adapter->Enumerate();
 				adapters_.push_back(adapter);
 			}
 

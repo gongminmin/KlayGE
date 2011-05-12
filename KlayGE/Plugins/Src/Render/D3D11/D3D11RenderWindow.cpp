@@ -76,7 +76,25 @@ namespace KlayGE
 		main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
 		main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
 
-		fs_color_depth_ = NumFormatBits(settings.color_fmt);
+		if (settings.gamma && ((EF_ARGB8 == format_) || (EF_ABGR8 == format_)))
+		{
+			for (size_t i = 0; i < adapter_->NumVideoMode(); ++ i)
+			{
+				D3D11VideoMode const & vm = adapter_->VideoMode(i);
+				if ((EF_ARGB8 == format_) && (DXGI_FORMAT_B8G8R8A8_UNORM_SRGB == vm.Format()))
+				{
+					format_ = MakeSRGB(format_);
+					break;
+				}
+				else if ((EF_ABGR8 == format_) && (DXGI_FORMAT_R8G8B8A8_UNORM_SRGB == vm.Format()))
+				{
+					format_ = MakeSRGB(format_);
+					break;
+				}
+			}
+		}
+
+		fs_color_depth_ = NumFormatBits(format_);
 
 		if (this->FullScreen())
 		{
@@ -201,11 +219,11 @@ namespace KlayGE
 								IDXGIAdapter* ada;
 								dxgi_device->GetAdapter(&ada);
 								adapter_->ResetAdapter(MakeCOMPtr(ada));
+								adapter_->Enumerate();
 								ada->Release();
 							}
 							dxgi_device->Release();
 						}
-						adapter_->Enumerate();
 
 						std::wostringstream oss;
 						oss << adapter_->Description() << L" " << boost::get<1>(dev_type_beh);

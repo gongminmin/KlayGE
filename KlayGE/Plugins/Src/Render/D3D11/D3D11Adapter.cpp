@@ -114,5 +114,6 @@ namespace KlayGE
 	{
 		adapter_ = ada;
 		adapter_->GetDesc(&adapter_desc_);
+		modes_.resize(0);
 	}
 }

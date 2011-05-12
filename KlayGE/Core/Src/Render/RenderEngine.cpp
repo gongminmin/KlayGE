@@ -176,6 +176,30 @@ namespace KlayGE
 			pp_chain_ = MakeSharedPtr<PostProcessChain>(L"RE");
 			pp_chain_->Append(MakeSharedPtr<HDRPostProcess>());
 		}
+		if (render_settings_.gamma)
+		{
+			bool use_gamma_pp = false;
+			if ((EF_ARGB8 == render_settings_.color_fmt) || (EF_ABGR8 == render_settings_.color_fmt))
+			{
+				ElementFormat srgb_fmt = MakeSRGB(render_settings_.color_fmt);
+				if (!caps_.rendertarget_format_support(srgb_fmt, render_settings_.sample_count, render_settings_.sample_quality))
+				{
+					use_gamma_pp = true;
+				}
+			}
+			else
+			{
+				BOOST_ASSERT(EF_A2BGR10 == render_settings_.color_fmt);
+				use_gamma_pp = true;
+			}
+
+			if (use_gamma_pp)
+			{
+				PostProcessPtr gamma_pp = LoadPostProcess(ResLoader::Instance().Load("GammaCorrection.ppml"), "gamma_correction");
+				gamma_pp->SetParam(0, 1 / 2.2f);
+				pp_chain_->Append(gamma_pp);
+			}
+		}
 		if (!pp_chain_)
 		{
 			before_pp_frame_buffer_ = screen_frame_buffer_;

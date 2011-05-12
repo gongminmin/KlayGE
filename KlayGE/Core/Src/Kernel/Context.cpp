@@ -102,6 +102,7 @@ namespace KlayGE
 		int sync_interval = 0;
 		int motion_frames = 0;
 		bool hdr = false;
+		bool gamma = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
 
@@ -226,17 +227,9 @@ namespace KlayGE
 			{
 				color_fmt = EF_ARGB8;
 			}
-			else if ("ARGB8_SRGB" == color_fmt_str)
-			{
-				color_fmt = EF_ARGB8_SRGB;
-			}
 			else if ("ABGR8" == color_fmt_str)
 			{
 				color_fmt = EF_ABGR8;
-			}
-			else if ("ABGR8_SRGB" == color_fmt_str)
-			{
-				color_fmt = EF_ABGR8_SRGB;
 			}
 			else if ("A2BGR10" == color_fmt_str)
 			{
@@ -286,14 +279,29 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string fs_str = attr->ValueString();
-				if (("1" == fs_str) || ("true" == fs_str))
+				std::string hdr_str = attr->ValueString();
+				if (("1" == hdr_str) || ("true" == hdr_str))
 				{
 					hdr = true;
 				}
 				else
 				{
 					hdr = false;
+				}
+			}
+
+			XMLNodePtr gamma_node = graphics_node->FirstNode("gamma");
+			attr = gamma_node->Attrib("value");
+			if (attr)
+			{
+				std::string gamma_str = attr->ValueString();
+				if (("1" == gamma_str) || ("true" == gamma_str))
+				{
+					gamma = true;
+				}
+				else
+				{
+					gamma = false;
 				}
 			}
 
@@ -372,6 +380,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.sync_interval = sync_interval;
 		cfg_.graphics_cfg.motion_frames = motion_frames;
 		cfg_.graphics_cfg.hdr = hdr;
+		cfg_.graphics_cfg.gamma = gamma;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 	}

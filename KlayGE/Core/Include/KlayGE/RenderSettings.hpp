@@ -35,7 +35,7 @@ namespace KlayGE
 				left(0), top(0),
 				color_fmt(EF_ARGB8), depth_stencil_fmt(EF_D16),
 				sample_count(1), sample_quality(0),
-				motion_frames(0), hdr(false),
+				motion_frames(0), hdr(false), gamma(false),
 				stereo_method(STM_None), stereo_separation(0)
 		{
 		}
@@ -52,6 +52,7 @@ namespace KlayGE
 		uint32_t sync_interval;
 		uint32_t motion_frames;
 		bool hdr;
+		bool gamma;
 
 		StereoMethod stereo_method;
 		float stereo_separation;

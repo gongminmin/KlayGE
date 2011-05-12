@@ -48,7 +48,7 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 	float lum = dot(color, RGB_TO_LUM);
 	
 	// martin's modified blue shift
-	color = lerp(lum * BLUE_SHIFT, color, saturate(8.0f * lum));
+	color = lerp(lum * BLUE_SHIFT, color, saturate(16.0f * lum));
 
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 

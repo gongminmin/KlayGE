@@ -1247,15 +1247,27 @@ namespace KlayGE
 
 		depth_base_ = 0.5f;
 
+		bool gamma = Context::Instance().Config().graphics_cfg.gamma;
+
 		bool bBackgroundIsVisible = (top_left_clr_.a() != 0) || (top_right_clr_.a() != 0)
 			|| (bottom_right_clr_.a() != 0) || (bottom_left_clr_.a() != 0);
 		if (!minimized_ && bBackgroundIsVisible)
 		{
 			boost::array<Color, 4> clrs;
-			clrs[0] = top_left_clr_;
-			clrs[1] = top_right_clr_;
-			clrs[2] = bottom_right_clr_;
-			clrs[3] = bottom_left_clr_;
+			if (gamma)
+			{
+				clrs[0] = Color(pow(top_left_clr_.r(), 2.2f), pow(top_left_clr_.g(), 2.2f), pow(top_left_clr_.b(), 2.2f), top_left_clr_.a());
+				clrs[1] = Color(pow(top_right_clr_.r(), 2.2f), pow(top_right_clr_.g(), 2.2f), pow(top_right_clr_.b(), 2.2f), top_right_clr_.a());
+				clrs[2] = Color(pow(bottom_right_clr_.r(), 2.2f), pow(bottom_right_clr_.g(), 2.2f), pow(bottom_right_clr_.b(), 2.2f), bottom_right_clr_.a());
+				clrs[3] = Color(pow(bottom_left_clr_.r(), 2.2f), pow(bottom_left_clr_.g(), 2.2f), pow(bottom_left_clr_.b(), 2.2f), bottom_left_clr_.a());
+			}
+			else
+			{
+				clrs[0] = top_left_clr_;
+				clrs[1] = top_right_clr_;
+				clrs[2] = bottom_right_clr_;
+				clrs[3] = bottom_left_clr_;
+			}
 
 			Rect_T<int32_t> rc(0, 0, this->GetWidth(), this->GetHeight());
 			Rect_T<int32_t> rcScreen = rc + this->GetLocation();
@@ -1289,7 +1301,11 @@ namespace KlayGE
 			w = std::min(w, static_cast<int32_t>(size.cx() * 1.2f));
 			rc.right() = w;
 
-			Color const & clr = cap_element_.TextureColor().Current;
+			Color clr = cap_element_.TextureColor().Current;
+			if (gamma)
+			{
+				clr = Color(pow(clr.r(), 2.2f), pow(clr.g(), 2.2f), pow(clr.b(), 2.2f), clr.a());
+			}
 			UIManager::VertexFormat vertices[] =
 			{
 				UIManager::VertexFormat(float3(0, static_cast<float>(-caption_height_), 0), clr, float2(0, 0)),
