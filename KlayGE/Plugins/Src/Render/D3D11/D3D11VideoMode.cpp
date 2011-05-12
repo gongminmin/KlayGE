@@ -82,7 +82,7 @@ namespace KlayGE
 				{
 					if (lhs.Height() == rhs.Height())
 					{
-						if (lhs.ColorDepth() < rhs.ColorDepth())
+						if (lhs.Format() < rhs.Format())
 						{
 							return true;
 						}
@@ -98,6 +98,6 @@ namespace KlayGE
 	{
 		return (lhs.Width() == rhs.Width())
 			&& (lhs.Height() == rhs.Height())
-			&& (lhs.ColorDepth() == rhs.ColorDepth());
+			&& (lhs.Format() == rhs.Format());
 	}
 }
