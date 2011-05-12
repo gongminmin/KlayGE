@@ -113,7 +113,7 @@ bool bsf32(uint32_t& index, uint32_t v)
 bool bsf64(uint32_t& index, uint64_t v)
 {
 #ifdef KLAYGE_COMPILER_MSVC
-	return _BitScanForward64(&index, v) != 0;
+	return _BitScanForward64(reinterpret_cast<DWORD*>(&index), v) != 0;
 #else
 	if (0 == v)
 	{

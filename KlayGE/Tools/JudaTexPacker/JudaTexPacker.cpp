@@ -252,12 +252,12 @@ void PackJTML(std::string const & jtml_name)
 				tile_ids.push_back(juda_tex->EncodeTileID(level, bx + x, by + y));
 				for (size_t dy = 0; dy < tile_size; ++ dy)
 				{
-					int32_t tex_y = (*calc_v)(by * tile_size + dy, in_height);
+					int32_t tex_y = (*calc_v)(static_cast<int32_t>(by * tile_size + dy), in_height);
 					if (tex_y >= 0)
 					{
 						for (size_t dx = 0; dx < tile_size; ++ dx)
 						{
-							int32_t tex_x = (*calc_u)(bx * tile_size + dx, in_width);
+							int32_t tex_x = (*calc_u)(static_cast<int32_t>(bx * tile_size + dx), in_width);
 							if (tex_x >= 0)
 							{
 								memcpy(&tiles[xindex][(dy * tile_size + dx) * pixel_size],
