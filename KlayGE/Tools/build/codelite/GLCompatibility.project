@@ -26,25 +26,23 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -g -Wall -O0 -march=core2" C_Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <LibraryPath Value="../../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
-        <Library Value="python2.6"/>
-        <Library Value="glloader_x64_d"/>
-        <Library Value="GL"/>
-        <Library Value="X11"/>
+        <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -70,25 +68,23 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -g -Wall -O0 -march=core2" C_Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <LibraryPath Value="../../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
-        <Library Value="python2.6"/>
-        <Library Value="glloader_x86_d"/>
-        <Library Value="GL"/>
-        <Library Value="X11"/>
+        <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -115,24 +111,23 @@
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" C_Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <LibraryPath Value="../../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="python31_d"/>
-        <Library Value="glloader_x64_d"/>
-        <Library Value="opengl32"/>
+        <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -158,25 +153,24 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -g -Wall -O0 -march=core2" C_Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <LibraryPath Value="../../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="python31_d"/>
-        <Library Value="glloader_x86_d"/>
-        <Library Value="opengl32"/>
+        <Library Value="python32_d"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -202,25 +196,23 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2 -march=core2" C_Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <LibraryPath Value="../../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
-        <Library Value="python2.6"/>
-        <Library Value="glloader_x64"/>
-        <Library Value="GL"/>
-        <Library Value="X11"/>
+        <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/linux_x64/$(ProjectName)" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -246,25 +238,23 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2 -march=core2" C_Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <LibraryPath Value="../../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
-        <Library Value="python2.6"/>
-        <Library Value="glloader_x86"/>
-        <Library Value="GL"/>
-        <Library Value="X11"/>
+        <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -290,25 +280,24 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2 -march=core2" C_Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <LibraryPath Value="../../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="python2.6"/>
-        <Library Value="glloader_x64"/>
-        <Library Value="opengl32"/>
+        <Library Value="python3.2"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/win_x64/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -334,25 +323,24 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2 -march=core2" C_Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+      <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
+		<IncludePath Value="../../../../External/Python/Include"/>
         <IncludePath Value="../../../Core/Include"/>
-        <IncludePath Value="../../../../glloader/include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../../External/Python/libs"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <LibraryPath Value="../../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="python31"/>
-        <Library Value="glloader_x86"/>
-        <Library Value="opengl32"/>
+        <Library Value="python32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <General OutputFile="../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

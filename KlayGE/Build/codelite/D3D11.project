@@ -49,8 +49,19 @@
     <File Name="../../Plugins/Include/KlayGE/D3D11/D3D11VideoMode.hpp"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN64"/>
@@ -60,16 +71,18 @@
         <Preprocessor Value="KLAYGE_D3D11_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="d3d11"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/D3D11" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -94,7 +107,9 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN32"/>
@@ -104,16 +119,18 @@
         <Preprocessor Value="KLAYGE_D3D11_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="d3d11"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/D3D11" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -138,7 +155,9 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN64"/>
@@ -148,16 +167,18 @@
         <Preprocessor Value="KLAYGE_D3D11_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="d3d11"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/D3D11" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -182,7 +203,9 @@
       </AdditionalRules>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/DXSDK/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <Preprocessor Value="WIN32"/>
@@ -192,16 +215,18 @@
         <Preprocessor Value="KLAYGE_D3D11_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="d3d11"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/D3D11" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -225,14 +250,5 @@
         <CustomPreBuild/>
       </AdditionalRules>
     </Configuration>
-    <GlobalSettings>
-      <Compiler Options="">
-        <IncludePath Value="."/>
-      </Compiler>
-      <Linker Options="">
-        <LibraryPath Value="."/>
-      </Linker>
-      <ResourceCompiler Options=""/>
-    </GlobalSettings>
   </Settings>
 </CodeLite_Project>

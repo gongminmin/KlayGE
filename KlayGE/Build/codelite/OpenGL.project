@@ -52,6 +52,8 @@
     </GlobalSettings>
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -60,7 +62,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/linux_x64"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib.x64"/>
+		<LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
@@ -98,6 +102,8 @@
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -106,7 +112,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/linux_x86"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib"/>
+		<LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
@@ -144,6 +152,8 @@
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -154,7 +164,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/win_x64"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib.x64"/>
+		<LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
@@ -192,6 +204,8 @@
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -202,7 +216,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/win_x86"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib"/>
+		<LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
@@ -240,6 +256,8 @@
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -248,7 +266,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/linux_x64"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib.x64"/>
+		<LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
@@ -286,6 +306,8 @@
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -294,7 +316,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/linux_x86"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib"/>
+		<LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
@@ -332,6 +356,8 @@
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -342,7 +368,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/win_x64"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib.x64"/>
+		<LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
@@ -380,6 +408,8 @@
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+		<IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -390,7 +420,9 @@
         <Preprocessor Value="KLAYGE_OGL_RE_SOURCE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
-        <LibraryPath Value="../../lib/win_x86"/>
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+		<LibraryPath Value="../../../External/Cg/lib"/>
+		<LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>

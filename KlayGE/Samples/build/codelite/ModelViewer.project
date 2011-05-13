@@ -28,18 +28,19 @@
   <Settings Type="Executable">
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -63,18 +64,19 @@
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -98,12 +100,14 @@
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
@@ -111,7 +115,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -135,12 +138,14 @@
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -g -Wall -O0 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
@@ -148,7 +153,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -172,18 +176,19 @@
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -207,18 +212,19 @@
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -242,12 +248,14 @@
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="WIN64"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
@@ -255,7 +263,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -279,12 +286,14 @@
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2 -march=core2" Required="yes" PreCompiledHeader="">
+        <IncludePath Value="../../../../External/boost"/>
         <IncludePath Value="../../../Core/Include"/>
         <Preprocessor Value="WIN32"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="_CONSOLE"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
@@ -292,7 +301,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>

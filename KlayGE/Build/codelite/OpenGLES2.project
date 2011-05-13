@@ -50,6 +50,8 @@
     </GlobalSettings>
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -59,12 +61,15 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib.x64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64_d"/>
         <Library Value="boost_system"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x64_d"/>
+        <Library Value="GLU"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGLES2_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -94,6 +99,8 @@
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -103,12 +110,15 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86_d"/>
         <Library Value="boost_system"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x86_d"/>
+        <Library Value="GLU"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGLES2_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -138,6 +148,8 @@
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -149,12 +161,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib.x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x64_d"/>
+        <Library Value="glu32"/>
+        <Library Value="Gdi32"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGLES2_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -184,6 +200,8 @@
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -195,12 +213,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x86_d"/>
+        <Library Value="glu32"/>
+        <Library Value="Gdi32"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGLES2_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -230,6 +252,8 @@
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -239,12 +263,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib.x64"/>
         <LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
         <Library Value="KlayGE_Core_gcc_x64"/>
         <Library Value="boost_system"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x64"/>
+        <Library Value="GLU"/>
+        <Library Value="X11"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGLES2_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -274,6 +302,8 @@
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -283,12 +313,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-s --enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib"/>
         <LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
         <Library Value="KlayGE_Core_gcc_x86"/>
         <Library Value="boost_system"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x86"/>
+        <Library Value="GLU"/>
+        <Library Value="X11"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGLES2_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -318,6 +352,8 @@
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -329,12 +365,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib.x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x64"/>
+        <Library Value="glu32"/>
+        <Library Value="Gdi32"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGLES2_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -364,6 +404,8 @@
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+        <IncludePath Value="../../../External/boost"/>
+        <IncludePath Value="../../../External/Cg/include"/>
         <IncludePath Value="../../Core/Include"/>
         <IncludePath Value="../../Plugins/Include"/>
         <IncludePath Value="../../../glloader/include"/>
@@ -375,12 +417,16 @@
         <Preprocessor Value="GLLOADER_GLES_SUPPORT"/>
       </Compiler>
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
+        <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
+        <LibraryPath Value="../../../External/Cg/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_x86"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="EGL"/>
-        <Library Value="GLESv2"/>
+        <Library Value="glloader_es_x86"/>
+        <Library Value="glu32"/>
+        <Library Value="Gdi32"/>
+        <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGLES2_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OpenGLES2" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
