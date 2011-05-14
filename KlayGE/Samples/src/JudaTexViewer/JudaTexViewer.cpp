@@ -263,7 +263,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -280,7 +280,7 @@ JudaTexViewer::JudaTexViewer()
 				last_mouse_x_(-1), last_mouse_y_(-1),
 				position_(0, 0), scale_(1)
 {
-	ResLoader::Instance().AddPath("../Samples/media/JudaTexViewer");
+	ResLoader::Instance().AddPath("../../Samples/media/JudaTexViewer");
 }
 
 bool JudaTexViewer::ConfirmDevice()

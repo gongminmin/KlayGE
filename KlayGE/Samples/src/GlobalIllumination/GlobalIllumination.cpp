@@ -435,7 +435,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -450,7 +450,7 @@ GlobalIlluminationApp::GlobalIlluminationApp()
 			: App3DFramework("GlobalIllumination"),
 				il_scale_(1.0f)
 {
-	ResLoader::Instance().AddPath("../Samples/media/GlobalIllumination");
+	ResLoader::Instance().AddPath("../../Samples/media/GlobalIllumination");
 }
 
 bool GlobalIlluminationApp::ConfirmDevice() const

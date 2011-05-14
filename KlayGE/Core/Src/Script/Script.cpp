@@ -60,7 +60,7 @@ namespace KlayGE
 	{
 		methodNames_.push_back(methodName);
 
-		PyMethodDef def = { const_cast<char*>(methodName.c_str()), method, METH_VARARGS, NULL };
+		PyMethodDef def = { methodName.c_str(), method, METH_VARARGS, NULL };
 		methods_.push_back(def);
 	}
 
@@ -69,10 +69,10 @@ namespace KlayGE
 	void RegisterModule::Regiter()
 	{
 #if PY_MAJOR_VERSION >= 3
-		static struct PyModuleDef module =
+		static PyModuleDef module =
 		{
 			PyModuleDef_HEAD_INIT,
-			const_cast<char*>(moduleName_.c_str()),
+			moduleName_.c_str(),
 			NULL,
 			-1,
 			&methods_[0]

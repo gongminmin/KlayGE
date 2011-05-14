@@ -521,7 +521,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -536,7 +536,7 @@ PNTrianglesApp::PNTrianglesApp()
 					: App3DFramework("PNTriangles"),
 						tess_factor_(5)
 {
-	ResLoader::Instance().AddPath("../Samples/media/PNTriangles");
+	ResLoader::Instance().AddPath("../../Samples/media/PNTriangles");
 }
 
 bool PNTrianglesApp::ConfirmDevice() const

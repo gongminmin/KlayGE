@@ -128,7 +128,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -142,7 +142,7 @@ int main()
 VideoTextureApp::VideoTextureApp()
 					: App3DFramework("Video Texture")
 {
-	ResLoader::Instance().AddPath("../Samples/media/VideoTexture");
+	ResLoader::Instance().AddPath("../../Samples/media/VideoTexture");
 }
 
 bool VideoTextureApp::ConfirmDevice() const

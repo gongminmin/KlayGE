@@ -156,7 +156,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -171,7 +171,7 @@ DepthPeelingApp::DepthPeelingApp()
 			: App3DFramework("DepthPeeling"),
 				num_layers_(0)
 {
-	ResLoader::Instance().AddPath("../Samples/media/DepthPeeling");
+	ResLoader::Instance().AddPath("../../Samples/media/DepthPeeling");
 }
 
 bool DepthPeelingApp::ConfirmDevice() const

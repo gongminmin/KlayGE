@@ -48,7 +48,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -63,7 +63,7 @@ TextApp::TextApp()
 			: App3DFramework("Text"),
 				scale_(1)
 {
-	ResLoader::Instance().AddPath("../Samples/media/Text");
+	ResLoader::Instance().AddPath("../../Samples/media/Text");
 }
 
 bool TextApp::ConfirmDevice() const

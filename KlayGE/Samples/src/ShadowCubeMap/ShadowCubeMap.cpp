@@ -308,7 +308,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -322,7 +322,7 @@ int main()
 ShadowCubeMap::ShadowCubeMap()
 				: App3DFramework("ShadowCubeMap")
 {
-	ResLoader::Instance().AddPath("../Samples/media/ShadowCubeMap");
+	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 }
 
 bool ShadowCubeMap::ConfirmDevice() const

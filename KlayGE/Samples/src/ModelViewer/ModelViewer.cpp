@@ -167,7 +167,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -183,7 +183,7 @@ ModelViewerApp::ModelViewerApp()
 						last_time_(0), frame_(0),
 						skinned_(true), play_(false)
 {
-	ResLoader::Instance().AddPath("../Samples/media/ModelViewer");
+	ResLoader::Instance().AddPath("../../Samples/media/ModelViewer");
 }
 
 bool ModelViewerApp::ConfirmDevice() const

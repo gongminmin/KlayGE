@@ -266,7 +266,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -280,7 +280,7 @@ int main()
 DistanceMapping::DistanceMapping()
 					: App3DFramework("DistanceMapping")
 {
-	ResLoader::Instance().AddPath("../Samples/media/DistanceMapping");
+	ResLoader::Instance().AddPath("../../Samples/media/DistanceMapping");
 }
 
 bool DistanceMapping::ConfirmDevice() const

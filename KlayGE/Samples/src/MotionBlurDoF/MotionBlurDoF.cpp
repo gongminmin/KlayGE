@@ -460,7 +460,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -475,7 +475,7 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 					: App3DFramework("Motion Blur and Depth of field"),
 						num_objs_rendered_(0), num_renderable_rendered_(0), num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
-	ResLoader::Instance().AddPath("../Samples/media/MotionBlurDoF");
+	ResLoader::Instance().AddPath("../../Samples/media/MotionBlurDoF");
 }
 
 bool MotionBlurDoFApp::ConfirmDevice() const

@@ -758,7 +758,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -772,7 +772,7 @@ int main()
 OceanApp::OceanApp()
 				: App3DFramework("Ocean")
 {
-	ResLoader::Instance().AddPath("../Samples/media/Ocean");
+	ResLoader::Instance().AddPath("../../Samples/media/Ocean");
 }
 
 bool OceanApp::ConfirmDevice() const

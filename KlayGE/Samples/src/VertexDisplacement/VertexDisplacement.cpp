@@ -102,7 +102,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -116,7 +116,7 @@ int main()
 VertexDisplacement::VertexDisplacement()
 						: App3DFramework("VertexDisplacement")
 {
-	ResLoader::Instance().AddPath("../Samples/media/VertexDisplacement");
+	ResLoader::Instance().AddPath("../../Samples/media/VertexDisplacement");
 }
 
 bool VertexDisplacement::ConfirmDevice() const

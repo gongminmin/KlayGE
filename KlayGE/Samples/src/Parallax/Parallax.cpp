@@ -206,7 +206,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -221,7 +221,7 @@ Parallax::Parallax()
 			: App3DFramework("Parallax"),
 				parallax_scale_(0.06f), parallax_bias_(0.02f)
 {
-	ResLoader::Instance().AddPath("../Samples/media/Parallax");
+	ResLoader::Instance().AddPath("../../Samples/media/Parallax");
 }
 
 bool Parallax::ConfirmDevice() const

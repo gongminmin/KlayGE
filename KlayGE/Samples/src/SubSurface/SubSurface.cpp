@@ -93,7 +93,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -107,7 +107,7 @@ int main()
 SubSurfaceApp::SubSurfaceApp()
 					: App3DFramework("SubSurface")
 {
-	ResLoader::Instance().AddPath("../Samples/media/SubSurface");
+	ResLoader::Instance().AddPath("../../Samples/media/SubSurface");
 }
 
 bool SubSurfaceApp::ConfirmDevice() const

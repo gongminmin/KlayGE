@@ -659,7 +659,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -676,7 +676,7 @@ DeferredRenderingApp::DeferredRenderingApp()
 				num_objs_rendered_(0), num_renderable_rendered_(0),
 				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
-	ResLoader::Instance().AddPath("../Samples/media/DeferredRendering");
+	ResLoader::Instance().AddPath("../../Samples/media/DeferredRendering");
 }
 
 bool DeferredRenderingApp::ConfirmDevice() const

@@ -135,7 +135,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -149,7 +149,7 @@ int main()
 PostProcessingApp::PostProcessingApp()
 			: App3DFramework("Post Processing")
 {
-	ResLoader::Instance().AddPath("../Samples/media/PostProcessing");
+	ResLoader::Instance().AddPath("../../Samples/media/PostProcessing");
 }
 
 bool PostProcessingApp::ConfirmDevice() const

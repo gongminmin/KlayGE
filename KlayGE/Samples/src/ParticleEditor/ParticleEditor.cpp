@@ -455,7 +455,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -469,7 +469,7 @@ int main()
 ParticleEditorApp::ParticleEditorApp()
 					: App3DFramework("Particle Editor")
 {
-	ResLoader::Instance().AddPath("../Samples/media/ParticleEditor");
+	ResLoader::Instance().AddPath("../../Samples/media/ParticleEditor");
 }
 
 bool ParticleEditorApp::ConfirmDevice() const

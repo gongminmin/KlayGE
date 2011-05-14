@@ -61,8 +61,6 @@ namespace KlayGE
 		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
 
 		dll_suffix_ = KLAYGE_STRINGIZE(KLAYGE_COMPILER_NAME);
-		dll_suffix_ += "_";
-		dll_suffix_ += KLAYGE_STRINGIZE(KLAYGE_COMPILER_TARGET);
 #ifdef KLAYGE_DEBUG
 		dll_suffix_ += "_d";
 #endif

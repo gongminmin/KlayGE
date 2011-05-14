@@ -144,7 +144,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -158,7 +158,7 @@ int main()
 Refract::Refract()
 			: App3DFramework("Refract")
 {
-	ResLoader::Instance().AddPath("../Samples/media/Refract");
+	ResLoader::Instance().AddPath("../../Samples/media/Refract");
 }
 
 bool Refract::ConfirmDevice() const

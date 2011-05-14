@@ -83,7 +83,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -97,7 +97,7 @@ int main()
 Fractal::Fractal()
 			: App3DFramework("Fractal")
 {
-	ResLoader::Instance().AddPath("../Samples/media/Fractal");
+	ResLoader::Instance().AddPath("../../Samples/media/Fractal");
 }
 
 bool Fractal::ConfirmDevice() const

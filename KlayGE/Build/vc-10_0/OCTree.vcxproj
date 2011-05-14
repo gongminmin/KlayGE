@@ -81,10 +81,10 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)_Scene_$(ProjectName)_vc_x86_d</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)_Scene_$(ProjectName)_vc_x86</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)_Scene_$(ProjectName)_vc_x64_d</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)_Scene_$(ProjectName)_vc_x64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)_Scene_$(ProjectName)_vc_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)_Scene_$(ProjectName)_vc</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)_Scene_$(ProjectName)_vc_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)_Scene_$(ProjectName)_vc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,7 +107,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Scene\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Scene\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -134,7 +134,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Scene\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Scene\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,7 +164,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Scene\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Scene\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -193,7 +193,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Scene\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Scene\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -210,15 +210,6 @@ namespace KlayGE
 		return std::vector<PyObjectPtr>();
 	}
 
-	#define BEGIN_REG() 	methods.clear()
-	#define ADD(x, y) 		AddMethod(x,y)
-	#define END_REG() \
-				do\
-				{\
-					PyMethodDef __tmp = {NULL, NULL, 0, NULL};\
-					methods.push_back(__tmp);\
-				} while(0)
-
 	// 注册一个可以在Python中调用的模块
 	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API RegisterModule

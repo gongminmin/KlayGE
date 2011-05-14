@@ -158,23 +158,9 @@ namespace
 		SevenZipLoader()
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			if (!dll_loader_.Load("7z.dll"))
-			{
-#if defined KLAYGE_CPU_X86
-				dll_loader_.Load("7z_x86.dll");
-#elif defined KLAYGE_CPU_X64
-				dll_loader_.Load("7z_x64.dll");
-#endif
-			}
+			dll_loader_.Load("7z.dll");
 #elif defined KLAYGE_PLATFORM_LINUX
-			if (!dll_loader_.Load("7z.so"))
-			{
-#if defined KLAYGE_CPU_X86
-				dll_loader_.Load("7z_x86.so");
-#elif defined KLAYGE_CPU_X64
-				dll_loader_.Load("7z_x64.so");
-#endif
-			}
+			dll_loader_.Load("7z.so");
 #endif
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 

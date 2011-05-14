@@ -77,14 +77,15 @@ namespace KlayGE
 		pathes_.push_back("");
 
 		this->AddPath("");
-		this->AddPath("../media/RenderFX/");
-		this->AddPath("../media/Models/");
-		this->AddPath("../media/Textures/2D/");
-		this->AddPath("../media/Textures/3D/");
-		this->AddPath("../media/Textures/Cube/");
-		this->AddPath("../media/Textures/Juda/");
-		this->AddPath("../media/Fonts/");
-		this->AddPath("../media/PostProcessors/");
+		this->AddPath("../");
+		this->AddPath("../../media/RenderFX/");
+		this->AddPath("../../media/Models/");
+		this->AddPath("../../media/Textures/2D/");
+		this->AddPath("../../media/Textures/3D/");
+		this->AddPath("../../media/Textures/Cube/");
+		this->AddPath("../../media/Textures/Juda/");
+		this->AddPath("../../media/Fonts/");
+		this->AddPath("../../media/PostProcessors/");
 	}
 
 	void ResLoader::AddPath(std::string const & path)

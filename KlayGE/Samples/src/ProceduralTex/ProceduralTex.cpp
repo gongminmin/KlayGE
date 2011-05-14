@@ -154,7 +154,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -169,7 +169,7 @@ ProceduralTexApp::ProceduralTexApp()
 			: App3DFramework("ProceduralTex"),
 				procedural_type_(0), procedural_freq_(10)
 {
-	ResLoader::Instance().AddPath("../Samples/media/ProceduralTex");
+	ResLoader::Instance().AddPath("../../Samples/media/ProceduralTex");
 }
 
 bool ProceduralTexApp::ConfirmDevice() const

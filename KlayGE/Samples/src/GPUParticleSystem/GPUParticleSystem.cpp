@@ -654,7 +654,7 @@ namespace
 
 int main()
 {
-	ResLoader::Instance().AddPath("../Samples/media/Common");
+	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
@@ -668,7 +668,7 @@ int main()
 GPUParticleSystemApp::GPUParticleSystemApp()
 							: App3DFramework("GPU Particle System")
 {
-	ResLoader::Instance().AddPath("../Samples/media/GPUParticleSystem");
+	ResLoader::Instance().AddPath("../../Samples/media/GPUParticleSystem");
 }
 
 bool GPUParticleSystemApp::ConfirmDevice() const

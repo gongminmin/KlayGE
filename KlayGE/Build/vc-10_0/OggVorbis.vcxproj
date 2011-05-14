@@ -81,10 +81,10 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_x64</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_x64_d</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_x86_d</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_x86</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionName)_AudioDataSource_$(ProjectName)_vc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,7 +107,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\</Command>
       <Message>Deploying...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -135,7 +135,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\</Command>
       <Message>Deploying...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -166,7 +166,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\</Command>
       <Message>Deploying...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -196,7 +196,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\</Command>
+      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\</Command>
       <Message>Deploying...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
