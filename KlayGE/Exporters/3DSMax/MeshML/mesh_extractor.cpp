@@ -466,7 +466,19 @@ namespace KlayGE
 									int ti = tv_faces[i].t[j];
 									tex_indices[channel].push_back(ti);
 
-									Point3 uvw = uv_verts[ti] * tex_mat;
+									Point3 uvw;
+									// NaN test
+									if ((uv_verts[ti].x != uv_verts[ti].x)
+										|| (uv_verts[ti].y != uv_verts[ti].y)
+										|| (uv_verts[ti].z != uv_verts[ti].z))
+									{
+										uvw = Point3(0, 0, 0);
+									}
+									else
+									{
+										uvw = uv_verts[ti] * tex_mat;
+									}
+
 									texs[channel][ti].x = uvw[tex_u];
 									texs[channel][ti].y = uvw[(tex_u + 1) % 3];
 								}

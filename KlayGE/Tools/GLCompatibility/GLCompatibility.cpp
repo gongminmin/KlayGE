@@ -7,7 +7,6 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Script.hpp>
-#include <KlayGE/DllLoader.hpp>
 
 #include <iostream>
 #include <vector>
@@ -34,10 +33,9 @@ namespace
 			re.GetCustomAttrib("SHADING_LANGUAGE_VERSION", &glsl_ver_str);
 			if (!glsl_ver_str.empty())
 			{
-				std::string const glsl_ver = glsl_ver_str;
-				std::string::size_type const glsl_dot_pos = glsl_ver.find(".");
-				glsl_major_ver_ = glsl_ver[glsl_dot_pos - 1] - '0';
-				glsl_minor_ver_ = glsl_ver[glsl_dot_pos + 1] - '0';
+				std::string::size_type const glsl_dot_pos = glsl_ver_str.find(".");
+				glsl_major_ver_ = glsl_ver_str[glsl_dot_pos - 1] - '0';
+				glsl_minor_ver_ = glsl_ver_str[glsl_dot_pos + 1] - '0';
 			}
 			else
 			{

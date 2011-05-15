@@ -204,7 +204,7 @@ namespace
 					}
 				}
 
-				index_sizes.push_back(static_cast<uint32_t>(model_desc->indices[mesh_index].size() / index_elem_size));
+				index_sizes.push_back(static_cast<uint32_t>(model_desc->indices[mesh_index].size() / (model_desc->is_index_16_bit[mesh_index] ? 2 : 4)));
 				index_starts.push_back(static_cast<uint32_t>(merged_indices.size() / index_elem_size));
 				if (is_index_16_bit == model_desc->is_index_16_bit[mesh_index])
 				{
@@ -213,9 +213,17 @@ namespace
 				}
 				else
 				{
-					for (size_t i = 0; i < model_desc->indices[mesh_index].size(); ++ i)
+					BOOST_ASSERT(!is_index_16_bit && model_desc->is_index_16_bit[mesh_index]);
+
+					size_t const len = merged_indices.size();
+					size_t const n = model_desc->indices[mesh_index].size() / 2;
+					merged_indices.resize(len + n * 4);
+
+					uint16_t const * src = reinterpret_cast<uint16_t const *>(&model_desc->indices[mesh_index][0]);
+					uint32_t* dst = reinterpret_cast<uint32_t*>(&merged_indices[len]);
+					for (size_t i = 0; i < n; ++ i)
 					{
-						merged_indices.push_back(model_desc->indices[mesh_index][i]);
+						dst[i] = src[i];
 					}
 				}
 			}

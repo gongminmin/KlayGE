@@ -1503,7 +1503,6 @@ namespace KlayGE
 							data_block.resize(base[index] + init_data[index].slice_pitch);
 
 							file->read(&data_block[base[index]], static_cast<std::streamsize>(init_data[index].slice_pitch));
-							BOOST_ASSERT(file->gcount() == static_cast<int>(init_data[index].slice_pitch));
 						}
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
