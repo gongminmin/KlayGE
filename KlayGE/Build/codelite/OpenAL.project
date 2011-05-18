@@ -32,20 +32,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_x64_d.so" "../../bin/Audio"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_d.so" "../../bin/linux_x64/Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -76,20 +76,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x86"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_x86_d.so" "../../bin/Audio"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_d.so" "../../bin/linux_x86/Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -122,20 +122,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_OpenAL_mgw_x64_d.dll" "..\..\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_OpenAL_mgw_d.dll" "..\..\bin\win_x64\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -168,20 +168,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win32"/>
 		<LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_OpenAL_mgw_x86_d.dll" "..\..\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_OpenAL_mgw_d.dll" "..\..\bin\win_x86\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -212,20 +212,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="../../Release/linux_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc_x64.so" "../../bin/Audio"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_AudioEngine_OpenAL_gcc.so" "../../bin/linux_x64/Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -256,20 +256,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/linux_x86"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="openal"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc.so" IntermediateDirectory="../../Release/linux_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc_x86.so" "../../bin/Audio"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_AudioEngine_OpenAL_gcc.so" "../../bin/linux_x86/Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -302,20 +302,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="boost_thread-mgw45-mt-1_46_1"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="../../Release/win_x64/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_OpenAL_mgw_x64.dll" "..\..\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_AudioEngine_OpenAL_mgw.dll" "..\..\bin\win_x64\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -348,20 +348,20 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../External/OpenALSDK/libs/Win32"/>
 		<LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="boost_thread-mgw45-mt-1_46_1"/>
         <Library Value="OpenAL32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_AudioEngine_OpenAL_mgw.dll" IntermediateDirectory="../../Release/win_x86/OpenAL" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_OpenAL_mgw_x86.dll" "..\..\bin\Audio"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_AudioEngine_OpenAL_mgw.dll" "..\..\bin\win_x86\Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

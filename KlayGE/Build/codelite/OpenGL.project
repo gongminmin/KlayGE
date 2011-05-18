@@ -66,7 +66,7 @@
 		<LibraryPath Value="../../../External/Cg/lib.x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x64_d"/>
         <Library Value="GL"/>
@@ -75,7 +75,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -83,7 +83,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64_d.so" "../../bin/Render"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_d.so" "../../bin/linux_x64/Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -116,7 +116,7 @@
 		<LibraryPath Value="../../../External/Cg/lib"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x86_d"/>
         <Library Value="GL"/>
@@ -125,7 +125,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_d.so" IntermediateDirectory="../../Debug/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -133,7 +133,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86_d.so" "../../bin/Render"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_d.so" "../../bin/linux_x86/Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -168,7 +168,7 @@
 		<LibraryPath Value="../../../External/Cg/lib.x64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="glloader_x64_d"/>
         <Library Value="opengl32"/>
@@ -177,7 +177,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -185,7 +185,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_OpenGL_mgw_x64_d.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_OpenGL_mgw_d.dll" "..\..\bin\win_x64\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -220,7 +220,7 @@
 		<LibraryPath Value="../../../External/Cg/lib"/>
 		<LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="glloader_x86_d"/>
         <Library Value="opengl32"/>
@@ -229,7 +229,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -237,7 +237,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_OpenGL_mgw_x86_d.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_OpenGL_mgw_d.dll" "..\..\bin\win_x86\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -270,7 +270,7 @@
 		<LibraryPath Value="../../../External/Cg/lib.x64"/>
 		<LibraryPath Value="../../lib/linux_x64"/>
         <LibraryPath Value="../../../glloader/lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x64"/>
         <Library Value="GL"/>
@@ -279,7 +279,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64.so" IntermediateDirectory="../../Release/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc.so" IntermediateDirectory="../../Release/linux_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -287,7 +287,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc_x64.so" "../../bin/Audio"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x64/libKlayGE_RenderEngine_OpenGL_gcc.so" "../../bin/linux_x64/Audio"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -320,7 +320,7 @@
 		<LibraryPath Value="../../../External/Cg/lib"/>
 		<LibraryPath Value="../../lib/linux_x86"/>
         <LibraryPath Value="../../../glloader/lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="glloader_x86"/>
         <Library Value="GL"/>
@@ -329,7 +329,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86.so" IntermediateDirectory="../../Release/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc.so" IntermediateDirectory="../../Release/linux_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -337,7 +337,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc_x86.so" "../../bin/Render"</Command>
+        <Command Enabled="yes">cp "../../lib/linux_x86/libKlayGE_RenderEngine_OpenGL_gcc.so" "../../bin/linux_x86/Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -372,7 +372,7 @@
 		<LibraryPath Value="../../../External/Cg/lib.x64"/>
 		<LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="glloader_x64"/>
         <Library Value="opengl32"/>
@@ -381,7 +381,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_OpenGL_mgw.dll" IntermediateDirectory="../../Release/win_x64/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -389,7 +389,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_OpenGL_mgw_x64.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_OpenGL_mgw.dll" "..\..\bin\win_x64\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -424,7 +424,7 @@
 		<LibraryPath Value="../../../External/Cg/lib"/>
 		<LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="glloader_x86"/>
         <Library Value="opengl32"/>
@@ -433,7 +433,7 @@
         <Library Value="Cg"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_OpenGL_mgw.dll" IntermediateDirectory="../../Release/win_x86/OpenGL" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -441,7 +441,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_OpenGL_mgw_x86.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_OpenGL_mgw.dll" "..\..\bin\win_x86\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

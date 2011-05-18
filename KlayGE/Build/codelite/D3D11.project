@@ -74,14 +74,14 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -89,7 +89,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_D3D11_mgw_x64_d.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_D3D11_mgw_d.dll" "..\..\bin\win_x64\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -122,14 +122,14 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="d3dx11d"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -137,7 +137,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_D3D11_mgw_x86_d.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_D3D11_mgw_d.dll" "..\..\bin\win_x86\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -170,14 +170,14 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/DXSDK/lib/x64"/>
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_RenderEngine_D3D11_mgw.dll" IntermediateDirectory="../../Release/win_x64/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -185,7 +185,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_D3D11_mgw_x64.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_RenderEngine_D3D11_mgw.dll" "..\..\bin\win_x64\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -218,14 +218,14 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/DXSDK/lib/x86"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="d3dx11"/>
         <Library Value="d3dcompiler"/>
         <Library Value="Gdi32"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_RenderEngine_D3D11_mgw.dll" IntermediateDirectory="../../Release/win_x86/D3D11" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -233,7 +233,7 @@
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_D3D11_mgw_x86.dll" "..\..\bin\Render"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_RenderEngine_D3D11_mgw.dll" "..\..\bin\win_x86\Render"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

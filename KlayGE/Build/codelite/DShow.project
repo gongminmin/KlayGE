@@ -33,22 +33,21 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
-        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_x64_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw_x64_d.dll" "..\..\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw_d.dll" "..\..\bin\win_x64\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -80,22 +79,21 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
-        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_x86_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw_x86_d.dll" "..\..\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw_d.dll" "..\..\bin\win_x86\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -127,22 +125,21 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
-        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw_x64.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x64/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="../../Release/win_x64/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw_x64.dll" "..\..\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x64\libKlayGE_ShowEngine_DShow_mgw.dll" "..\..\bin\win_x64\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>
@@ -174,22 +171,21 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
         <Library Value="strmiids"/>
         <Library Value="ole32"/>
         <Library Value="uuid"/>
-        <Library Value="d3d9"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw_x86.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../lib/win_x86/libKlayGE_ShowEngine_DShow_mgw.dll" IntermediateDirectory="../../Release/win_x86/DShow" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
       <PreBuild/>
       <PostBuild>
-        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw_x86.dll" "..\..\bin\Show"</Command>
+        <Command Enabled="yes">cmd /c copy "..\..\lib\win_x86\libKlayGE_ShowEngine_DShow_mgw.dll" "..\..\bin\win_x86\Show"</Command>
       </PostBuild>
       <CustomBuild Enabled="no">
         <RebuildCommand/>

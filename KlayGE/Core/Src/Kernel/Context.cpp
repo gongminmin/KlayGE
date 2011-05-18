@@ -581,7 +581,7 @@ namespace KlayGE
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
 		std::string fn = KLAYGE_STRINGIZE(KLAYGE_NAME) + std::string("_RenderEngine_") + rf_name + "_" + dll_suffix_;
-#ifdef KLAYGE_PLATFORM_LINUX
+#ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
 		render_loader_.Load(render_path + "/" + fn);

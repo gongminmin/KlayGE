@@ -40,11 +40,11 @@
       <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/linux_x64/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -76,11 +76,11 @@
       <Linker Options="--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/linux_x86/$(ProjectName)_d" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -113,11 +113,11 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -150,11 +150,11 @@
       <Linker Options="-Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
         <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -190,7 +190,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/linux_x64/$(ProjectName)_x64" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -226,7 +226,7 @@
         <Library Value="boost_system"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/linux_x86/$(ProjectName)" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -263,7 +263,7 @@
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/win_x64/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -296,11 +296,11 @@
       <Linker Options="-s -Wl,--enable-auto-import" Required="yes">
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
+        <Library Value="KlayGE_Core_mgw"/>
         <Library Value="boost_system-mgw45-mt-1_46_1"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
-      <General OutputFile="../../../bin/$(ProjectName)_x86.exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
