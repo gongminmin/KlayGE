@@ -67,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x86_d.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x86/lib;../../../External/Cg/lib;../../../glloader/lib/Win32;../../lib/Win32"
 				GenerateDebugInformation="true"
@@ -93,7 +93,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Render\"
 			/>
 		</Configuration>
 		<Configuration
@@ -145,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x64_d.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x64/lib;../../../External/Cg/lib.x64;../../../glloader/lib/x64;../../lib/x64"
 				GenerateDebugInformation="true"
@@ -171,7 +171,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Render\"
 			/>
 		</Configuration>
 		<Configuration
@@ -226,7 +226,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x86.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x86/lib;../../../External/Cg/lib;../../../glloader/lib/Win32;../../lib/Win32"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -253,7 +253,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Render\"
 			/>
 		</Configuration>
 		<Configuration
@@ -305,7 +305,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc_x64.dll"
+				OutputFile="$(OutDir)/KlayGE_RenderEngine_OpenGL_vc.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x64/lib;../../../External/Cg/lib.x64;../../../glloader/lib/x64;../../lib/x64"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -332,7 +332,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Render\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Render\"
 			/>
 		</Configuration>
 	</Configurations>

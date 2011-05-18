@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="../../../bin"
+			OutputDirectory="../../../bin/win_x86/"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_x86_d.exe"
+				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x86/lib;../../../../External/Python/libs;../../../lib/Win32"
 				GenerateDebugInformation="true"
@@ -99,7 +99,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="../../../bin"
+			OutputDirectory="../../../bin/win_x64/"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_x64_d.exe"
+				OutputFile="$(OutDir)/$(ProjectName)_d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x64/lib;../../../../External/Python/libs/amd64;../../../lib/x64"
 				GenerateDebugInformation="true"
@@ -177,7 +177,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="../../../bin"
+			OutputDirectory="../../../bin/win_x86/"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -226,7 +226,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_x86.exe"
+				OutputFile="$(OutDir)/$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x86/lib;../../../../External/Python/libs;../../../lib/Win32"
 				GenerateDebugInformation="true"
@@ -262,7 +262,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="../../../bin"
+			OutputDirectory="../../../bin/win_x64/"
 			IntermediateDirectory="../../$(ConfigurationName)/$(PlatformName)/$(TargetName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -306,7 +306,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_x64.exe"
+				OutputFile="$(OutDir)/$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../../../External/boost/lib_vc9_x64/lib;../../../../External/Python/libs/amd64;../../../lib/x64"
 				GenerateDebugInformation="true"

@@ -66,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86_d.dll"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_d.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x86/lib;../../../External/libogg/lib/$(PlatformName);../../../External/libvorbis/libs/$(PlatformName);../../lib/Win32"
 				GenerateDebugInformation="true"
 			/>
@@ -91,7 +91,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -141,7 +141,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64_d.dll"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_d.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x64/lib;../../../External/libogg/lib/$(PlatformName);../../../External/libvorbis/libs/$(PlatformName);../../lib/x64"
 				GenerateDebugInformation="true"
 			/>
@@ -166,7 +166,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -219,7 +219,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x86.dll"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x86/lib;../../../External/libogg/lib/$(PlatformName);../../../External/libvorbis/libs/$(PlatformName);../../lib/Win32"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -246,7 +246,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -296,7 +296,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc_x64.dll"
+				OutputFile="$(OutDir)/KlayGE_AudioDataSource_OggVorbis_vc.dll"
 				AdditionalLibraryDirectories="../../../External/boost/lib_vc9_x64/lib;../../../External/libogg/lib/$(PlatformName);../../../External/libvorbis/libs/$(PlatformName);../../lib/x64"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -323,7 +323,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\Audio\"
+				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\"
 			/>
 		</Configuration>
 	</Configurations>
