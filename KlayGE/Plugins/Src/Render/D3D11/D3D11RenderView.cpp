@@ -41,7 +41,7 @@ namespace KlayGE
 
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture, int array_index, int level)
-		: rt_src_(&texture)
+		: rt_src_(&texture), rt_first_subres_(array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DRenderTargetView(array_index, level);
 
@@ -51,7 +51,7 @@ namespace KlayGE
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
-		: rt_src_(&texture_3d)
+		: rt_src_(&texture_3d), rt_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), rt_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DRenderTargetView(array_index, first_slice, num_slices, level);
 
@@ -61,7 +61,7 @@ namespace KlayGE
     }
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
-		: rt_src_(&texture_cube)
+		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
 	{
 		rt_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DRenderTargetView(array_index, face, level);
 
@@ -71,7 +71,7 @@ namespace KlayGE
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf)
-		: rt_src_(&gb)
+		: rt_src_(&gb), rt_first_subres_(0), rt_num_subres_(1)
 	{
 		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
 
@@ -91,7 +91,7 @@ namespace KlayGE
 	}
 
 	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(ID3D11RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: rt_view_(view), rt_src_(NULL)
+		: rt_view_(view), rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		width_ = width;
 		height_ = height;

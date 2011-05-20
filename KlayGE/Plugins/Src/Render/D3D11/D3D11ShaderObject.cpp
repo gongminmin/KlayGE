@@ -328,19 +328,20 @@ namespace
 	class SetD3D11ShaderParameter<TexturePtr, ID3D11ShaderResourceView*>
 	{
 	public:
-		SetD3D11ShaderParameter(void*& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
 
 		void operator()()
 		{
-			TexturePtr tex;
-			param_->Value(tex);
-			if (tex)
+			boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
+			param_->Value(tex_tuple);
+			if (tex_tuple.get<0>())
 			{
-				*srvsrc_ = tex.get();
-				*srv_ = checked_cast<D3D11Texture*>(tex.get())->D3DShaderResourceView().get();
+				*srvsrc_ = boost::make_tuple(tex_tuple.get<0>().get(), tex_tuple.get<1>() * tex_tuple.get<0>()->NumMipMaps() + tex_tuple.get<3>(),
+					tex_tuple.get<2>() * tex_tuple.get<4>());
+				*srv_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DShaderResourceView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>(), tex_tuple.get<4>()).get();
 			}
 			else
 			{
@@ -349,7 +350,7 @@ namespace
 		}
 
 	private:
-		void** srvsrc_;
+		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -358,7 +359,7 @@ namespace
 	class SetD3D11ShaderParameter<GraphicsBufferPtr, ID3D11ShaderResourceView*>
 	{
 	public:
-		SetD3D11ShaderParameter(void*& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameter(boost::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -369,7 +370,7 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
-				*srvsrc_ = buf.get();
+				*srvsrc_ = boost::make_tuple(buf.get(), 0, 1);
 				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
 			}
 			else
@@ -379,7 +380,7 @@ namespace
 		}
 
 	private:
-		void** srvsrc_;
+		boost::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -395,12 +396,12 @@ namespace
 
 		void operator()()
 		{
-			TexturePtr tex;
-			param_->Value(tex);
-			if (tex)
+			boost::tuple<TexturePtr, uint32_t, uint32_t, uint32_t, uint32_t> tex_tuple;
+			param_->Value(tex_tuple);
+			if (tex_tuple.get<0>())
 			{
-				*uavsrc_ = tex.get();
-				*uav_ = checked_cast<D3D11Texture*>(tex.get())->D3DUnorderedAccessView().get();
+				*uavsrc_ = tex_tuple.get<0>().get();
+				*uav_ = checked_cast<D3D11Texture*>(tex_tuple.get<0>().get())->RetriveD3DUnorderedAccessView(tex_tuple.get<1>(), tex_tuple.get<2>(), tex_tuple.get<3>()).get();
 			}
 			else
 			{
@@ -1731,7 +1732,7 @@ namespace KlayGE
 			{
 				if (uavsrcs_[ST_ComputeShader][i] != NULL)
 				{
-					re.DetachTextureByRTV(uavsrcs_[ST_ComputeShader][i]);
+					re.DetachTexture(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
 			}
 

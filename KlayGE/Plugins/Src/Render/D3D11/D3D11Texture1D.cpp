@@ -101,35 +101,6 @@ namespace KlayGE
 		TIF(d3d_device_->CreateTexture1D(&desc_, (init_data != NULL) ? &subres_data[0] : NULL, &d3d_tex));
 		d3dTexture1D_ = MakeCOMPtr(d3d_tex);
 
-		if (access_hint_ & EAH_GPU_Read)
-		{
-			ID3D11ShaderResourceView* d3d_sr_view;
-			d3d_device_->CreateShaderResourceView(d3dTexture1D_.get(), NULL, &d3d_sr_view);
-			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
-		}
-
-		if (access_hint_ & EAH_GPU_Unordered)
-		{
-			D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-			uav_desc.Format = desc_.Format;
-			if (array_size_ > 1)
-			{
-				uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
-				uav_desc.Texture1DArray.ArraySize = array_size_;
-				uav_desc.Texture1DArray.FirstArraySlice = 0;
-				uav_desc.Texture1DArray.MipSlice = 0;
-			}
-			else
-			{
-				uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1D;
-				uav_desc.Texture1D.MipSlice = 0;
-			}
-
-			ID3D11UnorderedAccessView* d3d_ua_view;
-			TIF(d3d_device_->CreateUnorderedAccessView(d3dTexture1D_.get(), &uav_desc, &d3d_ua_view));
-			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
-		}
-
 		this->UpdateParams();
 	}
 
@@ -187,6 +158,92 @@ namespace KlayGE
 		this->CopyToSubTexture(target,
 			D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()), dst_x_offset, 0, 0, dst_width, 1, 1,
 			D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), src_x_offset, 0, 0, src_width, 1, 1);
+	}
+
+	ID3D11ShaderResourceViewPtr const & D3D11Texture1D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC sr_desc;
+		switch (format_)
+		{
+		case EF_D16:
+			sr_desc.Format = DXGI_FORMAT_R16_UNORM;
+			break;
+
+		case EF_D24S8:
+			sr_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			sr_desc.Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+
+		default:
+			sr_desc.Format = desc_.Format;
+			break;
+		}
+
+		if (array_size_ > 1)
+		{
+			sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1DARRAY;
+			sr_desc.Texture1DArray.MostDetailedMip = first_level;
+			sr_desc.Texture1DArray.MipLevels = num_levels;
+			sr_desc.Texture1DArray.ArraySize = num_items;
+			sr_desc.Texture1DArray.FirstArraySlice = first_array_index;
+		}
+		else
+		{
+			sr_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
+			sr_desc.Texture1D.MostDetailedMip = first_level;
+			sr_desc.Texture1D.MipLevels = num_levels;
+		}
+
+		for (size_t i = 0; i < d3d_sr_views_.size(); ++ i)
+		{
+			if (0 == memcmp(&d3d_sr_views_[i].first, &sr_desc, sizeof(sr_desc)))
+			{
+				return d3d_sr_views_[i].second;
+			}
+		}
+
+		ID3D11ShaderResourceView* d3d_sr_view;
+		d3d_device_->CreateShaderResourceView(d3dTexture1D_.get(), &sr_desc, &d3d_sr_view);
+		d3d_sr_views_.push_back(std::make_pair(sr_desc, MakeCOMPtr(d3d_sr_view)));
+		return d3d_sr_views_.back().second;
+	}
+
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture1D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level)
+	{
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = desc_.Format;
+		if (array_size_ > 1)
+		{
+			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1DARRAY;
+			uav_desc.Texture1DArray.MipSlice = level;
+			uav_desc.Texture1DArray.ArraySize = num_items;
+			uav_desc.Texture1DArray.FirstArraySlice = first_array_index;
+		}
+		else
+		{
+			uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1D;
+			uav_desc.Texture1D.MipSlice = level;
+		}
+
+		for (size_t i = 0; i < d3d_ua_views_.size(); ++ i)
+		{
+			if (0 == memcmp(&d3d_ua_views_[i].first, &uav_desc, sizeof(uav_desc)))
+			{
+				return d3d_ua_views_[i].second;
+			}
+		}
+
+		ID3D11UnorderedAccessView* d3d_ua_view;
+		d3d_device_->CreateUnorderedAccessView(d3dTexture1D_.get(), &uav_desc, &d3d_ua_view);
+		d3d_ua_views_.push_back(std::make_pair(uav_desc, MakeCOMPtr(d3d_ua_view)));
+		return d3d_ua_views_.back().second;
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture1D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t level)
@@ -282,10 +339,10 @@ namespace KlayGE
 
 	void D3D11Texture1D::BuildMipSubLevels()
 	{
-		if (d3d_sr_view_)
+		if (!d3d_sr_views_.empty())
 		{
 			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
-			d3d_imm_ctx_->GenerateMips(d3d_sr_view_.get());
+			d3d_imm_ctx_->GenerateMips(d3d_sr_views_[0].second.get());
 		}
 		else
 		{

@@ -144,13 +144,13 @@ namespace KlayGE
 		void CSSetShader(ID3D11ComputeShaderPtr const & shader);
 		void HSSetShader(ID3D11HullShaderPtr const & shader);
 		void DSSetShader(ID3D11DomainShaderPtr const & shader);
-		void SetShaderResources(ShaderObject::ShaderType st, std::vector<void*> const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs);
+		void SetShaderResources(ShaderObject::ShaderType st, std::vector<boost::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs);
 		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers);
 		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs);
 		void RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports);
 		
 		void ResetRenderStates();
-		void DetachTextureByRTV(void* rtv_src);
+		void DetachTexture(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres);
 
 		ID3D11InputLayoutPtr const & CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, ID3DBlobPtr const & vs_code);
 
@@ -220,7 +220,7 @@ namespace KlayGE
 		std::vector<UINT> vb_offset_cache_;
 		ID3D11BufferPtr ib_cache_;
 
-		boost::array<std::vector<void*>, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
+		boost::array<std::vector<boost::tuple<void*, uint32_t, uint32_t> >, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
 		boost::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
 		boost::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
 		boost::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;

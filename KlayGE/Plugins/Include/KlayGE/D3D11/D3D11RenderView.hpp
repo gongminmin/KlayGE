@@ -69,10 +69,20 @@ namespace KlayGE
 		{
 			return rt_src_;
 		}
+		uint32_t RTFirstSubRes() const
+		{
+			return rt_first_subres_;
+		}
+		uint32_t RTNumSubRes() const
+		{
+			return rt_num_subres_;
+		}
 
 	private:
 		ID3D11RenderTargetViewPtr rt_view_;
 		void* rt_src_;
+		uint32_t rt_first_subres_;
+		uint32_t rt_num_subres_;
 	};
 	typedef boost::shared_ptr<D3D11RenderTargetRenderView> D3D11RenderTargetRenderViewPtr;
 

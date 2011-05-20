@@ -1128,7 +1128,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<void*> const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<boost::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
@@ -1166,19 +1166,29 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::DetachTextureByRTV(void* rtv_src)
+	void D3D11RenderEngine::DetachTexture(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres)
 	{
 		for (uint32_t st = 0; st < ShaderObject::ST_NumShaderTypes; ++ st)
 		{
 			bool cleared = false;
 			for (uint32_t i = 0; i < shader_srvsrc_cache_[st].size(); ++ i)
 			{
-				if (shader_srvsrc_cache_[st][i])
+				if (shader_srvsrc_cache_[st][i].get<0>())
 				{
-					if (shader_srvsrc_cache_[st][i] == rtv_src)
+					if (shader_srvsrc_cache_[st][i].get<0>() == rtv_src)
 					{
-						shader_srv_cache_[st][i] = NULL;
-						cleared = true;
+						uint32_t const first = shader_srvsrc_cache_[st][i].get<1>();
+						uint32_t const last = first + shader_srvsrc_cache_[st][i].get<2>();
+						uint32_t const rt_first = rt_first_subres;
+						uint32_t const rt_last = rt_first_subres + rt_num_subres;
+						if (((first >= rt_first) && (first < rt_last))
+							|| ((last >= rt_first) && (last < rt_last))
+							|| ((rt_first >= first) && (rt_first < last))
+							|| ((rt_last >= first) && (rt_last < last)))
+						{
+							shader_srv_cache_[st][i] = NULL;
+							cleared = true;
+						}
 					}
 				}
 			}

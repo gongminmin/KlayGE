@@ -93,17 +93,23 @@ namespace KlayGE
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		std::vector<void*> rt_src(clr_views_.size());
+		std::vector<uint32_t> rt_first_subres(clr_views_.size());
+		std::vector<uint32_t> rt_num_subres(clr_views_.size());
 		std::vector<ID3D11RenderTargetView*> rt_view(clr_views_.size());
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{
-				rt_src[i] = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get())->RTSrc();
+				D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
+				rt_src[i] = p->RTSrc();
+				rt_first_subres[i] = p->RTFirstSubRes();
+				rt_num_subres[i] = p->RTNumSubRes();
 				rt_view[i] = this->D3DRTView(i).get();
 			}
 			else
 			{
 				rt_src[i] = NULL;
+				rt_first_subres[i] = rt_num_subres[i] = 0;
 				rt_view[i] = NULL;
 			}
 		}
@@ -112,7 +118,7 @@ namespace KlayGE
 		{
 			if (rt_src[i] != NULL)
 			{
-				re.DetachTextureByRTV(rt_src[i]);
+				re.DetachTexture(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
 			}
 		}
 
