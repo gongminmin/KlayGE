@@ -77,6 +77,8 @@ namespace
 			diffuse_clr_param_ = effect_->ParameterByName("diffuse_clr");
 			specular_map_enabled_param_ = effect_->ParameterByName("specular_map_enabled");
 			specular_tex_param_ = effect_->ParameterByName("specular_tex");
+			emit_map_enabled_param_ = effect_->ParameterByName("emit_map_enabled");
+			emit_tex_param_ = effect_->ParameterByName("emit_tex");
 			emit_clr_param_ = effect_->ParameterByName("emit_clr");
 			specular_level_param_ = effect_->ParameterByName("specular_level");
 			flipping_param_ = effect_->ParameterByName("flipping");
@@ -119,10 +121,14 @@ namespace
 				{
 					bump_tex_ = tex;
 				}
+				else if ("Self-Illumination" == iter->first)
+				{
+					emit_tex_ = tex;
+				}
 				else if ("Opacity" == iter->first)
 				{
 					alpha_ = true;
-				}
+				}				
 			}
 
 			if ((mtl.emit.x() > 0) || (mtl.emit.y() > 0) || (mtl.emit.z() > 0))
@@ -175,6 +181,8 @@ namespace
 				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
+				*emit_map_enabled_param_ = static_cast<int32_t>(!!emit_tex_);
+				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -183,6 +191,8 @@ namespace
 				break;
 
 			case PT_SpecialShading:
+				*emit_map_enabled_param_ = static_cast<int32_t>(!!emit_tex_);
+				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
 				break;
 
@@ -211,6 +221,8 @@ namespace
 		RenderEffectParameterPtr diffuse_map_enabled_param_;
 		RenderEffectParameterPtr diffuse_tex_param_;
 		RenderEffectParameterPtr diffuse_clr_param_;
+		RenderEffectParameterPtr emit_map_enabled_param_;
+		RenderEffectParameterPtr emit_tex_param_;
 		RenderEffectParameterPtr emit_clr_param_;
 		RenderEffectParameterPtr specular_level_param_;
 		RenderEffectParameterPtr flipping_param_;
@@ -218,6 +230,7 @@ namespace
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;
 		TexturePtr bump_tex_;
+		TexturePtr emit_tex_;
 
 		bool special_shading_;
 	};

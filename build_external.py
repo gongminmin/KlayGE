@@ -58,9 +58,6 @@ print("\nBuilding boost...\n")
 if not os.path.exists("External/boost/bjam.exe"):
 	os.system("External/boost/bootstrap.bat")
 
-boost_define_str = "define=_CRT_SECURE_NO_DEPRECATE define=_SCL_SECURE_NO_DEPRECATE"
-if ("vc" == compiler_name) and ((8 == compiler_version) or (9 == compiler_version)):
-	boost_define_str += " define=_SECURE_SCL=0"
 os.chdir("External/boost")
 if "vc" == compiler_name:
 	boost_toolset = "%s%d" % (compiler_name, compiler_version)

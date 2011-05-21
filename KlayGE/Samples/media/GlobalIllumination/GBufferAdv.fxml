@@ -28,6 +28,8 @@
 	<parameter type="int" name="specular_map_enabled"/>
 	<parameter type="texture2D" name="bump_tex"/>
 	<parameter type="int" name="bump_map_enabled"/>
+	<parameter type="texture2D" name="emit_tex"/>
+	<parameter type="int" name="emit_map_enabled"/>
 
 	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -464,7 +466,16 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	{
 		diffuse = diffuse_clr.rgb;
 	}
-	return CalcShading(tc, diffuse, emit_clr.rgb);
+	float3 emit;
+	if (emit_map_enabled)
+	{
+		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		emit = emit_clr.rgb;
+	}
+	return CalcShading(tc, diffuse, emit);
 }
 
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0
@@ -479,7 +490,16 @@ float4 SpecialShadingPS(float2 texcoord : TEXCOORD0
 	tc /= w;
 #endif
 
-	return float4(max(emit_clr.rgb, 0), 0);
+	float3 emit;
+	if (emit_map_enabled)
+	{
+		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		emit = emit_clr.rgb;
+	}
+	return float4(max(emit, 0), 0);
 }
 
 void ShadingSkyBoxVS(float4 pos : POSITION,
