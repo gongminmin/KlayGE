@@ -53,16 +53,20 @@ namespace
 		{
 			uint32_t access_hint;
 			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc;
-			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc;
+			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
 			std::vector<RenderModel::Material> mtls;
+			std::vector<vertex_element> merged_ves;
+			char all_is_index_16_bit;
+			std::vector<std::vector<uint8_t> > merged_buff;
+			std::vector<uint8_t> merged_indices;
 			std::vector<std::string> mesh_names;
 			std::vector<int32_t> mtl_ids;
-			std::vector<std::vector<vertex_element> > ves;
-			std::vector<uint32_t> max_num_blends;
-			std::vector<std::vector<std::vector<uint8_t> > > buffs;
-			std::vector<char> is_index_16_bit;
-			std::vector<std::vector<uint8_t> > indices;
+			std::vector<Box> bbs;
+			std::vector<uint32_t> mesh_num_vertices;
+			std::vector<uint32_t> mesh_base_vertices;
+			std::vector<uint32_t> mesh_num_indices;
+			std::vector<uint32_t> mesh_start_indices;
 			std::vector<Joint> joints;
 			boost::shared_ptr<KeyFramesType> kfs;
 			int32_t start_frame;
@@ -75,7 +79,7 @@ namespace
 	public:
 		RenderModelLoader(std::string const & meshml_name, uint32_t access_hint,
 			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
 			ml_thread_ = GlobalThreadPool()(boost::bind(&RenderModelLoader::LoadKModel, this, meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 		}
@@ -108,15 +112,18 @@ namespace
 	private:
 		boost::shared_ptr<ModelDesc> LoadKModel(std::string const & meshml_name, uint32_t access_hint,
 			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-			boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
 			boost::shared_ptr<ModelDesc> model_desc = MakeSharedPtr<ModelDesc>();
 			model_desc->access_hint = access_hint;
 			model_desc->CreateModelFactoryFunc = CreateModelFactoryFunc;
 			model_desc->CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 
-			LoadModel(meshml_name, model_desc->mtls, model_desc->mesh_names, model_desc->mtl_ids, model_desc->ves, model_desc->max_num_blends,
-				model_desc->buffs, model_desc->is_index_16_bit, model_desc->indices, model_desc->joints, model_desc->kfs,
+			LoadModel(meshml_name, model_desc->mtls, model_desc->merged_ves, model_desc->all_is_index_16_bit,
+				model_desc->merged_buff, model_desc->merged_indices,
+				model_desc->mesh_names, model_desc->mtl_ids, model_desc->bbs, 
+				model_desc->mesh_num_vertices, model_desc->mesh_base_vertices, model_desc->mesh_num_indices, model_desc->mesh_start_indices, 
+				model_desc->joints, model_desc->kfs,
 				model_desc->start_frame, model_desc->end_frame, model_desc->frame_rate);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -147,103 +154,22 @@ namespace
 				model->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
 			}
 
-			std::vector<vertex_element> merged_ves;
-			std::vector<std::vector<uint32_t> > ves_mapping(model_desc->mesh_names.size());
-			char is_index_16_bit = true;
-			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
-			{
-				ves_mapping[mesh_index].resize(model_desc->ves[mesh_index].size());
-				for (uint32_t ve_index = 0; ve_index < model_desc->ves[mesh_index].size(); ++ ve_index)
-				{
-					bool found = false;
-					for (uint32_t mve_index = 0; mve_index < merged_ves.size(); ++ mve_index)
-					{
-						if (model_desc->ves[mesh_index][ve_index] == merged_ves[mve_index])
-						{
-							ves_mapping[mesh_index][ve_index] = mve_index;
-							found = true;
-							break;
-						}
-					}
-					if (!found)
-					{
-						ves_mapping[mesh_index][ve_index] = static_cast<uint32_t>(merged_ves.size());
-						merged_ves.push_back(model_desc->ves[mesh_index][ve_index]);
-					}
-				}
-
-				is_index_16_bit &= model_desc->is_index_16_bit[mesh_index];
-			}
-
-			int index_elem_size = is_index_16_bit ? 2 : 4;
-
-			std::vector<std::vector<uint8_t> > merged_buff(merged_ves.size());
-			std::vector<uint8_t> merged_indices;
-			std::vector<uint32_t> buff_sizes;
-			std::vector<uint32_t> buff_starts;
-			std::vector<uint32_t> index_sizes;
-			std::vector<uint32_t> index_starts;
-			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
-			{
-				buff_sizes.push_back(static_cast<uint32_t>(model_desc->buffs[mesh_index][0].size() / model_desc->ves[mesh_index][0].element_size()));
-				buff_starts.push_back(static_cast<uint32_t>(merged_buff[0].size() / merged_ves[0].element_size()));
-
-				std::vector<char> expanded(merged_ves.size(), 0);
-				for (uint32_t ve_index = 0; ve_index < model_desc->buffs[mesh_index].size(); ++ ve_index)
-				{
-					expanded[ves_mapping[mesh_index][ve_index]] = 1;
-					merged_buff[ves_mapping[mesh_index][ve_index]].insert(merged_buff[ves_mapping[mesh_index][ve_index]].end(),
-						model_desc->buffs[mesh_index][ve_index].begin(), model_desc->buffs[mesh_index][ve_index].end());
-				}
-
-				for (size_t i = 0; i < merged_buff.size(); ++ i)
-				{
-					if (!expanded[i])
-					{
-						merged_buff[i].resize(merged_buff[i].size() + buff_sizes.back() * merged_ves[i].element_size(), 0);
-					}
-				}
-
-				index_sizes.push_back(static_cast<uint32_t>(model_desc->indices[mesh_index].size() / (model_desc->is_index_16_bit[mesh_index] ? 2 : 4)));
-				index_starts.push_back(static_cast<uint32_t>(merged_indices.size() / index_elem_size));
-				if (is_index_16_bit == model_desc->is_index_16_bit[mesh_index])
-				{
-					merged_indices.insert(merged_indices.end(),
-						model_desc->indices[mesh_index].begin(), model_desc->indices[mesh_index].end());
-				}
-				else
-				{
-					BOOST_ASSERT(!is_index_16_bit && model_desc->is_index_16_bit[mesh_index]);
-
-					size_t const len = merged_indices.size();
-					size_t const n = model_desc->indices[mesh_index].size() / 2;
-					merged_indices.resize(len + n * 4);
-
-					uint16_t const * src = reinterpret_cast<uint16_t const *>(&model_desc->indices[mesh_index][0]);
-					uint32_t* dst = reinterpret_cast<uint32_t*>(&merged_indices[len]);
-					for (size_t i = 0; i < n; ++ i)
-					{
-						dst[i] = src[i];
-					}
-				}
-			}
-
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			ElementInitData init_data;
-			std::vector<GraphicsBufferPtr> merged_vbs(merged_buff.size());
-			for (size_t i = 0; i < merged_buff.size(); ++ i)
+			std::vector<GraphicsBufferPtr> merged_vbs(model_desc->merged_buff.size());
+			for (size_t i = 0; i < model_desc->merged_buff.size(); ++ i)
 			{
-				init_data.data = &merged_buff[i][0];
-				init_data.row_pitch = static_cast<uint32_t>(merged_buff[i].size());
+				init_data.data = &model_desc->merged_buff[i][0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc->merged_buff[i].size());
 				init_data.slice_pitch = 0;
 				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc->access_hint, &init_data);
 			}
 
 			GraphicsBufferPtr merged_ib;
 			{
-				init_data.data = &merged_indices[0];
-				init_data.row_pitch = static_cast<uint32_t>(merged_indices.size());
+				init_data.data = &model_desc->merged_indices[0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc->merged_indices.size());
 				init_data.slice_pitch = 0;
 				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc->access_hint, &init_data);
 			}
@@ -258,42 +184,18 @@ namespace
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
 				mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
+				mesh->SetBound(model_desc->bbs[mesh_index]);
 
-				for (uint32_t ve_index = 0; ve_index < merged_buff.size(); ++ ve_index)
+				for (uint32_t ve_index = 0; ve_index < model_desc->merged_buff.size(); ++ ve_index)
 				{
-					void const * buff = &merged_buff[ve_index][buff_starts[mesh_index] * merged_ves[ve_index].element_size()];
-					uint32_t const buff_size = buff_sizes[mesh_index] * merged_ves[ve_index].element_size();
-					mesh->AddVertexStream(merged_vbs[ve_index], merged_ves[ve_index]);
-
-					if (VEU_Position == merged_ves[ve_index].usage)
-					{
-						Box box;
-						switch (merged_ves[ve_index].format)
-						{
-						case EF_BGR32F:
-							box = MathLib::compute_bounding_box<float>(static_cast<float3 const *>(buff),
-								static_cast<float3 const *>(buff) + buff_size / sizeof(float3));
-							break;
-
-						case EF_ABGR32F:
-							box = MathLib::compute_bounding_box<float>(static_cast<float4 const *>(buff),
-								static_cast<float4 const *>(buff) + buff_size / sizeof(float4));
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
-						mesh->SetBound(box);
-					}
+					mesh->AddVertexStream(merged_vbs[ve_index], model_desc->merged_ves[ve_index]);
 				}
+				mesh->AddIndexStream(merged_ib, model_desc->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
 
-				mesh->AddIndexStream(merged_ib, is_index_16_bit ? EF_R16UI : EF_R32UI);
-
-				mesh->NumVertices(buff_sizes[mesh_index]);
-				mesh->NumTriangles(index_sizes[mesh_index] / 3);
-				mesh->BaseVertexLocation(buff_starts[mesh_index]);
-				mesh->StartIndexLocation(index_starts[mesh_index]);
+				mesh->NumVertices(model_desc->mesh_num_vertices[mesh_index]);
+				mesh->NumTriangles(model_desc->mesh_num_indices[mesh_index] / 3);
+				mesh->BaseVertexLocation(model_desc->mesh_base_vertices[mesh_index]);
+				mesh->StartIndexLocation(model_desc->mesh_start_indices[mesh_index]);
 			}
 
 			if (model_desc->kfs && !model_desc->kfs->empty())
@@ -611,7 +513,7 @@ namespace KlayGE
 			lzma_file->read(&fourcc, sizeof(fourcc));
 			uint32_t ver;
 			lzma_file->read(&ver, sizeof(ver));
-			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != 2))
+			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != 3))
 			{
 				jit = true;
 			}
@@ -753,13 +655,27 @@ namespace KlayGE
 
 			if (meshes_chunk)
 			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				ElementFormat tbn_format;
+				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+				{
+					tbn_format = EF_A2BGR10;
+				}
+				else
+				{
+					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+					tbn_format = EF_ARGB8;
+				}
+
+				std::vector<std::vector<vertex_element> > ves;
+				std::vector<uint32_t> mesh_num_vertices;
+				std::vector<uint32_t> mesh_base_vertices(1, 0);
+				std::vector<uint32_t> mesh_num_indices;
+				std::vector<uint32_t> mesh_start_indices(1, 0);
+				char is_index_16_bit = true;
 				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
 				{
-					WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
-
-					int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
-					ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
-
 					{
 						XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
 
@@ -845,17 +761,11 @@ namespace KlayGE
 							}
 						}
 
-						std::vector<float3> position_buf;
-						std::vector<float3> normal_buf;
-						std::vector<float4> diffuse_buf;
-						std::vector<float4> specular_buf;
-						std::vector<float> blend_weight_buf;
-						std::vector<uint8_t> blend_index_buf;
-						std::vector<std::vector<float> > tex_coord_buf;
-						std::vector<float4> tangent_buf;
-						std::vector<float3> binormal_buf;
+						mesh_num_vertices.push_back(num_vertices);
+						mesh_base_vertices.push_back(mesh_base_vertices.back() + num_vertices);
 
-						std::vector<vertex_element> vertex_elements;
+						ves.push_back(std::vector<vertex_element>());
+						std::vector<vertex_element>& vertex_elements = ves.back();
 						{
 							vertex_element ve;
 
@@ -866,18 +776,14 @@ namespace KlayGE
 								ve.usage_index = 0;
 								ve.format = EF_BGR32F;
 								vertex_elements.push_back(ve);
-
-								position_buf.resize(num_vertices, float3(0, 0, 0));
 							}
 
 							if (has_normal)
 							{
 								ve.usage = VEU_Normal;
 								ve.usage_index = 0;
-								ve.format = EF_BGR32F;
+								ve.format = tbn_format;
 								vertex_elements.push_back(ve);
-
-								normal_buf.resize(num_vertices, float3(0, 0, 0));
 							}
 
 							if (has_diffuse)
@@ -886,8 +792,6 @@ namespace KlayGE
 								ve.usage_index = 0;
 								ve.format = EF_ABGR32F;
 								vertex_elements.push_back(ve);
-
-								diffuse_buf.resize(num_vertices, float4(0, 0, 0, 0));
 							}
 
 							if (has_specular)
@@ -896,8 +800,6 @@ namespace KlayGE
 								ve.usage_index = 0;
 								ve.format = EF_ABGR32F;
 								vertex_elements.push_back(ve);
-
-								specular_buf.resize(num_vertices, float4(0, 0, 0, 0));
 							}
 
 							if (has_weight)
@@ -945,12 +847,8 @@ namespace KlayGE
 									break;
 								}
 								vertex_elements.push_back(ve);
-
-								blend_weight_buf.resize(num_vertices * max_num_blend, 0);
-								blend_index_buf.resize(num_vertices * max_num_blend, 0);
 							}
 
-							tex_coord_buf.resize(max_num_tc_components.size());
 							for (uint32_t usage = 0; usage < max_num_tc_components.size(); ++ usage)
 							{
 								ve.usage = VEU_TextureCoord;
@@ -974,198 +872,397 @@ namespace KlayGE
 									break;
 								}
 								vertex_elements.push_back(ve);
-
-								tex_coord_buf[usage].resize(num_vertices * max_num_tc_components[usage], 0);
 							}
 
 							if (has_tangent)
 							{
 								ve.usage = VEU_Tangent;
 								ve.usage_index = 0;
-								ve.format = EF_ABGR32F;
+								ve.format = tbn_format;
 								vertex_elements.push_back(ve);
-
-								tangent_buf.resize(num_vertices, float4(0, 0, 0, 0));
 							}
 
 							if (has_binormal)
 							{
 								ve.usage = VEU_Binormal;
 								ve.usage_index = 0;
-								ve.format = EF_BGR32F;
+								ve.format = tbn_format;
 								vertex_elements.push_back(ve);
-
-								binormal_buf.resize(num_vertices, float3(0, 0, 0));
 							}
-						}
-
-						uint32_t index = 0;
-						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
-						{
-							position_buf[index] = float3(vertex_node->Attrib("x")->ValueFloat(),
-								vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
-
-							XMLNodePtr normal_node = vertex_node->FirstNode("normal");
-							if (normal_node)
-							{
-								normal_buf[index] = float3(normal_node->Attrib("x")->ValueFloat(),
-									normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
-							}
-
-							XMLNodePtr diffuse_node = vertex_node->FirstNode("diffuse");
-							if (diffuse_node)
-							{
-								diffuse_buf[index] = float4(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
-									diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat());
-							}
-
-							XMLNodePtr specular_node = vertex_node->FirstNode("diffuse");
-							if (specular_node)
-							{
-								specular_buf[index] = float4(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
-									specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat());
-							}
-
-							uint32_t num_blend = 0;
-							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
-							{
-								blend_index_buf[index * max_num_blend + num_blend] = static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt());
-								blend_weight_buf[index * max_num_blend + num_blend] = weight_node->Attrib("weight")->ValueFloat();
-								++ num_blend;
-							}
-
-							uint32_t usage = 0;
-							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
-							{
-								XMLAttributePtr attr = tex_coord_node->Attrib("u");
-								if (attr)
-								{
-									tex_coord_buf[usage][index * max_num_tc_components[usage] + 0] = attr->ValueFloat();
-								}
-								attr = tex_coord_node->Attrib("v");
-								if (attr)
-								{
-									tex_coord_buf[usage][index * max_num_tc_components[usage] + 1] = attr->ValueFloat();
-								}
-								attr = tex_coord_node->Attrib("w");
-								if (attr)
-								{
-									tex_coord_buf[usage][index * max_num_tc_components[usage] + 2] = attr->ValueFloat();
-								}
-
-								++ usage;
-							}
-
-							XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
-							if (tangent_node)
-							{
-								float k = 1;
-								XMLAttributePtr attr = tangent_node->Attrib("w");
-								if (attr)
-								{
-									k = attr->ValueFloat();
-								}
-								tangent_buf[index] = float4(tangent_node->Attrib("x")->ValueFloat(),
-									tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat(),
-									k);
-							}
-
-							XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
-							if (binormal_node)
-							{
-								binormal_buf[index] = float3(binormal_node->Attrib("x")->ValueFloat(),
-									binormal_node->Attrib("y")->ValueFloat(), binormal_node->Attrib("z")->ValueFloat());
-							}
-
-							++ index;
-						}
-
-						uint32_t num_ves = static_cast<uint32_t>(vertex_elements.size());
-						ss->write(reinterpret_cast<char*>(&num_ves), sizeof(num_ves));
-						for (size_t i = 0; i < vertex_elements.size(); ++ i)
-						{
-							ss->write(reinterpret_cast<char*>(&vertex_elements[i]), sizeof(vertex_elements[i]));
-						}
-
-						ss->write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
-						ss->write(reinterpret_cast<char*>(&max_num_blend), sizeof(max_num_blend));
-
-						ss->write(reinterpret_cast<char*>(&position_buf[0]), position_buf.size() * sizeof(position_buf[0]));
-						if (!normal_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&normal_buf[0]), normal_buf.size() * sizeof(normal_buf[0]));
-						}
-						if (!diffuse_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&diffuse_buf[0]), diffuse_buf.size() * sizeof(diffuse_buf[0]));
-						}
-						if (!specular_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&specular_buf[0]), specular_buf.size() * sizeof(specular_buf[0]));
-						}
-						if (!blend_weight_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&blend_weight_buf[0]), blend_weight_buf.size() * sizeof(blend_weight_buf[0]));
-						}
-						if (!blend_index_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&blend_index_buf[0]), blend_index_buf.size() * sizeof(blend_index_buf[0]));
-						}
-						for (size_t i = 0; i < tex_coord_buf.size(); ++ i)
-						{
-							ss->write(reinterpret_cast<char*>(&tex_coord_buf[i][0]), tex_coord_buf[i].size() * sizeof(tex_coord_buf[i][0]));
-						}
-						if (!tangent_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&tangent_buf[0]), tangent_buf.size() * sizeof(tangent_buf[0]));
-						}
-						if (!binormal_buf.empty())
-						{
-							ss->write(reinterpret_cast<char*>(&binormal_buf[0]), binormal_buf.size() * sizeof(binormal_buf[0]));
 						}
 					}
 
 					{
 						XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
 
-						uint32_t num_triangles = 0;
+						uint32_t num_indices = 0;
 						for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 						{
-							++ num_triangles;
+							num_indices += 3;
 						}
-						ss->write(reinterpret_cast<char*>(&num_triangles), sizeof(num_triangles));
 
 						char is_index_16 = true;
-						std::vector<uint32_t> indices;
 						for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
 						{
 							uint32_t a = static_cast<uint32_t>(tri_node->Attrib("a")->ValueUInt());
 							uint32_t b = static_cast<uint32_t>(tri_node->Attrib("b")->ValueUInt());
 							uint32_t c = static_cast<uint32_t>(tri_node->Attrib("c")->ValueUInt());
-							indices.push_back(a);
-							indices.push_back(b);
-							indices.push_back(c);
-
 							if ((a > 0xFFFF) || (b > 0xFFFF) || (c > 0xFFFF))
 							{
 								is_index_16 = false;
 							}
 						}
-						ss->write(&is_index_16, sizeof(is_index_16));
-						if (is_index_16)
+						is_index_16_bit &= is_index_16;
+
+						mesh_num_indices.push_back(num_indices);
+						mesh_start_indices.push_back(mesh_start_indices.back() + num_indices);
+					}
+				}
+
+				std::vector<vertex_element> merged_ves;
+				std::vector<std::vector<uint32_t> > ves_mapping(ves.size());
+				uint32_t mesh_index = 0;
+				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
+				{
+					XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
+
+					ves_mapping[mesh_index].resize(ves[mesh_index].size());
+					for (uint32_t ve_index = 0; ve_index < ves[mesh_index].size(); ++ ve_index)
+					{
+						bool found = false;
+						for (uint32_t mve_index = 0; mve_index < merged_ves.size(); ++ mve_index)
 						{
-							std::vector<uint16_t> indices_16(indices.size());
-							for (size_t i = 0; i < indices.size(); ++ i)
+							if (ves[mesh_index][ve_index] == merged_ves[mve_index])
 							{
-								indices_16[i] = static_cast<uint16_t>(indices[i]);
+								ves_mapping[mesh_index][ve_index] = mve_index;
+								found = true;
+								break;
 							}
-							ss->write(reinterpret_cast<char*>(&indices_16[0]), static_cast<uint32_t>(indices_16.size() * sizeof(indices_16[0])));
 						}
-						else
+						if (!found)
 						{
-							ss->write(reinterpret_cast<char*>(&indices[0]), static_cast<uint32_t>(indices.size() * sizeof(indices[0])));
+							ves_mapping[mesh_index][ve_index] = static_cast<uint32_t>(merged_ves.size());
+							merged_ves.push_back(ves[mesh_index][ve_index]);
 						}
 					}
+				}
+
+				std::vector<std::vector<uint8_t> > merged_buff(merged_ves.size());
+				for (size_t i = 0; i < merged_buff.size(); ++ i)
+				{
+					merged_buff[i].resize(mesh_base_vertices.back() * merged_ves[i].element_size(), 0);
+				}
+
+				int const index_elem_size = is_index_16_bit ? 2 : 4;
+
+				std::vector<uint8_t> merged_indices(mesh_start_indices.back() * index_elem_size);
+				std::vector<Box> bounding_boxes;
+				mesh_index = 0;
+				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
+				{
+					float3 min_bb, max_bb;
+						
+					{
+						XMLNodePtr vertices_chunk = mesh_node->FirstNode("vertices_chunk");
+
+						uint32_t index = 0;
+						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
+						{
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Position == ves[mesh_index][i].usage)
+									{
+										float3 pos(vertex_node->Attrib("x")->ValueFloat(),
+											vertex_node->Attrib("y")->ValueFloat(), vertex_node->Attrib("z")->ValueFloat());
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &pos, sizeof(pos));
+										if (0 == index)
+										{
+											min_bb = max_bb = pos;
+										}
+										else
+										{
+											min_bb = MathLib::minimize(min_bb, pos);
+											max_bb = MathLib::maximize(max_bb, pos);
+										}
+										break;
+									}
+								}
+							}
+
+							XMLNodePtr normal_node = vertex_node->FirstNode("normal");
+							if (normal_node)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Normal == ves[mesh_index][i].usage)
+									{
+										float3 normal(normal_node->Attrib("x")->ValueFloat(),
+											normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
+										normal = MathLib::normalize(normal) * 0.5f + 0.5f;
+
+										uint32_t compact;
+										if (EF_A2BGR10 == ves[mesh_index][i].format)
+										{	
+											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
+										}
+										else
+										{
+											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
+
+											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255) << 16)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 0);
+										}
+
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
+										break;
+									}
+								}
+							}
+
+							XMLNodePtr diffuse_node = vertex_node->FirstNode("diffuse");
+							if (diffuse_node)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Diffuse == ves[mesh_index][i].usage)
+									{
+										float4 diffuse(diffuse_node->Attrib("r")->ValueFloat(), diffuse_node->Attrib("g")->ValueFloat(),
+											diffuse_node->Attrib("b")->ValueFloat(), diffuse_node->Attrib("a")->ValueFloat());
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &diffuse, sizeof(diffuse));
+										break;
+									}
+								}
+							}
+
+							XMLNodePtr specular_node = vertex_node->FirstNode("specular");
+							if (specular_node)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Specular == ves[mesh_index][i].usage)
+									{
+										float4 specular(specular_node->Attrib("r")->ValueFloat(), specular_node->Attrib("g")->ValueFloat(),
+											specular_node->Attrib("b")->ValueFloat(), specular_node->Attrib("a")->ValueFloat());
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &specular, sizeof(specular));
+										break;
+									}
+								}
+							}
+
+							uint32_t num_blend = 0;
+							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_BlendIndex == ves[mesh_index][i].usage)
+									{
+										uint8_t bone_index = static_cast<uint8_t>(weight_node->Attrib("bone_index")->ValueUInt());
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(bone_index)], &bone_index, sizeof(bone_index));
+										break;
+									}
+								}
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_BlendWeight == ves[mesh_index][i].usage)
+									{
+										float weight = weight_node->Attrib("weight")->ValueFloat();
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + num_blend * sizeof(weight)], &weight, sizeof(weight));
+										break;
+									}
+								}
+								++ num_blend;
+							}
+
+							uint32_t usage = 0;
+							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if ((VEU_TextureCoord == ves[mesh_index][i].usage) && (usage == ves[mesh_index][i].usage_index))
+									{
+										float3 tex_coord(0, 0, 0);
+										XMLAttributePtr attr = tex_coord_node->Attrib("u");
+										if (attr)
+										{
+											tex_coord.x() = attr->ValueFloat();
+										}
+										attr = tex_coord_node->Attrib("v");
+										if (attr)
+										{
+											tex_coord.y() = attr->ValueFloat();
+										}
+										attr = tex_coord_node->Attrib("w");
+										if (attr)
+										{
+											tex_coord.z() = attr->ValueFloat();
+										}
+
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &tex_coord, merged_ves[buf_index].element_size());
+										break;
+									}
+								}
+								++ usage;
+							}
+
+							XMLNodePtr tangent_node = vertex_node->FirstNode("tangent");
+							if (tangent_node)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Tangent == ves[mesh_index][i].usage)
+									{
+										float k = 1;
+										XMLAttributePtr attr = tangent_node->Attrib("w");
+										if (attr)
+										{
+											k = attr->ValueFloat();
+										}
+
+										float3 tangent(tangent_node->Attrib("x")->ValueFloat(),
+											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
+										tangent = MathLib::normalize(tangent) * 0.5f + 0.5f;
+
+										uint32_t compact;
+										if (EF_A2BGR10 == ves[mesh_index][i].format)
+										{	
+											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 1023), 0, 1023)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.y() * 1023), 0, 1023) << 10)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.z() * 1023), 0, 1023) << 20)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((k * 0.5f + 0.5f) * 3), 0, 3) << 30);
+										}
+										else
+										{
+											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
+
+											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 255), 0, 255) << 16)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.y() * 255), 0, 255) << 8)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.z() * 255), 0, 255) << 0)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((k * 0.5f + 0.5f) * 255), 0, 255) << 24);
+										}
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
+										break;
+									}
+								}
+							}
+
+							XMLNodePtr binormal_node = vertex_node->FirstNode("binormal");
+							if (binormal_node)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_Binormal == ves[mesh_index][i].usage)
+									{
+										float3 binormal(tangent_node->Attrib("x")->ValueFloat(),
+											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
+										binormal = MathLib::normalize(binormal) * 0.5f + 0.5f;
+
+										uint32_t compact;
+										if (EF_A2BGR10 == ves[mesh_index][i].format)
+										{	
+											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 1023), 0, 1023)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.y() * 1023), 0, 1023) << 10)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.z() * 1023), 0, 1023) << 20);
+										}
+										else
+										{
+											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
+
+											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 255), 0, 255) << 16)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.y() * 255), 0, 255) << 8)
+												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.z() * 255), 0, 255) << 0);
+										}
+
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
+										break;
+									}
+								}
+							}
+
+							++ index;
+						}
+					}
+
+					bounding_boxes.push_back(Box(min_bb, max_bb));
+
+					{
+						XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
+
+						uint32_t index = 0;
+						for (XMLNodePtr tri_node = triangles_chunk->FirstNode("triangle"); tri_node; tri_node = tri_node->NextSibling("triangle"))
+						{
+							if (is_index_16_bit)
+							{
+								uint16_t a = static_cast<uint16_t>(tri_node->Attrib("a")->ValueUInt());
+								uint16_t b = static_cast<uint16_t>(tri_node->Attrib("b")->ValueUInt());
+								uint16_t c = static_cast<uint16_t>(tri_node->Attrib("c")->ValueUInt());
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 0) * index_elem_size], &a, sizeof(a));
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 1) * index_elem_size], &b, sizeof(b));
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 2) * index_elem_size], &c, sizeof(c));
+							}
+							else
+							{
+								uint32_t a = static_cast<uint32_t>(tri_node->Attrib("a")->ValueUInt());
+								uint32_t b = static_cast<uint32_t>(tri_node->Attrib("b")->ValueUInt());
+								uint32_t c = static_cast<uint32_t>(tri_node->Attrib("c")->ValueUInt());
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 0) * index_elem_size], &a, sizeof(a));
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 1) * index_elem_size], &b, sizeof(b));
+								memcpy(&merged_indices[(mesh_start_indices[mesh_index] + index * 3 + 2) * index_elem_size], &c, sizeof(c));
+							}
+
+							++ index;
+						}
+					}
+				}
+
+				uint32_t num_merged_ves = static_cast<uint32_t>(merged_ves.size());
+				ss->write(reinterpret_cast<char*>(&num_merged_ves), sizeof(num_merged_ves));
+				for (size_t i = 0; i < merged_ves.size(); ++ i)
+				{
+					ss->write(reinterpret_cast<char*>(&merged_ves[i]), sizeof(merged_ves[i]));
+				}
+
+				ss->write(reinterpret_cast<char*>(&mesh_base_vertices.back()), sizeof(mesh_base_vertices.back()));
+				ss->write(reinterpret_cast<char*>(&mesh_start_indices.back()), sizeof(mesh_start_indices.back()));
+				ss->write(&is_index_16_bit, sizeof(is_index_16_bit));
+
+				for (size_t i = 0; i < merged_buff.size(); ++ i)
+				{
+					ss->write(reinterpret_cast<char*>(&merged_buff[i][0]), merged_buff[i].size() * sizeof(merged_buff[i][0]));
+				}
+				ss->write(reinterpret_cast<char*>(&merged_indices[0]), merged_indices.size() * sizeof(merged_indices[0]));
+
+				mesh_index = 0;
+				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"))
+				{
+					WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
+
+					int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
+					ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+
+					float3 min_bb = bounding_boxes[mesh_index].Min();
+					ss->write(reinterpret_cast<char*>(&min_bb), sizeof(min_bb));
+					float3 max_bb = bounding_boxes[mesh_index].Max();
+					ss->write(reinterpret_cast<char*>(&max_bb), sizeof(max_bb));
+
+					ss->write(reinterpret_cast<char*>(&mesh_num_vertices[mesh_index]), sizeof(mesh_num_vertices[mesh_index]));
+					ss->write(reinterpret_cast<char*>(&mesh_base_vertices[mesh_index]), sizeof(mesh_base_vertices[mesh_index]));
+					ss->write(reinterpret_cast<char*>(&mesh_num_indices[mesh_index]), sizeof(mesh_num_indices[mesh_index]));
+					ss->write(reinterpret_cast<char*>(&mesh_start_indices[mesh_index]), sizeof(mesh_start_indices[mesh_index]));
+
+					++ mesh_index;
 				}
 			}
 
@@ -1231,7 +1328,7 @@ namespace KlayGE
 			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
 			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
 
-			uint32_t ver = 2;
+			uint32_t ver = 3;
 			ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
 			uint64_t original_len = ss->str().size();
@@ -1250,9 +1347,11 @@ namespace KlayGE
 	}
 
 	void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<std::vector<vertex_element> >& ves,
-		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs,
-		std::vector<char>& is_index_16_bit, std::vector<std::vector<uint8_t> >& indices,
+		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
+		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
+		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
+		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
 		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate)
 	{
@@ -1284,7 +1383,7 @@ namespace KlayGE
 
 		uint32_t ver;
 		lzma_file->read(&ver, sizeof(ver));
-		BOOST_ASSERT(2 == ver);
+		BOOST_ASSERT(3 == ver);
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
@@ -1338,204 +1437,53 @@ namespace KlayGE
 			}
 		}
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		uint32_t num_merged_ves;
+		decoded->read(&num_merged_ves, sizeof(num_merged_ves));
+		merged_ves.resize(num_merged_ves);
+		for (size_t i = 0; i < merged_ves.size(); ++ i)
+		{
+			decoded->read(&merged_ves[i], sizeof(merged_ves[i]));
+		}
+
+		uint32_t all_num_vertices;
+		uint32_t all_num_indices;
+		decoded->read(&all_num_vertices, sizeof(all_num_vertices));
+		decoded->read(&all_num_indices, sizeof(all_num_indices));
+		decoded->read(&all_is_index_16_bit, sizeof(all_is_index_16_bit));
+
+		int const index_elem_size = all_is_index_16_bit ? 2 : 4;
+
+		merged_buff.resize(merged_ves.size());
+		for (size_t i = 0; i < merged_buff.size(); ++ i)
+		{
+			merged_buff[i].resize(all_num_vertices * merged_ves[i].element_size());
+			decoded->read(&merged_buff[i][0], merged_buff[i].size() * sizeof(merged_buff[i][0]));
+		}
+		merged_indices.resize(all_num_indices * index_elem_size);
+		decoded->read(&merged_indices[0], merged_indices.size() * sizeof(merged_indices[0]));
 
 		mesh_names.resize(num_meshes);
 		mtl_ids.resize(num_meshes);
-		ves.resize(num_meshes),
-		max_num_blends.resize(num_meshes);
-		buffs.resize(num_meshes);
-		is_index_16_bit.resize(num_meshes);
-		indices.resize(num_meshes);
+		bbs.resize(num_meshes);
+		mesh_num_vertices.resize(num_meshes);
+		mesh_base_vertices.resize(num_meshes);
+		mesh_num_triangles.resize(num_meshes);
+		mesh_base_triangles.resize(num_meshes);
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
 			ReadShortString(decoded, mesh_names[mesh_index]);
 
 			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
 
-			uint32_t num_ves;
-			decoded->read(&num_ves, sizeof(num_ves));
-			ves[mesh_index].resize(num_ves);
+			float3 min_bb, max_bb;
+			decoded->read(&min_bb, sizeof(min_bb));
+			decoded->read(&max_bb, sizeof(max_bb));
+			bbs[mesh_index] = Box(min_bb, max_bb);
 
-			std::vector<vertex_element>& vertex_elements = ves[mesh_index];
-			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
-			{
-				decoded->read(&vertex_elements[ve_index], sizeof(vertex_elements[ve_index]));
-			}
-
-			uint32_t num_vertices;
-			decoded->read(&num_vertices, sizeof(num_vertices));
-
-			uint32_t& max_num_blend = max_num_blends[mesh_index];
-			decoded->read(&max_num_blend, sizeof(max_num_blend));
-
-			buffs[mesh_index].resize(num_ves);
-			for (uint32_t ve_index = 0; ve_index < num_ves; ++ ve_index)
-			{
-				std::vector<uint8_t>& buff = buffs[mesh_index][ve_index];
-				vertex_element& ve = vertex_elements[ve_index];
-				switch (ve.usage)
-				{
-				case VEU_Position:
-				case VEU_Normal:
-				case VEU_Binormal:
-					buff.resize(num_vertices * sizeof(float3));
-					break;
-
-				case VEU_Tangent:
-					buff.resize(num_vertices * sizeof(float4));
-					break;
-
-				case VEU_Diffuse:
-				case VEU_Specular:
-					buff.resize(num_vertices * sizeof(float4));
-					break;
-
-				case VEU_BlendIndex:
-					buff.resize(num_vertices * max_num_blend);
-					break;
-
-				case VEU_BlendWeight:
-					buff.resize(num_vertices * max_num_blend * sizeof(float));
-					break;
-
-				case VEU_TextureCoord:
-					buff.resize(num_vertices * NumComponents(ve.format) * sizeof(float));
-					break;
-				}
-
-				decoded->read(&buff[0], buff.size() * sizeof(buff[0]));
-
-				switch (ve.usage)
-				{
-				case VEU_Normal:
-				case VEU_Binormal:
-					if (EF_BGR32F == ve.format)
-					{
-						std::vector<uint32_t> compacted(num_vertices);
-
-						{
-							float3 const * p = reinterpret_cast<float3 const *>(&buff[0]);
-							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-							{	
-								ve.format = EF_A2BGR10;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
-									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
-								}
-							}
-							else
-							{
-								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-								ve.format = EF_ARGB8;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
-									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
-								}
-							}
-						}
-
-						buff.resize(compacted.size() * sizeof(compacted[0]));
-						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
-					}
-					break;
-
-				case VEU_Tangent:
-					if (EF_BGR32F == ve.format)
-					{
-						std::vector<uint32_t> compacted(num_vertices);
-
-						{
-							float3 const * p = reinterpret_cast<float3 const *>(&buff[0]);
-							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-							{	
-								ve.format = EF_A2BGR10;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
-									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
-								}
-							}
-							else
-							{
-								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-								ve.format = EF_ARGB8;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(p[j]) * 0.5f + 0.5f;
-									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
-								}
-							}
-						}
-
-						buff.resize(compacted.size() * sizeof(compacted[0]));
-						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
-					}
-					else
-					{
-						BOOST_ASSERT(EF_ABGR32F == ve.format);
-
-						std::vector<uint32_t> compacted(num_vertices);
-
-						{
-							float4 const * p = reinterpret_cast<float4 const *>(&buff[0]);
-							if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-							{	
-								ve.format = EF_A2BGR10;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(float3(p[j].x(), p[j].y(), p[j].z())) * 0.5f + 0.5f;
-									compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((p[j].w() * 0.5f + 0.5f) * 3), 0, 3) << 30);
-								}
-							}
-							else
-							{
-								BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-								ve.format = EF_ARGB8;
-								for (size_t j = 0; j < compacted.size(); ++ j)
-								{
-									float3 n = MathLib::normalize(float3(p[j].x(), p[j].y(), p[j].z())) * 0.5f + 0.5f;
-									compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0)
-										| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((p[j].w() * 0.5f + 0.5f) * 255), 0, 255) << 24);
-								}
-							}
-						}
-
-						buff.resize(compacted.size() * sizeof(compacted[0]));
-						memcpy(&buff[0], &compacted[0], buff.size() * sizeof(buff[0]));
-					}
-					break;
-
-				default:
-					break;
-				}
-			}
-
-			uint32_t num_triangles;
-			decoded->read(&num_triangles, sizeof(num_triangles));
-
-			decoded->read(&is_index_16_bit[mesh_index], sizeof(is_index_16_bit[mesh_index]));
-
-			indices[mesh_index].resize((is_index_16_bit[mesh_index] ? 2 : 4) * num_triangles * 3);
-			decoded->read(&indices[mesh_index][0], indices[mesh_index].size() * sizeof(indices[mesh_index][0]));
+			decoded->read(&mesh_num_vertices[mesh_index], sizeof(mesh_num_vertices[mesh_index]));
+			decoded->read(&mesh_base_vertices[mesh_index], sizeof(mesh_base_vertices[mesh_index]));
+			decoded->read(&mesh_num_triangles[mesh_index], sizeof(mesh_num_triangles[mesh_index]));
+			decoded->read(&mesh_base_triangles[mesh_index], sizeof(mesh_base_triangles[mesh_index]));
 		}
 
 		joints.resize(num_joints);
@@ -1584,7 +1532,7 @@ namespace KlayGE
 
 	boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc)
+		boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
@@ -1783,9 +1731,9 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", p[j].y()));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", p[j].z()));
 								}
-								else if (EF_BGR32F == ve.format)
+								else if (EF_ABGR32F == ve.format)
 								{
-									BOOST_ASSERT(EF_BGR32F == ve.format);
+									BOOST_ASSERT(EF_ABGR32F == ve.format);
 
 									float4 const * p = reinterpret_cast<float4 const *>(&buffs[mesh_index][k][0]);
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", p[j].x()));

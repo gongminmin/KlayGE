@@ -417,14 +417,16 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<std::vector<vertex_element> >& ves,
-		std::vector<uint32_t>& max_num_blends, std::vector<std::vector<std::vector<uint8_t> > >& buffs,
-		std::vector<char>& is_index_16_bit, std::vector<std::vector<uint8_t> >& indices,
+		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
+		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
+		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
+		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
 		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate);
 	KLAYGE_CORE_API boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		boost::function<StaticMeshPtr (RenderModelPtr, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+		boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
