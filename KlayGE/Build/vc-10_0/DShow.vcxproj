@@ -109,7 +109,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Show\</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\bin\win_x86\Show\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -136,7 +136,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Show\</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\bin\win_x64\Show\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -166,7 +166,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Show\</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\bin\win_x86\Show\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -195,7 +195,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Deploying...</Message>
-      <Command>copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Show\</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\bin\win_x64\Show\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

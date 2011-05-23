@@ -93,7 +93,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Show\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Show\"
 			/>
 		</Configuration>
 		<Configuration
@@ -171,7 +171,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Show\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Show\"
 			/>
 		</Configuration>
 		<Configuration
@@ -253,7 +253,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Show\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Show\"
 			/>
 		</Configuration>
 		<Configuration
@@ -332,7 +332,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Show\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Show\"
 			/>
 		</Configuration>
 	</Configurations>

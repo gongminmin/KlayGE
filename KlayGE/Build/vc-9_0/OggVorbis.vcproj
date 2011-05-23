@@ -91,7 +91,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -166,7 +166,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -246,7 +246,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Audio\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Audio\"
 			/>
 		</Configuration>
 		<Configuration
@@ -323,7 +323,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Audio\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Audio\"
 			/>
 		</Configuration>
 	</Configurations>

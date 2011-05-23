@@ -92,7 +92,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Scene\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Scene\"
 			/>
 		</Configuration>
 		<Configuration
@@ -169,7 +169,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Scene\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Scene\"
 			/>
 		</Configuration>
 		<Configuration
@@ -251,7 +251,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x86\Scene\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x86\Scene\"
 			/>
 		</Configuration>
 		<Configuration
@@ -330,7 +330,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Deploying..."
-				CommandLine="copy $(TargetDir)$(TargetFileName) ..\..\bin\win_x64\Scene\"
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\bin\win_x64\Scene\"
 			/>
 		</Configuration>
 	</Configurations>
