@@ -11,7 +11,7 @@
 
 	<shader>
 		<![CDATA[
-void GenShadowMapVS(float4 Position : POSITION,
+void GenCubeShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
@@ -22,7 +22,7 @@ void GenShadowMapVS(float4 Position : POSITION,
 	oDist = length(LightWorldPos.xyz);
 }
 
-float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
+float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 {
 	float2 dxdy = float2(ddx(dist), ddy(dist));
 	return float4(dist, dist * dist + 0.25f * dot(dxdy, dxdy), 0, 1);
@@ -30,12 +30,65 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="GenShadowMap">
+	<technique name="GenCubeShadowMap">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
-			<state name="vertex_shader" value="GenShadowMapVS()"/>
-			<state name="pixel_shader" value="GenShadowMapPS()"/>
+			<state name="vertex_shader" value="GenCubeShadowMapVS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="float4x4" name="mv" />
+	<parameter type="float" name="far" />
+
+	<shader>
+		<![CDATA[    
+void GenDPShadowMapVS(float4 Position : POSITION,
+						float3 Normal : NORMAL,
+					out float2 oDist  : TEXCOORD0,
+					out float4 oPos   : SV_Position)
+{
+	// transform vertex to DP-space
+	oPos = mul(Position, mv);
+	oPos /= oPos.w;
+
+	// because the origin is at 0 the proj-vector
+	// matches the vertex-position
+	float fLength = length(oPos.xyz);
+	// normalize
+	oPos /= fLength;
+	// save for clipping
+	oDist.y = oPos.z;
+	// calc "normal" on intersection, by adding the 
+	// reflection-vector(0,0,1) and divide through 
+	// his z to get the texture coords
+	oPos.xy /= oPos.z + 1;
+	
+	// set z for z-buffering and neutralize w
+	oPos.z = fLength / far;
+	oPos.w = 1.0f;
+
+	// DP-depth
+	oDist.x = fLength;
+}
+
+float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
+{
+	clip(dist.y);
+
+	float2 dxdy = float2(ddx(dist.x), ddy(dist.x));
+	return float4(dist.x, dist.x * dist.x + 0.25f * dot(dxdy, dxdy), 0, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="GenDPShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenDPShadowMapVS()"/>
+			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
 		</pass>
 	</technique>
 
@@ -56,19 +109,23 @@ float4 GenShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<parameter type="texture2D" name="specular_tex"/>
 	<parameter type="texture2D" name="emit_tex"/>
 
-	<parameter type="sampler" name="linear_sampler">
+	<parameter type="textureCUBE" name="light_projective_tex"/>
+	<parameter type="textureCUBE" name="shadow_cube_tex"/>
+	<parameter type="texture2D" name="shadow_dual_tex"/>
+	<parameter type="int" name="dpsm"/>
+
+	<parameter type="sampler" name="linear_wrap_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
 		<state name="address_v" value="wrap"/>
 	</parameter>
-
-	<parameter type="textureCUBE" name="light_projective_tex"/>
-	<parameter type="textureCUBE" name="shadow_cube_tex"/>
-	<parameter type="sampler" name="cube_sampler">
+	<parameter type="sampler" name="linear_clamp_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+
+	<parameter type="float4x4" name="obj_model_to_light_view" />
 
 	<shader>
 		<![CDATA[
@@ -78,12 +135,14 @@ void RenderSceneVS(float4 Position : POSITION,
 					out float2 oTexcoord : TEXCOORD0,
 					out float3 oLightWorldPos : TEXCOORD1,
 					out float3 oLightWorldNormal : TEXCOORD2,
+					out float3 oLightVuewPos : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
 	oTexcoord = Texcoord;
 	oPos = mul(Position, mvp);
 	oLightWorldPos = mul(Position, obj_model_to_light_model).xyz;
 	oLightWorldNormal = mul(Normal * 2 - 1, (float3x3)obj_model_to_light_model);
+	oLightVuewPos = mul(Position, obj_model_to_light_view).xyz;
 }
 
 float linstep(float min, float max, float v)
@@ -92,13 +151,13 @@ float linstep(float min, float max, float v)
 }
 
 float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,
-					float3 LightWorldNormal : TEXCOORD2) : SV_Target 
+					float3 LightWorldNormal : TEXCOORD2, float3 LightViewPos : TEXCOORD3) : SV_Target 
 {
 	float3 c_diff, c_spec, emit;
 	float opacity;
 	if (diffuse_clr.a > 0.5f)
 	{
-		c_diff = diffuse_tex.Sample(linear_sampler, Texcoord).rgb;
+		c_diff = diffuse_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	else
 	{
@@ -106,7 +165,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	}
 	if (specular_clr.a > 0.5f)
 	{
-		c_spec = specular_tex.Sample(linear_sampler, Texcoord).rgb;
+		c_spec = specular_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	else
 	{
@@ -114,7 +173,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	}
 	if (emit_clr.a > 0.5f)
 	{
-		emit = emit_tex.Sample(linear_sampler, Texcoord).rgb;
+		emit = emit_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	else
 	{
@@ -126,12 +185,31 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 halfway = normalize(light_vec + normal);
 	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
-	float3 ori_color = light_projective_tex.Sample(cube_sampler, LightWorldPos).rgb;
-	float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
-	float2 moments = shadow_cube_tex.Sample(cube_sampler, shadow_dir).xy;
+	float3 ori_color = 1;//light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
+	float2 moments;
+	float dist;
+	if (dpsm)
+	{
+		dist = length(LightViewPos);
 
-	float dist_sq = dot(LightWorldPos, LightWorldPos);
-	float dist = sqrt(dist_sq);
+		float2 tex = float2(LightViewPos.x * sign(LightViewPos.z), LightViewPos.y) / (dist + abs(LightViewPos.z));
+		tex.y *= flipping;
+		tex = (tex + 1) / 2;
+		tex.x *= 0.5f;
+		if (LightViewPos.z < 0.0f)
+		{
+			tex.x += 0.5f;
+		}
+
+		moments = shadow_dual_tex.SampleLevel(linear_clamp_sampler, tex, 0).xy;
+	}
+	else
+	{
+		dist = length(LightWorldPos);
+
+		float3 shadow_dir = float3(LightWorldPos.x, flipping * LightWorldPos.y, LightWorldPos.z);
+		moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
+	}
 
 	float p = (dist <= moments.x);
 	// Variance shadow mapping

@@ -155,7 +155,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 		opacity = opacity_clr.r;
 	}
 	
-	float3 clr = ambient_clr.rgb * c_diff * emit;
+	float3 clr = ambient_clr.rgb * c_diff + emit;
 
 	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
