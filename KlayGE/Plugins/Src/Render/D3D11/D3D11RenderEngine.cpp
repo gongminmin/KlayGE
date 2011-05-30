@@ -474,11 +474,23 @@ namespace KlayGE
 		uint32_t num_buffs = rl ? rl->NumVertexStreams() : 0;
 		if (num_buffs > 0)
 		{
+			std::vector<void*> so_src(num_buffs, NULL);
 			std::vector<ID3D11Buffer*> d3d11_buffs(num_buffs);
 			std::vector<UINT> d3d11_buff_offsets(num_buffs, 0);
 			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				d3d11_buffs[i] = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get())->D3DBuffer().get();
+				D3D11GraphicsBuffer* d3d11_buf = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get());
+
+				so_src[i] = d3d11_buf;
+				d3d11_buffs[i] = d3d11_buf->D3DBuffer().get();
+			}
+
+			for (uint32_t i = 0; i < num_buffs; ++ i)
+			{
+				if (so_src[i] != NULL)
+				{
+					this->DetachSRV(so_src[i], 0, 1);
+				}
 			}
 
 			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
@@ -1166,7 +1178,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::DetachTexture(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres)
+	void D3D11RenderEngine::DetachSRV(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres)
 	{
 		for (uint32_t st = 0; st < ShaderObject::ST_NumShaderTypes; ++ st)
 		{

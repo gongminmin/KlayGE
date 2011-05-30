@@ -1732,7 +1732,7 @@ namespace KlayGE
 			{
 				if (uavsrcs_[ST_ComputeShader][i] != NULL)
 				{
-					re.DetachTexture(uavsrcs_[ST_ComputeShader][i], 0, 1);
+					re.DetachSRV(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
 			}
 

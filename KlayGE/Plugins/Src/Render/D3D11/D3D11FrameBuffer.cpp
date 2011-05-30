@@ -118,7 +118,7 @@ namespace KlayGE
 		{
 			if (rt_src[i] != NULL)
 			{
-				re.DetachTexture(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
+				re.DetachSRV(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
 			}
 		}
 
