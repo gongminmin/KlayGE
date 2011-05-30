@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "DepthPeeling.hpp"

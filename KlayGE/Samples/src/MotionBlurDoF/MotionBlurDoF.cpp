@@ -22,7 +22,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <ctime>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

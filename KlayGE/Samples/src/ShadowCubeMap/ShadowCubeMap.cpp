@@ -25,7 +25,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "ShadowCubeMap.hpp"
@@ -280,7 +279,7 @@ namespace
 
 		void Update()
 		{
-			model_ = MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-std::clock() / 1500.0f);
+			model_ = MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f);
 			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -291,6 +290,7 @@ namespace
 
 	private:
 		float4x4 model_;
+		Timer timer_;
 	};
 
 	class RoomObject : public SceneObjectHelper
@@ -325,7 +325,7 @@ namespace
 		void operator()(LightSource& light)
 		{
 			light.ModelMatrix(MathLib::rotation_z(0.4f)
-				* MathLib::rotation_y(static_cast<float>(timer_.current_time()) / 1.4f)
+				* MathLib::rotation_y(static_cast<float>(timer_.elapsed()) / 1.4f)
 				* MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 

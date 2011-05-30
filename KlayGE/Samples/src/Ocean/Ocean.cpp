@@ -26,7 +26,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <iostream>
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>

@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "Refract.hpp"

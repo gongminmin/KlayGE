@@ -29,6 +29,7 @@ private:
 
 	int tess_factor_;
 	bool animation_;
+	KlayGE::Timer ani_timer_;
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;

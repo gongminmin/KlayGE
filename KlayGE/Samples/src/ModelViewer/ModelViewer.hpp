@@ -42,6 +42,7 @@ private:
 	KlayGE::FirstPersonCameraController fpsController_;
 	KlayGE::TrackballCameraController tbController_;
 
+	KlayGE::Timer ani_timer_;
 	float last_time_;
 	int frame_;
 

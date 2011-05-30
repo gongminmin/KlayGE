@@ -388,7 +388,7 @@ namespace
 
 		void operator()(LightSource& light)
 		{
-			light.ModelMatrix(MathLib::rotation_y(static_cast<float>(timer_.current_time()) * 1000 * rot_speed_)
+			light.ModelMatrix(MathLib::rotation_y(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_)
 				* MathLib::translation(pos_));
 		}
 
@@ -410,7 +410,7 @@ namespace
 
 		void operator()(LightSource& light)
 		{
-			light.ModelMatrix(MathLib::translation(sin(static_cast<float>(timer_.current_time()) * 1000 * move_speed_), 0.0f, 0.0f)
+			light.ModelMatrix(MathLib::translation(sin(static_cast<float>(timer_.elapsed()) * 1000 * move_speed_), 0.0f, 0.0f)
 				* MathLib::translation(pos_));
 		}
 

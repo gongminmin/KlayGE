@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 

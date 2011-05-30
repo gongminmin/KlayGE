@@ -239,7 +239,7 @@ namespace
 	public:
 		void operator()(LightSource& light)
 		{
-			float degree = static_cast<float>(timer_.current_time());
+			float degree = static_cast<float>(timer_.elapsed());
 			float4x4 matRot = MathLib::rotation_z(degree);
 
 			float3 light_pos(1, 0, -1);

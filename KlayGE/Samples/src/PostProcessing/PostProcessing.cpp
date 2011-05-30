@@ -21,7 +21,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "AsciiArtsPP.hpp"
@@ -91,12 +90,13 @@ namespace
 
 		void Update()
 		{
-			model_ = MathLib::rotation_y(-std::clock() / 1500.0f);
+			model_ = MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f);
 			checked_pointer_cast<RenderTorus>(renderable_)->SetModelMatrix(model_);
 		}
 
 	private:
 		float4x4 model_;
+		Timer timer_;
 	};
 
 	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox

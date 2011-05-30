@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "ProceduralTex.hpp"
@@ -55,7 +54,7 @@ namespace
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
-			*(technique_->Effect().ParameterByName("t")) = clock() / 2000.0f;
+			*(technique_->Effect().ParameterByName("t")) = static_cast<float>(timer_.elapsed()) / 2.0f;
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -82,6 +81,9 @@ namespace
 		{
 			*(technique_->Effect().ParameterByName("freq")) = freq;
 		}
+
+	private:
+		Timer timer_;
 	};
 
 	class PolygonObject : public SceneObjectHelper

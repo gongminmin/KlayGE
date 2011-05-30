@@ -25,7 +25,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <ctime>
 #include <boost/tuple/tuple.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

@@ -30,7 +30,6 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#include <ctime>
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

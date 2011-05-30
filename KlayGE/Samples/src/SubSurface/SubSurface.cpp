@@ -20,7 +20,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "SubSurface.hpp"

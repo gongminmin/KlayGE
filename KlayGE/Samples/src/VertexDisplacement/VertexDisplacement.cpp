@@ -20,7 +20,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 #include <boost/typeof/typeof.hpp>
 
@@ -83,8 +82,11 @@ namespace
 
 		void Update()
 		{
-			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(clock() / 400.0f);
+			checked_pointer_cast<FlagRenderable>(renderable_)->SetAngle(static_cast<float>(timer_.elapsed()) / 0.4f);
 		}
+
+	private:
+		Timer timer_;
 	};
 
 

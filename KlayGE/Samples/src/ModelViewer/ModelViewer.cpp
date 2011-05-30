@@ -20,7 +20,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "ModelViewer.hpp"
@@ -569,7 +568,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 
 	if (play_)
 	{
-		float this_time = clock() / 1000.0f;
+		float this_time = static_cast<float>(ani_timer_.elapsed());
 		if (this_time - last_time_ > 1.0f / model_->FrameRate())
 		{
 			++ frame_;

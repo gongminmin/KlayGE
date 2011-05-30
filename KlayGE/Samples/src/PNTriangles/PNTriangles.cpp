@@ -23,7 +23,6 @@
 
 #include <vector>
 #include <sstream>
-#include <ctime>
 #include <boost/bind.hpp>
 
 #include "PNTriangles.hpp"
@@ -715,7 +714,7 @@ uint32_t PNTrianglesApp::DoUpdate(uint32_t /*pass*/)
 
 	if (animation_)
 	{
-		float this_time = clock() / 1000.0f;
+		float this_time = static_cast<float>(ani_timer_.elapsed());
 		obj->SetFrame(this_time * obj->FrameRate());
 	}
 	obj->LightDir(MathLib::transform_coord(light_->Direction(), this->ActiveCamera().ViewMatrix()));
