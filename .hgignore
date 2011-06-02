@@ -70,6 +70,17 @@ KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.sdf
 KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.suo
 KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/*.user
 KlayGE/Exporters/3DSMax/MeshML/build/vc-10_0/ipch/
+KlayGE/Exporters/Maya/Debug/
+KlayGE/Exporters/Maya/Release/
+KlayGE/Exporters/Maya/*.aps
+KlayGE/Exporters/Maya/build/vc-9_0/*.ncb
+KlayGE/Exporters/Maya/build/vc-9_0/*.user
+KlayGE/Exporters/Maya/build/vc-9_0/*.suo
+KlayGE/Exporters/Maya/build/vc-10_0/*.opensdf
+KlayGE/Exporters/Maya/build/vc-10_0/*.sdf
+KlayGE/Exporters/Maya/build/vc-10_0/*.suo
+KlayGE/Exporters/Maya/build/vc-10_0/*.user
+KlayGE/Exporters/Maya/build/vc-10_0/ipch/
 KlayGE/media/Models/*.model_bin
 KlayGE/Samples/Debug/
 KlayGE/Samples/Release/

@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeshMLExport", "MeshMLExport.vcxproj", "{B2E57368-EC68-4951-BDC4-7DBDA23E110C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		ReleaseDebug|Win32 = ReleaseDebug|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.Debug|Win32.Build.0 = Debug|Win32
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.Release|Win32.ActiveCfg = Release|Win32
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.Release|Win32.Build.0 = Release|Win32
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.ReleaseDebug|Win32.ActiveCfg = ReleaseDebug|Win32
+		{B2E57368-EC68-4951-BDC4-7DBDA23E110C}.ReleaseDebug|Win32.Build.0 = ReleaseDebug|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
