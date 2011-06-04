@@ -25,6 +25,8 @@ public:
 	void VisualizeTexture(int slot);
 
 	void LineMode(bool line_mode);
+	void SmoothMesh(bool smooth);
+	void SetTessFactor(int32_t tess_factor);
 
 	KlayGE::RenderEffectPtr const & Effect() const
 	{
@@ -48,6 +50,13 @@ private:
 	KlayGE::TexturePtr empty_normal_map_;
 };
 
+enum TessMode
+{
+	TM_HWTess,
+	TM_InstancedTess,
+	TM_No
+};
+
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
@@ -56,6 +65,7 @@ public:
 	void BuildMeshInfo();
 
 	void OnRenderBegin();
+	void Render();
 
 	void SetWorld(KlayGE::float4x4 const & mat);
 	void SetLightPos(KlayGE::float3 const & light_pos);
@@ -66,6 +76,8 @@ public:
 	void VisualizeTexture(int slot);
 
 	void LineMode(bool line_mode);
+	void SmoothMesh(bool smooth);
+	void SetTessFactor(int32_t tess_factor);
 
 	bool HasOpacityMap() const
 	{
@@ -82,9 +94,22 @@ private:
 	KlayGE::float3 light_pos_;
 
 	bool line_mode_;
+	bool smooth_mesh_;
+	TessMode tess_mode_;
+	float tess_factor_;
 	std::string visualize_;
 	bool has_opacity_map_;
 	bool has_skinned_;
+
+	KlayGE::RenderLayoutPtr mesh_rl_;
+	KlayGE::RenderLayoutPtr point_rl_;
+	KlayGE::RenderLayoutPtr skinned_rl_;
+	KlayGE::RenderLayoutPtr tess_pattern_rl_;
+	KlayGE::GraphicsBufferPtr skinned_pos_vb_;
+	KlayGE::GraphicsBufferPtr skinned_normal_vb_;
+	KlayGE::GraphicsBufferPtr skinned_tangent_vb_;
+	KlayGE::GraphicsBufferPtr skinned_binormal_vb_;
+	KlayGE::GraphicsBufferPtr bindable_ib_;
 
 	KlayGE::TexturePtr diffuse_map_;
 	KlayGE::TexturePtr specular_map_;

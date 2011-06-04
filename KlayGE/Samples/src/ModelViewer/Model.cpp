@@ -19,15 +19,134 @@
 
 using namespace KlayGE;
 
+std::vector<GraphicsBufferPtr> tess_pattern_vbs;
+std::vector<GraphicsBufferPtr> tess_pattern_ibs;
+
+void InitInstancedTessBuffs()
+{
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	tess_pattern_vbs.resize(32);
+	tess_pattern_ibs.resize(tess_pattern_vbs.size());
+
+	ElementInitData init_data;
+		
+	std::vector<float2> vert;
+	vert.push_back(float2(0, 0));
+	vert.push_back(float2(1, 0));
+	vert.push_back(float2(0, 1));
+	init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
+	init_data.slice_pitch = 0;
+	init_data.data = &vert[0];
+	tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+	std::vector<uint16_t> index;
+	index.push_back(0);
+	index.push_back(1);
+	index.push_back(2);
+	init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+	init_data.slice_pitch = 0;
+	init_data.data = &index[0];
+	tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+	for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
+	{
+		for (size_t j = 0; j < vert.size(); ++ j)
+		{
+			float f = i / (i + 1.0f);
+			vert[j] *= f;
+		}
+
+		for (size_t j = 0; j < i + 1; ++ j)
+		{
+			vert.push_back(float2(1 - j / (i + 1.0f), j / (i + 1.0f)));
+		}
+		vert.push_back(float2(0, 1));
+
+		uint16_t last_1_row = static_cast<uint16_t>(vert.size() - (i + 2));
+		uint16_t last_2_row = static_cast<uint16_t>(last_1_row - (i + 1));
+
+		for (size_t j = 0; j < i; ++ j)
+		{
+			index.push_back(static_cast<uint16_t>(last_2_row + j));
+			index.push_back(static_cast<uint16_t>(last_1_row + j));
+			index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
+
+			index.push_back(static_cast<uint16_t>(last_2_row + j));
+			index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
+			index.push_back(static_cast<uint16_t>(last_2_row + j + 1));
+		}
+		index.push_back(static_cast<uint16_t>(last_2_row + i));
+		index.push_back(static_cast<uint16_t>(last_1_row + i));
+		index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
+
+		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
+		init_data.slice_pitch = 0;
+		init_data.data = &vert[0];
+		tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+
+		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
+		init_data.slice_pitch = 0;
+		init_data.data = &index[0];
+		tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+	}
+}
+
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
 		world_(float4x4::Identity()),
 			effect_(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect()),
 			light_pos_(1, 1, -1),
-			line_mode_(false), visualize_("Lighting")
+			line_mode_(false), smooth_mesh_(false), tess_mode_(TM_No), tess_factor_(5), visualize_("Lighting")
 {
 	inv_world_ = MathLib::inverse(world_);
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+	if (caps.hs_support && caps.ds_support)
+	{
+		tess_mode_ = TM_HWTess;
+	}
+	else if (caps.max_shader_model >= 4)
+	{
+		tess_mode_ = TM_InstancedTess;
+	}
+	else
+	{
+		tess_mode_ = TM_No;
+	}
+
+	if (TM_No == tess_mode_)
+	{
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
+	}
+	else
+	{
+		if (TM_HWTess == tess_mode_)
+		{
+			rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+		}
+	}
+
+	if (TM_InstancedTess == tess_mode_)
+	{
+		tess_pattern_rl_ = rf.MakeRenderLayout();
+		tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_binormal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_rl_ = rf.MakeRenderLayout();
+		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+		point_rl_ = rf.MakeRenderLayout();
+		point_rl_->TopologyType(RenderLayout::TT_PointList);
+	}
+
+	mesh_rl_ = rl_;
 }
 
 void DetailedSkinnedMesh::BuildMeshInfo()
@@ -126,6 +245,35 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	specular_level_ = mtl.specular_level;
 	shininess_ = std::max(1e-6f, mtl.shininess);
 
+	if (TM_InstancedTess == tess_mode_)
+	{
+		bindable_ib_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL, rl_->IndexStreamFormat());
+
+		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_binormal_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_rl_->BindVertexStream(skinned_pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_normal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_binormal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F)));
+		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
+		skinned_rl_->StartIndexLocation(rl_->StartIndexLocation());
+		skinned_rl_->BaseVertexLocation(rl_->BaseVertexLocation());
+
+		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
+		{
+			point_rl_->BindVertexStream(rl_->GetVertexStream(i), rl_->VertexStreamFormat(i));
+		}
+		point_rl_->StartIndexLocation(rl_->StartIndexLocation());
+		point_rl_->BaseVertexLocation(rl_->BaseVertexLocation());
+
+		bindable_ib_->Resize(rl_->GetIndexStream()->Size());
+		rl_->GetIndexStream()->CopyToBuffer(*bindable_ib_);
+
+		this->SetTessFactor(static_cast<int32_t>(tess_factor_));
+	}
+
 	this->UpdateTech();
 }
 
@@ -160,6 +308,23 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	{
 		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRotations();
 		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindPositions();
+	}
+
+	if (tess_mode_ != TM_No)
+	{
+		*(effect_->ParameterByName("adaptive_tess")) = true;
+		*(effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
+
+		if (TM_InstancedTess == tess_mode_)
+		{
+			*(effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
+			*(effect_->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
+			*(effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
+			*(effect_->ParameterByName("skinned_binormal_buf")) = skinned_binormal_vb_;
+			*(effect_->ParameterByName("index_buf")) = bindable_ib_;
+			*(effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
+			*(effect_->ParameterByName("base_vertex_loc")) = static_cast<int32_t>(this->BaseVertexLocation());
+		}
 	}
 }
 
@@ -206,6 +371,31 @@ void DetailedSkinnedMesh::LineMode(bool line_mode)
 	this->UpdateTech();
 }
 
+void DetailedSkinnedMesh::SmoothMesh(bool smooth)
+{
+	smooth_mesh_ = smooth;
+	this->UpdateTech();
+}
+
+void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
+{
+	if (TM_InstancedTess == tess_mode_)
+	{
+		if (tess_pattern_vbs.empty())
+		{
+			InitInstancedTessBuffs();
+		}
+
+		tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
+
+		tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
+		tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
+			RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
+	}
+
+	tess_factor_ = static_cast<float>(tess_factor);
+}
+
 void DetailedSkinnedMesh::UpdateTech()
 {
 	std::string tech = visualize_;
@@ -223,9 +413,57 @@ void DetailedSkinnedMesh::UpdateTech()
 			tech += "Blend";
 		}
 	}
+	if (smooth_mesh_)
+	{
+		switch (tess_mode_)
+		{
+		case TM_HWTess:
+			tech += "Smooth5";
+			break;
+
+		case TM_InstancedTess:
+			tech += "Smooth4";
+			break;
+
+		case TM_No:
+			break;
+		}
+	}
 	tech += "Tech";
 
 	technique_ = effect_->TechniqueByName(tech);
+}
+
+void DetailedSkinnedMesh::Render()
+{
+	if (smooth_mesh_)
+	{
+		if (TM_HWTess == tess_mode_)
+		{
+			rl_ = mesh_rl_;
+			SkinnedMesh::Render();
+		}
+		else
+		{
+			RenderTechniquePtr backup_tech = technique_;
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			re.BindSOBuffers(skinned_rl_);
+			rl_ = point_rl_;
+			technique_ = technique_->Effect().TechniqueByName("SkinnedStreamOut");
+			SkinnedMesh::Render();
+			re.BindSOBuffers(RenderLayoutPtr());
+
+			technique_ = backup_tech;
+			rl_ = tess_pattern_rl_;
+			SkinnedMesh::Render();
+		}
+	}
+	else
+	{
+		rl_ = mesh_rl_;
+		SkinnedMesh::Render();
+	}
 }
 
 
@@ -602,5 +840,21 @@ void DetailedSkinnedModel::LineMode(bool line_mode)
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
 		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->LineMode(line_mode);
+	}
+}
+
+void DetailedSkinnedModel::SmoothMesh(bool smooth)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SmoothMesh(smooth);
+	}
+}
+
+void DetailedSkinnedModel::SetTessFactor(int32_t tess_factor)
+{
+	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
+	{
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetTessFactor(tess_factor);
 	}
 }

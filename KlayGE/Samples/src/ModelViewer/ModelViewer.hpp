@@ -28,6 +28,7 @@ private:
 	void SkinnedHandler(KlayGE::UICheckBox const & sender);
 	void FrameChangedHandler(KlayGE::UISlider const & sender);
 	void PlayHandler(KlayGE::UICheckBox const & sender);
+	void SmoothMeshHandler(KlayGE::UICheckBox const & sender);
 	void FPSCameraHandler(KlayGE::UICheckBox const & sender);
 	void MeshChangedHandler(KlayGE::UIComboBox const & sender);
 	void VisualizeChangedHandler(KlayGE::UIComboBox const & sender);
@@ -56,6 +57,7 @@ private:
 	int id_frame_static_;
 	int id_frame_slider_;
 	int id_play_;
+	int id_smooth_mesh_;
 	int id_fps_camera_;
 	int id_hdr_;
 	int id_mesh_;

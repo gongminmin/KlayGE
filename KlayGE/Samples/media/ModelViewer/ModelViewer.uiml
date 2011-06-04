@@ -8,7 +8,8 @@
 		<control type="static" id="FrameStatic" caption="0:" x="20" y="50" width="80" height="24" is_default="0"/>
 
 		<control type="check_box" id="Play" caption="Play Animation" x="220" y="20" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
-		<control type="check_box" id="FPSCamera" caption="FPS camera" x="420" y="20" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="SmoothMesh" caption="Smooth Mesh" x="420" y="20" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="620" y="20" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
 	<dialog id="Model" caption="Model" x="-220" y="130" align_x="right" width="220" height="520">

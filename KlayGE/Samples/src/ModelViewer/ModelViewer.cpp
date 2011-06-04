@@ -216,6 +216,7 @@ void ModelViewerApp::InitObjects()
 	id_frame_static_ = dialog_animation_->IDFromName("FrameStatic");
 	id_frame_slider_ = dialog_animation_->IDFromName("FrameSlider");
 	id_play_ = dialog_animation_->IDFromName("Play");
+	id_smooth_mesh_ = dialog_animation_->IDFromName("SmoothMesh");
 	id_fps_camera_ = dialog_animation_->IDFromName("FPSCamera");
 	id_hdr_ = dialog_animation_->IDFromName("HDR");
 	id_open_ = dialog_model_->IDFromName("Open");
@@ -246,6 +247,7 @@ void ModelViewerApp::InitObjects()
 	this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 
 	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
+	dialog_animation_->Control<UICheckBox>(id_smooth_mesh_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SmoothMeshHandler, this, _1));
 	dialog_animation_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::FPSCameraHandler, this, _1));
 
 	dialog_model_->Control<UIButton>(id_open_)->OnClickedEvent().connect(boost::bind(&ModelViewerApp::OpenHandler, this, _1));
@@ -398,6 +400,11 @@ void ModelViewerApp::FrameChangedHandler(KlayGE::UISlider const & sender)
 void ModelViewerApp::PlayHandler(KlayGE::UICheckBox const & sender)
 {
 	play_ = sender.GetChecked();
+}
+
+void ModelViewerApp::SmoothMeshHandler(KlayGE::UICheckBox const & sender)
+{
+	model_->SmoothMesh(sender.GetChecked());
 }
 
 void ModelViewerApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
