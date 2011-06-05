@@ -285,15 +285,6 @@ namespace KlayGE
 		virtual void WriteKeyframeChunk();
 
 	private:
-		std::ostream& Stream(size_t indent)
-		{
-			for (size_t i = 0; i < indent; ++ i)
-			{
-				*output_stream_ << "    ";
-			}
-			return *output_stream_;
-		}
-
 		void OptimizeJoints();
 		void OptimizeMaterials();
 		void OptimizeMeshes();

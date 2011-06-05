@@ -46,16 +46,16 @@ namespace KlayGE
 			return;
 		}
 
-		std::ostream& os0 = this->Stream(0);
+		std::ostream& os = *output_stream_;
 
 		// Initialize the xml document
-		os0 << "<?xml version=\"1.0\" ";
+		os << "<?xml version=\"1.0\" ";
 		if (!encoding.empty())
 		{
-			os0 << "encoding=\"" << encoding << "\"";
+			os << "encoding=\"" << encoding << "\"";
 		}
-		os0 << "?>" << std::endl << std::endl;
-		os0 << "<model version=\"" << modelVersion << "\">" << std::endl;
+		os << "?>" << std::endl << std::endl;
+		os << "<model version=\"" << modelVersion << "\">" << std::endl;
 
 		if (!joints_.empty())
 		{
@@ -75,7 +75,7 @@ namespace KlayGE
 		}
 
 		// Finish the writing process
-		os0 << "</model>" << std::endl;
+		os << "</model>" << std::endl;
 	}
 
 	void MeshExtractor::WriteJointChunk()
@@ -131,51 +131,45 @@ namespace KlayGE
 			}
 		}
 
-		std::ostream& os0 = this->Stream(0);
-		std::ostream& os1 = this->Stream(1);
-		std::ostream& os2 = this->Stream(2);
-		std::ostream& os3 = this->Stream(3);
+		std::ostream& os = *output_stream_;
 
 		// Write joints out
-		os1 << "<bones_chunk>" << std::endl;
+		os << "\t<bones_chunk>" << std::endl;
 		for (size_t i=0; i<sorted_joints.size(); ++i)
 		{
 			fitr = joints_.find(sorted_joints[i]);
 			if (fitr == joints_.end()) continue;
 
 			JointStruct& joint = fitr->second;
-			os2 << "<bone name=\"" << fitr->first;
+			os << "\t\t<bone name=\"" << fitr->first;
 
 			int parent_id = -1;
 			fitr = joints_.find(joint.parent_name);
 			if (fitr != joints_.end())
 				parent_id = fitr->second.joint_id;
 
-			os0 << "\" parent=\"" << parent_id << "\">" << std::endl;
-			os3 << "<bind_pos x=\"" << joint.position[0]
-			<< "\" y=\"" << joint.position[1]
-			<< "\" z=\"" << joint.position[2] << "\"/>" << std::endl;
-			os3 << "<bind_quat x=\"" << joint.quaternion[0]
-			<< "\" y=\"" << joint.quaternion[1]
-			<< "\" z=\"" << joint.quaternion[2]
-			<< "\" w=\"" << joint.quaternion[3] << "\"/>" << std::endl;
-			os2 << "</bone>" << std::endl;
+			os << "\" parent=\"" << parent_id << "\">" << std::endl;
+			os << "\t\t\t<bind_pos x=\"" << joint.position[0]
+				<< "\" y=\"" << joint.position[1]
+				<< "\" z=\"" << joint.position[2] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_quat x=\"" << joint.quaternion[0]
+				<< "\" y=\"" << joint.quaternion[1]
+				<< "\" z=\"" << joint.quaternion[2]
+				<< "\" w=\"" << joint.quaternion[3] << "\"/>" << std::endl;
+			os << "\t\t</bone>" << std::endl;
 		}
-		os1 << "</bones_chunk>" << std::endl;
+		os << "\t</bones_chunk>" << std::endl;
 	}
 
 	void MeshExtractor::WriteMaterialChunk()
 	{
-		std::ostream& os1 = this->Stream(1);
-		std::ostream& os2 = this->Stream(2);
-		std::ostream& os3 = this->Stream(3);
-		std::ostream& os4 = this->Stream(4);
+		std::ostream& os = *output_stream_;
 
-		os1 << "<materials_chunk>" << std::endl;
+		os << "\t<materials_chunk>" << std::endl;
 		for (size_t i=0; i<obj_materials_.size(); ++i)
 		{
 			MaterialStruct& mtl = obj_materials_[i];
-			os2 << "<material ambient_r=\"" << mtl.ambient[0]
+			os << "\t\t<material ambient_r=\"" << mtl.ambient[0]
 				<< "\" ambient_g=\"" << mtl.ambient[1]
 				<< "\" ambient_b=\"" << mtl.ambient[2]
 				<< "\" diffuse_r=\"" << mtl.diffuse[0]
@@ -193,61 +187,57 @@ namespace KlayGE
 
 			if (!mtl.texture_slots.empty())
 			{
-				os3 << "<textures_chunk>" << std::endl;
+				os << "\t\t\t<textures_chunk>" << std::endl;
 				for (std::vector<TextureSlot>::iterator itr=mtl.texture_slots.begin();
 					itr!=mtl.texture_slots.end(); ++itr)
 				{
-					os4 << "<texture type=\"" << itr->first
+					os << "\t\t\t\t<texture type=\"" << itr->first
 						<< "\" name=\"" << itr->second << "\"/>" << std::endl;
 				}
-				os3 << "</textures_chunk>" << std::endl;
+				os << "\t\t\t</textures_chunk>" << std::endl;
 			}
-			os2 << "</material>" << std::endl;
+			os << "\t\t</material>" << std::endl;
 		}
-		os1 << "</materials_chunk>" << std::endl;
+		os << "\t</materials_chunk>" << std::endl;
 	}
 
 	void MeshExtractor::WriteMeshChunk()
 	{
-		std::ostream& os1 = this->Stream(1);
-		std::ostream& os2 = this->Stream(2);
-		std::ostream& os3 = this->Stream(3);
-		std::ostream& os4 = this->Stream(4);
-		std::ostream& os5 = this->Stream(5);
+		std::ostream& os = *output_stream_;
 
-		os1 << "<meshes_chunk>" << std::endl;
+		os << "\t<meshes_chunk>" << std::endl;
 		for (size_t i=0; i<obj_meshes_.size(); ++i)
 		{
 			MeshStruct& mesh = obj_meshes_[i];
-			os2 << "<mesh name=\"" << mesh.name
+			os << "\t\t<mesh name=\"" << mesh.name
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
-			os3 << "<vertices_chunk>" << std::endl;
+			os << "\t\t\t<vertices_chunk>" << std::endl;
 			for (std::vector<VertexStruct>::iterator itr = mesh.vertices.begin();
 				itr != mesh.vertices.end(); ++ itr)
 			{
 				VertexStruct& vertex = (*itr);
-				os4 << "<vertex x=\"" << vertex.position[0]
+				os << "\t\t\t\t<vertex x=\"" << vertex.position[0]
 					<< "\" y=\"" << vertex.position[1]
 					<< "\" z=\"" << vertex.position[2] << "\">" << std::endl;
 
 				if (vertexExportSettings_ & VES_NORMAL)
 				{
-					os5 << "<normal x=\"" << vertex.normal[0]
+					os << "\t\t\t\t\t<normal x=\"" << vertex.normal[0]
 						<< "\" y=\"" << vertex.normal[1]
 						<< "\" z=\"" << vertex.normal[2] << "\"/>" << std::endl;
 				}
 
 				if (vertexExportSettings_ & VES_TANGENT)
 				{
-					os5 << "<tangent x=\"" << vertex.tangent[0]
+					os << "\t\t\t\t\t<tangent x=\"" << vertex.tangent[0]
 						<< "\" y=\"" << vertex.tangent[1]
 						<< "\" z=\"" << vertex.tangent[2] << "\"/>" << std::endl;
 				}
 
 				if (vertexExportSettings_ & VES_BINORMAL)
 				{
-					os5 << "<binormal x=\"" << vertex.binormal[0]
+					os << "\t\t\t\t\t<binormal x=\"" << vertex.binormal[0]
 						<< "\" y=\"" << vertex.binormal[1]
 						<< "\" z=\"" << vertex.binormal[2] << "\"/>" << std::endl;
 				}
@@ -260,7 +250,7 @@ namespace KlayGE
 						for (std::vector<TexCoord>::iterator titr = vertex.texcoords.begin();
 							titr != vertex.texcoords.end(); ++ titr)
 						{
-							os5 << "<tex_coord u=\"" << (*titr)[0] << "\"/>" << std::endl;
+							os << "\t\t\t\t\t<tex_coord u=\"" << (*titr)[0] << "\"/>" << std::endl;
 						}
 						break;
 
@@ -268,7 +258,7 @@ namespace KlayGE
 						for (std::vector<TexCoord>::iterator titr = vertex.texcoords.begin();
 							titr != vertex.texcoords.end(); ++ titr)
 						{
-							os5 << "<tex_coord u=\"" << (*titr)[0]
+							os << "\t\t\t\t\t<tex_coord u=\"" << (*titr)[0]
 								<< "\" v=\"" << (*titr)[1] << "\"/>" << std::endl;
 						}
 						break;
@@ -277,7 +267,7 @@ namespace KlayGE
 						for (std::vector<TexCoord>::iterator titr = vertex.texcoords.begin();
 							titr != vertex.texcoords.end(); ++ titr)
 						{
-							os5 << "<tex_coord u=\"" << (*titr)[0] << "\" v=\"" << (*titr)[1]
+							os << "\t\t\t\t\t<tex_coord u=\"" << (*titr)[0] << "\" v=\"" << (*titr)[1]
 								<< "\" w=\"" << (*titr)[2] << "\"/>" << std::endl;
 						}
 						break;
@@ -296,37 +286,34 @@ namespace KlayGE
 						continue;
 					}
 
-					os5 << "<weight bone_index=\"" << fitr->second.joint_id
+					os << "\t\t\t\t\t<weight bone_index=\"" << fitr->second.joint_id
 						<< "\" weight=\"" << jitr->second << "\"/>" << std::endl;
 				}
-				os4 << "</vertex>" << std::endl;
+				os << "\t\t\t\t</vertex>" << std::endl;
 			}
-			os3 << "</vertices_chunk>" << std::endl;
+			os << "\t\t\t</vertices_chunk>" << std::endl;
 
-			os3 << "<triangles_chunk>" << std::endl;
+			os << "\t\t\t<triangles_chunk>" << std::endl;
 			for (std::vector<TriangleStruct>::iterator itr = mesh.triangles.begin();
 				itr != mesh.triangles.end(); ++ itr)
 			{
 				TriangleStruct& tri = *itr;
-				os4 << "<triangle a=\"" << tri.vertex_index[0]
+				os << "\t\t\t\t<triangle a=\"" << tri.vertex_index[0]
 					<< "\" b=\"" << tri.vertex_index[1]
 					<< "\" c=\"" << tri.vertex_index[2] << "\"/>" << std::endl;
 			}
-			os3 << "</triangles_chunk>" << std::endl;
+			os << "\t\t\t</triangles_chunk>" << std::endl;
 
-			os2 << "</mesh>" << std::endl;
+			os << "\t\t</mesh>" << std::endl;
 		}
-		os1 << "</meshes_chunk>" << std::endl;
+		os << "\t</meshes_chunk>" << std::endl;
 	}
 
 	void MeshExtractor::WriteKeyframeChunk()
 	{
-		std::ostream& os1 = this->Stream(1);
-		std::ostream& os2 = this->Stream(2);
-		std::ostream& os3 = this->Stream(3);
-		std::ostream& os4 = this->Stream(4);
+		std::ostream& os = *output_stream_;
 
-		os1 << "<key_frames_chunk start_frame=\"" << start_frame_
+		os << "\t<key_frames_chunk start_frame=\"" << start_frame_
 			<< "\" end_frame=\"" << end_frame_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
 		for (size_t i = 0; i < keyframes_.size(); ++ i)
@@ -334,25 +321,25 @@ namespace KlayGE
 			KeyframeStruct& kf = keyframes_[i];
 			size_t frames = std::min<size_t>(kf.positions.size(), kf.quaternions.size());
 
-			os2 << "<key_frame joint=\"" << kf.joint << "\">" << std::endl;
+			os << "\t\t<key_frame joint=\"" << kf.joint << "\">" << std::endl;
 			for (size_t j = 0; j < frames; ++ j)
 			{
 				Point3& pos = kf.positions[j];
 				Quat& quat = kf.quaternions[j];
 
-				os3 << "<key>" << std::endl;
-				os4 << "<pos x=\"" << pos[0]
+				os << "\t\t\t<key>" << std::endl;
+				os << "\t\t\t\t<pos x=\"" << pos[0]
 					<< "\" y=\"" << pos[1]
 					<< "\" z=\"" << pos[2] << "\"/>" << std::endl;
-				os4 << "<quat x=\"" << quat[0]
+				os << "\t\t\t\t<quat x=\"" << quat[0]
 					<< "\" y=\"" << quat[1]
 					<< "\" z=\"" << quat[2]
 					<< "\" w=\"" << quat[3] << "\"/>" << std::endl;
-				os3 << "</key>" << std::endl;
+				os << "\t\t\t</key>" << std::endl;
 			}
-			os2 << "</key_frame>" << std::endl;
+			os << "\t\t</key_frame>" << std::endl;
 		}
-		os1 << "</key_frames_chunk>" << std::endl;
+		os << "\t</key_frames_chunk>" << std::endl;
 	}
 
 	void MeshExtractor::OptimizeJoints()
