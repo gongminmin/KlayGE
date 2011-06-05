@@ -247,8 +247,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 	if (TM_InstancedTess == tess_mode_)
 	{
-		bindable_ib_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read, NULL, rl_->IndexStreamFormat());
-
 		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
@@ -258,18 +256,27 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)));
 		skinned_rl_->BindVertexStream(skinned_binormal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
-		skinned_rl_->StartIndexLocation(rl_->StartIndexLocation());
-		skinned_rl_->BaseVertexLocation(rl_->BaseVertexLocation());
 
 		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
 		{
 			point_rl_->BindVertexStream(rl_->GetVertexStream(i), rl_->VertexStreamFormat(i));
 		}
-		point_rl_->StartIndexLocation(rl_->StartIndexLocation());
-		point_rl_->BaseVertexLocation(rl_->BaseVertexLocation());
+		point_rl_->NumVertices(rl_->NumVertices());
+		point_rl_->StartVertexLocation(rl_->StartVertexLocation());
 
-		bindable_ib_->Resize(rl_->GetIndexStream()->Size());
-		rl_->GetIndexStream()->CopyToBuffer(*bindable_ib_);
+		uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
+
+		GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+		ib_sysmem->Resize(rl_->GetIndexStream()->Size());
+		rl_->GetIndexStream()->CopyToBuffer(*ib_sysmem);
+		{
+			GraphicsBuffer::Mapper mapper(*ib_sysmem, BA_Read_Only);
+			ElementInitData init_data;
+			init_data.data = mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size;
+			init_data.row_pitch = this->NumTriangles() * 3 * index_size;
+			init_data.slice_pitch = init_data.row_pitch;
+			bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, rl_->IndexStreamFormat());
+		}
 
 		this->SetTessFactor(static_cast<int32_t>(tess_factor_));
 	}

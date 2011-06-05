@@ -195,6 +195,7 @@ namespace
 				mesh->NumVertices(model_desc->mesh_num_vertices[mesh_index]);
 				mesh->NumTriangles(model_desc->mesh_num_indices[mesh_index] / 3);
 				mesh->BaseVertexLocation(model_desc->mesh_base_vertices[mesh_index]);
+				mesh->StartVertexLocation(model_desc->mesh_base_vertices[mesh_index]);
 				mesh->StartIndexLocation(model_desc->mesh_start_indices[mesh_index]);
 			}
 
