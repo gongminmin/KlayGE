@@ -50,13 +50,6 @@ private:
 	KlayGE::TexturePtr empty_normal_map_;
 };
 
-enum TessMode
-{
-	TM_HWTess,
-	TM_InstancedTess,
-	TM_No
-};
-
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 {
 public:
@@ -95,7 +88,6 @@ private:
 
 	bool line_mode_;
 	bool smooth_mesh_;
-	TessMode tess_mode_;
 	float tess_factor_;
 	std::string visualize_;
 	bool has_opacity_map_;
@@ -106,9 +98,9 @@ private:
 	KlayGE::RenderLayoutPtr skinned_rl_;
 	KlayGE::RenderLayoutPtr tess_pattern_rl_;
 	KlayGE::GraphicsBufferPtr skinned_pos_vb_;
+	KlayGE::GraphicsBufferPtr skinned_tex_vb_;
 	KlayGE::GraphicsBufferPtr skinned_normal_vb_;
 	KlayGE::GraphicsBufferPtr skinned_tangent_vb_;
-	KlayGE::GraphicsBufferPtr skinned_binormal_vb_;
 	KlayGE::GraphicsBufferPtr bindable_ib_;
 
 	KlayGE::TexturePtr diffuse_map_;

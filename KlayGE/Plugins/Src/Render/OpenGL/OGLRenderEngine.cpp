@@ -1450,6 +1450,8 @@ namespace KlayGE
 			caps_.ds_support = false;
 		}
 
+		caps_.tess_method = TM_No;
+
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
 		if (vendor.find("NVIDIA", 0) != std::string::npos)
 		{

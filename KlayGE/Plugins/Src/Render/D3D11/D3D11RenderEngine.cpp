@@ -878,6 +878,7 @@ namespace KlayGE
 			caps_.cs_support = true;
 			caps_.hs_support = true;
 			caps_.ds_support = true;
+			caps_.tess_method = TM_Hardware;
 			break;
 
 		case D3D_FEATURE_LEVEL_10_1:
@@ -895,6 +896,7 @@ namespace KlayGE
 				d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &cs4_feature, sizeof(cs4_feature));
 				caps_.cs_support = cs4_feature.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x ? true : false;
 			}
+			caps_.tess_method = TM_Instanced;
 			break;
 
 		default:
@@ -907,6 +909,7 @@ namespace KlayGE
 			caps_.cs_support = false;
 			caps_.hs_support = false;
 			caps_.ds_support = false;
+			caps_.tess_method = TM_No;
 			break;
 		}
 

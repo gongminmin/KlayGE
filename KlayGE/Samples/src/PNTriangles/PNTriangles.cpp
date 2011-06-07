@@ -32,13 +32,6 @@ using namespace KlayGE;
 
 namespace
 {
-	enum TessMode
-	{
-		TM_HWTess,
-		TM_InstancedTess,
-		TM_No
-	};
-
 	std::vector<GraphicsBufferPtr> tess_pattern_vbs;
 	std::vector<GraphicsBufferPtr> tess_pattern_ibs;
 
@@ -125,41 +118,22 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			RenderEffectPtr effect = rf.LoadEffect("PNTriangles.fxml");
-			if (caps.hs_support && caps.ds_support)
+			switch (caps.tess_method)
 			{
-				tess_mode_ = TM_HWTess;
-
+			case TM_Hardware:
 				technique_ = effect->TechniqueByName("PNTriangles");
-				if (!technique_->Validate())
-				{
-					tess_mode_ = TM_InstancedTess;
-
-					technique_ = effect->TechniqueByName("InstTessPNTriangles");
-					if (!technique_->Validate())
-					{
-						tess_mode_ = TM_No;
-						technique_ = effect->TechniqueByName("NoPNTriangles");
-					}
-				}
-			}
-			else if (caps.max_shader_model >= 4)
-			{
-				tess_mode_ = TM_InstancedTess;
-				
+				break;
+			
+			case TM_Instanced:
 				technique_ = effect->TechniqueByName("InstTessPNTriangles");
-				if (!technique_->Validate())
-				{
-					tess_mode_ = TM_No;
-					technique_ = effect->TechniqueByName("NoPNTriangles");
-				}
-			}
-			else
-			{
-				tess_mode_ = TM_No;
+				break;
+			
+			default:
 				technique_ = effect->TechniqueByName("NoPNTriangles");
+				break;
 			}
 
-			if (TM_No == tess_mode_)
+			if (TM_No == caps.tess_method)
 			{
 				pn_enabled_ = false;
 				rl_->TopologyType(RenderLayout::TT_TriangleList);
@@ -167,14 +141,11 @@ namespace
 			else
 			{
 				pn_enabled_ = true;
-				if (TM_HWTess == tess_mode_)
+				if (TM_Hardware == caps.tess_method)
 				{
 					rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 				}
-			}
 
-			if (tess_mode_ != TM_No)
-			{
 				tess_pattern_rl_ = rf.MakeRenderLayout();
 				tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
@@ -214,7 +185,8 @@ namespace
 			}
 			*(technique_->Effect().ParameterByName("diffuse_tex")) = dm;
 
-			if (tess_mode_ != TM_No)
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (caps.tess_method != TM_No)
 			{
 				skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
 				skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
@@ -250,7 +222,8 @@ namespace
 
 		void SetTessFactor(int32_t tess_factor)
 		{
-			if (TM_InstancedTess == tess_mode_)
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (TM_Instanced == caps.tess_method)
 			{
 				tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
 
@@ -264,7 +237,8 @@ namespace
 
 		void EnablePNTriangles(bool pn)
 		{
-			if (tess_mode_ != TM_No)
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (caps.tess_method != TM_No)
 			{
 				pn_enabled_ = pn;
 			}
@@ -333,7 +307,8 @@ namespace
 		{
 			if (pn_enabled_)
 			{
-				if (TM_HWTess == tess_mode_)
+				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+				if (TM_Hardware == caps.tess_method)
 				{
 					rl_ = mesh_rl_;
 					SkinnedMesh::Render();
@@ -371,7 +346,6 @@ namespace
 		float tess_factor_;
 		bool line_mode_;
 		bool pn_enabled_;
-		TessMode tess_mode_;
 
 		RenderLayoutPtr mesh_rl_;
 		RenderLayoutPtr point_rl_;

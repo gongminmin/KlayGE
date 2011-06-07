@@ -573,6 +573,7 @@ namespace KlayGE
 		caps_.cs_support = false;
 		caps_.hs_support = false;
 		caps_.ds_support = false;
+		caps_.tess_method = TM_No;
 
 		
 		vertex_format_.insert(EF_A8);

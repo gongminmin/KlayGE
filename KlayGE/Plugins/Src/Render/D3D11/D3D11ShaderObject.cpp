@@ -1001,9 +1001,15 @@ namespace KlayGE
 										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
 									}
 
+									UINT rasterized_stream = 0;
+									if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc((*shader_desc_ids)[ST_PixelShader]).func_name.empty()))
+									{
+										rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
+									}
+
 									ID3D11GeometryShader* gs;
 									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
-										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, 0, NULL, &gs)))
+										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
 									{
 										is_shader_validate_[type] = false;
 									}
@@ -1037,9 +1043,15 @@ namespace KlayGE
 									d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
 								}
 
+								UINT rasterized_stream = 0;
+								if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc((*shader_desc_ids)[ST_PixelShader]).func_name.empty()))
+								{
+									rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
+								}
+
 								ID3D11GeometryShader* gs;
-								if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(vs_code_->GetBufferPointer(), code_blob->GetBufferSize(),
-									&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, 0, NULL, &gs)))
+								if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(code_blob->GetBufferPointer(), code_blob->GetBufferSize(),
+									&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, NULL, &gs)))
 								{
 									is_shader_validate_[type] = false;
 								}

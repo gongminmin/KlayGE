@@ -22,6 +22,13 @@
 
 namespace KlayGE
 {
+	enum TessellationMethod
+	{
+		TM_Hardware,
+		TM_Instanced,
+		TM_No
+	};
+
 	struct RenderDeviceCaps
 	{
 		uint8_t max_shader_model;
@@ -55,6 +62,8 @@ namespace KlayGE
 		bool cs_support;
 		bool hs_support;
 		bool ds_support;
+
+		TessellationMethod tess_method;
 
 		boost::function<bool(ElementFormat)> vertex_format_support;
 		boost::function<bool(ElementFormat)> texture_format_support;

@@ -98,52 +98,39 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 		world_(float4x4::Identity()),
 			effect_(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect()),
 			light_pos_(1, 1, -1),
-			line_mode_(false), smooth_mesh_(false), tess_mode_(TM_No), tess_factor_(5), visualize_("Lighting")
+			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_("Lighting")
 {
 	inv_world_ = MathLib::inverse(world_);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
-	if (caps.hs_support && caps.ds_support)
-	{
-		tess_mode_ = TM_HWTess;
-	}
-	else if (caps.max_shader_model >= 4)
-	{
-		tess_mode_ = TM_InstancedTess;
-	}
-	else
-	{
-		tess_mode_ = TM_No;
-	}
-
-	if (TM_No == tess_mode_)
+	if (TM_No == caps.tess_method)
 	{
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 	}
 	else
 	{
-		if (TM_HWTess == tess_mode_)
+		if (TM_Hardware == caps.tess_method)
 		{
 			rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 		}
-	}
+		else
+		{
+			BOOST_ASSERT(TM_Instanced == caps.tess_method);
+		
+			tess_pattern_rl_ = rf.MakeRenderLayout();
+			tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-	if (TM_InstancedTess == tess_mode_)
-	{
-		tess_pattern_rl_ = rf.MakeRenderLayout();
-		tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
+			skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+			skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_GR32F);
+			skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+			skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+			skinned_rl_ = rf.MakeRenderLayout();
+			skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-		skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-		skinned_binormal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-		skinned_rl_ = rf.MakeRenderLayout();
-		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-		point_rl_ = rf.MakeRenderLayout();
-		point_rl_->TopologyType(RenderLayout::TT_PointList);
+			point_rl_ = rf.MakeRenderLayout();
+			point_rl_->TopologyType(RenderLayout::TT_PointList);
+		}
 	}
 
 	mesh_rl_ = rl_;
@@ -245,16 +232,17 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	specular_level_ = mtl.specular_level;
 	shininess_ = std::max(1e-6f, mtl.shininess);
 
-	if (TM_InstancedTess == tess_mode_)
+	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+	if (TM_Instanced == caps.tess_method)
 	{
 		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_tex_vb_->Resize(this->NumVertices() * sizeof(float2));
 		skinned_normal_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
-		skinned_binormal_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_rl_->BindVertexStream(skinned_pos_vb_, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-		skinned_rl_->BindVertexStream(skinned_normal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
-		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)));
-		skinned_rl_->BindVertexStream(skinned_binormal_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tex_vb_, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+		skinned_rl_->BindVertexStream(skinned_normal_vb_, boost::make_tuple(vertex_element(VEU_Normal, 1, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tangent_vb_, boost::make_tuple(vertex_element(VEU_Tangent, 2, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
@@ -317,17 +305,18 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindPositions();
 	}
 
-	if (tess_mode_ != TM_No)
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.tess_method != TM_No)
 	{
 		*(effect_->ParameterByName("adaptive_tess")) = true;
 		*(effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
 
-		if (TM_InstancedTess == tess_mode_)
+		if (TM_Instanced == caps.tess_method)
 		{
 			*(effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
+			*(effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
 			*(effect_->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
 			*(effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
-			*(effect_->ParameterByName("skinned_binormal_buf")) = skinned_binormal_vb_;
 			*(effect_->ParameterByName("index_buf")) = bindable_ib_;
 			*(effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
 			*(effect_->ParameterByName("base_vertex_loc")) = static_cast<int32_t>(this->BaseVertexLocation());
@@ -386,7 +375,8 @@ void DetailedSkinnedMesh::SmoothMesh(bool smooth)
 
 void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 {
-	if (TM_InstancedTess == tess_mode_)
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (TM_Instanced == caps.tess_method)
 	{
 		if (tess_pattern_vbs.empty())
 		{
@@ -422,13 +412,14 @@ void DetailedSkinnedMesh::UpdateTech()
 	}
 	if (smooth_mesh_)
 	{
-		switch (tess_mode_)
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		switch (caps.tess_method)
 		{
-		case TM_HWTess:
+		case TM_Hardware:
 			tech += "Smooth5";
 			break;
 
-		case TM_InstancedTess:
+		case TM_Instanced:
 			tech += "Smooth4";
 			break;
 
@@ -445,7 +436,8 @@ void DetailedSkinnedMesh::Render()
 {
 	if (smooth_mesh_)
 	{
-		if (TM_HWTess == tess_mode_)
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (TM_Hardware == caps.tess_method)
 		{
 			rl_ = mesh_rl_;
 			SkinnedMesh::Render();
