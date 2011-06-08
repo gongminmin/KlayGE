@@ -440,6 +440,7 @@ void DetailedSkinnedMesh::Render()
 		if (TM_Hardware == caps.tess_method)
 		{
 			rl_ = mesh_rl_;
+			rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 			SkinnedMesh::Render();
 		}
 		else
@@ -461,6 +462,7 @@ void DetailedSkinnedMesh::Render()
 	else
 	{
 		rl_ = mesh_rl_;
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 		SkinnedMesh::Render();
 	}
 }

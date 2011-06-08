@@ -519,7 +519,7 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float2 tex0 : TEXCOORD0,
 				int4 blend_indices : BLENDINDICES,
 #endif
 #endif
-				float3 N	: NORMAL
+				float3 N	: NORMAL,
 				float4 T	: TANGENT)
 {
 	VS_CONTROL_POINT_OUTPUT output;
@@ -601,7 +601,7 @@ HS_CONSTANT_DATA_OUTPUT PNTrianglesConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPU
 				ip[0].Normal, ip[1].Normal, ip[2].Normal,				
 				output.b210, output.b120, output.b021,
 				output.b012, output.b102, output.b201, output.b111,
-				output.n110, output.n011, output.n101)
+				output.n110, output.n011, output.n101);
 
 	return output;
 }
@@ -647,9 +647,9 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	InterpolatePNAttrs(bc_coords,
 				patch[0].Pos, patch[1].Pos, patch[2].Pos,
 				patch[0].Texcoord0, patch[1].Texcoord0, patch[2].Texcoord0,
-				patch[0].normal, patch[1].normal, patch[2].normal,
-				patch[0].tangent, patch[1].tangent, patch[2].tangent,
-				patch[0].binormal, patch[1].binormal, patch[2].binormal,
+				patch[0].Normal, patch[1].Normal, patch[2].Normal,
+				patch[0].Tangent, patch[1].Tangent, patch[2].Tangent,
+				patch[0].Binormal, patch[1].Binormal, patch[2].Binormal,
 
 				HSConstantData.b210, HSConstantData.b120, HSConstantData.b021,
 				HSConstantData.b012, HSConstantData.b102, HSConstantData.b201, HSConstantData.b111,
