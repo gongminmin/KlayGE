@@ -43,11 +43,10 @@ float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
 	<parameter type="float" name="far" />
 
 	<shader>
-		<![CDATA[    
-void GenDPShadowMapVS(float4 Position : POSITION,
-						float3 Normal : NORMAL,
-					out float2 oDist  : TEXCOORD0,
-					out float4 oPos   : SV_Position)
+		<![CDATA[
+void CalcDPSM(float4 Position,
+			out float2 oDist,
+			out float4 oPos)
 {
 	// transform vertex to DP-space
 	oPos = mul(Position, mv);
@@ -73,6 +72,14 @@ void GenDPShadowMapVS(float4 Position : POSITION,
 	oDist.x = fLength;
 }
 
+void GenDPShadowMapVS(float4 Position : POSITION,
+						float3 Normal : NORMAL,
+					out float2 oDist  : TEXCOORD0,
+					out float4 oPos   : SV_Position)
+{
+	CalcDPSM(Position, oDist, oPos);
+}
+
 float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 {
 	clip(dist.y);
@@ -91,6 +98,170 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
 		</pass>
 	</technique>
+
+
+	<parameter type="bool" name="adaptive_tess"/>
+	<parameter type="float4" name="tess_factors"/>
+
+	<shader>
+		<![CDATA[
+void InterpolateFlatAttrs(float3 bc_coords,
+				float3 pos0, float3 pos1, float3 pos2,
+				out float3 oPos)
+{
+	float u = bc_coords.x;
+	float v = bc_coords.y;
+	float w = bc_coords.z;
+
+	oPos = pos0 * w + pos1 * u + pos2 * v;
+}
+		]]>
+	</shader>
+
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+	float3 Pos : POSITION;
+};
+
+VS_CONTROL_POINT_OUTPUT HWTessGenDPShadowMapVS(float4 pos : POSITION)
+{
+	VS_CONTROL_POINT_OUTPUT output;
+	output.Pos = pos.xyz;
+	return output;
+}
+		
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	// Tess factor for the FF HW block
+	float edges[3]	: SV_TessFactor;
+	float inside	: SV_InsideTessFactor;
+};
+
+//--------------------------------------------------------------------------------------
+// Constant data function for the HWTessGenDPShadowMapHS.  This is executed once per patch.
+//--------------------------------------------------------------------------------------
+HS_CONSTANT_DATA_OUTPUT HWTessGenDPShadowMapConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
+{	
+	HS_CONSTANT_DATA_OUTPUT output;
+    
+	if (adaptive_tess)
+	{
+		// Calculate the tessellation factor per edge, based on distance from camera
+		float dist;
+		float3 mid_point;
+		// Edge 0
+		mid_point = (ip[2].Pos + ip[0].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Edge 1
+		mid_point = (ip[0].Pos + ip[1].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Edge 2
+		mid_point = (ip[1].Pos + ip[2].Pos) / 2;
+		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		// Inside
+		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
+	}
+	else
+	{
+		// Simply output the tessellation factors from constant space 
+		// for use by the FF tessellation unit
+		output.edges[0] = output.edges[1] = output.edges[2] = tess_factors.x;
+		output.inside = tess_factors.y;
+	}
+
+	return output;
+}
+
+struct HS_CONTROL_POINT
+{
+	float3 Pos : POSITION;
+};
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("HWTessGenDPShadowMapConstantsHS")]
+HS_CONTROL_POINT HWTessGenDPShadowMapHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+										uint i : SV_OutputControlPointID)
+{
+	HS_CONTROL_POINT output;
+	output.Pos = p[i].Pos;
+	return output;
+}
+
+[domain("tri")]
+void HWTessGenDPShadowMapDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<HS_CONTROL_POINT, 3> patch,
+
+							out float2 oDist : TEXCOORD0,
+							out float4 oPos : SV_Position)
+{
+	float4 Position = float4(0, 0, 0, 1);
+	InterpolateFlatAttrs(bc_coords,
+				patch[0].Pos, patch[1].Pos, patch[2].Pos,
+				Position.xyz);
+
+	CalcDPSM(Position, oDist, oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="GenDPShadowMapTess5Tech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="HWTessGenDPShadowMapVS()"/>
+			<state name="hull_shader" value="HWTessGenDPShadowMapHS()"/>
+			<state name="domain_shader" value="HWTessGenDPShadowMapDS()"/>
+			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="buffer" elem_type="float4" name="skinned_pos_buf"/>
+	<parameter type="buffer" elem_type="uint" name="index_buf"/>
+
+	<shader type="vertex_shader" version="4">
+		<![CDATA[
+void InstTessGenDPShadowMapVS(float2 barycentric : TEXCOORD1,
+
+					uint instance_id : SV_InstanceID,
+					
+					out float2 oDist : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	uint index0 = index_buf.Load(instance_id * 3 + 0);
+	float3 pos_os0 = skinned_pos_buf.Load(index0).xyz;
+	uint index1 = index_buf.Load(instance_id * 3 + 1);
+	float3 pos_os1 = skinned_pos_buf.Load(index1).xyz;
+	uint index2 = index_buf.Load(instance_id * 3 + 2);
+	float3 pos_os2 = skinned_pos_buf.Load(index2).xyz;
+
+	float4 Position = float4(0, 0, 0, 1);
+	InterpolateFlatAttrs(float3(barycentric, 1 - barycentric.x - barycentric.y),
+				pos_os0, pos_os1, pos_os2, Position.xyz);
+
+	CalcDPSM(Position, oDist, oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="GenDPShadowMapTess4Tech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="InstTessGenDPShadowMapVS()"/>
+			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
+		</pass>
+	</technique>
+
 
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
