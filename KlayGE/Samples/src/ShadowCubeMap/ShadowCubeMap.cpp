@@ -184,6 +184,7 @@ namespace
 					float4x4 mv = model * light_view_;
 					*(effect->ParameterByName("mv")) = mv;
 					*(effect->ParameterByName("far")) = app.ActiveCamera().FarPlane();
+					*(effect->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), MathLib::inverse(model));
 				}
 			}
 			else
@@ -370,8 +371,24 @@ namespace
 			{
 				if (dpsm)
 				{
-					technique_ = effect_->TechniqueByName("GenDPShadowMapTess4Tech");
-					smooth_mesh_ = true;
+					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+					if (caps.tess_method != TM_No)
+					{
+						if (TM_Hardware == caps.tess_method)
+						{
+							technique_ = effect_->TechniqueByName("GenDPShadowMapTess5Tech");
+						}
+						else
+						{
+							technique_ = effect_->TechniqueByName("GenDPShadowMapTess4Tech");
+						}
+						smooth_mesh_ = true;
+					}
+					else
+					{
+						technique_ = effect_->TechniqueByName("GenDPShadowMap");
+						smooth_mesh_ = false;
+					}
 				}
 				else
 				{

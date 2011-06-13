@@ -102,6 +102,7 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 
 	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
+	<parameter type="float3" name="eye_pos"/>
 
 	<shader>
 		<![CDATA[

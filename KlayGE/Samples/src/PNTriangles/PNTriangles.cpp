@@ -291,7 +291,7 @@ namespace
 			*(technique_->Effect().ParameterByName("worldview")) = model_matrix_ * view;
 			*(technique_->Effect().ParameterByName("viewproj")) = view * proj;
 			*(technique_->Effect().ParameterByName("worldviewproj")) = model_matrix_ * view * proj;
-			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), MathLib::inverse(model_matrix_));
 
 			*(technique_->Effect().ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
 
