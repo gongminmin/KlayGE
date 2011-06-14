@@ -184,7 +184,9 @@ namespace
 					float4x4 mv = model * light_view_;
 					*(effect->ParameterByName("mv")) = mv;
 					*(effect->ParameterByName("far")) = app.ActiveCamera().FarPlane();
-					*(effect->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), MathLib::inverse(model));
+
+					FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
+					*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
 				}
 			}
 			else

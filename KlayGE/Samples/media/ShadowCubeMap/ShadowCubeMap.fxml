@@ -102,7 +102,7 @@ float4 GenDPShadowMapPS(float2 dist : TEXCOORD0) : SV_Target
 
 	<parameter type="bool" name="adaptive_tess"/>
 	<parameter type="float4" name="tess_factors"/>
-	<parameter type="float3" name="eye_pos"/>
+	<parameter type="float2" name="tess_edge_length_scale"/>
 
 	<shader>
 		<![CDATA[
@@ -149,21 +149,25 @@ HS_CONSTANT_DATA_OUTPUT HWTessGenDPShadowMapConstantsHS(InputPatch<VS_CONTROL_PO
     
 	if (adaptive_tess)
 	{
-		// Calculate the tessellation factor per edge, based on distance from camera
-		float dist;
-		float3 mid_point;
+		float4 p0 = mul(float4(ip[0].Pos, 1), mvp);
+		float4 p1 = mul(float4(ip[1].Pos, 1), mvp);
+		float4 p2 = mul(float4(ip[2].Pos, 1), mvp);
+		p0.xy /= p0.w;
+		p1.xy /= p1.w;
+		p2.xy /= p2.w;
+		
+		float3 factor;
+		factor.x = length((p1.xy - p0.xy) * tess_edge_length_scale);
+		factor.y = length((p2.xy - p1.xy) * tess_edge_length_scale);
+		factor.z = length((p0.xy - p2.xy) * tess_edge_length_scale);
+		factor = clamp(factor, tess_factors.z, tess_factors.w);
+		
 		// Edge 0
-		mid_point = (ip[2].Pos + ip[0].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
-		output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		output.edges[0] = factor.x;
 		// Edge 1
-		mid_point = (ip[0].Pos + ip[1].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
-		output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		output.edges[1] = factor.y;
 		// Edge 2
-		mid_point = (ip[1].Pos + ip[2].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
-		output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+		output.edges[2] = factor.z;
 		// Inside
 		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
 	}
@@ -357,7 +361,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 halfway = normalize(light_vec + normal);
 	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
-	float3 ori_color = 1;//light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
+	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
 	float2 moments;
 	float dist;
 	if (dpsm)
