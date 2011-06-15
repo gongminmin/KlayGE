@@ -151,7 +151,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			vb->CopyToBuffer(*vb_cpu);
 
 			GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
-			if (mapper.Pointer<float4>()->x() > 0)
+			if ((mapper.Pointer<float4>() + this->StartVertexLocation())->x() > 0)
 			{
 				has_skinned_ = true;
 			}
