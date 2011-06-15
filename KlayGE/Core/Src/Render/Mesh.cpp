@@ -690,7 +690,6 @@ namespace KlayGE
 						bool has_binormal = false;
 
 						uint32_t num_vertices = 0;
-						uint32_t max_num_blend = 0;
 						for (XMLNodePtr vertex_node = vertices_chunk->FirstNode("vertex"); vertex_node; vertex_node = vertex_node->NextSibling("vertex"))
 						{
 							++ num_vertices;
@@ -715,13 +714,10 @@ namespace KlayGE
 								has_specular = true;
 							}
 
-							uint32_t num_blend = 0;
 							for (XMLNodePtr weight_node = vertex_node->FirstNode("weight"); weight_node; weight_node = weight_node->NextSibling("weight"))
 							{
 								has_weight = true;
-								++ num_blend;
 							}
-							max_num_blend = std::max(max_num_blend, num_blend);
 
 							uint32_t num_tex_coord = 0;
 							for (XMLNodePtr tex_coord_node = vertex_node->FirstNode("tex_coord"); tex_coord_node; tex_coord_node = tex_coord_node->NextSibling("tex_coord"))
@@ -807,46 +803,12 @@ namespace KlayGE
 							{
 								ve.usage = VEU_BlendWeight;
 								ve.usage_index = 0;
-								switch (max_num_blend)
-								{
-								case 1:
-									ve.format = EF_R32F;
-									break;
-
-								case 2:
-									ve.format = EF_GR32F;
-									break;
-
-								case 3:
-									ve.format = EF_BGR32F;
-									break;
-
-								default:
-									ve.format = EF_ABGR32F;
-									break;
-								}
+								ve.format = EF_ABGR32F;
 								vertex_elements.push_back(ve);
 
 								ve.usage = VEU_BlendIndex;
 								ve.usage_index = 0;
-								switch (max_num_blend)
-								{
-								case 1:
-									ve.format = EF_R8UI;
-									break;
-
-								case 2:
-									ve.format = EF_GR8UI;
-									break;
-
-								case 3:
-									ve.format = EF_BGR8UI;
-									break;
-
-								default:
-									ve.format = EF_ABGR8UI;
-									break;
-								}
+								ve.format = EF_ABGR8UI;
 								vertex_elements.push_back(ve);
 							}
 
@@ -1082,6 +1044,27 @@ namespace KlayGE
 									}
 								}
 								++ num_blend;
+							}
+							for (uint32_t b = num_blend; b < 4; ++ b)
+							{
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_BlendIndex == ves[mesh_index][i].usage)
+									{
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(uint8_t)], 0, sizeof(uint8_t));
+										break;
+									}
+								}
+								for (size_t i = 0; i < ves[mesh_index].size(); ++ i)
+								{
+									if (VEU_BlendWeight == ves[mesh_index][i].usage)
+									{
+										uint32_t buf_index = ves_mapping[mesh_index][i];
+										memset(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size() + b * sizeof(float)], 0, sizeof(float));
+										break;
+									}
+								}
 							}
 
 							uint32_t usage = 0;
