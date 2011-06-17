@@ -565,7 +565,7 @@ namespace KlayGE
 	{
 		BC2_layout const * bc2_layout = reinterpret_cast<BC2_layout const *>(bc2);
 
-		DecodeBC1Internal(argb, bc2_layout->bc1);
+		DecodeBC1(argb, reinterpret_cast<uint8_t const *>(&bc2_layout->bc1));
 
 		for (int i = 0; i < 16; ++ i)
 		{
@@ -585,7 +585,7 @@ namespace KlayGE
 	{
 		BC3_layout const * bc3_layout = reinterpret_cast<BC3_layout const *>(bc3);
 
-		DecodeBC1Internal(argb, bc3_layout->bc1);
+		DecodeBC1(argb, reinterpret_cast<uint8_t const *>(&bc3_layout->bc1));
 
 		boost::array<uint8_t, 16> alpha_block;
 		DecodeBC4Internal(&alpha_block[0], bc3_layout->alpha);
@@ -607,9 +607,104 @@ namespace KlayGE
 		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
 
 		boost::array<uint8_t, 16> block_0;
-		DecodeBC4Internal(&block_0[0], bc5_layout->red);
+		DecodeBC4(&block_0[0], reinterpret_cast<uint8_t const *>(&bc5_layout->red));
 		boost::array<uint8_t, 16> block_1;
-		DecodeBC4Internal(&block_1[0], bc5_layout->green);
+		DecodeBC4(&block_1[0], reinterpret_cast<uint8_t const *>(&bc5_layout->green));
+
+		for (size_t i = 0; i < block_0.size(); ++ i)
+		{
+			r[i] = block_0[i];
+			g[i] = block_1[i];
+		}
+	}
+
+	void DecodeBC1_sRGB(uint32_t* argb, uint8_t const * bc1)
+	{
+		BC1_layout p = *reinterpret_cast<BC1_layout const *>(bc1);
+
+		Color clr = RGB565_to_Color(p.clr_0);
+		clr.r() = pow(clr.r(), 2.2f);
+		clr.g() = pow(clr.g(), 2.2f);
+		clr.b() = pow(clr.b(), 2.2f);
+		p.clr_0 = Color_to_RGB565(clr);
+
+		clr = RGB565_to_Color(p.clr_1);
+		clr.r() = pow(clr.r(), 2.2f);
+		clr.g() = pow(clr.g(), 2.2f);
+		clr.b() = pow(clr.b(), 2.2f);
+		p.clr_1 = Color_to_RGB565(clr);
+
+		DecodeBC1Internal(argb, p);
+
+		for (size_t i = 0; i < 16; ++ i)
+		{
+			clr = Color(argb[i]);
+			clr.r() = pow(clr.r(), 1 / 2.2f);
+			clr.g() = pow(clr.g(), 1 / 2.2f);
+			clr.b() = pow(clr.b(), 1 / 2.2f);
+			argb[i] = clr.ARGB();
+		}
+	}
+	
+	void DecodeBC2_sRGB(uint32_t* argb, uint8_t const * bc2)
+	{
+		BC2_layout const * bc2_layout = reinterpret_cast<BC2_layout const *>(bc2);
+
+		DecodeBC1_sRGB(argb, reinterpret_cast<uint8_t const *>(&bc2_layout->bc1));
+
+		for (int i = 0; i < 16; ++ i)
+		{
+			argb[i] &= 0x00FFFFFF;
+		}
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			for (int j = 0; j < 4; ++ j)
+			{
+				argb[i * 4 + j] |= (((bc2_layout->alpha[i] >> (4 * j)) & 0xF) << 4) << 24;
+			}
+		}
+	}
+
+	void DecodeBC3_sRGB(uint32_t* argb, uint8_t const * bc3)
+	{
+		BC3_layout const * bc3_layout = reinterpret_cast<BC3_layout const *>(bc3);
+
+		DecodeBC1_sRGB(argb, reinterpret_cast<uint8_t const *>(&bc3_layout->bc1));
+
+		boost::array<uint8_t, 16> alpha_block;
+		DecodeBC4Internal(&alpha_block[0], bc3_layout->alpha);
+
+		for (size_t i = 0; i < alpha_block.size(); ++ i)
+		{
+			argb[i] &= 0x00FFFFFF;
+			argb[i] |= alpha_block[i] << 24;
+		}
+	}
+
+	void DecodeBC4_sRGB(uint8_t* r, uint8_t const * bc4)
+	{
+		BC4_layout p = *reinterpret_cast<BC4_layout const *>(bc4);
+
+		p.alpha_0 = static_cast<uint8_t>(MathLib::clamp(pow(p.alpha_0 / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		p.alpha_1 = static_cast<uint8_t>(MathLib::clamp(pow(p.alpha_1 / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+
+		DecodeBC4Internal(r, *reinterpret_cast<BC4_layout const *>(bc4));
+
+		for (size_t i = 0; i < 16; ++ i)
+		{
+			r[i] = static_cast<uint8_t>(MathLib::clamp(pow(r[i] / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		}
+	}
+
+	void DecodeBC5_sRGB(uint8_t* r, uint8_t* g, uint8_t const * bc5)
+	{
+		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
+
+		boost::array<uint8_t, 16> block_0;
+		DecodeBC4_sRGB(&block_0[0], reinterpret_cast<uint8_t const *>(&bc5_layout->red));
+		boost::array<uint8_t, 16> block_1;
+		DecodeBC4_sRGB(&block_1[0], reinterpret_cast<uint8_t const *>(&bc5_layout->green));
 
 		for (size_t i = 0; i < block_0.size(); ++ i)
 		{
@@ -726,6 +821,128 @@ namespace KlayGE
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
 				DecodeBC5(&uncompressed_r[0], &uncompressed_g[0], src);
+				src += 16;
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						dst[(y_base + y) * pitch + (x_base + x) * 2 + 0] = uncompressed_r[y * 4 + x];
+						dst[(y_base + y) * pitch + (x_base + x) * 2 + 1] = uncompressed_g[y * 4 + x];
+					}
+				}
+			}
+		}
+	}
+
+	void DecodeBC1_sRGB(void* argb, uint32_t pitch, void const * bc1, uint32_t width, uint32_t height)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(bc1);
+		uint32_t * dst = static_cast<uint32_t*>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				DecodeBC1_sRGB(&uncompressed[0], src);
+				src += 8;
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
+					}
+				}
+			}
+		}
+	}
+
+	void DecodeBC2_sRGB(void* argb, uint32_t pitch, void const * bc2, uint32_t width, uint32_t height)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(bc2);
+		uint32_t * dst = static_cast<uint32_t*>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				DecodeBC2_sRGB(&uncompressed[0], src);
+				src += 16;
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
+					}
+				}
+			}
+		}
+	}
+
+	void DecodeBC3_sRGB(void* argb, uint32_t pitch, void const * bc3, uint32_t width, uint32_t height)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(bc3);
+		uint32_t * dst = static_cast<uint32_t*>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				DecodeBC3_sRGB(&uncompressed[0], src);
+				src += 16;
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
+					}
+				}
+			}
+		}
+	}
+
+	void DecodeBC4_sRGB(void* r, uint32_t pitch, void const * bc4, uint32_t width, uint32_t height)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(bc4);
+		uint8_t * dst = static_cast<uint8_t*>(r);
+
+		uint8_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				DecodeBC4_sRGB(&uncompressed[0], src);
+				src += 8;
+
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						dst[(y_base + y) * pitch + (x_base + x)] = uncompressed[y * 4 + x];
+					}
+				}
+			}
+		}
+	}
+
+	void DecodeBC5_sRGB(void* gr, uint32_t pitch, void const * bc5, uint32_t width, uint32_t height)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(bc5);
+		uint8_t * dst = static_cast<uint8_t*>(gr);
+
+		uint8_t uncompressed_r[16];
+		uint8_t uncompressed_g[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				DecodeBC5_sRGB(&uncompressed_r[0], &uncompressed_g[0], src);
 				src += 16;
 
 				for (int y = 0; y < 4; ++ y)
@@ -928,8 +1145,129 @@ namespace KlayGE
 
 	void EncodeBC5(BC5_layout& bc5, uint8_t const * r, uint8_t const * g)
 	{
-		EncodeBC4Internal(bc5.red, r);
-		EncodeBC4Internal(bc5.green, g);
+		EncodeBC4(bc5.red, r);
+		EncodeBC4(bc5.green, g);
+	}
+
+	void EncodeBC1_sRGB(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
+	{
+		boost::array<uint32_t, 16> tmp_argb;
+		for (size_t i = 0; i < tmp_argb.size(); ++ i)
+		{
+			if (((argb[i] >> 24) & 0xFF) < 0x80)
+			{
+				tmp_argb[i] = 0;
+			}
+			else
+			{
+				Color clr(argb[i]);
+				clr.r() = pow(clr.r(), 2.2f);
+				clr.g() = pow(clr.g(), 2.2f);
+				clr.b() = pow(clr.b(), 2.2f);
+				tmp_argb[i] = clr.ARGB();
+			}
+		}
+
+		EncodeBC1Internal(bc1, &tmp_argb[0], method);
+
+		Color clr = RGB565_to_Color(bc1.clr_0);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc1.clr_0 = Color_to_RGB565(clr);
+
+		clr = RGB565_to_Color(bc1.clr_1);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc1.clr_1 = Color_to_RGB565(clr);
+	}
+
+	void EncodeBC2_sRGB(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
+	{
+		boost::array<uint8_t, 16> alpha;
+		boost::array<uint32_t, 16> xrgb;
+		for (size_t i = 0; i < xrgb.size(); ++ i)
+		{
+			Color clr(argb[i]);
+			clr.r() = pow(clr.r(), 2.2f);
+			clr.g() = pow(clr.g(), 2.2f);
+			clr.b() = pow(clr.b(), 2.2f);
+			clr.a() = 1;
+			xrgb[i] = clr.ARGB();
+			alpha[i] = static_cast<uint8_t>(argb[i] >> 28);
+		}
+
+		EncodeBC1Internal(bc2.bc1, &xrgb[0], method);
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			bc2.alpha[i] = (alpha[i * 4 + 0] << 0) | (alpha[i * 4 + 1] << 4)
+				| (alpha[i * 4 + 2] << 8) | (alpha[i * 4 + 3] << 12);
+		}
+
+		Color clr = RGB565_to_Color(bc2.bc1.clr_0);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc2.bc1.clr_0 = Color_to_RGB565(clr);
+
+		clr = RGB565_to_Color(bc2.bc1.clr_1);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc2.bc1.clr_1 = Color_to_RGB565(clr);
+	}
+
+	void EncodeBC3_sRGB(BC3_layout& bc3, uint32_t const * argb, EBCMethod method)
+	{
+		boost::array<uint8_t, 16> alpha;
+		boost::array<uint32_t, 16> xrgb;
+		for (size_t i = 0; i < xrgb.size(); ++ i)
+		{
+			Color clr(argb[i]);
+			clr.r() = pow(clr.r(), 2.2f);
+			clr.g() = pow(clr.g(), 2.2f);
+			clr.b() = pow(clr.b(), 2.2f);
+			clr.a() = 1;
+			xrgb[i] = clr.ARGB();
+			alpha[i] = static_cast<uint8_t>(argb[i] >> 24);
+		}
+
+		EncodeBC1Internal(bc3.bc1, &xrgb[0], method);
+		EncodeBC4Internal(bc3.alpha, &alpha[0]);
+
+		Color clr = RGB565_to_Color(bc3.bc1.clr_0);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc3.bc1.clr_0 = Color_to_RGB565(clr);
+
+		clr = RGB565_to_Color(bc3.bc1.clr_1);
+		clr.r() = pow(clr.r(), 1 / 2.2f);
+		clr.g() = pow(clr.g(), 1 / 2.2f);
+		clr.b() = pow(clr.b(), 1 / 2.2f);
+		bc3.bc1.clr_1 = Color_to_RGB565(clr);
+	}
+
+	void EncodeBC4_sRGB(BC4_layout& bc4, uint8_t const * r)
+	{
+		boost::array<uint8_t, 16> sr;
+		for (size_t i = 0; i < 16; ++ i)
+		{
+			sr[i] = static_cast<uint8_t>(MathLib::clamp(pow(r[i] / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		}
+
+		EncodeBC4Internal(bc4, &sr[0]);
+
+		bc4.alpha_0 = static_cast<uint8_t>(MathLib::clamp(pow(bc4.alpha_0 / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		bc4.alpha_1 = static_cast<uint8_t>(MathLib::clamp(pow(bc4.alpha_1 / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+	}
+
+	void EncodeBC5_sRGB(BC5_layout& bc5, uint8_t const * r, uint8_t const * g)
+	{
+		EncodeBC4_sRGB(bc5.red, r);
+		EncodeBC4_sRGB(bc5.green, g);
 	}
 
 	void EncodeBC1(void* bc1, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method)
@@ -1080,6 +1418,159 @@ namespace KlayGE
 				}
 
 				EncodeBC5(*dst, &uncompressed_r[0], &uncompressed_g[0]);
+				++ dst;
+			}
+		}
+	}
+
+	void EncodeBC1_sRGB(void* bc1, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method)
+	{
+		uint32_t const * src = static_cast<uint32_t const *>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			BC1_layout* dst = reinterpret_cast<BC1_layout*>(static_cast<uint8_t*>(bc1) + y_base / 4 * out_pitch);
+
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint32_t pixel = 0;
+						if ((x_base + x < width) && (y_base + y < height))
+						{
+							pixel = src[(y_base + y) * in_pitch / 4 + (x_base + x)];
+						}
+						uncompressed[y * 4 + x] = pixel;
+					}
+				}
+
+				EncodeBC1_sRGB(*dst, &uncompressed[0], method);
+				++ dst;
+			}
+		}
+	}
+
+	void EncodeBC2_sRGB(void* bc2, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method)
+	{
+		uint32_t const * src = static_cast<uint32_t const *>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			BC2_layout* dst = reinterpret_cast<BC2_layout*>(static_cast<uint8_t*>(bc2) + y_base / 4 * out_pitch);
+
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint32_t pixel = 0;
+						if ((x_base + x < width) && (y_base + y < height))
+						{
+							pixel = src[(y_base + y) * in_pitch / 4 + (x_base + x)];
+						}
+						uncompressed[y * 4 + x] = pixel;
+					}
+				}
+
+				EncodeBC2_sRGB(*dst, &uncompressed[0], method);
+				++ dst;
+			}
+		}
+	}
+
+	void EncodeBC3_sRGB(void* bc3, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method)
+	{
+		uint32_t const * src = static_cast<uint32_t const *>(argb);
+
+		uint32_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			BC3_layout* dst = reinterpret_cast<BC3_layout*>(static_cast<uint8_t*>(bc3) + y_base / 4 * out_pitch);
+
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint32_t pixel = 0;
+						if ((x_base + x < width) && (y_base + y < height))
+						{
+							pixel = src[(y_base + y) * in_pitch / 4 + (x_base + x)];
+						}
+						uncompressed[y * 4 + x] = pixel;
+					}
+				}
+
+				EncodeBC3_sRGB(*dst, &uncompressed[0], method);
+				++ dst;
+			}
+		}
+	}
+
+	void EncodeBC4_sRGB(void* bc4, uint32_t out_pitch, void const * r, uint32_t width, uint32_t height, uint32_t in_pitch)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(r);
+
+		uint8_t uncompressed[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			BC4_layout* dst = reinterpret_cast<BC4_layout*>(static_cast<uint8_t*>(bc4) + y_base / 4 * out_pitch);
+
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint8_t pixel = 0;
+						if ((x_base + x < width) && (y_base + y < height))
+						{
+							pixel = src[(y_base + y) * in_pitch / 4 + (x_base + x)];
+						}
+						uncompressed[y * 4 + x] = pixel;
+					}
+				}
+
+				EncodeBC4_sRGB(*dst, &uncompressed[0]);
+				++ dst;
+			}
+		}
+	}
+
+	void EncodeBC5_sRGB(void* bc5, uint32_t out_pitch, void const * gr, uint32_t width, uint32_t height, uint32_t in_pitch)
+	{
+		uint8_t const * src = static_cast<uint8_t const *>(gr);
+
+		uint8_t uncompressed_r[16];
+		uint8_t uncompressed_g[16];
+		for (uint32_t y_base = 0; y_base < height; y_base += 4)
+		{
+			BC5_layout* dst = reinterpret_cast<BC5_layout*>(static_cast<uint8_t*>(bc5) + y_base / 4 * out_pitch);
+
+			for (uint32_t x_base = 0; x_base < width; x_base += 4)
+			{
+				for (int y = 0; y < 4; ++ y)
+				{
+					for (int x = 0; x < 4; ++ x)
+					{
+						uint8_t r = 0, g = 0;
+						if ((x_base + x < width) && (y_base + y < height))
+						{
+							r = src[(y_base + y) * in_pitch + (x_base + x) * 2 + 0];
+							g = src[(y_base + y) * in_pitch + (x_base + x) * 2 + 1];
+						}
+						uncompressed_r[y * 4 + x] = r;
+						uncompressed_g[y * 4 + x] = g;
+					}
+				}
+
+				EncodeBC5_sRGB(*dst, &uncompressed_r[0], &uncompressed_g[0]);
 				++ dst;
 			}
 		}

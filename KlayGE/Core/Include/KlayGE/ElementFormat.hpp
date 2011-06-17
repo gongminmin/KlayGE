@@ -410,17 +410,20 @@ namespace KlayGE
 		{
 			format = ChannelType<0>(format, ECT_UNorm_SRGB);
 		}
-		if (ECT_UNorm == ChannelType<1>(format))
+		if (!IsCompressedFormat(format))
 		{
-			format = ChannelType<1>(format, ECT_UNorm_SRGB);
-		}
-		if (ECT_UNorm == ChannelType<2>(format))
-		{
-			format = ChannelType<2>(format, ECT_UNorm_SRGB);
-		}
-		if (ECT_UNorm == ChannelType<3>(format))
-		{
-			format = ChannelType<3>(format, ECT_UNorm_SRGB);
+			if (ECT_UNorm == ChannelType<1>(format))
+			{
+				format = ChannelType<1>(format, ECT_UNorm_SRGB);
+			}
+			if (ECT_UNorm == ChannelType<2>(format))
+			{
+				format = ChannelType<2>(format, ECT_UNorm_SRGB);
+			}
+			if (ECT_UNorm == ChannelType<3>(format))
+			{
+				format = ChannelType<3>(format, ECT_UNorm_SRGB);
+			}
 		}
 
 		return format;
