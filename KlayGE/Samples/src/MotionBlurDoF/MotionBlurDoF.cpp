@@ -528,7 +528,14 @@ void MotionBlurDoFApp::InitObjects()
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
 
 	clear_float_ = LoadPostProcess(ResLoader::Instance().Load("ClearFloat.ppml"), "clear_float");
-	clear_float_->SetParam(clear_float_->ParamByName("clear_clr"), float4(0.2f, 0.4f, 0.6f, 1));
+	float4 clear_clr(0.2f, 0.4f, 0.6f, 1);
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		clear_clr.x() = 0.029f;
+		clear_clr.y() = 0.133f;
+		clear_clr.z() = 0.325f;
+	}
+	clear_float_->SetParam(clear_float_->ParamByName("clear_clr"), clear_clr);
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];

@@ -242,7 +242,14 @@ uint32_t SubSurfaceApp::DoUpdate(KlayGE::uint32_t pass)
 
 	default:
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+		if (Context::Instance().Config().graphics_cfg.gamma)
+		{
+			clear_clr.r() = 0.029f;
+			clear_clr.g() = 0.133f;
+			clear_clr.b() = 0.325f;
+		}
+		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 		checked_pointer_cast<ModelObject>(model_)->LightPos(light_->Position());
 		checked_pointer_cast<ModelObject>(model_)->LightColor(light_->Color());

@@ -920,27 +920,42 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 
 void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 {
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	float4 f4_clr;
+	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8;
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		f4_clr.x() = pow(clr.r(), 2.2f);
+		f4_clr.y() = pow(clr.g(), 2.2f);
+		f4_clr.z() = pow(clr.b(), 2.2f);
+		f4_clr.w() = 1;
+
+		fmt = MakeSRGB(fmt);
+	}
+	else
+	{
+		f4_clr = float4(clr.r(), clr.g(), clr.b(), 1);
+	}
+
 	if (id_particle_color_from_button_ == id)
 	{
-		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorFrom(float4(clr.r(), clr.g(), clr.b(), 1));
+		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorFrom(f4_clr);
 	}
 	else
 	{
 		BOOST_ASSERT(id_particle_color_to_button_ == id);
-		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorTo(float4(clr.r(), clr.g(), clr.b(), 1));
+		checked_pointer_cast<ParticlesObject>(particles_)->ParticleColorTo(f4_clr);
 	}
 
 	TexturePtr tex_for_button;
-
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	uint32_t data;
 	data = 0xFF000000 | (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? clr.ARGB() : clr.ABGR());
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	tex_for_button = rf.MakeTexture2D(1, 1, 1, 1,
-		rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+	tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read, &init_data);
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }
@@ -1200,15 +1215,25 @@ uint32_t ParticleEditorApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		re.BindFrameBuffer(scene_buffer_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		{
+			re.BindFrameBuffer(scene_buffer_);
+			
+			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				clear_clr.r() = 0.029f;
+				clear_clr.g() = 0.133f;
+				clear_clr.b() = 0.325f;
+			}
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-		checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
-		checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
-		checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<ParticlesObject>(particles_)->SetSizeOverLife(dialog_->Control<UIPolylineEditBox>(id_size_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<ParticlesObject>(particles_)->SetWeightOverLife(dialog_->Control<UIPolylineEditBox>(id_weight_over_life_)->GetCtrlPoints());
+			checked_pointer_cast<ParticlesObject>(particles_)->SetTransparencyOverLife(dialog_->Control<UIPolylineEditBox>(id_transparency_over_life_)->GetCtrlPoints());
 
-		terrain_->Visible(true);
-		particles_->Visible(false);
+			terrain_->Visible(true);
+			particles_->Visible(false);
+		}
 		return App3DFramework::URV_Need_Flush;
 
 	default:

@@ -31,7 +31,6 @@
 
 using namespace std;
 using namespace KlayGE;
-using namespace KlayGE::MathLib;
 
 namespace
 {	
@@ -825,7 +824,15 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		default:
 			{
 				renderEngine.BindFrameBuffer(FrameBufferPtr());
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+				
+				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					clear_clr.r() = 0.029f;
+					clear_clr.g() = 0.133f;
+					clear_clr.b() = 0.325f;
+				}
+				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 				shadow_dual_texs_[0]->CopyToSubTexture2D(*shadow_dual_tex_, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 				shadow_dual_texs_[1]->CopyToSubTexture2D(*shadow_dual_tex_, 0, 0, SHADOW_MAP_SIZE, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, 0, 0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
@@ -870,7 +877,15 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		default:
 			{
 				renderEngine.BindFrameBuffer(FrameBufferPtr());
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+
+				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					clear_clr.r() = 0.029f;
+					clear_clr.g() = 0.133f;
+					clear_clr.b() = 0.325f;
+				}
+				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{

@@ -229,7 +229,14 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 
-	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		clear_clr.r() = 0.029f;
+		clear_clr.g() = 0.133f;
+		clear_clr.b() = 0.325f;
+	}		
+	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
 	checked_pointer_cast<TeapotObject>(ground_)->LightPos(light_->Position());

@@ -76,6 +76,15 @@ void DetailedMesh::BuildMeshInfo()
 
 	*(technique_->Effect().ParameterByName("specular_level")) = mtl.specular_level;
 	*(technique_->Effect().ParameterByName("shininess")) = mtl.shininess;
+
+	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		extinction_coefficient.x() = pow(extinction_coefficient.x(), 2.2f);
+		extinction_coefficient.y() = pow(extinction_coefficient.y(), 2.2f);
+		extinction_coefficient.z() = pow(extinction_coefficient.z(), 2.2f);
+	}
+	*(technique_->Effect().ParameterByName("extinction_coefficient")) = extinction_coefficient;
 }
 
 void DetailedMesh::OnRenderBegin()

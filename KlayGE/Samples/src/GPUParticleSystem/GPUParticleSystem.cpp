@@ -794,11 +794,20 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 	switch (pass)
 	{
 	case 0:
-		re.BindFrameBuffer(scene_buffer_);
-		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+		{
+			re.BindFrameBuffer(scene_buffer_);
+			Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				clear_clr.r() = 0.029f;
+				clear_clr.g() = 0.133f;
+				clear_clr.b() = 0.325f;
+			}
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-		terrain_->Visible(true);
-		particles_->Visible(false);
+			terrain_->Visible(true);
+			particles_->Visible(false);
+		}
 		return App3DFramework::URV_Need_Flush;
 
 	case 1:
@@ -835,7 +844,7 @@ uint32_t GPUParticleSystemApp::DoUpdate(uint32_t pass)
 			blend_pp_->InputPin(1, fog_tex_);
 
 			re.BindFrameBuffer(FrameBufferPtr());
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.2f, 0.4f, 0.6f, 1), 1.0f, 0);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 1), 1.0f, 0);
 
 			blend_pp_->Apply();
 
