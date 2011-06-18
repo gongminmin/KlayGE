@@ -98,7 +98,7 @@ private:
 	void ExportMesh(MString const & objName, MFnMesh& fnMesh, MFnSkinCluster* fnSkinClusterPtr, MDagPath& dagPath);
 	void ExportJoint(MString const * parentName, MFnIkJoint& fnJoint, MDagPath& dagPath);
 	void ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTransformationMatrix const & initMatrix,
-		MDagPath& dagPath, MDagPath& parentDagPath);
+		MDagPath& dagPath, MMatrix const & inv_parent);
 	int ExportMaterialAndTexture(MObject* shader, MObjectArray const & textures);
 	MeshExtractor::MaterialStruct* CreateDefaultMaterial();
 	MFnSkinCluster* ExportSkinCluster(MFnMesh& fnMesh, MDagPath& dagPath);
@@ -301,8 +301,16 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dagIterator)
 				}
 
 				MatrixAndParentPath& mapp = joints_info_[jointNameString];
-				MDagPath parentDagPath = joints_info_[itr->second->parent_name].second;
-				ExportKeyframe(key, mapp.first, mapp.second, parentDagPath);
+				MMatrix inv_parent;
+				if (itr->second->parent_name.empty())
+				{
+					inv_parent = MMatrix::identity;
+				}
+				else
+				{
+					inv_parent = joints_info_[itr->second->parent_name].second.inclusiveMatrixInverse();
+				}
+				ExportKeyframe(key, mapp.first, mapp.second, inv_parent);
 			}
 		}
 	}
@@ -628,24 +636,19 @@ void MayaMeshExporter::ExportJoint(MString const * parentName, MFnIkJoint& fnJoi
 
 	// Compute joint transformation
 	MMatrix bindMatrix = dagPath.inclusiveMatrix();
-	MTransformationMatrix localMatrix;
+	MTransformationMatrix localMatrix = bindMatrix;
 	if (parentName)
 	{
 		MDagPath parentDagPath = joints_info_[parentName->asChar()].second;
-		localMatrix = bindMatrix * parentDagPath.inclusiveMatrixInverse();
 		export_joint->parent_name = parentName->asChar();
-	}
-	else
-	{
-		localMatrix = bindMatrix;
 	}
 	joints_info_[jointNameString] = MatrixAndParentPath(localMatrix, dagPath);
 
 	double qx, qy, qz, qw;
 	MVector pos = localMatrix.translation(MSpace::kPostTransform);
 	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
-	export_joint->position = MeshExtractor::Point3(3, pos.x, pos.z, pos.y);
-	export_joint->quaternion = MeshExtractor::Quat(4, qx, qz, qy, qw);  // Swap Y and Z here
+	export_joint->position = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
+	export_joint->quaternion = MeshExtractor::Quat(4, qx, qy, qz, qw);
 
 	// Traverse child joints
 	for (unsigned int i=0; i<dagPath.childCount(); ++i)
@@ -664,10 +667,10 @@ void MayaMeshExporter::ExportJoint(MString const * parentName, MFnIkJoint& fnJoi
 }
 
 void MayaMeshExporter::ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTransformationMatrix const & /*initMatrix*/,
-	MDagPath& dagPath, MDagPath& parentDagPath)
+	MDagPath& dagPath, MMatrix const & inv_parent)
 {
 	MMatrix bindMatrix = dagPath.inclusiveMatrix();
-	MTransformationMatrix localMatrix = bindMatrix * parentDagPath.inclusiveMatrixInverse();
+	MTransformationMatrix localMatrix = bindMatrix * inv_parent;
 
 	double qx, qy, qz, qw;
 #if 0
@@ -680,8 +683,8 @@ void MayaMeshExporter::ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTrans
 	MVector pos = localMatrix.translation(MSpace::kPostTransform);
 	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
 #endif
-	key->positions.push_back(MeshExtractor::Point3(3, pos.x, pos.z, pos.y));
-	key->quaternions.push_back(MeshExtractor::Quat(4, qx, qz, qy, qw));  // Swap Y and Z here
+	key->positions.push_back(MeshExtractor::Point3(3, pos.x, pos.y, pos.z));
+	key->quaternions.push_back(MeshExtractor::Quat(4, qx, qy, qz, qw));
 }
 
 int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray const & /*textures*/)
@@ -800,7 +803,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 	}
 
 	export_materials_.push_back(material);
-	return export_materials_.size();
+	return static_cast<int>(export_materials_.size());
 }
 
 MeshExtractor::MaterialStruct* MayaMeshExporter::CreateDefaultMaterial()
@@ -918,12 +921,12 @@ public:
 			return MStatus::kFailure;
 		}
 
-		if (mode == MPxFileTranslator::kExportAccessMode || mode == MPxFileTranslator::kSaveAccessMode)
+		if ((MPxFileTranslator::kExportAccessMode == mode) || (MPxFileTranslator::kSaveAccessMode == mode))
 		{
 			// Export all
 			exporter.ExportMayaNodes(dagIterator);
 		}
-		else if (mode == MPxFileTranslator::kExportActiveAccessMode)
+		else if (MPxFileTranslator::kExportActiveAccessMode == mode)
 		{
 			// Export selected
 			MSelectionList selectionList;
@@ -971,7 +974,7 @@ MStatus initializePlugin(MObject obj)
 {
 	MFnPlugin plugin(obj, "KlayGE", "3.0", "Any");
 	return plugin.registerFileTranslator("MeshMLMayaExporter", "none",
-		MayaToMeshML::creator, (char*)objOptionScript, (char*)objDefaultOptions);                                        
+		MayaToMeshML::creator, const_cast<char*>(objOptionScript), const_cast<char*>(objDefaultOptions));
 }
 
 MStatus uninitializePlugin(MObject obj)

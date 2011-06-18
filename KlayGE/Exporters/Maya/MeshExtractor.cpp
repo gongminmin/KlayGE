@@ -127,7 +127,7 @@ namespace KlayGE
 			fitr = joints_.find(sorted_joints[i]);
 			if (fitr != joints_.end())
 			{
-				fitr->second.joint_id = i;
+				fitr->second.joint_id = static_cast<int>(i);
 			}
 		}
 
