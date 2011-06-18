@@ -227,7 +227,7 @@ void ModelViewerApp::InitObjects()
 	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
 	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
 	
-	this->OpenModel("monster.meshml");
+	this->OpenModel("archer_attacking.meshml");
 
 	tbController_.AttachCamera(this->ActiveCamera());
 	tbController_.Scalers(0.01f, 0.5f);

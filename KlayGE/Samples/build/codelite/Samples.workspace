@@ -16,7 +16,6 @@
   <Project Name="DepthPeeling" Path="DepthPeeling.project"/>
   <Project Name="Ocean" Path="Ocean.project"/>
   <Project Name="DistanceMapping" Path="DistanceMapping.project"/>
-  <Project Name="PNTriangles" Path="PNTriangles.project"/>
   <Project Name="GPUParticleSystem" Path="GPUParticleSystem.project"/>
   <Project Name="Fractal" Path="Fractal.project"/>
   <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
@@ -31,7 +30,6 @@
       <Project Name="Refract" ConfigName="Debug_win_x86"/>
       <Project Name="ProceduralTex" ConfigName="Debug_win_x86"/>
       <Project Name="PostProcessing" ConfigName="Debug_win_x86"/>
-      <Project Name="PNTriangles" ConfigName="Debug_win_x86"/>
       <Project Name="ParticleEditor" ConfigName="Debug_win_x86"/>
       <Project Name="Parallax" ConfigName="Debug_win_x86"/>
       <Project Name="Ocean" ConfigName="Debug_win_x86"/>
@@ -54,7 +52,6 @@
       <Project Name="Refract" ConfigName="Release_win_x86"/>
       <Project Name="ProceduralTex" ConfigName="Release_win_x86"/>
       <Project Name="PostProcessing" ConfigName="Release_win_x86"/>
-      <Project Name="PNTriangles" ConfigName="Release_win_x86"/>
       <Project Name="ParticleEditor" ConfigName="Release_win_x86"/>
       <Project Name="Parallax" ConfigName="Release_win_x86"/>
       <Project Name="Ocean" ConfigName="Release_win_x86"/>
@@ -77,7 +74,6 @@
       <Project Name="Refract" ConfigName="Debug_win_x64"/>
       <Project Name="ProceduralTex" ConfigName="Debug_win_x64"/>
       <Project Name="PostProcessing" ConfigName="Debug_win_x64"/>
-      <Project Name="PNTriangles" ConfigName="Debug_win_x64"/>
       <Project Name="ParticleEditor" ConfigName="Debug_win_x64"/>
       <Project Name="Parallax" ConfigName="Debug_win_x64"/>
       <Project Name="Ocean" ConfigName="Debug_win_x64"/>
@@ -100,7 +96,6 @@
       <Project Name="Refract" ConfigName="Release_win_x64"/>
       <Project Name="ProceduralTex" ConfigName="Release_win_x64"/>
       <Project Name="PostProcessing" ConfigName="Release_win_x64"/>
-      <Project Name="PNTriangles" ConfigName="Release_win_x64"/>
       <Project Name="ParticleEditor" ConfigName="Release_win_x64"/>
       <Project Name="Parallax" ConfigName="Release_win_x64"/>
       <Project Name="Ocean" ConfigName="Release_win_x64"/>
@@ -123,7 +118,6 @@
       <Project Name="Refract" ConfigName="Debug_linux_x86"/>
       <Project Name="ProceduralTex" ConfigName="Debug_linux_x86"/>
       <Project Name="PostProcessing" ConfigName="Debug_linux_x86"/>
-      <Project Name="PNTriangles" ConfigName="Debug_linux_x86"/>
       <Project Name="ParticleEditor" ConfigName="Debug_linux_x86"/>
       <Project Name="Parallax" ConfigName="Debug_linux_x86"/>
       <Project Name="Ocean" ConfigName="Debug_linux_x86"/>
@@ -146,7 +140,6 @@
       <Project Name="Refract" ConfigName="Release_linux_x86"/>
       <Project Name="ProceduralTex" ConfigName="Release_linux_x86"/>
       <Project Name="PostProcessing" ConfigName="Release_linux_x86"/>
-      <Project Name="PNTriangles" ConfigName="Release_linux_x86"/>
       <Project Name="ParticleEditor" ConfigName="Release_linux_x86"/>
       <Project Name="Parallax" ConfigName="Release_linux_x86"/>
       <Project Name="Ocean" ConfigName="Release_linux_x86"/>
@@ -169,7 +162,6 @@
       <Project Name="Refract" ConfigName="Debug_linux_x64"/>
       <Project Name="ProceduralTex" ConfigName="Debug_linux_x64"/>
       <Project Name="PostProcessing" ConfigName="Debug_linux_x64"/>
-      <Project Name="PNTriangles" ConfigName="Debug_linux_x64"/>
       <Project Name="ParticleEditor" ConfigName="Debug_linux_x64"/>
       <Project Name="Parallax" ConfigName="Debug_linux_x64"/>
       <Project Name="Ocean" ConfigName="Debug_linux_x64"/>
@@ -192,7 +184,6 @@
       <Project Name="Refract" ConfigName="Release_linux_x64"/>
       <Project Name="ProceduralTex" ConfigName="Release_linux_x64"/>
       <Project Name="PostProcessing" ConfigName="Release_linux_x64"/>
-      <Project Name="PNTriangles" ConfigName="Release_linux_x64"/>
       <Project Name="ParticleEditor" ConfigName="Release_linux_x64"/>
       <Project Name="Parallax" ConfigName="Release_linux_x64"/>
       <Project Name="Ocean" ConfigName="Release_linux_x64"/>
