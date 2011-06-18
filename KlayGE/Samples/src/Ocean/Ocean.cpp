@@ -810,6 +810,12 @@ void OceanApp::InitObjects()
 
 	Color sun_color(1, 0.7f, 0.5f, 1);
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		fog_color.r() = pow(fog_color.r(), 2.2f);
+		fog_color.g() = pow(fog_color.g(), 2.2f);
+		fog_color.b() = pow(fog_color.b(), 2.2f);
+	}
 
 	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());
 	checked_pointer_cast<TerrainObject>(terrain_)->SunColor(sun_color);

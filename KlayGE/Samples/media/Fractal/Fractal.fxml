@@ -2,6 +2,8 @@
 
 <effect>
 	<parameter type="int" name="flipping"/>
+	<parameter type="float3" name="clr0"/>
+	<parameter type="float3" name="clr1"/>
 	
 	<shader>
 		<![CDATA[
@@ -35,7 +37,7 @@ float4 MandelbrotPS(float2 texcoord0 : TEXCOORD0) : SV_Target
 	float3 clr = 0;
 	if (r2 >= 4)
 	{
-		clr = lerp(float3(0, 0.2f, 0.6f), float3(0.2f, 1, 0), frac(i * 0.05f));
+		clr = lerp(clr0, clr1, frac(i * 0.05f));
 	}
 	return float4(clr, 1);
 }

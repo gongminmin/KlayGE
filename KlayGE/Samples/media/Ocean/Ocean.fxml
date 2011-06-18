@@ -171,7 +171,7 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 		</pass>
 	</technique>
 
-	<parameter type="float2" name="scale_bias" x="5.2" y="0.1"/>
+	<parameter type="float2" name="scale_bias" x="4.2" y="-0.2"/>
 	<parameter type="float4x4" name="inv_mvp"/>
 
 	<parameter type="textureCUBE" name="skybox_tex"/>
