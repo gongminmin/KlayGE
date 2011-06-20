@@ -26,7 +26,7 @@ public:
 
 	void LineMode(bool line_mode);
 	void SmoothMesh(bool smooth);
-	void SetTessFactor(int32_t tess_factor);
+	void SetTessFactor(KlayGE::int32_t tess_factor);
 
 	KlayGE::RenderEffectPtr const & Effect() const
 	{
@@ -70,7 +70,7 @@ public:
 
 	void LineMode(bool line_mode);
 	void SmoothMesh(bool smooth);
-	void SetTessFactor(int32_t tess_factor);
+	void SetTessFactor(KlayGE::int32_t tess_factor);
 
 	bool HasOpacityMap() const
 	{
