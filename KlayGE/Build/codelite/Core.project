@@ -14,6 +14,7 @@
       <File Name="../../Core/Src/Render/CameraController.cpp"/>
       <File Name="../../Core/Src/Render/Font.cpp"/>
       <File Name="../../Core/Src/Render/FrameBuffer.cpp"/>
+	  <File Name="../../Core/Src/Render/FXAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/GraphicsBuffer.cpp"/>
       <File Name="../../Core/Src/Render/HDRPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/HeightMap.cpp"/>
@@ -43,6 +44,7 @@
       <File Name="../../Core/Include/KlayGE/ElementFormat.hpp"/>
       <File Name="../../Core/Include/KlayGE/Font.hpp"/>
       <File Name="../../Core/Include/KlayGE/FrameBuffer.hpp"/>
+	  <File Name="../../Core/Include/KlayGE/FXAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/GraphicsBuffer.hpp"/>
       <File Name="../../Core/Include/KlayGE/HDRPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Heightmap.hpp"/>
@@ -79,6 +81,7 @@
       <File Name="../../media/RenderFX/DownSample.fxml"/>
       <File Name="../../media/RenderFX/Fog.fxml"/>
       <File Name="../../media/RenderFX/Font.fxml"/>
+	  <File Name="../../media/RenderFX/FXAA.fxml"/>
       <File Name="../../media/RenderFX/GammaCorrection.fxml"/>
       <File Name="../../media/RenderFX/GlowMerger.fxml"/>
       <File Name="../../media/RenderFX/InfTerrain.fxml"/>
@@ -94,6 +97,7 @@
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>
       <File Name="../../media/RenderFX/SummedAreaTable.fxml"/>
+	  <File Name="../../media/RenderFX/TAA.fxml"/>
       <File Name="../../media/RenderFX/ToneMapping.fxml"/>
       <File Name="../../media/RenderFX/util.fxml"/>
     </VirtualDirectory>
@@ -102,6 +106,7 @@
       <File Name="../../media/PostProcessors/Downsampler2x2.ppml"/>
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
       <File Name="../../media/PostProcessors/GlowMerger.ppml"/>
+	  <File Name="../../media/PostProcessors/TAA.ppml"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="Kernel">

@@ -372,6 +372,9 @@
     <ClCompile Include="..\..\Core\Src\Math\Math.cpp">
       <Filter>Math Library\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\FXAAPostProcess.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -677,6 +680,9 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Light.hpp">
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\FXAAPostProcess.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\media\RenderFX\2D.fxml">
@@ -771,6 +777,15 @@
     </None>
     <None Include="..\..\media\RenderFX\LightSourceProxy.fxml">
       <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\FXAA.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\TAA.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\TAA.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
     </None>
   </ItemGroup>
 </Project>

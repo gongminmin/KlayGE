@@ -323,6 +323,7 @@ namespace KlayGE
 		{
 			T::SeparableInputPin(index, tex, true);
 		}
+		using T::InputPin;
 	};
 
 	template <typename T>
@@ -338,6 +339,7 @@ namespace KlayGE
 		{
 			T::SeparableInputPin(index, tex, false);
 		}
+		using T::InputPin;
 	};
 
 	template <typename T>
@@ -368,6 +370,8 @@ namespace KlayGE
 				pp_chain_[1]->InputPin(index, tex);
 			}
 		}
+
+		using PostProcessChain::InputPin;
 	};
 }
 

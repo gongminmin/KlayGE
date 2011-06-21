@@ -366,6 +366,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\FXAAPostProcess.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\GraphicsBuffer.cpp"
 					>
 				</File>
@@ -475,6 +479,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\FrameBuffer.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\FXAAPostProcess.hpp"
 					>
 				</File>
 				<File
@@ -618,6 +626,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\FXAA.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\GammaCorrection.fxml"
 					>
 				</File>
@@ -678,6 +690,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\TAA.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\ToneMapping.fxml"
 					>
 				</File>
@@ -703,6 +719,10 @@
 				</File>
 				<File
 					RelativePath="..\..\media\PostProcessors\GlowMerger.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\TAA.ppml"
 					>
 				</File>
 			</Filter>

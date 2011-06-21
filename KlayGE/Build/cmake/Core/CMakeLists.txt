@@ -6,6 +6,7 @@ SET(RENDERING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Render/FXAAPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/GraphicsBuffer.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/HDRPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/HeightMap.cpp
@@ -36,6 +37,7 @@ SET(RENDERING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Font.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FXAAPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HDRPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Heightmap.hpp
@@ -73,6 +75,7 @@ SET(RENDERING_EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/DownSample.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/GlowMerger.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
@@ -87,6 +90,7 @@ SET(RENDERING_EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Stereoscopic.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SummedAreaTable.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/util.fxml
 )
@@ -96,6 +100,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/Downsampler2x2.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/GlowMerger.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 )
 
 SOURCE_GROUP( "Rendering System\\Source Files" FILES ${RENDERING_SOURCE_FILES} )
