@@ -247,10 +247,10 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
 #ifdef KLAYGE_OPENGL
-				float4 blend_indices : BLENDINDICES,
+				float4 blend_indices_f : BLENDINDICES,
 #else
 #ifdef KLAYGE_OPENGLES2
-				float4 blend_indices : BLENDINDICES,
+				float4 blend_indices_f : BLENDINDICES,
 #else
 				int4 blend_indices : BLENDINDICES,
 #endif

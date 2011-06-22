@@ -152,7 +152,7 @@ namespace KlayGE
 					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 					WGL_SAMPLES_ARB, sample_count,
-					try_srgb ? WGL_FRAMEBUFFER_SRGB_CAPABLE_EXT : 0, try_srgb,
+					try_srgb ? WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB : 0, try_srgb,
 					0, 0
 				};
 
@@ -318,6 +318,14 @@ namespace KlayGE
 			glXSwapIntervalSGI(settings.sync_interval);
 		}
 #endif
+
+		if (try_srgb)
+		{
+			if (glloader_GL_ARB_framebuffer_sRGB())
+			{
+				glEnable(GL_FRAMEBUFFER_SRGB);
+			}
+		}
 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
