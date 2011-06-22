@@ -376,10 +376,6 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\DeferredRendering\AdaptiveAntiAliasPP.fxml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\DeferredRendering\DeferredRendering.fxml"
 				>
 			</File>

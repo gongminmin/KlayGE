@@ -3,12 +3,6 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 
-	<macro name="FXAA_DEBUG_PASSTHROUGH" value="0"/>
-	<macro name="FXAA_DEBUG_HORZVERT" value="0"/>
-	<macro name="FXAA_DEBUG_PAIR" value="0"/>
-	<macro name="FXAA_DEBUG_NEGPOS" value="0"/>
-	<macro name="FXAA_DEBUG_OFFSET" value="0"/>
-
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="texture2D" name="color_tex"/>
 	<parameter type="sampler" name="point_sampler">
@@ -24,29 +18,6 @@
 
 	<shader>
 		<![CDATA[
-/*============================================================================
-                                DEBUG KNOBS
-------------------------------------------------------------------------------
-All debug knobs draw FXAA-untouched pixels in FXAA computed luma (monochrome).
- 
-FXAA_DEBUG_PASSTHROUGH - Red for pixels which are filtered by FXAA with a
-                         yellow tint on sub-pixel aliasing filtered by FXAA.
-FXAA_DEBUG_HORZVERT    - Blue for horizontal edges, gold for vertical edges. 
-FXAA_DEBUG_PAIR        - Blue/green for the 2 pixel pair choice. 
-FXAA_DEBUG_NEGPOS      - Red/blue for which side of center of span.
-FXAA_DEBUG_OFFSET      - Red/blue for -/+ x, gold/skyblue for -/+ y.
-============================================================================*/
-
-#if FXAA_DEBUG_PASSTHROUGH || FXAA_DEBUG_HORZVERT || FXAA_DEBUG_PAIR
-    #define FXAA_DEBUG 1
-#endif    
-#if FXAA_DEBUG_NEGPOS || FXAA_DEBUG_OFFSET
-    #define FXAA_DEBUG 1
-#endif
-#ifndef FXAA_DEBUG
-    #define FXAA_DEBUG 0
-#endif
-
 // Return the luma, the estimation of luminance from rgb inputs.
 // This approximates luma using one FMA instruction,
 // skipping normalization and tossing out blue.
@@ -56,7 +27,7 @@ float FxaaLuma(float3 rgb)
 	return rgb.y * (0.587f / 0.299f) + rgb.x;
 }
 
-float3 FxaaPixelShader(float2 pos)
+float3 DebugFxaaPixelShader(float2 pos)
 {
 	float3 rgbN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).xyz;
 	float3 rgbW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).xyz;
@@ -71,15 +42,9 @@ float3 FxaaPixelShader(float2 pos)
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
-#if FXAA_DEBUG
-	float lumaO = lumaM / (1.0 + (0.587f / 0.299f));
-#endif        
-	if(range < max(1 / 24.0f, rangeMax / 8))
+	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
-#if FXAA_DEBUG
-		return lumaO;
-#endif
-		return rgbM;
+		return lumaM / (1.0 + (0.587f / 0.299f));
 	}
 	float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
 
@@ -87,9 +52,6 @@ float3 FxaaPixelShader(float2 pos)
 	float rangeL = abs(lumaL - lumaM);
 	float blendL = max(0.0f, (rangeL / range) - 0.25f) / 0.75f;
 	blendL = min(0.75f, blendL);
-#if FXAA_DEBUG_PASSTHROUGH
-	return float3(1.0f, blendL / 0.75f, 0.0f);
-#endif
 
 	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
 	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
@@ -108,8 +70,7 @@ float3 FxaaPixelShader(float2 pos)
 		+ abs((0.50f * lumaN ) + (-1.0f * lumaM) + (0.50f * lumaS ))
 		+ abs((0.25f * lumaNE) + (-0.5f * lumaE) + (0.25f * lumaSE));
 	bool horzSpan = edgeHorz >= edgeVert;
-#if FXAA_DEBUG_HORZVERT
-	if(horzSpan)
+	if (horzSpan)
 	{
 		return float3(1.0f, 0.75f, 0.0f);
 	}
@@ -117,7 +78,51 @@ float3 FxaaPixelShader(float2 pos)
 	{
 		return float3(0.0f, 0.50f, 1.0f);
 	}
-#endif
+}
+
+float3 FxaaPixelShader(float2 pos)
+{
+	float3 rgbN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).xyz;
+	float3 rgbW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).xyz;
+	float3 rgbM = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +0) * inv_width_height, 0).xyz;
+	float3 rgbE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).xyz;
+	float3 rgbS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).xyz;
+	float lumaN = FxaaLuma(rgbN);
+	float lumaW = FxaaLuma(rgbW);
+	float lumaM = FxaaLuma(rgbM);
+	float lumaE = FxaaLuma(rgbE);
+	float lumaS = FxaaLuma(rgbS);
+	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
+	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
+	float range = rangeMax - rangeMin;
+	if (range < max(1 / 24.0f, rangeMax / 8))
+	{
+		return rgbM;
+	}
+	float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
+
+	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
+	float rangeL = abs(lumaL - lumaM);
+	float blendL = max(0.0f, (rangeL / range) - 0.25f) / 0.75f;
+	blendL = min(0.75f, blendL);
+
+	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
+	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
+	float3 rgbSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).xyz;
+	float3 rgbSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).xyz;
+	rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
+	rgbL *= (1.0 / 9.0f);
+	float lumaNW = FxaaLuma(rgbNW);
+	float lumaNE = FxaaLuma(rgbNE);
+	float lumaSW = FxaaLuma(rgbSW);
+	float lumaSE = FxaaLuma(rgbSE);
+	float edgeVert = abs((0.25f * lumaNW) + (-0.5f * lumaN) + (0.25f * lumaNE))
+		+ abs((0.50f * lumaW ) + (-1.0f * lumaM) + (0.50f * lumaE ))
+		+ abs((0.25f * lumaSW) + (-0.5f * lumaS) + (0.25f * lumaSE));
+	float edgeHorz = abs((0.25f * lumaNW) + (-0.5f * lumaW) + (0.25f * lumaSW))
+		+ abs((0.50f * lumaN ) + (-1.0f * lumaM) + (0.50f * lumaS ))
+		+ abs((0.25f * lumaNE) + (-0.5f * lumaE) + (0.25f * lumaSE));
+	bool horzSpan = edgeHorz >= edgeVert;
 	float lengthSign = horzSpan ? -inv_width_height.y : -inv_width_height.x;
 	if (!horzSpan)
 	{
@@ -133,16 +138,6 @@ float3 FxaaPixelShader(float2 pos)
 	lumaS = (lumaS + lumaM) * 0.5f;
 
 	bool pairN = gradientN >= gradientS;
-#if FXAA_DEBUG_PAIR
-	if (pairN)
-	{
-		return float3(0, 0, 1);
-	}
-	else
-	{
-		return float3(0, 1, 0);
-	}
-#endif
 	if (!pairN)
 	{
 		lumaN = lumaS;
@@ -193,16 +188,6 @@ float3 FxaaPixelShader(float2 pos)
 	float dstN = horzSpan ? pos.x - posN.x : pos.y - posN.y;
 	float dstP = horzSpan ? posP.x - pos.x : posP.y - pos.y;
 	bool directionN = dstN < dstP;
-#if FXAA_DEBUG_NEGPOS
-	if (directionN)
-	{
-		return float3(1.0f, 0.0f, 0.0f);
-	}
-	else
-	{
-		return float3(0.0f, 0.0f, 1.0f);
-	}
-#endif
 	lumaEndN = directionN ? lumaEndN : lumaEndP;
 
 	if ((lumaM - lumaN < 0) == (lumaEndN - lumaN < 0)) 
@@ -213,27 +198,6 @@ float3 FxaaPixelShader(float2 pos)
 	float spanLength = (dstP + dstN);
 	dstN = directionN ? dstN : dstP;
 	float subPixelOffset = (0.5 + (dstN * (-1 / spanLength))) * lengthSign;
-#if FXAA_DEBUG_OFFSET
-	float ox = horzSpan ? 0 : subPixelOffset * 2 / inv_width_height.x;
-	float oy = horzSpan ? subPixelOffset * 2 / inv_width_height.y : 0;
-	if (ox < 0)
-	{
-		return lerp(float3(1.0f, 0.0f, 0.0f), lumaO, -ox);
-	}
-	if (ox > 0)
-	{
-		return lerp(float3(0.0f, 0.0f, 1.0f), lumaO, +ox);
-	}
-	if (oy < 0)
-	{
-		return lerp(float3(1.0f, 0.6f, 0.2f), lumaO, -oy);
-	}
-	if (oy > 0)
-	{
-		return lerp(float3(0.2f, 0.6f, 1.0f), lumaO, +oy);
-	}
-	return luma0;
-#endif
 	float3 rgbF = color_tex.SampleLevel(linear_sampler, float2(
 		pos.x + (horzSpan ? 0 : subPixelOffset),
 		pos.y + (horzSpan ? subPixelOffset : 0)), 0).xyz;
@@ -244,6 +208,11 @@ float4 FXAAPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	return float4(FxaaPixelShader(tc0), 1.0f);
 }
+
+float4 DebugFXAAPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return float4(DebugFxaaPixelShader(tc0), 1.0f);
+}
 		]]>
 	</shader>
 
@@ -253,6 +222,15 @@ float4 FXAAPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="FXAAPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="FXAAShowEdge">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DebugFXAAPS()"/>
 		</pass>
 	</technique>
 </effect>

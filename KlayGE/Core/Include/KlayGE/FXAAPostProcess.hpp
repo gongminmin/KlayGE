@@ -13,6 +13,12 @@ namespace KlayGE
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		using PostProcess::InputPin;
+
+		void ShowEdge(bool se);
+
+	private:
+		RenderTechniquePtr fxaa_tech_;
+		RenderTechniquePtr show_edge_tech_;
 	};
 }
 

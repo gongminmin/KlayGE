@@ -206,7 +206,6 @@
     <ClInclude Include="..\..\src\DeferredRendering\DeferredRenderingLayer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\media\DeferredRendering\AdaptiveAntiAliasPP.fxml" />
     <None Include="..\..\media\DeferredRendering\DeferredRendering.fxml" />
     <None Include="..\..\media\DeferredRendering\DeferredRenderingDebug.fxml" />
     <None Include="..\..\media\DeferredRendering\DepthToVSM.fxml" />

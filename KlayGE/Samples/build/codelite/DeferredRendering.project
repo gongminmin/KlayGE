@@ -16,7 +16,6 @@
     <File Name="../../src/DeferredRendering/DeferredRenderingLayer.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
-    <File Name="../../media/DeferredRendering/AdaptiveAntiAliasPP.fxml"/>
     <File Name="../../media/DeferredRendering/DeferredRendering.fxml"/>
     <File Name="../../media/DeferredRendering/DeferredRenderingDebug.fxml"/>
     <File Name="../../media/DeferredRendering/GBuffer.fxml"/>

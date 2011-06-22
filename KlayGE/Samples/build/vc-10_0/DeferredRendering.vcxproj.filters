@@ -39,9 +39,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\media\DeferredRendering\AdaptiveAntiAliasPP.fxml">
-      <Filter>Effects</Filter>
-    </None>
     <None Include="..\..\media\DeferredRendering\GBuffer.fxml">
       <Filter>Effects</Filter>
     </None>

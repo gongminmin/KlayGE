@@ -19,6 +19,7 @@
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/half.hpp>
+#include <KlayGE/FXAAPostProcess.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -471,96 +472,6 @@ namespace
 		}
 	};
 
-	class AdaptiveAntiAliasPostProcess : public PostProcess
-	{
-	public:
-		AdaptiveAntiAliasPostProcess()
-			: PostProcess(L"AdaptiveAntiAlias")
-		{
-			input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-
-			output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("AdaptiveAntiAliasPP.fxml");
-
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			if (caps.cs_support && (5 == caps.max_shader_model))
-			{
-				adaptive_aa_tech_ = effect->TechniqueByName("AdaptiveAntiAliasCS");
-				cs_pp_ = true;
-			}
-			else
-			{
-				adaptive_aa_tech_ = effect->TechniqueByName("AdaptiveAntiAlias");
-				cs_pp_ = false;
-			}
-			show_edge_tech_ = effect->TechniqueByName("AdaptiveAntiAliasShowEdge");
-			show_edge_ = false;
-
-			this->Technique(adaptive_aa_tech_);
-		}
-
-		void InputPin(uint32_t index, TexturePtr const & tex)
-		{
-			PostProcess::InputPin(index, tex);
-			if ((0 == index) && tex)
-			{
-				*(technique_->Effect().ParameterByName("inv_width_height")) = float2(1.0f / tex->Width(0), 1.0f / tex->Height(0));
-			}
-		}
-
-		using PostProcess::InputPin;
-
-		void ShowEdge(bool se)
-		{
-			show_edge_ = se;
-			if (se)
-			{
-				technique_ = show_edge_tech_;
-			}
-			else
-			{
-				technique_ = adaptive_aa_tech_;
-			}
-		}
-
-		void Apply()
-		{
-			if (cs_pp_ && !show_edge_)
-			{
-				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-				if (!this->OutputPin(0))
-				{
-					this->OutputPin(0, re.DefaultFrameBufferTexture());
-				}
-
-				re.BindFrameBuffer(re.DefaultFrameBuffer());
-
-				TexturePtr const & tex = this->InputPin(0);
-
-				int const BLOCK_SIZE_X = 16;
-				int const BLOCK_SIZE_Y = 16;
-
-				this->OnRenderBegin();
-				re.Dispatch(*technique_, (tex->Width(0) + (BLOCK_SIZE_X - 1)) / BLOCK_SIZE_X, (tex->Height(0) + (BLOCK_SIZE_Y - 1)) / BLOCK_SIZE_Y, 1);
-				this->OnRenderEnd();
-			}
-			else
-			{
-				PostProcess::Apply();
-			}
-		}
-
-	protected:
-		bool cs_pp_;
-		bool show_edge_;
-		RenderTechniquePtr adaptive_aa_tech_;
-		RenderTechniquePtr show_edge_tech_;
-	};
-
 	class SSAOPostProcess : public PostProcess
 	{
 	public:
@@ -765,7 +676,8 @@ void DeferredRenderingApp::InitObjects()
 	input_handler->connect(boost::bind(&DeferredRenderingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
+	//edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
+	edge_anti_alias_ = MakeSharedPtr<FXAAPostProcess>();
 	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
@@ -826,8 +738,7 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 
 	deferred_rendering_->SSAOTex(blur_ssao_tex_);
 
-	edge_anti_alias_->InputPin(0, deferred_rendering_->GBufferTex());
-	edge_anti_alias_->InputPin(1, deferred_rendering_->ShadingTex());
+	edge_anti_alias_->InputPin(0, deferred_rendering_->ShadingTex());
 
 	copy_pp_->InputPin(0, deferred_rendering_->ShadingTex());
 
@@ -869,7 +780,7 @@ void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 	}
 	dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(anti_alias_enabled_);
 
-	checked_pointer_cast<AdaptiveAntiAliasPostProcess>(edge_anti_alias_)->ShowEdge(4 == buffer_type_);
+	checked_pointer_cast<FXAAPostProcess>(edge_anti_alias_)->ShowEdge(4 == buffer_type_);
 }
 
 void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
