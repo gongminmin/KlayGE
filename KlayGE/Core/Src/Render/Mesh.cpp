@@ -1409,6 +1409,16 @@ namespace KlayGE
 			decoded->read(&mtl.specular_level, sizeof(float));
 			decoded->read(&mtl.shininess, sizeof(float));
 
+			if (Context::Instance().Config().graphics_cfg.gamma)
+			{
+				mtl.ambient.x() = pow(mtl.ambient.x(), 2.2f);
+				mtl.ambient.y() = pow(mtl.ambient.y(), 2.2f);
+				mtl.ambient.z() = pow(mtl.ambient.z(), 2.2f);
+				mtl.diffuse.x() = pow(mtl.diffuse.x(), 2.2f);
+				mtl.diffuse.y() = pow(mtl.diffuse.y(), 2.2f);
+				mtl.diffuse.z() = pow(mtl.diffuse.z(), 2.2f);
+			}
+
 			uint32_t num_texs;
 			decoded->read(&num_texs, sizeof(num_texs));
 
@@ -1583,12 +1593,23 @@ namespace KlayGE
 				XMLNodePtr mtl_node = doc.AllocNode(XNT_Element, "material");
 				materials_chunk->AppendNode(mtl_node);
 
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_r", mtl.ambient.x()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_g", mtl.ambient.y()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_b", mtl.ambient.z()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_r", mtl.diffuse.x()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_g", mtl.diffuse.y()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_b", mtl.diffuse.z()));
+				float3 ambient, diffuse;
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					ambient.x() = pow(mtl.ambient.x(), 1 / 2.2f);
+					ambient.y() = pow(mtl.ambient.y(), 1 / 2.2f);
+					ambient.z() = pow(mtl.ambient.z(), 1 / 2.2f);
+					diffuse.x() = pow(mtl.diffuse.x(), 1 / 2.2f);
+					diffuse.y() = pow(mtl.diffuse.y(), 1 / 2.2f);
+					diffuse.z() = pow(mtl.diffuse.z(), 1 / 2.2f);
+				}
+
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_r", ambient.x()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_g", ambient.y()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_b", ambient.z()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_r", diffuse.x()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_g", diffuse.y()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_b", diffuse.z()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_r", mtl.specular.x()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_g", mtl.specular.y()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_b", mtl.specular.z()));
@@ -1700,6 +1721,10 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1));
+									if (VEU_Tangent == ve.usage)
+									{
+										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 30) & 0x3) / 3.0f * 2 - 1));
+									}
 								}
 								else if (EF_ARGB8 == ve.format)
 								{
@@ -1707,6 +1732,10 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+									if (VEU_Tangent == ve.usage)
+									{
+										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
+									}
 								}
 								else if (EF_BGR32F == ve.format)
 								{
