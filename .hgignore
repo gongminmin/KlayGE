@@ -1,4 +1,5 @@
 syntax: glob
+__pycache__
 glloader/Debug/
 glloader/Debug-GLES/
 glloader/Release/

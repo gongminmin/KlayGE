@@ -32,6 +32,7 @@
 #include <KlayGE/XMLDom.hpp>
 
 #include <fstream>
+#include <iostream>
 
 #include <KlayGE/Context.hpp>
 
@@ -488,6 +489,10 @@ namespace KlayGE
 			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
 			graphics_node->AppendNode(hdr_node);
 
+			XMLNodePtr gamma_node = cfg_doc.AllocNode(XNT_Element, "gamma");
+			gamma_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.gamma));
+			graphics_node->AppendNode(gamma_node);
+
 			XMLNodePtr stereo_node = cfg_doc.AllocNode(XNT_Element, "stereo");
 			std::string method_str;
 			switch (cfg_.graphics_cfg.stereo_method)
@@ -584,7 +589,9 @@ namespace KlayGE
 #ifdef KLAYGE_COMPILER_GCC
 		fn = "lib" + fn;
 #endif
-		render_loader_.Load(render_path + "/" + fn);
+
+		std::string path = render_path + "/" + fn;
+		render_loader_.Load(path);
 
 		MakeRenderFactoryFunc mrf = (MakeRenderFactoryFunc)render_loader_.GetProcAddress("MakeRenderFactory");
 		if (mrf != NULL)
@@ -593,6 +600,7 @@ namespace KlayGE
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			render_loader_.Free();
 		}
 	}
@@ -607,11 +615,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_LINUX
 		fn = "lib" + fn;
 #endif
-		audio_loader_.Load(audio_path + "/" + fn);
+
+		std::string path = audio_path + "/" + fn;
+		audio_loader_.Load(path);
 
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 		if (maf != NULL)
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			maf(audio_factory_);
 		}
 		else
@@ -630,11 +641,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_LINUX
 		fn = "lib" + fn;
 #endif
-		input_loader_.Load(input_path + "/" + fn);
+
+		std::string path = input_path + "/" + fn;
+		input_loader_.Load(path);
 
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 		if (mif != NULL)
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			mif(input_factory_);
 		}
 		else
@@ -653,11 +667,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_LINUX
 		fn = "lib" + fn;
 #endif
-		show_loader_.Load(show_path + "/" + fn);
+
+		std::string path = show_path + "/" + fn;
+		show_loader_.Load(path);
 
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 		if (msf != NULL)
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			msf(show_factory_);
 		}
 		else
@@ -676,11 +693,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_LINUX
 		fn = "lib" + fn;
 #endif
-		sm_loader_.Load(sm_path + "/" + fn);
+
+		std::string path = sm_path + "/" + fn;
+		sm_loader_.Load(path);
 
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 		if (msm != NULL)
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			msm(scene_mgr_);
 		}
 		else
@@ -699,11 +719,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_LINUX
 		fn = "lib" + fn;
 #endif
-		ads_loader_.Load(adsf_path + "/" + fn);
+
+		std::string path = adsf_path + "/" + fn;
+		ads_loader_.Load(path);
 
 		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
 		if (madsf != NULL)
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			madsf(audio_data_src_factory_);
 		}
 		else

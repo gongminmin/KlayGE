@@ -160,7 +160,7 @@ class Extension:
 					one_of.append(ext.getAttribute("name"))
 				self.additionals.append(one_of)
 
-def create_header(prefix, extensions):
+def create_header(prefix, extensions, base_dir):
 	header_str = StringIO()
 
 	header_str.write("/*\n%s*/\n\n" % GPLNotice);
@@ -257,7 +257,7 @@ def create_header(prefix, extensions):
 	header_str.write("#endif		/* _GLLOADER_%s_H */\n" % prefix.upper())
 
 	try:
-		cur_header_file = open("include/glloader/glloader_%s.h" % prefix.lower(), "r")
+		cur_header_file = open("%s/include/glloader/glloader_%s.h" % (base_dir, prefix.lower()), "r")
 		cur_header_str = cur_header_file.read()
 		cur_header_file.close()
 	except:
@@ -265,13 +265,13 @@ def create_header(prefix, extensions):
 	new_header_str = header_str.getvalue()
 	if new_header_str != cur_header_str:
 		print("glloader_%s.h is updated" % prefix.lower())
-		header_file = open("include/glloader/glloader_%s.h" % prefix.lower(), "w")
+		header_file = open("%s/include/glloader/glloader_%s.h" % (base_dir, prefix.lower()), "w")
 		header_file.write(new_header_str)
 		header_file.close()
 	else:
 		print("No change detected. Skip glloader_%s.h" % prefix.lower())
 
-def create_source(prefix, extensions):
+def create_source(prefix, extensions, base_dir):
 	source_str = StringIO()
 
 	source_str.write("/*\n%s*/\n\n" % GPLNotice);
@@ -502,7 +502,7 @@ def create_source(prefix, extensions):
 	source_str.write("#endif\t\t/* GLLOADER_%s */\n" % prefix.upper())
 
 	try:
-		cur_source_file = open("src/glloader_%s.c" % prefix.lower(), "r")
+		cur_source_file = open("%s/src/glloader_%s.c" % (base_dir, prefix.lower()), "r")
 		cur_source_str = cur_source_file.read()
 		cur_source_file.close()
 	except:
@@ -510,16 +510,16 @@ def create_source(prefix, extensions):
 	new_source_str = source_str.getvalue()
 	if new_source_str != cur_source_str:
 		print("glloader_%s.c is updated" % prefix.lower())
-		source_file = open("src/glloader_%s.c" % prefix.lower(), "w")
+		source_file = open("%s/src/glloader_%s.c" % (base_dir, prefix.lower()), "w")
 		source_file.write(new_source_str)
 		source_file.close()
 	else:
 		print("No change detected. Skip glloader_%s.c" % prefix.lower())
 
 
-if __name__ == "__main__":
+def auto_gen_glloader_files(base_dir):
 	import os
-	exts = os.listdir("xml")
+	exts = os.listdir(base_dir + "/xml")
 
 	extension_set = {}
 
@@ -530,16 +530,22 @@ if __name__ == "__main__":
 			prefix = ext[0 : ext.find("_")]
 			if prefix not in extension_set:
 				extension_set[prefix] = []
-			extension_set[prefix].append(Extension(parse("xml/" + ext)))
+			extension_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext)))
 
 	print("")
 
 	print("Creating Header Files...")
 	for extensions in extension_set.items():
-		create_header(extensions[0], extensions[1])
+		create_header(extensions[0], extensions[1], base_dir)
 	print("")
 
 	print("Creating Source Files...")
 	for extensions in extension_set.items():
-		create_source(extensions[0], extensions[1])
+		create_source(extensions[0], extensions[1], base_dir)
 	print("")
+
+
+if __name__ == "__main__":
+	import os
+	import sys
+	auto_gen_glloader_files(os.path.dirname(sys.argv[0]))

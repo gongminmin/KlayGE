@@ -174,6 +174,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -197,6 +206,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -224,6 +242,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -252,6 +279,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-GLES|Win32'">
     <ClCompile>
@@ -271,6 +307,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-GLES|x64'">
     <Midl>
@@ -295,6 +340,15 @@
       <TargetMachine>MachineX64</TargetMachine>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-GLES|Win32'">
     <ClCompile>
@@ -321,6 +375,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x86\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-GLES|x64'">
     <Midl>
@@ -350,6 +413,15 @@
       <TargetMachine>MachineX64</TargetMachine>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
+    <PreBuildEvent>
+      <Command>..\..\autogen.py</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" ..\..\..\KlayGE\bin\win_x64\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Deploying...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\glloader_egl.c" />
