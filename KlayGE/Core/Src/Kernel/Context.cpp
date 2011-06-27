@@ -622,11 +622,11 @@ namespace KlayGE
 		MakeAudioFactoryFunc maf = (MakeAudioFactoryFunc)audio_loader_.GetProcAddress("MakeAudioFactory");
 		if (maf != NULL)
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			maf(audio_factory_);
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			audio_loader_.Free();
 		}
 	}
@@ -648,11 +648,11 @@ namespace KlayGE
 		MakeInputFactoryFunc mif = (MakeInputFactoryFunc)input_loader_.GetProcAddress("MakeInputFactory");
 		if (mif != NULL)
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			mif(input_factory_);
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			input_loader_.Free();
 		}
 	}
@@ -674,11 +674,11 @@ namespace KlayGE
 		MakeShowFactoryFunc msf = (MakeShowFactoryFunc)show_loader_.GetProcAddress("MakeShowFactory");
 		if (msf != NULL)
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			msf(show_factory_);
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			show_loader_.Free();
 		}
 	}
@@ -700,11 +700,11 @@ namespace KlayGE
 		MakeSceneManagerFunc msm = (MakeSceneManagerFunc)sm_loader_.GetProcAddress("MakeSceneManager");
 		if (msm != NULL)
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			msm(scene_mgr_);
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			sm_loader_.Free();
 		}
 	}
@@ -726,11 +726,11 @@ namespace KlayGE
 		MakeAudioDataSourceFactoryFunc madsf = (MakeAudioDataSourceFactoryFunc)ads_loader_.GetProcAddress("MakeAudioDataSourceFactory");
 		if (madsf != NULL)
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			madsf(audio_data_src_factory_);
 		}
 		else
 		{
+			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
 			ads_loader_.Free();
 		}
 	}

@@ -27,6 +27,7 @@ SET(RENDERING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderView.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/SATPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/ShaderObject.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Render/TAAPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
 )
 
@@ -61,6 +62,7 @@ SET(RENDERING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderView.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SATPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ShaderObject.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TAAPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Viewport.hpp
 )

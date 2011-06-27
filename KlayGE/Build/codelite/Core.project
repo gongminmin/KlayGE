@@ -35,6 +35,7 @@
       <File Name="../../Core/Src/Render/RenderView.cpp"/>
       <File Name="../../Core/Src/Render/SATPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/ShaderObject.cpp"/>
+	  <File Name="../../Core/Src/Render/TAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Header Files">
@@ -68,6 +69,7 @@
       <File Name="../../Core/Include/KlayGE/RenderView.hpp"/>
       <File Name="../../Core/Include/KlayGE/SATPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/ShaderObject.hpp"/>
+	  <File Name="../../Core/Include/KlayGE/TAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
       <File Name="../../Core/Include/KlayGE/Viewport.hpp"/>
     </VirtualDirectory>

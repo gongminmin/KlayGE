@@ -450,6 +450,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\TAAPostProcess.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\Texture.cpp"
 					>
 				</File>
@@ -575,6 +579,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\ShaderObject.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\TAAPostProcess.hpp"
 					>
 				</File>
 				<File
