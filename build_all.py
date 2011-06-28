@@ -35,16 +35,6 @@ if __name__ == "__main__":
 		compiler_version = 9
 		ide_name = "VS"
 		ide_version = 2008
-	elif "vc8" == cfg:
-		compiler_name = "vc"
-		compiler_version = 8
-		ide_name = "VS"
-		ide_version = 2005
-	elif "mingw" == cfg:
-		compiler_name = "gcc"
-		compiler_version = 0
-		ide_name = "mingw"
-		ide_version = 0
 	else:
 		print("Wrong configuration\n")
 		sys.exit(1)
@@ -74,3 +64,13 @@ if __name__ == "__main__":
 	os.chdir("KlayGE/Build/%s-%d_0" % (compiler_name, compiler_version))
 	os.system("build_all.bat -q")
 	os.chdir("../../../")
+
+	print("Building KlayGE Samples...")
+	os.chdir("KlayGE/Samples/build/%s-%d_0" % (compiler_name, compiler_version))
+	os.system("build_all.bat -q")
+	os.chdir("../../../../")
+
+	print("Building KlayGE Tools...")
+	os.chdir("KlayGE/Tools/build/%s-%d_0" % (compiler_name, compiler_version))
+	os.system("build_all.bat -q")
+	os.chdir("../../../../")
