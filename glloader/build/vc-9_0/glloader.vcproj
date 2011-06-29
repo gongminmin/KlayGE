@@ -28,6 +28,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -90,6 +91,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x86\"
 			/>
 		</Configuration>
 		<Configuration
@@ -101,6 +104,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -164,6 +168,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x64\"
 			/>
 		</Configuration>
 		<Configuration
@@ -175,6 +181,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -243,6 +250,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x86\"
 			/>
 		</Configuration>
 		<Configuration
@@ -254,6 +263,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -321,6 +331,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x64\"
 			/>
 		</Configuration>
 		<Configuration
@@ -332,6 +344,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -393,6 +406,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x86\"
 			/>
 		</Configuration>
 		<Configuration
@@ -404,6 +419,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -468,6 +484,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x64\"
 			/>
 		</Configuration>
 		<Configuration
@@ -479,6 +497,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -546,6 +565,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x86\"
 			/>
 		</Configuration>
 		<Configuration
@@ -557,6 +578,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="..\..\autogen.py"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -625,6 +647,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Deploying..."
+				CommandLine="copy &quot;$(TargetDir)$(TargetFileName)&quot; ..\..\..\KlayGE\bin\win_x64\"
 			/>
 		</Configuration>
 	</Configurations>
