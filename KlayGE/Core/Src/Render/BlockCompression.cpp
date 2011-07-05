@@ -168,15 +168,23 @@ namespace KlayGE
 	}
 
 	// The color matching function
-	uint32_t MatchColorsBlock(uint32_t const * argb, Color const & min_clr, Color const & max_clr)
+	uint32_t MatchColorsBlock(uint32_t const * argb, Color const & min_clr, Color const & max_clr, bool alpha)
 	{
 		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
 
 		Color color[4];
 		color[0] = max_clr;
 		color[1] = min_clr;
-		color[2] = MathLib::lerp(color[0], color[1], 1 / 3.0f);
-		color[3] = MathLib::lerp(color[0], color[1], 2 / 3.0f);
+		if (alpha)
+		{
+			color[2] = MathLib::lerp(color[0], color[1], 1 / 2.0f);
+			color[3] = Color(0, 0, 0, 0);
+		}
+		else
+		{
+			color[2] = MathLib::lerp(color[0], color[1], 1 / 3.0f);
+			color[3] = MathLib::lerp(color[0], color[1], 2 / 3.0f);
+		}
 
 		uint32_t mask = 0;
 		int dirr = static_cast<int>((color[0].r() - color[1].r()) * 255 + 0.5f);
@@ -189,30 +197,68 @@ namespace KlayGE
 			dots[i] = block[i * 4 + 2] * dirr + block[i * 4 + 1] * dirg + block[i * 4 + 0] * dirb;
 		}
 
-		int stops[4];
-		for (int i = 0; i < 4; ++ i)
+		if (alpha)
 		{
-			stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
-				+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
-				+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
-		}
-  
-		int c0Point = (stops[1] + stops[3]) >> 1;
-		int halfPoint = (stops[3] + stops[2]) >> 1;
-		int c3Point = (stops[2] + stops[0]) >> 1;
-
-		for (int i = 15; i >= 0; -- i)
-		{
-			mask <<= 2;
-			int dot = dots[i];
-
-			if (dot < halfPoint)
+			int stops[3];
+			for (int i = 0; i < 3; ++ i)
 			{
-				mask |= (dot < c0Point) ? 1 : 3;
+				stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
+					+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
+					+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
 			}
-			else
+  
+			int c0Point = (stops[1] + stops[2]) >> 1;
+			int halfPoint = stops[2];
+			int c3Point = (stops[2] + stops[0]) >> 1;
+
+			for (int i = 15; i >= 0; -- i)
 			{
-				mask |= (dot < c3Point) ? 2 : 0;
+				mask <<= 2;
+				int dot = dots[i];
+				if (0 == block[i * 4 + 3])
+				{
+					mask |= 3;
+				}
+				else
+				{
+					if (dot < halfPoint)
+					{
+						mask |= (dot < c0Point) ? 1 : 2;
+					}
+					else
+					{
+						mask |= (dot < c3Point) ? 2 : 0;
+					}
+				}
+			}
+		}
+		else
+		{
+			int stops[4];
+			for (int i = 0; i < 4; ++ i)
+			{
+				stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
+					+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
+					+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
+			}
+  
+			int c0Point = (stops[1] + stops[3]) >> 1;
+			int halfPoint = (stops[3] + stops[2]) >> 1;
+			int c3Point = (stops[2] + stops[0]) >> 1;
+
+			for (int i = 15; i >= 0; -- i)
+			{
+				mask <<= 2;
+				int dot = dots[i];
+
+				if (dot < halfPoint)
+				{
+					mask |= (dot < c0Point) ? 1 : 3;
+				}
+				else
+				{
+					mask |= (dot < c3Point) ? 2 : 0;
+				}
 			}
 		}
 
@@ -440,7 +486,7 @@ namespace KlayGE
 		}
 	}
 
-	void EncodeBC1Internal(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
+	void EncodeBC1Internal(BC1_layout& bc1, uint32_t const * argb, bool alpha, EBCMethod method)
 	{
 		// check if block is constant
 		uint32_t min32, max32;
@@ -461,7 +507,7 @@ namespace KlayGE
 			min16 = Color_to_RGB565(min_clr);
 			if (max16 != min16)
 			{
-				mask = MatchColorsBlock(argb, min_clr, max_clr);
+				mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);
 			}
 			else
 			{
@@ -475,7 +521,7 @@ namespace KlayGE
 					min16 = Color_to_RGB565(min_clr);
 					if (max_clr != min_clr)
 					{
-						mask = MatchColorsBlock(argb, min_clr, max_clr);
+						mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);
 					}
 					else
 					{
@@ -486,13 +532,21 @@ namespace KlayGE
 		}
 		else // constant color
 		{
-			int r = (argb[0] >> 16) & 0xFF;
-			int g = (argb[0] >> 8) & 0xFF;
-			int b = (argb[0] >> 0) & 0xFF;
+			if (alpha && (0 == argb[0]))
+			{
+				mask = 0xFFFFFFFF;
+				max16 = min16 = 0;
+			}
+			else
+			{
+				int r = (argb[0] >> 16) & 0xFF;
+				int g = (argb[0] >> 8) & 0xFF;
+				int b = (argb[0] >> 0) & 0xFF;
 
-			mask  = 0xAAAAAAAA;
-			max16 = (OMatch5[r][0] << 11) | (OMatch6[g][0] << 5) | OMatch5[b][0];
-			min16 = (OMatch5[r][1] << 11) | (OMatch6[g][1] << 5) | OMatch5[b][1];
+				mask  = 0xAAAAAAAA;
+				max16 = (OMatch5[r][0] << 11) | (OMatch6[g][0] << 5) | OMatch5[b][0];
+				min16 = (OMatch5[r][1] << 11) | (OMatch6[g][1] << 5) | OMatch5[b][1];
+			}
 		}
 
 		if (max16 < min16)
@@ -501,8 +555,16 @@ namespace KlayGE
 			mask ^= 0x55555555;
 		}
 
-		bc1.clr_0 = max16;
-		bc1.clr_1 = min16;
+		if (alpha)
+		{
+			bc1.clr_0 = min16;
+			bc1.clr_1 = max16;
+		}
+		else
+		{
+			bc1.clr_0 = max16;
+			bc1.clr_1 = min16;
+		}
 		memcpy(bc1.bitmap, &mask, sizeof(mask));
 	}
 
@@ -1090,11 +1152,13 @@ namespace KlayGE
 	void EncodeBC1(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
 	{
 		boost::array<uint32_t, 16> tmp_argb;
+		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
 			if (((argb[i] >> 24) & 0xFF) < 0x80)
 			{
 				tmp_argb[i] = 0;
+				alpha = true;
 			}
 			else
 			{
@@ -1102,7 +1166,7 @@ namespace KlayGE
 			}
 		}
 
-		EncodeBC1Internal(bc1, &tmp_argb[0], method);
+		EncodeBC1Internal(bc1, &tmp_argb[0], alpha, method);
 	}
 
 	void EncodeBC2(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
@@ -1115,7 +1179,7 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 28);
 		}
 
-		EncodeBC1Internal(bc2.bc1, &xrgb[0], method);
+		EncodeBC1Internal(bc2.bc1, &xrgb[0], false, method);
 
 		for (int i = 0; i < 4; ++ i)
 		{
@@ -1134,7 +1198,7 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 24);
 		}
 
-		EncodeBC1Internal(bc3.bc1, &xrgb[0], method);
+		EncodeBC1Internal(bc3.bc1, &xrgb[0], false, method);
 		EncodeBC4Internal(bc3.alpha, &alpha[0]);
 	}
 
@@ -1152,11 +1216,13 @@ namespace KlayGE
 	void EncodeBC1_sRGB(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
 	{
 		boost::array<uint32_t, 16> tmp_argb;
+		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
 			if (((argb[i] >> 24) & 0xFF) < 0x80)
 			{
 				tmp_argb[i] = 0;
+				alpha = true;
 			}
 			else
 			{
@@ -1168,7 +1234,9 @@ namespace KlayGE
 			}
 		}
 
-		EncodeBC1Internal(bc1, &tmp_argb[0], method);
+		EncodeBC1Internal(bc1, &tmp_argb[0], alpha, method);
+
+		bool order = bc1.clr_0 < bc1.clr_1;
 
 		Color clr = RGB565_to_Color(bc1.clr_0);
 		clr.r() = pow(clr.r(), 1 / 2.2f);
@@ -1181,6 +1249,11 @@ namespace KlayGE
 		clr.g() = pow(clr.g(), 1 / 2.2f);
 		clr.b() = pow(clr.b(), 1 / 2.2f);
 		bc1.clr_1 = Color_to_RGB565(clr);
+
+		if ((bc1.clr_0 < bc1.clr_1) ^ order)
+		{
+			std::swap(bc1.clr_0, bc1.clr_1);
+		}
 	}
 
 	void EncodeBC2_sRGB(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
@@ -1198,7 +1271,7 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 28);
 		}
 
-		EncodeBC1Internal(bc2.bc1, &xrgb[0], method);
+		EncodeBC1Internal(bc2.bc1, &xrgb[0], false, method);
 
 		for (int i = 0; i < 4; ++ i)
 		{
@@ -1234,7 +1307,7 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 24);
 		}
 
-		EncodeBC1Internal(bc3.bc1, &xrgb[0], method);
+		EncodeBC1Internal(bc3.bc1, &xrgb[0], false, method);
 		EncodeBC4Internal(bc3.alpha, &alpha[0]);
 
 		Color clr = RGB565_to_Color(bc3.bc1.clr_0);
