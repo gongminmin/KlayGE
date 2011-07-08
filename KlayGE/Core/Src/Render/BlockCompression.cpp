@@ -199,17 +199,16 @@ namespace KlayGE
 
 		if (alpha)
 		{
-			int stops[3];
-			for (int i = 0; i < 3; ++ i)
+			int stops[2];
+			for (int i = 0; i < 2; ++ i)
 			{
 				stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
 					+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
 					+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
 			}
   
-			int c0Point = (stops[1] + stops[2]) >> 1;
-			int halfPoint = stops[2];
-			int c3Point = (stops[2] + stops[0]) >> 1;
+			int c0Point = (stops[0] + stops[1] * 2) / 3;
+			int c3Point = (stops[0] * 2 + stops[1]) / 3;
 
 			for (int i = 15; i >= 0; -- i)
 			{
@@ -221,9 +220,9 @@ namespace KlayGE
 				}
 				else
 				{
-					if (dot < halfPoint)
+					if (dot < c0Point)
 					{
-						mask |= (dot < c0Point) ? 1 : 2;
+						mask |= 1;
 					}
 					else
 					{
@@ -549,19 +548,37 @@ namespace KlayGE
 			}
 		}
 
-		if (max16 < min16)
-		{
-			std::swap(max16, min16);
-			mask ^= 0x55555555;
-		}
-
 		if (alpha)
 		{
+			if (max16 < min16)
+			{
+				std::swap(max16, min16);
+
+				uint32_t xor_mask = 0;
+				for (int i = 15; i >= 0; -- i)
+				{
+					xor_mask <<= 2;
+
+					uint32_t pixel_mask = (mask >> (i * 2)) & 0x3;
+					if (pixel_mask <= 1)
+					{
+						xor_mask |= 0x1;
+					}
+				}
+				mask ^= xor_mask;
+			}
+
 			bc1.clr_0 = min16;
 			bc1.clr_1 = max16;
 		}
 		else
 		{
+			if (max16 < min16)
+			{
+				std::swap(max16, min16);
+				mask ^= 0x55555555;
+			}
+
 			bc1.clr_0 = max16;
 			bc1.clr_1 = min16;
 		}
