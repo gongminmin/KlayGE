@@ -55,10 +55,10 @@ def build_external_libs(cfg):
 
 	print("\nBuilding boost...\n")
 
-	if not os.path.exists("External/boost/bjam.exe"):
-		os.system("External/boost/bootstrap.bat")
-
 	os.chdir("External/boost")
+	if not os.path.exists("bjam.exe"):
+		os.system("bootstrap.bat")
+
 	if "vc" == compiler_name:
 		boost_toolset = "%s%d" % (compiler_name, compiler_version)
 	else:
