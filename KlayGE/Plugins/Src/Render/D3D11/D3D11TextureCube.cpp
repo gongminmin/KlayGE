@@ -389,8 +389,8 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = array_index * 6 + face - CF_Positive_X;;
-		desc.Texture2DArray.FirstArraySlice = 1;
+		desc.Texture2DArray.ArraySize = 1;
+		desc.Texture2DArray.FirstArraySlice = array_index * 6 + face - CF_Positive_X;
 
 		ID3D11DepthStencilView* ds_view;
 		TIF(d3d_device_->CreateDepthStencilView(this->D3DTexture().get(), &desc, &ds_view));
