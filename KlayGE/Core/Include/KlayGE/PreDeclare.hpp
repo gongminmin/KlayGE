@@ -88,6 +88,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<SceneObjectHDRSkyBox> SceneObjectHDRSkyBoxPtr;
 	class SceneObjectLightSourceProxy;
 	typedef boost::shared_ptr<SceneObjectLightSourceProxy> SceneObjectLightSourceProxyPtr;
+	class SceneObjectCameraProxy;
+	typedef boost::shared_ptr<SceneObjectCameraProxy> SceneObjectCameraProxyPtr;
 
 	struct ElementInitData;
 	class Camera;

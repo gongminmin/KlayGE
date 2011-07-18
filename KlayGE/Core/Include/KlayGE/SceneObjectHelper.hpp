@@ -82,6 +82,31 @@ namespace KlayGE
 
 		LightSourcePtr light_;
 	};
+
+	class KLAYGE_CORE_API SceneObjectCameraProxy : public SceneObjectHelper
+	{
+	public:
+		explicit SceneObjectCameraProxy(CameraPtr const & camera);
+
+		void Update();
+
+		void EyePos(float x, float y, float z);
+		void EyePos(float3 const & t);
+		void LookAt(float x, float y, float z);
+		void LookAt(float3 const & t);
+		void UpVec(float x, float y, float z);
+		void UpVec(float3 const & t);
+
+		float4x4 const & GetModelMatrix() const;
+
+	protected:
+		float4x4 model_;
+		float3 eye_pos_;
+		float3 look_at_;
+		float3 up_vec_;
+
+		CameraPtr camera_;
+	};
 }
 
 #endif		// _RENDERABLEHELPER_HPP

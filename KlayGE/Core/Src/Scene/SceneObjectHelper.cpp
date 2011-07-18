@@ -31,6 +31,7 @@
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -144,6 +145,57 @@ namespace KlayGE
 	}
 
 	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const
+	{
+		return model_;
+	}
+
+
+	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera)
+		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
+			camera_(camera)
+	{
+		eye_pos_ = camera_->EyePos();
+		look_at_ = camera->LookAt();
+		up_vec_ = camera->UpVec();;
+	}
+
+	void SceneObjectCameraProxy::Update()
+	{
+		camera_->ViewParams(eye_pos_, look_at_, up_vec_);
+		model_ = MathLib::inverse(camera_->ViewMatrix());
+	}
+
+	void SceneObjectCameraProxy::EyePos(float x, float y, float z)
+	{
+		eye_pos_ = float3(x, y, z);
+	}
+
+	void SceneObjectCameraProxy::EyePos(float3 const & t)
+	{
+		eye_pos_ = t;
+	}
+
+	void SceneObjectCameraProxy::LookAt(float x, float y, float z)
+	{
+		look_at_ = float3(x, y, z);
+	}
+
+	void SceneObjectCameraProxy::LookAt(float3 const & t)
+	{
+		look_at_ = t;
+	}
+
+	void SceneObjectCameraProxy::UpVec(float x, float y, float z)
+	{
+		up_vec_ = float3(x, y, z);
+	}
+
+	void SceneObjectCameraProxy::UpVec(float3 const & t)
+	{
+		up_vec_ = t;
+	}
+
+	float4x4 const & SceneObjectCameraProxy::GetModelMatrix() const
 	{
 		return model_;
 	}
