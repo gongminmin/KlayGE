@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- coding: ascii -*-
+
 from math import pi, sin, cos
 
 def get_pos(i, j, num, line):
