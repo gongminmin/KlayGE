@@ -496,17 +496,17 @@ void GlobalIlluminationApp::InitObjects()
 	deferred_rendering_->SSAOEnabled(false);
 
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
-	ambient_light_->Color(float3(0.7f, 0.75f, 0.78f));
+	ambient_light_->Color(float3(0.0f, 0.0f, 0.0f));
 	ambient_light_->AddToSceneManager();
 
 	spot_light_ = MakeSharedPtr<SpotLightSource>();
 	spot_light_->Attrib(LSA_IndirectLighting);
-	spot_light_->Position(float3(0, 35, -4));
-	spot_light_->Direction(float3(0, -1, 0.72f));
-	spot_light_->Color(float3(6.0f, 5.88f, 4.38f) * 2.0f);
+	spot_light_->Position(float3(0, 12, -4.8f));
+	spot_light_->Direction(float3(0, 0, 1));
+	spot_light_->Color(float3(6.0f, 5.88f, 4.38f));
 	spot_light_->Falloff(float3(0, 0.1f, 0));
-	spot_light_->OuterAngle(PI / 6);
-	spot_light_->InnerAngle(PI / 8);
+	spot_light_->OuterAngle(PI / 4);
+	spot_light_->InnerAngle(PI / 6);
 	spot_light_->AddToSceneManager();
 
 	spot_light_src_ = MakeSharedPtr<SpotLightProxyObject>(sqrt(3.0f) / 3, 1.0f, spot_light_->Color());
@@ -524,7 +524,7 @@ void GlobalIlluminationApp::InitObjects()
 	input_handler->connect(boost::bind(&GlobalIlluminationApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	copy_pp_ = KlayGE::LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("GlobalIllumination.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

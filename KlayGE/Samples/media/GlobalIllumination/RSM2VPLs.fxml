@@ -76,14 +76,11 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	}
 	else if (tc.y < 2 / 3.0f)
 	{
-		float4 normal_es = mul(float4(normal_ls, 0), ls_to_es);
-		return normal_es;
+		return mul(float4(normal_ls, 0), ls_to_es);
 	}
 	else
 	{
-		float4 pos_es_dist = mul(float4(pos_ls, 1), ls_to_es);
-		pos_es_dist.w = dot(pos_ls, pos_ls);
-		return pos_es_dist;
+		return mul(float4(pos_ls, 1), ls_to_es);
 	}
 }
 		]]>
