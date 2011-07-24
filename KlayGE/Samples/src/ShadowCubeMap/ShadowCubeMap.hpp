@@ -45,6 +45,7 @@ private:
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
 	KlayGE::FrameBufferPtr shadow_cube_one_buffer_;
+	KlayGE::TexturePtr shadow_cube_one_tex_;
 
 	KlayGE::FrameBufferPtr shadow_dual_buffers_[2];
 	KlayGE::TexturePtr shadow_dual_texs_[2];

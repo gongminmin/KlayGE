@@ -2161,7 +2161,7 @@ namespace KlayGE
 	}
 
 	// 把纹理保存入DDS文件
-	void SaveTexture(TexturePtr texture, std::string const & tex_name)
+	void SaveTexture(TexturePtr const & texture, std::string const & tex_name)
 	{
 		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 

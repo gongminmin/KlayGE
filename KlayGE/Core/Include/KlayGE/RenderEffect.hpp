@@ -68,6 +68,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/Texture.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/Math.hpp>
 

@@ -292,7 +292,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,
 		ElementFormat format, std::vector<ElementInitData> const & init_data);
-	KLAYGE_CORE_API void SaveTexture(TexturePtr texture, std::string const & tex_name);
+	KLAYGE_CORE_API void SaveTexture(TexturePtr const & texture, std::string const & tex_name);
 
 	// 返回立方环境映射的lookat和up向量
 	//////////////////////////////////////////////////////////////////////////////////

@@ -201,7 +201,7 @@ namespace
 					*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
 					break;
 
-				case SMT_CubeOne:
+				default:
 					{
 						std::vector<float4x4> mvps(6);
 						for (int i = 0; i < 6; ++ i)
@@ -228,19 +228,16 @@ namespace
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
 
 				*(effect->ParameterByName("dpsm")) = static_cast<int32_t>((SMT_DP == sm_type_) ? 1 : 0);
-				switch (sm_type_)
+				if (SMT_DP == sm_type_)
 				{
-				case SMT_DP:
 					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(1);
 					*(effect->ParameterByName("flipping")) = -flipping_;
 					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
-					break;
-				
-				case SMT_Cube:
-				case SMT_CubeOne:
+				}
+				else
+				{
 					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(0);
 					*(effect->ParameterByName("flipping")) = flipping_;
-					break;
 				}
 			}
 		}
@@ -430,7 +427,7 @@ namespace
 					smooth_mesh_ = false;
 					break;
 
-				case SMT_CubeOne:
+				default:
 					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
 					smooth_mesh_ = false;
 					break;
@@ -580,9 +577,9 @@ namespace
 	public:
 		void operator()(LightSource& light)
 		{
-			light.ModelMatrix(/*MathLib::rotation_z(0.4f)
+			light.ModelMatrix(MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.elapsed()) / 1.4f)
-				* */MathLib::translation(2.0f, 12.0f, 4.0f));
+				* MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 
 	private:
@@ -685,10 +682,11 @@ void ShadowCubeMap::InitObjects()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
+	shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
 	shadow_cube_one_buffer_->GetViewport().camera->OmniDirectionalMode(true);
 	shadow_cube_one_buffer_->GetViewport().camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
-	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_tex_, 0, 0));
+	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_one_tex_, 0, 0));
 	TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
 	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
 
@@ -943,7 +941,6 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		}
 		break;
 
-	case SMT_CubeOne:
 	default:
 		switch (pass)
 		{
@@ -964,10 +961,12 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 		default:
 			{
-				/*for (int p = 0; p < 6; ++ p)
+				for (int p = 0; p < 6; ++ p)
 				{
+					shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
+						p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
 					sm_filter_pps_[p]->Apply();
-				}*/
+				}
 
 				renderEngine.BindFrameBuffer(FrameBufferPtr());
 

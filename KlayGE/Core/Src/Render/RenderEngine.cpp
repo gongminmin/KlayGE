@@ -48,6 +48,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 
 #include <KlayGE/RenderEngine.hpp>

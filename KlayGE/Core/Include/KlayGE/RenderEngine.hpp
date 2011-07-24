@@ -82,7 +82,6 @@
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/Color.hpp>
-#include <KlayGE/PostProcess.hpp>
 
 #include <vector>
 
