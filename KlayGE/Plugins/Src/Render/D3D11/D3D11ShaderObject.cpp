@@ -968,6 +968,10 @@ namespace KlayGE
 								std::cerr << "..." << std::endl;
 								std::cerr << err_str.c_str() << std::endl;
 							}
+							else
+							{
+								std::cerr << err_str.c_str() << std::endl;
+							}
 
 							err_msg->Release();
 						}

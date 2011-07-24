@@ -268,6 +268,70 @@ void InstTessGenDPShadowMapVS(float2 barycentric : TEXCOORD1,
 	</technique>
 
 
+	<parameter type="float4x4" name="mvps" array_size="6"/>
+
+	<shader version="4">
+		<![CDATA[
+struct VS_TO_GS
+{
+	float4 pos[6] : POSITION0;
+	float dist : TEXCOORD0;
+};
+
+struct PS_IN
+{
+	float dist : TEXCOORD0;
+    float4 pos : SV_Position;
+    uint rt_index : SV_RenderTargetArrayIndex;
+};
+
+VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
+						float3 Normal : NORMAL)
+{
+	VS_TO_GS output;
+
+	for (int f = 0; f < 6; ++ f)
+    {
+		output.pos[f] = mul(Position, mvps[f]);
+	}
+
+    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
+    LightWorldPos /= LightWorldPos.w;
+	output.dist = length(LightWorldPos.xyz);
+
+	return output;
+}
+
+[maxvertexcount(18)]
+void GenCubeOneShadowMapGS(triangle VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
+{
+	PS_IN output;
+    for (int f = 0; f < 6; ++ f)
+    {
+        output.rt_index = f;
+        for (int v = 0; v < 3; ++ v)
+        {
+            output.pos = input[v].pos[f];
+            output.dist = input[v].dist;
+            out_stream.Append(output);
+        }
+        out_stream.RestartStrip();
+    }
+}
+		]]>
+	</shader>
+
+	<technique name="GenCubeOneShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenCubeOneShadowMapVS()"/>
+			<state name="geometry_shader" value="GenCubeOneShadowMapGS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+
+
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>

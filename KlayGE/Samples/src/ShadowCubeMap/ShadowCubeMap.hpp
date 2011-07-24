@@ -6,6 +6,13 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
+enum SM_TYPE
+{
+	SMT_DP,
+	SMT_Cube,
+	SMT_CubeOne
+};
+	
 class ShadowCubeMap : public KlayGE::App3DFramework
 {
 public:
@@ -37,6 +44,8 @@ private:
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
+	KlayGE::FrameBufferPtr shadow_cube_one_buffer_;
+
 	KlayGE::FrameBufferPtr shadow_dual_buffers_[2];
 	KlayGE::TexturePtr shadow_dual_texs_[2];
 	KlayGE::RenderViewPtr shadow_dual_view_[2];
@@ -47,7 +56,7 @@ private:
 	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
-	int sm_type_;
+	SM_TYPE sm_type_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_min_variance_static_;

@@ -19,6 +19,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -122,13 +123,13 @@ namespace
 
 		float4x4 LightViewProj() const
 		{
-			return light_view_ * light_proj_;
+			return light_views_[pass_index_] * light_proj_;
 		}
 
-		virtual void GenShadowMapPass(bool gen_sm, bool dpsm, int pass_index)
+		virtual void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
 			gen_sm_pass_ = gen_sm;
-			dpsm_ = dpsm;
+			sm_type_ = sm_type;
 			pass_index_ = pass_index;
 		}
 
@@ -140,13 +141,18 @@ namespace
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			light_view_ = app.ActiveCamera().ViewMatrix();
-			light_proj_ = app.ActiveCamera().ProjMatrix();
-
-			if (0 == pass_index_)
+			if (SMT_CubeOne == sm_type_)
 			{
-				first_light_view_ = light_view_;
+				for (int i = 0; i < 6; ++ i)
+				{
+					light_views_[i] = light_src->SMCamera(i)->ViewMatrix();
+				}
 			}
+			else
+			{
+				light_views_[pass_index_] = app.ActiveCamera().ViewMatrix();
+			}
+			light_proj_ = app.ActiveCamera().ProjMatrix();
 
 			light_falloff_ = light_src->Falloff();
 		}
@@ -176,16 +182,35 @@ namespace
 
 			if (gen_sm_pass_)
 			{
-				*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
-
-				if (dpsm_)
+				switch (sm_type_)
 				{
-					float4x4 mv = model * light_view_;
-					*(effect->ParameterByName("mv")) = mv;
-					*(effect->ParameterByName("far")) = app.ActiveCamera().FarPlane();
+				case SMT_DP:
+					{
+						*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
 
-					FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-					*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
+						float4x4 mv = model * light_views_[pass_index_];
+						*(effect->ParameterByName("mv")) = mv;
+						*(effect->ParameterByName("far")) = app.ActiveCamera().FarPlane();
+
+						FrameBufferPtr const & cur_fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
+						*(effect->ParameterByName("tess_edge_length_scale")) = float2(static_cast<float>(cur_fb->Width()), static_cast<float>(cur_fb->Height())) / 12.0f;
+					}
+					break;
+
+				case SMT_Cube:
+					*(effect->ParameterByName("mvp")) = model * this->LightViewProj();
+					break;
+
+				case SMT_CubeOne:
+					{
+						std::vector<float4x4> mvps(6);
+						for (int i = 0; i < 6; ++ i)
+						{
+							mvps[i] = model * light_views_[i] * light_proj_;
+						}
+						*(effect->ParameterByName("mvps")) = mvps;
+					}
+					break;
 				}
 			}
 			else
@@ -202,15 +227,20 @@ namespace
 
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
 
-				*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(dpsm_);
-				if (dpsm_)
+				*(effect->ParameterByName("dpsm")) = static_cast<int32_t>((SMT_DP == sm_type_) ? 1 : 0);
+				switch (sm_type_)
 				{
+				case SMT_DP:
+					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(1);
 					*(effect->ParameterByName("flipping")) = -flipping_;
-					*(effect->ParameterByName("obj_model_to_light_view")) = model * first_light_view_;
-				}
-				else
-				{
+					*(effect->ParameterByName("obj_model_to_light_view")) = model * light_views_[0];
+					break;
+				
+				case SMT_Cube:
+				case SMT_CubeOne:
+					*(effect->ParameterByName("dpsm")) = static_cast<int32_t>(0);
 					*(effect->ParameterByName("flipping")) = flipping_;
+					break;
 				}
 			}
 		}
@@ -221,15 +251,15 @@ namespace
 		int32_t flipping_;
 
 		bool gen_sm_pass_;
-		bool dpsm_;
+		SM_TYPE sm_type_;
 		int pass_index_;
 		TexturePtr sm_cube_tex_;
 		TexturePtr sm_dual_tex_;
 
 		float3 light_pos_;
 		float4x4 inv_light_model_;
-		float4x4 light_view_, light_proj_;
-		float4x4 first_light_view_;
+		float4x4 light_views_[6];
+		float4x4 light_proj_;
 		float3 light_falloff_;
 
 		TexturePtr lamp_tex_;
@@ -364,37 +394,46 @@ namespace
 			model_matrix_ = model;
 		}
 
-		void GenShadowMapPass(bool gen_sm, bool dpsm, int pass_index)
+		void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
-			ShadowMapped::GenShadowMapPass(gen_sm, dpsm, pass_index);
+			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
 			if (gen_sm)
 			{
-				if (dpsm)
+				switch (sm_type_)
 				{
-					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-					if (caps.tess_method != TM_No)
+				case SMT_DP:
 					{
-						if (TM_Hardware == caps.tess_method)
+						RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+						if (caps.tess_method != TM_No)
 						{
-							technique_ = effect_->TechniqueByName("GenDPShadowMapTess5Tech");
+							if (TM_Hardware == caps.tess_method)
+							{
+								technique_ = effect_->TechniqueByName("GenDPShadowMapTess5Tech");
+							}
+							else
+							{
+								technique_ = effect_->TechniqueByName("GenDPShadowMapTess4Tech");
+							}
+							smooth_mesh_ = true;
 						}
 						else
 						{
-							technique_ = effect_->TechniqueByName("GenDPShadowMapTess4Tech");
+							technique_ = effect_->TechniqueByName("GenDPShadowMap");
+							smooth_mesh_ = false;
 						}
-						smooth_mesh_ = true;
 					}
-					else
-					{
-						technique_ = effect_->TechniqueByName("GenDPShadowMap");
-						smooth_mesh_ = false;
-					}
-				}
-				else
-				{
+					break;
+				
+				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
 					smooth_mesh_ = false;
+					break;
+
+				case SMT_CubeOne:
+					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
+					smooth_mesh_ = false;
+					break;
 				}
 			}
 			else
@@ -541,9 +580,9 @@ namespace
 	public:
 		void operator()(LightSource& light)
 		{
-			light.ModelMatrix(MathLib::rotation_z(0.4f)
+			light.ModelMatrix(/*MathLib::rotation_z(0.4f)
 				* MathLib::rotation_y(static_cast<float>(timer_.elapsed()) / 1.4f)
-				* MathLib::translation(2.0f, 12.0f, 4.0f));
+				* */MathLib::translation(2.0f, 12.0f, 4.0f));
 		}
 
 	private:
@@ -578,7 +617,7 @@ int main()
 
 ShadowCubeMap::ShadowCubeMap()
 				: App3DFramework("ShadowCubeMap"),
-					sm_type_(0)
+					sm_type_(SMT_DP)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 }
@@ -628,7 +667,6 @@ void ShadowCubeMap::InitObjects()
 	}
 
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D24S8, 1, 0);
-	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
 	{
@@ -641,15 +679,23 @@ void ShadowCubeMap::InitObjects()
 		fmt = EF_ABGR16F;
 	}
 	shadow_tex_ = rf.MakeTexture2D(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 0));
+	shadow_cube_buffer_ = rf.MakeFrameBuffer();
+	shadow_cube_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadow_tex_, 0, 1, 0));
 	shadow_cube_buffer_->Attach(FrameBuffer::ATT_DepthStencil, depth_view);
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
+	shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
+	shadow_cube_one_buffer_->GetViewport().camera->OmniDirectionalMode(true);
+	shadow_cube_one_buffer_->GetViewport().camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_tex_, 0, 0));
+	TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
+	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
+
 	for (int i = 0; i < 2; ++ i)
 	{
 		shadow_dual_texs_[i] = rf.MakeTexture2D(SHADOW_MAP_SIZE,  SHADOW_MAP_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		shadow_dual_view_[i] = rf.Make2DRenderView(*shadow_dual_texs_[i], 0, 0);
+		shadow_dual_view_[i] = rf.Make2DRenderView(*shadow_dual_texs_[i], 0, 1, 0);
 
 		shadow_dual_buffers_[i] = rf.MakeFrameBuffer();
 		shadow_dual_buffers_[i]->GetViewport().camera->ProjParams(PI, 1, 0.1f, 500.0f);
@@ -768,7 +814,7 @@ void ShadowCubeMap::BleedingReduceChangedHandler(KlayGE::UISlider const & sender
 
 void ShadowCubeMap::SMTypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
-	sm_type_ = sender.GetSelectedIndex();
+	sm_type_ = static_cast<SM_TYPE>(sender.GetSelectedIndex());
 }
 
 void ShadowCubeMap::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -799,8 +845,9 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 {
 	RenderEngine& renderEngine = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-	if (0 == sm_type_)
+	switch (sm_type_)
 	{
+	case SMT_DP:
 		switch (pass)
 		{
 		case 0:
@@ -815,7 +862,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, 0 == sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
 				}
 			}
@@ -839,14 +886,14 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, 0 == sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
 				}
 			}
 			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 		}
-	}
-	else
-	{
+		break;
+	
+	case SMT_Cube:
 		if (pass > 0)
 		{
 			sm_filter_pps_[pass - 1]->Apply();
@@ -868,7 +915,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, 0 == sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
 					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
 				}
 			}
@@ -889,10 +936,57 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 
 				for (size_t i = 0; i < scene_objs_.size(); ++ i)
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, 0 == sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
 				}
 			}
 			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 		}
+		break;
+
+	case SMT_CubeOne:
+	default:
+		switch (pass)
+		{
+		case 0:
+			{
+				shadow_cube_one_buffer_->GetViewport().camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
+
+				renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
+				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+
+				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				{
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+				}
+			}
+			return App3DFramework::URV_Need_Flush;
+
+		default:
+			{
+				/*for (int p = 0; p < 6; ++ p)
+				{
+					sm_filter_pps_[p]->Apply();
+				}*/
+
+				renderEngine.BindFrameBuffer(FrameBufferPtr());
+
+				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+				if (Context::Instance().Config().graphics_cfg.gamma)
+				{
+					clear_clr.r() = 0.029f;
+					clear_clr.g() = 0.133f;
+					clear_clr.b() = 0.325f;
+				}
+				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+
+				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+				{
+					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
+				}
+			}
+			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
+		break;
 	}
 }
