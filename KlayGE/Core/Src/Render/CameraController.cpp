@@ -30,6 +30,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Color.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/Camera.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)

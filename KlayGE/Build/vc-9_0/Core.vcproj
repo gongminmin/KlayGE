@@ -457,6 +457,10 @@
 					RelativePath="..\..\Core\Src\Render\Texture.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\Core\Src\Render\Viewport.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Header Files"

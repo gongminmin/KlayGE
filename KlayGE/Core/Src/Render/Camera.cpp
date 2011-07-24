@@ -24,10 +24,16 @@
 
 namespace KlayGE
 {
+	enum CameraMode
+	{
+		CM_Stereo = 1UL << 0,
+		CM_Omni = 1UL << 1
+	};
+
 	// ¹¹Ôìº¯Êý
 	//////////////////////////////////////////////////////////////////////////////////
 	Camera::Camera()
-		: frustum_dirty_(true), stereo_mode_(false)
+		: frustum_dirty_(true), mode_(0)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		uint32_t num_motion_frames = re.NumMotionFrames();
@@ -172,13 +178,40 @@ namespace KlayGE
 		return frustum_[eye];
 	}
 
+	bool Camera::StereoMode() const
+	{
+		return (mode_ & CM_Stereo) > 0;
+	}
+
 	void Camera::StereoMode(bool stereo)
 	{
-		stereo_mode_ = stereo;
-		if (stereo_mode_)
+		if (stereo)
 		{
+			mode_ |= CM_Stereo;
+
 			prev_view_mats_[1].resize(prev_view_mats_[0].size());
 			prev_proj_mats_[1].resize(prev_proj_mats_[0].size());
+		}
+		else
+		{
+			mode_ &= ~CM_Stereo;
+		}
+	}
+
+	bool Camera::OmniDirectionalMode() const
+	{
+		return (mode_ & CM_Omni) > 0;
+	}
+
+	void Camera::OmniDirectionalMode(bool omni)
+	{
+		if (omni)
+		{
+			mode_ |= CM_Omni;
+		}
+		else
+		{
+			mode_ &= ~CM_Omni;
 		}
 	}
 }

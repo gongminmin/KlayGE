@@ -17,6 +17,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/SATPostProcess.hpp>
 #include <KlayGE/Script.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

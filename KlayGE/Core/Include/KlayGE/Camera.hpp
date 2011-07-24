@@ -77,11 +77,11 @@ namespace KlayGE
 
 		Frustum const & ViewFrustum() const;
 
-		bool StereoMode() const
-		{
-			return stereo_mode_;
-		}
+		bool StereoMode() const;
 		void StereoMode(bool stereo);
+
+		bool OmniDirectionalMode() const;
+		void OmniDirectionalMode(bool omni);
 
 	private:
 		float3		eyePos_;		// π€≤Ïæÿ’Ûµƒ Ù–‘
@@ -102,7 +102,7 @@ namespace KlayGE
 		mutable Frustum	frustum_[2];
 		mutable bool	frustum_dirty_;
 
-		bool		stereo_mode_;
+		uint32_t	mode_;
 	};
 }
 

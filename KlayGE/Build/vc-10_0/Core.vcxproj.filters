@@ -378,6 +378,9 @@
     <ClCompile Include="..\..\Core\Src\Render\TAAPostProcess.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\Viewport.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">

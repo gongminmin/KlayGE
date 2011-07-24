@@ -18,6 +18,7 @@
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

@@ -20,6 +20,7 @@
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/half.hpp>
 #include <KlayGE/FXAAPostProcess.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

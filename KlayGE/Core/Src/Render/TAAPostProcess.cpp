@@ -2,6 +2,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/TAAPostProcess.hpp>
 

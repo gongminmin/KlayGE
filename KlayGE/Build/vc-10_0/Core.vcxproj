@@ -251,6 +251,7 @@
     <ClCompile Include="..\..\Core\Src\Net\Lobby.cpp" />
     <ClCompile Include="..\..\Core\Src\Net\Player.cpp" />
     <ClCompile Include="..\..\Core\Src\Net\Socket.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\Viewport.cpp" />
     <ClCompile Include="..\..\Core\Src\Script\Script.cpp" />
     <ClCompile Include="..\..\Core\Src\Show\ShowEngine.cpp" />
     <ClCompile Include="..\..\Core\Src\Show\ShowFactory.cpp" />

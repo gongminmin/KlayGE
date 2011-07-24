@@ -16,6 +16,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

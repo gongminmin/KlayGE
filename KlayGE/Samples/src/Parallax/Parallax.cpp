@@ -17,6 +17,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/JudaTexture.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

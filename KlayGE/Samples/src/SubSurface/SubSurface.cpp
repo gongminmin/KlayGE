@@ -15,6 +15,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

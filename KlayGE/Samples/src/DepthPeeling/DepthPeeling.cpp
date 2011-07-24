@@ -17,6 +17,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>

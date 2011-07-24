@@ -21,23 +21,13 @@
 #endif
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Util.hpp>
-#include <KlayGE/Camera.hpp>
 
 namespace KlayGE
 {
 	struct KLAYGE_CORE_API Viewport
 	{
-		Viewport()
-			: camera(MakeSharedPtr<Camera>())
-		{
-		}
-		Viewport(int _left, int _top, int _width, int _height)
-			: left(_left), top(_top),
-				width(_width), height(_height),
-				camera(MakeSharedPtr<Camera>())
-		{
-		}
+		Viewport();
+		Viewport(int _left, int _top, int _width, int _height);
 
 		int left;
 		int top;

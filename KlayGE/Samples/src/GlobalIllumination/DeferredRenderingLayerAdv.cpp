@@ -14,6 +14,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Query.hpp>
+#include <KlayGE/Camera.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>

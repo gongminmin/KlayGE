@@ -41,6 +41,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Viewport.hpp>
+#include <KlayGE/Camera.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -134,6 +135,9 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::ClipScene()
 	{
+		App3DFramework& app = Context::Instance().AppInstance();
+		Camera& camera = app.ActiveCamera();
+
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
 			bool visible;
@@ -141,35 +145,42 @@ namespace KlayGE
 			SceneObjectPtr const & obj = scene_objs_[i];
 			if (!(obj->Attrib() & SceneObject::SOA_Overlay) && obj->Visible())
 			{
-				if (obj->Attrib() & SceneObject::SOA_Cullable)
+				if (camera.OmniDirectionalMode())
 				{
-					Box bb_ws;
-					if (obj->Attrib() & SceneObject::SOA_Moveable)
-					{
-						Box const & box = obj->GetBound();
-						float4x4 const & mat = obj->GetModelMatrix();
-
-						float3 min, max;
-						min = max = MathLib::transform_coord(box[0], mat);
-						for (size_t j = 1; j < 8; ++ j)
-						{
-							float3 vec = MathLib::transform_coord(box[j], mat);
-							min = MathLib::minimize(min, vec);
-							max = MathLib::maximize(max, vec);
-						}
-
-						bb_ws = Box(min, max);
-					}
-					else
-					{
-						bb_ws = *scene_obj_bbs_[i];
-					}
-
-					visible = this->AABBVisible(bb_ws);
+					visible = true;
 				}
 				else
 				{
-					visible = true;
+					if (obj->Attrib() & SceneObject::SOA_Cullable)
+					{
+						Box bb_ws;
+						if (obj->Attrib() & SceneObject::SOA_Moveable)
+						{
+							Box const & box = obj->GetBound();
+							float4x4 const & mat = obj->GetModelMatrix();
+
+							float3 min, max;
+							min = max = MathLib::transform_coord(box[0], mat);
+							for (size_t j = 1; j < 8; ++ j)
+							{
+								float3 vec = MathLib::transform_coord(box[j], mat);
+								min = MathLib::minimize(min, vec);
+								max = MathLib::maximize(max, vec);
+							}
+
+							bb_ws = Box(min, max);
+						}
+						else
+						{
+							bb_ws = *scene_obj_bbs_[i];
+						}
+
+						visible = this->AABBVisible(bb_ws);
+					}
+					else
+					{
+						visible = true;
+					}
 				}
 			}
 			else
@@ -369,6 +380,7 @@ namespace KlayGE
 			}
 			size_t seed = 0;
 			boost::hash_range(seed, visible_list.begin(), visible_list.end());
+			boost::hash_combine(seed, camera.OmniDirectionalMode());
 			boost::hash_combine(seed, &camera);
 
 			BOOST_AUTO(vmiter, visible_marks_map_.find(seed));

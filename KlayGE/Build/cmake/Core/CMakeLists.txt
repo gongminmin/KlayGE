@@ -29,6 +29,7 @@ SET(RENDERING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/ShaderObject.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/TAAPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Viewport.cpp
 )
 
 SET(RENDERING_HEADER_FILES

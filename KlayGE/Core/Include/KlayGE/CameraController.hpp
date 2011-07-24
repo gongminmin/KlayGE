@@ -30,7 +30,6 @@
 #endif
 
 #include <KlayGE/Math.hpp>
-#include <KlayGE/Camera.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
