@@ -292,9 +292,9 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 0));
+		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
 		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 0);
+		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -305,8 +305,8 @@ namespace KlayGE
 
 			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 0)); // albedo
-			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 0)); // normal (light space)
+			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 1, 0)); // albedo
+			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 1, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 3, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
@@ -412,11 +412,11 @@ namespace KlayGE
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
 		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 0));
+		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 1, 0));
 		if (mrt_g_buffer_)
 		{
 			g_buffer_1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*g_buffer_1_tex_, 0, 0));
+			g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*g_buffer_1_tex_, 0, 1, 0));
 		}
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -443,10 +443,10 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 		shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 0));
+		shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 1, 0));
 
 		lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 0));
+		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 1, 0));
 		lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -460,7 +460,7 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 		shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 0));
+		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		if (g_buffer_tex_)

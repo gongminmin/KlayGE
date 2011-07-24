@@ -95,12 +95,12 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
-		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
@@ -136,12 +136,12 @@ namespace KlayGE
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make1DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		RenderViewPtr Make1DDepthStencilRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}
 
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
 		{
 			return RenderView::NullObject();
 		}

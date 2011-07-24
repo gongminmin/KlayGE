@@ -93,14 +93,16 @@ namespace KlayGE
 		return MakeSharedPtr<OGLConditionalRender>();
 	}
 
-	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLTexture1DRenderView>(texture, array_index, level);
+		// TODO: Support render-to-texture-array
+		return MakeSharedPtr<OGLTexture1DRenderView>(texture, first_array_index, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLTexture2DRenderView>(texture, array_index, level);
+		// TODO: Support render-to-texture-array
+		return MakeSharedPtr<OGLTexture2DRenderView>(texture, first_array_index, level);
 	}
 
 	RenderViewPtr OGLRenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
@@ -133,14 +135,16 @@ namespace KlayGE
 		return MakeSharedPtr<OGLDepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make1DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLRenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return this->Make2DDepthStencilRenderView(texture, array_index, level);
+		// TODO: Support render-to-texture-array
+		return this->Make2DDepthStencilRenderView(texture, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLDepthStencilRenderView>(texture, array_index, level);
+		// TODO: Support render-to-texture-array
+		return MakeSharedPtr<OGLDepthStencilRenderView>(texture, first_array_index, level);
 	}
 	
 	RenderViewPtr OGLRenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)

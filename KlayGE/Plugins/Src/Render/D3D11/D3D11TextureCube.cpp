@@ -248,13 +248,16 @@ namespace KlayGE
 		return d3d_ua_views_.back().second;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11TextureCube::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t level)
+	ID3D11RenderTargetViewPtr const & D3D11TextureCube::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
 		RTVDSVCreation rtv_creation;
 		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.array_index = array_index;
+		rtv_creation.first_array_index = first_array_index;
+		rtv_creation.array_size = array_size;
 		rtv_creation.level = level;
 		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
 		{
@@ -276,8 +279,8 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = 6;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6;
+		desc.Texture2DArray.ArraySize = array_size * 6;
+		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
 
 		ID3D11RenderTargetView* rt_view;
 		TIF(d3d_device_->CreateRenderTargetView(this->D3DTexture().get(), &desc, &rt_view));
@@ -291,7 +294,8 @@ namespace KlayGE
 
 		RTVDSVCreation rtv_creation;
 		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.array_index = array_index;
+		rtv_creation.first_array_index = array_index;
+		rtv_creation.array_size = 1;
 		rtv_creation.level = level;
 		rtv_creation.for_3d_or_cube.for_cube.face = face;
 		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
@@ -322,13 +326,16 @@ namespace KlayGE
 		return d3d_rt_views_.back().second;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11TextureCube::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11TextureCube::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
 		RTVDSVCreation dsv_creation;
 		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.array_index = array_index;
+		dsv_creation.first_array_index = first_array_index;
+		dsv_creation.array_size = array_size;
 		dsv_creation.level = level;
 		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
 		{
@@ -351,8 +358,8 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = 6;
-		desc.Texture2DArray.FirstArraySlice = array_index * 6;
+		desc.Texture2DArray.ArraySize = array_size * 6;
+		desc.Texture2DArray.FirstArraySlice = first_array_index * 6;
 
 		ID3D11DepthStencilView* ds_view;
 		TIF(d3d_device_->CreateDepthStencilView(this->D3DTexture().get(), &desc, &ds_view));
@@ -366,7 +373,8 @@ namespace KlayGE
 
 		RTVDSVCreation dsv_creation;
 		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.array_index = array_index;
+		dsv_creation.first_array_index = array_index;
+		dsv_creation.array_size = 1;
 		dsv_creation.level = level;
 		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
 		{

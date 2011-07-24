@@ -90,14 +90,14 @@ namespace KlayGE
 		return MakeSharedPtr<D3D11ConditionalRender>();
 	}
 
-	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, array_index, level);
+		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D11RenderFactory::Make2DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr D3D11RenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, array_index, level);
+		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, first_array_index, array_size, level);
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
@@ -112,7 +112,8 @@ namespace KlayGE
 
 	RenderViewPtr D3D11RenderFactory::MakeCubeRenderView(Texture& texture, int array_index, int level)
 	{
-		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, array_index, level);
+		int array_size = 1;
+		return MakeSharedPtr<D3D11RenderTargetRenderView>(texture, array_index, array_size, level);
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make3DRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -132,14 +133,14 @@ namespace KlayGE
 		return MakeSharedPtr<D3D11DepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr D3D11RenderFactory::Make1DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr D3D11RenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, array_index, level);
+		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr D3D11RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr D3D11RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, array_index, level);
+		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, first_array_index, array_size, level);
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
@@ -154,7 +155,8 @@ namespace KlayGE
 
 	RenderViewPtr D3D11RenderFactory::MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level)
 	{
-		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, array_index, level);
+		int array_size = 1;
+		return MakeSharedPtr<D3D11DepthStencilRenderView>(texture, array_index, array_size, level);
 	}
 	
 	RenderViewPtr D3D11RenderFactory::Make3DDepthStencilRenderView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level)

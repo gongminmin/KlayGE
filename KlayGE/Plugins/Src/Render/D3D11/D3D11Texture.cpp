@@ -137,7 +137,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, uint32_t /*level*/)
+	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 		static ID3D11RenderTargetViewPtr ret;
@@ -158,7 +158,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, uint32_t /*level*/)
+	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
 		static ID3D11DepthStencilViewPtr ret;

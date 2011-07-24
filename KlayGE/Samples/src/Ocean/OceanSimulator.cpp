@@ -222,9 +222,9 @@ namespace KlayGE
 		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		displacement_fb_ = rf.MakeFrameBuffer();
-		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 0));
+		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 1, 0));
 		gradient_fb_ = rf.MakeFrameBuffer();
-		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 0));
+		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 1, 0));
 
 		// Constant buffers
 		uint32_t actual_dim = param_.dmap_dim;

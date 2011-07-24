@@ -611,12 +611,12 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
 	clr_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 0));
+	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*clr_depth_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	clear_float_->OutputPin(0, clr_depth_tex_);
 
 	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 0));
+	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	mbed_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);

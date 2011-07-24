@@ -44,8 +44,8 @@ namespace KlayGE
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();
 
-		RenderViewPtr Make1DRenderView(Texture& texture, int array_index, int level);
-		RenderViewPtr Make2DRenderView(Texture& texture, int array_index, int level);
+		RenderViewPtr Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level);
+		RenderViewPtr Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int array_index, uint32_t slice, int level);
 		RenderViewPtr MakeCubeRenderView(Texture& texture, int array_index, int level);
@@ -53,8 +53,8 @@ namespace KlayGE
 		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& gbuffer, uint32_t width, uint32_t height, ElementFormat pf);
 		RenderViewPtr Make2DDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf,
 			uint32_t sample_count, uint32_t sample_quality);
-		RenderViewPtr Make1DDepthStencilRenderView(Texture& texture, int array_index, int level);
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& texture, int array_index, int level);
+		RenderViewPtr Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level);
+		RenderViewPtr Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level);
 		RenderViewPtr Make2DDepthStencilRenderView(Texture& texture, int array_index, uint32_t slice, int level);
 		RenderViewPtr MakeCubeDepthStencilRenderView(Texture& texture, int array_index, int level);

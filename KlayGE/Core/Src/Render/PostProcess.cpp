@@ -483,7 +483,7 @@ namespace KlayGE
 			RenderViewPtr view;
 			if (Texture::TT_2D == tex->Type())
 			{
-				view = rf.Make2DRenderView(*tex, array_index, level);
+				view = rf.Make2DRenderView(*tex, array_index, 1, level);
 			}
 			else
 			{

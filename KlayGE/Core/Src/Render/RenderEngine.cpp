@@ -41,6 +41,7 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Viewport.hpp>
+#include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
@@ -231,7 +232,7 @@ namespace KlayGE
 				access_hint |= EAH_GPU_Unordered;
 			}
 			before_pp_tex_ = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), 1, 1, fmt, 1, 0, access_hint, NULL);
-			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
+			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 1, 0));
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, 
 				rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(), render_settings_.depth_stencil_fmt, 1, 0));
 
@@ -432,7 +433,7 @@ namespace KlayGE
 				fmt = EF_ABGR16F;
 			}
 			before_pp_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 0));
+			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 1, 0));
 
 			pp_chain_->InputPin(0, before_pp_tex_);
 		}
@@ -444,7 +445,7 @@ namespace KlayGE
 				stereo_colors_[i] = rf.MakeTexture2D(width, height, 1, 1, stereo_colors_[i]->Format(),
 					stereo_colors_[i]->SampleCount(), stereo_colors_[i]->SampleQuality(),
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 1, 0));
 
 				RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
 					stereo_frame_buffers_[i]->Attached(FrameBuffer::ATT_DepthStencil)->Format(),
@@ -575,7 +576,7 @@ namespace KlayGE
 				stereo_colors_[i] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
 					1, 1, screen_frame_buffer_->Format(), render_settings_.sample_count, render_settings_.sample_quality,
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
-				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 0));
+				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 1, 0));
 
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 			}

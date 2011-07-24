@@ -40,10 +40,10 @@ namespace KlayGE
 	}
 
 
-	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture, int array_index, int level)
-		: rt_src_(&texture), rt_first_subres_(array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
+	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(Texture& texture, int first_array_index, int array_size, int level)
+		: rt_src_(&texture), rt_first_subres_(first_array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
 	{
-		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DRenderTargetView(array_index, level);
+		rt_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DRenderTargetView(first_array_index, array_size, level);
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
@@ -127,9 +127,9 @@ namespace KlayGE
 	}
 
 
-	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture, int array_index, int level)
+	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DDepthStencilView(array_index, level);
+		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DDepthStencilView(first_array_index, array_size, level);
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);

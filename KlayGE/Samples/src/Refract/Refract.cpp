@@ -224,7 +224,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, cfg.graphics_cfg.depth_stencil_fmt, 1, 0);
 
 	render_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 0));
+	render_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*render_tex_, 0, 1, 0));
 	render_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	UIManager::Instance().SettleCtrls(width, height);

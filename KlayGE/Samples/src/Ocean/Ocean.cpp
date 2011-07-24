@@ -934,7 +934,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
 	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 0));
+	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 1, 0));
 	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	ElementFormat fmt;
@@ -947,7 +947,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 		fmt = EF_ABGR16F;
 	}
 	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 0));
+	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
 	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, refraction_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
 	reflection_fb_->GetViewport().left = 0;
@@ -959,7 +959,7 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	blur_y_->OutputPin(0, reflection_blur_tex_);
 
 	composed_tex_ = rf.MakeTexture2D(width, height, 1, 1, reflection_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	composed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*composed_tex_, 0, 0));
+	composed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*composed_tex_, 0, 1, 0));
 	composed_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	copy_pp_->InputPin(0, refraction_tex_);

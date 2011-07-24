@@ -314,13 +314,16 @@ namespace KlayGE
 		return d3d_ua_views_.back().second;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture2D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t level)
+	ID3D11RenderTargetViewPtr const & D3D11Texture2D::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
 		RTVDSVCreation rtv_creation;
 		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.array_index = array_index;
+		rtv_creation.first_array_index = first_array_index;
+		rtv_creation.array_size = array_size;
 		rtv_creation.level = level;
 		for (size_t i = 0; i < d3d_rt_views_.size(); ++ i)
 		{
@@ -358,8 +361,8 @@ namespace KlayGE
 		if (this->ArraySize() > 1)
 		{
 			desc.Texture2DArray.MipSlice = level;
-			desc.Texture2DArray.ArraySize = 1;
-			desc.Texture2DArray.FirstArraySlice = array_index;
+			desc.Texture2DArray.ArraySize = array_size;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
 		}
 		else
 		{
@@ -372,13 +375,16 @@ namespace KlayGE
 		return d3d_rt_views_.back().second;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture2D::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture2D::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
 
 		RTVDSVCreation dsv_creation;
 		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.array_index = array_index;
+		dsv_creation.first_array_index = first_array_index;
+		dsv_creation.array_size = array_size;
 		dsv_creation.level = level;
 		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
 		{
@@ -417,8 +423,8 @@ namespace KlayGE
 		if (this->ArraySize() > 1)
 		{
 			desc.Texture2DArray.MipSlice = level;
-			desc.Texture2DArray.ArraySize = 1;
-			desc.Texture2DArray.FirstArraySlice = array_index;
+			desc.Texture2DArray.ArraySize = array_size;
+			desc.Texture2DArray.FirstArraySlice = first_array_index;
 		}
 		else
 		{

@@ -92,14 +92,14 @@ namespace KlayGE
 		return QueryPtr();
 	}
 
-	RenderViewPtr OGLES2RenderFactory::Make1DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLES2RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLES2Texture1DRenderView>(texture, array_index, level);
+		return MakeSharedPtr<OGLES2Texture1DRenderView>(texture, first_array_index, level);
 	}
 
-	RenderViewPtr OGLES2RenderFactory::Make2DRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLES2RenderFactory::Make2DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLES2Texture2DRenderView>(texture, array_index, level);
+		return MakeSharedPtr<OGLES2Texture2DRenderView>(texture, first_array_index, level);
 	}
 
 	RenderViewPtr OGLES2RenderFactory::Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
@@ -132,14 +132,14 @@ namespace KlayGE
 		return MakeSharedPtr<OGLES2DepthStencilRenderView>(width, height, pf, sample_count, sample_quality);
 	}
 
-	RenderViewPtr OGLES2RenderFactory::Make1DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLES2RenderFactory::Make1DDepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
 	{
-		return this->Make2DDepthStencilRenderView(texture, array_index, level);
+		return this->Make2DDepthStencilRenderView(texture, first_array_index, array_size, level);
 	}
 
-	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, int level)
+	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)
 	{
-		return MakeSharedPtr<OGLES2DepthStencilRenderView>(texture, array_index, level);
+		return MakeSharedPtr<OGLES2DepthStencilRenderView>(texture, first_array_index, level);
 	}
 
 	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)

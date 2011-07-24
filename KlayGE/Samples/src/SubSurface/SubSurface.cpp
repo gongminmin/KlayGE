@@ -173,7 +173,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	back_face_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	back_face_depth_fb_ = rf.MakeFrameBuffer();
-	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex_, 0, 0));
+	back_face_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*back_face_depth_tex_, 0, 1, 0));
 	back_face_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
 	back_face_depth_fb_->GetViewport().camera = screen_buffer->GetViewport().camera;

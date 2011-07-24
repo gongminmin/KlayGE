@@ -263,7 +263,8 @@ namespace KlayGE
 
 		RTVDSVCreation rtv_creation;
 		memset(&rtv_creation, 0, sizeof(rtv_creation));
-		rtv_creation.array_index = array_index;
+		rtv_creation.first_array_index = array_index;
+		rtv_creation.array_size = 1;
 		rtv_creation.level = level;
 		rtv_creation.for_3d_or_cube.for_3d.first_slice = first_slice;
 		rtv_creation.for_3d_or_cube.for_3d.num_slices = num_slices;
@@ -294,7 +295,8 @@ namespace KlayGE
 
 		RTVDSVCreation dsv_creation;
 		memset(&dsv_creation, 0, sizeof(dsv_creation));
-		dsv_creation.array_index = array_index;
+		dsv_creation.first_array_index = array_index;
+		dsv_creation.array_size = 1;
 		dsv_creation.level = level;
 		for (size_t i = 0; i < d3d_ds_views_.size(); ++ i)
 		{
