@@ -11,7 +11,8 @@ enum SM_TYPE
 	SMT_DP,
 	SMT_Cube,
 	SMT_CubeOne,
-	SMT_CubeOneInstance
+	SMT_CubeOneInstance,
+	SMT_CubeOneInstanceGS
 };
 	
 class ShadowCubeMap : public KlayGE::App3DFramework

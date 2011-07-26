@@ -335,7 +335,7 @@ void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout
 		<![CDATA[
 struct GenCubeOneInstanceShadowMap_VS_TO_GS
 {
-	float4 pos : POSITION0;
+	float4 pos : POSITION;
 	float2 dist : TEXCOORD0;
 };
 
@@ -380,7 +380,37 @@ void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS
 		</pass>
 	</technique>
 
+	<shader version="5">
+		<![CDATA[
+[maxvertexcount(3)]
+[instance(6)]
+void GenCubeOneInstanceGSShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3],
+						uint instance_id : SV_GSInstanceID,
+						inout TriangleStream<PS_IN> out_stream)
+{
+	PS_IN output;
+	output.rt_index = instance_id;
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.pos = input[v].pos[instance_id];
+		output.dist = input[v].dist;
+		out_stream.Append(output);
+	}
+}
+		]]>
+	</shader>
 
+	<technique name="GenCubeOneInstanceGSShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenCubeOneShadowMapVS()"/>
+			<state name="geometry_shader" value="GenCubeOneInstanceGSShadowMapGS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+	
+	
 	<parameter type="float" name="min_variance"/>
 	<parameter type="float" name="bleeding_reduce"/>
 	<parameter type="float3" name="light_pos"/>

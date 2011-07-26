@@ -141,7 +141,7 @@ namespace
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			if ((SMT_CubeOne == sm_type_) || (SMT_CubeOneInstance == sm_type_))
+			if ((SMT_CubeOne == sm_type_) || (SMT_CubeOneInstance == sm_type_) || (SMT_CubeOneInstanceGS == sm_type_))
 			{
 				for (int i = 0; i < 6; ++ i)
 				{
@@ -435,10 +435,16 @@ namespace
 					mesh_rl_->NumInstances(1);
 					break;
 
-				default:
+				case SMT_CubeOneInstance:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
 					smooth_mesh_ = false;
 					mesh_rl_->NumInstances(6);
+					break;
+
+				default:
+					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
+					smooth_mesh_ = false;
+					mesh_rl_->NumInstances(1);
 					break;
 				}
 			}
@@ -692,13 +698,16 @@ void ShadowCubeMap::InitObjects()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
-	shadow_cube_one_buffer_->GetViewport().camera->OmniDirectionalMode(true);
-	shadow_cube_one_buffer_->GetViewport().camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
-	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_one_tex_, 0, 0));
-	TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
-	shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
+	if (rf.RenderEngineInstance().DeviceCaps().max_texture_array_length > 1)
+	{
+		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
+		shadow_cube_one_buffer_->GetViewport().camera->OmniDirectionalMode(true);
+		shadow_cube_one_buffer_->GetViewport().camera->ProjParams(PI / 2, 1, 0.1f, 500.0f);
+		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_Color0, rf.MakeCubeRenderView(*shadow_cube_one_tex_, 0, 0));
+		TexturePtr shadow_one_depth_tex = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
+		shadow_cube_one_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.MakeCubeDepthStencilRenderView(*shadow_one_depth_tex, 0, 0));
+	}
 
 	for (int i = 0; i < 2; ++ i)
 	{
@@ -952,49 +961,56 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		break;
 
 	default:
-		switch (pass)
+		if (renderEngine.DeviceCaps().max_texture_array_length > 1)
 		{
-		case 0:
+			switch (pass)
 			{
-				shadow_cube_one_buffer_->GetViewport().camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
-
-				renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
-
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
+			case 0:
 				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+					shadow_cube_one_buffer_->GetViewport().camera->ViewParams(light_->Position(), light_->Position() + light_->Direction());
+
+					renderEngine.BindFrameBuffer(shadow_cube_one_buffer_);
+					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+
+					for (size_t i = 0; i < scene_objs_.size(); ++ i)
+					{
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(true, sm_type_, pass);
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->LightSrc(light_);
+					}
 				}
+				return App3DFramework::URV_Need_Flush;
+
+			default:
+				{
+					for (int p = 0; p < 6; ++ p)
+					{
+						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
+							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
+						sm_filter_pps_[p]->Apply();
+					}
+
+					renderEngine.BindFrameBuffer(FrameBufferPtr());
+
+					Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+					if (Context::Instance().Config().graphics_cfg.gamma)
+					{
+						clear_clr.r() = 0.029f;
+						clear_clr.g() = 0.133f;
+						clear_clr.b() = 0.325f;
+					}
+					renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
+
+					for (size_t i = 0; i < scene_objs_.size(); ++ i)
+					{
+						checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
+					}
+				}
+				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 			}
-			return App3DFramework::URV_Need_Flush;
-
-		default:
-			{
-				for (int p = 0; p < 6; ++ p)
-				{
-					shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
-						p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
-					sm_filter_pps_[p]->Apply();
-				}
-
-				renderEngine.BindFrameBuffer(FrameBufferPtr());
-
-				Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-				if (Context::Instance().Config().graphics_cfg.gamma)
-				{
-					clear_clr.r() = 0.029f;
-					clear_clr.g() = 0.133f;
-					clear_clr.b() = 0.325f;
-				}
-				renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
-
-				for (size_t i = 0; i < scene_objs_.size(); ++ i)
-				{
-					checked_pointer_cast<OccluderMesh>(scene_objs_[i]->GetRenderable())->GenShadowMapPass(false, sm_type_, pass);
-				}
-			}
-			return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+		}
+		else
+		{
+			return App3DFramework::URV_Finished;
 		}
 		break;
 	}
