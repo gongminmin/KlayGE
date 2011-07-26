@@ -13,6 +13,7 @@
 			<item name="Dual Paraboloid"/>
 			<item name="Cube"/>
 			<item name="One pass Cube"/>
+			<item name="One pass Cube with instance"/>
 		</control>
 
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="226" width="120" height="24" checked="0" hotkey="0" is_default="0"/>

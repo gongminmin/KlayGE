@@ -141,7 +141,7 @@ namespace
 			inv_light_model_ = MathLib::inverse(light_model);
 
 			App3DFramework const & app = Context::Instance().AppInstance();
-			if (SMT_CubeOne == sm_type_)
+			if ((SMT_CubeOne == sm_type_) || (SMT_CubeOneInstance == sm_type_))
 			{
 				for (int i = 0; i < 6; ++ i)
 				{
@@ -420,16 +420,25 @@ namespace
 							smooth_mesh_ = false;
 						}
 					}
+					mesh_rl_->NumInstances(1);
 					break;
 				
 				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
 					smooth_mesh_ = false;
+					mesh_rl_->NumInstances(1);
+					break;
+
+				case SMT_CubeOne:
+					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
+					smooth_mesh_ = false;
+					mesh_rl_->NumInstances(1);
 					break;
 
 				default:
-					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
+					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
 					smooth_mesh_ = false;
+					mesh_rl_->NumInstances(6);
 					break;
 				}
 			}
@@ -437,6 +446,7 @@ namespace
 			{
 				technique_ = effect_->TechniqueByName("RenderScene");
 				smooth_mesh_ = false;
+				mesh_rl_->NumInstances(1);
 			}
 		}
 

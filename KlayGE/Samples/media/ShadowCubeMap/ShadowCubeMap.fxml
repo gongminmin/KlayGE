@@ -272,7 +272,7 @@ void InstTessGenDPShadowMapVS(float2 barycentric : TEXCOORD1,
 
 	<shader version="4">
 		<![CDATA[
-struct VS_TO_GS
+struct GenCubeOneShadowMap_VS_TO_GS
 {
 	float4 pos[6] : POSITION0;
 	float dist : TEXCOORD0;
@@ -285,38 +285,38 @@ struct PS_IN
     uint rt_index : SV_RenderTargetArrayIndex;
 };
 
-VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
+GenCubeOneShadowMap_VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
 						float3 Normal : NORMAL)
 {
-	VS_TO_GS output;
+	GenCubeOneShadowMap_VS_TO_GS output;
 
 	for (int f = 0; f < 6; ++ f)
-    {
+	{
 		output.pos[f] = mul(Position, mvps[f]);
 	}
 
-    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
-    LightWorldPos /= LightWorldPos.w;
+	float4 LightWorldPos = mul(Position, obj_model_to_light_model);
+	LightWorldPos /= LightWorldPos.w;
 	output.dist = length(LightWorldPos.xyz);
 
 	return output;
 }
 
 [maxvertexcount(18)]
-void GenCubeOneShadowMapGS(triangle VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
+void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
 {
 	PS_IN output;
-    for (int f = 0; f < 6; ++ f)
-    {
-        output.rt_index = f;
-        for (int v = 0; v < 3; ++ v)
-        {
-            output.pos = input[v].pos[f];
-            output.dist = input[v].dist;
-            out_stream.Append(output);
-        }
-        out_stream.RestartStrip();
-    }
+	for (int f = 0; f < 6; ++ f)
+	{
+		output.rt_index = f;
+		for (int v = 0; v < 3; ++ v)
+		{
+			output.pos = input[v].pos[f];
+			output.dist = input[v].dist;
+			out_stream.Append(output);
+		}
+		out_stream.RestartStrip();
+	}
 }
 		]]>
 	</shader>
@@ -327,6 +327,55 @@ void GenCubeOneShadowMapGS(triangle VS_TO_GS input[3], inout TriangleStream<PS_I
 
 			<state name="vertex_shader" value="GenCubeOneShadowMapVS()"/>
 			<state name="geometry_shader" value="GenCubeOneShadowMapGS()"/>
+			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
+		</pass>
+	</technique>
+
+	<shader version="4">
+		<![CDATA[
+struct GenCubeOneInstanceShadowMap_VS_TO_GS
+{
+	float4 pos : POSITION0;
+	float2 dist : TEXCOORD0;
+};
+
+GenCubeOneInstanceShadowMap_VS_TO_GS GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
+						float3 Normal : NORMAL,
+						uint instance_id : SV_InstanceID)
+{
+	GenCubeOneInstanceShadowMap_VS_TO_GS output;
+
+	output.pos = mul(Position, mvps[instance_id]);
+
+    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
+    LightWorldPos /= LightWorldPos.w;
+	output.dist.x = length(LightWorldPos.xyz);
+	output.dist.y = asfloat(instance_id);
+
+	return output;
+}
+
+[maxvertexcount(3)]
+void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
+{
+	PS_IN output;
+	output.rt_index = asuint(input[0].dist.y);
+	for (int v = 0; v < 3; ++ v)
+	{
+		output.pos = input[v].pos;
+		output.dist = input[v].dist.x;
+		out_stream.Append(output);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="GenCubeOneInstanceShadowMap">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenCubeOneInstanceShadowMapVS()"/>
+			<state name="geometry_shader" value="GenCubeOneInstanceShadowMapGS()"/>
 			<state name="pixel_shader" value="GenCubeShadowMapPS()"/>
 		</pass>
 	</technique>
