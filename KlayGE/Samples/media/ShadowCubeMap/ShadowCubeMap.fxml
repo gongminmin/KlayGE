@@ -272,6 +272,15 @@ void InstTessGenDPShadowMapVS(float2 barycentric : TEXCOORD1,
 
 	<shader version="4">
 		<![CDATA[
+bool frustum_culling(float4 pos0, float4 pos1, float4 pos2)
+{
+	float4 t0 = saturate(pos0.xyxy * float4(-1, -1, 1, 1) - pos0.w);
+	float4 t1 = saturate(pos1.xyxy * float4(-1, -1, 1, 1) - pos1.w);
+	float4 t2 = saturate(pos2.xyxy * float4(-1, -1, 1, 1) - pos2.w);
+	float4 t = t0 * t1 * t2;
+	return !any(t);
+}
+
 struct GenCubeOneShadowMap_VS_TO_GS
 {
 	float4 pos[6] : POSITION0;
@@ -309,11 +318,17 @@ void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout
 	for (int f = 0; f < 6; ++ f)
 	{
 		output.rt_index = f;
-		for (int v = 0; v < 3; ++ v)
+		
+		[branch]
+		if (frustum_culling(input[0].pos[f], input[1].pos[f], input[2].pos[f]))
 		{
-			output.pos = input[v].pos[f];
-			output.dist = input[v].dist;
-			out_stream.Append(output);
+			[unroll]
+			for (int v = 0; v < 3; ++ v)
+			{
+				output.pos = input[v].pos[f];
+				output.dist = input[v].dist;
+				out_stream.Append(output);
+			}
 		}
 		out_stream.RestartStrip();
 	}
@@ -360,11 +375,16 @@ void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS
 {
 	PS_IN output;
 	output.rt_index = asuint(input[0].dist.y);
-	for (int v = 0; v < 3; ++ v)
+	
+	if (frustum_culling(input[0].pos, input[1].pos, input[2].pos))
 	{
-		output.pos = input[v].pos;
-		output.dist = input[v].dist.x;
-		out_stream.Append(output);
+		[unroll]
+		for (int v = 0; v < 3; ++ v)
+		{
+			output.pos = input[v].pos;
+			output.dist = input[v].dist.x;
+			out_stream.Append(output);
+		}
 	}
 }
 		]]>
@@ -390,11 +410,16 @@ void GenCubeOneInstanceGSShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input
 {
 	PS_IN output;
 	output.rt_index = instance_id;
-	for (int v = 0; v < 3; ++ v)
+	
+	if (frustum_culling(input[0].pos[instance_id], input[1].pos[instance_id], input[2].pos[instance_id]))
 	{
-		output.pos = input[v].pos[instance_id];
-		output.dist = input[v].dist;
-		out_stream.Append(output);
+		[unroll]
+		for (int v = 0; v < 3; ++ v)
+		{
+			output.pos = input[v].pos[instance_id];
+			output.dist = input[v].dist.x;
+			out_stream.Append(output);
+		}
 	}
 }
 		]]>
