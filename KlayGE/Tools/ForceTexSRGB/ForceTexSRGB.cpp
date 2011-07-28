@@ -26,6 +26,12 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
+		uint32_t num_sub_res = in_array_size;
+		if (Texture::TT_Cube == in_type)
+		{
+			num_sub_res *= 6;
+		}
+
 		if (IsSRGB(in_format))
 		{
 			cout << "This texture is already in sRGB format." << endl;
@@ -45,7 +51,7 @@ namespace
 		if ((EF_BC1 == in_format) || (EF_BC2 == in_format) || (EF_BC3 == in_format))
 		{
 			std::vector<ElementInitData> decom_data(in_data.size());
-			for (size_t index = 0; index < in_array_size; ++ index)
+			for (size_t index = 0; index < num_sub_res; ++ index)
 			{
 				decom_data[index * in_num_mipmaps].row_pitch = in_width * 4;
 				decom_data[index * in_num_mipmaps].slice_pitch = decom_data[index * in_num_mipmaps].row_pitch * in_height;
@@ -75,10 +81,13 @@ namespace
 			std::swap(in_data, decom_data);
 		}
 
-		std::vector<float> float_data(in_width * in_height * 4);
-		std::vector<float> float_data_small(((in_width + 1) / 2) * ((in_height + 1) / 2) * 4);
-		for (size_t index = 0; index < in_array_size; ++ index)
+		std::vector<float> float_data;
+		std::vector<float> float_data_small;
+		for (size_t index = 0; index < num_sub_res; ++ index)
 		{
+			float_data.resize(in_width * in_height * 4);
+			float_data_small.resize(((in_width + 1) / 2) * ((in_height + 1) / 2) * 4);
+
 			new_data[index * in_num_mipmaps].row_pitch = in_width * 4;
 			new_data[index * in_num_mipmaps].slice_pitch = new_data[index * in_num_mipmaps].row_pitch * in_height;
 
@@ -173,7 +182,7 @@ namespace
 			}
 
 			std::vector<ElementInitData> com_data(in_data.size());
-			for (size_t index = 0; index < in_array_size; ++ index)
+			for (size_t index = 0; index < num_sub_res; ++ index)
 			{
 				uint32_t the_width = in_width;
 				uint32_t the_height = in_height;

@@ -11,15 +11,20 @@
 
 	<shader>
 		<![CDATA[
+float calc_dist(float4 position)
+{
+    float4 LightWorldPos = mul(position, obj_model_to_light_model);
+    LightWorldPos /= LightWorldPos.w;
+	return length(LightWorldPos.xyz);
+}
+
 void GenCubeShadowMapVS(float4 Position : POSITION,
 						float3 Normal   : NORMAL,
 						out float oDist : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
     oPos = mul(Position, mvp);
-    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
-    LightWorldPos /= LightWorldPos.w;
-	oDist = length(LightWorldPos.xyz);
+    oDist = calc_dist(Position);
 }
 
 float4 GenCubeShadowMapPS(float dist : TEXCOORD0) : SV_Target
@@ -146,7 +151,7 @@ struct HS_CONSTANT_DATA_OUTPUT
 HS_CONSTANT_DATA_OUTPUT HWTessGenDPShadowMapConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
 {	
 	HS_CONSTANT_DATA_OUTPUT output;
-    
+
 	if (adaptive_tess)
 	{
 		float4 p0 = mul(float4(ip[0].Pos, 1), mvp);
@@ -290,8 +295,8 @@ struct GenCubeOneShadowMap_VS_TO_GS
 struct PS_IN
 {
 	float dist : TEXCOORD0;
-    float4 pos : SV_Position;
-    uint rt_index : SV_RenderTargetArrayIndex;
+	float4 pos : SV_Position;
+	uint rt_index : SV_RenderTargetArrayIndex;
 };
 
 GenCubeOneShadowMap_VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
@@ -304,9 +309,7 @@ GenCubeOneShadowMap_VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
 		output.pos[f] = mul(Position, mvps[f]);
 	}
 
-	float4 LightWorldPos = mul(Position, obj_model_to_light_model);
-	LightWorldPos /= LightWorldPos.w;
-	output.dist = length(LightWorldPos.xyz);
+	output.dist = calc_dist(Position);
 
 	return output;
 }
@@ -362,9 +365,7 @@ GenCubeOneInstanceShadowMap_VS_TO_GS GenCubeOneInstanceShadowMapVS(float4 Positi
 
 	output.pos = mul(Position, mvps[instance_id]);
 
-    float4 LightWorldPos = mul(Position, obj_model_to_light_model);
-    LightWorldPos /= LightWorldPos.w;
-	output.dist.x = length(LightWorldPos.xyz);
+	output.dist.x = calc_dist(Position);
 	output.dist.y = asfloat(instance_id);
 
 	return output;
@@ -375,7 +376,8 @@ void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS
 {
 	PS_IN output;
 	output.rt_index = asuint(input[0].dist.y);
-	
+
+	[branch]
 	if (frustum_culling(input[0].pos, input[1].pos, input[2].pos))
 	{
 		[unroll]
@@ -410,7 +412,8 @@ void GenCubeOneInstanceGSShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input
 {
 	PS_IN output;
 	output.rt_index = instance_id;
-	
+
+	[branch]
 	if (frustum_culling(input[0].pos[instance_id], input[1].pos[instance_id], input[2].pos[instance_id]))
 	{
 		[unroll]
