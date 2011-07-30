@@ -502,6 +502,20 @@ namespace KlayGE
 		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+
+		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_tex_);
+		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
+		float delta_x = 1.0f / g_buffer_tex_->Width(0);
+		float delta_y = 1.0f / g_buffer_tex_->Height(0);
+		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
+		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
+
+		gbuffer_to_normal_cone_pp_->InputPin(0, g_buffer_tex_);
+		gbuffer_to_normal_cone_pp_->OutputPin(0, normal_cone_tex_);
+		gbuffer_to_normal_cone_pp_->SetParam(0, delta_offset);
+
+		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
+		normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
 	}
 
 	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
@@ -904,54 +918,18 @@ namespace KlayGE
 
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
+					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+
 					rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
+
 					return App3DFramework::URV_Need_Flush;
 				}
 				else if (PT_IndirectLighting == pass_type)
 				{
-					CameraPtr const & rsm_camera = rsm_buffer_->GetViewport().camera;
-
-					// 1. extract vpls
-					{
-						rsm_texs_[0]->BuildMipSubLevels();
-						rsm_texs_[1]->BuildMipSubLevels();
-						float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
-						float mip_level = (MathLib::log(static_cast<float>(SM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
-						float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
-
-						float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
-
-						rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
-						rsm_to_vpls_pps[type]->SetParam(1, mip_level);
-						rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
-						rsm_to_vpls_pps[type]->SetParam(3, light->Color());
-						rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
-						rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
-						rsm_to_vpls_pps[type]->SetParam(6, MathLib::transform_coord(float3(-1, +1, 1), inv_proj));
-						rsm_to_vpls_pps[type]->SetParam(7, MathLib::transform_coord(float3(+1, +1, 1), inv_proj));
-						rsm_to_vpls_pps[type]->SetParam(8, MathLib::transform_coord(float3(-1, -1, 1), inv_proj));
-						rsm_to_vpls_pps[type]->SetParam(9, MathLib::transform_coord(float3(+1, -1, 1), inv_proj));
-						rsm_to_vpls_pps[type]->Apply();
-					}
-					
-					// 2. vpls lighting
-					{
-						*vpl_light_volume_mv_param_ = inv_proj_;
-						*vpl_light_volume_mvp_param_ = float4x4::Identity();
-						*vpl_depth_near_far_invfar_param_ = depth_near_far_invfar_;
-		
-						for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
-						{
-							re.BindFrameBuffer(vpls_lighting_fbs_[i]);
-							vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-
-							re.Render(*vpls_lighting_tech_, *rl_quad_);
-						}
-					}
-
-					// 3. upsampling
+					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
+					this->VPLsLighting();
 					this->UpsampleMultiresLighting();
 
 					return App3DFramework::URV_Flushed;
@@ -1041,30 +1019,16 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::CreateDepthDerivativeMipMap()
 	{
-		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_tex_);
-		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
-
-		float delta_x = 1.0f / g_buffer_tex_->Width(0);
-		float delta_y = 1.0f / g_buffer_tex_->Height(0);
-		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
-		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
 		gbuffer_to_depth_derivate_pp_->Apply();
-
-		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
 
 		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			int width = depth_deriative_tex_->Width(i - 1);
 			int height = depth_deriative_tex_->Height(i - 1);
-			if ((1 == width) || (1 == height))
-			{
-				break;
-			}
 
 			float delta_x = 1.0f / width;
 			float delta_y = 1.0f / height;
-			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
-			
+			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);			
 			depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
 			depth_derivate_mipmap_pp_->SetParam(1, i - 1.0f);
 			
@@ -1078,26 +1042,12 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::CreateNormalConeMipMap()
 	{
-		gbuffer_to_normal_cone_pp_->InputPin(0, g_buffer_tex_);
-		gbuffer_to_normal_cone_pp_->OutputPin(0, normal_cone_tex_);
-
-		float delta_x = 1.0f / g_buffer_tex_->Width(0);
-		float delta_y = 1.0f / g_buffer_tex_->Height(0);
-		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
-		gbuffer_to_normal_cone_pp_->SetParam(0, delta_offset);
 		gbuffer_to_normal_cone_pp_->Apply();
-
-		normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
 
 		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			int width = normal_cone_tex_->Width(i - 1);
 			int height = normal_cone_tex_->Height(i - 1);
-			if ((1 == width) || (1 == height))
-			{
-				break;
-			}
-
 			float delta_x = 1.0f / width;
 			float delta_y = 1.0f / height;
 			float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
@@ -1125,6 +1075,47 @@ namespace KlayGE
 			*is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
 
 			re.Render(*subsplat_stencil_tech_, *rl_quad_);
+		}
+	}
+
+	void DeferredRenderingLayer::ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light)
+	{
+		rsm_texs_[0]->BuildMipSubLevels();
+		rsm_texs_[1]->BuildMipSubLevels();
+		float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
+		float mip_level = (MathLib::log(static_cast<float>(SM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
+		float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
+
+		float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
+
+		LightType type = light->Type();
+		rsm_to_vpls_pps[type]->SetParam(0, ls_to_es);
+		rsm_to_vpls_pps[type]->SetParam(1, mip_level);
+		rsm_to_vpls_pps[type]->SetParam(2, vpl_params);
+		rsm_to_vpls_pps[type]->SetParam(3, light->Color());
+		rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
+		rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
+		rsm_to_vpls_pps[type]->SetParam(6, MathLib::transform_coord(float3(-1, +1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(7, MathLib::transform_coord(float3(+1, +1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(8, MathLib::transform_coord(float3(-1, -1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(9, MathLib::transform_coord(float3(+1, -1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->Apply();
+	}
+
+	void DeferredRenderingLayer::VPLsLighting()
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		*vpl_light_volume_mv_param_ = inv_proj_;
+		*vpl_light_volume_mvp_param_ = float4x4::Identity();
+		*vpl_depth_near_far_invfar_param_ = depth_near_far_invfar_;
+		
+		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
+		{
+			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
+			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+
+			re.Render(*vpls_lighting_tech_, *rl_quad_);
 		}
 	}
 

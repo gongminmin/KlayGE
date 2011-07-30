@@ -304,6 +304,8 @@ namespace KlayGE
 		void CreateDepthDerivativeMipMap();
 		void CreateNormalConeMipMap();
 		void SetSubsplatStencil();
+		void ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light);
+		void VPLsLighting();
 		void UpsampleMultiresLighting();
 
 	private:
