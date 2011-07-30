@@ -22,33 +22,36 @@ float4 SetSubsplatStencilPS(float3 tc: TEXCOORD0) : SV_Target
 	float2 mip_tc = tc.xy;
 	float mip_level = tc.z;
     
-	float depth_deriv_0 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level).r;
-	float depth_deriv_1 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1).r;
+	if (mip_level > 0.5f)
+	{
+		float depth_deriv_0 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level).r;  
+		float4 normal_cone_0 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level);
+		float normal_deriv_0 = max(normal_cone_0.x - normal_cone_0.z, normal_cone_0.y - normal_cone_0.w);
+		if ((depth_deriv_0 > depth_threshold) || (normal_deriv_0 > normal_threshold))
+		{
+			discard;
+		}
+	}
+
+	if (mip_level < num_levels - 1.5f)
+	{
+		float depth_deriv_1 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1).r;
+		float4 normal_cone_1 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1);
+		float normal_deriv_1 = max(normal_cone_1.x - normal_cone_1.z, normal_cone_1.y - normal_cone_1.w);
+		if ((depth_deriv_1 <= depth_threshold) && (normal_deriv_1 <= normal_threshold))
+		{
+			discard;
+		}
+	}
   
-	float4 normal_cone_0 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level);
-	float4 normal_cone_1 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1);
-	float normal_deriv_0 = max(normal_cone_0.x - normal_cone_0.z, normal_cone_0.y - normal_cone_0.w);
-	float normal_deriv_1 = max(normal_cone_1.x - normal_cone_1.z, normal_cone_1.y - normal_cone_1.w);
-  
-	bool at_coarest_level = (mip_level > num_levels - 1.5);
-	bool at_finest_level = (mip_level < 0.5);
-  
-	bool need_refinement_0 = (depth_deriv_0 > depth_threshold) || (normal_deriv_0 > normal_threshold);
-	bool need_refinement_1 = (depth_deriv_1 > depth_threshold) || (normal_deriv_1 > normal_threshold);
-  
-	if (need_refinement_0 && !at_finest_level)
-		discard;
-    
-	if (!at_coarest_level && !need_refinement_1)
-		discard;
-  
-	return float4(1, 1, 1, 1);
+	return 1;
 }
 		]]>
 	</shader>
 
 	<technique name="SetSubsplatStencil">
 		<pass name="p0">
+			<state name="color_write_mask" value="0"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="front_stencil_enable" value="true"/>

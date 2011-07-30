@@ -7,10 +7,10 @@
 		<![CDATA[
 float2 TexCoordFromPos(float4 pos)   
 {                                    
-	float2 tex = pos.xy / 2;           
-	tex.y *= flipping;                 
-	tex += 0.5;                        
-	return tex;                        
+	float2 tex = pos.xy / 2;
+	tex.y *= flipping;
+	tex += 0.5;
+	return tex;
 }
 
 void MultiresPostProcessVS(float4 pos: POSITION,
