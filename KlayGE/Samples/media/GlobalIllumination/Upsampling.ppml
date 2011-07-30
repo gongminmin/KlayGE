@@ -4,10 +4,7 @@
 	<post_processor name="Upsampling">
 		<params>
 			<param name="delta"/>
-			<param name="loc_scale_0"/>
-			<param name="loc_scale_1"/>
-			<param name="tc_min_max_0"/>
-			<param name="tc_min_max_1"/>
+			<param name="cur_lower_level"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>
@@ -16,22 +13,5 @@
 			<pin name="output"/>
 		</output>
 		<shader effect="Upsampling.fxml" tech="Upsampling"/>
-	</post_processor>
-
-	<post_processor name="UpsamplingInterpolate">
-		<params>
-			<param name="delta"/>
-			<param name="loc_scale_0"/>
-			<param name="loc_scale_1"/>
-			<param name="tc_min_max_0"/>
-			<param name="tc_min_max_1"/>
-		</params>
-		<input>
-			<pin name="src_tex"/>
-		</input>
-		<output>
-			<pin name="output"/>
-		</output>
-		<shader effect="Upsampling.fxml" tech="UpsamplingInterpolate"/>
 	</post_processor>
 </post_processors>

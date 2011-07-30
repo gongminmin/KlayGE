@@ -24,7 +24,6 @@
 namespace KlayGE
 {
 	int const SM_SIZE = 512;
-	int const RSM_SIZE = 512;
 	
 	int const VPL_COUNT_SQRT = 16;
 	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
@@ -32,7 +31,7 @@ namespace KlayGE
 	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
 	float const VPL_OFFSET = VPL_DELTA / 3;
 
-	int const MAX_MIPMAP_LEVELS = 4;
+	int const MAX_IL_MIPMAP_LEVELS = 3;
 
 
 	DeferredRenderable::DeferredRenderable(RenderEffectPtr const & effect)
@@ -304,8 +303,8 @@ namespace KlayGE
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
-			rsm_texs_[0] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-			rsm_texs_[1] = rf.MakeTexture2D(RSM_SIZE, RSM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+			rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 0, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*(rsm_texs_[0]), 0, 1, 0)); // albedo
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 1, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
@@ -323,9 +322,22 @@ namespace KlayGE
 			gbuffer_to_normal_cone_pp_ =  LoadPostProcess(ResLoader::Instance().Load("CustomMipMap.ppml"), "GBuffer2NormalCone");
 			normal_cone_mipmap_pp_ =  LoadPostProcess(ResLoader::Instance().Load("CustomMipMap.ppml"), "NormalConeMipMap");
 
-			set_subsplat_stencil_pp_ = LoadMultiresPostProcess(ResLoader::Instance().Load("SetSubsplatStencil.ppml"), "SetSubsplatStencil", MAX_MIPMAP_LEVELS);
-			vpls_lighting_pp_ = LoadMultiresPostProcess(ResLoader::Instance().Load("VPLsLighting.ppml"), "VPLsLighting", MAX_MIPMAP_LEVELS);			
-			upsampling_pp_ = LoadPostProcess(ResLoader::Instance().Load("Upsampling.ppml"), "UpsamplingInterpolate");
+			RenderEffectPtr subsplat_stencil_effect = rf.LoadEffect("SetSubsplatStencil.fxml");
+			subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
+
+			cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
+			is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
+
+			RenderEffectPtr vpls_lighting_effect = rf.LoadEffect("VPLsLighting.fxml");
+			vpls_lighting_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLighting");
+
+			vpl_light_volume_mv_param_ = vpls_lighting_effect->ParameterByName("light_volume_mv");
+			vpl_light_volume_mvp_param_ = vpls_lighting_effect->ParameterByName("light_volume_mvp");
+			vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
+			*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
+			*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
+
+			upsampling_pp_ = LoadPostProcess(ResLoader::Instance().Load("Upsampling.ppml"), "Upsampling");
 			copy_to_light_buffer_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy2LightBuffer.ppml"), "CopyToLightBuffer");
 			copy_to_light_buffer_i_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy2LightBuffer.ppml"), "CopyToLightBufferI");
 		}
@@ -412,7 +424,7 @@ namespace KlayGE
 
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
 
-		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 1, 0));
 		if (mrt_g_buffer_)
 		{
@@ -421,16 +433,23 @@ namespace KlayGE
 		}
 		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_MIPMAP_LEVELS, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		if (depth_deriative_tex_->NumMipMaps() > 1)
 		{
-			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_MIPMAP_LEVELS - 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			normal_cone_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			normal_cone_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
-		indirect_lighting_tex_ = rf.MakeTexture2D(width, height / 2, 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width, height / 2, 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		subsplat_ds_view_ = rf.Make2DDepthStencilRenderView(width, height / 2, EF_D24S8, 1, 0);
+		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		TexturePtr subsplat_ds_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		{
+			FrameBufferPtr fb = rf.MakeFrameBuffer();
+			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
+			fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 0, i));
+			vpls_lighting_fbs_.push_back(fb);
+		}
 
 		ElementFormat fmt;
 		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
@@ -475,6 +494,14 @@ namespace KlayGE
 
 		*(effect_->ParameterByName("lighting_tex")) = lighting_tex_;
 		*(effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
+
+		*(vpls_lighting_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
+		*(vpls_lighting_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+
+		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
+		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
+		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);;
+		*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 	}
 
 	uint32_t DeferredRenderingLayer::Update(uint32_t pass)
@@ -891,7 +918,7 @@ namespace KlayGE
 						rsm_texs_[0]->BuildMipSubLevels();
 						rsm_texs_[1]->BuildMipSubLevels();
 						float4x4 ls_to_es = MathLib::inverse(rsm_camera->ViewMatrix()) * view_;
-						float mip_level = (MathLib::log(static_cast<float>(RSM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
+						float mip_level = (MathLib::log(static_cast<float>(SM_SIZE)) - MathLib::log(static_cast<float>(VPL_COUNT_SQRT))) / MathLib::log(2);
 						float4 vpl_params = float4(static_cast<float>(VPL_COUNT), static_cast<float>(VPL_COUNT_SQRT), VPL_DELTA, VPL_OFFSET);
 
 						float4x4 inv_proj = MathLib::inverse(rsm_camera->ProjMatrix());
@@ -911,23 +938,21 @@ namespace KlayGE
 					
 					// 2. vpls lighting
 					{
-						vpls_lighting_pp_->InputPin(0, vpl_tex_);
-						vpls_lighting_pp_->InputPin(1, g_buffer_tex_);
-						vpls_lighting_pp_->SetParam(0, inv_proj_);
-						vpls_lighting_pp_->SetParam(1, depth_near_far_invfar_);
-						vpls_lighting_pp_->SetParam(2, float3(static_cast<float>(VPL_COUNT), 1.0f / VPL_COUNT, 0.5f / VPL_COUNT));
-						vpls_lighting_pp_->OutputPin(0, indirect_lighting_tex_);
+						*vpl_light_volume_mv_param_ = inv_proj_;
+						*vpl_light_volume_mvp_param_ = float4x4::Identity();
+						*vpl_depth_near_far_invfar_param_ = depth_near_far_invfar_;
+		
+						for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
+						{
+							re.BindFrameBuffer(vpls_lighting_fbs_[i]);
+							vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 
-						FrameBufferPtr const & fb = vpls_lighting_pp_->OutputFrameBuffer();
-						fb->Attach(FrameBuffer::ATT_DepthStencil, subsplat_ds_view_);
-						fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-
-						vpls_lighting_pp_->Apply();
-						fb->Detach(FrameBuffer::ATT_DepthStencil);
+							re.Render(*vpls_lighting_tech_, *rl_quad_);
+						}
 					}
 
 					// 3. upsampling
-					UpsampleMultiresLighting();
+					this->UpsampleMultiresLighting();
 
 					return App3DFramework::URV_Flushed;
 				}
@@ -1026,9 +1051,8 @@ namespace KlayGE
 		gbuffer_to_depth_derivate_pp_->Apply();
 
 		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
-		num_mipmap_levels_ = 1;
 
-		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++ i)
+		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			int width = depth_deriative_tex_->Width(i - 1);
 			int height = depth_deriative_tex_->Height(i - 1);
@@ -1046,7 +1070,6 @@ namespace KlayGE
 			
 			depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 			depth_derivate_mipmap_pp_->Apply();
-			++ num_mipmap_levels_;
 
 			depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, width / 2, height / 2,
 				0, i - 1, 0, 0, width / 2, height / 2);
@@ -1065,9 +1088,8 @@ namespace KlayGE
 		gbuffer_to_normal_cone_pp_->Apply();
 
 		normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
-		num_mipmap_levels_ = 1;
 
-		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++i)
+		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			int width = normal_cone_tex_->Width(i - 1);
 			int height = normal_cone_tex_->Height(i - 1);
@@ -1085,7 +1107,6 @@ namespace KlayGE
 
 			normal_cone_mipmap_pp_->OutputPin(0, normal_cone_small_tex_, i - 1);
 			normal_cone_mipmap_pp_->Apply();
-			++ num_mipmap_levels_;
 
 			normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, width / 2, height / 2,
 				0, i - 1, 0, 0, width / 2, height / 2);
@@ -1094,64 +1115,33 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::SetSubsplatStencil()
 	{
-		const float depth_threshold = 0.001f;
-		const float normal_threshold = 0.77f;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		{
+			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
+			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(0.0f, 0);
 
-		set_subsplat_stencil_pp_->InputPin(0, depth_deriative_tex_);
-		set_subsplat_stencil_pp_->InputPin(1, normal_cone_tex_);
-		set_subsplat_stencil_pp_->SetParam(0, static_cast<float>(num_mipmap_levels_));
-		set_subsplat_stencil_pp_->SetParam(1, depth_threshold);
-		set_subsplat_stencil_pp_->SetParam(2, normal_threshold);
-		
-		set_subsplat_stencil_pp_->OutputPin(0, indirect_lighting_tex_);
+			*cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
+			*is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
 
-		FrameBufferPtr fb = set_subsplat_stencil_pp_->OutputFrameBuffer();
-		fb->Attach(FrameBuffer::ATT_DepthStencil, subsplat_ds_view_);
-		fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
-
-		set_subsplat_stencil_pp_->Apply();
-		fb->Detach(FrameBuffer::ATT_DepthStencil);
+			re.Render(*subsplat_stencil_tech_, *rl_quad_);
+		}
 	}
 
 	void DeferredRenderingLayer::UpsampleMultiresLighting()
 	{
-		std::vector<float4> loc_size(MAX_MIPMAP_LEVELS);
-		loc_size[0] = float4(-1, -1, 1, 2);
-		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++i)
-		{
-			loc_size[i].x() = loc_size[i - 1].x() + loc_size[i - 1].z();
-			loc_size[i].y() = loc_size[i - 1].y();
-			loc_size[i].z() = loc_size[i - 1].z() / 2;
-			loc_size[i].w() = loc_size[i - 1].w() / 2;
-		}
-
-		std::vector<float4> tc_min_max(MAX_MIPMAP_LEVELS);
-		tc_min_max[0] = float4(0, 0, 0.5f, 1);
-		for (int i = 1; i < MAX_MIPMAP_LEVELS; ++i)
-		{
-			tc_min_max[i].x() = tc_min_max[i - 1].z();
-			tc_min_max[i].y() = tc_min_max[i - 1].y();
-			tc_min_max[i].z() = tc_min_max[i].x() + loc_size[i].z() / 2;
-			tc_min_max[i].w() = 1 - tc_min_max[i].x();
-		}
-
 		indirect_lighting_tex_->CopyToTexture(*indirect_lighting_pingpong_tex_);
 
-		int width = indirect_lighting_tex_->Width(0);
-		int height = indirect_lighting_tex_->Height(0);
-		upsampling_pp_->SetParam(0, float4(1.0f / width , 1.0f / height, 0.5f / width, 0.5f / height));
-		
-		for (int i = num_mipmap_levels_ - 2; i >= 0; --i)
+		for (int i = MAX_IL_MIPMAP_LEVELS - 2; i >= 0; -- i)
 		{
 			std::swap(indirect_lighting_tex_, indirect_lighting_pingpong_tex_);
-			
-			upsampling_pp_->SetParam(1, loc_size[i + 0]);
-			upsampling_pp_->SetParam(2, loc_size[i + 1]);
-			upsampling_pp_->SetParam(3, tc_min_max[i + 0]);
-			upsampling_pp_->SetParam(4, tc_min_max[i + 1]);
+
+			upsampling_pp_->SetParam(0, float4(1.0f / indirect_lighting_tex_->Width(i + 1) , 1.0f / indirect_lighting_tex_->Height(i + 1),
+				1.0f / indirect_lighting_tex_->Width(i), 1.0f / indirect_lighting_tex_->Height(i)));
+			upsampling_pp_->SetParam(1, int2(i + 1, i));
 			
 			upsampling_pp_->InputPin(0, indirect_lighting_pingpong_tex_);
-			upsampling_pp_->OutputPin(0, indirect_lighting_tex_);
+			upsampling_pp_->OutputPin(0, indirect_lighting_tex_, i);
 			upsampling_pp_->Apply();
 		}
 	}

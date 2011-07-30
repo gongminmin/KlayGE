@@ -195,9 +195,9 @@ void DeferredRenderingVS(float4 pos : POSITION,
 #endif
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(float4(pos.xyz, 1), light_volume_mvp);
+	oPos = mul(pos, light_volume_mvp);
 
-	oViewDir = mul(float4(pos.xyz, 1), light_volume_mv).xyz;
+	oViewDir = mul(pos, light_volume_mv).xyz;
 	oTc = oPos.xy / oPos.w * 0.5f;
 	oTc.y *= flipping;
 	oTc += 0.5f;

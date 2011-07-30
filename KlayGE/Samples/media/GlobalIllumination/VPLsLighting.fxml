@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
-	<include name="MultiresPostProcess.fxml"/>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
 
@@ -14,37 +13,60 @@
 	<parameter type="texture2D" name="vpls_tex"/>
 	<parameter type="texture2D" name="gbuffer_tex"/>
 
-	<parameter type="float4x4" name="inv_proj"/>
+	<parameter type="float4x4" name="light_volume_mv"/>
+	<parameter type="float4x4" name="light_volume_mvp"/>
 	<parameter type="float3" name="depth_near_far_invfar"/>
-	<parameter type="float3" name="vpl_params"/>
+	<parameter type="float2" name="vpl_params"/>
+	<parameter type='int' name='flipping'/>
 
 	<shader>
 		<![CDATA[
-void VPLsLightingVS(float4 pos: POSITION,
-		float3 tc : TEXCOORD0,
-		out float3 oTex : TEXCOORD0,
-		out float3 oViewDir : TEXCOORD1,
-		out float4 oPos : SV_Position)
-{
-	tc.y = (tc.y - 0.5f) * flipping + 0.5f;
-	oTex = tc;
-	oPos = pos;
+#ifdef KLAYGE_D3D11
+#define NOPERSPECTIVE_SUPPORT
+#endif
 
-	float4 spos = float4(tc.xy, 1, 1);
-	spos.xy = spos.xy - 0.5f;
-	spos.y = spos.y * flipping;
-	spos.xy = spos.xy * 2;
-	oViewDir = mul(spos, inv_proj).xyz;
+void VPLsLightingVS(float4 pos: POSITION,
+#ifdef NOPERSPECTIVE_SUPPORT
+				out noperspective float2 oTc : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+#else
+				out float2 oTc : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float oW : TEXCOORD2,
+#endif
+				out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, light_volume_mvp);
+
+	oViewDir = mul(pos, light_volume_mv).xyz;
+	oTc = oPos.xy / oPos.w * 0.5f;
+	oTc.y *= flipping;
+	oTc += 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oW = oPos.w;
+	oTc *= oW;
+#endif
 }
 
-float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 VPLsLightingPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
+#else
+	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
+#endif
+	) : SV_Target
 {
-	float4 ndc = gbuffer_tex.Sample(point_sampler, tc.xy);
+#ifndef NOPERSPECTIVE_SUPPORT
+	tc /= w;
+#endif
+
+	float4 ndc = gbuffer_tex.Sample(point_sampler, tc);
 	float3 norm_i = GetNormal(ndc);
 	float3 pos_i = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 color_i = 0;
   
-	for (float k = vpl_params.z; k < 1; k += vpl_params.y)
+	for (float k = vpl_params.y; k < 1; k += vpl_params.x)
 	{
 		float3 pos_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.833f), 0).xyz;
 
@@ -71,7 +93,11 @@ float4 VPLsLightingPS(float3 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 
 	<technique name="VPLsLighting">
 		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="equal"/>

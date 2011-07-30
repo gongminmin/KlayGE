@@ -169,12 +169,10 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.cpp" />
     <ClCompile Include="..\..\src\GlobalIllumination\GlobalIllumination.cpp" />
-    <ClCompile Include="..\..\src\GlobalIllumination\MultiresPostProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.hpp" />
     <ClInclude Include="..\..\src\GlobalIllumination\GlobalIllumination.hpp" />
-    <ClInclude Include="..\..\src\GlobalIllumination\MultiresPostProcess.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\klayge_logo.ico" />
@@ -187,15 +185,12 @@
     <None Include="..\..\media\GlobalIllumination\DepthToVSM.ppml" />
     <None Include="..\..\media\GlobalIllumination\GBufferAdv.fxml" />
     <None Include="..\..\media\GlobalIllumination\GlobalIllumination.uiml" />
-    <None Include="..\..\media\GlobalIllumination\MultiresPostProcess.fxml" />
     <None Include="..\..\media\GlobalIllumination\RSM2VPLs.fxml" />
     <None Include="..\..\media\GlobalIllumination\RSM2VPLs.ppml" />
     <None Include="..\..\media\GlobalIllumination\SetSubsplatStencil.fxml" />
-    <None Include="..\..\media\GlobalIllumination\SetSubsplatStencil.ppml" />
     <None Include="..\..\media\GlobalIllumination\Upsampling.fxml" />
     <None Include="..\..\media\GlobalIllumination\Upsampling.ppml" />
     <None Include="..\..\media\GlobalIllumination\VPLsLighting.fxml" />
-    <None Include="..\..\media\GlobalIllumination\VPLsLighting.ppml" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\media\Common\KlayGESample.rc" />

@@ -1,5 +1,5 @@
-#ifndef _PARALLAX_HPP
-#define _PARALLAX_HPP
+#ifndef _GLOBALILLUMINATION_HPP
+#define _GLOBALILLUMINATION_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -53,4 +53,4 @@ private:
 	int id_ctrl_camera_;
 };
 
-#endif		// _PARALLAX_HPP
+#endif		// _GLOBALILLUMINATION_HPP

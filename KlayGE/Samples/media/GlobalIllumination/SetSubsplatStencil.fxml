@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
-	<include name="MultiresPostProcess.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -11,34 +11,33 @@
 
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 	<parameter type="texture2D" name="normal_cone_tex"/>
-	<parameter type="float" name="num_levels"/>
-	<parameter type="float" name="depth_threshold"/>
-	<parameter type="float" name="normal_threshold"/>
+	<parameter type="float2" name="depth_normal_threshold"/>
+	<parameter type="float2" name="cur_lower_level"/>
+	<parameter type="int2" name="is_not_first_last_level"/>
 
 	<shader>
 		<![CDATA[
-float4 SetSubsplatStencilPS(float3 tc: TEXCOORD0) : SV_Target
+float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 {
-	float2 mip_tc = tc.xy;
-	float mip_level = tc.z;
-    
-	if (mip_level > 0.5f)
+	if (is_not_first_last_level.x)
 	{
-		float depth_deriv_0 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level).r;  
-		float4 normal_cone_0 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level);
-		float normal_deriv_0 = max(normal_cone_0.x - normal_cone_0.z, normal_cone_0.y - normal_cone_0.w);
-		if ((depth_deriv_0 > depth_threshold) || (normal_deriv_0 > normal_threshold))
+		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.x).r;  
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.x);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (any(float2(depth_deriv, normal_deriv) > depth_normal_threshold))
 		{
 			discard;
 		}
 	}
 
-	if (mip_level < num_levels - 1.5f)
+	if (is_not_first_last_level.y)
 	{
-		float depth_deriv_1 = depth_deriv_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1).r;
-		float4 normal_cone_1 = normal_cone_tex.SampleLevel(point_sampler, mip_tc, mip_level + 1);
-		float normal_deriv_1 = max(normal_cone_1.x - normal_cone_1.z, normal_cone_1.y - normal_cone_1.w);
-		if ((depth_deriv_1 <= depth_threshold) && (normal_deriv_1 <= normal_threshold))
+		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, cur_lower_level.y).r;
+		float4 normal_cone = normal_cone_tex.SampleLevel(point_sampler, tc, cur_lower_level.y);
+		normal_cone.xy -= normal_cone.zw;
+		float normal_deriv = max(normal_cone.x, normal_cone.y);
+		if (all(float2(depth_deriv, normal_deriv) <= depth_normal_threshold))
 		{
 			discard;
 		}
@@ -52,7 +51,11 @@ float4 SetSubsplatStencilPS(float3 tc: TEXCOORD0) : SV_Target
 	<technique name="SetSubsplatStencil">
 		<pass name="p0">
 			<state name="color_write_mask" value="0"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
 			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -65,7 +68,7 @@ float4 SetSubsplatStencilPS(float3 tc: TEXCOORD0) : SV_Target
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_read_mask" value="127"/>
 
-			<state name="vertex_shader" value="MultiresPostProcessVS()"/>
+			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SetSubsplatStencilPS()"/>
 		</pass>
 	</technique>
