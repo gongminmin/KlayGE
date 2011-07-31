@@ -15,6 +15,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/Mesh.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -309,7 +310,7 @@ namespace KlayGE
 			rsm_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*(rsm_texs_[1]), 0, 1, 0)); // normal (light space)
 			rsm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
-			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 3, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
+			vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);	
 
 			rsm_to_vpls_pps[LT_Spot] = LoadPostProcess(ResLoader::Instance().Load("RSM2VPLs.ppml"), "RSM2VPLsSpot");
 			rsm_to_vpls_pps[LT_Spot]->InputPin(0, rsm_texs_[0]);
@@ -331,8 +332,8 @@ namespace KlayGE
 			RenderEffectPtr vpls_lighting_effect = rf.LoadEffect("VPLsLighting.fxml");
 			vpls_lighting_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLighting");
 
-			vpl_light_volume_mv_param_ = vpls_lighting_effect->ParameterByName("light_volume_mv");
-			vpl_light_volume_mvp_param_ = vpls_lighting_effect->ParameterByName("light_volume_mvp");
+			vpl_view_param_ = vpls_lighting_effect->ParameterByName("view");
+			vpl_proj_param_ = vpls_lighting_effect->ParameterByName("proj");
 			vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
 			*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 			*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
@@ -340,6 +341,9 @@ namespace KlayGE
 			upsampling_pp_ = LoadPostProcess(ResLoader::Instance().Load("Upsampling.ppml"), "Upsampling");
 			copy_to_light_buffer_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy2LightBuffer.ppml"), "CopyToLightBuffer");
 			copy_to_light_buffer_i_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy2LightBuffer.ppml"), "CopyToLightBufferI");
+
+			rl_vpl_ = LoadModel("indirect_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())()->Mesh(0)->GetRenderLayout();
+			rl_vpl_->NumInstances(VPL_COUNT);
 		}
 
 
@@ -843,7 +847,7 @@ namespace KlayGE
 
 							if (PT_GenReflectiveShadowMap == pass_type)
 							{
-								rsm_to_vpls_pps[type]->SetParam(10, near_q);
+								rsm_to_vpls_pps[type]->SetParam(11, near_q);
 							}
 						}
 
@@ -1095,10 +1099,11 @@ namespace KlayGE
 		rsm_to_vpls_pps[type]->SetParam(3, light->Color());
 		rsm_to_vpls_pps[type]->SetParam(4, light->CosOuterInner());
 		rsm_to_vpls_pps[type]->SetParam(5, light->Falloff());
-		rsm_to_vpls_pps[type]->SetParam(6, MathLib::transform_coord(float3(-1, +1, 1), inv_proj));
-		rsm_to_vpls_pps[type]->SetParam(7, MathLib::transform_coord(float3(+1, +1, 1), inv_proj));
-		rsm_to_vpls_pps[type]->SetParam(8, MathLib::transform_coord(float3(-1, -1, 1), inv_proj));
-		rsm_to_vpls_pps[type]->SetParam(9, MathLib::transform_coord(float3(+1, -1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(6, inv_view_);
+		rsm_to_vpls_pps[type]->SetParam(7, MathLib::transform_coord(float3(-1, +1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(8, MathLib::transform_coord(float3(+1, +1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(9, MathLib::transform_coord(float3(-1, -1, 1), inv_proj));
+		rsm_to_vpls_pps[type]->SetParam(10, MathLib::transform_coord(float3(+1, -1, 1), inv_proj));
 		rsm_to_vpls_pps[type]->Apply();
 	}
 
@@ -1106,8 +1111,8 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		*vpl_light_volume_mv_param_ = inv_proj_;
-		*vpl_light_volume_mvp_param_ = float4x4::Identity();
+		*vpl_view_param_ = view_;
+		*vpl_proj_param_ = proj_;
 		*vpl_depth_near_far_invfar_param_ = depth_near_far_invfar_;
 		
 		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
@@ -1115,7 +1120,7 @@ namespace KlayGE
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
 			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 
-			re.Render(*vpls_lighting_tech_, *rl_quad_);
+			re.Render(*vpls_lighting_tech_, *rl_vpl_);
 		}
 	}
 

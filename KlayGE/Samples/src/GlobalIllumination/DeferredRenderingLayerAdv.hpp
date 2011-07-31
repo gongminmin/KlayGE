@@ -313,36 +313,6 @@ namespace KlayGE
 
 		RenderEffectPtr effect_;
 
-		FrameBufferPtr rsm_buffer_;
-		TexturePtr rsm_texs_[2];
-
-		PostProcessPtr rsm_to_vpls_pps[LT_NumLightTypes];
-		TexturePtr vpl_tex_;
-		
-		TexturePtr depth_deriative_tex_;
-		TexturePtr depth_deriative_small_tex_;
-		TexturePtr normal_cone_tex_;
-		TexturePtr normal_cone_small_tex_;
-		
-		TexturePtr indirect_lighting_tex_;
-		TexturePtr indirect_lighting_pingpong_tex_;
-		RenderTechniquePtr subsplat_stencil_tech_;
-		RenderTechniquePtr vpls_lighting_tech_;
-		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
-		bool indirect_lighting_enabled_;	
-
-		PostProcessPtr gbuffer_to_depth_derivate_pp_;
-		PostProcessPtr depth_derivate_mipmap_pp_;
-		PostProcessPtr gbuffer_to_normal_cone_pp_;
-		PostProcessPtr normal_cone_mipmap_pp_;
-
-		PostProcessPtr upsampling_pp_;
-
-		int illum_;
-		float indirect_scale_;
-		PostProcessPtr copy_to_light_buffer_pp_;
-		PostProcessPtr copy_to_light_buffer_i_pp_;
-
 		FrameBufferPtr g_buffer_;
 		TexturePtr g_buffer_tex_;
 		TexturePtr g_buffer_1_tex_;
@@ -404,14 +374,46 @@ namespace KlayGE
 		RenderEffectParameterPtr ssao_tex_param_;
 		RenderEffectParameterPtr ssao_enabled_param_;
 
+		std::vector<DeferredSceneObject*> deferred_scene_objs_;
+
+		FrameBufferPtr rsm_buffer_;
+		TexturePtr rsm_texs_[2];
+
+		PostProcessPtr rsm_to_vpls_pps[LT_NumLightTypes];
+		TexturePtr vpl_tex_;
+		
+		TexturePtr depth_deriative_tex_;
+		TexturePtr depth_deriative_small_tex_;
+		TexturePtr normal_cone_tex_;
+		TexturePtr normal_cone_small_tex_;
+		
+		TexturePtr indirect_lighting_tex_;
+		TexturePtr indirect_lighting_pingpong_tex_;
+		RenderTechniquePtr subsplat_stencil_tech_;
+		RenderTechniquePtr vpls_lighting_tech_;
+		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
+		bool indirect_lighting_enabled_;	
+
+		PostProcessPtr gbuffer_to_depth_derivate_pp_;
+		PostProcessPtr depth_derivate_mipmap_pp_;
+		PostProcessPtr gbuffer_to_normal_cone_pp_;
+		PostProcessPtr normal_cone_mipmap_pp_;
+
+		PostProcessPtr upsampling_pp_;
+
+		int illum_;
+		float indirect_scale_;
+		PostProcessPtr copy_to_light_buffer_pp_;
+		PostProcessPtr copy_to_light_buffer_i_pp_;
+
 		RenderEffectParameterPtr cur_lower_level_param_;
 		RenderEffectParameterPtr is_not_first_last_level_param_;
 
-		RenderEffectParameterPtr vpl_light_volume_mv_param_;
-		RenderEffectParameterPtr vpl_light_volume_mvp_param_;
+		RenderEffectParameterPtr vpl_view_param_;
+		RenderEffectParameterPtr vpl_proj_param_;
 		RenderEffectParameterPtr vpl_depth_near_far_invfar_param_;
 
-		std::vector<DeferredSceneObject*> deferred_scene_objs_;
+		RenderLayoutPtr rl_vpl_;
 	};
 
 	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;

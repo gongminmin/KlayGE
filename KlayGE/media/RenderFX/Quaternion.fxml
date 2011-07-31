@@ -8,6 +8,37 @@ float4 conjugate_quat(float4 rhs)
 	return float4(-rhs.x, -rhs.y, -rhs.z, rhs.w);
 }
 
+float4 unit_axis_to_unit_axis(float3 from, float3 to)
+{
+	float cos_theta = dot(from, to);
+	if (abs(cos_theta - 1) < 1e-6f)
+	{
+		return float4(0, 0, 0, 1);
+	}
+	else
+	{
+		if (abs(cos_theta + 1) < 1e-6f)
+		{
+			return float4(1, 0, 0, 0);
+		}
+		else
+		{
+			float3 axis = cross(from, to);
+
+			float sin_theta = sqrt(1 - cos_theta * cos_theta);
+			float sin_half_theta = sqrt((1 - cos_theta) / 2);
+			float cos_half_theta = sin_theta / (2 * sin_half_theta);
+
+			return float4(axis * sin_half_theta, cos_half_theta);
+		}
+	}
+}
+
+float4 axis_to_axis(float3 from, float3 to)
+{
+	return unit_axis_to_unit_axis(normalize(from), normalize(to));
+}
+
 float4 exp_quat(float4 rhs)
 {
 	float theta = length(rhs.xyz);

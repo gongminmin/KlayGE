@@ -3,6 +3,7 @@
 <effect>
 	<include name="DeferredRenderingUtil.fxml"/>
 	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -13,8 +14,8 @@
 	<parameter type="texture2D" name="vpls_tex"/>
 	<parameter type="texture2D" name="gbuffer_tex"/>
 
-	<parameter type="float4x4" name="light_volume_mv"/>
-	<parameter type="float4x4" name="light_volume_mvp"/>
+	<parameter type="float4x4" name="view"/>
+	<parameter type="float4x4" name="proj"/>
 	<parameter type="float3" name="depth_near_far_invfar"/>
 	<parameter type="float2" name="vpl_params"/>
 	<parameter type='int' name='flipping'/>
@@ -25,20 +26,27 @@
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
-void VPLsLightingVS(float4 pos: POSITION,
+void VPLsLightingVS(float4 pos : POSITION,
+				uint instance_id : SV_InstanceID,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
-				out float3 oViewDir : TEXCOORD1,
+				out float4 oViewDir : TEXCOORD1,
 #else
 				out float2 oTc : TEXCOORD0,
-				out float3 oViewDir : TEXCOORD1,
+				out float4 oViewDir : TEXCOORD1,
 				out float oW : TEXCOORD2,
 #endif
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(pos, light_volume_mvp);
+	oViewDir.w = (instance_id + 0.5f) * vpl_params.x;
 
-	oViewDir = mul(pos, light_volume_mv).xyz;
+	float3 offset = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0).xyz;
+	float4 rotation = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 3.5f / 4), 0);
+
+	const float SCALE = 20;
+	oViewDir.xyz = mul(float4(mul_quat(pos.xyz, rotation) * SCALE, 1), view).xyz + offset;
+	oPos = mul(float4(oViewDir.xyz, 1), proj);
+
 	oTc = oPos.xy / oPos.w * 0.5f;
 	oTc.y *= flipping;
 	oTc += 0.5f;
@@ -51,9 +59,9 @@ void VPLsLightingVS(float4 pos: POSITION,
 
 float4 VPLsLightingPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1
 #else
-	float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, float w : TEXCOORD2
+	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2
 #endif
 	) : SV_Target
 {
@@ -63,27 +71,20 @@ float4 VPLsLightingPS(
 
 	float4 ndc = gbuffer_tex.Sample(point_sampler, tc);
 	float3 norm_i = GetNormal(ndc);
-	float3 pos_i = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_i = view_dir.xyz * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
 	float3 color_i = 0;
-  
-	for (float k = vpl_params.y; k < 1; k += vpl_params.x)
+
+	float3 pos_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 2.5f / 4), 0).xyz;
+
+	float3 vij = pos_j - pos_i;
+	float3 norm_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 1.5f / 4), 0).xyz;
+	if (dot(norm_j, vij) < 0)
 	{
-		float3 pos_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.833f), 0).xyz;
+		float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 0.5f / 4), 0).xyz;
 
-		float3 vij = pos_j - pos_i;
-		float dij_sqr = dot(vij, vij);
-		if (dij_sqr < 400)
-		{
-			float3 norm_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.5f), 0).xyz;
-			if (dot(norm_j, vij) < 0)
-			{
-				float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(k, 0.166f), 0).xyz;
-
-				float cos_iv = max(0, dot(norm_i, vij) / sqrt(dij_sqr));
-				float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
-				color_i += cos_iv * atten * color_j;
-			}
-		}
+		float cos_iv = max(0, dot(norm_i, vij) / sqrt(dot(vij, vij)));
+		float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
+		color_i = cos_iv * atten * color_j;
 	}
 
 	return float4(color_i, 1);
@@ -109,6 +110,14 @@ float4 VPLsLightingPS(
 			<state name="back_stencil_ref" value="127"/>
 			<state name="back_stencil_pass" value="keep"/>
 			<state name="back_stencil_read_mask" value="127"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="max"/>
+			<state name="src_blend_alpha" value="src_alpha"/>
+			<state name="dest_blend_alpha" value="dst_alpha"/>
 
 			<state name="vertex_shader" value="VPLsLightingVS()"/>
 			<state name="pixel_shader" value="VPLsLightingPS()"/>
