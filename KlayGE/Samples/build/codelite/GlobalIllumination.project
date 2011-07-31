@@ -10,12 +10,10 @@
   <VirtualDirectory Name="Source Files">
     <File Name="../../src/GlobalIllumination/GlobalIllumination.cpp"/>
     <File Name="../../src/GlobalIllumination/DeferredRenderingLayerAdv.cpp"/>
-    <File Name="../../src/GlobalIllumination/MultiresPostProcess.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files">
     <File Name="../../src/GlobalIllumination/GlobalIllumination.hpp"/>
     <File Name="../../src/GlobalIllumination/DeferredRenderingLayerAdv.hpp"/>
-    <File Name="../../src/GlobalIllumination/MultiresPostProcess.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
     <File Name="../../media/GlobalIllumination/Copy2LightBuffer.fxml"/>
@@ -23,7 +21,6 @@
     <File Name="../../media/GlobalIllumination/DeferredRenderingAdv.fxml"/>
     <File Name="../../media/GlobalIllumination/DepthToVSM.fxml"/>
     <File Name="../../media/GlobalIllumination/GBufferAdv.fxml"/>
-    <File Name="../../media/GlobalIllumination/MultiresPostProcess.fxml"/>
     <File Name="../../media/GlobalIllumination/RSM2VPLs.fxml"/>
     <File Name="../../media/GlobalIllumination/SetSubsplatStencil.fxml"/>
     <File Name="../../media/GlobalIllumination/Upsampling.fxml"/>
@@ -34,9 +31,7 @@
     <File Name="../../media/GlobalIllumination/CustomMipMap.ppml"/>
     <File Name="../../media/GlobalIllumination/DepthToVSM.ppml"/>
     <File Name="../../media/GlobalIllumination/RSM2VPLs.ppml"/>
-    <File Name="../../media/GlobalIllumination/SetSubsplatStencil.ppml"/>
     <File Name="../../media/GlobalIllumination/Upsampling.ppml"/>
-    <File Name="../../media/GlobalIllumination/VPLsLighting.ppml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
     <File Name="../../media/GlobalIllumination/GlobalIllumination.uiml"/>

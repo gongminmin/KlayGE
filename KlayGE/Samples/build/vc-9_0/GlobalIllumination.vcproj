@@ -357,10 +357,6 @@
 				RelativePath="..\..\src\GlobalIllumination\GlobalIllumination.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\GlobalIllumination\MultiresPostProcess.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -373,10 +369,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\GlobalIllumination\GlobalIllumination.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\GlobalIllumination\MultiresPostProcess.hpp"
 				>
 			</File>
 		</Filter>
@@ -401,10 +393,6 @@
 			</File>
 			<File
 				RelativePath="..\..\media\GlobalIllumination\GBufferAdv.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\MultiresPostProcess.fxml"
 				>
 			</File>
 			<File
@@ -464,15 +452,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\GlobalIllumination\SetSubsplatStencil.ppml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\GlobalIllumination\Upsampling.ppml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\VPLsLighting.ppml"
 				>
 			</File>
 		</Filter>
