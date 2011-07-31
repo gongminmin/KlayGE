@@ -922,8 +922,6 @@ namespace KlayGE
 
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
-					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
-
 					rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
@@ -953,7 +951,10 @@ namespace KlayGE
 						else
 						{
 							sm_filter_pps_[0]->Apply();
-							light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+							if (!(light->Attrib() & LSA_IndirectLighting))
+							{
+								light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+							}
 						}
 					}
 				}
