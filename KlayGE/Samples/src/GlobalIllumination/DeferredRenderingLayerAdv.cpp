@@ -426,7 +426,8 @@ namespace KlayGE
 		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
+		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 0, 0);
 
 		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 1, 0));
@@ -502,6 +503,7 @@ namespace KlayGE
 		*(vpls_lighting_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(vpls_lighting_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
+		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_tex")) = ds_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);;

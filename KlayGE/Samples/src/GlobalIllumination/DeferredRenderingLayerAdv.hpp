@@ -316,6 +316,7 @@ namespace KlayGE
 		FrameBufferPtr g_buffer_;
 		TexturePtr g_buffer_tex_;
 		TexturePtr g_buffer_1_tex_;
+		TexturePtr ds_tex_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
