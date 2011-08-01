@@ -92,34 +92,36 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
 
-		std::vector<void*> rt_src(clr_views_.size());
-		std::vector<uint32_t> rt_first_subres(clr_views_.size());
-		std::vector<uint32_t> rt_num_subres(clr_views_.size());
+		std::vector<void*> rt_src;
+		std::vector<uint32_t> rt_first_subres;
+		std::vector<uint32_t> rt_num_subres;
 		std::vector<ID3D11RenderTargetView*> rt_view(clr_views_.size());
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{
 				D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src[i] = p->RTSrc();
-				rt_first_subres[i] = p->RTFirstSubRes();
-				rt_num_subres[i] = p->RTNumSubRes();
+				rt_src.push_back(p->RTSrc());
+				rt_first_subres.push_back(p->RTFirstSubRes());
+				rt_num_subres.push_back(p->RTNumSubRes());
 				rt_view[i] = this->D3DRTView(i).get();
 			}
 			else
 			{
-				rt_src[i] = NULL;
-				rt_first_subres[i] = rt_num_subres[i] = 0;
 				rt_view[i] = NULL;
 			}
 		}
-
-		for (uint32_t i = 0; i < rt_view.size(); ++ i)
+		if (rs_view_)
 		{
-			if (rt_src[i] != NULL)
-			{
-				re.DetachSRV(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
-			}
+			D3D11DepthStencilRenderView* p = checked_cast<D3D11DepthStencilRenderView*>(rs_view_.get());
+			rt_src.push_back(p->RTSrc());
+			rt_first_subres.push_back(p->RTFirstSubRes());
+			rt_num_subres.push_back(p->RTNumSubRes());
+		}
+
+		for (size_t i = 0; i < rt_src.size(); ++ i)
+		{
+			re.DetachSRV(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
 		}
 
 		d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());

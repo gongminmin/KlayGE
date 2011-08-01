@@ -108,8 +108,24 @@ namespace KlayGE
 			return ds_view_;
 		}
 
+		void* RTSrc() const
+		{
+			return rt_src_;
+		}
+		uint32_t RTFirstSubRes() const
+		{
+			return rt_first_subres_;
+		}
+		uint32_t RTNumSubRes() const
+		{
+			return rt_num_subres_;
+		}
+
 	private:
 		ID3D11DepthStencilViewPtr ds_view_;
+		void* rt_src_;
+		uint32_t rt_first_subres_;
+		uint32_t rt_num_subres_;
 	};
 	typedef boost::shared_ptr<D3D11DepthStencilRenderView> D3D11DepthStencilRenderViewPtr;
 }

@@ -128,6 +128,7 @@ namespace KlayGE
 
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture, int first_array_index, int array_size, int level)
+		: rt_src_(&texture), rt_first_subres_(first_array_index * texture.NumMipMaps() + level), rt_num_subres_(1)
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture)->RetriveD3DDepthStencilView(first_array_index, array_size, level);
 
@@ -137,6 +138,7 @@ namespace KlayGE
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
+		: rt_src_(&texture_3d), rt_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), rt_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture_3d)->RetriveD3DDepthStencilView(array_index, first_slice, num_slices, level);
 
@@ -146,6 +148,7 @@ namespace KlayGE
     }
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
+		: rt_src_(&texture_cube), rt_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), rt_num_subres_(1)
 	{
 		ds_view_ = checked_cast<D3D11Texture*>(&texture_cube)->RetriveD3DDepthStencilView(array_index, face, level);
 
@@ -155,7 +158,7 @@ namespace KlayGE
 	}
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(ID3D11DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: ds_view_(view)
+		: ds_view_(view), rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		width_ = width;
 		height_ = height;
@@ -164,6 +167,7 @@ namespace KlayGE
 
 	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(uint32_t width, uint32_t height,
 											ElementFormat pf, uint32_t sample_count, uint32_t sample_quality)
+		: rt_src_(NULL), rt_first_subres_(0), rt_num_subres_(0)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
