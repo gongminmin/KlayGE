@@ -175,12 +175,7 @@ namespace KlayGE
 		Color color[4];
 		color[0] = max_clr;
 		color[1] = min_clr;
-		if (alpha)
-		{
-			color[2] = MathLib::lerp(color[0], color[1], 1 / 2.0f);
-			color[3] = Color(0, 0, 0, 0);
-		}
-		else
+		if (!alpha)
 		{
 			color[2] = MathLib::lerp(color[0], color[1], 1 / 3.0f);
 			color[3] = MathLib::lerp(color[0], color[1], 2 / 3.0f);
@@ -220,13 +215,9 @@ namespace KlayGE
 				}
 				else
 				{
-					if (dot < c0Point)
+					if (dot >= c0Point)
 					{
-						mask |= 1;
-					}
-					else
-					{
-						mask |= (dot < c3Point) ? 2 : 0;
+						mask |= (dot < c3Point) ? 2 : 1;
 					}
 				}
 			}
@@ -410,8 +401,8 @@ namespace KlayGE
 	// (By solving a least squares system via normal equations+Cramer's rule)
 	bool RefineBlock(uint32_t const * argb, Color& min_clr, Color& max_clr, uint32_t mask)
 	{
-		static const int w1Tab[4] = { 3, 0, 2, 1 };
-		static const int prods[4] = { 0x090000, 0x000900, 0x040102, 0x010402 };
+		static int const w1Tab[4] = { 3, 0, 2, 1 };
+		static int const prods[4] = { 0x090000, 0x000900, 0x040102, 0x010402 };
 		// ^some magic to save a lot of multiplies in the accumulating loop...
 
 		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
@@ -453,9 +444,9 @@ namespace KlayGE
 			return false;
 		}
 
-		float f = 3.0f / 255.0f / (xx * yy - xy * xy);
-		float frb = f * 31.0f;
-		float fg = f * 63.0f;
+		float const f = 3.0f / 255.0f / (xx * yy - xy * xy);
+		float const frb = f * 31.0f;
+		float const fg = f * 63.0f;
 
 		uint16_t old_min = Color_to_RGB565(min_clr);
 		uint16_t old_max = Color_to_RGB565(max_clr);
@@ -512,7 +503,7 @@ namespace KlayGE
 			{
 				mask = 0;
 			}
-			if (method != EBCM_Speed)
+			if (!alpha && (method != EBCM_Speed))
 			{
 				if (RefineBlock(argb, min_clr, max_clr, mask))
 				{
