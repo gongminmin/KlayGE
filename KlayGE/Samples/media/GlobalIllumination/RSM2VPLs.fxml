@@ -87,8 +87,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	}
 	else
 	{
-		float3 normal_os = mul(float4(normal_es, 0), inv_view).xyz;
-		return normalize(unit_axis_to_unit_axis(float3(0, 1, 0), normal_os));
+		return normalize(unit_axis_to_unit_axis(float3(0, 1, 0), mul(normal_es, (float3x3)inv_view)));
 	}
 }
 		]]>

@@ -44,7 +44,7 @@ void VPLsLightingVS(float4 pos : POSITION,
 	float4 rotation = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 3.5f / 4), 0);
 
 	const float SCALE = 20;
-	oViewDir.xyz = mul(float4(mul_quat(pos.xyz, rotation) * SCALE, 1), view).xyz + offset;
+	oViewDir.xyz = mul(mul_quat(pos.xyz, rotation) * SCALE, (float3x3)view) + offset;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
 	oTc = oPos.xy / oPos.w * 0.5f;

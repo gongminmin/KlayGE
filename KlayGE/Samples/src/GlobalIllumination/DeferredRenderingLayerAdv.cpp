@@ -326,8 +326,9 @@ namespace KlayGE
 			RenderEffectPtr subsplat_stencil_effect = rf.LoadEffect("SetSubsplatStencil.fxml");
 			subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
 
-			cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
-			is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
+			subsplat_near_q_far_param_ = subsplat_stencil_effect->ParameterByName("near_q_far");
+			subsplat_cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
+			subsplat_is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
 
 			RenderEffectPtr vpls_lighting_effect = rf.LoadEffect("VPLsLighting.fxml");
 			vpls_lighting_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLighting");
@@ -446,7 +447,7 @@ namespace KlayGE
 			normal_cone_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		}
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		TexturePtr subsplat_ds_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
@@ -503,10 +504,10 @@ namespace KlayGE
 		*(vpls_lighting_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(vpls_lighting_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
-		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_tex")) = ds_tex_;
+		*(subsplat_stencil_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
-		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);;
+		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);
 		*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_tex_);
@@ -850,6 +851,7 @@ namespace KlayGE
 							if (PT_GenReflectiveShadowMap == pass_type)
 							{
 								rsm_to_vpls_pps[type]->SetParam(11, near_q);
+								*subsplat_near_q_far_param_ = float3(near_q.x(), near_q.y(), sm_camera->FarPlane());
 							}
 						}
 
@@ -1078,8 +1080,8 @@ namespace KlayGE
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
 			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(0.0f, 0);
 
-			*cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
-			*is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
+			*subsplat_cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
+			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
 
 			re.Render(*subsplat_stencil_tech_, *rl_quad_);
 		}
@@ -1129,19 +1131,21 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::UpsampleMultiresLighting()
 	{
-		indirect_lighting_tex_->CopyToTexture(*indirect_lighting_pingpong_tex_);
-
 		for (int i = MAX_IL_MIPMAP_LEVELS - 2; i >= 0; -- i)
 		{
-			std::swap(indirect_lighting_tex_, indirect_lighting_pingpong_tex_);
+			uint32_t const width = indirect_lighting_tex_->Width(i);
+			uint32_t const height = indirect_lighting_tex_->Height(i);
 
 			upsampling_pp_->SetParam(0, float4(1.0f / indirect_lighting_tex_->Width(i + 1) , 1.0f / indirect_lighting_tex_->Height(i + 1),
-				1.0f / indirect_lighting_tex_->Width(i), 1.0f / indirect_lighting_tex_->Height(i)));
+				1.0f / width, 1.0f / height));
 			upsampling_pp_->SetParam(1, int2(i + 1, i));
 			
-			upsampling_pp_->InputPin(0, indirect_lighting_pingpong_tex_);
-			upsampling_pp_->OutputPin(0, indirect_lighting_tex_, i);
+			upsampling_pp_->InputPin(0, indirect_lighting_tex_);
+			upsampling_pp_->OutputPin(0, indirect_lighting_pingpong_tex_, i);
 			upsampling_pp_->Apply();
+
+			indirect_lighting_pingpong_tex_->CopyToSubTexture2D(*indirect_lighting_tex_, 0, i, 0, 0, width, height,
+				0, i, 0, 0, width, height);
 		}
 	}
 

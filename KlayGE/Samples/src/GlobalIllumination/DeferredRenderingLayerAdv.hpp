@@ -407,8 +407,9 @@ namespace KlayGE
 		PostProcessPtr copy_to_light_buffer_pp_;
 		PostProcessPtr copy_to_light_buffer_i_pp_;
 
-		RenderEffectParameterPtr cur_lower_level_param_;
-		RenderEffectParameterPtr is_not_first_last_level_param_;
+		RenderEffectParameterPtr subsplat_near_q_far_param_;
+		RenderEffectParameterPtr subsplat_cur_lower_level_param_;
+		RenderEffectParameterPtr subsplat_is_not_first_last_level_param_;
 
 		RenderEffectParameterPtr vpl_view_param_;
 		RenderEffectParameterPtr vpl_proj_param_;
