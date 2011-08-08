@@ -754,7 +754,7 @@ namespace KlayGE
 					if (indirect_lighting_enabled_ && (illum_ != 1))
 					{
 						PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
-						copy_to_light_buffer_pp->SetParam(0, indirect_scale_);
+						copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
 						copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
 						copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
 						copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
