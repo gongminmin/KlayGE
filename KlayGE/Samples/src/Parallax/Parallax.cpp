@@ -116,6 +116,20 @@ namespace
 			return tile_ids_;
 		}
 
+		void DetailType(uint32_t dt)
+		{
+			switch (dt)
+			{
+			case 0:
+				technique_ = technique_->Effect().TechniqueByName("Bump");
+				break;
+
+			default:
+				technique_ = technique_->Effect().TechniqueByName("Parallax");
+				break;
+			}
+		}
+
 	private:
 		int4 tile_bb_[3];
 		std::vector<uint32_t> tile_ids_;
@@ -188,6 +202,15 @@ namespace
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			return checked_pointer_cast<RenderPolygon>(model->Mesh(index))->JudaTexTileIDs();
+		}
+
+		void DetailType(uint32_t dt)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DetailType(dt);
+			}
 		}
 	};
 
@@ -297,6 +320,11 @@ void Parallax::BiasChangedHandler(KlayGE::UISlider const & sender)
 	dialog_->Control<UIStatic>(id_bias_static_)->SetText(stream.str());
 }
 
+void Parallax::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->DetailType(sender.GetSelectedIndex());
+}
+
 void Parallax::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
@@ -401,6 +429,8 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 			id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
 			id_bias_static_ = dialog_->IDFromName("BiasStatic");
 			id_bias_slider_ = dialog_->IDFromName("BiasSlider");
+			id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
+			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(parallax_scale_ * 100));
@@ -410,6 +440,10 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(parallax_bias_ * 100));
 			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::BiasChangedHandler, this, _1));
 			this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
+
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(1);
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&Parallax::DetailTypeChangedHandler, this, _1));
+			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
 			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&Parallax::CtrlCameraHandler, this, _1));
 

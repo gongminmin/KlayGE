@@ -23,6 +23,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void ScaleChangedHandler(KlayGE::UISlider const & sender);
 	void BiasChangedHandler(KlayGE::UISlider const & sender);
+	void DetailTypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -43,6 +44,8 @@ private:
 	int id_scale_slider_;
 	int id_bias_static_;
 	int id_bias_slider_;
+	int id_detail_type_static_;
+	int id_detail_type_combo_;
 	int id_ctrl_camera_;
 
 	int loading_percentage_;

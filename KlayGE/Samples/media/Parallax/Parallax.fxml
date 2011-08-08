@@ -22,7 +22,7 @@
 
 	<shader>
 		<![CDATA[
-void ParallaxVS(float4 pos				: POSITION,
+void CalcTBNVS(float4 pos				: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float3 N			: NORMAL,
 					float4 T			: TANGENT,
@@ -53,6 +53,26 @@ void ParallaxVS(float4 pos				: POSITION,
 	oV.w = texcoord0.y;
 }
 
+float4 Shading(float4 L, float3 H, float2 uv)
+{
+	float atten = attenuation_term(0, -L.xyz, light_falloff);
+
+	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, uv).rgb;
+
+	float3 bump_normal = normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1);
+	float3 light_vec = normalize(L.xyz);
+	float3 halfway = normalize(H);
+
+	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, bump_normal), 1);
+}
+
+float4 BumpPS(float4 L		: TEXCOORD0,
+					float4 V		: TEXCOORD1,
+					float3 H		: TEXCOORD2) : SV_Target
+{
+	return Shading(L, H, float2(L.w, V.w));
+}
+
 float4 ParallaxPS(float4 L		: TEXCOORD0,
 					float4 V		: TEXCOORD1,
 					float3 H		: TEXCOORD2) : SV_Target
@@ -60,26 +80,25 @@ float4 ParallaxPS(float4 L		: TEXCOORD0,
 	float2 texCoord0 = float2(L.w, V.w);
 	
 	float3 view = normalize(V.xyz);
-
-	float atten = attenuation_term(0, -L.xyz, light_falloff);
-
+	
 	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * parallax_scale - parallax_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, texUV).rgb;
-
-	float3 bump_normal = normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1);
-	float3 light_vec = normalize(L.xyz);
-	float3 halfway = normalize(H);
-
-	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, bump_normal), 1);
+	return Shading(L, H, texUV);
 }
 		]]>
 	</shader>
+
+	<technique name="Bump">
+		<pass name="p0">
+			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="pixel_shader" value="BumpPS()"/>
+		</pass>
+	</technique>
 	
 	<technique name="Parallax">
 		<pass name="p0">
-			<state name="vertex_shader" value="ParallaxVS()"/>
+			<state name="vertex_shader" value="CalcTBNVS()"/>
 			<state name="pixel_shader" value="ParallaxPS()"/>
 		</pass>
 	</technique>
