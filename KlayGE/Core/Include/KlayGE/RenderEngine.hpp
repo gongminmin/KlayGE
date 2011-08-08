@@ -126,9 +126,6 @@ namespace KlayGE
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
 
-		// Determines the bit depth of the hardware accelerated stencil buffer, if supported.
-		virtual uint16_t StencilBufferBitDepth() = 0;
-
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;
 

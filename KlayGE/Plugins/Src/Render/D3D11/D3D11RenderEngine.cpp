@@ -754,28 +754,6 @@ namespace KlayGE
 		d3d_imm_ctx_->Flush();
 	}
 
-	// 获取模板位数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint16_t D3D11RenderEngine::StencilBufferBitDepth()
-	{
-		BOOST_ASSERT(d3d_device_);
-
-		ID3D11DepthStencilView* view;
-		d3d_imm_ctx_->OMGetRenderTargets(0, NULL, &view);
-		ID3D11DepthStencilViewPtr ds_view = MakeCOMPtr(view);
-		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		ds_view->GetDesc(&desc);
-
-		if (DXGI_FORMAT_D24_UNORM_S8_UINT == desc.Format)
-		{
-			return 8;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
 	// 设置剪除矩阵
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

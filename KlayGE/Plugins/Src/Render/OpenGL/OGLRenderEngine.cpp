@@ -1184,13 +1184,6 @@ namespace KlayGE
 		glFlush();
 	}
 
-	// 设置模板位数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint16_t OGLRenderEngine::StencilBufferBitDepth()
-	{
-		return 8;
-	}
-
 	// 设置剪除矩阵
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLRenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

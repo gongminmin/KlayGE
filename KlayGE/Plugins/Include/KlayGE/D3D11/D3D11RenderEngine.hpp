@@ -26,7 +26,6 @@
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <d3d11.h>
-#include <d3dx11.h>
 #include <D3D11Shader.h>
 
 #include <vector>
@@ -93,8 +92,6 @@ namespace KlayGE
 		void EndPass();
 
 		void ForceFlush();
-
-		uint16_t StencilBufferBitDepth();
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 

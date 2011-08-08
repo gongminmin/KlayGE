@@ -86,11 +86,6 @@ namespace KlayGE
 		{
 		}
 
-		uint16_t StencilBufferBitDepth()
-		{
-			return 0;
-		}
-
 		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
 		}
