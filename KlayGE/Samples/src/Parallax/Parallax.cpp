@@ -124,8 +124,12 @@ namespace
 				technique_ = technique_->Effect().TechniqueByName("Bump");
 				break;
 
-			default:
+			case 1:
 				technique_ = technique_->Effect().TechniqueByName("Parallax");
+				break;
+
+			default:
+				technique_ = technique_->Effect().TechniqueByName("ParallaxOcclusion");
 				break;
 			}
 		}
