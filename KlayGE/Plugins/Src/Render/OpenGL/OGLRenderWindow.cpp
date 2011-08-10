@@ -194,8 +194,9 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
-			int versions[6][2] =
+			int versions[7][2] =
 			{
+				{ 4, 2 },
 				{ 4, 1 },
 				{ 4, 0 },
 				{ 3, 3 },
@@ -204,9 +205,9 @@ namespace KlayGE
 				{ 3, 0 },
 			};
 
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 4, WGL_CONTEXT_MINOR_VERSION_ARB, 0, WGL_CONTEXT_FLAGS_ARB, flags,
+			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 4, WGL_CONTEXT_MINOR_VERSION_ARB, 2, WGL_CONTEXT_FLAGS_ARB, flags,
 					WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
-			for (int i = 0; i < 6; ++ i)
+			for (int i = 0; i < 7; ++ i)
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
@@ -258,8 +259,9 @@ namespace KlayGE
 
 		if (!glloader_GL_VERSION_4_0() && !glloader_GL_VERSION_3_0() && glloader_GLX_ARB_create_context())
 		{
-			int versions[6][2] =
+			int versions[7][2] =
 			{
+				{ 4, 2 },
 				{ 4, 1 },
 				{ 4, 0 },
 				{ 3, 3 },
@@ -268,8 +270,8 @@ namespace KlayGE
 				{ 3, 0 },
 			};
 
-			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 4, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
-			for (int i = 0; i < 6; ++ i)
+			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 4, GLX_CONTEXT_MINOR_VERSION_ARB, 2, 0 };
+			for (int i = 0; i < 7; ++ i)
 			{
 				attribs[1] = versions[i][0];
 				attribs[3] = versions[i][1];
