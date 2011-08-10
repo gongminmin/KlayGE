@@ -1,0 +1,90 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_image_load_store" reg_no="115">
+	<tokens>
+		<token name="GL_MAX_IMAGE_UNITS" value="0x8F38"/>
+		<token name="GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS" value="0x8F39"/>
+		<token name="GL_MAX_IMAGE_SAMPLES" value="0x906D"/>
+		<token name="GL_MAX_VERTEX_IMAGE_UNIFORMS" value="0x90CA"/>
+		<token name="GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS" value="0x90CB"/>
+		<token name="GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS" value="0x90CC"/>
+		<token name="GL_MAX_GEOMETRY_IMAGE_UNIFORMS" value="0x90CD"/>
+		<token name="GL_MAX_FRAGMENT_IMAGE_UNIFORMS" value="0x90CE"/>
+		<token name="GL_MAX_COMBINED_IMAGE_UNIFORMS" value="0x90CF"/>
+		<token name="GL_IMAGE_BINDING_NAME" value="0x8F3A"/>
+		<token name="GL_IMAGE_BINDING_LEVEL" value="0x8F3B"/>
+		<token name="GL_IMAGE_BINDING_LAYERED" value="0x8F3C"/>
+		<token name="GL_IMAGE_BINDING_LAYER" value="0x8F3D"/>
+		<token name="GL_IMAGE_BINDING_ACCESS" value="0x8F3E"/>
+		<token name="GL_IMAGE_BINDING_FORMAT" value="0x906E"/>
+		<token name="GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT" value="0x00000001"/>
+		<token name="GL_ELEMENT_ARRAY_BARRIER_BIT" value="0x00000002"/>
+		<token name="GL_UNIFORM_BARRIER_BIT" value="0x00000004"/>
+		<token name="GL_TEXTURE_FETCH_BARRIER_BIT" value="0x00000008"/>
+		<token name="GL_SHADER_IMAGE_ACCESS_BARRIER_BIT" value="0x00000020"/>
+		<token name="GL_COMMAND_BARRIER_BIT" value="0x00000040"/>
+		<token name="GL_PIXEL_BUFFER_BARRIER_BIT" value="0x00000080"/>
+		<token name="GL_TEXTURE_UPDATE_BARRIER_BIT" value="0x00000100"/>
+		<token name="GL_BUFFER_UPDATE_BARRIER_BIT" value="0x00000200"/>
+		<token name="GL_FRAMEBUFFER_BARRIER_BIT" value="0x00000400"/>
+		<token name="GL_TRANSFORM_FEEDBACK_BARRIER_BIT" value="0x00000800"/>
+		<token name="GL_ATOMIC_COUNTER_BARRIER_BIT" value="0x00001000"/>
+		<token name="GL_ALL_BARRIER_BITS" value="0xFFFFFFFF"/>
+		<token name="GL_IMAGE_1D" value="0x904C"/>
+		<token name="GL_IMAGE_2D" value="0x904D"/>
+		<token name="GL_IMAGE_3D" value="0x904E"/>
+		<token name="GL_IMAGE_2D_RECT" value="0x904F"/>
+		<token name="GL_IMAGE_CUBE" value="0x9050"/>
+		<token name="GL_IMAGE_BUFFER" value="0x9051"/>
+		<token name="GL_IMAGE_1D_ARRAY" value="0x9052"/>
+		<token name="GL_IMAGE_2D_ARRAY" value="0x9053"/>
+		<token name="GL_IMAGE_CUBE_MAP_ARRAY" value="0x9054"/>
+		<token name="GL_IMAGE_2D_MULTISAMPLE" value="0x9055"/>
+		<token name="GL_IMAGE_2D_MULTISAMPLE_ARRAY" value="0x9056"/>
+		<token name="GL_INT_IMAGE_1D" value="0x9057"/>
+		<token name="GL_INT_IMAGE_2D" value="0x9058"/>
+		<token name="GL_INT_IMAGE_3D" value="0x9059"/>
+		<token name="GL_INT_IMAGE_2D_RECT" value="0x905A"/>
+		<token name="GL_INT_IMAGE_CUBE" value="0x905B"/>
+		<token name="GL_INT_IMAGE_BUFFER" value="0x905C"/>
+		<token name="GL_INT_IMAGE_1D_ARRAY" value="0x905D"/>
+		<token name="GL_INT_IMAGE_2D_ARRAY" value="0x905E"/>
+		<token name="GL_INT_IMAGE_CUBE_MAP_ARRAY" value="0x905F"/>
+		<token name="GL_INT_IMAGE_2D_MULTISAMPLE" value="0x9060"/>
+		<token name="GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY" value="0x9061"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_1D" value="0x9062"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_2D" value="0x9063"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_3D" value="0x9064"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_2D_RECT" value="0x9065"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_CUBE" value="0x9066"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_BUFFER" value="0x9067"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_1D_ARRAY" value="0x9068"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_2D_ARRAY" value="0x9069"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY" value="0x906A"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE" value="0x906B"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY" value="0x906C"/>
+		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_TYPE" value="0x90C7"/>
+		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_BY_SIZE" value="0x90C8"/>
+		<token name="GL_IMAGE_FORMAT_COMPATIBILITY_BY_CLASS" value="0x90C9"/>
+	</tokens>
+
+	<functions>
+		<function name="glBindImageTexture" return="void">
+			<params>
+				<param type="GLuint" name="unit"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLboolean" name="layered"/>
+				<param type="GLint" name="layer"/>
+				<param type="GLenum" name="access"/>
+				<param type="GLenum" name="format"/>
+			</params>
+		</function>
+
+		<function name="glMemoryBarrier" return="void">
+			<params>
+				<param type="GLbitfield" name="barriers"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

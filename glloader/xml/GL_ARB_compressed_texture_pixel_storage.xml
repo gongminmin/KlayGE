@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_compressed_texture_pixel_storage" reg_no="110">
+	<tokens>
+		<token name="GL_UNPACK_COMPRESSED_BLOCK_WIDTH" value="0x9127"/>
+		<token name="GL_UNPACK_COMPRESSED_BLOCK_HEIGHT" value="0x9128"/>
+		<token name="GL_UNPACK_COMPRESSED_BLOCK_DEPTH" value="0x9129"/>
+		<token name="GL_UNPACK_COMPRESSED_BLOCK_SIZE" value="0x912A"/>
+		<token name="GL_PACK_COMPRESSED_BLOCK_WIDTH" value="0x912B"/>
+		<token name="GL_PACK_COMPRESSED_BLOCK_HEIGHT" value="0x912C"/>
+		<token name="GL_PACK_COMPRESSED_BLOCK_DEPTH" value="0x912D"/>
+		<token name="GL_PACK_COMPRESSED_BLOCK_SIZE" value="0x912E"/>
+	</tokens>
+</gl_extension>

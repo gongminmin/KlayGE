@@ -1,0 +1,70 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_storage" reg_no="117">
+	<tokens>
+		<token name="GL_TEXTURE_IMMUTABLE_FORMAT" value="0x912F"/>
+		<token name="GL_ALPHA8_EXT" value="0x803C"/>
+		<token name="GL_LUMINANCE8_EXT" value="0x8040"/>
+		<token name="GL_LUMINANCE8_ALPHA8_EXT" value="0x8045"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexStorage1D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glTexStorage2D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glTexStorage3D" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+			</params>
+		</function>
+		<function name="glTextureStorage1DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glTextureStorage2DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glTextureStorage3DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

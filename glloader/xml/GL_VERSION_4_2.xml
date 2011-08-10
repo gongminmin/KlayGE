@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_2">
+	<additionals>
+		<ext name="GL_ARB_texture_compression_bptc"/>
+		<ext name="GL_ARB_compressed_texture_pixel_storage"/>
+		<ext name="GL_ARB_shader_atomic_counters"/>
+		<ext name="GL_ARB_texture_storage"/>
+		<ext name="GL_ARB_transform_feedback_instanced"/>
+		<ext name="GL_ARB_base_instance"/>
+		<ext name="GL_ARB_shader_image_load_store"/>
+		<ext name="GL_ARB_conservative_depth"/>
+		<ext name="GL_ARB_shading_language_420pack"/>
+		<ext name="GL_ARB_internalformat_query"/>
+		<ext name="GL_ARB_shading_language_packing"/>
+		<ext name="GL_ARB_map_buffer_alignment"/>
+	</additionals>
+</gl_extension>

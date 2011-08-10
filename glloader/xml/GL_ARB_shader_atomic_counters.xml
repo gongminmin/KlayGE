@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_atomic_counters" reg_no="114">
+	<tokens>
+		<token name="GL_ATOMIC_COUNTER_BUFFER" value="0x92C0"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_BINDING" value="0x92C1"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_START" value="0x92C2"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_SIZE" value="0x92C3"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_DATA_SIZE" value="0x92C4"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTERS" value="0x92C5"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTER_INDICES" value="0x92C6"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_VERTEX_SHADER" value="0x92C7"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_TESS_CONTROL_SHADER" value="0x92C8"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x92C9"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_GEOMETRY_SHADER" value="0x92CA"/>
+		<token name="GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_FRAGMENT_SHADER" value="0x92CB"/>
+		<token name="GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS" value="0x92CC"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS" value="0x92CD"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS" value="0x92CE"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS" value="0x92CF"/>
+		<token name="GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS" value="0x92D0"/>
+		<token name="GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS" value="0x92D1"/>
+		<token name="GL_MAX_VERTEX_ATOMIC_COUNTERS" value="0x92D2"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS" value="0x92D3"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS" value="0x92D4"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTERS" value="0x92D5"/>
+		<token name="GL_MAX_FRAGMENT_ATOMIC_COUNTERS" value="0x92D6"/>
+		<token name="GL_MAX_COMBINED_ATOMIC_COUNTERS" value="0x92D7"/>
+		<token name="GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE" value="0x92D8"/>
+		<token name="GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS" value="0x92DC"/>
+		<token name="GL_ACTIVE_ATOMIC_COUNTER_BUFFERS" value="0x92D9"/>
+		<token name="GL_UNIFORM_ATOMIC_COUNTER_BUFFER_INDEX" value="0x92DA"/>
+		<token name="GL_UNSIGNED_INT_ATOMIC_COUNTER" value="0x92DB"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetActiveAtomicCounterBufferiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLuint" name="bufferIndex"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

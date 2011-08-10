@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_map_buffer_alignment" reg_no="113">
+	<tokens>
+		<token name="GL_MIN_MAP_BUFFER_ALIGNMENT" value="0x90BC"/>
+	</tokens>
+</gl_extension>

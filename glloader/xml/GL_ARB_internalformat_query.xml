@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_internalformat_query" reg_no="112">
+	<tokens>
+		<token name="GL_NUM_SAMPLE_COUNTS" value="0x9380"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetInternalformativ" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
