@@ -49,7 +49,8 @@ namespace
 
 			*(technique_->Effect().ParameterByName("diffuse_tex_bb")) = tile_bb_[0];
 			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb_[1];
-			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb_[2];			
+			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb_[2];
+			*(technique_->Effect().ParameterByName("tex_size")) = int2(512, 512);
 		}
 
 		void BuildMeshInfo()
@@ -65,6 +66,7 @@ namespace
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
+			*(technique_->Effect().ParameterByName("world")) = model;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 		}
 

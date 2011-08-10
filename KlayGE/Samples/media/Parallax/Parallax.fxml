@@ -20,6 +20,7 @@
 	<parameter type="int4" name="diffuse_tex_bb"/>
 	<parameter type="int4" name="normal_tex_bb"/>
 	<parameter type="int4" name="height_tex_bb"/>
+	<parameter type="int2" name="tex_size"/>
 
 	<parameter type="int" name="lod_threshold" value="3"/>
 	<parameter type="int" name="min_samples" value="8"/>
@@ -28,23 +29,17 @@
 
 	<shader>
 		<![CDATA[
-void CalcTBNVS(float4 pos				: POSITION,
-					float2 texcoord0	: TEXCOORD0,
-					float3 N			: NORMAL,
-					float4 T			: TANGENT,
-					out float4 oL			: TEXCOORD0,	// in tangent space
-					out float4 oV			: TEXCOORD1,	// in tangent space
-					out float3 oH			: TEXCOORD2,	// in tangent space
-					out float2 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
-					out float3 oNormalWS         : TEXCOORD4,   // Normal vector in world space
-					out float3 oViewWS           : TEXCOORD5,   // View vector in world space
-					out float4 oPos			: SV_Position)
+void CalcTBN(float4 pos,
+					float2 texcoord0,
+					float3 N,
+					float4 T,
+					out float4 oL,
+					out float4 oV,
+					out float3 oH,
+					out float4 oPos)
 {
 	oPos = mul(pos, mvp);
 	
-	N = N * 2 - 1;
-	T = T * 2 - 1;
-
 	float3x3 objToTangentSpace;
 	objToTangentSpace[0] = T.xyz;
 	objToTangentSpace[1] = cross(N, T.xyz) * T.w;
@@ -60,16 +55,22 @@ void CalcTBNVS(float4 pos				: POSITION,
 	
 	oL.w = texcoord0.x;
 	oV.w = texcoord0.y;
-	
-	oNormalWS = mul(N, (float3x3)world);
-	oViewWS = mul(viewVec, (float3x3)world);
-	
-	float2 vParallaxDirection = normalize(oV.xy);
+}
 
-	float fLength = length(oV.xyz);
-	float fParallaxLength = sqrt(fLength * fLength - oV.z * oV.z) / oV.z;
+void CalcTBNVS(float4 pos				: POSITION,
+					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,
+					float4 T			: TANGENT,
+					out float4 oL			: TEXCOORD0,	// in tangent space
+					out float4 oV			: TEXCOORD1,	// in tangent space
+					out float3 oH			: TEXCOORD2,	// in tangent space
+					out float4 oPos			: SV_Position)
+{
+	N = N * 2 - 1;
+	T = T * 2 - 1;
 
-	oParallaxOffsetTS = vParallaxDirection * fParallaxLength * parallax_scale;
+	CalcTBN(pos, texcoord0, N, T,
+		oL, oV, oH, oPos);
 }
 
 float4 Shading(float4 L, float3 H, float2 uv)
@@ -106,6 +107,36 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	return Shading(L, H, texUV);
 }
 
+void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
+					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,
+					float4 T			: TANGENT,
+					out float4 oL			: TEXCOORD0,	// in tangent space
+					out float4 oV			: TEXCOORD1,	// in tangent space
+					out float3 oH			: TEXCOORD2,	// in tangent space
+					out float2 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
+					out float3 oNormalWS         : TEXCOORD4,   // Normal vector in world space
+					out float3 oViewWS           : TEXCOORD5,   // View vector in world space
+					out float4 oPos			: SV_Position)
+{
+	N = N * 2 - 1;
+	T = T * 2 - 1;
+
+	CalcTBN(pos, texcoord0, N, T,
+		oL, oV, oH, oPos);
+	
+	float3 viewVec = eye_pos - pos.xyz;
+	oNormalWS = mul(N, (float3x3)world);
+	oViewWS = mul(viewVec, (float3x3)world);
+	
+	float2 vParallaxDirection = normalize(oV.xy);
+
+	float fLength = length(oV.xyz);
+	float fParallaxLength = sqrt(fLength * fLength - oV.z * oV.z) / oV.z;
+
+	oParallaxOffsetTS = vParallaxDirection * fParallaxLength * parallax_scale;
+}
+
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 					float4 V					: TEXCOORD1,
 					float3 H					: TEXCOORD2,
@@ -113,9 +144,12 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 					float3 vNormalWS			: TEXCOORD4,
 					float3 vViewWS				: TEXCOORD5) : SV_Target
 {
+	vNormalWS = normalize(vNormalWS);
+	vViewWS = normalize(vViewWS);
+
 	float2 texCoord = float2(L.w, V.w);
 	
-	float level = mipmap_level(texCoord, diffuse_tex_bb.zw - diffuse_tex_bb.xy);
+	float level = mipmap_level(texCoord, tex_size);
 	
 	float2 dx = ddx(texCoord);
 	float2 dy = ddy(texCoord);
@@ -126,18 +160,18 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 	{
 		int nNumSteps = (int)lerp(max_samples, min_samples, dot(vViewWS, vNormalWS));
 
-		float fCurrHeight = 0.0;
-		float fStepSize   = 1.0f / nNumSteps;
-		float fPrevHeight = 1.0f;
-		float fNextHeight = 0.0;
+		float fCurrHeight = 0;
+		float fStepSize = 1.0f / nNumSteps;
+		float fPrevHeight = 1;
+		float fNextHeight = 0;
 
-		int    nStepIndex = 0;
-		bool   bCondition = true;
+		int nStepIndex = 0;
+		bool bCondition = true;
 
 		float2 vTexOffsetPerStep = fStepSize * vParallaxOffsetTS;
 		float2 vTexCurrentOffset = texCoord;
-		float  fCurrentBound     = 1.0f;
-		float  fParallaxAmount   = 0.0f;
+		float fCurrentBound = 1;
+		float fParallaxAmount = 0;
 
 		float2 pt1 = 0;
 		float2 pt2 = 0;
@@ -182,10 +216,10 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		}
 		else
 		{
-			fParallaxAmount = (pt1.x * fDelta2 - pt2.x * fDelta1 ) / fDenominator;
+			fParallaxAmount = (pt1.x * fDelta2 - pt2.x * fDelta1) / fDenominator;
 		}
       
-		float2 vParallaxOffset = vParallaxOffsetTS * (1 - fParallaxAmount );
+		float2 vParallaxOffset = vParallaxOffsetTS * (1 - fParallaxAmount);
 
 		// The computed texture offset for the displaced point on the pseudo-extruded surface:
 		float2 texSampleBase = texCoord - vParallaxOffset;
@@ -205,19 +239,19 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		
 		// shadow
 		{
-			float2 vLightRayTS = L.xy * parallax_scale;
+			float2 vLightRayTS = normalize(L.xyz).xy * parallax_scale;
       
 			// Compute the soft blurry shadows taking into account self-occlusion for 
 			// features of the height field:
 
 			float sh0 = judatex2d_level_wrap(height_tex_bb, texSampleBase, level).r;
-			float shA = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.88, level).r - sh0 - 0.88f) *  1 * shadow_softening;
-			float sh9 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.77, level).r - sh0 - 0.77f) *  2 * shadow_softening;
-			float sh8 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.66, level).r - sh0 - 0.66f) *  4 * shadow_softening;
-			float sh7 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.55, level).r - sh0 - 0.55f) *  6 * shadow_softening;
-			float sh6 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.44, level).r - sh0 - 0.44f) *  8 * shadow_softening;
-			float sh5 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.33, level).r - sh0 - 0.33f) * 10 * shadow_softening;
-			float sh4 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.22, level).r - sh0 - 0.22f) * 12 * shadow_softening;
+			float shA = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.88f, level).r - sh0 - 0.88f) *  1 * shadow_softening;
+			float sh9 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.77f, level).r - sh0 - 0.77f) *  2 * shadow_softening;
+			float sh8 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.66f, level).r - sh0 - 0.66f) *  4 * shadow_softening;
+			float sh7 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.55f, level).r - sh0 - 0.55f) *  6 * shadow_softening;
+			float sh6 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.44f, level).r - sh0 - 0.44f) *  8 * shadow_softening;
+			float sh5 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.33f, level).r - sh0 - 0.33f) * 10 * shadow_softening;
+			float sh4 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.22f, level).r - sh0 - 0.22f) * 12 * shadow_softening;
 
 			// Compute the actual shadow strength:
 			fOcclusionShadow = 1 - max(max(max(max(max(max(shA, sh9), sh8), sh7), sh6), sh5), sh4);
@@ -248,7 +282,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 
 	<technique name="ParallaxOcclusion">
 		<pass name="p0">
-			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="vertex_shader" value="ParallaxOcclusionMappingVS()"/>
 			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
 		</pass>
 	</technique>
