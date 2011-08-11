@@ -110,7 +110,7 @@ namespace
 		{
 			float4 mat[3];
 			float4 last_mat[3];
-			Color clr;
+			uint32_t clr;
 		};
 
 	public:
@@ -162,7 +162,8 @@ namespace
 
 			*(technique_->Effect().ParameterByName("modelmat")) = model;
 			*(technique_->Effect().ParameterByName("last_modelmat")) = last_model;
-			*(technique_->Effect().ParameterByName("color")) = float4(data->clr.r(), data->clr.g(), data->clr.b(), data->clr.a());
+			Color clr(data->clr);
+			*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
 		}
 
 		void MotionVecPass(bool motion_vec)
@@ -190,12 +191,12 @@ namespace
 		{
 			float4 mat[3];
 			float4 last_mat[3];
-			Color clr;
+			uint32_t clr;
 		};
 
 	public:
 		Teapot()
-			: SceneObjectHelper(SOA_Cullable),
+			: SceneObjectHelper(SOA_Moveable | SOA_Cullable),
 				last_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
 		{
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
@@ -204,13 +205,13 @@ namespace
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR32F));
+			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ARGB8));
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
 			mat_ = mat;
-			inst_.clr = clr;
+			inst_.clr = clr.ARGB();
 		}
 
 		void const * InstanceData() const

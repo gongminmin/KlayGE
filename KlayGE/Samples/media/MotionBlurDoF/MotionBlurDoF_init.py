@@ -7,4 +7,4 @@ def get_pos(i, j, num, line):
 	return (sin(2 * pi * j / int(num / line)), i / float(line), cos(2 * pi * j / int(num / line)))
 
 def get_clr(i, j, num, line):
-	return (sin(2 * pi * j / int(num / line)), cos(2 * pi * j / int(num / line)), 0.0, 1.0)
+	return (abs(sin(2 * pi * j / int(num / line))), abs(cos(2 * pi * j / int(num / line))), 0.0, 1.0)
