@@ -848,6 +848,12 @@ namespace KlayGE
 
 		template <typename T>
 		bool bary_centric_in_triangle(T const & u, T const & v);
+
+
+		// Color space
+		///////////////////////////////////////////////////////////////////////////////
+		KLAYGE_CORE_API float linear_to_srgb(float linear);
+		KLAYGE_CORE_API float srgb_to_linear(float srgb);
 	}
 }
 

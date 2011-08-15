@@ -693,15 +693,15 @@ namespace KlayGE
 		BC1_layout p = *reinterpret_cast<BC1_layout const *>(bc1);
 
 		Color clr = RGB565_to_Color(p.clr_0);
-		clr.r() = pow(clr.r(), 2.2f);
-		clr.g() = pow(clr.g(), 2.2f);
-		clr.b() = pow(clr.b(), 2.2f);
+		clr.r() = MathLib::srgb_to_linear(clr.r());
+		clr.g() = MathLib::srgb_to_linear(clr.g());
+		clr.b() = MathLib::srgb_to_linear(clr.b());
 		p.clr_0 = Color_to_RGB565(clr);
 
 		clr = RGB565_to_Color(p.clr_1);
-		clr.r() = pow(clr.r(), 2.2f);
-		clr.g() = pow(clr.g(), 2.2f);
-		clr.b() = pow(clr.b(), 2.2f);
+		clr.r() = MathLib::srgb_to_linear(clr.r());
+		clr.g() = MathLib::srgb_to_linear(clr.g());
+		clr.b() = MathLib::srgb_to_linear(clr.b());
 		p.clr_1 = Color_to_RGB565(clr);
 
 		DecodeBC1Internal(argb, p);
@@ -709,9 +709,9 @@ namespace KlayGE
 		for (size_t i = 0; i < 16; ++ i)
 		{
 			clr = Color(argb[i]);
-			clr.r() = pow(clr.r(), 1 / 2.2f);
-			clr.g() = pow(clr.g(), 1 / 2.2f);
-			clr.b() = pow(clr.b(), 1 / 2.2f);
+			clr.r() = MathLib::linear_to_srgb(clr.r());
+			clr.g() = MathLib::linear_to_srgb(clr.g());
+			clr.b() = MathLib::linear_to_srgb(clr.b());
 			argb[i] = clr.ARGB();
 		}
 	}
@@ -756,14 +756,14 @@ namespace KlayGE
 	{
 		BC4_layout p = *reinterpret_cast<BC4_layout const *>(bc4);
 
-		p.alpha_0 = static_cast<uint8_t>(MathLib::clamp(pow(p.alpha_0 / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
-		p.alpha_1 = static_cast<uint8_t>(MathLib::clamp(pow(p.alpha_1 / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		p.alpha_0 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(p.alpha_0 / 255.0f) * 255 + 0.5f), 0, 255));
+		p.alpha_1 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(p.alpha_1 / 255.0f) * 255 + 0.5f), 0, 255));
 
 		DecodeBC4Internal(r, *reinterpret_cast<BC4_layout const *>(bc4));
 
 		for (size_t i = 0; i < 16; ++ i)
 		{
-			r[i] = static_cast<uint8_t>(MathLib::clamp(pow(r[i] / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+			r[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::linear_to_srgb(r[i] / 255.0f) * 255 + 0.5f), 0, 255));
 		}
 	}
 
@@ -1235,9 +1235,9 @@ namespace KlayGE
 			else
 			{
 				Color clr(argb[i]);
-				clr.r() = pow(clr.r(), 2.2f);
-				clr.g() = pow(clr.g(), 2.2f);
-				clr.b() = pow(clr.b(), 2.2f);
+				clr.r() = MathLib::srgb_to_linear(clr.r());
+				clr.g() = MathLib::srgb_to_linear(clr.g());
+				clr.b() = MathLib::srgb_to_linear(clr.b());
 				tmp_argb[i] = clr.ARGB();
 			}
 		}
@@ -1247,15 +1247,15 @@ namespace KlayGE
 		bool order = bc1.clr_0 < bc1.clr_1;
 
 		Color clr = RGB565_to_Color(bc1.clr_0);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc1.clr_0 = Color_to_RGB565(clr);
 
 		clr = RGB565_to_Color(bc1.clr_1);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc1.clr_1 = Color_to_RGB565(clr);
 
 		if ((bc1.clr_0 < bc1.clr_1) ^ order)
@@ -1271,9 +1271,9 @@ namespace KlayGE
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			Color clr(argb[i]);
-			clr.r() = pow(clr.r(), 2.2f);
-			clr.g() = pow(clr.g(), 2.2f);
-			clr.b() = pow(clr.b(), 2.2f);
+			clr.r() = MathLib::srgb_to_linear(clr.r());
+			clr.g() = MathLib::srgb_to_linear(clr.g());
+			clr.b() = MathLib::srgb_to_linear(clr.b());
 			clr.a() = 1;
 			xrgb[i] = clr.ARGB();
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 28);
@@ -1288,15 +1288,15 @@ namespace KlayGE
 		}
 
 		Color clr = RGB565_to_Color(bc2.bc1.clr_0);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc2.bc1.clr_0 = Color_to_RGB565(clr);
 
 		clr = RGB565_to_Color(bc2.bc1.clr_1);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc2.bc1.clr_1 = Color_to_RGB565(clr);
 	}
 
@@ -1307,9 +1307,9 @@ namespace KlayGE
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			Color clr(argb[i]);
-			clr.r() = pow(clr.r(), 2.2f);
-			clr.g() = pow(clr.g(), 2.2f);
-			clr.b() = pow(clr.b(), 2.2f);
+			clr.r() = MathLib::srgb_to_linear(clr.r());
+			clr.g() = MathLib::srgb_to_linear(clr.g());
+			clr.b() = MathLib::srgb_to_linear(clr.b());
 			clr.a() = 1;
 			xrgb[i] = clr.ARGB();
 			alpha[i] = static_cast<uint8_t>(argb[i] >> 24);
@@ -1319,15 +1319,15 @@ namespace KlayGE
 		EncodeBC4Internal(bc3.alpha, &alpha[0]);
 
 		Color clr = RGB565_to_Color(bc3.bc1.clr_0);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc3.bc1.clr_0 = Color_to_RGB565(clr);
 
 		clr = RGB565_to_Color(bc3.bc1.clr_1);
-		clr.r() = pow(clr.r(), 1 / 2.2f);
-		clr.g() = pow(clr.g(), 1 / 2.2f);
-		clr.b() = pow(clr.b(), 1 / 2.2f);
+		clr.r() = MathLib::linear_to_srgb(clr.r());
+		clr.g() = MathLib::linear_to_srgb(clr.g());
+		clr.b() = MathLib::linear_to_srgb(clr.b());
 		bc3.bc1.clr_1 = Color_to_RGB565(clr);
 	}
 
@@ -1336,13 +1336,13 @@ namespace KlayGE
 		boost::array<uint8_t, 16> sr;
 		for (size_t i = 0; i < 16; ++ i)
 		{
-			sr[i] = static_cast<uint8_t>(MathLib::clamp(pow(r[i] / 255.0f, 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+			sr[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::srgb_to_linear(r[i] / 255.0f) * 255 + 0.5f), 0, 255));
 		}
 
 		EncodeBC4Internal(bc4, &sr[0]);
 
-		bc4.alpha_0 = static_cast<uint8_t>(MathLib::clamp(pow(bc4.alpha_0 / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
-		bc4.alpha_1 = static_cast<uint8_t>(MathLib::clamp(pow(bc4.alpha_1 / 255.0f, 1 / 2.2f), 0.0f, 1.0f) * 255 + 0.5f);
+		bc4.alpha_0 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::linear_to_srgb(bc4.alpha_0 / 255.0f) * 255 + 0.5f), 0, 255));
+		bc4.alpha_1 = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::linear_to_srgb(bc4.alpha_1 / 255.0f) * 255 + 0.5f), 0, 255));
 	}
 
 	void EncodeBC5_sRGB(BC5_layout& bc5, uint8_t const * r, uint8_t const * g)

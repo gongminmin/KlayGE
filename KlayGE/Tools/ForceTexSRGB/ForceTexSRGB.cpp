@@ -81,12 +81,12 @@ namespace
 			std::swap(in_data, decom_data);
 		}
 
-		std::vector<float> float_data;
-		std::vector<float> float_data_small;
+		std::vector<float> linear_data;
+		std::vector<float> linear_data_small;
 		for (size_t index = 0; index < num_sub_res; ++ index)
 		{
-			float_data.resize(in_width * in_height * 4);
-			float_data_small.resize(((in_width + 1) / 2) * ((in_height + 1) / 2) * 4);
+			linear_data.resize(in_width * in_height * 4);
+			linear_data_small.resize(((in_width + 1) / 2) * ((in_height + 1) / 2) * 4);
 
 			new_data[index * in_num_mipmaps].row_pitch = in_width * 4;
 			new_data[index * in_num_mipmaps].slice_pitch = new_data[index * in_num_mipmaps].row_pitch * in_height;
@@ -104,13 +104,14 @@ namespace
 					{
 						if (ch < 3)
 						{
-							float_data[(y * in_width + x) * 4 + ch] = pow(src[x * 4 + ch] / 255.0f, 2.2f);
+							linear_data[(y * in_width + x) * 4 + ch] = src[x * 4 + ch] > 0 ? pow(src[x * 4 + ch] / 255.0f, 2.2f) : 0;
+							dst[x * 4 + ch] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::linear_to_srgb(linear_data[(y * in_width + x) * 4 + ch]) * 255.0f + 0.5f), 0, 255));
 						}
 						else
 						{
-							float_data[(y * in_width + x) * 4 + ch] = src[x * 4 + ch] / 255.0f;
+							linear_data[(y * in_width + x) * 4 + ch] = src[x * 4 + ch] / 255.0f;
+							dst[x * 4 + ch] = src[x * 4 + ch];
 						}
-						dst[x * 4 + ch] = src[x * 4 + ch];
 					}
 				}
 
@@ -143,16 +144,16 @@ namespace
 
 						for (uint32_t ch = 0; ch < 4; ++ ch)
 						{
-							float_data_small[(y * new_width + x) * 4 + ch] = (float_data[(y0 * the_width + x0) * 4 + ch] + float_data[(y0 * the_width + x1) * 4 + ch]
-								+ float_data[(y1 * the_width + x0) * 4 + ch] + float_data[(y1 * the_width + x1) * 4 + ch]) * 0.25f;
+							linear_data_small[(y * new_width + x) * 4 + ch] = (linear_data[(y0 * the_width + x0) * 4 + ch] + linear_data[(y0 * the_width + x1) * 4 + ch]
+								+ linear_data[(y1 * the_width + x0) * 4 + ch] + linear_data[(y1 * the_width + x1) * 4 + ch]) * 0.25f;
 
 							if (ch < 3)
 							{
-								dst[x * 4 + ch] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(pow(float_data_small[(y * new_width + x) * 4 + ch], 1 / 2.2f) * 255.0f + 0.5f), 0, 255));
+								dst[x * 4 + ch] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::linear_to_srgb(linear_data_small[(y * new_width + x) * 4 + ch]) * 255.0f + 0.5f), 0, 255));
 							}
 							else
 							{
-								dst[x * 4 + ch] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(float_data_small[(y * new_width + x) * 4 + ch] * 255.0f + 0.5f), 0, 255));
+								dst[x * 4 + ch] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(linear_data_small[(y * new_width + x) * 4 + ch] * 255.0f + 0.5f), 0, 255));
 							}
 						}
 					}
@@ -160,7 +161,7 @@ namespace
 					dst += new_data[index * in_num_mipmaps + l].row_pitch;
 				}
 
-				std::swap(float_data_small, float_data);
+				std::swap(linear_data_small, linear_data);
 
 				the_width = new_width;
 				the_height = new_height;
