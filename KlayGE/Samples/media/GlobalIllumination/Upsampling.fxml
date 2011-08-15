@@ -53,15 +53,15 @@ float4 UpsamplingInterpolatePS(float2 tc : TEXCOORD0) : SV_Target
 	weight[4] *= color[3].a * color[5].a;
 	weight[6] *= color[5].a * color[7].a;
 	weight[8] *= color[7].a * color[1].a;
-  
+
 	float tot_weight = weight[0] + weight[1] + weight[2] 
 					+ weight[3] + weight[4] + weight[5] 
 					+ weight[6] + weight[7] + weight[8] + 0.001;
-  
+
 	float4 tot_color = color[0] * weight[0] + color[1] * weight[1] + color[2] * weight[2]
 					+ color[3] * weight[3] + color[4] * weight[4] + color[5] * weight[5]
 					+ color[6] * weight[6] + color[7] * weight[7] + color[8] * weight[8];
-  
+
 	return color[0].a * float4(tot_color.rgb / tot_weight, 1);
 }
 		]]>

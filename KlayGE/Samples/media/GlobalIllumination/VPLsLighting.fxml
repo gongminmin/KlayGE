@@ -116,9 +116,9 @@ float4 VPLsLightingPS(
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="one"/>
 			<state name="dest_blend" value="one"/>
-			<state name="blend_op_alpha" value="max"/>
-			<state name="src_blend_alpha" value="src_alpha"/>
-			<state name="dest_blend_alpha" value="dst_alpha"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="zero"/>
 
 			<state name="vertex_shader" value="VPLsLightingVS()"/>
 			<state name="pixel_shader" value="VPLsLightingPS()"/>

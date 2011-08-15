@@ -448,12 +448,14 @@ namespace KlayGE
 		}
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		TexturePtr subsplat_ds_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
+			TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
+				1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
-			fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 0, i));
+			fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0));
 			vpls_lighting_fbs_.push_back(fb);
 		}
 
@@ -851,7 +853,10 @@ namespace KlayGE
 							if (PT_GenReflectiveShadowMap == pass_type)
 							{
 								rsm_to_vpls_pps[type]->SetParam(11, near_q);
-								*subsplat_near_q_far_param_ = float3(near_q.x(), near_q.y(), sm_camera->FarPlane());
+
+								CameraPtr const & camera = g_buffer_->GetViewport().camera;
+								q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+								*subsplat_near_q_far_param_ = float3(camera->NearPlane() * q, q, camera->FarPlane());
 							}
 						}
 
