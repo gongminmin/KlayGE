@@ -15,8 +15,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2']
 
 features_db = {
 	'1.1' : {
@@ -183,6 +183,20 @@ features_db = {
 			'Precision requirements for shaders' : lambda : is_supported('GL_ARB_shader_precision'),
 			'64-bit fp components for VS inputs' : lambda : support_one(['GL_ARB_vertex_attrib_64bit', 'GL_EXT_vertex_attrib_64bit']),
 			'Multiple viewports' : lambda : is_supported ('GL_ARB_viewport_array'),
+		},
+
+	'4.2' : {
+			'BPTC compressed textures' : lambda : is_supported('GL_ARB_texture_compression_bptc'),
+			'Allow pixel storage parameters to affect packing and unpacking of compressed textures' : lambda : is_supported('GL_ARB_compressed_texture_pixel_storage'),
+			'Shader atomic counters' : lambda : is_supported('GL_ARB_shader_atomic_counters'),
+			'Immutable texture images' : lambda : is_supported('GL_ARB_texture_storage'),
+			'Instanced transformed feedback drawing' : lambda : is_supported('GL_ARB_transform_feedback_instanced'),
+			'Allow the offset within buffer objects used for instanced rendering to be specified' : lambda : is_supported('GL_ARB_base_instance'),
+			'Loads from and stores to textures from shader' : lambda : is_supported('GL_ARB_shader_image_load_store'),
+			'Add new layout qualifiers to communicate what kind of changes will be made to gl_FragDepth' : lambda : support_one(['GL_ARB_conservative_depth', 'GL_AMD_conservative_depth']),
+			'GLSL 4.20 feature pack' : lambda : is_supported('GL_ARB_shading_language_420pack'),
+			'Queries for sample counts available for a given internal format and usage' : lambda : is_supported('GL_ARB_internalformat_query'),
+			'More restrictive alignment constraints for mapped buffers' : lambda : is_supported('GL_ARB_map_buffer_alignment'),
 		}
 }
 
@@ -248,6 +262,8 @@ class information:
 			is_supported.exts.append('GLSL_4_0')
 		if glsl_ver_index >= 8:
 			is_supported.exts.append('GLSL_4_1')
+		if glsl_ver_index >= 9:
+			is_supported.exts.append('GLSL_4_2')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
@@ -284,7 +300,7 @@ def gl_compatibility(info_name):
 		exts.append(ext.getAttribute('name'))
 
 	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2010 Minmin Gong\n')
+	print('Copyright(C) 2004-2011 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
