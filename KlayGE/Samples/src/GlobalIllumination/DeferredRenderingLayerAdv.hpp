@@ -305,7 +305,7 @@ namespace KlayGE
 		void CreateNormalConeMipMap();
 		void SetSubsplatStencil();
 		void ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light);
-		void VPLsLighting();
+		void VPLsLighting(LightSourcePtr const & light);
 		void UpsampleMultiresLighting();
 
 	private:
@@ -414,6 +414,8 @@ namespace KlayGE
 		RenderEffectParameterPtr vpl_view_param_;
 		RenderEffectParameterPtr vpl_proj_param_;
 		RenderEffectParameterPtr vpl_depth_near_far_invfar_param_;
+		RenderEffectParameterPtr vpl_light_pos_es_param_;
+		RenderEffectParameterPtr vpl_light_color_param_;
 
 		RenderLayoutPtr rl_vpl_;
 	};

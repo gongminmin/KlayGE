@@ -52,8 +52,12 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float j = floor(vpl_id / vpl_params.y);
 	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
 
-	float4 albedo = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
-	float3 normal_ls = normal_es_tex.SampleLevel(point_sampler, rsm_tc, mip_level).xyz * 2 - 1;
+	float4 albedo_spec = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
+	float3 albedo = albedo_spec.xyz;
+	float specular_level = albedo_spec.w;
+	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
+	float3 normal_ls = normal_shininess.xyz * 2 - 1;
+	float shininess = normal_shininess.w * 256.0f;
 	float3 normal_es = mul(float4(normal_ls, 0), ls_to_es).xyz;
 	float depth_ls = near_q.x / (near_q.y - depth_tex.Sample(point_sampler, rsm_tc).r);
 
@@ -66,12 +70,11 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 		float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls);
 		if (spot > 0)
 		{
-			float n_dot_l = max(0, dot(float3(0, 0, -1), normal_ls));
+			float n_dot_l = dot(float3(0, 0, -1), normal_ls);
 			if (n_dot_l > 0)
 			{
 				float atten = spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
-				float diff = max(0, n_dot_l * atten);
-				light = diff * light_color * albedo;
+				light = float4(albedo, atten);
 			}
 		}
 
@@ -79,11 +82,13 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	}
 	else if (tc.y < 2 / 4.0f)
 	{
-		return float4(normal_es, 1);
+		return float4(normal_es, specular_level);
 	}
 	else if (tc.y < 3 / 4.0f)
 	{
-		return mul(float4(pos_ls, 1), ls_to_es);
+		float4 pos_es = mul(float4(pos_ls, 1), ls_to_es);
+		pos_es /= pos_es.w;
+		return float4(pos_es.xyz, shininess);
 	}
 	else
 	{

@@ -336,6 +336,8 @@ namespace KlayGE
 			vpl_view_param_ = vpls_lighting_effect->ParameterByName("view");
 			vpl_proj_param_ = vpls_lighting_effect->ParameterByName("proj");
 			vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
+			vpl_light_pos_es_param_ = vpls_lighting_effect->ParameterByName("light_pos_es");
+			vpl_light_color_param_ = vpls_lighting_effect->ParameterByName("light_color");
 			*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 			*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
@@ -940,7 +942,7 @@ namespace KlayGE
 				else if (PT_IndirectLighting == pass_type)
 				{
 					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
-					this->VPLsLighting();
+					this->VPLsLighting(light);
 					this->UpsampleMultiresLighting();
 
 					return App3DFramework::URV_Flushed;
@@ -1117,13 +1119,17 @@ namespace KlayGE
 		rsm_to_vpls_pps[type]->Apply();
 	}
 
-	void DeferredRenderingLayer::VPLsLighting()
+	void DeferredRenderingLayer::VPLsLighting(LightSourcePtr const & light)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		*vpl_view_param_ = view_;
 		*vpl_proj_param_ = proj_;
 		*vpl_depth_near_far_invfar_param_ = depth_near_far_invfar_;
+
+		float3 p = MathLib::transform_coord(light->Position(), view_);
+		*vpl_light_pos_es_param_ = float4(p.x(), p.y(), p.z(), 1);
+		*vpl_light_color_param_ = light->Color();
 		
 		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
 		{

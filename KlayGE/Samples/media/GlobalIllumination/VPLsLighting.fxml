@@ -20,6 +20,9 @@
 	<parameter type="float2" name="vpl_params"/>
 	<parameter type='int' name='flipping'/>
 
+	<parameter type="float4" name="light_pos_es"/>
+	<parameter type="float4" name="light_color"/>
+
 	<shader>
 		<![CDATA[
 #ifdef KLAYGE_D3D11
@@ -31,21 +34,32 @@ void VPLsLightingVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
+				out float3 oVPLColor : TEXCOORD2,
 #else
 				out float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
 				out float oW : TEXCOORD2,
+				out float3 oColor : TEXCOORD3,
 #endif
 				out float4 oPos : SV_Position)
 {
 	oViewDir.w = (instance_id + 0.5f) * vpl_params.x;
 
-	float3 offset = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0).xyz;
+	float4 albedo = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 0.5f / 4), 0);
+	float4 normal = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 1.5f / 4), 0);
+	float4 offset = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0);
 	float4 rotation = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 3.5f / 4), 0);
-	float3 color = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 0.5f / 4), 0).xyz;
 
-	float scale = sqrt((color.x + color.y + color.z) / 3) * 20;
-	oViewDir.xyz = mul(mul_quat(pos.xyz * scale, rotation), (float3x3)view) + offset;
+	float3 rot_pos = mul(mul_quat(pos.xyz, rotation), (float3x3)view);
+
+	float3 light_vec = normalize(light_pos_es.xyz - offset.xyz);
+	float3 view_vec = normalize(rot_pos);
+	float3 halfway = normalize(light_vec + view_vec);
+
+	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
+
+	float scale = sqrt((oVPLColor.x + oVPLColor.y + oVPLColor.z) / 3) * 20;
+	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
 	oTc = oPos.xy / oPos.w * 0.5f;
@@ -60,9 +74,9 @@ void VPLsLightingVS(float4 pos : POSITION,
 
 float4 VPLsLightingPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1
+	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float3 vpl_color : TEXCOORD2
 #else
-	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2
+	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2, float3 vpl_color : TEXCOORD3
 #endif
 	) : SV_Target
 {
@@ -81,9 +95,8 @@ float4 VPLsLightingPS(
 	float cos_iv = dot(norm_i, vij);
 	if (cos_iv > 0)
 	{
-		float3 color_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 0.5f / 4), 0).xyz;
 		float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
-		color_i = cos_iv * atten * color_j;
+		color_i = cos_iv * atten * vpl_color;
 	}
 
 	return float4(color_i, 1);

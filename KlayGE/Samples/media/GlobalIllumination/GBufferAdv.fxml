@@ -278,11 +278,19 @@ void ConstructRSMBuffer(float2 tc, float3 ts_to_view_0,
 {
 	if (diffuse_map_enabled)
 	{
-		oAlbedo = diffuse_tex.Sample(aniso_sampler, tc);
+		oAlbedo.xyz = diffuse_tex.Sample(aniso_sampler, tc).xyz;
 	}
 	else
 	{
-		oAlbedo = diffuse_clr;
+		oAlbedo.xyz = diffuse_clr.xyz;
+	}
+	if (specular_map_enabled)
+	{
+		oAlbedo.w = dot(specular_tex.Sample(aniso_sampler, tc).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		oAlbedo.w = specular_level;
 	}
 
 	float3 normal = normalize(ts_to_view_2);
@@ -295,7 +303,7 @@ void ConstructRSMBuffer(float2 tc, float3 ts_to_view_0,
 		normal = normalize(mul(decompress_normal(bump_tex.Sample(trilinear_sampler, tc)), ts_to_view));
 	}
 
-	oNormal = float4(normal / 2 + 0.5f, 1);
+	oNormal = float4(normal / 2 + 0.5f, shininess);
 }
 
 void GenReflectiveShadowMapPS(float2 tc : TEXCOORD0,
