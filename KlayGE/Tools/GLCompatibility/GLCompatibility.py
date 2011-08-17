@@ -208,29 +208,72 @@ class information:
 		self.minor_ver = 0
 		self.feature_infos = []
 
-	def to_xml(self, stream):
-		stream.write('<?xml version="1.0" encoding="utf-8"?>\n')
-		stream.write('<?xml-stylesheet type="text/xsl" href="report.xsl"?>\n\n')
+	def to_html(self, stream):
+		stream.write('<html>\n')
+		stream.write('<head>\n')
+		stream.write('\t<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\n')
+		stream.write('\t<title>OpenGL Compatibility</title>\n')
+		stream.write('</head>\n')
+		stream.write('<body>\n')
+		stream.write('<h1>OpenGL Compatibility</h1>\n')
+		stream.write('\t<table width="100%">\n')
+		stream.write('\t\t<tr>\n')
+		stream.write('\t\t\t<th style="background: gray; color: white">Vendor:</th>\n')
+		stream.write('\t\t\t<td style="border-bottom: 1px solid black">%s</td>\n' % self.vendor)
+		stream.write('\t\t</tr>\n')
+		stream.write('\t\t<tr>\n')
+		stream.write('\t\t\t<th style="background: gray; color: white">Renderer:</th>\n')
+		stream.write('\t\t\t<td style="border-bottom: 1px solid black">%s</td>\n' % self.renderer)
+		stream.write('\t\t</tr>\n')
+		stream.write('\t\t<tr>\n')
+		stream.write('\t\t\t<th style="background: gray; color: white">Core:</th>\n')
+		stream.write('\t\t\t<td style="border-bottom: 1px solid black">%i.%i</td>\n' % (self.major_ver, self.minor_ver))
+		stream.write('\t\t</tr>\n')
+		stream.write('\t\t<tr>\n')
+		stream.write('\t\t\t<th style="background: gray; color: white">GLSL:</th>\n')
+		stream.write('\t\t\t<td style="border-bottom: 1px solid black">%i.%i</td>\n' % (self.glsl_major_ver, self.glsl_minor_ver))
+		stream.write('\t\t</tr>\n')
+		stream.write('\t</table>\n')
 
-		stream.write('<compatibility vendor="%s" renderer="%s" core="%i.%i" glsl_version="%i.%i">\n' % (self.vendor, self.renderer, self.major_ver, self.minor_ver, self.glsl_major_ver, self.glsl_minor_ver))
-
+		stream.write('\t<h2>Details</h2>\n')
 		for feature_info in self.feature_infos:
 			supported = feature_info[1][0]
 			unsupported = feature_info[1][1]
 
 			potential_rate = len(supported) * 100.0 / (len(supported) + len(unsupported))
 
-			stream.write('\t<version name="%s" rate="%.1f">\n' % (feature_info[0], potential_rate))
+			stream.write('\t<h3>OpenGL %s potential support rate: %.1f%%</h3>\n' % (feature_info[0], potential_rate))
+			stream.write('\t<table width="100%" style="border-bottom: 1px solid black">\n')
 
-			for feature in supported:
-				stream.write('\t\t<supported name="%s"/>\n' % feature)
+			if len(supported) > 0:
+				stream.write('\t\t<tr>\n')
+				stream.write('\t\t\t<th style="background: green; color: white; text-align: left">Supported</th>\n')
+				stream.write('\t\t</tr>\n')
+				stream.write('\t\t<tr>\n')
+				stream.write('\t\t\t<td style="padding-left:20pt">\n')
 
-			for feature in unsupported:
-				stream.write('\t\t<unsupported name="%s"/>\n' % feature)
+				for feature in supported:
+					stream.write('\t\t\t\t%s<br />\n' % feature)
 
-			stream.write('\t</version>\n')
+				stream.write('\t\t\t</td>\n')
+				stream.write('\t\t</tr>\n')
 
-		stream.write('</compatibility>\n')
+			if len(unsupported) > 0:
+				stream.write('\t\t<tr>\n')
+				stream.write('\t\t\t<th style="background: red; color: white; text-align: left">Unsupported</th>\n')
+				stream.write('\t\t</tr>\n')
+				stream.write('\t\t<tr>\n')
+				stream.write('\t\t\t<td style="padding-left:20pt">\n')
+
+				for feature in unsupported:
+					stream.write('\t\t\t\t%s<br />\n' % feature)
+
+				stream.write('\t\t\t</td>\n')
+				stream.write('\t\t</tr>\n')
+				
+			stream.write('\t</table>\n')
+		stream.write('</body>\n')
+		stream.write('</html>\n')
 
 	def make_reports(self, vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts):
 		core_ver_index = ogl_ver_db.index(str(major_ver) + '.' + str(minor_ver))
@@ -305,11 +348,11 @@ def gl_compatibility(info_name):
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
 
-	report_file_name = 'report.xml'
+	report_file_name = 'report.html'
+	info.to_html(open(report_file_name, 'w'))
 
-	info.to_xml(open(report_file_name, 'w'))
-
-	print('The results are saved in the file ' + report_file_name)
+	import os
+	os.system(report_file_name);
 
 
 if __name__ == '__main__':

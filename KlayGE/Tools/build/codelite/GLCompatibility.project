@@ -12,9 +12,6 @@
     <File Name="../../GLCompatibility/GLCompatibility.py"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files"/>
-  <VirtualDirectory Name="Resource Files">
-    <File Name="../../GLCompatibility/report.xsl"/>
-  </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="">
@@ -48,7 +45,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cp ../../GLCompatibility/report.xsl ../../bin/linux_x64</Command>
         <Command Enabled="yes">cp ../../GLCompatibility/GLCompatibility.py ../../bin/linux_x64</Command>
       </PreBuild>
       <PostBuild/>
@@ -90,7 +86,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cp ../../GLCompatibility/report.xsl ../../bin/linux_x86</Command>
         <Command Enabled="yes">cp ../../GLCompatibility/GLCompatibility.py ../../bin/linux_x86</Command>
       </PreBuild>
       <PostBuild/>
@@ -133,7 +128,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\report.xsl ..\..\bin\win_x64</Command>
         <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\GLCompatibility.py ..\..\bin\win_x64</Command>
       </PreBuild>
       <PostBuild/>
@@ -176,7 +170,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\report.xsl ..\..\bin\win_x86</Command>
         <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\GLCompatibility.py ..\..\bin\win_x86</Command>
       </PreBuild>
       <PostBuild/>
@@ -218,7 +211,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cp ../../GLCompatibility/report.xsl ../../bin/linux_x64</Command>
         <Command Enabled="yes">cp ../../GLCompatibility/GLCompatibility.py ../../bin/linux_x64</Command>
       </PreBuild>
       <PostBuild/>
@@ -260,7 +252,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cp ../../GLCompatibility/report.xsl ../../bin/linux_x86</Command>
         <Command Enabled="yes">cp ../../GLCompatibility/GLCompatibility.py ../../bin/linux_x86</Command>
       </PreBuild>
       <PostBuild/>
@@ -303,7 +294,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\report.xsl ..\..\bin\win_x64</Command>
         <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\GLCompatibility.py ..\..\bin\win_x64</Command>
       </PreBuild>
       <PostBuild/>
@@ -346,7 +336,6 @@
         <StartupCommands/>
       </Debugger>
       <PreBuild>
-        <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\report.xsl ..\..\bin\win_x86</Command>
         <Command Enabled="yes">cmd /c copy ..\..\GLCompatibility\GLCompatibility.py ..\..\bin\win_x86</Command>
       </PreBuild>
       <PostBuild/>
