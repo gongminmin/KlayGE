@@ -1,4 +1,7 @@
 <?xml version='1.0'?>
 
 <gl_extension name="GL_ARB_conservative_depth" reg_no="111">
+	<additionals>
+		<ext name="GL_AMD_conservative_depth"/>
+	</additionals>
 </gl_extension>

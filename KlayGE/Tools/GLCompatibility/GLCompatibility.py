@@ -192,7 +192,7 @@ features_db = {
 			'Immutable texture images' : lambda : is_supported('GL_ARB_texture_storage'),
 			'Instanced transformed feedback drawing' : lambda : is_supported('GL_ARB_transform_feedback_instanced'),
 			'Allow the offset within buffer objects used for instanced rendering to be specified' : lambda : is_supported('GL_ARB_base_instance'),
-			'Loads from and stores to textures from shader' : lambda : is_supported('GL_ARB_shader_image_load_store'),
+			'Loads from and stores to textures from shader' : lambda : support_one(['GL_ARB_shader_image_load_store', 'GL_EXT_shader_image_load_store']),
 			'Add new layout qualifiers to communicate what kind of changes will be made to gl_FragDepth' : lambda : support_one(['GL_ARB_conservative_depth', 'GL_AMD_conservative_depth']),
 			'GLSL 4.20 feature pack' : lambda : is_supported('GL_ARB_shading_language_420pack'),
 			'Queries for sample counts available for a given internal format and usage' : lambda : is_supported('GL_ARB_internalformat_query'),

@@ -79,12 +79,17 @@
 				<param type="GLenum" name="access"/>
 				<param type="GLenum" name="format"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_shader_image_load_store" name="glBindImageTextureEXT"/>
+			</mappings>
 		</function>
-
 		<function name="glMemoryBarrier" return="void">
 			<params>
 				<param type="GLbitfield" name="barriers"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_shader_image_load_store" name="glMemoryBarrierEXT"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>
