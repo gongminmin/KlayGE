@@ -123,10 +123,14 @@ namespace
 			switch (dt)
 			{
 			case 0:
-				technique_ = technique_->Effect().TechniqueByName("Bump");
+				technique_ = technique_->Effect().TechniqueByName("None");
 				break;
 
 			case 1:
+				technique_ = technique_->Effect().TechniqueByName("Bump");
+				break;
+
+			case 2:
 				technique_ = technique_->Effect().TechniqueByName("Parallax");
 				break;
 
@@ -447,7 +451,7 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::BiasChangedHandler, this, _1));
 			this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
 
-			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(1);
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(2);
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&Parallax::DetailTypeChangedHandler, this, _1));
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 

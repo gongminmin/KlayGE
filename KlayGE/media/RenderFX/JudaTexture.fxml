@@ -329,7 +329,7 @@ float4 judatex2d_level_internal(int2 tile_xy, float2 in_tile_coord, float lod)
 
 float4 judatex2d_grad_internal(int2 tile_xy, float2 in_tile_coord, float2 tc_ddx, float2 tc_ddy)
 {
-	float3 cache_addr = juda_tex_indirect.Sample(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size).rgb * 255;
+	float3 cache_addr = juda_tex_indirect.SampleLevel(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 0).rgb * 255;
 	cache_addr.xy = cache_addr.xy * tile_size.y + tile_size.z;
 	float2 tc = float2((cache_addr.xy + in_tile_coord * tile_size.x) * inv_juda_tex_cache_size);
 #if KLAYGE_MAX_TEX_ARRAY_LEN > 1

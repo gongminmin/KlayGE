@@ -73,24 +73,31 @@ void CalcTBNVS(float4 pos				: POSITION,
 		oL, oV, oH, oPos);
 }
 
-float4 Shading(float4 L, float3 H, float2 uv)
+float4 Shading(float4 L, float3 H, float2 uv, int bump)
 {
 	float atten = attenuation_term(0, -L.xyz, light_falloff);
 
 	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, uv).rgb;
 
-	float3 bump_normal = normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1);
+	float3 bump_normal = bump ? normalize(judatex2d_wrap(normal_tex_bb, uv).rgb * 2 - 1) : float3(0, 0, 1);
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H);
 
 	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, halfway, bump_normal), 1);
 }
 
+float4 NonePS(float4 L		: TEXCOORD0,
+					float4 V		: TEXCOORD1,
+					float3 H		: TEXCOORD2) : SV_Target
+{
+	return Shading(L, H, float2(L.w, V.w), false);
+}
+
 float4 BumpMappingPS(float4 L		: TEXCOORD0,
 					float4 V		: TEXCOORD1,
 					float3 H		: TEXCOORD2) : SV_Target
 {
-	return Shading(L, H, float2(L.w, V.w));
+	return Shading(L, H, float2(L.w, V.w), true);
 }
 
 float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
@@ -104,7 +111,7 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * parallax_scale - parallax_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
 
-	return Shading(L, H, texUV);
+	return Shading(L, H, texUV, true);
 }
 
 void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
@@ -114,9 +121,7 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 					out float4 oL			: TEXCOORD0,	// in tangent space
 					out float4 oV			: TEXCOORD1,	// in tangent space
 					out float3 oH			: TEXCOORD2,	// in tangent space
-					out float2 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
-					out float3 oNormalWS         : TEXCOORD4,   // Normal vector in world space
-					out float3 oViewWS           : TEXCOORD5,   // View vector in world space
+					out float4 oParallaxOffsetTS : TEXCOORD3,   // Parallax offset vector in tangent space
 					out float4 oPos			: SV_Position)
 {
 	N = N * 2 - 1;
@@ -124,41 +129,26 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 
 	CalcTBN(pos, texcoord0, N, T,
 		oL, oV, oH, oPos);
-	
-	float3 viewVec = eye_pos - pos.xyz;
-	oNormalWS = mul(N, (float3x3)world);
-	oViewWS = mul(viewVec, (float3x3)world);
-	
-	float2 vParallaxDirection = normalize(oV.xy);
 
-	float fLength = length(oV.xyz);
-	float fParallaxLength = sqrt(fLength * fLength - oV.z * oV.z) / oV.z;
-
-	oParallaxOffsetTS = vParallaxDirection * fParallaxLength * parallax_scale;
+	oParallaxOffsetTS.xy = normalize(oV.xyz).xy * parallax_scale;
+	oParallaxOffsetTS.zw = normalize(oL.xyz).xy * parallax_scale;
 }
 
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 					float4 V					: TEXCOORD1,
 					float3 H					: TEXCOORD2,
-					float2 vParallaxOffsetTS	: TEXCOORD3,
-					float3 vNormalWS			: TEXCOORD4,
-					float3 vViewWS				: TEXCOORD5) : SV_Target
+					float4 vParallaxOffsetTS	: TEXCOORD3) : SV_Target
 {
-	vNormalWS = normalize(vNormalWS);
-	vViewWS = normalize(vViewWS);
-
+	float3 view = normalize(V.xyz);
 	float2 texCoord = float2(L.w, V.w);
-	
+
 	float level = mipmap_level(texCoord, tex_size);
-	
-	float2 dx = ddx(texCoord);
-	float2 dy = ddy(texCoord);
-	
+
 	float2 texUV = texCoord;
 	float fOcclusionShadow = 1;
 	if (level <= lod_threshold)
 	{
-		int nNumSteps = (int)lerp(max_samples, min_samples, dot(vViewWS, vNormalWS));
+		int nNumSteps = (int)lerp(max_samples, min_samples, dot(view, float3(0, 0, 1)));
 
 		float fCurrHeight = 0;
 		float fStepSize = 1.0f / nNumSteps;
@@ -168,22 +158,18 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		int nStepIndex = 0;
 		bool bCondition = true;
 
-		float2 vTexOffsetPerStep = fStepSize * vParallaxOffsetTS;
+		float2 vTexOffsetPerStep = fStepSize * vParallaxOffsetTS.xy;
 		float2 vTexCurrentOffset = texCoord;
 		float fCurrentBound = 1;
 		float fParallaxAmount = 0;
 
 		float2 pt1 = 0;
 		float2 pt2 = 0;
-       
-		float2 texOffset2 = 0;
 
 		while (nStepIndex < nNumSteps)
 		{
 			vTexCurrentOffset -= vTexOffsetPerStep;
-
 			fCurrHeight = judatex2d_level_wrap(height_tex_bb, vTexCurrentOffset, level).r;
-
 			fCurrentBound -= fStepSize;
 
 			if (fCurrHeight > fCurrentBound)
@@ -191,58 +177,46 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 				pt1 = float2(fCurrentBound, fCurrHeight);
 				pt2 = float2(fCurrentBound + fStepSize, fPrevHeight);
 
-				texOffset2 = vTexCurrentOffset - vTexOffsetPerStep;
-
-				nStepIndex = nNumSteps + 1;
-				fPrevHeight = fCurrHeight;
+				nStepIndex = nNumSteps;
 			}
 			else
 			{
 				++ nStepIndex;
-				fPrevHeight = fCurrHeight;
 			}
+			fPrevHeight = fCurrHeight;
 		}   
 
 		float fDelta2 = pt2.x - pt2.y;
 		float fDelta1 = pt1.x - pt1.y;
-      
+
 		float fDenominator = fDelta2 - fDelta1;
-      
-		// SM 3.0 requires a check for divide by zero, since that operation will generate
-		// an 'Inf' number instead of 0, as previous models (conveniently) did:
-		if (fDenominator == 0.0f)
+		if (0 == fDenominator)
 		{
-			fParallaxAmount = 0.0f;
+			fParallaxAmount = 0;
 		}
 		else
 		{
 			fParallaxAmount = (pt1.x * fDelta2 - pt2.x * fDelta1) / fDenominator;
 		}
       
-		float2 vParallaxOffset = vParallaxOffsetTS * (1 - fParallaxAmount);
-
-		// The computed texture offset for the displaced point on the pseudo-extruded surface:
-		float2 texSampleBase = texCoord - vParallaxOffset;
-		texUV = texSampleBase;
-
-		// Lerp to bump mapping only if we are in between, transition section:
-        
+		float2 texSampleBase = texCoord - vParallaxOffsetTS.xy * (1 - fParallaxAmount);
 		if (level > lod_threshold - 1)
 		{
-			// Lerp based on the fractional part:
-			float fMipLevelFrac = frac(level);
-
 			// Lerp the texture coordinate from parallax occlusion mapped coordinate to bump mapping
-			// smoothly based on the current mip level:
-			texUV = lerp(texSampleBase, texCoord, fMipLevelFrac);
+			// smoothly based on the current mip level
+			texUV = lerp(texSampleBase, texCoord, frac(level));
 		}
-		
+		else
+		{
+			texUV = texSampleBase;
+		}
+
 		// shadow
 		{
-			float2 vLightRayTS = normalize(L.xyz).xy * parallax_scale;
+			float2 vLightRayTS = vParallaxOffsetTS.zw;
       
 			// Compute the soft blurry shadows taking into account self-occlusion for 
-			// features of the height field:
+			// features of the height field
 
 			float sh0 = judatex2d_level_wrap(height_tex_bb, texSampleBase, level).r;
 			float shA = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.88f, level).r - sh0 - 0.88f) *  1 * shadow_softening;
@@ -253,18 +227,25 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 			float sh5 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.33f, level).r - sh0 - 0.33f) * 10 * shadow_softening;
 			float sh4 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.22f, level).r - sh0 - 0.22f) * 12 * shadow_softening;
 
-			// Compute the actual shadow strength:
+			// Compute the actual shadow strength
 			fOcclusionShadow = 1 - max(max(max(max(max(max(shA, sh9), sh8), sh7), sh6), sh5), sh4);
 
-			// The previous computation overbrightens the image, let's adjust for that:
+			// The previous computation overbrightens the image, let's adjust for that
 			fOcclusionShadow = fOcclusionShadow * 0.6f + 0.4f;         
 		}
 	}
-	
-	return Shading(L, H, texUV) * fOcclusionShadow;
+
+	return Shading(L, H, texUV, true) * fOcclusionShadow;
 }
 		]]>
 	</shader>
+
+	<technique name="None">
+		<pass name="p0">
+			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="pixel_shader" value="NonePS()"/>
+		</pass>
+	</technique>
 
 	<technique name="Bump">
 		<pass name="p0">
