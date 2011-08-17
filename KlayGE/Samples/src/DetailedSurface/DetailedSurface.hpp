@@ -1,15 +1,15 @@
-#ifndef _PARALLAX_HPP
-#define _PARALLAX_HPP
+#ifndef _DETAILEDSURFACE_HPP
+#define _DETAILEDSURFACE_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
-class Parallax : public KlayGE::App3DFramework
+class DetailedSurfaceApp : public KlayGE::App3DFramework
 {
 public:
-	Parallax();
+	DetailedSurfaceApp();
 
 	bool ConfirmDevice() const;
 
@@ -51,4 +51,4 @@ private:
 	int loading_percentage_;
 };
 
-#endif		// _PARALLAX_HPP
+#endif		// _DETAILEDSURFACE_HPP

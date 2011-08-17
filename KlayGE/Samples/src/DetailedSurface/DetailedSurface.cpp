@@ -26,7 +26,7 @@
 #include <sstream>
 #include <boost/bind.hpp>
 
-#include "Parallax.hpp"
+#include "DetailedSurface.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -41,7 +41,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = rf.LoadEffect("Parallax.fxml")->TechniqueByName("Parallax");
+			technique_ = rf.LoadEffect("DetailedSurface.fxml")->TechniqueByName("Parallax");
 
 			tile_bb_[0] = int4(1, 1, 4, 4);
 			tile_bb_[1] = int4(7, 1, 4, 4);
@@ -243,21 +243,21 @@ int main()
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
-	Parallax app;
+	DetailedSurfaceApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-Parallax::Parallax()
-			: App3DFramework("Parallax"),
+DetailedSurfaceApp::DetailedSurfaceApp()
+			: App3DFramework("DetailedSurface"),
 				parallax_scale_(0.06f), parallax_bias_(0.02f)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/Parallax");
+	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
 }
 
-bool Parallax::ConfirmDevice() const
+bool DetailedSurfaceApp::ConfirmDevice() const
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -268,14 +268,14 @@ bool Parallax::ConfirmDevice() const
 	return true;
 }
 
-void Parallax::InitObjects()
+void DetailedSurfaceApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Load("Parallax.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Load("DetailedSurface.uiml"));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	juda_tex_ = LoadJudaTexture("Parallax.jdt");
+	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");
 
 	ElementFormat fmt;
 	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
@@ -293,14 +293,14 @@ void Parallax::InitObjects()
 	loading_percentage_ = 0;
 }
 
-void Parallax::OnResize(uint32_t width, uint32_t height)
+void DetailedSurfaceApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
 
-void Parallax::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void DetailedSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -310,7 +310,7 @@ void Parallax::InputHandler(InputEngine const & /*sender*/, InputAction const & 
 	}
 }
 
-void Parallax::ScaleChangedHandler(KlayGE::UISlider const & sender)
+void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 {
 	parallax_scale_ = sender.GetValue() / 100.0f;
 	checked_pointer_cast<PolygonObject>(polygon_)->ParallaxScale(parallax_scale_);
@@ -320,7 +320,7 @@ void Parallax::ScaleChangedHandler(KlayGE::UISlider const & sender)
 	dialog_->Control<UIStatic>(id_scale_static_)->SetText(stream.str());
 }
 
-void Parallax::BiasChangedHandler(KlayGE::UISlider const & sender)
+void DetailedSurfaceApp::BiasChangedHandler(KlayGE::UISlider const & sender)
 {
 	parallax_bias_ = sender.GetValue() / 100.0f;
 	checked_pointer_cast<PolygonObject>(polygon_)->ParallaxBias(parallax_bias_);
@@ -330,12 +330,12 @@ void Parallax::BiasChangedHandler(KlayGE::UISlider const & sender)
 	dialog_->Control<UIStatic>(id_bias_static_)->SetText(stream.str());
 }
 
-void Parallax::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
+void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	checked_pointer_cast<PolygonObject>(polygon_)->DetailType(sender.GetSelectedIndex());
 }
 
-void Parallax::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
+void DetailedSurfaceApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 {
 	if (sender.GetChecked())
 	{
@@ -347,7 +347,7 @@ void Parallax::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
 	}
 }
 
-void Parallax::DoUpdateOverlay()
+void DetailedSurfaceApp::DoUpdateOverlay()
 {
 	UIManager::Instance().Render();
 
@@ -355,7 +355,7 @@ void Parallax::DoUpdateOverlay()
 	stream.precision(2);
 	stream << std::fixed << this->FPS() << " FPS";
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Parallax Mapping", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Detailed Surface", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), stream.str(), 16);
 
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
@@ -366,7 +366,7 @@ void Parallax::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 }
 
-uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
+uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 	if (loading_percentage_ < 100)
@@ -377,7 +377,7 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 
 		if (loading_percentage_ < 20)
 		{
-			dialog_ = UIManager::Instance().GetDialog("Parallax");
+			dialog_ = UIManager::Instance().GetDialog("DetailedSurface");
 			dialog_->SetVisible(false);
 
 			dialog_loading->SetVisible(true);
@@ -426,7 +426,7 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(boost::bind(&Parallax::InputHandler, this, _1, _2));
+			input_handler->connect(boost::bind(&DetailedSurfaceApp::InputHandler, this, _1, _2));
 			inputEngine.ActionMap(actionMap, input_handler, true);
 
 			loading_percentage_ = 90;
@@ -444,18 +444,18 @@ uint32_t Parallax::DoUpdate(uint32_t /*pass*/)
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(parallax_scale_ * 100));
-			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::ScaleChangedHandler, this, _1));
+			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, _1));
 			this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
 
 			dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(parallax_bias_ * 100));
-			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&Parallax::BiasChangedHandler, this, _1));
+			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::BiasChangedHandler, this, _1));
 			this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
 
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(2);
-			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&Parallax::DetailTypeChangedHandler, this, _1));
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, _1));
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
-			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&Parallax::CtrlCameraHandler, this, _1));
+			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, _1));
 
 			loading_percentage_ = 100;
 			progress_bar->SetValue(loading_percentage_);

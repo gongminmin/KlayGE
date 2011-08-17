@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CodeLite_Project Name="Parallax">
+<CodeLite_Project Name="DetailedSurface">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0015Release_win_x86000000000000]]>
@@ -8,16 +8,16 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="Source Files">
-    <File Name="../../src/Parallax/Parallax.cpp"/>
+    <File Name="../../src/DetailedSurface/DetailedSurface.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files">
-    <File Name="../../src/Parallax/Parallax.hpp"/>
+    <File Name="../../src/DetailedSurface/DetailedSurface.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
-    <File Name="../../media/Parallax/Parallax.fxml"/>
+    <File Name="../../media/DetailedSurface/DetailedSurface.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
-    <File Name="../../media/Parallax/Parallax.uiml"/>
+    <File Name="../../media/DetailedSurface/DetailedSurface.uiml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Resource Files">
     <File Name="../../../klayge_logo.ico"/>

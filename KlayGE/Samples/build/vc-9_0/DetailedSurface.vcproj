@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Parallax"
+	Name="DetailedSurface"
 	ProjectGUID="{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
-	RootNamespace="Parallax"
+	RootNamespace="DetailedSurface"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -350,7 +350,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\Parallax\Parallax.cpp"
+				RelativePath="..\..\src\DetailedSurface\DetailedSurface.cpp"
 				>
 			</File>
 		</Filter>
@@ -360,7 +360,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\Parallax\Parallax.hpp"
+				RelativePath="..\..\src\DetailedSurface\DetailedSurface.hpp"
 				>
 			</File>
 		</Filter>
@@ -368,7 +368,7 @@
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\Parallax\Parallax.fxml"
+				RelativePath="..\..\media\DetailedSurface\DetailedSurface.fxml"
 				>
 			</File>
 		</Filter>
@@ -376,7 +376,7 @@
 			Name="UI"
 			>
 			<File
-				RelativePath="..\..\media\Parallax\Parallax.uiml"
+				RelativePath="..\..\media\DetailedSurface\DetailedSurface.uiml"
 				>
 			</File>
 		</Filter>

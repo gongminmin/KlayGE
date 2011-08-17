@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Parallax", "Parallax.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DetailedSurface", "DetailedSurface.vcproj", "{32EBA7EF-137A-4C06-8E1B-383F27A0E0C1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VertexDisplacement", "VertexDisplacement.vcproj", "{63128457-8C79-4C9F-ACB7-506537BBC4BE}"
 EndProject
