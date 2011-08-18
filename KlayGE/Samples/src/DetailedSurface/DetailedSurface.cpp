@@ -33,11 +33,20 @@ using namespace KlayGE;
 
 namespace
 {
+	enum
+	{
+		DT_None,
+		DT_Bump,
+		DT_Parallax,
+		DT_ParallaxOcclusion
+	};
+
 	class RenderPolygon : public StaticMesh
 	{
 	public:
 		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+			: StaticMesh(model, name),
+				detail_type_(DT_Parallax), wireframe_(false)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -85,14 +94,14 @@ namespace
 			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
 		}
 
-		void ParallaxScale(float scale)
+		void HeightScale(float scale)
 		{
-			*(technique_->Effect().ParameterByName("parallax_scale")) = scale;
+			*(technique_->Effect().ParameterByName("height_scale")) = scale;
 		}
 
-		void ParallaxBias(float bias)
+		void HeightBias(float bias)
 		{
-			*(technique_->Effect().ParameterByName("parallax_bias")) = bias;
+			*(technique_->Effect().ParameterByName("height_bias")) = bias;
 		}
 
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
@@ -120,29 +129,56 @@ namespace
 
 		void DetailType(uint32_t dt)
 		{
-			switch (dt)
+			detail_type_ = dt;
+			this->UpdateTech();
+		}
+
+		void Wireframe(bool wf)
+		{
+			wireframe_ = wf;
+			this->UpdateTech();
+		}
+
+	private:
+		void UpdateTech()
+		{
+			std::string tech_name;
+			switch (detail_type_)
 			{
-			case 0:
-				technique_ = technique_->Effect().TechniqueByName("None");
+			case DT_None:
+				tech_name = "None";
 				break;
 
-			case 1:
-				technique_ = technique_->Effect().TechniqueByName("Bump");
+			case DT_Bump:
+				tech_name = "Bump";
 				break;
 
-			case 2:
-				technique_ = technique_->Effect().TechniqueByName("Parallax");
+			case DT_Parallax:
+				tech_name = "Parallax";
+				break;
+
+			case DT_ParallaxOcclusion:
+				tech_name = "ParallaxOcclusion";
 				break;
 
 			default:
-				technique_ = technique_->Effect().TechniqueByName("ParallaxOcclusion");
+				tech_name = "None";
 				break;
 			}
+
+			if (wireframe_)
+			{
+				tech_name += "Wireframe";
+			}
+
+			technique_ = technique_->Effect().TechniqueByName(tech_name);
 		}
 
 	private:
 		int4 tile_bb_[3];
 		std::vector<uint32_t> tile_ids_;
+		uint32_t detail_type_;
+		bool wireframe_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -181,21 +217,21 @@ namespace
 			}
 		}
 
-		void ParallaxScale(float scale)
+		void HeightScale(float scale)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ParallaxScale(scale);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->HeightScale(scale);
 			}
 		}
 
-		void ParallaxBias(float bias)
+		void HeightBias(float bias)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->ParallaxBias(bias);
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->HeightBias(bias);
 			}
 		}
 
@@ -220,6 +256,15 @@ namespace
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->DetailType(dt);
+			}
+		}
+
+		void Wireframe(bool wf)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->Wireframe(wf);
 			}
 		}
 	};
@@ -252,7 +297,7 @@ int main()
 
 DetailedSurfaceApp::DetailedSurfaceApp()
 			: App3DFramework("DetailedSurface"),
-				parallax_scale_(0.06f), parallax_bias_(0.02f)
+				height_scale_(0.06f), height_bias_(0.02f)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
 }
@@ -312,27 +357,32 @@ void DetailedSurfaceApp::InputHandler(InputEngine const & /*sender*/, InputActio
 
 void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 {
-	parallax_scale_ = sender.GetValue() / 100.0f;
-	checked_pointer_cast<PolygonObject>(polygon_)->ParallaxScale(parallax_scale_);
+	height_scale_ = sender.GetValue() / 100.0f;
+	checked_pointer_cast<PolygonObject>(polygon_)->HeightScale(height_scale_);
 
 	std::wostringstream stream;
-	stream << L"Scale: " << parallax_scale_;
+	stream << L"Scale: " << height_scale_;
 	dialog_->Control<UIStatic>(id_scale_static_)->SetText(stream.str());
 }
 
 void DetailedSurfaceApp::BiasChangedHandler(KlayGE::UISlider const & sender)
 {
-	parallax_bias_ = sender.GetValue() / 100.0f;
-	checked_pointer_cast<PolygonObject>(polygon_)->ParallaxBias(parallax_bias_);
+	height_bias_ = sender.GetValue() / 100.0f;
+	checked_pointer_cast<PolygonObject>(polygon_)->HeightBias(height_bias_);
 
 	std::wostringstream stream;
-	stream << L"Bias: " << parallax_bias_;
+	stream << L"Bias: " << height_bias_;
 	dialog_->Control<UIStatic>(id_bias_static_)->SetText(stream.str());
 }
 
 void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	checked_pointer_cast<PolygonObject>(polygon_)->DetailType(sender.GetSelectedIndex());
+}
+
+void DetailedSurfaceApp::WireframeHandler(KlayGE::UICheckBox const & sender)
+{
+	checked_pointer_cast<PolygonObject>(polygon_)->Wireframe(sender.GetChecked());
 }
 
 void DetailedSurfaceApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
@@ -393,7 +443,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			juda_tex_->UpdateCache(checked_pointer_cast<PolygonObject>(polygon_)->JudaTexTileIDs(0));
 			polygon_->AddToSceneManager();
 
-			this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
+			this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 			this->Proj(0.01f, 100);
 
 			fpcController_.Scalers(0.05f, 0.01f);
@@ -441,13 +491,14 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_bias_slider_ = dialog_->IDFromName("BiasSlider");
 			id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
 			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
+			id_wireframe_ = dialog_->IDFromName("Wireframe");
 			id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(parallax_scale_ * 100));
+			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(height_scale_ * 100));
 			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, _1));
 			this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
 
-			dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(parallax_bias_ * 100));
+			dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(height_bias_ * 100));
 			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::BiasChangedHandler, this, _1));
 			this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
 
@@ -455,6 +506,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, _1));
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
+			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::WireframeHandler, this, _1));
 			dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DetailedSurfaceApp::CtrlCameraHandler, this, _1));
 
 			loading_percentage_ = 100;

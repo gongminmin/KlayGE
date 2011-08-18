@@ -14,8 +14,8 @@
 		<parameter type="float3" name="light_falloff"/>
 	</cbuffer>
 
-	<parameter type="float" name="parallax_scale"/>
-	<parameter type="float" name="parallax_bias"/>
+	<parameter type="float" name="height_scale"/>
+	<parameter type="float" name="height_bias"/>
 
 	<parameter type="int4" name="diffuse_tex_bb"/>
 	<parameter type="int4" name="normal_tex_bb"/>
@@ -108,7 +108,7 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	
 	float3 view = normalize(V.xyz);
 	
-	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * parallax_scale - parallax_bias;
+	float height = judatex2d_wrap(height_tex_bb, texCoord0).r * height_scale - height_bias;
 	float2 texUV = texCoord0 + (view.xy * height);
 
 	return Shading(L, H, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1));
@@ -130,7 +130,7 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 	CalcTBN(pos, texcoord0, N, T,
 		oL, oV, oH, oPos);
 
-	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * parallax_scale;
+	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * height_scale;
 }
 
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
@@ -216,19 +216,21 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 			// features of the height field
 
 			float sh0 = judatex2d_level_wrap(height_tex_bb, texSampleBase, level).r;
-			float shA = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.88f, level).r - sh0 - 0.88f) *  1 * shadow_softening;
-			float sh9 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.77f, level).r - sh0 - 0.77f) *  2 * shadow_softening;
-			float sh8 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.66f, level).r - sh0 - 0.66f) *  4 * shadow_softening;
-			float sh7 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.55f, level).r - sh0 - 0.55f) *  6 * shadow_softening;
-			float sh6 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.44f, level).r - sh0 - 0.44f) *  8 * shadow_softening;
-			float sh5 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.33f, level).r - sh0 - 0.33f) * 10 * shadow_softening;
-			float sh4 = (judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.22f, level).r - sh0 - 0.22f) * 12 * shadow_softening;
+			float4 shA987 = float4(judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.88f, level).r - 0.88f,
+				judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.77f, level).r - 0.77f,
+				judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.66f, level).r - 0.66f,
+				judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.55f, level).r - 0.55f);
+			float3 sh654 = float3(judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.44f, level).r - 0.44f,
+				judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.33f, level).r - 0.33f,
+				judatex2d_level_wrap(height_tex_bb, texSampleBase + vLightRayTS * 0.22f, level).r - 0.22f);
+			shA987 = (shA987 - sh0) * shadow_softening * float4(1, 2, 4, 6);
+			sh654 = (sh654 - sh0) * shadow_softening * float3(8, 10, 12);
 
 			// Compute the actual shadow strength
-			fOcclusionShadow = 1 - max(max(max(max(max(max(shA, sh9), sh8), sh7), sh6), sh5), sh4);
+			fOcclusionShadow = 1 - max(max(max(max(max(max(shA987.x, shA987.y), shA987.z), shA987.w), sh654.x), sh654.y), sh654.z);
 
 			// The previous computation overbrightens the image, let's adjust for that
-			fOcclusionShadow = fOcclusionShadow * 0.6f + 0.4f;         
+			fOcclusionShadow = saturate(fOcclusionShadow * 0.6f + 0.4f);
 		}
 	}
 
@@ -260,6 +262,43 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 
 	<technique name="ParallaxOcclusion">
 		<pass name="p0">
+			<state name="vertex_shader" value="ParallaxOcclusionMappingVS()"/>
+			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
+		</pass>
+	</technique>
+
+
+	<technique name="NoneWireframe">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="pixel_shader" value="NonePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BumpWireframe">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="pixel_shader" value="BumpMappingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParallaxWireframe">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="CalcTBNVS()"/>
+			<state name="pixel_shader" value="ParallaxMappingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParallaxOcclusionWireframe">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
 			<state name="vertex_shader" value="ParallaxOcclusionMappingVS()"/>
 			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
 		</pass>
