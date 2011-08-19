@@ -42,9 +42,6 @@
     <None Include="..\..\media\DeferredRendering\GBuffer.fxml">
       <Filter>Effects</Filter>
     </None>
-    <None Include="..\..\media\DeferredRendering\SSAOPP.fxml">
-      <Filter>Effects</Filter>
-    </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
     </None>

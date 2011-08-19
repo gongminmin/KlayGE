@@ -223,8 +223,8 @@ namespace KlayGE
 
 		virtual void Pass(PassType type) = 0;
 		virtual void LightingTex(TexturePtr const & tex);
-		virtual void SSAOTex(TexturePtr const & tex);
-		virtual void SSAOEnabled(bool ssao);
+		virtual void SSVOTex(TexturePtr const & tex);
+		virtual void SSVOEnabled(bool ssvo);
 
 	protected:
 		virtual RenderTechniquePtr const & Pass(PassType type, bool alpha) const;
@@ -244,8 +244,8 @@ namespace KlayGE
 		RenderTechniquePtr special_shading_tech_;
 
 		RenderEffectParameterPtr lighting_tex_param_;
-		RenderEffectParameterPtr ssao_tex_param_;
-		RenderEffectParameterPtr ssao_enabled_param_;
+		RenderEffectParameterPtr ssvo_tex_param_;
+		RenderEffectParameterPtr ssvo_enabled_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
 	};
 
@@ -264,8 +264,8 @@ namespace KlayGE
 
 		virtual void Pass(PassType type) = 0;
 		virtual void LightingTex(TexturePtr const & tex);
-		virtual void SSAOTex(TexturePtr const & tex);
-		virtual void SSAOEnabled(bool ssao);
+		virtual void SSVOTex(TexturePtr const & tex);
+		virtual void SSVOEnabled(bool ssvo);
 
 	private:
 		DeferredRenderable* dr_;
@@ -278,8 +278,8 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
-		void SSAOTex(TexturePtr const & tex);
-		void SSAOEnabled(bool ssao);
+		void SSVOTex(TexturePtr const & tex);
+		void SSVOEnabled(bool ssvo);
 
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
@@ -327,8 +327,8 @@ namespace KlayGE
 		FrameBufferPtr shading_buffer_;
 		TexturePtr shading_tex_;
 
-		TexturePtr ssao_tex_;
-		bool ssao_enabled_;
+		TexturePtr ssvo_tex_;
+		bool ssvo_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
@@ -372,8 +372,8 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
-		RenderEffectParameterPtr ssao_tex_param_;
-		RenderEffectParameterPtr ssao_enabled_param_;
+		RenderEffectParameterPtr ssvo_tex_param_;
+		RenderEffectParameterPtr ssvo_enabled_param_;
 
 		std::vector<DeferredSceneObject*> deferred_scene_objs_;
 

@@ -228,6 +228,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<FXAAPostProcess> FXAAPostProcessPtr;
 	class TAAPostProcess;
 	typedef boost::shared_ptr<TAAPostProcess> TAAPostProcessPtr;
+	class SSVOPostProcess;
+	typedef boost::shared_ptr<SSVOPostProcess> SSVOPostProcessPtr;
 	template <typename ParticleType>
 	class ParticleSystem;
 	class InfTerrainRenderable;

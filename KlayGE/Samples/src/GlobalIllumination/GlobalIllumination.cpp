@@ -494,7 +494,7 @@ void GlobalIlluminationApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = MakeSharedPtr<DeferredRenderingLayer>();
-	deferred_rendering_->SSAOEnabled(false);
+	deferred_rendering_->SSVOEnabled(false);
 
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 	ambient_light_->Color(float3(0.0f, 0.0f, 0.0f));

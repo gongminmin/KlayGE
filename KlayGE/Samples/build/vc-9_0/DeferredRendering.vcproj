@@ -387,10 +387,6 @@
 				RelativePath="..\..\media\DeferredRendering\GBuffer.fxml"
 				>
 			</File>
-			<File
-				RelativePath="..\..\media\DeferredRendering\SSAOPP.fxml"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="UI"

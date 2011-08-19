@@ -406,8 +406,8 @@ float4 GenShadowMapAlphaPS(float2 tc : TEXCOORD0) : SV_Target
 		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="ssao_tex"/>
-	<parameter type="int" name="ssao_enabled"/>
+	<parameter type="texture2D" name="ssvo_tex"/>
+	<parameter type="int" name="ssvo_enabled"/>
 	
 	<shader>
 		<![CDATA[
@@ -441,16 +441,16 @@ void ShadingVS(float4 pos : POSITION,
 
 float4 CalcShading(float2 tc, float3 diffuse, float3 emit)
 {
-	float ssao = 1;
-	if (ssao_enabled)
+	float ssvo = 1;
+	if (ssvo_enabled)
 	{
-		ssao = ssao_tex.Sample(point_sampler, tc).x;
+		ssvo = ssvo_tex.Sample(point_sampler, tc).x;
 	}
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
 	float3 diff_lighting = lighting.rgb;
 	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
-	return float4(max(emit + (diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting) * ssao, 0), 1);
+	return float4(max(emit + (diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting) * ssvo, 0), 1);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0

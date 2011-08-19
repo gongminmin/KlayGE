@@ -226,6 +226,7 @@
     <ClCompile Include="..\..\Core\Src\Render\RenderView.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\SATPostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\ShaderObject.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\SSVOPostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\TAAPostProcess.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Texture.cpp" />
     <ClCompile Include="..\..\Core\Src\Kernel\Context.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\RenderView.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\SATPostProcess.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\ShaderObject.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\SSVOPostProcess.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\TAAPostProcess.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Texture.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Viewport.hpp" />
@@ -423,6 +425,7 @@
     <None Include="..\..\media\RenderFX\PostProcess.fxml" />
     <None Include="..\..\media\RenderFX\Quaternion.fxml" />
     <None Include="..\..\media\RenderFX\RenderableHelper.fxml" />
+    <None Include="..\..\media\RenderFX\SSVO.fxml" />
     <None Include="..\..\media\RenderFX\Stereoscopic.fxml" />
     <None Include="..\..\media\RenderFX\SumLum.fxml" />
     <None Include="..\..\media\RenderFX\SummedAreaTable.fxml" />

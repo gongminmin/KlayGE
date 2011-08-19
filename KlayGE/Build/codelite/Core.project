@@ -35,6 +35,7 @@
       <File Name="../../Core/Src/Render/RenderView.cpp"/>
       <File Name="../../Core/Src/Render/SATPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/ShaderObject.cpp"/>
+      <File Name="../../Core/Src/Render/SSVOPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/TAAPostProcess.cpp"/>
       <File Name="../../Core/Src/Render/Texture.cpp"/>
       <File Name="../../Core/Src/Render/Viewport.cpp"/>
@@ -70,6 +71,7 @@
       <File Name="../../Core/Include/KlayGE/RenderView.hpp"/>
       <File Name="../../Core/Include/KlayGE/SATPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/ShaderObject.hpp"/>
+      <File Name="../../Core/Include/KlayGE/SSVOPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/TAAPostProcess.hpp"/>
       <File Name="../../Core/Include/KlayGE/Texture.hpp"/>
       <File Name="../../Core/Include/KlayGE/Viewport.hpp"/>
@@ -97,6 +99,7 @@
       <File Name="../../media/RenderFX/PostProcess.fxml"/>
       <File Name="../../media/RenderFX/Quaternion.fxml"/>
       <File Name="../../media/RenderFX/RenderableHelper.fxml"/>
+      <File Name="../../media/RenderFX/SSVO.fxml"/>
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>
       <File Name="../../media/RenderFX/SummedAreaTable.fxml"/>

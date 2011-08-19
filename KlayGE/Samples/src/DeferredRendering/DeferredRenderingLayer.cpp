@@ -37,8 +37,8 @@ namespace KlayGE
 			shading_tech_ = effect_->TechniqueByName("Shading");
 
 			lighting_tex_param_ = effect_->ParameterByName("lighting_tex");
-			ssao_tex_param_ = effect_->ParameterByName("ssao_tex");
-			ssao_enabled_param_ = effect_->ParameterByName("ssao_enabled");
+			ssvo_tex_param_ = effect_->ParameterByName("ssvo_tex");
+			ssvo_enabled_param_ = effect_->ParameterByName("ssvo_enabled");
 		}
 	}
 
@@ -80,14 +80,14 @@ namespace KlayGE
 		*lighting_tex_param_ = tex;
 	}
 
-	void DeferredRenderable::SSAOTex(TexturePtr const & tex)
+	void DeferredRenderable::SSVOTex(TexturePtr const & tex)
 	{
-		*ssao_tex_param_ = tex;
+		*ssvo_tex_param_ = tex;
 	}
 
-	void DeferredRenderable::SSAOEnabled(bool ssao)
+	void DeferredRenderable::SSVOEnabled(bool ssvo)
 	{
-		*ssao_enabled_param_ = static_cast<int32_t>(ssao);
+		*ssvo_enabled_param_ = static_cast<int32_t>(ssvo);
 	}
 
 
@@ -101,14 +101,14 @@ namespace KlayGE
 		dr_->LightingTex(tex);
 	}
 
-	void DeferredSceneObject::SSAOTex(TexturePtr const & tex)
+	void DeferredSceneObject::SSVOTex(TexturePtr const & tex)
 	{
-		dr_->SSAOTex(tex);
+		dr_->SSVOTex(tex);
 	}
 
-	void DeferredSceneObject::SSAOEnabled(bool ssao)
+	void DeferredSceneObject::SSVOEnabled(bool ssvo)
 	{
-		dr_->SSAOEnabled(ssao);
+		dr_->SSVOEnabled(ssvo);
 	}
 
 
@@ -292,14 +292,14 @@ namespace KlayGE
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 	}
 
-	void DeferredRenderingLayer::SSAOTex(TexturePtr const & tex)
+	void DeferredRenderingLayer::SSVOTex(TexturePtr const & tex)
 	{
-		ssao_tex_ = tex;
+		ssvo_tex_ = tex;
 	}
 
-	void DeferredRenderingLayer::SSAOEnabled(bool ssao)
+	void DeferredRenderingLayer::SSVOEnabled(bool ssvo)
 	{
-		ssao_enabled_ = ssao;
+		ssvo_enabled_ = ssvo;
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -384,8 +384,8 @@ namespace KlayGE
 					deferred_scene_objs_.push_back(deo);
 
 					deo->LightingTex(lighting_tex_);
-					deo->SSAOTex(ssao_tex_);
-					deo->SSAOEnabled(ssao_enabled_);
+					deo->SSVOTex(ssvo_tex_);
+					deo->SSVOEnabled(ssvo_enabled_);
 				}
 			}
 		}

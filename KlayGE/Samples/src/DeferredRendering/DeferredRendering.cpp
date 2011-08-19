@@ -20,6 +20,7 @@
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/half.hpp>
 #include <KlayGE/FXAAPostProcess.hpp>
+#include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
@@ -473,39 +474,6 @@ namespace
 		}
 	};
 
-	class SSAOPostProcess : public PostProcess
-	{
-	public:
-		SSAOPostProcess()
-			: PostProcess(L"SSAO",
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSAOPP.fxml")->TechniqueByName("SSVO"))
-		{
-			depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
-			proj_param_ = technique_->Effect().ParameterByName("proj");
-			inv_proj_param_ = technique_->Effect().ParameterByName("inv_proj");
-		}
-
-		void OnRenderBegin()
-		{
-			PostProcess::OnRenderBegin();
-
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
-			float4x4 const & proj = camera.ProjMatrix();
-			*proj_param_ = proj;
-			*inv_proj_param_ = MathLib::inverse(proj);
-		}
-
-	protected:
-		RenderEffectParameterPtr proj_param_;
-		RenderEffectParameterPtr inv_proj_param_;
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
-	};
-
 	class DeferredRenderingDebug : public PostProcess
 	{
 	public:
@@ -514,7 +482,7 @@ namespace
 		{
 			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("ssao_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
 
 			this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
 		}
@@ -542,7 +510,7 @@ namespace
 				break;
 
 			case 5:
-				technique_ = technique_->Effect().TechniqueByName("ShowSSAO");
+				technique_ = technique_->Effect().TechniqueByName("ShowSSVO");
 				break;
 
 			case 6:
@@ -679,7 +647,7 @@ void DeferredRenderingApp::InitObjects()
 
 	//edge_anti_alias_ = MakeSharedPtr<AdaptiveAntiAliasPostProcess>();
 	edge_anti_alias_ = MakeSharedPtr<FXAAPostProcess>();
-	ssao_pp_ = MakeSharedPtr<SSAOPostProcess>();
+	ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
 	blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
@@ -690,7 +658,7 @@ void DeferredRenderingApp::InitObjects()
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
 	id_anti_alias_ = dialog_->IDFromName("AntiAlias");
-	id_ssao_ = dialog_->IDFromName("SSAO");
+	id_ssvo_ = dialog_->IDFromName("SSVO");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredRenderingApp::BufferChangedHandler, this, _1));
@@ -698,8 +666,8 @@ void DeferredRenderingApp::InitObjects()
 
 	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::AntiAliasHandler, this, _1));
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
-	dialog_->Control<UICheckBox>(id_ssao_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::SSAOHandler, this, _1));
-	this->SSAOHandler(*dialog_->Control<UICheckBox>(id_ssao_));
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::SSVOHandler, this, _1));
+	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
@@ -734,24 +702,24 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ABGR16F;
 	}
-	ssao_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	blur_ssao_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	blur_ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	deferred_rendering_->SSAOTex(blur_ssao_tex_);
+	deferred_rendering_->SSVOTex(blur_ssvo_tex_);
 
 	edge_anti_alias_->InputPin(0, deferred_rendering_->ShadingTex());
 
 	copy_pp_->InputPin(0, deferred_rendering_->ShadingTex());
 
-	ssao_pp_->InputPin(0, deferred_rendering_->GBufferTex());
-	ssao_pp_->OutputPin(0, ssao_tex_);
+	ssvo_pp_->InputPin(0, deferred_rendering_->GBufferTex());
+	ssvo_pp_->OutputPin(0, ssvo_tex_);
 
-	blur_pp_->InputPin(0, ssao_tex_);
-	blur_pp_->OutputPin(0, blur_ssao_tex_);
+	blur_pp_->InputPin(0, ssvo_tex_);
+	blur_pp_->OutputPin(0, blur_ssvo_tex_);
 
 	debug_pp_->InputPin(0, deferred_rendering_->GBufferTex());
 	debug_pp_->InputPin(1, deferred_rendering_->LightingTex());
-	debug_pp_->InputPin(2, blur_ssao_tex_);
+	debug_pp_->InputPin(2, blur_ssvo_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -792,12 +760,12 @@ void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
 	}
 }
 
-void DeferredRenderingApp::SSAOHandler(UICheckBox const & sender)
+void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 {
 	if ((0 == buffer_type_) || (5 == buffer_type_))
 	{
-		ssao_enabled_ = sender.GetChecked();
-		deferred_rendering_->SSAOEnabled(ssao_enabled_);
+		ssvo_enabled_ = sender.GetChecked();
+		deferred_rendering_->SSVOEnabled(ssvo_enabled_);
 	}
 }
 
@@ -869,9 +837,9 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 	{
 		if ((0 == buffer_type_) || (5 == buffer_type_))
 		{
-			if (ssao_enabled_)
+			if (ssvo_enabled_)
 			{
-				ssao_pp_->Apply();
+				ssvo_pp_->Apply();
 				blur_pp_->Apply();
 
 				if (5 == buffer_type_)

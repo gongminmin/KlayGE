@@ -26,7 +26,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void BufferChangedHandler(KlayGE::UIComboBox const & sender);
 	void AntiAliasHandler(KlayGE::UICheckBox const & sender);
-	void SSAOHandler(KlayGE::UICheckBox const & sender);
+	void SSVOHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -44,10 +44,10 @@ private:
 	KlayGE::PostProcessPtr edge_anti_alias_;
 	KlayGE::PostProcessPtr copy_pp_;
 
-	KlayGE::TexturePtr ssao_tex_;
-	KlayGE::PostProcessPtr ssao_pp_;
+	KlayGE::TexturePtr ssvo_tex_;
+	KlayGE::PostProcessPtr ssvo_pp_;
 
-	KlayGE::TexturePtr blur_ssao_tex_;
+	KlayGE::TexturePtr blur_ssvo_tex_;
 	KlayGE::PostProcessPtr blur_pp_;
 
 	KlayGE::PostProcessPtr debug_pp_;
@@ -55,11 +55,11 @@ private:
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
 	bool anti_alias_enabled_;
-	bool ssao_enabled_;
+	bool ssvo_enabled_;
 
 	int id_buffer_combo_;
 	int id_anti_alias_;
-	int id_ssao_;
+	int id_ssvo_;
 	int id_ctrl_camera_;
 
 	KlayGE::AmbientLightSourcePtr ambient_light_;

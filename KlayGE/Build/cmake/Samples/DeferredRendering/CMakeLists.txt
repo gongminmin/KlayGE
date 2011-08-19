@@ -12,7 +12,6 @@ SET(EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRendering.fxml
     ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.fxml
     ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/GBuffer.fxml
-    ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/SSAOPP.fxml
 )
 
 SET(UI_FILES

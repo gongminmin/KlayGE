@@ -9,13 +9,13 @@
 			<item name="Normal"/>
 			<item name="Depth"/>
 			<item name="Edge"/>
-			<item name="SSAO"/>
+			<item name="SSVO"/>
 			<item name="Diffuse Lighting"/>
 			<item name="Specular Lighting"/>
 		</control>
 
 		<control type="check_box" id="AntiAlias" caption="Anti alias" x="20" y="88" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
-		<control type="check_box" id="SSAO" caption="SSAO" x="20" y="128" width="100" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="SSVO" caption="SSVO" x="20" y="128" width="100" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="206" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 

@@ -27,6 +27,7 @@ SET(RENDERING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderView.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/SATPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/ShaderObject.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/TAAPostProcess.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Viewport.cpp
@@ -63,6 +64,7 @@ SET(RENDERING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderView.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SATPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ShaderObject.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TAAPostProcess.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Viewport.hpp
@@ -90,6 +92,7 @@ SET(RENDERING_EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Stereoscopic.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SummedAreaTable.fxml

@@ -450,6 +450,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\SSVOPostProcess.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\TAAPostProcess.cpp"
 					>
 				</File>
@@ -586,6 +590,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Include\KlayGE\SSVOPostProcess.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Include\KlayGE\TAAPostProcess.hpp"
 					>
 				</File>
@@ -687,6 +695,10 @@
 				</File>
 				<File
 					RelativePath="..\..\media\RenderFX\RenderableHelper.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\SSVO.fxml"
 					>
 				</File>
 				<File

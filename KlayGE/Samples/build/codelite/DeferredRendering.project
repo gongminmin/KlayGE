@@ -19,7 +19,6 @@
     <File Name="../../media/DeferredRendering/DeferredRendering.fxml"/>
     <File Name="../../media/DeferredRendering/DeferredRenderingDebug.fxml"/>
     <File Name="../../media/DeferredRendering/GBuffer.fxml"/>
-    <File Name="../../media/DeferredRendering/SSAOPP.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
     <File Name="../../media/DeferredRendering/DeferredRendering.uiml"/>
