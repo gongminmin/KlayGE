@@ -16,6 +16,9 @@
 #include <KlayGE/Query.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Mesh.hpp>
+#include <KlayGE/SSVOPostProcess.hpp>
+#include <KlayGE/HDRPostProcess.hpp>
+#include <KlayGE/FXAAPostProcess.hpp>
 
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
@@ -301,6 +304,15 @@ namespace KlayGE
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
+		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
+		blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
+
+		hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
+		skip_hdr_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+
+		aa_pp_ = MakeSharedPtr<FXAAPostProcess>();
+		skip_aa_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
@@ -396,17 +408,7 @@ namespace KlayGE
 		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
 		if (mrt_g_buffer_)
 		{
-			ssvo_tex_param_ = effect_->ParameterByName("ssvo_tex");
 			ssvo_enabled_param_ = effect_->ParameterByName("ssvo_enabled");
-		}
-	}
-
-	void DeferredRenderingLayer::SSVOTex(TexturePtr const & tex)
-	{
-		ssvo_tex_ = tex;
-		if (mrt_g_buffer_)
-		{
-			*ssvo_tex_param_ = ssvo_tex_;
 		}
 	}
 
@@ -417,6 +419,16 @@ namespace KlayGE
 		{
 			*ssvo_enabled_param_ = static_cast<int32_t>(ssvo_enabled_);
 		}
+	}
+
+	void DeferredRenderingLayer::HDREnabled(bool hdr)
+	{
+		hdr_enabled_ = hdr;
+	}
+
+	void DeferredRenderingLayer::AAEnabled(bool aa)
+	{
+		aa_enabled_ = aa;
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -493,6 +505,8 @@ namespace KlayGE
 		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
+		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.CurFrameBuffer()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
 		if (g_buffer_tex_)
 		{
 			*(effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
@@ -504,6 +518,27 @@ namespace KlayGE
 
 		*(effect_->ParameterByName("lighting_tex")) = lighting_tex_;
 		*(effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
+
+		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+		ssvo_pp_->InputPin(0, g_buffer_tex_);
+		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
+		blur_pp_->InputPin(0, small_ssvo_tex_);
+		blur_pp_->OutputPin(0, ssvo_tex_);
+
+		hdr_pp_->InputPin(0, shading_tex_);
+		hdr_pp_->OutputPin(0, ldr_tex_);
+		skip_hdr_pp_->InputPin(0, shading_tex_);
+		skip_hdr_pp_->OutputPin(0, ldr_tex_);
+
+		aa_pp_->InputPin(0, ldr_tex_);
+		skip_aa_pp_->InputPin(0, ldr_tex_);
+
+		if (mrt_g_buffer_)
+		{
+			*(effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
+		}
 
 		*(vpls_lighting_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(vpls_lighting_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
@@ -603,6 +638,12 @@ namespace KlayGE
 			else
 			{
 				g_buffer_tex_->BuildMipSubLevels();
+
+				if (ssvo_enabled_)
+				{
+					ssvo_pp_->Apply();
+					blur_pp_->Apply();
+				}
 
 				if (indirect_lighting_enabled_)
 				{
@@ -750,48 +791,64 @@ namespace KlayGE
 		}
 		else
 		{
-			if (PT_Shading == pass_type)
+			if ((PT_Shading == pass_type) || (PT_SpecialShading == pass_type))
 			{
 				if (0 == index_in_pass)
 				{
-					// 4. accumulate to light buffer
-					if (indirect_lighting_enabled_ && (illum_ != 1))
+					if (PT_Shading == pass_type)
 					{
-						PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
-						copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
-						copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
-						copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
-						copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
-						copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
-						copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
-						copy_to_light_buffer_pp->Apply();
-					}
+						// 4. accumulate to light buffer
+						if (indirect_lighting_enabled_ && (illum_ != 1))
+						{
+							PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
+							copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
+							copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
+							copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
+							copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
+							copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
+							copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
+							copy_to_light_buffer_pp->Apply();
+						}
 
-					re.BindFrameBuffer(shading_buffer_);
-					if (mrt_g_buffer_)
-					{
-						re.Render(*technique_shading_, *rl_quad_);
-						return App3DFramework::URV_Flushed;
+						re.BindFrameBuffer(shading_buffer_);
+						if (mrt_g_buffer_)
+						{
+							re.Render(*technique_shading_, *rl_quad_);
+							return App3DFramework::URV_Flushed;
+						}
+						else
+						{
+							return App3DFramework::URV_Need_Flush;
+						}
 					}
 					else
 					{
+						re.BindFrameBuffer(shading_buffer_);
 						return App3DFramework::URV_Need_Flush;
 					}
 				}
 				else
 				{
-					return App3DFramework::URV_Finished;
-				}
-			}
-			else if (PT_SpecialShading == pass_type)
-			{
-				if (0 == index_in_pass)
-				{
-					re.BindFrameBuffer(shading_buffer_);
-					return App3DFramework::URV_Need_Flush;
-				}
-				else
-				{
+					re.BindFrameBuffer(FrameBufferPtr());
+					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+
+					if (hdr_enabled_)
+					{
+						hdr_pp_->Apply();
+					}
+					else
+					{
+						skip_hdr_pp_->Apply();
+					}
+					if (aa_enabled_)
+					{
+						aa_pp_->Apply();
+					}
+					else
+					{
+						skip_aa_pp_->Apply();
+					}
+
 					return App3DFramework::URV_Finished;
 				}
 			}

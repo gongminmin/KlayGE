@@ -453,6 +453,10 @@ int main()
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.graphics_cfg.hdr = false;
+	Context::Instance().Config(cfg);
+
 	GlobalIlluminationApp app;
 	app.Create();
 	app.Run();
@@ -494,7 +498,6 @@ void GlobalIlluminationApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = MakeSharedPtr<DeferredRenderingLayer>();
-	deferred_rendering_->SSVOEnabled(false);
 
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 	ambient_light_->Color(float3(0.0f, 0.0f, 0.0f));
@@ -533,6 +536,9 @@ void GlobalIlluminationApp::InitObjects()
 	id_illum_combo_ = dialog_->IDFromName("IllumCombo");
 	id_il_scale_static_ = dialog_->IDFromName("ILScaleStatic");
 	id_il_scale_slider_ = dialog_->IDFromName("ILScaleSlider");
+	id_ssvo_ = dialog_->IDFromName("SSVO");
+	id_hdr_ = dialog_->IDFromName("HDR");
+	id_aa_ = dialog_->IDFromName("AA");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&GlobalIlluminationApp::IllumChangedHandler, this, _1));
@@ -541,6 +547,15 @@ void GlobalIlluminationApp::InitObjects()
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
 	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&GlobalIlluminationApp::ILScaleChangedHandler, this, _1));
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
+
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::SSVOHandler, this, _1));
+	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
+
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::HDRHandler, this, _1));
+	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
+
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::AAHandler, this, _1));
+	this->AAHandler(*dialog_->Control<UICheckBox>(id_aa_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, _1));
 
@@ -592,6 +607,21 @@ void GlobalIlluminationApp::ILScaleChangedHandler(KlayGE::UISlider const & sende
 	dialog_->Control<UIStatic>(id_il_scale_static_)->SetText(stream.str());
 }
 
+void GlobalIlluminationApp::SSVOHandler(UICheckBox const & sender)
+{
+	deferred_rendering_->SSVOEnabled(sender.GetChecked());
+}
+
+void GlobalIlluminationApp::HDRHandler(UICheckBox const & sender)
+{
+	deferred_rendering_->HDREnabled(sender.GetChecked());
+}
+
+void GlobalIlluminationApp::AAHandler(UICheckBox const & sender)
+{
+	deferred_rendering_->AAEnabled(sender.GetChecked());
+}
+
 void GlobalIlluminationApp::CtrlCameraHandler(UICheckBox const & sender)
 {
 	if (sender.GetChecked())
@@ -621,15 +651,5 @@ void GlobalIlluminationApp::DoUpdateOverlay()
 
 uint32_t GlobalIlluminationApp::DoUpdate(uint32_t pass)
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	uint32_t ret = deferred_rendering_->Update(pass);
-	if (ret & App3DFramework::URV_Finished)
-	{
-		renderEngine.BindFrameBuffer(FrameBufferPtr());
-		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-		copy_pp_->Apply();
-	}
-
-	return ret;
+	return deferred_rendering_->Update(pass);
 }

@@ -278,8 +278,9 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
-		void SSVOTex(TexturePtr const & tex);
 		void SSVOEnabled(bool ssvo);
+		void HDREnabled(bool hdr);
+		void AAEnabled(bool aa);
 
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
@@ -327,8 +328,21 @@ namespace KlayGE
 		FrameBufferPtr shading_buffer_;
 		TexturePtr shading_tex_;
 
+		TexturePtr ldr_tex_;
+
+		PostProcessPtr ssvo_pp_;
+		PostProcessPtr blur_pp_;
+		TexturePtr small_ssvo_tex_;
 		TexturePtr ssvo_tex_;
 		bool ssvo_enabled_;
+
+		PostProcessPtr hdr_pp_;
+		PostProcessPtr skip_hdr_pp_;
+		bool hdr_enabled_;
+
+		PostProcessPtr aa_pp_;
+		PostProcessPtr skip_aa_pp_;
+		bool aa_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;
@@ -372,7 +386,6 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
-		RenderEffectParameterPtr ssvo_tex_param_;
 		RenderEffectParameterPtr ssvo_enabled_param_;
 
 		std::vector<DeferredSceneObject*> deferred_scene_objs_;
