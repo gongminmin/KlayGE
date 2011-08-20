@@ -39,7 +39,7 @@ void VPLsLightingVS(float4 pos : POSITION,
 				out float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
 				out float oW : TEXCOORD2,
-				out float3 oColor : TEXCOORD3,
+				out float3 oVPLColor : TEXCOORD3,
 #endif
 				out float4 oPos : SV_Position)
 {
@@ -58,7 +58,7 @@ void VPLsLightingVS(float4 pos : POSITION,
 
 	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
 
-	float scale = sqrt((oVPLColor.x + oVPLColor.y + oVPLColor.z) / 3) * 20;
+	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 

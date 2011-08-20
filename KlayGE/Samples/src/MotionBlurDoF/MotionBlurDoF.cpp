@@ -163,7 +163,7 @@ namespace
 			*(technique_->Effect().ParameterByName("modelmat")) = model;
 			*(technique_->Effect().ParameterByName("last_modelmat")) = last_model;
 			Color clr(data->clr);
-			*(technique_->Effect().ParameterByName("color")) = float4(clr.r(), clr.g(), clr.b(), clr.a());
+			*(technique_->Effect().ParameterByName("color")) = float4(clr.b(), clr.g(), clr.r(), clr.a());	// swap b and r
 		}
 
 		void MotionVecPass(bool motion_vec)
@@ -205,13 +205,13 @@ namespace
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
 			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ARGB8));
+			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR8));
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
 			mat_ = mat;
-			inst_.clr = clr.ARGB();
+			inst_.clr = clr.ABGR();
 		}
 
 		void const * InstanceData() const

@@ -797,9 +797,11 @@ namespace KlayGE
 				{
 					if (PT_Shading == pass_type)
 					{
-						// 4. accumulate to light buffer
 						if (indirect_lighting_enabled_ && (illum_ != 1))
 						{
+							this->UpsampleMultiresLighting();
+
+							// accumulate to light buffer
 							PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
 							copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
 							copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
@@ -1000,7 +1002,6 @@ namespace KlayGE
 				{
 					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
 					this->VPLsLighting(light);
-					this->UpsampleMultiresLighting();
 
 					return App3DFramework::URV_Flushed;
 				}
@@ -1142,7 +1143,7 @@ namespace KlayGE
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
-			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(0.0f, 0);
+			vpls_lighting_fbs_[i]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 0);
 
 			*subsplat_cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
 			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
@@ -1191,8 +1192,6 @@ namespace KlayGE
 		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
 		{
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
-			vpls_lighting_fbs_[i]->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-
 			re.Render(*vpls_lighting_tech_, *rl_vpl_);
 		}
 	}
