@@ -193,3 +193,4 @@ External/libvorbis/win32/*/*.suo
 External/libvorbis/win32/*/*.ncb
 External/libvorbis/win32/*/*.opensdf
 External/libvorbis/win32/*/*.sdf
+glloader/doc/html/

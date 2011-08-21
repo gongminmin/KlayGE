@@ -1,21 +1,30 @@
-/*
-// glloader
-// Copyright (C) 2004-2009 Minmin Gong
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+/**
+ * @file glloader.h
+ * @author  Minmin Gong
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * @section DESCRIPTION
+ * The glloader, a subproject of Klay Game Engine, is an OpenGL extension
+ * loading library. It supports OpenGL core 1.0 to 4.2, OpenGL ES core 1.0
+ * to 2.0, as well as WGL, GLX, and other GL extensions. There is a automatic
+ * code generater. All the things you want to do is to write a xml script
+ * if you have to support new extensions. 
+ */
 
 /*
 ** License Applicability. Except to the extent portions of this file are
@@ -291,19 +300,44 @@ extern "C"
 {
 #endif
 
-/* Initiate GLLoader */
+/**
+ * Initiate GLLoader
+ */
 GLLOADER_API void glloader_init();
 
-/* Check if a feature is supported, including the core and the extensions */
+/**
+ * Find out if a particular feature is available on your platform, including the core and the extensions.
+ *
+ * @param name The name string of a feature.
+ *       Note: You can use a name string "GL_VERSION_x_y" to determine if the x.y core version is supported. 
+ *
+ * @return Non-zero if a feature is supported.
+ */
 GLLOADER_API int glloader_is_supported(const char* name);
 
-/* Get the address of OpenGL extension functions, given the function name */
+/**
+ * Load an OpenGL function.
+ *
+ * @param name The function name.
+ *
+ * @return The address of the extension function. When the function fails, there is NOT guarantee that the return value is NULL.
+ */
 GLLOADER_API void* glloader_get_gl_proc_address(const char* name);
 
-/* Get the number of supported features, including the core and the extensions */
+/**
+ * Get the number of supported features.
+ *
+ * @return The number of supported features, including the core and the extensions.
+ */
 GLLOADER_API int glloader_num_features();
 
-/* Get the name of a feature. The parameter 'index' is between [0, num_features - 1] */
+/**
+ * Get the name of a feature.
+ *
+ * @param index The index of a feature. It's between [0, glloader_num_features() - 1].
+ *
+ * @return The name of a feature.
+ */
 GLLOADER_API const char* glloader_get_feature_name(int index);
 
 #ifdef __cplusplus
