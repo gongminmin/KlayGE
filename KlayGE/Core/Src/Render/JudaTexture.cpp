@@ -987,6 +987,14 @@ namespace KlayGE
 			{
 				++ mipmap;
 			}
+			if (IsCompressedFormat(format))
+			{
+				// BC format must be multiply of 4
+				while (((tile_with_border_size >> mipmap) & 0x3) != 0)
+				{
+					-- mipmap;
+				}
+			}
 			++ mipmap;
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

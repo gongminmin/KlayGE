@@ -1404,6 +1404,7 @@ namespace KlayGE
 		caps_.max_vertex_streams = temp;
 
 		caps_.hw_instancing_support = true;
+		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_NV_primitive_restart())

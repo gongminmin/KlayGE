@@ -323,15 +323,22 @@ void DetailedSurfaceApp::InitObjects()
 	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");
 
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_BC1))
 	{
-		fmt = EF_ABGR8;
+		fmt = EF_BC1;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
 
-		fmt = EF_ARGB8;
+			fmt = EF_ARGB8;
+		}
 	}
 	juda_tex_->CacheProperty(1024, fmt, 4);
 

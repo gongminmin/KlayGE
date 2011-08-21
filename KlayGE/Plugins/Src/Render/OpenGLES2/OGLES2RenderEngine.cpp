@@ -556,6 +556,7 @@ namespace KlayGE
 		caps_.max_vertex_streams = temp;
 
 		caps_.hw_instancing_support = true;
+		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		caps_.primitive_restart_support = false;

@@ -838,6 +838,7 @@ namespace KlayGE
 		caps_.max_vertex_streams = 16;
 		caps_.max_texture_anisotropy = (D3D_FEATURE_LEVEL_9_1 == d3d_feature_level_) ? 2 : 16;
 		caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
+		caps_.instance_id_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		{
 			D3D11_FEATURE_DATA_THREADING mt_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));

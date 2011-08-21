@@ -51,6 +51,7 @@ namespace KlayGE
 		uint8_t max_texture_anisotropy;
 
 		bool hw_instancing_support;
+		bool instance_id_support;
 		bool stream_output_support;
 		bool alpha_to_coverage_support;
 		bool primitive_restart_support;
