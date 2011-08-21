@@ -158,8 +158,9 @@ namespace KlayGE
 		: illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		mrt_g_buffer_ = (rf.RenderEngineInstance().DeviceCaps().max_simultaneous_rts > 1);
+		mrt_g_buffer_ = (caps.max_simultaneous_rts > 1);
 
 		if (mrt_g_buffer_)
 		{
@@ -277,21 +278,21 @@ namespace KlayGE
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR32F, 1, 0))
+		if (caps.rendertarget_format_support(EF_GR32F, 1, 0))
 		{
 			fmt = EF_GR32F;
 		}
-		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0))
+		else if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
 		{
 			fmt = EF_ABGR32F;
 		}
-		else if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+		else if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
 		{
 			fmt = EF_GR16F;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 			fmt = EF_ABGR16F;
 		}
@@ -343,13 +344,15 @@ namespace KlayGE
 			subsplat_is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
 
 			RenderEffectPtr vpls_lighting_effect = rf.LoadEffect("VPLsLighting.fxml");
-			vpls_lighting_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLighting");
+			vpls_lighting_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingInstanceID");
+			vpls_lighting_no_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingNoInstanceID");
 
 			vpl_view_param_ = vpls_lighting_effect->ParameterByName("view");
 			vpl_proj_param_ = vpls_lighting_effect->ParameterByName("proj");
 			vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
 			vpl_light_pos_es_param_ = vpls_lighting_effect->ParameterByName("light_pos_es");
 			vpl_light_color_param_ = vpls_lighting_effect->ParameterByName("light_color");
+			vpl_x_coord_param_ = vpls_lighting_effect->ParameterByName("x_coord");
 			*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 			*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
@@ -358,7 +361,10 @@ namespace KlayGE
 			copy_to_light_buffer_i_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy2LightBuffer.ppml"), "CopyToLightBufferI");
 
 			rl_vpl_ = LoadModel("indirect_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())()->Mesh(0)->GetRenderLayout();
-			rl_vpl_->NumInstances(VPL_COUNT);
+			if (caps.instance_id_support)
+			{
+				rl_vpl_->NumInstances(VPL_COUNT);
+			}
 		}
 
 
@@ -434,6 +440,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
@@ -465,7 +472,7 @@ namespace KlayGE
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
-				1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+				1, 1, EF_D24S8, 1, 0,  EAH_GPU_Write, NULL);
 
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
@@ -474,13 +481,13 @@ namespace KlayGE
 		}
 
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 		{
 			fmt = EF_R16F;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 			fmt = EF_ABGR16F;
 		}
@@ -491,13 +498,13 @@ namespace KlayGE
 		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 1, 0));
 		lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			fmt = EF_B10G11R11F;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 			fmt = EF_ABGR16F;
 		}
@@ -540,8 +547,8 @@ namespace KlayGE
 			*(effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
 		}
 
-		*(vpls_lighting_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
-		*(vpls_lighting_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
+		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
 		*(subsplat_stencil_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
@@ -800,16 +807,7 @@ namespace KlayGE
 						if (indirect_lighting_enabled_ && (illum_ != 1))
 						{
 							this->UpsampleMultiresLighting();
-
-							// accumulate to light buffer
-							PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
-							copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
-							copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
-							copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
-							copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
-							copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
-							copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
-							copy_to_light_buffer_pp->Apply();
+							this->AccumulateToLightingTex();
 						}
 
 						re.BindFrameBuffer(shading_buffer_);
@@ -914,10 +912,6 @@ namespace KlayGE
 							if (PT_GenReflectiveShadowMap == pass_type)
 							{
 								rsm_to_vpls_pps[type]->SetParam(11, near_q);
-
-								CameraPtr const & camera = g_buffer_->GetViewport().camera;
-								q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-								*subsplat_near_q_far_param_ = float3(camera->NearPlane() * q, q, camera->FarPlane());
 							}
 						}
 
@@ -1139,6 +1133,10 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::SetSubsplatStencil()
 	{
+		CameraPtr const & camera = g_buffer_->GetViewport().camera;
+		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+		*subsplat_near_q_far_param_ = float3(camera->NearPlane() * q, q, camera->FarPlane());
+
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
@@ -1180,6 +1178,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::VPLsLighting(LightSourcePtr const & light)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		*vpl_view_param_ = view_;
 		*vpl_proj_param_ = proj_;
@@ -1192,7 +1191,19 @@ namespace KlayGE
 		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
 		{
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
-			re.Render(*vpls_lighting_tech_, *rl_vpl_);
+
+			if (caps.instance_id_support)
+			{
+				re.Render(*vpls_lighting_instance_id_tech_, *rl_vpl_);
+			}
+			else
+			{
+				for (int j = 0; j < VPL_COUNT; ++ j)
+				{
+					*vpl_x_coord_param_ = (j + 0.5f) / VPL_COUNT;
+					re.Render(*vpls_lighting_no_instance_id_tech_, *rl_vpl_);
+				}
+			}
 		}
 	}
 
@@ -1214,6 +1225,18 @@ namespace KlayGE
 			indirect_lighting_pingpong_tex_->CopyToSubTexture2D(*indirect_lighting_tex_, 0, i, 0, 0, width, height,
 				0, i, 0, 0, width, height);
 		}
+	}
+
+	void DeferredRenderingLayer::AccumulateToLightingTex()
+	{
+		PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
+		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
+		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
+		copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
+		copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
+		copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
+		copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
+		copy_to_light_buffer_pp->Apply();
 	}
 
 	void DeferredRenderingLayer::DisplayIllum(int illum)

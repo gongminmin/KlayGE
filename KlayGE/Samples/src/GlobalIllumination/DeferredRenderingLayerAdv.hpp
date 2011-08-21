@@ -308,6 +308,7 @@ namespace KlayGE
 		void ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light);
 		void VPLsLighting(LightSourcePtr const & light);
 		void UpsampleMultiresLighting();
+		void AccumulateToLightingTex();
 
 	private:
 		bool mrt_g_buffer_;
@@ -404,7 +405,8 @@ namespace KlayGE
 		TexturePtr indirect_lighting_tex_;
 		TexturePtr indirect_lighting_pingpong_tex_;
 		RenderTechniquePtr subsplat_stencil_tech_;
-		RenderTechniquePtr vpls_lighting_tech_;
+		RenderTechniquePtr vpls_lighting_instance_id_tech_;
+		RenderTechniquePtr vpls_lighting_no_instance_id_tech_;
 		std::vector<FrameBufferPtr> vpls_lighting_fbs_;
 		bool indirect_lighting_enabled_;	
 
@@ -429,6 +431,7 @@ namespace KlayGE
 		RenderEffectParameterPtr vpl_depth_near_far_invfar_param_;
 		RenderEffectParameterPtr vpl_light_pos_es_param_;
 		RenderEffectParameterPtr vpl_light_color_param_;
+		RenderEffectParameterPtr vpl_x_coord_param_;
 
 		RenderLayoutPtr rl_vpl_;
 	};

@@ -14,14 +14,21 @@
 	<parameter type="texture2D" name="vpls_tex"/>
 	<parameter type="texture2D" name="gbuffer_tex"/>
 
-	<parameter type="float4x4" name="view"/>
-	<parameter type="float4x4" name="proj"/>
-	<parameter type="float3" name="depth_near_far_invfar"/>
 	<parameter type="float2" name="vpl_params"/>
 	<parameter type='int' name='flipping'/>
 
-	<parameter type="float4" name="light_pos_es"/>
-	<parameter type="float4" name="light_color"/>
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="view"/>
+		<parameter type="float4x4" name="proj"/>
+		<parameter type="float3" name="depth_near_far_invfar"/>
+
+		<parameter type="float4" name="light_pos_es"/>
+		<parameter type="float4" name="light_color"/>
+	</cbuffer>
+
+	<cbuffer name="per_vpl">
+		<parameter type="float" name="x_coord"/>
+	</cbuffer>
 
 	<shader>
 		<![CDATA[
@@ -29,21 +36,21 @@
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
-void VPLsLightingVS(float4 pos : POSITION,
-				uint instance_id : SV_InstanceID,
+void CalcVPLsLightingShape(float4 pos,
+				float vpl_x_coord,
 #ifdef NOPERSPECTIVE_SUPPORT
-				out noperspective float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float3 oVPLColor : TEXCOORD2,
+				out float2 oTc,
+				out float4 oViewDir,
+				out float3 oVPLColor,
 #else
-				out float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float oW : TEXCOORD2,
-				out float3 oVPLColor : TEXCOORD3,
+				out float2 oTc,
+				out float4 oViewDir,
+				out float oW,
+				out float3 oVPLColor,
 #endif
-				out float4 oPos : SV_Position)
+				out float4 oPos)
 {
-	oViewDir.w = (instance_id + 0.5f) * vpl_params.x;
+	oViewDir.w = vpl_x_coord;
 
 	float4 albedo = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 0.5f / 4), 0);
 	float4 normal = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 1.5f / 4), 0);
@@ -70,6 +77,51 @@ void VPLsLightingVS(float4 pos : POSITION,
 	oW = oPos.w;
 	oTc *= oW;
 #endif
+}
+
+void VPLsLightingInstanceIDVS(float4 pos : POSITION,
+				uint instance_id : SV_InstanceID,
+#ifdef NOPERSPECTIVE_SUPPORT
+				out noperspective float2 oTc : TEXCOORD0,
+				out float4 oViewDir : TEXCOORD1,
+				out float3 oVPLColor : TEXCOORD2,
+#else
+				out float2 oTc : TEXCOORD0,
+				out float4 oViewDir : TEXCOORD1,
+				out float oW : TEXCOORD2,
+				out float3 oVPLColor : TEXCOORD3,
+#endif
+				out float4 oPos : SV_Position)
+{
+	CalcVPLsLightingShape(pos, (instance_id + 0.5f) * vpl_params.x,
+#ifdef NOPERSPECTIVE_SUPPORT
+			oTc, oViewDir, oVPLColor,
+#else
+			oTc, oViewDir, oW, oVPLColor,
+#endif
+			oPos);
+}
+
+void VPLsLightingNoInstanceIDVS(float4 pos : POSITION,
+#ifdef NOPERSPECTIVE_SUPPORT
+				out noperspective float2 oTc : TEXCOORD0,
+				out float4 oViewDir : TEXCOORD1,
+				out float3 oVPLColor : TEXCOORD2,
+#else
+				out float2 oTc : TEXCOORD0,
+				out float4 oViewDir : TEXCOORD1,
+				out float oW : TEXCOORD2,
+				out float3 oVPLColor : TEXCOORD3,
+#endif
+				out float4 oPos : SV_Position)
+{
+	CalcVPLsLightingShape(pos, x_coord,
+#ifdef NOPERSPECTIVE_SUPPORT
+			oTc, oViewDir, oVPLColor,
+#else
+			oTc, oViewDir, oW, oVPLColor,
+#endif
+			oPos);
 }
 
 float4 VPLsLightingPS(
@@ -104,7 +156,7 @@ float4 VPLsLightingPS(
 		]]>
 	</shader>
 
-	<technique name="VPLsLighting">
+	<technique name="VPLsLightingInstanceID">
 		<pass name="p0">
 			<state name="depth_enable" value="true"/>
 			<state name="depth_func" value="greater_equal"/>
@@ -132,7 +184,40 @@ float4 VPLsLightingPS(
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="zero"/>
 
-			<state name="vertex_shader" value="VPLsLightingVS()"/>
+			<state name="vertex_shader" value="VPLsLightingInstanceIDVS()"/>
+			<state name="pixel_shader" value="VPLsLightingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VPLsLightingNoInstanceID">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="depth_clip_enable" value="false"/>
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="127"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="127"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="127"/>
+			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="127"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="zero"/>
+
+			<state name="vertex_shader" value="VPLsLightingNoInstanceIDVS()"/>
 			<state name="pixel_shader" value="VPLsLightingPS()"/>
 		</pass>
 	</technique>
