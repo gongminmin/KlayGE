@@ -1022,14 +1022,6 @@ namespace KlayGE
 			}
 
 			tex_a_tile_cache_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format, 1, 0, EAH_CPU_Write, NULL);
-			if (format != format_)
-			{
-				tex_a_tile_data_ = rf.MakeTexture2D(tile_with_border_size, tile_with_border_size, mipmap, 1, format_, 1, 0, EAH_CPU_Write, NULL);
-			}
-			else
-			{
-				tex_a_tile_data_ = tex_a_tile_cache_;
-			}
 			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, NULL);
 			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, NULL);
 
@@ -1175,7 +1167,7 @@ namespace KlayGE
 			}
 		}
 
-		uint32_t mipmaps = tex_a_tile_data_->NumMipMaps();
+		uint32_t mipmaps = tex_a_tile_cache_->NumMipMaps();
 		std::vector<std::vector<uint8_t> > neighbor_data;
 		this->DecodeTiles(neighbor_data, neighbor_ids, mipmaps);
 
@@ -1283,14 +1275,14 @@ namespace KlayGE
 					}
 				}
 
+				std::vector<uint8_t> tex_a_tile_data(mip_tile_with_border_size * mip_tile_with_border_size * texel_size_);
 				{
-					Texture::Mapper mapper(*tex_a_tile_data_, 0, l, TMA_Write_Only,
-						0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
-					uint8_t* data_with_border = mapper.Pointer<uint8_t>();
+					uint8_t* data_with_border = &tex_a_tile_data[0];
+					uint32_t const data_pitch = mip_tile_with_border_size * texel_size_;
 				
 					for (uint32_t y = 0; y < mip_tile_size; ++ y)
 					{
-						texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+						texel_op_.copy_array(data_with_border + (y + mip_border_size) * data_pitch + mip_border_size * texel_size_,
 							neighbor_data_ptr[0] + y * mip_tile_size * texel_size_, mip_tile_size);
 					}
 
@@ -1298,7 +1290,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + y * mapper.RowPitch(),
+							texel_op_.copy_array(data_with_border + y * data_pitch,
 								neighbor_data_ptr[1] + ((y + mip_tile_size - mip_border_size) * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_,
 								mip_border_size);
 						}
@@ -1309,7 +1301,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + y * mapper.RowPitch() + x * texel_size_,
+								texel_op_.copy(data_with_border + y * data_pitch + x * texel_size_,
 									neighbor_data_ptr[0]);
 							}
 						}
@@ -1318,7 +1310,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
+							texel_op_.copy_array(data_with_border + y * data_pitch + mip_border_size * texel_size_,
 								neighbor_data_ptr[2] + ((y + mip_tile_size - mip_border_size) * mip_tile_size) * texel_size_, mip_tile_size);
 						}
 					}
@@ -1326,7 +1318,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + mip_border_size * texel_size_,
+							texel_op_.copy_array(data_with_border + y * data_pitch + mip_border_size * texel_size_,
 								neighbor_data_ptr[0], mip_tile_size);
 						}
 					}
@@ -1334,7 +1326,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + y * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+							texel_op_.copy_array(data_with_border + y * data_pitch + (mip_border_size + mip_tile_size) * texel_size_,
 								neighbor_data_ptr[3] + (y + mip_tile_size - mip_border_size) * mip_tile_size * texel_size_, mip_border_size);
 						}
 					}
@@ -1344,7 +1336,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + y * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+								texel_op_.copy(data_with_border + y * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
 									neighbor_data_ptr[0] + (mip_tile_size - 1) * texel_size_);
 							}
 						}
@@ -1354,7 +1346,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch(),
+							texel_op_.copy_array(data_with_border + (y + mip_border_size) * data_pitch,
 								neighbor_data_ptr[4] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
 						}
 					}
@@ -1364,7 +1356,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + x * texel_size_,
+								texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + x * texel_size_,
 									neighbor_data_ptr[0] + y * mip_tile_size * texel_size_);
 							}
 						}
@@ -1373,7 +1365,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_tile_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+							texel_op_.copy_array(data_with_border + (y + mip_border_size) * data_pitch + (mip_border_size + mip_tile_size) * texel_size_,
 								neighbor_data_ptr[5] + y * mip_tile_size * texel_size_, mip_border_size);
 						}
 					}
@@ -1383,7 +1375,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+								texel_op_.copy(data_with_border + (y + mip_border_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
 									neighbor_data_ptr[0] + (y * mip_tile_size + mip_tile_size - 1) * texel_size_);
 							}
 						}
@@ -1393,7 +1385,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch(),
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch,
 								neighbor_data_ptr[6] + (y * mip_tile_size + (mip_tile_size - mip_border_size)) * texel_size_, mip_border_size);
 						}
 					}
@@ -1403,7 +1395,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + x * texel_size_,
+								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + x * texel_size_,
 									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
 							}
 						}
@@ -1412,7 +1404,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + mip_border_size * texel_size_,
 								neighbor_data_ptr[7] + y * mip_tile_size * texel_size_, mip_tile_size);
 						}
 					}
@@ -1420,7 +1412,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + mip_border_size * texel_size_,
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + mip_border_size * texel_size_,
 								neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_, mip_tile_size);
 						}
 					}			
@@ -1428,7 +1420,7 @@ namespace KlayGE
 					{
 						for (uint32_t y = 0; y < mip_border_size; ++ y)
 						{
-							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (mip_border_size + mip_tile_size) * texel_size_,
+							texel_op_.copy_array(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + (mip_border_size + mip_tile_size) * texel_size_,
 								neighbor_data_ptr[8] + y * mip_tile_size * texel_size_, mip_border_size);
 						}
 					}
@@ -1438,7 +1430,7 @@ namespace KlayGE
 						{
 							for (uint32_t x = 0; x < mip_border_size; ++ x)
 							{
-								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * mapper.RowPitch() + (x + mip_border_size + mip_tile_size) * texel_size_,
+								texel_op_.copy(data_with_border + (y + mip_border_size + mip_tile_size) * data_pitch + (x + mip_border_size + mip_tile_size) * texel_size_,
 									neighbor_data_ptr[0] + (mip_tile_size - 1) * mip_tile_size * texel_size_);
 							}
 						}
@@ -1469,12 +1461,10 @@ namespace KlayGE
 					}
 					std::vector<uint8_t> bc(((mip_tile_with_border_size + 3) / 4) * ((mip_tile_with_border_size + 3) / 4) * block_size);
 					{
-						Texture::Mapper mapper(*tex_a_tile_data_, 0, l, TMA_Write_Only,
-							0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
-						uint8_t* data_with_border = mapper.Pointer<uint8_t>();
-						uint32_t data_pitch = mapper.RowPitch();
+						uint8_t const * data_with_border = &tex_a_tile_data[0];
+						uint32_t const data_pitch = mip_tile_with_border_size * texel_size_;
 
-						uint32_t* p_argb;
+						uint32_t const * p_argb;
 						uint32_t pitch;
 						std::vector<uint32_t> argb_data;
 						switch (format_)
@@ -1529,7 +1519,7 @@ namespace KlayGE
 							break;
 
 						case EF_ARGB8:
-							p_argb = reinterpret_cast<uint32_t*>(data_with_border);
+							p_argb = reinterpret_cast<uint32_t const *>(data_with_border);
 							pitch = data_pitch;
 							break;
 
@@ -1562,19 +1552,38 @@ namespace KlayGE
 					{
 						Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
 							0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
-						uint8_t* dst = mapper.Pointer<uint8_t>();
+
 						uint8_t const * src = &bc[0];
+						uint32_t const src_pitch = (mip_tile_with_border_size + 3) / 4 * block_size;
+
+						uint8_t* dst = mapper.Pointer<uint8_t>();
+						uint32_t const dst_pitch = mapper.RowPitch();
+
 						for (uint32_t y = 0; y < (mip_tile_with_border_size + 3) / 4; ++ y)
 						{
-							memcpy(dst, src, (mip_tile_with_border_size + 3) / 4 * block_size);
-							src += (mip_tile_with_border_size + 3) / 4 * block_size;
-							dst += mapper.RowPitch();
+							memcpy(dst, src, src_pitch);
+							src += src_pitch;
+							dst += dst_pitch;
 						}
 					}
 				}
-				else if (tex_a_tile_cache_ != tex_a_tile_data_)
+				else
 				{
-					tex_a_tile_data_->CopyToTexture(*tex_a_tile_cache_);
+					Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
+						0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
+
+					uint8_t const * src = &tex_a_tile_data[0];
+					uint32_t const src_pitch = mip_tile_with_border_size * texel_size_;
+
+					uint8_t* dst = mapper.Pointer<uint8_t>();
+					uint32_t const dst_pitch = mapper.RowPitch();
+
+					for (uint32_t y = 0; y < mip_tile_with_border_size; ++ y)
+					{
+						memcpy(dst, src, src_pitch);
+						src += src_pitch;
+						dst += dst_pitch;
+					}
 				}
 
 				if (tex_cache_)
