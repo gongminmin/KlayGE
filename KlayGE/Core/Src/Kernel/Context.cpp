@@ -600,7 +600,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			render_loader_.Free();
 		}
 	}
@@ -626,7 +626,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			audio_loader_.Free();
 		}
 	}
@@ -652,7 +652,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			input_loader_.Free();
 		}
 	}
@@ -678,7 +678,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			show_loader_.Free();
 		}
 	}
@@ -704,7 +704,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			sm_loader_.Free();
 		}
 	}
@@ -730,7 +730,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << ResLoader::Instance().Locate(path) << " failed" << std::endl;
+			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			ads_loader_.Free();
 		}
 	}
