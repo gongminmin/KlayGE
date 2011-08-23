@@ -41,12 +41,12 @@ void CalcVPLsLightingShape(float4 pos,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out float2 oTc,
 				out float4 oViewDir,
-				out float3 oVPLColor,
+				out float4 oVPLColor,
 #else
 				out float2 oTc,
 				out float4 oViewDir,
 				out float oW,
-				out float3 oVPLColor,
+				out float4 oVPLColor,
 #endif
 				out float4 oPos)
 {
@@ -63,11 +63,13 @@ void CalcVPLsLightingShape(float4 pos,
 	float3 view_vec = normalize(rot_pos);
 	float3 halfway = normalize(light_vec + view_vec);
 
-	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
+	oVPLColor.xyz = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
 
 	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
+
+	oVPLColor.w = oPos.w;
 
 	oTc = oPos.xy / oPos.w * 0.5f;
 	oTc.y *= flipping;
@@ -84,12 +86,12 @@ void VPLsLightingInstanceIDVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
-				out float3 oVPLColor : TEXCOORD2,
+				out float4 oVPLColor : TEXCOORD2,
 #else
 				out float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
 				out float oW : TEXCOORD2,
-				out float3 oVPLColor : TEXCOORD3,
+				out float4 oVPLColor : TEXCOORD3,
 #endif
 				out float4 oPos : SV_Position)
 {
@@ -106,12 +108,12 @@ void VPLsLightingNoInstanceIDVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
-				out float3 oVPLColor : TEXCOORD2,
+				out float4 oVPLColor : TEXCOORD2,
 #else
 				out float2 oTc : TEXCOORD0,
 				out float4 oViewDir : TEXCOORD1,
 				out float oW : TEXCOORD2,
-				out float3 oVPLColor : TEXCOORD3,
+				out float4 oVPLColor : TEXCOORD3,
 #endif
 				out float4 oPos : SV_Position)
 {
@@ -126,9 +128,9 @@ void VPLsLightingNoInstanceIDVS(float4 pos : POSITION,
 
 float4 VPLsLightingPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float3 vpl_color : TEXCOORD2
+	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float4 vpl_color : TEXCOORD2
 #else
-	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2, float3 vpl_color : TEXCOORD3
+	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2, float4 vpl_color : TEXCOORD3
 #endif
 	) : SV_Target
 {
@@ -137,9 +139,15 @@ float4 VPLsLightingPS(
 #endif
 
 	float4 ndc = gbuffer_tex.Sample(point_sampler, tc);
-	float3 norm_i = GetNormal(ndc);
-	float3 pos_i = view_dir.xyz * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float pixel_depth = GetDepth(ndc) * depth_near_far_invfar.y;
 	float3 color_i = 0;
+	if (vpl_color.w < pixel_depth)
+	{
+		discard;
+	}
+
+	float3 norm_i = GetNormal(ndc);
+	float3 pos_i = view_dir.xyz * (pixel_depth / view_dir.z);
 
 	float3 pos_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 2.5f / 4), 0).xyz;
 
@@ -148,7 +156,7 @@ float4 VPLsLightingPS(
 	if (cos_iv > 0)
 	{
 		float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
-		color_i = cos_iv * atten * vpl_color;
+		color_i = cos_iv * atten * vpl_color.xyz;
 	}
 
 	return float4(color_i, 1);
@@ -158,8 +166,7 @@ float4 VPLsLightingPS(
 
 	<technique name="VPLsLightingInstanceID">
 		<pass name="p0">
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="greater_equal"/>
+			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="depth_clip_enable" value="false"/>

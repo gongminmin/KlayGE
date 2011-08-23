@@ -661,7 +661,7 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);
 	float3 diff_lighting = lighting.rgb;
 	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
-	return float4(max((diff_lighting * diffuse.rgb + specular_normalize_factor(diffuse.a) * spec_lighting) * ssvo, 0), 1);
+	return float4(max((diff_lighting * diffuse.rgb + specular_normalize_factor(diffuse.a * 256) * spec_lighting) * ssvo, 0), 1);
 }
 		]]>
 	</shader>

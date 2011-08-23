@@ -124,7 +124,7 @@ void ConstructMRTGBuffer(float4 texcoord_depth_2x, float4 ts_to_view0_2y, float4
 	{
 		diffuse = diffuse_clr.rgb;
 	}
-	mrt_1 = float4(diffuse, shininess * 256);
+	mrt_1 = float4(diffuse, shininess);
 }
 
 float4 GBufferPS(float4 texcoord_depth_2x : TEXCOORD0, float4 ts_to_view0_2y : TEXCOORD1, float4 ts_to_view1_2z : TEXCOORD2) : SV_Target

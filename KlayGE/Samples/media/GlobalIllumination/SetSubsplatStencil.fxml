@@ -10,7 +10,6 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="gbuffer_tex"/>
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 	<parameter type="texture2D" name="normal_cone_tex"/>
 	<parameter type="float3" name="near_q_far"/>
@@ -20,9 +19,7 @@
 
 	<shader>
 		<![CDATA[
-void SetSubsplatStencilPS(float2 tc: TEXCOORD0,
-		out float4 out_clr : SV_Target,
-		out float out_depth : SV_Depth)
+float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 {
 	if (is_not_first_last_level.x)
 	{
@@ -48,8 +45,7 @@ void SetSubsplatStencilPS(float2 tc: TEXCOORD0,
 		}
 	}
 
-	out_clr = 1;
-	out_depth = near_q_far.y - near_q_far.x / (GetDepth(gbuffer_tex.Sample(point_sampler, tc)) * near_q_far.z);
+	return 1;
 }
 		]]>
 	</shader>
@@ -57,9 +53,8 @@ void SetSubsplatStencilPS(float2 tc: TEXCOORD0,
 	<technique name="SetSubsplatStencil">
 		<pass name="p0">
 			<state name="color_write_mask" value="0"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="always_pass"/>
-			<state name="depth_write_mask" value="true"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
 
 			<state name="cull_mode" value="front"/>
 

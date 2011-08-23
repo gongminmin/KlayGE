@@ -464,11 +464,11 @@ namespace KlayGE
 		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		if (depth_deriative_tex_->NumMipMaps() > 1)
 		{
-			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			normal_cone_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_R16F, 1, 0, EAH_GPU_Write, NULL);
+			normal_cone_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write, NULL);
 		}
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Write, NULL);
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{
 			TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
@@ -550,7 +550,6 @@ namespace KlayGE
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
-		*(subsplat_stencil_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);
