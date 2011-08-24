@@ -2,6 +2,7 @@ syntax: glob
 __pycache__
 glloader/Debug/
 glloader/Debug-GLES/
+glloader/doc/html/
 glloader/Release/
 glloader/Release-GLES/
 glloader/build/codeblocks/*.layout
@@ -162,6 +163,10 @@ External/Python/PCbuild/*.sdf
 External/Python/PCbuild/*.bsc
 External/Python/PCbuild/*.pdb
 External/Python/PCbuild/*.exp
+External/Python/PCbuild/*.lib
+External/Python/PCbuild/*.pyd
+External/Python/PCbuild/*.dll
+External/Python/PCbuild/*.exe
 External/Python/PCbuild/ipch/
 External/Python/PCbuild/obj/
 External/Python/PCbuild/amd64/
@@ -193,4 +198,3 @@ External/libvorbis/win32/*/*.suo
 External/libvorbis/win32/*/*.ncb
 External/libvorbis/win32/*/*.opensdf
 External/libvorbis/win32/*/*.sdf
-glloader/doc/html/

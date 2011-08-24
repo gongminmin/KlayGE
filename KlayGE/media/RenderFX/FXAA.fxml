@@ -24,7 +24,7 @@
 // FxaaLuma() will range 0.0 to 2.963210702.
 float FxaaLuma(float3 rgb)
 {
-	return rgb.y * (0.587f / 0.299f) + rgb.x;
+	return dot(rgb, float3(0.299f, 0.587f, 0.114f));
 }
 
 float3 DebugFxaaPixelShader(float2 pos)
@@ -46,29 +46,26 @@ float3 DebugFxaaPixelShader(float2 pos)
 	{
 		return lumaM / (1.0 + (0.587f / 0.299f));
 	}
-	float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
 
 	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
 	float rangeL = abs(lumaL - lumaM);
-	float blendL = max(0.0f, (rangeL / range) - 0.25f) / 0.75f;
+	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
 	blendL = min(0.75f, blendL);
 
 	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
 	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
 	float3 rgbSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).xyz;
 	float3 rgbSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).xyz;
-	rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
-	rgbL *= (1.0 / 9.0f);
 	float lumaNW = FxaaLuma(rgbNW);
 	float lumaNE = FxaaLuma(rgbNE);
 	float lumaSW = FxaaLuma(rgbSW);
 	float lumaSE = FxaaLuma(rgbSE);
-	float edgeVert = abs((0.25f * lumaNW) + (-0.5f * lumaN) + (0.25f * lumaNE))
-		+ abs((0.50f * lumaW ) + (-1.0f * lumaM) + (0.50f * lumaE ))
-		+ abs((0.25f * lumaSW) + (-0.5f * lumaS) + (0.25f * lumaSE));
-	float edgeHorz = abs((0.25f * lumaNW) + (-0.5f * lumaW) + (0.25f * lumaSW))
-		+ abs((0.50f * lumaN ) + (-1.0f * lumaM) + (0.50f * lumaS ))
-		+ abs((0.25f * lumaNE) + (-0.5f * lumaE) + (0.25f * lumaSE));
+	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
+		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
+		+ abs(lumaSW + (-2 * lumaS) + lumaSE);
+	float edgeHorz = abs(lumaNW + (-2 * lumaW) + lumaSW)
+		+ 2 * abs(lumaN  + (-2 * lumaM) + lumaS )
+		+ abs(lumaNE + (-2 * lumaE) + lumaSE);
 	bool horzSpan = edgeHorz >= edgeVert;
 	if (horzSpan)
 	{
@@ -99,29 +96,27 @@ float3 FxaaPixelShader(float2 pos)
 	{
 		return rgbM;
 	}
-	float3 rgbL = rgbN + rgbW + rgbM + rgbE + rgbS;
-
+	
 	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
 	float rangeL = abs(lumaL - lumaM);
-	float blendL = max(0.0f, (rangeL / range) - 0.25f) / 0.75f;
+	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
 	blendL = min(0.75f, blendL);
 
 	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
 	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
 	float3 rgbSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).xyz;
 	float3 rgbSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).xyz;
-	rgbL += (rgbNW + rgbNE + rgbSW + rgbSE);
-	rgbL *= (1.0 / 9.0f);
 	float lumaNW = FxaaLuma(rgbNW);
 	float lumaNE = FxaaLuma(rgbNE);
 	float lumaSW = FxaaLuma(rgbSW);
 	float lumaSE = FxaaLuma(rgbSE);
-	float edgeVert = abs((0.25f * lumaNW) + (-0.5f * lumaN) + (0.25f * lumaNE))
-		+ abs((0.50f * lumaW ) + (-1.0f * lumaM) + (0.50f * lumaE ))
-		+ abs((0.25f * lumaSW) + (-0.5f * lumaS) + (0.25f * lumaSE));
-	float edgeHorz = abs((0.25f * lumaNW) + (-0.5f * lumaW) + (0.25f * lumaSW))
-		+ abs((0.50f * lumaN ) + (-1.0f * lumaM) + (0.50f * lumaS ))
-		+ abs((0.25f * lumaNE) + (-0.5f * lumaE) + (0.25f * lumaSE));
+	
+	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
+		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
+		+ abs(lumaSW + (-2 * lumaS) + lumaSE);
+	float edgeHorz = abs(lumaNW + (-2 * lumaW) + lumaSW)
+		+ 2 * abs(lumaN  + (-2 * lumaM) + lumaS )
+		+ abs(lumaNE + (-2 * lumaE) + lumaSE);
 	bool horzSpan = edgeHorz >= edgeVert;
 	float lengthSign = horzSpan ? -inv_width_height.y : -inv_width_height.x;
 	if (!horzSpan)
@@ -152,36 +147,39 @@ float3 FxaaPixelShader(float2 pos)
 
 	float2 posP = posN;
 	float2 offNP = horzSpan ? float2(inv_width_height.x, 0) : float2(0, inv_width_height.y); 
-	float lumaEndN = lumaN;
-	float lumaEndP = lumaN;
+	float lumaEndN;
+	float lumaEndP;
 	bool doneN = false;
 	bool doneP = false;
-	posN += offNP * float2(-1.0f, -1.0f);
-	posP += offNP * float2( 1.0f,  1.0f);
-	for (int i = 0; i < 16; ++ i)
+	posN -= offNP * 1.5f;
+	posP += offNP * 1.5f;
+	for (int i = 0; i < 6; ++ i)
 	{
-		if (!doneN)
+		lumaEndN = FxaaLuma(color_tex.SampleLevel(linear_sampler, posN.xy, 0).xyz);
+		lumaEndP = FxaaLuma(color_tex.SampleLevel(linear_sampler, posP.xy, 0).xyz);
+		bool doneN2 = abs(lumaEndN - lumaN) >= gradientN;
+		bool doneP2 = abs(lumaEndP - lumaN) >= gradientN;
+		if (doneN2 && !doneN)
 		{
-			lumaEndN = FxaaLuma(color_tex.SampleLevel(linear_sampler, posN.xy, 0).xyz);
+			posN += offNP;
 		}
-		if (!doneP)
+		if (doneP2 && !doneP)
 		{
-			lumaEndP = FxaaLuma(color_tex.SampleLevel(linear_sampler, posP.xy, 0).xyz);
+			posP -= offNP;
 		}
-
-		doneN = doneN || (abs(lumaEndN - lumaN) >= gradientN);
-		doneP = doneP || (abs(lumaEndP - lumaN) >= gradientN);
-		if (doneN && doneP)
+		if (doneN2 && doneP2)
 		{
 			break;
 		}
+		doneN = doneN2;
+		doneP = doneP2;
 		if (!doneN)
 		{
-			posN -= offNP;
+			posN -= offNP * 2;
 		}
 		if (!doneP)
 		{
-			posP += offNP;
+			posP += offNP * 2;
 		}
 	}
 
@@ -197,11 +195,18 @@ float3 FxaaPixelShader(float2 pos)
 
 	float spanLength = (dstP + dstN);
 	dstN = directionN ? dstN : dstP;
-	float subPixelOffset = (0.5 + (dstN * (-1 / spanLength))) * lengthSign;
+	float subPixelOffset = 0.5f + (dstN * (-1 / spanLength));
+	subPixelOffset += blendL * 0.125f;
+	subPixelOffset *= lengthSign;
 	float3 rgbF = color_tex.SampleLevel(linear_sampler, float2(
 		pos.x + (horzSpan ? 0 : subPixelOffset),
 		pos.y + (horzSpan ? subPixelOffset : 0)), 0).xyz;
-	return lerp(rgbF, rgbL, blendL);
+
+	float lumaF = FxaaLuma(rgbF) + 1 / (65536.0f * 256);
+	float lumaB = lerp(lumaF, lumaL, blendL);
+	float scale = min(4, lumaB / lumaF);
+	rgbF *= scale;
+	return rgbF;
 }
 
 float4 FXAAPS(float2 tc0 : TEXCOORD0) : SV_Target
