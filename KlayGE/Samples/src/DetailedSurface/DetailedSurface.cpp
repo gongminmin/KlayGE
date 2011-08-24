@@ -38,7 +38,8 @@ namespace
 		DT_None,
 		DT_Bump,
 		DT_Parallax,
-		DT_ParallaxOcclusion
+		DT_ParallaxOcclusion,
+		DT_Tessellation
 	};
 
 	class RenderPolygon : public StaticMesh
@@ -77,6 +78,19 @@ namespace
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
 			*(technique_->Effect().ParameterByName("world")) = model;
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+		}
+
+		void Render()
+		{
+			if (DT_Tessellation == detail_type_)
+			{
+				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+			}
+			else
+			{
+				rl_->TopologyType(RenderLayout::TT_TriangleList);
+			}
+			StaticMesh::Render();
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -159,6 +173,10 @@ namespace
 
 			case DT_ParallaxOcclusion:
 				tech_name = "ParallaxOcclusion";
+				break;
+
+			case DT_Tessellation:
+				tech_name = "Tessellation";
 				break;
 
 			default:

@@ -303,4 +303,172 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
 		</pass>
 	</technique>
+
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+	float3 Pos : POSITION;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+	float3 Tangent : TEXCOORD2;
+	float3 Binormal : TEXCOORD3;
+};
+
+VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
+					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,
+					float4 T			: TANGENT)
+{
+	N = N * 2 - 1;
+	T = T * 2 - 1;
+
+	VS_CONTROL_POINT_OUTPUT output;
+	
+	output.Pos = pos.xyz;
+	output.Texcoord0 = texcoord0;
+	output.Normal = N;
+	output.Tangent = T.xyz;
+	output.Binormal = cross(N, T.xyz) * T.w;
+
+	return output;
+}
+		
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	// Tess factor for the FF HW block
+	float edges[3]	: SV_TessFactor;
+	float inside	: SV_InsideTessFactor;
+};
+
+HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
+{
+	float4 tess_factors = float4(5, 5, 1, 9);
+	
+	HS_CONSTANT_DATA_OUTPUT output;
+    
+	// Calculate the tessellation factor per edge, based on distance from camera
+	float dist;
+	float3 mid_point;
+	// Edge 0
+	mid_point = (ip[2].Pos + ip[0].Pos) / 2;
+	dist = distance(mid_point, eye_pos) - tess_factors.z;
+	output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+	// Edge 1
+	mid_point = (ip[0].Pos + ip[1].Pos) / 2;
+	dist = distance(mid_point, eye_pos) - tess_factors.z;
+	output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+	// Edge 2
+	mid_point = (ip[1].Pos + ip[2].Pos) / 2;
+	dist = distance(mid_point, eye_pos) - tess_factors.z;
+	output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
+	// Inside
+	output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
+
+	return output;
+}
+
+struct HS_CONTROL_POINT
+{
+	float3 Pos : POSITION;
+	float2 Texcoord0 : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+	float3 Tangent : TEXCOORD2;
+	float3 Binormal : TEXCOORD3;
+};
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("TessellationConstantsHS")]
+HS_CONTROL_POINT TessellationHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+										uint i : SV_OutputControlPointID)
+{
+	HS_CONTROL_POINT output;
+	output.Pos = p[i].Pos;
+	output.Texcoord0 = p[i].Texcoord0;
+	output.Normal = p[i].Normal;
+	output.Tangent = p[i].Tangent;
+	output.Binormal = p[i].Binormal;
+	return output;
+}
+
+[domain("tri")]
+void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<HS_CONTROL_POINT, 3> patch,
+
+							out float4 oL : TEXCOORD0,
+							out float4 oV : TEXCOORD1,
+							out float3 oH : TEXCOORD2,
+							out float4 oPos : SV_Position)
+{
+	// The barycentric coordinates
+	float u = bc_coords.x;
+	float v = bc_coords.y;
+	float w = bc_coords.z;
+	
+	float2 texcoord0 = patch[0].Texcoord0 * w
+			+ patch[1].Texcoord0 * u
+			+ patch[2].Texcoord0 * v;
+	float3 normal = patch[0].Normal * w
+			+ patch[1].Normal * u
+			+ patch[2].Normal * v;
+	normal = normalize(normal);
+	float3 tangent = patch[0].Tangent * w
+			+ patch[1].Tangent * u
+			+ patch[2].Tangent * v;
+	tangent = normalize(tangent);
+	float3 binormal = patch[0].Binormal * w
+			+ patch[1].Binormal * u
+			+ patch[2].Binormal * v;
+	binormal = normalize(binormal);
+
+	float3 pos = patch[0].Pos * w
+			+ patch[1].Pos * u
+			+ patch[2].Pos * v;
+	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * height_scale * 0.1f;
+	pos += height * normal;
+	
+	oPos = mul(float4(pos, 1), mvp);
+	
+	float3x3 objToTangentSpace;
+	objToTangentSpace[0] = tangent;
+	objToTangentSpace[1] = binormal;
+	objToTangentSpace[2] = normal;
+
+	float3 lightVec = light_pos - pos.xyz;
+	float3 viewVec = eye_pos - pos.xyz;
+	float3 halfVec = normalize(lightVec) + normalize(viewVec);
+
+	oL.xyz = mul(objToTangentSpace, lightVec);
+	oV.xyz = mul(objToTangentSpace, viewVec);
+	oH = mul(objToTangentSpace, halfVec);
+	
+	oL.w = texcoord0.x;
+	oV.w = texcoord0.y;
+}
+		]]>
+	</shader>
+
+	<technique name="Tessellation">
+		<pass name="p0">
+			<state name="vertex_shader" value="TessellationVS()"/>
+			<state name="hull_shader" value="TessellationHS()"/>
+			<state name="domain_shader" value="TessellationDS()"/>
+			<state name="pixel_shader" value="BumpMappingPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="TessellationWireframe">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="TessellationVS()"/>
+			<state name="hull_shader" value="TessellationHS()"/>
+			<state name="domain_shader" value="TessellationDS()"/>
+			<state name="pixel_shader" value="BumpMappingPS()"/>
+		</pass>
+	</technique>
 </effect>
