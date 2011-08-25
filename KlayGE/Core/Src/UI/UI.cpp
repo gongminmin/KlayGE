@@ -437,7 +437,7 @@ namespace KlayGE
 					TexturePtr tex;
 					if (!skin.empty())
 					{
-						tex = LoadTexture(skin, EAH_GPU_Read)();
+						tex = LoadTexture(skin, EAH_GPU_Read | EAH_Immutable)();
 					}
 					dlg = this->MakeDialog(tex);
 					dlg->SetID(id);
@@ -577,7 +577,7 @@ namespace KlayGE
 						if (attr)
 						{
 							std::string tex_name = attr->ValueString();
-							tex = LoadTexture(tex_name, EAH_GPU_Read)();
+							tex = LoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable)();
 						}
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
@@ -1126,7 +1126,7 @@ namespace KlayGE
 		TexturePtr ct;
 		if (!control_tex)
 		{
-			ct = LoadTexture("ui.dds", EAH_GPU_Read)();
+			ct = LoadTexture("ui.dds", EAH_GPU_Read | EAH_Immutable)();
 		}
 		else
 		{

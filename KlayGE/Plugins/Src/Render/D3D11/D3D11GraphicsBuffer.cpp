@@ -92,19 +92,26 @@ namespace KlayGE
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
 	{
-		if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
+		if (access_hint_ & EAH_Immutable)
 		{
-			usage = D3D11_USAGE_DYNAMIC;
+			usage = D3D11_USAGE_IMMUTABLE;
 		}
 		else
 		{
-			if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
+			if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
-				usage = D3D11_USAGE_DEFAULT;
+				usage = D3D11_USAGE_DYNAMIC;
 			}
 			else
 			{
-				usage = D3D11_USAGE_STAGING;
+				if (!(access_hint_ & EAH_CPU_Read) && !(access_hint_ & EAH_CPU_Write))
+				{
+					usage = D3D11_USAGE_DEFAULT;
+				}
+				else
+				{
+					usage = D3D11_USAGE_STAGING;
+				}
 			}
 		}
 

@@ -604,7 +604,8 @@ namespace KlayGE
 		EAH_GPU_Write = 1UL << 3,
 		EAH_GPU_Unordered = 1UL << 4,
 		EAH_GPU_Structured = 1UL << 5,
-		EAH_Generate_Mips = 1UL << 6
+		EAH_Generate_Mips = 1UL << 6,
+		EAH_Immutable = 1UL << 7
 	};
 
 	struct ElementInitData

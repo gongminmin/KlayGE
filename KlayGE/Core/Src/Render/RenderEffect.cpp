@@ -2369,7 +2369,7 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						*var_ = LoadTexture(val, EAH_GPU_Read)();
+						*var_ = LoadTexture(val, EAH_GPU_Read | EAH_Immutable)();
 					}
 				}
 			}
