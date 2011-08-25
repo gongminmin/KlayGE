@@ -589,14 +589,34 @@ namespace KlayGE
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
-		if (topology_type_cache_ != rl.TopologyType())
+		RenderLayout::topology_type tt = rl.TopologyType();
+		if (tech.HasTessellation())
 		{
-			d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(rl.TopologyType()));
-			topology_type_cache_ = rl.TopologyType();
+			switch (tt)
+			{
+			case RenderLayout::TT_PointList:
+				tt = RenderLayout::TT_1_Ctrl_Pt_PatchList;
+				break;
+
+			case RenderLayout::TT_LineList:
+				tt = RenderLayout::TT_2_Ctrl_Pt_PatchList;
+				break;
+
+			case RenderLayout::TT_TriangleList:
+				tt = RenderLayout::TT_3_Ctrl_Pt_PatchList;
+				break;
+
+			default:
+				break;
+			}
+		}
+		if (topology_type_cache_ != tt)
+		{
+			d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(tt));
+			topology_type_cache_ = tt;
 		}
 
 		uint32_t prim_count;
-		RenderLayout::topology_type tt = rl.TopologyType();
 		switch (tt)
 		{
 		case RenderLayout::TT_PointList:
@@ -624,10 +644,10 @@ namespace KlayGE
 			break;
 
 		default:
-			if ((rl.TopologyType() >= RenderLayout::TT_1_Ctrl_Pt_PatchList)
-				&& (rl.TopologyType() <= RenderLayout::TT_32_Ctrl_Pt_PatchList))
+			if ((tt >= RenderLayout::TT_1_Ctrl_Pt_PatchList)
+				&& (tt <= RenderLayout::TT_32_Ctrl_Pt_PatchList))
 			{
-				prim_count = vertex_count / 3;
+				prim_count = vertex_count / (tt - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1);
 			}
 			else
 			{

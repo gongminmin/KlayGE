@@ -986,6 +986,7 @@ namespace KlayGE
 		: gs_input_type_(0), gs_output_type_(0)
 	{
 		has_discard_ = false;
+		has_tessellation_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -1936,6 +1937,7 @@ namespace KlayGE
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>();
 
 		ret->has_discard_ = has_discard_;
+		ret->has_tessellation_ = has_tessellation_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
 		ret->glsl_bin_formats_ = glsl_bin_formats_;

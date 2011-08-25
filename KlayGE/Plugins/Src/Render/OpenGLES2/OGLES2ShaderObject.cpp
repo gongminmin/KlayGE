@@ -867,6 +867,7 @@ namespace KlayGE
 	OGLES2ShaderObject::OGLES2ShaderObject()
 	{
 		has_discard_ = false;
+		has_tessellation_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -1553,6 +1554,7 @@ namespace KlayGE
 		OGLES2ShaderObjectPtr ret = MakeSharedPtr<OGLES2ShaderObject>();
 
 		ret->has_discard_ = has_discard_;
+		ret->has_tessellation_ = has_tessellation_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->shader_text_ = shader_text_;
 		ret->glsl_srcs_ = glsl_srcs_;

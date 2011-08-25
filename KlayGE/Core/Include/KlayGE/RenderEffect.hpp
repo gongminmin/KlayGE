@@ -615,6 +615,10 @@ namespace KlayGE
 		{
 			return has_discard_;
 		}
+		bool HasTessellation() const
+		{
+			return has_tessellation_;
+		}
 
 	protected:
 		RenderEffect& effect_;
@@ -628,6 +632,7 @@ namespace KlayGE
 
 		bool is_validate_;
 		bool has_discard_;
+		bool has_tessellation_;
 	};
 
 	class KLAYGE_CORE_API RenderPass : boost::noncopyable

@@ -450,6 +450,7 @@ namespace KlayGE
 	D3D11ShaderObject::D3D11ShaderObject()
 	{
 		has_discard_ = true;
+		has_tessellation_ = false;
 		is_shader_validate_.assign(true);
 	}
 
@@ -769,10 +770,18 @@ namespace KlayGE
 
 				case ST_HullShader:
 					hull_shader_ = so.hull_shader_;
+					if (hull_shader_)
+					{
+						has_tessellation_ = true;
+					}
 					break;
 
 				case ST_DomainShader:
 					domain_shader_ = so.domain_shader_;
+					if (domain_shader_)
+					{
+						has_tessellation_ = true;
+					}
 					break;
 
 				default:
@@ -1098,6 +1107,7 @@ namespace KlayGE
 							else
 							{
 								hull_shader_ = MakeCOMPtr(hs);
+								has_tessellation_ = true;
 							}
 							break;
 
@@ -1110,6 +1120,7 @@ namespace KlayGE
 							else
 							{
 								domain_shader_ = MakeCOMPtr(ds);
+								has_tessellation_ = true;
 							}
 							break;
 
@@ -1307,6 +1318,8 @@ namespace KlayGE
 		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		D3D11ShaderObjectPtr ret = MakeSharedPtr<D3D11ShaderObject>();
+		ret->has_discard_ = has_discard_;
+		ret->has_tessellation_ = has_tessellation_;
 		ret->is_validate_ = is_validate_;
 		ret->is_shader_validate_ = is_shader_validate_;
 		ret->vertex_shader_ = vertex_shader_;

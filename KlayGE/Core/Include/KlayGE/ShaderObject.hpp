@@ -105,10 +105,15 @@ namespace KlayGE
 		{
 			return has_discard_;
 		}
+		bool HasTessellation() const
+		{
+			return has_tessellation_;
+		}
 
 	protected:
 		bool is_validate_;
 		bool has_discard_;
+		bool has_tessellation_;
 	};
 }
 

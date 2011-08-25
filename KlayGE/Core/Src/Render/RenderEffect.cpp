@@ -1768,6 +1768,7 @@ namespace KlayGE
 			weight_ = 0;
 			transparent_ = false;
 			has_discard_ = false;
+			has_tessellation_ = false;
 			is_validate_ = true;
 		}
 
@@ -1813,6 +1814,7 @@ namespace KlayGE
 		is_validate_ = true;
 
 		has_discard_ = false;
+		has_tessellation_ = false;
 		transparent_ = false;
 		weight_ = 1;
 		uint32_t index = 0;
@@ -1841,6 +1843,7 @@ namespace KlayGE
 			}
 
 			has_discard_ |= pass->GetShaderObject()->HasDiscard();
+			has_tessellation_ |= pass->GetShaderObject()->HasTessellation();
 		}
 		if (transparent_)
 		{
@@ -1858,6 +1861,8 @@ namespace KlayGE
 		ret->weight_ = weight_;
 		ret->transparent_ = transparent_;
 		ret->is_validate_ = is_validate_;
+		ret->has_discard_ = has_discard_;
+		ret->has_tessellation_ = has_tessellation_;
 
 		ret->passes_.resize(passes_.size());
 		for (size_t i = 0; i < passes_.size(); ++ i)
