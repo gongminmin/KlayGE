@@ -104,33 +104,20 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-	if (TM_No == caps.tess_method)
+	if (TM_Instanced == caps.tess_method)
 	{
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
-	}
-	else
-	{
-		if (TM_Hardware == caps.tess_method)
-		{
-			rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-		}
-		else
-		{
-			BOOST_ASSERT(TM_Instanced == caps.tess_method);
-		
-			tess_pattern_rl_ = rf.MakeRenderLayout();
-			tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
+		tess_pattern_rl_ = rf.MakeRenderLayout();
+		tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-			skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_GR32F);
-			skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-			skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
-			skinned_rl_ = rf.MakeRenderLayout();
-			skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
+		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_GR32F);
+		skinned_normal_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, NULL, EF_ABGR32F);
+		skinned_rl_ = rf.MakeRenderLayout();
+		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-			point_rl_ = rf.MakeRenderLayout();
-			point_rl_->TopologyType(RenderLayout::TT_PointList);
-		}
+		point_rl_ = rf.MakeRenderLayout();
+		point_rl_->TopologyType(RenderLayout::TT_PointList);
 	}
 
 	mesh_rl_ = rl_;
@@ -440,7 +427,6 @@ void DetailedSkinnedMesh::Render()
 		if (TM_Hardware == caps.tess_method)
 		{
 			rl_ = mesh_rl_;
-			rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 			SkinnedMesh::Render();
 		}
 		else
@@ -462,7 +448,6 @@ void DetailedSkinnedMesh::Render()
 	else
 	{
 		rl_ = mesh_rl_;
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
 		SkinnedMesh::Render();
 	}
 }

@@ -80,19 +80,6 @@ namespace
 			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
 		}
 
-		void Render()
-		{
-			if (DT_Tessellation == detail_type_)
-			{
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-			}
-			else
-			{
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
-			}
-			StaticMesh::Render();
-		}
-
 		void LightPos(float3 const & light_pos)
 		{
 			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;

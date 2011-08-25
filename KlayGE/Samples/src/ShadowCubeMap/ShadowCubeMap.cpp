@@ -499,27 +499,17 @@ namespace
 
 		void Render()
 		{
+			rl_ = mesh_rl_;
 			if (smooth_mesh_)
 			{
 				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				if (TM_Hardware == caps.tess_method)
-				{
-					rl_ = mesh_rl_;
-					rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-					StaticMesh::Render();
-				}
-				else
+				if (TM_Instanced == caps.tess_method)
 				{
 					rl_ = tess_pattern_rl_;
-					StaticMesh::Render();
 				}
 			}
-			else
-			{
-				rl_ = mesh_rl_;
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
-				StaticMesh::Render();
-			}
+
+			StaticMesh::Render();
 		}
 
 	private:
