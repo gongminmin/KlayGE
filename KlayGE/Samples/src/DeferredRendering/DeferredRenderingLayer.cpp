@@ -137,12 +137,12 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
-			rl_cone_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+			rl_cone_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
-			rl_cone_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+			rl_cone_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data), EF_R16UI);
 		}
 		{
 			rl_pyramid_ = rf.MakeRenderLayout();
@@ -157,12 +157,12 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
-			rl_pyramid_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+			rl_pyramid_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
-			rl_pyramid_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+			rl_pyramid_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data), EF_R16UI);
 		}
 		{
 			rl_box_ = rf.MakeRenderLayout();
@@ -177,12 +177,12 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
-			rl_box_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+			rl_box_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
-			rl_box_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data), EF_R16UI);
+			rl_box_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data), EF_R16UI);
 		}
 		{
 			rl_quad_ = rf.MakeRenderLayout();
@@ -200,7 +200,7 @@ namespace KlayGE
 			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
-			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data),
+			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 

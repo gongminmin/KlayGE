@@ -38,7 +38,7 @@ void InitInstancedTessBuffs()
 	init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 	init_data.slice_pitch = 0;
 	init_data.data = &vert[0];
-	tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+	tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 	std::vector<uint16_t> index;
 	index.push_back(0);
@@ -47,7 +47,7 @@ void InitInstancedTessBuffs()
 	init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 	init_data.slice_pitch = 0;
 	init_data.data = &index[0];
-	tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+	tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 	for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
 	{
@@ -83,12 +83,12 @@ void InitInstancedTessBuffs()
 		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &vert[0];
-		tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &index[0];
-		tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 	}
 }
 
@@ -161,7 +161,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				diffuse_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
+				diffuse_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 			}
 		}
 		else
@@ -170,7 +170,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
-					normal_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
+					normal_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 				}
 			}
 			else
@@ -179,7 +179,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						specular_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
+						specular_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 					}
 				}
 				else
@@ -188,7 +188,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						if (!ResLoader::Instance().Locate(iter->second).empty())
 						{
-							emit_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
+							emit_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 						}
 					}
 					else
@@ -197,7 +197,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								opacity_map_ = LoadTexture(iter->second, EAH_GPU_Read)();
+								opacity_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 
 								if (opacity_map_)
 								{
@@ -250,7 +250,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			init_data.data = mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size;
 			init_data.row_pitch = this->NumTriangles() * 3 * index_size;
 			init_data.slice_pitch = init_data.row_pitch;
-			bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, rl_->IndexStreamFormat());
+			bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, rl_->IndexStreamFormat());
 		}
 
 		this->SetTessFactor(static_cast<int32_t>(tess_factor_));
@@ -758,14 +758,14 @@ void DetailedSkinnedModel::BuildModelInfo()
 			init_data.data = &blend_indices[0];
 			init_data.row_pitch = total_num_vertices * sizeof(blend_indices[0]);
 			init_data.slice_pitch = 0;
-			blend_indices_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			blend_indices_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		}
 		{
 			std::vector<float4> blend_weights(total_num_vertices, float4(-1, -1, -1, -1));
 			init_data.data = &blend_weights[0];
 			init_data.row_pitch = total_num_vertices * sizeof(blend_weights[0]);
 			init_data.slice_pitch = 0;
-			blend_weights_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			blend_weights_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		}
 
 		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)

@@ -36,7 +36,7 @@ namespace
 		ModelObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>())();
+			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>())();
 		}
 
 		void EyePos(float3 const & eye_pos)

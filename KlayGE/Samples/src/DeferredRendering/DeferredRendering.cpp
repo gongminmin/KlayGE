@@ -109,7 +109,7 @@ namespace
 				}
 				else
 				{
-					tex = LoadTexture(iter->second, EAH_GPU_Read)();
+					tex = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
 
@@ -307,7 +307,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				light_(light)
 		{
-			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(light_->Color());
 			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
 
@@ -347,7 +347,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred),
 				light_(light)
 		{
-			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("point_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(light_->Color());
 			model_org_ = MathLib::scaling(0.1f, 0.1f, 0.1f);
 
@@ -590,9 +590,9 @@ void DeferredRenderingApp::InitObjects()
 	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
-	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
-	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
+	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 

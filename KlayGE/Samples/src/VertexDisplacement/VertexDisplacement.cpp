@@ -40,7 +40,7 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			BOOST_AUTO(flag_tl, LoadTexture("Flag.dds", EAH_GPU_Read));
+			BOOST_AUTO(flag_tl, LoadTexture("Flag.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

@@ -798,8 +798,8 @@ void OceanApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	TexturePtr skybox_y_tex = LoadTexture("DH001cross_y.dds", EAH_GPU_Read)();
-	TexturePtr skybox_c_tex = LoadTexture("DH001cross_c.dds", EAH_GPU_Read)();
+	TexturePtr skybox_y_tex = LoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable)();
+	TexturePtr skybox_c_tex = LoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable)();
 
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();

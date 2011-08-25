@@ -40,9 +40,9 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon")
 		{
-			BOOST_AUTO(diffuse_loader, LoadTexture("diffuse.dds", EAH_GPU_Read));
-			BOOST_AUTO(normal_loader, LoadTexture("normal.dds", EAH_GPU_Read));
-			BOOST_AUTO(dist_loader, LoadTexture("distance.dds", EAH_GPU_Read));
+			BOOST_AUTO(diffuse_loader, LoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(normal_loader, LoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(dist_loader, LoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -86,12 +86,12 @@ namespace
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
 			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
-			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 			rl_->BindVertexStream(tex0_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
@@ -161,19 +161,19 @@ namespace
 			init_data.row_pitch = sizeof(normal);
 			init_data.slice_pitch = 0;
 			init_data.data = normal;
-			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr normal_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(normal_vb, boost::make_tuple(vertex_element(VEU_Normal, 0, fmt)));
 			
 			init_data.row_pitch = sizeof(tangent);
 			init_data.slice_pitch = 0;
 			init_data.data = tangent;
-			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tan_vb, boost::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
 			init_data.data = indices;
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindIndexStream(ib, EF_R16UI);
 
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);

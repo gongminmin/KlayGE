@@ -66,7 +66,7 @@ namespace
 		TerrainRenderable()
 			: RenderableHelper(L"Terrain")
 		{
-			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read));
+			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -87,7 +87,7 @@ namespace
 			init_data.row_pitch = sizeof(vertices);
 			init_data.slice_pitch = 0;
 			init_data.data = &vertices[0];
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			box_ = MathLib::compute_bounding_box<float>(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
@@ -161,7 +161,7 @@ namespace
 				init_data.row_pitch = sizeof(texs);
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
-				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, NULL);
@@ -173,7 +173,7 @@ namespace
 				init_data.row_pitch = sizeof(indices);
 				init_data.slice_pitch = 0;
 				init_data.data = indices;
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
 				technique_ = rf.LoadEffect("ParticleEditor.fxml")->TechniqueByName("Particle");
@@ -871,7 +871,7 @@ void ParticleEditorApp::CurveTypeChangedHandler(KlayGE::UIComboBox const & sende
 
 void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 {
-	TexturePtr tex = LoadTexture(name, EAH_GPU_Read)();
+	TexturePtr tex = LoadTexture(name, EAH_GPU_Read | EAH_Immutable)();
 	if (id_particle_alpha_from_button_ == id)
 	{
 		checked_pointer_cast<ParticlesObject>(particles_)->ParticleAlphaFrom(tex);

@@ -115,7 +115,7 @@ namespace
 		RefractorObject(TexturePtr const & y_cube, TexturePtr const & c_cube)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())()->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RefractorRenderable>())()->Mesh(0);
 			checked_pointer_cast<RefractorRenderable>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 		}
 
@@ -181,8 +181,8 @@ void Refract::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
-	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
+	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read | EAH_Immutable)();
+	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read | EAH_Immutable)();
 
 	refractor_ = MakeSharedPtr<RefractorObject>(y_cube_map_, c_cube_map_);
 	refractor_->AddToSceneManager();

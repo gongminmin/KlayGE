@@ -90,7 +90,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())()->Mesh(0);
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())()->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)

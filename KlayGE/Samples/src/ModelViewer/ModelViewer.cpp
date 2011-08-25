@@ -58,7 +58,7 @@ namespace
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
 			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
@@ -117,7 +117,7 @@ namespace
 			init_data.row_pitch = sizeof(xyzs);
 			init_data.slice_pitch = 0;
 			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
@@ -268,7 +268,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>())());
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>())());
 	model_->SetTime(0);
 
 	frame_ = 0;

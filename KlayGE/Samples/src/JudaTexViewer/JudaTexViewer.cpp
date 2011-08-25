@@ -66,7 +66,7 @@ namespace
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
-			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 		}
 
@@ -166,13 +166,13 @@ namespace
 			init_data.row_pitch = sizeof(texs);
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
-			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
 			init_data.data = indices;
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindIndexStream(ib, EF_R16UI);
 		}
 

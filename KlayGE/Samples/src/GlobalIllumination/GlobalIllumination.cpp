@@ -106,7 +106,7 @@ namespace
 				}
 				else
 				{
-					tex = LoadTexture(iter->second, EAH_GPU_Read)();
+					tex = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 					tex_pool.insert(std::make_pair(iter->second, tex));
 				}
 
@@ -333,7 +333,7 @@ namespace
 		SpotLightProxyObject(float cone_radius, float cone_height, float3 const & clr)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred)
 		{
-			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
+			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
 			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
 			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height);
 
@@ -491,9 +491,9 @@ void GlobalIlluminationApp::InitObjects()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
-	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read);
-	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read);
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
+	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 

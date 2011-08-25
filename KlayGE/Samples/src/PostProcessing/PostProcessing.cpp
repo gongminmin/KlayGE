@@ -81,7 +81,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable),
 				model_(float4x4::Identity())
 		{
-			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())()->Mesh(0);
+			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())()->Mesh(0);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -182,8 +182,8 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100.0f);
 
-	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read)();
-	TexturePtr c_cube_map = LoadTexture("rnl_cross_c.dds", EAH_GPU_Read)();
+	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable)();
+	TexturePtr c_cube_map = LoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable)();
 	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
 	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();

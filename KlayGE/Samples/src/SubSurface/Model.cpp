@@ -42,7 +42,7 @@ void DetailedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				dm = LoadTexture(iter->second, EAH_GPU_Read)();
+				dm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 			}
 		}
 		else
@@ -51,7 +51,7 @@ void DetailedMesh::BuildMeshInfo()
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
-					bm = LoadTexture(iter->second, EAH_GPU_Read)();
+					bm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 				}
 			}
 			else
@@ -60,7 +60,7 @@ void DetailedMesh::BuildMeshInfo()
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						sm = LoadTexture(iter->second, EAH_GPU_Read)();
+						sm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 					}
 				}
 			}

@@ -54,7 +54,7 @@ namespace
 		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &vert[0];
-		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		std::vector<uint16_t> index;
 		index.push_back(0);
@@ -63,7 +63,7 @@ namespace
 		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 		init_data.slice_pitch = 0;
 		init_data.data = &index[0];
-		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 		for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
 		{
@@ -99,12 +99,12 @@ namespace
 			init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &vert[0];
-			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.slice_pitch = 0;
 			init_data.data = &index[0];
-			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		}
 	}
 
@@ -297,7 +297,7 @@ namespace
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						dm = LoadTexture(iter->second, EAH_GPU_Read)();
+						dm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 					}
 				}
 				else
@@ -306,7 +306,7 @@ namespace
 					{
 						if (!ResLoader::Instance().Locate(iter->second).empty())
 						{
-							sm = LoadTexture(iter->second, EAH_GPU_Read)();
+							sm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 						}
 					}
 					else
@@ -315,7 +315,7 @@ namespace
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								em = LoadTexture(iter->second, EAH_GPU_Read)();
+								em = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
 							}
 						}
 					}
@@ -355,7 +355,7 @@ namespace
 					init_data.data = &dst[0];
 					init_data.row_pitch = this->NumVertices() * sizeof(float4);
 					init_data.slice_pitch = init_data.row_pitch;
-					skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, EF_ABGR32F);
+					skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_ABGR32F);
 				}
 				{
 					uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
@@ -369,7 +369,7 @@ namespace
 					init_data.data = mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size;
 					init_data.row_pitch = this->NumTriangles() * 3 * index_size;
 					init_data.slice_pitch = init_data.row_pitch;
-					bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, rl_->IndexStreamFormat());
+					bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, rl_->IndexStreamFormat());
 				}
 
 				this->SetTessFactor(static_cast<int32_t>(tess_factor_));
@@ -532,7 +532,7 @@ namespace
 		explicit OccluderObject(std::string const & model_name)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
-			renderable_ = LoadModel(model_name, EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())()->Mesh(0);
+			renderable_ = LoadModel(model_name, EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())()->Mesh(0);
 			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -648,12 +648,12 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	boost::function<RenderModelPtr()> model_ml = LoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);
 
-	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read)();
+	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable)();
 
 	RenderModelPtr scene_model = model_ml();
 	scene_objs_.resize(scene_model->NumMeshes() + 1);

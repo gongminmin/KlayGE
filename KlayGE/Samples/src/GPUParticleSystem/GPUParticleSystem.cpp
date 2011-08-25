@@ -143,7 +143,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
-			BOOST_AUTO(pt, LoadTexture("particle.dds", EAH_GPU_Read));
+			BOOST_AUTO(pt, LoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -184,7 +184,7 @@ namespace
 					init_data.row_pitch = max_num_particles * sizeof(float2);
 					init_data.slice_pitch = 0;
 					init_data.data = &p_in_tex[0];
-					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGS");
@@ -201,17 +201,17 @@ namespace
 				init_data.row_pitch = max_num_particles * sizeof(float2);
 				init_data.slice_pitch = 0;
 				init_data.data = &p_in_tex[0];
-				GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 				init_data.row_pitch = sizeof(texs);
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
-				GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 				init_data.row_pitch = sizeof(indices);
 				init_data.slice_pitch = 0;
 				init_data.data = indices;
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 				rl_->BindVertexStream(tex0, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
@@ -349,7 +349,7 @@ namespace
 				vel_init.row_pitch = max_num_particles_ * sizeof(float4);
 				vel_init.slice_pitch = 0;
 
-				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &vel_init, EF_ABGR32F);
+				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &vel_init, EF_ABGR32F);
 				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
 
 				particle_pos_buff_param_ = technique_->Effect().ParameterByName("particle_pos_buff");
@@ -372,7 +372,7 @@ namespace
 					init_data.slice_pitch = 0;
 					init_data.data = &xyzs[0];
 
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 					box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[4]);
@@ -390,7 +390,7 @@ namespace
 					init_data.slice_pitch = 0;
 					init_data.data = &texs[0];
 
-					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 				}
 
@@ -482,7 +482,7 @@ namespace
 			{
 				init_data.row_pitch = max_num_particles_ * sizeof(float);
 
-				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data, EF_R32F);
+				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_R32F);
 				*(technique_->Effect().ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
 			}
 			else
@@ -587,7 +587,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read));
+			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -697,8 +697,8 @@ void GPUParticleSystemApp::InitObjects()
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	BOOST_AUTO(terrain_height, LoadTexture("terrain_height.dds", EAH_GPU_Read));
-	BOOST_AUTO(terrain_normal, LoadTexture("terrain_normal.dds", EAH_GPU_Read));
+	BOOST_AUTO(terrain_height, LoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
+	BOOST_AUTO(terrain_normal, LoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
