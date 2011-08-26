@@ -5,7 +5,7 @@
 
 	<parameter type="float4x4" name="modelview" semantic="WORLDVIEW"/>
 	<parameter type="float4x4" name="proj"/>
-	<parameter type="float4x4" name="modelviewIT"/>
+	<parameter type="float4x4" name="mvp"/>
 	<parameter type="float" name="currentAngle"/>
 	<parameter type="float3" name="lightDir"/>
 
@@ -33,9 +33,9 @@ void VertexDisplacementVS(float4 pos			: POSITION,
 
 	float3 x_dir = float3(0.5f, 0, -sin(pos.x + currentAngle) * 0.2f);
 	float3 y_dir = float3(0, 0.5f, cos(pos.y + currentAngle) * pos.x * 0.2f);
-	float3 normal = mul(cross(x_dir, y_dir), (float3x3)modelviewIT);
+	float3 normal = mul(cross(x_dir, y_dir), (float3x3)modelview);
 
-	oPos = mul(mul(v, modelview), proj);
+	oPos = mul(v, mvp);
 	oNormal = normal;
 	oTexcoord0 = texcoord0;
 }

@@ -512,7 +512,21 @@ namespace KlayGE
 		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.CurFrameBuffer()->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+			fmt = EF_ARGB8;
+		}
+		if (Context::Instance().Config().graphics_cfg.gamma)
+		{
+			fmt = MakeSRGB(fmt);
+		}
+		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		if (g_buffer_tex_)
 		{

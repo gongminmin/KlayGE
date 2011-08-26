@@ -18,27 +18,13 @@
 
 	<shader>
 		<![CDATA[
-// Return the luma, the estimation of luminance from rgb inputs.
-// This approximates luma using one FMA instruction,
-// skipping normalization and tossing out blue.
-// FxaaLuma() will range 0.0 to 2.963210702.
-float FxaaLuma(float3 rgb)
-{
-	return dot(rgb, float3(0.299f, 0.587f, 0.114f));
-}
-
 float3 DebugFxaaPixelShader(float2 pos)
 {
-	float3 rgbN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).xyz;
-	float3 rgbW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).xyz;
-	float3 rgbM = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +0) * inv_width_height, 0).xyz;
-	float3 rgbE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).xyz;
-	float3 rgbS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).xyz;
-	float lumaN = FxaaLuma(rgbN);
-	float lumaW = FxaaLuma(rgbW);
-	float lumaM = FxaaLuma(rgbM);
-	float lumaE = FxaaLuma(rgbE);
-	float lumaS = FxaaLuma(rgbS);
+	float lumaN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).w;
+	float lumaW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).w;
+	float lumaM = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +0) * inv_width_height, 0).w;
+	float lumaE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).w;
+	float lumaS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).w;
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
@@ -52,14 +38,10 @@ float3 DebugFxaaPixelShader(float2 pos)
 	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
 	blendL = min(0.75f, blendL);
 
-	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
-	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
-	float3 rgbSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).xyz;
-	float3 rgbSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).xyz;
-	float lumaNW = FxaaLuma(rgbNW);
-	float lumaNE = FxaaLuma(rgbNE);
-	float lumaSW = FxaaLuma(rgbSW);
-	float lumaSE = FxaaLuma(rgbSE);
+	float lumaNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
+	float lumaNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
+	float lumaSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
+	float lumaSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
 	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
 		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
 		+ abs(lumaSW + (-2 * lumaS) + lumaSE);
@@ -79,22 +61,18 @@ float3 DebugFxaaPixelShader(float2 pos)
 
 float3 FxaaPixelShader(float2 pos)
 {
-	float3 rgbN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).xyz;
-	float3 rgbW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).xyz;
-	float3 rgbM = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +0) * inv_width_height, 0).xyz;
-	float3 rgbE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).xyz;
-	float3 rgbS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).xyz;
-	float lumaN = FxaaLuma(rgbN);
-	float lumaW = FxaaLuma(rgbW);
-	float lumaM = FxaaLuma(rgbM);
-	float lumaE = FxaaLuma(rgbE);
-	float lumaS = FxaaLuma(rgbS);
+	float4 rgbyM = color_tex.SampleLevel(linear_sampler, pos.xy, 0);
+	float lumaN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).w;
+	float lumaW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).w;
+	float lumaM = rgbyM.w;
+	float lumaE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).w;
+	float lumaS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).w;
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
-		return rgbM;
+		return rgbyM.xyz;
 	}
 	
 	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
@@ -102,14 +80,10 @@ float3 FxaaPixelShader(float2 pos)
 	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
 	blendL = min(0.75f, blendL);
 
-	float3 rgbNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).xyz;
-	float3 rgbNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).xyz;
-	float3 rgbSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).xyz;
-	float3 rgbSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).xyz;
-	float lumaNW = FxaaLuma(rgbNW);
-	float lumaNE = FxaaLuma(rgbNE);
-	float lumaSW = FxaaLuma(rgbSW);
-	float lumaSE = FxaaLuma(rgbSE);
+	float lumaNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
+	float lumaNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
+	float lumaSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
+	float lumaSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
 	
 	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
 		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
@@ -155,8 +129,8 @@ float3 FxaaPixelShader(float2 pos)
 	posP += offNP * 1.5f;
 	for (int i = 0; i < 6; ++ i)
 	{
-		lumaEndN = FxaaLuma(color_tex.SampleLevel(linear_sampler, posN.xy, 0).xyz);
-		lumaEndP = FxaaLuma(color_tex.SampleLevel(linear_sampler, posP.xy, 0).xyz);
+		lumaEndN = color_tex.SampleLevel(linear_sampler, posN.xy, 0).w;
+		lumaEndP = color_tex.SampleLevel(linear_sampler, posP.xy, 0).w;
 		bool doneN2 = abs(lumaEndN - lumaN) >= gradientN;
 		bool doneP2 = abs(lumaEndP - lumaN) >= gradientN;
 		if (doneN2 && !doneN)
@@ -198,15 +172,15 @@ float3 FxaaPixelShader(float2 pos)
 	float subPixelOffset = 0.5f + (dstN * (-1 / spanLength));
 	subPixelOffset += blendL * 0.125f;
 	subPixelOffset *= lengthSign;
-	float3 rgbF = color_tex.SampleLevel(linear_sampler, float2(
+	float4 rgbyF = color_tex.SampleLevel(linear_sampler, float2(
 		pos.x + (horzSpan ? 0 : subPixelOffset),
-		pos.y + (horzSpan ? subPixelOffset : 0)), 0).xyz;
+		pos.y + (horzSpan ? subPixelOffset : 0)), 0);
 
-	float lumaF = FxaaLuma(rgbF) + 1 / (65536.0f * 256);
+	float lumaF = rgbyF.w + 1 / (65536.0f * 256);
 	float lumaB = lerp(lumaF, lumaL, blendL);
 	float scale = min(4, lumaB / lumaF);
-	rgbF *= scale;
-	return rgbF;
+	rgbyF.xyz *= scale;
+	return rgbyF.xyz;
 }
 
 float4 FXAAPS(float2 tc0 : TEXCOORD0) : SV_Target

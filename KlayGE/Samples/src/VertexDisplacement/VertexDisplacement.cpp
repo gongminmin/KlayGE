@@ -49,7 +49,7 @@ namespace
 			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
 			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
 			*(technique_->Effect().ParameterByName("flag_tex")) = flag_tl();
-			*(technique_->Effect().ParameterByName("lightDir")) = float3(0, 0, -1);
+			*(technique_->Effect().ParameterByName("lightDir")) = float3(1, 0, -1);
 		}
 
 		void SetAngle(float angle)
@@ -63,12 +63,11 @@ namespace
 
 			float4x4 view = app.ActiveCamera().ViewMatrix();
 			float4x4 proj = app.ActiveCamera().ProjMatrix();
-			float4x4 modelView = float4x4::Identity() * view;
+			float4x4 modelView = view;
 
 			*(technique_->Effect().ParameterByName("modelview")) = modelView;
 			*(technique_->Effect().ParameterByName("proj")) = proj;
-
-			*(technique_->Effect().ParameterByName("modelviewIT")) = MathLib::transpose(MathLib::inverse(modelView));
+			*(technique_->Effect().ParameterByName("mvp")) = modelView * proj;
 		}
 	};
 
