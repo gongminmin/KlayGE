@@ -18,6 +18,7 @@
 #include <KlayGE/BlockCompression.hpp>
 
 #include <fstream>
+#include <sstream>
 #include <boost/assert.hpp>
 #include <boost/typeof/typeof.hpp>
 
@@ -1054,22 +1055,12 @@ namespace KlayGE
 		}
 		else
 		{
-			*(effect.ParameterByName("juda_tex_cache_0")) = tex_cache_array_[0];
-			*(effect.ParameterByName("juda_tex_cache_1")) = tex_cache_array_[1];
-			*(effect.ParameterByName("juda_tex_cache_2")) = tex_cache_array_[2];
-			*(effect.ParameterByName("juda_tex_cache_3")) = tex_cache_array_[3];
-			*(effect.ParameterByName("juda_tex_cache_4")) = tex_cache_array_[4];
-			*(effect.ParameterByName("juda_tex_cache_5")) = tex_cache_array_[5];
-			*(effect.ParameterByName("juda_tex_cache_6")) = tex_cache_array_[6];
-			*(effect.ParameterByName("juda_tex_cache_7")) = tex_cache_array_[7];
-			*(effect.ParameterByName("juda_tex_cache_8")) = tex_cache_array_[8];
-			*(effect.ParameterByName("juda_tex_cache_9")) = tex_cache_array_[9];
-			*(effect.ParameterByName("juda_tex_cache_10")) = tex_cache_array_[10];
-			*(effect.ParameterByName("juda_tex_cache_11")) = tex_cache_array_[11];
-			*(effect.ParameterByName("juda_tex_cache_12")) = tex_cache_array_[12];
-			*(effect.ParameterByName("juda_tex_cache_13")) = tex_cache_array_[13];
-			*(effect.ParameterByName("juda_tex_cache_14")) = tex_cache_array_[14];
-			*(effect.ParameterByName("juda_tex_cache_15")) = tex_cache_array_[15];
+			for (size_t i = 0; i < tex_cache_array_.size(); ++ i)
+			{
+				std::ostringstream oss;
+				oss << "juda_tex_cache_" << i;
+				*(effect.ParameterByName(oss.str())) = tex_cache_array_[i];
+			}
 			*(effect.ParameterByName("inv_juda_tex_cache_size")) = float2(1.0f / tex_cache_array_[0]->Width(0), 1.0f / tex_cache_array_[0]->Height(0));
 		}
 
