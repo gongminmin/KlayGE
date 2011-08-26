@@ -504,7 +504,7 @@ namespace KlayGE
 		ElementInitData init_data;
 		init_data.row_pitch = sizeof(pos);
 		init_data.data = &pos[0];
-		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
+		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 		stereoscopic_rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		stereoscopic_effect_ = rf.LoadEffect("Stereoscopic.fxml");
