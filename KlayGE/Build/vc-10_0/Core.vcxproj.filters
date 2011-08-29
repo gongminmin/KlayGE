@@ -384,6 +384,9 @@
     <ClCompile Include="..\..\Core\Src\Render\SSVOPostProcess.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Render\DeferredRenderingLayer.cpp">
+      <Filter>Rendering System\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -698,6 +701,9 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\SSVOPostProcess.hpp">
       <Filter>Rendering System\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\DeferredRenderingLayer.hpp">
+      <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\media\RenderFX\2D.fxml">
@@ -801,6 +807,48 @@
     </None>
     <None Include="..\..\media\RenderFX\SSVO.fxml">
       <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\Copy2LightBuffer.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\CustomMipMap.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\DeferredRendering.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\DepthToVSM.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\GBuffer.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\RSM2VPLs.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\SetSubsplatStencil.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\Upsampling.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\VPLsLighting.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\Copy2LightBuffer.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\CustomMipMap.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\DepthToVSM.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\RSM2VPLs.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\PostProcessors\Upsampling.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
     </None>
   </ItemGroup>
 </Project>

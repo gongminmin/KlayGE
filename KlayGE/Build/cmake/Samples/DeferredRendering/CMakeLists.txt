@@ -1,17 +1,13 @@
 SET(SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRendering.cpp
-    ${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRenderingLayer.cpp
 )
 
 SET(HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRendering.hpp
-    ${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRenderingLayer.hpp
 )
 
 SET(EFFECT_FILES
-    ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRendering.fxml
     ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/DeferredRenderingDebug.fxml
-    ${KLAYGE_PROJECT_DIR}/Samples/media/DeferredRendering/GBuffer.fxml
 )
 
 SET(UI_FILES

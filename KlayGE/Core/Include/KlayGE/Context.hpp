@@ -53,6 +53,7 @@ namespace KlayGE
 		std::string audio_data_source_factory_name;
 
 		RenderSettings graphics_cfg;
+		bool deferred_rendering;
 	};
 
 	class KLAYGE_CORE_API Context
@@ -152,6 +153,15 @@ namespace KlayGE
 			return *audio_data_src_factory_;
 		}
 
+		void DeferredRenderingLayerInstance(DeferredRenderingLayerPtr const & drl)
+		{
+			deferred_rendering_layer_ = drl;
+		}
+		DeferredRenderingLayerPtr const & DeferredRenderingLayerInstance()
+		{
+			return deferred_rendering_layer_;
+		}
+
 	private:
 		Context();
 
@@ -166,6 +176,7 @@ namespace KlayGE
 		InputFactoryPtr		input_factory_;
 		ShowFactoryPtr		show_factory_;
 		AudioDataSourceFactoryPtr audio_data_src_factory_;
+		DeferredRenderingLayerPtr deferred_rendering_layer_;
 
 		DllLoader render_loader_;
 		DllLoader audio_loader_;

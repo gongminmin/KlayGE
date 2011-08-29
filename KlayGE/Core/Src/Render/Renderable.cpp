@@ -23,17 +23,112 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/SceneObject.hpp>
+#include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/Camera.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <KlayGE/Renderable.hpp>
 
 namespace KlayGE
 {
+	Renderable::Renderable()
+	{
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			deferred_effect_ = drl->GBufferEffect();
+			
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
+			gbuffer_alpha_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+			gbuffer_alpha_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaMRTTech");
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMap");
+			gen_rsm_alpha_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlpha");
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMap");
+			gen_sm_alpha_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlpha");
+			shading_tech_ = deferred_effect_->TechniqueByName("Shading");
+			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShading");
+
+			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
+			ssvo_tex_param_ = deferred_effect_->ParameterByName("ssvo_tex");
+			ssvo_enabled_param_ = deferred_effect_->ParameterByName("ssvo_enabled");
+			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
+
+			mvp_param_ = deferred_effect_->ParameterByName("mvp");
+			model_view_param_ = deferred_effect_->ParameterByName("model_view");
+			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
+			shininess_param_ = deferred_effect_->ParameterByName("shininess");
+			bump_map_enabled_param_ = deferred_effect_->ParameterByName("bump_map_enabled");
+			bump_tex_param_ = deferred_effect_->ParameterByName("bump_tex");
+			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
+			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
+			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
+			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
+			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
+			flipping_param_ = deferred_effect_->ParameterByName("flipping");
+
+			model_mat_ = float4x4::Identity();
+		}
+	}
+
 	Renderable::~Renderable()
 	{
 	}
 
 	void Renderable::OnRenderBegin()
 	{
+		if (deferred_effect_)
+		{
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			Camera const & camera = *re.CurFrameBuffer()->GetViewport().camera;
+
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+
+			float4x4 const mv = model_mat_ * view;
+			*mvp_param_ = mv * proj;
+			*model_view_param_ = mv;
+
+			switch (type_)
+			{
+			case PT_GBuffer:
+			case PT_MRTGBuffer:
+			case PT_GenReflectiveShadowMap:
+				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+				*diffuse_tex_param_ = diffuse_tex_;
+				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
+				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
+				*bump_tex_param_ = bump_tex_;
+				*specular_tex_param_ = specular_tex_;
+				*specular_level_param_ = float4(mtl_->specular_level, mtl_->specular_level, mtl_->specular_level, static_cast<float>(!!specular_tex_));
+				*shininess_param_ = MathLib::clamp(mtl_->shininess / 256.0f, 1e-6f, 0.999f);
+				break;
+
+			case PT_GenShadowMap:
+				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
+				*diffuse_tex_param_ = diffuse_tex_;
+				break;
+
+			case PT_Shading:
+				*shininess_param_ = std::max(1e-6f, mtl_->shininess);
+				*diffuse_tex_param_ = diffuse_tex_;
+				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
+				*emit_tex_param_ = emit_tex_;
+				*emit_clr_param_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), static_cast<float>(!!emit_tex_));
+				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				break;
+
+			case PT_SpecialShading:
+				*emit_tex_param_ = emit_tex_;
+				*emit_clr_param_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), static_cast<float>(!!emit_tex_));
+				break;
+
+			default:
+				break;
+			}
+		}
 	}
 
 	void Renderable::OnRenderEnd()
@@ -132,5 +227,87 @@ namespace KlayGE
 				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, static_cast<uint32_t>(instances_.size()));
 			}
 		}
+	}
+
+	void Renderable::SetModelMatrix(float4x4 const & mat)
+	{
+		model_mat_ = mat;
+	}
+
+	void Renderable::Pass(PassType type)
+	{
+		type_ = type;
+		technique_ = this->PassTech(type, alpha_);
+	}
+
+	RenderTechniquePtr const & Renderable::PassTech(PassType type, bool alpha) const
+	{
+		switch (type)
+		{
+		case PT_GBuffer:
+			if (alpha)
+			{
+				return gbuffer_alpha_tech_;
+			}
+			else
+			{
+				return gbuffer_tech_;
+			}
+
+		case PT_MRTGBuffer:
+			if (alpha)
+			{
+				return gbuffer_alpha_mrt_tech_;
+			}
+			else
+			{
+				return gbuffer_mrt_tech_;
+			}
+
+		case PT_GenReflectiveShadowMap:
+			if (alpha)
+			{
+				return gen_rsm_alpha_tech_;
+			}
+			else
+			{
+				return gen_rsm_tech_;
+			}
+
+		case PT_GenShadowMap:
+			if (alpha)
+			{
+				return gen_sm_alpha_tech_;
+			}
+			else
+			{
+				return gen_sm_tech_;
+			}
+
+		case PT_Shading:
+			return shading_tech_;
+
+		case PT_SpecialShading:
+			return special_shading_tech_;
+
+		default:
+			BOOST_ASSERT(false);
+			return gbuffer_tech_;
+		}
+	}
+
+	void Renderable::LightingTex(TexturePtr const & tex)
+	{
+		*lighting_tex_param_ = tex;
+	}
+
+	void Renderable::SSVOTex(TexturePtr const & tex)
+	{
+		*ssvo_tex_param_ = tex;
+	}
+
+	void Renderable::SSVOEnabled(bool ssvo)
+	{
+		*ssvo_enabled_param_ = static_cast<int32_t>(ssvo);
 	}
 }

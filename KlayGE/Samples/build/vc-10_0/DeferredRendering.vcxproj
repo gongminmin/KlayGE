@@ -199,18 +199,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\DeferredRendering\DeferredRendering.cpp" />
-    <ClCompile Include="..\..\src\DeferredRendering\DeferredRenderingLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\DeferredRendering\DeferredRendering.hpp" />
-    <ClInclude Include="..\..\src\DeferredRendering\DeferredRenderingLayer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\media\DeferredRendering\DeferredRendering.fxml" />
     <None Include="..\..\media\DeferredRendering\DeferredRenderingDebug.fxml" />
-    <None Include="..\..\media\DeferredRendering\DepthToVSM.fxml" />
-    <None Include="..\..\media\DeferredRendering\DepthToVSM.ppml" />
-    <None Include="..\..\media\DeferredRendering\GBuffer.fxml" />
     <None Include="..\..\media\DeferredRendering\DeferredRendering.uiml" />
     <None Include="..\..\..\klayge_logo.ico" />
   </ItemGroup>

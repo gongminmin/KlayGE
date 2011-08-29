@@ -59,6 +59,8 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
+
+		void Pass(PassType type);
 	};
 
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
@@ -74,6 +76,8 @@ namespace KlayGE
 		void Translation(float3 const & t);
 
 		float4x4 const & GetModelMatrix() const;
+
+		void Pass(PassType type);
 
 	protected:
 		float4x4 model_;

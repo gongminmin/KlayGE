@@ -285,12 +285,12 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+			RenderMaterialPtr const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
 			// ½¨Á¢ÎÆÀí
 			TexturePtr dm, sm, em;
-			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
-			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
+			TextureSlotsType const & texture_slots = mtl->texture_slots;
+			for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 				iter != texture_slots.end(); ++ iter)
 			{
 				if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
@@ -325,13 +325,13 @@ namespace
 			*(effect_->ParameterByName("specular_tex")) = sm;
 			*(effect_->ParameterByName("emit_tex")) = em;
 
-			*(effect_->ParameterByName("ambient_clr")) = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(dm));
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(sm));
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(em));
+			*(effect_->ParameterByName("ambient_clr")) = float4(mtl->ambient.x(), mtl->ambient.y(), mtl->ambient.z(), 1);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl->diffuse.x(), mtl->diffuse.y(), mtl->diffuse.z(), bool(dm));
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl->specular.x(), mtl->specular.y(), mtl->specular.z(), bool(sm));
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl->emit.x(), mtl->emit.y(), mtl->emit.z(), bool(em));
 
-			*(effect_->ParameterByName("specular_level")) = mtl.specular_level;
-			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl.shininess);
+			*(effect_->ParameterByName("specular_level")) = mtl->specular_level;
+			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl->shininess);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

@@ -17,6 +17,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -34,405 +35,12 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderModelTorus : public RenderModel
+	class SpotLightSourceUpdate
 	{
 	public:
-		RenderModelTorus(std::wstring const & name)
-			: RenderModel(name)
+		void operator()(LightSource& light)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			effect_ = rf.LoadEffect("GBufferAdv.fxml");
-		}
-
-		RenderEffectPtr const & Effect() const
-		{
-			return effect_;
-		}
-
-		std::map<std::string, TexturePtr>& TexPool()
-		{
-			return tex_pool_;
-		}
-
-	private:
-		RenderEffectPtr effect_;
-		std::map<std::string, TexturePtr> tex_pool_;
-	};
-
-	class RenderTorus : public StaticMesh, public DeferredRenderable
-	{
-	public:
-		RenderTorus(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name),
-				DeferredRenderable(checked_pointer_cast<RenderModelTorus>(model)->Effect()),
-				special_shading_(false)
-		{
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_view_param_ = effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-			shininess_param_ = effect_->ParameterByName("shininess");
-			bump_map_enabled_param_ = effect_->ParameterByName("bump_map_enabled");
-			bump_tex_param_ = effect_->ParameterByName("bump_tex");
-			diffuse_map_enabled_param_ = effect_->ParameterByName("diffuse_map_enabled");
-			diffuse_tex_param_ = effect_->ParameterByName("diffuse_tex");
-			diffuse_clr_param_ = effect_->ParameterByName("diffuse_clr");
-			specular_map_enabled_param_ = effect_->ParameterByName("specular_map_enabled");
-			specular_tex_param_ = effect_->ParameterByName("specular_tex");
-			emit_map_enabled_param_ = effect_->ParameterByName("emit_map_enabled");
-			emit_tex_param_ = effect_->ParameterByName("emit_tex");
-			emit_clr_param_ = effect_->ParameterByName("emit_clr");
-			specular_level_param_ = effect_->ParameterByName("specular_level");
-			flipping_param_ = effect_->ParameterByName("flipping");
-		}
-
-		void BuildMeshInfo()
-		{
-			alpha_ = false;
-
-			boost::shared_ptr<RenderModelTorus> model = checked_pointer_cast<RenderModelTorus>(model_.lock());
-
-			std::map<std::string, TexturePtr>& tex_pool = model->TexPool();
-
-			RenderModel::Material const & mtl = model->GetMaterial(this->MaterialID());
-			RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
-			for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
-				iter != texture_slots.end(); ++ iter)
-			{
-				TexturePtr tex;
-				BOOST_AUTO(titer, tex_pool.find(iter->second));
-				if (titer != tex_pool.end())
-				{
-					tex = titer->second;
-				}
-				else
-				{
-					tex = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
-					tex_pool.insert(std::make_pair(iter->second, tex));
-				}
-
-				if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
-				{
-					diffuse_tex_ = tex;
-				}
-				else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
-				{
-					specular_tex_ = tex;
-				}
-				else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
-				{
-					bump_tex_ = tex;
-				}
-				else if ("Self-Illumination" == iter->first)
-				{
-					emit_tex_ = tex;
-				}
-				else if ("Opacity" == iter->first)
-				{
-					alpha_ = true;
-				}				
-			}
-
-			if ((mtl.emit.x() > 0) || (mtl.emit.y() > 0) || (mtl.emit.z() > 0))
-			{
-				special_shading_ = true;
-			}
-		}
-
-		void Pass(PassType type)
-		{
-			type_ = type;
-			technique_ = DeferredRenderable::Pass(type, alpha_);
-		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			*mvp_param_ = view * proj;
-			*model_view_param_ = view;
-
-			RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
-			switch (type_)
-			{
-			case PT_GBuffer:
-			case PT_MRTGBuffer:
-			case PT_GenReflectiveShadowMap:
-				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
-				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
-				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
-				*bump_tex_param_ = bump_tex_;
-				*specular_map_enabled_param_ = static_cast<int32_t>(!!specular_tex_);
-				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = mtl.specular_level;
-				*shininess_param_ = MathLib::clamp(mtl.shininess / 256.0f, 1e-6f, 0.999f);
-				break;
-
-			case PT_GenShadowMap:
-				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
-				*diffuse_tex_param_ = diffuse_tex_;
-				break;
-
-			case PT_Shading:
-				*shininess_param_ = max(1e-6f, mtl.shininess);
-				*diffuse_map_enabled_param_ = static_cast<int32_t>(!!diffuse_tex_);
-				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), 1);
-				*emit_map_enabled_param_ = static_cast<int32_t>(!!emit_tex_);
-				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-				{
-					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
-				}
-				break;
-
-			case PT_SpecialShading:
-				*emit_map_enabled_param_ = static_cast<int32_t>(!!emit_tex_);
-				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), 1);
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		bool SpecialShading() const
-		{
-			return special_shading_;
-		}
-
-	private:
-		PassType type_;
-		bool alpha_;
-
-		RenderEffectParameterPtr mvp_param_;
-		RenderEffectParameterPtr model_view_param_;
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
-		RenderEffectParameterPtr shininess_param_;
-		RenderEffectParameterPtr specular_map_enabled_param_;
-		RenderEffectParameterPtr specular_tex_param_;
-		RenderEffectParameterPtr bump_map_enabled_param_;
-		RenderEffectParameterPtr bump_tex_param_;
-		RenderEffectParameterPtr diffuse_map_enabled_param_;
-		RenderEffectParameterPtr diffuse_tex_param_;
-		RenderEffectParameterPtr diffuse_clr_param_;
-		RenderEffectParameterPtr emit_map_enabled_param_;
-		RenderEffectParameterPtr emit_tex_param_;
-		RenderEffectParameterPtr emit_clr_param_;
-		RenderEffectParameterPtr specular_level_param_;
-		RenderEffectParameterPtr flipping_param_;
-
-		TexturePtr diffuse_tex_;
-		TexturePtr specular_tex_;
-		TexturePtr bump_tex_;
-		TexturePtr emit_tex_;
-
-		bool special_shading_;
-	};
-
-	class TorusObject : public SceneObjectHelper, public DeferredSceneObject
-	{
-	public:
-		TorusObject(RenderablePtr const & mesh)
-			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Deferred)
-		{
-			this->AttachRenderable(checked_cast<RenderTorus*>(renderable_.get()));
-		}
-
-		void Pass(PassType type)
-		{
-			checked_pointer_cast<RenderTorus>(renderable_)->Pass(type);
-
-			if (PT_SpecialShading == type)
-			{
-				this->Visible(checked_pointer_cast<RenderTorus>(renderable_)->SpecialShading());
-			}
-			else
-			{
-				this->Visible(true);
-			}
-		}
-	};
-
-
-	class RenderPointSpotLightProxy : public StaticMesh, public DeferredRenderable
-	{
-	public:
-		RenderPointSpotLightProxy(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name),
-				DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBufferAdv.fxml"))
-		{
-			technique_ = gbuffer_tech_;
-
-			*(effect_->ParameterByName("bump_map_enabled")) = static_cast<int32_t>(0);
-			*(effect_->ParameterByName("diffuse_map_enabled")) = static_cast<int32_t>(0);
-
-			*(effect_->ParameterByName("diffuse_clr")) = float4(1, 1, 1, 1);
-
-			mvp_param_ = effect_->ParameterByName("mvp");
-			model_view_param_ = effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-		}
-
-		void BuildMeshInfo()
-		{
-		}
-
-		void SetModelMatrix(float4x4 const & mat)
-		{
-			model_ = mat;
-		}
-
-		void EmitClr(float3 const & clr)
-		{
-			*(effect_->ParameterByName("emit_clr")) = float4(clr.x(), clr.y(), clr.z(), 1);
-		}
-
-		void Pass(PassType type)
-		{
-			technique_ = DeferredRenderable::Pass(type, false);
-		}
-
-		void Update()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			float4x4 mv = model_ * view;
-			*mvp_param_ = mv * proj;
-			*model_view_param_ = mv;
-
-			*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-		}
-
-		void OnRenderBegin()
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
-		}
-
-	private:
-		float4x4 model_;
-
-		RenderEffectParameterPtr mvp_param_;
-		RenderEffectParameterPtr model_view_param_;
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
-	};
-
-	class SpotLightProxyObject : public SceneObjectHelper, public DeferredSceneObject
-	{
-	public:
-		SpotLightProxyObject(float cone_radius, float cone_height, float3 const & clr)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_Deferred)
-		{
-			renderable_ = LoadModel("spot_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPointSpotLightProxy>())()->Mesh(0);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->EmitClr(clr);
-			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height);
-
-			this->AttachRenderable(checked_cast<RenderPointSpotLightProxy*>(renderable_.get()));
-		}
-
-		void Update()
-		{
-			model_ = MathLib::scaling(0.1f, 0.1f, 0.1f) * model_org_
-				* MathLib::inverse(light_->SMCamera(0)->ViewMatrix());
-
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->SetModelMatrix(model_);
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Update();
-
-			light_->ModelMatrix(model_);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-		void Pass(PassType type)
-		{
-			checked_pointer_cast<RenderPointSpotLightProxy>(renderable_)->Pass(type);
-			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
-		}
-
-		void AttachLightSrc(LightSourcePtr const & light)
-		{
-			light_ = light;
-		}
-
-	private:
-		float4x4 model_;
-		float4x4 model_org_;
-
-		LightSourcePtr light_;
-
-		Timer timer_;
-	};
-
-	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox, public DeferredRenderable
-	{
-	public:
-		RenderableDeferredHDRSkyBox()
-			: DeferredRenderable(Context::Instance().RenderFactoryInstance().LoadEffect("GBufferAdv.fxml"))
-		{
-			gbuffer_tech_ = effect_->TechniqueByName("GBufferSkyBoxTech");
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferSkyBoxMRTTech");
-			shading_tech_ = effect_->TechniqueByName("ShadingSkyBox");
-			special_shading_tech_ = shading_tech_;
-			this->Technique(gbuffer_tech_);
-
-			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
-			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
-			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
-		}
-
-		void Pass(PassType type)
-		{
-			switch (type)
-			{
-			case PT_GBuffer:
-				technique_ = gbuffer_tech_;
-				break;
-
-			case PT_MRTGBuffer:
-				technique_ = gbuffer_mrt_tech_;
-				break;
-
-			case PT_Shading:
-				technique_ = shading_tech_;
-				break;
-
-			case PT_SpecialShading:
-				technique_ = special_shading_tech_;
-				break;
-
-			default:
-				break;
-			}
-		}
-	};
-
-	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox, public DeferredSceneObject
-	{
-	public:
-		SceneObjectDeferredHDRSkyBox()
-			: SceneObjectHDRSkyBox(SOA_Deferred)
-		{
-			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
-			this->AttachRenderable(checked_cast<RenderableDeferredHDRSkyBox*>(renderable_.get()));
-		}
-
-		void Pass(PassType type)
-		{
-			checked_pointer_cast<RenderableDeferredHDRSkyBox>(renderable_)->Pass(type);
-			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+			light.Position(float3(0, 12, -4.8f));
 		}
 	};
 
@@ -455,6 +63,7 @@ int main()
 
 	ContextCfg cfg = Context::Instance().Config();
 	cfg.graphics_cfg.hdr = false;
+	cfg.deferred_rendering = true;
 	Context::Instance().Config(cfg);
 
 	GlobalIlluminationApp app;
@@ -491,13 +100,13 @@ void GlobalIlluminationApp::InitObjects()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModelTorus>(), CreateMeshFactory<RenderTorus>());
+	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
 	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	deferred_rendering_ = MakeSharedPtr<DeferredRenderingLayer>();
+	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 	ambient_light_->Color(float3(0.0f, 0.0f, 0.0f));
@@ -511,12 +120,12 @@ void GlobalIlluminationApp::InitObjects()
 	spot_light_->Falloff(float3(0, 0.1f, 0));
 	spot_light_->OuterAngle(PI / 4);
 	spot_light_->InnerAngle(PI / 6);
+	spot_light_->BindUpdateFunc(SpotLightSourceUpdate());
 	spot_light_->AddToSceneManager();
 
-	spot_light_src_ = MakeSharedPtr<SpotLightProxyObject>(sqrt(3.0f) / 3, 1.0f, spot_light_->Color());
+	spot_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_->AddToSceneManager();
-
-	checked_pointer_cast<SpotLightProxyObject>(spot_light_src_)->AttachLightSrc(spot_light_);
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -527,8 +136,6 @@ void GlobalIlluminationApp::InitObjects()
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(boost::bind(&GlobalIlluminationApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
-
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("GlobalIllumination.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -563,12 +170,12 @@ void GlobalIlluminationApp::InitObjects()
 	scene_objs_.resize(scene_model_->NumMeshes());
 	for (size_t i = 0; i < scene_model_->NumMeshes(); ++ i)
 	{
-		scene_objs_[i] = MakeSharedPtr<TorusObject>(scene_model_->Mesh(i));
+		scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model_->Mesh(i), SceneObject::SOA_Cullable);
 		scene_objs_[i]->AddToSceneManager();
 	}
 
-	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
-	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
+	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
+	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
 	sky_box_->AddToSceneManager();
 }
 
@@ -577,8 +184,6 @@ void GlobalIlluminationApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 	deferred_rendering_->OnResize(width, height);
 
-	copy_pp_->InputPin(0, deferred_rendering_->ShadingTex());
-	
 	UIManager::Instance().SettleCtrls(width, height);
 }
 

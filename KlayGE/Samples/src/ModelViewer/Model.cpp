@@ -148,13 +148,13 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	}
 
 
-	RenderModel::Material const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+	RenderMaterialPtr const & mtl = model_.lock()->GetMaterial(this->MaterialID());
 
 	// Ω®¡¢Œ∆¿Ì
 	has_opacity_map_ = false;
 	normal_map_ = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
-	RenderModel::TextureSlotsType const & texture_slots = mtl.texture_slots;
-	for (RenderModel::TextureSlotsType::const_iterator iter = texture_slots.begin();
+	TextureSlotsType const & texture_slots = mtl->texture_slots;
+	for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 		iter != texture_slots.end(); ++ iter)
 	{
 		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
@@ -211,13 +211,13 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 	}
 
-	ambient_clr_ = float4(mtl.ambient.x(), mtl.ambient.y(), mtl.ambient.z(), 1);
-	diffuse_clr_ = float4(mtl.diffuse.x(), mtl.diffuse.y(), mtl.diffuse.z(), bool(diffuse_map_));
-	specular_clr_ = float4(mtl.specular.x(), mtl.specular.y(), mtl.specular.z(), bool(specular_map_));
-	emit_clr_ = float4(mtl.emit.x(), mtl.emit.y(), mtl.emit.z(), bool(emit_map_));
-	opacity_clr_ = float4(mtl.opacity, mtl.opacity, mtl.opacity, bool(opacity_map_));
-	specular_level_ = mtl.specular_level;
-	shininess_ = std::max(1e-6f, mtl.shininess);
+	ambient_clr_ = float4(mtl->ambient.x(), mtl->ambient.y(), mtl->ambient.z(), 1);
+	diffuse_clr_ = float4(mtl->diffuse.x(), mtl->diffuse.y(), mtl->diffuse.z(), bool(diffuse_map_));
+	specular_clr_ = float4(mtl->specular.x(), mtl->specular.y(), mtl->specular.z(), bool(specular_map_));
+	emit_clr_ = float4(mtl->emit.x(), mtl->emit.y(), mtl->emit.z(), bool(emit_map_));
+	opacity_clr_ = float4(mtl->opacity, mtl->opacity, mtl->opacity, bool(opacity_map_));
+	specular_level_ = mtl->specular_level;
+	shininess_ = std::max(1e-6f, mtl->shininess);
 
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (TM_Instanced == caps.tess_method)
@@ -392,7 +392,7 @@ void DetailedSkinnedMesh::UpdateTech()
 		tech += "Fill";
 
 		if (("Lighting" == visualize_)
-			&& ((model_.lock()->GetMaterial(this->MaterialID()).opacity < 0.99f) || this->HasOpacityMap()))
+			&& ((model_.lock()->GetMaterial(this->MaterialID())->opacity < 0.99f) || this->HasOpacityMap()))
 		{
 			tech += "Blend";
 		}

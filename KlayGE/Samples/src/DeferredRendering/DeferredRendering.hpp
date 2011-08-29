@@ -6,8 +6,6 @@
 #include <KlayGE/CameraController.hpp>
 #include <KlayGE/UI.hpp>
 
-#include "DeferredRenderingLayer.hpp"
-
 class DeferredRenderingApp : public KlayGE::App3DFramework
 {
 public:
@@ -41,14 +39,7 @@ private:
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
-	KlayGE::PostProcessPtr edge_anti_alias_;
 	KlayGE::PostProcessPtr copy_pp_;
-
-	KlayGE::TexturePtr ssvo_tex_;
-	KlayGE::PostProcessPtr ssvo_pp_;
-
-	KlayGE::TexturePtr blur_ssvo_tex_;
-	KlayGE::PostProcessPtr blur_pp_;
 
 	KlayGE::PostProcessPtr debug_pp_;
 

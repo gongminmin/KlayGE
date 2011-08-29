@@ -345,13 +345,53 @@ namespace KlayGE
 
 	RenderableHDRSkyBox::RenderableHDRSkyBox()
 	{
-		this->Technique(technique_->Effect().TechniqueByName("HDRSkyBoxTec"));
+		if (deferred_effect_)
+		{
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBox");
+			special_shading_tech_ = shading_tech_;
+			this->Technique(gbuffer_tech_);
+
+			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
+			skybox_Ccube_tex_ep_ = deferred_effect_->ParameterByName("skybox_C_tex");
+			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
+		}
+		else
+		{
+			this->Technique(technique_->Effect().TechniqueByName("HDRSkyBoxTec"));
+		}
 	}
 
 	void RenderableHDRSkyBox::Technique(RenderTechniquePtr const & tech)
 	{
 		RenderableSkyBox::Technique(tech);
 		skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
+	}
+
+	void RenderableHDRSkyBox::Pass(PassType type)
+	{
+		switch (type)
+		{
+		case PT_GBuffer:
+			technique_ = gbuffer_tech_;
+			break;
+
+		case PT_MRTGBuffer:
+			technique_ = gbuffer_mrt_tech_;
+			break;
+
+		case PT_Shading:
+			technique_ = shading_tech_;
+			break;
+
+		case PT_SpecialShading:
+			technique_ = special_shading_tech_;
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	void RenderableHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)

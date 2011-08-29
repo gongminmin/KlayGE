@@ -4,6 +4,7 @@ SET(RENDERING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/BlockCompression.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Render/FXAAPostProcess.cpp
@@ -37,6 +38,7 @@ SET(RENDERING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/BlockCompression.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Camera.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CameraController.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DeferredRenderingLayer.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Font.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp
@@ -76,13 +78,18 @@ SET(RENDERING_EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Bone.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/CustomMipMap.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingUtil.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/DownSample.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/DepthToVSM.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/GlowMerger.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/JudaTexture.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml
@@ -92,20 +99,29 @@ SET(RENDERING_EFFECT_FILES
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/SetSubsplatStencil.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/Stereoscopic.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/SummedAreaTable.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/Upsampling.fxml
     ${KLAYGE_PROJECT_DIR}/media/RenderFX/util.fxml
+    ${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.fxml
 )
 
 SET(RENDERING_POSTPROCESSOR_FILES
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/CustomMipMap.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/DepthToVSM.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/Downsampler2x2.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/GlowMerger.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+    ${KLAYGE_PROJECT_DIR}/media/PostProcessors/Upsampling.ppml
     ${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 )
 

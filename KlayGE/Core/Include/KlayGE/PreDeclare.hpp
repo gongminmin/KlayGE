@@ -100,6 +100,8 @@ namespace KlayGE
 	class RenderEngine;
 	typedef boost::shared_ptr<RenderEngine> RenderEnginePtr;
 	struct RenderSettings;
+	struct RenderMaterial;
+	typedef boost::shared_ptr<RenderMaterial> RenderMaterialPtr;
 	class Renderable;
 	typedef boost::shared_ptr<Renderable> RenderablePtr;
 	class RenderableHelper;
@@ -236,6 +238,8 @@ namespace KlayGE
 	class InfTerrainSceneObject;
 	class LensFlareRenderable;
 	class LensFlareSceneObject;
+	class DeferredRenderingLayer;
+	typedef boost::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
 
 	class UIManager;
 	typedef boost::shared_ptr<UIManager> UIManagerPtr;

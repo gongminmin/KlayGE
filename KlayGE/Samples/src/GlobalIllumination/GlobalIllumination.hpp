@@ -7,8 +7,6 @@
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
 
-#include "DeferredRenderingLayerAdv.hpp"
-
 class GlobalIlluminationApp : public KlayGE::App3DFramework
 {
 public:
@@ -43,8 +41,6 @@ private:
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
-
-	KlayGE::PostProcessPtr copy_pp_;
 
 	KlayGE::UIDialogPtr dialog_;
 

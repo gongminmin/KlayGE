@@ -12,6 +12,7 @@
       <File Name="../../Core/Src/Render/BlockCompression.cpp"/>
       <File Name="../../Core/Src/Render/Camera.cpp"/>
       <File Name="../../Core/Src/Render/CameraController.cpp"/>
+      <File Name="../../Core/Src/Render/DeferredRenderingLayer.cpp"/>
       <File Name="../../Core/Src/Render/Font.cpp"/>
       <File Name="../../Core/Src/Render/FrameBuffer.cpp"/>
       <File Name="../../Core/Src/Render/FXAAPostProcess.cpp"/>
@@ -44,6 +45,7 @@
       <File Name="../../Core/Include/KlayGE/BlockCompression.hpp"/>
       <File Name="../../Core/Include/KlayGE/Camera.hpp"/>
       <File Name="../../Core/Include/KlayGE/CameraController.hpp"/>
+      <File Name="../../Core/Include/KlayGE/DeferredRenderingLayer.hpp"/>
       <File Name="../../Core/Include/KlayGE/ElementFormat.hpp"/>
       <File Name="../../Core/Include/KlayGE/Font.hpp"/>
       <File Name="../../Core/Include/KlayGE/FrameBuffer.hpp"/>
@@ -82,12 +84,17 @@
       <File Name="../../media/RenderFX/Blur.fxml"/>
       <File Name="../../media/RenderFX/Bone.fxml"/>
       <File Name="../../media/RenderFX/Copy.fxml"/>
+      <File Name="../../media/RenderFX/Copy2LightBuffer.fxml"/>
+      <File Name="../../media/RenderFX/CustomMipMap.fxml"/>
+      <File Name="../../media/RenderFX/DeferredRendering.fxml"/>
       <File Name="../../media/RenderFX/DeferredRenderingUtil.fxml"/>
+      <File Name="../../media/RenderFX/DepthToVSM.fxml"/>
       <File Name="../../media/RenderFX/DownSample.fxml"/>
       <File Name="../../media/RenderFX/Fog.fxml"/>
       <File Name="../../media/RenderFX/Font.fxml"/>
       <File Name="../../media/RenderFX/FXAA.fxml"/>
       <File Name="../../media/RenderFX/GammaCorrection.fxml"/>
+      <File Name="../../media/RenderFX/GBuffer.fxml"/>
       <File Name="../../media/RenderFX/GlowMerger.fxml"/>
       <File Name="../../media/RenderFX/InfTerrain.fxml"/>
       <File Name="../../media/RenderFX/JudaTexture.fxml"/>
@@ -99,19 +106,28 @@
       <File Name="../../media/RenderFX/PostProcess.fxml"/>
       <File Name="../../media/RenderFX/Quaternion.fxml"/>
       <File Name="../../media/RenderFX/RenderableHelper.fxml"/>
+      <File Name="../../media/RenderFX/RSM2VPLs.fxml"/>
+      <File Name="../../media/RenderFX/SetSubsplatStencil.fxml"/>
       <File Name="../../media/RenderFX/SSVO.fxml"/>
       <File Name="../../media/RenderFX/Stereoscopic.fxml"/>
       <File Name="../../media/RenderFX/SumLum.fxml"/>
       <File Name="../../media/RenderFX/SummedAreaTable.fxml"/>
       <File Name="../../media/RenderFX/TAA.fxml"/>
       <File Name="../../media/RenderFX/ToneMapping.fxml"/>
+      <File Name="../../media/RenderFX/Upsampling.fxml"/>
       <File Name="../../media/RenderFX/util.fxml"/>
+      <File Name="../../media/RenderFX/VPLsLighting.fxml"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Post Processors">
       <File Name="../../media/PostProcessors/Copy.ppml"/>
+      <File Name="../../media/PostProcessors/Copy2LightBuffer.ppml"/>
+      <File Name="../../media/PostProcessors/CustomMipMap.ppml"/>
+      <File Name="../../media/PostProcessors/DepthToVSM.ppml"/>
       <File Name="../../media/PostProcessors/Downsampler2x2.ppml"/>
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
       <File Name="../../media/PostProcessors/GlowMerger.ppml"/>
+      <File Name="../../media/PostProcessors/RSM2VPLs.ppml"/>
+      <File Name="../../media/PostProcessors/Upsampling.ppml"/>
       <File Name="../../media/PostProcessors/TAA.ppml"/>
     </VirtualDirectory>
   </VirtualDirectory>

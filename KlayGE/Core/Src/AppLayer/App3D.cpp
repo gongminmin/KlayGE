@@ -38,6 +38,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <boost/assert.hpp>
 
@@ -76,6 +77,11 @@ namespace KlayGE
 		ContextCfg const & cfg = Context::Instance().Config();
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().CreateRenderWindow(name_,
 			cfg.graphics_cfg);
+
+		if (cfg.deferred_rendering)
+		{
+			Context::Instance().DeferredRenderingLayerInstance(MakeSharedPtr<DeferredRenderingLayer>());
+		}
 
 		this->InitObjects();
 		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);

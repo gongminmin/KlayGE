@@ -82,6 +82,12 @@ namespace KlayGE
 		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 	}
 
+	void SceneObjectHDRSkyBox::Pass(PassType type)
+	{
+		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->Pass(type);
+		this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+	}
+
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable),
@@ -147,6 +153,12 @@ namespace KlayGE
 	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const
 	{
 		return model_;
+	}
+
+	void SceneObjectLightSourceProxy::Pass(PassType type)
+	{
+		renderable_->Pass(type);
+		this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
 	}
 
 

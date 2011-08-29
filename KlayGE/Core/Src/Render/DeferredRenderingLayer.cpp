@@ -1,3 +1,15 @@
+// DeferredRenderingLayer.cpp
+// KlayGE Deferred Rendering Layer implement file
+// Ver 4.0.0
+// Copyright(C) Minmin Gong, 2011
+// Homepage: http://www.klayge.org
+//
+// 4.0.0
+// First release (2011.8.28)
+//
+// CHANGE LIST
+//////////////////////////////////////////////////////////////////////////////////
+
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
@@ -23,7 +35,7 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
-#include "DeferredRenderingLayerAdv.hpp"
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 namespace KlayGE
 {
@@ -37,120 +49,198 @@ namespace KlayGE
 
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
-
-	DeferredRenderable::DeferredRenderable(RenderEffectPtr const & effect)
-		: effect_(effect)
+	template <typename T>
+	void CreateConeMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height, uint16_t n)
 	{
-		if (effect_)
+		for (int i = 0; i < n; ++ i)
 		{
-			gbuffer_tech_ = effect_->TechniqueByName("GBufferTech");
-			gbuffer_alpha_tech_ = effect_->TechniqueByName("GBufferAlphaTech");
-			gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
-			gbuffer_alpha_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaMRTTech");
-			gen_rsm_tech_ = effect_->TechniqueByName("GenReflectiveShadowMap");
-			gen_rsm_alpha_tech_ = effect_->TechniqueByName("GenReflectiveShadowMapAlpha");
-			gen_sm_tech_ = effect_->TechniqueByName("GenShadowMap");
-			gen_sm_alpha_tech_ = effect_->TechniqueByName("GenShadowMapAlpha");
-			shading_tech_ = effect_->TechniqueByName("Shading");
-			special_shading_tech_ = effect_->TechniqueByName("SpecialShading");
-
-			lighting_tex_param_ = effect_->ParameterByName("lighting_tex");
-			ssvo_tex_param_ = effect_->ParameterByName("ssvo_tex");
-			ssvo_enabled_param_ = effect_->ParameterByName("ssvo_enabled");
-			g_buffer_1_tex_param_ = effect_->ParameterByName("g_buffer_1_tex");
+			vb.push_back(T());
+			vb.back().x() = vb.back().y() = vb.back().z() = 0;
 		}
-	}
 
-	RenderTechniquePtr const & DeferredRenderable::Pass(PassType type, bool alpha) const
-	{
-		switch (type)
+		float outer_radius = radius / cos(PI / n);
+		for (int i = 0; i < n; ++ i)
 		{
-		case PT_GBuffer:
-			if (alpha)
-			{
-				return gbuffer_alpha_tech_;
-			}
-			else
-			{
-				return gbuffer_tech_;
-			}
-
-		case PT_MRTGBuffer:
-			if (alpha)
-			{
-				return gbuffer_alpha_mrt_tech_;
-			}
-			else
-			{
-				return gbuffer_mrt_tech_;
-			}
-
-		case PT_GenReflectiveShadowMap:
-			if (alpha)
-			{
-				return gen_rsm_alpha_tech_;
-			}
-			else
-			{
-				return gen_rsm_tech_;
-			}
-
-		case PT_GenShadowMap:
-			if (alpha)
-			{
-				return gen_sm_alpha_tech_;
-			}
-			else
-			{
-				return gen_sm_tech_;
-			}
-
-		case PT_Shading:
-			return shading_tech_;
-
-		case PT_SpecialShading:
-			return special_shading_tech_;
-
-		default:
-			BOOST_ASSERT(false);
-			return gbuffer_tech_;
+			vb.push_back(T());
+			float angle = i * 2 * PI / n;
+			vb.back().x() = outer_radius * cos(angle);
+			vb.back().y() = outer_radius * sin(angle);
+			vb.back().z() = height;
 		}
+
+		vb.push_back(T());
+		vb.back().x() = vb.back().y() = 0;
+		vb.back().z() = height;
+
+		for (int i = 0; i < n; ++ i)
+		{
+			vb.push_back(T());
+			vb.back() = vb[vertex_base + n + i];
+		}
+
+		for (uint16_t i = 0; i < n - 1; ++ i)
+		{
+			ib.push_back(vertex_base + i);
+			ib.push_back(vertex_base + n + i + 1);
+			ib.push_back(vertex_base + n + i);
+		}
+		ib.push_back(vertex_base + n - 1);
+		ib.push_back(vertex_base + n + 0);
+		ib.push_back(vertex_base + n + n - 1);
+
+		for (uint16_t i = 0; i < n - 1; ++ i)
+		{
+			ib.push_back(vertex_base + 2 * n);
+			ib.push_back(vertex_base + 2 * n + 1 + i);
+			ib.push_back(vertex_base + 2 * n + 1 + i + 1);
+		}
+		ib.push_back(vertex_base + 2 * n);
+		ib.push_back(vertex_base + 2 * n + 1 + n - 1);
+		ib.push_back(vertex_base + 2 * n + 1);
 	}
 
-	void DeferredRenderable::LightingTex(TexturePtr const & tex)
+	template <typename T>
+	void CreatePyramidMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height)
 	{
-		*lighting_tex_param_ = tex;
+		for (int i = 0; i < 4; ++ i)
+		{
+			vb.push_back(T());
+			vb.back().x() = vb.back().y() = vb.back().z() = 0;
+		}
+
+		float outer_radius = radius * sqrt(2.0f);
+		vb.push_back(T());
+		vb.back().x() = -outer_radius;
+		vb.back().y() = -outer_radius;
+		vb.back().z() = height;
+		vb.push_back(T());
+		vb.back().x() = +outer_radius;
+		vb.back().y() = -outer_radius;
+		vb.back().z() = height;
+		vb.push_back(T());
+		vb.back().x() = +outer_radius;
+		vb.back().y() = +outer_radius;
+		vb.back().z() = height;
+		vb.push_back(T());
+		vb.back().x() = -outer_radius;
+		vb.back().y() = +outer_radius;
+		vb.back().z() = height;
+
+		vb.push_back(T());
+		vb.back().x() = vb.back().y() = 0;
+		vb.back().z() = height;
+
+		for (int i = 0; i < 4; ++ i)
+		{
+			vb.push_back(T());
+			vb.back() = vb[vertex_base + 4 + i];
+		}
+
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 7);
+
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 9);
+		ib.push_back(vertex_base + 10);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 10);
+		ib.push_back(vertex_base + 11);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 11);
+		ib.push_back(vertex_base + 12);
+		ib.push_back(vertex_base + 8);
+		ib.push_back(vertex_base + 12);
+		ib.push_back(vertex_base + 9);
 	}
 
-	void DeferredRenderable::SSVOTex(TexturePtr const & tex)
+	template <typename T>
+	void CreateBoxMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float half_length)
 	{
-		*ssvo_tex_param_ = tex;
-	}
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = -half_length;
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = -half_length;
 
-	void DeferredRenderable::SSVOEnabled(bool ssvo)
-	{
-		*ssvo_enabled_param_ = static_cast<int32_t>(ssvo);
-	}
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = +half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = +half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = +half_length;
+		vb.push_back(T());
+		vb.back().x() = -half_length;
+		vb.back().y() = -half_length;
+		vb.back().z() = +half_length;
 
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 0);
 
-	void DeferredSceneObject::AttachRenderable(DeferredRenderable* dr)
-	{
-		dr_ = dr;
-	}
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 5);
 
-	void DeferredSceneObject::LightingTex(TexturePtr const & tex)
-	{
-		dr_->LightingTex(tex);
-	}
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 4);
 
-	void DeferredSceneObject::SSVOTex(TexturePtr const & tex)
-	{
-		dr_->SSVOTex(tex);
-	}
+		ib.push_back(vertex_base + 1);
+		ib.push_back(vertex_base + 5);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 1);
 
-	void DeferredSceneObject::SSVOEnabled(bool ssvo)
-	{
-		dr_->SSVOEnabled(ssvo);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 2);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 6);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 3);
+
+		ib.push_back(vertex_base + 4);
+		ib.push_back(vertex_base + 0);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 3);
+		ib.push_back(vertex_base + 7);
+		ib.push_back(vertex_base + 4);
 	}
 
 
@@ -258,22 +348,23 @@ namespace KlayGE
 				boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
-		effect_ = rf.LoadEffect("DeferredRenderingAdv.fxml");
+		g_buffer_effect_ = rf.LoadEffect("GBuffer.fxml");
+		dr_effect_ = rf.LoadEffect("DeferredRendering.fxml");
 
-		technique_shadows_[LT_Ambient] = effect_->TechniqueByName("DeferredShadowingAmbient");
-		technique_shadows_[LT_Directional] = effect_->TechniqueByName("DeferredShadowingDirectional");
-		technique_shadows_[LT_Point] = effect_->TechniqueByName("DeferredShadowingPoint");
-		technique_shadows_[LT_Spot] = effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_lights_[LT_Ambient] = effect_->TechniqueByName("DeferredRenderingAmbient");
-		technique_lights_[LT_Directional] = effect_->TechniqueByName("DeferredRenderingDirectional");
-		technique_lights_[LT_Point] = effect_->TechniqueByName("DeferredRenderingPoint");
-		technique_lights_[LT_Spot] = effect_->TechniqueByName("DeferredRenderingSpot");
-		technique_light_depth_only_ = effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
-		technique_light_stencil_ = effect_->TechniqueByName("DeferredRenderingLightStencil");
-		technique_clear_stencil_ = effect_->TechniqueByName("ClearStencil");
+		technique_shadows_[LT_Ambient] = dr_effect_->TechniqueByName("DeferredShadowingAmbient");
+		technique_shadows_[LT_Directional] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
+		technique_shadows_[LT_Point] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LT_Spot] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
+		technique_lights_[LT_Ambient] = dr_effect_->TechniqueByName("DeferredRenderingAmbient");
+		technique_lights_[LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
+		technique_lights_[LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
+		technique_lights_[LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
+		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
+		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
+		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
 		if (mrt_g_buffer_)
 		{
-			technique_shading_ = effect_->TechniqueByName("Shading");
+			technique_shading_ = dr_effect_->TechniqueByName("Shading");
 		}
 
 		sm_buffer_ = rf.MakeFrameBuffer();
@@ -399,22 +490,22 @@ namespace KlayGE
 		depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
 		depth_to_vsm_pp_->OutputPin(0, sm_tex_);
 
-		*(effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
-		*(effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
+		*(dr_effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
+		*(dr_effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
-		depth_near_far_invfar_param_ = effect_->ParameterByName("depth_near_far_invfar");
-		light_attrib_param_ = effect_->ParameterByName("light_attrib");
-		light_color_param_ = effect_->ParameterByName("light_color");
-		light_falloff_param_ = effect_->ParameterByName("light_falloff");
-		light_view_proj_param_ = effect_->ParameterByName("light_view_proj");
-		light_volume_mv_param_ = effect_->ParameterByName("light_volume_mv");
-		light_volume_mvp_param_ = effect_->ParameterByName("light_volume_mvp");
-		view_to_light_model_param_ = effect_->ParameterByName("view_to_light_model");
-		light_pos_es_param_ = effect_->ParameterByName("light_pos_es");
-		light_dir_es_param_ = effect_->ParameterByName("light_dir_es");
+		depth_near_far_invfar_param_ = dr_effect_->ParameterByName("depth_near_far_invfar");
+		light_attrib_param_ = dr_effect_->ParameterByName("light_attrib");
+		light_color_param_ = dr_effect_->ParameterByName("light_color");
+		light_falloff_param_ = dr_effect_->ParameterByName("light_falloff");
+		light_view_proj_param_ = dr_effect_->ParameterByName("light_view_proj");
+		light_volume_mv_param_ = dr_effect_->ParameterByName("light_volume_mv");
+		light_volume_mvp_param_ = dr_effect_->ParameterByName("light_volume_mvp");
+		view_to_light_model_param_ = dr_effect_->ParameterByName("view_to_light_model");
+		light_pos_es_param_ = dr_effect_->ParameterByName("light_pos_es");
+		light_dir_es_param_ = dr_effect_->ParameterByName("light_dir_es");
 		if (mrt_g_buffer_)
 		{
-			ssvo_enabled_param_ = effect_->ParameterByName("ssvo_enabled");
+			ssvo_enabled_param_ = dr_effect_->ParameterByName("ssvo_enabled");
 		}
 	}
 
@@ -530,15 +621,15 @@ namespace KlayGE
 
 		if (g_buffer_tex_)
 		{
-			*(effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
+			*(dr_effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
 		}
 
-		*(effect_->ParameterByName("g_buffer_tex")) = g_buffer_tex_;
-		*(effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
-		*(effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(dr_effect_->ParameterByName("g_buffer_tex")) = g_buffer_tex_;
+		*(dr_effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
+		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
 
-		*(effect_->ParameterByName("lighting_tex")) = lighting_tex_;
-		*(effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
+		*(dr_effect_->ParameterByName("lighting_tex")) = lighting_tex_;
+		*(dr_effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
 
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -558,7 +649,7 @@ namespace KlayGE
 
 		if (mrt_g_buffer_)
 		{
-			*(effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
+			*(dr_effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
 		}
 
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
@@ -601,15 +692,13 @@ namespace KlayGE
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
 			{
-				if (so->Attrib() & SOA_Deferred)
+				if (0 == (so->Attrib() & SceneObject::SOA_Overlay))
 				{
-					DeferredSceneObject* deo = dynamic_cast<DeferredSceneObject*>(so.get());
+					deferred_scene_objs_.push_back(so.get());
 
-					deferred_scene_objs_.push_back(deo);
-
-					deo->LightingTex(lighting_tex_);
-					deo->SSVOTex(ssvo_tex_);
-					deo->SSVOEnabled(ssvo_enabled_);
+					so->LightingTex(lighting_tex_);
+					so->SSVOTex(ssvo_tex_);
+					so->SSVOEnabled(ssvo_enabled_);
 				}
 			}
 

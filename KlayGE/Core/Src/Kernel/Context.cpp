@@ -30,6 +30,7 @@
 #include <KlayGE/AudioDataSource.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/XMLDom.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -382,6 +383,8 @@ namespace KlayGE
 		cfg_.graphics_cfg.gamma = gamma;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
+
+		cfg_.deferred_rendering = false;
 	}
 
 	void Context::SaveCfg(std::string const & cfg_file)
@@ -546,32 +549,32 @@ namespace KlayGE
 
 	void Context::Config(ContextCfg const & cfg)
 	{
-		cfg_ = cfg;
+		if ((cfg_.render_factory_name != cfg.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
+		{
+			this->LoadRenderFactory(cfg.render_factory_name);
+		}
+		if ((cfg_.audio_factory_name != cfg.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
+		{
+			this->LoadAudioFactory(cfg.audio_factory_name);
+		}
+		if ((cfg_.input_factory_name != cfg.input_factory_name) || (InputFactory::NullObject() == input_factory_))
+		{
+			this->LoadInputFactory(cfg.input_factory_name);
+		}
+		if ((cfg_.show_factory_name != cfg.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
+		{
+			this->LoadShowFactory(cfg.show_factory_name);
+		}
+		if ((cfg_.scene_manager_name != cfg.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
+		{
+			this->LoadSceneManager(cfg.scene_manager_name);
+		}
+		if ((cfg_.audio_data_source_factory_name != cfg.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
+		{
+			this->LoadAudioDataSourceFactory(cfg.audio_data_source_factory_name);
+		}
 
-		if ((cfg_.render_factory_name != cfg_.render_factory_name) || (RenderFactory::NullObject() == render_factory_))
-		{
-			this->LoadRenderFactory(cfg_.render_factory_name);
-		}
-		if ((cfg_.audio_factory_name != cfg_.audio_factory_name) || (AudioFactory::NullObject() == audio_factory_))
-		{
-			this->LoadAudioFactory(cfg_.audio_factory_name);
-		}
-		if ((cfg_.input_factory_name != cfg_.input_factory_name) || (InputFactory::NullObject() == input_factory_))
-		{
-			this->LoadInputFactory(cfg_.input_factory_name);
-		}
-		if ((cfg_.show_factory_name != cfg_.show_factory_name) || (ShowFactory::NullObject() == show_factory_))
-		{
-			this->LoadShowFactory(cfg_.show_factory_name);
-		}
-		if ((cfg_.scene_manager_name != cfg_.scene_manager_name) || (SceneManager::NullObject() == scene_mgr_))
-		{
-			this->LoadSceneManager(cfg_.scene_manager_name);
-		}
-		if ((cfg_.audio_data_source_factory_name != cfg_.audio_data_source_factory_name) || (AudioDataSourceFactory::NullObject() == audio_data_src_factory_))
-		{
-			this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);
-		}
+		cfg_ = cfg;
 	}
 
 	ContextCfg const & Context::Config() const

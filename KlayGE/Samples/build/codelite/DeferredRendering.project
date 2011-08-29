@@ -9,16 +9,12 @@
   <Dependencies/>
   <VirtualDirectory Name="Source Files">
     <File Name="../../src/DeferredRendering/DeferredRendering.cpp"/>
-    <File Name="../../src/DeferredRendering/DeferredRenderingLayer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Header Files">
     <File Name="../../src/DeferredRendering/DeferredRendering.hpp"/>
-    <File Name="../../src/DeferredRendering/DeferredRenderingLayer.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Effects">
-    <File Name="../../media/DeferredRendering/DeferredRendering.fxml"/>
     <File Name="../../media/DeferredRendering/DeferredRenderingDebug.fxml"/>
-    <File Name="../../media/DeferredRendering/GBuffer.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">
     <File Name="../../media/DeferredRendering/DeferredRendering.uiml"/>

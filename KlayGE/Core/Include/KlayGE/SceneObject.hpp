@@ -26,6 +26,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/Renderable.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -68,6 +69,12 @@ namespace KlayGE
 
 		vertex_elements_type const & InstanceFormat() const;
 		virtual void const * InstanceData() const;
+
+		// For deferred only
+		virtual void Pass(PassType type);
+		virtual void LightingTex(TexturePtr const & tex);
+		virtual void SSVOTex(TexturePtr const & tex);
+		virtual void SSVOEnabled(bool ssvo);
 
 	protected:
 		uint32_t attrib_;

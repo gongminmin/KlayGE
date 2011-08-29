@@ -31,13 +31,43 @@
 
 namespace KlayGE
 {
+	enum PassType
+	{
+		PT_GBuffer,
+		PT_MRTGBuffer,
+		PT_GenShadowMap,
+		PT_GenReflectiveShadowMap,
+		PT_Lighting,
+		PT_IndirectLighting,
+		PT_Shading,
+		PT_SpecialShading
+	};
+
+	typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
+	struct KLAYGE_CORE_API RenderMaterial
+	{
+		float3 ambient;
+		float3 diffuse;
+		float3 specular;
+		float3 emit;
+		float opacity;
+		float specular_level;
+		float shininess;
+
+		TextureSlotsType texture_slots;
+	};
+
 	// Abstract class defining the interface all renderable objects must implement.
 	class KLAYGE_CORE_API Renderable : public boost::enable_shared_from_this<Renderable>
 	{
 	public:
+		Renderable();
 		virtual ~Renderable();
 
-		virtual RenderTechniquePtr const & GetRenderTechnique() const = 0;
+		virtual RenderTechniquePtr const & GetRenderTechnique() const
+		{
+			return technique_;
+		}
 		virtual RenderLayoutPtr const & GetRenderLayout() const = 0;
 		virtual std::wstring const & Name() const = 0;
 
@@ -74,11 +104,77 @@ namespace KlayGE
 			return instances_[index].lock();
 		}
 
+		// For deferred only
+
+		virtual void SetModelMatrix(float4x4 const & mat);
+
+		virtual void Pass(PassType type);
+		virtual void LightingTex(TexturePtr const & tex);
+		virtual void SSVOTex(TexturePtr const & tex);
+		virtual void SSVOEnabled(bool ssvo);
+
+		bool SpecialShading() const
+		{
+			return special_shading_;
+		}
+
 	protected:
 		virtual void UpdateInstanceStream();
 
+		// For deferred only
+		virtual RenderTechniquePtr const & PassTech(PassType type, bool alpha) const;
+
 	protected:
 		std::vector<boost::weak_ptr<SceneObject> > instances_;
+
+		RenderTechniquePtr technique_;
+
+		// For deferred only
+
+		RenderEffectPtr deferred_effect_;
+
+		RenderTechniquePtr gbuffer_tech_;
+		RenderTechniquePtr gbuffer_alpha_tech_;
+		RenderTechniquePtr gbuffer_mrt_tech_;
+		RenderTechniquePtr gbuffer_alpha_mrt_tech_;
+		RenderTechniquePtr gen_sm_tech_;
+		RenderTechniquePtr gen_sm_alpha_tech_;
+		RenderTechniquePtr gen_rsm_tech_;
+		RenderTechniquePtr gen_rsm_alpha_tech_;
+		RenderTechniquePtr shading_tech_;
+		RenderTechniquePtr special_shading_tech_;
+
+		RenderEffectParameterPtr lighting_tex_param_;
+		RenderEffectParameterPtr ssvo_tex_param_;
+		RenderEffectParameterPtr ssvo_enabled_param_;
+		RenderEffectParameterPtr g_buffer_1_tex_param_;
+
+		float4x4 model_mat_;
+
+		PassType type_;
+		bool alpha_;
+		bool special_shading_;
+
+		RenderMaterialPtr mtl_;
+
+		RenderEffectParameterPtr mvp_param_;
+		RenderEffectParameterPtr model_view_param_;
+		RenderEffectParameterPtr depth_near_far_invfar_param_;
+		RenderEffectParameterPtr shininess_param_;
+		RenderEffectParameterPtr specular_tex_param_;
+		RenderEffectParameterPtr bump_map_enabled_param_;
+		RenderEffectParameterPtr bump_tex_param_;
+		RenderEffectParameterPtr diffuse_tex_param_;
+		RenderEffectParameterPtr diffuse_clr_param_;
+		RenderEffectParameterPtr emit_tex_param_;
+		RenderEffectParameterPtr emit_clr_param_;
+		RenderEffectParameterPtr specular_level_param_;
+		RenderEffectParameterPtr flipping_param_;
+
+		TexturePtr diffuse_tex_;
+		TexturePtr specular_tex_;
+		TexturePtr bump_tex_;
+		TexturePtr emit_tex_;
 	};
 }
 

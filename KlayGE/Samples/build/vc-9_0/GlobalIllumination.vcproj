@@ -350,10 +350,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\GlobalIllumination\GlobalIllumination.cpp"
 				>
 			</File>
@@ -364,51 +360,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\GlobalIllumination\GlobalIllumination.hpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Effects"
-			>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\Copy2LightBuffer.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\CustomMipMap.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\DeferredRenderingAdv.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\DepthToVSM.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\GBufferAdv.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\RSM2VPLs.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\SetSubsplatStencil.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\Upsampling.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\VPLsLighting.fxml"
 				>
 			</File>
 		</Filter>
@@ -429,30 +381,6 @@
 			</File>
 			<File
 				RelativePath="..\..\media\Common\KlayGESample.rc"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Post Processors"
-			>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\Copy2LightBuffer.ppml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\CustomMipMap.ppml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\DepthToVSM.ppml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\RSM2VPLs.ppml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\GlobalIllumination\Upsampling.ppml"
 				>
 			</File>
 		</Filter>

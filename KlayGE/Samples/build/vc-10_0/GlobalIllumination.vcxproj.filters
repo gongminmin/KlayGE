@@ -4,15 +4,9 @@
     <ClCompile Include="..\..\src\GlobalIllumination\GlobalIllumination.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\GlobalIllumination\GlobalIllumination.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\GlobalIllumination\DeferredRenderingLayerAdv.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -26,12 +20,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{2871d62d-84d8-4e81-8908-ad9add4c91c7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Effects">
-      <UniqueIdentifier>{7f2806c0-c958-44af-aa24-bb5b4f01c2b2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Post Processors">
-      <UniqueIdentifier>{096ec97d-fa67-428d-9cc6-f1fdf42e6711}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{da49914a-4bb0-4117-94c0-773c15686353}</UniqueIdentifier>
     </Filter>
@@ -40,50 +28,8 @@
     <None Include="..\..\media\GlobalIllumination\GlobalIllumination.uiml">
       <Filter>UI</Filter>
     </None>
-    <None Include="..\..\media\GlobalIllumination\RSM2VPLs.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\RSM2VPLs.ppml">
-      <Filter>Post Processors</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\CustomMipMap.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\CustomMipMap.ppml">
-      <Filter>Post Processors</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\SetSubsplatStencil.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\VPLsLighting.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\Upsampling.ppml">
-      <Filter>Post Processors</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\Upsampling.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\Copy2LightBuffer.ppml">
-      <Filter>Post Processors</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\Copy2LightBuffer.fxml">
-      <Filter>Effects</Filter>
-    </None>
     <None Include="..\..\..\klayge_logo.ico">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\DeferredRenderingAdv.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\GBufferAdv.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\DepthToVSM.fxml">
-      <Filter>Effects</Filter>
-    </None>
-    <None Include="..\..\media\GlobalIllumination\DepthToVSM.ppml">
-      <Filter>Post Processors</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

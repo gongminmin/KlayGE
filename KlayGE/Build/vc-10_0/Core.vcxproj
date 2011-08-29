@@ -203,6 +203,7 @@
     <ClCompile Include="..\..\Core\Src\Render\BlockCompression.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Camera.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\CameraController.cpp" />
+    <ClCompile Include="..\..\Core\Src\Render\DeferredRenderingLayer.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\Font.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\FrameBuffer.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\FXAAPostProcess.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Camera.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\CameraController.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\DeferredRenderingLayer.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\ElementFormat.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Font.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\FrameBuffer.hpp" />
@@ -399,14 +401,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\media\PostProcessors\Copy.ppml" />
+    <None Include="..\..\media\PostProcessors\Copy2LightBuffer.ppml" />
+    <None Include="..\..\media\PostProcessors\CustomMipMap.ppml" />
+    <None Include="..\..\media\PostProcessors\DepthToVSM.ppml" />
     <None Include="..\..\media\PostProcessors\GammaCorrection.ppml" />
     <None Include="..\..\media\PostProcessors\GlowMerger.ppml" />
+    <None Include="..\..\media\PostProcessors\RSM2VPLs.ppml" />
+    <None Include="..\..\media\PostProcessors\Upsampling.ppml" />
     <None Include="..\..\media\RenderFX\2D.fxml" />
     <None Include="..\..\media\RenderFX\BilateralBlur.fxml" />
     <None Include="..\..\media\RenderFX\Blur.fxml" />
     <None Include="..\..\media\RenderFX\Bone.fxml" />
     <None Include="..\..\media\RenderFX\Copy.fxml" />
+    <None Include="..\..\media\RenderFX\Copy2LightBuffer.fxml" />
+    <None Include="..\..\media\RenderFX\CustomMipMap.fxml" />
+    <None Include="..\..\media\RenderFX\DeferredRendering.fxml" />
     <None Include="..\..\media\RenderFX\DeferredRenderingUtil.fxml" />
+    <None Include="..\..\media\RenderFX\DepthToVSM.fxml" />
     <None Include="..\..\media\RenderFX\DownSample.fxml">
       <SubType>Designer</SubType>
     </None>
@@ -414,6 +425,7 @@
     <None Include="..\..\media\RenderFX\Font.fxml" />
     <None Include="..\..\media\RenderFX\FXAA.fxml" />
     <None Include="..\..\media\RenderFX\GammaCorrection.fxml" />
+    <None Include="..\..\media\RenderFX\GBuffer.fxml" />
     <None Include="..\..\media\RenderFX\GlowMerger.fxml" />
     <None Include="..\..\media\RenderFX\InfTerrain.fxml" />
     <None Include="..\..\media\RenderFX\JudaTexture.fxml" />
@@ -425,15 +437,19 @@
     <None Include="..\..\media\RenderFX\PostProcess.fxml" />
     <None Include="..\..\media\RenderFX\Quaternion.fxml" />
     <None Include="..\..\media\RenderFX\RenderableHelper.fxml" />
+    <None Include="..\..\media\RenderFX\RSM2VPLs.fxml" />
+    <None Include="..\..\media\RenderFX\SetSubsplatStencil.fxml" />
     <None Include="..\..\media\RenderFX\SSVO.fxml" />
     <None Include="..\..\media\RenderFX\Stereoscopic.fxml" />
     <None Include="..\..\media\RenderFX\SumLum.fxml" />
     <None Include="..\..\media\RenderFX\SummedAreaTable.fxml" />
     <None Include="..\..\media\RenderFX\TAA.fxml" />
     <None Include="..\..\media\RenderFX\ToneMapping.fxml" />
+    <None Include="..\..\media\RenderFX\Upsampling.fxml" />
     <None Include="..\..\media\RenderFX\util.fxml" />
     <None Include="..\..\media\PostProcessors\Downsampler2x2.ppml" />
     <None Include="..\..\media\RenderFX\UI.fxml" />
+    <None Include="..\..\media\RenderFX\VPLsLighting.fxml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

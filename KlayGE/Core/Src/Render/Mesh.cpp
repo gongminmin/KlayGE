@@ -39,6 +39,14 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011 6334)
+#endif
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/Mesh.hpp>
 
@@ -55,7 +63,7 @@ namespace
 			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc;
 			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
-			std::vector<RenderModel::Material> mtls;
+			std::vector<RenderMaterialPtr> mtls;
 			std::vector<vertex_element> merged_ves;
 			char all_is_index_16_bit;
 			std::vector<std::vector<uint8_t> > merged_buff;
@@ -265,6 +273,21 @@ namespace KlayGE
 		}
 	}
 
+	TexturePtr const & RenderModel::RetriveTexture(std::string const & name)
+	{
+		size_t seed = 0;
+		boost::hash_range(seed, name.begin(), name.end());
+
+		BOOST_AUTO(iter, tex_pool_.find(seed));
+		if (tex_pool_.end() == iter)
+		{
+			TexturePtr tex = LoadTexture(name, EAH_GPU_Read | EAH_Immutable)();
+			iter = tex_pool_.insert(std::make_pair(seed, tex)).first;
+		}
+
+		return iter->second;
+	}
+
 
 	StaticMesh::StaticMesh(RenderModelPtr const & model, std::wstring const & name)
 		: name_(name), model_(model)
@@ -275,6 +298,51 @@ namespace KlayGE
 
 	StaticMesh::~StaticMesh()
 	{
+	}
+
+	void StaticMesh::BuildMeshInfo()
+	{
+		if (deferred_effect_)
+		{
+			alpha_ = false;
+			special_shading_ = false;
+
+			RenderModelPtr model = model_.lock();
+
+			mtl_ = model->GetMaterial(this->MaterialID());
+			TextureSlotsType const & texture_slots = mtl_->texture_slots;
+			for (TextureSlotsType::const_iterator iter = texture_slots.begin();
+				iter != texture_slots.end(); ++ iter)
+			{
+				TexturePtr tex = model->RetriveTexture(iter->second);
+
+				if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
+				{
+					diffuse_tex_ = tex;
+				}
+				else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+				{
+					specular_tex_ = tex;
+				}
+				else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
+				{
+					bump_tex_ = tex;
+				}
+				else if ("Self-Illumination" == iter->first)
+				{
+					emit_tex_ = tex;
+				}
+				else if ("Opacity" == iter->first)
+				{
+					alpha_ = true;
+				}				
+			}
+
+			if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0))
+			{
+				special_shading_ = true;
+			}
+		}
 	}
 
 	std::wstring const & StaticMesh::Name() const
@@ -597,7 +665,7 @@ namespace KlayGE
 				uint32_t mtl_index = 0;
 				for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
 				{
-					RenderModel::Material mtl;
+					RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 					float ambient_r = mtl_node->Attrib("ambient_r")->ValueFloat();
 					float ambient_g = mtl_node->Attrib("ambient_g")->ValueFloat();
 					float ambient_b = mtl_node->Attrib("ambient_b")->ValueFloat();
@@ -1330,7 +1398,7 @@ namespace KlayGE
 		}
 	}
 
-	void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
+	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
@@ -1392,31 +1460,33 @@ namespace KlayGE
 		mtls.resize(num_mtls);
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
 		{
-			RenderModel::Material& mtl = mtls[mtl_index];
-			decoded->read(&mtl.ambient.x(), sizeof(float));
-			decoded->read(&mtl.ambient.y(), sizeof(float));
-			decoded->read(&mtl.ambient.z(), sizeof(float));
-			decoded->read(&mtl.diffuse.x(), sizeof(float));
-			decoded->read(&mtl.diffuse.y(), sizeof(float));
-			decoded->read(&mtl.diffuse.z(), sizeof(float));
-			decoded->read(&mtl.specular.x(), sizeof(float));
-			decoded->read(&mtl.specular.y(), sizeof(float));
-			decoded->read(&mtl.specular.z(), sizeof(float));
-			decoded->read(&mtl.emit.x(), sizeof(float));
-			decoded->read(&mtl.emit.y(), sizeof(float));
-			decoded->read(&mtl.emit.z(), sizeof(float));
-			decoded->read(&mtl.opacity, sizeof(float));
-			decoded->read(&mtl.specular_level, sizeof(float));
-			decoded->read(&mtl.shininess, sizeof(float));
+			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
+			mtls[mtl_index] = mtl;
+
+			decoded->read(&mtl->ambient.x(), sizeof(float));
+			decoded->read(&mtl->ambient.y(), sizeof(float));
+			decoded->read(&mtl->ambient.z(), sizeof(float));
+			decoded->read(&mtl->diffuse.x(), sizeof(float));
+			decoded->read(&mtl->diffuse.y(), sizeof(float));
+			decoded->read(&mtl->diffuse.z(), sizeof(float));
+			decoded->read(&mtl->specular.x(), sizeof(float));
+			decoded->read(&mtl->specular.y(), sizeof(float));
+			decoded->read(&mtl->specular.z(), sizeof(float));
+			decoded->read(&mtl->emit.x(), sizeof(float));
+			decoded->read(&mtl->emit.y(), sizeof(float));
+			decoded->read(&mtl->emit.z(), sizeof(float));
+			decoded->read(&mtl->opacity, sizeof(float));
+			decoded->read(&mtl->specular_level, sizeof(float));
+			decoded->read(&mtl->shininess, sizeof(float));
 
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
-				mtl.ambient.x() = pow(mtl.ambient.x(), 2.2f);
-				mtl.ambient.y() = pow(mtl.ambient.y(), 2.2f);
-				mtl.ambient.z() = pow(mtl.ambient.z(), 2.2f);
-				mtl.diffuse.x() = pow(mtl.diffuse.x(), 2.2f);
-				mtl.diffuse.y() = pow(mtl.diffuse.y(), 2.2f);
-				mtl.diffuse.z() = pow(mtl.diffuse.z(), 2.2f);
+				mtl->ambient.x() = pow(mtl->ambient.x(), 2.2f);
+				mtl->ambient.y() = pow(mtl->ambient.y(), 2.2f);
+				mtl->ambient.z() = pow(mtl->ambient.z(), 2.2f);
+				mtl->diffuse.x() = pow(mtl->diffuse.x(), 2.2f);
+				mtl->diffuse.y() = pow(mtl->diffuse.y(), 2.2f);
+				mtl->diffuse.z() = pow(mtl->diffuse.z(), 2.2f);
 			}
 
 			uint32_t num_texs;
@@ -1427,7 +1497,7 @@ namespace KlayGE
 				std::string type, name;
 				ReadShortString(decoded, type);
 				ReadShortString(decoded, name);
-				mtl.texture_slots.push_back(std::make_pair(type, name));
+				mtl->texture_slots.push_back(std::make_pair(type, name));
 			}
 		}
 
@@ -1534,7 +1604,7 @@ namespace KlayGE
 		return RenderModelLoader(meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc);
 	}
 
-	void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
+	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
 		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
 		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
@@ -1588,7 +1658,7 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < mtls.size(); ++ i)
 			{
-				RenderModel::Material const & mtl = mtls[i];
+				RenderMaterialPtr const & mtl = mtls[i];
 
 				XMLNodePtr mtl_node = doc.AllocNode(XNT_Element, "material");
 				materials_chunk->AppendNode(mtl_node);
@@ -1596,12 +1666,12 @@ namespace KlayGE
 				float3 ambient, diffuse;
 				if (Context::Instance().Config().graphics_cfg.gamma)
 				{
-					ambient.x() = pow(mtl.ambient.x(), 1 / 2.2f);
-					ambient.y() = pow(mtl.ambient.y(), 1 / 2.2f);
-					ambient.z() = pow(mtl.ambient.z(), 1 / 2.2f);
-					diffuse.x() = pow(mtl.diffuse.x(), 1 / 2.2f);
-					diffuse.y() = pow(mtl.diffuse.y(), 1 / 2.2f);
-					diffuse.z() = pow(mtl.diffuse.z(), 1 / 2.2f);
+					ambient.x() = pow(mtl->ambient.x(), 1 / 2.2f);
+					ambient.y() = pow(mtl->ambient.y(), 1 / 2.2f);
+					ambient.z() = pow(mtl->ambient.z(), 1 / 2.2f);
+					diffuse.x() = pow(mtl->diffuse.x(), 1 / 2.2f);
+					diffuse.y() = pow(mtl->diffuse.y(), 1 / 2.2f);
+					diffuse.z() = pow(mtl->diffuse.z(), 1 / 2.2f);
 				}
 
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_r", ambient.x()));
@@ -1610,17 +1680,17 @@ namespace KlayGE
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_r", diffuse.x()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_g", diffuse.y()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("diffuse_b", diffuse.z()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_r", mtl.specular.x()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_g", mtl.specular.y()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_b", mtl.specular.z()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_r", mtl.emit.x()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_g", mtl.emit.y()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_b", mtl.emit.z()));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("opacity", mtl.opacity));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_level", mtl.specular_level));
-				mtl_node->AppendAttrib(doc.AllocAttribFloat("shininess", mtl.shininess));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_r", mtl->specular.x()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_g", mtl->specular.y()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_b", mtl->specular.z()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_r", mtl->emit.x()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_g", mtl->emit.y()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("emit_b", mtl->emit.z()));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("opacity", mtl->opacity));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("specular_level", mtl->specular_level));
+				mtl_node->AppendAttrib(doc.AllocAttribFloat("shininess", mtl->shininess));
 
-				uint32_t const num_textures = static_cast<uint32_t const>(mtl.texture_slots.size());
+				uint32_t const num_textures = static_cast<uint32_t const>(mtl->texture_slots.size());
 				if (num_textures > 0)
 				{
 					XMLNodePtr textures_chunk = doc.AllocNode(XNT_Element, "textures_chunk");
@@ -1631,8 +1701,8 @@ namespace KlayGE
 						XMLNodePtr texture_node = doc.AllocNode(XNT_Element, "texture");
 						textures_chunk->AppendNode(texture_node);
 
-						texture_node->AppendAttrib(doc.AllocAttribString("type", mtl.texture_slots[j].first));
-						texture_node->AppendAttrib(doc.AllocAttribString("name", mtl.texture_slots[j].second));
+						texture_node->AppendAttrib(doc.AllocAttribString("type", mtl->texture_slots[j].first));
+						texture_node->AppendAttrib(doc.AllocAttribString("name", mtl->texture_slots[j].second));
 					}
 				}
 			}
@@ -1931,7 +2001,7 @@ namespace KlayGE
 
 	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)
 	{
-		std::vector<RenderModel::Material> mtls(model->NumMaterials());
+		std::vector<RenderMaterialPtr> mtls(model->NumMaterials());
 		if (!mtls.empty())
 		{
 			for (uint32_t i = 0; i < mtls.size(); ++ i)
@@ -2046,41 +2116,53 @@ namespace KlayGE
 		}
 	}
 
-	void RenderableLightSourceProxy::SetModelMatrix(float4x4 const & mat)
-	{
-		model_ = mat;
-	}
-
 	void RenderableLightSourceProxy::Update()
 	{
-		if (light_color_param_)
+		if (!deferred_effect_)
 		{
-			*light_color_param_ = light_->Color();
-		}
-		if (light_falloff_param_)
-		{
-			*light_falloff_param_ = light_->Falloff();
-		}
-		if (light_->ProjectiveTexture() && light_is_projective_param_)
-		{
-			*light_is_projective_param_ = static_cast<int32_t>(light_->ProjectiveTexture() ? 1 : 0);
-		}
-		if (light_projective_tex_param_)
-		{
-			*light_projective_tex_param_ = light_->ProjectiveTexture();
+			if (light_color_param_)
+			{
+				*light_color_param_ = light_->Color();
+			}
+			if (light_falloff_param_)
+			{
+				*light_falloff_param_ = light_->Falloff();
+			}
+			if (light_->ProjectiveTexture() && light_is_projective_param_)
+			{
+				*light_is_projective_param_ = static_cast<int32_t>(light_->ProjectiveTexture() ? 1 : 0);
+			}
+			if (light_projective_tex_param_)
+			{
+				*light_projective_tex_param_ = light_->ProjectiveTexture();
+			}
 		}
 	}
 
 	void RenderableLightSourceProxy::OnRenderBegin()
 	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		if (deferred_effect_)
+		{
+			StaticMesh::OnRenderBegin();
 
-		float4x4 const & view = camera.ViewMatrix();
-		float4x4 const & proj = camera.ProjMatrix();
+			if ((PT_Shading == type_) || (PT_SpecialShading == type_))
+			{
+				float4 clr = light_->Color();
+				clr.w() = 0;
+				*emit_clr_param_ = clr;
+			}
+		}
+		else
+		{
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 
-		float4x4 mv = model_ * view;
-		*mvp_param_ = mv * proj;
-		*model_param_ = model_;
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
+
+			float4x4 mv = model_mat_ * view;
+			*mvp_param_ = mv * proj;
+			*model_param_ = model_mat_;
+		}
 	}
 
 	void RenderableLightSourceProxy::AttachLightSrc(LightSourcePtr const & light)

@@ -358,6 +358,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Render\DeferredRenderingLayer.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Render\Font.cpp"
 					>
 				</File>
@@ -479,6 +483,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\CameraController.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\DeferredRenderingLayer.hpp"
 					>
 				</File>
 				<File
@@ -630,7 +638,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\Copy2LightBuffer.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\CustomMipMap.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\DeferredRendering.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\DeferredRenderingUtil.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\Depth2VSM.fxml"
 					>
 				</File>
 				<File
@@ -651,6 +675,10 @@
 				</File>
 				<File
 					RelativePath="..\..\media\RenderFX\GammaCorrection.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\GBuffer.fxml"
 					>
 				</File>
 				<File
@@ -698,6 +726,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\RSM2VPLs.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\SetSubsplatStencil.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\SSVO.fxml"
 					>
 				</File>
@@ -722,7 +758,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\media\RenderFX\Upsampling.fxml"
+					>
+				</File>
+				<File
 					RelativePath="..\..\media\RenderFX\util.fxml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\RenderFX\VPLsLighting.fxml"
 					>
 				</File>
 			</Filter>
@@ -731,6 +775,18 @@
 				>
 				<File
 					RelativePath="..\..\media\PostProcessors\Copy.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\Copy2LightBuffer.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\CustomMipMap.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\DepthToVSM.ppml"
 					>
 				</File>
 				<File
@@ -743,6 +799,14 @@
 				</File>
 				<File
 					RelativePath="..\..\media\PostProcessors\GlowMerger.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\RSM2VPLs.ppml"
+					>
+				</File>
+				<File
+					RelativePath="..\..\media\PostProcessors\Upsampling.ppml"
 					>
 				</File>
 				<File

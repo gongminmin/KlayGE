@@ -353,10 +353,6 @@
 				RelativePath="..\..\src\DeferredRendering\DeferredRendering.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\DeferredRendering\DeferredRenderingLayer.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -367,24 +363,12 @@
 				RelativePath="..\..\src\DeferredRendering\DeferredRendering.hpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\DeferredRendering\DeferredRenderingLayer.hpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Effects"
 			>
 			<File
-				RelativePath="..\..\media\DeferredRendering\DeferredRendering.fxml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\DeferredRendering\DeferredRenderingDebug.fxml"
-				>
-			</File>
-			<File
-				RelativePath="..\..\media\DeferredRendering\GBuffer.fxml"
 				>
 			</File>
 		</Filter>

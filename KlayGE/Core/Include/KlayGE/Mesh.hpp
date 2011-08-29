@@ -39,6 +39,8 @@
 #include <KlayGE/MapVector.hpp>
 
 #include <vector>
+#include <map>
+#include <string>
 
 #include <boost/function.hpp>
 
@@ -50,14 +52,8 @@ namespace KlayGE
 		StaticMesh(RenderModelPtr const & model, std::wstring const & name);
 		virtual ~StaticMesh();
 
-		virtual void BuildMeshInfo()
-		{
-		}
+		virtual void BuildMeshInfo();
 
-		RenderTechniquePtr const & GetRenderTechnique() const
-		{
-			return technique_;
-		}
 		void SetRenderTechnique(RenderTechniquePtr const & tech)
 		{
 			technique_ = tech;
@@ -145,7 +141,6 @@ namespace KlayGE
 		std::wstring name_;
 
 		RenderLayoutPtr rl_;
-		RenderTechniquePtr technique_;
 
 		Box box_;
 
@@ -156,21 +151,6 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API RenderModel : public Renderable
 	{
-	public:
-		typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
-		struct Material
-		{
-			float3 ambient;
-			float3 diffuse;
-			float3 specular;
-			float3 emit;
-			float opacity;
-			float specular_level;
-			float shininess;
-
-			TextureSlotsType texture_slots;
-		};
-
 	public:
 		explicit RenderModel(std::wstring const & name);
 		virtual ~RenderModel()
@@ -203,10 +183,6 @@ namespace KlayGE
 			return static_cast<uint32_t>(meshes_.size());
 		}
 
-		RenderTechniquePtr const & GetRenderTechnique() const
-		{
-			return technique_;
-		}
 		void SetRenderTechnique(RenderTechniquePtr const & tech)
 		{
 			technique_ = tech;
@@ -237,16 +213,18 @@ namespace KlayGE
 		{
 			materials_.resize(i);
 		}
-		RenderModel::Material& GetMaterial(int32_t i)
+		RenderMaterialPtr& GetMaterial(int32_t i)
 		{
 			return materials_[i];
 		}
-		RenderModel::Material const & GetMaterial(int32_t i) const
+		RenderMaterialPtr const & GetMaterial(int32_t i) const
 		{
 			return materials_[i];
 		}
 
 		void AddToRenderQueue();
+
+		TexturePtr const & RetriveTexture(std::string const & name);
 
 	protected:
 		void UpdateBoundBox();
@@ -255,14 +233,15 @@ namespace KlayGE
 		std::wstring name_;
 
 		RenderLayoutPtr rl_;
-		RenderTechniquePtr technique_;
 
 		Box box_;
 
-		std::vector<Material> materials_;
+		std::vector<RenderMaterialPtr> materials_;
 
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;
+
+		std::map<size_t, TexturePtr> tex_pool_;
 	};
 
 
@@ -416,7 +395,7 @@ namespace KlayGE
 		}
 	};
 
-	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderModel::Material>& mtls,
+	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
@@ -428,7 +407,7 @@ namespace KlayGE
 		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
 		boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
-	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderModel::Material> const & mtls,
+	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,
 		std::vector<std::vector<std::vector<uint8_t> > > const & buffs,
 		std::vector<char> const & is_index_16_bit, std::vector<std::vector<uint8_t> > const & indices,
@@ -443,8 +422,6 @@ namespace KlayGE
 		RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name);
 		virtual void Technique(RenderTechniquePtr const & tech);
 
-		virtual void SetModelMatrix(float4x4 const & mat);
-
 		virtual void Update();
 
 		virtual void OnRenderBegin();
@@ -452,7 +429,6 @@ namespace KlayGE
 		virtual void AttachLightSrc(LightSourcePtr const & light);
 
 	private:
-		float4x4 model_;
 		LightSourcePtr light_;
 
 		RenderEffectParameterPtr mvp_param_;

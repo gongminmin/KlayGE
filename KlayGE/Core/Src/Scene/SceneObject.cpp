@@ -92,4 +92,33 @@ namespace KlayGE
 	{
 		return NULL;
 	}
+
+	void SceneObject::Pass(PassType type)
+	{
+		renderable_->Pass(type);
+
+		if (PT_SpecialShading == type)
+		{
+			this->Visible(renderable_->SpecialShading());
+		}
+		else
+		{
+			this->Visible(true);
+		}
+	}
+
+	void SceneObject::LightingTex(TexturePtr const & tex)
+	{
+		renderable_->LightingTex(tex);
+	}
+
+	void SceneObject::SSVOTex(TexturePtr const & tex)
+	{
+		renderable_->SSVOTex(tex);
+	}
+
+	void SceneObject::SSVOEnabled(bool ssvo)
+	{
+		renderable_->SSVOEnabled(ssvo);
+	}
 }

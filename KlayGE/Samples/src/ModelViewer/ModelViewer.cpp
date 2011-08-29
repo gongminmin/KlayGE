@@ -497,7 +497,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	}
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
-	RenderModel::TextureSlotsType const & texture_slots = model_->GetMaterial(model_->Mesh(mi)->MaterialID()).texture_slots;
+	TextureSlotsType const & texture_slots = model_->GetMaterial(model_->Mesh(mi)->MaterialID())->texture_slots;
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
 		std::wostringstream oss;
