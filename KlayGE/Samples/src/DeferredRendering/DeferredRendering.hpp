@@ -23,15 +23,18 @@ private:
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void BufferChangedHandler(KlayGE::UIComboBox const & sender);
-	void AntiAliasHandler(KlayGE::UICheckBox const & sender);
+	void IllumChangedHandler(KlayGE::UIComboBox const & sender);
+	void ILScaleChangedHandler(KlayGE::UISlider const & sender);
 	void SSVOHandler(KlayGE::UICheckBox const & sender);
+	void HDRHandler(KlayGE::UICheckBox const & sender);
+	void AntiAliasHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::RenderModelPtr scene_model_;
 	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 	KlayGE::SceneObjectPtr point_light_src_;
-	KlayGE::SceneObjectPtr spot_light_src_[2];
+	KlayGE::SceneObjectPtr spot_light_src_[3];
 
 	KlayGE::SceneObjectPtr sky_box_;
 
@@ -39,23 +42,28 @@ private:
 
 	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
-	KlayGE::PostProcessPtr copy_pp_;
-
 	KlayGE::PostProcessPtr debug_pp_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;
-	bool anti_alias_enabled_;
 	bool ssvo_enabled_;
+	bool hdr_enabled_;
+	int anti_alias_enabled_;
+
+	float il_scale_;
 
 	int id_buffer_combo_;
-	int id_anti_alias_;
+	int id_illum_combo_;
+	int id_il_scale_static_;
+	int id_il_scale_slider_;
 	int id_ssvo_;
+	int id_hdr_;
+	int id_aa_;
 	int id_ctrl_camera_;
 
 	KlayGE::AmbientLightSourcePtr ambient_light_;
 	KlayGE::PointLightSourcePtr point_light_;
-	KlayGE::SpotLightSourcePtr spot_light_[2];
+	KlayGE::SpotLightSourcePtr spot_light_[3];
 
 	size_t num_objs_rendered_;
 	size_t num_renderable_rendered_;

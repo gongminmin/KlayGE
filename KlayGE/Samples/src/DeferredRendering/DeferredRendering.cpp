@@ -177,7 +177,8 @@ int main()
 
 DeferredRenderingApp::DeferredRenderingApp()
 			: App3DFramework("DeferredRendering"),
-				anti_alias_enabled_(true),
+				il_scale_(1.0f),
+				anti_alias_enabled_(1),
 				num_objs_rendered_(0), num_renderable_rendered_(0),
 				num_primitives_rendered_(0), num_vertices_rendered_(0)
 {
@@ -211,7 +212,6 @@ void DeferredRenderingApp::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
-	deferred_rendering_->HDREnabled(true);
 	
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 	ambient_light_->Color(float3(1, 1, 1));
@@ -243,15 +243,28 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[1]->BindUpdateFunc(SpotLightSourceUpdate(1.0f, 1.0f, 0.0f, -1 / 700.0f, float3(0.0f, 3.4f, 0.0f)));
 	spot_light_[1]->AddToSceneManager();
 
+	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
+	spot_light_[2]->Attrib(LSA_IndirectLighting);
+	spot_light_[2]->Position(float3(0, 12, -4.8f));
+	spot_light_[2]->Direction(float3(0, 0, 1));
+	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f));
+	spot_light_[2]->Falloff(float3(0, 0.1f, 0));
+	spot_light_[2]->OuterAngle(PI / 4);
+	spot_light_[2]->InnerAngle(PI / 6);
+	spot_light_[2]->AddToSceneManager();
+
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(point_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[0] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[0]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[0])->Scaling(0.1f, 0.1f, 0.1f);
 	spot_light_src_[1] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[1]);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[1])->Scaling(0.1f, 0.1f, 0.1f);
+	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(spot_light_src_[2])->Scaling(0.1f, 0.1f, 0.1f);
 	point_light_src_->AddToSceneManager();
 	spot_light_src_[0]->AddToSceneManager();
 	spot_light_src_[1]->AddToSceneManager();
+	spot_light_src_[2]->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -263,25 +276,37 @@ void DeferredRenderingApp::InitObjects()
 	input_handler->connect(boost::bind(&DeferredRenderingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
-
 	debug_pp_ = MakeSharedPtr<DeferredRenderingDebug>();
 
 	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");
-	id_anti_alias_ = dialog_->IDFromName("AntiAlias");
+	id_illum_combo_ = dialog_->IDFromName("IllumCombo");
+	id_il_scale_static_ = dialog_->IDFromName("ILScaleStatic");
+	id_il_scale_slider_ = dialog_->IDFromName("ILScaleSlider");
 	id_ssvo_ = dialog_->IDFromName("SSVO");
+	id_hdr_ = dialog_->IDFromName("HDR");
+	id_aa_ = dialog_->IDFromName("AA");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredRenderingApp::BufferChangedHandler, this, _1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
-	dialog_->Control<UICheckBox>(id_anti_alias_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::AntiAliasHandler, this, _1));
-	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_anti_alias_));
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DeferredRenderingApp::IllumChangedHandler, this, _1));
+	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
+
+	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&DeferredRenderingApp::ILScaleChangedHandler, this, _1));
+	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
+
 	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::SSVOHandler, this, _1));
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::HDRHandler, this, _1));
+	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::AntiAliasHandler, this, _1));
+	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
+
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&DeferredRenderingApp::CtrlCameraHandler, this, _1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
@@ -302,10 +327,6 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 	deferred_rendering_->OnResize(width, height);
-
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-	copy_pp_->InputPin(0, deferred_rendering_->ShadingTex());
 
 	debug_pp_->InputPin(0, deferred_rendering_->GBufferTex());
 	debug_pp_->InputPin(1, deferred_rendering_->LightingTex());
@@ -329,26 +350,26 @@ void DeferredRenderingApp::BufferChangedHandler(UIComboBox const & sender)
 	buffer_type_ = sender.GetSelectedIndex();
 	checked_pointer_cast<DeferredRenderingDebug>(debug_pp_)->ShowType(buffer_type_);
 
-	if (buffer_type_ != 0)
+	if (dialog_->Control<UICheckBox>(id_aa_)->GetChecked())
 	{
-		anti_alias_enabled_ = false;
-	}
-	else
-	{
-		anti_alias_enabled_ = true;
-	}
-	dialog_->Control<UICheckBox>(id_anti_alias_)->SetChecked(anti_alias_enabled_);
-
-	//checked_pointer_cast<FXAAPostProcess>(edge_anti_alias_)->ShowEdge(4 == buffer_type_);
-}
-
-void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
-{
-	if (0 == buffer_type_)
-	{
-		anti_alias_enabled_ = sender.GetChecked();
+		anti_alias_enabled_ = 1 + (4 == buffer_type_);
 		deferred_rendering_->AAEnabled(anti_alias_enabled_);
 	}
+}
+
+void DeferredRenderingApp::IllumChangedHandler(UIComboBox const & sender)
+{
+	deferred_rendering_->DisplayIllum(sender.GetSelectedIndex());
+}
+
+void DeferredRenderingApp::ILScaleChangedHandler(KlayGE::UISlider const & sender)
+{
+	il_scale_ = sender.GetValue() / 10.0f;
+	deferred_rendering_->IndirectScale(il_scale_);
+
+	std::wostringstream stream;
+	stream << L"Scale: " << il_scale_ << " x";
+	dialog_->Control<UIStatic>(id_il_scale_static_)->SetText(stream.str());
 }
 
 void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
@@ -357,6 +378,32 @@ void DeferredRenderingApp::SSVOHandler(UICheckBox const & sender)
 	{
 		ssvo_enabled_ = sender.GetChecked();
 		deferred_rendering_->SSVOEnabled(ssvo_enabled_);
+		if (5 == buffer_type_)
+		{
+			deferred_rendering_->HDREnabled(false);
+		}
+		else
+		{
+			deferred_rendering_->HDREnabled(true);
+		}
+	}
+}
+
+void DeferredRenderingApp::HDRHandler(UICheckBox const & sender)
+{
+	if (0 == buffer_type_)
+	{
+		hdr_enabled_ = sender.GetChecked();
+		deferred_rendering_->HDREnabled(hdr_enabled_);
+	}
+}
+
+void DeferredRenderingApp::AntiAliasHandler(UICheckBox const & sender)
+{
+	if (0 == buffer_type_)
+	{
+		anti_alias_enabled_ = sender.GetChecked();
+		deferred_rendering_->AAEnabled(anti_alias_enabled_);
 	}
 }
 
@@ -414,6 +461,28 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 		}
 	}
+	else if (2 == pass)
+	{
+		if (5 == buffer_type_)
+		{
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			debug_pp_->Apply();
+			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+		}
+	}
 
-	return deferred_rendering_->Update(pass);
+	uint32_t ret = deferred_rendering_->Update(pass);
+	if (ret & App3DFramework::URV_Finished)
+	{
+		if ((6 == buffer_type_) || (7 == buffer_type_))
+		{
+			renderEngine.BindFrameBuffer(FrameBufferPtr());
+			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			debug_pp_->Apply();
+			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+		}
+	}
+
+	return ret;
 }
