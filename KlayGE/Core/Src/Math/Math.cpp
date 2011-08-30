@@ -1637,5 +1637,71 @@ namespace KlayGE
 				return pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
 			}
 		}
+
+		template KLAYGE_CORE_API Quaternion quat_trans_to_udq(Quaternion const & q, float3 const & t);
+
+		template <typename T>
+		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t)
+		{
+			return Quaternion_T<T>(
+				+T(0.5) * (+t.x() * q.w() + t.y() * q.z() - t.z() * q.y()),
+				+T(0.5) * (-t.x() * q.z() + t.y() * q.w() + t.z() * q.x()),
+				+T(0.5) * (+t.x() * q.y() - t.y() * q.x() + t.z() * q.w()),
+				-T(0.5) * (+t.x() * q.x() + t.y() * q.y() + t.z() * q.z()));
+		}
+
+		template KLAYGE_CORE_API float3 udq_to_trans(Quaternion const & ndp, Quaternion const & dp);
+
+		template <typename T>
+		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		{
+			return Vector_T<T, 3>(
+				T(2.0) * (-dp.w() * ndp.x() + dp.x() * ndp.w() - dp.y() * ndp.z() + dp.z() * ndp.y()),
+				T(2.0) * (-dp.w() * ndp.y() + dp.x() * ndp.z() + dp.y() * ndp.w() - dp.z() * ndp.x()),
+				T(2.0) * (-dp.w() * ndp.z() - dp.x() * ndp.y() + dp.y() * ndp.x() + dp.z() * ndp.w()));
+		}
+
+		template KLAYGE_CORE_API float3 dq_to_trans(Quaternion const & ndp, Quaternion const & dp);
+
+		template <typename T>
+		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		{
+			return udq_to_trans(ndp, dp) / length(ndp);
+		}
+
+		template KLAYGE_CORE_API float4x4 udq_to_matrix(Quaternion const & ndp, Quaternion const & dp);
+
+		template <typename T>
+		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		{
+			Matrix4_T<T> m;
+
+			float len2 = dot(ndp, ndp);
+			float w = ndp.w(), x = ndp.x(), y = ndp.y(), z = ndp.z();
+			float t0 = dp.w(), t1 = dp.x(), t2 = dp.y(), t3 = dp.z();
+
+			m(0, 0) = w * w + x * x - y * y - z * z;
+			m(1, 0) = 2 * x * y - 2 * w * z;
+			m(2, 0) = 2 * x * z + 2 * w * y;
+			m(0, 1) = 2 * x * y + 2 * w * z;
+			m(1, 1) = w * w + y * y - x * x - z * z;
+			m(2, 1) = 2 * y * z - 2 * w * x;
+			m(0, 2) = 2 * x * z - 2 * w * y;
+			m(1, 2) = 2 * y * z + 2 * w * x;
+			m(2, 2) = w * w + z * z - x * x - y * y;
+
+			m(3, 0) = -2 * t0 * x + 2 * w * t1 - 2 * t2 * z + 2 * y * t3;
+			m(3, 1) = -2 * t0 * y + 2 * t1 * z - 2 * x * t3 + 2 * w * t2;
+			m(3, 2) = -2 * t0 * z + 2 * x * t2 + 2 * w * t3 - 2 * t1 * y;
+
+			m(0, 3) = 0;
+			m(1, 3) = 0;
+			m(2, 3) = 0;
+			m(3, 3) = len2;
+
+			m /= len2;
+
+			return m;
+		}
 	}
 }
