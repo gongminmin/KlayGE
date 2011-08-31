@@ -202,7 +202,7 @@ bool DeferredRenderingApp::ConfirmDevice() const
 
 void DeferredRenderingApp::InitObjects()
 {
-	this->LookAt(float3(-14.5f, 15, -4), float3(-13.6f, 14.8f, -3.7f));
+	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
 	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
@@ -214,12 +214,12 @@ void DeferredRenderingApp::InitObjects()
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	
 	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
-	ambient_light_->Color(float3(1, 1, 1));
+	ambient_light_->Color(float3(0, 0, 0));
 	ambient_light_->AddToSceneManager();
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(0);
-	point_light_->Color(float3(6.0f, 5.88f, 4.38f));
+	point_light_->Color(float3(0.8f, 0.96f, 1.0f));
 	point_light_->Position(float3(0, 0, 0));
 	point_light_->Falloff(float3(0, 0.5f, 0));
 	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
@@ -245,12 +245,12 @@ void DeferredRenderingApp::InitObjects()
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[2]->Attrib(LSA_IndirectLighting);
-	spot_light_[2]->Position(float3(0, 12, -4.8f));
-	spot_light_[2]->Direction(float3(0, 0, 1));
+	spot_light_[2]->Position(float3(0, 16, -4.8f));
+	spot_light_[2]->Direction(MathLib::normalize(float3(0, -1.0f, 1)));
 	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f));
 	spot_light_[2]->Falloff(float3(0, 0.1f, 0));
-	spot_light_[2]->OuterAngle(PI / 4);
-	spot_light_[2]->InnerAngle(PI / 6);
+	spot_light_[2]->OuterAngle(PI / 6);
+	spot_light_[2]->InnerAngle(PI / 8);
 	spot_light_[2]->AddToSceneManager();
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
