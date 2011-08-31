@@ -415,20 +415,20 @@ namespace KlayGE
 	}
 
 
-	float3 KeyFrames::FramePos(float frame) const
+	Quaternion KeyFrames::FrameReal(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(bind_pos.size()));
+		frame = std::fmod(frame, static_cast<float>(bind_real.size()));
 		int frame0 = static_cast<int>(frame);
-		int frame1 = (frame0 + 1) % bind_pos.size();
-		return MathLib::lerp(bind_pos[frame0], bind_pos[frame1], frame - frame0);
+		int frame1 = (frame0 + 1) % bind_real.size();
+		return MathLib::slerp(bind_real[frame0], bind_real[frame1], frame - frame0);
 	}
 
-	Quaternion KeyFrames::FrameQuat(float frame) const
+	Quaternion KeyFrames::FrameDual(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(bind_quat.size()));
+		frame = std::fmod(frame, static_cast<float>(bind_dual.size()));
 		int frame0 = static_cast<int>(frame);
-		int frame1 = (frame0 + 1) % bind_quat.size();
-		return MathLib::slerp(bind_quat[frame0], bind_quat[frame1], frame - frame0);
+		int frame1 = (frame0 + 1) % bind_dual.size();
+		return MathLib::slerp(bind_dual[frame0], bind_dual[frame1], frame - frame0);
 	}
 
 
@@ -444,20 +444,26 @@ namespace KlayGE
 		BOOST_FOREACH(BOOST_TYPEOF(joints_)::reference joint, joints_)
 		{
 			KeyFrames const & kf = key_frames_->find(joint.name)->second;
-			float3 const & key_pos = kf.FramePos(frame);
-			Quaternion const & key_quat = kf.FrameQuat(frame);
+			Quaternion key_real = kf.FrameReal(frame);
+			Quaternion key_dual = kf.FrameDual(frame);
 
 			if (joint.parent != -1)
 			{
 				Joint const & parent(joints_[joint.parent]);
 
-				joint.bind_quat = key_quat * parent.bind_quat;
-				joint.bind_pos = MathLib::transform_quat(key_pos, parent.bind_quat) + parent.bind_pos;
+				if (MathLib::dot(key_real, parent.bind_real) < 0)
+				{
+					key_real = -key_real;
+					key_dual = -key_dual;
+				}
+
+				joint.bind_real = MathLib::mul_real(key_real, parent.bind_real);
+				joint.bind_dual = MathLib::mul_dual(key_real, key_dual, parent.bind_real, parent.bind_dual);
 			}
 			else
 			{
-				joint.bind_quat = key_quat;
-				joint.bind_pos = key_pos;
+				joint.bind_real = key_real;
+				joint.bind_dual = key_dual;
 			}
 		}
 
@@ -466,20 +472,16 @@ namespace KlayGE
 
 	void SkinnedModel::UpdateBinds()
 	{
-		bind_rots_.resize(joints_.size());
-		bind_poss_.resize(joints_.size());
+		bind_reals_.resize(joints_.size());
+		bind_duals_.resize(joints_.size());
 		for (size_t i = 0; i < joints_.size(); ++ i)
 		{
-			Quaternion quat = joints_[i].inverse_origin_quat * joints_[i].bind_quat;
-			float3 pos = MathLib::transform_quat(joints_[i].inverse_origin_pos, joints_[i].bind_quat) + joints_[i].bind_pos;
-			bind_rots_[i].x() = quat.x();
-			bind_rots_[i].y() = quat.y();
-			bind_rots_[i].z() = quat.z();
-			bind_rots_[i].w() = quat.w();
-			bind_poss_[i].x() = pos.x();
-			bind_poss_[i].y() = pos.y();
-			bind_poss_[i].z() = pos.z();
-			bind_poss_[i].w() = 1;
+			Quaternion real = MathLib::mul_real(joints_[i].inverse_origin_real, joints_[i].bind_real);
+			bind_reals_[i] = float4(real.x(), real.y(), real.z(), real.w());
+
+			Quaternion dual = MathLib::mul_dual(joints_[i].inverse_origin_real, joints_[i].inverse_origin_dual,
+				joints_[i].bind_real, joints_[i].bind_dual);
+			bind_duals_[i] = float4(dual.x(), dual.y(), dual.z(), dual.w());
 		}
 	}
 
@@ -510,10 +512,10 @@ namespace KlayGE
 
 	void SkinnedModel::UnbindJoints()
 	{
-		for (size_t i = 0; i < bind_rots_.size(); ++ i)
+		for (size_t i = 0; i < bind_reals_.size(); ++ i)
 		{
-			bind_rots_[i] = float4(0, 0, 0, 1);
-			bind_poss_[i] = float4(0, 0, 0, 1);
+			bind_reals_[i] = float4(0, 0, 0, 1);
+			bind_duals_[i] = float4(0, 0, 0, 0);
 		}
 	}
 
@@ -1558,11 +1560,15 @@ namespace KlayGE
 			ReadShortString(decoded, joint.name);
 			decoded->read(&joint.parent, sizeof(joint.parent));
 
-			decoded->read(&joint.bind_pos, sizeof(joint.bind_pos));
-			decoded->read(&joint.bind_quat, sizeof(joint.bind_quat));
+			float3 bind_pos;
+			decoded->read(&bind_pos, sizeof(bind_pos));
+			decoded->read(&joint.bind_real, sizeof(joint.bind_real));
 
-			joint.inverse_origin_quat = MathLib::inverse(joint.bind_quat);
-			joint.inverse_origin_pos = MathLib::transform_quat(-joint.bind_pos, joint.inverse_origin_quat);
+			joint.bind_dual = MathLib::quat_trans_to_udq(joint.bind_real, bind_pos);
+
+			std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
+			joint.inverse_origin_real = inv.first;
+			joint.inverse_origin_dual = inv.second;
 		}
 
 		if (num_kfs > 0)
@@ -1581,12 +1587,14 @@ namespace KlayGE
 				decoded->read(&num_kf, sizeof(num_kf));
 
 				KeyFrames kf;
-				kf.bind_pos.resize(num_kf);
-				kf.bind_quat.resize(num_kf);
+				kf.bind_real.resize(num_kf);
+				kf.bind_dual.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
-					decoded->read(&kf.bind_pos[k_index], sizeof(kf.bind_pos[k_index]));
-					decoded->read(&kf.bind_quat[k_index], sizeof(kf.bind_quat[k_index]));
+					float3 bind_pos;
+					decoded->read(&bind_pos, sizeof(bind_pos));
+					decoded->read(&kf.bind_real[k_index], sizeof(kf.bind_real[k_index]));
+					kf.bind_dual[k_index] = MathLib::quat_trans_to_udq(kf.bind_real[k_index], bind_pos);
 				}
 
 				kfs->insert(std::make_pair(name, kf));
@@ -1633,8 +1641,9 @@ namespace KlayGE
 				bone_node->AppendAttrib(doc.AllocAttribString("name", joint.name));
 				bone_node->AppendAttrib(doc.AllocAttribInt("parent", joint.parent));
 
-				Quaternion bind_quat = MathLib::inverse(joint.inverse_origin_quat);
-				float3 bind_pos = -MathLib::transform_quat(joint.inverse_origin_pos, bind_quat);
+				Quaternion bind_quat = MathLib::inverse(joint.inverse_origin_real);
+				float3 inverse_origin_pos = MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual);
+				float3 bind_pos = -MathLib::transform_quat(inverse_origin_pos, bind_quat);
 
 				XMLNodePtr bind_pos_node = doc.AllocNode(XNT_Element, "bind_pos");
 				bone_node->AppendNode(bind_pos_node);
@@ -1973,23 +1982,25 @@ namespace KlayGE
 
 					key_frame_node->AppendAttrib(doc.AllocAttribString("joint", iter->first));
 
-					for (size_t j = 0; j < iter->second.bind_pos.size(); ++ j)
+					for (size_t j = 0; j < iter->second.bind_real.size(); ++ j)
 					{
 						XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
 						key_frame_node->AppendNode(key_node);
 
+						float3 bind_pos = MathLib::udq_to_trans(iter->second.bind_real[j], iter->second.bind_dual[j]);
+
 						XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
 						key_node->AppendNode(pos_node);
-						pos_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_pos[j].x()));
-						pos_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_pos[j].y()));
-						pos_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_pos[j].z()));
+						pos_node->AppendAttrib(doc.AllocAttribFloat("x", bind_pos.x()));
+						pos_node->AppendAttrib(doc.AllocAttribFloat("y", bind_pos.y()));
+						pos_node->AppendAttrib(doc.AllocAttribFloat("z", bind_pos.z()));
 
 						XMLNodePtr quat_node = doc.AllocNode(XNT_Element, "quat");
 						key_node->AppendNode(quat_node);
-						quat_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_quat[j].x()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_quat[j].y()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_quat[j].z()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_quat[j].w()));
+						quat_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_real[j].x()));
+						quat_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_real[j].y()));
+						quat_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_real[j].z()));
+						quat_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_real[j].w()));
 					}
 				}
 			}

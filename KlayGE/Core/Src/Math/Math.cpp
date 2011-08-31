@@ -50,7 +50,7 @@ namespace KlayGE
 			fni.f = number;											// evil floating point bit level hacking
 			fni.i = 0x5f375a86 - (fni.i >> 1);						// what the fuck?
 			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));	// 1st iteration
-			//fni.f = f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
+			fni.f = fni.f * (threehalfs - (x2 * fni.f * fni.f));		// 2nd iteration, this can be removed
 
 			return fni.f;
 		}
@@ -1650,35 +1650,35 @@ namespace KlayGE
 				-T(0.5) * (+t.x() * q.x() + t.y() * q.y() + t.z() * q.z()));
 		}
 
-		template KLAYGE_CORE_API float3 udq_to_trans(Quaternion const & ndp, Quaternion const & dp);
+		template KLAYGE_CORE_API float3 udq_to_trans(Quaternion const & real, Quaternion const & dual);
 
 		template <typename T>
-		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
 			return Vector_T<T, 3>(
-				T(2.0) * (-dp.w() * ndp.x() + dp.x() * ndp.w() - dp.y() * ndp.z() + dp.z() * ndp.y()),
-				T(2.0) * (-dp.w() * ndp.y() + dp.x() * ndp.z() + dp.y() * ndp.w() - dp.z() * ndp.x()),
-				T(2.0) * (-dp.w() * ndp.z() - dp.x() * ndp.y() + dp.y() * ndp.x() + dp.z() * ndp.w()));
+				T(2.0) * (-dual.w() * real.x() + dual.x() * real.w() - dual.y() * real.z() + dual.z() * real.y()),
+				T(2.0) * (-dual.w() * real.y() + dual.x() * real.z() + dual.y() * real.w() - dual.z() * real.x()),
+				T(2.0) * (-dual.w() * real.z() - dual.x() * real.y() + dual.y() * real.x() + dual.z() * real.w()));
 		}
 
-		template KLAYGE_CORE_API float3 dq_to_trans(Quaternion const & ndp, Quaternion const & dp);
+		template KLAYGE_CORE_API float3 dq_to_trans(Quaternion const & real, Quaternion const & dual);
 
 		template <typename T>
-		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
-			return udq_to_trans(ndp, dp) / length(ndp);
+			return udq_to_trans(real, dual) / length(real);
 		}
 
-		template KLAYGE_CORE_API float4x4 udq_to_matrix(Quaternion const & ndp, Quaternion const & dp);
+		template KLAYGE_CORE_API float4x4 udq_to_matrix(Quaternion const & real, Quaternion const & dual);
 
 		template <typename T>
-		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & ndp, Quaternion_T<T> const & dp)
+		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
 			Matrix4_T<T> m;
 
-			float len2 = dot(ndp, ndp);
-			float w = ndp.w(), x = ndp.x(), y = ndp.y(), z = ndp.z();
-			float t0 = dp.w(), t1 = dp.x(), t2 = dp.y(), t3 = dp.z();
+			float len2 = dot(real, real);
+			float w = real.w(), x = real.x(), y = real.y(), z = real.z();
+			float t0 = dual.w(), t1 = dual.x(), t2 = dual.y(), t3 = dual.z();
 
 			m(0, 0) = w * w + x * x - y * y - z * z;
 			m(1, 0) = 2 * x * y - 2 * w * z;
@@ -1702,6 +1702,45 @@ namespace KlayGE
 			m /= len2;
 
 			return m;
+		}
+
+		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> conjugate(Quaternion const & real, Quaternion const & dual);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			return std::make_pair(MathLib::conjugate(real), MathLib::conjugate(dual));
+		}
+
+		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> inverse(Quaternion const & real, Quaternion const & dual);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			float sqr_len_0 = MathLib::dot(real, real);
+			float sqr_len_e = 2.0f * MathLib::dot(real, dual);
+			float inv_sqr_len_0 = 1.0f / sqr_len_0;
+			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
+			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);
+			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
+		}
+
+		template KLAYGE_CORE_API Quaternion mul_real(Quaternion const & lhs_real, Quaternion const & rhs_real);
+
+		template <typename T>
+		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real)
+		{
+			return lhs_real * rhs_real;
+		}
+
+		template KLAYGE_CORE_API Quaternion mul_dual(Quaternion const & lhs_real, Quaternion const & lhs_dual,
+			Quaternion const & rhs_real, Quaternion const & rhs_dual);
+
+		template <typename T>
+		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual)
+		{
+			return lhs_real * rhs_dual + lhs_dual * rhs_real;
 		}
 	}
 }

@@ -249,22 +249,22 @@ namespace KlayGE
 	{
 		std::string name;
 
-		float3 bind_pos;
-		Quaternion bind_quat;
+		Quaternion bind_real;
+		Quaternion bind_dual;
 
-		float3 inverse_origin_pos;
-		Quaternion inverse_origin_quat;
+		Quaternion inverse_origin_real;
+		Quaternion inverse_origin_dual;
 
 		int16_t parent;
 	};
 
 	struct KLAYGE_CORE_API KeyFrames
 	{
-		std::vector<float3> bind_pos;
-		std::vector<Quaternion> bind_quat;
+		std::vector<Quaternion> bind_real;
+		std::vector<Quaternion> bind_dual;
 
-		float3 FramePos(float frame) const;
-		Quaternion FrameQuat(float frame) const;
+		Quaternion FrameReal(float frame) const;
+		Quaternion FrameDual(float frame) const;
 	};
 	typedef MapVector<std::string, KeyFrames> KeyFramesType;
 
@@ -273,7 +273,6 @@ namespace KlayGE
 	public:
 		typedef std::vector<Joint> JointsType;
 		typedef std::vector<float4> RotationsType;
-		typedef std::vector<float4> PositionsType;
 
 	public:
 		explicit SkinnedModel(std::wstring const & name);
@@ -305,13 +304,13 @@ namespace KlayGE
 			joints_.assign(first, last);
 			this->UpdateBinds();
 		}
-		RotationsType const & GetBindRotations() const
+		RotationsType const & GetBindRealParts() const
 		{
-			return bind_rots_;
+			return bind_reals_;
 		}
-		PositionsType const & GetBindPositions() const
+		RotationsType const & GetBindDualParts() const
 		{
-			return bind_poss_;
+			return bind_duals_;
 		}
 		void AttachKeyFrames(boost::shared_ptr<KlayGE::KeyFramesType> const & kf);
 
@@ -356,8 +355,8 @@ namespace KlayGE
 
 	protected:
 		JointsType joints_;
-		RotationsType bind_rots_;
-		PositionsType bind_poss_;
+		RotationsType bind_reals_;
+		RotationsType bind_duals_;
 
 		boost::shared_ptr<KeyFramesType> key_frames_;
 		float last_frame_;
