@@ -86,6 +86,45 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 	return (total_weight > 1e-6f) ? obscurance / total_weight : 0;
 }
 
+float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float3 normal, float radius){
+	float sqr_radius = radius * radius;
+	float obscurance = 0;
+	float total_weight = 0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		float2 sxy = sphere_xy[i];
+		for (int j = 0; j < 2; ++ j)
+		{
+			float3 sample_point_offset = (sxy.x * x_dir + sxy.y * y_dir) * radius;
+			float3 sample_point = pos_es + sample_point_offset;
+			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
+		
+			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
+			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
+			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
+
+			float3 view_dir_sample = normalize(sample_point);
+			float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
+			float3 dir_es_sample = pos_es_sample - pos_es;
+
+			float epsilon = 0.0001f;
+			float beta = 0.002f;
+			float r_sqr = 1.0f;
+	
+			float dist_sqr = dot( dir_es_sample, dir_es_sample );
+			if( dist_sqr < r_sqr ){
+				obscurance += max( 0.0f, dot(dir_es_sample, normal) - depth_sample * beta ) / ( dist_sqr + epsilon );
+				total_weight += 1.0f;
+			}
+			
+			sxy = -sxy;
+		}
+	}
+
+	float delta = 1.0f;
+	return (total_weight > 1e-6f) ? 2.0f * delta * obscurance / total_weight : 0;
+}
+
 void SSVOVS(float4 pos : POSITION,
 					out float2 oTex : TEXCOORD0,
 					out float3 oViewDir : TEXCOORD1,
@@ -111,8 +150,11 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float3 y_dir = cross(normal, float3(0, 0, 1));
 	float3 x_dir = cross(y_dir, normal);
 
-	obscurance = CalcObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
-	return float4(1 - saturate(vo_intensity * obscurance), depth, 0, 0);
+	// obscurance = CalcObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
+	// return float4(1 - saturate(vo_intensity * obscurance), depth, 0, 0);
+	
+	obscurance = CalcAlchemyObscurance(tc, pos_es, x_dir, y_dir, normal, radius);
+	return float4( max(0.0, 1.0 - obscurance), depth, 0, 0 );
 }
 		]]>
 	</shader>
