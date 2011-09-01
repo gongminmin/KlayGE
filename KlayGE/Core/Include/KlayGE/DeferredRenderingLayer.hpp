@@ -32,7 +32,7 @@ namespace KlayGE
 
 		void SSVOEnabled(bool ssvo);
 		void HDREnabled(bool hdr);
-		void AAEnabled(bool aa);
+		void AAEnabled(int aa);
 
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
@@ -105,7 +105,7 @@ namespace KlayGE
 
 		PostProcessPtr aa_pp_;
 		PostProcessPtr skip_aa_pp_;
-		bool aa_enabled_;
+		int aa_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;

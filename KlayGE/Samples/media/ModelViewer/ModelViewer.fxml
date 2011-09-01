@@ -5,14 +5,15 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 
-	<parameter type="float4" name="joint_rots" array_size="NUM_JOINTS"/>
-	<parameter type="float4" name="joint_poss" array_size="NUM_JOINTS"/>
+	<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
+	<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
 
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="eye_pos"/>
 
 	<parameter type="int" name="has_skinned"/>
+	<parameter type="int" name="has_normal_map"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -52,19 +53,32 @@ void Skinned(float3 pos,
 			out float3 result_normal,
 			out float3 result_tangent)
 {
-	result_pos = float3(0, 0, 0);
-	result_normal = float3(0, 0, 0);
-	result_tangent = float3(0, 0, 0);
+	float4 dp0 = joint_reals[blend_indices[0]];
+	
+	float4 blend_real = 0;
+	float4 blend_dual = 0;
 	for (int i = 0; i < 4; ++ i)
 	{
-		float4 joint_rot = joint_rots[blend_indices[i]];
-		float4 joint_pos = joint_poss[blend_indices[i]];
+		float4 joint_real = joint_reals[blend_indices[i]];
+		float4 joint_dual = joint_duals[blend_indices[i]];
+		
 		float weight = blend_weights[i];
+		
+		if (dot(dp0, joint_real) < 0)
+		{
+			joint_real = -joint_real;
+			joint_dual = -joint_dual;
+		}
 
-		result_pos += (mul_quat(pos, joint_rot) + joint_pos.xyz) * weight;
-		result_normal += mul_quat(normal, joint_rot) * weight;
-		result_tangent += mul_quat(tangent, joint_rot) * weight;
+		blend_real += joint_real * weight;
+		blend_dual += joint_dual * weight;
 	}
+	
+	float4x4 m = udq_to_matrix(blend_real, blend_dual);
+
+	result_pos = mul(float4(pos, 1), m).xyz;
+	result_normal = mul(normal, (float3x3)m);
+	result_tangent = mul(tangent, (float3x3)m);
 }
 
 void CalcMesh(float2 tex0,
@@ -153,6 +167,7 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 }
 
 
+
 void MeshVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
@@ -197,7 +212,15 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 H	: TEXCOORD2) : SV_Target
 {
-	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
+	float3 normal;
+	if (has_normal_map)
+	{
+		normal = decompress_normal(normal_tex.Sample(linear_sampler, uv)).rgb;
+	}
+	else
+	{
+		normal = float3(0, 0, 1);
+	}
 
 	float3 c_diff, c_spec, emit;
 	float opacity;
@@ -227,7 +250,7 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	}
 	if (opacity_clr.a > 0.5f)
 	{
-		opacity = opacity_tex.Sample(linear_sampler, uv).a;
+		opacity = diffuse_tex.Sample(linear_sampler, uv).a;
 	}
 	else
 	{

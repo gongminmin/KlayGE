@@ -33,21 +33,8 @@ public:
 		return effect_;
 	}
 
-	std::map<std::string, KlayGE::TexturePtr>& TexPool()
-	{
-		return tex_pool_;
-	}
-
-	KlayGE::TexturePtr const & EmptyNormalMap() const
-	{
-		return empty_normal_map_;
-	}
-
 private:
 	KlayGE::RenderEffectPtr effect_;
-	std::map<std::string, KlayGE::TexturePtr> tex_pool_;
-
-	KlayGE::TexturePtr empty_normal_map_;
 };
 
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
@@ -91,6 +78,7 @@ private:
 	float tess_factor_;
 	std::string visualize_;
 	bool has_opacity_map_;
+	bool has_normal_map_;
 	bool has_skinned_;
 
 	KlayGE::RenderLayoutPtr mesh_rl_;

@@ -523,7 +523,7 @@ namespace KlayGE
 		hdr_enabled_ = hdr;
 	}
 
-	void DeferredRenderingLayer::AAEnabled(bool aa)
+	void DeferredRenderingLayer::AAEnabled(int aa)
 	{
 		aa_enabled_ = aa;
 	}
@@ -603,6 +603,9 @@ namespace KlayGE
 		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
+		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
 		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
@@ -630,9 +633,6 @@ namespace KlayGE
 
 		*(dr_effect_->ParameterByName("lighting_tex")) = lighting_tex_;
 		*(dr_effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
-
-		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		ssvo_pp_->InputPin(0, g_buffer_tex_);
 		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
@@ -944,6 +944,7 @@ namespace KlayGE
 					}
 					if (aa_enabled_)
 					{
+						checked_pointer_cast<FXAAPostProcess>(aa_pp_)->ShowEdge(aa_enabled_ > 1);
 						aa_pp_->Apply();
 					}
 					else

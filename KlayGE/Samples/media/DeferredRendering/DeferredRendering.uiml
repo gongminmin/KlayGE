@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="DeferredRendering" caption="Deferred Rendering" x="-140" y="200" align_x="right" width="140" height="250">
-		<control type="static" id="BufferStatic" caption="Buffer:" x="20" y="20" width="100" height="24" is_default="0"/>
+	<dialog id="DeferredRendering" caption="Deferred Rendering" x="-160" y="200" align_x="right" width="160" height="350">
+		<control type="static" id="BufferStatic" caption="Buffer:" x="20" y="20" width="120" height="24" is_default="0"/>
 		<control type="combo_box" id="BufferCombo" x="20" y="40" width="100" height="24" hotkey="0" is_default="0">
 			<item name="Final"/>
 			<item name="Position"/>
@@ -14,9 +14,21 @@
 			<item name="Specular Lighting"/>
 		</control>
 
-		<control type="check_box" id="AntiAlias" caption="Anti alias" x="20" y="88" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
-		<control type="check_box" id="SSVO" caption="SSVO" x="20" y="128" width="100" height="24" checked="1" hotkey="0" is_default="0"/>
-		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="206" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="static" id="IllumStatic" caption="Illumination:" x="20" y="80" width="120" height="24" is_default="0"/>
+		<control type="combo_box" id="IllumCombo" x="20" y="100" width="120" height="24" hotkey="0" is_default="0">
+			<item name="Global"/>
+			<item name="Direct only"/>
+			<item name="Indirect only"/>
+		</control>
+
+		<control type="static" id="ILScaleStatic" caption="Scale:" x="20" y="138" width="120" height="24" is_default="0"/>
+		<control type="slider" id="ILScaleSlider" x="20" y="158" width="120" height="24" min="0" max="50" value="10" is_default="0"/>
+
+		<control type="check_box" id="SSVO" caption="SSVO" x="20" y="188" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="HDR" caption="HDR" x="20" y="218" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		<control type="check_box" id="AA" caption="AA" x="20" y="248" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
+		
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="306" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
 	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" bg_color_a="0">

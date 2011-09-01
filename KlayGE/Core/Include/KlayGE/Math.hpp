@@ -854,6 +854,34 @@ namespace KlayGE
 		///////////////////////////////////////////////////////////////////////////////
 		KLAYGE_CORE_API float linear_to_srgb(float linear);
 		KLAYGE_CORE_API float srgb_to_linear(float srgb);
+
+		
+		// Dual quaternion
+		///////////////////////////////////////////////////////////////////////////////
+		template <typename T>
+		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t);
+
+		template <typename T>
+		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real);
+
+		template <typename T>
+		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual);
 	}
 }
 

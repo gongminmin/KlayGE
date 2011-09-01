@@ -147,13 +147,13 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 	}
 
-
-	RenderMaterialPtr const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+	boost::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+	mtl_ = model->GetMaterial(this->MaterialID());
 
 	// Ω®¡¢Œ∆¿Ì
 	has_opacity_map_ = false;
-	normal_map_ = checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->EmptyNormalMap();
-	TextureSlotsType const & texture_slots = mtl->texture_slots;
+	has_normal_map_ = false;
+	TextureSlotsType const & texture_slots = mtl_->texture_slots;
 	for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 		iter != texture_slots.end(); ++ iter)
 	{
@@ -161,7 +161,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				diffuse_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+				diffuse_map_ = model->RetriveTexture(iter->second);
 			}
 		}
 		else
@@ -170,7 +170,12 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
-					normal_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+					normal_map_ = model->RetriveTexture(iter->second);
+
+					if (normal_map_)
+					{
+						has_normal_map_ = true;
+					}
 				}
 			}
 			else
@@ -179,7 +184,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						specular_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+						specular_map_ = model->RetriveTexture(iter->second);
 					}
 				}
 				else
@@ -188,7 +193,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 					{
 						if (!ResLoader::Instance().Locate(iter->second).empty())
 						{
-							emit_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+							emit_map_ = model->RetriveTexture(iter->second);
 						}
 					}
 					else
@@ -197,7 +202,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								opacity_map_ = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+								opacity_map_ = model->RetriveTexture(iter->second);
 
 								if (opacity_map_)
 								{
@@ -211,13 +216,13 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		}
 	}
 
-	ambient_clr_ = float4(mtl->ambient.x(), mtl->ambient.y(), mtl->ambient.z(), 1);
-	diffuse_clr_ = float4(mtl->diffuse.x(), mtl->diffuse.y(), mtl->diffuse.z(), bool(diffuse_map_));
-	specular_clr_ = float4(mtl->specular.x(), mtl->specular.y(), mtl->specular.z(), bool(specular_map_));
-	emit_clr_ = float4(mtl->emit.x(), mtl->emit.y(), mtl->emit.z(), bool(emit_map_));
-	opacity_clr_ = float4(mtl->opacity, mtl->opacity, mtl->opacity, bool(opacity_map_));
-	specular_level_ = mtl->specular_level;
-	shininess_ = std::max(1e-6f, mtl->shininess);
+	ambient_clr_ = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
+	diffuse_clr_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_map_));
+	specular_clr_ = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_map_));
+	emit_clr_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_map_));
+	opacity_clr_ = float4(mtl_->opacity, mtl_->opacity, mtl_->opacity, bool(opacity_map_));
+	specular_level_ = mtl_->specular_level;
+	shininess_ = std::max(1e-6f, mtl_->shininess);
 
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (TM_Instanced == caps.tess_method)
@@ -268,6 +273,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	*(effect_->ParameterByName("opacity_tex")) = opacity_map_;
 
 	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
+	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(has_normal_map_);
 
 	*(effect_->ParameterByName("ambient_clr")) = ambient_clr_;
 	*(effect_->ParameterByName("diffuse_clr")) = diffuse_clr_;
@@ -288,8 +294,8 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	RenderModelPtr model = model_.lock();
 	if (model)
 	{
-		*(effect_->ParameterByName("joint_rots")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRotations();
-		*(effect_->ParameterByName("joint_poss")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindPositions();
+		*(effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
+		*(effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
 	}
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
@@ -467,23 +473,6 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		num_joints_macro[0].second = "64";
 		effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
 	}
-
-	uint32_t const empty_nor = 0x80808080;
-
-	ElementInitData nor_init_data;
-	nor_init_data.data = &empty_nor;
-	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
-
-	ElementFormat format;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
-	{
-		format = EF_ARGB8;
-	}
-	else
-	{
-		format = EF_ABGR8;
-	}
-	empty_normal_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
 }
 
 void DetailedSkinnedModel::BuildModelInfo()
