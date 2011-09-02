@@ -798,10 +798,17 @@ namespace KlayGE
 
 								//if (scene_mgr.AABBVisible(Box(min, max)))
 								{
-									if ((illum_ != 1) && (attr & LSA_IndirectLighting))
+									if (attr & LSA_IndirectLighting)
 									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 28) + (i << 16) + 0));
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 28) + (i << 16) + 0));
+										if (illum_ != 1)
+										{
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 28) + (i << 16) + 0));
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 28) + (i << 16) + 0));
+										}
+										else
+										{
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+										}
 									}
 
 									if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
