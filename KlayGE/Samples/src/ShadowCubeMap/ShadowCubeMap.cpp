@@ -285,11 +285,12 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderMaterialPtr const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+			RenderModelPtr model = model_.lock();
+			mtl_ = model->GetMaterial(this->MaterialID());
 
 			// ½¨Á¢ÎÆÀí
 			TexturePtr dm, sm, em;
-			TextureSlotsType const & texture_slots = mtl->texture_slots;
+			TextureSlotsType const & texture_slots = mtl_->texture_slots;
 			for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 				iter != texture_slots.end(); ++ iter)
 			{
@@ -297,7 +298,7 @@ namespace
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						dm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+						dm = model->RetriveTexture(iter->second);
 					}
 				}
 				else
@@ -306,7 +307,7 @@ namespace
 					{
 						if (!ResLoader::Instance().Locate(iter->second).empty())
 						{
-							sm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+							sm = model->RetriveTexture(iter->second);
 						}
 					}
 					else
@@ -315,7 +316,7 @@ namespace
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								em = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+								em = model->RetriveTexture(iter->second);
 							}
 						}
 					}
@@ -325,13 +326,13 @@ namespace
 			*(effect_->ParameterByName("specular_tex")) = sm;
 			*(effect_->ParameterByName("emit_tex")) = em;
 
-			*(effect_->ParameterByName("ambient_clr")) = float4(mtl->ambient.x(), mtl->ambient.y(), mtl->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl->diffuse.x(), mtl->diffuse.y(), mtl->diffuse.z(), bool(dm));
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl->specular.x(), mtl->specular.y(), mtl->specular.z(), bool(sm));
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl->emit.x(), mtl->emit.y(), mtl->emit.z(), bool(em));
+			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(dm));
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(sm));
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(em));
 
-			*(effect_->ParameterByName("specular_level")) = mtl->specular_level;
-			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl->shininess);
+			*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
+			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

@@ -94,14 +94,13 @@ private:
 	KlayGE::TexturePtr diffuse_map_;
 	KlayGE::TexturePtr specular_map_;
 	KlayGE::TexturePtr emit_map_;
-	KlayGE::TexturePtr opacity_map_;
 	KlayGE::TexturePtr normal_map_;
 
 	KlayGE::float4 ambient_clr_;
 	KlayGE::float4 diffuse_clr_;
 	KlayGE::float4 specular_clr_;
 	KlayGE::float4 emit_clr_;
-	KlayGE::float4 opacity_clr_;
+	float opacity_clr_;
 	float specular_level_;
 	float shininess_;
 };

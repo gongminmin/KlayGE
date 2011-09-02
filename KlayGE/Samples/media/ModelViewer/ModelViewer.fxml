@@ -14,6 +14,7 @@
 
 	<parameter type="int" name="has_skinned"/>
 	<parameter type="int" name="has_normal_map"/>
+	<parameter type="int" name="has_opacity_map"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -25,7 +26,7 @@
 	<parameter type="float4" name="diffuse_clr"/>
 	<parameter type="float4" name="specular_clr"/>
 	<parameter type="float4" name="emit_clr"/>
-	<parameter type="float4" name="opacity_clr"/>
+	<parameter type="float" name="opacity_clr"/>
 
 	<parameter type="float" name="specular_level"/>
 	<parameter type="float" name="shininess"/>
@@ -34,7 +35,6 @@
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="specular_tex"/>
 	<parameter type="texture2D" name="emit_tex"/>
-	<parameter type="texture2D" name="opacity_tex"/>
 
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
@@ -61,7 +61,7 @@ void Skinned(float3 pos,
 	{
 		float4 joint_real = joint_reals[blend_indices[i]];
 		float4 joint_dual = joint_duals[blend_indices[i]];
-		
+
 		float weight = blend_weights[i];
 		
 		if (dot(dp0, joint_real) < 0)
@@ -73,12 +73,17 @@ void Skinned(float3 pos,
 		blend_real += joint_real * weight;
 		blend_dual += joint_dual * weight;
 	}
-	
-	float4x4 m = udq_to_matrix(blend_real, blend_dual);
 
-	result_pos = mul(float4(pos, 1), m).xyz;
-	result_normal = mul(normal, (float3x3)m);
-	result_tangent = mul(tangent, (float3x3)m);
+	float inv_len = 1 / length(blend_real);
+	blend_real *= inv_len;
+	blend_dual *= inv_len;
+
+	result_pos = pos + 2 * cross(blend_real.xyz, cross(blend_real.xyz, pos) + blend_real.w * pos);
+	float3 trans = 2 * (blend_real.w * blend_dual.xyz - blend_dual.w * blend_real.xyz + cross(blend_real.xyz, blend_dual.xyz));
+	result_pos += trans;
+
+	result_normal = normal + 2 * cross(blend_real.xyz, cross(blend_real.xyz, normal) + blend_real.w * normal);
+	result_tangent = tangent + 2 * cross(blend_real.xyz, cross(blend_real.xyz, tangent) + blend_real.w * tangent);
 }
 
 void CalcMesh(float2 tex0,
@@ -248,13 +253,13 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	{
 		emit = emit_clr.rgb;
 	}
-	if (opacity_clr.a > 0.5f)
+	if (has_opacity_map)
 	{
 		opacity = diffuse_tex.Sample(linear_sampler, uv).a;
 	}
 	else
 	{
-		opacity = opacity_clr.r;
+		opacity = opacity_clr;
 	}
 	
 	float3 clr = ambient_clr.rgb * c_diff + emit;
@@ -330,7 +335,7 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 	}
 	else //if (4 == texture_slot)
 	{
-		return opacity_tex.Sample(linear_sampler, tex0);
+		return diffuse_tex.Sample(linear_sampler, tex0).a;
 	}
 }
 		]]>

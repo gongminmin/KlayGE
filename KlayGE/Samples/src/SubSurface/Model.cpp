@@ -29,12 +29,13 @@ DetailedMesh::DetailedMesh(RenderModelPtr const & model, std::wstring const & na
 
 void DetailedMesh::BuildMeshInfo()
 {
-	RenderMaterialPtr const & mtl = model_.lock()->GetMaterial(this->MaterialID());
+	RenderModelPtr model = model_.lock();
+	mtl_ = model->GetMaterial(this->MaterialID());
 
 	// Ω®¡¢Œ∆¿Ì
 	TexturePtr dm, sm;
 	TexturePtr bm = checked_pointer_cast<DetailedModel>(model_.lock())->EmptyBumpMap();
-	TextureSlotsType const & texture_slots = mtl->texture_slots;
+	TextureSlotsType const & texture_slots = mtl_->texture_slots;
 	for (TextureSlotsType::const_iterator iter = texture_slots.begin();
 		iter != texture_slots.end(); ++ iter)
 	{
@@ -42,7 +43,7 @@ void DetailedMesh::BuildMeshInfo()
 		{
 			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				dm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+				dm = model->RetriveTexture(iter->second);
 			}
 		}
 		else
@@ -51,7 +52,7 @@ void DetailedMesh::BuildMeshInfo()
 			{
 				if (!ResLoader::Instance().Locate(iter->second).empty())
 				{
-					bm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+					bm = model->RetriveTexture(iter->second);
 				}
 			}
 			else
@@ -60,7 +61,7 @@ void DetailedMesh::BuildMeshInfo()
 				{
 					if (!ResLoader::Instance().Locate(iter->second).empty())
 					{
-						sm = LoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable)();
+						sm = model->RetriveTexture(iter->second);
 					}
 				}
 			}
@@ -70,12 +71,12 @@ void DetailedMesh::BuildMeshInfo()
 	*(technique_->Effect().ParameterByName("bump_tex")) = bm;
 	*(technique_->Effect().ParameterByName("specular_tex")) = sm;
 
-	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl->ambient.x(), mtl->ambient.y(), mtl->ambient.z(), 1);
-	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl->diffuse.x(), mtl->diffuse.y(), mtl->diffuse.z(), bool(dm));
-	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl->specular.x(), mtl->specular.y(), mtl->specular.z(), bool(sm));
+	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
+	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(dm));
+	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(sm));
 
-	*(technique_->Effect().ParameterByName("specular_level")) = mtl->specular_level;
-	*(technique_->Effect().ParameterByName("shininess")) = mtl->shininess;
+	*(technique_->Effect().ParameterByName("specular_level")) = mtl_->specular_level;
+	*(technique_->Effect().ParameterByName("shininess")) = mtl_->shininess;
 
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)

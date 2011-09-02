@@ -202,12 +202,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 						{
 							if (!ResLoader::Instance().Locate(iter->second).empty())
 							{
-								opacity_map_ = model->RetriveTexture(iter->second);
-
-								if (opacity_map_)
-								{
-									has_opacity_map_ = true;
-								}
+								has_opacity_map_ = true;
 							}
 						}
 					}
@@ -220,7 +215,7 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	diffuse_clr_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_map_));
 	specular_clr_ = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_map_));
 	emit_clr_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_map_));
-	opacity_clr_ = float4(mtl_->opacity, mtl_->opacity, mtl_->opacity, bool(opacity_map_));
+	opacity_clr_ = mtl_->opacity;
 	specular_level_ = mtl_->specular_level;
 	shininess_ = std::max(1e-6f, mtl_->shininess);
 
@@ -270,10 +265,10 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	*(effect_->ParameterByName("normal_tex")) = normal_map_;
 	*(effect_->ParameterByName("specular_tex")) = specular_map_;
 	*(effect_->ParameterByName("emit_tex")) = emit_map_;
-	*(effect_->ParameterByName("opacity_tex")) = opacity_map_;
 
 	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
 	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(has_normal_map_);
+	*(effect_->ParameterByName("has_opacity_map")) = static_cast<int32_t>(has_opacity_map_);
 
 	*(effect_->ParameterByName("ambient_clr")) = ambient_clr_;
 	*(effect_->ParameterByName("diffuse_clr")) = diffuse_clr_;
