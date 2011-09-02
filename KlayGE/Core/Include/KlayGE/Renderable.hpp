@@ -152,7 +152,7 @@ namespace KlayGE
 		float4x4 model_mat_;
 
 		PassType type_;
-		bool alpha_;
+		bool has_opacity_map_;
 		bool special_shading_;
 
 		RenderMaterialPtr mtl_;
@@ -162,8 +162,10 @@ namespace KlayGE
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr shininess_param_;
 		RenderEffectParameterPtr specular_tex_param_;
-		RenderEffectParameterPtr bump_map_enabled_param_;
-		RenderEffectParameterPtr bump_tex_param_;
+		RenderEffectParameterPtr normal_map_enabled_param_;
+		RenderEffectParameterPtr normal_tex_param_;
+		RenderEffectParameterPtr height_map_enabled_param_;
+		RenderEffectParameterPtr height_tex_param_;
 		RenderEffectParameterPtr diffuse_tex_param_;
 		RenderEffectParameterPtr diffuse_clr_param_;
 		RenderEffectParameterPtr emit_tex_param_;
@@ -173,7 +175,8 @@ namespace KlayGE
 
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;
-		TexturePtr bump_tex_;
+		TexturePtr normal_tex_;
+		TexturePtr height_tex_;
 		TexturePtr emit_tex_;
 	};
 }

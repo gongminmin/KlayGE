@@ -182,7 +182,7 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGLES2
 				float4 blend_indices_f : BLENDINDICES,
 #else
-				int4 blend_indices : BLENDINDICES,
+				uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
 				float3 N	: NORMAL,	// in object space
@@ -280,7 +280,7 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGLES2
 				float4 blend_indices_f : BLENDINDICES,
 #else
-				int4 blend_indices : BLENDINDICES,
+				uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
 				float3 N	: NORMAL,	// in object space
@@ -544,7 +544,7 @@ VS_CONTROL_POINT_OUTPUT PNTrianglesVS(float2 tex0 : TEXCOORD0,
 #ifdef KLAYGE_OPENGLES2
 				float4 blend_indices_f : BLENDINDICES,
 #else
-				int4 blend_indices : BLENDINDICES,
+				uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
 				float3 N	: NORMAL,
@@ -797,7 +797,7 @@ void SkinnedStreamOutVS(float3 pos : POSITION,
 #ifdef KLAYGE_OPENGLES2
 					float4 blend_indices_f : BLENDINDICES,
 #else
-					int4 blend_indices : BLENDINDICES,
+					uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
 

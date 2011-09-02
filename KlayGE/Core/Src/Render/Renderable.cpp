@@ -59,8 +59,10 @@ namespace KlayGE
 			model_view_param_ = deferred_effect_->ParameterByName("model_view");
 			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
 			shininess_param_ = deferred_effect_->ParameterByName("shininess");
-			bump_map_enabled_param_ = deferred_effect_->ParameterByName("bump_map_enabled");
-			bump_tex_param_ = deferred_effect_->ParameterByName("bump_tex");
+			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
+			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
+			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
 			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
 			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
 			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
@@ -99,8 +101,10 @@ namespace KlayGE
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
-				*bump_map_enabled_param_ = static_cast<int32_t>(!!bump_tex_);
-				*bump_tex_param_ = bump_tex_;
+				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
+				*normal_tex_param_ = normal_tex_;
+				*height_map_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+				*height_tex_param_ = normal_tex_;
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = float4(mtl_->specular_level, mtl_->specular_level, mtl_->specular_level, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_->shininess / 256.0f, 1e-6f, 0.999f);
@@ -237,7 +241,7 @@ namespace KlayGE
 	void Renderable::Pass(PassType type)
 	{
 		type_ = type;
-		technique_ = this->PassTech(type, alpha_);
+		technique_ = this->PassTech(type, has_opacity_map_);
 	}
 
 	RenderTechniquePtr const & Renderable::PassTech(PassType type, bool alpha) const

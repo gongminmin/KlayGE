@@ -302,46 +302,54 @@ namespace KlayGE
 
 	void StaticMesh::BuildMeshInfo()
 	{
-		if (deferred_effect_)
+		has_opacity_map_ = false;
+		special_shading_ = false;
+
+		RenderModelPtr model = model_.lock();
+
+		mtl_ = model->GetMaterial(this->MaterialID());
+		TextureSlotsType const & texture_slots = mtl_->texture_slots;
+		for (TextureSlotsType::const_iterator iter = texture_slots.begin();
+			iter != texture_slots.end(); ++ iter)
 		{
-			alpha_ = false;
-			special_shading_ = false;
-
-			RenderModelPtr model = model_.lock();
-
-			mtl_ = model->GetMaterial(this->MaterialID());
-			TextureSlotsType const & texture_slots = mtl_->texture_slots;
-			for (TextureSlotsType::const_iterator iter = texture_slots.begin();
-				iter != texture_slots.end(); ++ iter)
+			TexturePtr tex;
+			if (!ResLoader::Instance().Locate(iter->second).empty())
 			{
-				TexturePtr tex = model->RetriveTexture(iter->second);
-
-				if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
-				{
-					diffuse_tex_ = tex;
-				}
-				else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
-				{
-					specular_tex_ = tex;
-				}
-				else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
-				{
-					bump_tex_ = tex;
-				}
-				else if ("Self-Illumination" == iter->first)
-				{
-					emit_tex_ = tex;
-				}
-				else if ("Opacity" == iter->first)
-				{
-					alpha_ = true;
-				}				
+				tex = model->RetriveTexture(iter->second);
 			}
 
-			if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0))
+			if (("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 			{
-				special_shading_ = true;
+				diffuse_tex_ = tex;
 			}
+			else if (("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
+			{
+				specular_tex_ = tex;
+			}
+			else if (("Bump" == iter->first) || ("Bump Map" == iter->first))
+			{
+				normal_tex_ = tex;
+			}
+			else if (("Height" == iter->first) || ("Height Map" == iter->first))
+			{
+				height_tex_ = tex;
+			}
+			else if ("Self-Illumination" == iter->first)
+			{
+				emit_tex_ = tex;
+			}
+			else if ("Opacity" == iter->first)
+			{
+				if (tex)
+				{
+					has_opacity_map_ = true;
+				}
+			}				
+		}
+
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0))
+		{
+			special_shading_ = true;
 		}
 	}
 

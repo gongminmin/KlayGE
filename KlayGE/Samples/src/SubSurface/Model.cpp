@@ -29,51 +29,15 @@ DetailedMesh::DetailedMesh(RenderModelPtr const & model, std::wstring const & na
 
 void DetailedMesh::BuildMeshInfo()
 {
-	RenderModelPtr model = model_.lock();
-	mtl_ = model->GetMaterial(this->MaterialID());
+	StaticMesh::BuildMeshInfo();
 
-	// Ω®¡¢Œ∆¿Ì
-	TexturePtr dm, sm;
-	TexturePtr bm = checked_pointer_cast<DetailedModel>(model_.lock())->EmptyBumpMap();
-	TextureSlotsType const & texture_slots = mtl_->texture_slots;
-	for (TextureSlotsType::const_iterator iter = texture_slots.begin();
-		iter != texture_slots.end(); ++ iter)
-	{
-		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first))
-		{
-			if (!ResLoader::Instance().Locate(iter->second).empty())
-			{
-				dm = model->RetriveTexture(iter->second);
-			}
-		}
-		else
-		{
-			if (("NormalMap" == iter->first) || ("Bump" == iter->first))
-			{
-				if (!ResLoader::Instance().Locate(iter->second).empty())
-				{
-					bm = model->RetriveTexture(iter->second);
-				}
-			}
-			else
-			{
-				if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first))
-				{
-					if (!ResLoader::Instance().Locate(iter->second).empty())
-					{
-						sm = model->RetriveTexture(iter->second);
-					}
-				}
-			}
-		}
-	}
-	*(technique_->Effect().ParameterByName("diffuse_tex")) = dm;
-	*(technique_->Effect().ParameterByName("bump_tex")) = bm;
-	*(technique_->Effect().ParameterByName("specular_tex")) = sm;
+	*(technique_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex_;
+	*(technique_->Effect().ParameterByName("bump_tex")) = normal_tex_;
+	*(technique_->Effect().ParameterByName("specular_tex")) = specular_tex_;
 
 	*(technique_->Effect().ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(dm));
-	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(sm));
+	*(technique_->Effect().ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
+	*(technique_->Effect().ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
 
 	*(technique_->Effect().ParameterByName("specular_level")) = mtl_->specular_level;
 	*(technique_->Effect().ParameterByName("shininess")) = mtl_->shininess;

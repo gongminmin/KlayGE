@@ -125,6 +125,8 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 
 void DetailedSkinnedMesh::BuildMeshInfo()
 {
+	SkinnedMesh::BuildMeshInfo();
+
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	has_skinned_ = false;
@@ -146,78 +148,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 			break;
 		}
 	}
-
-	boost::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
-	mtl_ = model->GetMaterial(this->MaterialID());
-
-	// ½¨Á¢ÎÆÀí
-	has_opacity_map_ = false;
-	has_normal_map_ = false;
-	TextureSlotsType const & texture_slots = mtl_->texture_slots;
-	for (TextureSlotsType::const_iterator iter = texture_slots.begin();
-		iter != texture_slots.end(); ++ iter)
-	{
-		if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
-		{
-			if (!ResLoader::Instance().Locate(iter->second).empty())
-			{
-				diffuse_map_ = model->RetriveTexture(iter->second);
-			}
-		}
-		else
-		{
-			if (("NormalMap" == iter->first) || ("Bump" == iter->first) || ("Bump Map" == iter->first))
-			{
-				if (!ResLoader::Instance().Locate(iter->second).empty())
-				{
-					normal_map_ = model->RetriveTexture(iter->second);
-
-					if (normal_map_)
-					{
-						has_normal_map_ = true;
-					}
-				}
-			}
-			else
-			{
-				if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
-				{
-					if (!ResLoader::Instance().Locate(iter->second).empty())
-					{
-						specular_map_ = model->RetriveTexture(iter->second);
-					}
-				}
-				else
-				{
-					if (("EmitMap" == iter->first) || ("Self-Illumination" == iter->first))
-					{
-						if (!ResLoader::Instance().Locate(iter->second).empty())
-						{
-							emit_map_ = model->RetriveTexture(iter->second);
-						}
-					}
-					else
-					{
-						if (("OpacityMap" == iter->first) || ("Opacity" == iter->first))
-						{
-							if (!ResLoader::Instance().Locate(iter->second).empty())
-							{
-								has_opacity_map_ = true;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	ambient_clr_ = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-	diffuse_clr_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_map_));
-	specular_clr_ = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_map_));
-	emit_clr_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_map_));
-	opacity_clr_ = mtl_->opacity;
-	specular_level_ = mtl_->specular_level;
-	shininess_ = std::max(1e-6f, mtl_->shininess);
 
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (TM_Instanced == caps.tess_method)
@@ -261,23 +191,23 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 void DetailedSkinnedMesh::OnRenderBegin()
 {
-	*(effect_->ParameterByName("diffuse_tex")) = diffuse_map_;
-	*(effect_->ParameterByName("normal_tex")) = normal_map_;
-	*(effect_->ParameterByName("specular_tex")) = specular_map_;
-	*(effect_->ParameterByName("emit_tex")) = emit_map_;
+	*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+	*(effect_->ParameterByName("normal_tex")) = normal_tex_;
+	*(effect_->ParameterByName("specular_tex")) = specular_tex_;
+	*(effect_->ParameterByName("emit_tex")) = emit_tex_;
 
 	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
-	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(has_normal_map_);
+	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(!!normal_tex_);
 	*(effect_->ParameterByName("has_opacity_map")) = static_cast<int32_t>(has_opacity_map_);
 
-	*(effect_->ParameterByName("ambient_clr")) = ambient_clr_;
-	*(effect_->ParameterByName("diffuse_clr")) = diffuse_clr_;
-	*(effect_->ParameterByName("specular_clr")) = specular_clr_;
-	*(effect_->ParameterByName("emit_clr")) = emit_clr_;
-	*(effect_->ParameterByName("opacity_clr")) = opacity_clr_;
+	*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
+	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
+	*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
+	*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tex_));
+	*(effect_->ParameterByName("opacity_clr")) = mtl_->opacity;
 
-	*(effect_->ParameterByName("specular_level")) = specular_level_;
-	*(effect_->ParameterByName("shininess")) = shininess_;
+	*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
+	*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);
 
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 const & view = app.ActiveCamera().ViewMatrix();

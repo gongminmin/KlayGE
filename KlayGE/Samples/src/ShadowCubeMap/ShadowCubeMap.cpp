@@ -285,51 +285,16 @@ namespace
 
 		void BuildMeshInfo()
 		{
-			RenderModelPtr model = model_.lock();
-			mtl_ = model->GetMaterial(this->MaterialID());
+			StaticMesh::BuildMeshInfo();
 
-			// ½¨Á¢ÎÆÀí
-			TexturePtr dm, sm, em;
-			TextureSlotsType const & texture_slots = mtl_->texture_slots;
-			for (TextureSlotsType::const_iterator iter = texture_slots.begin();
-				iter != texture_slots.end(); ++ iter)
-			{
-				if (("DiffuseMap" == iter->first) || ("Diffuse Color" == iter->first) || ("Diffuse Color Map" == iter->first))
-				{
-					if (!ResLoader::Instance().Locate(iter->second).empty())
-					{
-						dm = model->RetriveTexture(iter->second);
-					}
-				}
-				else
-				{
-					if (("SpecularMap" == iter->first) || ("Specular Level" == iter->first) || ("Reflection Glossiness Map" == iter->first))
-					{
-						if (!ResLoader::Instance().Locate(iter->second).empty())
-						{
-							sm = model->RetriveTexture(iter->second);
-						}
-					}
-					else
-					{
-						if (("EmitMap" == iter->first) || ("Self-Illumination" == iter->first))
-						{
-							if (!ResLoader::Instance().Locate(iter->second).empty())
-							{
-								em = model->RetriveTexture(iter->second);
-							}
-						}
-					}
-				}
-			}
-			*(effect_->ParameterByName("diffuse_tex")) = dm;
-			*(effect_->ParameterByName("specular_tex")) = sm;
-			*(effect_->ParameterByName("emit_tex")) = em;
+			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+			*(effect_->ParameterByName("specular_tex")) = specular_tex_;
+			*(effect_->ParameterByName("emit_tex")) = emit_tex_;
 
 			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(dm));
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(sm));
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(em));
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tex_));
 
 			*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
 			*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);
