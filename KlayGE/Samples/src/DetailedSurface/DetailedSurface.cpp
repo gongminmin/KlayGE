@@ -42,6 +42,121 @@ namespace
 		DT_Tessellation
 	};
 
+	class RenderDetailedModel : public RenderModel
+	{
+	public:
+		RenderDetailedModel(std::wstring const & name)
+			: RenderModel(name)
+		{
+		}
+
+		void BuildModelInfo()
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			RenderLayoutPtr rl = this->Mesh(0)->GetRenderLayout();
+
+			GraphicsBufferPtr pos_vb;
+			GraphicsBufferPtr normal_vb;
+			GraphicsBufferPtr tangent_vb;
+			std::vector<float3> positions(rl->NumVertices());
+			std::vector<float2> texs(rl->NumVertices());
+			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+			{
+				GraphicsBufferPtr const & vb = rl->GetVertexStream(i);
+				switch (rl->VertexStreamFormat(i)[0].usage)
+				{
+				case VEU_Position:
+					pos_vb = vb;
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						float3* p = mapper.Pointer<float3>();
+						memcpy(&positions[0], p, positions.size() * sizeof(positions[0]));
+					}
+					break;
+
+				case VEU_TextureCoord:
+					if (0 == rl->VertexStreamFormat(i)[0].usage_index)
+					{
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+						vb_cpu->Resize(vb->Size());
+						vb->CopyToBuffer(*vb_cpu);
+
+						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
+						float2* p = mapper.Pointer<float2>();
+						memcpy(&texs[0], p, texs.size() * sizeof(texs[0]));
+					}
+					break;
+
+				case VEU_Normal:
+					normal_vb = vb;
+					break;
+
+				case VEU_Tangent:
+					tangent_vb = vb;
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			std::vector<uint32_t> indices(rl->NumIndices());
+			{
+				GraphicsBufferPtr ib = rl->GetIndexStream();
+				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, NULL);
+				ib_cpu->Resize(ib->Size());
+				ib->CopyToBuffer(*ib_cpu);
+
+				GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
+				if (EF_R16UI == rl->IndexStreamFormat())
+				{
+					uint16_t* p = mapper.Pointer<uint16_t>();
+					std::copy(p, p + indices.size(), indices.begin());
+				}
+				else
+				{
+					uint32_t* p = mapper.Pointer<uint32_t>();
+					std::copy(p, p + indices.size(), indices.begin());
+				}
+			}
+
+			std::vector<float> distortions(rl->NumVertices(), 0);
+			std::vector<uint32_t> vert_times(rl->NumVertices(), 0);
+			for (size_t i = 0; i < indices.size(); i += 3)
+			{
+				uint32_t i0 = indices[i + 0];
+				uint32_t i1 = indices[i + 1];
+				uint32_t i2 = indices[i + 2];
+
+				float geom_area = MathLib::length(MathLib::cross(positions[i1] - positions[i0], positions[i2] - positions[i0]));
+				float tex_area = MathLib::cross(texs[i1] - texs[i0], texs[i2] - texs[i0]);
+				float tri_distortion = sqrt(geom_area / tex_area);
+				distortions[i0] += tri_distortion;
+				distortions[i1] += tri_distortion;
+				distortions[i2] += tri_distortion;
+				++ vert_times[i0];
+				++ vert_times[i1];
+				++ vert_times[i2];
+			}
+			for (size_t i = 0; i < distortions.size(); ++ i)
+			{
+				distortions[i] /= vert_times[i];
+			}
+
+			ElementInitData init_data;
+			init_data.row_pitch = distortions.size() * sizeof(distortions[0]);
+			init_data.slice_pitch = 0;
+			init_data.data = &distortions[0];
+			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			rl->BindVertexStream(distortion_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
+		}
+	};
+
 	class RenderPolygon : public StaticMesh
 	{
 	public:
@@ -192,7 +307,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>())();
+			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>())();
 		}
 
 		void LightPos(float3 const & light_pos)
