@@ -35,7 +35,6 @@ private:
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr spot_light_src_;
 
-	KlayGE::AmbientLightSourcePtr ambient_light_;
 	KlayGE::SpotLightSourcePtr spot_light_;
 
 	KlayGE::FirstPersonCameraController fpcController_;

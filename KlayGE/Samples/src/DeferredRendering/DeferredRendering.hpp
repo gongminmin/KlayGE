@@ -61,7 +61,6 @@ private:
 	int id_aa_;
 	int id_ctrl_camera_;
 
-	KlayGE::AmbientLightSourcePtr ambient_light_;
 	KlayGE::PointLightSourcePtr point_light_;
 	KlayGE::SpotLightSourcePtr spot_light_[3];
 

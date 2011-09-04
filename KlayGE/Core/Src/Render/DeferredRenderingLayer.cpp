@@ -254,18 +254,22 @@ namespace KlayGE
 
 		if (mrt_g_buffer_)
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_MRTGBuffer << 28) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_MRTGBuffer << 28) + 1));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 28) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 28) + 1));
 		}
 		else
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_GBuffer << 28) + 1));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 28) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 28) + 1));
 		}
 
-		g_buffer_ = rf.MakeFrameBuffer();
+		opaque_g_buffer_ = rf.MakeFrameBuffer();
+		transparency_back_g_buffer_ = rf.MakeFrameBuffer();
+		transparency_front_g_buffer_ = rf.MakeFrameBuffer();
 		shadowing_buffer_ = rf.MakeFrameBuffer();
-		lighting_buffer_ = rf.MakeFrameBuffer();
+		opaque_lighting_buffer_ = rf.MakeFrameBuffer();
+		transparency_back_lighting_buffer_ = rf.MakeFrameBuffer();
+		transparency_front_lighting_buffer_ = rf.MakeFrameBuffer();
 		shading_buffer_ = rf.MakeFrameBuffer();
 
 		{
@@ -364,7 +368,8 @@ namespace KlayGE
 		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
 		if (mrt_g_buffer_)
 		{
-			technique_shading_ = dr_effect_->TechniqueByName("Shading");
+			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
+			technique_shading_alpha_blend_ = dr_effect_->TechniqueByName("ShadingAlphaBlendTech");
 		}
 
 		sm_buffer_ = rf.MakeFrameBuffer();
@@ -493,6 +498,9 @@ namespace KlayGE
 		*(dr_effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 		*(dr_effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
 
+		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");
+		g_buffer_1_tex_param_ = dr_effect_->ParameterByName("g_buffer_1_tex");
+		lighting_tex_param_ = dr_effect_->ParameterByName("lighting_tex");
 		depth_near_far_invfar_param_ = dr_effect_->ParameterByName("depth_near_far_invfar");
 		light_attrib_param_ = dr_effect_->ParameterByName("light_attrib");
 		light_color_param_ = dr_effect_->ParameterByName("light_color");
@@ -534,22 +542,50 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 		RenderEngine& re = rf.RenderEngineInstance();
-		g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		opaque_g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		transparency_back_g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		transparency_front_g_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shadowing_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
-		lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		opaque_lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		transparency_back_lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
+		transparency_front_lighting_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 		shading_buffer_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 0, 0);
+		opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		RenderViewPtr opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
 
-		g_buffer_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-		g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*g_buffer_tex_, 0, 1, 0));
+		opaque_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		opaque_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_g_buffer_rt0_tex_, 0, 1, 0));
 		if (mrt_g_buffer_)
 		{
-			g_buffer_1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-			g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*g_buffer_1_tex_, 0, 1, 0));
+			opaque_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			opaque_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*opaque_g_buffer_rt1_tex_, 0, 1, 0));
 		}
-		g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		opaque_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
+
+		transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		RenderViewPtr transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
+
+		transparency_back_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_g_buffer_rt0_tex_, 0, 1, 0));
+		if (mrt_g_buffer_)
+		{
+			transparency_back_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			transparency_back_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*transparency_back_g_buffer_rt1_tex_, 0, 1, 0));
+		}
+		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
+
+		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		RenderViewPtr transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
+
+		transparency_front_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_g_buffer_rt0_tex_, 0, 1, 0));
+		if (mrt_g_buffer_)
+		{
+			transparency_front_g_buffer_rt1_tex_ = rf.MakeTexture2D(width, height, 1, 1, re.DeviceCaps().mrt_independent_bit_depths_support ? EF_ARGB8 : EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*transparency_front_g_buffer_rt1_tex_, 0, 1, 0));
+		}
+		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
 		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -585,9 +621,17 @@ namespace KlayGE
 		shadowing_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shadowing_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shadowing_tex_, 0, 1, 0));
 
-		lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*lighting_tex_, 0, 1, 0));
-		lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		opaque_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		opaque_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_lighting_tex_, 0, 1, 0));
+		opaque_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
+
+		transparency_back_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		transparency_back_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_lighting_tex_, 0, 1, 0));
+		transparency_back_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
+
+		transparency_front_lighting_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		transparency_front_lighting_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_lighting_tex_, 0, 1, 0));
+		transparency_front_lighting_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
@@ -601,7 +645,7 @@ namespace KlayGE
 		}
 		shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
-		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
 
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -622,19 +666,15 @@ namespace KlayGE
 		}
 		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-		if (g_buffer_tex_)
+		if (opaque_g_buffer_rt0_tex_)
 		{
 			*(dr_effect_->ParameterByName("inv_width_height")) = float2(1.0f / width, 1.0f / height);
 		}
 
-		*(dr_effect_->ParameterByName("g_buffer_tex")) = g_buffer_tex_;
 		*(dr_effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
-		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
 
-		*(dr_effect_->ParameterByName("lighting_tex")) = lighting_tex_;
-		*(dr_effect_->ParameterByName("g_buffer_1_tex")) = g_buffer_1_tex_;
-
-		ssvo_pp_->InputPin(0, g_buffer_tex_);
+		ssvo_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
 		blur_pp_->InputPin(0, small_ssvo_tex_);
 		blur_pp_->OutputPin(0, ssvo_tex_);
@@ -652,22 +692,22 @@ namespace KlayGE
 			*(dr_effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
 		}
 
-		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = g_buffer_tex_;
-		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
+		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
 
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 		*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f, 0.77f);
-		*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
 
-		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_tex_);
+		gbuffer_to_depth_derivate_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		gbuffer_to_depth_derivate_pp_->OutputPin(0, depth_deriative_tex_);
-		float delta_x = 1.0f / g_buffer_tex_->Width(0);
-		float delta_y = 1.0f / g_buffer_tex_->Height(0);
+		float delta_x = 1.0f / opaque_g_buffer_rt0_tex_->Width(0);
+		float delta_y = 1.0f / opaque_g_buffer_rt0_tex_->Height(0);
 		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
 
-		gbuffer_to_normal_cone_pp_->InputPin(0, g_buffer_tex_);
+		gbuffer_to_normal_cone_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		gbuffer_to_normal_cone_pp_->OutputPin(0, normal_cone_tex_);
 		gbuffer_to_normal_cone_pp_->SetParam(0, delta_offset);
 
@@ -686,17 +726,41 @@ namespace KlayGE
 
 		if (0 == pass)
 		{
-			lights_ = scene_mgr.LightSources();
+			lights_.resize(0);
+			std::vector<LightSourcePtr> cur_lights = scene_mgr.LightSources();
+			bool with_ambient = false;
+			BOOST_FOREACH(BOOST_TYPEOF(cur_lights)::const_reference light, cur_lights)
+			{
+				if (LT_Ambient == light->Type())
+				{
+					with_ambient = true;
+					break;
+				}
+			}
+			if (!with_ambient)
+			{
+				LightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+				lights_.push_back(ambient_light);
+			}
 
-			deferred_scene_objs_.resize(0);
+			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
+
+			transparency_scene_objs_.resize(0);
+			opaque_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
 			{
-				if (0 == (so->Attrib() & SceneObject::SOA_Overlay))
+				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
 				{
-					deferred_scene_objs_.push_back(so.get());
+					if (so->AlphaBlend())
+					{
+						transparency_scene_objs_.push_back(so.get());
+					}
+					else
+					{
+						opaque_scene_objs_.push_back(so.get());
+					}
 
-					so->LightingTex(lighting_tex_);
 					so->SSVOTex(ssvo_tex_);
 					so->SSVOEnabled(ssvo_enabled_);
 				}
@@ -714,192 +778,285 @@ namespace KlayGE
 					}
 				}
 			}
+
+			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+
+			view_ = camera.ViewMatrix();
+			proj_ = camera.ProjMatrix();
+			inv_view_ = MathLib::inverse(view_);
+			inv_proj_ = MathLib::inverse(proj_);
+			depth_near_far_invfar_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 
-		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting) && ((mrt_g_buffer_ && (pass_type != PT_Shading)) || !mrt_g_buffer_))
+		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
+			&& ((mrt_g_buffer_ && (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading)) || !mrt_g_buffer_))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(deferred_scene_objs_)::reference deo, deferred_scene_objs_)
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->Pass(static_cast<PassType>(pass_type));
+			}
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
 			{
 				deo->Pass(static_cast<PassType>(pass_type));
 			}
 		}
+		if ((PT_OpaqueShading == pass_type) && (0 == index_in_pass))
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->LightingTex(opaque_lighting_tex_);
+			}
+		}
+		if ((PT_TransparencyBackShading == pass_type) && (0 == index_in_pass))
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->LightingTex(transparency_back_lighting_tex_);
+			}
+		}
+		if ((PT_TransparencyFrontShading == pass_type) && (0 == index_in_pass))
+		{
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->LightingTex(transparency_front_lighting_tex_);
+			}
+		}
 
-		if ((PT_GBuffer == pass_type) || (PT_MRTGBuffer == pass_type))
+		if ((PT_OpaqueGBuffer == pass_type) || (PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyFrontGBuffer == pass_type)
+			|| (PT_OpaqueMRTGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type) || (PT_TransparencyFrontMRTGBuffer == pass_type))
 		{
 			if (0 == index_in_pass)
 			{
 				// Generate G-Buffer
 
-				Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(false);
+					}
 
-				view_ = camera.ViewMatrix();
-				proj_ = camera.ProjMatrix();
-				inv_view_ = MathLib::inverse(view_);
-				inv_proj_ = MathLib::inverse(proj_);
-				depth_near_far_invfar_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+					re.BindFrameBuffer(opaque_g_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
+				}
+				else
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(false);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+
+					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
+					{
+						re.BindFrameBuffer(transparency_back_g_buffer_);
+					}
+					else
+					{
+						re.BindFrameBuffer(transparency_front_g_buffer_);
+					}
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 128);
+				}
 
 				*depth_near_far_invfar_param_ = depth_near_far_invfar_;
 
-				re.BindFrameBuffer(g_buffer_);
-				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
 				return App3DFramework::URV_Need_Flush;
 			}
 			else
 			{
-				g_buffer_tex_->BuildMipSubLevels();
-
-				if (ssvo_enabled_)
+				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
 				{
-					ssvo_pp_->Apply();
-					blur_pp_->Apply();
-				}
+					opaque_g_buffer_rt0_tex_->BuildMipSubLevels();
 
-				if (indirect_lighting_enabled_)
-				{
-					this->CreateDepthDerivativeMipMap();
-					this->CreateNormalConeMipMap();
-					this->SetSubsplatStencil();
-				}
-
-				// Light depth only
-
-				float4x4 vp = view_ * proj_;
-
-				re.BindFrameBuffer(lighting_buffer_);
-
-				pass_scaned_.resize(2);
-				for (size_t i = 0; i < lights_.size(); ++ i)
-				{
-					LightSourcePtr const & light = lights_[i];
-					if (light->Enabled())
+					if (ssvo_enabled_)
 					{
-						int type = light->Type();
-						int32_t attr = light->Attrib();
-						switch (type)
+						ssvo_pp_->Apply();
+						blur_pp_->Apply();
+					}
+
+					if (indirect_lighting_enabled_)
+					{
+						this->CreateDepthDerivativeMipMap();
+						this->CreateNormalConeMipMap();
+						this->SetSubsplatStencil();
+					}
+
+					// Light depth only
+
+					float4x4 vp = view_ * proj_;
+
+					re.BindFrameBuffer(opaque_lighting_buffer_);
+
+					pass_scaned_.resize(2);
+
+					if (!transparency_scene_objs_.empty())
+					{
+						if (mrt_g_buffer_)
 						{
-						case LT_Spot:
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 28) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 28) + 1));
+
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 28) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 28) + 1));
+						}
+					}
+
+					for (size_t i = 0; i < lights_.size(); ++ i)
+					{
+						LightSourcePtr const & light = lights_[i];
+						if (light->Enabled())
+						{
+							int type = light->Type();
+							int32_t attr = light->Attrib();
+							switch (type)
 							{
-								float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
-
-								float const scale = light->CosOuterInner().w();
-								float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
-								float4x4 light_model = mat * MathLib::inverse(light_view);
-								*light_volume_mv_param_ = light_model * view_;
-								*light_volume_mvp_param_ = light_model * vp;
-
-								float3 min, max;
-								min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
-								for (size_t k = 1; k < 8; ++ k)
+							case LT_Spot:
 								{
-									float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
-									min = MathLib::minimize(min, vec);
-									max = MathLib::maximize(max, vec);
-								}
+									float4x4 const & light_view = light->SMCamera(0)->ViewMatrix();
 
-								//if (scene_mgr.AABBVisible(Box(min, max)))
-								{
-									if (attr & LSA_IndirectLighting)
+									float const scale = light->CosOuterInner().w();
+									float4x4 mat = MathLib::scaling(scale, scale, 1.0f);
+									float4x4 light_model = mat * MathLib::inverse(light_view);
+									*light_volume_mv_param_ = light_model * view_;
+									*light_volume_mvp_param_ = light_model * vp;
+
+									float3 min, max;
+									min = max = MathLib::transform_coord(cone_bbox_[0], light_model);
+									for (size_t k = 1; k < 8; ++ k)
 									{
-										if (illum_ != 1)
+										float3 vec = MathLib::transform_coord(cone_bbox_[k], light_model);
+										min = MathLib::minimize(min, vec);
+										max = MathLib::maximize(max, vec);
+									}
+
+									//if (scene_mgr.AABBVisible(Box(min, max)))
+									{
+										if (attr & LSA_IndirectLighting)
 										{
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 28) + (i << 16) + 0));
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 28) + (i << 16) + 0));
+											if (illum_ != 1)
+											{
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 28) + (i << 16) + 0));
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 28) + (i << 16) + 0));
+											}
+											else
+											{
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+											}
 										}
-										else
+
+										if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
 										}
-									}
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
 
-									if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
-									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+										light->ConditionalRenderQuery(0)->Begin();
+										re.Render(*technique_light_depth_only_, *rl_cone_);
+										light->ConditionalRenderQuery(0)->End();
 									}
-									pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
-
-									light->ConditionalRenderQuery(0)->Begin();
-									re.Render(*technique_light_depth_only_, *rl_cone_);
-									light->ConditionalRenderQuery(0)->End();
 								}
-							}
-							break;
+								break;
 
-						case LT_Point:
-							{
-								float3 const & p = light->Position();
-								for (int j = 0; j < 6; ++ j)
+							case LT_Point:
 								{
-									float4x4 const & light_view = light->SMCamera(j)->ViewMatrix();
-									float4x4 light_model = MathLib::inverse(light_view);
-									*light_volume_mv_param_ = light_model * view_;
-									*light_volume_mvp_param_ = light_model * vp;
-
-									float3 min, max;
-									min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
-									for (size_t k = 1; k < 8; ++ k)
+									float3 const & p = light->Position();
+									for (int j = 0; j < 6; ++ j)
 									{
-										float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
-										min = MathLib::minimize(min, vec);
-										max = MathLib::maximize(max, vec);
-									}
+										float4x4 const & light_view = light->SMCamera(j)->ViewMatrix();
+										float4x4 light_model = MathLib::inverse(light_view);
+										*light_volume_mv_param_ = light_model * view_;
+										*light_volume_mvp_param_ = light_model * vp;
 
-									//if (scene_mgr.AABBVisible(Box(min, max)))
-									{
-										if (0 == (attr & LSA_NoShadow))
+										float3 min, max;
+										min = max = MathLib::transform_coord(pyramid_bbox_[0], light_model);
+										for (size_t k = 1; k < 8; ++ k)
 										{
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+											float3 vec = MathLib::transform_coord(pyramid_bbox_[k], light_model);
+											min = MathLib::minimize(min, vec);
+											max = MathLib::maximize(max, vec);
 										}
 
-										light->ConditionalRenderQuery(j)->Begin();
-										re.Render(*technique_light_depth_only_, *rl_pyramid_);
-										light->ConditionalRenderQuery(j)->End();
+										//if (scene_mgr.AABBVisible(Box(min, max)))
+										{
+											if (0 == (attr & LSA_NoShadow))
+											{
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+											}
+
+											light->ConditionalRenderQuery(j)->Begin();
+											re.Render(*technique_light_depth_only_, *rl_pyramid_);
+											light->ConditionalRenderQuery(j)->End();
+										}
+									}
+									{
+										float4x4 light_model = MathLib::translation(p);
+										*light_volume_mv_param_ = light_model * view_;
+										*light_volume_mvp_param_ = light_model * vp;
+
+										float3 min, max;
+										min = max = MathLib::transform_coord(box_bbox_[0], light_model);
+										for (size_t k = 1; k < 8; ++ k)
+										{
+											float3 vec = MathLib::transform_coord(box_bbox_[k], light_model);
+											min = MathLib::minimize(min, vec);
+											max = MathLib::maximize(max, vec);
+										}
+
+										//if (scene_mgr.AABBVisible(Box(min, max)))
+										{
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
+
+											light->ConditionalRenderQuery(6)->Begin();
+											re.Render(*technique_light_depth_only_, *rl_box_);
+											light->ConditionalRenderQuery(6)->End();
+										}
 									}
 								}
+								break;
+
+							default:
+								if (0 == (attr & LSA_NoShadow))
 								{
-									float4x4 light_model = MathLib::translation(p);
-									*light_volume_mv_param_ = light_model * view_;
-									*light_volume_mvp_param_ = light_model * vp;
-
-									float3 min, max;
-									min = max = MathLib::transform_coord(box_bbox_[0], light_model);
-									for (size_t k = 1; k < 8; ++ k)
-									{
-										float3 vec = MathLib::transform_coord(box_bbox_[k], light_model);
-										min = MathLib::minimize(min, vec);
-										max = MathLib::maximize(max, vec);
-									}
-
-									//if (scene_mgr.AABBVisible(Box(min, max)))
-									{
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
-
-										light->ConditionalRenderQuery(6)->Begin();
-										re.Render(*technique_light_depth_only_, *rl_box_);
-										light->ConditionalRenderQuery(6)->End();
-									}
+									pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
 								}
+								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
+								break;
 							}
-							break;
-
-						default:
-							if (0 == (attr & LSA_NoShadow))
-							{
-								pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
-							}
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
-							break;
 						}
 					}
-				}
-				pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 0));
-				if (mrt_g_buffer_)
-				{
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 0));
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 1));
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 28) + 0));
+					if (!transparency_scene_objs_.empty())
+					{
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 28) + 0));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 28) + 0));
+					}
+					if (mrt_g_buffer_)
+					{
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 0));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 1));
+					}
+					else
+					{
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 28) + 1));
+					}
 				}
 				else
 				{
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_Shading << 28) + 1));
+					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
+					{
+						transparency_back_g_buffer_rt0_tex_->BuildMipSubLevels();
+					}
+					else
+					{
+						transparency_front_g_buffer_rt0_tex_->BuildMipSubLevels();
+					}
 				}
 
 				return App3DFramework::URV_Flushed;
@@ -907,33 +1064,115 @@ namespace KlayGE
 		}
 		else
 		{
-			if ((PT_Shading == pass_type) || (PT_SpecialShading == pass_type))
+			if ((PT_OpaqueShading == pass_type) || (PT_TransparencyBackShading == pass_type) || (PT_TransparencyFrontShading == pass_type)
+				|| (PT_SpecialShading == pass_type))
 			{
 				if (0 == index_in_pass)
 				{
-					if (PT_Shading == pass_type)
+					if (PT_SpecialShading == pass_type)
 					{
-						if (indirect_lighting_enabled_ && (illum_ != 1))
+						BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
 						{
-							this->UpsampleMultiresLighting();
-							this->AccumulateToLightingTex();
+							deo->Visible(true);
+						}
+						BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+						{
+							deo->Visible(true);
 						}
 
 						re.BindFrameBuffer(shading_buffer_);
-						if (mrt_g_buffer_)
-						{
-							re.Render(*technique_shading_, *rl_quad_);
-							return App3DFramework::URV_Flushed;
-						}
-						else
-						{
-							return App3DFramework::URV_Need_Flush;
-						}
+						return App3DFramework::URV_Need_Flush;
 					}
 					else
 					{
+						if (PT_OpaqueShading == pass_type)
+						{
+							if (indirect_lighting_enabled_ && (illum_ != 1))
+							{
+								this->UpsampleMultiresLighting();
+								this->AccumulateToLightingTex();
+							}
+						}
+
 						re.BindFrameBuffer(shading_buffer_);
-						return App3DFramework::URV_Need_Flush;
+						switch (pass_type)
+						{
+						case PT_OpaqueShading:
+							if (mrt_g_buffer_)
+							{
+								*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
+								*g_buffer_1_tex_param_ = opaque_g_buffer_rt1_tex_;
+								*lighting_tex_param_ = opaque_lighting_tex_;
+
+								re.Render(*technique_shading_, *rl_quad_);
+
+								return App3DFramework::URV_Flushed;
+							}
+							else
+							{
+								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+								{
+									deo->Visible(true);
+								}
+								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+								{
+									deo->Visible(false);
+								}
+
+								return App3DFramework::URV_Need_Flush;
+							}
+
+						case PT_TransparencyBackShading:
+							if (mrt_g_buffer_)
+							{
+								*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
+								*g_buffer_1_tex_param_ = transparency_back_g_buffer_rt1_tex_;
+								*lighting_tex_param_ = transparency_back_lighting_tex_;
+
+								re.Render(*technique_shading_alpha_blend_, *rl_quad_);
+
+								return App3DFramework::URV_Flushed;
+							}
+							else
+							{
+								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+								{
+									deo->Visible(false);
+								}
+								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+								{
+									deo->Visible(true);
+								}
+
+								return App3DFramework::URV_Need_Flush;
+							}
+
+						case PT_TransparencyFrontShading:
+						default:
+							if (mrt_g_buffer_)
+							{
+								*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
+								*g_buffer_1_tex_param_ = transparency_front_g_buffer_rt1_tex_;
+								*lighting_tex_param_ = transparency_front_lighting_tex_;
+
+								re.Render(*technique_shading_alpha_blend_, *rl_quad_);
+
+								return App3DFramework::URV_Flushed;
+							}
+							else
+							{
+								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+								{
+									deo->Visible(false);
+								}
+								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+								{
+									deo->Visible(true);
+								}
+
+								return App3DFramework::URV_Need_Flush;
+							}
+						}
 					}
 				}
 				else
@@ -957,6 +1196,15 @@ namespace KlayGE
 					else
 					{
 						skip_aa_pp_->Apply();
+					}
+
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(true);
 					}
 
 					return App3DFramework::URV_Finished;
@@ -1096,6 +1344,15 @@ namespace KlayGE
 
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(false);
+					}
+
 					rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
@@ -1134,6 +1391,15 @@ namespace KlayGE
 
 				if (PT_GenShadowMap == pass_type)
 				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(false);
+					}
+
 					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 
 					// Shadow map generation
@@ -1149,6 +1415,7 @@ namespace KlayGE
 					re.BindFrameBuffer(shadowing_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(1, 1, 1, 1));
 
+					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
 					*light_attrib_param_ = attr;
 					*light_color_param_ = light->Color();
 					*light_falloff_param_ = light->Falloff();
@@ -1168,21 +1435,58 @@ namespace KlayGE
 
 					// Lighting
 
-					re.BindFrameBuffer(lighting_buffer_);
-					// Clear stencil to 0 with write mask
-					re.Render(*technique_clear_stencil_, *rl_quad_);
-
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
 						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 					}
+
+					// Opaque objects
+
+					re.BindFrameBuffer(opaque_lighting_buffer_);
+					// Clear stencil to 0 with write mask
+					re.Render(*technique_clear_stencil_, *rl_quad_);
 
 					if ((LT_Point == type) || (LT_Spot == type))
 					{
 						re.Render(*technique_light_stencil_, *rl);
 					}
 
+					*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
+
 					re.Render(*technique_lights_[type], *rl);
+
+					if (!transparency_scene_objs_.empty())
+					{
+						// Transparency objects back
+
+						re.BindFrameBuffer(transparency_back_lighting_buffer_);
+						// Clear stencil to 0 with write mask
+						re.Render(*technique_clear_stencil_, *rl_quad_);
+
+						if ((LT_Point == type) || (LT_Spot == type))
+						{
+							re.Render(*technique_light_stencil_, *rl);
+						}
+
+						*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
+
+						re.Render(*technique_lights_[type], *rl);
+
+						// Transparency objects front
+
+						re.BindFrameBuffer(transparency_front_lighting_buffer_);
+						// Clear stencil to 0 with write mask
+						re.Render(*technique_clear_stencil_, *rl_quad_);
+
+						if ((LT_Point == type) || (LT_Spot == type))
+						{
+							re.Render(*technique_light_stencil_, *rl);
+						}
+
+						*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
+
+						re.Render(*technique_lights_[type], *rl);
+					}
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
@@ -1243,7 +1547,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::SetSubsplatStencil()
 	{
-		CameraPtr const & camera = g_buffer_->GetViewport().camera;
+		CameraPtr const & camera = opaque_g_buffer_->GetViewport().camera;
 		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
 		*subsplat_near_q_far_param_ = float3(camera->NearPlane() * q, q, camera->FarPlane());
 
@@ -1341,11 +1645,11 @@ namespace KlayGE
 	{
 		PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
 		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
-		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / g_buffer_tex_->Width(0), 1.0f / g_buffer_tex_->Height(0)));
+		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / opaque_g_buffer_rt0_tex_->Width(0), 1.0f / opaque_g_buffer_rt0_tex_->Height(0)));
 		copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
 		copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);
-		copy_to_light_buffer_pp->InputPin(1, g_buffer_tex_);
-		copy_to_light_buffer_pp->OutputPin(0, lighting_tex_);
+		copy_to_light_buffer_pp->InputPin(1, opaque_g_buffer_rt0_tex_);
+		copy_to_light_buffer_pp->OutputPin(0, opaque_lighting_tex_);
 		copy_to_light_buffer_pp->Apply();
 	}
 

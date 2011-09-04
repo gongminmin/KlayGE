@@ -99,11 +99,10 @@ namespace KlayGE
 
 		if (PT_SpecialShading == type)
 		{
-			this->Visible(renderable_->SpecialShading());
-		}
-		else
-		{
-			this->Visible(true);
+			if (this->Visible())
+			{
+				this->Visible(renderable_->SpecialShading());
+			}
 		}
 	}
 

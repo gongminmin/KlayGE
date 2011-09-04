@@ -76,6 +76,11 @@ namespace KlayGE
 		virtual void SSVOTex(TexturePtr const & tex);
 		virtual void SSVOEnabled(bool ssvo);
 
+		bool AlphaBlend() const
+		{
+			return renderable_->AlphaBlend();
+		}
+
 	protected:
 		uint32_t attrib_;
 

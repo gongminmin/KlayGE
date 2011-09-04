@@ -349,7 +349,7 @@ namespace KlayGE
 		{
 			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBox");
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
 			special_shading_tech_ = shading_tech_;
 			this->Technique(gbuffer_tech_);
 
@@ -373,15 +373,15 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_GBuffer:
+		case PT_OpaqueGBuffer:
 			technique_ = gbuffer_tech_;
 			break;
 
-		case PT_MRTGBuffer:
+		case PT_OpaqueMRTGBuffer:
 			technique_ = gbuffer_mrt_tech_;
 			break;
 
-		case PT_Shading:
+		case PT_OpaqueShading:
 			technique_ = shading_tech_;
 			break;
 

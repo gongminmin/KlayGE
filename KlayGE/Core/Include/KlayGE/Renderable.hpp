@@ -33,13 +33,19 @@ namespace KlayGE
 {
 	enum PassType
 	{
-		PT_GBuffer,
-		PT_MRTGBuffer,
+		PT_OpaqueGBuffer,
+		PT_TransparencyBackGBuffer,
+		PT_TransparencyFrontGBuffer,
+		PT_OpaqueMRTGBuffer,
+		PT_TransparencyBackMRTGBuffer,
+		PT_TransparencyFrontMRTGBuffer,
 		PT_GenShadowMap,
 		PT_GenReflectiveShadowMap,
 		PT_Lighting,
 		PT_IndirectLighting,
-		PT_Shading,
+		PT_OpaqueShading,
+		PT_TransparencyBackShading,
+		PT_TransparencyFrontShading,
 		PT_SpecialShading
 	};
 
@@ -117,12 +123,16 @@ namespace KlayGE
 		{
 			return special_shading_;
 		}
+		bool AlphaBlend() const
+		{
+			return need_alpha_blend_;
+		}
 
 	protected:
 		virtual void UpdateInstanceStream();
 
 		// For deferred only
-		virtual RenderTechniquePtr const & PassTech(PassType type, bool alpha) const;
+		virtual RenderTechniquePtr const & PassTech(PassType type) const;
 
 	protected:
 		std::vector<boost::weak_ptr<SceneObject> > instances_;
@@ -134,14 +144,19 @@ namespace KlayGE
 		RenderEffectPtr deferred_effect_;
 
 		RenderTechniquePtr gbuffer_tech_;
-		RenderTechniquePtr gbuffer_alpha_tech_;
+		RenderTechniquePtr gbuffer_alpha_test_tech_;
 		RenderTechniquePtr gbuffer_mrt_tech_;
-		RenderTechniquePtr gbuffer_alpha_mrt_tech_;
+		RenderTechniquePtr gbuffer_alpha_test_mrt_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_back_mrt_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_front_mrt_tech_;
 		RenderTechniquePtr gen_sm_tech_;
-		RenderTechniquePtr gen_sm_alpha_tech_;
+		RenderTechniquePtr gen_sm_alpha_test_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
-		RenderTechniquePtr gen_rsm_alpha_tech_;
+		RenderTechniquePtr gen_rsm_alpha_test_tech_;
 		RenderTechniquePtr shading_tech_;
+		RenderTechniquePtr shading_alpha_blend_tech_;
+		RenderTechniquePtr shading_alpha_blend_back_tech_;
+		RenderTechniquePtr shading_alpha_blend_front_tech_;
 		RenderTechniquePtr special_shading_tech_;
 
 		RenderEffectParameterPtr lighting_tex_param_;
@@ -154,6 +169,8 @@ namespace KlayGE
 		PassType type_;
 		bool has_opacity_map_;
 		bool special_shading_;
+		bool need_alpha_blend_;
+		bool need_alpha_test_;
 
 		RenderMaterialPtr mtl_;
 
@@ -171,6 +188,8 @@ namespace KlayGE
 		RenderEffectParameterPtr emit_tex_param_;
 		RenderEffectParameterPtr emit_clr_param_;
 		RenderEffectParameterPtr specular_level_param_;
+		RenderEffectParameterPtr opacity_clr_param_;
+		RenderEffectParameterPtr opacity_map_enabled_param_;
 		RenderEffectParameterPtr flipping_param_;
 
 		TexturePtr diffuse_tex_;

@@ -85,7 +85,10 @@ namespace KlayGE
 	void SceneObjectHDRSkyBox::Pass(PassType type)
 	{
 		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->Pass(type);
-		this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+		if (this->Visible())
+		{
+			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+		}
 	}
 
 

@@ -304,6 +304,8 @@ namespace KlayGE
 	{
 		has_opacity_map_ = false;
 		special_shading_ = false;
+		need_alpha_blend_ = false;
+		need_alpha_test_ = false;
 
 		RenderModelPtr model = model_.lock();
 
@@ -343,6 +345,15 @@ namespace KlayGE
 				if (tex)
 				{
 					has_opacity_map_ = true;
+
+					if ((EF_BC1 == tex->Format()) || (EF_BC1_SRGB == tex->Format()))
+					{
+						need_alpha_test_ = true;
+					}
+					else
+					{
+						need_alpha_blend_ = true;
+					}
 				}
 			}				
 		}
@@ -350,6 +361,10 @@ namespace KlayGE
 		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0))
 		{
 			special_shading_ = true;
+		}
+		if (!need_alpha_test_ && (mtl_->opacity < 1))
+		{
+			need_alpha_blend_ = true;
 		}
 	}
 
@@ -2164,7 +2179,7 @@ namespace KlayGE
 		{
 			StaticMesh::OnRenderBegin();
 
-			if ((PT_Shading == type_) || (PT_SpecialShading == type_))
+			if ((PT_OpaqueShading == type_) || (PT_SpecialShading == type_))
 			{
 				float4 clr = light_->Color();
 				clr.w() = 0;

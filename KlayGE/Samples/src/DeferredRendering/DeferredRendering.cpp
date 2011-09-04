@@ -213,10 +213,6 @@ void DeferredRenderingApp::InitObjects()
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	
-	ambient_light_ = MakeSharedPtr<AmbientLightSource>();
-	ambient_light_->Color(float3(0, 0, 0));
-	ambient_light_->AddToSceneManager();
-
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(0);
 	point_light_->Color(float3(0.8f, 0.96f, 1.0f));
@@ -328,8 +324,8 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 	deferred_rendering_->OnResize(width, height);
 
-	debug_pp_->InputPin(0, deferred_rendering_->GBufferTex());
-	debug_pp_->InputPin(1, deferred_rendering_->LightingTex());
+	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
+	debug_pp_->InputPin(1, deferred_rendering_->OpaqueLightingTex());
 	debug_pp_->InputPin(2, deferred_rendering_->SSVOTex());
 
 	UIManager::Instance().SettleCtrls(width, height);

@@ -42,13 +42,9 @@ namespace KlayGE
 			return g_buffer_effect_;
 		}
 
-		TexturePtr const & GBufferTex() const
+		TexturePtr const & OpaqueLightingTex() const
 		{
-			return g_buffer_tex_;
-		}
-		TexturePtr const & LightingTex() const
-		{
-			return lighting_tex_;
+			return opaque_lighting_tex_;
 		}
 		TexturePtr const & ShadingTex() const
 		{
@@ -57,6 +53,15 @@ namespace KlayGE
 		TexturePtr const & SSVOTex() const
 		{
 			return ssvo_tex_;
+		}
+
+		TexturePtr const & OpaqueGBufferRT0Tex() const
+		{
+			return opaque_g_buffer_rt0_tex_;
+		}
+		TexturePtr const & OpaqueGBufferRT1Tex() const
+		{
+			return opaque_g_buffer_rt1_tex_;
 		}
 
 		void DisplayIllum(int illum);
@@ -77,16 +82,32 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
 
-		FrameBufferPtr g_buffer_;
-		TexturePtr g_buffer_tex_;
-		TexturePtr g_buffer_1_tex_;
-		TexturePtr ds_tex_;
+		FrameBufferPtr opaque_g_buffer_;
+		TexturePtr opaque_g_buffer_rt0_tex_;
+		TexturePtr opaque_g_buffer_rt1_tex_;
+		TexturePtr opaque_ds_tex_;
+
+		FrameBufferPtr transparency_back_g_buffer_;
+		TexturePtr transparency_back_g_buffer_rt0_tex_;
+		TexturePtr transparency_back_g_buffer_rt1_tex_;
+		TexturePtr transparency_back_ds_tex_;
+
+		FrameBufferPtr transparency_front_g_buffer_;
+		TexturePtr transparency_front_g_buffer_rt0_tex_;
+		TexturePtr transparency_front_g_buffer_rt1_tex_;
+		TexturePtr transparency_front_ds_tex_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
 
-		FrameBufferPtr lighting_buffer_;
-		TexturePtr lighting_tex_;
+		FrameBufferPtr opaque_lighting_buffer_;
+		TexturePtr opaque_lighting_tex_;
+
+		FrameBufferPtr transparency_back_lighting_buffer_;
+		TexturePtr transparency_back_lighting_tex_;
+
+		FrameBufferPtr transparency_front_lighting_buffer_;
+		TexturePtr transparency_front_lighting_tex_;
 
 		FrameBufferPtr shading_buffer_;
 		TexturePtr shading_tex_;
@@ -125,6 +146,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
 		RenderTechniquePtr technique_shading_;
+		RenderTechniquePtr technique_shading_alpha_blend_;
 
 		FrameBufferPtr sm_buffer_;
 		TexturePtr sm_tex_;
@@ -139,6 +161,9 @@ namespace KlayGE
 		float4x4 inv_view_, inv_proj_;
 		float3 depth_near_far_invfar_;
 
+		RenderEffectParameterPtr g_buffer_tex_param_;
+		RenderEffectParameterPtr g_buffer_1_tex_param_;
+		RenderEffectParameterPtr lighting_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;
 		RenderEffectParameterPtr light_color_param_;
@@ -151,7 +176,8 @@ namespace KlayGE
 		RenderEffectParameterPtr light_dir_es_param_;
 		RenderEffectParameterPtr ssvo_enabled_param_;
 
-		std::vector<SceneObject*> deferred_scene_objs_;
+		std::vector<SceneObject*> opaque_scene_objs_;
+		std::vector<SceneObject*> transparency_scene_objs_;
 
 		FrameBufferPtr rsm_buffer_;
 		TexturePtr rsm_texs_[2];
