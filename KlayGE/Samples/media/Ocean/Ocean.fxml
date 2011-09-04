@@ -151,7 +151,8 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 
 	float n_dot_l = max(0.0f, directional_lighting(-light_dir, normal));
 	float3 water_color = ambient + (diffuse + specular) * n_dot_l;
-	water_color = lerp(lerp(water_color, refraction * exp(-water_depth * 0.05f), saturate(10 / pos_ss.w)), reflection, fresnel);
+	float3 sss = 0.9f * (max(0, dot(-normal, light_dir)) + max(0, dot(-eye_dir, light_dir))) * exp(-water_depth * 0.04f) * waterbody_color;
+	water_color = lerp(lerp(water_color, refraction * exp(-water_depth * 0.05f), saturate(10 / pos_ss.w)), reflection, fresnel) + sss;
 
 	return float4(lerp(water_color, fog_color, eye_dir_fog.w), saturate(water_depth * 0.1f));
 }
