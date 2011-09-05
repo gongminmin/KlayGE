@@ -226,7 +226,7 @@ def create_header(prefix, extensions, base_dir):
 
 			for function in extension.functions:
 				if (function.name not in function_set):
-					header_str.write("typedef %s (APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
+					header_str.write("typedef %s (GLLOADER_APIENTRY *%sFUNC)(%s);\n" % (function.return_type, function.name, function.params_str()))
 
 			header_str.write("\n")
 
@@ -243,7 +243,7 @@ def create_header(prefix, extensions, base_dir):
 			header_str.write("#endif\n\n")
 
 	for extension in extensions:
-		header_str.write("typedef char (APIENTRY *glloader_%sFUNC)();\n" % extension.name)
+		header_str.write("typedef char (GLLOADER_APIENTRY *glloader_%sFUNC)();\n" % extension.name)
 	header_str.write("\n")
 
 	for extension in extensions:
@@ -302,13 +302,13 @@ def create_source(prefix, extensions, base_dir):
 		if extension.predefined != None:
 			source_str.write("#ifdef %s\n\n" % extension.predefined)
 
-		source_str.write("static char APIENTRY _glloader_%s()\n" % extension.name)
+		source_str.write("static char GLLOADER_APIENTRY _glloader_%s()\n" % extension.name)
 		source_str.write("{\n")
 		source_str.write("\treturn _%s;\n" % extension.name)
 		source_str.write("}\n")
 		source_str.write("\n")
 
-		source_str.write("static char APIENTRY self_init_glloader_%s()\n" % extension.name)
+		source_str.write("static char GLLOADER_APIENTRY self_init_glloader_%s()\n" % extension.name)
 		source_str.write("{\n")
 		source_str.write("\tglloader_init();\n")
 		source_str.write("\treturn glloader_%s();\n" % extension.name)
@@ -323,7 +323,7 @@ def create_source(prefix, extensions, base_dir):
 
 			for function in extension.functions:
 				if (function.name not in function_set):
-					source_str.write("static %s APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
+					source_str.write("static %s GLLOADER_APIENTRY self_init_%s(%s)\n" % (function.return_type, function.name, function.params_str()))
 					source_str.write("{\n")
 					if function.static_link:
 						source_str.write("\tLOAD_FUNC1(%s);\n" % function.name)

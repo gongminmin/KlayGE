@@ -60,6 +60,8 @@
 
 #include <stddef.h>
 
+#include <KHR/khrplatform.h>
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define GLLOADER_DEBUG
 #endif
@@ -167,13 +169,17 @@ typedef EGLNativeWindowType  NativeWindowType;
 #define GLAPI WINGDIAPI
 #endif
 
-#ifndef APIENTRY
-#if defined(__CYGWIN__) || defined(__MINGW32__)
-#define APIENTRY __stdcall
-#elif (_MSC_VER >= 800) || defined(_STDCALL_SUPPORTED)
-#define APIENTRY __stdcall
+#ifndef GLLOADER_APIENTRY
+#ifdef KHRONOS_APIENTRY
+#define GLLOADER_APIENTRY KHRONOS_APIENTRY
 #else
-#define APIENTRY
+#if defined(__CYGWIN__) || defined(__MINGW32__)
+#define GLLOADER_APIENTRY __stdcall
+#elif (_MSC_VER >= 800) || defined(_STDCALL_SUPPORTED)
+#define GLLOADER_APIENTRY __stdcall
+#else
+#define GLLOADER_APIENTRY
+#endif
 #endif
 #endif
 
