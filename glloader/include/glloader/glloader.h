@@ -60,7 +60,9 @@
 
 #include <stddef.h>
 
+#ifdef GLLOADER_GLES_SUPPORT
 #include <KHR/khrplatform.h>
+#endif
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define GLLOADER_DEBUG

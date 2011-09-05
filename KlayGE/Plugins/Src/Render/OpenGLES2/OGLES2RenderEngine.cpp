@@ -334,7 +334,7 @@ namespace KlayGE
 
 		uint32_t const num_passes = tech.NumPasses();
 
-			for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
+		for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
 		{
 			BOOST_ASSERT(!rl.InstanceStream());
 

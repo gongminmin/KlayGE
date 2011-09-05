@@ -360,6 +360,8 @@ namespace KlayGE
 		{
 			eglDestroyContext(display_, context_);
 			eglTerminate(display_);
+
+			display_ = NULL;
 		}
 	}
 
