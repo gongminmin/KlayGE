@@ -415,6 +415,19 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_SHORT;
 			break;
 
+		case EF_D24S8:
+			if (glloader_GLES_OES_packed_depth_stencil())
+			{
+				internalFormat = GL_DEPTH_STENCIL_OES;
+				glformat = GL_DEPTH_STENCIL_OES;
+				gltype = GL_UNSIGNED_INT_24_8_OES;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
 		default:
 			THR(boost::system::posix_error::not_supported);
 		}

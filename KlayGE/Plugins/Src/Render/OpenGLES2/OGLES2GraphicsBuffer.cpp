@@ -68,13 +68,14 @@ namespace KlayGE
 		switch (ba)
 		{
 		case BA_Write_Only:
-			if (glloader_GLES_OES_mapbuffer())
+			// TODO: fix OES_mapbuffer
+			/*if (glloader_GLES_OES_mapbuffer())
 			{
 				OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
 				return glMapBufferOES(target_, GL_WRITE_ONLY_OES);
 			}
-			else
+			else*/
 			{
 				return &buf_data_[0];
 			}
@@ -88,11 +89,12 @@ namespace KlayGE
 	{
 		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
-		if (glloader_GLES_OES_mapbuffer())
+		// TODO: fix OES_mapbuffer
+		/*if (glloader_GLES_OES_mapbuffer())
 		{
 			glUnmapBufferOES(target_);
 		}
-		else
+		else*/
 		{
 			glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
 		}

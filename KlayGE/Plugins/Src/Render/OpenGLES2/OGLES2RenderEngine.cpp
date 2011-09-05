@@ -671,16 +671,10 @@ namespace KlayGE
 		rendertarget_format_.insert(EF_SIGNED_ABGR16);
 		if (glloader_GLES_OES_texture_half_float())
 		{
-			rendertarget_format_.insert(EF_R16F);
-			rendertarget_format_.insert(EF_GR16F);
-			rendertarget_format_.insert(EF_BGR16F);
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
 		if (glloader_GLES_OES_texture_float())
 		{
-			rendertarget_format_.insert(EF_R32F);
-			rendertarget_format_.insert(EF_GR32F);
-			rendertarget_format_.insert(EF_BGR32F);
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
