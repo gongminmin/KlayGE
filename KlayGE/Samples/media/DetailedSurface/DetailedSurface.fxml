@@ -444,7 +444,7 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	float3 pos = patch[0].Pos * w
 			+ patch[1].Pos * u
 			+ patch[2].Pos * v;
-	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion;
+	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion * 0.1f;
 	pos += height * normal;
 	
 	oPos = mul(float4(pos, 1), mvp);

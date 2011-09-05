@@ -61,7 +61,7 @@ public:
 
 	bool HasOpacityMap() const
 	{
-		return has_opacity_map_;
+		return opacity_map_enabled_;
 	}
 
 private:

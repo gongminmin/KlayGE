@@ -198,7 +198,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 
 	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
 	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(!!normal_tex_);
-	*(effect_->ParameterByName("has_opacity_map")) = static_cast<int32_t>(has_opacity_map_);
+	*(effect_->ParameterByName("has_opacity_map")) = static_cast<int32_t>(opacity_map_enabled_);
 
 	*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
 	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));

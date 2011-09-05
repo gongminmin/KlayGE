@@ -201,6 +201,26 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
+	<technique name="GBufferAlphaBlendBackTech">
+		<pass name="p0">
+			<state name="depth_func" value="greater"/>
+			
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendFrontTech">
+		<pass name="p0">
+			<state name="depth_func" value="less"/>
+			
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="GBufferVS()"/>
+			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
+		</pass>
+	</technique>
 
 	<technique name="GBufferMRTTech">
 		<pass name="p0">
@@ -220,6 +240,8 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 	</technique>
 	<technique name="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
+			<state name="depth_func" value="greater"/>
+			
 			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
@@ -237,6 +259,8 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 	</technique>
 	<technique name="GBufferAlphaBlendFrontMRTTech">
 		<pass name="p0">
+			<state name="depth_func" value="less"/>
+			
 			<state name="cull_mode" value="back"/>
 
 			<state name="front_stencil_enable" value="true"/>

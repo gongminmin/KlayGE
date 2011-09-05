@@ -41,6 +41,8 @@ namespace KlayGE
 			
 			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
 			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
+			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
 			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
 			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
@@ -79,7 +81,7 @@ namespace KlayGE
 
 			model_mat_ = float4x4::Identity();
 
-			has_opacity_map_ = false;
+			opacity_map_enabled_ = false;
 			special_shading_ = false;
 			need_alpha_blend_ = false;
 			need_alpha_test_ = false;
@@ -124,7 +126,7 @@ namespace KlayGE
 				*specular_level_param_ = float4(mtl_->specular_level, mtl_->specular_level, mtl_->specular_level, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_->shininess / 256.0f, 1e-6f, 0.999f);
 				*opacity_clr_param_ = mtl_->opacity;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(has_opacity_map_);
+				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				break;
 
 			case PT_GenShadowMap:
@@ -141,7 +143,7 @@ namespace KlayGE
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), static_cast<float>(!!emit_tex_));
 				*opacity_clr_param_ = mtl_->opacity;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(has_opacity_map_);
+				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				break;
 
@@ -270,8 +272,6 @@ namespace KlayGE
 		switch (type)
 		{
 		case PT_OpaqueGBuffer:
-		case PT_TransparencyBackGBuffer:
-		case PT_TransparencyFrontGBuffer:
 			if (need_alpha_test_)
 			{
 				return gbuffer_alpha_test_tech_;
@@ -280,6 +280,12 @@ namespace KlayGE
 			{
 				return gbuffer_tech_;
 			}
+
+		case PT_TransparencyBackGBuffer:
+			return gbuffer_alpha_blend_back_tech_;
+
+		case PT_TransparencyFrontGBuffer:
+			return gbuffer_alpha_blend_front_tech_;
 
 		case PT_OpaqueMRTGBuffer:
 			if (need_alpha_test_)

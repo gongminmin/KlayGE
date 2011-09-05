@@ -145,6 +145,8 @@ namespace KlayGE
 
 		RenderTechniquePtr gbuffer_tech_;
 		RenderTechniquePtr gbuffer_alpha_test_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_back_tech_;
+		RenderTechniquePtr gbuffer_alpha_blend_front_tech_;
 		RenderTechniquePtr gbuffer_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_test_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_mrt_tech_;
@@ -167,7 +169,7 @@ namespace KlayGE
 		float4x4 model_mat_;
 
 		PassType type_;
-		bool has_opacity_map_;
+		bool opacity_map_enabled_;
 		bool special_shading_;
 		bool need_alpha_blend_;
 		bool need_alpha_test_;

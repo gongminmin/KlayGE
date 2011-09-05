@@ -302,7 +302,7 @@ namespace KlayGE
 
 	void StaticMesh::BuildMeshInfo()
 	{
-		has_opacity_map_ = false;
+		opacity_map_enabled_ = false;
 		special_shading_ = false;
 		need_alpha_blend_ = false;
 		need_alpha_test_ = false;
@@ -344,7 +344,7 @@ namespace KlayGE
 			{
 				if (tex)
 				{
-					has_opacity_map_ = true;
+					opacity_map_enabled_ = true;
 
 					if ((EF_BC1 == tex->Format()) || (EF_BC1_SRGB == tex->Format()))
 					{
@@ -358,7 +358,7 @@ namespace KlayGE
 			}				
 		}
 
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0))
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_)
 		{
 			special_shading_ = true;
 		}
