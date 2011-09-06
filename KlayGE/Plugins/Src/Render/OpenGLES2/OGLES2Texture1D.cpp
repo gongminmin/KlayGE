@@ -216,11 +216,14 @@ namespace KlayGE
 
 		if (IsCompressedFormat(format_))
 		{
-			BOOST_ASSERT((0 == src_x_offset) && (0 == dst_x_offset));
-			BOOST_ASSERT((src_width == dst_width));
+			BOOST_ASSERT(src_width == dst_width);
+			BOOST_ASSERT(0 == (src_x_offset & 0x3));
+			BOOST_ASSERT(0 == (dst_x_offset & 0x3));
+			BOOST_ASSERT(0 == (src_width & 0x3));
+			BOOST_ASSERT(0 == (dst_width & 0x3));
 
-			Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_width);
-			Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
+			Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, 0, this->Width(src_level));
+			Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, 0, target.Width(dst_level));
 
 			int block_size;
 			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
@@ -233,9 +236,9 @@ namespace KlayGE
 				block_size = 16;
 			}
 
-			GLsizei const image_size = ((dst_width + 3) / 4) * block_size;
-
-			memcpy(mapper_dst.Pointer<uint8_t>(), mapper_src.Pointer<uint8_t>(), image_size);
+			uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_x_offset / 4 * block_size);
+			uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_x_offset / 4 * block_size);
+			memcpy(d, s, src_width / 4 * block_size);
 		}
 		else
 		{

@@ -221,6 +221,25 @@ namespace KlayGE
 		}
 	}
 
+	void OGLES2RenderEngine::DeleteBuffers(GLsizei n, GLuint const * buffers)
+	{
+		for (GLsizei i = 0; i < n; ++ i)
+		{
+			for (BOOST_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
+			{
+				if (iter->second == buffers[i])
+				{
+					iter = binded_buffer_.erase(iter);
+				}
+				else
+				{
+					++ iter;
+				}
+			}
+		}
+		glDeleteBuffers(n, buffers);
+	}
+
 	void OGLES2RenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	{
 		if ((clear_clr_[0] != r) || (clear_clr_[1] != g) || (clear_clr_[2] != b) || (clear_clr_[3] != a))
@@ -258,6 +277,18 @@ namespace KlayGE
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			cur_fbo_ = fbo;
 		}
+	}
+
+	void OGLES2RenderEngine::DeleteFramebuffers(GLsizei n, GLuint const * framebuffers)
+	{
+		for (GLsizei i = 0; i < n; ++ i)
+		{
+			if (cur_fbo_ == framebuffers[i])
+			{
+				cur_fbo_ = 0;
+			}
+		}
+		glDeleteFramebuffers(n, framebuffers);
 	}
 
 	// 设置当前渲染目标
@@ -303,7 +334,8 @@ namespace KlayGE
 		uint32_t const num_instance = rl.NumInstances();
 		BOOST_ASSERT(num_instance != 0);
 
-		checked_cast<OGLES2RenderLayout const *>(&rl)->Active(tech.Pass(0)->GetShaderObject());
+		OGLES2ShaderObjectPtr cur_shader = checked_pointer_cast<OGLES2ShaderObject>(tech.Pass(0)->GetShaderObject());
+		checked_cast<OGLES2RenderLayout const *>(&rl)->Active(cur_shader);
 
 		size_t const vertexCount = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
 		GLenum mode;
@@ -333,10 +365,82 @@ namespace KlayGE
 		}
 
 		uint32_t const num_passes = tech.NumPasses();
+		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 
 		for (uint32_t instance = rl.StartInstanceLocation(); instance < rl.StartInstanceLocation() + num_instance; ++ instance)
 		{
-			BOOST_ASSERT(!rl.InstanceStream());
+			if (rl.InstanceStream())
+			{
+				GraphicsBuffer& stream = *rl.InstanceStream();
+
+				uint32_t const instance_size = rl.InstanceSize();
+				BOOST_ASSERT(num_instance * instance_size <= stream.Size());
+				GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
+				uint8_t const * buffer = mapper.Pointer<uint8_t>();
+
+				uint32_t elem_offset = 0;
+				for (size_t i = 0; i < inst_format_size; ++ i)
+				{
+					BOOST_ASSERT(elem_offset < instance_size);
+
+					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
+
+					GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+					if (attr != -1)
+					{
+						void const * addr = &buffer[instance * instance_size + elem_offset];
+						GLfloat const * float_addr = static_cast<GLfloat const *>(addr);
+						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+						GLenum type;
+						GLboolean normalized;
+						OGLES2Mapping::MappingVertexFormat(type, normalized, vs_elem.format);
+						normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+
+						switch (num_components)
+						{
+						case 1:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							glVertexAttrib1fv(attr, float_addr);
+							break;
+
+						case 2:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							glVertexAttrib2fv(attr, float_addr);
+							break;
+
+						case 3:
+							BOOST_ASSERT(IsFloatFormat(vs_elem.format));
+							glVertexAttrib3fv(attr, float_addr);
+							break;
+
+						case 4:
+							if (IsFloatFormat(vs_elem.format))
+							{
+								glVertexAttrib4fv(attr, float_addr);
+							}
+							else
+							{
+								GLubyte const * byte_addr = static_cast<GLubyte const *>(addr);
+								if (normalized)
+								{
+									glVertexAttrib4f(attr, byte_addr[0] / 255.0f, byte_addr[1] / 255.0f, byte_addr[2] / 255.0f, byte_addr[3] / 255.0f);
+								}
+								else
+								{
+									glVertexAttrib4f(attr, byte_addr[0], byte_addr[1], byte_addr[2], byte_addr[3]);
+								}
+							}
+							break;
+
+						default:
+							BOOST_ASSERT(false);
+							break;
+						}
+					}
+
+					elem_offset += vs_elem.element_size();
+				}
+			}
 
 			if (rl.UseIndices())
 			{

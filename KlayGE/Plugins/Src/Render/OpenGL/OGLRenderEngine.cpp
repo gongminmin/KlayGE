@@ -300,6 +300,25 @@ namespace KlayGE
 		}
 	}
 
+	void OGLRenderEngine::DeleteBuffers(GLsizei n, GLuint const * buffers)
+	{
+		for (GLsizei i = 0; i < n; ++ i)
+		{
+			for (BOOST_AUTO(iter, binded_buffer_.begin()); iter != binded_buffer_.end();)
+			{
+				if (iter->second == buffers[i])
+				{
+					iter = binded_buffer_.erase(iter);
+				}
+				else
+				{
+					++ iter;
+				}
+			}
+		}
+		glDeleteBuffers(n, buffers);
+	}
+
 	void OGLRenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	{
 		if ((clear_clr_[0] != r) || (clear_clr_[1] != g) || (clear_clr_[2] != b) || (clear_clr_[3] != a))
@@ -681,6 +700,18 @@ namespace KlayGE
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 			cur_fbo_ = fbo;
 		}
+	}
+
+	void OGLRenderEngine::DeleteFramebuffers(GLsizei n, GLuint const * framebuffers)
+	{
+		for (GLsizei i = 0; i < n; ++ i)
+		{
+			if (cur_fbo_ == framebuffers[i])
+			{
+				cur_fbo_ = 0;
+			}
+		}
+		glDeleteFramebuffersEXT(n, framebuffers);
 	}
 
 	// 设置当前渲染目标

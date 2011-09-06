@@ -80,6 +80,10 @@ namespace KlayGE
 		{
 			app_ = &app;
 		}
+		bool AppValid() const
+		{
+			return app_ != NULL;
+		}
 		App3DFramework& AppInstance()
 		{
 #ifdef KLAYGE_COMPILER_MSVC
@@ -97,6 +101,10 @@ namespace KlayGE
 		{
 			scene_mgr_ = mgr;
 		}
+		bool SceneManagerValid() const
+		{
+			return scene_mgr_;
+		}
 		SceneManager& SceneManagerInstance()
 		{
 			BOOST_ASSERT(scene_mgr_);
@@ -106,6 +114,10 @@ namespace KlayGE
 		void RenderFactoryInstance(RenderFactoryPtr const & factory)
 		{
 			render_factory_ = factory;
+		}
+		bool RenderFactoryValid() const
+		{
+			return render_factory_;
 		}
 		RenderFactory& RenderFactoryInstance()
 		{
@@ -117,6 +129,10 @@ namespace KlayGE
 		{
 			audio_factory_ = factory;
 		}
+		bool AudioFactoryValid() const
+		{
+			return audio_factory_;
+		}
 		AudioFactory& AudioFactoryInstance()
 		{
 			BOOST_ASSERT(audio_factory_);
@@ -126,6 +142,10 @@ namespace KlayGE
 		void InputFactoryInstance(InputFactoryPtr const & factory)
 		{
 			input_factory_ = factory;
+		}
+		bool InputFactoryValid() const
+		{
+			return input_factory_;
 		}
 		InputFactory& InputFactoryInstance()
 		{
@@ -137,6 +157,10 @@ namespace KlayGE
 		{
 			show_factory_ = factory;
 		}
+		bool ShowFactoryValid() const
+		{
+			return show_factory_;
+		}
 		ShowFactory& ShowFactoryInstance()
 		{
 			BOOST_ASSERT(show_factory_);
@@ -146,6 +170,10 @@ namespace KlayGE
 		void AudioDataSourceFactoryInstance(AudioDataSourceFactoryPtr const & factory)
 		{
 			audio_data_src_factory_ = factory;
+		}
+		bool AudioDataSourceFactoryValid() const
+		{
+			return audio_data_src_factory_;
 		}
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance()
 		{

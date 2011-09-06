@@ -52,7 +52,15 @@ namespace KlayGE
 	{
 		if (fbo_ != 0)
 		{
-			glDeleteFramebuffersEXT(1, &fbo_);
+			if (Context::Instance().RenderFactoryValid())
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteFramebuffers(1, &fbo_);
+			}
+			else
+			{
+				glDeleteFramebuffersEXT(1, &fbo_);
+			}
 		}
 	}
 

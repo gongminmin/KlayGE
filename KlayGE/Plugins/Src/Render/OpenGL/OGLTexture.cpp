@@ -34,6 +34,7 @@
 #include <glloader/glloader.h>
 #include <GL/glu.h>
 
+#include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 
@@ -97,7 +98,15 @@ namespace KlayGE
 	{
 		if (!pbos_.empty())
 		{
-			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+			if (Context::Instance().RenderFactoryValid())
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+			}
+			else
+			{
+				glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+			}
 		}
 		if (sample_count_ <= 1)
 		{

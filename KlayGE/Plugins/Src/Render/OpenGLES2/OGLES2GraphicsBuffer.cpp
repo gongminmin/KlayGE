@@ -48,7 +48,15 @@ namespace KlayGE
 
 	OGLES2GraphicsBuffer::~OGLES2GraphicsBuffer()
 	{
-		glDeleteBuffers(1, &vb_);
+		if (Context::Instance().RenderFactoryValid())
+		{
+			OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeleteBuffers(1, &vb_);
+		}
+		else
+		{
+			glDeleteBuffers(1, &vb_);
+		}
 	}
 
 	void OGLES2GraphicsBuffer::DoResize()

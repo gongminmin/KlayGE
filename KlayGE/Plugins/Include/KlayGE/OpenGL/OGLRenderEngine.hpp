@@ -86,6 +86,7 @@ namespace KlayGE
 		void MipMapLodBias(uint32_t stage, float bias);
 		void ActiveTexture(GLenum tex_unit);
 		void BindBuffer(GLenum target, GLuint buffer);
+		void DeleteBuffers(GLsizei n, GLuint const * buffers);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);
@@ -120,6 +121,7 @@ namespace KlayGE
 		{
 			return cur_fbo_;
 		}
+		void DeleteFramebuffers(GLsizei n, GLuint const * framebuffers);
 
 		bool HackForNV() const
 		{
