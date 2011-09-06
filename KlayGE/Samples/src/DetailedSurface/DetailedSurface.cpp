@@ -145,7 +145,10 @@ namespace
 			}
 			for (size_t i = 0; i < distortions.size(); ++ i)
 			{
-				distortions[i] /= vert_times[i];
+				if (vert_times[i] > 0)
+				{
+					distortions[i] /= vert_times[i];
+				}
 			}
 
 			ElementInitData init_data;

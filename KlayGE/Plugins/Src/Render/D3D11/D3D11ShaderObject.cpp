@@ -945,6 +945,8 @@ namespace KlayGE
 							0, 0, &code, &err_msg);
 						if (err_msg != NULL)
 						{
+							std::cerr << "Error when compiling " << sd.func_name << ":" << std::endl;
+
 							std::string err_str(static_cast<char*>(err_msg->GetBufferPointer()));
 							std::string::size_type pos = err_str.find("): error X");
 							if (pos == std::string::npos)

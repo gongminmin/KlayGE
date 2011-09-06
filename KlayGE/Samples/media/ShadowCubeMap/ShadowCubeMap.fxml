@@ -288,7 +288,7 @@ bool frustum_culling(float4 pos0, float4 pos1, float4 pos2)
 
 struct GenCubeOneShadowMap_VS_TO_GS
 {
-	float4 pos[6] : POSITION0;
+	float4 pos : POSITION;
 	float dist : TEXCOORD0;
 };
 
@@ -304,36 +304,59 @@ GenCubeOneShadowMap_VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
 {
 	GenCubeOneShadowMap_VS_TO_GS output;
 
-	for (int f = 0; f < 6; ++ f)
-	{
-		output.pos[f] = mul(Position, mvps[f]);
-	}
-
+	output.pos = Position;
 	output.dist = calc_dist(Position);
 
 	return output;
 }
 
+#ifdef KLAYGE_OPENGL
+TRIANGLE TRIANGLE_OUT void GenCubeOneShadowMapGS(AttribArray<float4> in_pos : POSITION, AttribArray<float> in_dist : TEXCOORD0)
+{
+#else
 [maxvertexcount(18)]
 void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
 {
+	float4 in_pos[3] =
+	{
+		input[0].pos, input[1].pos, input[2].pos
+	};
+	float in_dist[3] = 
+	{
+		input[0].dist, input[1].dist, input[2].dist
+	};
+#endif
+	
 	PS_IN output;
 	for (int f = 0; f < 6; ++ f)
 	{
 		output.rt_index = f;
 		
+		float4 pos[3] =
+		{
+			mul(in_pos[0], mvps[f]), mul(in_pos[1], mvps[f]), mul(in_pos[2], mvps[f])
+		};
+		
 		[branch]
-		if (frustum_culling(input[0].pos[f], input[1].pos[f], input[2].pos[f]))
+		if (frustum_culling(pos[0], pos[1], pos[2]))
 		{
 			[unroll]
 			for (int v = 0; v < 3; ++ v)
 			{
-				output.pos = input[v].pos[f];
-				output.dist = input[v].dist;
+				output.pos = pos[v];
+				output.dist = in_dist[v];
+#ifdef KLAYGE_OPENGL
+				emitVertex(output.dist : TEXCOORD0, output.pos : POSITION, output.rt_index : LAYER);
+#else
 				out_stream.Append(output);
+#endif
 			}
 		}
+#ifdef KLAYGE_OPENGL
+		restartStrip();
+#else
 		out_stream.RestartStrip();
+#endif
 	}
 }
 		]]>
@@ -366,26 +389,52 @@ GenCubeOneInstanceShadowMap_VS_TO_GS GenCubeOneInstanceShadowMapVS(float4 Positi
 	output.pos = mul(Position, mvps[instance_id]);
 
 	output.dist.x = calc_dist(Position);
+#ifdef KLAYGE_OPENGL
+	output.dist.y = intBitsToFloat(instance_id);
+#else
 	output.dist.y = asfloat(instance_id);
+#endif
 
 	return output;
 }
 
+#ifdef KLAYGE_OPENGL
+TRIANGLE TRIANGLE_OUT void GenCubeOneInstanceShadowMapGS(AttribArray<float4> in_pos : POSITION, AttribArray<float2> in_dist : TEXCOORD0)
+{
+#else
 [maxvertexcount(3)]
 void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
 {
+	float4 in_pos[3] =
+	{
+		input[0].pos, input[1].pos, input[2].pos
+	};
+	float2 in_dist[3] = 
+	{
+		input[0].dist, input[1].dist, input[2].dist
+	};
+#endif
+
 	PS_IN output;
-	output.rt_index = asuint(input[0].dist.y);
+#ifdef KLAYGE_OPENGL
+	output.rt_index = floatToIntBits(in_dist[0].y);
+#else
+	output.rt_index = asuint(in_dist[0].y);
+#endif
 
 	[branch]
-	if (frustum_culling(input[0].pos, input[1].pos, input[2].pos))
+	if (frustum_culling(in_pos[0], in_pos[1], in_pos[2]))
 	{
 		[unroll]
 		for (int v = 0; v < 3; ++ v)
 		{
-			output.pos = input[v].pos;
-			output.dist = input[v].dist.x;
+			output.pos = in_pos[v];
+			output.dist = in_dist[v].x;
+#ifdef KLAYGE_OPENGL
+			emitVertex(output.dist : TEXCOORD0, output.pos : POSITION, output.rt_index : LAYER);
+#else
 			out_stream.Append(output);
+#endif
 		}
 	}
 }
@@ -410,17 +459,31 @@ void GenCubeOneInstanceGSShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input
 						uint instance_id : SV_GSInstanceID,
 						inout TriangleStream<PS_IN> out_stream)
 {
+	float4 in_pos[3] =
+	{
+		input[0].pos, input[1].pos, input[2].pos
+	};
+	float in_dist[3] = 
+	{
+		input[0].dist, input[1].dist, input[2].dist
+	};
+	
 	PS_IN output;
 	output.rt_index = instance_id;
+	
+	float4 pos[3] =
+	{
+		mul(in_pos[0], mvps[instance_id]), mul(in_pos[1], mvps[instance_id]), mul(in_pos[2], mvps[instance_id])
+	};
 
 	[branch]
-	if (frustum_culling(input[0].pos[instance_id], input[1].pos[instance_id], input[2].pos[instance_id]))
+	if (frustum_culling(pos[0], pos[1], pos[2]))
 	{
 		[unroll]
 		for (int v = 0; v < 3; ++ v)
 		{
-			output.pos = input[v].pos[instance_id];
-			output.dist = input[v].dist.x;
+			output.pos = pos[v];
+			output.dist = in_dist[v];
 			out_stream.Append(output);
 		}
 	}
