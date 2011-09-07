@@ -315,68 +315,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(0 == array_index);
 		UNREF_PARAM(array_index);
+		UNREF_PARAM(width);
+		UNREF_PARAM(height);
+		UNREF_PARAM(depth);
 
 		last_tma_ = tma;
-		last_x_offset_ = x_offset;
-		last_y_offset_ = y_offset;
-		last_z_offset_ = z_offset;
-		last_width_ = width;
-		last_height_ = height;
-		last_depth_ = depth;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
 
+		row_pitch = widthes_[level] * texel_size;
+		slice_pitch = row_pitch * heights_[level];
+
+		uint8_t* p;
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (tma)
 		{
 		case TMA_Read_Only:
-			{
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				if (!pbos_.empty())
-				{
-					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbos_[level]);
-
-					glBindTexture(target_type_, texture_);
-					glGetTexImage(target_type_, level, gl_format, gl_type, NULL);
-
-					data = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY)) + ((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size;
-				}
-				else
-				{
-					glBindTexture(target_type_, texture_);
-					glGetTexImage(target_type_, level, gl_format, gl_type, &tex_data_[level][0]);
-
-					data = &tex_data_[level][((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size];
-				}
-				row_pitch = widthes_[level] * texel_size;
-				slice_pitch = row_pitch * heights_[level];
-			}
-			break;
-
-		case TMA_Write_Only:
-			{
-				if (!pbos_.empty())
-				{
-					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
-					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbos_[level]);
-					data = glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY);
-					row_pitch = width * texel_size;
-					slice_pitch = row_pitch * height;
-				}
-				else
-				{
-					data = &tex_data_[level][((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size];
-					row_pitch = widthes_[level] * texel_size;
-					slice_pitch = row_pitch * heights_[level];
-				}
-			}
-			break;
-
 		case TMA_Read_Write:
 			{
 				GLint gl_internalFormat;
@@ -386,40 +340,52 @@ namespace KlayGE
 
 				if (!pbos_.empty())
 				{
-					// fix me: works only when read_write the whole texture
-
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbos_[level]);
 
 					glBindTexture(target_type_, texture_);
 					glGetTexImage(target_type_, level, gl_format, gl_type, NULL);
 
-					data = glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_WRITE);
+					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY));
 				}
 				else
 				{
 					glBindTexture(target_type_, texture_);
 					glGetTexImage(target_type_, level, gl_format, gl_type, &tex_data_[level][0]);
 
-					data = &tex_data_[level][((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size];
+					p = &tex_data_[level][0];
 				}
-				row_pitch = widthes_[level] * texel_size;
-				slice_pitch = row_pitch * heights_[level];
+			}
+			break;
+
+		case TMA_Write_Only:
+			{
+				if (!pbos_.empty())
+				{
+					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbos_[level]);
+					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY));
+				}
+				else
+				{
+					p = &tex_data_[level][0];
+				}
 			}
 			break;
 
 		default:
 			BOOST_ASSERT(false);
+			p = NULL;
 			break;
 		}
+
+		data = p + ((z_offset * depthes_[level] + y_offset) * widthes_[level] + x_offset) * texel_size;
 	}
 
 	void OGLTexture3D::Unmap3D(uint32_t array_index, uint32_t level)
 	{
 		BOOST_ASSERT(0 == array_index);
 		UNREF_PARAM(array_index);
-
-		uint32_t const texel_size = NumFormatBytes(format_);
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (last_tma_)
@@ -434,67 +400,6 @@ namespace KlayGE
 			break;
 
 		case TMA_Write_Only:
-			{
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLsizei image_size = 0;
-				if (IsCompressedFormat(format_))
-				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
-					image_size = ((widthes_[level] + 3) / 4) * ((heights_[level] + 3) / 4) * block_size;
-				}
-
-				glBindTexture(target_type_, texture_);
-
-				if (!pbos_.empty())
-				{
-					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
-					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbos_[level]);
-					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
-
-					if (IsCompressedFormat(format_))
-					{
-						glCompressedTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_,
-								last_width_, last_height_, last_depth_, gl_format, image_size, NULL);
-					}
-					else
-					{
-						glTexSubImage3D(target_type_, level,
-								last_x_offset_, last_y_offset_, last_z_offset_, last_width_, last_height_, last_depth_,
-								gl_format, gl_type, NULL);
-					}
-				}
-				else
-				{
-					uint8_t* p = &tex_data_[array_index * num_mip_maps_ + level][((last_z_offset_ * depthes_[level] + last_y_offset_) * widthes_[level] + last_x_offset_) * texel_size];
-					if (IsCompressedFormat(format_))
-					{
-						glCompressedTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_,
-								last_width_, last_height_, last_depth_, gl_format, image_size,
-								p);
-					}
-					else
-					{
-						glTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_, last_width_, last_height_, last_depth_,
-								gl_format, gl_type, p);
-					}
-				}
-			}
-			break;
-
 		case TMA_Read_Write:
 			{
 				GLint gl_internalFormat;
@@ -521,39 +426,30 @@ namespace KlayGE
 
 				glBindTexture(target_type_, texture_);
 
+				uint8_t* p;
 				if (!pbos_.empty())
 				{
-					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pbos_[level]);
-					glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
-
+					re.BindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pbos_[level]);
+					glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
 
-					if (IsCompressedFormat(format_))
-					{
-						glCompressedTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_,
-								last_width_, last_height_, last_depth_, gl_format, image_size, NULL);
-					}
-					else
-					{
-						glTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_,
-								last_width_, last_height_, last_depth_,
-								gl_format, gl_type, NULL);
-					}
+					p = NULL;
 				}
 				else
 				{
-					uint8_t* p = &tex_data_[array_index * num_mip_maps_ + level][((last_z_offset_ * depthes_[level] + last_y_offset_) * widthes_[level] + last_x_offset_) * texel_size];
-					if (IsCompressedFormat(format_))
-					{
-						glCompressedTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_,
-								last_width_, last_height_, last_depth_, gl_format, image_size,
-								p);
-					}
-					else
-					{
-						glTexSubImage3D(target_type_, level, last_x_offset_, last_y_offset_, last_z_offset_, last_width_, last_height_, last_depth_,
-								gl_format, gl_type, p);
-					}
+					p = &tex_data_[array_index * num_mip_maps_ + level][0];
+				}
+
+				if (IsCompressedFormat(format_))
+				{
+					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
+							widthes_[level], heights_[level], depthes_[level], gl_format, image_size,
+							p);
+				}
+				else
+				{
+					glTexSubImage3D(target_type_, level, 0, 0, 0, widthes_[level], heights_[level], depthes_[level],
+							gl_format, gl_type, p);
 				}
 			}
 			break;

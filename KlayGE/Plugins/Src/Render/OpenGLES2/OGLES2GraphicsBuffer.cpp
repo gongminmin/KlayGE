@@ -73,6 +73,8 @@ namespace KlayGE
 
 	void* OGLES2GraphicsBuffer::Map(BufferAccess ba)
 	{
+		last_ba_ = ba;
+
 		switch (ba)
 		{
 		case BA_Write_Only:
@@ -95,16 +97,22 @@ namespace KlayGE
 
 	void OGLES2GraphicsBuffer::Unmap()
 	{
-		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindBuffer(target_, vb_);
-		// TODO: fix OES_mapbuffer
-		/*if (glloader_GLES_OES_mapbuffer())
+		switch (last_ba_)
 		{
-			glUnmapBufferOES(target_);
-		}
-		else*/
-		{
-			glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
+		case BA_Write_Only:
+		case BA_Read_Write:
+			OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindBuffer(target_, vb_);
+			// TODO: fix OES_mapbuffer
+			/*if (glloader_GLES_OES_mapbuffer())
+			{
+				glUnmapBufferOES(target_);
+			}
+			else*/
+			{
+				glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
+			}
+			break;
 		}
 	}
 

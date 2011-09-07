@@ -50,6 +50,7 @@ namespace KlayGE
 	private:
 		GLuint vb_;
 		GLenum target_;
+		BufferAccess last_ba_;
 		std::vector<uint8_t> buf_data_;
 	};
 }

@@ -327,8 +327,35 @@ namespace KlayGE
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
-		data = &tex_data_[face * num_mip_maps_ + level][(y_offset * widthes_[level] + x_offset) * texel_size];
+		int block_size;
+		if (IsCompressedFormat(format_))
+		{
+			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+				|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+			{
+				block_size = 8;
+			}
+			else
+			{
+				block_size = 16;
+			}
+		}
+		else
+		{
+			block_size = 0;
+		}
+
 		row_pitch = widthes_[level] * texel_size;
+
+		uint8_t* p = &tex_data_[face * num_mip_maps_ + level][0];
+		if (IsCompressedFormat(format_))
+		{
+			data = p + (y_offset / 4) * row_pitch + (x_offset / 4 * block_size);
+		}
+		else
+		{
+			data = p + (y_offset * widthes_[level] + x_offset) * texel_size;
+		}
 	}
 
 	void OGLES2TextureCube::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)

@@ -134,9 +134,6 @@ namespace KlayGE
 
 	private:
 		std::vector<uint32_t> widthes_;
-
-		uint32_t last_width_;
-		uint32_t last_x_offset_;
 	};
 
 	class OGLTexture2D : public OGLTexture
@@ -165,9 +162,6 @@ namespace KlayGE
 	private:
 		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
-
-		uint32_t last_width_, last_height_;
-		uint32_t last_x_offset_, last_y_offset_;
 	};
 
 	class OGLTexture3D : public OGLTexture
@@ -196,9 +190,6 @@ namespace KlayGE
 		std::vector<uint32_t> widthes_;
 		std::vector<uint32_t> heights_;
 		std::vector<uint32_t> depthes_;
-
-		uint32_t last_width_, last_height_, last_depth_;
-		uint32_t last_x_offset_, last_y_offset_, last_z_offset_;
 	};
 
 	class OGLTextureCube : public OGLTexture
@@ -223,9 +214,6 @@ namespace KlayGE
 
 	private:
 		std::vector<uint32_t> widthes_;
-
-		uint32_t last_width_, last_height_;
-		uint32_t last_x_offset_, last_y_offset_;
 	};
 }
 
