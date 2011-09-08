@@ -787,6 +787,93 @@ namespace KlayGE
 			depth_near_far_invfar_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 
+		switch (pass_type)
+		{
+		case PT_OpaqueGBuffer:
+		case PT_OpaqueMRTGBuffer:
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->Visible(true);
+			}
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->Visible(false);
+			}
+			break;
+
+		case PT_TransparencyBackGBuffer:
+		case PT_TransparencyFrontGBuffer:
+		case PT_TransparencyBackMRTGBuffer:
+		case PT_TransparencyFrontMRTGBuffer:
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->Visible(false);
+			}
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->Visible(true);
+			}
+			break;
+					
+		case PT_GenShadowMap:
+		case PT_GenReflectiveShadowMap:
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->Visible(true);
+			}
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->Visible(false);
+			}
+			break;
+
+		case PT_OpaqueShading:
+			if (0 == index_in_pass)
+			{
+				if (!mrt_g_buffer_)
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(false);
+					}
+				}
+			}
+			break;
+			
+		case PT_TransparencyBackShading:
+		case PT_TransparencyFrontShading:
+			if (0 == index_in_pass)
+			{
+				if (!mrt_g_buffer_)
+				{
+					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+					{
+						deo->Visible(false);
+					}
+					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					{
+						deo->Visible(true);
+					}
+				}
+			}
+			break;
+
+		case PT_SpecialShading:
+			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			{
+				deo->Visible(true);
+			}
+			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			{
+				deo->Visible(true);
+			}
+			break;
+		}
+
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
 			&& ((mrt_g_buffer_ && (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading)) || !mrt_g_buffer_))
 		{
@@ -830,29 +917,11 @@ namespace KlayGE
 
 				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-
 					re.BindFrameBuffer(opaque_g_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
 				}
 				else
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-
 					if ((PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type))
 					{
 						re.BindFrameBuffer(transparency_back_g_buffer_);
@@ -1070,15 +1139,6 @@ namespace KlayGE
 				{
 					if (PT_SpecialShading == pass_type)
 					{
-						BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-						{
-							deo->Visible(true);
-						}
-						BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-						{
-							deo->Visible(true);
-						}
-
 						re.BindFrameBuffer(shading_buffer_);
 						return App3DFramework::URV_Need_Flush;
 					}
@@ -1109,15 +1169,6 @@ namespace KlayGE
 							}
 							else
 							{
-								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-								{
-									deo->Visible(true);
-								}
-								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-								{
-									deo->Visible(false);
-								}
-
 								return App3DFramework::URV_Need_Flush;
 							}
 
@@ -1134,15 +1185,6 @@ namespace KlayGE
 							}
 							else
 							{
-								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-								{
-									deo->Visible(false);
-								}
-								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-								{
-									deo->Visible(true);
-								}
-
 								return App3DFramework::URV_Need_Flush;
 							}
 
@@ -1160,15 +1202,6 @@ namespace KlayGE
 							}
 							else
 							{
-								BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-								{
-									deo->Visible(false);
-								}
-								BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-								{
-									deo->Visible(true);
-								}
-
 								return App3DFramework::URV_Need_Flush;
 							}
 						}
@@ -1343,15 +1376,6 @@ namespace KlayGE
 
 				if (PT_GenReflectiveShadowMap == pass_type)
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-
 					rsm_buffer_->GetViewport().camera = sm_buffer_->GetViewport().camera;
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 1), 1.0f, 0);
@@ -1390,15 +1414,6 @@ namespace KlayGE
 
 				if (PT_GenShadowMap == pass_type)
 				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-
 					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
 
 					// Shadow map generation
