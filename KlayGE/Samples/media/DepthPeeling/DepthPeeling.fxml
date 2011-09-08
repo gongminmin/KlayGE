@@ -3,12 +3,13 @@
 <effect>
 	<include name="Lighting.fxml"/>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="float3" name="light_pos"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
-		<parameter type="float" name="inv_depth_range"/>
+		<parameter type="float2" name="near_q"/>
 
 		<parameter type="int" name="flip"/>
 	</cbuffer>
@@ -25,45 +26,30 @@
 		<![CDATA[
 void DepthPeelingVS(float4 pos				: POSITION,
 					float3 normal			: NORMAL,
-					out float4 oPosSS		: TEXCOORD0,
 					out float4 oClr			: COLOR0,
+					out float4 oPosSS		: TEXCOORD0,
 					out float4 oPos			: SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal * 2 - 1), 0.0f).xxx, 0.5f);
+	oClr = float4(max(point_lighting(light_pos, pos.xyz, normal * 2 - 1), 0.0f) * float3(1, 1, 0), 0.3f);
 	oPosSS = oPos;
 }
 
-void DepthPeeling1stPS(float4 pos_ss : TEXCOORD0,
-					float4 clr : COLOR0,
-					out float4 oClr : SV_Target0,
-					out float4 oDepth : SV_Target1)
+float4 DepthPeeling1stPS(float4 clr : COLOR0) : SV_Target
 {
-	oClr = clr;
-	oDepth = pos_ss.w * inv_depth_range;
+	return clr;
 }
 
-void DepthPeelingNthPS(float4 pos_ss : TEXCOORD0,
-					float4 clr : COLOR0,
-					out float4 oClr : SV_Target0,
-					out float4 oDepth : SV_Target1)
+float4 DepthPeelingNthPS(float4 clr : COLOR0, float4 pos_ss : TEXCOORD0) : SV_Target
 {
-	oDepth = pos_ss.w * inv_depth_range;
-  
 	float2 tex_coord = pos_ss.xy / pos_ss.w;
 	tex_coord.y *= flip;
 	tex_coord = tex_coord / 2 + 0.5f;
 
-	float last_depth = last_depth_tex.Sample(point_sampler, tex_coord).r;
-	if (oDepth.r <= last_depth)
-	{
-		oClr = 0;
-		discard;
-	}
-	else
-	{
-		oClr = clr;
-	}
+	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
+	clip(pos_ss.w - (last_depth + 1e-6f));
+
+	return clr;
 }
 		]]>
 	</shader>

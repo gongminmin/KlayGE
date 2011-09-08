@@ -50,6 +50,16 @@ float mipmap_level(float2 uv, float2 texture_size)
 
 	return log2(sqrt(d));
 }
+
+float non_linear_depth_to_linear(float depth, float near_mul_q, float q)
+{
+	return near_mul_q / (q - depth);
+}
+
+float linear_depth_to_non_linear(float depth, float near_mul_q, float q)
+{
+	return (depth * q - near_mul_q) / depth;
+}
 		]]>
 	</shader>
 </effect>

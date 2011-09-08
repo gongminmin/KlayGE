@@ -435,7 +435,6 @@ namespace KlayGE
 			RenderEffectPtr subsplat_stencil_effect = rf.LoadEffect("SetSubsplatStencil.fxml");
 			subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
 
-			subsplat_near_q_far_param_ = subsplat_stencil_effect->ParameterByName("near_q_far");
 			subsplat_cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
 			subsplat_is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
 
@@ -1547,10 +1546,6 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::SetSubsplatStencil()
 	{
-		CameraPtr const & camera = opaque_g_buffer_->GetViewport().camera;
-		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-		*subsplat_near_q_far_param_ = float3(camera->NearPlane() * q, q, camera->FarPlane());
-
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
 		{

@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -28,7 +29,7 @@ void DepthToVSMVS(float4 pos : POSITION,
 
 float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float dist = near_q.x / (near_q.y - src_tex.Sample(point_sampler, tc).r);
+	float dist = non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 	dist *= length(view_dir) / view_dir.z;
 
 	float2 dxdy = float2(ddx(dist), ddy(dist));

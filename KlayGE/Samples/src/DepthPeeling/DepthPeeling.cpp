@@ -68,22 +68,23 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr depth_tex, bool flip)
+		void LastDepth(TexturePtr const & depth_tex, bool flip)
 		{
 			*(technique_->Effect().ParameterByName("last_depth_tex")) = depth_tex;
 			*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flip ? -1 : 1);
 		}
 
-		void OnRenderBegin()
+		void Update()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
 
 			float4x4 const & model = float4x4::Identity();
-			float4x4 const & view = app.ActiveCamera().ViewMatrix();
-			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 const & proj = camera.ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("inv_depth_range")) = 1 / app.ActiveCamera().FarPlane();
+			*(technique_->Effect().ParameterByName("near_q")) = float2(-proj(3, 2), proj(2, 2));
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -131,12 +132,23 @@ namespace
 			}
 		}
 
-		void LastDepth(TexturePtr depth_tex, bool flip)
+		void LastDepth(TexturePtr const & depth_tex, bool flip)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->LastDepth(depth_tex, flip);
+			}
+		}
+
+		void Update()
+		{
+			SceneObjectHelper::Update();
+
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->Update();
 			}
 		}
 	};
@@ -181,14 +193,6 @@ bool DepthPeelingApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (caps.max_simultaneous_rts < 2)
-	{
-		return false;
-	}
-	if (!(caps.rendertarget_format_support(EF_R32F, 1, 0) || caps.rendertarget_format_support(EF_ABGR32F, 1, 0)))
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -203,7 +207,7 @@ void DepthPeelingApp::InitObjects()
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(-0.3f, 0.4f, -0.3f), float3(0, 0, 0));
-	this->Proj(0.01f, 100);
+	this->Proj(0.1f, 10);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -219,7 +223,7 @@ void DepthPeelingApp::InitObjects()
 
 	for (size_t i = 0; i < oc_queries_.size(); ++ i)
 	{
-		oc_queries_[i] = rf.MakeConditionalRender();
+		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
 	fpcController_.Scalers(0.05f, 0.01f);
@@ -266,40 +270,36 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	ElementFormat depth_format;
-	ElementFormat peel_format;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
 	{
-		depth_format = EF_R32F;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
-		{
-			peel_format = EF_ARGB8;
-		}
-		else
-		{
-			peel_format = EF_ABGR8;
-		}
+		depth_format = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR32F, 1, 0));
-
-		depth_format = peel_format = EF_ABGR32F;
+		depth_format = EF_D16;
 	}
-	depth_texs_[0] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	depth_view_[0] = rf.Make2DRenderView(*depth_texs_[0], 0, 1, 0);
-	depth_texs_[1] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	depth_view_[1] = rf.Make2DRenderView(*depth_texs_[1], 0, 1, 0);
+	for (size_t i = 0; i < depth_texs_.size(); ++ i)
+	{
+		depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_view_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
+	}
 
-	peeled_depth_view_ = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
-
+	ElementFormat peel_format;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0))
+	{
+		peel_format = EF_ARGB8;
+	}
+	else
+	{
+		peel_format = EF_ABGR8;
+	}
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		peeled_views_[i] = rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, peeled_views_[i]);
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color1, depth_view_[i % 2]);
-		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, peeled_depth_view_);
+		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_view_[i % 2]);
 	}
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -378,7 +378,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			re.BindFrameBuffer(peeling_fbs_[0]);
 			peeling_fbs_[0]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-			depth_view_[0]->ClearColor(Color(1, 0, 0, 0));
 			return App3DFramework::URV_Need_Flush;
 
 		default:
@@ -402,7 +401,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 					oc_queries_.back()->End();
 					for (size_t j = 0; j < oc_queries_.size(); ++ j)
 					{
-						if (!checked_pointer_cast<ConditionalRender>(oc_queries_[j])->AnySamplesPassed())
+						if (!oc_queries_[j]->AnySamplesPassed())
 						{
 							finished = true;
 						}
@@ -420,7 +419,6 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 
 						re.BindFrameBuffer(peeling_fbs_[layer]);
 						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
-						depth_view_[layer % 2]->ClearColor(Color(1, 0, 0, 0));
 
 						oc_queries_[oc_index]->Begin();
 					}
