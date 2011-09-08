@@ -84,7 +84,9 @@ namespace
 			float4x4 const & proj = camera.ProjMatrix();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("near_q")) = float2(-proj(3, 2), proj(2, 2));
+
+			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+			*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -394,14 +396,20 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				size_t layer = layer_batch + oc_index;
 				if (oc_index > 0)
 				{
-					oc_queries_[oc_index - 1]->End();
+					if (oc_queries_[oc_index - 1])
+					{
+						oc_queries_[oc_index - 1]->End();
+					}
 				}
 				if ((oc_index == 0) && (layer_batch > 1))
 				{
-					oc_queries_.back()->End();
+					if (oc_queries_.back())
+					{
+						oc_queries_.back()->End();
+					}
 					for (size_t j = 0; j < oc_queries_.size(); ++ j)
 					{
-						if (!oc_queries_[j]->AnySamplesPassed())
+						if (oc_queries_[j] && !oc_queries_[j]->AnySamplesPassed())
 						{
 							finished = true;
 						}
@@ -420,7 +428,10 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 						re.BindFrameBuffer(peeling_fbs_[layer]);
 						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);
 
-						oc_queries_[oc_index]->Begin();
+						if (oc_queries_[oc_index])
+						{
+							oc_queries_[oc_index]->Begin();
+						}
 					}
 				}
 				else
