@@ -12,7 +12,6 @@
 
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 	<parameter type="texture2D" name="normal_cone_tex"/>
-	<parameter type="float3" name="near_q_far"/>
 	<parameter type="float2" name="depth_normal_threshold"/>
 	<parameter type="float2" name="cur_lower_level"/>
 	<parameter type="int2" name="is_not_first_last_level"/>
