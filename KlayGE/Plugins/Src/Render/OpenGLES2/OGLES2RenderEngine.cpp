@@ -766,7 +766,10 @@ namespace KlayGE
 		texture_format_.insert(EF_D24S8);
 		texture_format_.insert(EF_D32F);
 
-		rendertarget_format_.insert(EF_ARGB8);
+		if (glloader_GLES_EXT_texture_format_BGRA8888())
+		{
+			rendertarget_format_.insert(EF_ARGB8);
+		}
 		rendertarget_format_.insert(EF_ABGR8);
 		rendertarget_format_.insert(EF_SIGNED_ABGR8);
 		rendertarget_format_.insert(EF_A2BGR10);
@@ -782,8 +785,10 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32F);
 		}
 		rendertarget_format_.insert(EF_D16);
-		rendertarget_format_.insert(EF_D24S8);
-		rendertarget_format_.insert(EF_D32F);
+		if (glloader_GLES_OES_packed_depth_stencil())
+		{
+			rendertarget_format_.insert(EF_D24S8);
+		}
 
 		caps_.vertex_format_support = boost::bind<bool>(&OGLES2RenderEngine::VertexFormatSupport, this, _1);
 		caps_.texture_format_support = boost::bind<bool>(&OGLES2RenderEngine::TextureFormatSupport, this, _1);
