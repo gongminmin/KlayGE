@@ -3,9 +3,8 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
-#include <KlayGE/RenderLayout.hpp>
-#include <KlayGE/Renderable.hpp>
-#include <KlayGE/RenderableHelper.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/InputFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -17,12 +16,8 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Timer.hpp>
-#include <KlayGE/half.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
-
-#include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/InputFactory.hpp>
 
 #include <sstream>
 #include <boost/bind.hpp>

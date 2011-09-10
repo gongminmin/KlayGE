@@ -35,21 +35,21 @@ float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 	tc = tc + delta_offset.zw;
 	float max_depth = depth_tex.SampleLevel(point_sampler, tc, 0).r;
 	float min_depth = max_depth;
-	for (int i = 1; i < 9; ++i)
+	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
 		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).r;
 		max_depth = max(max_depth, depth);
 		min_depth = min(min_depth, depth);
 	}
-	return float4(max_depth - min_depth, 0, 0, 1);
+	return max_depth - min_depth;
 }
 
 float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
 	float max_depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, tc, prev_level).r;
-	for (int i = 1; i < 9; ++i)
+	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
 		float depth_deriv = depth_deriv_tex.SampleLevel(point_sampler, ntc, prev_level).r;
@@ -63,21 +63,21 @@ float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
 	tc = tc + delta_offset.zw;
 	float2 max_nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc, 0)).xy;
 	float2 min_nxy = max_nxy;
-	for (int i = 1; i < 9; ++i)
+	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
 		float2 nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, ntc, 0)).xy;
 		max_nxy = max(max_nxy, nxy);
 		min_nxy = min(min_nxy, nxy);
 	}
-	return float4(max_nxy, min_nxy);
+	return float4(max_nxy, min_nxy) * 0.5f + 0.5f;
 }
 
 float4 NormalConeMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;  
 	float4 max_min_nxy = normal_cone_tex.SampleLevel(point_sampler, tc, prev_level);
-	for (int i = 1; i < 9; ++i)
+	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
 		float4 nxy = normal_cone_tex.SampleLevel(point_sampler, ntc, prev_level);

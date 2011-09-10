@@ -96,6 +96,7 @@ namespace KlayGE
 		Context::Instance().ShowFactoryInstance(ShowFactoryPtr());
 
 		UIManager::ForceDestroy();
+		Context::Instance().DeferredRenderingLayerInstance(DeferredRenderingLayerPtr());
 		Context::Instance().RenderFactoryInstance(RenderFactoryPtr());
 	}
 

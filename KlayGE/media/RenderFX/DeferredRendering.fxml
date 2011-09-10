@@ -329,7 +329,7 @@ float4 DeferredShadowingPointPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0).r / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
 	float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
@@ -349,7 +349,7 @@ float4 DeferredShadowingSpotPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (depth_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0).r / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float len = length(light_pos_es.xyz - pos_es);
 	return VSM_Directional(pos_es, len);
 }
@@ -658,8 +658,7 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 		ssvo = ssvo_tex.Sample(point_sampler, tc).x;
 	}
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float shininess = GetShininess(ndc);
+	float shininess = GetShininess(g_buffer_tex.Sample(point_sampler, tc));
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
 	float4 diffuse = g_buffer_1_tex.Sample(point_sampler, tc);

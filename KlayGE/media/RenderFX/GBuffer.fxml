@@ -321,14 +321,13 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float3 normal   : NORMAL,
 						float4 tangent : TANGENT,
-						out float2 oTc : TEXCOORD0,
-						out float3 ts_to_view_0 : TEXCOORD1,
-						out float3 ts_to_view_1 : TEXCOORD2,
-						out float3 ts_to_view_2 : TEXCOORD3,
+						out float4 oTexCoord_2xy : TEXCOORD0,
+						out float4 oTsToView0_2z : TEXCOORD1,
+						out float3 oTsToView1 : TEXCOORD2,
 						out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
-	oTc = texcoord;
+	oTexCoord_2xy.xy = texcoord;
 
 	normal = normal * 2 - 1;
 	tangent = tangent * 2 - 1;
@@ -338,19 +337,18 @@ void GenReflectiveShadowMapVS(float4 pos : POSITION,
 	obj_to_ts[1] = cross(normal, tangent.xyz) * tangent.w;
 	obj_to_ts[2] = normal;
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
-	ts_to_view_0 = ts_to_view[0];
-	ts_to_view_1 = ts_to_view[1];
-	ts_to_view_2 = ts_to_view[2];
+	oTsToView0_2z.xyz = ts_to_view[0];
+	oTsToView1 = ts_to_view[1];
+	oTexCoord_2xy.zw = ts_to_view[2].xy;
+	oTsToView0_2z.w = ts_to_view[2].z;
 }
 
-void ConstructRSMBuffer(float2 tc, float3 ts_to_view_0,
-						float3 ts_to_view_1,
-						float3 ts_to_view_2,
+void ConstructRSMBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 						out float4 oAlbedo, out float4 oNormal)
 {
 	if (diffuse_clr.w > 0.5f)
 	{
-		oAlbedo.xyz = diffuse_tex.Sample(aniso_sampler, tc).xyz;
+		oAlbedo.xyz = diffuse_tex.Sample(aniso_sampler, texcoord_2xy.xy).xyz;
 	}
 	else
 	{
@@ -358,45 +356,39 @@ void ConstructRSMBuffer(float2 tc, float3 ts_to_view_0,
 	}
 	if (specular_level.w > 0.5f)
 	{
-		oAlbedo.w = dot(specular_tex.Sample(aniso_sampler, tc).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+		oAlbedo.w = dot(specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
 	}
 	else
 	{
 		oAlbedo.w = specular_level.x;
 	}
 
-	float3 normal = normalize(ts_to_view_2);
+	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	if (normal_map_enabled)
 	{
 		float3x3 ts_to_view;
-		ts_to_view[0] = normalize(ts_to_view_0);
-		ts_to_view[1] = normalize(ts_to_view_1);
+		ts_to_view[0] = normalize(ts_to_view0_2z.xyz);
+		ts_to_view[1] = normalize(ts_to_view1);
 		ts_to_view[2] = normal;
-		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, tc)), ts_to_view));
+		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
 	}
 
 	oNormal = float4(normal / 2 + 0.5f, shininess);
 }
 
-void GenReflectiveShadowMapPS(float2 tc : TEXCOORD0,
-						float3 ts_to_view_0 : TEXCOORD1,
-						float3 ts_to_view_1 : TEXCOORD2,
-						float3 ts_to_view_2 : TEXCOORD3,
+void GenReflectiveShadowMapPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 						out float4 oAlbedo : SV_Target0, 
 						out float4 oNormal : SV_Target1)
 {
-	ConstructRSMBuffer(tc, ts_to_view_0, ts_to_view_1, ts_to_view_2, oAlbedo, oNormal);
+	ConstructRSMBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, oAlbedo, oNormal);
 }
 
-void GenReflectiveShadowMapAlphaTestPS(float2 tc : TEXCOORD0,
-						float3 ts_to_view_0 : TEXCOORD1,
-						float3 ts_to_view_1 : TEXCOORD2,
-						float3 ts_to_view_2 : TEXCOORD3,
+void GenReflectiveShadowMapAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 						out float4 oAlbedo : SV_Target0, 
 						out float4 oNormal : SV_Target1)
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc.xy).a - ALPHA_TEST_THRESHOLD);
-	ConstructRSMBuffer(tc, ts_to_view_0, ts_to_view_1, ts_to_view_2, oAlbedo, oNormal);
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	ConstructRSMBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, oAlbedo, oNormal);
 }
 		]]>
 	</shader>
