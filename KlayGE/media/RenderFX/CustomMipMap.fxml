@@ -13,7 +13,8 @@
 	<parameter type="float4" name="delta_offset"/>
 	<parameter type="float" name="prev_level"/>
 
-	<parameter type="texture2D" name="gbuffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 	<parameter type="texture2D" name="normal_cone_tex"/>
 
@@ -32,12 +33,12 @@
 float4 GBuffer2DepthDerivatePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float max_depth = GetDepth(gbuffer_tex.SampleLevel(point_sampler, tc, 0));
+	float max_depth = depth_tex.SampleLevel(point_sampler, tc, 0).r;
 	float min_depth = max_depth;
 	for (int i = 1; i < 9; ++i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
-		float depth = GetDepth(gbuffer_tex.SampleLevel(point_sampler, ntc, 0));
+		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).r;
 		max_depth = max(max_depth, depth);
 		min_depth = min(min_depth, depth);
 	}
@@ -60,12 +61,12 @@ float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float2 max_nxy = GetNormal(gbuffer_tex.SampleLevel(point_sampler, tc, 0)).xy;
+	float2 max_nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc, 0)).xy;
 	float2 min_nxy = max_nxy;
 	for (int i = 1; i < 9; ++i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
-		float2 nxy = GetNormal(gbuffer_tex.SampleLevel(point_sampler, ntc, 0)).xy;
+		float2 nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, ntc, 0)).xy;
 		max_nxy = max(max_nxy, nxy);
 		min_nxy = min(min_nxy, nxy);
 	}

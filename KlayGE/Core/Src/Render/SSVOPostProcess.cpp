@@ -9,12 +9,15 @@
 namespace KlayGE
 {
 	SSVOPostProcess::SSVOPostProcess()
-			: PostProcess(L"SSAO",
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "out_tex"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("SSVO.fxml")->TechniqueByName("SSVO"))
+			: PostProcess(L"SSAO")
 	{
+		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
+		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+
+		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+
+		this->Technique(Context::Instance().RenderFactoryInstance().LoadEffect("SSVO.fxml")->TechniqueByName("SSVO"));
+
 		depth_near_far_invfar_param_ = technique_->Effect().ParameterByName("depth_near_far_invfar");
 		proj_param_ = technique_->Effect().ParameterByName("proj");
 		inv_proj_param_ = technique_->Effect().ParameterByName("inv_proj");
@@ -25,8 +28,6 @@ namespace KlayGE
 		PostProcess::OnRenderBegin();
 
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-
 		float4x4 const & proj = camera.ProjMatrix();
 		*proj_param_ = proj;
 		*inv_proj_param_ = MathLib::inverse(proj);

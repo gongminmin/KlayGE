@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="DepthToSM">
+		<params>
+			<param name="near_q"/>
+			<param name="inv_proj"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="DepthToSM.fxml" tech="DepthToSM"/>
+	</post_processor>
+
+	<post_processor name="DepthToVSM">
+		<params>
+			<param name="near_q"/>
+			<param name="inv_proj"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="DepthToSM.fxml" tech="DepthToVSM"/>
+	</post_processor>
+</post_processors>

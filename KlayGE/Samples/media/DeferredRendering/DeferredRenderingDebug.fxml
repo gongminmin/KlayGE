@@ -16,6 +16,7 @@
 	</parameter>
 
 	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="ssvo_tex"/>
 
@@ -35,7 +36,7 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (GetDepth(ndc) * depth_near_far_invfar.y / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc0).r / view_dir.z);
 
 	return float4(pos_es * 0.03f, 1);
 }
@@ -51,7 +52,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0) : SV_Target
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc0);
-	return float4(GetDepth(ndc).xxx * 10, 1);
+	return float4((depth_tex.Sample(point_sampler, tc0).r * depth_near_far_invfar.z * 10).xxx, 1);
 }
 
 float4 ShowSSVOPS(float2 tc0 : TEXCOORD0) : SV_Target

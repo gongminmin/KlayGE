@@ -68,6 +68,7 @@ float linstep(float min, float max, float v)
 
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -155,12 +156,12 @@ float4 NearestDepthUpsamplingShadow(float2 tc)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0, 1));
-	float z10 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1));
-	float z01 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1));
-	float z11 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1));
-	float z_full = GetDepth(g_buffer_tex.Sample(point_sampler, tc));
-	float threshold = 0.25f * depth_near_far_invfar.z;
+	float z00 = depth_tex.SampleLevel(point_sampler, tc0, 1).r;
+	float z10 = depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1).r;
+	float z01 = depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1).r;
+	float z11 = depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1).r;
+	float z_full = depth_tex.Sample(point_sampler, tc).r;
+	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
 	if (ndus.z > 0)
@@ -224,13 +225,13 @@ float4 DeferredRenderingPointPS(
 	float4 final_clr = 0;
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float spec = roughness_term(GetSpecular(ndc), dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 		float shadow = NearestDepthUpsamplingShadow(tc).r;
 		float atten = shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 		final_clr = CalcColor(n_dot_l, spec, atten);
@@ -255,7 +256,7 @@ float4 DeferredRenderingSpotPS(
 	float4 final_clr = 0;
 	
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).r / view_dir.z);
 	float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
@@ -265,7 +266,7 @@ float4 DeferredRenderingSpotPS(
 		float n_dot_l = dot(normal, dir);
 		if (n_dot_l > 0)
 		{
-			float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+			float spec = roughness_term(GetSpecular(ndc), dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 			float shadow = NearestDepthUpsamplingShadow(tc).r;
 			float atten = spot * shadow * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
 			final_clr = CalcColor(n_dot_l, spec, atten);
@@ -297,7 +298,7 @@ float4 DeferredRenderingDirectionalPS(
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(GetSpecular(ndc) * 0.01f, dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float spec = roughness_term(GetSpecular(ndc), dir, normalize(dir - view_dir), normal, GetShininess(ndc)).x;
 		final_clr = CalcColor(n_dot_l, spec, 1);
 	}
 
@@ -327,10 +328,8 @@ float4 DeferredShadowingPointPS(
 	tc /= w;
 #endif
 
-	float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0);
-
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0).r / view_dir.z);
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
 	float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
@@ -349,10 +348,8 @@ float4 DeferredShadowingSpotPS(
 	tc /= w;
 #endif
 
-	float4 ndc = g_buffer_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0);
-
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * ((GetDepth(ndc) * depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.SampleLevel(point_sampler, tc - inv_width_height * 0.5f, 0).r / view_dir.z);
 	float len = length(light_pos_es.xyz - pos_es);
 	return VSM_Directional(pos_es, len);
 }

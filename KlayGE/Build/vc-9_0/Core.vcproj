@@ -654,7 +654,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\media\RenderFX\Depth2VSM.fxml"
+					RelativePath="..\..\media\RenderFX\DepthToSM.fxml"
 					>
 				</File>
 				<File
@@ -786,7 +786,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\media\PostProcessors\DepthToVSM.ppml"
+					RelativePath="..\..\media\PostProcessors\DepthToSM.ppml"
 					>
 				</File>
 				<File

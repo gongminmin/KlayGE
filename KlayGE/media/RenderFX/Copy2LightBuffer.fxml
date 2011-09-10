@@ -20,6 +20,7 @@
 	<parameter type="float3" name="depth_near_far_invfar"/>
 	<parameter type="texture2D" name="indirect_lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -27,12 +28,12 @@ float4 NearestDepthUpsamplingIL(float2 tc)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0, 1));
-	float z10 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1));
-	float z01 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1));
-	float z11 = GetDepth(g_buffer_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1));
-	float z_full = GetDepth(g_buffer_tex.Sample(point_sampler, tc));
-	float threshold = 0.25f * depth_near_far_invfar.z;
+	float z00 = depth_tex.SampleLevel(point_sampler, tc0, 1).r;
+	float z10 = depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1).r;
+	float z01 = depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1).r;
+	float z11 = depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1).r;
+	float z_full = depth_tex.Sample(point_sampler, tc).r;
+	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
 	if (ndus.z > 0)

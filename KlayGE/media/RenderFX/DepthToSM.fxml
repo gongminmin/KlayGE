@@ -17,7 +17,7 @@
 
 	<shader>
 		<![CDATA[
-void DepthToVSMVS(float4 pos : POSITION,
+void DepthToSMVS(float4 pos : POSITION,
 					out float2 oTex : TEXCOORD0,
 					out float3 oViewDir : TEXCOORD1,
 					out float4 oPos : SV_Position)
@@ -25,6 +25,11 @@ void DepthToVSMVS(float4 pos : POSITION,
 	oTex = TexCoordFromPos(pos);
 	oPos = pos;
 	oViewDir = mul(pos, inv_proj).xyz;
+}
+
+float4 DepthToSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	return non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 }
 
 float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -38,11 +43,20 @@ float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 		]]>
 	</shader>
 
+	<technique name="DepthToSM">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="DepthToSMVS()"/>
+			<state name="pixel_shader" value="DepthToSMPS()"/>
+		</pass>
+	</technique>
+
 	<technique name="DepthToVSM">
 		<pass name="p0">
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="vertex_shader" value="DepthToVSMVS()"/>
+			<state name="vertex_shader" value="DepthToSMVS()"/>
 			<state name="pixel_shader" value="DepthToVSMPS()"/>
 		</pass>
 	</technique>

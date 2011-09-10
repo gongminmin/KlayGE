@@ -13,6 +13,7 @@
 
 	<parameter type="texture2D" name="vpls_tex"/>
 	<parameter type="texture2D" name="gbuffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 
 	<parameter type="float2" name="vpl_params"/>
 	<parameter type='int' name='flipping'/>
@@ -136,14 +137,14 @@ float4 VPLsLightingPS(
 	tc /= w;
 #endif
 
-	float4 ndc = gbuffer_tex.Sample(point_sampler, tc);
-	float pixel_depth = GetDepth(ndc) * depth_near_far_invfar.y;
+	float pixel_depth = depth_tex.Sample(point_sampler, tc).r;
 	float3 color_i = 0;
 	if (view_dir.z < pixel_depth)
 	{
 		discard;
 	}
 
+	float4 ndc = gbuffer_tex.Sample(point_sampler, tc);
 	float3 norm_i = GetNormal(ndc);
 	float3 pos_i = view_dir.xyz * (pixel_depth / view_dir.z);
 

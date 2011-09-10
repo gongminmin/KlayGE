@@ -817,7 +817,7 @@
     <None Include="..\..\media\RenderFX\DeferredRendering.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
-    <None Include="..\..\media\RenderFX\DepthToVSM.fxml">
+    <None Include="..\..\media\RenderFX\DepthToSM.fxml">
       <Filter>Rendering System\Effect Files</Filter>
     </None>
     <None Include="..\..\media\RenderFX\GBuffer.fxml">
@@ -841,7 +841,7 @@
     <None Include="..\..\media\PostProcessors\CustomMipMap.ppml">
       <Filter>Rendering System\Post Processors</Filter>
     </None>
-    <None Include="..\..\media\PostProcessors\DepthToVSM.ppml">
+    <None Include="..\..\media\PostProcessors\DepthToSM.ppml">
       <Filter>Rendering System\Post Processors</Filter>
     </None>
     <None Include="..\..\media\PostProcessors\RSM2VPLs.ppml">

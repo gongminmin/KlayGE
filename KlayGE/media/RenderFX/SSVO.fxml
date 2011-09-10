@@ -18,7 +18,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float4x4" name="inv_proj"/>
-		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
 	<cbuffer name="vo_params">
@@ -36,7 +35,8 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -55,8 +55,7 @@ float CalcObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir, float
 			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
 		
 			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
-			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
+			float depth_sample = depth_tex.Sample(bilinear_sampler, tc_sample).r;
 
 			float3 view_dir_sample = normalize(sample_point);
 			float v = dot(pos_es, view_dir_sample);
@@ -100,8 +99,7 @@ float CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_dir
 			float4 sample_point_ss = mul(float4(sample_point, 1), proj);
 		
 			float2 tc_sample = TexCoordFromPos(sample_point_ss / sample_point_ss.w);
-			float4 ndc_sample = src_tex.Sample(bilinear_sampler, tc_sample);
-			float depth_sample = GetDepth(ndc_sample) * depth_near_far_invfar.y;
+			float depth_sample = depth_tex.Sample(bilinear_sampler, tc_sample).r;
 
 			float3 view_dir_sample = normalize(sample_point);
 			float3 pos_es_sample = view_dir_sample * (depth_sample / view_dir_sample.z);
@@ -140,9 +138,8 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float radius = 0.5f;
 	float obscurance = 1;
 	
-	float4 ndc = src_tex.Sample(point_sampler, tc);
-	float depth = GetDepth(ndc) * depth_near_far_invfar.y;
-	float3 normal = GetNormal(ndc);
+	float depth = depth_tex.Sample(point_sampler, tc).r;
+	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);

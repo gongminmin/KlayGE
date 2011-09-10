@@ -63,6 +63,10 @@ namespace KlayGE
 		{
 			return opaque_g_buffer_rt1_tex_;
 		}
+		TexturePtr const & OpaqueDepthTex() const
+		{
+			return opaque_depth_tex_;
+		}
 
 		void DisplayIllum(int illum);
 		void IndirectScale(float scale);
@@ -86,16 +90,19 @@ namespace KlayGE
 		TexturePtr opaque_g_buffer_rt0_tex_;
 		TexturePtr opaque_g_buffer_rt1_tex_;
 		TexturePtr opaque_ds_tex_;
+		TexturePtr opaque_depth_tex_;
 
 		FrameBufferPtr transparency_back_g_buffer_;
 		TexturePtr transparency_back_g_buffer_rt0_tex_;
 		TexturePtr transparency_back_g_buffer_rt1_tex_;
 		TexturePtr transparency_back_ds_tex_;
+		TexturePtr transparency_back_depth_tex_;
 
 		FrameBufferPtr transparency_front_g_buffer_;
 		TexturePtr transparency_front_g_buffer_rt0_tex_;
 		TexturePtr transparency_front_g_buffer_rt1_tex_;
 		TexturePtr transparency_front_ds_tex_;
+		TexturePtr transparency_front_depth_tex_;
 
 		FrameBufferPtr shadowing_buffer_;
 		TexturePtr shadowing_tex_;
@@ -156,6 +163,7 @@ namespace KlayGE
 
 		PostProcessPtr sm_filter_pps_[7];
 		PostProcessPtr depth_to_vsm_pp_;
+		PostProcessPtr depth_to_linear_pp_;
 
 		float4x4 view_, proj_;
 		float4x4 inv_view_, inv_proj_;
@@ -163,6 +171,7 @@ namespace KlayGE
 
 		RenderEffectParameterPtr g_buffer_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
+		RenderEffectParameterPtr depth_tex_param_;
 		RenderEffectParameterPtr lighting_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;

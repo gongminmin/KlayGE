@@ -123,7 +123,7 @@ namespace KlayGE
 				*height_map_enabled_param_ = static_cast<int32_t>(!!height_tex_);
 				*height_tex_param_ = normal_tex_;
 				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = float4(mtl_->specular_level, mtl_->specular_level, mtl_->specular_level, static_cast<float>(!!specular_tex_));
+				*specular_level_param_ = float4(MathLib::clamp(mtl_->specular_level, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_->shininess / 256.0f, 1e-6f, 0.999f);
 				*opacity_clr_param_ = mtl_->opacity;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);

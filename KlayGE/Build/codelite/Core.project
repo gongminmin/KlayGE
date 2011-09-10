@@ -88,7 +88,7 @@
       <File Name="../../media/RenderFX/CustomMipMap.fxml"/>
       <File Name="../../media/RenderFX/DeferredRendering.fxml"/>
       <File Name="../../media/RenderFX/DeferredRenderingUtil.fxml"/>
-      <File Name="../../media/RenderFX/DepthToVSM.fxml"/>
+      <File Name="../../media/RenderFX/DepthToSM.fxml"/>
       <File Name="../../media/RenderFX/DownSample.fxml"/>
       <File Name="../../media/RenderFX/Fog.fxml"/>
       <File Name="../../media/RenderFX/Font.fxml"/>
@@ -122,7 +122,7 @@
       <File Name="../../media/PostProcessors/Copy.ppml"/>
       <File Name="../../media/PostProcessors/Copy2LightBuffer.ppml"/>
       <File Name="../../media/PostProcessors/CustomMipMap.ppml"/>
-      <File Name="../../media/PostProcessors/DepthToVSM.ppml"/>
+      <File Name="../../media/PostProcessors/DepthToSM.ppml"/>
       <File Name="../../media/PostProcessors/Downsampler2x2.ppml"/>
       <File Name="../../media/PostProcessors/GammaCorrection.ppml"/>
       <File Name="../../media/PostProcessors/GlowMerger.ppml"/>

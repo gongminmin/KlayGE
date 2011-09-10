@@ -16,11 +16,8 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/PostProcess.hpp>
-#include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Timer.hpp>
 #include <KlayGE/half.hpp>
-#include <KlayGE/FXAAPostProcess.hpp>
-#include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
@@ -90,6 +87,7 @@ namespace
 			: PostProcess(L"DeferredRenderingDebug")
 		{
 			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
+			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
 			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
 
@@ -325,8 +323,9 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	deferred_rendering_->OnResize(width, height);
 
 	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
-	debug_pp_->InputPin(1, deferred_rendering_->OpaqueLightingTex());
-	debug_pp_->InputPin(2, deferred_rendering_->SSVOTex());
+	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex());
+	debug_pp_->InputPin(2, deferred_rendering_->OpaqueLightingTex());
+	debug_pp_->InputPin(3, deferred_rendering_->SSVOTex());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }

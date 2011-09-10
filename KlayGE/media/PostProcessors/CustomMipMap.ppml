@@ -6,7 +6,8 @@
 			<param name="delta_offset"/>
 		</params>
 		<input>
-			<pin name="gbuffer_tex"/>
+			<pin name="g_buffer_tex"/>
+			<pin name="depth_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -33,7 +34,7 @@
 			<param name="delta_offset"/>
 		</params>
 		<input>
-			<pin name="gbuffer_tex"/>
+			<pin name="g_buffer_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
