@@ -121,7 +121,6 @@ namespace KlayGE
 		void BindFrameBuffer(FrameBufferPtr const & fb);
 		FrameBufferPtr const & CurFrameBuffer() const;
 		FrameBufferPtr const & DefaultFrameBuffer() const;
-		TexturePtr const & DefaultFrameBufferTexture() const;
 		FrameBufferPtr const & ScreenFrameBuffer() const;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
@@ -140,6 +139,7 @@ namespace KlayGE
 		virtual void FullScreen(bool fs) = 0;
 
 		void PostProcess(bool skip);
+		void GammaCorrection();
 
 		virtual void AdjustPerspectiveMatrix(float4x4& /*pers_mat*/)
 		{
@@ -223,8 +223,11 @@ namespace KlayGE
 		FrameBufferPtr screen_frame_buffer_;
 		FrameBufferPtr before_pp_frame_buffer_;
 		TexturePtr before_pp_tex_;
+		FrameBufferPtr before_gamma_frame_buffer_;
+		TexturePtr before_gamma_tex_;
 		FrameBufferPtr stereo_frame_buffers_[2];
 		TexturePtr stereo_colors_[2];
+		FrameBufferPtr default_frame_buffers_[6];
 
 		RenderLayoutPtr so_buffers_;
 
@@ -252,7 +255,8 @@ namespace KlayGE
 
 		PostProcessPtr copy_pp_;
 		PostProcessChainPtr pp_chain_;
-		bool inside_pp_;
+		PostProcessPtr gamma_pp_;
+		int fb_stage_;
 	};
 }
 

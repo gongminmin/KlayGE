@@ -557,6 +557,8 @@ namespace KlayGE
 
 		this->Flush(App3DFramework::URV_Overlay);
 
+		re.GammaCorrection();
+
 		re.BindFrameBuffer(fb);
 	}
 }
