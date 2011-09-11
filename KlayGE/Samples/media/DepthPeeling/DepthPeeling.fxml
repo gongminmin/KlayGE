@@ -47,7 +47,7 @@ float4 DepthPeelingNthPS(float4 clr : COLOR0, float4 pos_ss : TEXCOORD0) : SV_Ta
 	tex_coord = tex_coord / 2 + 0.5f;
 
 	float last_depth = non_linear_depth_to_linear(last_depth_tex.Sample(point_sampler, tex_coord).r, near_q.x, near_q.y);
-	clip(pos_ss.w - (last_depth + 1e-6f));
+	clip(pos_ss.w - (last_depth + 1e-5f));
 
 	return clr;
 }
@@ -96,15 +96,6 @@ float4 BlendPS(float2 tex : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<shader>
-		<![CDATA[
-float4 NoDepthPeelingPS(float4 pos_ss : TEXCOORD0, float4 clr : COLOR0) : SV_Target
-{
-	return clr;
-}
-		]]>
-	</shader>
-
 	<technique name="NoDepthPeeling">
 		<pass name="p0">
 			<state name="blend_enable" value="true"/>
@@ -114,7 +105,7 @@ float4 NoDepthPeelingPS(float4 pos_ss : TEXCOORD0, float4 clr : COLOR0) : SV_Tar
 			<state name="depth_write_mask" value="false"/>
 
 			<state name="vertex_shader" value="DepthPeelingVS()"/>
-			<state name="pixel_shader" value="NoDepthPeelingPS()"/>
+			<state name="pixel_shader" value="DepthPeeling1stPS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -330,21 +330,24 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void RenderEngine::BindFrameBuffer(FrameBufferPtr const & fb)
 	{
-		if ((fb != cur_frame_buffer_) || (fb && fb->Dirty()))
+		FrameBufferPtr new_fb;
+		if (!fb)
+		{
+			new_fb = this->DefaultFrameBuffer();
+		}
+		else
+		{
+			new_fb = fb;
+		}
+
+		if ((fb != new_fb) || (fb && fb->Dirty()))
 		{
 			if (cur_frame_buffer_)
 			{
 				cur_frame_buffer_->OnUnbind();
 			}
 
-			if (!fb)
-			{
-				cur_frame_buffer_ = this->DefaultFrameBuffer();
-			}
-			else
-			{
-				cur_frame_buffer_ = fb;
-			}
+			cur_frame_buffer_ = new_fb;
 
 			cur_frame_buffer_->OnBind();
 
@@ -545,9 +548,9 @@ namespace KlayGE
 			fb_stage_ = 2;
 
 			gamma_pp_->Apply();
-
-			fb_stage_ = 0;
 		}
+
+		fb_stage_ = 0;
 	}
 
 	void RenderEngine::Stereoscopic()
