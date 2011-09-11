@@ -287,13 +287,13 @@ void DepthPeelingApp::OnResize(uint32_t width, uint32_t height)
 	}
 
 	ElementFormat peel_format;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0))
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
 	{
-		peel_format = EF_ARGB8;
+		peel_format = EF_ABGR8;
 	}
 	else
 	{
-		peel_format = EF_ABGR8;
+		peel_format = EF_ARGB8;
 	}
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{

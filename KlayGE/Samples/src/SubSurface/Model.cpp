@@ -120,13 +120,13 @@ DetailedModel::DetailedModel(std::wstring const & name)
 	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
 
 	ElementFormat format;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 	{
-		format = EF_ARGB8;
+		format = EF_ABGR8;
 	}
 	else
 	{
-		format = EF_ABGR8;
+		format = EF_ARGB8;
 	}
 	empty_bump_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read, &nor_init_data);
 }

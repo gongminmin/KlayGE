@@ -103,18 +103,18 @@ namespace
 
 					normal = MathLib::normalize(normal);
 
-					data_block[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
+					data_block[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.x() / 2 + 0.5f) * 255.0f), 0, 255));
 					data_block[((z * vol_size + y) * vol_size + x) * 4 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.y() / 2 + 0.5f) * 255.0f), 0, 255));
-					data_block[((z * vol_size + y) * vol_size + x) * 4 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
+					data_block[((z * vol_size + y) * vol_size + x) * 4 + 2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((normal.z() / 2 + 0.5f) * 255.0f), 0, 255));
 				}
 			}
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr ret;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 		{
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
 		}
 		else
 		{
@@ -123,7 +123,7 @@ namespace
 				std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 			}
 
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
 		}
 
 		return ret;

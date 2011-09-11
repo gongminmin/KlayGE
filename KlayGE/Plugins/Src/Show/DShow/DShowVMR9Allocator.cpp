@@ -152,14 +152,15 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8))
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 		{
-			fmt = EF_ARGB8;
+			fmt = EF_ABGR8;
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8));
-			fmt = EF_ABGR8;
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+			fmt = EF_ARGB8;
 		}
 		if (Context::Instance().Config().graphics_cfg.gamma)
 		{

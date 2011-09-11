@@ -910,7 +910,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
 		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1,
-			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
+			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
 	}
 	else
 	{
@@ -924,7 +924,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	float4 f4_clr;
-	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? EF_ARGB8 : EF_ABGR8;
+	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
 		f4_clr.x() = pow(clr.r(), 2.2f);
@@ -952,7 +952,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	TexturePtr tex_for_button;
 
 	uint32_t data;
-	data = 0xFF000000 | (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8) ? clr.ARGB() : clr.ABGR());
+	data = 0xFF000000 | (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? clr.ABGR() : clr.ARGB());
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
