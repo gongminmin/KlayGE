@@ -78,8 +78,10 @@ float4 WoodPS(float3 pos_os : TEXCOORD0,
 	float3 normal = normalize(normal_os + bump * 0.1f);
 
 	float atten = attenuation_term(light_pos, pos_os, light_falloff);
+	
+	float3 clr = wood(tex_coord).xyz;
 
-	return float4(atten * light_color * calc_brdf(wood(tex_coord).xyz, 0.1f, 32, light_os, halfway_os, normal), 1);
+	return float4(clr * 0.05f + atten * light_color * calc_brdf(clr, 0.1f, 32, light_os, halfway_os, normal), 1);
 }
 
 float4 MarblePS(float3 pos_os : TEXCOORD0,
@@ -94,7 +96,9 @@ float4 MarblePS(float3 pos_os : TEXCOORD0,
 
 	float atten = attenuation_term(light_pos, pos_os, light_falloff);
 
-	return float4(atten * light_color * calc_brdf(marble(tex_coord).xyz, 0.4f, 16, light_os, halfway_os, normal_os), 1);
+	float3 clr = marble(tex_coord).xyz;
+
+	return float4(clr * 0.05f + atten * light_color * calc_brdf(clr, 0.4f, 16, light_os, halfway_os, normal_os), 1);
 }
 
 float4 CloudPS(float3 pos_os : TEXCOORD0,

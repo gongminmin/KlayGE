@@ -15,7 +15,6 @@
 	</cbuffer>
 
 	<parameter type="float" name="height_scale"/>
-	<parameter type="float" name="height_bias"/>
 
 	<parameter type="int4" name="diffuse_tex_bb"/>
 	<parameter type="int4" name="normal_tex_bb"/>
@@ -113,7 +112,7 @@ float4 ParallaxMappingPS(float4 L		: TEXCOORD0,
 	
 	float3 view = normalize(V.xyz);
 	
-	float height = (judatex2d_wrap(height_tex_bb, texCoord0).r - 1) * distortion;
+	float height = (judatex2d_wrap(height_tex_bb, texCoord0).r - 1) * height_scale;
 	float2 texUV = texCoord0 + (view.xy * height);
 
 	return Shading(L, H, texUV, normalize(judatex2d_wrap(normal_tex_bb, texUV).rgb * 2 - 1));
@@ -136,7 +135,7 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 	CalcTBN(pos, texcoord0, N, T,
 		oL, oV, oH, oPos);
 
-	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * distortion;
+	oParallaxOffsetTS = float4(normalize(oV.xyz).xy, normalize(oL.xyz).xy) * height_scale;
 }
 
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
@@ -339,7 +338,7 @@ VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 	output.Normal = N;
 	output.Tangent = T.xyz;
 	output.Binormal = cross(N, T.xyz) * T.w;
-	output.Distortion = distortion;
+	output.Distortion = distortion * height_scale;
 
 	return output;
 }
@@ -444,7 +443,7 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	float3 pos = patch[0].Pos * w
 			+ patch[1].Pos * u
 			+ patch[2].Pos * v;
-	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion * 0.1f;
+	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion;
 	pos += height * normal;
 	
 	oPos = mul(float4(pos, 1), mvp);

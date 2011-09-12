@@ -218,11 +218,6 @@ namespace
 			*(technique_->Effect().ParameterByName("height_scale")) = scale;
 		}
 
-		void HeightBias(float bias)
-		{
-			*(technique_->Effect().ParameterByName("height_bias")) = bias;
-		}
-
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
 			juda_tex->SetParams(technique_);
@@ -349,15 +344,6 @@ namespace
 			}
 		}
 
-		void HeightBias(float bias)
-		{
-			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
-			{
-				checked_pointer_cast<RenderPolygon>(model->Mesh(i))->HeightBias(bias);
-			}
-		}
-
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
@@ -420,7 +406,7 @@ int main()
 
 DetailedSurfaceApp::DetailedSurfaceApp()
 			: App3DFramework("DetailedSurface"),
-				height_scale_(0.06f), height_bias_(0.02f)
+				height_scale_(0.06f)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
 }
@@ -493,16 +479,6 @@ void DetailedSurfaceApp::ScaleChangedHandler(KlayGE::UISlider const & sender)
 	std::wostringstream stream;
 	stream << L"Scale: " << height_scale_;
 	dialog_->Control<UIStatic>(id_scale_static_)->SetText(stream.str());
-}
-
-void DetailedSurfaceApp::BiasChangedHandler(KlayGE::UISlider const & sender)
-{
-	height_bias_ = sender.GetValue() / 100.0f;
-	checked_pointer_cast<PolygonObject>(polygon_)->HeightBias(height_bias_);
-
-	std::wostringstream stream;
-	stream << L"Bias: " << height_bias_;
-	dialog_->Control<UIStatic>(id_bias_static_)->SetText(stream.str());
 }
 
 void DetailedSurfaceApp::DetailTypeChangedHandler(KlayGE::UIComboBox const & sender)
@@ -617,8 +593,6 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		{
 			id_scale_static_ = dialog_->IDFromName("ScaleStatic");
 			id_scale_slider_ = dialog_->IDFromName("ScaleSlider");
-			id_bias_static_ = dialog_->IDFromName("BiasStatic");
-			id_bias_slider_ = dialog_->IDFromName("BiasSlider");
 			id_detail_type_static_ = dialog_->IDFromName("DetailTypeStatic");
 			id_detail_type_combo_ = dialog_->IDFromName("DetailTypeCombo");
 			id_wireframe_ = dialog_->IDFromName("Wireframe");
@@ -627,10 +601,6 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(height_scale_ * 100));
 			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, _1));
 			this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
-
-			dialog_->Control<UISlider>(id_bias_slider_)->SetValue(static_cast<int>(height_bias_ * 100));
-			dialog_->Control<UISlider>(id_bias_slider_)->OnValueChangedEvent().connect(boost::bind(&DetailedSurfaceApp::BiasChangedHandler, this, _1));
-			this->BiasChangedHandler(*dialog_->Control<UISlider>(id_bias_slider_));
 
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(2);
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(boost::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, _1));

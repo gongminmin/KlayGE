@@ -39,12 +39,9 @@ private:
 
 	KlayGE::UIDialogPtr dialog_;
 	float height_scale_;
-	float height_bias_;
 
 	int id_scale_static_;
 	int id_scale_slider_;
-	int id_bias_static_;
-	int id_bias_slider_;
 	int id_detail_type_static_;
 	int id_detail_type_combo_;
 	int id_wireframe_;
