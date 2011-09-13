@@ -1327,6 +1327,7 @@ namespace KlayGE
 									std::cerr << line << " " << s << std::endl;
 									++ line;
 								}
+								std::cerr << "Error when compiling " << sd.func_name << ":" << std::endl;
 								std::cerr << cgGetErrorString(error) << std::endl;
 
 								char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());

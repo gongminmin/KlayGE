@@ -932,7 +932,11 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 		f4_clr.z() = pow(clr.b(), 2.2f);
 		f4_clr.w() = 1;
 
-		fmt = MakeSRGB(fmt);
+		ElementFormat fmt_srgb = MakeSRGB(fmt);
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(fmt_srgb))
+		{
+			fmt = fmt_srgb;
+		}
 	}
 	else
 	{

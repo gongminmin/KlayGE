@@ -408,6 +408,12 @@ namespace KlayGE
 		{
 			ogl_mag_filter_ = GL_NEAREST;
 		}
+		if (desc_.filter & TFOE_Anisotropic)
+		{
+			ogl_mag_filter_ = GL_LINEAR;
+			ogl_min_filter_ = GL_LINEAR;
+			//ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+		}
 	}
 
 	void OGLES2SamplerStateObject::Active(uint32_t /*stage*/, TexturePtr const & texture)
@@ -426,7 +432,14 @@ namespace KlayGE
 
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
-			tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+			if (desc_.filter & TFOE_Anisotropic)
+			{
+				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+			}
+			else
+			{
+				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+			}
 		}
 	}
 }

@@ -121,6 +121,44 @@ void ParticleVS(float4 pos : TEXCOORD0,
 	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 }
 
+float4 ParticlePS(PS_IN ps_in) : SV_Target
+{
+	ps_in.CenterView /= ps_in.CenterView.w;
+	ps_in.view_dir.xyz = normalize(ps_in.view_dir.xyz);
+	
+	float4 clr = ps_in.clr;
+	
+	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir.xyz);
+	float disc = ps_in.view_dir.w * ps_in.view_dir.w - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
+	if (disc < 0)
+	{
+		discard;
+	}
+	else
+	{
+		float2 tex_coord = ps_in.PosSS.xy;
+		tex_coord.y *= flip;
+		tex_coord = tex_coord / 2 + 0.5f;
+		
+		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a * depth_near_far_invfar.y;
+
+		clr.a *= lerp(particle_alpha_from_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
+						particle_alpha_to_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
+						ps_in.tex.z);
+		float intersect_z = (v - sqrt(disc)) * ps_in.view_dir.z;
+		clr.a *= saturate((depth - intersect_z) * 5);
+#ifndef KLAYGE_OPENGL
+		clip(clr.a - 0.03f);
+#endif
+	}
+
+	return clr;
+}
+		]]>
+	</shader>
+
+	<shader version="4">
+		<![CDATA[
 void ParticleVS2(float4 pos : POSITION,
 					float spin : TEXCOORD0,
 					out VS_TO_GS vs_out)
@@ -195,40 +233,6 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 #else
 	out_stream.RestartStrip();
 #endif
-}
-
-float4 ParticlePS(PS_IN ps_in) : SV_Target
-{
-	ps_in.CenterView /= ps_in.CenterView.w;
-	ps_in.view_dir.xyz = normalize(ps_in.view_dir.xyz);
-	
-	float4 clr = ps_in.clr;
-	
-	float v = dot(ps_in.CenterView.xyz, ps_in.view_dir.xyz);
-	float disc = ps_in.view_dir.w * ps_in.view_dir.w - (dot(ps_in.CenterView.xyz, ps_in.CenterView.xyz) - v * v);
-	if (disc < 0)
-	{
-		discard;
-	}
-	else
-	{
-		float2 tex_coord = ps_in.PosSS.xy;
-		tex_coord.y *= flip;
-		tex_coord = tex_coord / 2 + 0.5f;
-		
-		float depth = scene_tex.SampleLevel(scene_sampler, tex_coord, 0).a * depth_near_far_invfar.y;
-
-		clr.a *= lerp(particle_alpha_from_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
-						particle_alpha_to_tex.SampleLevel(particle_sampler, ps_in.tex.xy, 0).r,
-						ps_in.tex.z);
-		float intersect_z = (v - sqrt(disc)) * ps_in.view_dir.z;
-		clr.a *= saturate((depth - intersect_z) * 5);
-#ifndef KLAYGE_OPENGL
-		clip(clr.a - 0.03f);
-#endif
-	}
-
-	return clr;
 }
 		]]>
 	</shader>

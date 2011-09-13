@@ -96,6 +96,11 @@ void DetailedMesh::BackFaceDepthTex(KlayGE::TexturePtr const & tex, bool flippin
 {
 	*(technique_->Effect().ParameterByName("back_face_depth_tex")) = tex;
 	*(technique_->Effect().ParameterByName("flip")) = static_cast<int32_t>(flipping ? -1 : 1);
+
+	App3DFramework const & app = Context::Instance().AppInstance();
+	Camera const & camera = app.ActiveCamera();
+	float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+	*(technique_->Effect().ParameterByName("near_q")) = float2(camera.NearPlane() * q, q);
 }
 
 void DetailedMesh::SigmaT(float sigma_t)

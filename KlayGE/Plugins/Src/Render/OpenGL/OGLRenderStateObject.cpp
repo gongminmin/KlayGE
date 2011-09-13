@@ -498,6 +498,11 @@ namespace KlayGE
 		{
 			ogl_mag_filter_ = GL_NEAREST;
 		}
+		if (desc_.filter & TFOE_Anisotropic)
+		{
+			ogl_mag_filter_ = GL_LINEAR;
+			ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+		}
 	}
 
 	void OGLSamplerStateObject::Active(uint32_t stage, TexturePtr const & texture)
@@ -515,7 +520,17 @@ namespace KlayGE
 		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
 		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
 
-		tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+		if (glloader_GL_EXT_texture_filter_anisotropic())
+		{
+			if (desc_.filter & TFOE_Anisotropic)
+			{
+				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
+			}
+			else
+			{
+				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
+			}
+		}
 		tex.TexParameterf(GL_TEXTURE_MIN_LOD, desc_.min_lod);
 		tex.TexParameterf(GL_TEXTURE_MAX_LOD, desc_.max_lod);
 		if (desc_.cmp_func != CF_AlwaysFail)
