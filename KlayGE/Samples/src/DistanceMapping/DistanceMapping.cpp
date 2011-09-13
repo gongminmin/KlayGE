@@ -177,11 +177,14 @@ namespace
 			rl_->BindIndexStream(ib, EF_R16UI);
 
 			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+
+			model_mat_ = MathLib::rotation_x(-0.5f);
+			inv_model_mat_ = MathLib::inverse(model_mat_);
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;			
+			*(technique_->Effect().ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_model_mat_);
 		}
 
 		void LightColor(float3 const & light_color)
@@ -198,13 +201,15 @@ namespace
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			float4x4 model = MathLib::rotation_x(-0.5f);
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("worldviewproj")) = model * view * proj;
-			*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();
+			*(technique_->Effect().ParameterByName("worldviewproj")) = model_mat_ * view * proj;
+			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
+
+	private:
+		float4x4 inv_model_mat_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
