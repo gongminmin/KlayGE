@@ -349,51 +349,107 @@ namespace KlayGE
 			break;
 
 		case EF_R16F:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_HALF_FLOAT_OES;
+			if (glloader_GLES_OES_texture_half_float())
+			{
+				internalFormat = GL_LUMINANCE;
+				glformat = GL_LUMINANCE;
+				gltype = GL_HALF_FLOAT_OES;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_GR16F:
-			internalFormat = GL_LUMINANCE_ALPHA;
-			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_OES_texture_half_float())
+			{
+				internalFormat = GL_LUMINANCE_ALPHA;
+				glformat = GL_LUMINANCE_ALPHA;
+				gltype = GL_HALF_FLOAT_OES;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BGR16F:
-			internalFormat = GL_RGB;
-			glformat = GL_RGB;
-			gltype = GL_HALF_FLOAT_OES;
+			if (glloader_GLES_OES_texture_half_float())
+			{
+				internalFormat = GL_RGB;
+				glformat = GL_RGB;
+				gltype = GL_HALF_FLOAT_OES;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_ABGR16F:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_HALF_FLOAT_OES;
+			if (glloader_GLES_OES_texture_half_float())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_HALF_FLOAT_OES;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_R32F:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_OES_texture_float())
+			{
+				internalFormat = GL_LUMINANCE;
+				glformat = GL_LUMINANCE;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_GR32F:
-			internalFormat = GL_LUMINANCE_ALPHA;
-			glformat = GL_LUMINANCE_ALPHA;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_OES_texture_float())
+			{
+				internalFormat = GL_LUMINANCE_ALPHA;
+				glformat = GL_LUMINANCE_ALPHA;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BGR32F:
-			internalFormat = GL_RGB;
-			glformat = GL_RGB;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_OES_texture_float())
+			{
+				internalFormat = GL_RGB;
+				glformat = GL_RGB;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_ABGR32F:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_FLOAT;
+			if (glloader_GLES_OES_texture_float())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_FLOAT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_BC1:

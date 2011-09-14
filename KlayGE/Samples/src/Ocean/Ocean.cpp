@@ -375,24 +375,60 @@ namespace
 				gradient_tex_.resize(ocean_param_.num_frames);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					ElementInitData* did = NULL;
-					ElementInitData* gid = NULL;
-					if (use_load_tex)
+					ElementFormat fmt;
+					if (re.DeviceCaps().texture_format_support(EF_GR8))
 					{
-						did = &disp_init_data[i * disp_num_mipmaps];
-						gid = &grad_init_data[i * grad_num_mipmaps];
+						fmt = EF_GR8;
+					}
+					else
+					{
+						BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ABGR8));
+
+						fmt = EF_ABGR8;
 					}
 
-					displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, did);
-
-					TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						1, 1, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, gid);
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						0, 1, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
-					gta->CopyToSubTexture2D(*gradient_tex_[i],
-						0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+						0, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+
+					if (use_load_tex)
+					{
+						displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+							1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &disp_init_data[i * disp_num_mipmaps]);
+
+						TexturePtr gta;
+						if (EF_GR8 == fmt)
+						{
+							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, &grad_init_data[i * grad_num_mipmaps]);
+						}
+						else
+						{
+							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, NULL);
+
+							Texture::Mapper mapper(*gta, 0, 0, TMA_Write_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+							ElementInitData* gid = &grad_init_data[i * grad_num_mipmaps];
+							uint8_t const * src = static_cast<uint8_t const *>(gid->data);
+							uint8_t* dst = mapper.Pointer<uint8_t>();
+							uint32_t const src_pitch = gid->row_pitch;
+							uint32_t const dst_pitch = mapper.RowPitch();
+							for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
+							{
+								for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
+								{
+									dst[y * dst_pitch + x * 4 + 0] = src[y * src_pitch + x * 2 + 0];
+									dst[y * dst_pitch + x * 4 + 1] = src[y * src_pitch + x * 2 + 1];
+									dst[y * dst_pitch + x * 4 + 2] = 0;
+									dst[y * dst_pitch + x * 4 + 3] = 0;
+								}
+							}
+						}
+						
+						gta->CopyToSubTexture2D(*gradient_tex_[i],
+							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim,
+							0, 0, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
+					}
+
 					gradient_tex_[i]->BuildMipSubLevels();
 				}
 			}
@@ -932,19 +968,31 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0);
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	{
+		fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+
+		fmt = EF_D16;
+	}
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
 
 	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 1, 0));
 	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	ElementFormat fmt;
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		fmt = EF_B10G11R11F;
 	}
 	else
 	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+
 		fmt = EF_ABGR16F;
 	}
 	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
