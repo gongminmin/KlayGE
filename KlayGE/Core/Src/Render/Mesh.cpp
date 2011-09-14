@@ -54,6 +54,8 @@ namespace
 {
 	using namespace KlayGE;
 
+	uint32_t const MODEL_BIN_VERSION = 4;
+
 	class RenderModelLoader
 	{
 	private:
@@ -607,7 +609,7 @@ namespace KlayGE
 			lzma_file->read(&fourcc, sizeof(fourcc));
 			uint32_t ver;
 			lzma_file->read(&ver, sizeof(ver));
-			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != 3))
+			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
 			{
 				jit = true;
 			}
@@ -1353,14 +1355,32 @@ namespace KlayGE
 					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
 					XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
-					float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
-						bind_pos_node->Attrib("z")->ValueFloat());
-					ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
+					if (bind_pos_node)
+					{
+						float3 bind_pos(bind_pos_node->Attrib("x")->ValueFloat(), bind_pos_node->Attrib("y")->ValueFloat(),
+							bind_pos_node->Attrib("z")->ValueFloat());
 
-					XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
-					Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
-						bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
-					ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+						XMLNodePtr bind_quat_node = bone_node->FirstNode("bind_quat");
+						Quaternion bind_quat(bind_quat_node->Attrib("x")->ValueFloat(), bind_quat_node->Attrib("y")->ValueFloat(),
+							bind_quat_node->Attrib("z")->ValueFloat(), bind_quat_node->Attrib("w")->ValueFloat());
+
+						Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+
+						ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+					}
+					else
+					{
+						XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
+						Quaternion bind_real(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
+							bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
+						ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
+							
+						XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
+						Quaternion bind_dual(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
+							bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
+						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+					}
 				}
 			}
 
@@ -1388,14 +1408,32 @@ namespace KlayGE
 					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 					{
 						XMLNodePtr pos_node = key_node->FirstNode("pos");
-						float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
-							pos_node->Attrib("z")->ValueFloat());
-						ss->write(reinterpret_cast<char*>(&bind_pos), sizeof(bind_pos));
+						if (pos_node)
+						{
+							float3 bind_pos(pos_node->Attrib("x")->ValueFloat(), pos_node->Attrib("y")->ValueFloat(),
+								pos_node->Attrib("z")->ValueFloat());
 
-						XMLNodePtr quat_node = key_node->FirstNode("quat");
-						Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
-							quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
-						ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+							XMLNodePtr quat_node = key_node->FirstNode("quat");
+							Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
+								quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
+					
+					        Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
+
+							ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+							ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+						}
+						else
+						{
+							XMLNodePtr bind_real_node = key_node->FirstNode("bind_real");
+							Quaternion bind_real(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
+								bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
+							ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
+							
+							XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
+							Quaternion bind_dual(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
+								bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
+							ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+						}
 					}
 				}
 			}
@@ -1405,7 +1443,7 @@ namespace KlayGE
 			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
 			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
 
-			uint32_t ver = 3;
+			uint32_t ver = MODEL_BIN_VERSION;
 			ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
 			uint64_t original_len = ss->str().size();
@@ -1460,7 +1498,7 @@ namespace KlayGE
 
 		uint32_t ver;
 		lzma_file->read(&ver, sizeof(ver));
-		BOOST_ASSERT(3 == ver);
+		BOOST_ASSERT(MODEL_BIN_VERSION == ver);
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
@@ -1583,11 +1621,8 @@ namespace KlayGE
 			ReadShortString(decoded, joint.name);
 			decoded->read(&joint.parent, sizeof(joint.parent));
 
-			float3 bind_pos;
-			decoded->read(&bind_pos, sizeof(bind_pos));
 			decoded->read(&joint.bind_real, sizeof(joint.bind_real));
-
-			joint.bind_dual = MathLib::quat_trans_to_udq(joint.bind_real, bind_pos);
+			decoded->read(&joint.bind_dual, sizeof(joint.bind_dual)); 
 
 			std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
 			joint.inverse_origin_real = inv.first;
@@ -1614,10 +1649,8 @@ namespace KlayGE
 				kf.bind_dual.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
-					float3 bind_pos;
-					decoded->read(&bind_pos, sizeof(bind_pos));
 					decoded->read(&kf.bind_real[k_index], sizeof(kf.bind_real[k_index]));
-					kf.bind_dual[k_index] = MathLib::quat_trans_to_udq(kf.bind_real[k_index], bind_pos);
+					decoded->read(&kf.bind_dual[k_index], sizeof(kf.bind_dual[k_index]));
 				}
 
 				kfs->insert(std::make_pair(name, kf));
@@ -1664,22 +1697,22 @@ namespace KlayGE
 				bone_node->AppendAttrib(doc.AllocAttribString("name", joint.name));
 				bone_node->AppendAttrib(doc.AllocAttribInt("parent", joint.parent));
 
-				Quaternion bind_quat = MathLib::inverse(joint.inverse_origin_real);
-				float3 inverse_origin_pos = MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual);
-				float3 bind_pos = -MathLib::transform_quat(inverse_origin_pos, bind_quat);
+				Quaternion const & bind_real = joint.bind_real;
+				Quaternion const & bind_dual = joint.bind_dual;
 
-				XMLNodePtr bind_pos_node = doc.AllocNode(XNT_Element, "bind_pos");
-				bone_node->AppendNode(bind_pos_node);
-				bind_pos_node->AppendAttrib(doc.AllocAttribFloat("x", bind_pos.x()));
-				bind_pos_node->AppendAttrib(doc.AllocAttribFloat("y", bind_pos.y()));
-				bind_pos_node->AppendAttrib(doc.AllocAttribFloat("z", bind_pos.z()));
+				XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
+				bone_node->AppendNode(bind_real_node);
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", bind_real.x()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", bind_real.y()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", bind_real.z()));
+				bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", bind_real.w()));
 
-				XMLNodePtr bind_quat_node = doc.AllocNode(XNT_Element, "bind_quat");
-				bone_node->AppendNode(bind_quat_node);
-				bind_quat_node->AppendAttrib(doc.AllocAttribFloat("x", bind_quat.x()));
-				bind_quat_node->AppendAttrib(doc.AllocAttribFloat("y", bind_quat.y()));
-				bind_quat_node->AppendAttrib(doc.AllocAttribFloat("z", bind_quat.z()));
-				bind_quat_node->AppendAttrib(doc.AllocAttribFloat("w", bind_quat.w()));
+				XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
+				bone_node->AppendNode(bind_dual_node);
+				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", bind_dual.x()));
+				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", bind_dual.y()));
+				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", bind_dual.z()));
+				bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", bind_dual.w()));
 			}
 		}
 
@@ -2010,20 +2043,19 @@ namespace KlayGE
 						XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
 						key_frame_node->AppendNode(key_node);
 
-						float3 bind_pos = MathLib::udq_to_trans(iter->second.bind_real[j], iter->second.bind_dual[j]);
+						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
+						key_node->AppendNode(bind_real_node); 
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_real[j].x()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_real[j].y()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_real[j].z()));
+						bind_real_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_real[j].w()));
 
-						XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
-						key_node->AppendNode(pos_node);
-						pos_node->AppendAttrib(doc.AllocAttribFloat("x", bind_pos.x()));
-						pos_node->AppendAttrib(doc.AllocAttribFloat("y", bind_pos.y()));
-						pos_node->AppendAttrib(doc.AllocAttribFloat("z", bind_pos.z()));
-
-						XMLNodePtr quat_node = doc.AllocNode(XNT_Element, "quat");
-						key_node->AppendNode(quat_node);
-						quat_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_real[j].x()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_real[j].y()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_real[j].z()));
-						quat_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_real[j].w()));
+						XMLNodePtr bind_dual_node = doc.AllocNode(XNT_Element, "bind_dual");
+						key_node->AppendNode(bind_dual_node);
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("x", iter->second.bind_dual[j].x()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("y", iter->second.bind_dual[j].y()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("z", iter->second.bind_dual[j].z()));
+						bind_dual_node->AppendAttrib(doc.AllocAttribFloat("w", iter->second.bind_dual[j].w()));
 					}
 				}
 			}
