@@ -135,26 +135,28 @@ namespace KlayGE
 
 	void DecodeBC4Internal(uint8_t* alpha_block, BC4_layout const & bc4)
 	{
-		boost::array<float, 8> alpha;
-		alpha[0] = bc4.alpha_0 / 255.0f;
-		alpha[1] = bc4.alpha_1 / 255.0f;
+		boost::array<uint8_t, 8> alpha;
+		float falpha0 = bc4.alpha_0 / 255.0f;
+		float falpha1 = bc4.alpha_1 / 255.0f;
+		alpha[0] = bc4.alpha_0;
+		alpha[1] = bc4.alpha_1;
 		if (alpha[0] > alpha[1])
 		{
-			alpha[2] = MathLib::lerp(alpha[0], alpha[1], 1 / 7.0f);
-			alpha[3] = MathLib::lerp(alpha[0], alpha[1], 2 / 7.0f);
-			alpha[4] = MathLib::lerp(alpha[0], alpha[1], 3 / 7.0f);
-			alpha[5] = MathLib::lerp(alpha[0], alpha[1], 4 / 7.0f);
-			alpha[6] = MathLib::lerp(alpha[0], alpha[1], 5 / 7.0f);
-			alpha[7] = MathLib::lerp(alpha[0], alpha[1], 6 / 7.0f);
+			alpha[2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 1 / 7.0f) * 255 + 0.5f), 0, 255));
+			alpha[3] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 2 / 7.0f) * 255 + 0.5f), 0, 255));
+			alpha[4] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 3 / 7.0f) * 255 + 0.5f), 0, 255));
+			alpha[5] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 4 / 7.0f) * 255 + 0.5f), 0, 255));
+			alpha[6] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 5 / 7.0f) * 255 + 0.5f), 0, 255));
+			alpha[7] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 6 / 7.0f) * 255 + 0.5f), 0, 255));
 		}
 		else
 		{
-			alpha[2] = MathLib::lerp(alpha[0], alpha[1], 1 / 5.0f);
-			alpha[3] = MathLib::lerp(alpha[0], alpha[1], 2 / 5.0f);
-			alpha[4] = MathLib::lerp(alpha[0], alpha[1], 3 / 5.0f);
-			alpha[5] = MathLib::lerp(alpha[0], alpha[1], 4 / 5.0f);
+			alpha[2] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 1 / 5.0f) * 255 + 0.5f), 0, 255));
+			alpha[3] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 2 / 5.0f) * 255 + 0.5f), 0, 255));
+			alpha[4] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 3 / 5.0f) * 255 + 0.5f), 0, 255));
+			alpha[5] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(MathLib::lerp(falpha0, falpha1, 4 / 5.0f) * 255 + 0.5f), 0, 255));
 			alpha[6] = 0;
-			alpha[7] = 1;
+			alpha[7] = 255;
 		}
 
 		for (int i = 0; i < 2; ++ i)
@@ -162,7 +164,7 @@ namespace KlayGE
 			uint32_t alpha32 = (bc4.bitmap[i * 3 + 2] << 16) | (bc4.bitmap[i * 3 + 1] << 8) | (bc4.bitmap[i * 3 + 0] << 0);
 			for (int j = 0; j < 8; ++ j)
 			{
-				alpha_block[i * 8 + j] = static_cast<uint8_t>(alpha[(alpha32 >> (j * 3)) & 0x7] * 255.0f + 0.5f);
+				alpha_block[i * 8 + j] = alpha[(alpha32 >> (j * 3)) & 0x7];
 			}
 		}
 	}
@@ -1459,7 +1461,7 @@ namespace KlayGE
 						uint8_t pixel = 0;
 						if ((x_base + x < width) && (y_base + y < height))
 						{
-							pixel = src[(y_base + y) * in_pitch / 4 + (x_base + x)];
+							pixel = src[(y_base + y) * in_pitch + (x_base + x)];
 						}
 						uncompressed[y * 4 + x] = pixel;
 					}

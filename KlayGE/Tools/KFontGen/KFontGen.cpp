@@ -718,14 +718,14 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 	}
 }
 
-void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
-				std::pair<int32_t, int32_t> const * char_index,
-				font_info const * char_info, float const * char_dist_data,
-				uint32_t char_size_sq, int16_t& base, int16_t& scale)
+void stat_min_max(float& min_value, float& max_value, std::pair<int32_t, int32_t> const * char_index,
+	font_info const * char_info, float const * char_dist_data, uint32_t char_size_sq,
+	uint32_t s, uint32_t e)
 {
-	float max_value = -1;
-	float min_value = 1;
-	for (size_t i = 0; i < non_empty_chars; ++ i)
+	max_value = -1;
+	min_value = 1;
+
+	for (uint32_t i = s; i < e; ++ i)
 	{
 		int const ch = char_index[i].first;
 		float const * dist = &char_dist_data[char_info[ch].dist_index];
@@ -736,6 +736,77 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 			min_value = std::min(min_value, value);
 			max_value = std::max(max_value, value);
 		}
+	}
+}
+
+void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, float4 const & min_value_inv_scale_frscale_fbase,
+	std::pair<int32_t, int32_t> const * char_index,
+	font_info const * char_info, float const * char_dist_data, uint32_t char_size_sq,
+	uint32_t s, uint32_t e)
+{
+	lzma_dist.clear();
+	mse = 0;
+
+	float const min_value = min_value_inv_scale_frscale_fbase.x();
+	float const inv_scale = min_value_inv_scale_frscale_fbase.y();
+	float const frscale = min_value_inv_scale_frscale_fbase.z();
+	float const fbase = min_value_inv_scale_frscale_fbase.w();
+
+	LZMACodec lzma_enc;
+	lzma_enc.EncodeProps(5, char_size_sq);
+	std::vector<uint8_t> uint8_dist(char_size_sq);
+	std::vector<uint8_t> bc4_dist(char_size_sq / 2);
+	std::vector<uint8_t> char_lzma_dist;
+	for (uint32_t i = s; i < e; ++ i)
+	{
+		int const ch = char_index[i].first;
+		float const * dist = &char_dist_data[char_info[ch].dist_index];
+		for (size_t j = 0; j < char_size_sq; ++ j)
+		{
+			uint8_dist[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
+
+			float const d = dist[j] - (uint8_dist[j] * frscale + fbase);
+			mse += d * d;
+		}
+
+		lzma_enc.Encode(char_lzma_dist, &uint8_dist[0], uint8_dist.size());
+		uint64_t len = static_cast<uint64_t>(char_lzma_dist.size());
+
+		lzma_dist.insert(lzma_dist.end(), reinterpret_cast<uint8_t*>(&len), reinterpret_cast<uint8_t*>(&len + 1));
+		lzma_dist.insert(lzma_dist.end(), char_lzma_dist.begin(), char_lzma_dist.end());
+	}
+}
+
+void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
+				int num_threads, std::pair<int32_t, int32_t> const * char_index,
+				font_info const * char_info, float const * char_dist_data,
+				uint32_t char_size_sq, int16_t& base, int16_t& scale)
+{
+	thread_pool tp(1, num_threads);
+
+	std::vector<joiner<void> > joiners(num_threads);
+
+	std::vector<float> max_values(num_threads);
+	std::vector<float> min_values(num_threads);
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		uint32_t n = (non_empty_chars + num_threads - 1) / num_threads;
+		uint32_t s = i * n;
+		uint32_t e = std::min(s + n, non_empty_chars);
+
+		joiners[i] = tp(boost::bind(stat_min_max, boost::ref(min_values[i]), boost::ref(max_values[i]), char_index,
+			char_info, char_dist_data, char_size_sq,
+			s, e));
+	}
+
+	float max_value = -1;
+	float min_value = 1;
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		joiners[i]();
+
+		min_value = std::min(min_value, min_values[i]);
+		max_value = std::max(max_value, max_values[i]);
 	}
 
 	if (abs(max_value - min_value) < 2.0f / 65536)
@@ -748,31 +819,30 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 	scale = static_cast<int16_t>((fscale - 1) * 32768 + 0.5f);
 	float inv_scale = 255 / fscale;
 
-	float mse = 0;
 	float const frscale = (scale / 32768.0f + 1) / 255.0f;
 	float const fbase = base / 32768.0f;
 
-	LZMACodec lzma_enc;
-	lzma_enc.EncodeProps(5, char_size_sq);
-	std::vector<uint8_t> uint8_dist(char_size_sq);
-	std::vector<uint8_t> char_lzma_dist;
-	for (size_t i = 0; i < non_empty_chars; ++ i)
+	std::vector<std::vector<uint8_t> > lzma_dists(num_threads);
+	std::vector<float> mses(num_threads);
+	for (int i = 0; i < num_threads; ++ i)
 	{
-		int const ch = char_index[i].first;
-		float const * dist = &char_dist_data[char_info[ch].dist_index];
-		for (size_t j = 0; j < char_size_sq; ++ j)
-		{
-			uint8_dist[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((dist[j] - min_value) * inv_scale + 0.5f), 0, 255));
+		uint32_t n = (non_empty_chars + num_threads - 1) / num_threads;
+		uint32_t s = i * n;
+		uint32_t e = std::min(s + n, non_empty_chars);
 
-			float const d = dist[j] - (uint8_dist[j] * frscale + fbase);
-			mse += d * d;
-		}
+		joiners[i] = tp(boost::bind(quantizer_chars, boost::ref(lzma_dists[i]), boost::ref(mses[i]),
+			boost::cref(float4(min_value, inv_scale, frscale, fbase)),
+			char_index, char_info, char_dist_data, char_size_sq,
+			s, e));
+	}
 
-		lzma_enc.Encode(char_lzma_dist, &uint8_dist[0], char_size_sq);
-		uint64_t len = static_cast<uint64_t>(char_lzma_dist.size());
+	float mse = 0;
+	for (int i = 0; i < num_threads; ++ i)
+	{
+		joiners[i]();
 
-		lzma_dist.insert(lzma_dist.end(), reinterpret_cast<uint8_t*>(&len), reinterpret_cast<uint8_t*>(&len + 1));
-		lzma_dist.insert(lzma_dist.end(), char_lzma_dist.begin(), char_lzma_dist.end());
+		mse += mses[i];
+		lzma_dist.insert(lzma_dist.end(), lzma_dists[i].begin(), lzma_dists[i].end());
 	}
 
 	cout << "Quantize MSE: " << mse << endl;
@@ -983,7 +1053,7 @@ int main(int argc, char* argv[])
 	cout << "Quantize..." << endl;
 	timer_stage.restart();
 	std::vector<uint8_t> lzma_dist;
-	quantizer(lzma_dist, header.non_empty_chars, &char_index[0], &char_info[0], &char_dist_data[0],
+	quantizer(lzma_dist, header.non_empty_chars, num_threads, &char_index[0], &char_info[0], &char_dist_data[0],
 		header.char_size * header.char_size, header.base, header.scale);
 	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
