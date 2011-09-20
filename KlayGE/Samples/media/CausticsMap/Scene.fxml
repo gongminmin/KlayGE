@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8"?>
+<effect>
+  <include name="util.fxml"/>
+  <include name="Lighting.fxml"/>
+
+  <parameter type="texture2D" name="rt_texture" />
+  <parameter type="sampler" name="rt_texture_sampler">
+    <state name="filtering" value="min_mag_linear_mip_point" />
+    <state name="address_u" value="clamp" />
+    <state name="address_v" value="clamp" />
+  </parameter>
+  <parameter type="float4x4" name="display_pos" />
+  <shader>
+    <![CDATA[
+    void RTDisplayVS(
+        float4 mask : POSITION, 
+        float2 uv : TEXCOORD0, 
+        out float4 pos : SV_Position,
+        out float2 out_uv : TEXCOORD0)
+    {
+        pos =  mul(mask, display_pos);
+        out_uv = uv;
+    }
+    
+    float4 RTDisplayPS(float4 pos : SV_Position, float2 in_uv : TEXCOORD0) : SV_Target
+    {
+        return rt_texture.Sample(rt_texture_sampler, in_uv);
+    }
+    ]]>
+  </shader>
+  <technique name="DebugRTDisplay">
+    <pass name="p0">
+      <state name="cull_mode" value="none" />
+      <state name="vertex_shader" value="RTDisplayVS()" />
+      <state name="pixel_shader" value="RTDisplayPS()" />
+    </pass>
+  </technique>
+
+  <parameter type="float4x4" name="model" />
+  <parameter type="float4x4" name="mit" />
+  <parameter type="float4x4" name="mvp" />
+
+  <shader>
+    <![CDATA[
+    void PosTexVS(
+        float4 oPos : POSITION,
+        out float4 hPos : SV_Position,
+        out float3 wPos : TEXCOORD0
+        )
+    {
+        hPos = mul(float4(oPos.xyz, 1), mvp);
+        wPos = mul(float4(oPos.xyz, 1), model).xyz;
+    }  
+    void PosTexPS(
+        float4 hPos : SV_Position,
+        float3 wPos : TEXCOORD0,
+        out float4 out_pos : SV_Target0
+        )
+    {
+        out_pos = float4(wPos, 1);
+    }
+    ]]>
+  </shader>
+  <technique name="PositionTex">
+    <pass name="p0">
+      <state name="cull_mode" value="back" />
+      <state name="depth_enable" value="true" />
+      <state name="vertex_shader" value="PosTexVS()" />
+      <state name="pixel_shader" value="PosTexPS()" />
+    </pass>
+  </technique>
+
+  <shader>
+    <![CDATA[
+    void PosNormTexVS(
+        float4 oPos : POSITION,
+        float3 oNormal : NORMAL,
+        out float4 hPos : SV_Position,
+        out float3 wPos : TEXCOORD0,
+        out float3 wNormal : TEXCOORD1
+        )
+    {
+        hPos = mul(float4(oPos.xyz, 1), mvp);
+        wPos = mul(float4(oPos.xyz, 1), model).xyz;
+        wNormal = mul(oNormal*2 - 1, (float3x3) mit);
+    }
+    
+    void PosNormTexPS(
+        float4 hPos : SV_Position,
+        float3 wPos : TEXCOORD0,
+        float3 wNormal : TEXCOORD1,
+        out float4 out_pos : SV_Target0,
+        out float4 out_norm : SV_Target1
+        )
+    {
+        out_pos = float4(wPos, 1);
+        out_norm = float4(normalize(wNormal), 1);
+    }
+    ]]>
+  </shader>
+  <technique name="PosNormTexBack">
+    <pass name="p0">
+      <state name="cull_mode" value="front" />
+      <state name="depth_enable" value="true" />
+      <state name="vertex_shader" value="PosNormTexVS()" />
+      <state name="pixel_shader" value="PosNormTexPS()" />
+    </pass>
+  </technique>
+  <technique name="PosNormTexFront">
+    <pass name="p0">
+      <state name="cull_mode" value="back" />
+      <state name="depth_enable" value="true" />
+      <state name="vertex_shader" value="PosNormTexVS()" />
+      <state name="pixel_shader" value="PosNormTexPS()" />
+    </pass>
+  </technique>
+
+  <parameter type="float3" name="eye_pos"/>
+  <parameter type="float3" name="light_pos"/>
+  <parameter type="float3" name="light_color"/>
+  <parameter type="float3" name="light_falloff"/>
+  <parameter type="float4x4" name="light_vp" />
+
+  <parameter type="texture2D" name="diffuse_tex"/>
+  <parameter type="texture2D" name="normal_tex"/>
+  <parameter type="texture3D" name="distance_tex"/>
+
+  <parameter type="sampler" name="linear_sampler">
+    <state name="filtering" value="min_mag_linear_mip_point"/>
+    <state name="address_u" value="wrap"/>
+    <state name="address_v" value="wrap"/>
+    <state name="address_w" value="clamp"/>
+  </parameter>
+
+  <parameter type="float" name="min_variance"/>
+  <parameter type="float" name="bleeding_reduce"/>
+  <parameter type="textureCUBE" name="shadow_cube_tex"/>
+  <parameter type="texture2D" name="caustics_tex"/>
+  <parameter type="sampler" name="linear_clamp_sampler">
+    <state name="filtering" value="min_mag_linear_mip_point"/>
+    <state name="address_u" value="clamp"/>
+    <state name="address_v" value="clamp"/>
+  </parameter>
+  <parameter type="float4x4" name="obj_model_to_light_model"/>
+  <parameter type="float4x4" name="obj_model_to_light_view" />
+
+  <shader>
+    <![CDATA[
+void DistanceMappingVS(float4 pos		: POSITION,
+					float2 texcoord0	: TEXCOORD0,
+					float3 N			: NORMAL,	// in object space
+					float4 T			: TANGENT,	// in object space
+					
+					out float4 oL		: TEXCOORD0,	// in tangent space
+					out float4 oV		: TEXCOORD1,	// in tangent space
+					out float3 oH		: TEXCOORD2,	// in tangent space
+          out float3 oLightWorldPos : TEXCOORD3,
+          out float3 wPos : TEXCOORD4,
+					out float4 oPos		: SV_Position
+          )
+{
+	oPos = mul(pos, mvp);
+
+	N = N * 2 - 1;
+	T = T * 2 - 1;
+
+	float3x3 matObjToTangentSpace;
+	matObjToTangentSpace[0] = T.xyz;
+	matObjToTangentSpace[1] = cross(N, T.xyz) * T.w;
+	matObjToTangentSpace[2] = N;
+
+	float3 vLight = light_pos - pos.xyz;
+	float3 vView = eye_pos - pos.xyz;
+	float3 vHalf = normalize(vLight) + normalize(vView);
+
+	oL.xyz = mul(matObjToTangentSpace, vLight);
+	oV.xyz = mul(matObjToTangentSpace, vView);
+	oH = mul(matObjToTangentSpace, vHalf);
+	
+	oL.w = texcoord0.x;
+	oV.w = texcoord0.y;
+  
+  oLightWorldPos = mul(pos, obj_model_to_light_model).xyz;
+  wPos = mul(pos, model).xyz;
+}
+
+float linstep(float min, float max, float v)
+{
+	return clamp((v - min) / (max - min), 0, 1);
+}
+
+float4 DistanceMappingShading(float3 L, float3 V, float3 H, float3 diffuse, float3 normal)
+{
+	float atten = attenuation_term(0, -L.xyz, light_falloff);
+	float3 light_vec = normalize(L);
+	float3 halfway_vec = normalize(H);
+	return float4(atten * light_color * calc_brdf(diffuse, 0.2f, 16, light_vec, halfway_vec, normal), 1);
+}
+
+float4 DistanceMappingPS(
+            float4 L	: TEXCOORD0,
+						float4 V	: TEXCOORD1,
+						float3 H	: TEXCOORD2,
+            float3 LightWorldPos : TEXCOORD3,
+            float3 wPos : TEXCOORD4
+            ) : SV_Target
+{
+	float3 texCoord0 = float3(L.w, V.w, 1);
+	
+	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
+
+	float3 texUV = texCoord0;
+	for (int i = 0; i < 8; ++ i)
+	{
+		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
+	}
+
+	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
+	{
+		discard;
+	}
+  
+  float2 dx = ddx(texCoord0.xy);
+	float2 dy = ddy(texCoord0.xy);
+  
+  //roughly hack only for this demo, in order to correct shadow for distance mapping
+  float3 deltaUV;
+  deltaUV = normalize(float3(texUV.xy, 0.5)) - normalize(float3(texCoord0.xy, 0.5));
+  
+  float dist = length(LightWorldPos);
+  float3 shadow_dir = normalize(LightWorldPos);
+  shadow_dir = normalize(shadow_dir + deltaUV);
+  float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
+  float p = (dist <= moments.x);
+  float variance = moments.y - moments.x * moments.x;
+	variance = max(variance, 500);
+	float m_d = moments.x - dist;
+	float p_max = variance / (variance + m_d * m_d);
+	p_max = linstep(0.55, 1, p_max);
+  float atten = max(p, p_max);
+  //
+  
+  float4 caustics = float4(1, 1, 1, 1);
+  float4 lookup_proj = mul(float4(wPos, 1.0), light_vp);
+  float2 lookup_uv = float2(0.5 * (lookup_proj.xy / lookup_proj.w) + float2(0.5, 0.5));
+  lookup_uv.y = 1.0f - lookup_uv.y;
+  if (lookup_uv.x >= 0 && lookup_uv.x <= 1 && lookup_uv.y >=0 && lookup_uv.y <= 1)
+  {
+      caustics = float4(caustics_tex.SampleLevel(linear_clamp_sampler, lookup_uv + (texUV.xy - texCoord0.xy), 0).xyz, 1);
+      caustics = caustics + float4(1, 1, 1, 1);
+  }
+
+	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
+	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten * caustics;
+}
+
+float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
+						float4 V		: TEXCOORD1,
+						float3 H		: TEXCOORD2,
+            float3 LightWorldPos : TEXCOORD3,
+            float3 LightWorldNormal : TEXCOORD4,
+            float3 LightViewPos : TEXCOORD5) : SV_Target
+{
+	float3 texCoord0 = float3(L.w, V.w, 1);
+
+	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
+
+	float3 texUV = texCoord0;
+	for (int i = 0; i < 2; ++ i)
+	{
+		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
+	}
+	
+	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
+	{
+		discard;
+	}
+  
+  float3 deltaUV;
+  deltaUV = normalize(float3(texUV.xy, 0.5)) - normalize(float3(texCoord0.xy, 0.5));
+  
+  float dist = length(LightWorldPos);
+  float3 shadow_dir = normalize(LightWorldPos);
+  shadow_dir = normalize(shadow_dir + deltaUV);
+  float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
+  float p = (dist <= moments.x);
+  float variance = moments.y - moments.x * moments.x;
+	variance = max(variance, 500);
+	float m_d = moments.x - dist;
+	float p_max = variance / (variance + m_d * m_d);
+	p_max = linstep(0.55, 1, p_max);
+  float atten = max(p, p_max);
+
+	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
+	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
+	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal);
+}
+		]]>
+  </shader>
+
+  <technique name="DistanceMapping2a">
+    <pass name="p0">
+      <state name="vertex_shader" value="DistanceMappingVS()"/>
+      <state name="pixel_shader" value="DistanceMappingPS()"/>
+    </pass>
+  </technique>
+
+  <technique name="DistanceMapping20">
+    <pass name="p0">
+      <state name="vertex_shader" value="DistanceMappingVS()"/>
+      <state name="pixel_shader" value="DistanceMappingPS_20()"/>
+    </pass>
+  </technique>
+
+  <parameter type="float" name="refract_idx" />
+  <parameter type="float3" name="absorption_idx" />
+  <parameter type="float4x4" name="vp" />
+  <parameter type="texture2D" name="background_texture" />
+  <parameter type="sampler" name="background_sampler">
+    <state name="filtering" value="min_mag_linear_mip_point" />
+    <state name="address_u" value="clamp" />
+    <state name="address_v" value="clamp" />
+  </parameter>
+  <parameter type="textureCUBE" name="skybox_Ycube_tex"/>
+  <parameter type="sampler" name="skybox_YcubeMapSampler">
+    <state name="filtering" value="min_mag_linear_mip_point"/>
+    <state name="address_u" value="clamp"/>
+    <state name="address_v" value="clamp"/>
+    <state name="address_w" value="clamp"/>
+  </parameter>
+  <parameter type="textureCUBE" name="skybox_Ccube_tex"/>
+  <parameter type="sampler" name="skybox_CcubeMapSampler">
+    <state name="filtering" value="min_mag_linear_mip_point"/>
+    <state name="address_u" value="clamp"/>
+    <state name="address_v" value="clamp"/>
+    <state name="address_w" value="clamp"/>
+  </parameter>
+  <parameter type="textureCUBE" name="env_cube"/>
+  <parameter type="sampler" name="env_cube_sampler">
+    <state name="filtering" value="min_mag_linear_mip_point"/>
+    <state name="address_u" value="clamp"/>
+    <state name="address_v" value="clamp"/>
+    <state name="address_w" value="clamp"/>
+  </parameter>
+  
+  <shader>
+    <![CDATA[
+    void RefractEffectVS(
+        float4 position : POSITION,
+        float3 normal : NORMAL,
+        out float4 hPos : SV_Position,
+        out float3 wPosition : TEXCOORD0,
+        out float3 wNormal : TEXCOORD1,
+        out float3 wViewVec : TEXCOORD2
+    )
+    {
+        hPos = mul(float4(position.xyz, 1), mvp);
+        wPosition = mul(float4(position.xyz, 1), model).xyz;
+        wNormal = mul(normal * 2 - 1, (float3x3) mit);
+        wViewVec = normalize(wPosition - eye_pos);
+    }
+    float4 RefractEffectPS(
+        float4 hPos : SV_Position,
+        float3 wPosition : TEXCOORD0,
+        float3 wNormal : TEXCOORD1,
+        float3 wViewVec : TEXCOORD2
+    ) : SV_Target
+    {
+        wViewVec = normalize(wViewVec);
+        wNormal = normalize(wNormal);
+        
+        float3 refract_vec = refract(wViewVec, wNormal, 1/refract_idx);
+        float3 reflect_vec = reflect(wViewVec, wNormal);
+        float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
+        
+        float3 reflected_clr = env_cube.Sample(env_cube_sampler, reflect_vec).xyz;
+        float3 refracted_clr;
+        
+        float dist = 10.0;
+        float3 intersection_pt = wPosition + dist * refract_vec;
+        
+        float4 lookup_proj = mul(float4(intersection_pt, 1.0), vp);
+        float2 lookup_uv = float2(0.5 * (lookup_proj.xy / lookup_proj.w) + float2(0.5, 0.5));
+        lookup_uv.y = 1.0f - lookup_uv.y;
+        float4 lookup_rt = background_texture.Sample(background_sampler, lookup_uv);
+         
+        if (any(lookup_rt.w))
+        {
+            refracted_clr = lookup_rt.xyz;
+        }
+        else
+        {
+             float refract_y = skybox_Ycube_tex.Sample(skybox_YcubeMapSampler, refract_vec).r;
+             refract_y = exp2(refract_y * 65536 / 2048 - 16);
+             float4 refract_c = float4(get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_vec)).y, 
+                                                 get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_vec)).x, 
+                                                 get_xy_channel(skybox_Ccube_tex.Sample(skybox_CcubeMapSampler, refract_vec)));
+             refract_c *= refract_c;
+             refracted_clr = refract_y * float3(refract_c.x, (1 - refract_c.z - refract_c.w), refract_c.y) / float3(0.2126f, 0.7152f, 0.0722f);
+        }
+        
+        return float4(lerp(refracted_clr, reflected_clr, fresnel_term), 1);
+    }
+    ]]>
+  </shader>
+  <technique name="RefractEffect" >
+    <pass name="p0">
+      <state name="cull_mode" value="back" />
+      <state name="depth_enable" value="true" />
+      <state name="vertex_shader" value="RefractEffectVS()" />
+      <state name="pixel_shader" value="RefractEffectPS()" />
+    </pass>
+  </technique>
+  
+</effect>
