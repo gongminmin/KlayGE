@@ -438,7 +438,6 @@ namespace
 				{
 					*(technique_->Effect().ParameterByName("mvp")) = model_ * view * proj;
 					*(technique_->Effect().ParameterByName("model")) = model_;
-					*(technique_->Effect().ParameterByName("mit")) = MathLib::transpose(MathLib::inverse(model_));
 				}
 				break;
 
@@ -461,7 +460,6 @@ namespace
 					*(technique_->Effect().ParameterByName("mvp")) = model_ * view * proj;
 					*(technique_->Effect().ParameterByName("model")) = model_;
 					*(technique_->Effect().ParameterByName("vp")) = view * proj;
-					*(technique_->Effect().ParameterByName("mit")) = MathLib::transpose(MathLib::inverse(model_));
 					*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();				
 					*(technique_->Effect().ParameterByName("background_texture")) = scene_texture_;
 					*(technique_->Effect().ParameterByName("skybox_Ycube_tex")) = y_cube_map_;
@@ -742,7 +740,6 @@ void CausticsMapApp::InitObjects()
 	dummy_light_env_->Position(float3(0.0f, 20.0f, 0.0f));
 
 	light_proxy_ = MakeSharedPtr<SceneObjectLightSourceProxy>(light_);
-	checked_pointer_cast<SceneObjectLightSourceProxy>(light_proxy_)->Scaling(0.1f, 0.1f, 0.1f);
 	light_proxy_->AddToSceneManager();
 
 	//Input Bind
@@ -864,7 +861,14 @@ void CausticsMapApp::InitEnvCube()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	RenderViewPtr env_cube_dp_rv_ = rf.Make2DDepthStencilRenderView(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, EF_D24S8, 1, 0);
-	env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	{
+		env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	}
+	else
+	{
+		env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	}
 
 	for (int i = 0; i < 6; ++ i)
 	{
@@ -1028,12 +1032,14 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 		refract_obj_->Visible(false);
 		refract_obj_ = sphere_;
 		refract_obj_->Visible(true);
+		dummy_light_env_->Position(float3(0.0f, 10.0f, 0.0f));
 		break;
 
 	case 1:
 		refract_obj_->Visible(false);
 		refract_obj_ = bunny_;
 		refract_obj_->Visible(true);
+		dummy_light_env_->Position(float3(3.0f, 2.0f, 0.0f));
 		break;
 	}
 }

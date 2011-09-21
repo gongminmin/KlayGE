@@ -46,24 +46,19 @@ void PointGS(point CAUSTICS_VS_OUT input[1], inout TriangleStream<CAUSTICS_GS_OU
         
     out_stream.RestartStrip();
 }
-    ]]>
+		]]>
 	</shader>
 
 	<parameter type="texture2D" name="t_first_positions"/>
 	<parameter type="texture2D" name="t_first_normals"/>
 	<parameter type="texture2D" name="t_background_positions"/>
-	<parameter type="sampler" name="caustics_input_sampler">
+	<parameter type="sampler" name="trilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
 	<parameter type="texture2D" name="pt_texture"/>
-	<parameter type="sampler" name="pt_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
 
 	<parameter type="float" name="refract_idx"/>
 	<parameter type="float3" name="absorption_idx"/>
@@ -74,46 +69,52 @@ void PointGS(point CAUSTICS_VS_OUT input[1], inout TriangleStream<CAUSTICS_GS_OU
 
 	<shader>
 		<![CDATA[
-float3 CalcIntersectionPt(float3 v, float3 pre_pos, float3 refract_vec, texture2D bg_tex)
+float2 CalcLookupUV(float3 p)
 {   
-    float3 p = v + distance(v, pre_pos) * refract_vec;
-    float4 lookup_proj = mul(float4(p, 1.0), light_vp);
-    float2 lookup_uv = float2(0.5 * (lookup_proj.xy / lookup_proj.w) + float2(0.5, 0.5));
-    lookup_uv.y = 1.0f - lookup_uv.y;
-
-    return bg_tex.SampleLevel(caustics_input_sampler, lookup_uv, 0).xyz;
+	float4 lookup_proj = mul(float4(p, 1), light_vp);
+	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f + 0.5f;
+	lookup_uv.y = 1 - lookup_uv.y;
+	return lookup_uv;
 }
-    
+
+float2 CalcIntersectionPtUV(float3 v, float3 pre_pos, float3 refract_vec)
+{   
+	float3 p = v + distance(v, pre_pos) * refract_vec;
+	return CalcLookupUV(p);
+}
+
 CAUSTICS_VS_OUT GenSingleFaceCausticsMapVS(int2 idx : POSITION)
 {
-    float3 surface_pt = t_first_positions.Load(int3(idx, 0)).xyz;
-    float3 surface_n = t_first_normals.Load(int3(idx, 0)).xyz;
-    float3 incident_light = normalize(surface_pt - light_pos);
-    float3 refract_light = refract(incident_light, surface_n, 1 / refract_idx);
+	float3 surface_pt = t_first_positions.Load(int3(idx, 0)).xyz;
+	float3 surface_n = t_first_normals.Load(int3(idx, 0)).xyz;
+	float3 incident_light = normalize(surface_pt - light_pos);
+	float3 refract_light = refract(incident_light, surface_n, 1 / refract_idx);
 
-    float3 caustics_pt = float3(surface_pt.x, surface_pt.y, surface_pt.z + 1.0);
+	float3 caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
 
-    //2 steps
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_background_positions);
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_background_positions);
+	//2 steps
+	caustics_pt = t_background_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
+	caustics_pt = t_background_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
 
-    float dist = distance(caustics_pt, surface_pt);
-    float alpha = dot(surface_n, -incident_light) / occlusion_pixs;
-    float3 clr = light_density * light_color * exp(-dist * absorption_idx);
+	float dist = distance(caustics_pt, surface_pt);
+	float alpha = dot(surface_n, -incident_light) / occlusion_pixs;
+	float3 clr = light_density * light_color * exp(-dist * absorption_idx);
 
 	CAUSTICS_VS_OUT vs_out;
-	
-    vs_out.pos = float4(caustics_pt, 1);
-    vs_out.color = float4(clr, alpha);
-	
+
+	vs_out.pos = float4(caustics_pt, 1);
+	vs_out.color = float4(clr, alpha);
+
 	return vs_out;
 }
 
 float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Target
 {
-    return color * pt_texture.Sample(pt_sampler, tc);
+	return color * pt_texture.Sample(trilinear_sampler, tc);
 }
-     ]]>
+		]]>
 	</shader>
 	
 	<technique name="GenSingleFaceCausticsMap">
@@ -145,45 +146,46 @@ float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Ta
 CAUSTICS_VS_OUT GenDualFaceCausticsMapVS(int2 idx : POSITION)
 {
 	float3 surface_pt = t_first_positions.Load(int3(idx, 0)).xyz;
-    float3 surface_n = t_first_normals.Load(int3(idx, 0)).xyz;
-    float3 incident_light = normalize(surface_pt - light_pos);
-    float3 refract_light = refract(incident_light, surface_n, 1 /	refract_idx);
+	float3 surface_n = t_first_normals.Load(int3(idx, 0)).xyz;
+	float3 incident_light = normalize(surface_pt - light_pos);
+	float3 refract_light = refract(incident_light, surface_n, 1 / refract_idx);
 
-    float3 first_pt = surface_pt;
-    float3 first_n = surface_n;
-    float3 fisrt_incident_light = incident_light;
+	float3 first_pt = surface_pt;
+	float3 first_n = surface_n;
+	float3 fisrt_incident_light = incident_light;
 
-    float3 caustics_pt = float3(surface_pt.x, surface_pt.y, surface_pt.z + 1.0);
+	float3 caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
 
-    //2 steps first refract
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_second_positions);
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_second_positions);
+	//2 steps first refract
+	caustics_pt = t_second_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
+	caustics_pt = t_second_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
 
-    surface_pt = caustics_pt;
+	surface_pt = caustics_pt;
 
-    float4 lookup_proj = mul(float4(surface_pt, 1.0), light_vp);
-    float2 lookup_uv = float2(0.5 * (lookup_proj.xy / lookup_proj.w) + float2(0.5, 0.5));
-    lookup_uv.y = 1.0f - lookup_uv.y;
-    surface_n = -t_second_normals.SampleLevel(caustics_input_sampler, lookup_uv, 0).xyz;
+	surface_n = -t_second_normals.SampleLevel(trilinear_sampler, CalcLookupUV(surface_pt), 0).xyz;
 
-    incident_light = normalize(surface_pt - first_pt);
-    refract_light = refract(incident_light, surface_n, refract_idx);
+	incident_light = normalize(surface_pt - first_pt);
+	refract_light = refract(incident_light, surface_n, refract_idx);
 
-    caustics_pt = float3(surface_pt.x, surface_pt.y, surface_pt.z + 1.0);
+	caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
 
-    //2 steps second refract
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_background_positions);
-    caustics_pt = CalcIntersectionPt(surface_pt, caustics_pt, refract_light, t_background_positions);
+	//2 steps second refract
+	caustics_pt = t_background_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
+	caustics_pt = t_background_positions.SampleLevel(trilinear_sampler,
+		CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light), 0).xyz;
 
-    float dist = distance(caustics_pt, first_pt);
-    float alpha = dot(first_n, -fisrt_incident_light) / occlusion_pixs;
-    float3 clr = light_density * light_color * exp(-dist * absorption_idx);
+	float dist = distance(caustics_pt, first_pt);
+	float alpha = dot(first_n, -fisrt_incident_light) / occlusion_pixs;
+	float3 clr = light_density * light_color * exp(-dist * absorption_idx);
 
-    CAUSTICS_VS_OUT vs_out;
-	
+	CAUSTICS_VS_OUT vs_out;
+
 	vs_out.pos = float4(caustics_pt, 1);
-    vs_out.color = float4(clr, alpha);
-	
+	vs_out.color = float4(clr, alpha);
+
 	return vs_out;
 }
 		]]>
