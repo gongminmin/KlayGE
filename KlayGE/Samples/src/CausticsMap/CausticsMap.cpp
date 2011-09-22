@@ -58,112 +58,6 @@ namespace
 		InputActionDefine(Exit, KS_Escape),
 	};
 
-	class TextureRenderable : public RenderableHelper
-	{
-	public:
-		TextureRenderable()
-			: RenderableHelper(L"TextureRenderable")
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEffectPtr effect = rf.LoadEffect("Scene.fxml");
-			technique_ = effect->TechniqueByName("DebugRTDisplay");
-			assert(technique_->Validate());
-
-			display_position_para_ = effect->ParameterByName("display_pos");
-			texture_para_ = effect->ParameterByName("rt_texture");
-
-			float4 xyzs[] =
-			{
-				float4(1, 0, 0, 0),
-				float4(0, 1, 0, 0),
-				float4(0, 0, 1, 0),
-				float4(0, 0, 0, 1)
-			};
-
-			uint16_t indices[] =
-			{
-				0, 1, 2, 2, 3, 0
-			};
-
-			float2 texcoord[] =
-			{
-				float2(0.0f, 0.0f),
-				float2(1.0f, 0.0f),
-				float2(1.0f, 1.0f),
-				float2(0.0f, 1.0f)
-			};
-
-			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-			ElementInitData init_data;
-			init_data.row_pitch = sizeof(xyzs);
-			init_data.slice_pitch = 0;
-			init_data.data = xyzs;
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-
-			init_data.row_pitch = sizeof(indices);
-			init_data.slice_pitch = 0;
-			init_data.data = indices;
-			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindIndexStream(ib, EF_R16UI);
-
-			init_data.row_pitch = sizeof(texcoord);
-			init_data.slice_pitch = 0;
-			init_data.data = texcoord;
-			GraphicsBufferPtr tb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(tb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-
-			display_position_ = float4x4::Zero();
-		}
-
-		void Display(int32_t x, int32_t y, int32_t width, int32_t height, TexturePtr texture)
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			Viewport vp = re.CurFrameBuffer()->GetViewport();
-			float half_w, half_h;
-			half_w = vp.width * 0.5f;
-			half_h = vp.height * 0.5f;
-
-			display_position_ = float4x4			
-				(
-					(x - half_w) / half_w, (half_h - y) / half_h, 0.f, 1.f,
-					(x + width - half_w) / half_w, (half_h - y) / half_h, 0.f, 1.f,
-					(x + width - half_w) / half_w, (half_h - y - height) / half_h, 0.f, 1.f,
-					(x - half_w) / half_w, (half_h - y - height) / half_h, 0.f, 1.f
-				);
-
-			texture_ = texture;
-		}
-
-		void OnRenderBegin()
-		{
-			*display_position_para_ = display_position_;
-			*texture_para_ = texture_;
-		}
-
-	private:
-		float4x4 display_position_;
-		TexturePtr texture_;
-		RenderEffectParameterPtr display_position_para_;
-		RenderEffectParameterPtr texture_para_;
-	};
-
-	class TextureRenderObject : public SceneObjectHelper
-	{
-	public:
-		TextureRenderObject()
-			: SceneObjectHelper(MakeSharedPtr<TextureRenderable>(), SOA_Overlay)
-		{
-		}
-
-		void Display(int32_t x, int32_t y, uint32_t width, uint32_t height, TexturePtr texture)
-		{
-			checked_pointer_cast<TextureRenderable>(renderable_)->Display(x, y, width, height, texture);
-			this->AddToSceneManager();
-		}
-	};
 
 	class ReceivePlane : public RenderablePlane
 	{
@@ -367,8 +261,6 @@ namespace
 		{
 			checked_pointer_cast<ReceivePlane>(renderable_)->Pass(pass);
 		}
-
-	private:
 	};
 
 	class RefractMesh : public StaticMesh
@@ -393,40 +285,35 @@ namespace
 			BOOST_ASSERT(gen_cube_sm_tech_->Validate());
 		}
 
-		void BindLight(LightSourcePtr light)
+		void BindLight(LightSourcePtr const & light)
 		{
 			light_ = light;
 		}
 
-		void SceneTexture(TexturePtr scene_texture)
+		void SceneTexture(TexturePtr const & scene_texture)
 		{
 			scene_texture_ = scene_texture;
 		}
 
-		void SetHDRSkyMap(TexturePtr y_cube_map, TexturePtr c_cube_map)
+		void SetHDRSkyMap(TexturePtr const & y_cube_map, TexturePtr const & c_cube_map)
 		{
 			y_cube_map_ = y_cube_map;
 			c_cube_map_ = c_cube_map;
 		}
 
-		void SetModelMatrix(float4x4 model)
-		{
-			model_ = model;
-		}
-
-		void SetEnvCubeCamera(Camera camera)
+		void SetEnvCubeCamera(CameraPtr const & camera)
 		{
 			env_cube_camera_ = camera;
 		}
 
-		void SetEnvCube(TexturePtr texture)
+		void SetEnvCube(TexturePtr const & texture)
 		{
 			env_cube_ = texture;
 		}
 
 		void OnRenderBegin()
 		{
-			CausticsMapApp & app = dynamic_cast<CausticsMapApp&>(Context::Instance().AppInstance());
+			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
@@ -436,8 +323,8 @@ namespace
 			case Position_Normal_Front_Pass:
 			case Position_Normal_Back_Pass:
 				{
-					*(technique_->Effect().ParameterByName("mvp")) = model_ * view * proj;
-					*(technique_->Effect().ParameterByName("model")) = model_;
+					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
+					*(technique_->Effect().ParameterByName("model")) = model_mat_;
 				}
 				break;
 
@@ -446,9 +333,9 @@ namespace
 					float4x4 light_model = MathLib::to_matrix(light_->Rotation()) * MathLib::translation(light_->Position());
 					float4x4 inv_light_model = MathLib::inverse(light_model);
 
-					*(technique_->Effect().ParameterByName("model")) = model_;
-					*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model_ * inv_light_model;
-					*(technique_->Effect().ParameterByName("mvp")) = model_ * view * proj;
+					*(technique_->Effect().ParameterByName("model")) = model_mat_;
+					*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model_mat_ * inv_light_model;
+					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
 				}
 				break;
 
@@ -457,8 +344,8 @@ namespace
 					float refract_idx = app.RefractIndex();
 					float3 absorption_idx = float3(0.1f, 0.1f, 0.1f);
 					
-					*(technique_->Effect().ParameterByName("mvp")) = model_ * view * proj;
-					*(technique_->Effect().ParameterByName("model")) = model_;
+					*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * view * proj;
+					*(technique_->Effect().ParameterByName("model")) = model_mat_;
 					*(technique_->Effect().ParameterByName("vp")) = view * proj;
 					*(technique_->Effect().ParameterByName("eye_pos")) = app.ActiveCamera().EyePos();				
 					*(technique_->Effect().ParameterByName("background_texture")) = scene_texture_;
@@ -479,33 +366,24 @@ namespace
 			switch (pass_)
 			{
 			case Position_Normal_Front_Pass:
-				{
-					technique_ = caustics_input_tech_f_;
-				}
+				technique_ = caustics_input_tech_f_;
 				break;
 
 			case Position_Normal_Back_Pass:
-				{
-					technique_ = caustics_input_tech_b_;
-				}
+				technique_ = caustics_input_tech_b_;
 				break;
 
 			case Gen_Shadow_Pass:
-				{
-					technique_ = gen_cube_sm_tech_;
-				}
+				technique_ = gen_cube_sm_tech_;
 				break;
 
 			case Refract_Pass:
-				{
-					technique_ = refract_tech_;
-				}
+				technique_ = refract_tech_;
 				break;
 			}
 		}
 
 	private:
-		float4x4 model_;
 		RenderTechniquePtr refract_tech_;
 		RenderTechniquePtr caustics_input_tech_f_;
 		RenderTechniquePtr caustics_input_tech_b_;
@@ -515,7 +393,7 @@ namespace
 		TexturePtr scene_texture_;
 		TexturePtr y_cube_map_;
 		TexturePtr c_cube_map_;
-		Camera env_cube_camera_;
+		CameraPtr env_cube_camera_;
 		TexturePtr env_cube_;
 	};
 
@@ -525,10 +403,9 @@ namespace
 		explicit RefractModel(std::wstring const & name)
 			: RenderModel(name)
 		{
-
 		}
 
-		void BindLight(LightSourcePtr light)
+		void BindLight(LightSourcePtr const & light)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
 			{
@@ -536,7 +413,7 @@ namespace
 			}
 		}
 
-		void SceneTexture(TexturePtr scene_texture)
+		void SceneTexture(TexturePtr const & scene_texture)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
 			{
@@ -544,7 +421,7 @@ namespace
 			}
 		}
 
-		void SetHDRSkyMap(TexturePtr y_cube_map, TexturePtr c_cube_map)
+		void SetHDRSkyMap(TexturePtr const & y_cube_map, TexturePtr const & c_cube_map)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
 			{
@@ -552,7 +429,7 @@ namespace
 			}
 		}
 
-		void SetModelMatrix(float4x4 model)
+		void SetModelMatrix(float4x4 const & model)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
 			{
@@ -560,7 +437,7 @@ namespace
 			}
 		}
 
-		void SetEnvCube(TexturePtr texture)
+		void SetEnvCube(TexturePtr const & texture)
 		{
 			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
 			{
@@ -631,7 +508,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			CausticsMapApp & app = dynamic_cast<CausticsMapApp&>(Context::Instance().AppInstance());
+			CausticsMapApp& app = *checked_cast<CausticsMapApp*>(&Context::Instance().AppInstance());
 			float4x4 light_view = app.ActiveCamera().ViewMatrix();
 			float4x4 light_proj = app.ActiveCamera().ProjMatrix();
 			float pt_size = app.PointSize();
@@ -645,7 +522,7 @@ namespace
 
 			CausticsInputTexture const & input_tex = app.GetCausticsInputTexture();
 
-			if (Single_Caustics_Pass == pass_ || Dual_Caustics_Pass == pass_)
+			if ((Single_Caustics_Pass == pass_) || (Dual_Caustics_Pass == pass_))
 			{			
 				*(technique_->Effect().ParameterByName("light_view")) = light_view;
 				*(technique_->Effect().ParameterByName("light_proj")) = light_proj;
@@ -662,12 +539,12 @@ namespace
 				*(technique_->Effect().ParameterByName("t_background_positions")) = input_tex.background_P_texture;
 				*(technique_->Effect().ParameterByName("t_first_positions")) = input_tex.refract_obj_P_texture_f;
 				*(technique_->Effect().ParameterByName("t_first_normals")) = input_tex.refract_obj_N_texture_f;
-			}
 
-			if (Dual_Caustics_Pass == pass_)
-			{
-				*(technique_->Effect().ParameterByName("t_second_positions")) = input_tex.refract_obj_P_texture_b;
-				*(technique_->Effect().ParameterByName("t_second_normals")) = input_tex.refract_obj_N_texture_b;
+				if (Dual_Caustics_Pass == pass_)
+				{
+					*(technique_->Effect().ParameterByName("t_second_positions")) = input_tex.refract_obj_P_texture_b;
+					*(technique_->Effect().ParameterByName("t_second_normals")) = input_tex.refract_obj_N_texture_b;
+				}
 			}
 		}
 
@@ -782,9 +659,6 @@ void CausticsMapApp::InitObjects()
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>(0);
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
-
-	rt_display_ = MakeSharedPtr<TextureRenderObject>();
-	rt_display2_ = MakeSharedPtr<TextureRenderObject>();	
 
 	this->InitUI();
 
@@ -1056,8 +930,6 @@ void CausticsMapApp::DoUpdateOverlay()
 	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Caustics Map", 16);
 	font_->RenderText(0, 16, Color(1, 1, 0, 1), st.str().c_str(), 16);
 	font_->RenderText(0, 32, Color(1, 1, 0, 1), re.ScreenFrameBuffer()->Description(), 16);
-
-	checked_pointer_cast<TextureRenderObject>(rt_display_)->Display(5, 50, CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, caustics_texture_filtered_);
 }
 
 uint32_t CausticsMapApp::DoUpdate(uint32_t pass)

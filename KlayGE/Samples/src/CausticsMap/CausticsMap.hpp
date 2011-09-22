@@ -126,8 +126,6 @@ private:
 	SceneObjectPtr refract_obj_;
 	SceneObjectPtr bunny_;
 	SceneObjectPtr sphere_;
-	SceneObjectPtr rt_display_;
-	SceneObjectPtr rt_display2_;
 	RenderablePtr caustics_grid_;
 
 	KlayGE::UIDialogPtr dialog_;
