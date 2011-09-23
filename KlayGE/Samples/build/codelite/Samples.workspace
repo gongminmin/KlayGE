@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CodeLite_Workspace Name="Samples" Database="./Samples.tags">
-  <Project Name="MotionBlurDoF" Path="MotionBlurDoF.project" Active="No"/>
+  <Project Name="MotionBlurDoF" Path="MotionBlurDoF.project"/>
   <Project Name="DeferredRendering" Path="DeferredRendering.project" Active="Yes"/>
   <Project Name="ProceduralTex" Path="ProceduralTex.project"/>
   <Project Name="VideoTexture" Path="VideoTexture.project"/>
@@ -19,7 +19,8 @@
   <Project Name="GPUParticleSystem" Path="GPUParticleSystem.project"/>
   <Project Name="Fractal" Path="Fractal.project"/>
   <Project Name="JudaTexViewer" Path="JudaTexViewer.project"/>
-  <Project Name="GlobalIllumination" Path="GlobalIllumination.project" Active="No"/>
+  <Project Name="GlobalIllumination" Path="GlobalIllumination.project"/>
+  <Project Name="CausticsMap" Path="CausticsMap.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug_win_x86" Selected="no">
       <Project Name="VideoTexture" ConfigName="Debug_win_x86"/>
@@ -42,6 +43,7 @@
       <Project Name="DeferredRendering" ConfigName="Debug_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x86"/>
       <Project Name="GlobalIllumination" ConfigName="Debug_win_x86"/>
+      <Project Name="CausticsMap" ConfigName="Debug_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x86"/>
@@ -64,6 +66,7 @@
       <Project Name="DeferredRendering" ConfigName="Release_win_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x86"/>
       <Project Name="GlobalIllumination" ConfigName="Release_win_x86"/>
+      <Project Name="CausticsMap" ConfigName="Release_win_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_win_x64"/>
@@ -86,6 +89,7 @@
       <Project Name="DeferredRendering" ConfigName="Debug_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_win_x64"/>
       <Project Name="GlobalIllumination" ConfigName="Debug_win_x64"/>
+      <Project Name="CausticsMap" ConfigName="Debug_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_win_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_win_x64"/>
@@ -108,6 +112,7 @@
       <Project Name="DeferredRendering" ConfigName="Release_win_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_win_x64"/>
       <Project Name="GlobalIllumination" ConfigName="Release_win_x64"/>
+      <Project Name="CausticsMap" ConfigName="Release_win_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x86"/>
@@ -130,6 +135,7 @@
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x86"/>
       <Project Name="GlobalIllumination" ConfigName="Debug_linux_x86"/>
+      <Project Name="CausticsMap" ConfigName="Debug_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x86" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x86"/>
@@ -152,6 +158,7 @@
       <Project Name="DeferredRendering" ConfigName="Release_linux_x86"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x86"/>
       <Project Name="GlobalIllumination" ConfigName="Release_linux_x86"/>
+      <Project Name="CausticsMap" ConfigName="Release_linux_x86"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Debug_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Debug_linux_x64"/>
@@ -174,6 +181,7 @@
       <Project Name="DeferredRendering" ConfigName="Debug_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Debug_linux_x64"/>
       <Project Name="GlobalIllumination" ConfigName="Debug_linux_x64"/>
+      <Project Name="CausticsMap" ConfigName="Debug_linux_x64"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release_linux_x64" Selected="yes">
       <Project Name="VideoTexture" ConfigName="Release_linux_x64"/>
@@ -196,6 +204,7 @@
       <Project Name="DeferredRendering" ConfigName="Release_linux_x64"/>
       <Project Name="JudaTexViewer" ConfigName="Release_linux_x64"/>
       <Project Name="GlobalIllumination" ConfigName="Release_linux_x64"/>
+      <Project Name="CausticsMap" ConfigName="Release_linux_x64"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

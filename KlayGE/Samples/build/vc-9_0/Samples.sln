@@ -40,6 +40,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JudaTexViewer", "JudaTexVie
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlobalIllumination", "GlobalIllumination.vcproj", "{264DA6A3-5040-4846-9E49-B61324D4879B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CausticsMap", "CausticsMap.vcproj", "{FE697854-D1EB-43F6-A530-3D2409A02647}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -208,6 +210,14 @@ Global
 		{264DA6A3-5040-4846-9E49-B61324D4879B}.Release|Win32.Build.0 = Release|Win32
 		{264DA6A3-5040-4846-9E49-B61324D4879B}.Release|x64.ActiveCfg = Release|x64
 		{264DA6A3-5040-4846-9E49-B61324D4879B}.Release|x64.Build.0 = Release|x64
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Debug|Win32.Build.0 = Debug|Win32
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Debug|x64.ActiveCfg = Debug|x64
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Debug|x64.Build.0 = Debug|x64
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Release|Win32.ActiveCfg = Release|Win32
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Release|Win32.Build.0 = Release|Win32
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Release|x64.ActiveCfg = Release|x64
+		{FE697854-D1EB-43F6-A530-3D2409A02647}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
