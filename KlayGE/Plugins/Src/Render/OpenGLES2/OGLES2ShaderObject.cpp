@@ -1247,10 +1247,10 @@ namespace KlayGE
 		}
 		args.push_back(NULL);
 
-		glsl_srcs_ = MakeSharedPtr<std::vector<std::string> >(ShaderObject::ST_NumShaderTypes);
+		glsl_srcs_ = MakeSharedPtr<boost::array<std::string, ST_NumShaderTypes> >();
 
-		pnames_ = MakeSharedPtr<std::vector<std::vector<std::string> > >(ShaderObject::ST_NumShaderTypes);
-		glsl_res_names_ = MakeSharedPtr<std::vector<std::vector<std::string> > >(ShaderObject::ST_NumShaderTypes);
+		pnames_ = MakeSharedPtr<boost::array<std::vector<std::string>, ST_NumShaderTypes> >();
+		glsl_res_names_ = MakeSharedPtr<boost::array<std::vector<std::string>, ST_NumShaderTypes> >();
 
 		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
@@ -1457,39 +1457,7 @@ namespace KlayGE
 
 				if (is_shader_validate_[type])
 				{
-					char const * glsl = (*glsl_srcs_)[type].c_str();
-					GLuint object = glCreateShader(shader_type);
-					if (0 == object)
-					{
-						is_shader_validate_[type] = false;
-					}
-					//printf("%s\n", glsl);
-
-					glShaderSource(object, 1, &glsl, NULL);
-
-					glCompileShader(object);
-
-					GLint compiled = false;
-					glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
-					if (!compiled)
-					{
-						printf("%s\n", glsl);
-
-						GLint len = 0;
-						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-						if (len > 0)
-						{
-							std::vector<char> info(len + 1, 0);
-							glGetShaderInfoLog(object, len, &len, &info[0]);
-							std::cerr << &info[0] << std::endl;
-						}
-					}
-#endif
-					is_shader_validate_[type] &= compiled ? true : false;
-
-					glAttachShader(glsl_program_, object);
-					glDeleteShader(object);
+					this->AttachGLSL(type);
 
 					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
@@ -1500,24 +1468,7 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
-			glLinkProgram(glsl_program_);
-
-			GLint linked = false;
-			glGetProgramiv(glsl_program_, GL_LINK_STATUS, &linked);
-#ifdef KLAYGE_DEBUG
-			if (!linked)
-			{
-				GLint len = 0;
-				glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			is_validate_ &= linked ? true : false;
+			this->LinkGLSL();
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
@@ -1601,56 +1552,10 @@ namespace KlayGE
 
 			if (is_shader_validate_[type])
 			{
-				shader_desc& sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
+				shader_desc const & sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
 				if (!sd.func_name.empty())
 				{
-					GLenum shader_type;
-					switch (type)
-					{
-					case ST_VertexShader:
-						shader_type = GL_VERTEX_SHADER;
-						break;
-
-					case ST_PixelShader:
-						shader_type = GL_FRAGMENT_SHADER;
-						break;
-
-					default:
-						shader_type = 0;
-						BOOST_ASSERT(false);
-						break;
-					}
-
-					char const * glsl = (*glsl_srcs_)[type].c_str();
-					GLuint object = glCreateShader(shader_type);
-					if (0 == object)
-					{
-						ret->is_shader_validate_[type] = false;
-					}
-
-					glShaderSource(object, 1, &glsl, NULL);
-
-					glCompileShader(object);
-
-					GLint compiled = false;
-					glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-#ifdef KLAYGE_DEBUG
-					if (!compiled)
-					{
-						GLint len = 0;
-						glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-						if (len > 0)
-						{
-							std::vector<char> info(len + 1, 0);
-							glGetShaderInfoLog(object, len, &len, &info[0]);
-							std::cerr << &info[0] << std::endl;
-						}
-					}
-#endif
-					ret->is_shader_validate_[type] &= compiled ? true : false;
-
-					glAttachShader(ret->glsl_program_, object);
-					glDeleteShader(object);
+					ret->AttachGLSL(type);
 				}
 			}
 
@@ -1659,24 +1564,7 @@ namespace KlayGE
 
 		if (ret->is_validate_)
 		{
-			glLinkProgram(ret->glsl_program_);
-
-			GLint linked = false;
-			glGetProgramiv(ret->glsl_program_, GL_LINK_STATUS, &linked);
-#ifdef KLAYGE_DEBUG
-			if (!linked)
-			{
-				GLint len = 0;
-				glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
-				if (len > 0)
-				{
-					std::vector<char> info(len + 1, 0);
-					glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-					std::cerr << &info[0] << std::endl;
-				}
-			}
-#endif
-			ret->is_validate_ &= linked ? true : false;
+			ret->LinkGLSL();
 
 			ret->attrib_locs_ = attrib_locs_;
 
@@ -1901,6 +1789,81 @@ namespace KlayGE
 		}
 
 		return ret;
+	}
+
+	void OGLES2ShaderObject::AttachGLSL(uint32_t type)
+	{
+		GLenum shader_type;
+		switch (type)
+		{
+		case ST_VertexShader:
+			shader_type = GL_VERTEX_SHADER;
+			break;
+
+		case ST_PixelShader:
+			shader_type = GL_FRAGMENT_SHADER;
+			break;
+
+		default:
+			shader_type = 0;
+			break;
+		}
+
+		char const * glsl = (*glsl_srcs_)[type].c_str();
+		GLuint object = glCreateShader(shader_type);
+		if (0 == object)
+		{
+			is_shader_validate_[type] = false;
+		}
+		//printf("%s\n", glsl);
+
+		glShaderSource(object, 1, &glsl, NULL);
+
+		glCompileShader(object);
+
+		GLint compiled = false;
+		glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
+#ifdef KLAYGE_DEBUG
+		if (!compiled)
+		{
+			printf("%s\n", glsl);
+
+			GLint len = 0;
+			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
+			if (len > 0)
+			{
+				std::vector<char> info(len + 1, 0);
+				glGetShaderInfoLog(object, len, &len, &info[0]);
+				std::cerr << &info[0] << std::endl;
+			}
+		}
+#endif
+		is_shader_validate_[type] &= compiled ? true : false;
+
+		glAttachShader(glsl_program_, object);
+		glDeleteShader(object);
+	}
+
+	void OGLES2ShaderObject::LinkGLSL()
+	{
+		glLinkProgram(glsl_program_);
+
+		GLint linked = false;
+		glGetProgramiv(glsl_program_, GL_LINK_STATUS, &linked);
+#ifdef KLAYGE_DEBUG
+		if (!linked)
+		{
+			GLint len = 0;
+			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
+			if (len > 0)
+			{
+				std::vector<char> info(len + 1, 0);
+				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
+				std::cerr << &info[0] << std::endl;
+			}
+		}
+#endif
+		is_validate_ &= linked ? true : false;
 	}
 
 	void OGLES2ShaderObject::Bind()

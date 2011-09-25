@@ -66,6 +66,8 @@ namespace KlayGE
 
 		std::string ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs);
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
+		void AttachGLSL(uint32_t type);
+		void LinkGLSL();
 
 	private:
 		boost::shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
@@ -73,9 +75,9 @@ namespace KlayGE
 		GLuint glsl_program_;
 		boost::shared_ptr<std::vector<GLint> > glsl_bin_formats_;
 		boost::shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
-		boost::shared_ptr<std::vector<std::string> > glsl_srcs_;
-		boost::shared_ptr<std::vector<std::vector<std::string> > > pnames_;
-		boost::shared_ptr<std::vector<std::vector<std::string> > > glsl_res_names_;
+		boost::shared_ptr<boost::array<std::string, ST_NumShaderTypes> > glsl_srcs_;
+		boost::shared_ptr<boost::array<std::vector<std::string>, ST_NumShaderTypes> > pnames_;
+		boost::shared_ptr<boost::array<std::vector<std::string>, ST_NumShaderTypes> > glsl_res_names_;
 		boost::shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
 		boost::shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
 		boost::shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
