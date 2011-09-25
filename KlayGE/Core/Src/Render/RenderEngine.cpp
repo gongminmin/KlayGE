@@ -172,6 +172,8 @@ namespace KlayGE
 		{
 			pp_chain_ = MakeSharedPtr<PostProcessChain>(L"RE");
 			pp_chain_->Append(MakeSharedPtr<HDRPostProcess>());
+
+			copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 		}
 		if (render_settings_.gamma)
 		{
@@ -284,7 +286,6 @@ namespace KlayGE
 
 			pp_chain_->InputPin(0, before_pp_tex_);
 
-			copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 			copy_pp_->InputPin(0, before_pp_tex_);
 
 			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1] = before_pp_frame_buffer_;
