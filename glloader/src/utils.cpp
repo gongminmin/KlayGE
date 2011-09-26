@@ -101,16 +101,23 @@ namespace glloader
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
+				gl_dlls_.push_back(::LoadLibraryA("libGLESv2.dll"));
 			}
-			ogl_dll = ::LoadLibraryA("libGLESv2.dll");
-			if (ogl_dll != NULL)
+			else
 			{
-				gl_dlls_.push_back(ogl_dll);
-			}
-			ogl_dll = ::LoadLibraryA("libGLES20.dll");
-			if (ogl_dll != NULL)
-			{
-				gl_dlls_.push_back(ogl_dll);
+				ogl_dll = ::LoadLibraryA("libGLES20.dll");
+				if (ogl_dll != NULL)
+				{
+					gl_dlls_.push_back(ogl_dll);
+				}
+				else
+				{
+					ogl_dll = ::LoadLibraryA("atioglxx.dll");
+					if (ogl_dll != NULL)
+					{
+						gl_dlls_.push_back(ogl_dll);
+					}
+				}
 			}
 #else
 			ogl_dll = ::LoadLibraryA("opengl32.dll");
