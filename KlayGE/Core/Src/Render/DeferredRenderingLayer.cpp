@@ -606,7 +606,7 @@ namespace KlayGE
 
 		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
-		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, 1, MAX_IL_MIPMAP_LEVELS + 1, EF_R32F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_R32F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		transparency_front_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_g_buffer_rt0_tex_, 0, 1, 0));
