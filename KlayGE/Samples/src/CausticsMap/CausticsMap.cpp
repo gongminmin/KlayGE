@@ -234,6 +234,9 @@ namespace
 				*(technique_->Effect().ParameterByName("caustics_tex")) = caustics_map_;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_model")) = model * inv_light_model;
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
+
+				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+				*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 			}			
 			
 		}
@@ -354,6 +357,9 @@ namespace
 					*(technique_->Effect().ParameterByName("env_cube")) = env_cube_;
 					*(technique_->Effect().ParameterByName("refract_idx")) = refract_idx;
 					*(technique_->Effect().ParameterByName("absorption_idx")) = absorption_idx;
+
+					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				}
 				break;
 			}
@@ -462,12 +468,12 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			std::vector<int2> xys(CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE);
+			std::vector<float2> xys(CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE);
 			for(uint32_t i = 0; i < CAUSTICS_GRID_SIZE; ++i)
 			{
 				for(uint32_t j = 0; j < CAUSTICS_GRID_SIZE; ++j)
 				{
-					xys[i * CAUSTICS_GRID_SIZE + j] = int2(j, i);
+					xys[i * CAUSTICS_GRID_SIZE + j] = float2(static_cast<float>(j), static_cast<float>(i)) / static_cast<float>(CAUSTICS_GRID_SIZE);
 				}
 			}
 
@@ -479,7 +485,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = &xys[0];
 			GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32I)));
+			rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 			box_ = Box(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
 
@@ -546,6 +552,9 @@ namespace
 					*(technique_->Effect().ParameterByName("t_second_normals")) = input_tex.refract_obj_N_texture_b;
 				}
 			}
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 		}
 
 	private:

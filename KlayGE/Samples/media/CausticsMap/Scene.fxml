@@ -116,6 +116,7 @@ void PosNormTexPS(float3 wPos : TEXCOORD0,
 	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
 	<parameter type="float4x4" name="light_vp"/>
+	<parameter type="int" name="flipping"/>
 
 	<parameter type="texture2D" name="diffuse_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
@@ -142,6 +143,14 @@ void PosNormTexPS(float3 wPos : TEXCOORD0,
 
 	<shader>
 		<![CDATA[
+float2 CalcLookupUV(float4 lookup_proj)
+{
+	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f;
+	lookup_uv.y *= flipping;
+	lookup_uv += 0.5f;
+	return lookup_uv;
+}
+
 void DistanceMappingVS(float4 pos		: POSITION,
 					float2 texcoord0	: TEXCOORD0,
 					float3 N			: NORMAL,	// in object space
@@ -221,7 +230,8 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 
 	float dist = length(LightWorldPos);
 	float3 shadow_dir = normalize(LightWorldPos);
-	shadow_dir = normalize(shadow_dir + deltaUV);
+	shadow_dir += deltaUV;
+	shadow_dir.y *= -flipping;
 	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
 	float p = (dist <= moments.x);
 	float variance = moments.y - moments.x * moments.x;
@@ -233,9 +243,7 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 
 
 	float4 caustics = 1;
-	float4 lookup_proj = LightProjPos;
-	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f + 0.5f;
-	lookup_uv.y = 1.0f - lookup_uv.y;
+	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	if ((lookup_uv.x > 0) && (lookup_uv.x < 1) && (lookup_uv.y > 0) && (lookup_uv.y < 1))
 	{
 		caustics = float4(caustics_tex.SampleLevel(linear_clamp_sampler, lookup_uv + (texUV.xy - texCoord0.xy), 0).xyz + 1, 1);
@@ -271,7 +279,8 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 
 	float dist = length(LightWorldPos);
 	float3 shadow_dir = normalize(LightWorldPos);
-	shadow_dir = normalize(shadow_dir + deltaUV);
+	shadow_dir += deltaUV;
+	shadow_dir.y *= -flipping;
 	float2 moments = shadow_cube_tex.SampleLevel(linear_clamp_sampler, shadow_dir, 0).xy;
 	float p = (dist <= moments.x);
 	float variance = moments.y - moments.x * moments.x;
@@ -283,9 +292,7 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 
 
 	float4 caustics = 1;
-	float4 lookup_proj = LightProjPos;
-	float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f + 0.5f;
-	lookup_uv.y = 1 - lookup_uv.y;
+	float2 lookup_uv = CalcLookupUV(LightProjPos);
 	if ((lookup_uv.x > 0) && (lookup_uv.x < 1) && (lookup_uv.y > 0) && (lookup_uv.y < 1))
 	{
 		caustics = float4(caustics_tex.SampleLevel(linear_clamp_sampler, lookup_uv + (texUV.xy - texCoord0.xy), 0).xyz + 1, 1);
@@ -356,10 +363,8 @@ float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1,
     float dist = 10.0f;
     float3 intersection_pt = wPosition + dist * refract_vec;
 
-    float4 lookup_proj = mul(float4(intersection_pt, 1), vp);
-    float2 lookup_uv = lookup_proj.xy / lookup_proj.w * 0.5f + 0.5f;
-    lookup_uv.y = 1 - lookup_uv.y;
-    float4 lookup_rt = background_texture.Sample(trilinear_sampler, lookup_uv);
+	float4 lookup_proj = mul(float4(intersection_pt, 1), vp);
+	float4 lookup_rt = background_texture.Sample(trilinear_sampler, CalcLookupUV(lookup_proj));
 
     if (any(lookup_rt.w))
     {
