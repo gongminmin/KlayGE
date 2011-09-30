@@ -286,12 +286,6 @@ bool frustum_culling(float4 pos0, float4 pos1, float4 pos2)
 	return !any(t);
 }
 
-struct GenCubeOneShadowMap_VS_TO_GS
-{
-	float4 pos : POSITION;
-	float dist : TEXCOORD0;
-};
-
 struct PS_IN
 {
 	float dist : TEXCOORD0;
@@ -299,15 +293,13 @@ struct PS_IN
 	uint rt_index : SV_RenderTargetArrayIndex;
 };
 
-GenCubeOneShadowMap_VS_TO_GS GenCubeOneShadowMapVS(float4 Position : POSITION,
-						float3 Normal : NORMAL)
+void GenCubeOneShadowMapVS(float4 Position : POSITION,
+						float3 Normal : NORMAL,
+						out float4 oPos : POSITION,
+						out float oDist : TEXCOORD0)
 {
-	GenCubeOneShadowMap_VS_TO_GS output;
-
-	output.pos = Position;
-	output.dist = calc_dist(Position);
-
-	return output;
+	oPos = Position;
+	oDist = calc_dist(Position);
 }
 
 #ifdef KLAYGE_OPENGL
@@ -315,16 +307,8 @@ TRIANGLE TRIANGLE_OUT void GenCubeOneShadowMapGS(AttribArray<float4> in_pos : PO
 {
 #else
 [maxvertexcount(18)]
-void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
+void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
-	float4 in_pos[3] =
-	{
-		input[0].pos, input[1].pos, input[2].pos
-	};
-	float in_dist[3] = 
-	{
-		input[0].dist, input[1].dist, input[2].dist
-	};
 #endif
 	
 	PS_IN output;
@@ -374,28 +358,20 @@ void GenCubeOneShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3], inout
 
 	<shader version="4">
 		<![CDATA[
-struct GenCubeOneInstanceShadowMap_VS_TO_GS
-{
-	float4 pos : POSITION;
-	float2 dist : TEXCOORD0;
-};
-
-GenCubeOneInstanceShadowMap_VS_TO_GS GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
+void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 						float3 Normal : NORMAL,
-						uint instance_id : SV_InstanceID)
+						uint instance_id : SV_InstanceID,
+						out float4 oPos : POSITION,
+						out float2 oDist : TEXCOORD0)
 {
-	GenCubeOneInstanceShadowMap_VS_TO_GS output;
+	oPos = mul(Position, mvps[instance_id]);
 
-	output.pos = mul(Position, mvps[instance_id]);
-
-	output.dist.x = calc_dist(Position);
+	oDist.x = calc_dist(Position);
 #ifdef KLAYGE_OPENGL
-	output.dist.y = intBitsToFloat(instance_id);
+	oDist.y = intBitsToFloat(instance_id);
 #else
-	output.dist.y = asfloat(instance_id);
+	oDist.y = asfloat(instance_id);
 #endif
-
-	return output;
 }
 
 #ifdef KLAYGE_OPENGL
@@ -403,16 +379,8 @@ TRIANGLE TRIANGLE_OUT void GenCubeOneInstanceShadowMapGS(AttribArray<float4> in_
 {
 #else
 [maxvertexcount(3)]
-void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS input[3], inout TriangleStream<PS_IN> out_stream)
+void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float2 in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
-	float4 in_pos[3] =
-	{
-		input[0].pos, input[1].pos, input[2].pos
-	};
-	float2 in_dist[3] = 
-	{
-		input[0].dist, input[1].dist, input[2].dist
-	};
 #endif
 
 	PS_IN output;
@@ -455,19 +423,10 @@ void GenCubeOneInstanceShadowMapGS(triangle GenCubeOneInstanceShadowMap_VS_TO_GS
 		<![CDATA[
 [maxvertexcount(3)]
 [instance(6)]
-void GenCubeOneInstanceGSShadowMapGS(triangle GenCubeOneShadowMap_VS_TO_GS input[3],
+void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float in_dist[3] : TEXCOORD0,
 						uint instance_id : SV_GSInstanceID,
 						inout TriangleStream<PS_IN> out_stream)
 {
-	float4 in_pos[3] =
-	{
-		input[0].pos, input[1].pos, input[2].pos
-	};
-	float in_dist[3] = 
-	{
-		input[0].dist, input[1].dist, input[2].dist
-	};
-	
 	PS_IN output;
 	output.rt_index = instance_id;
 	

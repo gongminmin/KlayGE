@@ -80,13 +80,6 @@ float GetTransparencyOverLife(float p)
 
 	<shader>
 		<![CDATA[
-struct VS_TO_GS
-{
-	float4 CenterView_Life : SV_Position;
-	float radius : TEXCOORD0;
-	float spin : TEXCOORD1;
-};
-
 struct PS_IN
 {
 	float4 pos : SV_Position;
@@ -115,7 +108,7 @@ void ParticleVS(float4 pos : TEXCOORD0,
 	vs_out.pos = mul(view_pos, Proj);
 	vs_out.clr.rgb = lerp(particle_color_from, particle_color_to, life_factor).rgb;
 	vs_out.clr.a = GetTransparencyOverLife(init_life - pos.w);
-	vs_out.PosSS = vs_out.pos / vs_out.pos.w;
+	vs_out.PosSS = vs_out.pos;
 	vs_out.view_dir.xyz = view_pos.xyz;
 	vs_out.view_dir.w = radius;
 	vs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
@@ -136,7 +129,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 	}
 	else
 	{
-		float2 tex_coord = ps_in.PosSS.xy;
+		float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w;
 		tex_coord.y *= flip;
 		tex_coord = tex_coord / 2 + 0.5f;
 		
@@ -161,27 +154,29 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		<![CDATA[
 void ParticleVS2(float4 pos : POSITION,
 					float spin : TEXCOORD0,
-					out VS_TO_GS vs_out)
+					out float4 oCenterView_Life : SV_Position,
+					out float oRadius : TEXCOORD0,
+					out float oSpin : TEXCOORD1)
 {
-	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
-	vs_out.radius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
-	vs_out.spin = spin;
+	oCenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+	oRadius = point_radius * GetSizeOverLife(init_life - pos.w) * 2;
+	oSpin = spin;
 }
 
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> input0 : SV_Position, AttribArray<float> input1 : TEXCOORD0, AttribArray<float> input2 : TEXCOORD1)
+POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float> in_radius : TEXCOORD0, AttribArray<float> in_spin : TEXCOORD1)
 {
-	float4 CenterView_Life = input0[0];
-	float radius = input1[0];
-	float spin = input2[0];
 #else
 [maxvertexcount(4)]
-void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
+void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in_radius[1] : TEXCOORD0, point float in_spin[1] : TEXCOORD1,
+					inout TriangleStream<PS_IN> out_stream)
 {
-	float4 CenterView_Life = input[0].CenterView_Life;
-	float radius = input[0].radius;
-	float spin = input[0].spin;
 #endif
+
+	float4 CenterView_Life = in_CenterView_Life[0];
+	float radius = in_radius[0];
+	float spin = in_spin[0];
+	
 	PS_IN gs_out;
 	
 	float life_factor = (init_life - CenterView_Life.w) / init_life;
@@ -216,7 +211,7 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		float4 view_pos = gs_out.CenterView;
 		view_pos.xy += float2(offset.x * cz - offset.y * sz, offset.x * sz + offset.y * cz);
 		gs_out.pos = mul(view_pos, Proj);
-		gs_out.PosSS = gs_out.pos / gs_out.pos.w;
+		gs_out.PosSS = gs_out.pos;
 		gs_out.view_dir.xyz = view_pos.xyz;
 		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
@@ -227,12 +222,6 @@ void ParticleGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
 		out_stream.Append(gs_out);
 #endif
 	}
-	
-#ifdef KLAYGE_OPENGL
-	restartStrip();
-#else
-	out_stream.RestartStrip();
-#endif
 }
 		]]>
 	</shader>

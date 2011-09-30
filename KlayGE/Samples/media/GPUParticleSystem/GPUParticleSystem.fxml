@@ -39,11 +39,6 @@
 
 	<shader>
 		<![CDATA[
-struct VS_TO_GS
-{
-	float4 CenterView_Life : SV_Position;
-};
-
 struct PS_IN
 {
 	float4 pos : SV_Position;
@@ -81,7 +76,7 @@ void ParticlesVS(float2 tex_pos		: POSITION,
 		vs_out.pos = mul(view_pos, Proj);
 			  
 		vs_out.clr = float4(1, 1, 1, pos.w);
-		vs_out.PosSS = vs_out.pos / vs_out.pos.w;
+		vs_out.PosSS = vs_out.pos;
 		
 		vs_out.view_dir = view_pos.xyz;
 		
@@ -232,11 +227,11 @@ void UpdatePS(float2 tex : TEXCOORD0,
 	<shader type="vertex_shader" version="3">
 		<![CDATA[
 void ParticlesVS2(float2 tex_pos : POSITION,
-					out VS_TO_GS vs_out)
+					out float4 CenterView_Life : SV_Position)
 {
 	float4 pos = particle_pos_tex.SampleLevel(point_sampler, tex_pos, 0);
 
-	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+	CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
 		]]>
 	</shader>
@@ -247,11 +242,11 @@ void ParticlesVS2(float2 tex_pos : POSITION,
 	<shader type="vertex_shader" version="4">
 		<![CDATA[
 void ParticlesVS3(uint vid : SV_VertexID,
-					out VS_TO_GS vs_out)
+					out float4 CenterView_Life : SV_Position)
 {
 	float4 pos = particle_pos_buff.Load(vid);
 	
-	vs_out.CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
+	CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
 		]]>
 	</shader>
@@ -261,15 +256,13 @@ void ParticlesVS3(uint vid : SV_VertexID,
 #ifdef KLAYGE_OPENGL
 POINT TRIANGLE_OUT void ParticlesGS(AttribArray<float4> input : POSITION)
 {
-	float4 CenterView_Life;
-	CenterView_Life = input[0];
 #else
 [maxvertexcount(4)]
-void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream)
+void ParticlesGS(point float4 input[1] : SV_Position, inout TriangleStream<PS_IN> out_stream)
 {
-	float4 CenterView_Life;
-	CenterView_Life = input[0].CenterView_Life;
 #endif
+
+	float4 CenterView_Life = input[0];
 
 	if (CenterView_Life.w > 0)
 	{
@@ -295,12 +288,6 @@ void ParticlesGS(point VS_TO_GS input[1], inout TriangleStream<PS_IN> out_stream
 			out_stream.Append(gs_out);
 #endif
 		}
-		
-#ifdef KLAYGE_OPENGL
-		restartStrip();
-#else
-		out_stream.RestartStrip();
-#endif
 	}
 }
 		]]>

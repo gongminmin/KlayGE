@@ -8,12 +8,6 @@
 
 	<shader>
 		<![CDATA[
-struct CAUSTICS_VS_OUT
-{
-    float4 pos : POSITION;
-    float4 color : TEXCOORD0;
-};
-
 struct CAUSTICS_GS_OUT
 {
     float2 tc : TEXCOORD0;
@@ -26,44 +20,30 @@ struct CAUSTICS_GS_OUT
 	<shader type="geometry_shader" version="4">
 		<![CDATA[
 #ifdef KLAYGE_OPENGL
-POINT TRIANGLE_OUT void PointGS(AttribArray<float4> input_pos : POSITION, AttribArray<float4> input_color : TEXCOORD0)
+POINT TRIANGLE_OUT void PointGS(AttribArray<float4> in_pos : POSITION, AttribArray<float4> in_color : TEXCOORD0)
 {
-	float4 inpos = input_pos[0];
-	float4 incolor = input_color[0];
 #else
 [maxvertexcount(4)]
-void PointGS(point CAUSTICS_VS_OUT input[1], inout TriangleStream<CAUSTICS_GS_OUT> out_stream)
+void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCOORD0, inout TriangleStream<CAUSTICS_GS_OUT> out_stream)
 {
-	float4 inpos = input[0].pos;
-	float4 incolor = input[0].color;
 #endif
 
 	CAUSTICS_GS_OUT gs_out;
-    float4 point_center = inpos;
-    point_center = mul(point_center, light_view);
-    for (int i = 0; i < 4; ++i)
-    {
-        float2 tex = float2((i & 1) ? 1 : -1, (i & 2) ? -1 : 1);
-            
-        float4 pos;
-        pos.xy = point_center.xy + point_size * tex;
-        pos.zw = point_center.zw;
-        gs_out.pos = mul(pos, light_proj);
-        gs_out.tc = tex * 0.5f + 0.5f;
-        gs_out.color = incolor;
-		
+	float4 point_center = mul(in_pos[0], light_view);
+	gs_out.color = in_color[0];
+	for (int i = 0; i < 4; ++ i)
+	{
+		float2 tex = float2((i & 1) ? 1 : -1, (i & 2) ? -1 : 1);
+
+		gs_out.pos = mul(float4(point_center.xy + point_size * tex, point_center.zw), light_proj);
+		gs_out.tc = tex * 0.5f + 0.5f;
+
 #ifdef KLAYGE_OPENGL
 		emitVertex(gs_out.tc : TEXCOORD0, gs_out.color : TEXCOORD1, gs_out.pos : POSITION);
 #else
 		out_stream.Append(gs_out);
 #endif
     }
-	
-#ifdef KLAYGE_OPENGL
-	restartStrip();
-#else
-	out_stream.RestartStrip();
-#endif
 }
 		]]>
 	</shader>
@@ -109,7 +89,9 @@ float2 CalcIntersectionPtUV(float3 v, float3 pre_pos, float3 refract_vec)
 	return CalcLookupUV(lookup_proj);
 }
 
-CAUSTICS_VS_OUT GenSingleFaceCausticsMapVS(float2 idx : POSITION)
+void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
+									out float4 oPos : POSITION,
+									out float4 oColor : TEXCOORD0)
 {
 	float3 surface_pt = t_first_positions.SampleLevel(point_sampler, idx, 0).xyz;
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz;
@@ -128,12 +110,8 @@ CAUSTICS_VS_OUT GenSingleFaceCausticsMapVS(float2 idx : POSITION)
 	float alpha = dot(surface_n, -incident_light) / occlusion_pixs;
 	float3 clr = light_density * light_color * exp(-dist * absorption_idx);
 
-	CAUSTICS_VS_OUT vs_out;
-
-	vs_out.pos = float4(caustics_pt, 1);
-	vs_out.color = float4(clr, alpha);
-
-	return vs_out;
+	oPos = float4(caustics_pt, 1);
+	oColor = float4(clr, alpha);
 }
 
 float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Target
@@ -169,7 +147,9 @@ float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Ta
 	
 	<shader>
 		<![CDATA[
-CAUSTICS_VS_OUT GenDualFaceCausticsMapVS(float2 idx : POSITION)
+void GenDualFaceCausticsMapVS(float2 idx : POSITION,
+									out float4 oPos : POSITION,
+									out float4 oColor : TEXCOORD0)
 {
 	float3 surface_pt = t_first_positions.SampleLevel(point_sampler, idx, 0).xyz;
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz;
@@ -208,12 +188,8 @@ CAUSTICS_VS_OUT GenDualFaceCausticsMapVS(float2 idx : POSITION)
 	float alpha = dot(first_n, -fisrt_incident_light) / occlusion_pixs;
 	float3 clr = light_density * light_color * exp(-dist * absorption_idx);
 
-	CAUSTICS_VS_OUT vs_out;
-
-	vs_out.pos = float4(caustics_pt, 1);
-	vs_out.color = float4(clr, alpha);
-
-	return vs_out;
+	oPos = float4(caustics_pt, 1);
+	oColor = float4(clr, alpha);
 }
 		]]>
 	</shader>
