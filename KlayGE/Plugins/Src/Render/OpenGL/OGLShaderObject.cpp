@@ -1566,27 +1566,22 @@ namespace KlayGE
 				is_shader_validate_[type] = true;
 
 				GLenum shader_type;
-				CGprofile profile;
 				switch (type)
 				{
 				case ST_VertexShader:
 					shader_type = GL_VERTEX_SHADER;
-					profile = CG_PROFILE_GLSLV;
 					break;
 
 				case ST_PixelShader:
 					shader_type = GL_FRAGMENT_SHADER;
-					profile = CG_PROFILE_GLSLF;
 					break;
 
 				case ST_GeometryShader:
 					shader_type = GL_GEOMETRY_SHADER_EXT;
-					profile = CG_PROFILE_GLSLG;
 					break;
 
 				default:
 					shader_type = 0;
-					profile = CG_PROFILE_UNKNOWN;
 					is_shader_validate_[type] = false;
 					break;
 				}
@@ -1626,10 +1621,29 @@ namespace KlayGE
 				}
 				else
 				{
-					CGprogram cg_shader = 0;
 					if (is_shader_validate_[type])
-					{
-						cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
+					{		
+						CGprofile profile;
+						switch (type)
+						{
+						case ST_VertexShader:
+							profile = CG_PROFILE_GLSLV;
+							break;
+
+						case ST_PixelShader:
+							profile = CG_PROFILE_GLSLF;
+							break;
+
+						case ST_GeometryShader:
+							profile = CG_PROFILE_GLSLG;
+							break;
+
+						default:
+							profile = CG_PROFILE_UNKNOWN;
+							break;
+						}
+
+						CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
 
 						CGerror error = cgGetError();
@@ -1660,168 +1674,167 @@ namespace KlayGE
 
 							is_shader_validate_[type] = false;
 						}
-					}
-
-					if (is_shader_validate_[type])
-					{
-						uint32_t gs_input_vertices = 0;
-						if (ST_GeometryShader == type)
+						else
 						{
-							switch (cgGetProgramInput(cg_shader))
+							uint32_t gs_input_vertices = 0;
+							if (ST_GeometryShader == type)
 							{
-							case CG_POINT:
-								gs_input_type_ = GL_POINTS;
-								gs_input_vertices = 1;
-								break;
-
-							case CG_LINE:
-								gs_input_type_ = GL_LINES;
-								gs_input_vertices = 2;
-								break;
-
-							case CG_LINE_ADJ:
-								gs_input_type_ = GL_LINES_ADJACENCY_EXT;
-								gs_input_vertices = 4;
-								break;
-
-							case CG_TRIANGLE:
-								gs_input_type_ = GL_TRIANGLES;
-								gs_input_vertices = 3;
-								break;
-
-							case CG_TRIANGLE_ADJ:
-								gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
-								gs_input_vertices = 6;
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								gs_input_type_ = 0;
-								gs_input_vertices = 0;
-								break;
-							}
-
-							switch (cgGetProgramOutput(cg_shader))
-							{
-							case CG_POINT_OUT:
-								gs_output_type_ = GL_POINTS;
-								break;
-
-							case CG_LINE_OUT:
-								gs_output_type_ = GL_LINE_STRIP;
-								break;
-
-							case CG_TRIANGLE_OUT:
-								gs_output_type_ = GL_TRIANGLE_STRIP;
-								break;
-
-							default:
-								BOOST_ASSERT(false);
-								gs_output_type_ = 0;
-								break;
-							}
-						}
-
-						(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
-							static_cast<ShaderType>(type), gs_input_vertices, has_gs);
-
-						CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
-						while (cg_param)
-						{
-							if (cgIsParameterUsed(cg_param, cg_shader)
-								&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
-							{
-								char const * pname = cgGetParameterName(cg_param);
-								(*pnames_)[type].push_back(pname);
-
-								char const * glsl_param_name = cgGetParameterResourceName(cg_param);
-								std::string hacked_name = std::string("_") + pname;
-
-								if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
+								switch (cgGetProgramInput(cg_shader))
 								{
-									// Some times cgGetParameterResourceName doesn't work
-									glsl_param_name = hacked_name.c_str();
+								case CG_POINT:
+									gs_input_type_ = GL_POINTS;
+									gs_input_vertices = 1;
+									break;
+
+								case CG_LINE:
+									gs_input_type_ = GL_LINES;
+									gs_input_vertices = 2;
+									break;
+
+								case CG_LINE_ADJ:
+									gs_input_type_ = GL_LINES_ADJACENCY_EXT;
+									gs_input_vertices = 4;
+									break;
+
+								case CG_TRIANGLE:
+									gs_input_type_ = GL_TRIANGLES;
+									gs_input_vertices = 3;
+									break;
+
+								case CG_TRIANGLE_ADJ:
+									gs_input_type_ = GL_TRIANGLES_ADJACENCY_EXT;
+									gs_input_vertices = 6;
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									gs_input_type_ = 0;
+									gs_input_vertices = 0;
+									break;
 								}
 
-								(*glsl_res_names_)[type].push_back(glsl_param_name);
+								switch (cgGetProgramOutput(cg_shader))
+								{
+								case CG_POINT_OUT:
+									gs_output_type_ = GL_POINTS;
+									break;
+
+								case CG_LINE_OUT:
+									gs_output_type_ = GL_LINE_STRIP;
+									break;
+
+								case CG_TRIANGLE_OUT:
+									gs_output_type_ = GL_TRIANGLE_STRIP;
+									break;
+
+								default:
+									BOOST_ASSERT(false);
+									gs_output_type_ = 0;
+									break;
+								}
 							}
 
-							cg_param = cgGetNextParameter(cg_param);
-						}
+							(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
+								static_cast<ShaderType>(type), gs_input_vertices, has_gs);
 
-						if (0 == type)
-						{
-							cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+							CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
 							while (cg_param)
 							{
 								if (cgIsParameterUsed(cg_param, cg_shader)
-									&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
-									&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+									&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 								{
-									std::string semantic = cgGetParameterSemantic(cg_param);
-									std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+									char const * pname = cgGetParameterName(cg_param);
+									(*pnames_)[type].push_back(pname);
 
-									VertexElementUsage usage = VEU_Position;
-									uint8_t usage_index = 0;
-									if ("POSITION" == semantic)
-									{
-										usage = VEU_Position;
-										glsl_param_name = "a_gl_Vertex";
-									}
-									else if ("NORMAL" == semantic)
-									{
-										usage = VEU_Normal;
-										glsl_param_name = "a_gl_Normal";
-									}
-									else if (("COLOR0" == semantic) || ("COLOR" == semantic))
-									{
-										usage = VEU_Diffuse;
-										glsl_param_name = "a_gl_Color";
-									}
-									else if ("COLOR1" == semantic)
-									{
-										usage = VEU_Specular;
-										glsl_param_name = "a_gl_SecondaryColor";
-									}
-									else if ("BLENDWEIGHT" == semantic)
-									{
-										usage = VEU_BlendWeight;
-										glsl_param_name = "BLENDWEIGHT";
-									}
-									else if ("BLENDINDICES" == semantic)
-									{
-										usage = VEU_BlendIndex;
-										glsl_param_name = "BLENDINDICES";
-									}
-									else if (0 == semantic.find("TEXCOORD"))
-									{
-										usage = VEU_TextureCoord;
-										usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-										glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
-									}
-									else if ("TANGENT" == semantic)
-									{
-										usage = VEU_Tangent;
-										glsl_param_name = "TANGENT";
-									}
-									else
-									{
-										BOOST_ASSERT("BINORMAL" == semantic);
+									char const * glsl_param_name = cgGetParameterResourceName(cg_param);
+									std::string hacked_name = std::string("_") + pname;
 
-										usage = VEU_Binormal;
-										glsl_param_name = "BINORMAL";
+									if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
+									{
+										// Some times cgGetParameterResourceName doesn't work
+										glsl_param_name = hacked_name.c_str();
 									}
 
-									vs_usages_->push_back(usage);
-									vs_usage_indices_->push_back(usage_index);
-									glsl_vs_attrib_names_->push_back(glsl_param_name);
+									(*glsl_res_names_)[type].push_back(glsl_param_name);
 								}
 
 								cg_param = cgGetNextParameter(cg_param);
 							}
-						}
 
-						cgDestroyProgram(cg_shader);
+							if (0 == type)
+							{
+								cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+								while (cg_param)
+								{
+									if (cgIsParameterUsed(cg_param, cg_shader)
+										&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
+										&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+									{
+										std::string semantic = cgGetParameterSemantic(cg_param);
+										std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+
+										VertexElementUsage usage = VEU_Position;
+										uint8_t usage_index = 0;
+										if ("POSITION" == semantic)
+										{
+											usage = VEU_Position;
+											glsl_param_name = "a_gl_Vertex";
+										}
+										else if ("NORMAL" == semantic)
+										{
+											usage = VEU_Normal;
+											glsl_param_name = "a_gl_Normal";
+										}
+										else if (("COLOR0" == semantic) || ("COLOR" == semantic))
+										{
+											usage = VEU_Diffuse;
+											glsl_param_name = "a_gl_Color";
+										}
+										else if ("COLOR1" == semantic)
+										{
+											usage = VEU_Specular;
+											glsl_param_name = "a_gl_SecondaryColor";
+										}
+										else if ("BLENDWEIGHT" == semantic)
+										{
+											usage = VEU_BlendWeight;
+											glsl_param_name = "BLENDWEIGHT";
+										}
+										else if ("BLENDINDICES" == semantic)
+										{
+											usage = VEU_BlendIndex;
+											glsl_param_name = "BLENDINDICES";
+										}
+										else if (0 == semantic.find("TEXCOORD"))
+										{
+											usage = VEU_TextureCoord;
+											usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
+											glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
+										}
+										else if ("TANGENT" == semantic)
+										{
+											usage = VEU_Tangent;
+											glsl_param_name = "TANGENT";
+										}
+										else
+										{
+											BOOST_ASSERT("BINORMAL" == semantic);
+
+											usage = VEU_Binormal;
+											glsl_param_name = "BINORMAL";
+										}
+
+										vs_usages_->push_back(usage);
+										vs_usage_indices_->push_back(usage_index);
+										glsl_vs_attrib_names_->push_back(glsl_param_name);
+									}
+
+									cg_param = cgGetNextParameter(cg_param);
+								}
+							}
+
+							cgDestroyProgram(cg_shader);
+						}
 					}
 				}
 

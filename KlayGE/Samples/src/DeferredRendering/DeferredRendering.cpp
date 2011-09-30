@@ -41,7 +41,7 @@ namespace
 
 		void operator()(LightSource& light)
 		{
-			light.ModelMatrix(MathLib::rotation_y(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_)
+			light.ModelMatrix(model_org_ * MathLib::rotation_y(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_)
 				* MathLib::translation(pos_));
 		}
 
