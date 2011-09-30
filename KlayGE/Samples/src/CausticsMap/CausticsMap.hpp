@@ -7,11 +7,11 @@
 
 struct CausticsInputTexture
 {
-	KlayGE::TexturePtr refract_obj_P_texture_f;
-	KlayGE::TexturePtr refract_obj_P_texture_b;
 	KlayGE::TexturePtr refract_obj_N_texture_f;
 	KlayGE::TexturePtr refract_obj_N_texture_b;
-	KlayGE::TexturePtr background_P_texture;
+	KlayGE::TexturePtr refract_obj_depth_tex_f;
+	KlayGE::TexturePtr refract_obj_depth_tex_b;
+	KlayGE::TexturePtr background_depth_tex;
 };
 
 class CausticsMapApp : public KlayGE::App3DFramework
@@ -50,11 +50,11 @@ public:
 	{
 		static CausticsInputTexture input_texture;
 
-		input_texture.background_P_texture = background_P_texture_;
-		input_texture.refract_obj_P_texture_f = refract_obj_P_texture_f_;
+		input_texture.background_depth_tex = background_depth_tex_;
 		input_texture.refract_obj_N_texture_f = refract_obj_N_texture_f_;
-		input_texture.refract_obj_P_texture_b = refract_obj_P_texture_b_;
+		input_texture.refract_obj_depth_tex_f = refract_obj_depth_tex_f_;
 		input_texture.refract_obj_N_texture_b = refract_obj_N_texture_b_;
+		input_texture.refract_obj_depth_tex_b = refract_obj_depth_tex_b_;
 
 		return input_texture;
 	}
@@ -92,11 +92,11 @@ private:
 	KlayGE::TexturePtr c_cube_map_;
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::TexturePtr refract_obj_P_texture_f_;
-	KlayGE::TexturePtr refract_obj_P_texture_b_;
 	KlayGE::TexturePtr refract_obj_N_texture_f_;
 	KlayGE::TexturePtr refract_obj_N_texture_b_;
-	KlayGE::TexturePtr background_P_texture_;
+	KlayGE::TexturePtr refract_obj_depth_tex_f_;
+	KlayGE::TexturePtr refract_obj_depth_tex_b_;
+	KlayGE::TexturePtr background_depth_tex_;
 	KlayGE::FrameBufferPtr background_fb_;
 	KlayGE::FrameBufferPtr refract_obj_fb_f_;
 	KlayGE::FrameBufferPtr refract_obj_fb_b_;
