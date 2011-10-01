@@ -485,21 +485,20 @@ void ShadingVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
 #else
-			out float2 oTc : TEXCOORD1,
-			out float oW : TEXCOORD2,
+			out float3 oTc : TEXCOORD1,
 #endif
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
 
-	oTc = oPos.xy / oPos.w;
+	oTc.xy = oPos.xy / oPos.w;
 	oTc.y *= flipping;
-	oTc = oTc * 0.5f + 0.5f;
+	oTc.xy = oTc.xy * 0.5f + 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
-	oW = oPos.w;
-	oTc *= oW;
+	oTc.z = oPos.w;
+	oTc.xy *= oTc.z;
 #endif
 }
 
@@ -517,16 +516,16 @@ float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float opacity)
 	return float4(max(emit + (diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting) * ssvo, 0), opacity);
 }
 
-float4 ShadingPS(float2 texcoord : TEXCOORD0
+float4 ShadingPS(float2 texcoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
-	, noperspective float2 tc : TEXCOORD1
+	noperspective float2 tc : TEXCOORD1
 #else
-	, float2 tc : TEXCOORD1, float w : TEXCOORD2
+	float3 tc_w : TEXCOORD1
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	tc /= w;
+	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
 	float3 diffuse;
@@ -550,16 +549,16 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0
 	return CalcShading(tc, diffuse, emit, 1);
 }
 
-float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0
+float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
-	, noperspective float2 tc : TEXCOORD1
+	noperspective float2 tc : TEXCOORD1
 #else
-	, float2 tc : TEXCOORD1, float w : TEXCOORD2
+	float3 tc_w : TEXCOORD1
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	tc /= w;
+	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
 	float3 diffuse;
@@ -592,16 +591,16 @@ float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0
 	return CalcShading(tc, diffuse, emit, opacity);
 }
 
-float4 SpecialShadingPS(float2 texcoord : TEXCOORD0
+float4 SpecialShadingPS(float2 texcoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
-	, noperspective float2 tc : TEXCOORD1
+	noperspective float2 tc : TEXCOORD1
 #else
-	, float2 tc : TEXCOORD1, float w : TEXCOORD2
+	float3 tc_w : TEXCOORD1
 #endif
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	tc /= w;
+	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
 	float3 emit;

@@ -41,14 +41,11 @@ void CalcVPLsLightingShape(float4 pos,
 				float vpl_x_coord,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out float2 oTc,
-				out float4 oViewDir,
-				out float3 oVPLColor,
 #else
-				out float2 oTc,
-				out float4 oViewDir,
-				out float oW,
-				out float3 oVPLColor,
+				out float3 oTc,
 #endif
+				out float3 oVPLColor,
+				out float4 oViewDir,
 				out float4 oPos)
 {
 	oViewDir.w = vpl_x_coord;
@@ -70,13 +67,13 @@ void CalcVPLsLightingShape(float4 pos,
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
-	oTc = oPos.xy / oPos.w * 0.5f;
+	oTc.xy = oPos.xy / oPos.w * 0.5f;
 	oTc.y *= flipping;
-	oTc += 0.5f;
+	oTc.xy += 0.5f;
 
 #ifndef NOPERSPECTIVE_SUPPORT
-	oW = oPos.w;
-	oTc *= oW;
+	oTc.z = oPos.w;
+	oTc.xy *= oTc.z;
 #endif
 }
 
@@ -84,57 +81,42 @@ void VPLsLightingInstanceIDVS(float4 pos : POSITION,
 				uint instance_id : SV_InstanceID,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float3 oVPLColor : TEXCOORD2,
 #else
-				out float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float oW : TEXCOORD2,
-				out float3 oVPLColor : TEXCOORD3,
+				out float3 oTc : TEXCOORD0,
 #endif
+				out float3 oVPLColor : TEXCOORD1,
+				out float4 oViewDir : TEXCOORD2,
 				out float4 oPos : SV_Position)
 {
 	CalcVPLsLightingShape(pos, (instance_id + 0.5f) * vpl_params.x,
-#ifdef NOPERSPECTIVE_SUPPORT
-			oTc, oViewDir, oVPLColor,
-#else
-			oTc, oViewDir, oW, oVPLColor,
-#endif
-			oPos);
+			oTc, oVPLColor, oViewDir, oPos);
 }
 
 void VPLsLightingNoInstanceIDVS(float4 pos : POSITION,
 #ifdef NOPERSPECTIVE_SUPPORT
 				out noperspective float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float3 oVPLColor : TEXCOORD2,
 #else
-				out float2 oTc : TEXCOORD0,
-				out float4 oViewDir : TEXCOORD1,
-				out float oW : TEXCOORD2,
-				out float3 oVPLColor : TEXCOORD3,
+				out float3 oTc : TEXCOORD0,
 #endif
+				out float3 oVPLColor : TEXCOORD1,
+				out float4 oViewDir : TEXCOORD2,
 				out float4 oPos : SV_Position)
 {
 	CalcVPLsLightingShape(pos, x_coord,
-#ifdef NOPERSPECTIVE_SUPPORT
-			oTc, oViewDir, oVPLColor,
-#else
-			oTc, oViewDir, oW, oVPLColor,
-#endif
-			oPos);
+			oTc, oVPLColor, oViewDir, oPos);
 }
 
 float4 VPLsLightingPS(
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float3 vpl_color : TEXCOORD2
+	noperspective float2 tc : TEXCOORD0,
 #else
-	float2 tc : TEXCOORD0, float4 view_dir : TEXCOORD1, float w : TEXCOORD2, float3 vpl_color : TEXCOORD3
+	float3 tc_w : TEXCOORD0,
 #endif
+	float3 vpl_color : TEXCOORD1, float4 view_dir : TEXCOORD2
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
-	tc /= w;
+	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
 	float pixel_depth = depth_tex.Sample(point_sampler, tc).r;

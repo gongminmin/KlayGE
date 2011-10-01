@@ -53,6 +53,29 @@ namespace
 		Timer timer_;
 	};
 
+	class GISpotLightSourceUpdate
+	{
+	public:
+		GISpotLightSourceUpdate(float cone_radius, float cone_height, float org_angle, float rot_speed, float3 const & pos)
+			: rot_speed_(rot_speed), pos_(pos)
+		{
+			model_org_ = MathLib::scaling(cone_radius, cone_radius, cone_height) * MathLib::rotation_x(org_angle);
+		}
+
+		void operator()(LightSource& light)
+		{
+			light.ModelMatrix(model_org_ * MathLib::rotation_y(sin(static_cast<float>(timer_.elapsed()) * 1000 * rot_speed_))
+				* MathLib::translation(pos_));
+		}
+
+	private:
+		float4x4 model_org_;
+		float rot_speed_;
+		float3 pos_;
+
+		Timer timer_;
+	};
+
 	class PointLightSourceUpdate
 	{
 	public:
@@ -234,12 +257,11 @@ void DeferredRenderingApp::InitObjects()
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[2]->Attrib(LSA_IndirectLighting);
-	spot_light_[2]->Position(float3(0, 16, -4.8f));
-	spot_light_[2]->Direction(MathLib::normalize(float3(0, -1.0f, 1)));
 	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f));
 	spot_light_[2]->Falloff(float3(0, 0.1f, 0));
 	spot_light_[2]->OuterAngle(PI / 6);
 	spot_light_[2]->InnerAngle(PI / 8);
+	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI * 0.13f, 1 / 1400.0f, float3(0.0f, 16.0f, -4.8f)));
 	spot_light_[2]->AddToSceneManager();
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
