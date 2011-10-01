@@ -1513,19 +1513,6 @@ namespace KlayGE
 	}
 
 
-	class NullRenderEffect : public RenderEffect
-	{
-	public:
-		NullRenderEffect()
-		{
-		}
-
-		RenderTechniquePtr MakeRenderTechnique()
-		{
-			return RenderTechnique::NullObject();
-		}
-	};
-
 	RenderEffect::RenderEffect()
 	{
 	}
@@ -1534,6 +1521,8 @@ namespace KlayGE
 	{
 		if (source)
 		{
+			res_name_ = MakeSharedPtr<std::string>(source->ResName());
+
 			shader_descs_.resize(1);
 
 			XMLDocument doc;
@@ -1684,12 +1673,6 @@ namespace KlayGE
 		return ret;
 	}
 
-	RenderEffectPtr const & RenderEffect::NullObject()
-	{
-		static RenderEffectPtr obj = MakeSharedPtr<NullRenderEffect>();
-		return obj;
-	}
-
 	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
 	{
 		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
@@ -1723,7 +1706,8 @@ namespace KlayGE
 				return tech;
 			}
 		}
-		return RenderTechnique::NullObject();
+		static RenderTechniquePtr null_tech;
+		return null_tech;
 	}
 
 	uint32_t RenderEffect::AddShaderDesc(shader_desc const & sd)
@@ -1758,39 +1742,6 @@ namespace KlayGE
 		return type_define::instance().type_name(code);
 	}
 
-
-	class NullRenderTechnique : public RenderTechnique
-	{
-	public:
-		NullRenderTechnique()
-			: RenderTechnique(*RenderEffect::NullObject())
-		{
-			weight_ = 0;
-			transparent_ = false;
-			has_discard_ = false;
-			has_tessellation_ = false;
-			is_validate_ = true;
-		}
-
-	private:
-		void DoBegin()
-		{
-		}
-		void DoEnd()
-		{
-		}
-
-		RenderPassPtr MakeRenderPass()
-		{
-			return RenderPass::NullObject();
-		}
-	};
-
-	RenderTechniquePtr const & RenderTechnique::NullObject()
-	{
-		static RenderTechniquePtr obj = MakeSharedPtr<NullRenderTechnique>();
-		return obj;
-	}
 
 	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
@@ -1873,22 +1824,6 @@ namespace KlayGE
 		return ret;
 	}
 
-
-	class NullRenderPass : public RenderPass
-	{
-	public:
-		NullRenderPass()
-			: RenderPass(*RenderEffect::NullObject())
-		{
-			is_validate_ = true;
-		}
-	};
-
-	RenderPassPtr const & RenderPass::NullObject()
-	{
-		static RenderPassPtr obj = MakeSharedPtr<NullRenderPass>();
-		return obj;
-	}
 
 	void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index)
 	{

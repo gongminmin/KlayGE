@@ -475,6 +475,11 @@ namespace KlayGE
 		void Load(ResIdentifierPtr const & source, std::pair<std::string, std::string>* macros);
 		RenderEffectPtr Clone();
 
+		std::string const & ResName() const
+		{
+			return *res_name_;
+		}
+
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
 		{
 			prototype_effect_ = prototype_effect;
@@ -483,8 +488,6 @@ namespace KlayGE
 		{
 			return prototype_effect_;
 		}
-
-		static RenderEffectPtr const & NullObject();
 
 		uint32_t NumParameters() const
 		{
@@ -540,7 +543,9 @@ namespace KlayGE
 
 		std::string const & TypeName(uint32_t code) const;
 
-	protected:
+	private:
+		boost::shared_ptr<std::string> res_name_;
+
 		std::vector<RenderEffectParameterPtr> params_;
 		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;
 		std::vector<RenderTechniquePtr> techniques_;
@@ -563,8 +568,6 @@ namespace KlayGE
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
 		RenderTechniquePtr Clone(RenderEffect& effect);
-
-		static RenderTechniquePtr const & NullObject();
 
 		std::string const & Name() const
 		{
@@ -620,7 +623,7 @@ namespace KlayGE
 			return has_tessellation_;
 		}
 
-	protected:
+	private:
 		RenderEffect& effect_;
 		boost::shared_ptr<std::string> name_;
 
@@ -644,8 +647,6 @@ namespace KlayGE
 				blend_factor_(1, 1, 1, 1), sample_mask_(0xFFFFFFFF)
 		{
 		}
-
-		static RenderPassPtr const & NullObject();
 
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index);
 		RenderPassPtr Clone(RenderEffect& effect);
@@ -690,7 +691,7 @@ namespace KlayGE
 			return (*annotations_)[n];
 		}
 
-	protected:
+	private:
 		RenderEffect& effect_;
 
 		boost::shared_ptr<std::string> name_;
@@ -764,7 +765,7 @@ namespace KlayGE
 			var_->Value(val);
 		}
 
-	protected:
+	private:
 		RenderEffect& effect_;
 
 		boost::shared_ptr<std::string> name_;

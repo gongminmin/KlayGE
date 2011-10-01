@@ -377,38 +377,21 @@ HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTP
 	return output;
 }
 
-struct HS_CONTROL_POINT
-{
-	float3 Pos : POSITION;
-	float2 Texcoord0 : TEXCOORD0;
-	float3 Normal : TEXCOORD1;
-	float3 Tangent : TEXCOORD2;
-	float3 Binormal : TEXCOORD3;
-	float Distortion : TEXCOORD4;
-};
-
 [domain("tri")]
 [partitioning("fractional_odd")]
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(3)]
 [patchconstantfunc("TessellationConstantsHS")]
-HS_CONTROL_POINT TessellationHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+VS_CONTROL_POINT_OUTPUT TessellationHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
 										uint i : SV_OutputControlPointID)
 {
-	HS_CONTROL_POINT output;
-	output.Pos = p[i].Pos;
-	output.Texcoord0 = p[i].Texcoord0;
-	output.Normal = p[i].Normal;
-	output.Tangent = p[i].Tangent;
-	output.Binormal = p[i].Binormal;
-	output.Distortion = p[i].Distortion;
-	return output;
+	return p[i];
 }
 
 [domain("tri")]
 void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
 							float3 bc_coords : SV_DomainLocation,
-							const OutputPatch<HS_CONTROL_POINT, 3> patch,
+							const OutputPatch<VS_CONTROL_POINT_OUTPUT, 3> patch,
 
 							out float4 oL : TEXCOORD0,
 							out float4 oV : TEXCOORD1,
