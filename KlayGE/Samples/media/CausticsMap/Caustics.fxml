@@ -51,9 +51,8 @@ void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCO
 	</shader>
 
 	<parameter type="float3" name="upper_left"/>
-	<parameter type="float3" name="upper_right"/>
-	<parameter type="float3" name="lower_left"/>
-	<parameter type="float3" name="lower_right"/>
+	<parameter type="float3" name="x_span"/>
+	<parameter type="float3" name="y_span"/>
 	<parameter type="float4x4" name="inv_view"/>
 
 	<parameter type="texture2D" name="t_first_depth"/>
@@ -74,7 +73,7 @@ void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCO
 
 	<parameter type="texture2D" name="pt_texture"/>
 
-	<parameter type="float" name="refract_idx"/>
+	<parameter type="float2" name="refract_idx"/>
 	<parameter type="float3" name="absorption_idx"/>
 	<parameter type="float3" name="light_pos"/>
 	<parameter type="float3" name="light_color"/>
@@ -101,9 +100,7 @@ float2 CalcIntersectionPtUV(float3 v, float3 pre_pos, float3 refract_vec)
 
 float3 texcoord_to_view(float2 tex)
 {
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
+	return upper_left + tex.x * x_span + tex.y * y_span;
 }
 
 void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
@@ -118,7 +115,7 @@ void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
 	float3 surface_pt = mul(float4(view_dir * (depth / view_dir.z), 1), inv_view).xyz;
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz * 2 - 1;
 	float3 incident_light = normalize(surface_pt - light_pos);
-	float3 refract_light = refract(incident_light, surface_n, 1 / refract_idx);
+	float3 refract_light = refract(incident_light, surface_n, refract_idx.y);
 
 	float3 caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
 
@@ -186,7 +183,7 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	float3 surface_pt = mul(float4(view_dir * (depth / view_dir.z), 1), inv_view).xyz;
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz * 2 - 1;
 	float3 incident_light = normalize(surface_pt - light_pos);
-	float3 refract_light = refract(incident_light, surface_n, 1 / refract_idx);
+	float3 refract_light = refract(incident_light, surface_n, refract_idx.y);
 
 	float3 first_pt = surface_pt;
 	float3 first_n = surface_n;
@@ -212,7 +209,7 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	surface_n = -(t_second_normals.SampleLevel(linear_sampler, CalcLookupUV(lookup_proj), 0).xyz * 2 - 1);
 
 	incident_light = normalize(surface_pt - first_pt);
-	refract_light = refract(incident_light, surface_n, refract_idx);
+	refract_light = refract(incident_light, surface_n, refract_idx.x);
 
 	caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
 

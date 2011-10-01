@@ -122,11 +122,13 @@ private:
 	KlayGE::TexturePtr scene_texture_;
 	KlayGE::FrameBufferPtr scene_fb_;
 
-	SceneObjectPtr plane_object_;
-	SceneObjectPtr refract_obj_;
-	SceneObjectPtr bunny_;
-	SceneObjectPtr sphere_;
-	RenderablePtr caustics_grid_;
+	KlayGE::PostProcessPtr copy_pp_;
+
+	KlayGE::SceneObjectPtr plane_object_;
+	KlayGE::SceneObjectPtr refract_obj_;
+	KlayGE::SceneObjectPtr bunny_;
+	KlayGE::SceneObjectPtr sphere_;
+	KlayGE::RenderablePtr caustics_grid_;
 
 	KlayGE::UIDialogPtr dialog_;
 	bool enable_dual_face_caustics_;

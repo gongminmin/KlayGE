@@ -3,43 +3,7 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
-
-	<parameter type="texture2D" name="rt_texture"/>
-	<parameter type="sampler" name="rt_texture_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
 	
-	<parameter type="float4x4" name="display_pos"/>
-	
-	<shader>
-		<![CDATA[
-void RTDisplayVS(float4 mask : POSITION,
-	float2 uv : TEXCOORD0,
-	out float2 out_uv : TEXCOORD0,
-	out float4 pos : SV_Position)
-{
-	pos = mul(mask, display_pos);
-	out_uv = uv;
-}
-    
-float4 RTDisplayPS(float2 uv : TEXCOORD0) : SV_Target
-{
-    return rt_texture.Sample(rt_texture_sampler, uv);
-}
-		]]>
-	</shader>
-	
-	<technique name="DebugRTDisplay">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			
-			<state name="vertex_shader" value="RTDisplayVS()"/>
-			<state name="pixel_shader" value="RTDisplayPS()"/>
-		</pass>
-	</technique>
-
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4x4" name="mvp"/>
 
@@ -313,13 +277,11 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 		</pass>
 	</technique>
 
-	<parameter type="float" name="refract_idx"/>
+	<parameter type="float2" name="refract_idx"/>
 	<parameter type="float3" name="absorption_idx"/>
 	<parameter type="float4x4" name="vp"/>
 	
 	<parameter type="texture2D" name="background_texture"/>
-	<parameter type="textureCUBE" name="skybox_Ycube_tex"/>
-	<parameter type="textureCUBE" name="skybox_Ccube_tex"/>
 	<parameter type="textureCUBE" name="env_cube"/>
 	
 	<parameter type="sampler" name="trilinear_sampler">
@@ -347,33 +309,17 @@ float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1,
     wViewVec = normalize(wViewVec);
     wNormal = normalize(wNormal);
 
-    float3 refract_vec = refract(wViewVec, wNormal, 1 / refract_idx);
+    float3 refract_vec = refract(wViewVec, wNormal, refract_idx.y);
     float3 reflect_vec = reflect(wViewVec, wNormal);
     float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
 
     float3 reflected_clr = env_cube.Sample(trilinear_sampler, reflect_vec).xyz;
-    float3 refracted_clr;
 
     float dist = 10.0f;
     float3 intersection_pt = wPosition + dist * refract_vec;
 
 	float4 lookup_proj = mul(float4(intersection_pt, 1), vp);
-	float4 lookup_rt = background_texture.Sample(trilinear_sampler, CalcLookupUV(lookup_proj));
-
-    if (any(lookup_rt.w))
-    {
-        refracted_clr = lookup_rt.xyz;
-    }
-    else
-    {
-		float refract_y = skybox_Ycube_tex.Sample(trilinear_sampler, refract_vec).r;
-		refract_y = exp2(refract_y * 65536 / 2048 - 16);
-		float4 refract_c = float4(get_xy_channel(skybox_Ccube_tex.Sample(trilinear_sampler, refract_vec)).y, 
-										get_xy_channel(skybox_Ccube_tex.Sample(trilinear_sampler, refract_vec)).x, 
-										get_xy_channel(skybox_Ccube_tex.Sample(trilinear_sampler, refract_vec)));
-		refract_c *= refract_c;
-		refracted_clr = refract_y * float3(refract_c.x, (1 - refract_c.z - refract_c.w), refract_c.y) / float3(0.2126f, 0.7152f, 0.0722f);
-    }
+	float3 refracted_clr = background_texture.Sample(trilinear_sampler, CalcLookupUV(lookup_proj)).xyz;
 
     return float4(lerp(refracted_clr, reflected_clr, fresnel_term), 1);
 }
