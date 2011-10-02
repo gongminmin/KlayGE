@@ -50,9 +50,9 @@ namespace KlayGE
 		{
 			return shading_tex_;
 		}
-		TexturePtr const & SSVOTex() const
+		TexturePtr const & SmallSSVOTex() const
 		{
-			return ssvo_tex_;
+			return small_ssvo_tex_;
 		}
 
 		TexturePtr const & OpaqueGBufferRT0Tex() const
@@ -124,7 +124,6 @@ namespace KlayGE
 		PostProcessPtr ssvo_pp_;
 		PostProcessPtr blur_pp_;
 		TexturePtr small_ssvo_tex_;
-		TexturePtr ssvo_tex_;
 		bool ssvo_enabled_;
 
 		PostProcessPtr hdr_pp_;
@@ -183,7 +182,6 @@ namespace KlayGE
 		RenderEffectParameterPtr view_to_light_model_param_;
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
-		RenderEffectParameterPtr ssvo_enabled_param_;
 
 		std::vector<SceneObject*> opaque_scene_objs_;
 		std::vector<SceneObject*> transparency_scene_objs_;

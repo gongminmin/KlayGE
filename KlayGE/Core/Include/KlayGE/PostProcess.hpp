@@ -253,10 +253,11 @@ namespace KlayGE
 	class KLAYGE_CORE_API SeparableBoxFilterPostProcess : public PostProcess
 	{
 	public:
-		SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		SeparableBoxFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableBoxFilterPostProcess();
 
-		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcess::InputPin;
 
 	protected:
 		void CalSampleOffsets(uint32_t tex_size);
@@ -264,6 +265,7 @@ namespace KlayGE
 	protected:
 		int kernel_radius_;
 		float multiplier_;
+		bool x_dir_;
 
 		RenderEffectParameterPtr src_tex_size_ep_;
 		RenderEffectParameterPtr color_weight_ep_;
@@ -273,10 +275,11 @@ namespace KlayGE
 	class KLAYGE_CORE_API SeparableGaussianFilterPostProcess : public PostProcess
 	{
 	public:
-		SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		SeparableGaussianFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableGaussianFilterPostProcess();
 
-		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcess::InputPin;
 
 	protected:
 		float GaussianDistribution(float x, float y, float rho);
@@ -285,6 +288,7 @@ namespace KlayGE
 	protected:
 		int kernel_radius_;
 		float multiplier_;
+		bool x_dir_;
 
 		RenderEffectParameterPtr src_tex_size_ep_;
 		RenderEffectParameterPtr color_weight_ep_;
@@ -294,14 +298,16 @@ namespace KlayGE
 	class KLAYGE_CORE_API SeparableBilateralFilterPostProcess : public PostProcess
 	{
 	public:
-		SeparableBilateralFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier);
+		SeparableBilateralFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir);
 		virtual ~SeparableBilateralFilterPostProcess();
 
-		void SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir);
+		void InputPin(uint32_t index, TexturePtr const & tex);
+		using PostProcess::InputPin;
 
 	protected:
 		int kernel_radius_;
 		float multiplier_;
+		bool x_dir_;
 
 		RenderEffectParameterPtr kernel_radius_ep_;
 		RenderEffectParameterPtr src_tex_size_ep_;
@@ -311,46 +317,20 @@ namespace KlayGE
 	};
 
 	template <typename T>
-	class BlurXPostProcess : public T
-	{
-	public:
-		BlurXPostProcess(int kernel_radius, float multiplier)
-			: T("BlurX", kernel_radius, multiplier)
-		{
-		}
-
-		void InputPin(uint32_t index, TexturePtr const & tex)
-		{
-			T::SeparableInputPin(index, tex, true);
-		}
-		using T::InputPin;
-	};
-
-	template <typename T>
-	class BlurYPostProcess : public T
-	{
-	public:
-		BlurYPostProcess(int kernel_radius, float multiplier)
-			: T("BlurY", kernel_radius, multiplier)
-		{
-		}
-
-		void InputPin(uint32_t index, TexturePtr const & tex)
-		{
-			T::SeparableInputPin(index, tex, false);
-		}
-		using T::InputPin;
-	};
-
-	template <typename T>
 	class BlurPostProcess : public PostProcessChain
 	{
 	public:
 		BlurPostProcess(int kernel_radius, float multiplier)
 			: PostProcessChain(L"Blur")
 		{
-			this->Append(MakeSharedPtr<BlurXPostProcess<T> >(kernel_radius, multiplier));
-			this->Append(MakeSharedPtr<BlurYPostProcess<T> >(kernel_radius, multiplier));
+			this->Append(MakeSharedPtr<T>(RenderTechniquePtr(), kernel_radius, multiplier, true));
+			this->Append(MakeSharedPtr<T>(RenderTechniquePtr(), kernel_radius, multiplier, false));
+		}
+		BlurPostProcess(int kernel_radius, float multiplier, RenderTechniquePtr const & tech_x, RenderTechniquePtr const & tech_y)
+			: PostProcessChain(L"Blur")
+		{
+			this->Append(MakeSharedPtr<T>(tech_x, kernel_radius, multiplier, true));
+			this->Append(MakeSharedPtr<T>(tech_y, kernel_radius, multiplier, false));
 		}
 
 		void InputPin(uint32_t index, TexturePtr const & tex)

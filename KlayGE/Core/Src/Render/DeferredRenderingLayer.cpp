@@ -402,7 +402,8 @@ namespace KlayGE
 		sm_cube_tex_ = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
-		blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f);
+		blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
+			rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"), rf.LoadEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 
 		hdr_pp_ = MakeSharedPtr<HDRPostProcess>();
 		skip_hdr_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
@@ -525,19 +526,11 @@ namespace KlayGE
 		view_to_light_model_param_ = dr_effect_->ParameterByName("view_to_light_model");
 		light_pos_es_param_ = dr_effect_->ParameterByName("light_pos_es");
 		light_dir_es_param_ = dr_effect_->ParameterByName("light_dir_es");
-		if (mrt_g_buffer_)
-		{
-			ssvo_enabled_param_ = dr_effect_->ParameterByName("ssvo_enabled");
-		}
 	}
 
 	void DeferredRenderingLayer::SSVOEnabled(bool ssvo)
 	{
 		ssvo_enabled_ = ssvo;
-		if (mrt_g_buffer_)
-		{
-			*ssvo_enabled_param_ = static_cast<int32_t>(ssvo_enabled_);
-		}
 	}
 
 	void DeferredRenderingLayer::HDREnabled(bool hdr)
@@ -677,8 +670,18 @@ namespace KlayGE
 		shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*shading_tex_, 0, 1, 0));
 		shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
 
+		if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
+		{
+			fmt = EF_GR16F;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+			fmt = EF_ABGR16F;
+		}
+
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		ssvo_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
@@ -708,7 +711,7 @@ namespace KlayGE
 		ssvo_pp_->InputPin(1, opaque_depth_tex_);
 		ssvo_pp_->OutputPin(0, small_ssvo_tex_);
 		blur_pp_->InputPin(0, small_ssvo_tex_);
-		blur_pp_->OutputPin(0, ssvo_tex_);
+		blur_pp_->OutputPin(0, opaque_lighting_tex_);
 
 		hdr_pp_->InputPin(0, shading_tex_);
 		hdr_pp_->OutputPin(0, ldr_tex_);
@@ -717,11 +720,6 @@ namespace KlayGE
 
 		aa_pp_->InputPin(0, ldr_tex_);
 		skip_aa_pp_->InputPin(0, ldr_tex_);
-
-		if (mrt_g_buffer_)
-		{
-			*(dr_effect_->ParameterByName("ssvo_tex")) = ssvo_tex_;
-		}
 
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = opaque_depth_tex_;
@@ -780,7 +778,7 @@ namespace KlayGE
 
 			transparency_scene_objs_.resize(0);
 			opaque_scene_objs_.resize(0);
-			SceneManager::SceneObjectsType& scene_objs = scene_mgr.SceneObjects();
+			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
 			{
 				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
@@ -793,9 +791,6 @@ namespace KlayGE
 					{
 						opaque_scene_objs_.push_back(so.get());
 					}
-
-					so->SSVOTex(ssvo_tex_);
-					so->SSVOEnabled(ssvo_enabled_);
 				}
 			}
 
@@ -989,12 +984,6 @@ namespace KlayGE
 					depth_to_linear_pp_->Apply();
 
 					opaque_depth_tex_->BuildMipSubLevels();
-
-					if (ssvo_enabled_)
-					{
-						ssvo_pp_->Apply();
-						blur_pp_->Apply();
-					}
 
 					if (indirect_lighting_enabled_)
 					{
@@ -1209,6 +1198,12 @@ namespace KlayGE
 							{
 								this->UpsampleMultiresLighting();
 								this->AccumulateToLightingTex();
+							}
+
+							if (ssvo_enabled_)
+							{
+								ssvo_pp_->Apply();
+								blur_pp_->Apply();
 							}
 						}
 

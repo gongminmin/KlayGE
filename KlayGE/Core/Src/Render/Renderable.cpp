@@ -57,8 +57,6 @@ namespace KlayGE
 			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
 
 			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
-			ssvo_tex_param_ = deferred_effect_->ParameterByName("ssvo_tex");
-			ssvo_enabled_param_ = deferred_effect_->ParameterByName("ssvo_enabled");
 			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
 
 			mvp_param_ = deferred_effect_->ParameterByName("mvp");
@@ -344,15 +342,5 @@ namespace KlayGE
 	void Renderable::LightingTex(TexturePtr const & tex)
 	{
 		*lighting_tex_param_ = tex;
-	}
-
-	void Renderable::SSVOTex(TexturePtr const & tex)
-	{
-		*ssvo_tex_param_ = tex;
-	}
-
-	void Renderable::SSVOEnabled(bool ssvo)
-	{
-		*ssvo_enabled_param_ = static_cast<int32_t>(ssvo);
 	}
 }

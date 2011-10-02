@@ -110,14 +110,4 @@ namespace KlayGE
 	{
 		renderable_->LightingTex(tex);
 	}
-
-	void SceneObject::SSVOTex(TexturePtr const & tex)
-	{
-		renderable_->SSVOTex(tex);
-	}
-
-	void SceneObject::SSVOEnabled(bool ssvo)
-	{
-		renderable_->SSVOEnabled(ssvo);
-	}
 }

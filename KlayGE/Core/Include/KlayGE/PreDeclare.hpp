@@ -200,10 +200,8 @@ namespace KlayGE
 	typedef boost::shared_ptr<SeparableBoxFilterPostProcess> SeparableBoxFilterPostProcessPtr;
 	class SeparableGaussianFilterPostProcess;
 	typedef boost::shared_ptr<SeparableGaussianFilterPostProcess> SeparableGaussianFilterPostProcessPtr;
-	template <typename T>
-	class BlurXPostProcess;
-	template <typename T>
-	class BlurYPostProcess;
+	class SeparableBilateralFilterPostProcess;
+	typedef boost::shared_ptr<SeparableBilateralFilterPostProcess> SeparableBilateralFilterPostProcessPtr;
 	template <typename T>
 	class BlurPostProcess;
 	class SumLumPostProcess;

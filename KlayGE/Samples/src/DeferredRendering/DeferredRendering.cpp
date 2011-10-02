@@ -342,7 +342,7 @@ void DeferredRenderingApp::OnResize(uint32_t width, uint32_t height)
 	debug_pp_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
 	debug_pp_->InputPin(1, deferred_rendering_->OpaqueDepthTex());
 	debug_pp_->InputPin(2, deferred_rendering_->OpaqueLightingTex());
-	debug_pp_->InputPin(3, deferred_rendering_->SSVOTex());
+	debug_pp_->InputPin(3, deferred_rendering_->SmallSSVOTex());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -473,21 +473,11 @@ uint32_t DeferredRenderingApp::DoUpdate(uint32_t pass)
 			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
 		}
 	}
-	else if (2 == pass)
-	{
-		if (5 == buffer_type_)
-		{
-			renderEngine.BindFrameBuffer(FrameBufferPtr());
-			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
-			debug_pp_->Apply();
-			return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
-		}
-	}
 
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
-		if ((6 == buffer_type_) || (7 == buffer_type_))
+		if ((5 == buffer_type_) || (6 == buffer_type_) || (7 == buffer_type_))
 		{
 			renderEngine.BindFrameBuffer(FrameBufferPtr());
 			renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);

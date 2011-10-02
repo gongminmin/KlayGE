@@ -116,8 +116,6 @@ namespace KlayGE
 
 		virtual void Pass(PassType type);
 		virtual void LightingTex(TexturePtr const & tex);
-		virtual void SSVOTex(TexturePtr const & tex);
-		virtual void SSVOEnabled(bool ssvo);
 
 		bool SpecialShading() const
 		{
@@ -162,8 +160,6 @@ namespace KlayGE
 		RenderTechniquePtr special_shading_tech_;
 
 		RenderEffectParameterPtr lighting_tex_param_;
-		RenderEffectParameterPtr ssvo_tex_param_;
-		RenderEffectParameterPtr ssvo_enabled_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
 
 		float4x4 model_mat_;

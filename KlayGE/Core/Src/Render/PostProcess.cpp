@@ -972,13 +972,13 @@ namespace KlayGE
 	}
 
 
-	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir)
 		: PostProcess(L"SeparableBoxFilter",
 				std::vector<std::string>(),
 				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
-				Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
-			kernel_radius_(kernel_radius), multiplier_(multiplier)
+				tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
 
@@ -991,12 +991,12 @@ namespace KlayGE
 	{
 	}
 	
-	void SeparableBoxFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	void SeparableBoxFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		PostProcess::InputPin(index, tex);
 		if (0 == index)
 		{
-			this->CalSampleOffsets(x_dir ? tex->Width(0) : tex->Height(0));
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0));
 		}
 	}
 
@@ -1020,13 +1020,13 @@ namespace KlayGE
 	}
 
 
-	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir)
 			: PostProcess(L"SeparableGaussian",
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
-					Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(tech)),
-				kernel_radius_(kernel_radius), multiplier_(multiplier)
+					tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("Blur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+				kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 8));
 
@@ -1039,12 +1039,12 @@ namespace KlayGE
 	{
 	}
 
-	void SeparableGaussianFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	void SeparableGaussianFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		PostProcess::InputPin(index, tex);
 		if (0 == index)
 		{
-			this->CalSampleOffsets(x_dir ? tex->Width(0) : tex->Height(0), 3.0f);
+			this->CalSampleOffsets(x_dir_ ? tex->Width(0) : tex->Height(0), 3.0f);
 		}
 	}
 
@@ -1101,13 +1101,13 @@ namespace KlayGE
 	}
 
 
-	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(std::string const & tech, int kernel_radius, float multiplier)
+	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(RenderTechniquePtr const & tech, int kernel_radius, float multiplier, bool x_dir)
 		: PostProcess(L"SeparableBilateral",
 				std::vector<std::string>(),
 				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "out_tex"),
-				Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(tech)),
-			kernel_radius_(kernel_radius), multiplier_(multiplier)
+				tech ? tech : Context::Instance().RenderFactoryInstance().LoadEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX" : "BlurY")),
+			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		kernel_radius_ep_ = technique_->Effect().ParameterByName("kernel_radius");
 		src_tex_size_ep_ = technique_->Effect().ParameterByName("src_tex_size");
@@ -1120,13 +1120,13 @@ namespace KlayGE
 	{
 	}
 
-	void SeparableBilateralFilterPostProcess::SeparableInputPin(uint32_t index, TexturePtr const & tex, bool x_dir)
+	void SeparableBilateralFilterPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
 	{
 		PostProcess::InputPin(index, tex);
 		if (0 == index)
 		{
 			*kernel_radius_ep_ = static_cast<int32_t>(kernel_radius_);
-			float tex_size = static_cast<float>(x_dir ? tex->Width(0) : tex->Height(0));
+			float tex_size = static_cast<float>(x_dir_ ? tex->Width(0) : tex->Height(0));
 			*src_tex_size_ep_ = float2(tex_size, 1.0f / tex_size);
 			
 			float rho = kernel_radius_ / 4.0f;

@@ -3,7 +3,8 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 	<include name="DeferredRenderingUtil.fxml"/>
-
+	<include name="BilateralBlur.fxml"/>
+	
 	<cbuffer name="never_changes">
 		<parameter type="float2" name="sphere_xy" array_size="2">
 			<value>
@@ -162,6 +163,34 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 
 			<state name="vertex_shader" value="SSVOVS()"/>
 			<state name="pixel_shader" value="SSVOPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSVOBlurX">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurXPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSVOBlurY">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="dst_color"/>
+			<state name="dest_blend" value="zero"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="dst_alpha"/>
+			<state name="dest_blend_alpha" value="zero"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlurYPS()"/>
 		</pass>
 	</technique>
 </effect>

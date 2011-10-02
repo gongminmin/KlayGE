@@ -73,8 +73,6 @@ namespace KlayGE
 		// For deferred only
 		virtual void Pass(PassType type);
 		virtual void LightingTex(TexturePtr const & tex);
-		virtual void SSVOTex(TexturePtr const & tex);
-		virtual void SSVOEnabled(bool ssvo);
 
 		bool AlphaBlend() const
 		{
