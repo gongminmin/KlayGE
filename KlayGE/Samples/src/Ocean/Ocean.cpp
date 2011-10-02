@@ -889,7 +889,7 @@ void OceanApp::InitObjects()
 	reflection_fb_->GetViewport().camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
 			scene_camera.NearPlane(), scene_camera.FarPlane());
 
-	blur_y_ = MakeSharedPtr<BlurYPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+	blur_y_ = MakeSharedPtr<SeparableGaussianFilterPostProcess>(RenderTechniquePtr(), 8, 1.0f, false);
 
 	composed_fb_ = rf.MakeFrameBuffer();
 	composed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
