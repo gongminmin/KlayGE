@@ -154,15 +154,13 @@ float4 VPLsLightingPS(
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="127"/>
+			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="keep"/>
-			<state name="front_stencil_read_mask" value="127"/>
 			<state name="front_stencil_write_mask" value="0"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="equal"/>
-			<state name="back_stencil_ref" value="127"/>
+			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="keep"/>
-			<state name="back_stencil_read_mask" value="127"/>
 			<state name="back_stencil_write_mask" value="0"/>
 
 			<state name="blend_enable" value="true"/>
@@ -188,15 +186,13 @@ float4 VPLsLightingPS(
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="127"/>
+			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="keep"/>
-			<state name="front_stencil_read_mask" value="127"/>
 			<state name="front_stencil_write_mask" value="0"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="equal"/>
-			<state name="back_stencil_ref" value="127"/>
+			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="keep"/>
-			<state name="back_stencil_read_mask" value="127"/>
 			<state name="back_stencil_write_mask" value="0"/>
 
 			<state name="blend_enable" value="true"/>

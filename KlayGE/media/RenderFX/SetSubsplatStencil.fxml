@@ -59,14 +59,12 @@ float4 SetSubsplatStencilPS(float2 tc: TEXCOORD0) : SV_Target
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="127"/>
+			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="replace"/>
-			<state name="front_stencil_read_mask" value="127"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="127"/>
+			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="replace"/>
-			<state name="back_stencil_read_mask" value="127"/>
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="SetSubsplatStencilPS()"/>

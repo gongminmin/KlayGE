@@ -261,7 +261,7 @@ void DeferredRenderingApp::InitObjects()
 	spot_light_[2]->Falloff(float3(0, 0.1f, 0));
 	spot_light_[2]->OuterAngle(PI / 6);
 	spot_light_[2]->InnerAngle(PI / 8);
-	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI * 0.13f, 1 / 1400.0f, float3(0.0f, 16.0f, -4.8f)));
+	spot_light_[2]->BindUpdateFunc(GISpotLightSourceUpdate(sqrt(3.0f) / 3, 1.0f, PI * 0.13f, 1 / 2000.0f, float3(0.0f, 16.0f, -4.8f)));
 	spot_light_[2]->AddToSceneManager();
 
 	point_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(point_light_);
