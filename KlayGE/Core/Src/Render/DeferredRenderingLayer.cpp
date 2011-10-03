@@ -680,7 +680,6 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
-
 		small_ssvo_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
@@ -1499,18 +1498,8 @@ namespace KlayGE
 
 					re.Render(*technique_shadows_[type], *rl);
 
-					if ((type != LT_Ambient) && (type != LT_Directional))
-					{
-						light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
-					}
-
 
 					// Lighting
-
-					if ((type != LT_Ambient) && (type != LT_Directional))
-					{
-						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
-					}
 
 					// Opaque objects
 

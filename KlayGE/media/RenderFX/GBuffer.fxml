@@ -84,9 +84,10 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView0_2z.w = ts_to_view[2].z;
 }
 
-float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+void RestoreNormalSpecular(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
+	out float3 normal, out float specular)
 {
-	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
+	normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	if (normal_map_enabled)
 	{
 		float3x3 ts_to_view;
@@ -96,7 +97,6 @@ float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to
 		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
 	}
 
-	float specular;
 	if (specular_level.w > 0.5f)
 	{
 		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
@@ -105,6 +105,14 @@ float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to
 	{
 		specular = specular_level.x;
 	}
+}
+
+float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+{
+	float3 normal;
+	float specular;
+	RestoreNormalSpecular(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+			normal, specular);
 
 	return StoreGBuffer(normal, specular, shininess);
 }
@@ -112,7 +120,10 @@ float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to
 void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1, float opacity,
 					out float4 mrt_0, out float4 mrt_1)
 {
-	mrt_0 = ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	float3 normal;
+	float specular;
+	RestoreNormalSpecular(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+			normal, specular);
 
 	float3 diffuse;
 	if (diffuse_clr.w > 0.5f)
@@ -123,7 +134,9 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 	{
 		diffuse = diffuse_clr.rgb;
 	}
-	mrt_1 = float4(diffuse, opacity);
+	
+	StoreMRTGBuffer(normal, specular, shininess, diffuse, opacity,
+		mrt_0, mrt_1);
 }
 
 float4 GBufferPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
