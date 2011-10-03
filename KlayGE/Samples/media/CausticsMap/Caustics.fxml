@@ -112,9 +112,10 @@ void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
 	
 	depth = non_linear_depth_to_linear(t_first_depth.SampleLevel(point_sampler, idx, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
-	float3 surface_pt = view_dir * (depth / stow_z.w) + light_pos;
+	float3 incident_light = view_dir * (depth / ttow_z.w);
+	float3 surface_pt = incident_light + light_pos;
+	incident_light = normalize(incident_light);
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz * 2 - 1;
-	float3 incident_light = normalize(surface_pt - light_pos);
 	float3 refract_light = refract(incident_light, surface_n, refract_idx.y);
 
 	float3 caustics_pt = float3(surface_pt.xy, surface_pt.z + 1);
@@ -124,11 +125,11 @@ void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	float dist = distance(caustics_pt, surface_pt);
 	float alpha = dot(surface_n, -incident_light) * inv_occlusion_pixs;
@@ -180,9 +181,10 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	
 	depth = non_linear_depth_to_linear(t_first_depth.SampleLevel(point_sampler, idx, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
-	float3 surface_pt = view_dir * (depth / stow_z.w) + light_pos;
+	float3 incident_light = view_dir * (depth / ttow_z.w);
+	float3 surface_pt = incident_light + light_pos;
+	incident_light = normalize(incident_light);
 	float3 surface_n = t_first_normals.SampleLevel(point_sampler, idx, 0).xyz * 2 - 1;
-	float3 incident_light = normalize(surface_pt - light_pos);
 	float3 refract_light = refract(incident_light, surface_n, refract_idx.y);
 
 	float3 first_pt = surface_pt;
@@ -197,11 +199,11 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	surface_pt = caustics_pt;
 
@@ -217,11 +219,11 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
 	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
-	caustics_pt = view_dir * (depth / stow_z.w) + light_pos;
+	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
 	float dist = distance(caustics_pt, first_pt);
 	float alpha = dot(first_n, -fisrt_incident_light) * inv_occlusion_pixs;

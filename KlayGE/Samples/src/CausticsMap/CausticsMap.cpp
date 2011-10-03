@@ -540,9 +540,9 @@ namespace
 				float3 ttow_right = MathLib::transform_coord(MathLib::transform_coord(float3(+1, 0, 1), inv_light_proj), inv_light_view);
 				float3 ttow_upper = MathLib::transform_coord(MathLib::transform_coord(float3(0, +1, 1), inv_light_proj), inv_light_view);
 				float3 ttow_lower = MathLib::transform_coord(MathLib::transform_coord(float3(0, -1, 1), inv_light_proj), inv_light_view);
-				*(technique_->Effect().ParameterByName("stow_z")) = float4(ttow_center.x(), ttow_center.y(), ttow_center.z(), MathLib::length(ttow_center));
-				*(technique_->Effect().ParameterByName("stow_x")) = ttow_right - ttow_left;
-				*(technique_->Effect().ParameterByName("stow_y")) = ttow_lower - ttow_upper;
+				*(technique_->Effect().ParameterByName("ttow_z")) = float4(ttow_center.x(), ttow_center.y(), ttow_center.z(), MathLib::length(ttow_center));
+				*(technique_->Effect().ParameterByName("ttow_x")) = ttow_right - ttow_left;
+				*(technique_->Effect().ParameterByName("ttow_y")) = ttow_lower - ttow_upper;
 
 				if (Dual_Caustics_Pass == pass_)
 				{
