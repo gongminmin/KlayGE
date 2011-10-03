@@ -317,7 +317,7 @@ void ModelViewerApp::OpenHandler(KlayGE::UIButton const & /*sender*/)
 	ofn.lpstrFile = fn;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = sizeof(fn);
-	ofn.lpstrFilter = "MeshML File\0*.meshml\0All\0*.*\0";
+	ofn.lpstrFilter = "All Model File (*.meshml, *.model_bin)\0*.meshml;*.model_bin\0MeshML File (*.meshml)\0*.meshml\0model_bin File (*.model_bin)\0*.model_bin\0All\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
