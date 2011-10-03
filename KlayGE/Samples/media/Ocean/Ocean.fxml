@@ -13,6 +13,7 @@
 	<parameter type="float3" name="sun_color"/>
 	<parameter type="float3" name="fog_color"/>
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
+	<parameter type="float3" name="waterbody_specular_color" x="5" y="5" z="5"/>
 	<parameter type="float" name="patch_length"/>
 
 	<parameter type="texture2D" name="displacement_tex_0"/>
@@ -147,7 +148,7 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 
 	float3 light_dir = normalize(-sun_dir);
 	float3 halfway = normalize(light_dir + eye_dir);
-	float3 specular = sun_color * specular_normalize_factor(sun_shineness) * roughness_term(halfway, normal, sun_shineness);
+	float3 specular = sun_color * waterbody_specular_color * specular_normalize_factor(sun_shineness) * roughness_term(halfway, normal, sun_shineness);
 
 	float n_dot_l = max(0.0f, directional_lighting(-light_dir, normal));
 	float3 water_color = ambient + (diffuse + specular) * n_dot_l;

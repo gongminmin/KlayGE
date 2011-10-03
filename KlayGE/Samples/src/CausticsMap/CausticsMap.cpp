@@ -533,14 +533,16 @@ namespace
 				*(technique_->Effect().ParameterByName("t_first_depth")) = input_tex.refract_obj_depth_tex_f;
 				*(technique_->Effect().ParameterByName("t_first_normals")) = input_tex.refract_obj_N_texture_f;
 
+				float4x4 inv_light_view = MathLib::inverse(light_view);
 				float4x4 inv_light_proj = MathLib::inverse(light_proj);
-				float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_light_proj);
-				float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_light_proj);
-				float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), inv_light_proj);
-				*(technique_->Effect().ParameterByName("upper_left")) = upper_left;
-				*(technique_->Effect().ParameterByName("x_span")) = upper_right - upper_left;
-				*(technique_->Effect().ParameterByName("y_span")) = lower_left - upper_left;
-				*(technique_->Effect().ParameterByName("inv_view")) = MathLib::inverse(light_view);
+				float3 ttow_center = MathLib::transform_normal(MathLib::transform_coord(float3(0, 0, 1), inv_light_proj), inv_light_view);
+				float3 ttow_left = MathLib::transform_coord(MathLib::transform_coord(float3(-1, 0, 1), inv_light_proj), inv_light_view);
+				float3 ttow_right = MathLib::transform_coord(MathLib::transform_coord(float3(+1, 0, 1), inv_light_proj), inv_light_view);
+				float3 ttow_upper = MathLib::transform_coord(MathLib::transform_coord(float3(0, +1, 1), inv_light_proj), inv_light_view);
+				float3 ttow_lower = MathLib::transform_coord(MathLib::transform_coord(float3(0, -1, 1), inv_light_proj), inv_light_view);
+				*(technique_->Effect().ParameterByName("stow_z")) = float4(ttow_center.x(), ttow_center.y(), ttow_center.z(), MathLib::length(ttow_center));
+				*(technique_->Effect().ParameterByName("stow_x")) = ttow_right - ttow_left;
+				*(technique_->Effect().ParameterByName("stow_y")) = ttow_lower - ttow_upper;
 
 				if (Dual_Caustics_Pass == pass_)
 				{
