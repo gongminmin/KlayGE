@@ -1747,11 +1747,25 @@ namespace KlayGE
 	{
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(node->Attrib("name")->ValueString());
 
+		RenderTechniquePtr parent_tech;
+		XMLAttributePtr inherit_attr = node->Attrib("inherit");
+		if (inherit_attr)
+		{
+			std::string inherit = inherit_attr->ValueString();
+			BOOST_ASSERT(inherit != *name_);
+
+			parent_tech = effect_.TechniqueByName(inherit);
+			annotations_ = parent_tech->annotations_;
+		}
+
 		{
 			XMLNodePtr anno_node = node->FirstNode("annotation");
 			if (anno_node)
 			{
-				annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
+				if (!annotations_)
+				{
+					annotations_ = MakeSharedPtr<BOOST_TYPEOF(*annotations_)>();
+				}
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
@@ -1762,43 +1776,63 @@ namespace KlayGE
 			}
 		}
 
-		is_validate_ = true;
-
-		has_discard_ = false;
-		has_tessellation_ = false;
-		transparent_ = false;
-		weight_ = 1;
-		uint32_t index = 0;
-		for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
+		if (!node->FirstNode("pass") && parent_tech)
 		{
-			RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
-			passes_.push_back(pass);
+			is_validate_ = parent_tech->is_validate_;
+			has_discard_ = parent_tech->has_discard_;
+			has_tessellation_ = parent_tech->has_tessellation_;
+			transparent_ = parent_tech->transparent_;
+			weight_ = parent_tech->weight_;
 
-			pass->Load(pass_node, tech_index, index);
+			passes_ = parent_tech->passes_;
+		}
+		else
+		{
+			is_validate_ = true;
 
-			is_validate_ &= pass->Validate();
-
-			for (XMLNodePtr state_node = pass_node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
+			has_discard_ = false;
+			has_tessellation_ = false;
+			transparent_ = false;
+			weight_ = 1;
+		
+			uint32_t index = 0;
+			for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
 			{
-				++ weight_;
+				RenderPassPtr pass = MakeSharedPtr<RenderPass>(effect_);
+				passes_.push_back(pass);
 
-				std::string state_name = state_node->Attrib("name")->ValueString();
-				if ("blend_enable" == state_name)
+				RenderPassPtr inherit_pass;
+				if (parent_tech && (index < parent_tech->passes_.size()))
 				{
-					std::string value_str = state_node->Attrib("value")->ValueString();
-					if (bool_from_str(value_str))
+					inherit_pass = parent_tech->passes_[index];
+				}
+
+				pass->Load(pass_node, tech_index, index, inherit_pass);
+
+				is_validate_ &= pass->Validate();
+
+				for (XMLNodePtr state_node = pass_node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
+				{
+					++ weight_;
+
+					std::string state_name = state_node->Attrib("name")->ValueString();
+					if ("blend_enable" == state_name)
 					{
-						transparent_ = true;
+						std::string value_str = state_node->Attrib("value")->ValueString();
+						if (bool_from_str(value_str))
+						{
+							transparent_ = true;
+						}
 					}
 				}
-			}
 
-			has_discard_ |= pass->GetShaderObject()->HasDiscard();
-			has_tessellation_ |= pass->GetShaderObject()->HasTessellation();
-		}
-		if (transparent_)
-		{
-			weight_ += 10000;
+				has_discard_ |= pass->GetShaderObject()->HasDiscard();
+				has_tessellation_ |= pass->GetShaderObject()->HasTessellation();
+			}
+			if (transparent_)
+			{
+				weight_ += 10000;
+			}
 		}
 	}
 
@@ -1825,11 +1859,16 @@ namespace KlayGE
 	}
 
 
-	void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index)
+	void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = MakeSharedPtr<BOOST_TYPEOF(*name_)>(std::string(node->Attrib("name")->ValueString()));
+
+		if (inherit_pass)
+		{
+			annotations_ = inherit_pass->annotations_;
+		}
 
 		{
 			XMLNodePtr anno_node = node->FirstNode("annotation");
@@ -1853,6 +1892,18 @@ namespace KlayGE
 
 		shader_desc_ids_ = MakeSharedPtr<BOOST_TYPEOF(*shader_desc_ids_)>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
+
+		if (inherit_pass)
+		{
+			rs_desc = inherit_pass->rasterizer_state_obj_->GetDesc();
+			dss_desc = inherit_pass->depth_stencil_state_obj_->GetDesc();
+			bs_desc = inherit_pass->blend_state_obj_->GetDesc();
+
+			for (size_t i = 0; i < shader_desc_ids_->size(); ++ i)
+			{
+				(*shader_desc_ids_)[i] = (*inherit_pass->shader_desc_ids_)[i];
+			}
+		}
 
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{

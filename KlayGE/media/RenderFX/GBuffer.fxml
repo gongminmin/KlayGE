@@ -204,11 +204,8 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="pixel_shader" value="GBufferPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaTestTech">
+	<technique name="GBufferAlphaTestTech" inherit="GBufferTech">
 		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
@@ -222,14 +219,11 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendFrontTech">
+	<technique name="GBufferAlphaBlendFrontTech" inherit="GBufferAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
 			
 			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
 		</pass>
 	</technique>
 
@@ -241,11 +235,8 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaTestMRTTech">
+	<technique name="GBufferAlphaTestMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferAlphaTestMRTPS()"/>
 		</pass>
 	</technique>
@@ -268,23 +259,11 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendFrontMRTTech">
+	<technique name="GBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
 			
 			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
 		</pass>
 	</technique>
 
@@ -308,22 +287,8 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 		</pass>
 	</technique>
 
-	<technique name="GBufferSkyBoxMRTTech">
+	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxTech">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
 			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
 		</pass>
 	</technique>
@@ -408,18 +373,15 @@ void GenReflectiveShadowMapAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 t
 
 	<technique name="GenReflectiveShadowMapTech">
 		<pass name="p0">
-			<state name="cull_mode" value="back" />
+			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="GenReflectiveShadowMapVS()"/>
 			<state name="pixel_shader" value="GenReflectiveShadowMapPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GenReflectiveShadowMapAlphaTestTech">
+	<technique name="GenReflectiveShadowMapAlphaTestTech" inherit="GenReflectiveShadowMapTech">
 		<pass name="p0">
-			<state name="cull_mode" value="back" />
-
-			<state name="vertex_shader" value="GenReflectiveShadowMapVS()"/>
 			<state name="pixel_shader" value="GenReflectiveShadowMapAlphaTestPS()"/>
 		</pass>
 	</technique>
@@ -457,12 +419,8 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>
 	</technique>
-	<technique name="GenShadowMapAlphaTestTech">
+	<technique name="GenShadowMapAlphaTestTech" inherit="GenShadowMapTech">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="color_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="GenShadowMapVS()"/>
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
 		</pass>
 	</technique>

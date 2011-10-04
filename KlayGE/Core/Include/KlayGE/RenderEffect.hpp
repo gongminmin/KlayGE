@@ -648,7 +648,7 @@ namespace KlayGE
 		{
 		}
 
-		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index);
+		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 		RenderPassPtr Clone(RenderEffect& effect);
 
 		std::string const & Name() const

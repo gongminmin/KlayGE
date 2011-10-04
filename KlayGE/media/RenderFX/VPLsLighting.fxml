@@ -176,35 +176,9 @@ float4 VPLsLightingPS(
 		</pass>
 	</technique>
 
-	<technique name="VPLsLightingNoInstanceID">
+	<technique name="VPLsLightingNoInstanceID" inherit="VPLsLightingInstanceID">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="depth_clip_enable" value="false"/>
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="equal"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="keep"/>
-			<state name="front_stencil_write_mask" value="0"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="equal"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="keep"/>
-			<state name="back_stencil_write_mask" value="0"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="one"/>
-			<state name="dest_blend" value="one"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="one"/>
-			<state name="dest_blend_alpha" value="zero"/>
-
 			<state name="vertex_shader" value="VPLsLightingNoInstanceIDVS()"/>
-			<state name="pixel_shader" value="VPLsLightingPS()"/>
 		</pass>
 	</technique>
 </effect>

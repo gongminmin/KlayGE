@@ -63,11 +63,8 @@ float4 DepthPeelingNthPS(float4 clr : COLOR0, float4 pos_ss : TEXCOORD0) : SV_Ta
 		</pass>
 	</technique>
 
-	<technique name="DepthPeelingNth">
+	<technique name="DepthPeelingNth" inherit="DepthPeeling1st">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="DepthPeelingVS()"/>
 			<state name="pixel_shader" value="DepthPeelingNthPS()"/>
 		</pass>
 	</technique>

@@ -235,24 +235,9 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 		]]>
 	</shader>
 	
-	<technique name="GenDualFaceCausticsMap">
+	<technique name="GenDualFaceCausticsMap" inherit="GenSingleFaceCausticsMap">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="one"/>
-			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="one"/>
-			<state name="dest_blend_alpha" value="one"/>
-
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="none"/>
-			
 			<state name="vertex_shader" value="GenDualFaceCausticsMapVS()"/>
-			<state name="geometry_shader" value="PointGS()"/>
-			<state name="pixel_shader" value="GenCausticsMapPS()"/>
 		</pass>
 	</technique>
 </effect>

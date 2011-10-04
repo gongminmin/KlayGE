@@ -55,17 +55,15 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
 			<state name="depth_enable" value="true"/>
+			
 			<state name="vertex_shader" value="PosNormTexVS()"/>
 			<state name="pixel_shader" value="PosNormTexPS()"/>
 		</pass>
 	</technique>
 	
-	<technique name="PosNormTexFront">
+	<technique name="PosNormTexFront" inherit="PosNormTexBack">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
-			<state name="depth_enable" value="true"/>
-			<state name="vertex_shader" value="PosNormTexVS()"/>
-			<state name="pixel_shader" value="PosNormTexPS()"/>
 		</pass>
 	</technique>
 
@@ -270,9 +268,8 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="DistanceMapping20">
+	<technique name="DistanceMapping20" inherit="DistanceMapping2a">
 		<pass name="p0">
-			<state name="vertex_shader" value="DistanceMappingVS()"/>
 			<state name="pixel_shader" value="DistanceMappingPS_20()"/>
 		</pass>
 	</technique>
