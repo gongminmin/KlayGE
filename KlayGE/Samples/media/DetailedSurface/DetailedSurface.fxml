@@ -274,39 +274,27 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 	</technique>
 
 
-	<technique name="NoneWireframe">
+	<technique name="NoneWireframe" inherit="None">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-
-			<state name="vertex_shader" value="CalcTBNVS()"/>
-			<state name="pixel_shader" value="NonePS()"/>
 		</pass>
 	</technique>
 
-	<technique name="BumpWireframe">
+	<technique name="BumpWireframe" inherit="Bump">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-
-			<state name="vertex_shader" value="CalcTBNVS()"/>
-			<state name="pixel_shader" value="BumpMappingPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="ParallaxWireframe">
+	<technique name="ParallaxWireframe" inherit="Parallax">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-
-			<state name="vertex_shader" value="CalcTBNVS()"/>
-			<state name="pixel_shader" value="ParallaxMappingPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="ParallaxOcclusionWireframe">
+	<technique name="ParallaxOcclusionWireframe" inherit="ParallaxOcclusion">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-
-			<state name="vertex_shader" value="ParallaxOcclusionMappingVS()"/>
-			<state name="pixel_shader" value="ParallaxOcclusionMappingPS()"/>
 		</pass>
 	</technique>
 
@@ -459,14 +447,9 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="TessellationWireframe">
+	<technique name="TessellationWireframe" inherit="Tessellation">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
-
-			<state name="vertex_shader" value="TessellationVS()"/>
-			<state name="hull_shader" value="TessellationHS()"/>
-			<state name="domain_shader" value="TessellationDS()"/>
-			<state name="pixel_shader" value="BumpMappingPS()"/>
 		</pass>
 	</technique>
 </effect>

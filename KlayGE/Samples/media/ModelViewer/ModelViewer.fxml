@@ -341,36 +341,6 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="LightingLineTech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="MeshVS()"/>
-			<state name="pixel_shader" value="LightingPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexLineTech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureLineTech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="MeshVS()"/>
-			<state name="pixel_shader" value="VisualizeTexturePS()"/>
-		</pass>
-	</technique>
-
 	<technique name="LightingFillTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
@@ -412,6 +382,30 @@ float4 VisualizeTexturePS(float2 tex0 : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="MeshVS()"/>
 			<state name="pixel_shader" value="VisualizeTexturePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineTech" inherit="LightingFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineBlendTech" inherit="LightingFillBlendTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeVertexLineTech" inherit="VisualizeVertexFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineTech" inherit="VisualizeTextureFillTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
 
@@ -691,40 +685,6 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="LightingLineSmooth5Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="PNTrianglesVS()"/>
-			<state name="hull_shader" value="PNTrianglesHS()"/>
-			<state name="domain_shader" value="PNTrianglesDS()"/>
-			<state name="pixel_shader" value="LightingPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexLineSmooth5Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureLineSmooth5Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="PNTrianglesVS()"/>
-			<state name="hull_shader" value="PNTrianglesHS()"/>
-			<state name="domain_shader" value="PNTrianglesDS()"/>
-			<state name="pixel_shader" value="VisualizeTexturePS()"/>
-		</pass>
-	</technique>
-
 	<technique name="LightingFillSmooth5Tech">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
@@ -772,6 +732,30 @@ void PNTrianglesDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="hull_shader" value="PNTrianglesHS()"/>
 			<state name="domain_shader" value="PNTrianglesDS()"/>
 			<state name="pixel_shader" value="VisualizeTexturePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineSmooth5Tech" inherit="LightingFillSmooth5Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineBlendSmooth5Tech" inherit="LightingFillBlendSmooth5Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	
+	<technique name="VisualizeVertexLineSmooth5Tech" inherit="VisualizeVertexFillSmooth5Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineSmooth5Tech" inherit="VisualizeTextureFillSmooth5Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
 
@@ -926,35 +910,7 @@ void InstTessPNTrianglesVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="LightingLineSmooth4Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="back"/>
 
-			<state name="vertex_shader" value="InstTessPNTrianglesVS()"/>
-			<state name="pixel_shader" value="LightingPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexLineSmooth4Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessPNTrianglesVisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureLineSmooth4Tech">
-		<pass name="p0">
-			<state name="polygon_mode" value="line"/>
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessPNTrianglesVS()"/>
-			<state name="pixel_shader" value="VisualizeTexturePS()"/>
-		</pass>
-	</technique>
 
 	<technique name="LightingFillSmooth4Tech">
 		<pass name="p0">
@@ -997,6 +953,30 @@ void InstTessPNTrianglesVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 			<state name="vertex_shader" value="InstTessPNTrianglesVS()"/>
 			<state name="pixel_shader" value="VisualizeTexturePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineSmooth4Tech" inherit="LightingFillSmooth4Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="LightingLineBlendSmooth4Tech" inherit="LightingFillBlendSmooth4Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeVertexLineSmooth4Tech" inherit="VisualizeVertexFillSmooth4Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineSmooth4Tech" inherit="VisualizeTextureFillSmooth4Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
 </effect>

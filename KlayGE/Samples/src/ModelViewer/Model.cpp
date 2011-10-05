@@ -321,12 +321,11 @@ void DetailedSkinnedMesh::UpdateTech()
 	else
 	{
 		tech += "Fill";
-
-		if (("Lighting" == visualize_)
-			&& ((model_.lock()->GetMaterial(this->MaterialID())->opacity < 0.99f) || this->HasOpacityMap()))
-		{
-			tech += "Blend";
-		}
+	}
+	if (("Lighting" == visualize_)
+		&& ((model_.lock()->GetMaterial(this->MaterialID())->opacity < 0.99f) || this->HasOpacityMap()))
+	{
+		tech += "Blend";
 	}
 	if (smooth_mesh_)
 	{

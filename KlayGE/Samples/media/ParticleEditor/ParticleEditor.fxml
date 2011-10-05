@@ -240,19 +240,10 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float in
 		</pass>
 	</technique>
 
-	<technique name="ParticleWithGS">
+	<technique name="ParticleWithGS" inherit="Particle">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="blend_op" value="add"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="one"/>
-
 			<state name="vertex_shader" value="ParticleVS2()"/>
 			<state name="geometry_shader" value="ParticleGS()"/>
-			<state name="pixel_shader" value="ParticlePS()"/>
 		</pass>
 	</technique>
 
