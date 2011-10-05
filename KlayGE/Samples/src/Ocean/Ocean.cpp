@@ -991,7 +991,17 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	}
 	TexturePtr refraction_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*refraction_ds_tex, 0, 1, 0);
-	refraction_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R16F, 1, 0))
+	{
+		fmt = EF_R16F;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0));
+
+		fmt = EF_R32F;
+	}
+	refraction_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{

@@ -115,8 +115,6 @@ namespace KlayGE
 		DXGI_FORMAT					depth_stencil_format_;
 
 		std::wstring			description_;
-
-		uint32_t				fs_color_depth_;
 	};
 
 	typedef boost::shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;

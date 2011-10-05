@@ -40,8 +40,7 @@ namespace KlayGE
 	};
 
 	FrameBuffer::FrameBuffer()
-					: left_(0), top_(0), width_(0), height_(0), colorDepth_(0), format_(EF_Unknown),
-						isDepthBuffered_(false), depthBits_(0), stencilBits_(0),
+					: left_(0), top_(0), width_(0), height_(0),
 						active_(false)
 	{
 	}
@@ -82,34 +81,6 @@ namespace KlayGE
 	uint32_t FrameBuffer::Height() const
 	{
 		return height_;
-	}
-
-	// 渲染目标的颜色深度
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t FrameBuffer::ColorDepth() const
-	{
-		return colorDepth_;
-	}
-
-	// 渲染目标的深度位数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t FrameBuffer::DepthBits() const
-	{
-		return depthBits_;
-	}
-
-	// 渲染目标的模板位数
-	/////////////////////////////////////////////////////////////////////////////////
-	uint32_t FrameBuffer::StencilBits() const
-	{
-		return stencilBits_;
-	}
-
-	// 渲染目标的元素格式
-	/////////////////////////////////////////////////////////////////////////////////
-	ElementFormat FrameBuffer::Format() const
-	{
-		return format_;
 	}
 
 	// 获取视口
@@ -157,33 +128,6 @@ namespace KlayGE
 				}
 
 				rs_view_ = view;
-
-				isDepthBuffered_ = true;
-
-				switch (view->Format())
-				{
-				case EF_D16:
-					depthBits_ = 16;
-					stencilBits_ = 0;
-					break;
-
-				case EF_D24S8:
-					depthBits_ = 24;
-					stencilBits_ = 8;
-					break;
-
-				case EF_D32F:
-					depthBits_ = 32;
-					stencilBits_ = 0;
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-
-					depthBits_ = 0;
-					stencilBits_ = 0;
-					break;
-				}
 			}
 			break;
 
@@ -221,8 +165,6 @@ namespace KlayGE
 				{
 					width_ = view->Width();
 					height_ = view->Height();
-					colorDepth_ = view->Bpp();
-					format_ = view->Format();
 
 					viewport_.left		= 0;
 					viewport_.top		= 0;
@@ -246,11 +188,6 @@ namespace KlayGE
 		case ATT_DepthStencil:
 			{
 				rs_view_.reset();
-
-				isDepthBuffered_ = false;
-
-				depthBits_ = 0;
-				stencilBits_ = 0;
 			}
 			break;
 

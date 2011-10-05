@@ -166,8 +166,8 @@ namespace KlayGE
 		this->InitRenderStates();
 
 		win->Attach(FrameBuffer::ATT_Color0,
-			MakeSharedPtr<OGLES2ScreenColorRenderView>(win->Width(), win->Height(), win->Format()));
-		if (win->DepthBits() > 0)
+			MakeSharedPtr<OGLES2ScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
+		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
 		{
 			win->Attach(FrameBuffer::ATT_DepthStencil,
 				MakeSharedPtr<OGLES2ScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));

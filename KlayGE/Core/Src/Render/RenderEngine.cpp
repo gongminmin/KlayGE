@@ -652,7 +652,7 @@ namespace KlayGE
 				stereo_frame_buffers_[i]->GetViewport().camera = screen_frame_buffer_->GetViewport().camera;
 
 				stereo_colors_[i] = rf.MakeTexture2D(screen_frame_buffer_->Width(), screen_frame_buffer_->Height(),
-					1, 1, screen_frame_buffer_->Format(), render_settings_.sample_count, render_settings_.sample_quality,
+					1, 1, render_settings_.color_fmt, render_settings_.sample_count, render_settings_.sample_quality,
 					EAH_GPU_Read | EAH_GPU_Write, NULL);
 				stereo_frame_buffers_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*stereo_colors_[i], 0, 1, 0));
 

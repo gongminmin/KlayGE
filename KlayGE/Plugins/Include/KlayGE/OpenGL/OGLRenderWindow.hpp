@@ -82,9 +82,9 @@ namespace KlayGE
 		bool	closed_;
 		bool	isFullScreen_;
 
-		std::wstring			description_;
+		uint32_t color_bits_;
 
-		uint32_t				fs_color_depth_;
+		std::wstring			description_;
 	};
 }
 

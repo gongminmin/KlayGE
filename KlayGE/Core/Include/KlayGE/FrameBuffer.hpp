@@ -76,10 +76,6 @@ namespace KlayGE
 		uint32_t Top() const;
 		uint32_t Width() const;
 		uint32_t Height() const;
-		uint32_t ColorDepth() const;
-		uint32_t DepthBits() const;
-		uint32_t StencilBits() const;
-		ElementFormat Format() const;
 
 		Viewport const & GetViewport() const;
 		Viewport& GetViewport();
@@ -113,12 +109,6 @@ namespace KlayGE
 		uint32_t	top_;
 		uint32_t	width_;
 		uint32_t	height_;
-		uint32_t	colorDepth_;
-		ElementFormat format_;
-
-		bool		isDepthBuffered_;
-		uint32_t	depthBits_;
-		uint32_t	stencilBits_;
 
 		bool	active_;	// Is active i.e. visible
 

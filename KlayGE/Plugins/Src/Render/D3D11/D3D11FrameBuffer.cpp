@@ -30,8 +30,6 @@ namespace KlayGE
 {
 	D3D11FrameBuffer::D3D11FrameBuffer()
 	{
-		isDepthBuffered_ = false;
-
 		left_ = 0;
 		top_ = 0;
 

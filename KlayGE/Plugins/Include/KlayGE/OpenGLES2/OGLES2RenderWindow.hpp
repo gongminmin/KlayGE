@@ -79,10 +79,10 @@ namespace KlayGE
 		bool	ready_;				// Is ready i.e. available for update
 		bool	closed_;
 		bool	isFullScreen_;
+		
+		uint32_t color_bits_;
 
 		std::wstring			description_;
-
-		uint32_t				fs_color_depth_;
 	};
 }
 

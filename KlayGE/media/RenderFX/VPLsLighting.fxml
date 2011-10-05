@@ -136,7 +136,7 @@ float4 VPLsLightingPS(
 	if (cos_iv > 0)
 	{
 		float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
-		color_i = cos_iv * atten * vpl_color.xyz;
+		color_i = cos_iv * atten * vpl_color;
 	}
 
 	return float4(color_i, 1);

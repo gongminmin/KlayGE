@@ -41,13 +41,8 @@ namespace KlayGE
 		name_				= name;
 		width_				= settings.width;
 		height_				= settings.height;
-		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
-		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
-		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
-		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
-
-		fs_color_depth_ = NumFormatBits(settings.color_fmt);
+		color_bits_			= NumFormatBits(settings.color_fmt);
 
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().connect(boost::bind(&OGLES2RenderWindow::OnActive, this, _1, _2));
@@ -67,13 +62,11 @@ namespace KlayGE
 
 		if (isFullScreen_)
 		{
-			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 		}
 		else
 		{
-			colorDepth_ = fs_color_depth_;
 			top_ = settings.top;
 			left_ = settings.left;
 		}
@@ -274,11 +267,9 @@ namespace KlayGE
 			uint32_t style;
 			if (fs)
 			{
-				colorDepth_ = fs_color_depth_;
-
 				DEVMODE devMode;
 				devMode.dmSize = sizeof(devMode);
-				devMode.dmBitsPerPel = colorDepth_;
+				devMode.dmBitsPerPel = color_bits_;
 				devMode.dmPelsWidth = width_;
 				devMode.dmPelsHeight = height_;
 				devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
@@ -288,7 +279,6 @@ namespace KlayGE
 			}
 			else
 			{
-				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
 				::ChangeDisplaySettings(NULL, 0);
 
 				style = WS_OVERLAPPEDWINDOW;
@@ -306,7 +296,6 @@ namespace KlayGE
 			::ShowWindow(hWnd_, SW_SHOWNORMAL);
 			::UpdateWindow(hWnd_);
 #elif defined KLAYGE_PLATFORM_LINUX
-			colorDepth_ = fs_color_depth_;
 			isFullScreen_ = fs;
 			XFlush(x_display_);
 #endif

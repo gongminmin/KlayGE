@@ -49,10 +49,6 @@ namespace KlayGE
 		{
 			return pf_;
 		}
-		uint32_t Bpp() const
-		{
-			return NumFormatBits(pf_);
-		}
 
 		virtual void ClearColor(Color const & clr) = 0;
 		virtual void ClearDepth(float depth) = 0;

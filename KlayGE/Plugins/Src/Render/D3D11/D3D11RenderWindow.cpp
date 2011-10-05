@@ -53,12 +53,10 @@ namespace KlayGE
 		name_				= name;
 		width_				= settings.width;
 		height_				= settings.height;
-		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
-		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
-		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
-		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
 		sync_interval_		= settings.sync_interval;
+
+		ElementFormat format = settings.color_fmt;
 
 		// Destroy current window if any
 		if (hWnd_ != NULL)
@@ -76,43 +74,36 @@ namespace KlayGE
 		main_wnd->OnSetCursor().connect(boost::bind(&D3D11RenderWindow::OnSetCursor, this, _1));
 		main_wnd->OnClose().connect(boost::bind(&D3D11RenderWindow::OnClose, this, _1));
 
-		if (settings.gamma && ((EF_ARGB8 == format_) || (EF_ABGR8 == format_)))
+		if (settings.gamma && ((EF_ARGB8 == format) || (EF_ABGR8 == format)))
 		{
 			for (size_t i = 0; i < adapter_->NumVideoMode(); ++ i)
 			{
 				D3D11VideoMode const & vm = adapter_->VideoMode(i);
-				if ((EF_ARGB8 == format_) && (DXGI_FORMAT_B8G8R8A8_UNORM_SRGB == vm.Format()))
+				if ((EF_ARGB8 == format) && (DXGI_FORMAT_B8G8R8A8_UNORM_SRGB == vm.Format()))
 				{
-					format_ = MakeSRGB(format_);
+					format = MakeSRGB(format);
 					break;
 				}
-				else if ((EF_ABGR8 == format_) && (DXGI_FORMAT_R8G8B8A8_UNORM_SRGB == vm.Format()))
+				else if ((EF_ABGR8 == format) && (DXGI_FORMAT_R8G8B8A8_UNORM_SRGB == vm.Format()))
 				{
-					format_ = MakeSRGB(format_);
+					format = MakeSRGB(format);
 					break;
 				}
 			}
 		}
 
-		fs_color_depth_ = NumFormatBits(format_);
-
 		if (this->FullScreen())
 		{
-			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 		}
 		else
 		{
-			// Get colour depth from display
-			HDC hdc(::GetDC(hWnd_));
-			colorDepth_ = ::GetDeviceCaps(hdc, BITSPIXEL);
-			::ReleaseDC(hWnd_, hdc);
 			top_ = settings.top;
 			left_ = settings.left;
 		}
 
-		back_buffer_format_ = D3D11Mapping::MappingFormat(format_);
+		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
 		std::memset(&sc_desc_, 0, sizeof(sc_desc_));
 		sc_desc_.BufferCount = 1;
@@ -269,66 +260,58 @@ namespace KlayGE
 			main_wnd_ = true;
 		}
 
-		// Depth-stencil format
-		if (isDepthBuffered_)
+		bool isDepthBuffered = IsDepthFormat(settings.depth_stencil_fmt);
+		uint32_t depthBits = NumDepthBits(settings.depth_stencil_fmt);
+		uint32_t stencilBits = NumStencilBits(settings.depth_stencil_fmt);
+		if (isDepthBuffered)
 		{
-			BOOST_ASSERT((32 == depthBits_) || (24 == depthBits_) || (16 == depthBits_) || (0 == depthBits_));
-			BOOST_ASSERT((8 == stencilBits_) || (0 == stencilBits_));
+			BOOST_ASSERT((32 == depthBits) || (24 == depthBits) || (16 == depthBits) || (0 == depthBits));
+			BOOST_ASSERT((8 == stencilBits) || (0 == stencilBits));
 
 			UINT format_support;
 
-			if (32 == depthBits_)
+			if (32 == depthBits)
 			{
-				BOOST_ASSERT(0 == stencilBits_);
+				BOOST_ASSERT(0 == stencilBits);
 
 				// Try 32-bit zbuffer
 				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D32_FLOAT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D32_FLOAT;
-					stencilBits_ = 0;
+					stencilBits = 0;
 				}
 				else
 				{
-					depthBits_ = 24;
+					depthBits = 24;
 				}
 			}
-			if (24 == depthBits_)
+			if (24 == depthBits)
 			{
 				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
-					stencilBits_ = 8;
+					stencilBits = 8;
 				}
 				else
 				{
-					depthBits_ = 16;
+					depthBits = 16;
 				}
 			}
-			if (16 == depthBits_)
+			if (16 == depthBits)
 			{
 				d3d_device_->CheckFormatSupport(DXGI_FORMAT_D16_UNORM, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D16_UNORM;
-					stencilBits_ = 0;
+					stencilBits = 0;
 				}
 				else
 				{
-					depthBits_ = 0;
+					depthBits = 0;
 				}
 			}
-			if (0 == depthBits_)
-			{
-				isDepthBuffered_ = false;
-				stencilBits_ = 0;
-			}
-		}
-		else
-		{
-			depthBits_ = 0;
-			stencilBits_ = 0;
 		}
 
 		gi_factory_->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
@@ -450,16 +433,10 @@ namespace KlayGE
 			uint32_t style;
 			if (fs)
 			{
-				colorDepth_ = fs_color_depth_;
 				style = WS_POPUP;
 			}
 			else
 			{
-				// Get colour depth from display
-				HDC hdc(::GetDC(hWnd_));
-				colorDepth_ = ::GetDeviceCaps(hdc, BITSPIXEL);
-				::ReleaseDC(hWnd_, hdc);
-
 				style = WS_OVERLAPPEDWINDOW;
 			}
 
@@ -580,7 +557,7 @@ namespace KlayGE
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
 		this->Attach(ATT_Color0, MakeSharedPtr<D3D11RenderTargetRenderView>(render_target_view_,
-			this->Width(), this->Height(), format_));
+			this->Width(), this->Height(), D3D11Mapping::MappingFormat(back_buffer_format_)));
 		if (depth_stencil_view_)
 		{
 			this->Attach(ATT_DepthStencil, MakeSharedPtr<D3D11DepthStencilRenderView>(depth_stencil_view_,

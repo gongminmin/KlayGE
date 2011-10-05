@@ -51,13 +51,12 @@ namespace KlayGE
 		name_				= name;
 		width_				= settings.width;
 		height_				= settings.height;
-		isDepthBuffered_	= IsDepthFormat(settings.depth_stencil_fmt);
-		depthBits_			= NumDepthBits(settings.depth_stencil_fmt);
-		stencilBits_		= NumStencilBits(settings.depth_stencil_fmt);
-		format_				= settings.color_fmt;
 		isFullScreen_		= settings.full_screen;
+		color_bits_ = NumFormatBits(settings.color_fmt);
 
-		fs_color_depth_ = NumFormatBits(settings.color_fmt);
+		ElementFormat format = settings.color_fmt;
+		uint32_t depth_bits	= NumDepthBits(settings.depth_stencil_fmt);
+		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 
 		WindowPtr main_wnd = Context::Instance().AppInstance().MainWnd();
 		main_wnd->OnActive().connect(boost::bind(&OGLRenderWindow::OnActive, this, _1, _2));
@@ -68,7 +67,7 @@ namespace KlayGE
 		main_wnd->OnClose().connect(boost::bind(&OGLRenderWindow::OnClose, this, _1));
 
 		bool try_srgb = false;
-		if (settings.gamma && ((EF_ARGB8 == format_) || (EF_ABGR8 == format_)))
+		if (settings.gamma && ((EF_ARGB8 == format) || (EF_ABGR8 == format)))
 		{
 			try_srgb = true;
 		}
@@ -80,13 +79,12 @@ namespace KlayGE
 		uint32_t style;
 		if (isFullScreen_)
 		{
-			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 
 			DEVMODE devMode;
 			devMode.dmSize = sizeof(devMode);
-			devMode.dmBitsPerPel = colorDepth_;
+			devMode.dmBitsPerPel = color_bits_;
 			devMode.dmPelsWidth = width_;
 			devMode.dmPelsHeight = height_;
 			devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
@@ -97,7 +95,6 @@ namespace KlayGE
 		else
 		{
 			// Get colour depth from display
-			colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
 			top_ = settings.top;
 			left_ = settings.left;
 
@@ -119,9 +116,9 @@ namespace KlayGE
 		pfd.nVersion	= 1;
 		pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pfd.iPixelType	= PFD_TYPE_RGBA;
-		pfd.cColorBits	= static_cast<BYTE>(colorDepth_);
-		pfd.cDepthBits	= static_cast<BYTE>(depthBits_);
-		pfd.cStencilBits = static_cast<BYTE>(stencilBits_);
+		pfd.cColorBits	= static_cast<BYTE>(color_bits_);
+		pfd.cDepthBits	= static_cast<BYTE>(depth_bits);
+		pfd.cStencilBits = static_cast<BYTE>(stencil_bits);
 		pfd.iLayerType	= PFD_MAIN_PLANE;
 
 		int pixelFormat = ::ChoosePixelFormat(hDC_, &pfd);
@@ -146,9 +143,9 @@ namespace KlayGE
 					WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
 					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
 					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-					WGL_COLOR_BITS_ARB, colorDepth_,
-					WGL_DEPTH_BITS_ARB, depthBits_,
-					WGL_STENCIL_BITS_ARB, stencilBits_,
+					WGL_COLOR_BITS_ARB, color_bits_,
+					WGL_DEPTH_BITS_ARB, depth_bits,
+					WGL_STENCIL_BITS_ARB, stencil_bits,
 					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
 					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 					WGL_SAMPLES_ARB, sample_count,
@@ -231,13 +228,11 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (isFullScreen_)
 		{
-			colorDepth_ = fs_color_depth_;
 			left_ = 0;
 			top_ = 0;
 		}
 		else
 		{
-			colorDepth_ = fs_color_depth_;
 			top_ = settings.top;
 			left_ = settings.left;
 		}
@@ -429,11 +424,9 @@ namespace KlayGE
 			uint32_t style;
 			if (fs)
 			{
-				colorDepth_ = fs_color_depth_;
-
 				DEVMODE devMode;
 				devMode.dmSize = sizeof(devMode);
-				devMode.dmBitsPerPel = colorDepth_;
+				devMode.dmBitsPerPel = color_bits_;
 				devMode.dmPelsWidth = width_;
 				devMode.dmPelsHeight = height_;
 				devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
@@ -443,7 +436,6 @@ namespace KlayGE
 			}
 			else
 			{
-				colorDepth_ = ::GetDeviceCaps(hDC_, BITSPIXEL);
 				::ChangeDisplaySettings(NULL, 0);
 
 				style = WS_OVERLAPPEDWINDOW;
@@ -461,7 +453,6 @@ namespace KlayGE
 			::ShowWindow(hWnd_, SW_SHOWNORMAL);
 			::UpdateWindow(hWnd_);
 #elif defined KLAYGE_PLATFORM_LINUX
-			colorDepth_ = fs_color_depth_;
 			isFullScreen_ = fs;
 			XFlush(x_display_);
 #endif
