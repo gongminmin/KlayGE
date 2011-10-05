@@ -4,7 +4,6 @@
 	<post_processor name="DepthToSM">
 		<params>
 			<param name="near_q"/>
-			<param name="inv_proj"/>
 		</params>
 		<input>
 			<pin name="src_tex"/>

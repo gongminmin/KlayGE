@@ -226,6 +226,11 @@ namespace
 			*(technique_->Effect().ParameterByName("refraction_tex")) = tex;
 		}
 
+		void RefractionDepthTex(TexturePtr const & tex)
+		{
+			*(technique_->Effect().ParameterByName("refraction_depth_tex")) = tex;
+		}
+
 		void ReflectionTex(TexturePtr const & tex)
 		{
 			*(technique_->Effect().ParameterByName("reflection_tex")) = tex;
@@ -609,6 +614,11 @@ namespace
 			checked_pointer_cast<RenderOcean>(renderable_)->RefractionTex(tex);
 		}
 
+		void RefractionDepthTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<RenderOcean>(renderable_)->RefractionDepthTex(tex);
+		}
+
 		void ReflectionTex(TexturePtr const & tex)
 		{
 			checked_pointer_cast<RenderOcean>(renderable_)->ReflectionTex(tex);
@@ -879,7 +889,7 @@ void OceanApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
-	copy2_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Load("DepthToSM.ppml"), "DepthToSM");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
 	refraction_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
@@ -979,11 +989,9 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_D16;
 	}
-	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0);
-
-	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 1, 0));
-	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	TexturePtr refraction_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*refraction_ds_tex, 0, 1, 0);
+	refraction_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
@@ -995,9 +1003,12 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 
 		fmt = EF_ABGR16F;
 	}
+	refraction_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	refraction_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*refraction_tex_, 0, 1, 0));
+	refraction_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
-	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, refraction_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	reflection_blur_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width / 2, height / 2, EF_D16, 1, 0));
 	reflection_fb_->GetViewport().left = 0;
 	reflection_fb_->GetViewport().top = 0;
@@ -1011,11 +1022,13 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	composed_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*composed_tex_, 0, 1, 0));
 	composed_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	copy_pp_->InputPin(0, refraction_tex_);
-	copy_pp_->OutputPin(0, composed_tex_);
-	copy2_pp_->InputPin(0, composed_tex_);
+	copy_pp_->InputPin(0, composed_tex_);
+
+	depth_to_linear_pp_->InputPin(0, refraction_ds_tex);
+	depth_to_linear_pp_->OutputPin(0, refraction_depth_tex_);
 
 	checked_pointer_cast<OceanObject>(ocean_)->RefractionTex(refraction_tex_);
+	checked_pointer_cast<OceanObject>(ocean_)->RefractionDepthTex(refraction_depth_tex_);
 	checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_blur_tex_);
 
 	UIManager::Instance().SettleCtrls(width, height);
@@ -1171,6 +1184,11 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		{
 			Camera& scene_camera = this->ActiveCamera();
 
+			float q = scene_camera.FarPlane() / (scene_camera.FarPlane() - scene_camera.NearPlane());
+			float2 near_q(scene_camera.NearPlane() * q, q);
+			depth_to_linear_pp_->SetParam(0, near_q);
+			depth_to_linear_pp_->Apply();
+
 			re.BindFrameBuffer(reflection_fb_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
 			checked_pointer_cast<TerrainObject>(terrain_)->ReflectionPass(true);
@@ -1188,8 +1206,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 
 	case 2:
 		blur_y_->Apply();
+		refraction_tex_->CopyToTexture(*composed_tex_);
 		re.BindFrameBuffer(composed_fb_);
-		copy_pp_->Apply();
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
 		ocean_->Visible(true);
@@ -1199,7 +1217,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	default:
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1);
-		copy2_pp_->Apply();
+		copy_pp_->Apply();
 
 		return App3DFramework::URV_Flushed | App3DFramework::URV_Finished;
 	}

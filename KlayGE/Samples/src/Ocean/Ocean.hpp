@@ -37,11 +37,12 @@ private:
 	KlayGE::SceneObjectPtr sky_box_;
 	KlayGE::SceneObjectPtr sun_flare_;
 	KlayGE::PostProcessPtr copy_pp_;
-	KlayGE::PostProcessPtr copy2_pp_;
+	KlayGE::PostProcessPtr depth_to_linear_pp_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
 	KlayGE::TexturePtr refraction_tex_;
+	KlayGE::TexturePtr refraction_depth_tex_;
 	KlayGE::FrameBufferPtr refraction_fb_;
 	KlayGE::TexturePtr reflection_tex_;
 	KlayGE::TexturePtr reflection_blur_tex_;

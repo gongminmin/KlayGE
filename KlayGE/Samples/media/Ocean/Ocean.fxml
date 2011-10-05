@@ -23,6 +23,7 @@
 	<parameter type="texture2D" name="gradient_tex_1"/>
 	<parameter type="texture2DArray" name="gradient_tex_array"/>
 	<parameter type="texture2D" name="refraction_tex"/>
+	<parameter type="texture2D" name="refraction_depth_tex"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
 	<cbuffer name="per_frame">
@@ -123,10 +124,10 @@ float4 OceanPS(float4 eye_dir_fog : TEXCOORD0, float4 tex_coord_noise_grad : TEX
 	float2 bump = normal.xz / pos_ss.z;
 	float3 reflection = reflection_tex.Sample(linear_clamp_sampler, float2(ss_tc.x, 1 - ss_tc.y) + bump * 0.05f).xyz;
 
-	float no_water_depth = refraction_tex.Sample(point_clamp_sampler, ss_tc).w;
+	float no_water_depth = refraction_depth_tex.Sample(point_clamp_sampler, ss_tc).x;
 
 	float3 refraction;
-	float offseted_depth = refraction_tex.Sample(point_clamp_sampler, ss_tc + bump * 0.2f).w;
+	float offseted_depth = refraction_depth_tex.Sample(point_clamp_sampler, ss_tc + bump * 0.2f).x;
 	if (offseted_depth < pos_ss.w)
 	{
 		refraction = refraction_tex.Sample(linear_clamp_sampler, ss_tc).rgb;

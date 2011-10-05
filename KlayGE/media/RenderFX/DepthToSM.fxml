@@ -27,7 +27,7 @@ void DepthToSMVS(float4 pos : POSITION,
 	oViewDir = mul(pos, inv_proj).xyz;
 }
 
-float4 DepthToSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 DepthToSMPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	return non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 }

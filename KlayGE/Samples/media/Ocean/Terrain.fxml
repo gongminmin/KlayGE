@@ -27,7 +27,6 @@
 void TerrainVS(float2 pos : POSITION,
 					out float3 normal_os_fog : TEXCOORD0,
 					out float2 tex_coord : TEXCOORD1,
-					out float2 oPosOS_Y_PosSS_W : TEXCOORD2,
 					out float4 oPos : SV_Position)
 {
 	float lacunarity = 1.93485736f;
@@ -49,15 +48,13 @@ void TerrainVS(float2 pos : POSITION,
 	oPos = mul(pos_os, mvp);
 	tex_coord = pos_os.xz / 8;
 	normal_os_fog.z = fog_scale;
-
-	oPosOS_Y_PosSS_W = float2(pos_os.y, oPos.w);
 }
 
-float4 TerrainPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1, float2 pos_os_y_pos_ss_w : TEXCOORD2) : SV_Target0
+float4 TerrainPS(float3 normal_os_fog : TEXCOORD0, float2 tex_coord : TEXCOORD1) : SV_Target0
 {
 	float3 color = (sun_color * directional_lighting(-sun_dir, normalize(float3(normal_os_fog.x, 1, normal_os_fog.y))) + 0.1f)
 		* (ground_tex_detail.Sample(linear_sampler, tex_coord).rgb + ground_tex_base.Sample(linear_sampler, tex_coord / 16).rgb) / 2;
-	return float4(lerp(saturate(color), fog_color, normal_os_fog.z), pos_os_y_pos_ss_w.y);
+	return float4(lerp(saturate(color), fog_color, normal_os_fog.z), 1);
 }
 		]]>
 	</shader>

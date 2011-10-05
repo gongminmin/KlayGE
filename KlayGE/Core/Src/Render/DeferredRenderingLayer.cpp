@@ -817,9 +817,6 @@ namespace KlayGE
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 			float2 near_q(camera.NearPlane() * q, q);
 			depth_to_linear_pp_->SetParam(0, near_q);
-							
-			float4x4 inv_sm_proj = MathLib::inverse(camera.ProjMatrix());
-			depth_to_linear_pp_->SetParam(1, inv_sm_proj);
 		}
 
 		switch (pass_type)
