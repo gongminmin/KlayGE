@@ -605,9 +605,9 @@ void CausticsMapApp::InitObjects()
 	//Light
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
-	light_->Color(float3(10.f, 10.f, 10.f));
-	light_->Falloff(float3(0.f, 0.f, 0.01f));
-	light_->Position(float3(0.f, 30.f, 0.f));
+	light_->Color(float3(10, 10, 10));
+	light_->Falloff(float3(0, 0, 0.01f));
+	light_->Position(float3(0, 30, 0));
 	light_->Direction(MathLib::normalize(-light_->Position()));
 	light_->OuterAngle(PI / 8);
 	light_->AddToSceneManager();
@@ -890,10 +890,10 @@ void CausticsMapApp::RefractIndexHandler(KlayGE::UISlider const & sender)
 	float idx_min = 1.0f;
 	float idx_max = 2.0f;
 
-	int _min, _max;
-	sender.GetRange(_min, _max);
+	int min_val, max_val;
+	sender.GetRange(min_val, max_val);
 
-	refract_idx_ = ((float) sender.GetValue() - _min) / (_max - _min) * (idx_max - idx_min) + idx_min;
+	refract_idx_ = (static_cast<float>(sender.GetValue()) - min_val) / (max_val - min_val) * (idx_max - idx_min) + idx_min;
 }
 
 void CausticsMapApp::LightDensityHandler(KlayGE::UISlider const & sender)
@@ -901,10 +901,10 @@ void CausticsMapApp::LightDensityHandler(KlayGE::UISlider const & sender)
 	float density_min = 1000.0f;
 	float density_max = 20000.0f;
 
-	int _min, _max;
-	sender.GetRange(_min, _max);
+	int min_val, max_val;
+	sender.GetRange(min_val, max_val);
 
-	light_density_ = ((float) sender.GetValue() - _min) / (_max - _min) * (density_max - density_min) + density_min;
+	light_density_ = (static_cast<float>(sender.GetValue()) - min_val) / (max_val - min_val) * (density_max - density_min) + density_min;
 }
 
 void CausticsMapApp::PointSizeHandler(KlayGE::UISlider const & sender)
@@ -912,10 +912,10 @@ void CausticsMapApp::PointSizeHandler(KlayGE::UISlider const & sender)
 	float pt_min = 0.01f;
 	float pt_max = 0.1f;
 
-	int _min, _max;
-	sender.GetRange(_min, _max);
+	int min_val, max_val;
+	sender.GetRange(min_val, max_val);
 
-	point_size_ = ((float) sender.GetValue() - _min) / (_max - _min) * (pt_max - pt_min) + pt_min;
+	point_size_ = (static_cast<float>(sender.GetValue()) - min_val) / (max_val - min_val) * (pt_max - pt_min) + pt_min;
 }
 
 void CausticsMapApp::DualFaceCausticsCheckBoxHandler(KlayGE::UICheckBox const & sender)
@@ -925,22 +925,22 @@ void CausticsMapApp::DualFaceCausticsCheckBoxHandler(KlayGE::UICheckBox const & 
 
 void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 {
-	switch(sender.GetSelectedIndex())
+	switch (sender.GetSelectedIndex())
 	{
 	case 0:
 		refract_obj_->Visible(false);
 		refract_obj_ = sphere_;
 		refract_obj_->Visible(true);
-		dummy_light_env_->Position(float3(0.0f, 10.0f, 0.0f));
 		break;
 
-	case 1:
+	default:
 		refract_obj_->Visible(false);
 		refract_obj_ = bunny_;
 		refract_obj_->Visible(true);
-		dummy_light_env_->Position(float3(3.0f, 2.0f, 0.0f));
 		break;
 	}
+
+	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->GetBound().Center(), refract_obj_->GetModelMatrix()));
 }
 
 void CausticsMapApp::DoUpdateOverlay()

@@ -53,7 +53,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float i = vpl_id - j * vpl_params.y;
 	float2 rsm_tc = float2(i, j) * vpl_params.z + vpl_params.w;
 
-	float4 albedo_spec = albedo_tex.SampleLevel(trilinear_sampler, rsm_tc, mip_level);
+	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, mip_level);
 	float3 albedo = albedo_spec.xyz;
 	float specular_level = albedo_spec.w;
 	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, mip_level);

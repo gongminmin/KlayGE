@@ -45,7 +45,7 @@ namespace KlayGE
 	int const VPL_COUNT = VPL_COUNT_SQRT * VPL_COUNT_SQRT;
 	
 	float const VPL_DELTA = 1.0f / VPL_COUNT_SQRT;
-	float const VPL_OFFSET = VPL_DELTA / 3;
+	float const VPL_OFFSET = 0.5f * VPL_DELTA;
 
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
@@ -619,7 +619,7 @@ namespace KlayGE
 		}
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Write, NULL);
-		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 		{
 			TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
 				1, 1, EF_D24S8, 1, 0,  EAH_GPU_Write, NULL);
@@ -1564,7 +1564,7 @@ namespace KlayGE
 	{
 		gbuffer_to_depth_derivate_pp_->Apply();
 
-		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
 		{
 			int width = depth_deriative_tex_->Width(i - 1);
 			int height = depth_deriative_tex_->Height(i - 1);
@@ -1587,7 +1587,7 @@ namespace KlayGE
 	{
 		gbuffer_to_normal_cone_pp_->Apply();
 
-		for (int i = 1; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		for (uint32_t i = 1; i < normal_cone_tex_->NumMipMaps(); ++ i)
 		{
 			int width = normal_cone_tex_->Width(i - 1);
 			int height = normal_cone_tex_->Height(i - 1);
@@ -1609,13 +1609,13 @@ namespace KlayGE
 	void DeferredRenderingLayer::SetSubsplatStencil()
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
 		{
 			re.BindFrameBuffer(vpls_lighting_fbs_[i]);
 			vpls_lighting_fbs_[i]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
 
 			*subsplat_cur_lower_level_param_ = float2(static_cast<float>(i), static_cast<float>(i + 1));
-			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < MAX_IL_MIPMAP_LEVELS - 1);
+			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < vpls_lighting_fbs_.size() - 1);
 
 			re.Render(*subsplat_stencil_tech_, *rl_quad_);
 		}
@@ -1680,7 +1680,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::UpsampleMultiresLighting()
 	{
-		for (int i = MAX_IL_MIPMAP_LEVELS - 2; i >= 0; -- i)
+		for (int i = indirect_lighting_tex_->NumMipMaps() - 2; i >= 0; -- i)
 		{
 			uint32_t const width = indirect_lighting_tex_->Width(i);
 			uint32_t const height = indirect_lighting_tex_->Height(i);
