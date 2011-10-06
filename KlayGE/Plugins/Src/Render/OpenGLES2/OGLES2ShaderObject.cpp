@@ -22,11 +22,13 @@
 #include <KlayGE/Matrix.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <cstdio>
 #include <string>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
 #include <iostream>
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
@@ -1312,155 +1314,284 @@ namespace KlayGE
 				{
 					if (is_shader_validate_[type])
 					{
-						CGprofile profile;
-						switch (type)
+						std::string const & effect_name = ResLoader::Instance().Locate(effect.ResName());
+						std::string fxml_bin_name = effect_name.substr(0, effect_name.rfind("."));
+						std::stringstream oss;
+						oss << fxml_bin_name << "_" << sd.func_name << "_" << type << ".fxml_bin";
+						fxml_bin_name = oss.str();
+
+						bool recompile_cg;
+						ResIdentifierPtr bin_res = ResLoader::Instance().Load(fxml_bin_name);
+						if (bin_res)
 						{
-						case ST_VertexShader:
-							profile = CG_PROFILE_GLSLV;
-							break;
-
-						case ST_PixelShader:
-							profile = CG_PROFILE_GLSLF;
-							break;
-
-						default:
-							profile = CG_PROFILE_UNKNOWN;
-							break;
-						}
-
-						CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
-								CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
-
-						CGerror error = cgGetError();
-						if (error != CG_NO_ERROR)
-						{
-#ifdef KLAYGE_DEBUG
-							if (CG_COMPILER_ERROR == error)
+							uint32_t fourcc;
+							bin_res->read(&fourcc, sizeof(fourcc));
+							if (fourcc != MakeFourCC<'F', 'X', 'M', 'L'>::value)
 							{
-								std::istringstream iss(shader_text);
-								std::string s;
-								int line = 1;
-								while (iss)
+								recompile_cg = true;
+							}
+							else
+							{
+								uint32_t ver;
+								bin_res->read(&ver, sizeof(ver));
+								if (ver != 1)
 								{
-									std::getline(iss, s);
-									std::cerr << line << " " << s << std::endl;
-									++ line;
+									recompile_cg = true;
 								}
-								std::cerr << "Error when compiling " << sd.func_name << ":" << std::endl;
-								std::cerr << cgGetErrorString(error) << std::endl;
-
-								char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
-								if (listing)
+								else
 								{
-									std::cerr << listing << std::endl;
+									uint32_t len;
+									bin_res->read(&len, sizeof(len));
+									(*glsl_srcs_)[type].resize(len);
+									bin_res->read(&(*glsl_srcs_)[type][0], len);
+
+									uint32_t num;
+									bin_res->read(&num, sizeof(num));
+									(*pnames_)[type].resize(num);
+									for (size_t i = 0; i < num; ++ i)
+									{
+										bin_res->read(&len, sizeof(len));
+											
+										(*pnames_)[type][i].resize(len);
+										bin_res->read(&(*pnames_)[type][i][0], len);
+									}
+
+									bin_res->read(&num, sizeof(num));
+									(*glsl_res_names_)[type].resize(num);
+									for (size_t i = 0; i < num; ++ i)
+									{
+										bin_res->read(&len, sizeof(len));
+											
+										(*glsl_res_names_)[type][i].resize(len);
+										bin_res->read(&(*glsl_res_names_)[type][i][0], len);
+									}
+
+									bin_res->read(&num, sizeof(num));
+									vs_usages_->resize(num);
+									bin_res->read(&(*vs_usages_)[0], num * sizeof((*vs_usages_)[0]));
+
+									bin_res->read(&num, sizeof(num));
+									vs_usage_indices_->resize(num);
+									bin_res->read(&(*vs_usage_indices_)[0], num * sizeof((*vs_usage_indices_)[0]));
+
+									bin_res->read(&num, sizeof(num));
+									glsl_vs_attrib_names_->resize(num);
+									for (size_t i = 0; i < num; ++ i)
+									{
+										bin_res->read(&len, sizeof(len));
+											
+										(*glsl_vs_attrib_names_)[i].resize(len);
+										bin_res->read(&(*glsl_vs_attrib_names_)[i][0], len);
+									}
+
+									recompile_cg = false;
 								}
 							}
-#endif
 
-							is_shader_validate_[type] = false;
+							bin_res.reset();
 						}
 						else
 						{
-							(*glsl_srcs_)[type] = this->ConvertToELSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
-								static_cast<ShaderType>(type));
+							recompile_cg = true;
+						}
 
-							CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
-							while (cg_param)
+						if (recompile_cg)
+						{
+							CGprofile profile;
+							switch (type)
 							{
-								if (cgIsParameterUsed(cg_param, cg_shader)
-									&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
-								{
-									char const * pname = cgGetParameterName(cg_param);
-									(*pnames_)[type].push_back(pname);
+							case ST_VertexShader:
+								profile = CG_PROFILE_GLSLV;
+								break;
 
-									char const * glsl_param_name = cgGetParameterResourceName(cg_param);
-									std::string hacked_name = std::string("_") + pname;
+							case ST_PixelShader:
+								profile = CG_PROFILE_GLSLF;
+								break;
 
-									if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
-									{
-										// Some times cgGetParameterResourceName doesn't work
-										glsl_param_name = hacked_name.c_str();
-									}
-
-									(*glsl_res_names_)[type].push_back(glsl_param_name);
-								}
-
-								cg_param = cgGetNextParameter(cg_param);
+							default:
+								profile = CG_PROFILE_UNKNOWN;
+								break;
 							}
 
-							if (0 == type)
+							CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
+									CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
+
+							CGerror error = cgGetError();
+							if (error != CG_NO_ERROR)
 							{
-								cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+#ifdef KLAYGE_DEBUG
+								if (CG_COMPILER_ERROR == error)
+								{
+									std::istringstream iss(shader_text);
+									std::string s;
+									int line = 1;
+									while (iss)
+									{
+										std::getline(iss, s);
+										std::cerr << line << " " << s << std::endl;
+										++ line;
+									}
+									std::cerr << "Error when compiling " << sd.func_name << ":" << std::endl;
+									std::cerr << cgGetErrorString(error) << std::endl;
+
+									char const* listing = cgGetLastListing(CGContextIniter::Instance().Context());
+									if (listing)
+									{
+										std::cerr << listing << std::endl;
+									}
+								}
+#endif
+
+								is_shader_validate_[type] = false;
+							}
+							else
+							{
+								(*glsl_srcs_)[type] = this->ConvertToELSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
+									static_cast<ShaderType>(type));
+
+								CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
 								while (cg_param)
 								{
 									if (cgIsParameterUsed(cg_param, cg_shader)
-										&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
-										&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+										&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 									{
-										std::string semantic = cgGetParameterSemantic(cg_param);
-										std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+										char const * pname = cgGetParameterName(cg_param);
+										(*pnames_)[type].push_back(pname);
 
-										VertexElementUsage usage = VEU_Position;
-										uint8_t usage_index = 0;
-										if ("POSITION" == semantic)
-										{
-											usage = VEU_Position;
-											glsl_param_name = "a_gl_Vertex";
-										}
-										else if ("NORMAL" == semantic)
-										{
-											usage = VEU_Normal;
-											glsl_param_name = "a_gl_Normal";
-										}
-										else if (("COLOR0" == semantic) || ("COLOR" == semantic))
-										{
-											usage = VEU_Diffuse;
-											glsl_param_name = "a_gl_Color";
-										}
-										else if ("COLOR1" == semantic)
-										{
-											usage = VEU_Specular;
-											glsl_param_name = "a_gl_SecondaryColor";
-										}
-										else if ("BLENDWEIGHT" == semantic)
-										{
-											usage = VEU_BlendWeight;
-											glsl_param_name = "BLENDWEIGHT";
-										}
-										else if ("BLENDINDICES" == semantic)
-										{
-											usage = VEU_BlendIndex;
-											glsl_param_name = "BLENDINDICES";
-										}
-										else if (0 == semantic.find("TEXCOORD"))
-										{
-											usage = VEU_TextureCoord;
-											usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
-											glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
-										}
-										else if ("TANGENT" == semantic)
-										{
-											usage = VEU_Tangent;
-											glsl_param_name = "TANGENT";
-										}
-										else
-										{
-											BOOST_ASSERT("BINORMAL" == semantic);
+										char const * glsl_param_name = cgGetParameterResourceName(cg_param);
+										std::string hacked_name = std::string("_") + pname;
 
-											usage = VEU_Binormal;
-											glsl_param_name = "BINORMAL";
+										if ((cgGetError() != CG_NO_ERROR) || (NULL == glsl_param_name))
+										{
+											// Some times cgGetParameterResourceName doesn't work
+											glsl_param_name = hacked_name.c_str();
 										}
 
-										vs_usages_->push_back(usage);
-										vs_usage_indices_->push_back(usage_index);
-										glsl_vs_attrib_names_->push_back(glsl_param_name);
+										(*glsl_res_names_)[type].push_back(glsl_param_name);
 									}
 
 									cg_param = cgGetNextParameter(cg_param);
 								}
-							}
 
-							cgDestroyProgram(cg_shader);
+								if (0 == type)
+								{
+									cg_param = cgGetFirstParameter(cg_shader, CG_PROGRAM);
+									while (cg_param)
+									{
+										if (cgIsParameterUsed(cg_param, cg_shader)
+											&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param))
+											&& ((CG_IN == cgGetParameterDirection(cg_param)) || (CG_INOUT == cgGetParameterDirection(cg_param))))
+										{
+											std::string semantic = cgGetParameterSemantic(cg_param);
+											std::string glsl_param_name = semantic;//cgGetParameterResourceName(cg_param);
+
+											VertexElementUsage usage = VEU_Position;
+											uint8_t usage_index = 0;
+											if ("POSITION" == semantic)
+											{
+												usage = VEU_Position;
+												glsl_param_name = "a_gl_Vertex";
+											}
+											else if ("NORMAL" == semantic)
+											{
+												usage = VEU_Normal;
+												glsl_param_name = "a_gl_Normal";
+											}
+											else if (("COLOR0" == semantic) || ("COLOR" == semantic))
+											{
+												usage = VEU_Diffuse;
+												glsl_param_name = "a_gl_Color";
+											}
+											else if ("COLOR1" == semantic)
+											{
+												usage = VEU_Specular;
+												glsl_param_name = "a_gl_SecondaryColor";
+											}
+											else if ("BLENDWEIGHT" == semantic)
+											{
+												usage = VEU_BlendWeight;
+												glsl_param_name = "BLENDWEIGHT";
+											}
+											else if ("BLENDINDICES" == semantic)
+											{
+												usage = VEU_BlendIndex;
+												glsl_param_name = "BLENDINDICES";
+											}
+											else if (0 == semantic.find("TEXCOORD"))
+											{
+												usage = VEU_TextureCoord;
+												usage_index = static_cast<uint8_t>(boost::lexical_cast<int>(semantic.substr(8)));
+												glsl_param_name = "a_gl_MultiTexCoord" + semantic.substr(8);
+											}
+											else if ("TANGENT" == semantic)
+											{
+												usage = VEU_Tangent;
+												glsl_param_name = "TANGENT";
+											}
+											else
+											{
+												BOOST_ASSERT("BINORMAL" == semantic);
+
+												usage = VEU_Binormal;
+												glsl_param_name = "BINORMAL";
+											}
+
+											vs_usages_->push_back(usage);
+											vs_usage_indices_->push_back(usage_index);
+											glsl_vs_attrib_names_->push_back(glsl_param_name);
+										}
+
+										cg_param = cgGetNextParameter(cg_param);
+									}
+								}
+
+								cgDestroyProgram(cg_shader);
+
+								std::ofstream ofs(fxml_bin_name.c_str(), std::ios_base::out | std::ios_base::binary);
+								uint32_t fourcc = MakeFourCC<'F', 'X', 'M', 'L'>::value;
+								ofs.write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));
+								uint32_t ver = 1;
+								ofs.write(reinterpret_cast<char const *>(&ver), sizeof(ver));
+								
+								uint32_t len = (*glsl_srcs_)[type].size();
+								ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
+								ofs.write(&(*glsl_srcs_)[type][0], len);
+
+								uint32_t num = (*pnames_)[type].size();
+								ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
+								for (size_t i = 0; i < num; ++ i)
+								{
+									len = (*pnames_)[type][i].size();
+									ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
+									ofs.write(&(*pnames_)[type][i][0], len);
+								}
+
+								num = (*glsl_res_names_)[type].size();
+								ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
+								for (size_t i = 0; i < num; ++ i)
+								{
+									len = (*glsl_res_names_)[type][i].size();
+									ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
+									ofs.write(&(*glsl_res_names_)[type][i][0], len);
+								}
+
+								num = vs_usages_->size();
+								ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
+								ofs.write(reinterpret_cast<char const *>(&(*vs_usages_)[0]), num * sizeof((*vs_usages_)[0]));
+
+								num = vs_usage_indices_->size();
+								ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
+								ofs.write(reinterpret_cast<char const *>(&(*vs_usage_indices_)[0]), num * sizeof((*vs_usage_indices_)[0]));
+
+								num = glsl_vs_attrib_names_->size();
+								ofs.write(reinterpret_cast<char const *>(&num), sizeof(num));
+								for (size_t i = 0; i < num; ++ i)
+								{
+									len = (*glsl_vs_attrib_names_)[i].size();
+									ofs.write(reinterpret_cast<char const *>(&len), sizeof(len));
+									ofs.write(&(*glsl_vs_attrib_names_)[i][0], len);
+								}
+							}
 						}
 					}
 				}
