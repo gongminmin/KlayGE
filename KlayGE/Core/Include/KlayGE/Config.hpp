@@ -116,6 +116,9 @@
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
 	#define KLAYGE_COMPILER_NAME gcc
+#elif defined(__ANDROID__)
+	#define KLAYGE_PLATFORM_ANDROID
+	#define KLAYGE_COMPILER_NAME gcc
 #else
 	#error Unknown platform.
 #endif
@@ -141,13 +144,16 @@
 	#elif defined(__i386__)
 		#define KLAYGE_CPU_X86
 		#define KLAYGE_COMPILER_TARGET x86
+	#elif defined(__arm__)
+		#define KLAYGE_CPU_ARM
+		#define KLAYGE_COMPILER_TARGET arm
 	#else
 		#error Unknown CPU type.
 	#endif
 #endif
 
 // Defines the native endian
-#if defined(KLAYGE_CPU_PPC)
+#if defined(KLAYGE_CPU_PPC) || defined(KLAYGE_CPU_ARM)
 	#define KLAYGE_BIG_ENDIAN
 #elif defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN

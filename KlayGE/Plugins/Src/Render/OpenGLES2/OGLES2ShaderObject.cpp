@@ -55,7 +55,9 @@
 
 #include <glloader/glloader.h>
 
+#ifndef KLAYGE_PLATFORM_ANDROID
 #include <Cg/cg.h>
+#endif
 
 #include <KlayGE/OpenGLES2/OGLES2RenderFactory.hpp>
 #include <KlayGE/OpenGLES2/OGLES2RenderFactoryInternal.hpp>
@@ -73,6 +75,7 @@ namespace
 {
 	using namespace KlayGE;
 
+#ifndef KLAYGE_PLATFORM_ANDROID
 	class CGContextIniter
 	{
 	public:
@@ -96,6 +99,7 @@ namespace
 	private:
 		CGcontext context_;
 	};
+#endif
 
 	char const * predefined_funcs = "\n									\
 	float4 tex1DLevel(sampler1D s, float location, float lod)\n			\
@@ -1397,6 +1401,7 @@ namespace KlayGE
 
 						if (recompile_cg)
 						{
+#ifndef KLAYGE_PLATFORM_ANDROID
 							CGprofile profile;
 							switch (type)
 							{
@@ -1592,6 +1597,7 @@ namespace KlayGE
 									ofs.write(&(*glsl_vs_attrib_names_)[i][0], len);
 								}
 							}
+#endif
 						}
 					}
 				}
