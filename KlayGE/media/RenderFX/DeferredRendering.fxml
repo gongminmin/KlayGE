@@ -303,9 +303,18 @@ float4 DeferredRenderingDirectionalPS(
 	return final_clr;
 }
 
-float4 DeferredRenderingAmbientPS() : SV_Target
+float4 DeferredRenderingAmbientPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0
+#else
+	float3 tc_w : TEXCOORD0
+#endif
+	) : SV_Target
 {
-	return CalcColor(0.1f, 0, 1);
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(ndc);
+
+	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1);
 }
 
 float4 DeferredShadowingPointPS(

@@ -175,7 +175,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 			fCurrentBound -= fStepSize;
 
 			if (fCurrHeight > fCurrentBound)
-			{   
+			{
 				pt1 = float2(fCurrentBound, fCurrHeight);
 				pt2 = float2(fCurrentBound + fStepSize, fPrevHeight);
 
@@ -186,7 +186,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 				++ nStepIndex;
 			}
 			fPrevHeight = fCurrHeight;
-		}   
+		}
 
 		float fDelta2 = pt2.x - pt2.y;
 		float fDelta1 = pt1.x - pt1.y;
@@ -201,7 +201,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		{
 			fParallaxAmount = (pt1.x * fDelta2 - pt2.x * fDelta1) / fDenominator;
 		}
-      
+
 		float2 texSampleBase = texCoord - vParallaxOffsetTS.xy * (1 - fParallaxAmount);
 		if (level > lod_threshold - 1)
 		{
@@ -217,7 +217,7 @@ float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 		// shadow
 		{
 			float2 vLightRayTS = vParallaxOffsetTS.zw;
-      
+
 			// Compute the soft blurry shadows taking into account self-occlusion for 
 			// features of the height field
 

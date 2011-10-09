@@ -787,6 +787,7 @@ namespace KlayGE
 			if (!with_ambient)
 			{
 				LightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+				ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 				lights_.push_back(ambient_light);
 			}
 
@@ -1434,6 +1435,10 @@ namespace KlayGE
 					break;
 
 				case LT_Ambient:
+					{
+						float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), view_);
+						*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+					}
 					rl = rl_quad_;
 					*light_volume_mv_param_ = inv_proj_;
 					*light_volume_mvp_param_ = float4x4::Identity();
