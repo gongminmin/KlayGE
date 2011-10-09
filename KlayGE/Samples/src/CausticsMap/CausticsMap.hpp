@@ -113,9 +113,9 @@ private:
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
-	KlayGE::FrameBufferPtr env_cube_buffer_;
-	KlayGE::RenderViewPtr env_cube_rv_[6];
-	KlayGE::RenderViewPtr env_cube_dp_rv_;
+	KlayGE::FrameBufferPtr env_cube_buffers_[6];
+	KlayGE::RenderViewPtr env_cube_rvs_[6];
+	KlayGE::RenderViewPtr env_cube_depth_rvs_[6];
 	KlayGE::TexturePtr env_cube_tex_;
 	KlayGE::LightSourcePtr dummy_light_env_;
 

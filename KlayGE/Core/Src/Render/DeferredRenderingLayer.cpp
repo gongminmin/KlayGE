@@ -570,10 +570,28 @@ namespace KlayGE
 
 			fmt8 = EF_ARGB8;
 		}
+		ElementFormat fmt;
+		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
+		{
+			fmt = EF_R16F;
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
+			{
+				fmt = EF_R32F;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+
+				fmt = EF_ABGR16F;
+			}
+		}
 
 		opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
-		opaque_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_R32F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		opaque_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		opaque_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		opaque_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_g_buffer_rt0_tex_, 0, 1, 0));
@@ -586,7 +604,7 @@ namespace KlayGE
 
 		transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
-		transparency_back_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_R32F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		transparency_back_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		transparency_back_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_g_buffer_rt0_tex_, 0, 1, 0));
@@ -599,7 +617,7 @@ namespace KlayGE
 
 		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
-		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, EF_R32F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
+		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		transparency_front_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_g_buffer_rt0_tex_, 0, 1, 0));
@@ -610,7 +628,7 @@ namespace KlayGE
 		}
 		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
-		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		normal_cone_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		if (depth_deriative_tex_->NumMipMaps() > 1)
 		{
@@ -630,7 +648,6 @@ namespace KlayGE
 			vpls_lighting_fbs_.push_back(fb);
 		}
 
-		ElementFormat fmt;
 		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
 		{
 			fmt = EF_R16F;

@@ -747,7 +747,7 @@ void CausticsMapApp::InitEnvCube()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	RenderViewPtr env_cube_dp_rv_ = rf.Make2DDepthStencilRenderView(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, EF_D24S8, 1, 0);
+	TexturePtr env_cube_depth_tex = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -759,11 +759,14 @@ void CausticsMapApp::InitEnvCube()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		env_cube_rv_[i] = rf.Make2DRenderView(*env_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0);
-	}
+		env_cube_rvs_[i] = rf.Make2DRenderView(*env_cube_tex_, 0, static_cast<Texture::CubeFaces>(i), 0);
+		env_cube_depth_rvs_[i] = rf.Make2DDepthStencilRenderView(*env_cube_depth_tex, 0, static_cast<Texture::CubeFaces>(i), 0);
 
-	env_cube_buffer_ = rf.MakeFrameBuffer();
-	env_cube_buffer_->Attach(FrameBuffer::ATT_DepthStencil, env_cube_dp_rv_);
+		env_cube_buffers_[i] = rf.MakeFrameBuffer();
+		env_cube_buffers_[i]->Attach(FrameBuffer::ATT_Color0, env_cube_rvs_[i]);
+		env_cube_buffers_[i]->Attach(FrameBuffer::ATT_DepthStencil, env_cube_depth_rvs_[i]);
+		env_cube_buffers_[i]->GetViewport().camera = dummy_light_env_->SMCamera(i);
+	}
 }
 
 void CausticsMapApp::InitCubeSM()
@@ -1056,7 +1059,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->BindLight(dummy_light_);
 
 			re.BindFrameBuffer(shadow_cube_buffer_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 			shadow_cube_buffer_->GetViewport().camera = dummy_light_->SMCamera(pass - sm_start_pass);
 		}
 		return App3DFramework::URV_Need_Flush;
@@ -1079,10 +1082,8 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<ReceivePlane>(plane_object_->GetRenderable())->SetSMTexture(shadow_cube_tex_);
 			checked_pointer_cast<ReceivePlane>(plane_object_->GetRenderable())->SetCausticsMap(caustics_texture_filtered_);
 
-			env_cube_buffer_->Attach(FrameBuffer::ATT_Color0, env_cube_rv_[pass - env_start_pass]);
-			re.BindFrameBuffer(env_cube_buffer_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
-			env_cube_buffer_->GetViewport().camera = dummy_light_env_->SMCamera(pass - env_start_pass);
+			re.BindFrameBuffer(env_cube_buffers_[pass - env_start_pass]);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		}
 		return App3DFramework::URV_Need_Flush;
 
