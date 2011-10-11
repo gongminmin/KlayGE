@@ -245,7 +245,8 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: illum_(0), indirect_scale_(1.0f)
+		: ssvo_enabled_(true), hdr_enabled_(true), aa_enabled_(true), color_grading_enabled_(true),
+			illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -546,7 +547,7 @@ namespace KlayGE
 		aa_enabled_ = aa;
 	}
 
-	void DeferredRenderingLayer::ColorGradingEnabled(int cg)
+	void DeferredRenderingLayer::ColorGradingEnabled(bool cg)
 	{
 		color_grading_enabled_ = cg;
 	}

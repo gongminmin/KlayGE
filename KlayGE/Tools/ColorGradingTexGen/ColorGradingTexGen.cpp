@@ -33,7 +33,7 @@ namespace
 		{
 			for (uint32_t x = 0; x < width; ++ x)
 			{
-				Color clr(static_cast<float>(x % size) / size, static_cast<float>(y) / size, static_cast<float>(x / size) / size, 1);
+				Color clr(static_cast<float>(x % size) / (size - 1), static_cast<float>(y) / (size - 1), static_cast<float>(x / size) / (size - 1), 1);
 				p[y * width + x] = clr.ARGB();
 			}
 		}
@@ -86,7 +86,7 @@ namespace
 			out_data[0].row_pitch = dst_pitch;
 			out_data[0].slice_pitch = dst_pitch * size;
 
-			SaveTexture(out_file, Texture::TT_3D, size, size, size, num_mipmaps, array_size, MakeSRGB(format), out_data);
+			SaveTexture(out_file, Texture::TT_3D, size, size, size, num_mipmaps, array_size, format, out_data);
 		}
 		else
 		{

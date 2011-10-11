@@ -27,6 +27,7 @@ private:
 	void SSVOHandler(KlayGE::UICheckBox const & sender);
 	void HDRHandler(KlayGE::UICheckBox const & sender);
 	void AAHandler(KlayGE::UICheckBox const & sender);
+	void ColorGradingHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -51,6 +52,7 @@ private:
 	int id_ssvo_;
 	int id_hdr_;
 	int id_aa_;
+	int id_cg_;
 	int id_ctrl_camera_;
 };
 

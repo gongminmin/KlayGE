@@ -33,7 +33,7 @@ namespace KlayGE
 		void SSVOEnabled(bool ssvo);
 		void HDREnabled(bool hdr);
 		void AAEnabled(int aa);
-		void ColorGradingEnabled(int cg);
+		void ColorGradingEnabled(bool cg);
 
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
@@ -138,7 +138,7 @@ namespace KlayGE
 
 		PostProcessPtr color_grading_pp_;
 		PostProcessPtr skip_color_grading_pp_;
-		int color_grading_enabled_;
+		bool color_grading_enabled_;
 
 		RenderLayoutPtr rl_cone_;
 		RenderLayoutPtr rl_pyramid_;

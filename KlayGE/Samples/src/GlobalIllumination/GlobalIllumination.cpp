@@ -142,6 +142,7 @@ void GlobalIlluminationApp::InitObjects()
 	id_ssvo_ = dialog_->IDFromName("SSVO");
 	id_hdr_ = dialog_->IDFromName("HDR");
 	id_aa_ = dialog_->IDFromName("AA");
+	id_cg_ = dialog_->IDFromName("CG");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(boost::bind(&GlobalIlluminationApp::IllumChangedHandler, this, _1));
@@ -159,6 +160,9 @@ void GlobalIlluminationApp::InitObjects()
 
 	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::AAHandler, this, _1));
 	this->AAHandler(*dialog_->Control<UICheckBox>(id_aa_));
+
+	dialog_->Control<UICheckBox>(id_cg_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::ColorGradingHandler, this, _1));
+	this->ColorGradingHandler(*dialog_->Control<UICheckBox>(id_cg_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(boost::bind(&GlobalIlluminationApp::CtrlCameraHandler, this, _1));
 
@@ -221,6 +225,11 @@ void GlobalIlluminationApp::HDRHandler(UICheckBox const & sender)
 void GlobalIlluminationApp::AAHandler(UICheckBox const & sender)
 {
 	deferred_rendering_->AAEnabled(sender.GetChecked());
+}
+
+void GlobalIlluminationApp::ColorGradingHandler(UICheckBox const & sender)
+{
+	deferred_rendering_->ColorGradingEnabled(sender.GetChecked());
 }
 
 void GlobalIlluminationApp::CtrlCameraHandler(UICheckBox const & sender)
