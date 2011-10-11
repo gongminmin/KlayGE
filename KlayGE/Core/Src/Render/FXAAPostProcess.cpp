@@ -10,6 +10,7 @@ namespace KlayGE
 		: PostProcess(L"FXAA")
 	{
 		input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+		output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 		RenderEffectPtr effect = Context::Instance().RenderFactoryInstance().LoadEffect("FXAA.fxml");
 		fxaa_tech_ = effect->TechniqueByName("FXAA");
