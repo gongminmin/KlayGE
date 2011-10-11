@@ -400,6 +400,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\media\PostProcessors\ColorGrading.ppml" />
     <None Include="..\..\media\PostProcessors\Copy.ppml" />
     <None Include="..\..\media\PostProcessors\Copy2LightBuffer.ppml" />
     <None Include="..\..\media\PostProcessors\CustomMipMap.ppml" />
@@ -412,6 +413,7 @@
     <None Include="..\..\media\RenderFX\BilateralBlur.fxml" />
     <None Include="..\..\media\RenderFX\Blur.fxml" />
     <None Include="..\..\media\RenderFX\Bone.fxml" />
+    <None Include="..\..\media\RenderFX\ColorGrading.fxml" />
     <None Include="..\..\media\RenderFX\Copy.fxml" />
     <None Include="..\..\media\RenderFX\Copy2LightBuffer.fxml" />
     <None Include="..\..\media\RenderFX\CustomMipMap.fxml" />

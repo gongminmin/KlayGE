@@ -411,6 +411,9 @@ namespace KlayGE
 		aa_pp_ = MakeSharedPtr<FXAAPostProcess>();
 		skip_aa_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
 
+		color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Load("ColorGrading.ppml"), "color_grading");
+		skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+
 		{
 			rsm_buffer_ = rf.MakeFrameBuffer();
 
@@ -541,6 +544,11 @@ namespace KlayGE
 	void DeferredRenderingLayer::AAEnabled(int aa)
 	{
 		aa_enabled_ = aa;
+	}
+
+	void DeferredRenderingLayer::ColorGradingEnabled(int cg)
+	{
+		color_grading_enabled_ = cg;
 	}
 
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
@@ -714,6 +722,7 @@ namespace KlayGE
 			fmt = MakeSRGB(fmt);
 		}
 		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		grading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 		if (opaque_g_buffer_rt0_tex_)
 		{
@@ -735,7 +744,12 @@ namespace KlayGE
 		skip_hdr_pp_->OutputPin(0, ldr_tex_);
 
 		aa_pp_->InputPin(0, ldr_tex_);
+		aa_pp_->OutputPin(0, grading_tex_);
 		skip_aa_pp_->InputPin(0, ldr_tex_);
+		skip_aa_pp_->OutputPin(0, grading_tex_);
+
+		color_grading_pp_->InputPin(0, grading_tex_);
+		skip_color_grading_pp_->InputPin(0, grading_tex_);
 
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
 		*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = opaque_depth_tex_;
@@ -1298,6 +1312,14 @@ namespace KlayGE
 					else
 					{
 						skip_aa_pp_->Apply();
+					}
+					if (color_grading_enabled_)
+					{
+						color_grading_pp_->Apply();
+					}
+					else
+					{
+						skip_color_grading_pp_->Apply();
 					}
 
 					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)

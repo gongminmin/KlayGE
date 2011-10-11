@@ -850,5 +850,11 @@
     <None Include="..\..\media\PostProcessors\Upsampling.ppml">
       <Filter>Rendering System\Post Processors</Filter>
     </None>
+    <None Include="..\..\media\PostProcessors\ColorGrading.ppml">
+      <Filter>Rendering System\Post Processors</Filter>
+    </None>
+    <None Include="..\..\media\RenderFX\ColorGrading.fxml">
+      <Filter>Rendering System\Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

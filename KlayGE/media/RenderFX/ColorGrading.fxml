@@ -1,0 +1,39 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture3D" name="color_grading_tex">
+		<annotation type="string" name="SasResourceAddress" value="color_grading.dds"/>		
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 ColorGradingPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	return color_grading_tex.Sample(linear_sampler, src_tex.Sample(point_sampler, tc0).xyz);
+}
+		]]>
+	</shader>
+
+	<technique name="ColorGrading">
+		<pass name="p0">
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ColorGradingPS()"/>
+		</pass>
+	</technique>
+</effect>
