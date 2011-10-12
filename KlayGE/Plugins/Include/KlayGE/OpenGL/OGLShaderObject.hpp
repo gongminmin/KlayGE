@@ -38,9 +38,9 @@ namespace KlayGE
 
 		std::string GenShaderText(RenderEffect const & effect);
 
-		void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-			uint32_t tech_index, uint32_t pass_index);
-		ShaderObjectPtr Clone(RenderEffect& effect);
+		void SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+			std::vector<ShaderObjectPtr> const & shared_so);
+		ShaderObjectPtr Clone(RenderEffect const & effect);
 
 		void Bind();
 		void Unbind();
@@ -84,7 +84,6 @@ namespace KlayGE
 		GLint gs_input_type_, gs_output_type_;
 
 		parameter_binds_t param_binds_;
-		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
 

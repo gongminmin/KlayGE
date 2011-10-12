@@ -2245,7 +2245,26 @@ namespace KlayGE
 		depth_stencil_state_obj_ = rf.MakeDepthStencilStateObject(dss_desc);
 		blend_state_obj_ = rf.MakeBlendStateObject(bs_desc);
 
-		shader_obj_->SetShader(effect_, shader_desc_ids_, tech_index, pass_index);
+		std::vector<ShaderObjectPtr> shared_so(ShaderObject::ST_NumShaderTypes);
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			if (sd.tech_pass != 0xFFFFFFFF)
+			{
+				shared_so[type] = effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject();
+			}
+		}
+
+		shader_obj_->SetShader(effect_, shader_desc_ids_, shared_so);
+
+		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
+		{
+			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
+			if ((0xFFFFFFFF == sd.tech_pass) && shader_obj_->ShaderValidate(static_cast<ShaderObject::ShaderType>(type)))
+			{
+				sd.tech_pass = (tech_index << 16) + pass_index;
+			}
+		}
 
 		is_validate_ = shader_obj_->Validate();
 	}

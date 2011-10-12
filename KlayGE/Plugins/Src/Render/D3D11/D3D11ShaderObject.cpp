@@ -717,8 +717,8 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D11ShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-		uint32_t tech_index, uint32_t pass_index)
+	void D3D11ShaderObject::SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		std::vector<ShaderObjectPtr> const & shared_so)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = render_eng.D3DDevice();
@@ -741,10 +741,10 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
-			if (sd.tech_pass != 0xFFFFFFFF)
+			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			if (shared_so[type])
 			{
-				D3D11ShaderObject& so = *checked_cast<D3D11ShaderObject*>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject().get());
+				D3D11ShaderObject& so = *checked_cast<D3D11ShaderObject*>(shared_so[type].get());
 
 				is_shader_validate_[type] = so.is_shader_validate_[type];
 				switch (type)
@@ -1306,8 +1306,6 @@ namespace KlayGE
 							reflection->Release();
 						}
 					}
-
-					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 
@@ -1315,7 +1313,7 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect& effect)
+	ShaderObjectPtr D3D11ShaderObject::Clone(RenderEffect const & effect)
 	{
 		ID3D11DevicePtr const & d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 

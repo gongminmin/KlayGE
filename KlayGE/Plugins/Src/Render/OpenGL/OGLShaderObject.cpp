@@ -1502,8 +1502,8 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void OGLShaderObject::SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-		uint32_t tech_index, uint32_t pass_index)
+	void OGLShaderObject::SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		std::vector<ShaderObjectPtr> const & shared_so)
 	{
 		OGLRenderFactory& rf = *checked_cast<OGLRenderFactory*>(&Context::Instance().RenderFactoryInstance());
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -1550,7 +1550,7 @@ namespace KlayGE
 
 		bool has_gs = false;
 		{
-			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
+			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
 			if (!sd.func_name.empty())
 			{
 				has_gs = true;
@@ -1560,7 +1560,7 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc& sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
 			if (!sd.profile.empty())
 			{
 				is_shader_validate_[type] = true;
@@ -1586,9 +1586,9 @@ namespace KlayGE
 					break;
 				}
 
-				if (sd.tech_pass != 0xFFFFFFFF)
+				if (shared_so[type])
 				{
-					OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(effect.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject());
+					OGLShaderObjectPtr so = checked_pointer_cast<OGLShaderObject>(shared_so[type]);
 
 					is_shader_validate_[type] = so->is_shader_validate_[type];
 
@@ -1841,8 +1841,6 @@ namespace KlayGE
 				if (is_shader_validate_[type])
 				{
 					this->AttachGLSL(type);
-
-					sd.tech_pass = (tech_index << 16) + pass_index;
 				}
 			}
 
@@ -1925,7 +1923,7 @@ namespace KlayGE
 		}
 	}
 
-	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect& effect)
+	ShaderObjectPtr OGLShaderObject::Clone(RenderEffect const & effect)
 	{
 		OGLShaderObjectPtr ret = MakeSharedPtr<OGLShaderObject>();
 

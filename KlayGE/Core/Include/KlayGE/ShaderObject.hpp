@@ -89,13 +89,17 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(RenderEffect& effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
-			uint32_t tech_index, uint32_t pass_index) = 0;
-		virtual ShaderObjectPtr Clone(RenderEffect& effect) = 0;
+		virtual void SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+			std::vector<ShaderObjectPtr> const & shared_so) = 0;
+		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
+		bool ShaderValidate(ShaderType type) const
+		{
+			return is_shader_validate_[type];
+		}
 		bool Validate() const
 		{
 			return is_validate_;
@@ -111,6 +115,8 @@ namespace KlayGE
 		}
 
 	protected:
+		boost::array<bool, ST_NumShaderTypes> is_shader_validate_;
+		
 		bool is_validate_;
 		bool has_discard_;
 		bool has_tessellation_;
