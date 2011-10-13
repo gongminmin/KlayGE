@@ -1520,7 +1520,6 @@ namespace KlayGE
 			max_tex_array_str = ss.str();
 		}
 
-		shader_desc_ids_ = shader_desc_ids;
 		std::string shader_text = this->GenShaderText(effect);
 
 		std::vector<char const *> args;
@@ -1537,10 +1536,10 @@ namespace KlayGE
 		}
 		args.push_back(NULL);
 
-		glsl_srcs_ = MakeSharedPtr<boost::array<std::string, ST_NumShaderTypes> >();
+		glsl_srcs_ = MakeSharedPtr<boost::array<boost::shared_ptr<std::string>, ST_NumShaderTypes> >();
 
-		pnames_ = MakeSharedPtr<boost::array<std::vector<std::string>, ST_NumShaderTypes> >();
-		glsl_res_names_ = MakeSharedPtr<boost::array<std::vector<std::string>, ST_NumShaderTypes> >();
+		pnames_ = MakeSharedPtr<boost::array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		glsl_res_names_ = MakeSharedPtr<boost::array<boost::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
 
 		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
@@ -1550,7 +1549,7 @@ namespace KlayGE
 
 		bool has_gs = false;
 		{
-			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids_)[ST_GeometryShader]);
+			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids)[ST_GeometryShader]);
 			if (!sd.func_name.empty())
 			{
 				has_gs = true;
@@ -1734,8 +1733,10 @@ namespace KlayGE
 								}
 							}
 
-							(*glsl_srcs_)[type] = this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
-								static_cast<ShaderType>(type), gs_input_vertices, has_gs);
+							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(this->ConvertToGLSL(cgGetProgramString(cg_shader, CG_COMPILED_PROGRAM),
+								static_cast<ShaderType>(type), gs_input_vertices, has_gs));
+							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
+							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
 
 							CGparameter cg_param = cgGetFirstParameter(cg_shader, CG_GLOBAL);
 							while (cg_param)
@@ -1744,7 +1745,7 @@ namespace KlayGE
 									&& (CG_PARAMETERCLASS_OBJECT != cgGetParameterClass(cg_param)))
 								{
 									char const * pname = cgGetParameterName(cg_param);
-									(*pnames_)[type].push_back(pname);
+									(*pnames_)[type]->push_back(pname);
 
 									char const * glsl_param_name = cgGetParameterResourceName(cg_param);
 									std::string hacked_name = std::string("_") + pname;
@@ -1755,7 +1756,7 @@ namespace KlayGE
 										glsl_param_name = hacked_name.c_str();
 									}
 
-									(*glsl_res_names_)[type].push_back(glsl_param_name);
+									(*glsl_res_names_)[type]->push_back(glsl_param_name);
 								}
 
 								cg_param = cgGetNextParameter(cg_param);
@@ -1874,37 +1875,40 @@ namespace KlayGE
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
-				for (size_t pi = 0; pi < (*pnames_)[type].size(); ++ pi)
+				if ((*pnames_)[type])
 				{
-					GLint location = glGetUniformLocation(glsl_program_, (*glsl_res_names_)[type][pi].c_str());
-					if (location != -1)
+					for (size_t pi = 0; pi < (*pnames_)[type]->size(); ++ pi)
 					{
-						RenderEffectParameterPtr const & p = effect.ParameterByName((*pnames_)[type][pi]);
-						if (p)
+						GLint location = glGetUniformLocation(glsl_program_, (*(*glsl_res_names_)[type])[pi].c_str());
+						if (location != -1)
 						{
-							param_binds_.push_back(this->GetBindFunc(location, p));
-						}
-						else
-						{
-							for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
+							RenderEffectParameterPtr const & p = effect.ParameterByName((*(*pnames_)[type])[pi]);
+							if (p)
 							{
-								if (tex_sampler_binds_[i].first == (*pnames_)[type][pi])
+								param_binds_.push_back(this->GetBindFunc(location, p));
+							}
+							else
+							{
+								for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 								{
-									parameter_bind_t pb;
-									pb.combined_sampler_name = tex_sampler_binds_[i].first;
-									pb.location = location;
-									pb.shader_type = type;
-									pb.tex_sampler_bind_index = static_cast<int>(i);
+									if (tex_sampler_binds_[i].first == (*(*pnames_)[type])[pi])
+									{
+										parameter_bind_t pb;
+										pb.combined_sampler_name = tex_sampler_binds_[i].first;
+										pb.location = location;
+										pb.shader_type = type;
+										pb.tex_sampler_bind_index = static_cast<int>(i);
 
-									uint32_t index = static_cast<uint32_t>(samplers_.size());
-									samplers_.resize(index + 1);
+										uint32_t index = static_cast<uint32_t>(samplers_.size());
+										samplers_.resize(index + 1);
 
-									pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_, location,
-										index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
+										pb.func = SetOGLShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_, location,
+											index, tex_sampler_binds_[i].second.first, tex_sampler_binds_[i].second.second);
 
-									param_binds_.push_back(pb);
+										param_binds_.push_back(pb);
 
-									break;
+										break;
+									}
 								}
 							}
 						}
@@ -1929,7 +1933,6 @@ namespace KlayGE
 
 		ret->has_discard_ = has_discard_;
 		ret->has_tessellation_ = has_tessellation_;
-		ret->shader_desc_ids_ = shader_desc_ids_;
 		ret->glsl_bin_formats_ = glsl_bin_formats_;
 		ret->glsl_bin_program_ = glsl_bin_program_;
 		ret->glsl_srcs_ = glsl_srcs_;
@@ -1963,8 +1966,7 @@ namespace KlayGE
 			{
 				if (ret->is_shader_validate_[ST_GeometryShader])
 				{
-					shader_desc const & sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[ST_GeometryShader]);
-					if (!sd.func_name.empty())
+					if ((*glsl_srcs_)[ST_GeometryShader] && !(*glsl_srcs_)[ST_GeometryShader]->empty())
 					{
 						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, ret->gs_input_type_);
 						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, ret->gs_output_type_);
@@ -2007,8 +2009,7 @@ namespace KlayGE
 
 				if (is_shader_validate_[type])
 				{
-					shader_desc const & sd = effect.GetShaderDesc((*ret->shader_desc_ids_)[type]);
-					if (!sd.func_name.empty())
+					if ((*glsl_srcs_)[type] && !(*glsl_srcs_)[type]->empty())
 					{
 						ret->AttachGLSL(type);
 					}
@@ -2272,7 +2273,7 @@ namespace KlayGE
 			break;
 		}
 
-		char const * glsl = (*glsl_srcs_)[type].c_str();
+		char const * glsl = (*glsl_srcs_)[type]->c_str();
 		GLuint object = glCreateShader(shader_type);
 		if (0 == object)
 		{
