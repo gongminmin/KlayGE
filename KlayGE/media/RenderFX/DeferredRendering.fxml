@@ -311,6 +311,10 @@ float4 DeferredRenderingAmbientPS(
 #endif
 	) : SV_Target
 {
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
+#endif
+
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);
 
