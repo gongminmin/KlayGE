@@ -164,7 +164,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef boost::shared_ptr<OGLTexture2DRenderView> OGLTexture2DRenderViewPtr;
+	typedef boost::shared_ptr<OGLTextureCubeRenderView> OGLTextureCubeRenderViewPtr;
 
 
 	class OGLGraphicsBufferRenderView : public OGLRenderView, boost::noncopyable
@@ -212,6 +212,24 @@ namespace KlayGE
 	};
 
 	typedef boost::shared_ptr<OGLDepthStencilRenderView> OGLDepthStencilRenderViewPtr;
+
+	class OGLTextureCubeDepthStencilRenderView : public OGLRenderView, boost::noncopyable
+	{
+	public:
+		OGLTextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
+
+		void ClearColor(Color const & clr);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		OGLTextureCube& texture_cube_;
+		Texture::CubeFaces face_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<OGLTextureCubeDepthStencilRenderView> OGLTextureCubeDepthStencilRenderViewPtr;
 }
 
 #endif			// _OGLRENDERVIEW_HPP

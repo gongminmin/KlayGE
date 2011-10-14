@@ -871,9 +871,9 @@ namespace KlayGE
 		index_ = att - FrameBuffer::ATT_Color0;
 
 		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		if (glloader_GL_EXT_direct_state_access())
 		{
-			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 			glNamedFramebufferTexture2DEXT(fbo_,
 					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 					face, tex_, level_);
@@ -883,7 +883,6 @@ namespace KlayGE
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 					face, tex_, level_);
@@ -898,9 +897,9 @@ namespace KlayGE
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 		if (glloader_GL_EXT_direct_state_access())
 		{
-			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 			glNamedFramebufferTexture2DEXT(fbo_,
 					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 					face, 0, 0);
@@ -910,7 +909,6 @@ namespace KlayGE
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindFramebuffer(fbo_);
 
-			GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
 			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
 					GL_COLOR_ATTACHMENT0_EXT + att - FrameBuffer::ATT_Color0,
 					face, 0, 0);
@@ -1295,6 +1293,115 @@ namespace KlayGE
 
 				re.BindFramebuffer(0);
 			}
+		}
+	}
+
+
+	OGLTextureCubeDepthStencilRenderView::OGLTextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
+		: texture_cube_(*checked_cast<OGLTextureCube*>(&texture_cube)),
+			face_(face), level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
+		BOOST_ASSERT(IsDepthFormat(texture_cube.Format()));
+
+		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
+		width_ = texture_cube.Width(level);
+		height_ = texture_cube.Height(level);
+		pf_ = texture_cube.Format();
+
+		tex_ = checked_cast<OGLTextureCube*>(&texture_cube)->GLTexture();
+	}
+
+	void OGLTextureCubeDepthStencilRenderView::ClearColor(Color const & /*clr*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLTextureCubeDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
+		UNREF_PARAM(att);
+
+		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
+
+		index_ = 0;
+
+		fbo_ = checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo();
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			if (IsDepthFormat(pf_))
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+			}
+			if (IsStencilFormat(pf_))
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+			}
+		}
+		else
+		{
+			re.BindFramebuffer(fbo_);
+
+			if (IsDepthFormat(pf_))
+			{
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_DEPTH_ATTACHMENT_EXT, face, tex_, level_);
+			}
+			if (IsStencilFormat(pf_))
+			{
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_STENCIL_ATTACHMENT_EXT, face, tex_, level_);
+			}
+
+			re.BindFramebuffer(0);
+		}
+	}
+
+	void OGLTextureCubeDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	{
+		UNREF_PARAM(fb);
+		UNREF_PARAM(att);
+
+		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
+
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			if (IsDepthFormat(pf_))
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+			}
+			if (IsStencilFormat(pf_))
+			{
+				glNamedFramebufferTexture2DEXT(fbo_,
+					GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+			}
+		}
+		else
+		{
+			re.BindFramebuffer(fbo_);
+
+			if (IsDepthFormat(pf_))
+			{
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_DEPTH_ATTACHMENT_EXT, face, 0, 0);
+			}
+			if (IsStencilFormat(pf_))
+			{
+				glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+					GL_STENCIL_ATTACHMENT_EXT, face, 0, 0);
+			}
+
+			re.BindFramebuffer(0);
 		}
 	}
 }

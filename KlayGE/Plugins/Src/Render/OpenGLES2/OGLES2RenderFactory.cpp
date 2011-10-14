@@ -142,9 +142,9 @@ namespace KlayGE
 		return MakeSharedPtr<OGLES2DepthStencilRenderView>(texture, first_array_index, level);
 	}
 
-	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
+	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level)
 	{
-		return RenderViewPtr();
+		return MakeSharedPtr<OGLES2TextureCubeDepthStencilRenderView>(texture, array_index, face, level);
 	}
 
 	RenderViewPtr OGLES2RenderFactory::Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)

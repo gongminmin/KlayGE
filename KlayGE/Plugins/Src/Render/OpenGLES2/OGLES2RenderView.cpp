@@ -737,4 +737,81 @@ namespace KlayGE
 			re.BindFramebuffer(0);
 		}
 	}
+
+
+	OGLES2TextureCubeDepthStencilRenderView::OGLES2TextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
+		: texture_cube_(*checked_cast<OGLES2TextureCube*>(&texture_cube)),
+			face_(face), level_(level)
+	{
+		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
+		BOOST_ASSERT(IsDepthFormat(texture_cube.Format()));
+
+		if (array_index > 0)
+		{
+			THR(boost::system::posix_error::not_supported);
+		}
+
+		width_ = texture_cube.Width(level);
+		height_ = texture_cube.Height(level);
+		pf_ = texture_cube.Format();
+
+		tex_ = checked_cast<OGLES2TextureCube*>(&texture_cube)->GLTexture();
+	}
+
+	void OGLES2TextureCubeDepthStencilRenderView::ClearColor(Color const & /*clr*/)
+	{
+		BOOST_ASSERT(false);
+	}
+
+	void OGLES2TextureCubeDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
+		UNREF_PARAM(att);
+
+		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
+
+		index_ = 0;
+
+		fbo_ = checked_cast<OGLES2FrameBuffer*>(&fb)->OGLFbo();
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindFramebuffer(fbo_);
+
+		if (IsDepthFormat(pf_))
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_DEPTH_ATTACHMENT, face, tex_, level_);
+		}
+		if (IsStencilFormat(pf_))
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_STENCIL_ATTACHMENT, face, tex_, level_);
+		}
+
+		re.BindFramebuffer(0);
+	}
+
+	void OGLES2TextureCubeDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	{
+		UNREF_PARAM(fb);
+		UNREF_PARAM(att);
+
+		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
+
+		GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face_ - Texture::CF_Positive_X;
+		OGLES2RenderEngine& re = *checked_cast<OGLES2RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindFramebuffer(fbo_);
+
+		if (IsDepthFormat(pf_))
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_DEPTH_ATTACHMENT, face, 0, 0);
+		}
+		if (IsStencilFormat(pf_))
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER,
+				GL_STENCIL_ATTACHMENT, face, 0, 0);
+		}
+
+		re.BindFramebuffer(0);
+	}
 }

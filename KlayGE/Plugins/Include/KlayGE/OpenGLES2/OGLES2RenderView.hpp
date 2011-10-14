@@ -161,7 +161,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef boost::shared_ptr<OGLES2Texture2DRenderView> OGLES2Texture2DRenderViewPtr;
+	typedef boost::shared_ptr<OGLES2TextureCubeRenderView> OGLES2TextureCubeRenderViewPtr;
 
 
 	class OGLES2DepthStencilRenderView : public OGLES2RenderView, boost::noncopyable
@@ -185,6 +185,25 @@ namespace KlayGE
 	};
 
 	typedef boost::shared_ptr<OGLES2DepthStencilRenderView> OGLES2DepthStencilRenderViewPtr;
+
+
+	class OGLES2TextureCubeDepthStencilRenderView : public OGLES2RenderView, boost::noncopyable
+	{
+	public:
+		OGLES2TextureCubeDepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
+
+		void ClearColor(Color const & clr);
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	private:
+		OGLES2TextureCube& texture_cube_;
+		Texture::CubeFaces face_;
+		int level_;
+	};
+
+	typedef boost::shared_ptr<OGLES2TextureCubeDepthStencilRenderView> OGLES2TextureCubeDepthStencilRenderViewPtr;
 }
 
 #endif			// _OGLES2RENDERVIEW_HPP
