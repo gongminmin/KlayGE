@@ -717,7 +717,7 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void D3D11ShaderObject::SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+	void D3D11ShaderObject::SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 		std::vector<ShaderObjectPtr> const & shared_so)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -741,7 +741,7 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 			if (shared_so[type])
 			{
 				D3D11ShaderObject& so = *checked_cast<D3D11ShaderObject*>(shared_so[type].get());
@@ -1016,7 +1016,7 @@ namespace KlayGE
 									}
 
 									UINT rasterized_stream = 0;
-									if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc((*shader_desc_ids)[ST_PixelShader]).func_name.empty()))
+									if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc(shader_desc_ids[ST_PixelShader]).func_name.empty()))
 									{
 										rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
 									}
@@ -1058,7 +1058,7 @@ namespace KlayGE
 								}
 
 								UINT rasterized_stream = 0;
-								if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc((*shader_desc_ids)[ST_PixelShader]).func_name.empty()))
+								if ((caps.max_shader_model >= 5) && (effect.GetShaderDesc(shader_desc_ids[ST_PixelShader]).func_name.empty()))
 								{
 									rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
 								}

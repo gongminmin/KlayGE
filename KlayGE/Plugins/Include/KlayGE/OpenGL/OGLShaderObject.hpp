@@ -38,7 +38,7 @@ namespace KlayGE
 
 		std::string GenShaderText(RenderEffect const & effect);
 
-		void SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		void SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<ShaderObjectPtr> const & shared_so);
 		ShaderObjectPtr Clone(RenderEffect const & effect);
 

@@ -33,8 +33,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API ResIdentifier
 	{
 	public:
-		ResIdentifier(std::string const & name, boost::shared_ptr<std::istream> const & is)
-			: res_name_(name), istream_(is)
+		ResIdentifier(std::string const & name, uint64_t timestamp, boost::shared_ptr<std::istream> const & is)
+			: res_name_(name), timestamp_(timestamp), istream_(is)
 		{
 		}
 
@@ -45,6 +45,15 @@ namespace KlayGE
 		std::string const & ResName() const
 		{
 			return res_name_;
+		}
+
+		void Timestamp(uint64_t ts)
+		{
+			timestamp_ = ts;
+		}
+		uint64_t Timestamp() const
+		{
+			return timestamp_;
 		}
 
 		void read(void* p, size_t size)
@@ -84,6 +93,7 @@ namespace KlayGE
 
 	private:
 		std::string res_name_;
+		uint64_t timestamp_;
 		boost::shared_ptr<std::istream> istream_;
 	};
 

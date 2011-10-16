@@ -38,6 +38,9 @@ namespace KlayGE
 
 		uint32_t tech_pass;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		#pragma pack(push, 1)
+#endif
 		struct stream_output_decl
 		{
 			VertexElementUsage usage;
@@ -55,6 +58,9 @@ namespace KlayGE
 				return !(lhs == rhs);
 			}
 		};
+#ifdef KLAYGE_PLATFORM_WINDOWS
+		#pragma pack(pop)
+#endif
 		std::vector<stream_output_decl> so_decl;
 
 		friend bool operator==(shader_desc const & lhs, shader_desc const & rhs)
@@ -89,7 +95,7 @@ namespace KlayGE
 
 		static ShaderObjectPtr NullObject();
 
-		virtual void SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+		virtual void SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<ShaderObjectPtr> const & shared_so) = 0;
 		virtual ShaderObjectPtr Clone(RenderEffect const & effect) = 0;
 

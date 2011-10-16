@@ -1218,7 +1218,7 @@ namespace KlayGE
 		return ss.str();
 	}
 
-	void OGLES2ShaderObject::SetShader(RenderEffect const & effect, boost::shared_ptr<std::vector<uint32_t> > const & shader_desc_ids,
+	void OGLES2ShaderObject::SetShader(RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 		std::vector<ShaderObjectPtr> const & shared_so)
 	{
 		std::string shader_text = this->GenShaderText(effect);
@@ -1237,7 +1237,7 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			shader_desc const & sd = effect.GetShaderDesc((*shader_desc_ids)[type]);
+			shader_desc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 			if (!sd.profile.empty())
 			{
 				is_shader_validate_[type] = true;

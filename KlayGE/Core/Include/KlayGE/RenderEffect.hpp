@@ -555,7 +555,7 @@ namespace KlayGE
 
 		RenderEffectPtr prototype_effect_;
 
-		std::vector<shader_desc> shader_descs_;
+		boost::shared_ptr<std::vector<shader_desc> > shader_descs_;
 	};
 
 	class KLAYGE_CORE_API RenderTechnique : boost::noncopyable

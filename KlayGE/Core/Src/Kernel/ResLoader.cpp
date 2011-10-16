@@ -150,7 +150,8 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
-							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
+							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
 							{
@@ -174,7 +175,8 @@ namespace KlayGE
 		{
 			if (boost::filesystem::exists(name))
 			{
-				return MakeSharedPtr<ResIdentifier>(name,
+				uint64_t timestamp = boost::filesystem::last_write_time(name);
+				return MakeSharedPtr<ResIdentifier>(name, timestamp,
 					MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
 			}
 		}
@@ -186,7 +188,8 @@ namespace KlayGE
 
 				if (boost::filesystem::exists(res_name))
 				{
-					return MakeSharedPtr<ResIdentifier>(name,
+					uint64_t timestamp = boost::filesystem::last_write_time(res_name);
+					return MakeSharedPtr<ResIdentifier>(name, timestamp,
 						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 				}
 				else
@@ -208,13 +211,14 @@ namespace KlayGE
 							}
 							std::string const file_name = res_name.substr(pkt_offset + 2);
 
-							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name,
+							uint64_t timestamp = boost::filesystem::last_write_time(pkt_name);
+							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
 								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 							if (*pkt_file)
 							{
 								boost::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
 								Extract7z(pkt_file, password, file_name, packet_file);
-								return MakeSharedPtr<ResIdentifier>(name, packet_file);
+								return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
 							}
 						}
 					}

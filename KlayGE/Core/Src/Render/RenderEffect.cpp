@@ -1523,7 +1523,7 @@ namespace KlayGE
 		{
 			res_name_ = MakeSharedPtr<std::string>(source->ResName());
 
-			shader_descs_.resize(1);
+			shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
 
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(source);
@@ -1712,29 +1712,29 @@ namespace KlayGE
 
 	uint32_t RenderEffect::AddShaderDesc(shader_desc const & sd)
 	{
-		for (uint32_t i = 0; i < shader_descs_.size(); ++ i)
+		for (uint32_t i = 0; i < shader_descs_->size(); ++ i)
 		{
-			if (shader_descs_[i] == sd)
+			if ((*shader_descs_)[i] == sd)
 			{
 				return i;
 			}
 		}
 
-		uint32_t id = static_cast<uint32_t>(shader_descs_.size());
-		shader_descs_.push_back(sd);
+		uint32_t id = static_cast<uint32_t>(shader_descs_->size());
+		shader_descs_->push_back(sd);
 		return id;
 	}
 
 	shader_desc& RenderEffect::GetShaderDesc(uint32_t id)
 	{
-		BOOST_ASSERT(id < shader_descs_.size());
-		return shader_descs_[id];
+		BOOST_ASSERT(id < shader_descs_->size());
+		return (*shader_descs_)[id];
 	}
 
 	shader_desc const & RenderEffect::GetShaderDesc(uint32_t id) const
 	{
-		BOOST_ASSERT(id < shader_descs_.size());
-		return shader_descs_[id];
+		BOOST_ASSERT(id < shader_descs_->size());
+		return (*shader_descs_)[id];
 	}
 
 	std::string const & RenderEffect::TypeName(uint32_t code) const
@@ -2255,12 +2255,12 @@ namespace KlayGE
 			}
 		}
 
-		shader_obj_->SetShader(effect_, shader_desc_ids_, shared_so);
+		shader_obj_->SetShader(effect_, *shader_desc_ids_, shared_so);
 
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if ((0xFFFFFFFF == sd.tech_pass) && shader_obj_->ShaderValidate(static_cast<ShaderObject::ShaderType>(type)))
+			if (0xFFFFFFFF == sd.tech_pass)
 			{
 				sd.tech_pass = (tech_index << 16) + pass_index;
 			}

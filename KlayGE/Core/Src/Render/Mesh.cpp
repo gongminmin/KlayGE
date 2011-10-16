@@ -1509,7 +1509,7 @@ namespace KlayGE
 		LZMACodec lzma;
 		lzma.Decode(*ss, lzma_file, len, original_len);
 
-		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), ss);
+		ResIdentifierPtr decoded = MakeSharedPtr<ResIdentifier>(lzma_file->ResName(), lzma_file->Timestamp(), ss);
 
 		uint32_t num_mtls;
 		decoded->read(&num_mtls, sizeof(num_mtls));
