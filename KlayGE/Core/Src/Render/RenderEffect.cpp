@@ -2249,7 +2249,7 @@ namespace KlayGE
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			shader_desc const & sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (sd.tech_pass != 0xFFFFFFFF)
+			if (!sd.func_name.empty() && (sd.tech_pass != 0xFFFFFFFF))
 			{
 				shared_so[type] = effect_.TechniqueByIndex(sd.tech_pass >> 16)->Pass(sd.tech_pass & 0xFFFF)->GetShaderObject();
 			}
@@ -2260,7 +2260,7 @@ namespace KlayGE
 		for (int type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
 			shader_desc& sd = effect_.GetShaderDesc((*shader_desc_ids_)[type]);
-			if (0xFFFFFFFF == sd.tech_pass)
+			if (!sd.func_name.empty() && (0xFFFFFFFF == sd.tech_pass))
 			{
 				sd.tech_pass = (tech_index << 16) + pass_index;
 			}
