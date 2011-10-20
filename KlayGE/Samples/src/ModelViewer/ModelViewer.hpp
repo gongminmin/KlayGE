@@ -45,7 +45,7 @@ private:
 
 	KlayGE::Timer ani_timer_;
 	float last_time_;
-	int frame_;
+	float frame_;
 
 	bool skinned_;
 	bool play_;

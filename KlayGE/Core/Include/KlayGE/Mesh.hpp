@@ -263,8 +263,7 @@ namespace KlayGE
 		std::vector<Quaternion> bind_real;
 		std::vector<Quaternion> bind_dual;
 
-		Quaternion FrameReal(float frame) const;
-		Quaternion FrameDual(float frame) const;
+		std::pair<Quaternion, Quaternion> Frame(float frame) const;
 	};
 	typedef MapVector<std::string, KeyFrames> KeyFramesType;
 

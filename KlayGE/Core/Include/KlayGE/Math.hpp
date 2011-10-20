@@ -882,6 +882,18 @@ namespace KlayGE
 		template <typename T>
 		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
 			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual);
+
+		template <typename T>
+		void udq_to_screw(T& angle, T& pitch, Vector_T<T, 3>& dir, Vector_T<T, 3>& moment,
+			Quaternion_T<T> const & real, Quaternion_T<T> const & dual);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > udq_from_screw(T const & angle, T const & pitch,
+			Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp);
 	}
 }
 

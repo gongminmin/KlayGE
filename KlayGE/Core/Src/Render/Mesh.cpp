@@ -440,20 +440,12 @@ namespace KlayGE
 	}
 
 
-	Quaternion KeyFrames::FrameReal(float frame) const
+	std::pair<Quaternion, Quaternion> KeyFrames::Frame(float frame) const
 	{
 		frame = std::fmod(frame, static_cast<float>(bind_real.size()));
 		int frame0 = static_cast<int>(frame);
 		int frame1 = (frame0 + 1) % bind_real.size();
-		return MathLib::slerp(bind_real[frame0], bind_real[frame1], frame - frame0);
-	}
-
-	Quaternion KeyFrames::FrameDual(float frame) const
-	{
-		frame = std::fmod(frame, static_cast<float>(bind_dual.size()));
-		int frame0 = static_cast<int>(frame);
-		int frame1 = (frame0 + 1) % bind_dual.size();
-		return MathLib::slerp(bind_dual[frame0], bind_dual[frame1], frame - frame0);
+		return MathLib::sclerp(bind_real[frame0], bind_dual[frame0], bind_real[frame1], bind_dual[frame1], frame - frame0);
 	}
 
 
@@ -469,26 +461,25 @@ namespace KlayGE
 		BOOST_FOREACH(BOOST_TYPEOF(joints_)::reference joint, joints_)
 		{
 			KeyFrames const & kf = key_frames_->find(joint.name)->second;
-			Quaternion key_real = kf.FrameReal(frame);
-			Quaternion key_dual = kf.FrameDual(frame);
+			std::pair<Quaternion, Quaternion> key_dq = kf.Frame(frame);
 
 			if (joint.parent != -1)
 			{
 				Joint const & parent(joints_[joint.parent]);
 
-				if (MathLib::dot(key_real, parent.bind_real) < 0)
+				if (MathLib::dot(key_dq.first, parent.bind_real) < 0)
 				{
-					key_real = -key_real;
-					key_dual = -key_dual;
+					key_dq.first = -key_dq.first;
+					key_dq.second = -key_dq.second;
 				}
 
-				joint.bind_real = MathLib::mul_real(key_real, parent.bind_real);
-				joint.bind_dual = MathLib::mul_dual(key_real, key_dual, parent.bind_real, parent.bind_dual);
+				joint.bind_real = MathLib::mul_real(key_dq.first, parent.bind_real);
+				joint.bind_dual = MathLib::mul_dual(key_dq.first, key_dq.second, parent.bind_real, parent.bind_dual);
 			}
 			else
 			{
-				joint.bind_real = key_real;
-				joint.bind_dual = key_dual;
+				joint.bind_real = key_dq.first;
+				joint.bind_dual = key_dq.second;
 			}
 		}
 

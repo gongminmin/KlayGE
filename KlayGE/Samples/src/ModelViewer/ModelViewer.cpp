@@ -231,8 +231,6 @@ void ModelViewerApp::InitObjects()
 	this->OpenModel("archer_attacking.meshml");
 
 	tbController_.AttachCamera(this->ActiveCamera());
-	tbController_.Scalers(0.01f, 0.5f);
-	fpsController_.Scalers(0.01f, 0.5f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -272,8 +270,8 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	model_->SetTime(0);
 
 	frame_ = 0;
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame(), model_->EndFrame() - 1);
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame() * 10, model_->EndFrame() * 10 - 1);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 
 	dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
 	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
@@ -387,10 +385,10 @@ void ModelViewerApp::SkinnedHandler(UICheckBox const & /*sender*/)
 
 void ModelViewerApp::FrameChangedHandler(KlayGE::UISlider const & sender)
 {
-	frame_ = sender.GetValue();
+	frame_ = sender.GetValue() * 0.1f;
 	if (skinned_)
 	{
-		model_->SetFrame(static_cast<float>(frame_));
+		model_->SetFrame(frame_);
 	}
 
 	std::wostringstream stream;
@@ -584,16 +582,15 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	if (play_)
 	{
 		float this_time = static_cast<float>(ani_timer_.elapsed());
-		if (this_time - last_time_ > 1.0f / model_->FrameRate())
+		if (this_time - last_time_ > 0.1f / model_->FrameRate())
 		{
-			++ frame_;
-			frame_ = frame_ % (model_->EndFrame() - model_->StartFrame()) + model_->StartFrame();
+			frame_ += 0.1f;
+			frame_ = fmod(frame_, static_cast<float>(model_->EndFrame() - model_->StartFrame())) + model_->StartFrame();
 
 			last_time_ = this_time;
 		}
 
-		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(frame_);
-		this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
+		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 	}
 
 	model_->SetLightPos(float3(0, 2, 0));

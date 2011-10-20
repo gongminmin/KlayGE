@@ -1742,5 +1742,104 @@ namespace KlayGE
 		{
 			return lhs_real * rhs_dual + lhs_dual * rhs_real;
 		}
+
+		template KLAYGE_CORE_API void udq_to_screw(float& angle, float& pitch, float3& dir, float3& moment,
+			Quaternion const & real, Quaternion const & dual);
+
+		template <typename T>
+		void udq_to_screw(T& angle, T& pitch, Vector_T<T, 3>& dir, Vector_T<T, 3>& moment,
+			Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		{
+			if (abs(real.w()) >= 1)
+			{
+				// pure translation
+
+				angle = 0;
+				dir = dual.v();
+
+				T dir_sq_len = length_sq(dir);
+
+				if (dir_sq_len > T(1e-6))
+				{
+					T dir_len = sqrt(dir_sq_len);
+					pitch = 2 * dir_len;
+					dir /= dir_len;
+				}
+				else
+				{
+					pitch = 0;
+				}
+
+				moment = Vector_T<T, 3>::Zero();
+			}
+			else
+			{ 
+				angle = 2 * acos(real.w());
+
+				float s = length_sq(real.v());
+				if (s < T(1e-6))
+				{
+					dir = Vector_T<T, 3>::Zero();
+					pitch = 0;
+					moment = Vector_T<T, 3>::Zero();
+				}
+				else
+				{
+					float oos = recip_sqrt(s);
+					dir = real.v() * oos;
+
+					pitch = -2 * dual.w() * oos;
+
+					moment = (dual.v() - dir * pitch * real.w() * T(0.5)) * oos;
+				}
+			}
+		}
+
+		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> udq_from_screw(float const & angle, float const & pitch, float3 const & dir, float3 const & moment);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
+		{
+			T sa, ca;
+			sincos(angle * T(0.5), sa, ca);
+			return std::make_pair(Quaternion_T<T>(dir * sa, ca),
+				Quaternion_T<T>(sa * moment + T(0.5) * pitch * ca * dir, -pitch * sa * T(0.5)));
+		}
+
+
+		template KLAYGE_CORE_API std::pair<Quaternion, Quaternion> sclerp(Quaternion const & lhs_real, Quaternion const & lhs_dual,
+			Quaternion const & rhs_real, Quaternion const & rhs_dual, float const & slerp);
+
+		template <typename T>
+		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, float const & slerp)
+		{
+			// Make sure dot product is >= 0
+			float quat_dot = dot(lhs_real, rhs_real);
+			Quaternion to_sign_corrected_real = rhs_real;
+			Quaternion to_sign_corrected_dual = rhs_dual;
+			if (quat_dot < 0)
+			{
+				to_sign_corrected_real = -to_sign_corrected_real;
+				to_sign_corrected_dual = -to_sign_corrected_dual;
+			}
+
+			std::pair<Quaternion_T<T>, Quaternion_T<T> > dif_dq = inverse(lhs_real, lhs_dual);
+			dif_dq.second = mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
+			dif_dq.first = mul_real(dif_dq.first, to_sign_corrected_real);
+	
+			float angle, pitch;
+			float3 direction, moment;
+			udq_to_screw(angle, pitch, direction, moment, dif_dq.first, dif_dq.second);
+
+			angle *= slerp; 
+			pitch *= slerp;
+			dif_dq = udq_from_screw(angle, pitch, direction, moment);
+
+			dif_dq.second = mul_dual(lhs_real, lhs_dual, dif_dq.first, dif_dq.second);
+			dif_dq.first = mul_real(lhs_real, dif_dq.first);
+
+			return dif_dq;
+		}
 	}
 }
