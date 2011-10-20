@@ -131,6 +131,7 @@ External/boost/project-config.jam
 External/boost/tools/build/bjam.log
 External/boost/tools/build/v2/engine/bin.ntx86/
 External/boost/tools/build/v2/engine/bootstrap/
+External/boost/tools/build/v2/engine/bin.cygwinx86/
 External/Python/*.exe
 External/Python/amd64/*.exe
 External/Python/DLLs/*.pyd
