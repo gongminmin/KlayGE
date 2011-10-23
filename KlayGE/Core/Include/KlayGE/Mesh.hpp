@@ -260,6 +260,7 @@ namespace KlayGE
 
 	struct KLAYGE_CORE_API KeyFrames
 	{
+		std::vector<uint32_t> frame_id;
 		std::vector<Quaternion> bind_real;
 		std::vector<Quaternion> bind_dual;
 

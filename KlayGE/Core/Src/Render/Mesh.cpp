@@ -54,7 +54,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 4;
+	uint32_t const MODEL_BIN_VERSION = 5;
 
 	class RenderModelLoader
 	{
@@ -442,10 +442,16 @@ namespace KlayGE
 
 	std::pair<Quaternion, Quaternion> KeyFrames::Frame(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(bind_real.size()));
-		int frame0 = static_cast<int>(frame);
-		int frame1 = (frame0 + 1) % bind_real.size();
-		return MathLib::sclerp(bind_real[frame0], bind_dual[frame0], bind_real[frame1], bind_dual[frame1], frame - frame0);
+		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+
+		std::vector<uint32_t>::const_iterator iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+		int index = iter - frame_id.begin();
+
+		int index0 = index - 1;
+		int index1 = index % frame_id.size();
+		int frame0 = frame_id[index0];
+		int frame1 = frame_id[index1];
+		return MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], (frame - frame0) / (frame1 - frame0));
 	}
 
 
@@ -1384,20 +1390,31 @@ namespace KlayGE
 				ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
 				ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
 
-				boost::shared_ptr<KeyFramesType> kfs = MakeSharedPtr<KeyFramesType>();
+				KeyFrames kfs;
 				for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
 				{
 					WriteShortString(*ss, kf_node->Attrib("joint")->ValueString());
 
-					uint32_t num_kf = 0;
-					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
-					{
-						++ num_kf;
-					}
-					ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+					kfs.frame_id.clear();
+					kfs.bind_real.clear();
+					kfs.bind_dual.clear();
 
+					int32_t frame_id = -1;
 					for (XMLNodePtr key_node = kf_node->FirstNode("key"); key_node; key_node = key_node->NextSibling("key"))
 					{
+						XMLAttributePtr id_attr = key_node->Attrib("id");
+						if (id_attr)
+						{
+							frame_id = id_attr->ValueInt();
+						}
+						else
+						{
+							++ frame_id;
+						}
+						kfs.frame_id.push_back(frame_id);
+
+						Quaternion bind_real;
+						Quaternion bind_dual;
 						XMLNodePtr pos_node = key_node->FirstNode("pos");
 						if (pos_node)
 						{
@@ -1405,26 +1422,71 @@ namespace KlayGE
 								pos_node->Attrib("z")->ValueFloat());
 
 							XMLNodePtr quat_node = key_node->FirstNode("quat");
-							Quaternion bind_quat(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
+							bind_real = Quaternion(quat_node->Attrib("x")->ValueFloat(), quat_node->Attrib("y")->ValueFloat(),
 								quat_node->Attrib("z")->ValueFloat(), quat_node->Attrib("w")->ValueFloat());
 					
-					        Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
-
-							ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
-							ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+					        bind_dual = MathLib::quat_trans_to_udq(bind_real, bind_pos);
 						}
 						else
 						{
 							XMLNodePtr bind_real_node = key_node->FirstNode("bind_real");
-							Quaternion bind_real(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
+							bind_real = Quaternion(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
 								bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
-							ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
 							
 							XMLNodePtr bind_dual_node = key_node->FirstNode("bind_dual");
-							Quaternion bind_dual(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
+							bind_dual = Quaternion(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
 								bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
-							ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 						}
+
+						kfs.bind_real.push_back(bind_real);
+						kfs.bind_dual.push_back(bind_dual);
+					}
+
+					// compress the key frame data
+					uint32_t base = 0;
+					while (base < kfs.frame_id.size() - 2)
+					{
+						uint32_t frame0 = kfs.frame_id[base + 0];
+						uint32_t frame1 = kfs.frame_id[base + 1];
+						uint32_t frame2 = kfs.frame_id[base + 2];
+						std::pair<Quaternion, Quaternion> interpolate = MathLib::sclerp(kfs.bind_real[base + 0], kfs.bind_dual[base + 0],
+							kfs.bind_real[base + 2], kfs.bind_dual[base + 2], static_cast<float>(frame1 - frame0) / (frame2 - frame0));
+
+						float quat_dot = MathLib::dot(kfs.bind_real[base + 1], interpolate.first);
+						Quaternion to_sign_corrected_real = interpolate.first;
+						Quaternion to_sign_corrected_dual = interpolate.second;
+						if (quat_dot < 0)
+						{
+							to_sign_corrected_real = -to_sign_corrected_real;
+							to_sign_corrected_dual = -to_sign_corrected_dual;
+						}
+
+						std::pair<Quaternion, Quaternion> dif_dq = MathLib::inverse(kfs.bind_real[base + 1], kfs.bind_dual[base + 1]);
+						dif_dq.second = MathLib::mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
+						dif_dq.first = MathLib::mul_real(dif_dq.first, to_sign_corrected_real);
+
+						if ((abs(dif_dq.first.x()) < 1e-5f) && (abs(dif_dq.first.y()) < 1e-5f)
+							&& (abs(dif_dq.first.z()) < 1e-5f) && (abs(dif_dq.first.w() - 1) < 1e-5f)
+							&& (abs(dif_dq.second.x()) < 1e-5f) && (abs(dif_dq.second.y()) < 1e-5f)
+							&& (abs(dif_dq.second.z()) < 1e-5f) && (abs(dif_dq.second.w()) < 1e-5f))
+						{
+							kfs.frame_id.erase(kfs.frame_id.begin() + base + 1);
+							kfs.bind_real.erase(kfs.bind_real.begin() + base + 1);
+							kfs.bind_dual.erase(kfs.bind_dual.begin() + base + 1);
+						}
+						else
+						{
+							++ base;
+						}
+					}
+
+					uint32_t num_kf = static_cast<uint32_t>(kfs.frame_id.size());
+					ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+					for (uint32_t i = 0; i < num_kf; ++ i)
+					{
+						ss->write(reinterpret_cast<char*>(&kfs.frame_id[i]), sizeof(kfs.frame_id[i]));
+						ss->write(reinterpret_cast<char*>(&kfs.bind_real[i]), sizeof(kfs.bind_real[i]));
+						ss->write(reinterpret_cast<char*>(&kfs.bind_dual[i]), sizeof(kfs.bind_dual[i]));
 					}
 				}
 			}
@@ -1636,10 +1698,12 @@ namespace KlayGE
 				decoded->read(&num_kf, sizeof(num_kf));
 
 				KeyFrames kf;
+				kf.frame_id.resize(num_kf);
 				kf.bind_real.resize(num_kf);
 				kf.bind_dual.resize(num_kf);
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
+					decoded->read(&kf.frame_id[k_index], sizeof(kf.frame_id[k_index]));
 					decoded->read(&kf.bind_real[k_index], sizeof(kf.bind_real[k_index]));
 					decoded->read(&kf.bind_dual[k_index], sizeof(kf.bind_dual[k_index]));
 				}
