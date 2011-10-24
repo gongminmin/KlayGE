@@ -610,6 +610,17 @@ namespace KlayGE
 			{
 				jit = true;
 			}
+			else
+			{
+				ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
+				if (file)
+				{
+					if (lzma_file->Timestamp() < file->Timestamp())
+					{
+						jit = true;
+					}
+				}
+			}
 		}
 
 		if (jit)
@@ -2097,6 +2108,8 @@ namespace KlayGE
 					{
 						XMLNodePtr key_node = doc.AllocNode(XNT_Element, "key");
 						key_frame_node->AppendNode(key_node);
+
+						key_frame_node->AppendAttrib(doc.AllocAttribUInt("id", iter->second.frame_id[j]));
 
 						XMLNodePtr bind_real_node = doc.AllocNode(XNT_Element, "bind_real");
 						key_node->AppendNode(bind_real_node); 
