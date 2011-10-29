@@ -29,7 +29,7 @@ namespace KlayGE
 	class D3D11GraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data, ElementFormat fmt);
+		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData const * init_data, ElementFormat fmt);
 
 		ID3D11BufferPtr const & D3DBuffer() const
 		{

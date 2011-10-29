@@ -39,25 +39,25 @@ namespace KlayGE
 	}
 
 	TexturePtr OGLES2RenderFactory::MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 	{
 		return MakeSharedPtr<OGLES2Texture1D>(width, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
 	TexturePtr OGLES2RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 	{
 		return MakeSharedPtr<OGLES2Texture2D>(width, height, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
 	TexturePtr OGLES2RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 	{
 		return MakeSharedPtr<OGLES2Texture3D>(width, height, depth, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
 
 	TexturePtr OGLES2RenderFactory::MakeTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 	{
 		return MakeSharedPtr<OGLES2TextureCube>(size, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
 	}
@@ -72,12 +72,12 @@ namespace KlayGE
 		return MakeSharedPtr<OGLES2RenderLayout>();
 	}
 
-	GraphicsBufferPtr OGLES2RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLES2RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
 	{
 		return MakeSharedPtr<OGLES2GraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, init_data);
 	}
 
-	GraphicsBufferPtr OGLES2RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData* init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLES2RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
 	{
 		return MakeSharedPtr<OGLES2GraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data);
 	}

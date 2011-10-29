@@ -43,7 +43,7 @@
 namespace KlayGE
 {
 	D3D11TextureCube::D3D11TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 					: D3D11Texture(TT_Cube, sample_count, sample_quality, access_hint)
 	{
 		if (0 == numMipMaps)

@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData* init_data)
+	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData const * init_data)
 			: GraphicsBuffer(usage, access_hint),
 				target_(target)
 	{

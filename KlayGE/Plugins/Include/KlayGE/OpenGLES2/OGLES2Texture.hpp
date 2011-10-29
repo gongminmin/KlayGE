@@ -103,7 +103,7 @@ namespace KlayGE
 	{
 	public:
 		OGLES2Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
 
 		uint32_t Width(uint32_t level) const;
 
@@ -125,7 +125,7 @@ namespace KlayGE
 	{
 	public:
 		OGLES2Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
@@ -153,7 +153,7 @@ namespace KlayGE
 	{
 	public:
 		OGLES2Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
@@ -181,7 +181,7 @@ namespace KlayGE
 	{
 	public:
 		OGLES2TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

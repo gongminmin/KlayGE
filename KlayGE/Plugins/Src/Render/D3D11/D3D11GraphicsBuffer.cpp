@@ -28,7 +28,7 @@
 
 namespace KlayGE
 {
-	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData* init_data, ElementFormat fmt)
+	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData const * init_data, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint),
 							bind_flags_(bind_flags), hw_buf_size_(0), fmt_as_shader_res_(fmt)
 	{

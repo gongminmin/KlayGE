@@ -711,7 +711,7 @@ namespace
 	public:
 		TextureLoader(std::string const & tex_name, uint32_t access_hint)
 		{
-			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, tex_name, access_hint));
+			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, boost::cref(tex_name), access_hint));
 		}
 
 		TexturePtr operator()()
@@ -1026,8 +1026,7 @@ namespace
 				tex_desc->format = EF_ABGR8;
 			}
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
+			if (caps.multithread_res_creating_support)
 			{
 				tex_desc->texture = this->CreateTexture(tex_desc);
 			}

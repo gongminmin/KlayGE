@@ -35,7 +35,7 @@
 namespace KlayGE
 {
 	OGLES2TextureCube::OGLES2TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData* init_data)
+								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
 					: OGLES2Texture(TT_Cube, array_size, sample_count, sample_quality, access_hint)
 	{
 		if (IsSRGB(format))

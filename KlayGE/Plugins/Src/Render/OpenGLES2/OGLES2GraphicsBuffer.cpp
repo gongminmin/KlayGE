@@ -24,7 +24,7 @@
 
 namespace KlayGE
 {
-	OGLES2GraphicsBuffer::OGLES2GraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData* init_data)
+	OGLES2GraphicsBuffer::OGLES2GraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData const * init_data)
 			: GraphicsBuffer(usage, access_hint),
 				target_(target)
 	{
