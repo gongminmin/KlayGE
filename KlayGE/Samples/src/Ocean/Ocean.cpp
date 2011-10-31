@@ -844,8 +844,8 @@ void OceanApp::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	TexturePtr skybox_y_tex = LoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable)();
-	TexturePtr skybox_c_tex = LoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable)();
+	TexturePtr skybox_y_tex = SyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr skybox_c_tex = SyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	terrain_ = MakeSharedPtr<TerrainObject>();
 	terrain_->AddToSceneManager();
@@ -888,8 +888,8 @@ void OceanApp::InitObjects()
 	input_handler->connect(boost::bind(&OceanApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
-	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Load("DepthToSM.ppml"), "DepthToSM");
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
 	refraction_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
@@ -904,7 +904,7 @@ void OceanApp::InitObjects()
 	composed_fb_ = rf.MakeFrameBuffer();
 	composed_fb_->GetViewport().camera = re.CurFrameBuffer()->GetViewport().camera;
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Ocean.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_dmap_dim_static_ = dialog_params_->IDFromName("DMapDimStatic");
 	id_dmap_dim_slider_ = dialog_params_->IDFromName("DMapDimSlider");

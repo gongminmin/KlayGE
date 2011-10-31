@@ -40,9 +40,9 @@ namespace
 		RenderPolygon()
 			: RenderableHelper(L"Polygon")
 		{
-			BOOST_AUTO(diffuse_loader, LoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
-			BOOST_AUTO(normal_loader, LoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
-			BOOST_AUTO(dist_loader, LoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -336,7 +336,7 @@ void DistanceMapping::InitObjects()
 	input_handler->connect(boost::bind(&DistanceMapping::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DistanceMapping.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("DistanceMapping.uiml"));
 }
 
 void DistanceMapping::OnResize(uint32_t width, uint32_t height)

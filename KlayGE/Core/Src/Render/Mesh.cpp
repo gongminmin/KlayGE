@@ -39,14 +39,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011 6334)
-#endif
-#include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/Mesh.hpp>
 
@@ -56,14 +48,16 @@ namespace
 
 	uint32_t const MODEL_BIN_VERSION = 5;
 
-	class RenderModelLoader
+	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
 	private:
 		struct ModelDesc
 		{
+			std::string res_name;
+
 			uint32_t access_hint;
-			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc;
-			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
+			boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc;
+			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc;
 
 			std::vector<RenderMaterialPtr> mtls;
 			std::vector<vertex_element> merged_ves;
@@ -87,68 +81,63 @@ namespace
 		};
 
 	public:
-		RenderModelLoader(std::string const & meshml_name, uint32_t access_hint,
-			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint, 
+			boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+			boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
-			ml_thread_ = GlobalThreadPool()(boost::bind(&RenderModelLoader::LoadKModel, this, boost::cref(meshml_name), access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+			model_desc_.res_name = res_name;
+			model_desc_.access_hint = access_hint;
+			model_desc_.CreateModelFactoryFunc = CreateModelFactoryFunc;
+			model_desc_.CreateMeshFactoryFunc = CreateMeshFactoryFunc;
 		}
 
-		RenderModelPtr operator()()
+		void SubThreadStage()
 		{
-			if (!model_)
+			this->LoadKModel();
+		}
+
+		void* MainThreadStage()
+		{
+			if (!model_desc_.model)
 			{
-				boost::shared_ptr<ModelDesc> model_desc = ml_thread_();
-
-				if (model_desc->model)
-				{
-					model_ = model_desc->model;
-				}
-				else
-				{
-					model_ = this->CreateModel(model_desc);
-				}
-
-				model_->BuildModelInfo();
-				for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
-				{
-					model_->Mesh(i)->BuildMeshInfo();
-				}
+				this->CreateModel();
 			}
 
-			return model_;
+			model_desc_.model->BuildModelInfo();
+			for (uint32_t i = 0; i < model_desc_.model->NumMeshes(); ++ i)
+			{
+				model_desc_.model->Mesh(i)->BuildMeshInfo();
+			}
+
+			return &model_desc_.model;
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return true;
 		}
 
 	private:
-		boost::shared_ptr<ModelDesc> LoadKModel(std::string const & meshml_name, uint32_t access_hint,
-			boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-			boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+		void LoadKModel()
 		{
-			boost::shared_ptr<ModelDesc> model_desc = MakeSharedPtr<ModelDesc>();
-			model_desc->access_hint = access_hint;
-			model_desc->CreateModelFactoryFunc = CreateModelFactoryFunc;
-			model_desc->CreateMeshFactoryFunc = CreateMeshFactoryFunc;
-
-			LoadModel(meshml_name, model_desc->mtls, model_desc->merged_ves, model_desc->all_is_index_16_bit,
-				model_desc->merged_buff, model_desc->merged_indices,
-				model_desc->mesh_names, model_desc->mtl_ids, model_desc->bbs, 
-				model_desc->mesh_num_vertices, model_desc->mesh_base_vertices, model_desc->mesh_num_indices, model_desc->mesh_start_indices, 
-				model_desc->joints, model_desc->kfs,
-				model_desc->start_frame, model_desc->end_frame, model_desc->frame_rate);
+			LoadModel(model_desc_.res_name, model_desc_.mtls, model_desc_.merged_ves, model_desc_.all_is_index_16_bit,
+				model_desc_.merged_buff, model_desc_.merged_indices,
+				model_desc_.mesh_names, model_desc_.mtl_ids, model_desc_.bbs, 
+				model_desc_.mesh_num_vertices, model_desc_.mesh_base_vertices, model_desc_.mesh_num_indices, model_desc_.mesh_start_indices, 
+				model_desc_.joints, model_desc_.kfs,
+				model_desc_.start_frame, model_desc_.end_frame, model_desc_.frame_rate);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			if (rf.RenderEngineInstance().DeviceCaps().multithread_res_creating_support)
 			{
-				model_desc->model = this->CreateModel(model_desc);
+				this->CreateModel();
 			}
-
-			return model_desc;
 		}
 
-		RenderModelPtr CreateModel(boost::shared_ptr<ModelDesc> const & model_desc)
+		void CreateModel()
 		{
 			std::wstring model_name;
-			if (!model_desc->joints.empty())
+			if (!model_desc_.joints.empty())
 			{
 				model_name = L"SkinnedMesh";
 			}
@@ -156,82 +145,81 @@ namespace
 			{
 				model_name = L"Mesh";
 			}
-			RenderModelPtr model = model_desc->CreateModelFactoryFunc(model_name);
+			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(model_name);
 
-			model->NumMaterials(model_desc->mtls.size());
-			for (uint32_t mtl_index = 0; mtl_index < model_desc->mtls.size(); ++ mtl_index)
+			model->NumMaterials(model_desc_.mtls.size());
+			for (uint32_t mtl_index = 0; mtl_index < model_desc_.mtls.size(); ++ mtl_index)
 			{
-				model->GetMaterial(mtl_index) = model_desc->mtls[mtl_index];
+				model->GetMaterial(mtl_index) = model_desc_.mtls[mtl_index];
 			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			ElementInitData init_data;
-			std::vector<GraphicsBufferPtr> merged_vbs(model_desc->merged_buff.size());
-			for (size_t i = 0; i < model_desc->merged_buff.size(); ++ i)
+			std::vector<GraphicsBufferPtr> merged_vbs(model_desc_.merged_buff.size());
+			for (size_t i = 0; i < model_desc_.merged_buff.size(); ++ i)
 			{
-				init_data.data = &model_desc->merged_buff[i][0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc->merged_buff[i].size());
+				init_data.data = &model_desc_.merged_buff[i][0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc_.merged_buff[i].size());
 				init_data.slice_pitch = 0;
-				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc->access_hint, &init_data);
+				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc_.access_hint, &init_data);
 			}
 
 			GraphicsBufferPtr merged_ib;
 			{
-				init_data.data = &model_desc->merged_indices[0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc->merged_indices.size());
+				init_data.data = &model_desc_.merged_indices[0];
+				init_data.row_pitch = static_cast<uint32_t>(model_desc_.merged_indices.size());
 				init_data.slice_pitch = 0;
-				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc->access_hint, &init_data);
+				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc_.access_hint, &init_data);
 			}
 
-			std::vector<StaticMeshPtr> meshes(model_desc->mesh_names.size());
-			for (uint32_t mesh_index = 0; mesh_index < model_desc->mesh_names.size(); ++ mesh_index)
+			std::vector<StaticMeshPtr> meshes(model_desc_.mesh_names.size());
+			for (uint32_t mesh_index = 0; mesh_index < model_desc_.mesh_names.size(); ++ mesh_index)
 			{
 				std::wstring wname;
-				Convert(wname, model_desc->mesh_names[mesh_index]);
+				Convert(wname, model_desc_.mesh_names[mesh_index]);
 
-				meshes[mesh_index] = model_desc->CreateMeshFactoryFunc(model, wname);
+				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, wname);
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
-				mesh->MaterialID(model_desc->mtl_ids[mesh_index]);
-				mesh->SetBound(model_desc->bbs[mesh_index]);
+				mesh->MaterialID(model_desc_.mtl_ids[mesh_index]);
+				mesh->SetBound(model_desc_.bbs[mesh_index]);
 
-				for (uint32_t ve_index = 0; ve_index < model_desc->merged_buff.size(); ++ ve_index)
+				for (uint32_t ve_index = 0; ve_index < model_desc_.merged_buff.size(); ++ ve_index)
 				{
-					mesh->AddVertexStream(merged_vbs[ve_index], model_desc->merged_ves[ve_index]);
+					mesh->AddVertexStream(merged_vbs[ve_index], model_desc_.merged_ves[ve_index]);
 				}
-				mesh->AddIndexStream(merged_ib, model_desc->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
+				mesh->AddIndexStream(merged_ib, model_desc_.all_is_index_16_bit ? EF_R16UI : EF_R32UI);
 
-				mesh->NumVertices(model_desc->mesh_num_vertices[mesh_index]);
-				mesh->NumTriangles(model_desc->mesh_num_indices[mesh_index] / 3);
-				mesh->BaseVertexLocation(model_desc->mesh_base_vertices[mesh_index]);
-				mesh->StartVertexLocation(model_desc->mesh_base_vertices[mesh_index]);
-				mesh->StartIndexLocation(model_desc->mesh_start_indices[mesh_index]);
+				mesh->NumVertices(model_desc_.mesh_num_vertices[mesh_index]);
+				mesh->NumTriangles(model_desc_.mesh_num_indices[mesh_index] / 3);
+				mesh->BaseVertexLocation(model_desc_.mesh_base_vertices[mesh_index]);
+				mesh->StartVertexLocation(model_desc_.mesh_base_vertices[mesh_index]);
+				mesh->StartIndexLocation(model_desc_.mesh_start_indices[mesh_index]);
 			}
 
-			if (model_desc->kfs && !model_desc->kfs->empty())
+			if (model_desc_.kfs && !model_desc_.kfs->empty())
 			{
 				if (model->IsSkinned())
 				{
 					SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);
 
-					skinned->AssignJoints(model_desc->joints.begin(), model_desc->joints.end());
-					skinned->AttachKeyFrames(model_desc->kfs);
+					skinned->AssignJoints(model_desc_.joints.begin(), model_desc_.joints.end());
+					skinned->AttachKeyFrames(model_desc_.kfs);
 
-					skinned->StartFrame(model_desc->start_frame);
-					skinned->EndFrame(model_desc->end_frame);
-					skinned->FrameRate(model_desc->frame_rate);
+					skinned->StartFrame(model_desc_.start_frame);
+					skinned->EndFrame(model_desc_.end_frame);
+					skinned->FrameRate(model_desc_.frame_rate);
 				}
 			}
 
 			model->AssignMeshes(meshes.begin(), meshes.end());
 
-			return model;
+			model_desc_.model = model;
 		}
 
 	private:
-		joiner<boost::shared_ptr<ModelDesc> > ml_thread_;
-		RenderModelPtr model_;
+		ModelDesc model_desc_;
 	};
 }
 
@@ -277,14 +265,11 @@ namespace KlayGE
 
 	TexturePtr const & RenderModel::RetriveTexture(std::string const & name)
 	{
-		size_t seed = 0;
-		boost::hash_range(seed, name.begin(), name.end());
-
-		BOOST_AUTO(iter, tex_pool_.find(seed));
+		BOOST_AUTO(iter, tex_pool_.find(name));
 		if (tex_pool_.end() == iter)
 		{
-			TexturePtr tex = LoadTexture(name, EAH_GPU_Read | EAH_Immutable)();
-			iter = tex_pool_.insert(std::make_pair(seed, tex)).first;
+			TexturePtr tex = SyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable);
+			iter = tex_pool_.insert(std::make_pair(name, tex)).first;
 		}
 
 		return iter->second;
@@ -601,7 +586,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ResIdentifierPtr lzma_file = ResLoader::Instance().Load(path_name + jit_ext_name);
+			ResIdentifierPtr lzma_file = ResLoader::Instance().Open(path_name + jit_ext_name);
 			uint32_t fourcc;
 			lzma_file->read(&fourcc, sizeof(fourcc));
 			uint32_t ver;
@@ -612,7 +597,7 @@ namespace KlayGE
 			}
 			else
 			{
-				ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
+				ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 				if (file)
 				{
 					if (lzma_file->Timestamp() < file->Timestamp())
@@ -627,7 +612,7 @@ namespace KlayGE
 		{
 			boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
-			ResIdentifierPtr file = ResLoader::Instance().Load(meshml_name);
+			ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(file);
 
@@ -1537,7 +1522,7 @@ namespace KlayGE
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
 		{
-			lzma_file = ResLoader::Instance().Load(meshml_name);
+			lzma_file = ResLoader::Instance().Open(meshml_name);
 		}
 		else
 		{
@@ -1554,7 +1539,7 @@ namespace KlayGE
 			{
 				no_packing_name = full_meshml_name;
 			}
-			lzma_file = ResLoader::Instance().Load(no_packing_name + jit_ext_name);
+			lzma_file = ResLoader::Instance().Open(no_packing_name + jit_ext_name);
 		}
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));
@@ -1724,14 +1709,26 @@ namespace KlayGE
 		}
 	}
 
-	boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc,
-		boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+	RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		BOOST_ASSERT(CreateModelFactoryFunc);
 		BOOST_ASSERT(CreateMeshFactoryFunc);
 
-		return RenderModelLoader(meshml_name, access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc);
+		return ResLoader::Instance().SyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
+	}
+
+	boost::function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
+		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+	{
+		BOOST_ASSERT(CreateModelFactoryFunc);
+		BOOST_ASSERT(CreateMeshFactoryFunc);
+
+		return ResLoader::Instance().ASyncQueryT<RenderModel>(MakeSharedPtr<RenderModelLoadingDesc>(meshml_name,
+			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,

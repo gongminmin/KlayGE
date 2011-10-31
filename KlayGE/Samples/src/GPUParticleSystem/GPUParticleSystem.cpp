@@ -143,7 +143,7 @@ namespace
 			: RenderableHelper(L"RenderParticles"),
 				tex_width_(256), tex_height_((max_num_particles + 255) / 256)
 		{
-			BOOST_AUTO(pt, LoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(pt, ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
@@ -587,7 +587,7 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true)
 		{
-			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -697,8 +697,8 @@ void GPUParticleSystemApp::InitObjects()
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
-	BOOST_AUTO(terrain_height, LoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
-	BOOST_AUTO(terrain_normal, LoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));
+	BOOST_AUTO(terrain_height, ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable));
+	BOOST_AUTO(terrain_normal, ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable));
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
@@ -733,9 +733,9 @@ void GPUParticleSystemApp::InitObjects()
 	fog_buffer_ = rf.MakeFrameBuffer();
 	fog_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	blend_pp_ = LoadPostProcess(ResLoader::Instance().Load("Blend.ppml"), "blend");
+	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("GPUParticleSystem.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }
 
 void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)

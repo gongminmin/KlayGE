@@ -498,7 +498,7 @@ namespace
 		explicit OccluderObject(std::string const & model_name)
 			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
 		{
-			renderable_ = LoadModel(model_name, EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())()->Mesh(0);
+			renderable_ = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())->Mesh(0);
 			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
 		}
 
@@ -614,12 +614,12 @@ void ShadowCubeMap::InitObjects()
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);
 
-	lamp_tex_ = LoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable)();
+	lamp_tex_ = SyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
 
 	RenderModelPtr scene_model = model_ml();
 	scene_objs_.resize(scene_model->NumMeshes() + 1);
@@ -739,7 +739,7 @@ void ShadowCubeMap::InitObjects()
 	input_handler->connect(boost::bind(&ShadowCubeMap::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ShadowCubemap.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubemap.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_min_variance_static_ = dialog_->IDFromName("MinVarianceStatic");

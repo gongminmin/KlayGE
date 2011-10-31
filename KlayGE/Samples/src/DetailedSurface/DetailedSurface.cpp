@@ -305,7 +305,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>())();
+			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderDetailedModel>(), CreateMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -426,7 +426,7 @@ void DetailedSurfaceApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Load("DetailedSurface.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("DetailedSurface.uiml"));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	juda_tex_ = LoadJudaTexture("DetailedSurface.jdt");

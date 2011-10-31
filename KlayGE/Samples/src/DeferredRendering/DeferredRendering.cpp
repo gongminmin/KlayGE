@@ -221,9 +221,9 @@ void DeferredRenderingApp::InitObjects()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	boost::function<RenderModelPtr()> model_ml = LoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
-	boost::function<TexturePtr()> y_cube_tl = LoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
-	boost::function<TexturePtr()> c_cube_tl = LoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
+	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_y.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_c.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -289,7 +289,7 @@ void DeferredRenderingApp::InitObjects()
 
 	debug_pp_ = MakeSharedPtr<DeferredRenderingDebug>();
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DeferredRendering.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_buffer_combo_ = dialog_->IDFromName("BufferCombo");

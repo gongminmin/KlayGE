@@ -690,11 +690,13 @@ namespace
 		}
 	}
 
-	class TextureLoader
+	class TextureLoadingDesc : public ResLoadingDesc
 	{
 	private:
 		struct TexDesc
 		{
+			std::string res_name;
+
 			uint32_t access_hint;
 			Texture::TextureType type;
 			uint32_t width, height, depth;
@@ -704,95 +706,93 @@ namespace
 			std::vector<ElementInitData> tex_data;
 			std::vector<uint8_t> data_block;
 
-			// for multithread resource creation
 			TexturePtr texture;
 		};
 
 	public:
-		TextureLoader(std::string const & tex_name, uint32_t access_hint)
+		TextureLoadingDesc(std::string const & res_name, uint32_t access_hint)
 		{
-			tl_thread_ = GlobalThreadPool()(boost::bind(&TextureLoader::LoadDDS, this, boost::cref(tex_name), access_hint));
+			tex_desc_.res_name = res_name;
+			tex_desc_.access_hint = access_hint;
 		}
 
-		TexturePtr operator()()
+		void SubThreadStage()
 		{
-			if (!texture_)
-			{
-				boost::shared_ptr<TexDesc> tex_desc = tl_thread_();
-				if (tex_desc->texture)
-				{
-					texture_ = tex_desc->texture;
-				}
-				else
-				{
-					texture_ = this->CreateTexture(tex_desc);
-				}
-			}
+			this->LoadDDS();
+		}
 
-			return texture_;
+		void* MainThreadStage()
+		{
+			if (!tex_desc_.texture)
+			{
+				this->CreateTexture();
+			}
+			return &tex_desc_.texture;
+		}
+
+		bool HasSubThreadStage() const
+		{
+			return true;
 		}
 
 	private:
-		boost::shared_ptr<TexDesc> LoadDDS(std::string const & tex_name, uint32_t access_hint)
+		void LoadDDS()
 		{
-			boost::shared_ptr<TexDesc> tex_desc = MakeSharedPtr<TexDesc>();
-			tex_desc->access_hint = access_hint;
-
-			LoadTexture(tex_name, tex_desc->type, tex_desc->width, tex_desc->height, tex_desc->depth,
-				tex_desc->num_mipmaps, tex_desc->array_size, tex_desc->format, tex_desc->tex_data, tex_desc->data_block);
+			LoadTexture(tex_desc_.res_name, tex_desc_.type, tex_desc_.width, tex_desc_.height, tex_desc_.depth,
+				tex_desc_.num_mipmaps, tex_desc_.array_size, tex_desc_.format, tex_desc_.tex_data, tex_desc_.data_block);
 
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
 
-			if (((EF_BC5 == tex_desc->format) && !caps.texture_format_support(EF_BC5))
-				|| ((EF_BC5_SRGB == tex_desc->format) && !caps.texture_format_support(EF_BC5_SRGB)))
+			if (((EF_BC5 == tex_desc_.format) && !caps.texture_format_support(EF_BC5))
+				|| ((EF_BC5_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC5_SRGB)))
 			{
 				BC1_layout tmp;
-				for (size_t i = 0; i < tex_desc->tex_data.size(); ++ i)
+				for (size_t i = 0; i < tex_desc_.tex_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_desc->tex_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
+					for (size_t j = 0; j < tex_desc_.tex_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_desc->tex_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
 						memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
 					}
 				}
 
-				if (IsSRGB(tex_desc->format))
+				if (IsSRGB(tex_desc_.format))
 				{
-					tex_desc->format = EF_BC3;
+					tex_desc_.format = EF_BC3;
 				}
 				else
 				{
-					tex_desc->format = EF_BC3_SRGB;
+					tex_desc_.format = EF_BC3_SRGB;
 				}
 			}
-			if (((EF_BC1 == tex_desc->format) && !caps.texture_format_support(EF_BC1))
-				|| ((EF_BC1_SRGB == tex_desc->format) && !caps.texture_format_support(EF_BC1_SRGB)))
+			if (((EF_BC1 == tex_desc_.format) && !caps.texture_format_support(EF_BC1))
+				|| ((EF_BC1_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC1_SRGB)))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
 								p += sizeof(BC1_layout);
-								if (IsSRGB(tex_desc->format))
+								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC1_sRGB(rgba, p);
 								}
@@ -813,53 +813,53 @@ namespace
 					}
 				}
 
-				tex_desc->format = EF_ARGB8;
-				tex_desc->data_block = rgba_data_block;
+				tex_desc_.format = EF_ARGB8;
+				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						tex_desc->tex_data[i].row_pitch = width * 4;
-						tex_desc->tex_data[i].slice_pitch = width * height * 4;
-						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+						tex_desc_.tex_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
 
-						start += tex_desc->tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if (((EF_BC2 == tex_desc->format) && !caps.texture_format_support(EF_BC2))
-				|| ((EF_BC2_SRGB == tex_desc->format) && !caps.texture_format_support(EF_BC2_SRGB)))
+			if (((EF_BC2 == tex_desc_.format) && !caps.texture_format_support(EF_BC2))
+				|| ((EF_BC2_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC2_SRGB)))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
 								p += sizeof(BC2_layout);
-								if (IsSRGB(tex_desc->format))
+								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC2_sRGB(rgba, p);
 								}
@@ -880,53 +880,53 @@ namespace
 					}
 				}
 
-				tex_desc->format = EF_ARGB8;
-				tex_desc->data_block = rgba_data_block;
+				tex_desc_.format = EF_ARGB8;
+				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						tex_desc->tex_data[i].row_pitch = width * 4;
-						tex_desc->tex_data[i].slice_pitch = width * height * 4;
-						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+						tex_desc_.tex_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
 
-						start += tex_desc->tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if (((EF_BC3 == tex_desc->format) && !caps.texture_format_support(EF_BC3))
-				|| ((EF_BC3_SRGB == tex_desc->format) && !caps.texture_format_support(EF_BC3_SRGB)))
+			if (((EF_BC3 == tex_desc_.format) && !caps.texture_format_support(EF_BC3))
+				|| ((EF_BC3_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC3_SRGB)))
 			{
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc->tex_data[i].data);
+						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data[i].data);
 						for (uint32_t block_y = 0; block_y < height; block_y += 4)
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
 								p += sizeof(BC3_layout);
-								if (IsSRGB(tex_desc->format))
+								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC3_sRGB(rgba, p);
 								}
@@ -947,39 +947,39 @@ namespace
 					}
 				}
 
-				tex_desc->format = EF_ARGB8;
-				tex_desc->data_block = rgba_data_block;
+				tex_desc_.format = EF_ARGB8;
+				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						tex_desc->tex_data[i].row_pitch = width * 4;
-						tex_desc->tex_data[i].slice_pitch = width * height * 4;
-						tex_desc->tex_data[i].data = &tex_desc->data_block[start];
+						tex_desc_.tex_data[i].row_pitch = width * 4;
+						tex_desc_.tex_data[i].slice_pitch = width * height * 4;
+						tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
 
-						start += tex_desc->tex_data[i].slice_pitch;
+						start += tex_desc_.tex_data[i].slice_pitch;
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
 					}
 				}
 			}
-			if ((EF_ARGB8_SRGB == tex_desc->format) && !caps.texture_format_support(EF_ARGB8_SRGB))
+			if ((EF_ARGB8_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8_SRGB))
 			{
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
+						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
 						for (size_t y = 0; y < height; ++ y)
 						{
 							for (size_t x = 0; x < width; ++ x)
@@ -988,7 +988,7 @@ namespace
 								p[x * 4 + 1] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 1] / 255.0f) * 255.0f), 0, 255));
 								p[x * 4 + 2] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 2] / 255.0f) * 255.0f), 0, 255));
 							}
-							p += tex_desc->tex_data[i].row_pitch;
+							p += tex_desc_.tex_data[i].row_pitch;
 						}
 
 						width = std::max<uint32_t>(1U, width / 2);
@@ -996,26 +996,26 @@ namespace
 					}
 				}
 
-				tex_desc->format = EF_ARGB8;
+				tex_desc_.format = EF_ARGB8;
 			}
-			if ((EF_ARGB8 == tex_desc->format) && !caps.texture_format_support(EF_ARGB8))
+			if ((EF_ARGB8 == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8))
 			{
-				for (size_t index = 0; index < tex_desc->array_size; ++ index)
+				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
 				{
-					uint32_t width = tex_desc->width;
-					uint32_t height = tex_desc->height;
-					for (size_t level = 0; level < tex_desc->num_mipmaps; ++ level)
+					uint32_t width = tex_desc_.width;
+					uint32_t height = tex_desc_.height;
+					for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
 					{
-						size_t i = index * tex_desc->num_mipmaps + level;
+						size_t i = index * tex_desc_.num_mipmaps + level;
 
-						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc->tex_data[i].data));
+						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
 						for (size_t y = 0; y < height; ++ y)
 						{
 							for (size_t x = 0; x < width; ++ x)
 							{
 								std::swap(p[x * 4 + 0], p[x * 4 + 2]);
 							}
-							p += tex_desc->tex_data[i].row_pitch;
+							p += tex_desc_.tex_data[i].row_pitch;
 						}
 
 						width = std::max<uint32_t>(1U, width / 2);
@@ -1023,41 +1023,39 @@ namespace
 					}
 				}
 
-				tex_desc->format = EF_ABGR8;
+				tex_desc_.format = EF_ABGR8;
 			}
 
 			if (caps.multithread_res_creating_support)
 			{
-				tex_desc->texture = this->CreateTexture(tex_desc);
+				this->CreateTexture();
 			}
-
-			return tex_desc;
 		}
 
-		TexturePtr CreateTexture(boost::shared_ptr<TexDesc> const & tex_desc)
+		void CreateTexture()
 		{
 			TexturePtr texture;
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			switch (tex_desc->type)
+			switch (tex_desc_.type)
 			{
 			case Texture::TT_1D:
-				texture = rf.MakeTexture1D(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				texture = rf.MakeTexture1D(tex_desc_.width, tex_desc_.num_mipmaps, tex_desc_.array_size,
+					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
 				break;
 
 			case Texture::TT_2D:
-				texture = rf.MakeTexture2D(tex_desc->width, tex_desc->height, tex_desc->num_mipmaps, tex_desc->array_size,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				texture = rf.MakeTexture2D(tex_desc_.width, tex_desc_.height, tex_desc_.num_mipmaps, tex_desc_.array_size,
+					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
 				break;
 
 			case Texture::TT_3D:
-				texture = rf.MakeTexture3D(tex_desc->width, tex_desc->height, tex_desc->depth, tex_desc->num_mipmaps, tex_desc->array_size,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				texture = rf.MakeTexture3D(tex_desc_.width, tex_desc_.height, tex_desc_.depth, tex_desc_.num_mipmaps, tex_desc_.array_size,
+					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
 				break;
 
 			case Texture::TT_Cube:
-				texture = rf.MakeTextureCube(tex_desc->width, tex_desc->num_mipmaps, tex_desc->array_size,
-					tex_desc->format, 1, 0, tex_desc->access_hint, &tex_desc->tex_data[0]);
+				texture = rf.MakeTextureCube(tex_desc_.width, tex_desc_.num_mipmaps, tex_desc_.array_size,
+					tex_desc_.format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data[0]);
 				break;
 
 			default:
@@ -1065,12 +1063,11 @@ namespace
 				break;
 			}
 
-			return texture;
+			tex_desc_.texture = texture;
 		}
 
 	private:
-		joiner<boost::shared_ptr<TexDesc> > tl_thread_;
-		TexturePtr texture_;
+		TexDesc tex_desc_;
 	};
 }
 
@@ -1081,7 +1078,7 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& numMipMaps, uint32_t& array_size,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
 	{
-		ResIdentifierPtr file = ResLoader::Instance().Load(tex_name);
+		ResIdentifierPtr file = ResLoader::Instance().Open(tex_name);
 
 		uint32_t magic;
 		file->read(&magic, sizeof(magic));
@@ -1703,9 +1700,14 @@ namespace KlayGE
 		}
 	}
 
-	boost::function<TexturePtr()> LoadTexture(std::string const & tex_name, uint32_t access_hint)
+	TexturePtr SyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
-		return TextureLoader(tex_name, access_hint);
+		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
+	}
+
+	boost::function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	{
+		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
 	void SaveTexture(std::string const & tex_name, Texture::TextureType type,

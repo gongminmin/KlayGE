@@ -1537,7 +1537,7 @@ namespace KlayGE
 			{
 				attr = node->Attrib("name");
 				include_docs.push_back(MakeSharedPtr<XMLDocument>());
-				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Load(attr->ValueString()));
+				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
 
 				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
@@ -2374,7 +2374,7 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						*var_ = LoadTexture(val, EAH_GPU_Read | EAH_Immutable)();
+						*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
 					}
 				}
 			}

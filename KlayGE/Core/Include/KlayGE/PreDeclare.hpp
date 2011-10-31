@@ -18,6 +18,8 @@ namespace KlayGE
 	class Context;
 	class ResIdentifier;
 	typedef boost::shared_ptr<ResIdentifier> ResIdentifierPtr;
+	class ResLoadingDesc;
+	typedef boost::shared_ptr<ResLoadingDesc> ResLoadingDescPtr;
 	class ResLoader;
 	template <typename Key, typename Type, class Traits, class Allocator>
 	class MapVector;

@@ -105,7 +105,7 @@ void TextApp::InitObjects()
 	input_handler->connect(boost::bind(&TextApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Text.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("Text.uiml"));
 }
 
 void TextApp::OnResize(uint32_t width, uint32_t height)

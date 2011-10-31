@@ -209,7 +209,7 @@ void ModelViewerApp::InitObjects()
 	grid_ = MakeSharedPtr<GridObject>();
 	grid_->AddToSceneManager();
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ModelViewer.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("ModelViewer.uiml"));
 	dialog_animation_ = UIManager::Instance().GetDialog("Animation");
 	dialog_model_ = UIManager::Instance().GetDialog("Model");
 
@@ -266,7 +266,7 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(LoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>())());
+	model_ = checked_pointer_cast<DetailedSkinnedModel>(SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>()));
 	model_->SetTime(0);
 
 	frame_ = 0;

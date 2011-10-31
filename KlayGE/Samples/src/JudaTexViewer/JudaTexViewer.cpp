@@ -319,7 +319,7 @@ void JudaTexViewer::InitObjects()
 	input_handler->connect(boost::bind(&JudaTexViewer::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("JudaTexViewer.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("JudaTexViewer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");

@@ -35,7 +35,7 @@ namespace
 	class RenderPolygon : public StaticMesh
 	{
 	public:
-		RenderPolygon(RenderModelPtr model, std::wstring const & name)
+		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
 			technique_ = Context::Instance().RenderFactoryInstance().LoadEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
@@ -93,7 +93,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>())();
+			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -170,7 +170,8 @@ int main()
 
 ProceduralTexApp::ProceduralTexApp()
 			: App3DFramework("ProceduralTex"),
-				procedural_type_(0), procedural_freq_(10)
+				procedural_type_(0), procedural_freq_(10),
+				loading_percentage_(0)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/ProceduralTex");
 }
@@ -190,7 +191,7 @@ void ProceduralTexApp::InitObjects()
 {
 	// ½¨Á¢×ÖÌå
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
-	UIManager::Instance().Load(ResLoader::Instance().Load("ProceduralTex.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("ProceduralTex.uiml"));
 }
 
 void ProceduralTexApp::OnResize(uint32_t width, uint32_t height)

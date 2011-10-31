@@ -143,7 +143,7 @@ void Fractal::InitObjects()
 	input_handler->connect(boost::bind(&Fractal::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("Fractal.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("Fractal.uiml"));
 }
 
 void Fractal::OnResize(uint32_t width, uint32_t height)

@@ -66,7 +66,7 @@ namespace
 		TerrainRenderable()
 			: RenderableHelper(L"Terrain")
 		{
-			BOOST_AUTO(grass, LoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(grass, ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -525,9 +525,9 @@ void ParticleEditorApp::InitObjects()
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	scene_buffer_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("ParticleEditor.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
@@ -871,7 +871,7 @@ void ParticleEditorApp::CurveTypeChangedHandler(KlayGE::UIComboBox const & sende
 
 void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 {
-	TexturePtr tex = LoadTexture(name, EAH_GPU_Read | EAH_Immutable)();
+	TexturePtr tex = SyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable);
 	if (id_particle_alpha_from_button_ == id)
 	{
 		checked_pointer_cast<ParticlesObject>(particles_)->ParticleAlphaFrom(tex);
@@ -973,7 +973,7 @@ void ParticleEditorApp::LoadParticleSystem(std::string const & name)
 
 	using boost::lexical_cast;
 
-	ResIdentifierPtr ifs = ResLoader::Instance().Load(name.c_str());
+	ResIdentifierPtr ifs = ResLoader::Instance().Open(name.c_str());
 
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(ifs);

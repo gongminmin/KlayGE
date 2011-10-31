@@ -81,7 +81,7 @@ namespace
 			: SceneObjectHelper(SOA_Cullable),
 				model_(float4x4::Identity())
 		{
-			renderable_ = LoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())()->Mesh(0);
+			renderable_ = SyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())->Mesh(0);
 		}
 
 		float4x4 const & GetModelMatrix() const
@@ -182,8 +182,8 @@ void PostProcessingApp::InitObjects()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100.0f);
 
-	TexturePtr y_cube_map = LoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable)();
-	TexturePtr c_cube_map = LoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable)();
+	TexturePtr y_cube_map = SyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = SyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
 	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
@@ -202,15 +202,15 @@ void PostProcessingApp::InitObjects()
 	input_handler->connect(boost::bind(&PostProcessingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	copy_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	copy_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
 	hdr_ = MakeSharedPtr<HDRPostProcess>();
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
-	old_fashion_ = LoadPostProcess(ResLoader::Instance().Load("OldFashion.ppml"), "old_fashion");
+	old_fashion_ = LoadPostProcess(ResLoader::Instance().Open("OldFashion.ppml"), "old_fashion");
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("PostProcessing.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_fps_camera_ = dialog_->IDFromName("FPSCamera");

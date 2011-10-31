@@ -67,9 +67,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			BOOST_AUTO(diffuse_loader, LoadTexture("diffuse.dds", EAH_GPU_Read));
-			BOOST_AUTO(normal_loader, LoadTexture("normal.dds", EAH_GPU_Read));
-			BOOST_AUTO(dist_loader, LoadTexture("distance.dds", EAH_GPU_Read));
+			BOOST_AUTO(diffuse_loader, ASyncLoadTexture("diffuse.dds", EAH_GPU_Read));
+			BOOST_AUTO(normal_loader, ASyncLoadTexture("normal.dds", EAH_GPU_Read));
+			BOOST_AUTO(dist_loader, ASyncLoadTexture("distance.dds", EAH_GPU_Read));
 
 			//normals, tangents
 			uint32_t  vertex_num = rl_->NumVertices();
@@ -450,7 +450,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			
-			BOOST_AUTO(point_texture_loader, LoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(point_texture_loader, ASyncLoadTexture("point.dds", EAH_GPU_Read | EAH_Immutable));
 			
 			std::vector<float2> xys(CAUSTICS_GRID_SIZE * CAUSTICS_GRID_SIZE);
 			for (uint32_t i = 0; i < CAUSTICS_GRID_SIZE; ++ i)
@@ -638,19 +638,15 @@ void CausticsMapApp::InitObjects()
 	plane_object_ = MakeSharedPtr<PlaneObject>(50.f, 50.f);
 	plane_object_->AddToSceneManager();
 
-	RenderablePtr model_sphere = LoadModel("sphere_high.7z//sphere_high.meshml",
-		EAH_GPU_Read,
-		CreateModelFactory<RefractModel>(),
-		CreateMeshFactory<RefractMesh>())();
+	RenderablePtr model_sphere = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	checked_pointer_cast<RefractModel>(model_sphere)->SetModelMatrix(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_ = MakeSharedPtr<SceneObjectHelper>(model_sphere, SceneObjectHelper::SOA_Cullable);
 	sphere_->AddToSceneManager();
 	sphere_->Visible(false);
 
-	RenderablePtr model_bunny = LoadModel("bunny.7z//bunny.meshml",
-		EAH_GPU_Read,
-		CreateModelFactory<RefractModel>(),
-		CreateMeshFactory<RefractMesh>())();
+	RenderablePtr model_bunny = SyncLoadModel("bunny.7z//bunny.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	checked_pointer_cast<RefractModel>(model_bunny)->SetModelMatrix(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
 	bunny_ = MakeSharedPtr<SceneObjectHelper>(model_bunny, SceneObjectHelper::SOA_Cullable);
 	bunny_->AddToSceneManager();
@@ -661,13 +657,13 @@ void CausticsMapApp::InitObjects()
 	caustics_grid_ = MakeSharedPtr<CausticsGrid>();
 
 	//Sky Box
-	y_cube_map_ = LoadTexture("uffizi_cross_y.dds", EAH_GPU_Read)();
-	c_cube_map_ = LoadTexture("uffizi_cross_c.dds", EAH_GPU_Read)();
+	y_cube_map_ = SyncLoadTexture("uffizi_cross_y.dds", EAH_GPU_Read);
+	c_cube_map_ = SyncLoadTexture("uffizi_cross_c.dds", EAH_GPU_Read);
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>(0);
 	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
-	copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
 	this->InitUI();
 
@@ -820,7 +816,7 @@ void CausticsMapApp::InitCubeSM()
 void CausticsMapApp::InitUI()
 {
 	//UI Settings
-	UIManager::Instance().Load(ResLoader::Instance().Load("Caustics.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("Caustics.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	int ui_id = 0;

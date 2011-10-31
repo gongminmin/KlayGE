@@ -40,7 +40,7 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true)
 		{
-			BOOST_AUTO(flag_tl, LoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable));
+			BOOST_AUTO(flag_tl, ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -153,7 +153,7 @@ void VertexDisplacement::InitObjects()
 	input_handler->connect(boost::bind(&VertexDisplacement::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("VertexDisplacement.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("VertexDisplacement.uiml"));
 }
 
 void VertexDisplacement::OnResize(uint32_t width, uint32_t height)

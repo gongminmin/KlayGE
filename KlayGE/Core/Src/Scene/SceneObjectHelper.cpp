@@ -119,7 +119,7 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		renderable_ = LoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())()->Mesh(0);
+		renderable_ = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderableLightSourceProxy>())->Mesh(0);
 		model_scaling_ = model_translation_ = float4x4::Identity();
 
 		checked_pointer_cast<RenderableLightSourceProxy>(renderable_)->AttachLightSrc(light);

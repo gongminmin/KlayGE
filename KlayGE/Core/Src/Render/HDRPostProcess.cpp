@@ -247,14 +247,14 @@ namespace KlayGE
 			adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcess>();
 		}
 
-		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
-		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
-		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Load("Downsampler2x2.ppml"), "downsampler2x2");
+		bright_pass_downsampler_ = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "bright_pass_downsampler2x2");
+		downsamplers_[0] = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "downsampler2x2");
+		downsamplers_[1] = LoadPostProcess(ResLoader::Instance().Open("Downsampler2x2.ppml"), "downsampler2x2");
 		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
 
-		glow_merger_ = LoadPostProcess(ResLoader::Instance().Load("GlowMerger.ppml"), "glow_merger");
+		glow_merger_ = LoadPostProcess(ResLoader::Instance().Open("GlowMerger.ppml"), "glow_merger");
 
 		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
 	}

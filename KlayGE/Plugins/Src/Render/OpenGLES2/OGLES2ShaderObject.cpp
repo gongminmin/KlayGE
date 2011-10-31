@@ -1295,7 +1295,7 @@ namespace KlayGE
 						fxml_bin_name = oss.str();
 
 						bool recompile_cg;
-						ResIdentifierPtr bin_res = ResLoader::Instance().Load(fxml_bin_name);
+						ResIdentifierPtr bin_res = ResLoader::Instance().Open(fxml_bin_name);
 						if (bin_res)
 						{
 							uint32_t fourcc;

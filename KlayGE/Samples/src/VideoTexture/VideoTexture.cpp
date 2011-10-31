@@ -90,7 +90,7 @@ namespace
 		TeapotObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())()->Mesh(0);
+			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTeapot>())->Mesh(0);
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)
@@ -193,7 +193,7 @@ void VideoTextureApp::InitObjects()
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("VideoTexture.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
 }
 
 void VideoTextureApp::OnResize(uint32_t width, uint32_t height)

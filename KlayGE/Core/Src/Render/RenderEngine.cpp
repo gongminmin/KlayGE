@@ -173,7 +173,7 @@ namespace KlayGE
 			pp_chain_ = MakeSharedPtr<PostProcessChain>(L"RE");
 			pp_chain_->Append(MakeSharedPtr<HDRPostProcess>());
 
-			copy_pp_ = LoadPostProcess(ResLoader::Instance().Load("Copy.ppml"), "copy");
+			copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 		}
 		if (render_settings_.gamma)
 		{
@@ -194,7 +194,7 @@ namespace KlayGE
 
 			if (use_gamma_pp)
 			{
-				gamma_pp_ = LoadPostProcess(ResLoader::Instance().Load("GammaCorrection.ppml"), "gamma_correction");
+				gamma_pp_ = LoadPostProcess(ResLoader::Instance().Open("GammaCorrection.ppml"), "gamma_correction");
 				gamma_pp_->SetParam(0, 1 / 2.2f);
 			}
 		}

@@ -28,6 +28,10 @@
 #include <vector>
 #include <string>
 
+#include <boost/bind.hpp>
+
+#include <KlayGE/thread.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API ResIdentifier
@@ -97,6 +101,19 @@ namespace KlayGE
 		boost::shared_ptr<std::istream> istream_;
 	};
 
+	class KLAYGE_CORE_API ResLoadingDesc
+	{
+	public:
+		virtual ~ResLoadingDesc()
+		{
+		}
+
+		virtual void SubThreadStage() = 0;
+		virtual void* MainThreadStage() = 0;
+
+		virtual bool HasSubThreadStage() const = 0;
+	};
+
 	class KLAYGE_CORE_API ResLoader
 	{
 	public:
@@ -104,8 +121,33 @@ namespace KlayGE
 
 		void AddPath(std::string const & path);
 
-		ResIdentifierPtr Load(std::string const & name);
+		ResIdentifierPtr Open(std::string const & name);
 		std::string Locate(std::string const & name);
+
+		void* SyncQuery(ResLoadingDescPtr const & res_desc);
+		boost::function<void*()> ASyncQuery(ResLoadingDescPtr const & res_desc);
+
+		template <typename T>
+		boost::shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
+		{
+			return *static_cast<boost::shared_ptr<T>*>(this->SyncQuery(res_desc));
+		}
+
+		template <typename T>
+		boost::function<boost::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
+		{
+			return boost::bind(&ResLoader::EmptyToT<T>, this->ASyncQuery(res_desc));
+		}
+
+	private:		
+		void ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc);
+		void* ASyncFunc(ResLoadingDescPtr const & res_desc, boost::shared_ptr<joiner<void> > const & loading_thread);
+
+		template <typename T>
+		static boost::shared_ptr<T> EmptyToT(boost::function<void*()> func)
+		{
+			return *static_cast<boost::shared_ptr<T>*>(func());
+		}
 
 	private:
 		ResLoader();

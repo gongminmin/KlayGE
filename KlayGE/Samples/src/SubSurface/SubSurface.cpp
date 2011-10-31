@@ -36,7 +36,7 @@ namespace
 		ModelObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>())();
+			renderable_ = SyncLoadModel("Dragon.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<DetailedModel>(), CreateMeshFactory<DetailedMesh>());
 		}
 
 		void EyePos(float3 const & eye_pos)
@@ -153,7 +153,7 @@ void SubSurfaceApp::InitObjects()
 	input_handler->connect(boost::bind(&SubSurfaceApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("SubSurface.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("SubSurface.uiml"));
 	dialog_params_ = UIManager::Instance().GetDialog("Parameters");
 	id_sigma_static_ = dialog_params_->IDFromName("SigmaStatic");
 	id_sigma_slider_ = dialog_params_->IDFromName("SigmaSlider");

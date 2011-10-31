@@ -133,7 +133,7 @@ namespace KlayGE
 		XMLNodePtr sm_node;
 		XMLNodePtr adsf_node;
 
-		ResIdentifierPtr file = ResLoader::Instance().Load(cfg_file);
+		ResIdentifierPtr file = ResLoader::Instance().Open(cfg_file);
 		if (file)
 		{
 			XMLNodePtr cfg_root = cfg_doc.Parse(file);

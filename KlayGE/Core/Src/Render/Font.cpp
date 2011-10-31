@@ -102,7 +102,7 @@ namespace KlayGE
 
 	KFontLoader::KFontLoader(std::string const & font_name)
 	{
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(font_name);
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_name);
 		BOOST_ASSERT(kfont_input);
 
 		kfont_header header;

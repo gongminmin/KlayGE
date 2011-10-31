@@ -169,7 +169,7 @@ namespace KlayGE
 		return "";
 	}
 
-	ResIdentifierPtr ResLoader::Load(std::string const & name)
+	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
 		if (('/' == name[0]) || ('\\' == name[0]))
 		{
@@ -227,5 +227,38 @@ namespace KlayGE
 		}
 
 		return ResIdentifierPtr();
+	}
+
+	void* ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
+	{
+		if (res_desc->HasSubThreadStage())
+		{
+			res_desc->SubThreadStage();
+		}
+		return res_desc->MainThreadStage();
+	}
+
+	boost::function<void*()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
+	{
+		boost::shared_ptr<joiner<void> > async_thread;
+		if (res_desc->HasSubThreadStage())
+		{
+			async_thread = MakeSharedPtr<joiner<void> >(GlobalThreadPool()(boost::bind(&ResLoader::ASyncSubThreadFunc, this, res_desc)));
+		}
+		return boost::bind(&ResLoader::ASyncFunc, this, res_desc, async_thread);
+	}
+
+	void ResLoader::ASyncSubThreadFunc(ResLoadingDescPtr const & res_desc)
+	{
+		res_desc->SubThreadStage();
+	}
+
+	void* ResLoader::ASyncFunc(ResLoadingDescPtr const & res_desc, boost::shared_ptr<joiner<void> > const & loading_thread)
+	{
+		if (res_desc->HasSubThreadStage())
+		{
+			(*loading_thread)();
+		}
+		return res_desc->MainThreadStage();
 	}
 }

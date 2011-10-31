@@ -43,6 +43,15 @@
 #include <string>
 
 #include <boost/function.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 6011 6334)
+#endif
+#include <boost/unordered_map.hpp>
+#include <boost/functional/hash.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 namespace KlayGE
 {
@@ -241,7 +250,7 @@ namespace KlayGE
 		typedef std::vector<StaticMeshPtr> StaticMeshesPtrType;
 		StaticMeshesPtrType meshes_;
 
-		std::map<size_t, TexturePtr> tex_pool_;
+		boost::unordered_map<std::string, TexturePtr> tex_pool_;
 	};
 
 
@@ -402,9 +411,12 @@ namespace KlayGE
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
 		int32_t& start_frame, int32_t& end_frame, int32_t& frame_rate);
-	KLAYGE_CORE_API boost::function<RenderModelPtr()> LoadModel(std::string const & meshml_name, uint32_t access_hint,
-		boost::function<RenderModelPtr (std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
-		boost::function<StaticMeshPtr (RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+	KLAYGE_CORE_API RenderModelPtr SyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
+	KLAYGE_CORE_API boost::function<RenderModelPtr()> ASyncLoadModel(std::string const & meshml_name, uint32_t access_hint,
+		boost::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc = CreateModelFactory<RenderModel>(),
+		boost::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<std::vector<vertex_element> > const & ves,

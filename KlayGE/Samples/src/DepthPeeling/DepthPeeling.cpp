@@ -104,7 +104,7 @@ namespace
 		PolygonObject()
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>())();
+			renderable_ = SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderPolygon>());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -238,9 +238,9 @@ void DepthPeelingApp::InitObjects()
 	input_handler->connect(boost::bind(&DepthPeelingApp::InputHandler, this, _1, _2));
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
-	blend_pp_ = LoadPostProcess(ResLoader::Instance().Load("Blend.ppml"), "blend");
+	blend_pp_ = LoadPostProcess(ResLoader::Instance().Open("Blend.ppml"), "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("DepthPeeling.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("DepthPeeling.uiml"));
 	dialog_peeling_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 

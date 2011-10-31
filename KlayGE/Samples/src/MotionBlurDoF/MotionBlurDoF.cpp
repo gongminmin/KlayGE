@@ -496,8 +496,8 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 
 void MotionBlurDoFApp::InitObjects()
 {
-	boost::function<RenderModelPtr()> model_instance_ml = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	boost::function<RenderModelPtr()> model_mesh_ml = LoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	boost::function<RenderModelPtr()> model_instance_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	boost::function<RenderModelPtr()> model_mesh_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -529,7 +529,7 @@ void MotionBlurDoFApp::InitObjects()
 
 	motion_blur_ = MakeSharedPtr<MotionBlur>();
 
-	clear_float_ = LoadPostProcess(ResLoader::Instance().Load("ClearFloat.ppml"), "clear_float");
+	clear_float_ = LoadPostProcess(ResLoader::Instance().Open("ClearFloat.ppml"), "clear_float");
 	float4 clear_clr(0.2f, 0.4f, 0.6f, 1);
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
@@ -539,7 +539,7 @@ void MotionBlurDoFApp::InitObjects()
 	}
 	clear_float_->SetParam(clear_float_->ParamByName("clear_clr"), clear_clr);
 
-	UIManager::Instance().Load(ResLoader::Instance().Load("MotionBlurDoF.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];
 	mb_dialog_ = UIManager::Instance().GetDialogs()[1];
 	app_dialog_ = UIManager::Instance().GetDialogs()[2];
