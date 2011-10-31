@@ -918,7 +918,7 @@ int main(int argc, char* argv[])
 			char_info[i].dist_index = static_cast<uint32_t>(-1);
 		}
 
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Load(kfont_name);
+		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(kfont_name);
 		if (kfont_input)
 		{
 			kfont_header header2;

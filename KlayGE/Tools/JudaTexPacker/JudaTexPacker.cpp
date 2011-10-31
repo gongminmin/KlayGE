@@ -92,7 +92,7 @@ void PackJTML(std::string const & jtml_name)
 {
 	Timer timer;
 
-	ResIdentifierPtr jtml = ResLoader::Instance().Load(jtml_name);
+	ResIdentifierPtr jtml = ResLoader::Instance().Open(jtml_name);
 
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(jtml);
@@ -214,7 +214,7 @@ void PackJTML(std::string const & jtml_name)
 
 		cout << "Processing " << name << "... ";
 
-		TexturePtr src_texture = LoadTexture(name, EAH_CPU_Read | EAH_CPU_Write)();
+		TexturePtr src_texture = SyncLoadTexture(name, EAH_CPU_Read | EAH_CPU_Write);
 		if (src_texture->Type() != Texture::TT_2D)
 		{
 			cout << "Texture " << name << "is not 2D texture. Skipped." << endl;
