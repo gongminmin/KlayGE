@@ -38,120 +38,27 @@
 
 namespace KlayGE
 {
-	class PyObjDeleter
-	{
-	public:
-		void operator()(PyObject* p)
-		{
-			if (p != NULL)
-			{
-				Py_DecRef(p);
-			}
-		}
-	};
-
 	typedef boost::shared_ptr<PyObject> PyObjectPtr;
 
 	// PyObject指针
 	/////////////////////////////////////////////////////////////////////////////////
-	inline PyObjectPtr
-	MakePyObjectPtr(PyObject* p)
-	{
-		return PyObjectPtr(p, PyObjDeleter());
-	};
+	KLAYGE_CORE_API PyObjectPtr MakePyObjectPtr(PyObject* p);
 
-	template <typename T>
-	PyObjectPtr CppType2PyObjectPtr(T const &);
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<std::string>(std::string const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<char*>(char* const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("s", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<wchar_t*>(wchar_t* const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("u", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<int8_t>(int8_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("b", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<int16_t>(int16_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("h", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<int32_t>(int32_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("i", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<int64_t>(int64_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("L", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<uint8_t>(uint8_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("B", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<uint16_t>(uint16_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("H", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<uint32_t>(uint32_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("I", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<uint64_t>(uint64_t const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("K", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<double>(double const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("d", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<float>(float const & t)
-	{
-		return MakePyObjectPtr(Py_BuildValue("f", t));
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<PyObject*>(PyObject* const & t)
-	{
-		return MakePyObjectPtr(t);
-	}
-
-	template <>
-	inline PyObjectPtr CppType2PyObjectPtr<PyObjectPtr>(PyObjectPtr const & t)
-	{
-		return t;
-	}
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(std::string const & t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(char* t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(wchar_t* t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(int8_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(int16_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(int32_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(int64_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(uint8_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(uint16_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(uint32_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(uint64_t t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(double t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(float t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(PyObject* t);
+	KLAYGE_CORE_API PyObjectPtr CppType2PyObjectPtr(PyObjectPtr const & t);
 
 	// 从一个.py载入模块
 	/////////////////////////////////////////////////////////////////////////////////
@@ -177,26 +84,13 @@ namespace KlayGE
 		PyObjectPtr Value(std::string const & name);
 
 		template <typename TupleType>
-		PyObjectPtr Call(std::string const & funcName, const TupleType& t)
+		PyObjectPtr Call(std::string const & func_name, TupleType const & t)
 		{
 			std::vector<PyObjectPtr> v(Tuple2Vector(t));
-			return this->Call(funcName, v.begin(), v.end());
+			return this->Call(func_name, &v.front(), &v.back() + 1);
 		}
 
-		template <typename ForwardIterator>
-		PyObjectPtr Call(std::string const & funcName, ForwardIterator first, ForwardIterator last)
-		{
-			PyObjectPtr func(this->Value(funcName));
-			PyObjectPtr args(MakePyObjectPtr(PyTuple_New(last - first)));
-
-			for (ForwardIterator iter = first; iter != last; ++ iter)
-			{
-				Py_IncRef(iter->get());
-				PyTuple_SetItem(args.get(), iter - first, iter->get());
-			}
-
-			return MakePyObjectPtr(PyObject_CallObject(func.get(), args.get()));
-		}
+		PyObjectPtr Call(std::string const & func_name, PyObjectPtr* first, PyObjectPtr* last);
 
 	private:
 		PyObjectPtr module_;
@@ -218,20 +112,23 @@ namespace KlayGE
 		typedef PyObject *(*PyCallback)(PyObject*, PyObject*);
 
 		RegisterModule(std::string const & name)
-			: moduleName_(name)
-			{ }
+			: module_name_(name)
+		{
+		}
 
 		std::string const & Name() const
-			{ return moduleName_;}
+		{
+			return module_name_;
+		}
 
-		void AddMethod(std::string const & methodName, PyCallback method);
+		void AddMethod(std::string const & method_name, PyCallback method);
 		void Regiter();
 
 	protected:
-		std::string moduleName_;
+		std::string module_name_;
 
 		std::vector<PyMethodDef>	methods_;
-		std::vector<std::string>	methodNames_;
+		std::vector<std::string>	method_names_;
 	};
 
 

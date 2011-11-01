@@ -34,6 +34,101 @@
 
 namespace KlayGE
 {
+	class KLAYGE_CORE_API PyObjDeleter
+	{
+	public:
+		void operator()(PyObject* p)
+		{
+			if (p != NULL)
+			{
+				Py_DecRef(p);
+			}
+		}
+	};
+
+
+	PyObjectPtr MakePyObjectPtr(PyObject* p)
+	{
+		return PyObjectPtr(p, PyObjDeleter());
+	}
+
+
+	PyObjectPtr CppType2PyObjectPtr(std::string const & t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("s", t.c_str()));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(char* t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("s", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(wchar_t* t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("u", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(int8_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("b", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(int16_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("h", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(int32_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("i", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(int64_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("L", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(uint8_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("B", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(uint16_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("H", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(uint32_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("I", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(uint64_t t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("K", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(double t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("d", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(float t)
+	{
+		return MakePyObjectPtr(Py_BuildValue("f", t));
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(PyObject* t)
+	{
+		return MakePyObjectPtr(t);
+	}
+
+	PyObjectPtr CppType2PyObjectPtr(PyObjectPtr const & t)
+	{
+		return t;
+	}
+
+
 	ScriptModule::ScriptModule(std::string const & name)
 	{
 		module_	= MakePyObjectPtr(PyImport_ImportModule(name.c_str()));
@@ -54,13 +149,28 @@ namespace KlayGE
 		return MakePyObjectPtr(p);
 	}
 
+	PyObjectPtr ScriptModule::Call(std::string const & func_name, PyObjectPtr* first, PyObjectPtr* last)
+	{
+		PyObjectPtr func(this->Value(func_name));
+		PyObjectPtr args(MakePyObjectPtr(PyTuple_New(last - first)));
+
+		for (PyObjectPtr* iter = first; iter != last; ++ iter)
+		{
+			Py_IncRef(iter->get());
+			PyTuple_SetItem(args.get(), iter - first, iter->get());
+		}
+
+		return MakePyObjectPtr(PyObject_CallObject(func.get(), args.get()));
+	}
+
+
 	// 向模块声明中添加一个方法
 	/////////////////////////////////////////////////////////////////////////////////
-	void RegisterModule::AddMethod(std::string const & methodName, PyCallback method)
+	void RegisterModule::AddMethod(std::string const & method_name, PyCallback method)
 	{
-		methodNames_.push_back(methodName);
+		method_names_.push_back(method_name);
 
-		PyMethodDef def = { methodName.c_str(), method, METH_VARARGS, NULL };
+		PyMethodDef def = { method_name.c_str(), method, METH_VARARGS, NULL };
 		methods_.push_back(def);
 	}
 
@@ -72,7 +182,7 @@ namespace KlayGE
 		static PyModuleDef module =
 		{
 			PyModuleDef_HEAD_INIT,
-			moduleName_.c_str(),
+			module_name_.c_str(),
 			NULL,
 			-1,
 			&methods_[0]
@@ -80,7 +190,7 @@ namespace KlayGE
 
 		PyModule_Create(&module);
 #else
-		Py_InitModule(const_cast<char*>(moduleName_.c_str()), &methods_[0]);
+		Py_InitModule(const_cast<char*>(module_name_.c_str()), &methods_[0]);
 #endif
 	}
 
