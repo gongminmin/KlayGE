@@ -21,6 +21,12 @@
 	#include <Carbon/Carbon.h>
 #endif
 
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#ifdef GLLOADER_GLES
+	#include <dlfcn.h>
+#endif
+#endif
+
 #include <string>
 #include <vector>
 
@@ -132,12 +138,12 @@ namespace glloader
 #endif
 #if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
 #ifdef GLLOADER_GLES
-			ogl_dll = ::dlopen("libEGL.so");
+			ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
 			}
-			ogl_dll = ::LoadLibraryA("libGLESv2.so");
+			ogl_dll = ::dlopen("libGLESv2.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);

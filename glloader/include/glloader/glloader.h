@@ -94,39 +94,44 @@
 #include <windows.h>
 #endif
 #else
+
 #if defined(_WIN32) || defined(__VC32__) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__)
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 #include <windows.h>
-
 typedef HDC     EGLNativeDisplayType;
 typedef HBITMAP EGLNativePixmapType;
 typedef HWND    EGLNativeWindowType;
-#endif
-#endif
 
+#elif defined(__WINSCW__) || defined(__SYMBIAN32__)
 
-#if defined(__WINSCW__) || defined(__SYMBIAN32__)
-#ifdef GLLOADER_EGL
 typedef int   EGLNativeDisplayType;
 typedef void* EGLNativeWindowType;
 typedef void* EGLNativePixmapType;
-#endif
-#endif
 
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__)
+#elif defined(__ANDROID__) || defined(ANDROID)
+#include <android/native_window.h>
+struct egl_native_pixmap_t;
+
+typedef struct ANativeWindow*           EGLNativeWindowType;
+typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
+typedef void*                           EGLNativeDisplayType;
+
+#elif (defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__))
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 typedef XID GLXDrawable;
 typedef XID GLXContextID;
 
-#ifdef GLLOADER_EGL
 typedef Display* EGLNativeDisplayType;
 typedef Pixmap   EGLNativePixmapType;
 typedef Window   EGLNativeWindowType;
 #endif
+
 #endif
 
 #ifdef GLLOADER_EGL

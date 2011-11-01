@@ -5,10 +5,8 @@ glloader/Debug-GLES/
 glloader/doc/html/
 glloader/Release/
 glloader/Release-GLES/
-glloader/build/codeblocks/*.layout
-glloader/build/codeblocks/*.depend
-glloader/build/codeblocks/*.bmarks
-glloader/build/codeblocks/*.backup
+glloader/build/android/libs/
+glloader/build/android/obj/
 glloader/build/codelite/*.mk
 glloader/build/codelite/*.tags
 glloader/build/codelite/*.session
@@ -44,10 +42,6 @@ KlayGE/bin/*/*.ilk
 KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*.pyc
-KlayGE/Build/codeblocks/*.layout
-KlayGE/Build/codeblocks/*.depend
-KlayGE/Build/codeblocks/*.bmarks
-KlayGE/Build/codeblocks/*.backup
 KlayGE/Build/codelite/*.mk
 KlayGE/Build/codelite/*.tags
 KlayGE/Build/codelite/*.session
@@ -86,10 +80,6 @@ KlayGE/Exporters/Maya/build/vc-10_0/ipch/
 KlayGE/media/Models/*.model_bin
 KlayGE/Samples/Debug/
 KlayGE/Samples/Release/
-KlayGE/Samples/build/codeblocks/*.layout
-KlayGE/Samples/build/codeblocks/*.depend
-KlayGE/Samples/build/codeblocks/*.bmarks
-KlayGE/Samples/build/codeblocks/*.backup
 KlayGE/Samples/build/codelite/*.mk
 KlayGE/Samples/build/codelite/*.tags
 KlayGE/Samples/build/codelite/*.session
@@ -105,10 +95,6 @@ KlayGE/Samples/media/*/*.model_bin
 KlayGE/Tools/bin/
 KlayGE/Tools/Debug/
 KlayGE/Tools/Release/
-KlayGE/Tools/build/codeblocks/*.layout
-KlayGE/Tools/build/codeblocks/*.depend
-KlayGE/Tools/build/codeblocks/*.bmarks
-KlayGE/Tools/build/codeblocks/*.backup
 KlayGE/Tools/build/codelite/*.mk
 KlayGE/Tools/build/codelite/*.tags
 KlayGE/Tools/build/codelite/*.session
