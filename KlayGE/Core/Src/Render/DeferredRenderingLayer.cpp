@@ -646,6 +646,7 @@ namespace KlayGE
 		}
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		indirect_lighting_pingpong_tex_ = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS - 1, 1, EF_ABGR16F, 1, 0,  EAH_GPU_Write, NULL);
+		vpls_lighting_fbs_.resize(MAX_IL_MIPMAP_LEVELS);
 		for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 		{
 			TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
@@ -654,7 +655,7 @@ namespace KlayGE
 			FrameBufferPtr fb = rf.MakeFrameBuffer();
 			fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
 			fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0));
-			vpls_lighting_fbs_.push_back(fb);
+			vpls_lighting_fbs_[i] = fb;
 		}
 
 		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
