@@ -16,7 +16,11 @@
 	#define KLAYGE_COMPILER_GCC
 
 	#if __GNUC__ >= 4
-		#if __GNUC_MINOR__ >= 5
+		#if __GNUC_MINOR__ >= 7
+			#define KLAYGE_COMPILER_VERSION 47
+		#elif __GNUC_MINOR__ >= 6
+			#define KLAYGE_COMPILER_VERSION 46
+		#elif __GNUC_MINOR__ >= 5
 			#define KLAYGE_COMPILER_VERSION 45
 		#elif __GNUC_MINOR__ >= 4
 			#define KLAYGE_COMPILER_VERSION 44
@@ -32,7 +36,7 @@
 
 		#if __GNUC_MINOR__ >= 3
 			#ifdef __GXX_EXPERIMENTAL_CXX0X__
-				#define KLAYGE_CXX0X_SUPPORT
+				#define KLAYGE_CXX11_SUPPORT
 			#endif
 		#endif
 	#else
@@ -44,9 +48,10 @@
 
 	#define KLAYGE_HAS_DECLSPEC
 
-	#if _MSC_VER >= 1600
+	#if _MSC_VER >= 1700
+		#define KLAYGE_COMPILER_VERSION 110
+	#elif _MSC_VER >= 1600
 		#define KLAYGE_COMPILER_VERSION 100
-		#define KLAYGE_CXX0X_SUPPORT
 	#elif _MSC_VER >= 1500
 		#define KLAYGE_COMPILER_VERSION 90
 
@@ -61,6 +66,10 @@
 		#endif
 	#else
 		#error Unknown compiler.
+	#endif
+
+	#if _MSC_VER >= 1600
+		#define KLAYGE_CXX11_SUPPORT
 	#endif
 
 	#if _MSC_VER >= 1400

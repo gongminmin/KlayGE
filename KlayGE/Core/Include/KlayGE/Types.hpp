@@ -22,7 +22,7 @@
 
 namespace KlayGE
 {
-#if KLAYGE_COMPILER == MSVC
+#ifdef KLAYGE_COMPILER_MSVC
 	#ifndef _WCHAR_T_DEFINED
 		typedef unsigned short		wchar_t;
 		#define _WCHAR_T_DEFINED

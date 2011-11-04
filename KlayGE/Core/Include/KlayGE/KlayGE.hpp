@@ -29,8 +29,8 @@
 #include <KlayGE/Types.hpp>
 
 #define KLAYGE_NAME			KlayGE
-#define KLAYGE_VER_MAJOR	3
-#define KLAYGE_VER_MINOR	12
+#define KLAYGE_VER_MAJOR	4
+#define KLAYGE_VER_MINOR	0
 #define KLAYGE_VER_RELEASE	0
 #define KLAYGE_VER_STR		KLAYGE_STRINGIZE(KLAYGE_NAME)" "KLAYGE_STRINGIZE(KLAYGE_VER_MAJOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_MINOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_RELEASE)
 
@@ -44,7 +44,5 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Math.hpp>
-
-#include <boost/config/requires_threads.hpp>
 
 #endif		// _KLAYGE_HPP
