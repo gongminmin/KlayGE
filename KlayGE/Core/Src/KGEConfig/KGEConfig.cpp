@@ -92,6 +92,14 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 				FreeLibrary(mod_gl);
 			}
 			HMODULE mod_gles2 = LoadLibrary(TEXT("libGLESv2.dll"));
+			if (!mod_gles2)
+			{
+				mod_gles2 = LoadLibrary(TEXT("libGLES20.dll"));
+				if (!mod_gles2)
+				{
+					mod_gles2 = LoadLibrary(TEXT("atioglxx.dll"));
+				}
+			}
 			if (mod_gles2)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenGLES2")));
@@ -116,14 +124,16 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		}
 		{
 			HWND hResCombo = GetDlgItem(hDlg, IDC_RES_COMBO);
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1080")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1680x1050")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x1024")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x960")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x800")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x720")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1024x768")));
-			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("800x600")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1080 (16:9)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1680x1050 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1600x900 (16:9)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1440x900 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x1024 (5:4)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x960 (4:3)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x800 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x720 (16:9)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1024x768 (4:3)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("800x600 (4:3)")));
 
 			TCHAR buf[256];
 			int n = static_cast<int>(SendMessage(hResCombo, CB_GETCOUNT, 0, 0));
@@ -147,9 +157,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			HWND hClrFmtCombo = GetDlgItem(hDlg, IDC_CLR_FMT_COMBO);
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ARGB8")));
-			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ARGB8_SRGB")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR8")));
-			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR8_SRGB")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("A2BGR10")));
 
 			int sel = 0;
