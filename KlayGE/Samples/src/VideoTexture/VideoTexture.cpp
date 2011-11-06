@@ -170,7 +170,7 @@ void VideoTextureApp::InitObjects()
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(2, 2, 2));
-	light_->Falloff(float3(0, 0, 1.0f));
+	light_->Falloff(float3(1, 0, 1.0f));
 	light_->Position(float3(0.25f, 0.5f, -1.0f));
 	light_->AddToSceneManager();
 

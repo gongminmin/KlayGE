@@ -61,7 +61,7 @@ float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3
 float attenuation_term(float3 light_pos, float3 pos, float3 atten)
 {
 	float d = distance(light_pos, pos);
-	return min(1, 1 / (atten.x + d * atten.y + d * d * atten.z));
+	return 1 / (atten.x + d * atten.y + d * d * atten.z);
 }
     ]]>
 	</shader>

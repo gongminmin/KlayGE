@@ -137,7 +137,7 @@ void SubSurfaceApp::InitObjects()
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(1.5f, 1.5f, 1.5f));
-	light_->Falloff(float3(0, 0.5f, 0.0f));
+	light_->Falloff(float3(1, 0.5f, 0.0f));
 	light_->Position(float3(0, 2, -3));
 	light_->AddToSceneManager();
 

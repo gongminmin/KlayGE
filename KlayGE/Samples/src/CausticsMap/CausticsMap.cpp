@@ -606,7 +606,7 @@ void CausticsMapApp::InitObjects()
 	light_ = MakeSharedPtr<SpotLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(10, 10, 10));
-	light_->Falloff(float3(0, 0, 0.01f));
+	light_->Falloff(float3(1, 0, 0.01f));
 	light_->Position(float3(0, 30, 0));
 	light_->Direction(MathLib::normalize(-light_->Position()));
 	light_->OuterAngle(PI / 8);

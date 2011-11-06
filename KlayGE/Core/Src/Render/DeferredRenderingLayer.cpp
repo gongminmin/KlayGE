@@ -464,6 +464,7 @@ namespace KlayGE
 			vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
 			vpl_light_pos_es_param_ = vpls_lighting_effect->ParameterByName("light_pos_es");
 			vpl_light_color_param_ = vpls_lighting_effect->ParameterByName("light_color");
+			vpl_light_falloff_param_ = vpls_lighting_effect->ParameterByName("light_falloff");
 			vpl_x_coord_param_ = vpls_lighting_effect->ParameterByName("x_coord");
 			*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 			*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
@@ -1704,6 +1705,7 @@ namespace KlayGE
 		float3 p = MathLib::transform_coord(light->Position(), view_);
 		*vpl_light_pos_es_param_ = float4(p.x(), p.y(), p.z(), 1);
 		*vpl_light_color_param_ = light->Color();
+		*vpl_light_falloff_param_ = light->Falloff();
 		
 		for (size_t i = 0; i < vpls_lighting_fbs_.size(); ++ i)
 		{
@@ -1747,7 +1749,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::AccumulateToLightingTex()
 	{
 		PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
-		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
+		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 8 / VPL_COUNT);
 		copy_to_light_buffer_pp->SetParam(1, float2(1.0f / opaque_g_buffer_rt0_tex_->Width(0), 1.0f / opaque_g_buffer_rt0_tex_->Height(0)));
 		copy_to_light_buffer_pp->SetParam(2, depth_near_far_invfar_);
 		copy_to_light_buffer_pp->InputPin(0, indirect_lighting_tex_);

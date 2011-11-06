@@ -25,6 +25,7 @@
 
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_color"/>
+		<parameter type="float3" name="light_falloff"/>
 	</cbuffer>
 
 	<cbuffer name="per_vpl">
@@ -61,9 +62,10 @@ void CalcVPLsLightingShape(float4 pos,
 	float3 view_vec = normalize(rot_pos);
 	float3 halfway = normalize(light_vec + view_vec);
 
-	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
+	float cos_ij = normalize(pos.xyz).y;
+	oVPLColor = albedo.w * cos_ij * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
 
-	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
+	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 18;
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
@@ -135,7 +137,7 @@ float4 VPLsLightingPS(
 	float cos_iv = dot(norm_i, vij);
 	if (cos_iv > 0)
 	{
-		float atten = attenuation_term(pos_j, pos_i, float3(0, 0, 1));
+		float atten = attenuation_term(pos_j, pos_i, light_falloff);
 		color_i = cos_iv * atten * vpl_color;
 	}
 

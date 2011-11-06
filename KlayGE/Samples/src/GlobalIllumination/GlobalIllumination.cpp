@@ -26,7 +26,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>
-#include <boost/typeof/typeof.hpp>
 
 #include "GlobalIllumination.hpp"
 
@@ -113,7 +112,7 @@ void GlobalIlluminationApp::InitObjects()
 	spot_light_->Position(float3(0, 12, -4.8f));
 	spot_light_->Direction(float3(0, 0, 1));
 	spot_light_->Color(float3(6.0f, 5.88f, 4.38f));
-	spot_light_->Falloff(float3(0, 0.1f, 0));
+	spot_light_->Falloff(float3(1, 0.1f, 0));
 	spot_light_->OuterAngle(PI / 4);
 	spot_light_->InnerAngle(PI / 6);
 	spot_light_->BindUpdateFunc(SpotLightSourceUpdate());

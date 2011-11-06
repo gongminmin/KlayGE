@@ -696,7 +696,7 @@ void ShadowCubeMap::InitObjects()
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
 	light_->Color(float3(1, 1, 1));
-	light_->Falloff(float3(0, 0.05f, 0));
+	light_->Falloff(float3(1, 0.05f, 0));
 	light_->ProjectiveTexture(lamp_tex_);
 	light_->BindUpdateFunc(PointLightSourceUpdate());
 	light_->AddToSceneManager();
