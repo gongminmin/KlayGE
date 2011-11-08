@@ -120,6 +120,8 @@ External/boost/tools/build/v2/engine/bootstrap/
 External/boost/tools/build/v2/engine/bin.cygwinx86/
 External/Python/*.exe
 External/Python/amd64/*.exe
+External/Python/Android/libs
+External/Python/Android/obj
 External/Python/DLLs/*.pyd
 External/Python/DLLs/*.dll
 External/Python/DLLs/amd64/*.pyd
