@@ -61,6 +61,11 @@ namespace KlayGE
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
 	}
 
+	void SceneObject::DelFromSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().DelSceneObject(this->shared_from_this());
+	}
+
 	uint32_t SceneObject::Attrib() const
 	{
 		return attrib_;

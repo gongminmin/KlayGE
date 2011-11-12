@@ -247,6 +247,12 @@ namespace KlayGE
 
 	// É¾³ýäÖÈ¾ÎïÌå
 	/////////////////////////////////////////////////////////////////////////////////
+	void SceneManager::DelSceneObject(SceneObjectPtr const & obj)
+	{
+		BOOST_AUTO(iter, std::find(scene_objs_.begin(), scene_objs_.end(), obj));
+		this->DelSceneObject(iter);
+	}
+
 	SceneManager::SceneObjectsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjectsType::iterator iter)
 	{
 		this->OnDelSceneObject(iter);

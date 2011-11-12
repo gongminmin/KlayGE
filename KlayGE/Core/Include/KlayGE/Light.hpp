@@ -79,6 +79,7 @@ namespace KlayGE
 		virtual void Update();
 
 		virtual void AddToSceneManager();
+		virtual void DelFromSceneManager();
 
 		float4 const & Color() const;
 		void Color(float3 const & clr);

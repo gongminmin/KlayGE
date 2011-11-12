@@ -60,6 +60,7 @@ namespace KlayGE
 		virtual Box const & GetBound() const;
 
 		virtual void AddToSceneManager();
+		virtual void DelFromSceneManager();
 
 		virtual void Update();
 

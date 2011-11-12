@@ -80,6 +80,7 @@ namespace KlayGE
 		LightSourcesType const & LightSources() const;
 
 		void AddSceneObject(SceneObjectPtr const & obj);
+		void DelSceneObject(SceneObjectPtr const & obj);
 		SceneObjectsType::iterator DelSceneObject(SceneObjectsType::iterator iter);
 		void AddRenderable(RenderablePtr const & obj);
 

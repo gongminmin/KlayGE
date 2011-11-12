@@ -74,6 +74,11 @@ namespace KlayGE
 		Context::Instance().SceneManagerInstance().AddLight(this->shared_from_this());
 	}
 
+	void LightSource::DelFromSceneManager()
+	{
+		Context::Instance().SceneManagerInstance().DelLight(this->shared_from_this());
+	}
+
 	float4 const & LightSource::Color() const
 	{
 		return color_;
