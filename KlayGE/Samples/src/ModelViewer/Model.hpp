@@ -18,7 +18,6 @@ public:
 
 	void SetTime(float time);
 	void SetLightPos(KlayGE::float3 const & light_pos);
-	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -47,9 +46,7 @@ public:
 	void OnRenderBegin();
 	void Render();
 
-	void SetWorld(KlayGE::float4x4 const & mat);
 	void SetLightPos(KlayGE::float3 const & light_pos);
-	void SetEyePos(KlayGE::float3 const & eye_pos);
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -68,10 +65,7 @@ private:
 	void UpdateTech();
 
 private:
-	KlayGE::float4x4 world_;
-	KlayGE::float4x4 inv_world_;
 	KlayGE::RenderEffectPtr effect_;
-	KlayGE::float3 light_pos_;
 
 	bool line_mode_;
 	bool smooth_mesh_;

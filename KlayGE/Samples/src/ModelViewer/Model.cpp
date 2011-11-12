@@ -95,12 +95,10 @@ void InitInstancedTessBuffs()
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-		world_(float4x4::Identity()),
 			effect_(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect()),
-			light_pos_(1, 1, -1),
 			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_("Lighting")
 {
-	inv_world_ = MathLib::inverse(world_);
+	this->SetModelMatrix(float4x4::Identity());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -211,10 +209,9 @@ void DetailedSkinnedMesh::OnRenderBegin()
 
 	App3DFramework& app = Context::Instance().AppInstance();
 	float4x4 const & view = app.ActiveCamera().ViewMatrix();
-	float4x4 worldview = world_ * view;
+	float4x4 worldview = model_mat_ * view;
+	*(effect_->ParameterByName("worldview")) = worldview;
 	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
-
-	*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(MathLib::transform_coord(light_pos_, MathLib::inverse(view)), inv_world_);
 
 	RenderModelPtr model = model_.lock();
 	if (model)
@@ -242,20 +239,9 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	}
 }
 
-void DetailedSkinnedMesh::SetWorld(const float4x4& mat)
-{
-	world_ = mat;
-	inv_world_ = MathLib::inverse(world_);
-}
-
 void DetailedSkinnedMesh::SetLightPos(KlayGE::float3 const & light_pos)
 {
-	light_pos_ = light_pos;
-}
-
-void DetailedSkinnedMesh::SetEyePos(KlayGE::float3 const & eye_pos)
-{
-	*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(eye_pos, inv_world_);
+	*(effect_->ParameterByName("light_pos")) = light_pos;
 }
 
 void DetailedSkinnedMesh::VisualizeLighting()
@@ -694,14 +680,6 @@ void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
 		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetLightPos(light_pos);
-	}
-}
-
-void DetailedSkinnedModel::SetEyePos(KlayGE::float3 const & eye_pos)
-{
-	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
-	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetEyePos(eye_pos);
 	}
 }
 

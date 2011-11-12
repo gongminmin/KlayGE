@@ -8,9 +8,9 @@
 	<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
 	<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
 
+	<parameter type="float4x4" name="worldview" semantic="WORLDVIEW"/>
 	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
 	<parameter type="float3" name="light_pos"/>
-	<parameter type="float3" name="eye_pos"/>
 
 	<parameter type="int" name="has_skinned"/>
 	<parameter type="int" name="has_normal_map"/>
@@ -123,16 +123,22 @@ void CalcPosLH(float3 pos,
 				float3x3 obj2tan,
 				out float4 oPos,
 				out float3 oL,
-				out float3 oH)
+				out float3 oH,
+				out float3 oTs2View0,
+				out float3 oTs2View1,
+				out float3 oTs2View2)
 {
 	oPos = mul(float4(pos, 1), worldviewproj);
+	float4 pos_es = mul(float4(pos, 1), worldview);
 
-	float3 L = light_pos - pos;
-	float3 V = eye_pos - pos;
-	float3 H = normalize(L) + normalize(V);
-
-	oL = mul(obj2tan, L);
-	oH = mul(obj2tan, H);
+	oL = light_pos - pos_es.xyz;
+	float3 V = -pos_es.xyz;
+	oH = normalize(oL) + normalize(V);
+	
+	float3x3 ts2view = mul(obj2tan, (float3x3)worldview);
+	oTs2View0 = ts2view[0];
+	oTs2View1 = ts2view[1];
+	oTs2View2 = ts2view[2];
 }
 
 float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 normal,
@@ -185,12 +191,15 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 				uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
-				float3 N	: NORMAL,	// in object space
-				float4 T	: TANGENT,	// in object space
+				float3 N	: NORMAL,
+				float4 T	: TANGENT,
 				
 				out float2 oTex0 : TEXCOORD0,
-				out float3 oL	: TEXCOORD1,	// in tangent space
-				out float3 oH	: TEXCOORD2,	// in tangent space
+				out float3 oL	: TEXCOORD1,
+				out float3 oH	: TEXCOORD2,
+				out float3 oTan2View0 : TEXCOORD3,
+				out float3 oTan2View1 : TEXCOORD4,
+				out float3 oTan2View2 : TEXCOORD5,
 				out float4 oPos : SV_Position)
 {
 #ifdef KLAYGE_OPENGL
@@ -210,12 +219,16 @@ void MeshVS(float2 tex0 : TEXCOORD0,
 				obj2tan[2], obj2tan[0], obj2tan[1]);
 
 	CalcPosLH(result_pos, obj2tan,
-				oPos, oL, oH);
+				oPos, oL, oH,
+				oTan2View0, oTan2View1, oTan2View2);
 }
 
 float4 LightingPS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
-				float3 H	: TEXCOORD2) : SV_Target
+				float3 H	: TEXCOORD2,
+				float3 Tan2View0 : TEXCOORD3,
+				float3 Tan2View1 : TEXCOORD4,
+				float3 Tan2View2 : TEXCOORD5) : SV_Target
 {
 	float3 normal;
 	if (has_normal_map)
@@ -226,6 +239,12 @@ float4 LightingPS(float2 uv : TEXCOORD0,
 	{
 		normal = float3(0, 0, 1);
 	}
+	
+	float3x3 tan2view;
+	tan2view[0] = Tan2View0;
+	tan2view[1] = Tan2View1;
+	tan2view[2] = Tan2View2;
+	normal = mul(normal, tan2view);
 
 	float3 c_diff, c_spec, emit;
 	float opacity;
@@ -533,16 +552,16 @@ HS_CONSTANT_DATA_OUTPUT SmoothConstantsHS(InputPatch<CONTROL_POINT, 3> ip)
 		float dist;
 		float3 mid_point;
 		// Edge 0
-		mid_point = (ip[2].Pos + ip[0].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		mid_point = mul(float4((ip[2].Pos + ip[0].Pos) / 2, 1), worldview).xyz;
+		dist = length(mid_point) - tess_factors.z;
 		output.edges[0] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Edge 1
-		mid_point = (ip[0].Pos + ip[1].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		mid_point = mul(float4((ip[0].Pos + ip[1].Pos) / 2, 1), worldview).xyz;
+		dist = length(mid_point) - tess_factors.z;
 		output.edges[1] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Edge 2
-		mid_point = (ip[1].Pos + ip[2].Pos) / 2;
-		dist = distance(mid_point, eye_pos) - tess_factors.z;
+		mid_point = mul(float4((ip[1].Pos + ip[2].Pos) / 2, 1), worldview).xyz;
+		dist = length(mid_point) - tess_factors.z;
 		output.edges[2] = tess_factors.x * (1 - clamp(dist / tess_factors.w, 0, 1 - (1 / tess_factors.x)));
 		// Inside
 		output.inside = (output.edges[0] + output.edges[1] + output.edges[2]) / 3;
@@ -583,6 +602,9 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float2 oTex0 : TEXCOORD0,
 							out float3 oL : TEXCOORD1,
 							out float3 oH : TEXCOORD2,
+							out float3 oTan2View0 : TEXCOORD3,
+							out float3 oTan2View1 : TEXCOORD4,
+							out float3 oTan2View2 : TEXCOORD5,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -598,7 +620,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				obj2tan[2], obj2tan[0], obj2tan[1]);
 
 	CalcPosLH(pos, obj2tan,
-				oPos, oL, oH);
+				oPos, oL, oH,
+				oTan2View0, oTan2View1, oTan2View2);
 }
 		]]>
 	</shader>
@@ -774,6 +797,9 @@ void InstTessSmoothVS(float2 barycentric : TEXCOORD1,
 					out float2 oTex0 : TEXCOORD0,
 					out float3 oL : TEXCOORD1,
 					out float3 oH : TEXCOORD2,
+					out float3 oTan2View0 : TEXCOORD3,
+					out float3 oTan2View1 : TEXCOORD4,
+					out float3 oTan2View2 : TEXCOORD5,
 					out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -782,7 +808,8 @@ void InstTessSmoothVS(float2 barycentric : TEXCOORD1,
 					oTex0, pos, obj2tan[2], obj2tan[0], obj2tan[1]);
 
 	CalcPosLH(pos, obj2tan,
-				oPos, oL, oH);
+				oPos, oL, oH,
+				oTan2View0, oTan2View1, oTan2View2);
 }
 
 void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,

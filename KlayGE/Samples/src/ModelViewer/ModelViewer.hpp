@@ -36,7 +36,9 @@ private:
 
 	KlayGE::FontPtr font_;
 
-	boost::shared_ptr<DetailedSkinnedModel> model_;
+	KlayGE::PointLightSourcePtr point_light_;
+
+	KlayGE::SceneObjectPtr model_;
 	KlayGE::SceneObjectPtr axis_;
 	KlayGE::SceneObjectPtr grid_;
 

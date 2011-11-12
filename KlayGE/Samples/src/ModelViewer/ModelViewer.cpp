@@ -16,6 +16,7 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/Light.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -163,6 +164,102 @@ namespace
 			return MakeSharedPtr<DetailedSkinnedModel>(name);
 		}
 	};
+
+	class ModelObject : public SceneObjectHelper
+	{
+	public:
+		explicit ModelObject(std::string const & name)
+			: SceneObjectHelper(0)
+		{
+			renderable_ = SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>());
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
+		}
+
+		uint32_t StartFrame() const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->StartFrame();
+		}
+
+		uint32_t EndFrame() const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->EndFrame();
+		}
+
+		uint32_t FrameRate() const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->FrameRate();
+		}
+
+		StaticMeshPtr const & Mesh(size_t id) const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->Mesh(id);
+		}
+
+		uint32_t NumMeshes() const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumMeshes();
+		}
+
+		void RebindJoints()
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->RebindJoints();
+		}
+
+		void UnbindJoints()
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->UnbindJoints();
+		}
+
+		RenderMaterialPtr const & GetMaterial(int32_t i) const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->GetMaterial(i);
+		}
+
+		void SetTime(float time)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(time);
+		}
+
+		void SetFrame(float frame)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetFrame(frame);
+		}
+
+		void SetLightPos(KlayGE::float3 const & light_pos)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetLightPos(light_pos);
+		}
+
+		void VisualizeLighting()
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeLighting();
+		}
+
+		void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeVertex(usage, usage_index);
+		}
+
+		void VisualizeTexture(int slot)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeTexture(slot);
+		}
+
+		void LineMode(bool line_mode)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->LineMode(line_mode);
+		}
+
+		void SmoothMesh(bool smooth)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SmoothMesh(smooth);
+		}
+
+		void SetTessFactor(KlayGE::int32_t tess_factor)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTessFactor(tess_factor);
+		}
+	};
 }
 
 int main()
@@ -202,6 +299,13 @@ void ModelViewerApp::InitObjects()
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
+
+	point_light_ = MakeSharedPtr<PointLightSource>();
+	point_light_->Attrib(0);
+	point_light_->Color(float3(1.0f, 1.0f, 1.0f));
+	point_light_->Position(float3(0, 2.0f, 0));
+	point_light_->Falloff(float3(1, 0, 0));
+	point_light_->AddToSceneManager();
 	
 	axis_ = MakeSharedPtr<AxisObject>();
 	axis_->AddToSceneManager();
@@ -228,8 +332,6 @@ void ModelViewerApp::InitObjects()
 	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
 	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
 	
-	this->OpenModel("archer_attacking.meshml");
-
 	tbController_.AttachCamera(this->ActiveCamera());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -243,7 +345,6 @@ void ModelViewerApp::InitObjects()
 	dialog_animation_->Control<UICheckBox>(id_skinned_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SkinnedHandler, this, _1));
 
 	dialog_animation_->Control<UISlider>(id_frame_slider_)->OnValueChangedEvent().connect(boost::bind(&ModelViewerApp::FrameChangedHandler, this, _1));
-	this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 
 	dialog_animation_->Control<UICheckBox>(id_play_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::PlayHandler, this, _1));
 	dialog_animation_->Control<UICheckBox>(id_smooth_mesh_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::SmoothMeshHandler, this, _1));
@@ -255,6 +356,8 @@ void ModelViewerApp::InitObjects()
 	dialog_model_->Control<UIComboBox>(id_mesh_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::MeshChangedHandler, this, _1));
 	dialog_model_->Control<UIComboBox>(id_visualize_)->OnSelectionChangedEvent().connect(boost::bind(&ModelViewerApp::VisualizeChangedHandler, this, _1));
 	dialog_model_->Control<UICheckBox>(id_line_mode_)->OnChangedEvent().connect(boost::bind(&ModelViewerApp::LineModeChangedHandler, this, _1));
+
+	this->OpenModel("archer_attacking.meshml");
 }
 
 void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
@@ -266,17 +369,23 @@ void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 
 void ModelViewerApp::OpenModel(std::string const & name)
 {
-	model_ = checked_pointer_cast<DetailedSkinnedModel>(SyncLoadModel(name, EAH_GPU_Read | EAH_Immutable, CreateDetailedModelFactory(), CreateMeshFactory<DetailedSkinnedMesh>()));
-	model_->SetTime(0);
+	if (model_)
+	{
+		model_->DelFromSceneManager();
+	}
+	model_ = MakeSharedPtr<ModelObject>(name);
+	model_->AddToSceneManager();
+
+	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
 	frame_ = 0;
-	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model_->StartFrame() * 10, model_->EndFrame() * 10 - 1);
+	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetRange(model->StartFrame() * 10, model->EndFrame() * 10 - 1);
 	dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 
 	dialog_model_->Control<UIComboBox>(id_mesh_)->RemoveAllItems();
-	for (uint32_t i = 0; i < model_->NumMeshes(); ++ i)
+	for (uint32_t i = 0; i < model->NumMeshes(); ++ i)
 	{
-		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model_->Mesh(i)->Name());
+		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model->Mesh(i)->Name());
 	}
 
 	Box const & bb = model_->GetBound();
@@ -290,6 +399,9 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	fpsController_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
 
 	this->MeshChangedHandler(*dialog_model_->Control<UIComboBox>(id_mesh_));
+	this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
+	this->LineModeChangedHandler(*dialog_model_->Control<UICheckBox>(id_line_mode_));
+	this->SmoothMeshHandler(*dialog_animation_->Control<UICheckBox>(id_smooth_mesh_));
 }
 
 void ModelViewerApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -359,7 +471,7 @@ void ModelViewerApp::SaveAsHandler(KlayGE::UIButton const & /*sender*/)
 		HCURSOR cur = GetCursor();
 		SetCursor(LoadCursor(NULL, IDC_WAIT));
 		
-		SaveModel(model_, fn);
+		SaveModel(checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable()), fn);
 
 		SetCursor(cur);
 	}
@@ -372,12 +484,12 @@ void ModelViewerApp::SkinnedHandler(UICheckBox const & /*sender*/)
 	if (skinned_)
 	{
 		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(true);
-		model_->RebindJoints();
+		checked_pointer_cast<ModelObject>(model_)->RebindJoints();
 		this->FrameChangedHandler(*dialog_animation_->Control<UISlider>(id_frame_slider_));
 	}
 	else
 	{
-		model_->UnbindJoints();
+		checked_pointer_cast<ModelObject>(model_)->UnbindJoints();
 		dialog_animation_->Control<UICheckBox>(id_play_)->SetChecked(false);
 		dialog_animation_->Control<UICheckBox>(id_play_)->SetEnabled(false);
 	}
@@ -388,7 +500,7 @@ void ModelViewerApp::FrameChangedHandler(KlayGE::UISlider const & sender)
 	frame_ = sender.GetValue() * 0.1f;
 	if (skinned_)
 	{
-		model_->SetFrame(frame_);
+		checked_pointer_cast<ModelObject>(model_)->SetFrame(frame_);
 	}
 
 	std::wostringstream stream;
@@ -403,7 +515,7 @@ void ModelViewerApp::PlayHandler(KlayGE::UICheckBox const & sender)
 
 void ModelViewerApp::SmoothMeshHandler(KlayGE::UICheckBox const & sender)
 {
-	model_->SmoothMesh(sender.GetChecked());
+	checked_pointer_cast<ModelObject>(model_)->SmoothMesh(sender.GetChecked());
 }
 
 void ModelViewerApp::FPSCameraHandler(KlayGE::UICheckBox const & sender)
@@ -428,7 +540,7 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	dialog_model_->Control<UIComboBox>(id_visualize_)->AddItem(L"Lighting");
 
 	dialog_model_->Control<UIListBox>(id_vertex_streams_)->RemoveAllItems();
-	RenderLayoutPtr const & rl = model_->Mesh(mi)->GetRenderLayout();
+	RenderLayoutPtr const & rl = checked_pointer_cast<ModelObject>(model_)->Mesh(mi)->GetRenderLayout();
 	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 	{
 		std::wostringstream oss;
@@ -495,7 +607,8 @@ void ModelViewerApp::MeshChangedHandler(KlayGE::UIComboBox const & sender)
 	}
 
 	dialog_model_->Control<UIListBox>(id_textures_)->RemoveAllItems();
-	TextureSlotsType const & texture_slots = model_->GetMaterial(model_->Mesh(mi)->MaterialID())->texture_slots;
+	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+	TextureSlotsType const & texture_slots = model->GetMaterial(model->Mesh(mi)->MaterialID())->texture_slots;
 	for (size_t i = 0; i < texture_slots.size(); ++ i)
 	{
 		std::wostringstream oss;
@@ -513,7 +626,7 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	if (0 == sender.GetSelectedIndex())
 	{
-		model_->VisualizeLighting();
+		checked_pointer_cast<ModelObject>(model_)->VisualizeLighting();
 	}
 	else
 	{
@@ -521,19 +634,19 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 		try
 		{
 			int slot = boost::any_cast<int>(data);
-			model_->VisualizeTexture(slot);
+			checked_pointer_cast<ModelObject>(model_)->VisualizeTexture(slot);
 		}
 		catch (boost::bad_any_cast&)
 		{
 			vertex_element ve = boost::any_cast<vertex_element>(data);
-			model_->VisualizeVertex(ve.usage, ve.usage_index);
+			checked_pointer_cast<ModelObject>(model_)->VisualizeVertex(ve.usage, ve.usage_index);
 		}
 	}
 }
 
 void ModelViewerApp::LineModeChangedHandler(KlayGE::UICheckBox const & sender)
 {
-	model_->LineMode(sender.GetChecked());
+	checked_pointer_cast<ModelObject>(model_)->LineMode(sender.GetChecked());
 }
 
 void ModelViewerApp::DoUpdateOverlay()
@@ -579,13 +692,14 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	}
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
+	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 	if (play_)
 	{
 		float this_time = static_cast<float>(ani_timer_.elapsed());
-		if (this_time - last_time_ > 0.1f / model_->FrameRate())
+		if (this_time - last_time_ > 0.1f / model->FrameRate())
 		{
 			frame_ += 0.1f;
-			frame_ = fmod(frame_, static_cast<float>(model_->EndFrame() - model_->StartFrame())) + model_->StartFrame();
+			frame_ = fmod(frame_, static_cast<float>(model->EndFrame() - model->StartFrame())) + model->StartFrame();
 
 			last_time_ = this_time;
 		}
@@ -593,10 +707,7 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 	}
 
-	model_->SetLightPos(float3(0, 2, 0));
-	model_->SetEyePos(this->ActiveCamera().EyePos());
-
-	model_->AddToRenderQueue();
+	model->SetLightPos(point_light_->Position());
 
 	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
 }
