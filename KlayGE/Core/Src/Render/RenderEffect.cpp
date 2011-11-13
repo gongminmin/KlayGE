@@ -1793,7 +1793,14 @@ namespace KlayGE
 			has_discard_ = false;
 			has_tessellation_ = false;
 			transparent_ = false;
-			weight_ = 1;
+			if (parent_tech)
+			{
+				weight_ = parent_tech->Weight();
+			}
+			else
+			{
+				weight_ = 1;
+			}
 		
 			uint32_t index = 0;
 			for (XMLNodePtr pass_node = node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"), ++ index)
@@ -1898,6 +1905,10 @@ namespace KlayGE
 			rs_desc = inherit_pass->rasterizer_state_obj_->GetDesc();
 			dss_desc = inherit_pass->depth_stencil_state_obj_->GetDesc();
 			bs_desc = inherit_pass->blend_state_obj_->GetDesc();
+			front_stencil_ref_ = inherit_pass->front_stencil_ref_;
+			back_stencil_ref_ = inherit_pass->back_stencil_ref_;
+			blend_factor_ = inherit_pass->blend_factor_;
+			sample_mask_ = inherit_pass->sample_mask_;
 
 			for (size_t i = 0; i < shader_desc_ids_->size(); ++ i)
 			{
