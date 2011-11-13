@@ -95,9 +95,48 @@ void InitInstancedTessBuffs()
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-			effect_(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect()),
-			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_("Lighting")
+			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_("GBuffer")
 {
+	deferred_effect_ = checked_pointer_cast<DetailedSkinnedModel>(model)->Effect();
+			
+	gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
+	gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
+	gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+	gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+	gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillMRTTech");
+	gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+	gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillBlendBackMRTTech");
+	gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillBlendFrontMRTTech");
+	gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+	gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+	gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+	gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+	shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
+	shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
+	shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
+	special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+
+	lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
+	g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
+
+	mvp_param_ = deferred_effect_->ParameterByName("mvp");
+	model_view_param_ = deferred_effect_->ParameterByName("model_view");
+	depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
+	shininess_param_ = deferred_effect_->ParameterByName("shininess");
+	normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
+	normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
+	height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+	height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
+	diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
+	diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
+	specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+	emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
+	emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
+	specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
+	opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
+	opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
+	flipping_param_ = deferred_effect_->ParameterByName("flipping");
+
 	this->SetModelMatrix(float4x4::Identity());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -189,78 +228,53 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 void DetailedSkinnedMesh::OnRenderBegin()
 {
-	*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
-	*(effect_->ParameterByName("normal_tex")) = normal_tex_;
-	*(effect_->ParameterByName("specular_tex")) = specular_tex_;
-	*(effect_->ParameterByName("emit_tex")) = emit_tex_;
-
-	*(effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
-	*(effect_->ParameterByName("has_normal_map")) = static_cast<int32_t>(!!normal_tex_);
-	*(effect_->ParameterByName("has_opacity_map")) = static_cast<int32_t>(opacity_map_enabled_);
-
-	*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), bool(diffuse_tex_));
-	*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), bool(specular_tex_));
-	*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), bool(emit_tex_));
-	*(effect_->ParameterByName("opacity_clr")) = mtl_->opacity;
-
-	*(effect_->ParameterByName("specular_level")) = mtl_->specular_level;
-	*(effect_->ParameterByName("shininess")) = std::max(1e-6f, mtl_->shininess);
-
-	App3DFramework& app = Context::Instance().AppInstance();
-	float4x4 const & view = app.ActiveCamera().ViewMatrix();
-	float4x4 worldview = model_mat_ * view;
-	*(effect_->ParameterByName("worldview")) = worldview;
-	*(effect_->ParameterByName("worldviewproj")) = worldview * app.ActiveCamera().ProjMatrix();
+	SkinnedMesh::OnRenderBegin();
+	
+	*(deferred_effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
 
 	RenderModelPtr model = model_.lock();
 	if (model)
 	{
-		*(effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
-		*(effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
+		*(deferred_effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
+		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
 	}
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	if (caps.tess_method != TM_No)
 	{
-		*(effect_->ParameterByName("adaptive_tess")) = true;
-		*(effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
+		*(deferred_effect_->ParameterByName("adaptive_tess")) = true;
+		*(deferred_effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
 
 		if (TM_Instanced == caps.tess_method)
 		{
-			*(effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
-			*(effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
-			*(effect_->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
-			*(effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
-			*(effect_->ParameterByName("index_buf")) = bindable_ib_;
-			*(effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
-			*(effect_->ParameterByName("base_vertex_loc")) = static_cast<int32_t>(this->BaseVertexLocation());
+			*(deferred_effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
+			*(deferred_effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
+			*(deferred_effect_->ParameterByName("skinned_normal_buf")) = skinned_normal_vb_;
+			*(deferred_effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
+			*(deferred_effect_->ParameterByName("index_buf")) = bindable_ib_;
+			*(deferred_effect_->ParameterByName("start_index_loc")) = static_cast<int32_t>(this->StartIndexLocation());
+			*(deferred_effect_->ParameterByName("base_vertex_loc")) = static_cast<int32_t>(this->BaseVertexLocation());
 		}
 	}
 }
 
-void DetailedSkinnedMesh::SetLightPos(KlayGE::float3 const & light_pos)
-{
-	*(effect_->ParameterByName("light_pos")) = light_pos;
-}
-
 void DetailedSkinnedMesh::VisualizeLighting()
 {
-	visualize_ = "Lighting";
+	visualize_ = "GBuffer";
 	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	*(effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
-	*(effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
+	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
+	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
 	visualize_ = "VisualizeVertex";
 	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
-	*(effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
+	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
 	visualize_ = "VisualizeTexture";
 	this->UpdateTech();
 }
@@ -299,40 +313,41 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 
 void DetailedSkinnedMesh::UpdateTech()
 {
-	std::string tech = visualize_;
+	std::string g_buffer_tech_str = visualize_;
 	if (line_mode_)
 	{
-		tech += "Line";
+		g_buffer_tech_str += "Line";
 	}
 	else
 	{
-		tech += "Fill";
+		g_buffer_tech_str += "Fill";
 	}
-	if (("Lighting" == visualize_)
-		&& ((model_.lock()->GetMaterial(this->MaterialID())->opacity < 0.99f) || this->HasOpacityMap()))
-	{
-		tech += "Blend";
-	}
+	std::string g_buffer_back_tech_str = g_buffer_tech_str + "BlendBack";
+	std::string g_buffer_front_tech_str = g_buffer_tech_str + "BlendFront";
 	if (smooth_mesh_)
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		switch (caps.tess_method)
 		{
 		case TM_Hardware:
-			tech += "Smooth5";
+			g_buffer_tech_str += "Smooth5";
 			break;
 
 		case TM_Instanced:
-			tech += "Smooth4";
+			g_buffer_tech_str += "Smooth4";
 			break;
 
 		case TM_No:
 			break;
 		}
 	}
-	tech += "Tech";
+	g_buffer_tech_str += "MRTTech";
+	g_buffer_back_tech_str += "MRTTech";
+	g_buffer_front_tech_str += "MRTTech";
 
-	technique_ = effect_->TechniqueByName(tech);
+	gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_tech_str);
+	gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_back_tech_str);
+	gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_front_tech_str);
 }
 
 void DetailedSkinnedMesh::Render()
@@ -378,7 +393,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	num_joints_macro.push_back(std::make_pair("NUM_JOINTS", "128"));
 	num_joints_macro.push_back(std::make_pair("", ""));
 	effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
-	if (!effect_->TechniqueByName("LightingFillTech")->Validate())
+	if (!effect_->TechniqueByName("GBufferFillMRTTech")->Validate())
 	{
 		num_joints_macro[0].second = "64";
 		effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
@@ -675,11 +690,12 @@ void DetailedSkinnedModel::BuildModelInfo()
 	}
 }
 
-void DetailedSkinnedModel::SetLightPos(KlayGE::float3 const & light_pos)
+void DetailedSkinnedModel::Pass(PassType type)
 {
+	SkinnedModel::Pass(type);
 	for (StaticMeshesPtrType::iterator iter = meshes_.begin(); iter != meshes_.end(); ++ iter)
 	{
-		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->SetLightPos(light_pos);
+		checked_pointer_cast<DetailedSkinnedMesh>(*iter)->Pass(type);
 	}
 }
 

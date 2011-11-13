@@ -16,8 +16,9 @@ public:
 
 	void BuildModelInfo();
 
+	void Pass(KlayGE::PassType type);
+
 	void SetTime(float time);
-	void SetLightPos(KlayGE::float3 const & light_pos);
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -46,8 +47,6 @@ public:
 	void OnRenderBegin();
 	void Render();
 
-	void SetLightPos(KlayGE::float3 const & light_pos);
-
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
 	void VisualizeTexture(int slot);
@@ -56,17 +55,10 @@ public:
 	void SmoothMesh(bool smooth);
 	void SetTessFactor(KlayGE::int32_t tess_factor);
 
-	bool HasOpacityMap() const
-	{
-		return opacity_map_enabled_;
-	}
-
 private:
 	void UpdateTech();
 
 private:
-	KlayGE::RenderEffectPtr effect_;
-
 	bool line_mode_;
 	bool smooth_mesh_;
 	float tess_factor_;

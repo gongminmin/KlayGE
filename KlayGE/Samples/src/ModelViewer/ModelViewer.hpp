@@ -41,9 +41,12 @@ private:
 	KlayGE::SceneObjectPtr model_;
 	KlayGE::SceneObjectPtr axis_;
 	KlayGE::SceneObjectPtr grid_;
+	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpsController_;
 	KlayGE::TrackballCameraController tbController_;
+
+	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
 
 	KlayGE::Timer ani_timer_;
 	float last_time_;

@@ -17,6 +17,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -39,8 +40,45 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("MVUtil.fxml");
-			technique_ = effect->TechniqueByName("AxisTech");
+			deferred_effect_ = rf.LoadEffect("MVUtil.fxml");
+
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
+			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
+			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("AxisMRTTech");
+			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+			gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
+			shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
+			shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
+			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+
+			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
+			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
+
+			mvp_param_ = deferred_effect_->ParameterByName("mvp");
+			model_view_param_ = deferred_effect_->ParameterByName("model_view");
+			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
+			shininess_param_ = deferred_effect_->ParameterByName("shininess");
+			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
+			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
+			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
+			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
+			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
+			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
+			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
+			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
+			opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
+			opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
+			flipping_param_ = deferred_effect_->ParameterByName("flipping");
 
 			float4 xyzs[] =
 			{
@@ -68,6 +106,8 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderableHelper::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
@@ -76,7 +116,7 @@ namespace
 
 			float4x4 scaling = MathLib::scaling(0.006f, 0.006f, 0.006f);
 			float4x4 trans = MathLib::translation(MathLib::transform_coord(float3(0.8f, -0.8f, 0.1f), MathLib::inverse(vp)));
-			*(technique_->Effect().ParameterByName("worldviewproj")) = scaling * trans * vp;
+			*mvp_param_ = scaling * trans * vp;
 		}
 	};
 
@@ -98,8 +138,45 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = rf.LoadEffect("MVUtil.fxml");
-			technique_ = effect->TechniqueByName("GridTech");
+			deferred_effect_ = rf.LoadEffect("MVUtil.fxml");
+
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
+			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
+			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GridMRTTech");
+			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+			gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
+			shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
+			shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
+			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+
+			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
+			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
+
+			mvp_param_ = deferred_effect_->ParameterByName("mvp");
+			model_view_param_ = deferred_effect_->ParameterByName("model_view");
+			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
+			shininess_param_ = deferred_effect_->ParameterByName("shininess");
+			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
+			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
+			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
+			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
+			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
+			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
+			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
+			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
+			opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
+			opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
+			flipping_param_ = deferred_effect_->ParameterByName("flipping");
 
 			float3 xyzs[(21 + 21) * 2];
 			for (int i = 0; i < 21; ++ i)
@@ -127,13 +204,15 @@ namespace
 
 		void OnRenderBegin()
 		{
+			RenderableHelper::OnRenderBegin();
+
 			App3DFramework const & app = Context::Instance().AppInstance();
 
 			float4x4 const & view = app.ActiveCamera().ViewMatrix();
 			float4x4 const & proj = app.ActiveCamera().ProjMatrix();
 			float4x4 mvp = view * proj;
 
-			*(technique_->Effect().ParameterByName("worldviewproj")) = mvp;
+			*mvp_param_ = mvp;
 		}
 	};
 
@@ -225,11 +304,6 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetFrame(frame);
 		}
 
-		void SetLightPos(KlayGE::float3 const & light_pos)
-		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetLightPos(light_pos);
-		}
-
 		void VisualizeLighting()
 		{
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeLighting();
@@ -260,6 +334,22 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTessFactor(tess_factor);
 		}
 	};
+
+	class PointLightSourceUpdate
+	{
+	public:
+		PointLightSourceUpdate()
+		{
+		}
+
+		void operator()(LightSource& light)
+		{
+			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
+			light.Position(MathLib::transform_coord(float3(0, 2.0f, 0), inv_view));
+		}
+
+	private:
+	};
 }
 
 int main()
@@ -267,6 +357,11 @@ int main()
 	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
+
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.graphics_cfg.hdr = false;
+	cfg.deferred_rendering = true;
+	Context::Instance().Config(cfg);
 
 	ModelViewerApp app;
 	app.Create();
@@ -300,11 +395,18 @@ void ModelViewerApp::InitObjects()
 
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
+	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	deferred_rendering_->SSVOEnabled(false);
+	deferred_rendering_->HDREnabled(true);
+	deferred_rendering_->AAEnabled(1);
+	deferred_rendering_->ColorGradingEnabled(true);
+
 	point_light_ = MakeSharedPtr<PointLightSource>();
-	point_light_->Attrib(0);
+	point_light_->Attrib(LSA_NoShadow);
 	point_light_->Color(float3(1.0f, 1.0f, 1.0f));
 	point_light_->Position(float3(0, 2.0f, 0));
 	point_light_->Falloff(float3(1, 0, 0));
+	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 	
 	axis_ = MakeSharedPtr<AxisObject>();
@@ -312,6 +414,50 @@ void ModelViewerApp::InitObjects()
 
 	grid_ = MakeSharedPtr<GridObject>();
 	grid_->AddToSceneManager();
+
+	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
+	uint32_t texel;
+	ElementFormat fmt;
+	if (Context::Instance().Config().graphics_cfg.gamma)
+	{
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8_SRGB))
+		{
+			fmt = EF_ABGR8_SRGB;
+			texel = clear_clr.ABGR();
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8_SRGB));
+
+			fmt = EF_ARGB8_SRGB;
+			texel = clear_clr.ARGB();
+		}
+	}
+	else
+	{
+		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		{
+			fmt = EF_ABGR8;
+			texel = clear_clr.ABGR();
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+			fmt = EF_ARGB8;
+			texel = clear_clr.ARGB();
+		}
+	}
+	ElementInitData init_data[6];
+	for (int i = 0; i < 6; ++ i)
+	{
+		init_data[i].data = &texel;
+		init_data[i].row_pitch = sizeof(uint32_t);
+		init_data[i].slice_pitch = init_data[i].row_pitch;	
+	}
+	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read, init_data));
+	sky_box_->AddToSceneManager();
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ModelViewer.uiml"));
 	dialog_animation_ = UIManager::Instance().GetDialog("Animation");
@@ -363,6 +509,7 @@ void ModelViewerApp::InitObjects()
 void ModelViewerApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
+	deferred_rendering_->OnResize(width, height);
 
 	UIManager::Instance().SettleCtrls(width, height);
 }
@@ -664,7 +811,7 @@ void ModelViewerApp::DoUpdateOverlay()
 	font_->RenderText(0, 36, Color(1, 1, 0, 1), stream.str(), 16);
 }
 
-uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
+uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 	
@@ -683,15 +830,6 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 	}
 	this->Proj(near_plane, far_plane);*/
 
-	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-	if (Context::Instance().Config().graphics_cfg.gamma)
-	{
-		clear_clr.r() = 0.029f;
-		clear_clr.g() = 0.133f;
-		clear_clr.b() = 0.325f;
-	}
-	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
-
 	boost::shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 	if (play_)
 	{
@@ -707,7 +845,5 @@ uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t /*pass*/)
 		dialog_animation_->Control<UISlider>(id_frame_slider_)->SetValue(static_cast<int>(frame_ * 10 + 0.5f));
 	}
 
-	model->SetLightPos(point_light_->Position());
-
-	return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
+	return deferred_rendering_->Update(pass);
 }

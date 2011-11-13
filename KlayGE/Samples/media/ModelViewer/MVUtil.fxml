@@ -1,7 +1,10 @@
 <?xml version='1.0'?>
 
 <effect>
-	<parameter type="float4x4" name="worldviewproj" semantic="WORLDVIEWPROJECTION"/>
+	<include name="DeferredRenderingUtil.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="GBuffer.fxml"/>
 
 	<shader>
 		<![CDATA[
@@ -9,7 +12,7 @@ void AxisVS(float4 pos : POSITION,
 				out float4 oClr	: COLOR0,
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(float4(pos.xyz, 1), worldviewproj);
+	oPos = mul(float4(pos.xyz, 1), mvp);
 	if (pos.w < 0.5f)
 	{
 		oClr = float4(1, 0, 0, 1);
@@ -27,17 +30,28 @@ void AxisVS(float4 pos : POSITION,
 	}
 }
 
-float4 AxisPS(float4 clr : COLOR0) : SV_Target
+void AxisMRTPS(float4 clr : COLOR0,
+	out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-	return clr;
+	mrt_0 = 0;
+	mrt_1 = clr;
 }
 		]]>
 	</shader>
 
-	<technique name="AxisTech">
+	<technique name="AxisMRTTech">
 		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+			
 			<state name="vertex_shader" value="AxisVS()"/>
-			<state name="pixel_shader" value="AxisPS()"/>
+			<state name="pixel_shader" value="AxisMRTPS()"/>
 		</pass>
 	</technique>
 
@@ -47,7 +61,7 @@ void GridVS(float4 pos : POSITION,
 				out float2 oMark : TEXCOORD0,
 				out float4 oPos : SV_Position)
 {
-	oPos = mul(pos, worldviewproj);
+	oPos = mul(pos, mvp);
 
 	if (abs(pos.x) < 1e-6f)
 	{
@@ -66,8 +80,11 @@ void GridVS(float4 pos : POSITION,
 	}
 }
 
-float4 GridPS(float2 mark : TEXCOORD0) : SV_Target
+void GridMRTPS(float2 mark : TEXCOORD0,
+	out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
+	mrt_0 = 0;
+	
 	float4 clr;
 	if (mark.y > 2)
 	{
@@ -81,15 +98,24 @@ float4 GridPS(float2 mark : TEXCOORD0) : SV_Target
 	{
 		clr = float4(0.5f, 0.5f, 0.5f, 1);
 	}
-	return clr;
+	mrt_1 = clr;
 }
 		]]>
 	</shader>
 
-	<technique name="GridTech">
+	<technique name="GridMRTTech">
 		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+			
 			<state name="vertex_shader" value="GridVS()"/>
-			<state name="pixel_shader" value="GridPS()"/>
+			<state name="pixel_shader" value="GridMRTPS()"/>
 		</pass>
 	</technique>
 </effect>
