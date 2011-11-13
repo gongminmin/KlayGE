@@ -115,39 +115,38 @@ namespace KlayGE
 			case PT_GenReflectiveShadowMap:
 				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
+				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
 				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
 				*normal_tex_param_ = normal_tex_;
 				*height_map_enabled_param_ = static_cast<int32_t>(!!height_tex_);
 				*height_tex_param_ = normal_tex_;
 				*specular_tex_param_ = specular_tex_;
-				*specular_level_param_ = float4(MathLib::clamp(mtl_->specular_level, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
-				*shininess_param_ = MathLib::clamp(mtl_->shininess / 256.0f, 1e-6f, 0.999f);
-				*opacity_clr_param_ = mtl_->opacity;
+				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
+				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
+				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				break;
 
 			case PT_GenShadowMap:
-				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
 				*diffuse_tex_param_ = diffuse_tex_;
 				break;
 
 			case PT_OpaqueShading:
 			case PT_TransparencyBackShading:
 			case PT_TransparencyFrontShading:
-				*shininess_param_ = std::max(1e-6f, mtl_->shininess);
+				*shininess_param_ = std::max(1e-6f, mtl_ ? mtl_->shininess : 0);
 				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), static_cast<float>(!!diffuse_tex_));
+				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
 				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), static_cast<float>(!!emit_tex_));
-				*opacity_clr_param_ = mtl_->opacity;
+				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
+				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				break;
 
 			case PT_SpecialShading:
 				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), static_cast<float>(!!emit_tex_));
+				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				break;
 
 			default:

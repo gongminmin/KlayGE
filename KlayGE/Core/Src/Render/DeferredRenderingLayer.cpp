@@ -369,6 +369,7 @@ namespace KlayGE
 		technique_clear_stencil_ = dr_effect_->TechniqueByName("ClearStencil");
 		if (mrt_g_buffer_)
 		{
+			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
 			technique_shading_alpha_blend_ = dr_effect_->TechniqueByName("ShadingAlphaBlendTech");
 		}
@@ -1249,6 +1250,7 @@ namespace KlayGE
 								*depth_tex_param_ = opaque_depth_tex_;
 								*lighting_tex_param_ = opaque_lighting_tex_;
 
+								re.Render(*technique_no_lighting_, *rl_quad_);
 								re.Render(*technique_shading_, *rl_quad_);
 
 								return App3DFramework::URV_Flushed;

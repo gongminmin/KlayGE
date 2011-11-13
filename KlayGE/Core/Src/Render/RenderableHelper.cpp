@@ -295,7 +295,21 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		this->Technique(rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("SkyBoxTec"));
+		if (deferred_effect_)
+		{
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
+			special_shading_tech_ = shading_tech_;
+			this->Technique(gbuffer_tech_);
+
+			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
+			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
+		}
+		else
+		{
+			this->Technique(rf.LoadEffect("RenderableHelper.fxml")->TechniqueByName("SkyBoxTec"));
+		}
 
 		float3 xyzs[] =
 		{
@@ -331,45 +345,7 @@ namespace KlayGE
 		*skybox_cube_tex_ep_ = cube;
 	}
 
-	void RenderableSkyBox::OnRenderBegin()
-	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
-
-		float4x4 rot_view = camera.ViewMatrix();
-		rot_view(3, 0) = 0;
-		rot_view(3, 1) = 0;
-		rot_view(3, 2) = 0;
-		*inv_mvp_ep_ = MathLib::inverse(rot_view * camera.ProjMatrix());
-	}
-
-	RenderableHDRSkyBox::RenderableHDRSkyBox()
-	{
-		if (deferred_effect_)
-		{
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
-			special_shading_tech_ = shading_tech_;
-			this->Technique(gbuffer_tech_);
-
-			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
-			skybox_Ccube_tex_ep_ = deferred_effect_->ParameterByName("skybox_C_tex");
-			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
-		}
-		else
-		{
-			this->Technique(technique_->Effect().TechniqueByName("HDRSkyBoxTec"));
-		}
-	}
-
-	void RenderableHDRSkyBox::Technique(RenderTechniquePtr const & tech)
-	{
-		RenderableSkyBox::Technique(tech);
-		skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
-	}
-
-	void RenderableHDRSkyBox::Pass(PassType type)
+	void RenderableSkyBox::Pass(PassType type)
 	{
 		switch (type)
 		{
@@ -392,6 +368,39 @@ namespace KlayGE
 		default:
 			break;
 		}
+	}
+
+	void RenderableSkyBox::OnRenderBegin()
+	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		Camera const & camera = app.ActiveCamera();
+
+		float4x4 rot_view = camera.ViewMatrix();
+		rot_view(3, 0) = 0;
+		rot_view(3, 1) = 0;
+		rot_view(3, 2) = 0;
+		*inv_mvp_ep_ = MathLib::inverse(rot_view * camera.ProjMatrix());
+	}
+
+	RenderableHDRSkyBox::RenderableHDRSkyBox()
+	{
+		if (deferred_effect_)
+		{
+			shading_tech_ = deferred_effect_->TechniqueByName("ShadingSkyBoxTech");
+			special_shading_tech_ = shading_tech_;
+
+			skybox_Ccube_tex_ep_ = deferred_effect_->ParameterByName("skybox_C_tex");
+		}
+		else
+		{
+			this->Technique(technique_->Effect().TechniqueByName("HDRSkyBoxTec"));
+		}
+	}
+
+	void RenderableHDRSkyBox::Technique(RenderTechniquePtr const & tech)
+	{
+		RenderableSkyBox::Technique(tech);
+		skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
 	}
 
 	void RenderableHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)

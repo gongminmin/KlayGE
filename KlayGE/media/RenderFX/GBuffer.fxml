@@ -585,6 +585,11 @@ void ShadingSkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
+float4 ShadingLDRSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
+{
+	return skybox_tex.Sample(skybox_sampler, texcoord);
+}
+
 float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 {
 	return decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texcoord).r,
@@ -625,6 +630,18 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="ShadingAlphaBlendPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ShadingLDRSkyBoxTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="ShadingSkyBoxVS()"/>
+			<state name="pixel_shader" value="ShadingLDRSkyBoxPS()"/>
 		</pass>
 	</technique>
 

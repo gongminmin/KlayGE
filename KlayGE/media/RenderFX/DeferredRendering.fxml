@@ -558,6 +558,11 @@ void ShadingVS(float4 pos : POSITION,
 	oTexCoord += 0.5f;
 }
 
+float4 NoLightingPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return g_buffer_1_tex.Sample(point_sampler, tc);
+}
+
 float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	float shininess = GetShininess(g_buffer_tex.Sample(point_sampler, tc));
@@ -571,6 +576,27 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
+	<technique name="NoLightingTech">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="NoLightingPS()"/>
+		</pass>
+	</technique>
+
 	<technique name="ShadingTech">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
@@ -578,18 +604,22 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="cull_mode" value="front"/>
 
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="not_equal"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="not_equal"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="keep"/>
+
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="ShadingPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="ShadingAlphaBlendTech">
+	<technique name="ShadingAlphaBlendTech" inherit="ShadingTech">
 		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="cull_mode" value="front"/>
-
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="src_alpha"/>
@@ -597,9 +627,6 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 			<state name="blend_op_alpha" value="add"/>
 			<state name="src_blend_alpha" value="zero"/>
 			<state name="dest_blend_alpha" value="one"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="ShadingPS()"/>
 		</pass>
 	</technique>
 </effect>

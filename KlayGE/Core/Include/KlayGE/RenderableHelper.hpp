@@ -130,6 +130,10 @@ namespace KlayGE
 
 		void OnRenderBegin();
 
+		// For deferred only
+
+		virtual void Pass(PassType type);
+
 	protected:
 		RenderEffectParameterPtr inv_mvp_ep_;
 		RenderEffectParameterPtr skybox_cube_tex_ep_;
@@ -145,10 +149,6 @@ namespace KlayGE
 
 		virtual void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
-
-		// For deferred only
-
-		virtual void Pass(PassType type);
 
 	protected:
 		RenderEffectParameterPtr skybox_Ccube_tex_ep_;

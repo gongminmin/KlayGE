@@ -66,6 +66,15 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 
+	void SceneObjectSkyBox::Pass(PassType type)
+	{
+		checked_pointer_cast<RenderableSkyBox>(renderable_)->Pass(type);
+		if (this->Visible())
+		{
+			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+		}
+	}
+
 	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox(uint32_t attrib)
 		: SceneObjectSkyBox(attrib)
 	{
@@ -80,15 +89,6 @@ namespace KlayGE
 	void SceneObjectHDRSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
 		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
-	}
-
-	void SceneObjectHDRSkyBox::Pass(PassType type)
-	{
-		checked_pointer_cast<RenderableHDRSkyBox>(renderable_)->Pass(type);
-		if (this->Visible())
-		{
-			this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
-		}
 	}
 
 

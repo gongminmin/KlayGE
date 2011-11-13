@@ -47,6 +47,8 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
+
+		void Pass(PassType type);
 	};
 
 	class KLAYGE_CORE_API SceneObjectHDRSkyBox : public SceneObjectSkyBox
@@ -59,8 +61,6 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
-
-		void Pass(PassType type);
 	};
 
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper

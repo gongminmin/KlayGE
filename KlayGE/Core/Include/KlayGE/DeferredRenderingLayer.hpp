@@ -157,6 +157,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 		RenderTechniquePtr technique_clear_stencil_;
+		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		RenderTechniquePtr technique_shading_alpha_blend_;
 
