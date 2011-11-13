@@ -275,6 +275,26 @@ namespace KlayGE
 		return iter->second;
 	}
 
+	bool RenderModel::SpecialShading() const
+	{
+		bool ss = false;
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			ss |= mesh->SpecialShading();
+		}
+		return ss;
+	}
+	
+	bool RenderModel::AlphaBlend() const
+	{
+		bool ab = false;
+		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		{
+			ab |= mesh->AlphaBlend();
+		}
+		return ab;
+	}
+
 
 	StaticMesh::StaticMesh(RenderModelPtr const & model, std::wstring const & name)
 		: name_(name), model_(model)

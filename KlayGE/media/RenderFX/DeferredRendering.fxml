@@ -544,6 +544,7 @@ float4 ClearStencilPS() : SV_Target
 
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="shading_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -572,6 +573,15 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 	float3 diff_lighting = lighting.rgb;
 	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
 	return float4(max(diff_lighting * diffuse.rgb + specular_normalize_factor(shininess) * spec_lighting, 0), diffuse.a);
+}
+
+void MergeShadingPS(float2 tc : TEXCOORD0,
+			out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
+{
+	oClr = shading_tex.Sample(point_sampler, tc);
+	float depth = depth_tex.Sample(point_sampler, tc).r;
+	clip(depth - 1e-3f);
+	oDepth = depth;
 }
 		]]>
 	</shader>
@@ -618,15 +628,20 @@ float4 ShadingPS(float2 tc : TEXCOORD0) : SV_Target
 		</pass>
 	</technique>
 
-	<technique name="ShadingAlphaBlendTech" inherit="ShadingTech">
+	<technique name="MergeShadingAlphaBlendTech">
 		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
 			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="one"/>
+			<state name="dest_blend" value="inv_src_alpha"/>
 			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="zero"/>
+			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="MergeShadingPS()"/>
 		</pass>
 	</technique>
 </effect>

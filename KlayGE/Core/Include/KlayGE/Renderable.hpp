@@ -117,11 +117,11 @@ namespace KlayGE
 		virtual void Pass(PassType type);
 		virtual void LightingTex(TexturePtr const & tex);
 
-		bool SpecialShading() const
+		virtual bool SpecialShading() const
 		{
 			return special_shading_;
 		}
-		bool AlphaBlend() const
+		virtual bool AlphaBlend() const
 		{
 			return need_alpha_blend_;
 		}
