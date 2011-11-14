@@ -95,7 +95,7 @@ void InitInstancedTessBuffs()
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_("GBuffer")
+			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_(0)
 {
 	deferred_effect_ = checked_pointer_cast<DetailedSkinnedModel>(model)->Effect();
 			
@@ -260,7 +260,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 
 void DetailedSkinnedMesh::VisualizeLighting()
 {
-	visualize_ = "GBuffer";
+	visualize_ = 0;
 	this->UpdateTech();
 }
 
@@ -268,14 +268,14 @@ void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usag
 {
 	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
 	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
-	visualize_ = "VisualizeVertex";
+	visualize_ = 1;
 	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
 	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
-	visualize_ = "VisualizeTexture";
+	visualize_ = 2;
 	this->UpdateTech();
 }
 
@@ -313,41 +313,10 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 
 void DetailedSkinnedMesh::UpdateTech()
 {
-	std::string g_buffer_tech_str = visualize_;
-	if (line_mode_)
-	{
-		g_buffer_tech_str += "Line";
-	}
-	else
-	{
-		g_buffer_tech_str += "Fill";
-	}
-	std::string g_buffer_back_tech_str = g_buffer_tech_str + "BlendBack";
-	std::string g_buffer_front_tech_str = g_buffer_tech_str + "BlendFront";
-	if (smooth_mesh_)
-	{
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		switch (caps.tess_method)
-		{
-		case TM_Hardware:
-			g_buffer_tech_str += "Smooth5";
-			break;
-
-		case TM_Instanced:
-			g_buffer_tech_str += "Smooth4";
-			break;
-
-		case TM_No:
-			break;
-		}
-	}
-	g_buffer_tech_str += "MRTTech";
-	g_buffer_back_tech_str += "MRTTech";
-	g_buffer_front_tech_str += "MRTTech";
-
-	gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_tech_str);
-	gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_back_tech_str);
-	gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName(g_buffer_front_tech_str);
+	boost::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+	gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
+	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
+	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
 }
 
 void DetailedSkinnedMesh::Render()
@@ -397,6 +366,71 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	{
 		num_joints_macro[0].second = "64";
 		effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
+	}
+
+	std::string g_buffer_mrt_tech_str;
+	std::string g_buffer_alpha_blend_back_mrt_tech_str;
+	std::string g_buffer_alpha_blend_front_mrt_tech_str;
+	for (int i = 0; i < 3; ++ i)
+	{
+		for (int j = 0; j < 2; ++ j)
+		{
+			for (int k = 0; k < 2; ++ k)
+			{
+				switch (i)
+				{
+				case 0:
+					g_buffer_mrt_tech_str = "GBuffer";
+					break;
+
+				case 1:
+					g_buffer_mrt_tech_str = "VisualizeVertex";
+					break;
+
+				default:
+					g_buffer_mrt_tech_str = "VisualizeTexture";
+					break;
+				}
+
+				if (0 == j)
+				{
+					g_buffer_mrt_tech_str += "Fill";
+				}
+				else
+				{
+					g_buffer_mrt_tech_str += "Line";
+				}
+				g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
+				g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
+				if (0 == i)
+				{
+					g_buffer_alpha_blend_back_mrt_tech_str += "BlendBack";
+					g_buffer_alpha_blend_front_mrt_tech_str += "BlendFront";
+				}
+
+				if (1 == k)
+				{
+					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+					switch (caps.tess_method)
+					{
+					case TM_Hardware:
+						g_buffer_mrt_tech_str += "Smooth5";
+						break;
+
+					case TM_Instanced:
+						g_buffer_mrt_tech_str += "Smooth4";
+						break;
+
+					case TM_No:
+						break;
+					}
+				}
+
+				gbuffer_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
+				gbuffer_alpha_blend_back_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
+				gbuffer_alpha_blend_front_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
+			}
+		}
 	}
 }
 
