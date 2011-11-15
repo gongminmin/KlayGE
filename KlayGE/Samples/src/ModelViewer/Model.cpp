@@ -97,47 +97,7 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 	: SkinnedMesh(model, name),
 			line_mode_(false), smooth_mesh_(false), tess_factor_(5), visualize_(0)
 {
-	deferred_effect_ = checked_pointer_cast<DetailedSkinnedModel>(model)->Effect();
-			
-	gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
-	gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
-	gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
-	gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
-	gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillMRTTech");
-	gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-	gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillBlendBackMRTTech");
-	gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFillBlendFrontMRTTech");
-	gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-	gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-	gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-	gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-	shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
-	shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
-	shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
-	special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-
-	lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
-	g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
-
-	mvp_param_ = deferred_effect_->ParameterByName("mvp");
-	model_view_param_ = deferred_effect_->ParameterByName("model_view");
-	depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
-	shininess_param_ = deferred_effect_->ParameterByName("shininess");
-	normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
-	normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-	height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
-	height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-	diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
-	diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
-	specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
-	emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
-	emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-	specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
-	opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
-	opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
-	flipping_param_ = deferred_effect_->ParameterByName("flipping");
-
-	this->SetModelMatrix(float4x4::Identity());
+	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model)->Effect());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

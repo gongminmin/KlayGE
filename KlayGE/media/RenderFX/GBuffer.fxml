@@ -676,4 +676,16 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="SpecialShadingPS()"/>
 		</pass>
 	</technique>
+
+	<technique name="SpecialShadingAlphaBlendBackTech" inherit="SpecialShadingTech">
+		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+		</pass>
+	</technique>
+
+	<technique name="SpecialShadingAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendBackTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
 </effect>

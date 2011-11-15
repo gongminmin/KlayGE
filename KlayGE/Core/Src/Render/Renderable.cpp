@@ -37,45 +37,7 @@ namespace KlayGE
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			deferred_effect_ = drl->GBufferEffect();
-			
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
-			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
-			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
-			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
-			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
-			shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
-			shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-
-			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
-			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
-
-			mvp_param_ = deferred_effect_->ParameterByName("mvp");
-			model_view_param_ = deferred_effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
-			shininess_param_ = deferred_effect_->ParameterByName("shininess");
-			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
-			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
-			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
-			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
-			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
-			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
-			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
-			opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
-			opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
-			flipping_param_ = deferred_effect_->ParameterByName("flipping");
+			this->BindDeferredEffect(drl->GBufferEffect());
 
 			model_mat_ = float4x4::Identity();
 
@@ -144,7 +106,9 @@ namespace KlayGE
 				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
 				break;
 
-			case PT_SpecialShading:
+			case PT_OpaqueSpecialShading:
+			case PT_TransparencyBackSpecialShading:
+			case PT_TransparencyFrontSpecialShading:
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				break;
@@ -264,6 +228,51 @@ namespace KlayGE
 		technique_ = this->PassTech(type);
 	}
 
+	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
+	{
+		deferred_effect_ = deferred_effect;
+			
+		gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
+		gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
+		gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
+		gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+		gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+		gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+		gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+		gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+		gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+		gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+		gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+		shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
+		shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
+		shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
+		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+
+		lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
+		g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
+
+		mvp_param_ = deferred_effect_->ParameterByName("mvp");
+		model_view_param_ = deferred_effect_->ParameterByName("model_view");
+		depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
+		shininess_param_ = deferred_effect_->ParameterByName("shininess");
+		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
+		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
+		height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+		height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
+		diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
+		diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
+		specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
+		emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
+		emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
+		specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
+		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
+		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
+		flipping_param_ = deferred_effect_->ParameterByName("flipping");
+	}
+
 	RenderTechniquePtr const & Renderable::PassTech(PassType type) const
 	{
 		switch (type)
@@ -329,8 +338,14 @@ namespace KlayGE
 		case PT_TransparencyFrontShading:
 			return shading_alpha_blend_front_tech_;
 
-		case PT_SpecialShading:
+		case PT_OpaqueSpecialShading:
 			return special_shading_tech_;
+
+		case PT_TransparencyBackSpecialShading:
+			return special_shading_alpha_blend_back_tech_;
+
+		case PT_TransparencyFrontSpecialShading:
+			return special_shading_alpha_blend_front_tech_;
 
 		default:
 			BOOST_ASSERT(false);

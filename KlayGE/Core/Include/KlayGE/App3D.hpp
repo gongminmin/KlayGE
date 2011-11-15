@@ -60,7 +60,9 @@ namespace KlayGE
 			URV_Flushed = 1UL << 1,
 			URV_Finished = 1UL << 2,
 			URV_Overlay = 1UL << 3,
-			URV_Skip_Postprocess = 1UL << 4
+			URV_Skip_Postprocess = 1UL << 4,
+			URV_Opaque_Only = 1UL << 5,
+			URV_Transparency_Only = 1UL << 6
 		};
 
 	public:

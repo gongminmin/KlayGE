@@ -2296,7 +2296,7 @@ namespace KlayGE
 		{
 			StaticMesh::OnRenderBegin();
 
-			if ((PT_OpaqueShading == type_) || (PT_SpecialShading == type_))
+			if ((PT_OpaqueShading == type_) || (PT_OpaqueSpecialShading == type_))
 			{
 				float4 clr = light_->Color();
 				clr.w() = 0;

@@ -265,16 +265,43 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
-		RenderTechniquePtr const & tech = obj->GetRenderTechnique()->Effect().PrototypeEffect()->TechniqueByName(obj->GetRenderTechnique()->Name());
-		BOOST_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
-			boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech));
-		if (iter != render_queue_.end())
+		bool add;
+		if (urt_ != 0)
 		{
-			iter->second.push_back(obj);
+			if (urt_ & App3DFramework::URV_Opaque_Only)
+			{
+				add = !obj->AlphaBlend();
+			}
+			else
+			{
+				if (urt_ & App3DFramework::URV_Transparency_Only)
+				{
+					add = obj->AlphaBlend();
+				}
+				else
+				{
+					add = true;
+				}
+			}
 		}
 		else
 		{
-			render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
+			add = true;
+		}
+
+		if (add)
+		{
+			RenderTechniquePtr const & tech = obj->GetRenderTechnique()->Effect().PrototypeEffect()->TechniqueByName(obj->GetRenderTechnique()->Name());
+			BOOST_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
+				boost::bind(select1st<RenderQueueType::value_type>(), _1) == tech));
+			if (iter != render_queue_.end())
+			{
+				iter->second.push_back(obj);
+			}
+			else
+			{
+				render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
+			}
 		}
 	}
 
@@ -361,6 +388,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Flush(uint32_t urt)
 	{
+		urt_ = urt;
+
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		App3DFramework& app = Context::Instance().AppInstance();
 
@@ -501,6 +530,8 @@ namespace KlayGE
 		render_queue_.resize(0);
 
 		app.RenderOver();
+
+		urt_ = 0;
 	}
 
 	// 获取渲染的物体数量

@@ -830,20 +830,18 @@ namespace KlayGE
 
 			lights_.insert(lights_.end(), cur_lights.begin(), cur_lights.end());
 
-			transparency_scene_objs_.resize(0);
-			opaque_scene_objs_.resize(0);
+			has_transparency_objs_ = false;
+			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
 			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
 			{
 				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
 				{
+					visible_scene_objs_.push_back(so.get());
+
 					if (so->AlphaBlend())
 					{
-						transparency_scene_objs_.push_back(so.get());
-					}
-					else
-					{
-						opaque_scene_objs_.push_back(so.get());
+						has_transparency_objs_ = true;
 					}
 				}
 			}
@@ -874,122 +872,31 @@ namespace KlayGE
 			depth_to_linear_pp_->SetParam(0, near_q);
 		}
 
-		switch (pass_type)
-		{
-		case PT_OpaqueGBuffer:
-		case PT_OpaqueMRTGBuffer:
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-			{
-				deo->Visible(true);
-			}
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-			{
-				deo->Visible(false);
-			}
-			break;
-
-		case PT_TransparencyBackGBuffer:
-		case PT_TransparencyFrontGBuffer:
-		case PT_TransparencyBackMRTGBuffer:
-		case PT_TransparencyFrontMRTGBuffer:
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-			{
-				deo->Visible(false);
-			}
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-			{
-				deo->Visible(true);
-			}
-			break;
-					
-		case PT_GenShadowMap:
-		case PT_GenReflectiveShadowMap:
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-			{
-				deo->Visible(true);
-			}
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-			{
-				deo->Visible(false);
-			}
-			break;
-
-		case PT_OpaqueShading:
-			if (0 == index_in_pass)
-			{
-				if (!mrt_g_buffer_)
-				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-				}
-			}
-			break;
-			
-		case PT_TransparencyBackShading:
-		case PT_TransparencyFrontShading:
-			if (0 == index_in_pass)
-			{
-				if (!mrt_g_buffer_)
-				{
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(false);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-				}
-			}
-			break;
-
-		case PT_SpecialShading:
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-			{
-				deo->Visible(true);
-			}
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
-			{
-				deo->Visible(true);
-			}
-			break;
-		}
-
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
 			&& ((mrt_g_buffer_ && (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading)) || !mrt_g_buffer_))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-			{
-				deo->Pass(static_cast<PassType>(pass_type));
-			}
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
 			{
 				deo->Pass(static_cast<PassType>(pass_type));
 			}
 		}
 		if ((PT_OpaqueShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
+			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(opaque_lighting_tex_);
 			}
 		}
 		if ((PT_TransparencyBackShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(transparency_back_lighting_tex_);
 			}
 		}
 		if ((PT_TransparencyFrontShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(transparency_front_lighting_tex_);
 			}
@@ -1002,10 +909,13 @@ namespace KlayGE
 			{
 				// Generate G-Buffer
 
+				*depth_near_far_invfar_param_ = depth_near_far_invfar_;
+
 				if ((PT_OpaqueGBuffer == pass_type) || (PT_OpaqueMRTGBuffer == pass_type))
 				{
 					re.BindFrameBuffer(opaque_g_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 0);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
 				}
 				else
 				{
@@ -1013,17 +923,15 @@ namespace KlayGE
 					{
 						re.BindFrameBuffer(transparency_back_g_buffer_);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 0.0f, 128);
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 					}
 					else
 					{
 						re.BindFrameBuffer(transparency_front_g_buffer_);
 						re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 1, 0), 1.0f, 128);
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 					}
 				}
-
-				*depth_near_far_invfar_param_ = depth_near_far_invfar_;
-
-				return App3DFramework::URV_Need_Flush;
 			}
 			else
 			{
@@ -1052,7 +960,7 @@ namespace KlayGE
 
 					pass_scaned_.resize(2);
 
-					if (!transparency_scene_objs_.empty())
+					if (has_transparency_objs_)
 					{
 						if (mrt_g_buffer_)
 						{
@@ -1188,15 +1096,20 @@ namespace KlayGE
 						}
 					}
 					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 28) + 0));
-					if (!transparency_scene_objs_.empty())
+					if (has_transparency_objs_)
 					{
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 28) + 0));
 						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 28) + 0));
 					}
 					if (mrt_g_buffer_)
 					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 0));
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_SpecialShading << 28) + 1));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 28) + 0));
+						if (has_transparency_objs_)
+						{
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 28) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 28) + 0));
+						}
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 28) + 1));
 					}
 					else
 					{
@@ -1233,110 +1146,111 @@ namespace KlayGE
 		else
 		{
 			if ((PT_OpaqueShading == pass_type) || (PT_TransparencyBackShading == pass_type) || (PT_TransparencyFrontShading == pass_type)
-				|| (PT_SpecialShading == pass_type))
+				|| (PT_OpaqueSpecialShading == pass_type) || (PT_TransparencyBackSpecialShading == pass_type) || (PT_TransparencyFrontSpecialShading == pass_type))
 			{
 				if (0 == index_in_pass)
 				{
-					if (PT_SpecialShading == pass_type)
+					switch (pass_type)
 					{
-						re.BindFrameBuffer(all_shading_buffer_);
-
-						opaque_shading_tex_->CopyToTexture(*all_shading_tex_);
-						
-						if (!transparency_scene_objs_.empty())
+					case PT_OpaqueShading:
+						if (indirect_lighting_enabled_ && (illum_ != 1))
 						{
-							*depth_tex_param_ = transparency_back_ds_tex_;
-							*shading_tex_param_ = transparency_back_shading_tex_;
-							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
-						
-							*depth_tex_param_ = transparency_front_ds_tex_;
-							*shading_tex_param_ = transparency_front_shading_tex_;
-							re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+							this->UpsampleMultiresLighting();
+							this->AccumulateToLightingTex();
 						}
 
-						return App3DFramework::URV_Need_Flush;
-					}
-					else
-					{
-						if (PT_OpaqueShading == pass_type)
+						if (ssvo_enabled_)
 						{
-							if (indirect_lighting_enabled_ && (illum_ != 1))
-							{
-								this->UpsampleMultiresLighting();
-								this->AccumulateToLightingTex();
-							}
-
-							if (ssvo_enabled_)
-							{
-								ssvo_pp_->Apply();
-								blur_pp_->Apply();
-							}
+							ssvo_pp_->Apply();
+							blur_pp_->Apply();
 						}
 
-						switch (pass_type)
+						if (mrt_g_buffer_)
 						{
-						case PT_OpaqueShading:
-							if (mrt_g_buffer_)
-							{
-								*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
-								*g_buffer_1_tex_param_ = opaque_g_buffer_rt1_tex_;
-								*depth_tex_param_ = opaque_depth_tex_;
-								*lighting_tex_param_ = opaque_lighting_tex_;
+							*g_buffer_tex_param_ = opaque_g_buffer_rt0_tex_;
+							*g_buffer_1_tex_param_ = opaque_g_buffer_rt1_tex_;
+							*depth_tex_param_ = opaque_depth_tex_;
+							*lighting_tex_param_ = opaque_lighting_tex_;
 
-								re.BindFrameBuffer(opaque_shading_buffer_);
-								re.Render(*technique_no_lighting_, *rl_quad_);
-								re.Render(*technique_shading_, *rl_quad_);
+							re.BindFrameBuffer(opaque_shading_buffer_);
+							re.Render(*technique_no_lighting_, *rl_quad_);
+							re.Render(*technique_shading_, *rl_quad_);
 
-								return App3DFramework::URV_Flushed;
-							}
-							else
-							{
-								return App3DFramework::URV_Need_Flush;
-							}
-
-						case PT_TransparencyBackShading:
-							if (mrt_g_buffer_)
-							{
-								*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
-								*g_buffer_1_tex_param_ = transparency_back_g_buffer_rt1_tex_;
-								*depth_tex_param_ = transparency_back_depth_tex_;
-								*lighting_tex_param_ = transparency_back_lighting_tex_;
-
-								re.BindFrameBuffer(transparency_back_shading_buffer_);
-								re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-								re.Render(*technique_shading_, *rl_quad_);
-
-								return App3DFramework::URV_Flushed;
-							}
-							else
-							{
-								return App3DFramework::URV_Need_Flush;
-							}
-
-						case PT_TransparencyFrontShading:
-						default:
-							if (mrt_g_buffer_)
-							{
-								*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
-								*g_buffer_1_tex_param_ = transparency_front_g_buffer_rt1_tex_;
-								*depth_tex_param_ = transparency_front_depth_tex_;								
-								*lighting_tex_param_ = transparency_front_lighting_tex_;
-
-								re.BindFrameBuffer(transparency_front_shading_buffer_);
-								re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-								re.Render(*technique_shading_, *rl_quad_);
-
-								return App3DFramework::URV_Flushed;
-							}
-							else
-							{
-								return App3DFramework::URV_Need_Flush;
-							}
+							return App3DFramework::URV_Flushed;
 						}
+						else
+						{
+							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+						}
+
+					case PT_TransparencyBackShading:
+						if (mrt_g_buffer_)
+						{
+							*g_buffer_tex_param_ = transparency_back_g_buffer_rt0_tex_;
+							*g_buffer_1_tex_param_ = transparency_back_g_buffer_rt1_tex_;
+							*depth_tex_param_ = transparency_back_depth_tex_;
+							*lighting_tex_param_ = transparency_back_lighting_tex_;
+
+							re.BindFrameBuffer(transparency_back_shading_buffer_);
+							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+							re.Render(*technique_shading_, *rl_quad_);
+
+							return App3DFramework::URV_Flushed;
+						}
+						else
+						{
+							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+						}
+
+					case PT_TransparencyFrontShading:
+						if (mrt_g_buffer_)
+						{
+							*g_buffer_tex_param_ = transparency_front_g_buffer_rt0_tex_;
+							*g_buffer_1_tex_param_ = transparency_front_g_buffer_rt1_tex_;
+							*depth_tex_param_ = transparency_front_depth_tex_;								
+							*lighting_tex_param_ = transparency_front_lighting_tex_;
+
+							re.BindFrameBuffer(transparency_front_shading_buffer_);
+							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
+							re.Render(*technique_shading_, *rl_quad_);
+
+							return App3DFramework::URV_Flushed;
+						}
+						else
+						{
+							return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+						}
+
+					case PT_OpaqueSpecialShading:
+						re.BindFrameBuffer(opaque_shading_buffer_);
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+
+					case PT_TransparencyBackSpecialShading:
+						re.BindFrameBuffer(transparency_back_shading_buffer_);
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+
+					case PT_TransparencyFrontSpecialShading:
+					default:
+						re.BindFrameBuffer(transparency_front_shading_buffer_);
+						return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
 					}
 				}
 				else
 				{
+					re.BindFrameBuffer(all_shading_buffer_);
+
+					opaque_shading_tex_->CopyToTexture(*all_shading_tex_);						
+					if (has_transparency_objs_)
+					{
+						*depth_tex_param_ = transparency_back_ds_tex_;
+						*shading_tex_param_ = transparency_back_shading_tex_;
+						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+						
+						*depth_tex_param_ = transparency_front_ds_tex_;
+						*shading_tex_param_ = transparency_front_shading_tex_;
+						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
+					}
+
 					re.BindFrameBuffer(FrameBufferPtr());
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
@@ -1366,11 +1280,7 @@ namespace KlayGE
 						skip_color_grading_pp_->Apply();
 					}
 
-					BOOST_FOREACH(BOOST_TYPEOF(opaque_scene_objs_)::reference deo, opaque_scene_objs_)
-					{
-						deo->Visible(true);
-					}
-					BOOST_FOREACH(BOOST_TYPEOF(transparency_scene_objs_)::reference deo, transparency_scene_objs_)
+					BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
 					{
 						deo->Visible(true);
 					}
@@ -1520,7 +1430,7 @@ namespace KlayGE
 					re.BindFrameBuffer(rsm_buffer_);
 					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
 
-					return App3DFramework::URV_Need_Flush;
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
 				}
 				else if (PT_IndirectLighting == pass_type)
 				{
@@ -1560,7 +1470,7 @@ namespace KlayGE
 					re.BindFrameBuffer(sm_buffer_);
 					re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
-					return App3DFramework::URV_Need_Flush;
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
 				}
 				else //if (PT_Lighting == pass_type)
 				{
@@ -1601,7 +1511,7 @@ namespace KlayGE
 
 					re.Render(*technique_lights_[type], *rl);
 
-					if (!transparency_scene_objs_.empty())
+					if (has_transparency_objs_)
 					{
 						// Transparency objects back
 

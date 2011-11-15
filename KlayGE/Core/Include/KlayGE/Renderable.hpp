@@ -46,7 +46,9 @@ namespace KlayGE
 		PT_OpaqueShading,
 		PT_TransparencyBackShading,
 		PT_TransparencyFrontShading,
-		PT_SpecialShading
+		PT_OpaqueSpecialShading,
+		PT_TransparencyBackSpecialShading,
+		PT_TransparencyFrontSpecialShading
 	};
 
 	typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
@@ -130,6 +132,7 @@ namespace KlayGE
 		virtual void UpdateInstanceStream();
 
 		// For deferred only
+		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
 		virtual RenderTechniquePtr const & PassTech(PassType type) const;
 
 	protected:
@@ -154,10 +157,11 @@ namespace KlayGE
 		RenderTechniquePtr gen_rsm_tech_;
 		RenderTechniquePtr gen_rsm_alpha_test_tech_;
 		RenderTechniquePtr shading_tech_;
-		RenderTechniquePtr shading_alpha_blend_tech_;
 		RenderTechniquePtr shading_alpha_blend_back_tech_;
 		RenderTechniquePtr shading_alpha_blend_front_tech_;
 		RenderTechniquePtr special_shading_tech_;
+		RenderTechniquePtr special_shading_alpha_blend_back_tech_;
+		RenderTechniquePtr special_shading_alpha_blend_front_tech_;
 
 		RenderEffectParameterPtr lighting_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;

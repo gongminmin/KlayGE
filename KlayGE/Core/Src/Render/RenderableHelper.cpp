@@ -361,7 +361,7 @@ namespace KlayGE
 			technique_ = shading_tech_;
 			break;
 
-		case PT_SpecialShading:
+		case PT_OpaqueSpecialShading:
 			technique_ = special_shading_tech_;
 			break;
 

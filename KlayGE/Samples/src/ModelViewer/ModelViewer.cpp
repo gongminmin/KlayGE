@@ -813,8 +813,6 @@ void ModelViewerApp::DoUpdateOverlay()
 
 uint32_t ModelViewerApp::DoUpdate(KlayGE::uint32_t pass)
 {
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	
 	/*Box const & bb = model_->GetBound();
 	float near_plane = 1e10f;
 	float far_plane = 1e-10f;

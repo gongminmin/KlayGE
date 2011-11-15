@@ -102,7 +102,9 @@ namespace KlayGE
 	{
 		renderable_->Pass(type);
 
-		if (PT_SpecialShading == type)
+		if ((PT_OpaqueSpecialShading == type)
+			|| (PT_TransparencyBackSpecialShading == type)
+			|| (PT_TransparencyFrontSpecialShading == type))
 		{
 			if (this->Visible())
 			{

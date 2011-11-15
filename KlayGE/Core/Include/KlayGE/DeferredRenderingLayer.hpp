@@ -200,8 +200,8 @@ namespace KlayGE
 		RenderEffectParameterPtr light_pos_es_param_;
 		RenderEffectParameterPtr light_dir_es_param_;
 
-		std::vector<SceneObject*> opaque_scene_objs_;
-		std::vector<SceneObject*> transparency_scene_objs_;
+		std::vector<SceneObject*> visible_scene_objs_;
+		bool has_transparency_objs_;
 
 		FrameBufferPtr rsm_buffer_;
 		TexturePtr rsm_texs_[2];
