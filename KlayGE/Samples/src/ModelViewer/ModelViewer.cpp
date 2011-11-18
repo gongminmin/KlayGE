@@ -40,45 +40,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			deferred_effect_ = rf.LoadEffect("MVUtil.fxml");
-
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
-			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
-			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
-			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("AxisMRTTech");
-			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
-			shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
-			shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-
-			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
-			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
-
-			mvp_param_ = deferred_effect_->ParameterByName("mvp");
-			model_view_param_ = deferred_effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
-			shininess_param_ = deferred_effect_->ParameterByName("shininess");
-			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
-			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
-			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
-			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
-			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
-			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
-			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
-			opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
-			opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
-			flipping_param_ = deferred_effect_->ParameterByName("flipping");
 
 			float4 xyzs[] =
 			{
@@ -138,45 +101,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			deferred_effect_ = rf.LoadEffect("MVUtil.fxml");
-
-			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
-			gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
-			gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
-			gbuffer_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontTech");
+			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GridMRTTech");
-			gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
-			shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
-			shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-
-			lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
-			g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
-
-			mvp_param_ = deferred_effect_->ParameterByName("mvp");
-			model_view_param_ = deferred_effect_->ParameterByName("model_view");
-			depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
-			shininess_param_ = deferred_effect_->ParameterByName("shininess");
-			normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
-			normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-			height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
-			height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-			diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
-			diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
-			specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
-			emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
-			emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-			specular_level_param_ = deferred_effect_->ParameterByName("specular_level");
-			opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
-			opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
-			flipping_param_ = deferred_effect_->ParameterByName("flipping");
 
 			float3 xyzs[(21 + 21) * 2];
 			for (int i = 0; i < 21; ++ i)
@@ -774,6 +700,11 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 	if (0 == sender.GetSelectedIndex())
 	{
 		checked_pointer_cast<ModelObject>(model_)->VisualizeLighting();
+
+		deferred_rendering_->SSVOEnabled(false);
+		deferred_rendering_->HDREnabled(true);
+		deferred_rendering_->AAEnabled(1);
+		deferred_rendering_->ColorGradingEnabled(true);
 	}
 	else
 	{
@@ -788,6 +719,11 @@ void ModelViewerApp::VisualizeChangedHandler(KlayGE::UIComboBox const & sender)
 			vertex_element ve = boost::any_cast<vertex_element>(data);
 			checked_pointer_cast<ModelObject>(model_)->VisualizeVertex(ve.usage, ve.usage_index);
 		}
+
+		deferred_rendering_->SSVOEnabled(false);
+		deferred_rendering_->HDREnabled(false);
+		deferred_rendering_->AAEnabled(0);
+		deferred_rendering_->ColorGradingEnabled(false);
 	}
 }
 

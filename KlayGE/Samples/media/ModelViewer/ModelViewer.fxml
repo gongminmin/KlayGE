@@ -249,23 +249,58 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 	mrt_0 = 0;
 	if (0 == texture_slot)
 	{
-		mrt_1 = diffuse_tex.Sample(linear_sampler, tex0);
+		if (diffuse_clr.w > 0.5f)
+		{
+			mrt_1 = float4(diffuse_tex.Sample(linear_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			mrt_1 = float4(diffuse_clr.rgb, 1);
+		}
 	}
 	else if (1 == texture_slot)
 	{
-		mrt_1 = specular_tex.Sample(linear_sampler, tex0);
+		if (specular_level.w > 0.5f)
+		{
+			mrt_1 = float4(specular_tex.Sample(linear_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			mrt_1 = float4(specular_level.rgb, 1);
+		}
 	}
 	else if (2 == texture_slot)
 	{
-		mrt_1 = float4(decompress_normal(normal_tex.Sample(linear_sampler, tex0)).rgb, 1);
+		if (normal_map_enabled)
+		{
+			mrt_1 = float4(decompress_normal(normal_tex.Sample(linear_sampler, tex0)).rgb, 1);
+		}
+		else
+		{
+			mrt_1 = float4(0, 0, 1, 1);
+		}
 	}
 	else if (3 == texture_slot)
 	{
-		mrt_1 = emit_tex.Sample(linear_sampler, tex0);
+		if (emit_clr.w > 0.5f)
+		{
+			mrt_1 = float4(emit_tex.Sample(linear_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			mrt_1 = float4(emit_clr.rgb, 1);
+		}
 	}
 	else //if (4 == texture_slot)
 	{
-		mrt_1 = diffuse_tex.Sample(linear_sampler, tex0).a;
+		if (opacity_map_enabled)
+		{
+			mrt_1 = diffuse_tex.Sample(linear_sampler, tex0).a;
+		}
+		else
+		{
+			mrt_1 = opacity_clr;
+		}
 	}
 }
 		]]>
