@@ -22,6 +22,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ForceTexSRGB", "ForceTexSRG
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ColorGradingTexGen", "ColorGradingTexGen.vcxproj", "{675D2066-DA6D-48F0-BD05-90A40DDAB0E1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalsFittingGen", "NormalsFittingGen.vcxproj", "{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -118,6 +120,14 @@ Global
 		{675D2066-DA6D-48F0-BD05-90A40DDAB0E1}.Release|Win32.Build.0 = Release|Win32
 		{675D2066-DA6D-48F0-BD05-90A40DDAB0E1}.Release|x64.ActiveCfg = Release|x64
 		{675D2066-DA6D-48F0-BD05-90A40DDAB0E1}.Release|x64.Build.0 = Release|x64
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Debug|Win32.Build.0 = Debug|Win32
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Debug|x64.ActiveCfg = Debug|x64
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Debug|x64.Build.0 = Debug|x64
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Release|Win32.ActiveCfg = Release|Win32
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Release|Win32.Build.0 = Release|Win32
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Release|x64.ActiveCfg = Release|x64
+		{2265AC75-DDC2-4283-B5DD-B77C6F82B3E7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
