@@ -54,6 +54,10 @@
 		<state name="address_w" value="clamp"/>
 	</parameter>
 
+	<parameter type="texture2D" name="normals_fitting_tex">
+		<annotation type="string" name="SasResourceAddress" value="normals_fitting.dds"/>
+	</parameter>
+
 	<shader>
 		<![CDATA[
 void GBufferVS(float4 pos : POSITION,
@@ -82,10 +86,9 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView0_2z.w = ts_to_view[2].z;
 }
 
-void RestoreNormalSpecular(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
-	out float3 normal, out float specular)
+float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
-	normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
+	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
 	if (normal_map_enabled)
 	{
 		float3x3 ts_to_view;
@@ -94,34 +97,22 @@ void RestoreNormalSpecular(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts
 		ts_to_view[2] = normal;
 		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
 	}
-
-	if (specular_level.w > 0.5f)
-	{
-		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
-	}
-	else
-	{
-		specular = specular_level.x;
-	}
+	
+	float3 fitting_tc = FittingCoord(normal);
+	normal *= fitting_tc.z * normals_fitting_tex.Sample(bilinear_sampler, fitting_tc.xy).r;
+	return normal;
 }
 
 float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
-	float3 normal;
-	float specular;
-	RestoreNormalSpecular(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-			normal, specular);
-
-	return StoreGBuffer(normal, specular, shininess);
+	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	return StoreGBuffer(normal, shininess);
 }
 
 void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 					out float4 mrt_0, out float4 mrt_1)
 {
-	float3 normal;
-	float specular;
-	RestoreNormalSpecular(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-			normal, specular);
+	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 
 	float3 diffuse;
 	if (diffuse_clr.w > 0.5f)
@@ -131,6 +122,16 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 	else
 	{
 		diffuse = diffuse_clr.rgb;
+	}
+	
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
 	}
 	
 	StoreMRTGBuffer(normal, specular, shininess, diffuse,

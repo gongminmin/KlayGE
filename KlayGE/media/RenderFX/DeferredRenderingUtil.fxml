@@ -3,30 +3,21 @@
 <effect>
 	<shader>
 		<![CDATA[
-float4 StoreGBuffer(float3 normal, float specular_level, float shininess)
+float4 StoreGBuffer(float3 normal, float shininess)
 {
-	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5f + 0.5f) * 0.5f + 0.5f, specular_level, shininess);
+	return float4(normal * 0.5f + 0.5f, shininess);
 }
 
 void StoreMRTGBuffer(float3 normal, float specular_level, float shininess, float3 diffuse,
 			out float4 mrt_0, out float4 mrt_1)
 {
-	mrt_0 = StoreGBuffer(normal, specular_level, shininess);
-	mrt_1 = float4(diffuse, 1);
+	mrt_0 = StoreGBuffer(normal, shininess);
+	mrt_1 = float4(diffuse, specular_level);
 }
 
 float3 GetNormal(float4 ndc)
 {
-	float3 normal;
-	ndc.xy = ndc.xy * 2 - 1;
-	normal.z = dot(ndc.xy, ndc.xy) * 2 - 1;
-	normal.xy = normalize(ndc.xy) * sqrt(1 - normal.z * normal.z);
-	return normal;
-}
-
-float GetSpecular(float4 ndc)
-{
-	return ndc.z;
+	return normalize(ndc.xyz * 2 - 1);
 }
 
 float GetShininess(float4 ndc)
@@ -57,6 +48,16 @@ float3 NearestDepthUpsampling(float2 tc, float4 z_half, float z_full, float2 l1_
 	}
 
 	return float3(nearest_tc, all(dist_z < threshold) ? 1 : -1);
+}
+
+float3 FittingCoord(float3 normal)
+{
+	float3 normal_uns = abs(normal);
+	float max_comp = max(normal_uns.z, max(normal_uns.x, normal_uns.y));
+	float2 tc = normal_uns.z < max_comp ? (normal_uns.y < max_comp ? normal_uns.yz : normal_uns.xz) : normal_uns.xy;
+	tc = tc.x < tc.y ? tc.yx : tc.xy;
+	tc.y /= tc.x;
+	return float3(tc, 1 / max_comp);
 }
 		]]>
 	</shader>
