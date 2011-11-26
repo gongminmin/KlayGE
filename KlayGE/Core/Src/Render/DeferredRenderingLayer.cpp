@@ -1171,6 +1171,7 @@ namespace KlayGE
 							*g_buffer_1_tex_param_ = opaque_g_buffer_rt1_tex_;
 							*depth_tex_param_ = opaque_depth_tex_;
 							*lighting_tex_param_ = opaque_lighting_tex_;
+							*light_volume_mv_param_ = inv_proj_;
 
 							re.BindFrameBuffer(opaque_shading_buffer_);
 							re.Render(*technique_no_lighting_, *rl_quad_);
@@ -1190,6 +1191,7 @@ namespace KlayGE
 							*g_buffer_1_tex_param_ = transparency_back_g_buffer_rt1_tex_;
 							*depth_tex_param_ = transparency_back_depth_tex_;
 							*lighting_tex_param_ = transparency_back_lighting_tex_;
+							*light_volume_mv_param_ = inv_proj_;
 
 							re.BindFrameBuffer(transparency_back_shading_buffer_);
 							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
@@ -1209,6 +1211,7 @@ namespace KlayGE
 							*g_buffer_1_tex_param_ = transparency_front_g_buffer_rt1_tex_;
 							*depth_tex_param_ = transparency_front_depth_tex_;								
 							*lighting_tex_param_ = transparency_front_lighting_tex_;
+							*light_volume_mv_param_ = inv_proj_;
 
 							re.BindFrameBuffer(transparency_front_shading_buffer_);
 							re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
