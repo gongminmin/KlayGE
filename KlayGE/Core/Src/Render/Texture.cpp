@@ -58,6 +58,9 @@ namespace
 		// The surface has alpha channel information in the pixel format.
 		DDSPF_ALPHAPIXELS = 0x00000001,
 
+		// The pixel format contains alpha only information
+		DDSPF_ALPHA = 0x00000002,
+
 		// The FourCC code is valid.
 		DDSPF_FOURCC = 0x00000004,
 
@@ -1355,7 +1358,7 @@ namespace KlayGE
 					}
 					else
 					{
-						if ((desc.pixel_format.flags & DDSPF_ALPHAPIXELS) != 0)
+						if ((desc.pixel_format.flags & DDSPF_ALPHA) != 0)
 						{
 							format = EF_A8;
 						}
