@@ -101,16 +101,6 @@ namespace KlayGE
 	void SceneObject::Pass(PassType type)
 	{
 		renderable_->Pass(type);
-
-		if ((PT_OpaqueSpecialShading == type)
-			|| (PT_TransparencyBackSpecialShading == type)
-			|| (PT_TransparencyFrontSpecialShading == type))
-		{
-			if (this->Visible())
-			{
-				this->Visible(renderable_->SpecialShading());
-			}
-		}
 	}
 
 	void SceneObject::LightingTex(TexturePtr const & tex)

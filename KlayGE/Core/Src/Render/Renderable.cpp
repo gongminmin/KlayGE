@@ -75,7 +75,6 @@ namespace KlayGE
 			case PT_TransparencyBackMRTGBuffer:
 			case PT_TransparencyFrontMRTGBuffer:
 			case PT_GenReflectiveShadowMap:
-				*depth_near_far_invfar_param_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
 				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
@@ -109,8 +108,11 @@ namespace KlayGE
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
+				*diffuse_tex_param_ = diffuse_tex_;
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
+				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
+				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				break;
 
 			default:
@@ -249,14 +251,13 @@ namespace KlayGE
 		shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
 		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
 		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
 
 		lighting_tex_param_ = deferred_effect_->ParameterByName("lighting_tex");
 		g_buffer_1_tex_param_ = deferred_effect_->ParameterByName("g_buffer_1_tex");
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
-		depth_near_far_invfar_param_ = deferred_effect_->ParameterByName("depth_near_far_invfar");
 		shininess_param_ = deferred_effect_->ParameterByName("shininess");
 		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
 		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");

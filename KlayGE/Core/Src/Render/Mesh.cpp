@@ -364,14 +364,14 @@ namespace KlayGE
 				}
 			}				
 		}
-
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_)
-		{
-			special_shading_ = true;
-		}
+		
 		if (!need_alpha_test_ && (mtl_->opacity < 1))
 		{
 			need_alpha_blend_ = true;
+		}
+		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_ || need_alpha_blend_)
+		{
+			special_shading_ = true;
 		}
 	}
 

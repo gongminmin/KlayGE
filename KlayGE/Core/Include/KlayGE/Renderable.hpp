@@ -178,7 +178,6 @@ namespace KlayGE
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
-		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr shininess_param_;
 		RenderEffectParameterPtr specular_tex_param_;
 		RenderEffectParameterPtr normal_map_enabled_param_;

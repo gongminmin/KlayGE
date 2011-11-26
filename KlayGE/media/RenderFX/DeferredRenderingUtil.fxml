@@ -8,11 +8,11 @@ float4 StoreGBuffer(float3 normal, float specular_level, float shininess)
 	return float4(normalize(normal.xy) * sqrt(normal.z * 0.5f + 0.5f) * 0.5f + 0.5f, specular_level, shininess);
 }
 
-void StoreMRTGBuffer(float3 normal, float specular_level, float shininess, float3 diffuse, float opacity,
+void StoreMRTGBuffer(float3 normal, float specular_level, float shininess, float3 diffuse,
 			out float4 mrt_0, out float4 mrt_1)
 {
 	mrt_0 = StoreGBuffer(normal, specular_level, shininess);
-	mrt_1 = float4(diffuse, opacity);
+	mrt_1 = float4(diffuse, 1);
 }
 
 float3 GetNormal(float4 ndc)

@@ -333,7 +333,7 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferFillBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
@@ -630,7 +630,7 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 
@@ -851,7 +851,7 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 			<state name="dest_blend" value="inv_src_alpha"/>
 
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 	

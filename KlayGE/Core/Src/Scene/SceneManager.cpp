@@ -283,6 +283,11 @@ namespace KlayGE
 					add = true;
 				}
 			}
+
+			if (urt_ & App3DFramework::URV_Special_Shading_Only)
+			{
+				add &= obj->SpecialShading();
+			}
 		}
 		else
 		{

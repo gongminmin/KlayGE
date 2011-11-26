@@ -11,8 +11,6 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mvp"/>
-
-		<parameter type="float3" name="depth_near_far_invfar"/>
 	</cbuffer>
 
 	<cbuffer name="model">
@@ -117,7 +115,7 @@ float4 ConstructGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to
 	return StoreGBuffer(normal, specular, shininess);
 }
 
-void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1, float opacity,
+void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 					out float4 mrt_0, out float4 mrt_1)
 {
 	float3 normal;
@@ -135,7 +133,7 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 		diffuse = diffuse_clr.rgb;
 	}
 	
-	StoreMRTGBuffer(normal, specular, shininess, diffuse, opacity,
+	StoreMRTGBuffer(normal, specular, shininess, diffuse,
 		mrt_0, mrt_1);
 }
 
@@ -153,29 +151,14 @@ float4 GBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, 1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
 void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, 1, mrt_0, mrt_1);
-}
-
-void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
-{
-	float opacity;
-	if (opacity_map_enabled)
-	{
-		opacity = diffuse_tex.Sample(aniso_sampler, texcoord_2xy.xy).a;
-	}
-	else
-	{
-		opacity = opacity_clr;
-	}
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, opacity, mrt_0, mrt_1);
+	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -256,7 +239,7 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
+			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
@@ -553,18 +536,8 @@ float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
 	return CalcShading(tc, diffuse, emit, opacity);
 }
 
-float4 SpecialShadingPS(float2 texcoord : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1
-#else
-	float3 tc_w : TEXCOORD1
-#endif
-	) : SV_Target
+float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-
 	float3 emit;
 	if (emit_clr.w > 0.5f)
 	{
@@ -574,7 +547,30 @@ float4 SpecialShadingPS(float2 texcoord : TEXCOORD0,
 	{
 		emit = emit_clr.rgb;
 	}
-	return float4(max(emit, 0), 0);
+	return float4(max(emit, 0), 1);
+}
+
+float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float3 emit;
+	if (emit_clr.w > 0.5f)
+	{
+		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		emit = emit_clr.rgb;
+	}
+	float opacity;
+	if (opacity_map_enabled)
+	{
+		opacity = diffuse_tex.Sample(aniso_sampler, texcoord).a;
+	}
+	else
+	{
+		opacity = opacity_clr;
+	}
+	return float4(max(emit, 0), opacity);
 }
 
 void ShadingSkyBoxVS(float4 pos : POSITION,
@@ -609,27 +605,16 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="ShadingPS()"/>
 		</pass>
 	</technique>
-
-	<technique name="ShadingAlphaBlendBackTech">
+	<technique name="ShadingAlphaBlendBackTech" inherit="ShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
+			
 			<state name="pixel_shader" value="ShadingAlphaBlendPS()"/>
 		</pass>
 	</technique>
-	<technique name="ShadingAlphaBlendFrontTech">
+	<technique name="ShadingAlphaBlendFrontTech" inherit="ShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
-			<state name="depth_enable" value="true"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="ShadingAlphaBlendPS()"/>
 		</pass>
 	</technique>
 
@@ -669,20 +654,20 @@ float4 ShadingSkyBoxPS(float3 texcoord : TEXCOORD0) : SV_Target
 			<state name="src_blend" value="one"/>
 			<state name="dest_blend" value="one"/>
 			<state name="blend_op_alpha" value="add"/>
-			<state name="src_blend_alpha" value="one"/>
-			<state name="dest_blend_alpha" value="one"/>
+			<state name="src_blend_alpha" value="src_alpha"/>
+			<state name="dest_blend_alpha" value="zero"/>
 
 			<state name="vertex_shader" value="ShadingVS()"/>
 			<state name="pixel_shader" value="SpecialShadingPS()"/>
 		</pass>
 	</technique>
-
 	<technique name="SpecialShadingAlphaBlendBackTech" inherit="SpecialShadingTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
+
+			<state name="pixel_shader" value="SpecialShadingAlphaBlendPS()"/>
 		</pass>
 	</technique>
-
 	<technique name="SpecialShadingAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendBackTech">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>

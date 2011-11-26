@@ -305,6 +305,8 @@ namespace KlayGE
 
 			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
 			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
+
+			special_shading_ = true;
 		}
 		else
 		{
