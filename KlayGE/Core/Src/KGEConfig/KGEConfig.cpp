@@ -143,11 +143,11 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 				SendMessage(hResCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(buf));
 
 				std::ostringstream oss;
-				oss << cfg.graphics_cfg.width << "x" << cfg.graphics_cfg.height;
+				oss << cfg.graphics_cfg.width << "x" << cfg.graphics_cfg.height << ' ';
 
 				std::string str;
 				Convert(str, buf);
-				if (str == oss.str())
+				if (0 == str.find(oss.str()))
 				{
 					sel = i;
 				}

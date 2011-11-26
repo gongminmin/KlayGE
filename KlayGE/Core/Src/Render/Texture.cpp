@@ -1965,7 +1965,7 @@ namespace KlayGE
 					break;
 
 				case EF_A8:
-					desc.pixel_format.flags |= DDSPF_ALPHAPIXELS;
+					desc.pixel_format.flags |= DDSPF_ALPHA;
 					desc.pixel_format.rgb_bit_count = 8;
 
 					desc.pixel_format.rgb_alpha_bit_mask = 0x000000FF;
