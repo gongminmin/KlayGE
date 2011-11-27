@@ -403,7 +403,7 @@ void ModelViewerApp::InitObjects()
 	id_textures_ = dialog_model_->IDFromName("TextureList");
 	id_visualize_ = dialog_model_->IDFromName("VisualizeCombo");
 	id_line_mode_ = dialog_model_->IDFromName("LineModeCheck");
-	
+
 	tbController_.AttachCamera(this->ActiveCamera());
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
@@ -464,7 +464,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 	Box const & bb = model_->GetBound();
 	float3 center = bb.Center();
 	float3 half_size = bb.HalfSize();
-	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, half_size.y() * 0.5f, 0), float3(0.0f, 1.0f, 0.0f));
+	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, center.y(), 0), float3(0.0f, 1.0f, 0.0f));
 	this->Proj(0.1f, std::max(200.0f, MathLib::length(half_size) * 5));
 	this->FPSCameraHandler(*dialog_animation_->Control<UICheckBox>(id_fps_camera_));
 
