@@ -109,15 +109,32 @@ void CalcPosLH(float3 pos,
 				out float4 oPos,
 				out float2 oTsToView0_2xy,
 				out float4 oTsToView0_2z,
-				out float3 oTsToView1)
+				out float4 oTsToView1_Depth,
+#ifdef NOPERSPECTIVE_SUPPORT
+				out noperspective float2 oScreenTc
+#else
+				out float3 oScreenTc
+#endif
+				)
 {
 	oPos = mul(float4(pos, 1), mvp);
 
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
 	oTsToView0_2z.xyz = ts_to_view[0];
-	oTsToView1 = ts_to_view[1];
+	oTsToView1_Depth.xyz = ts_to_view[1];
 	oTsToView0_2xy.xy = ts_to_view[2].xy;
 	oTsToView0_2z.w = ts_to_view[2].z;
+	
+	oTsToView1_Depth.w = oPos.w;
+	
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= flipping;
+	oScreenTc.xy += 0.5f;
+	
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
 }
 
 float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 normal,
@@ -174,7 +191,12 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 			float4 tangent : TANGENT,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
-			out float3 oTsToView1 : TEXCOORD2,
+			out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+			out float3 oScreenTc : TEXCOORD3,
+#endif
 			out float4 oPos : SV_Position)
 {
 #ifdef KLAYGE_OPENGL
@@ -194,7 +216,8 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 				
 	CalcPosLH(result_pos, obj_to_ts,
-				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1);
+				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
+				oScreenTc);
 }
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
@@ -306,42 +329,26 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="GBufferFillMRTTech">
+	<technique name="GBufferFillMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferFillBlendBackMRTTech">
-		<pass name="p0">
-			<state name="depth_func" value="greater"/>
-			
+	<technique name="GBufferFillBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
+		<pass name="p0">			
 			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferFillBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
+	<technique name="GBufferFillBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
 		<pass name="p0">
-			<state name="depth_func" value="less"/>
-
 			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
 
@@ -585,7 +592,12 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 
 							out float4 oTexCoord_2xy : TEXCOORD0,
 							out float4 oTsToView0_2z : TEXCOORD1,
-							out float3 oTsToView1 : TEXCOORD2,
+							out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+							out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+							out float3 oScreenTc : TEXCOORD3,
+#endif
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -601,45 +613,33 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 
 	CalcPosLH(pos, obj_to_ts,
-				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1);
+				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
+				oScreenTc);
 }
 		]]>
 	</shader>
 
-	<technique name="GBufferFillSmooth5MRTTech">
+	<technique name="GBufferFillSmooth5MRTTech" inherit="GBufferFillMRTTech">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
-
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferFillBlendBackSmooth5MRTTech">
+	<technique name="GBufferFillBlendBackSmooth5MRTTech" inherit="GBufferFillBlendBackMRTTech">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
-
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
 			<state name="domain_shader" value="SmoothDS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferFillBlendFrontSmooth5MRTTech" inherit="GBufferFillBlendBackSmooth5MRTTech">
+	<technique name="GBufferFillBlendFrontSmooth5MRTTech" inherit="GBufferFillBlendFrontMRTTech">
 		<pass name="p0">
-			<state name="depth_func" value="less"/>
-
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
 
@@ -782,7 +782,12 @@ void InstTessSmoothVS(float2 barycentric : TEXCOORD1,
 					
 					out float4 oTexCoord_2xy : TEXCOORD0,
 					out float4 oTsToView0_2z : TEXCOORD1,
-					out float3 oTsToView1 : TEXCOORD2,
+					out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+					out float3 oScreenTc : TEXCOORD3,
+#endif
 					out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -791,7 +796,8 @@ void InstTessSmoothVS(float2 barycentric : TEXCOORD1,
 					oTexCoord_2xy.xy, pos, obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
 
 	CalcPosLH(pos, obj_to_ts,
-				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1);
+				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
+				oScreenTc);
 }
 
 void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
@@ -829,38 +835,21 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 
 
 
-	<technique name="GBufferFillSmooth4MRTTech">
+	<technique name="GBufferFillSmooth4MRTTech" inherit="GBufferFillMRTTech">
 		<pass name="p0">
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
-
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="GBufferFillBlendBackSmooth4MRTTech">
+	<technique name="GBufferFillBlendBackSmooth4MRTTech" inherit="GBufferFillBlendBackMRTTech">
 		<pass name="p0">
-			<state name="depth_func" value="greater"/>
-
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="front"/>
-
-			<state name="blend_enable" value="true"/>
-			<state name="src_blend" value="src_alpha"/>
-			<state name="dest_blend" value="inv_src_alpha"/>
-
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
 		</pass>
 	</technique>
 	
-	<technique name="GBufferFillBlendFrontSmooth4MRTTech" inherit="GBufferFillBlendBackSmooth4MRTTech">
+	<technique name="GBufferFillBlendFrontSmooth4MRTTech" inherit="GBufferFillBlendFrontMRTTech">
 		<pass name="p0">
-			<state name="depth_func" value="less"/>
-
-			<state name="polygon_mode" value="fill"/>
-			<state name="cull_mode" value="back"/>
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
 

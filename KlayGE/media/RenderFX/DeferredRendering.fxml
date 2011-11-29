@@ -579,13 +579,9 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	return float4(max(diff_lighting * diffuse.rgb + specular_normalize_factor(shininess) * spec_lighting * fresnel_term_schlick(normalize(view_dir), normal, diffuse.a), 0), 1);
 }
 
-void MergeShadingPS(float2 tc : TEXCOORD0,
-			out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
+float4 MergeShadingPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	oClr = shading_tex.Sample(point_sampler, tc);
-	float depth = depth_tex.Sample(point_sampler, tc).r;
-	clip(depth - 1e-3f);
-	oDepth = depth;
+	return shading_tex.Sample(point_sampler, tc);
 }
 		]]>
 	</shader>
@@ -635,6 +631,8 @@ void MergeShadingPS(float2 tc : TEXCOORD0,
 	<technique name="MergeShadingAlphaBlendTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
 			
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>

@@ -1245,11 +1245,9 @@ namespace KlayGE
 					opaque_shading_tex_->CopyToTexture(*all_shading_tex_);						
 					if (has_transparency_objs_)
 					{
-						*depth_tex_param_ = transparency_back_ds_tex_;
 						*shading_tex_param_ = transparency_back_shading_tex_;
 						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
 						
-						*depth_tex_param_ = transparency_front_ds_tex_;
 						*shading_tex_param_ = transparency_front_shading_tex_;
 						re.Render(*technique_merge_shading_alpha_blend_, *rl_quad_);
 					}

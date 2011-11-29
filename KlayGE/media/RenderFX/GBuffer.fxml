@@ -11,6 +11,7 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mvp"/>
+		<parameter type='int' name='flipping'/>
 	</cbuffer>
 
 	<cbuffer name="model">
@@ -30,6 +31,11 @@
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="height_tex"/>
 
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
 	<parameter type="sampler" name="bilinear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
 		<state name="address_u" value="wrap"/>
@@ -58,15 +64,26 @@
 		<annotation type="string" name="SasResourceAddress" value="normals_fitting.dds"/>
 	</parameter>
 
+	<parameter type="texture2D" name="opaque_depth_tex"/>
+
 	<shader>
 		<![CDATA[
+#ifdef KLAYGE_D3D11
+#define NOPERSPECTIVE_SUPPORT
+#endif
+
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float3 normal : NORMAL,
 			float4 tangent : TANGENT,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
-			out float3 oTsToView1 : TEXCOORD2,
+			out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+			out float3 oScreenTc : TEXCOORD3,
+#endif
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
@@ -81,9 +98,20 @@ void GBufferVS(float4 pos : POSITION,
 	obj_to_ts[2] = normal;
 	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
 	oTsToView0_2z.xyz = ts_to_view[0];
-	oTsToView1 = ts_to_view[1];
+	oTsToView1_Depth.xyz = ts_to_view[1];
 	oTexCoord_2xy.zw = ts_to_view[2].xy;
 	oTsToView0_2z.w = ts_to_view[2].z;
+	
+	oTsToView1_Depth.w = oPos.w;
+	
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= flipping;
+	oScreenTc.xy += 0.5f;
+	
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
 }
 
 float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
@@ -149,6 +177,26 @@ float4 GBufferAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z
 	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
 
+float4 GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3
+#else
+					float3 screen_tc_w : TEXCOORD3
+#endif
+			) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	if (ts_to_view1_depth.w > opaque_depth_tex.Sample(point_sampler, screen_tc).r)
+	{
+		discard;
+	}
+	
+	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
+}
+
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
@@ -160,6 +208,26 @@ void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 {
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+}
+
+void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3,
+#else
+					float3 screen_tc_w : TEXCOORD3,
+#endif
+					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	if (ts_to_view1_depth.w > opaque_depth_tex.Sample(point_sampler, screen_tc).r)
+	{
+		discard;
+	}
+
+	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
 }
 
 void GBufferSkyBoxVS(float4 pos : POSITION,
@@ -200,7 +268,7 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="cull_mode" value="front"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaTestPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaBlendPS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferAlphaBlendFrontTech" inherit="GBufferAlphaBlendBackTech">
@@ -240,7 +308,7 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 			<state name="back_stencil_pass" value="replace"/>
 
 			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferMRTPS()"/>
+			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
@@ -414,16 +482,6 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 	<parameter type="textureCUBE" name="skybox_C_tex"/>
 
 	<parameter type="texture2D" name="lighting_tex"/>
-
-	<parameter type="sampler" name="point_sampler">
-		<state name="filtering" value="min_mag_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
-	</parameter>
-
-	<cbuffer name="per_frame2">
-		<parameter type='int' name='flipping'/>
-	</cbuffer>
 	
 	<shader>
 		<![CDATA[

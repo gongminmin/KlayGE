@@ -84,8 +84,8 @@ namespace KlayGE
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
-				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
+				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
 				break;
 
 			case PT_GenShadowMap:
@@ -272,6 +272,7 @@ namespace KlayGE
 		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
 		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
 		flipping_param_ = deferred_effect_->ParameterByName("flipping");
+		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");
 	}
 
 	RenderTechniquePtr const & Renderable::PassTech(PassType type) const
