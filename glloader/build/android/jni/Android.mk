@@ -1,5 +1,3 @@
-TARGET_PLATFORM := android-9
-
 LOCAL_PATH := $(call my-dir)
 GLLOADER_PATH := $(LOCAL_PATH)
 GLLOADER_SRC_PATH := $(LOCAL_PATH)/../../../src
