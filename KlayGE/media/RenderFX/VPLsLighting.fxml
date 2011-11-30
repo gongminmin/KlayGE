@@ -62,10 +62,9 @@ void CalcVPLsLightingShape(float4 pos,
 	float3 view_vec = normalize(rot_pos);
 	float3 halfway = normalize(light_vec + view_vec);
 
-	float cos_ij = normalize(pos.xyz).y;
-	oVPLColor = albedo.w * cos_ij * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
+	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
 
-	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 18;
+	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
 	oPos = mul(float4(oViewDir.xyz, 1), proj);
 
