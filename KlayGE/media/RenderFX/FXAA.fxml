@@ -22,7 +22,7 @@ float3 DebugFxaaPixelShader(float2 pos)
 {
 	float lumaN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).w;
 	float lumaW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).w;
-	float lumaM = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +0) * inv_width_height, 0).w;
+	float lumaM = color_tex.SampleLevel(linear_sampler, pos.xy, 0).w;
 	float lumaE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +0) * inv_width_height, 0).w;
 	float lumaS = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, +1) * inv_width_height, 0).w;
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
@@ -30,24 +30,37 @@ float3 DebugFxaaPixelShader(float2 pos)
 	float range = rangeMax - rangeMin;
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
-		return lumaM / (1.0 + (0.587f / 0.299f));
+		return lumaM / (1 + (0.587f / 0.299f));
 	}
-
-	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
-	float rangeL = abs(lumaL - lumaM);
-	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
-	blendL = min(0.75f, blendL);
 
 	float lumaNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
 	float lumaNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
 	float lumaSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
 	float lumaSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
-	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
-		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
-		+ abs(lumaSW + (-2 * lumaS) + lumaSE);
-	float edgeHorz = abs(lumaNW + (-2 * lumaW) + lumaSW)
-		+ 2 * abs(lumaN  + (-2 * lumaM) + lumaS )
-		+ abs(lumaNE + (-2 * lumaE) + lumaSE);
+
+	float lumaNS = lumaN + lumaS;
+	float lumaWE = lumaW + lumaE;
+	float subpixRcpRange = 1 / range;
+	float subpixNSWE = lumaNS + lumaWE;
+	float edgeHorz1 = -2 * lumaM + lumaNS;
+	float edgeVert1 = -2 * lumaM + lumaWE;
+	
+	float lumaNESE = lumaNE + lumaSE;
+	float lumaNWNE = lumaNW + lumaNE;
+	float edgeHorz2 = -2 * lumaE + lumaNESE;
+	float edgeVert2 = -2 * lumaN + lumaNWNE;
+
+	float lumaNWSW = lumaNW + lumaSW;
+	float lumaSWSE = lumaSW + lumaSE;
+	float edgeHorz4 = abs(edgeHorz1) * 2 + abs(edgeHorz2);
+	float edgeVert4 = abs(edgeVert1) * 2 + abs(edgeVert2);
+	float edgeHorz3 = -2 * lumaW + lumaNWSW;
+	float edgeVert3 = -2 * lumaS + lumaSWSE;
+	float edgeHorz = abs(edgeHorz3) + edgeHorz4;
+	float edgeVert = abs(edgeVert3) + edgeVert4;
+	
+	float subpixNWSWNESE = lumaNWSW + lumaNESE;
+	float lengthSign = inv_width_height.x;
 	bool horzSpan = edgeHorz >= edgeVert;
 	if (horzSpan)
 	{
@@ -61,6 +74,8 @@ float3 DebugFxaaPixelShader(float2 pos)
 
 float3 FxaaPixelShader(float2 pos)
 {
+	float2 posM = pos;
+	
 	float4 rgbyM = color_tex.SampleLevel(linear_sampler, pos.xy, 0);
 	float lumaN = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+0, -1) * inv_width_height, 0).w;
 	float lumaW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +0) * inv_width_height, 0).w;
@@ -74,113 +89,165 @@ float3 FxaaPixelShader(float2 pos)
 	{
 		return rgbyM.xyz;
 	}
-	
-	float lumaL = (lumaN + lumaW + lumaE + lumaS) * 0.25f;
-	float rangeL = abs(lumaL - lumaM);
-	float blendL = saturate((rangeL / range) - 0.25f) / 0.75f;
-	blendL = min(0.75f, blendL);
 
 	float lumaNW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
 	float lumaNE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
 	float lumaSW = color_tex.SampleLevel(linear_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
 	float lumaSE = color_tex.SampleLevel(linear_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
+
+	float lumaNS = lumaN + lumaS;
+	float lumaWE = lumaW + lumaE;
+	float subpixRcpRange = 1 / range;
+	float subpixNSWE = lumaNS + lumaWE;
+	float edgeHorz1 = -2 * lumaM + lumaNS;
+	float edgeVert1 = -2 * lumaM + lumaWE;
 	
-	float edgeVert = abs(lumaNW + (-2 * lumaN) + lumaNE)
-		+ 2 * abs(lumaW  + (-2 * lumaM) + lumaE )
-		+ abs(lumaSW + (-2 * lumaS) + lumaSE);
-	float edgeHorz = abs(lumaNW + (-2 * lumaW) + lumaSW)
-		+ 2 * abs(lumaN  + (-2 * lumaM) + lumaS )
-		+ abs(lumaNE + (-2 * lumaE) + lumaSE);
+	float lumaNESE = lumaNE + lumaSE;
+	float lumaNWNE = lumaNW + lumaNE;
+	float edgeHorz2 = -2 * lumaE + lumaNESE;
+	float edgeVert2 = -2 * lumaN + lumaNWNE;
+
+	float lumaNWSW = lumaNW + lumaSW;
+	float lumaSWSE = lumaSW + lumaSE;
+	float edgeHorz4 = abs(edgeHorz1) * 2 + abs(edgeHorz2);
+	float edgeVert4 = abs(edgeVert1) * 2 + abs(edgeVert2);
+	float edgeHorz3 = -2 * lumaW + lumaNWSW;
+	float edgeVert3 = -2 * lumaS + lumaSWSE;
+	float edgeHorz = abs(edgeHorz3) + edgeHorz4;
+	float edgeVert = abs(edgeVert3) + edgeVert4;
+	
+	float subpixNWSWNESE = lumaNWSW + lumaNESE;
+	float lengthSign = inv_width_height.x;
 	bool horzSpan = edgeHorz >= edgeVert;
-	float lengthSign = horzSpan ? -inv_width_height.y : -inv_width_height.x;
+	float subpixA = subpixNSWE * 2 + subpixNWSWNESE;
+
 	if (!horzSpan)
 	{
 		lumaN = lumaW;
-	}
-	if (!horzSpan)
-	{
 		lumaS = lumaE;
 	}
-	float gradientN = abs(lumaN - lumaM);
-	float gradientS = abs(lumaS - lumaM);
-	lumaN = (lumaN + lumaM) * 0.5f;
-	lumaS = (lumaS + lumaM) * 0.5f;
+	else
+	{
+		lengthSign = inv_width_height.y;
+	}
+	float subpixB = subpixA / 12 - lumaM;
+	float gradientN = lumaN - lumaM;
+	float gradientS = lumaS - lumaM;
+	float lumaNN = lumaN + lumaM;
+	float lumaSS = lumaS + lumaM;
+	bool pairN = abs(gradientN) >= abs(gradientS);
+	float gradient = max(abs(gradientN), abs(gradientS));
+	if (pairN)
+	{
+		lengthSign = -lengthSign;
+	}
+	float subpixC = saturate(abs(subpixB) * subpixRcpRange);
 
-	bool pairN = gradientN >= gradientS;
+	float2 posB = posM;
+	float2 offNP;
+	if (!horzSpan)
+	{
+		offNP.x = 0;
+		offNP.y = inv_width_height.y;
+		posB.x += lengthSign * 0.5f;
+	}
+	else
+	{
+		offNP.x = inv_width_height.x;
+		offNP.y = 0;
+		posB.y += lengthSign * 0.5f;
+	}
+
+	float2 posN = posB - offNP;
+	float2 posP = posB + offNP;
+	float subpixD = -2 * subpixC + 3;
+	float lumaEndN = color_tex.SampleLevel(linear_sampler, posN, 0).w;
+	float subpixE = subpixC * subpixC;
+	float lumaEndP = color_tex.SampleLevel(linear_sampler, posP, 0).w;
+
 	if (!pairN)
 	{
-		lumaN = lumaS;
-		gradientN = gradientS;
-		lengthSign *= -1;
+		lumaNN = lumaSS;
 	}
-	float2 posN;
-	posN.x = pos.x + (horzSpan ? 0 : lengthSign * 0.5f);
-	posN.y = pos.y + (horzSpan ? lengthSign * 0.5f : 0);
+	float gradientScaled = gradient / 4;
+	float lumaMM = lumaM - lumaNN * 0.5f;
+	float subpixF = subpixD * subpixE;
+	bool lumaMLTZero = lumaMM < 0;
 
-	gradientN *= 0.25f;
-
-	float2 posP = posN;
-	float2 offNP = horzSpan ? float2(inv_width_height.x, 0) : float2(0, inv_width_height.y); 
-	float lumaEndN;
-	float lumaEndP;
-	bool doneN = false;
-	bool doneP = false;
-	posN -= offNP * 1.5f;
-	posP += offNP * 1.5f;
-	for (int i = 0; i < 6; ++ i)
+	lumaEndN -= lumaNN * 0.5f;
+	lumaEndP -= lumaNN * 0.5f;
+	bool doneN = abs(lumaEndN) >= gradientScaled;
+	bool doneP = abs(lumaEndP) >= gradientScaled;
+	if (!doneN)
 	{
-		lumaEndN = color_tex.SampleLevel(linear_sampler, posN.xy, 0).w;
-		lumaEndP = color_tex.SampleLevel(linear_sampler, posP.xy, 0).w;
-		bool doneN2 = abs(lumaEndN - lumaN) >= gradientN;
-		bool doneP2 = abs(lumaEndP - lumaN) >= gradientN;
-		if (doneN2 && !doneN)
-		{
-			posN += offNP;
-		}
-		if (doneP2 && !doneP)
-		{
-			posP -= offNP;
-		}
-		if (doneN2 && doneP2)
-		{
-			break;
-		}
-		doneN = doneN2;
-		doneP = doneP2;
+		posN -= offNP * 1.5f;
+	}
+	bool doneNP = (!doneN) || (!doneP);
+	if (!doneP)
+	{
+		posP += offNP * 1.5f;
+	}
+
+	float step = 2;
+	for (int i = 0; (i < 3) && doneNP; ++ i)
+	{
+		step *= i + 1;
+
 		if (!doneN)
 		{
-			posN -= offNP * 2;
+			lumaEndN = color_tex.SampleLevel(linear_sampler, posN.xy, 0).w;
+			lumaEndN = lumaEndN - lumaNN * 0.5f;
 		}
 		if (!doneP)
 		{
-			posP += offNP * 2;
+			lumaEndP = color_tex.SampleLevel(linear_sampler, posP.xy, 0).w;
+			lumaEndP = lumaEndP - lumaNN * 0.5f;
+		}
+		doneN = abs(lumaEndN) >= gradientScaled;
+		doneP = abs(lumaEndP) >= gradientScaled;
+		if (!doneN)
+		{
+			posN -= offNP * step;
+		}
+		doneNP = (!doneN) || (!doneP);
+		if (!doneP)
+		{
+			posP += offNP * step;
 		}
 	}
-
-	float dstN = horzSpan ? pos.x - posN.x : pos.y - posN.y;
-	float dstP = horzSpan ? posP.x - pos.x : posP.y - pos.y;
-	bool directionN = dstN < dstP;
-	lumaEndN = directionN ? lumaEndN : lumaEndP;
-
-	if ((lumaM - lumaN < 0) == (lumaEndN - lumaN < 0)) 
+	
+	float dstN = posM.x - posN.x;
+	float dstP = posP.x - posM.x;
+	if (!horzSpan)
 	{
-		lengthSign = 0.0f;
+		dstN = posM.y - posN.y;
+		dstP = posP.y - posM.y;
 	}
 
+	bool goodSpanN = (lumaEndN < 0) != lumaMLTZero;
 	float spanLength = (dstP + dstN);
-	dstN = directionN ? dstN : dstP;
-	float subPixelOffset = 0.5f + (dstN * (-1 / spanLength));
-	subPixelOffset += blendL * 0.125f;
-	subPixelOffset *= lengthSign;
-	float4 rgbyF = color_tex.SampleLevel(linear_sampler, float2(
-		pos.x + (horzSpan ? 0 : subPixelOffset),
-		pos.y + (horzSpan ? subPixelOffset : 0)), 0);
+	bool goodSpanP = (lumaEndP < 0) != lumaMLTZero;
+	float spanLengthRcp = 1 / spanLength;
 
-	float lumaF = rgbyF.w + 1 / (65536.0f * 256);
-	float lumaB = lerp(lumaF, lumaL, blendL);
-	float scale = min(4, lumaB / lumaF);
-	rgbyF.xyz *= scale;
-	return rgbyF.xyz;
+	bool directionN = dstN < dstP;
+	float dst = min(dstN, dstP);
+	bool goodSpan = directionN ? goodSpanN : goodSpanP;
+	float subpixG = subpixF * subpixF;
+	float pixelOffset = dst * -spanLengthRcp + 0.5f;
+	float subpixH = subpixG * 0.75f;
+
+	float pixelOffsetGood = goodSpan ? pixelOffset : 0;
+	float pixelOffsetSubpix = max(pixelOffsetGood, subpixH);
+	if (!horzSpan)
+	{
+		posM.x += pixelOffsetSubpix * lengthSign;
+	}
+	else
+	{
+		posM.y += pixelOffsetSubpix * lengthSign;
+	}
+
+	return color_tex.SampleLevel(linear_sampler, posM, 0).xyz;
 }
 
 float4 FXAAPS(float2 tc0 : TEXCOORD0) : SV_Target
