@@ -190,8 +190,6 @@ void DetailedSkinnedMesh::OnRenderBegin()
 {
 	SkinnedMesh::OnRenderBegin();
 	
-	*(deferred_effect_->ParameterByName("has_skinned")) = static_cast<int32_t>(has_skinned_);
-
 	RenderModelPtr model = model_.lock();
 	if (model)
 	{
@@ -274,9 +272,10 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 void DetailedSkinnedMesh::UpdateTech()
 {
 	boost::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
-	gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
-	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
-	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][line_mode_][smooth_mesh_];
+	gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+	gbuffer_alpha_test_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
+	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][line_mode_][smooth_mesh_][has_skinned_];
 }
 
 void DetailedSkinnedMesh::Render()
@@ -329,6 +328,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 	}
 
 	std::string g_buffer_mrt_tech_str;
+	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
 	std::string g_buffer_alpha_blend_front_mrt_tech_str;
 	for (int i = 0; i < 3; ++ i)
@@ -337,58 +337,76 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		{
 			for (int k = 0; k < 2; ++ k)
 			{
-				switch (i)
+				for (int l = 0; l < 2; ++ l)
 				{
-				case 0:
-					g_buffer_mrt_tech_str = "GBuffer";
-					break;
-
-				case 1:
-					g_buffer_mrt_tech_str = "VisualizeVertex";
-					break;
-
-				default:
-					g_buffer_mrt_tech_str = "VisualizeTexture";
-					break;
-				}
-
-				if (0 == j)
-				{
-					g_buffer_mrt_tech_str += "Fill";
-				}
-				else
-				{
-					g_buffer_mrt_tech_str += "Line";
-				}
-				g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
-				g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
-				if (0 == i)
-				{
-					g_buffer_alpha_blend_back_mrt_tech_str += "BlendBack";
-					g_buffer_alpha_blend_front_mrt_tech_str += "BlendFront";
-				}
-
-				if (1 == k)
-				{
-					RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-					switch (caps.tess_method)
+					switch (i)
 					{
-					case TM_Hardware:
-						g_buffer_mrt_tech_str += "Smooth5";
+					case 0:
+						g_buffer_mrt_tech_str = "GBuffer";
 						break;
 
-					case TM_Instanced:
-						g_buffer_mrt_tech_str += "Smooth4";
+					case 1:
+						g_buffer_mrt_tech_str = "VisualizeVertex";
 						break;
 
-					case TM_No:
+					default:
+						g_buffer_mrt_tech_str = "VisualizeTexture";
 						break;
 					}
-				}
 
-				gbuffer_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
-				gbuffer_alpha_blend_back_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
-				gbuffer_alpha_blend_front_mrt_techs_[i][j][k] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
+					if (0 == j)
+					{
+						g_buffer_mrt_tech_str += "Fill";
+					}
+					else
+					{
+						g_buffer_mrt_tech_str += "Line";
+					}
+					
+					if (1 == l)
+					{
+						g_buffer_mrt_tech_str += "Skinned";
+					}
+					
+					g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
+					g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
+					g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
+					if (0 == i)
+					{
+						g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
+						g_buffer_alpha_blend_back_mrt_tech_str += "BlendBack";
+						g_buffer_alpha_blend_front_mrt_tech_str += "BlendFront";
+					}
+
+					if (1 == k)
+					{
+						RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+						switch (caps.tess_method)
+						{
+						case TM_Hardware:
+							g_buffer_mrt_tech_str += "Smooth5";
+							g_buffer_alpha_test_mrt_tech_str += "Smooth5";
+							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth5";
+							g_buffer_alpha_blend_front_mrt_tech_str += "Smooth5";
+							break;
+
+						case TM_Instanced:
+							g_buffer_mrt_tech_str += "Smooth4";
+							g_buffer_alpha_test_mrt_tech_str += "Smooth4";
+							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth4";
+							g_buffer_alpha_blend_front_mrt_tech_str += "Smooth4";
+							break;
+
+						case TM_No:
+							break;
+						}
+					}
+
+					gbuffer_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
+					gbuffer_alpha_test_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
+					gbuffer_alpha_blend_back_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
+					gbuffer_alpha_blend_front_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
+				}
 			}
 		}
 	}

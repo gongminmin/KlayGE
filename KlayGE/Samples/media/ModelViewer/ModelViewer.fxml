@@ -10,8 +10,6 @@
 	<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
 	<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
 
-	<parameter type="int" name="has_skinned"/>
-
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
 		<state name="address_u" value="wrap"/>
@@ -73,6 +71,31 @@ void Skinned(float3 pos,
 
 void CalcMesh(float2 tex0,
 				float4 pos,
+				float3 N,
+				float4 T,
+
+				out float2 oTex,
+				out float3 oPos,
+				out float3 oNormal,
+				out float3 oTangent,
+				out float3 oBinormal)
+{
+	N = N * 2 - 1;
+	T = T * 2 - 1;
+	
+	oPos = pos.xyz;
+	oTangent = T.xyz;
+	oNormal = N;
+
+	oNormal = normalize(oNormal);
+	oTangent = normalize(oTangent);
+	oBinormal = cross(oNormal, oTangent) * T.w;
+
+	oTex = tex0;
+}
+
+void CalcSkinnedMesh(float2 tex0,
+				float4 pos,
 				float4 blend_weights,
 				int4 blend_indices,
 				float3 N,
@@ -87,16 +110,8 @@ void CalcMesh(float2 tex0,
 	N = N * 2 - 1;
 	T = T * 2 - 1;
 	
-	if (has_skinned)
-	{
-		Skinned(pos.xyz, N, T.xyz, blend_weights, blend_indices, oPos, oNormal, oTangent);
-	}
-	else
-	{
-		oPos = pos.xyz;
-		oTangent = T.xyz;
-		oNormal = N;
-	}
+	Skinned(pos.xyz, N, T.xyz, blend_weights, blend_indices, oPos, oNormal, oTangent);
+	
 	oNormal = normalize(oNormal);
 	oTangent = normalize(oTangent);
 	oBinormal = cross(oNormal, oTangent) * T.w;
@@ -177,6 +192,32 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 
 void MeshVS(float2 texcoord : TEXCOORD0,
 			float4 pos : POSITION,
+			float3 normal : NORMAL,
+			float4 tangent : TANGENT,
+			out float4 oTexCoord_2xy : TEXCOORD0,
+			out float4 oTsToView0_2z : TEXCOORD1,
+			out float4 oTsToView1_Depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD3,
+#else
+			out float3 oScreenTc : TEXCOORD3,
+#endif
+			out float4 oPos : SV_Position)
+{
+	float3 result_pos;
+	float3x3 obj_to_ts;
+	CalcMesh(texcoord, pos,
+				normal, tangent,
+				oTexCoord_2xy.xy, result_pos,
+				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
+				
+	CalcPosLH(result_pos, obj_to_ts,
+				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
+				oScreenTc);
+}
+
+void SkinnedMeshVS(float2 texcoord : TEXCOORD0,
+			float4 pos : POSITION,
 			float4 blend_weights : BLENDWEIGHT,
 #ifdef KLAYGE_OPENGL
 			float4 blend_indices_f : BLENDINDICES,
@@ -209,7 +250,7 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 
 	float3 result_pos;
 	float3x3 obj_to_ts;
-	CalcMesh(texcoord, pos,
+	CalcSkinnedMesh(texcoord, pos,
 				blend_weights, blend_indices,
 				normal, tangent,
 				oTexCoord_2xy.xy, result_pos,
@@ -221,6 +262,27 @@ void MeshVS(float2 texcoord : TEXCOORD0,
 }
 
 void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
+				float3 N	: NORMAL,	// in object space
+				float4 T	: TANGENT,	// in object space
+				
+				out float4 oClr : COLOR,
+				out float4 oPos : SV_Position)
+{
+	float3 result_pos;
+	float3x3 obj_to_ts;
+	float2 oTex;
+	CalcMesh(tex0, pos,
+				N, T,
+				oTex, result_pos,
+				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
+
+	oPos = mul(float4(result_pos, 1), mvp);
+	oClr = VisualizeVertex(result_pos, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2], 0, 0, oTex);
+}
+
+
+void VisualizeVertexSkinnedVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
 #ifdef KLAYGE_OPENGL
@@ -249,7 +311,7 @@ void VisualizeVertexVS(float2 tex0 : TEXCOORD0,
 	float3 result_pos;
 	float3x3 obj_to_ts;
 	float2 oTex;
-	CalcMesh(tex0, pos,
+	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
 				N, T,
 				oTex, result_pos,
@@ -336,6 +398,30 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 			<state name="vertex_shader" value="MeshVS()"/>
 		</pass>
 	</technique>
+	
+	<technique name="GBufferFillSkinnedMRTTech" inherit="GBufferMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+
+			<state name="vertex_shader" value="SkinnedMeshVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+
+			<state name="vertex_shader" value="MeshVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillSkinnedAlphaTestMRTTech" inherit="GBufferMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+
+			<state name="vertex_shader" value="SkinnedMeshVS()"/>
+		</pass>
+	</technique>
 
 	<technique name="GBufferFillBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">			
@@ -349,6 +435,21 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 			<state name="polygon_mode" value="fill"/>
 
 			<state name="vertex_shader" value="MeshVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillSkinnedBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+
+			<state name="vertex_shader" value="SkinnedMeshVS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferFillSkinnedBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="fill"/>
+
+			<state name="vertex_shader" value="SkinnedMeshVS()"/>
 		</pass>
 	</technique>
 
@@ -371,6 +472,12 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeVertexFillSkinnedMRTTech" inherit="VisualizeVertexFillMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="VisualizeVertexSkinnedVS()"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeTextureFillMRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="fill"/>
@@ -390,7 +497,31 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeTextureFillSkinnedMRTTech" inherit="VisualizeTextureFillMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SkinnedMeshVS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GBufferLineMRTTech" inherit="GBufferFillMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedMRTTech" inherit="GBufferFillSkinnedMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineAlphaTestMRTTech" inherit="GBufferFillAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedAlphaTestMRTTech" inherit="GBufferFillSkinnedAlphaTestMRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -407,13 +538,36 @@ void VisualizeTexturePS(float2 tex0 : TEXCOORD0,
 		</pass>
 	</technique>
 
+	<technique name="GBufferLineSkinnedBlendBackMRTTech" inherit="GBufferFillSkinnedBlendBackMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferLineSkinnedBlendFrontMRTTech" inherit="GBufferFillSkinnedBlendFrontMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeVertexLineMRTTech" inherit="VisualizeVertexFillMRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
 
+	<technique name="VisualizeVertexLineSkinnedMRTTech" inherit="VisualizeVertexFillSkinnedMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeTextureLineMRTTech" inherit="VisualizeTextureFillMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineSkinnedMRTTech" inherit="VisualizeTextureFillSkinnedMRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -491,6 +645,22 @@ struct CONTROL_POINT
 
 CONTROL_POINT SmoothVS(float2 tex0 : TEXCOORD0,
 				float4 pos : POSITION,
+				float3 N	: NORMAL,
+				float4 T	: TANGENT)
+{
+	CONTROL_POINT output;
+
+	CalcMesh(tex0, pos,
+				N, T,
+				output.Texcoord0, output.Pos,
+				output.Normal, output.Tangent, output.Binormal);
+
+	return output;
+}
+
+
+CONTROL_POINT SmoothSkinnedVS(float2 tex0 : TEXCOORD0,
+				float4 pos : POSITION,
 				float4 blend_weights : BLENDWEIGHT,
 #ifdef KLAYGE_OPENGL
 				float4 blend_indices_f : BLENDINDICES,
@@ -514,7 +684,7 @@ CONTROL_POINT SmoothVS(float2 tex0 : TEXCOORD0,
 #endif
 #endif
 
-	CalcMesh(tex0, pos,
+	CalcSkinnedMesh(tex0, pos,
 				blend_weights, blend_indices,
 				N, T,
 				output.Texcoord0, output.Pos,
@@ -627,7 +797,15 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="GBufferFillBlendBackSmooth5MRTTech" inherit="GBufferFillBlendBackMRTTech">
+	<technique name="GBufferFillSkinnedSmooth5MRTTech" inherit="GBufferFillMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillAlphaTestSmooth5MRTTech" inherit="GBufferFillAlphaTestMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
 			<state name="hull_shader" value="SmoothHS()"/>
@@ -635,6 +813,21 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="GBufferFillSkinnedAlphaTestSmooth5MRTTech" inherit="GBufferFillAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillBlendBackSmooth5MRTTech" inherit="GBufferFillBlendBackMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
 	<technique name="GBufferFillBlendFrontSmooth5MRTTech" inherit="GBufferFillBlendFrontMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="SmoothVS()"/>
@@ -643,7 +836,27 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="GBufferFillSkinnedBlendBackSmooth5MRTTech" inherit="GBufferFillSkinnedBlendBackMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferFillSkinnedBlendFrontSmooth5MRTTech" inherit="GBufferFillSkinnedBlendFrontMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeVertexFillSmooth5MRTTech" inherit="VisualizeVertexFillMRTTech">
+		<pass name="p0">
+		</pass>
+	</technique>
+
+	<technique name="VisualizeVertexFillSkinnedSmooth5MRTTech" inherit="VisualizeVertexFillSkinnedMRTTech">
 		<pass name="p0">
 		</pass>
 	</technique>
@@ -656,7 +869,33 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeTextureFillSkinnedSmooth5MRTTech" inherit="VisualizeTextureFillSkinnedMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="SmoothSkinnedVS()"/>
+			<state name="hull_shader" value="SmoothHS()"/>
+			<state name="domain_shader" value="SmoothDS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GBufferLineSmooth5MRTTech" inherit="GBufferFillSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedSmooth5MRTTech" inherit="GBufferFillSkinnedSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineAlphaTestSmooth5MRTTech" inherit="GBufferFillAlphaTestSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedAlphaTestSmooth5MRTTech" inherit="GBufferFillSkinnedAlphaTestSmooth5MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -667,8 +906,18 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
-
 	<technique name="GBufferLineBlendFrontSmooth5MRTTech" inherit="GBufferFillBlendFrontSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedBlendBackSmooth5MRTTech" inherit="GBufferFillSkinnedBlendBackSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferLineSkinnedBlendFrontSmooth5MRTTech" inherit="GBufferFillSkinnedBlendFrontSmooth5MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -680,7 +929,19 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeVertexLineSkinnedSmooth5MRTTech" inherit="VisualizeVertexFillSkinnedSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeTextureLineSmooth5MRTTech" inherit="VisualizeTextureFillSmooth5MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineSkinnedSmooth5MRTTech" inherit="VisualizeTextureFillSkinnedSmooth5MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -701,33 +962,14 @@ void SkinnedStreamOutVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
 					float3 N : NORMAL,
 					float4 T : Tangent,
-					float4 blend_weights : BLENDWEIGHT,
-#ifdef KLAYGE_OPENGL
-					float4 blend_indices_f : BLENDINDICES,
-#else
-#ifdef KLAYGE_OPENGLES2
-					float4 blend_indices_f : BLENDINDICES,
-#else
-					uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
 
 					out float4 oPosOS : SV_Position,
 					out float2 oTex0 : TEXCOORD0,
 					out float4 oNormal : NORMAL,
 					out float4 oTangent : TANGENT)
 {
-#ifdef KLAYGE_OPENGL
-	int4 blend_indices = (int4)blend_indices_f;
-#else
-#ifdef KLAYGE_OPENGLES2
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
-
 	float3 result_pos, result_normal, result_tangent, result_binormal;
 	CalcMesh(texcoord0, float4(pos, 1),
-				blend_weights, blend_indices,
 				N, T,
 				oTex0, result_pos,
 				result_normal, result_tangent, result_binormal);
@@ -841,13 +1083,41 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
+	<technique name="GBufferFillSkinnedSmooth4MRTTech" inherit="GBufferFillSkinnedMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillAlphaTestSmooth4MRTTech" inherit="GBufferFillAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillSkinnedAlphaTestSmooth4MRTTech" inherit="GBufferFillSkinnedAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GBufferFillBlendBackSmooth4MRTTech" inherit="GBufferFillBlendBackMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
 	</technique>
-	
 	<technique name="GBufferFillBlendFrontSmooth4MRTTech" inherit="GBufferFillBlendFrontMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFillSkinnedBlendBackSmooth4MRTTech" inherit="GBufferFillSkinnedBlendBackMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferFillSkinnedBlendFrontSmooth4MRTTech" inherit="GBufferFillSkinnedBlendFrontMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
@@ -859,7 +1129,19 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeVertexFillSkinnedSmooth4MRTTech" inherit="VisualizeVertexFillSkinnedMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVisualizeVertexVS()"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeTextureFillSmooth4MRTTech" inherit="VisualizeTextureFillMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="InstTessSmoothVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureFillSkinnedSmooth4MRTTech" inherit="VisualizeTextureFillSkinnedMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="InstTessSmoothVS()"/>
 		</pass>
@@ -871,13 +1153,41 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
-	<technique name="GBufferLineBlendBackSmooth4MRTTech" inherit="GBufferFillBlendBackSmooth4MRTTech">
+	<technique name="GBufferLineSkinnedSmooth4MRTTech" inherit="GBufferFillSkinnedSmooth4MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
 	</technique>
 
+	<technique name="GBufferLineAlphaTestSmooth4MRTTech" inherit="GBufferFillAlphaTestSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedAlphaTestSmooth4MRTTech" inherit="GBufferFillSkinnedAlphaTestSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineBlendBackSmooth4MRTTech" inherit="GBufferFillBlendBackSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
 	<technique name="GBufferLineBlendFrontSmooth4MRTTech" inherit="GBufferFillBlendFrontSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferLineSkinnedBlendBackSmooth4MRTTech" inherit="GBufferFillSkinnedBlendBackSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferLineSkinnedBlendFrontSmooth4MRTTech" inherit="GBufferFillSkinnedBlendFrontSmooth4MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
@@ -889,7 +1199,19 @@ void InstTessSmoothVisualizeVertexVS(float2 barycentric : TEXCOORD1,
 		</pass>
 	</technique>
 
+	<technique name="VisualizeVertexLineSkinnedSmooth4MRTTech" inherit="VisualizeVertexFillSkinnedSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
 	<technique name="VisualizeTextureLineSmooth4MRTTech" inherit="VisualizeTextureFillSmooth4MRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="VisualizeTextureLineSkinnedSmooth4MRTTech" inherit="VisualizeTextureFillSkinnedSmooth4MRTTech">
 		<pass name="p0">
 			<state name="polygon_mode" value="line"/>
 		</pass>
