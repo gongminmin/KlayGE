@@ -45,6 +45,16 @@ float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float
 	return pow(max(dot(halfway_vec, normal), 0.0f), roughness) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
 }
 
+float3 specular_term(float3 halfway_vec, float3 normal, float roughness)
+{
+	return specular_normalize_factor(roughness) * roughness_term(halfway_vec, normal, roughness);
+}
+
+float3 specular_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
+{
+	return specular_normalize_factor(roughness) * roughness_term(c_spec, light_vec, halfway_vec, normal, roughness);
+}
+
 
 // diffuse only
 float3 calc_brdf(float3 c_diff, float3 l, float3 n)
@@ -54,7 +64,7 @@ float3 calc_brdf(float3 c_diff, float3 l, float3 n)
 // diffuse + specular
 float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3 h, float3 n)
 {
-	return max((c_diff + specular_normalize_factor(roughness) * roughness_term(c_spec, l, h, n, roughness)) * dot(n, l), 0);
+	return max((c_diff + specular_term(c_spec, l, h, n, roughness)) * dot(n, l), 0);
 }
 
 

@@ -98,6 +98,8 @@ namespace KlayGE
 				*shininess_param_ = std::max(1e-6f, mtl_ ? mtl_->shininess : 0);
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
+				*specular_tex_param_ = specular_tex_;
+				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*emit_tex_param_ = emit_tex_;
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
