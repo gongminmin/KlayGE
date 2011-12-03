@@ -189,11 +189,7 @@ float4 GBufferAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	if (ts_to_view1_depth.w > opaque_depth_tex.Sample(point_sampler, screen_tc).r)
-	{
-		discard;
-	}
-	
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);	
 	return ConstructGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
 
@@ -222,11 +218,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
-	if (ts_to_view1_depth.w > opaque_depth_tex.Sample(point_sampler, screen_tc).r)
-	{
-		discard;
-	}
-
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - ts_to_view1_depth.w);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
 }
 
@@ -491,16 +483,24 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 
 void ShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
+			float3 normal : NORMAL,
 			out float2 oTexCoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
 			out noperspective float2 oTc : TEXCOORD1,
 #else
 			out float3 oTc : TEXCOORD1,
 #endif
+			out float3 oViewDir : TEXCOORD2,
+			out float3 oNormal : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, mvp);
 	oTexCoord = texcoord;
+	
+	oViewDir = -mul(pos, model_view).xyz;
+	
+	normal = normal * 2 - 1;
+	oNormal = mul(normal, (float3x3)model_view);
 
 	oTc.xy = oPos.xy / oPos.w;
 	oTc.y *= flipping;
@@ -512,20 +512,21 @@ void ShadingVS(float4 pos : POSITION,
 #endif
 }
 
-float4 CalcShading(float2 tc, float3 diffuse, float3 emit, float opacity)
+float4 CalcShading(float3 view_dir, float3 normal, float2 tc, float3 diffuse, float specular, float3 emit, float opacity)
 {	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
 	float3 diff_lighting = lighting.rgb;
 	float3 spec_lighting = lighting.a / (dot(lighting.rgb, float3(0.2126f, 0.7152f, 0.0722f)) + 1e-6f) * lighting.rgb;
-	return float4(max(emit + diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting, 0), opacity);
+	return float4(max(emit + diff_lighting * diffuse + specular_normalize_factor(shininess) * spec_lighting * fresnel_term_schlick(normalize(view_dir), normal, specular), 0), opacity);
 }
 
 float4 ShadingPS(float2 texcoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1
+	noperspective float2 tc : TEXCOORD1,
 #else
-	float3 tc_w : TEXCOORD1
+	float3 tc_w : TEXCOORD1,
 #endif
+	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -540,6 +541,15 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0,
 	else
 	{
 		diffuse = diffuse_clr.rgb;
+	}
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
 	}
 	float3 emit;
 	if (emit_clr.w > 0.5f)
@@ -550,15 +560,16 @@ float4 ShadingPS(float2 texcoord : TEXCOORD0,
 	{
 		emit = emit_clr.rgb;
 	}
-	return CalcShading(tc, diffuse, emit, 1);
+	return CalcShading(view_dir, normal, tc, diffuse, specular, emit, 1);
 }
 
 float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
 #ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1
+	noperspective float2 tc : TEXCOORD1,
 #else
-	float3 tc_w : TEXCOORD1
+	float3 tc_w : TEXCOORD1,
 #endif
+	float3 view_dir : TEXCOORD2, float3 normal : TEXCOORD3
 	) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
@@ -573,6 +584,15 @@ float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
 	else
 	{
 		diffuse = diffuse_clr.rgb;
+	}
+	float specular;
+	if (specular_level.w > 0.5f)
+	{
+		specular = dot(specular_tex.Sample(aniso_sampler, texcoord).rgb, float3(0.2126f, 0.7152f, 0.0722f));
+	}
+	else
+	{
+		specular = specular_level.x;
 	}
 	float3 emit;
 	if (emit_clr.w > 0.5f)
@@ -592,7 +612,7 @@ float4 ShadingAlphaBlendPS(float2 texcoord : TEXCOORD0,
 	{
 		opacity = opacity_clr;
 	}
-	return CalcShading(tc, diffuse, emit, opacity);
+	return CalcShading(view_dir, normal, tc, diffuse, specular, emit, opacity);
 }
 
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target

@@ -62,7 +62,7 @@ void CalcVPLsLightingShape(float4 pos,
 	float3 view_vec = normalize(rot_pos);
 	float3 halfway = normalize(light_vec + view_vec);
 
-	oVPLColor = albedo.w * light_color.xyz * calc_brdf(albedo.xyz, normal.w, offset.w, light_vec, halfway, normal.xyz);
+	oVPLColor = albedo.w * light_color.xyz * (albedo.xyz + specular_term(normal.w, light_vec, halfway, normal.xyz, offset.w));
 
 	float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
 	oViewDir.xyz = rot_pos * scale + offset.xyz;
@@ -122,10 +122,7 @@ float4 VPLsLightingPS(
 
 	float pixel_depth = depth_tex.Sample(point_sampler, tc).r;
 	float3 color_i = 0;
-	if (view_dir.z < pixel_depth)
-	{
-		discard;
-	}
+	clip(view_dir.z - pixel_depth);
 
 	float3 norm_i = GetNormal(gbuffer_tex.Sample(point_sampler, tc));
 	float3 pos_i = view_dir.xyz * (pixel_depth / view_dir.z);
@@ -136,7 +133,7 @@ float4 VPLsLightingPS(
 	float cos_iv = dot(norm_i, vij);
 	if (cos_iv > 0)
 	{
-		float atten = attenuation_term(pos_j, pos_i, light_falloff);
+		float atten = attenuation_term(pos_j, pos_i, float3(1, 0, 1));
 		color_i = cos_iv * atten * vpl_color;
 	}
 

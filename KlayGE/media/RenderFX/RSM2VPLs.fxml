@@ -27,9 +27,8 @@
 	<parameter type="float4x4" name="inv_view"/>
 
 	<parameter type="float3" name="upper_left"/>
-	<parameter type="float3" name="upper_right"/>
-	<parameter type="float3" name="lower_left"/>
-	<parameter type="float3" name="lower_right"/>
+	<parameter type="float3" name="x_dir"/>
+	<parameter type="float3" name="y_dir"/>
 
 	<parameter type="float2" name="near_q"/>
 
@@ -41,9 +40,7 @@
 		<![CDATA[
 float3 texcoord_to_view(float2 tex)
 {
-	return lerp(lerp(upper_left, upper_right, tex.x),
-				lerp(lower_left, lower_right, tex.x),
-				tex.y);
+	return upper_left + x_dir * tex.x + y_dir * tex.y;
 }
 
 float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
@@ -71,10 +68,10 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 		float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls);
 		if (spot > 0)
 		{
-			float n_dot_l = dot(float3(0, 0, -1), normal_ls);
+			float n_dot_l = -normal_ls.z;
 			if (n_dot_l > 0)
 			{
-				float atten = spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
+				float atten = n_dot_l * spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
 				light = float4(albedo, atten);
 			}
 		}

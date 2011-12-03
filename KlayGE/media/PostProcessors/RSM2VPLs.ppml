@@ -11,9 +11,8 @@
 			<param name="light_falloff"/>
 			<param name="inv_view"/>
 			<param name="upper_left"/>
-			<param name="upper_right"/>
-			<param name="lower_left"/>
-			<param name="lower_right"/>
+			<param name="x_dir"/>
+			<param name="y_dir"/>
 			<param name="near_q"/>
 		</params>
 		<input>
