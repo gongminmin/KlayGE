@@ -47,10 +47,27 @@ namespace KlayGE
 		{
 			return opaque_lighting_tex_;
 		}
+		TexturePtr const & TransparencyBackLightingTex() const
+		{
+			return transparency_back_lighting_tex_;
+		}
+		TexturePtr const & TransparencyFrontLightingTex() const
+		{
+			return transparency_front_lighting_tex_;
+		}
 		TexturePtr const & OpaqueShadingTex() const
 		{
 			return opaque_shading_tex_;
 		}
+		TexturePtr const & TransparencyBackShadingTex() const
+		{
+			return transparency_back_shading_tex_;
+		}
+		TexturePtr const & TransparencyFrontShadingTex() const
+		{
+			return transparency_front_shading_tex_;
+		}
+
 		TexturePtr const & SmallSSVOTex() const
 		{
 			return small_ssvo_tex_;
@@ -67,6 +84,30 @@ namespace KlayGE
 		TexturePtr const & OpaqueDepthTex() const
 		{
 			return opaque_depth_tex_;
+		}
+		TexturePtr const & TransparencyBackGBufferRT0Tex() const
+		{
+			return transparency_back_g_buffer_rt0_tex_;
+		}
+		TexturePtr const & TransparencyBackGBufferRT1Tex() const
+		{
+			return transparency_back_g_buffer_rt1_tex_;
+		}
+		TexturePtr const & TransparencyBackDepthTex() const
+		{
+			return transparency_back_depth_tex_;
+		}
+		TexturePtr const & TransparencyFrontGBufferRT0Tex() const
+		{
+			return transparency_front_g_buffer_rt0_tex_;
+		}
+		TexturePtr const & TransparencyFrontGBufferRT1Tex() const
+		{
+			return transparency_front_g_buffer_rt1_tex_;
+		}
+		TexturePtr const & TransparencyFrontDepthTex() const
+		{
+			return transparency_front_depth_tex_;
 		}
 
 		void DisplayIllum(int illum);

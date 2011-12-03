@@ -64,13 +64,13 @@ namespace
 			float3 clr1(0.2f, 1, 0);
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
-				clr0.x() = pow(clr0.x(), 2.2f);
-				clr0.y() = pow(clr0.y(), 2.2f);
-				clr0.z() = pow(clr0.z(), 2.2f);
+				clr0.x() = MathLib::srgb_to_linear(clr0.x());
+				clr0.y() = MathLib::srgb_to_linear(clr0.y());
+				clr0.z() = MathLib::srgb_to_linear(clr0.z());
 
-				clr1.x() = pow(clr1.x(), 2.2f);
-				clr1.y() = pow(clr1.y(), 2.2f);
-				clr1.z() = pow(clr1.z(), 2.2f);
+				clr1.x() = MathLib::srgb_to_linear(clr1.x());
+				clr1.y() = MathLib::srgb_to_linear(clr1.y());
+				clr1.z() = MathLib::srgb_to_linear(clr1.z());
 			}
 
 			*(technique_->Effect().ParameterByName("clr0")) = clr0;

@@ -927,9 +927,9 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	ElementFormat fmt = rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
-		f4_clr.x() = pow(clr.r(), 2.2f);
-		f4_clr.y() = pow(clr.g(), 2.2f);
-		f4_clr.z() = pow(clr.b(), 2.2f);
+		f4_clr.x() = MathLib::srgb_to_linear(clr.r());
+		f4_clr.y() = MathLib::srgb_to_linear(clr.g());
+		f4_clr.z() = MathLib::srgb_to_linear(clr.b());
 		f4_clr.w() = 1;
 
 		ElementFormat fmt_srgb = MakeSRGB(fmt);

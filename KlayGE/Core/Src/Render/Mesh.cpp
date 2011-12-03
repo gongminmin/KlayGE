@@ -1613,12 +1613,12 @@ namespace KlayGE
 
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
-				mtl->ambient.x() = pow(mtl->ambient.x(), 2.2f);
-				mtl->ambient.y() = pow(mtl->ambient.y(), 2.2f);
-				mtl->ambient.z() = pow(mtl->ambient.z(), 2.2f);
-				mtl->diffuse.x() = pow(mtl->diffuse.x(), 2.2f);
-				mtl->diffuse.y() = pow(mtl->diffuse.y(), 2.2f);
-				mtl->diffuse.z() = pow(mtl->diffuse.z(), 2.2f);
+				mtl->ambient.x() = MathLib::srgb_to_linear(mtl->ambient.x());
+				mtl->ambient.y() = MathLib::srgb_to_linear(mtl->ambient.y());
+				mtl->ambient.z() = MathLib::srgb_to_linear(mtl->ambient.z());
+				mtl->diffuse.x() = MathLib::srgb_to_linear(mtl->diffuse.x());
+				mtl->diffuse.y() = MathLib::srgb_to_linear(mtl->diffuse.y());
+				mtl->diffuse.z() = MathLib::srgb_to_linear(mtl->diffuse.z());
 			}
 
 			uint32_t num_texs;
@@ -1814,12 +1814,12 @@ namespace KlayGE
 				float3 ambient, diffuse;
 				if (Context::Instance().Config().graphics_cfg.gamma)
 				{
-					ambient.x() = pow(mtl->ambient.x(), 1 / 2.2f);
-					ambient.y() = pow(mtl->ambient.y(), 1 / 2.2f);
-					ambient.z() = pow(mtl->ambient.z(), 1 / 2.2f);
-					diffuse.x() = pow(mtl->diffuse.x(), 1 / 2.2f);
-					diffuse.y() = pow(mtl->diffuse.y(), 1 / 2.2f);
-					diffuse.z() = pow(mtl->diffuse.z(), 1 / 2.2f);
+					ambient.x() = MathLib::linear_to_srgb(mtl->ambient.x());
+					ambient.y() = MathLib::linear_to_srgb(mtl->ambient.y());
+					ambient.z() = MathLib::linear_to_srgb(mtl->ambient.z());
+					diffuse.x() = MathLib::linear_to_srgb(mtl->diffuse.x());
+					diffuse.y() = MathLib::linear_to_srgb(mtl->diffuse.y());
+					diffuse.z() = MathLib::linear_to_srgb(mtl->diffuse.z());
 				}
 
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_r", ambient.x()));

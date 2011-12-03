@@ -859,9 +859,9 @@ void OceanApp::InitObjects()
 	Color fog_color(0.61f, 0.52f, 0.62f, 1);
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
-		fog_color.r() = pow(fog_color.r(), 2.2f);
-		fog_color.g() = pow(fog_color.g(), 2.2f);
-		fog_color.b() = pow(fog_color.b(), 2.2f);
+		fog_color.r() = MathLib::srgb_to_linear(fog_color.r());
+		fog_color.g() = MathLib::srgb_to_linear(fog_color.g());
+		fog_color.b() = MathLib::srgb_to_linear(fog_color.b());
 	}
 
 	checked_pointer_cast<TerrainObject>(terrain_)->SunDirection(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->Direction());

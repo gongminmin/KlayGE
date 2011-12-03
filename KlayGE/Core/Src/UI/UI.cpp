@@ -1256,10 +1256,10 @@ namespace KlayGE
 			boost::array<Color, 4> clrs;
 			if (gamma)
 			{
-				clrs[0] = Color(pow(top_left_clr_.r(), 2.2f), pow(top_left_clr_.g(), 2.2f), pow(top_left_clr_.b(), 2.2f), top_left_clr_.a());
-				clrs[1] = Color(pow(top_right_clr_.r(), 2.2f), pow(top_right_clr_.g(), 2.2f), pow(top_right_clr_.b(), 2.2f), top_right_clr_.a());
-				clrs[2] = Color(pow(bottom_right_clr_.r(), 2.2f), pow(bottom_right_clr_.g(), 2.2f), pow(bottom_right_clr_.b(), 2.2f), bottom_right_clr_.a());
-				clrs[3] = Color(pow(bottom_left_clr_.r(), 2.2f), pow(bottom_left_clr_.g(), 2.2f), pow(bottom_left_clr_.b(), 2.2f), bottom_left_clr_.a());
+				clrs[0] = Color(MathLib::srgb_to_linear(top_left_clr_.r()), MathLib::srgb_to_linear(top_left_clr_.g()), MathLib::srgb_to_linear(top_left_clr_.b()), top_left_clr_.a());
+				clrs[1] = Color(MathLib::srgb_to_linear(top_right_clr_.r()), MathLib::srgb_to_linear(top_right_clr_.g()), MathLib::srgb_to_linear(top_right_clr_.b()), top_right_clr_.a());
+				clrs[2] = Color(MathLib::srgb_to_linear(bottom_right_clr_.r()), MathLib::srgb_to_linear(bottom_right_clr_.g()), MathLib::srgb_to_linear(bottom_right_clr_.b()), bottom_right_clr_.a());
+				clrs[3] = Color(MathLib::srgb_to_linear(bottom_left_clr_.r()), MathLib::srgb_to_linear(bottom_left_clr_.g()), MathLib::srgb_to_linear(bottom_left_clr_.b()), bottom_left_clr_.a());
 			}
 			else
 			{
@@ -1304,7 +1304,7 @@ namespace KlayGE
 			Color clr = cap_element_.TextureColor().Current;
 			if (gamma)
 			{
-				clr = Color(pow(clr.r(), 2.2f), pow(clr.g(), 2.2f), pow(clr.b(), 2.2f), clr.a());
+				clr = Color(MathLib::srgb_to_linear(clr.r()), MathLib::srgb_to_linear(clr.g()), MathLib::srgb_to_linear(clr.b()), clr.a());
 			}
 			UIManager::VertexFormat vertices[] =
 			{

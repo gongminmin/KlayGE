@@ -45,9 +45,9 @@ void DetailedMesh::BuildMeshInfo()
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
-		extinction_coefficient.x() = pow(extinction_coefficient.x(), 2.2f);
-		extinction_coefficient.y() = pow(extinction_coefficient.y(), 2.2f);
-		extinction_coefficient.z() = pow(extinction_coefficient.z(), 2.2f);
+		extinction_coefficient.x() = MathLib::srgb_to_linear(extinction_coefficient.x());
+		extinction_coefficient.y() = MathLib::srgb_to_linear(extinction_coefficient.y());
+		extinction_coefficient.z() = MathLib::srgb_to_linear(extinction_coefficient.z());
 	}
 	*(technique_->Effect().ParameterByName("extinction_coefficient")) = extinction_coefficient;
 }

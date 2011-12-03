@@ -132,7 +132,7 @@ void SubSurfaceApp::InitObjects()
 	this->Proj(0.1f, 200.0f);
 
 	tbController_.AttachCamera(this->ActiveCamera());
-	tbController_.Scalers(0.01f, 0.5f);
+	tbController_.Scalers(0.01f, 0.01f);
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
