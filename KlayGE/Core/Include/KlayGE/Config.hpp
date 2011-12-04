@@ -119,14 +119,14 @@
 		#define KLAYGE_HAS_DECLSPEC
 		#include <_mingw.h>
 	#endif
+#elif defined(__ANDROID__)
+	#define KLAYGE_PLATFORM_ANDROID
+	#define KLAYGE_COMPILER_NAME gcc
 #elif defined(__CYGWIN__)
 	#define KLAYGE_PLATFORM_CYGWIN
 	#define KLAYGE_COMPILER_NAME cyg
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
-	#define KLAYGE_COMPILER_NAME gcc
-#elif defined(__ANDROID__)
-	#define KLAYGE_PLATFORM_ANDROID
 	#define KLAYGE_COMPILER_NAME gcc
 #else
 	#error Unknown platform.

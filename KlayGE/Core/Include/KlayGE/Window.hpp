@@ -43,6 +43,8 @@
 #include <X11/keysym.h>
 
 #include <glloader/glloader.h>
+#elif defined KLAYGE_PLATFORM_ANDROID
+#include <glloader/glloader.h>
 #endif
 #include <string>
 
