@@ -65,26 +65,26 @@ namespace
 			}
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, information const & info)
+		std::vector<PyObjectPtr> store_to_py()
 		{
-			os << "<?xml version='1.0' encoding='utf-8'?>" << std::endl;
+			std::vector<PyObjectPtr> ret;
 
-			os << "<info vendor='" << info.vendor_
-				<< "' renderer='" << info.renderer_
-				<< "' major_ver='" << info.major_ver_
-				<< "' minor_ver='" << info.minor_ver_
-				<< "' glsl_major_ver='" << info.glsl_major_ver_
-				<< "' glsl_minor_ver='" << info.glsl_minor_ver_ << "'>" << std::endl;
+			ret.push_back(CppType2PyObjectPtr(vendor_));
+			ret.push_back(CppType2PyObjectPtr(renderer_));
+			ret.push_back(CppType2PyObjectPtr(major_ver_));
+			ret.push_back(CppType2PyObjectPtr(minor_ver_));
+			ret.push_back(CppType2PyObjectPtr(glsl_major_ver_));
+			ret.push_back(CppType2PyObjectPtr(glsl_minor_ver_));
 
-			for (std::vector<std::string>::const_iterator iter = info.extensions_.begin();
-					iter != info.extensions_.end(); ++ iter)
+			std::string ext_str;
+			for (std::vector<std::string>::const_iterator iter = extensions_.begin();
+					iter != extensions_.end(); ++ iter)
 			{
-				os << "\t<extension name='" << *iter << "'/>" << std::endl;
+				ext_str += *iter + ' ';
 			}
+			ret.push_back(CppType2PyObjectPtr(ext_str));
 
-			os << "</info>" << std::endl;
-
-			return os;
+			return ret;
 		}
 
 	private:
@@ -134,17 +134,13 @@ int main()
 	EmptyApp app;
 	app.Create();
 
-	std::string const info_file_name("info.xml");
-
 	information info;
-
-	std::ofstream ofs(info_file_name.c_str());
-	ofs << info;
+	std::vector<PyObjectPtr> for_py = info.store_to_py();
 
 	ScriptEngine scriptEng;
 	ScriptModule module("GLCompatibility");
 
-	module.Call("gl_compatibility", boost::make_tuple(info_file_name));
+	module.Call("gl_compatibility", &for_py.front(), &for_py.back() + 1);
 
 	return 0;
 }

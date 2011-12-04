@@ -206,6 +206,9 @@ class information:
 		self.renderer = ''
 		self.major_ver = 0
 		self.minor_ver = 0
+		self.glsl_major_ver = 0
+		self.glsl_minor_ver = 0
+		self.exts = []
 		self.feature_infos = []
 
 	def to_html(self, stream):
@@ -272,6 +275,15 @@ class information:
 				stream.write('\t\t</tr>\n')
 				
 			stream.write('\t</table>\n')
+
+		stream.write('\t<h2>Extensions</h2>\n')
+		stream.write('\t<table width="100%">\n')
+		for ext in self.exts:
+			stream.write('\t\t<tr>\n')
+			stream.write('\t\t\t<td>%s</td>\n' % ext)
+			stream.write('\t\t</tr>\n')
+		stream.write('\t</table>\n')
+
 		stream.write('</body>\n')
 		stream.write('</html>\n')
 
@@ -285,6 +297,7 @@ class information:
 		self.minor_ver = minor_ver
 		self.glsl_major_ver = glsl_major_ver
 		self.glsl_minor_ver = glsl_minor_ver
+		self.exts = exts
 		self.feature_infos = []
 
 		is_supported.exts = exts
@@ -325,22 +338,8 @@ class information:
 
 			self.feature_infos.append((ogl_ver_db[i], (supported, unsupported)))
 
-def gl_compatibility(info_name):
-	from xml.dom.minidom import parse
-
-	dom = parse(info_name)
-
-	vendor = dom.documentElement.getAttribute('vendor')
-	renderer = dom.documentElement.getAttribute('renderer')
-	major_ver = int(dom.documentElement.getAttribute('major_ver'))
-	minor_ver = int(dom.documentElement.getAttribute('minor_ver'))
-	glsl_major_ver = int(dom.documentElement.getAttribute('glsl_major_ver'))
-	glsl_minor_ver = int(dom.documentElement.getAttribute('glsl_minor_ver'))
-
-	exts = []
-	ext_tags = dom.documentElement.getElementsByTagName('extension')
-	for ext in ext_tags:
-		exts.append(ext.getAttribute('name'))
+def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, ext_str):
+	exts = ext_str.split(' ')
 
 	print('OpenGL Compatibility Viewer')
 	print('Copyright(C) 2004-2011 Minmin Gong\n')
