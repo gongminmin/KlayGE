@@ -59,7 +59,8 @@ namespace KlayGE
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
-		BOOST_FOREACH(BOOST_TYPEOF(sources_)::reference source, sources_)
+		typedef BOOST_TYPEOF(sources_) SourcesType;
+		BOOST_FOREACH(SourcesType::reference source, sources_)
 		{
 			alSourcef(source, AL_PITCH, 1);
 			alSourcef(source, AL_GAIN, volume);

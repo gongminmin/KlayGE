@@ -144,7 +144,8 @@ namespace KlayGE
 	{
 		soundVol_ = vol;
 
-		BOOST_FOREACH(BOOST_TYPEOF(audioBufs_)::reference ab, audioBufs_)
+		typedef BOOST_TYPEOF(audioBufs_) AudioBufsType;
+		BOOST_FOREACH(AudioBufsType::reference ab, audioBufs_)
 		{
 			if (ab.second->IsSound())
 			{
@@ -166,7 +167,8 @@ namespace KlayGE
 	{
 		musicVol_ = vol;
 
-		BOOST_FOREACH(BOOST_TYPEOF(audioBufs_)::reference ab, audioBufs_)
+		typedef BOOST_TYPEOF(audioBufs_) AudioBufsType;
+		BOOST_FOREACH(AudioBufsType::reference ab, audioBufs_)
 		{
 			if (!(ab.second->IsSound()))
 			{

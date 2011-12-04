@@ -60,7 +60,8 @@ namespace KlayGE
 	{
 		if (use_vao_)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(vaos_)::reference vao, vaos_)
+			typedef BOOST_TYPEOF(vaos_) VAOsType;
+			BOOST_FOREACH(VAOsType::reference vao, vaos_)
 			{
 				glDeleteVertexArrays(1, &vao.second);
 			}
@@ -82,7 +83,8 @@ namespace KlayGE
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
 			uint8_t* elem_offset = NULL;
-			BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
+			typedef BOOST_TYPEOF(vertex_stream_fmt) VertexStreamFmtType;
+			BOOST_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
@@ -127,7 +129,8 @@ namespace KlayGE
 		{
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
-			BOOST_FOREACH(BOOST_TYPEOF(vertex_stream_fmt)::const_reference vs_elem, vertex_stream_fmt)
+			typedef BOOST_TYPEOF(vertex_stream_fmt) VertexStreamFmtType;
+			BOOST_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
@@ -143,7 +146,8 @@ namespace KlayGE
 		if (use_vao_)
 		{
 			GLuint vao;
-			BOOST_TYPEOF(vaos_)::iterator iter = vaos_.find(so);
+			typedef BOOST_TYPEOF(vaos_) VAOsType;
+			VAOsType::iterator iter = vaos_.find(so);
 			if (iter == vaos_.end())
 			{
 				glGenVertexArrays(1, &vao);

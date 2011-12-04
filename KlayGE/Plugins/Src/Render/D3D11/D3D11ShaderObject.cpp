@@ -281,9 +281,9 @@ namespace
 			std::vector<float4x4> v;
 			param_->Value(v);
 
-
 			size_t start = 0;
-			BOOST_FOREACH(BOOST_TYPEOF(v)::reference mat, v)
+			typedef BOOST_TYPEOF(v) VType;
+			BOOST_FOREACH(VType::reference mat, v)
 			{
 				mat = MathLib::transpose(mat);
 				memcpy(&target_[start], &mat[0], rows_ * sizeof(float4));
@@ -466,12 +466,14 @@ namespace KlayGE
 		ss << std::endl;
 
 		BOOST_AUTO(cbuffers, effect.CBuffers());
-		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
+		typedef BOOST_TYPEOF(cbuffers) CBuffersType;
+		BOOST_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
 		{
 			ss << "cbuffer " << cbuff.first << std::endl;
 			ss << "{" << std::endl;
 
-			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
+			typedef BOOST_TYPEOF(cbuff.second) CBuffersSecondType;
+			BOOST_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 				switch (param.type())
@@ -815,7 +817,8 @@ namespace KlayGE
 				}
 
 				param_binds_[type].reserve(so.param_binds_[type].size());
-				BOOST_FOREACH(BOOST_TYPEOF(so.param_binds_[type])::const_reference pb, so.param_binds_[type])
+				typedef BOOST_TYPEOF(so.param_binds_[type]) ParamBindsType;
+				BOOST_FOREACH(ParamBindsType::const_reference pb, so.param_binds_[type])
 				{
 					param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 				}
@@ -1358,7 +1361,8 @@ namespace KlayGE
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
-			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[i])::const_reference pb, param_binds_[i])
+			typedef BOOST_TYPEOF(param_binds_[i]) ParamBindsType;
+			BOOST_FOREACH(ParamBindsType::const_reference pb, param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 			}
@@ -1714,7 +1718,8 @@ namespace KlayGE
 
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(param_binds_[st])::reference pb, param_binds_[st])
+			typedef BOOST_TYPEOF(param_binds_[st]) ParamBindsType;
+			BOOST_FOREACH(ParamBindsType::reference pb, param_binds_[st])
 			{
 				pb.func();
 			}

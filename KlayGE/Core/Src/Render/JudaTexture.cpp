@@ -527,7 +527,8 @@ namespace KlayGE
 	{
 		if (data_blocks_.empty())
 		{
-			BOOST_TYPEOF(decoded_block_cache_)::iterator iter = decoded_block_cache_.find(data_index);
+			typedef BOOST_TYPEOF(decoded_block_cache_) DecodedBlockCacheType;
+			DecodedBlockCacheType::iterator iter = decoded_block_cache_.find(data_index);
 			if (iter != decoded_block_cache_.end())
 			{
 				iter->second.tick = decode_tick_;
@@ -536,9 +537,9 @@ namespace KlayGE
 			{
 				if (decoded_block_cache_.size() >= 64)
 				{
-					BOOST_TYPEOF(decoded_block_cache_)::iterator min_iter = decoded_block_cache_.begin();
+					DecodedBlockCacheType::iterator min_iter = decoded_block_cache_.begin();
 					uint64_t min_tick = min_iter->second.tick;
-					for (BOOST_TYPEOF(decoded_block_cache_)::iterator dbiter = decoded_block_cache_.begin();
+					for (DecodedBlockCacheType::iterator dbiter = decoded_block_cache_.begin();
 						dbiter != decoded_block_cache_.end(); ++ dbiter)
 					{
 						if (dbiter->second.tick < min_tick)
@@ -548,7 +549,7 @@ namespace KlayGE
 						}
 					}
 
-					for (BOOST_TYPEOF(decoded_block_cache_)::iterator dbiter = decoded_block_cache_.begin();
+					for (DecodedBlockCacheType::iterator dbiter = decoded_block_cache_.begin();
 						dbiter != decoded_block_cache_.end();)
 					{
 						if (dbiter->second.tick == min_tick)
@@ -574,7 +575,7 @@ namespace KlayGE
 					memset(data.get(), 0, full_tile_bytes);
 				}
 
-				std::pair<BOOST_TYPEOF(decoded_block_cache_)::iterator, bool> p = decoded_block_cache_.insert(std::make_pair(data_index, DecodedBlockInfo(data, decode_tick_)));
+				std::pair<DecodedBlockCacheType::iterator, bool> p = decoded_block_cache_.insert(std::make_pair(data_index, DecodedBlockInfo(data, decode_tick_)));
 				iter = p.first;
 			}
 

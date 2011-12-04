@@ -232,7 +232,8 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->AddToRenderQueue();
 		}
@@ -240,7 +241,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderBegin()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->OnRenderBegin();
 		}
@@ -248,7 +250,8 @@ namespace KlayGE
 
 	void RenderModel::OnRenderEnd()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh->OnRenderEnd();
 		}
@@ -257,7 +260,8 @@ namespace KlayGE
 	void RenderModel::UpdateBoundBox()
 	{
 		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			box_ |= mesh->GetBound();
 		}
@@ -278,7 +282,8 @@ namespace KlayGE
 	bool RenderModel::SpecialShading() const
 	{
 		bool ss = false;
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ss |= mesh->SpecialShading();
 		}
@@ -288,7 +293,8 @@ namespace KlayGE
 	bool RenderModel::AlphaBlend() const
 	{
 		bool ab = false;
-		BOOST_FOREACH(BOOST_TYPEOF(meshes_)::const_reference mesh, meshes_)
+		typedef BOOST_TYPEOF(meshes_) MeshesType;
+		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			ab |= mesh->AlphaBlend();
 		}
@@ -469,7 +475,8 @@ namespace KlayGE
 	
 	void SkinnedModel::BuildBones(float frame)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(joints_)::reference joint, joints_)
+		typedef BOOST_TYPEOF(joints_) JointsType;
+		BOOST_FOREACH(JointsType::reference joint, joints_)
 		{
 			KeyFrames const & kf = key_frames_->find(joint.name)->second;
 			std::pair<Quaternion, Quaternion> key_dq = kf.Frame(frame);

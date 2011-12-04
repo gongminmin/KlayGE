@@ -41,7 +41,8 @@ namespace KlayGE
 		planes_[5] = column4 + column3;  // far
 
 		// Loop through each side of the frustum and normalize it.
-		BOOST_FOREACH(BOOST_TYPEOF(planes_)::reference plane, planes_)
+		typedef BOOST_TYPEOF(planes_) PlanesType;
+		BOOST_FOREACH(PlanesType::reference plane, planes_)
 		{
 			plane = MathLib::normalize(plane);
 		}

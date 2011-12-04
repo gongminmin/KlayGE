@@ -38,7 +38,7 @@ namespace KlayGE
 		Close();
 	}
 
-	Lobby::PlayerAddrsIter Lobby::ID(SOCKADDR_IN const & addr)
+	Lobby::PlayerAddrsIter Lobby::ID(sockaddr_in const & addr)
 	{
 		for (BOOST_AUTO(iter, players_.begin()); iter != players_.end(); ++ iter)
 		{
@@ -61,7 +61,7 @@ namespace KlayGE
 
 		this->socket_.Bind(TransAddr("", port));
 
-		SOCKADDR_IN from;
+		sockaddr_in from;
 		char revBuf[Max_Buffer];
 		char sendBuf[Max_Buffer];
 		int numSend = 0;
@@ -103,10 +103,12 @@ namespace KlayGE
 			}
 
 			// 发送信息
-			BOOST_FOREACH(BOOST_TYPEOF(players_)::reference player, players_)
+			typedef BOOST_TYPEOF(players_) PlayersType;
+			BOOST_FOREACH(PlayersType::reference player, players_)
 			{
 				SendQueueType& msgs = player.second.msgs;
-				BOOST_FOREACH(BOOST_TYPEOF(msgs)::reference msg, msgs)
+				typedef BOOST_TYPEOF(msgs) MsgsType;
+				BOOST_FOREACH(MsgsType::reference msg, msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
 				}
@@ -133,7 +135,8 @@ namespace KlayGE
 	char Lobby::NumPlayer() const
 	{
 		char n = 0;
-		BOOST_FOREACH(BOOST_TYPEOF(players_)::const_reference player, players_)
+		typedef BOOST_TYPEOF(players_) PlayersType;
+		BOOST_FOREACH(PlayersType::const_reference player, players_)
 		{
 			if (player.first != 0)
 			{
@@ -172,7 +175,8 @@ namespace KlayGE
 		players_.resize(maxPlayers);
 		PlayerAddrs(players_).swap(players_);
 
-		BOOST_FOREACH(BOOST_TYPEOF(players_)::reference player, players_)
+		typedef BOOST_TYPEOF(players_) PlayersType;
+		BOOST_FOREACH(PlayersType::reference player, players_)
 		{
 			player.first = 0;
 		}
@@ -194,21 +198,21 @@ namespace KlayGE
 
 	// 发送数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Lobby::Receive(void* buf, int maxSize, SOCKADDR_IN& from)
+	int Lobby::Receive(void* buf, int maxSize, sockaddr_in& from)
 	{
 		return this->socket_.ReceiveFrom(buf, maxSize, from);
 	}
 
 	// 接收数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Lobby::Send(void const * buf, int maxSize, SOCKADDR_IN const & to)
+	int Lobby::Send(void const * buf, int maxSize, sockaddr_in const & to)
 	{
 		return this->socket_.SendTo(buf, maxSize, to);
 	}
 
 
 	void Lobby::OnJoin(char* revBuf, char* sendBuf, int& numSend,
-							SOCKADDR_IN& from, Processor const & pro)
+							sockaddr_in& from, Processor const & pro)
 	{
 		// 命令格式:
 		//			Player名字		16 字节

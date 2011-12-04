@@ -341,7 +341,8 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
 
-		BOOST_FOREACH(BOOST_TYPEOF(lights_)::const_reference light, lights_)
+		typedef BOOST_TYPEOF(lights_) LightsType;
+		BOOST_FOREACH(LightsType::const_reference light, lights_)
 		{
 			if (light->Enabled())
 			{
@@ -349,7 +350,8 @@ namespace KlayGE
 			}
 		}
 
-		BOOST_FOREACH(BOOST_TYPEOF(scene_objs_)::const_reference scene_obj, scene_objs_)
+		typedef BOOST_TYPEOF(scene_objs_) SceneObjsType;
+		BOOST_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 		{
 			if (!(scene_obj->Attrib() & SceneObject::SOA_Overlay))
 			{
@@ -476,7 +478,8 @@ namespace KlayGE
 			}
 		}
 		renderables_map.clear();
-		BOOST_FOREACH(BOOST_TYPEOF(renderables)::const_reference renderable, renderables)
+		typedef BOOST_TYPEOF(renderables) RenderablesType;
+		BOOST_FOREACH(RenderablesType::const_reference renderable, renderables)
 		{
 			Renderable& ra(*renderable.first);
 			ra.AssignInstances(renderable.second.begin(), renderable.second.end());
@@ -486,7 +489,8 @@ namespace KlayGE
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
-		BOOST_FOREACH(BOOST_TYPEOF(render_queue_)::reference items, render_queue_)
+		typedef BOOST_TYPEOF(render_queue_) RenderQueueType;
+		BOOST_FOREACH(RenderQueueType::reference items, render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
@@ -523,7 +527,8 @@ namespace KlayGE
 				items.second.swap(sorted_items);
 			}
 
-			BOOST_FOREACH(BOOST_TYPEOF(items.second)::reference item, items.second)
+			typedef BOOST_TYPEOF(items.second) ItemsType;
+			BOOST_FOREACH(ItemsType::reference item, items.second)
 			{
 				item->Render();
 

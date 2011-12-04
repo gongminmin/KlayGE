@@ -200,28 +200,34 @@ namespace KlayGE
 
 	RenderFactory::~RenderFactory()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(effect_pool_)::reference effect, effect_pool_)
+		typedef BOOST_TYPEOF(effect_pool_) EffectPoolType;
+		BOOST_FOREACH(EffectPoolType::reference effect, effect_pool_)
 		{
 			effect.second.clear();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(font_pool_)::reference font, font_pool_)
+		typedef BOOST_TYPEOF(font_pool_) FontPoolType;
+		BOOST_FOREACH(FontPoolType::reference font, font_pool_)
 		{
 			font.second.first.reset();
 			font.second.second.reset();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(rs_pool_)::reference rs, rs_pool_)
+		typedef BOOST_TYPEOF(rs_pool_) RSPoolType;
+		BOOST_FOREACH(RSPoolType::reference rs, rs_pool_)
 		{
 			rs.second.reset();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(dss_pool_)::reference dss, dss_pool_)
+		typedef BOOST_TYPEOF(dss_pool_) DSSPoolType;
+		BOOST_FOREACH(DSSPoolType::reference dss, dss_pool_)
 		{
 			dss.second.reset();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(bs_pool_)::reference bs, bs_pool_)
+		typedef BOOST_TYPEOF(bs_pool_) BSPoolType;
+		BOOST_FOREACH(BSPoolType::reference bs, bs_pool_)
 		{
 			bs.second.reset();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(ss_pool_)::reference ss, ss_pool_)
+		typedef BOOST_TYPEOF(ss_pool_) SSPoolType;
+		BOOST_FOREACH(SSPoolType::reference ss, ss_pool_)
 		{
 			ss.second.reset();
 		}

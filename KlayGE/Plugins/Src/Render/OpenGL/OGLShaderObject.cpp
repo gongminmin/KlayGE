@@ -1201,9 +1201,11 @@ namespace KlayGE
 		ss << std::endl;
 
 		BOOST_AUTO(cbuffers, effect.CBuffers());
-		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
+		typedef BOOST_TYPEOF(cbuffers) CBuffersType;
+		BOOST_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
+			typedef BOOST_TYPEOF(cbuff.second) CBuffersSecondType;
+			BOOST_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *effect.ParameterByIndex(param_index);
 
@@ -2028,7 +2030,8 @@ namespace KlayGE
 		{
 			ret->attrib_locs_ = attrib_locs_;
 
-			BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
+			typedef BOOST_TYPEOF(param_binds_) ParamBindsType;
+			BOOST_FOREACH(ParamBindsType::reference pb, param_binds_)
 			{
 				if (pb.param)
 				{
@@ -2346,7 +2349,8 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
-		BOOST_FOREACH(BOOST_TYPEOF(param_binds_)::reference pb, param_binds_)
+		typedef BOOST_TYPEOF(param_binds_) ParamBindsType;
+		BOOST_FOREACH(ParamBindsType::reference pb, param_binds_)
 		{
 			pb.func();
 		}
