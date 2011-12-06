@@ -10,8 +10,8 @@ copy "%ANDROID_NDK%\sources\cxx-stl\gnu-libstdc++\libs\armeabi-v7a\libgnustl_sta
 
 ndk-build
 
-mkdir ..\..\lib\android_armeabi
-copy /Y obj\local\armeabi\libglloader.a ..\..\lib\android_armeabi\
+mkdir ..\..\..\lib\android_armeabi
+copy /Y obj\local\armeabi\libKlayGE_Core_gcc.a ..\..\..\lib\android_armeabi\
 
-mkdir ..\..\lib\android_armeabi-v7a
-copy /Y obj\local\armeabi-v7a\libglloader.a ..\..\lib\android_armeabi-v7a\
+mkdir ..\..\..\lib\android_armeabi-v7a
+copy /Y obj\local\armeabi-v7a\libKlayGE_Core_gcc.a ..\..\..\lib\android_armeabi-v7a\

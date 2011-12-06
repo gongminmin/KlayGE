@@ -44,6 +44,8 @@
 
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
+#include <android/native_window.h>
+
 #include <glloader/glloader.h>
 #endif
 #include <string>
@@ -90,6 +92,11 @@ namespace KlayGE
 		::Window XWindow() const
 		{
 			return x_window_;
+		}
+#elif defined KLAYGE_PLATFORM_ANDROID
+		::ANativeWindow* AWindow() const
+		{
+			return a_window_;
 		}
 #endif
 
@@ -231,6 +238,8 @@ namespace KlayGE
 		::XVisualInfo* vi_;
 		::Window x_window_;
 		::Atom wm_delete_window_;
+#elif defined KLAYGE_PLATFORM_ANDROID
+		::ANativeWindow* a_window_;
 #endif
 	};
 }

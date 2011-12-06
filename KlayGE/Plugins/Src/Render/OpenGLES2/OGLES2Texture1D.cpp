@@ -22,7 +22,9 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
+#ifndef KLAYGE_PLATFORM_ANDROID
 #include <GL/glu.h>
+#endif
 
 #include <KlayGE/OpenGLES2/OGLES2RenderEngine.hpp>
 #include <KlayGE/OpenGLES2/OGLES2Mapping.hpp>
@@ -247,6 +249,7 @@ namespace KlayGE
 
 			if (src_width != dst_width)
 			{
+#ifndef KLAYGE_PLATFORM_ANDROID
 				std::vector<uint8_t> data_in(src_width * src_format_size);
 				std::vector<uint8_t> data_out(dst_width * dst_format_size);
 
@@ -262,6 +265,9 @@ namespace KlayGE
 					Texture::Mapper mapper(other, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
 					memcpy(mapper.Pointer<uint8_t*>(), &data_out[0], data_out.size() * sizeof(data_out[0]));
 				}
+#else
+				BOOST_ASSERT(false);
+#endif
 			}
 			else
 			{

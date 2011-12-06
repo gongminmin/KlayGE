@@ -22,14 +22,9 @@
 #include <boost/typeof/typeof.hpp>
 
 #include <glloader/glloader.h>
-#include <GL/glu.h>
 
 #include <KlayGE/OpenGLES2/OGLES2Mapping.hpp>
 #include <KlayGE/OpenGLES2/OGLES2Texture.hpp>
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "glu32.lib")
-#endif
 
 namespace KlayGE
 {

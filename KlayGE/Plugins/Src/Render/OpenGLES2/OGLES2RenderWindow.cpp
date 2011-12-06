@@ -52,14 +52,6 @@ namespace KlayGE
 		main_wnd->OnSize().connect(boost::bind(&OGLES2RenderWindow::OnSize, this, _1, _2));
 		main_wnd->OnClose().connect(boost::bind(&OGLES2RenderWindow::OnClose, this, _1));
 
-		NativeWindowType wnd;
-#if defined KLAYGE_PLATFORM_WINDOWS
-		wnd = hWnd_ = main_wnd->HWnd();
-		hDC_ = ::GetDC(hWnd_);
-#elif defined KLAYGE_PLATFORM_LINUX
-		wnd = x_window_ = main_wnd->XWindow();
-#endif
-
 		if (isFullScreen_)
 		{
 			left_ = 0;
@@ -152,6 +144,20 @@ namespace KlayGE
 		eglGetConfigs(display_, NULL, 0, &num_cfgs);
 
 		eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
+
+		NativeWindowType wnd;
+#if defined KLAYGE_PLATFORM_WINDOWS
+		wnd = hWnd_ = main_wnd->HWnd();
+		hDC_ = ::GetDC(hWnd_);
+#elif defined KLAYGE_PLATFORM_LINUX
+		wnd = x_window_ = main_wnd->XWindow();
+#elif defined KLAYGE_PLATFORM_ANDROID
+		wnd = a_window_ = main_wnd->AWindow();
+		EGLConfig config;
+		EGLint format;
+		eglGetConfigAttrib(display_, &config, EGL_NATIVE_VISUAL_ID, &format);
+		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
+#endif
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, NULL);
 
@@ -298,6 +304,8 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 			isFullScreen_ = fs;
 			XFlush(x_display_);
+#elif defined KLAYGE_PLATFORM_ANDROID
+			isFullScreen_ = fs;
 #endif
 		}
 	}
@@ -321,6 +329,10 @@ namespace KlayGE
 		int screen = DefaultScreen(x_display_);
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
+#elif defined KLAYGE_PLATFORM_ANDROID
+		EGLint new_width, new_height;
+		eglQuerySurface(display_, surf_, EGL_WIDTH, &new_width);
+		eglQuerySurface(display_, surf_, EGL_HEIGHT, &new_height);
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
@@ -343,6 +355,7 @@ namespace KlayGE
 			}
 		}
 #elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_ANDROID
 #endif
 
 		if (display_ != NULL)

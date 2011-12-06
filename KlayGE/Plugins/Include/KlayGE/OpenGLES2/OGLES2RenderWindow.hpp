@@ -69,6 +69,8 @@ namespace KlayGE
 		HDC		hDC_;
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Window x_window_;
+#elif defined KLAYGE_PLATFORM_ANDROID
+		::ANativeWindow* a_window_;
 #endif
 
 		EGLDisplay display_;

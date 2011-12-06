@@ -636,5 +636,14 @@ namespace KlayGE
 			break;
 		}
 	}
+#elif defined KLAYGE_PLATFORM_ANDROID
+	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
+	{
+		std::locale loc("");
+	}
+
+	Window::~Window()
+	{
+	}
 #endif
 }

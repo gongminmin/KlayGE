@@ -22,7 +22,9 @@
 #include <cstring>
 
 #include <glloader/glloader.h>
+#ifndef KLAYGE_PLATFORM_ANDROID
 #include <GL/glu.h>
+#endif
 
 #include <KlayGE/OpenGLES2/OGLES2RenderEngine.hpp>
 #include <KlayGE/OpenGLES2/OGLES2Mapping.hpp>
@@ -263,6 +265,7 @@ namespace KlayGE
 
 			if ((src_width != dst_width) || (src_height != dst_height))
 			{
+#ifndef KLAYGE_PLATFORM_ANDROID
 				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
@@ -294,6 +297,9 @@ namespace KlayGE
 						d += mapper.RowPitch();
 					}
 				}
+#else
+				BOOST_ASSERT(false);
+#endif
 			}
 			else
 			{
@@ -369,6 +375,7 @@ namespace KlayGE
 
 			if ((src_width != dst_width) || (src_height != dst_height))
 			{
+#ifndef KLAYGE_PLATFORM_ANDROID
 				std::vector<uint8_t> data_in(src_width * src_height * src_format_size);
 				std::vector<uint8_t> data_out(dst_width * dst_height * dst_format_size);
 
@@ -400,6 +407,9 @@ namespace KlayGE
 						d += mapper.RowPitch();
 					}
 				}
+#else
+				BOOST_ASSERT(false);
+#endif
 			}
 			else
 			{

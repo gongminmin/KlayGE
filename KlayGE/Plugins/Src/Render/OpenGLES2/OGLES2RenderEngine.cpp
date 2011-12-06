@@ -229,7 +229,7 @@ namespace KlayGE
 			{
 				if (iter->second == buffers[i])
 				{
-					iter = binded_buffer_.erase(iter);
+					binded_buffer_.erase(iter ++);
 				}
 				else
 				{
