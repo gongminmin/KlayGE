@@ -21,7 +21,7 @@
 	#include <Carbon/Carbon.h>
 #endif
 
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 #ifdef GLLOADER_GLES
 	#include <dlfcn.h>
 #endif
@@ -136,7 +136,7 @@ namespace glloader
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 			// TODO
 #endif
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 #ifdef GLLOADER_GLES
 			ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
@@ -144,6 +144,11 @@ namespace glloader
 				gl_dlls_.push_back(ogl_dll);
 			}
 			ogl_dll = ::dlopen("libGLESv2.so", RTLD_LAZY);
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::dlopen("libGLESv1_CM.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
@@ -168,7 +173,7 @@ namespace glloader
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 				// TODO
 #endif
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 				::dlclose(gl_dlls_[i]);
 #endif
 			}
@@ -578,7 +583,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 	// TODO
 #endif
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
 		ret = ::dlsym(gl_dlls[i], name);

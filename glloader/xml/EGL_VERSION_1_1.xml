@@ -129,7 +129,7 @@
 				<param type="EGLint*" name="num_config"/>
 			</params>
 		</function>
-		<function name="eglGetConfigsAttrib" return="EGLBoolean" link="static">
+		<function name="eglGetConfigAttrib" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
 				<param type="EGLConfig*" name="configs"/>
