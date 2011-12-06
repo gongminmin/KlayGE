@@ -170,7 +170,8 @@ namespace KlayGE
 			};
 			size_t const num_feature_levels = sizeof(feature_levels) / sizeof(feature_levels[0]);
 
-			BOOST_FOREACH(BOOST_TYPEOF(dev_type_behaviors)::reference dev_type_beh, dev_type_behaviors)
+			typedef BOOST_TYPEOF(dev_type_behaviors) DevTypeBehaviorsType;
+			BOOST_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
 			{
 				IDXGISwapChain* sc = NULL;
 				ID3D11Device* d3d_device = NULL;

@@ -47,7 +47,7 @@ namespace KlayGE
 		{
         }
 		virtual void OnDefault(void* /*revBuf*/, int /*maxSize*/,
-			void* /*sendBuf*/, int& /*numSend*/, SOCKADDR_IN& /*from*/) const
+			void* /*sendBuf*/, int& /*numSend*/, sockaddr_in& /*from*/) const
 		{
         }
 	};
@@ -56,7 +56,7 @@ namespace KlayGE
 	struct PlayerDes
 	{
 		std::string		name;
-		SOCKADDR_IN		addr;
+		sockaddr_in		addr;
 
 		uint32_t				time;
 
@@ -83,31 +83,31 @@ namespace KlayGE
 		void MaxPlayers(char maxPlayers);
 		char MaxPlayers() const;
 
-		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
-		int Send(void const * buf, int maxSize, SOCKADDR_IN const & to);
+		int Receive(void* buf, int maxSize, sockaddr_in& from);
+		int Send(void const * buf, int maxSize, sockaddr_in const & to);
 
 		void TimeOut(uint32_t timeOut)
 			{ this->socket_.TimeOut(timeOut); }
 		uint32_t TimeOut()
 			{ return this->socket_.TimeOut(); }
 
-		SOCKADDR_IN const & SockAddr() const
+		sockaddr_in const & SockAddr() const
 			{ return this->sockAddr_; }
 
 	private:
-		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, SOCKADDR_IN& From, Processor const & pro);
+		void OnJoin(char* revbuf, char* sendbuf, int& sendnum, sockaddr_in& From, Processor const & pro);
 		void OnQuit(PlayerAddrsIter iter, char* sendbuf, int& sendnum, Processor const & pro);
 
 		void OnGetLobbyInfo(char* sendbuf, int& sendnum, Processor const & pro);
 		void OnNop(PlayerAddrsIter iter);
 
-		PlayerAddrsIter ID(SOCKADDR_IN const & Addr);
+		PlayerAddrsIter ID(sockaddr_in const & Addr);
 
 	private:
 		Socket			socket_;
 		PlayerAddrs		players_;
 
-		SOCKADDR_IN		sockAddr_;
+		sockaddr_in		sockAddr_;
 
 		std::string		name_;
 	};

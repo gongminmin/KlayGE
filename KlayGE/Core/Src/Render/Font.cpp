@@ -121,11 +121,13 @@ namespace KlayGE
 		std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
 		kfont_input->read(&temp_char_advance[0], static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
 
-		BOOST_FOREACH(BOOST_TYPEOF(temp_char_index)::reference ci, temp_char_index)
+		typedef BOOST_TYPEOF(temp_char_index) TempCharIndexType;
+		BOOST_FOREACH(TempCharIndexType::reference ci, temp_char_index)
 		{
 			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(temp_char_advance)::reference ca, temp_char_advance)
+		typedef BOOST_TYPEOF(temp_char_advance) TempCharAdvanceType;
+		BOOST_FOREACH(TempCharAdvanceType::reference ca, temp_char_advance)
 		{
 			BOOST_AUTO(iter, char_index_advance_.find(ca.first));
 			if (iter != char_index_advance_.end())
@@ -342,7 +344,8 @@ namespace KlayGE
 
 		std::vector<uint32_t> lines(1, 0);
 
-		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+		typedef BOOST_TYPEOF(text) TextType;
+		BOOST_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -400,7 +403,8 @@ namespace KlayGE
 
 		std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
-		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+		typedef BOOST_TYPEOF(text) TextType;
+		BOOST_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -427,7 +431,8 @@ namespace KlayGE
 		{
 			if (align & Font::FA_Hor_Right)
 			{
-				BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
+				typedef BOOST_TYPEOF(lines) LinesType;
+				BOOST_FOREACH(LinesType::const_reference p, lines)
 				{
 					sx.push_back(rc.right() - p.first);
 				}
@@ -435,7 +440,8 @@ namespace KlayGE
 			else
 			{
 				// Font::FA_Hor_Center
-				BOOST_FOREACH(BOOST_TYPEOF(lines)::const_reference p, lines)
+				typedef BOOST_TYPEOF(lines) LinesType;
+				BOOST_FOREACH(LinesType::const_reference p, lines)
 				{
 					sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
 				}
@@ -492,7 +498,8 @@ namespace KlayGE
 
 			uint16_t lastIndex(static_cast<uint16_t>(verts.size()));
 
-			BOOST_FOREACH(BOOST_TYPEOF(lines[i].second)::const_reference ch, lines[i].second)
+			typedef BOOST_TYPEOF(lines[i].second) LinesType;
+			BOOST_FOREACH(LinesType::const_reference ch, lines[i].second)
 			{
 				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
@@ -587,7 +594,8 @@ namespace KlayGE
 
 		uint16_t lastIndex(static_cast<uint16_t>(verts.size()));
 
-		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+		typedef BOOST_TYPEOF(text) TextType;
+		BOOST_FOREACH(TextType::const_reference ch, text)
 		{
 			if (ch != L'\n')
 			{
@@ -675,7 +683,8 @@ namespace KlayGE
 		uint32_t const num_chars_a_row = tex_size / kfont_char_size;
 		uint32_t const num_total_chars = num_chars_a_row * num_chars_a_row;
 
-		BOOST_FOREACH(BOOST_TYPEOF(text)::const_reference ch, text)
+		typedef BOOST_TYPEOF(text) TextType;
+		BOOST_FOREACH(TextType::const_reference ch, text)
 		{
 			int32_t offset = kl.CharIndex(ch);
 			if (offset != -1)

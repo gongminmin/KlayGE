@@ -965,7 +965,8 @@ namespace KlayGE
 
 	void PostProcessChain::Apply()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(pp_chain_)::reference pp, pp_chain_)
+		typedef BOOST_TYPEOF(pp_chain_) PPChainType;
+		BOOST_FOREACH(PPChainType::reference pp, pp_chain_)
 		{
 			pp->Apply();
 		}

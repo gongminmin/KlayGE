@@ -1675,7 +1675,8 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterByName(std::string const & name) const
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
+		typedef BOOST_TYPEOF(params_) ParamsType;
+		BOOST_FOREACH(ParamsType::const_reference param, params_)
 		{
 			if (name == *param->Name())
 			{
@@ -1687,7 +1688,8 @@ namespace KlayGE
 
 	RenderEffectParameterPtr RenderEffect::ParameterBySemantic(std::string const & semantic) const
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(params_)::const_reference param, params_)
+		typedef BOOST_TYPEOF(params_) ParamsType;
+		BOOST_FOREACH(ParamsType::const_reference param, params_)
 		{
 			if (semantic == *param->Semantic())
 			{
@@ -1699,7 +1701,8 @@ namespace KlayGE
 
 	RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(techniques_)::const_reference tech, techniques_)
+		typedef BOOST_TYPEOF(techniques_) TechsType;
+		BOOST_FOREACH(TechsType::const_reference tech, techniques_)
 		{
 			if (name == tech->Name())
 			{

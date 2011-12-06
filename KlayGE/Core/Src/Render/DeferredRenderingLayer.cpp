@@ -820,7 +820,8 @@ namespace KlayGE
 			lights_.resize(0);
 			std::vector<LightSourcePtr> cur_lights = scene_mgr.LightSources();
 			bool with_ambient = false;
-			BOOST_FOREACH(BOOST_TYPEOF(cur_lights)::const_reference light, cur_lights)
+			typedef BOOST_TYPEOF(cur_lights) CurLightsType;
+			BOOST_FOREACH(CurLightsType::const_reference light, cur_lights)
 			{
 				if (LT_Ambient == light->Type())
 				{
@@ -840,7 +841,8 @@ namespace KlayGE
 			has_transparency_objs_ = false;
 			visible_scene_objs_.resize(0);
 			SceneManager::SceneObjectsType const & scene_objs = scene_mgr.SceneObjects();
-			BOOST_FOREACH(BOOST_TYPEOF(scene_objs)::const_reference so, scene_objs)
+			typedef BOOST_TYPEOF(scene_objs) SceneObjsType;
+			BOOST_FOREACH(SceneObjsType::const_reference so, scene_objs)
 			{
 				if ((0 == (so->Attrib() & SceneObject::SOA_Overlay)) && so->Visible())
 				{
@@ -882,28 +884,32 @@ namespace KlayGE
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
 			&& ((mrt_g_buffer_ && (pass_type != PT_OpaqueShading) && (pass_type != PT_TransparencyBackShading) && (pass_type != PT_TransparencyFrontShading)) || !mrt_g_buffer_))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
+			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
+			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->Pass(static_cast<PassType>(pass_type));
 			}
 		}
 		if ((PT_OpaqueShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
+			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
+			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(opaque_lighting_tex_);
 			}
 		}
 		if ((PT_TransparencyBackShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
+			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
+			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(transparency_back_lighting_tex_);
 			}
 		}
 		if ((PT_TransparencyFrontShading == pass_type) && (0 == index_in_pass))
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(visible_scene_objs_)::reference deo, visible_scene_objs_)
+			typedef BOOST_TYPEOF(visible_scene_objs_) VisibleSceneObjsType;
+			BOOST_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->LightingTex(transparency_front_lighting_tex_);
 			}

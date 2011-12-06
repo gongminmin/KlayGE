@@ -862,21 +862,24 @@ namespace KlayGE
 
 	void UIManager::Render()
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(rects_)::reference rect, rects_)
+		typedef BOOST_TYPEOF(rects_) RectsType;
+		BOOST_FOREACH(RectsType::reference rect, rects_)
 		{
 			checked_pointer_cast<UIRectRenderable>(rect.second)->Clear();
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
+		typedef BOOST_TYPEOF(strings_) StringsType;
+		BOOST_FOREACH(StringsType::reference str, strings_)
 		{
-			string.second.clear();
+			str.second.clear();
 		}
 
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			dialog->Render();
 		}
 
-		BOOST_FOREACH(BOOST_TYPEOF(rects_)::reference rect, rects_)
+		BOOST_FOREACH(RectsType::reference rect, rects_)
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
@@ -884,10 +887,12 @@ namespace KlayGE
 				ui_rect_obj->AddToSceneManager();
 			}
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(strings_)::reference string, strings_)
+		BOOST_FOREACH(StringsType::reference str, strings_)
 		{
-			BOOST_TYPEOF(font_cache_)::reference font = font_cache_[string.first];
-			BOOST_FOREACH(BOOST_TYPEOF(string.second)::reference s, string.second)
+			typedef BOOST_TYPEOF(font_cache_) FontCacheType;
+			FontCacheType::reference font = font_cache_[str.first];
+			typedef BOOST_TYPEOF(str.second) StrType;
+			BOOST_FOREACH(StrType::reference s, str.second)
 			{
 				font.first->RenderText(s.rc, s.depth, 1, 1, s.clr, s.text, font.second, s.align);
 			}
@@ -1021,13 +1026,15 @@ namespace KlayGE
 	Size_T<uint32_t> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
 		Rect_T<int32_t> const & /*rc*/, uint32_t /*align*/)
 	{
-		BOOST_TYPEOF(font_cache_)::reference font = font_cache_[font_index];
+		typedef BOOST_TYPEOF(font_cache_) FontCacheType;
+		FontCacheType::reference font = font_cache_[font_index];
 		return font.first->CalcSize(strText, font.second);
 	}
 
 	void UIManager::KeyDownHandler(wchar_t key)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1038,7 +1045,8 @@ namespace KlayGE
 
 	void UIManager::KeyUpHandler(wchar_t key)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1049,7 +1057,8 @@ namespace KlayGE
 
 	void UIManager::MouseDownHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1060,7 +1069,8 @@ namespace KlayGE
 
 	void UIManager::MouseUpHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1071,7 +1081,8 @@ namespace KlayGE
 
 	void UIManager::MouseWheelHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt, int32_t z_delta)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1082,7 +1093,8 @@ namespace KlayGE
 
 	void UIManager::MouseOverHandler(uint32_t buttons, Vector_T<int32_t, 2> const & pt)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			if (dialog->GetVisible())
 			{
@@ -1107,7 +1119,8 @@ namespace KlayGE
 
 	void UIManager::SettleCtrls(uint32_t width, uint32_t height)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(dialogs_)::reference dialog, dialogs_)
+		typedef BOOST_TYPEOF(dialogs_) DialogsType;
+		BOOST_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			dialog->SettleCtrls(width, height);
 		}
@@ -1365,7 +1378,8 @@ namespace KlayGE
 
 			for (size_t i = 0; i < controls_.size(); ++ i)
 			{
-				BOOST_TYPEOF(intersected_controls)::iterator iter
+				typedef BOOST_TYPEOF(intersected_controls) ControlsType;
+				ControlsType::iterator iter
 					= std::lower_bound(intersected_controls.begin(), intersected_controls.end(), i);
 				if ((iter == intersected_controls.end()) || (*iter != i))
 				{
@@ -1764,7 +1778,8 @@ namespace KlayGE
 
 	void UIDialog::SettleCtrls(uint32_t width, uint32_t height)
 	{
-		BOOST_FOREACH(BOOST_TYPEOF(id_location_)::reference id_loc, id_location_)
+		typedef BOOST_TYPEOF(id_location_) IDLocationType;
+		BOOST_FOREACH(IDLocationType::reference id_loc, id_location_)
 		{
 			int x = id_loc.second.x;
 			int y = id_loc.second.y;
@@ -1833,7 +1848,8 @@ namespace KlayGE
 				// See if this matches a control's hotkey
 				// Activate the hotkey if the focus doesn't belong to an
 				// edit box.
-				BOOST_FOREACH(BOOST_TYPEOF(controls_)::reference control, controls_)
+				typedef BOOST_TYPEOF(controls_) ControlsType;
+				BOOST_FOREACH(ControlsType::reference control, controls_)
 				{
 					if (control->GetHotkey() == static_cast<uint8_t>(key))
 					{

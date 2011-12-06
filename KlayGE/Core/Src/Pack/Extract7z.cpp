@@ -159,7 +159,7 @@ namespace
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			dll_loader_.Load("7z.dll");
-#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 			dll_loader_.Load("7z.so");
 #endif
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");

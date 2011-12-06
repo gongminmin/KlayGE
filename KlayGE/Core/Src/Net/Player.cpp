@@ -75,7 +75,8 @@ namespace KlayGE
 			if (!sendQueue_.empty())
 			{
 				// 发送队列里的消息
-				BOOST_FOREACH(BOOST_TYPEOF(sendQueue_)::reference msg, sendQueue_)
+				typedef BOOST_TYPEOF(sendQueue_) SendQueneType;
+				BOOST_FOREACH(SendQueneType::reference msg, sendQueue_)
 				{
 					socket_.Send(&msg[0], static_cast<int>(msg.size()));
 				}
@@ -115,7 +116,7 @@ namespace KlayGE
 
 	// 加入服务器
 	/////////////////////////////////////////////////////////////////////////////////
-	bool Player::Join(SOCKADDR_IN const & lobbyAddr)
+	bool Player::Join(sockaddr_in const & lobbyAddr)
 	{
 		socket_.Close();
 		socket_.Create(SOCK_DGRAM);
@@ -207,7 +208,7 @@ namespace KlayGE
 
 	// 接收数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Player::Receive(void* buf, int maxSize, SOCKADDR_IN& from)
+	int Player::Receive(void* buf, int maxSize, sockaddr_in& from)
 	{
 		return socket_.ReceiveFrom(buf, maxSize, from);
 	}

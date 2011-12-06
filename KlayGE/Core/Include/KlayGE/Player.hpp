@@ -46,7 +46,7 @@ namespace KlayGE
 		char			numPlayer;
 		char			maxPlayers;
 		std::string		name;
-		SOCKADDR_IN		addr;
+		sockaddr_in		addr;
 	};
 
 	class KLAYGE_CORE_API Player
@@ -55,7 +55,7 @@ namespace KlayGE
 		Player();
 		~Player();
 
-		bool Join(SOCKADDR_IN const & lobbyAddr);
+		bool Join(sockaddr_in const & lobbyAddr);
 		void Quit();
 		void Destroy();
 		LobbyDes LobbyInfo();
@@ -64,7 +64,7 @@ namespace KlayGE
 		std::string const & Name()
 			{ return this->name_; }
 
-		int Receive(void* buf, int maxSize, SOCKADDR_IN& from);
+		int Receive(void* buf, int maxSize, sockaddr_in& from);
 		int Send(void const * buf, int size);
 
 		void ReceiveFunc();

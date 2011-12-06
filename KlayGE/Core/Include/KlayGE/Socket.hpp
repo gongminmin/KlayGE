@@ -30,24 +30,23 @@
 	#include <winsock.h>
 	#endif
 	typedef int socklen_t;
-#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <sys/ioctl.h>
 	#include <netdb.h>
-	typedef sockaddr SOCKADDR;
-	typedef sockaddr_in SOCKADDR_IN;
-	typedef in_addr IN_ADDR;
 	typedef int SOCKET;
+	#define INVALID_SOCKET (~0)
+	#define SOCKET_ERROR (-1)
 #endif
 
 namespace KlayGE
 {
-	KLAYGE_CORE_API SOCKADDR_IN TransAddr(std::string const & address, uint16_t port);
-	KLAYGE_CORE_API std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16_t& port);
-	KLAYGE_CORE_API IN_ADDR Host();
+	KLAYGE_CORE_API sockaddr_in TransAddr(std::string const & address, uint16_t port);
+	KLAYGE_CORE_API std::string TransAddr(sockaddr_in const & sockAddr, uint16_t& port);
+	KLAYGE_CORE_API in_addr Host();
 
 	// Í¬²½Ì×½Ó×Ö
 	///////////////////////////////////////////////////////////////////////////////
@@ -61,10 +60,10 @@ namespace KlayGE
 		void Close();
 
 		void Accept(Socket& connectedSocket);
-		void Accept(Socket& connectedSocket, SOCKADDR_IN& sockAddr);
-		void Bind(SOCKADDR_IN const & sockAddr);
+		void Accept(Socket& connectedSocket, sockaddr_in& sockAddr);
+		void Bind(sockaddr_in const & sockAddr);
 
-		void Connect(SOCKADDR_IN const & sockAddr);
+		void Connect(sockaddr_in const & sockAddr);
 
 		void IOCtl(long command, uint32_t* argument);
 		void Listen(int connectionBacklog = 5);
@@ -72,8 +71,8 @@ namespace KlayGE
 		int Receive(void* buf, int len, int flags = 0);
 		int Send(void const * buf, int len, int flags = 0);
 
-		int ReceiveFrom(void* buf, int len, SOCKADDR_IN& sockFrom, int flags = 0);
-		int SendTo(void const * buf, int len, SOCKADDR_IN const & sockTo, int flags = 0);
+		int ReceiveFrom(void* buf, int len, sockaddr_in& sockFrom, int flags = 0);
+		int SendTo(void const * buf, int len, sockaddr_in const & sockTo, int flags = 0);
 
 		enum ShutDownMode
 		{
@@ -83,8 +82,8 @@ namespace KlayGE
 		};
 		void ShutDown(ShutDownMode how = SDM_Sends);
 
-		void PeerName(SOCKADDR_IN& sockAddr, socklen_t& len);
-		void SockName(SOCKADDR_IN& sockAddr, socklen_t& len);
+		void PeerName(sockaddr_in& sockAddr, socklen_t& len);
+		void SockName(sockaddr_in& sockAddr, socklen_t& len);
 
 		void SetSockOpt(int optionName, void const * optionValue,
 			socklen_t optionLen, int level = SOL_SOCKET);

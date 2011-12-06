@@ -43,20 +43,15 @@
 			WSACleanup();
 		}
 	} wsaInit;
-#elif defined KLAYGE_PLATFORM_LINUX
-	typedef hostent HOSTENT;
-	typedef hostent* LPHOSTENT;
-	#define INVALID_SOCKET 0
-	#define SOCKET_ERROR -1
 #endif
 
 namespace KlayGE
 {
 	// 翻译网络地址
 	/////////////////////////////////////////////////////////////////////////////////
-	SOCKADDR_IN TransAddr(std::string const & address, uint16_t port)
+	sockaddr_in TransAddr(std::string const & address, uint16_t port)
 	{
-		SOCKADDR_IN sockAddr_in;
+		sockaddr_in sockAddr_in;
 		std::memset(&sockAddr_in, 0, sizeof(sockAddr_in));
 
 		if (address.empty())
@@ -70,7 +65,7 @@ namespace KlayGE
 
 		if (INADDR_NONE == sockAddr_in.sin_addr.s_addr)
 		{
-			LPHOSTENT pHostEnt = gethostbyname(address.c_str());
+			hostent* pHostEnt = gethostbyname(address.c_str());
 			if (pHostEnt != NULL)
 			{
 				std::memcpy(&sockAddr_in.sin_addr.s_addr,
@@ -88,7 +83,7 @@ namespace KlayGE
 		return sockAddr_in;
 	}
 
-	std::string TransAddr(SOCKADDR_IN const & sockAddr, uint16_t& port)
+	std::string TransAddr(sockaddr_in const & sockAddr, uint16_t& port)
 	{
 		port = ntohs(sockAddr.sin_port);
 		return std::string(inet_ntoa(sockAddr.sin_addr));
@@ -96,18 +91,18 @@ namespace KlayGE
 
 	// 获取主机地址
 	/////////////////////////////////////////////////////////////////////////////////
-	IN_ADDR Host()
+	in_addr Host()
 	{
-		IN_ADDR addr;
+		in_addr addr;
 		memset(&addr, 0, sizeof(addr));
 
 		char host[256];
 		if (0 == gethostname(host, sizeof(host)))
 		{
-			HOSTENT* pHostEnt = gethostbyname(host);
+			hostent* pHostEnt = gethostbyname(host);
 #if defined KLAYGE_PLATFORM_WINDOWS
 			std::memcpy(&addr.S_un.S_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
-#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 			std::memcpy(&addr.s_addr, pHostEnt->h_addr_list[0], pHostEnt->h_length);
 #endif
 		}
@@ -157,13 +152,13 @@ namespace KlayGE
 
 	// 服务端应答
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::Accept(Socket& connectedSocket, SOCKADDR_IN& sockAddr)
+	void Socket::Accept(Socket& connectedSocket, sockaddr_in& sockAddr)
 	{
 		connectedSocket.Close();
 
 		socklen_t len(sizeof(sockAddr));
 		connectedSocket.socket_ = accept(this->socket_,
-			reinterpret_cast<SOCKADDR*>(&sockAddr), &len);
+			reinterpret_cast<sockaddr*>(&sockAddr), &len);
 	}
 
 	void Socket::Accept(Socket& connectedSocket)
@@ -175,11 +170,11 @@ namespace KlayGE
 
 	// 绑定端口
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::Bind(SOCKADDR_IN const & sockAddr)
+	void Socket::Bind(sockaddr_in const & sockAddr)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-		Verify(bind(this->socket_, reinterpret_cast<SOCKADDR const *>(&sockAddr),
+		Verify(bind(this->socket_, reinterpret_cast<sockaddr const *>(&sockAddr),
 			sizeof(sockAddr)) != SOCKET_ERROR);
 	}
 
@@ -191,7 +186,7 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
-#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);
 #endif
 	}
@@ -234,22 +229,22 @@ namespace KlayGE
 
 	// 有连接的情况下获取点名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::PeerName(SOCKADDR_IN& sockAddr, socklen_t& len)
+	void Socket::PeerName(sockaddr_in& sockAddr, socklen_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(getpeername(this->socket_,
-			reinterpret_cast<SOCKADDR*>(&sockAddr), &len) != SOCKET_ERROR);
+			reinterpret_cast<sockaddr*>(&sockAddr), &len) != SOCKET_ERROR);
 	}
 
 	// 获取套接字名称
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::SockName(SOCKADDR_IN& sockAddr, socklen_t& len)
+	void Socket::SockName(sockaddr_in& sockAddr, socklen_t& len)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(getsockname(this->socket_,
-			reinterpret_cast<SOCKADDR*>(&sockAddr), &len) != SOCKET_ERROR);
+			reinterpret_cast<sockaddr*>(&sockAddr), &len) != SOCKET_ERROR);
 	}
 
 	// 设置套接字参数
@@ -274,33 +269,33 @@ namespace KlayGE
 
 	// 无连接情况下接收数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Socket::ReceiveFrom(void* buf, int len, SOCKADDR_IN& sockFrom, int flags)
+	int Socket::ReceiveFrom(void* buf, int len, sockaddr_in& sockFrom, int flags)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		socklen_t fromLen(sizeof(sockFrom));
 		return recvfrom(this->socket_, static_cast<char*>(buf), len, flags,
-			reinterpret_cast<SOCKADDR*>(&sockFrom), &fromLen);
+			reinterpret_cast<sockaddr*>(&sockFrom), &fromLen);
 	}
 
 	// 无连接情况下发送数据
 	/////////////////////////////////////////////////////////////////////////////////
-	int Socket::SendTo(void const * buf, int len, SOCKADDR_IN const & sockTo, int flags)
+	int Socket::SendTo(void const * buf, int len, sockaddr_in const & sockTo, int flags)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		return sendto(this->socket_, static_cast<char const *>(buf), len, flags,
-			reinterpret_cast<SOCKADDR const *>(&sockTo), sizeof(sockTo));
+			reinterpret_cast<sockaddr const *>(&sockTo), sizeof(sockTo));
 	}
 
 	// 连接服务端
 	/////////////////////////////////////////////////////////////////////////////////
-	void Socket::Connect(SOCKADDR_IN const & sockAddr)
+	void Socket::Connect(sockaddr_in const & sockAddr)
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
 		Verify(connect(this->socket_,
-			reinterpret_cast<SOCKADDR const *>(&sockAddr), sizeof(sockAddr)) != SOCKET_ERROR);
+			reinterpret_cast<sockaddr const *>(&sockAddr), sizeof(sockAddr)) != SOCKET_ERROR);
 	}
 
 	// 设置超时时间
