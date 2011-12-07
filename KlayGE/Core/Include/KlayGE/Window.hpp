@@ -44,7 +44,7 @@
 
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
-#include <android/native_window.h>
+#include <../../android/native_app_glue/android_native_app_glue.h>
 #endif
 
 #include <string>
@@ -215,6 +215,9 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
 		void MsgProc(XEvent const & event);
+#elif defined KLAYGE_PLATFORM_ANDROID
+	public:
+		static void MsgProc(android_app* app, int32_t cmd);
 #endif
 
 	private:

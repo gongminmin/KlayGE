@@ -150,6 +150,40 @@ namespace KlayGE
 				fb.SwapBuffers();
 			}
 		}
+#elif defined KLAYGE_PLATFORM_ANDROID
+		for (;;)
+		{
+			// Read all pending events.
+			int ident;
+			int events;
+			android_poll_source* source;
+
+			android_app* state = Context::Instance().AppInstance().AppState();
+
+			FrameBuffer& fb = *this->CurFrameBuffer();
+			do
+			{
+				ident = ALooper_pollAll(fb.Active() ? 0 : -1, NULL, &events, reinterpret_cast<void**>(&source));
+
+				// Process this event.
+				if (source != NULL)
+				{
+					source->process(state, source);
+				}
+
+				// Check if we are exiting.
+				if (state->destroyRequested != 0)
+				{
+					return;
+				}
+			} while (ident >= 0);
+
+			if (fb.Active())
+			{
+				Context::Instance().SceneManagerInstance().Update();
+				fb.SwapBuffers();
+			}
+		}
 #endif
 	}
 

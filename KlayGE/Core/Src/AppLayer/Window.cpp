@@ -20,6 +20,10 @@
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Util.hpp>
 
+#ifdef KLAYGE_PLATFORM_ANDROID
+#include <KlayGE/App3D.hpp>
+#endif
+
 #include <KlayGE/Window.hpp>
 
 #ifndef GET_KEYSTATE_WPARAM
@@ -639,11 +643,39 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
 	{
-		std::locale loc("");
+		android_app* state = Context::Instance().AppInstance().AppState();
+		a_window_ = state->window;
+		state->userData = this;
+		state->onAppCmd = MsgProc;
 	}
 
 	Window::~Window()
 	{
+	}
+
+	void Window::MsgProc(android_app* app, int32_t cmd)
+	{
+		Window* win = static_cast<Window*>(app->userData);
+		switch (cmd)
+		{
+		case APP_CMD_SAVE_STATE:
+			break;
+
+		case APP_CMD_INIT_WINDOW:
+			break;
+        
+		case APP_CMD_TERM_WINDOW:
+			win->OnClose()(*win);
+			break;
+
+		case APP_CMD_GAINED_FOCUS:
+			win->OnActive()(*win, true);
+            break;
+
+		case APP_CMD_LOST_FOCUS:
+			win->OnActive()(*win, false);
+			break;
+		}
 	}
 #endif
 }

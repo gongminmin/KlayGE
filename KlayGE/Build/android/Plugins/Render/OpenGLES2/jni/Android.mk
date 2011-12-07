@@ -41,7 +41,7 @@ LOCAL_SRC_FILES := \
 		
 LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_OGL_RE_SOURCE -DGLLOADER_GLES_SUPPORT
 
-LOCAL_LDLIBS += -llog -landroid
+LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core glloader boost_date_time boost_filesystem boost_signals boost_system boost_thread
 
 include $(BUILD_SHARED_LIBRARY)
