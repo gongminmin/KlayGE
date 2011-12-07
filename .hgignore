@@ -5,7 +5,6 @@ glloader/Debug-GLES/
 glloader/doc/html/
 glloader/Release/
 glloader/Release-GLES/
-glloader/build/android/libs/
 glloader/build/android/obj/
 glloader/build/codelite/*.mk
 glloader/build/codelite/*.tags
@@ -42,6 +41,11 @@ KlayGE/bin/*/*.ilk
 KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*.pyc
+KlayGE/Build/android/Core/obj
+KlayGE/Build/android/Plugins/Render/OpenGLES2/libs
+KlayGE/Build/android/Plugins/Render/OpenGLES2/obj
+KlayGE/Build/android/Plugins/Scene/OCTree/libs
+KlayGE/Build/android/Plugins/Scene/OCTree/obj
 KlayGE/Build/codelite/*.mk
 KlayGE/Build/codelite/*.tags
 KlayGE/Build/codelite/*.session

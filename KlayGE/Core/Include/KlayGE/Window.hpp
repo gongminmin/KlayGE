@@ -45,9 +45,8 @@
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/native_window.h>
-
-#include <glloader/glloader.h>
 #endif
+
 #include <string>
 
 namespace KlayGE

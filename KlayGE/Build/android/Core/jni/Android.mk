@@ -7,7 +7,6 @@ include $(CLEAR_VARS)
 LOCAL_C_INCLUDES := $(KLAYGE_SRC_PATH)/../../../External/boost \
 		$(KLAYGE_SRC_PATH)/../../../External/Python/include \
 		$(KLAYGE_SRC_PATH)/../../../External/rapidxml \
-		$(KLAYGE_SRC_PATH)/../../../glloader/include \
 		$(KLAYGE_SRC_PATH)/../Include \
 		
 LOCAL_MODULE := KlayGE_Core_gcc
@@ -103,6 +102,6 @@ LOCAL_SRC_FILES := \
 		UI/UITexButton.cpp \
 
 		
-LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_CORE_SOURCE -DGLLOADER_GLES_SUPPORT
+LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_CORE_SOURCE
 
 include $(BUILD_STATIC_LIBRARY)
