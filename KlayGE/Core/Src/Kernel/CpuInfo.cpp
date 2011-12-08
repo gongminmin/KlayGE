@@ -84,7 +84,7 @@ namespace
 	}
 
 
-#if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)
+#if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
 	enum CPUIDFeatureMask
 	{
 		// In EBX of type 1. Intel only.
@@ -307,7 +307,7 @@ namespace KlayGE
 		num_hw_threads_ = 1;
 		num_cores_ = 1;
 
-#if defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)
+#if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
 		Cpuid cpuid;
 
 		cpuid.Call(0);

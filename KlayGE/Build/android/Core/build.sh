@@ -7,3 +7,6 @@ cp obj/local/armeabi/libKlayGE_Core_gcc.a ../../../lib/android_armeabi/
 
 mkdir ../../../lib/android_armeabi-v7a
 cp obj/local/armeabi-v7a/libKlayGE_Core_gcc.a ../../../lib/android_armeabi-v7a/
+
+mkdir ../../../lib/android_x86
+cp obj/local/x86/libKlayGE_Core_gcc.a ../../../lib/android_x86/
