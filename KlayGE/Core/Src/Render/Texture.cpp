@@ -1085,16 +1085,48 @@ namespace KlayGE
 
 		uint32_t magic;
 		file->read(&magic, sizeof(magic));
+		LittleEndianToNative<sizeof(magic)>(&magic);
 		BOOST_ASSERT((MakeFourCC<'D', 'D', 'S', ' '>::value) == magic);
 
 		DDSSURFACEDESC2 desc;
 		file->read(&desc, sizeof(desc));
+		LittleEndianToNative<sizeof(desc.size)>(&desc.size);
+		LittleEndianToNative<sizeof(desc.flags)>(&desc.flags);
+		LittleEndianToNative<sizeof(desc.height)>(&desc.height);
+		LittleEndianToNative<sizeof(desc.width)>(&desc.width);
+		LittleEndianToNative<sizeof(desc.pitch)>(&desc.pitch);
+		LittleEndianToNative<sizeof(desc.depth)>(&desc.depth);
+		LittleEndianToNative<sizeof(desc.mip_map_count)>(&desc.mip_map_count);
+		for (uint32_t i = 0; i < sizeof(desc.reserved1) / sizeof(desc.reserved1[0]); ++ i)
+		{
+			LittleEndianToNative<sizeof(desc.reserved1[i])>(&desc.reserved1[i]);
+		}
+		LittleEndianToNative<sizeof(desc.pixel_format.size)>(&desc.pixel_format.size);
+		LittleEndianToNative<sizeof(desc.pixel_format.flags)>(&desc.pixel_format.flags);
+		LittleEndianToNative<sizeof(desc.pixel_format.four_cc)>(&desc.pixel_format.four_cc);
+		LittleEndianToNative<sizeof(desc.pixel_format.rgb_bit_count)>(&desc.pixel_format.rgb_bit_count);
+		LittleEndianToNative<sizeof(desc.pixel_format.r_bit_mask)>(&desc.pixel_format.r_bit_mask);
+		LittleEndianToNative<sizeof(desc.pixel_format.g_bit_mask)>(&desc.pixel_format.g_bit_mask);
+		LittleEndianToNative<sizeof(desc.pixel_format.b_bit_mask)>(&desc.pixel_format.b_bit_mask);
+		LittleEndianToNative<sizeof(desc.pixel_format.rgb_alpha_bit_mask)>(&desc.pixel_format.rgb_alpha_bit_mask);
+		LittleEndianToNative<sizeof(desc.dds_caps.caps1)>(&desc.dds_caps.caps1);
+		LittleEndianToNative<sizeof(desc.dds_caps.caps2)>(&desc.dds_caps.caps2);
+		for (uint32_t i = 0; i < sizeof(desc.dds_caps.reserved) / sizeof(desc.dds_caps.reserved[0]); ++ i)
+		{
+			LittleEndianToNative<sizeof(desc.dds_caps.reserved[i])>(&desc.dds_caps.reserved[i]);
+		}
+		LittleEndianToNative<sizeof(desc.reserved2)>(&desc.reserved2);
 
 		DDS_HEADER_DXT10 desc10;
 		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
 			file->read(&desc10, sizeof(desc10));
-			array_size = desc10.array_size;
+			LittleEndianToNative<sizeof(desc10.dxgi_format)>(&desc10.dxgi_format);
+			LittleEndianToNative<sizeof(desc10.resource_dim)>(&desc10.resource_dim);
+			LittleEndianToNative<sizeof(desc10.misc_flag)>(&desc10.misc_flag);
+			LittleEndianToNative<sizeof(desc10.array_size)>(&desc10.array_size);
+			LittleEndianToNative<sizeof(desc10.reserved)>(&desc10.reserved);
+			LittleEndianToNative<sizeof(desc10.array_size)>(&desc10.array_size);
 		}
 		else
 		{
@@ -1720,6 +1752,7 @@ namespace KlayGE
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
 
 		uint32_t magic = MakeFourCC<'D', 'D', 'S', ' '>::value;
+		NativeToLittleEndian<sizeof(magic)>(&magic);
 		file.write(reinterpret_cast<char*>(&magic), sizeof(magic));
 
 		DDSSURFACEDESC2 desc;
@@ -2030,7 +2063,34 @@ namespace KlayGE
 			desc.linear_size = main_image_size;
 		}
 
-		file.write(reinterpret_cast<char*>(&desc), sizeof(desc));
+		DDSSURFACEDESC2 desc_le = desc;
+		NativeToLittleEndian<sizeof(desc_le.size)>(&desc_le.size);
+		NativeToLittleEndian<sizeof(desc_le.flags)>(&desc_le.flags);
+		NativeToLittleEndian<sizeof(desc_le.height)>(&desc_le.height);
+		NativeToLittleEndian<sizeof(desc_le.width)>(&desc_le.width);
+		NativeToLittleEndian<sizeof(desc_le.pitch)>(&desc_le.pitch);
+		NativeToLittleEndian<sizeof(desc_le.depth)>(&desc_le.depth);
+		NativeToLittleEndian<sizeof(desc_le.mip_map_count)>(&desc_le.mip_map_count);
+		for (uint32_t i = 0; i < sizeof(desc_le.reserved1) / sizeof(desc_le.reserved1[0]); ++ i)
+		{
+			NativeToLittleEndian<sizeof(desc_le.reserved1[i])>(&desc_le.reserved1[i]);
+		}
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.size)>(&desc_le.pixel_format.size);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.flags)>(&desc_le.pixel_format.flags);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.four_cc)>(&desc_le.pixel_format.four_cc);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.rgb_bit_count)>(&desc_le.pixel_format.rgb_bit_count);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.r_bit_mask)>(&desc_le.pixel_format.r_bit_mask);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.g_bit_mask)>(&desc_le.pixel_format.g_bit_mask);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.b_bit_mask)>(&desc_le.pixel_format.b_bit_mask);
+		NativeToLittleEndian<sizeof(desc_le.pixel_format.rgb_alpha_bit_mask)>(&desc_le.pixel_format.rgb_alpha_bit_mask);
+		NativeToLittleEndian<sizeof(desc_le.dds_caps.caps1)>(&desc_le.dds_caps.caps1);
+		NativeToLittleEndian<sizeof(desc_le.dds_caps.caps2)>(&desc_le.dds_caps.caps2);
+		for (uint32_t i = 0; i < sizeof(desc_le.dds_caps.reserved) / sizeof(desc_le.dds_caps.reserved[0]); ++ i)
+		{
+			NativeToLittleEndian<sizeof(desc_le.dds_caps.reserved[i])>(&desc_le.dds_caps.reserved[i]);
+		}
+		NativeToLittleEndian<sizeof(desc_le.reserved2)>(&desc_le.reserved2);
+		file.write(reinterpret_cast<char*>(&desc_le), sizeof(desc_le));
 
 		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
@@ -2064,6 +2124,12 @@ namespace KlayGE
 			desc10.array_size = array_size;
 			desc10.reserved = 0;
 
+			NativeToLittleEndian<sizeof(desc10.dxgi_format)>(&desc10.dxgi_format);
+			NativeToLittleEndian<sizeof(desc10.resource_dim)>(&desc10.resource_dim);
+			NativeToLittleEndian<sizeof(desc10.misc_flag)>(&desc10.misc_flag);
+			NativeToLittleEndian<sizeof(desc10.array_size)>(&desc10.array_size);
+			NativeToLittleEndian<sizeof(desc10.reserved)>(&desc10.reserved);
+			NativeToLittleEndian<sizeof(desc10.array_size)>(&desc10.array_size);
 			file.write(reinterpret_cast<char*>(&desc10), sizeof(desc10));
 		}
 

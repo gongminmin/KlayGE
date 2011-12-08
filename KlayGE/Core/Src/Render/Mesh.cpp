@@ -616,8 +616,10 @@ namespace KlayGE
 			ResIdentifierPtr lzma_file = ResLoader::Instance().Open(path_name + jit_ext_name);
 			uint32_t fourcc;
 			lzma_file->read(&fourcc, sizeof(fourcc));
+			LittleEndianToNative<sizeof(fourcc)>(&fourcc);
 			uint32_t ver;
 			lzma_file->read(&ver, sizeof(ver));
+			LittleEndianToNative<sizeof(ver)>(&ver);
 			if ((fourcc != MakeFourCC<'K', 'L', 'M', ' '>::value) || (ver != MODEL_BIN_VERSION))
 			{
 				jit = true;
@@ -651,11 +653,13 @@ namespace KlayGE
 				{
 					++ num_mtls;
 				}
+				NativeToLittleEndian<sizeof(num_mtls)>(&num_mtls);
 				ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 			}
 			else
 			{
 				uint32_t num_mtls = 0;
+				NativeToLittleEndian<sizeof(num_mtls)>(&num_mtls);
 				ss->write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
 			}
 
@@ -667,11 +671,13 @@ namespace KlayGE
 				{
 					++ num_meshes;
 				}
+				NativeToLittleEndian<sizeof(num_meshes)>(&num_meshes);
 				ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 			}
 			else
 			{
 				uint32_t num_meshes = 0;
+				NativeToLittleEndian<sizeof(num_meshes)>(&num_meshes);
 				ss->write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
 			}
 
@@ -683,11 +689,13 @@ namespace KlayGE
 				{
 					++ num_joints;
 				}
+				NativeToLittleEndian<sizeof(num_joints)>(&num_joints);
 				ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 			}
 			else
 			{
 				uint32_t num_joints = 0;
+				NativeToLittleEndian<sizeof(num_joints)>(&num_joints);
 				ss->write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 			}
 
@@ -699,11 +707,13 @@ namespace KlayGE
 				{
 					++ num_kfs;
 				}
+				NativeToLittleEndian<sizeof(num_kfs)>(&num_kfs);
 				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 			}
 			else
 			{
 				uint32_t num_kfs = 0;
+				NativeToLittleEndian<sizeof(num_kfs)>(&num_kfs);
 				ss->write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
 			}
 
@@ -729,6 +739,22 @@ namespace KlayGE
 					float specular_level = mtl_node->Attrib("specular_level")->ValueFloat();
 					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
 
+					NativeToLittleEndian<sizeof(ambient_r)>(&ambient_r);
+					NativeToLittleEndian<sizeof(ambient_g)>(&ambient_g);
+					NativeToLittleEndian<sizeof(ambient_b)>(&ambient_b);
+					NativeToLittleEndian<sizeof(diffuse_r)>(&diffuse_r);
+					NativeToLittleEndian<sizeof(diffuse_g)>(&diffuse_g);
+					NativeToLittleEndian<sizeof(diffuse_b)>(&diffuse_b);
+					NativeToLittleEndian<sizeof(specular_r)>(&specular_r);
+					NativeToLittleEndian<sizeof(specular_g)>(&specular_g);
+					NativeToLittleEndian<sizeof(specular_b)>(&specular_b);
+					NativeToLittleEndian<sizeof(emit_r)>(&emit_r);
+					NativeToLittleEndian<sizeof(emit_g)>(&emit_g);
+					NativeToLittleEndian<sizeof(emit_b)>(&emit_b);
+					NativeToLittleEndian<sizeof(opacity)>(&opacity);
+					NativeToLittleEndian<sizeof(specular_level)>(&specular_level);
+					NativeToLittleEndian<sizeof(shininess)>(&shininess);
+
 					ss->write(reinterpret_cast<char*>(&ambient_r), sizeof(ambient_r));
 					ss->write(reinterpret_cast<char*>(&ambient_g), sizeof(ambient_g));
 					ss->write(reinterpret_cast<char*>(&ambient_b), sizeof(ambient_b));
@@ -753,6 +779,7 @@ namespace KlayGE
 						{
 							++ num_texs;
 						}
+						NativeToLittleEndian<sizeof(num_texs)>(&num_texs);
 						ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 
 						for (XMLNodePtr tex_node = textures_chunk->FirstNode("texture"); tex_node; tex_node = tex_node->NextSibling("texture"))
@@ -764,6 +791,7 @@ namespace KlayGE
 					else
 					{
 						uint32_t num_texs = 0;
+						NativeToLittleEndian<sizeof(num_texs)>(&num_texs);
 						ss->write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
 					}
 				}
@@ -1327,14 +1355,21 @@ namespace KlayGE
 				}
 
 				uint32_t num_merged_ves = static_cast<uint32_t>(merged_ves.size());
+				NativeToLittleEndian<sizeof(num_merged_ves)>(&num_merged_ves);
 				ss->write(reinterpret_cast<char*>(&num_merged_ves), sizeof(num_merged_ves));
 				for (size_t i = 0; i < merged_ves.size(); ++ i)
 				{
+					NativeToLittleEndian<sizeof(merged_ves[i].usage)>(&merged_ves[i].usage);
+					NativeToLittleEndian<sizeof(merged_ves[i].format)>(&merged_ves[i].format);
 					ss->write(reinterpret_cast<char*>(&merged_ves[i]), sizeof(merged_ves[i]));
 				}
 
-				ss->write(reinterpret_cast<char*>(&mesh_base_vertices.back()), sizeof(mesh_base_vertices.back()));
-				ss->write(reinterpret_cast<char*>(&mesh_start_indices.back()), sizeof(mesh_start_indices.back()));
+				uint32_t num_vertices = mesh_base_vertices.back();
+				NativeToLittleEndian<sizeof(num_vertices)>(&num_vertices);
+				ss->write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
+				uint32_t num_indices = mesh_start_indices.back();
+				NativeToLittleEndian<sizeof(num_indices)>(&num_indices);
+				ss->write(reinterpret_cast<char*>(&num_indices), sizeof(num_indices));
 				ss->write(&is_index_16_bit, sizeof(is_index_16_bit));
 
 				for (size_t i = 0; i < merged_buff.size(); ++ i)
@@ -1349,16 +1384,27 @@ namespace KlayGE
 					WriteShortString(*ss, mesh_node->Attrib("name")->ValueString());
 
 					int32_t mtl_id = mesh_node->Attrib("mtl_id")->ValueInt();
+					NativeToLittleEndian<sizeof(mtl_id)>(&mtl_id);
 					ss->write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
 
 					float3 min_bb = bounding_boxes[mesh_index].Min();
+					NativeToLittleEndian<sizeof(min_bb[0])>(&min_bb[0]);
+					NativeToLittleEndian<sizeof(min_bb[1])>(&min_bb[1]);
+					NativeToLittleEndian<sizeof(min_bb[2])>(&min_bb[2]);
 					ss->write(reinterpret_cast<char*>(&min_bb), sizeof(min_bb));
 					float3 max_bb = bounding_boxes[mesh_index].Max();
+					NativeToLittleEndian<sizeof(max_bb[0])>(&max_bb[0]);
+					NativeToLittleEndian<sizeof(max_bb[1])>(&max_bb[1]);
+					NativeToLittleEndian<sizeof(max_bb[2])>(&max_bb[2]);
 					ss->write(reinterpret_cast<char*>(&max_bb), sizeof(max_bb));
 
+					NativeToLittleEndian<sizeof(mesh_num_vertices[mesh_index])>(&mesh_num_vertices[mesh_index]);
 					ss->write(reinterpret_cast<char*>(&mesh_num_vertices[mesh_index]), sizeof(mesh_num_vertices[mesh_index]));
+					NativeToLittleEndian<sizeof(mesh_base_vertices[mesh_index])>(&mesh_base_vertices[mesh_index]);
 					ss->write(reinterpret_cast<char*>(&mesh_base_vertices[mesh_index]), sizeof(mesh_base_vertices[mesh_index]));
+					NativeToLittleEndian<sizeof(mesh_num_indices[mesh_index])>(&mesh_num_indices[mesh_index]);
 					ss->write(reinterpret_cast<char*>(&mesh_num_indices[mesh_index]), sizeof(mesh_num_indices[mesh_index]));
+					NativeToLittleEndian<sizeof(mesh_start_indices[mesh_index])>(&mesh_start_indices[mesh_index]);
 					ss->write(reinterpret_cast<char*>(&mesh_start_indices[mesh_index]), sizeof(mesh_start_indices[mesh_index]));
 
 					++ mesh_index;
@@ -1372,6 +1418,7 @@ namespace KlayGE
 					WriteShortString(*ss, bone_node->Attrib("name")->ValueString());
 
 					int16_t joint_parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
+					NativeToLittleEndian<sizeof(joint_parent)>(&joint_parent);
 					ss->write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
 
 					XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
@@ -1386,7 +1433,15 @@ namespace KlayGE
 
 						Quaternion bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
 
+						NativeToLittleEndian<sizeof(bind_quat[0])>(&bind_quat[0]);
+						NativeToLittleEndian<sizeof(bind_quat[1])>(&bind_quat[1]);
+						NativeToLittleEndian<sizeof(bind_quat[2])>(&bind_quat[2]);
+						NativeToLittleEndian<sizeof(bind_quat[3])>(&bind_quat[3]);
 						ss->write(reinterpret_cast<char*>(&bind_quat), sizeof(bind_quat));
+						NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
+						NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
+						NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
+						NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
 						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 					}
 					else
@@ -1394,11 +1449,19 @@ namespace KlayGE
 						XMLNodePtr bind_real_node = bone_node->FirstNode("bind_real");
 						Quaternion bind_real(bind_real_node->Attrib("x")->ValueFloat(), bind_real_node->Attrib("y")->ValueFloat(),
 							bind_real_node->Attrib("z")->ValueFloat(), bind_real_node->Attrib("w")->ValueFloat());
+						NativeToLittleEndian<sizeof(bind_real[0])>(&bind_real[0]);
+						NativeToLittleEndian<sizeof(bind_real[1])>(&bind_real[1]);
+						NativeToLittleEndian<sizeof(bind_real[2])>(&bind_real[2]);
+						NativeToLittleEndian<sizeof(bind_real[3])>(&bind_real[3]);
 						ss->write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
 							
 						XMLNodePtr bind_dual_node = bone_node->FirstNode("bind_dual");
 						Quaternion bind_dual(bind_dual_node->Attrib("x")->ValueFloat(), bind_dual_node->Attrib("y")->ValueFloat(),
 							bind_dual_node->Attrib("z")->ValueFloat(), bind_dual_node->Attrib("w")->ValueFloat());
+						NativeToLittleEndian<sizeof(bind_dual[0])>(&bind_dual[0]);
+						NativeToLittleEndian<sizeof(bind_dual[1])>(&bind_dual[1]);
+						NativeToLittleEndian<sizeof(bind_dual[2])>(&bind_dual[2]);
+						NativeToLittleEndian<sizeof(bind_dual[3])>(&bind_dual[3]);
 						ss->write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
 					}
 				}
@@ -1409,8 +1472,11 @@ namespace KlayGE
 				int32_t start_frame = key_frames_chunk->Attrib("start_frame")->ValueInt();
 				int32_t end_frame = key_frames_chunk->Attrib("end_frame")->ValueInt();
 				int32_t frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueInt();
+				NativeToLittleEndian<sizeof(start_frame)>(&start_frame);
 				ss->write(reinterpret_cast<char*>(&start_frame), sizeof(start_frame));
+				NativeToLittleEndian<sizeof(end_frame)>(&end_frame);
 				ss->write(reinterpret_cast<char*>(&end_frame), sizeof(end_frame));
+				NativeToLittleEndian<sizeof(frame_rate)>(&frame_rate);
 				ss->write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
 
 				KeyFrames kfs;
@@ -1504,11 +1570,21 @@ namespace KlayGE
 					}
 
 					uint32_t num_kf = static_cast<uint32_t>(kfs.frame_id.size());
+					NativeToLittleEndian<sizeof(num_kf)>(&num_kf);
 					ss->write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
 					for (uint32_t i = 0; i < num_kf; ++ i)
 					{
+						NativeToLittleEndian<sizeof(kfs.frame_id[i])>(&kfs.frame_id[i]);
 						ss->write(reinterpret_cast<char*>(&kfs.frame_id[i]), sizeof(kfs.frame_id[i]));
+						NativeToLittleEndian<sizeof(kfs.bind_real[i][0])>(&kfs.bind_real[i][0]);
+						NativeToLittleEndian<sizeof(kfs.bind_real[i][1])>(&kfs.bind_real[i][1]);
+						NativeToLittleEndian<sizeof(kfs.bind_real[i][2])>(&kfs.bind_real[i][2]);
+						NativeToLittleEndian<sizeof(kfs.bind_real[i][3])>(&kfs.bind_real[i][3]);
 						ss->write(reinterpret_cast<char*>(&kfs.bind_real[i]), sizeof(kfs.bind_real[i]));
+						NativeToLittleEndian<sizeof(kfs.bind_dual[i][0])>(&kfs.bind_dual[i][0]);
+						NativeToLittleEndian<sizeof(kfs.bind_dual[i][1])>(&kfs.bind_dual[i][1]);
+						NativeToLittleEndian<sizeof(kfs.bind_dual[i][2])>(&kfs.bind_dual[i][2]);
+						NativeToLittleEndian<sizeof(kfs.bind_dual[i][3])>(&kfs.bind_dual[i][3]);
 						ss->write(reinterpret_cast<char*>(&kfs.bind_dual[i]), sizeof(kfs.bind_dual[i]));
 					}
 				}
@@ -1517,12 +1593,15 @@ namespace KlayGE
 			std::ofstream ofs((path_name + jit_ext_name).c_str(), std::ios_base::binary);
 			BOOST_ASSERT(ofs);
 			uint32_t fourcc = MakeFourCC<'K', 'L', 'M', ' '>::value;
+			NativeToLittleEndian<sizeof(fourcc)>(&fourcc);
 			ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
 
 			uint32_t ver = MODEL_BIN_VERSION;
+			NativeToLittleEndian<sizeof(ver)>(&ver);
 			ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
 
 			uint64_t original_len = ss->str().size();
+			NativeToLittleEndian<sizeof(original_len)>(&original_len);
 			ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
 
 			std::ofstream::pos_type p = ofs.tellp();
@@ -1533,6 +1612,7 @@ namespace KlayGE
 			len = lzma.Encode(ofs, ss->str().c_str(), ss->str().size());
 
 			ofs.seekp(p, std::ios_base::beg);
+			NativeToLittleEndian<sizeof(len)>(&len);
 			ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
 		}
 	}
@@ -1570,17 +1650,21 @@ namespace KlayGE
 		}
 		uint32_t fourcc;
 		lzma_file->read(&fourcc, sizeof(fourcc));
+		LittleEndianToNative<sizeof(fourcc)>(&fourcc);
 		BOOST_ASSERT((fourcc == MakeFourCC<'K', 'L', 'M', ' '>::value));
 
 		uint32_t ver;
 		lzma_file->read(&ver, sizeof(ver));
+		LittleEndianToNative<sizeof(ver)>(&ver);
 		BOOST_ASSERT(MODEL_BIN_VERSION == ver);
 
 		boost::shared_ptr<std::stringstream> ss = MakeSharedPtr<std::stringstream>();
 
 		uint64_t original_len, len;
 		lzma_file->read(&original_len, sizeof(original_len));
+		LittleEndianToNative<sizeof(original_len)>(&original_len);
 		lzma_file->read(&len, sizeof(len));
+		LittleEndianToNative<sizeof(len)>(&len);
 
 		LZMACodec lzma;
 		lzma.Decode(*ss, lzma_file, len, original_len);
@@ -1589,12 +1673,16 @@ namespace KlayGE
 
 		uint32_t num_mtls;
 		decoded->read(&num_mtls, sizeof(num_mtls));
+		LittleEndianToNative<sizeof(num_mtls)>(&num_mtls);
 		uint32_t num_meshes;
 		decoded->read(&num_meshes, sizeof(num_meshes));
+		LittleEndianToNative<sizeof(num_meshes)>(&num_meshes);
 		uint32_t num_joints;
 		decoded->read(&num_joints, sizeof(num_joints));
+		LittleEndianToNative<sizeof(num_joints)>(&num_joints);
 		uint32_t num_kfs;
 		decoded->read(&num_kfs, sizeof(num_kfs));
+		LittleEndianToNative<sizeof(num_kfs)>(&num_kfs);
 
 		mtls.resize(num_mtls);
 		for (uint32_t mtl_index = 0; mtl_index < num_mtls; ++ mtl_index)
@@ -1618,6 +1706,22 @@ namespace KlayGE
 			decoded->read(&mtl->specular_level, sizeof(float));
 			decoded->read(&mtl->shininess, sizeof(float));
 
+			LittleEndianToNative<sizeof(mtl->ambient[0])>(&mtl->ambient[0]);
+			LittleEndianToNative<sizeof(mtl->ambient[1])>(&mtl->ambient[1]);
+			LittleEndianToNative<sizeof(mtl->ambient[2])>(&mtl->ambient[2]);
+			LittleEndianToNative<sizeof(mtl->diffuse[0])>(&mtl->diffuse[0]);
+			LittleEndianToNative<sizeof(mtl->diffuse[1])>(&mtl->diffuse[1]);
+			LittleEndianToNative<sizeof(mtl->diffuse[2])>(&mtl->diffuse[2]);
+			LittleEndianToNative<sizeof(mtl->specular[0])>(&mtl->specular[0]);
+			LittleEndianToNative<sizeof(mtl->specular[1])>(&mtl->specular[1]);
+			LittleEndianToNative<sizeof(mtl->specular[2])>(&mtl->specular[2]);
+			LittleEndianToNative<sizeof(mtl->emit[0])>(&mtl->emit[0]);
+			LittleEndianToNative<sizeof(mtl->emit[1])>(&mtl->emit[1]);
+			LittleEndianToNative<sizeof(mtl->emit[2])>(&mtl->emit[2]);
+			LittleEndianToNative<sizeof(mtl->opacity)>(&mtl->opacity);
+			LittleEndianToNative<sizeof(mtl->specular_level)>(&mtl->specular_level);
+			LittleEndianToNative<sizeof(mtl->shininess)>(&mtl->shininess);
+
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
 				mtl->ambient.x() = MathLib::srgb_to_linear(mtl->ambient.x());
@@ -1630,6 +1734,7 @@ namespace KlayGE
 
 			uint32_t num_texs;
 			decoded->read(&num_texs, sizeof(num_texs));
+			LittleEndianToNative<sizeof(num_texs)>(&num_texs);
 
 			for (uint32_t tex_index = 0; tex_index < num_texs; ++ tex_index)
 			{
@@ -1642,16 +1747,22 @@ namespace KlayGE
 
 		uint32_t num_merged_ves;
 		decoded->read(&num_merged_ves, sizeof(num_merged_ves));
+		LittleEndianToNative<sizeof(num_merged_ves)>(&num_merged_ves);
 		merged_ves.resize(num_merged_ves);
 		for (size_t i = 0; i < merged_ves.size(); ++ i)
 		{
 			decoded->read(&merged_ves[i], sizeof(merged_ves[i]));
+
+			LittleEndianToNative<sizeof(merged_ves[i].usage)>(&merged_ves[i].usage);
+			LittleEndianToNative<sizeof(merged_ves[i].format)>(&merged_ves[i].format);
 		}
 
 		uint32_t all_num_vertices;
 		uint32_t all_num_indices;
 		decoded->read(&all_num_vertices, sizeof(all_num_vertices));
+		LittleEndianToNative<sizeof(all_num_vertices)>(&all_num_vertices);
 		decoded->read(&all_num_indices, sizeof(all_num_indices));
+		LittleEndianToNative<sizeof(all_num_indices)>(&all_num_indices);
 		decoded->read(&all_is_index_16_bit, sizeof(all_is_index_16_bit));
 
 		int const index_elem_size = all_is_index_16_bit ? 2 : 4;
@@ -1677,16 +1788,27 @@ namespace KlayGE
 			ReadShortString(decoded, mesh_names[mesh_index]);
 
 			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
+			LittleEndianToNative<sizeof(mtl_ids[mesh_index])>(&mtl_ids[mesh_index]);
 
 			float3 min_bb, max_bb;
 			decoded->read(&min_bb, sizeof(min_bb));
+			LittleEndianToNative<sizeof(min_bb.x())>(&min_bb.x());
+			LittleEndianToNative<sizeof(min_bb.y())>(&min_bb.y());
+			LittleEndianToNative<sizeof(min_bb.z())>(&min_bb.z());
 			decoded->read(&max_bb, sizeof(max_bb));
+			LittleEndianToNative<sizeof(max_bb.x())>(&max_bb.x());
+			LittleEndianToNative<sizeof(max_bb.y())>(&max_bb.y());
+			LittleEndianToNative<sizeof(max_bb.z())>(&max_bb.z());
 			bbs[mesh_index] = Box(min_bb, max_bb);
 
 			decoded->read(&mesh_num_vertices[mesh_index], sizeof(mesh_num_vertices[mesh_index]));
+			LittleEndianToNative<sizeof(mesh_num_vertices[mesh_index])>(&mesh_num_vertices[mesh_index]);
 			decoded->read(&mesh_base_vertices[mesh_index], sizeof(mesh_base_vertices[mesh_index]));
+			LittleEndianToNative<sizeof(mesh_base_vertices[mesh_index])>(&mesh_base_vertices[mesh_index]);
 			decoded->read(&mesh_num_triangles[mesh_index], sizeof(mesh_num_triangles[mesh_index]));
+			LittleEndianToNative<sizeof(mesh_num_triangles[mesh_index])>(&mesh_num_triangles[mesh_index]);
 			decoded->read(&mesh_base_triangles[mesh_index], sizeof(mesh_base_triangles[mesh_index]));
+			LittleEndianToNative<sizeof(mesh_base_triangles[mesh_index])>(&mesh_base_triangles[mesh_index]);
 		}
 
 		joints.resize(num_joints);
@@ -1696,9 +1818,18 @@ namespace KlayGE
 
 			ReadShortString(decoded, joint.name);
 			decoded->read(&joint.parent, sizeof(joint.parent));
+			LittleEndianToNative<sizeof(joint.parent)>(&joint.parent);
 
 			decoded->read(&joint.bind_real, sizeof(joint.bind_real));
-			decoded->read(&joint.bind_dual, sizeof(joint.bind_dual)); 
+			LittleEndianToNative<sizeof(joint.bind_real[0])>(&joint.bind_real[0]);
+			LittleEndianToNative<sizeof(joint.bind_real[1])>(&joint.bind_real[1]);
+			LittleEndianToNative<sizeof(joint.bind_real[2])>(&joint.bind_real[2]);
+			LittleEndianToNative<sizeof(joint.bind_real[3])>(&joint.bind_real[3]);
+			decoded->read(&joint.bind_dual, sizeof(joint.bind_dual));
+			LittleEndianToNative<sizeof(joint.bind_dual[0])>(&joint.bind_dual[0]);
+			LittleEndianToNative<sizeof(joint.bind_dual[1])>(&joint.bind_dual[1]);
+			LittleEndianToNative<sizeof(joint.bind_dual[2])>(&joint.bind_dual[2]);
+			LittleEndianToNative<sizeof(joint.bind_dual[3])>(&joint.bind_dual[3]);
 
 			std::pair<Quaternion, Quaternion> inv = MathLib::inverse(joint.bind_real, joint.bind_dual);
 			joint.inverse_origin_real = inv.first;
@@ -1708,8 +1839,11 @@ namespace KlayGE
 		if (num_kfs > 0)
 		{
 			decoded->read(&start_frame, sizeof(start_frame));
+			LittleEndianToNative<sizeof(start_frame)>(&start_frame);
 			decoded->read(&end_frame, sizeof(end_frame));
+			LittleEndianToNative<sizeof(end_frame)>(&end_frame);
 			decoded->read(&frame_rate, sizeof(frame_rate));
+			LittleEndianToNative<sizeof(frame_rate)>(&frame_rate);
 
 			kfs = MakeSharedPtr<KeyFramesType>();
 			for (uint32_t kf_index = 0; kf_index < num_kfs; ++ kf_index)
@@ -1719,6 +1853,7 @@ namespace KlayGE
 
 				uint32_t num_kf;
 				decoded->read(&num_kf, sizeof(num_kf));
+				LittleEndianToNative<sizeof(num_kf)>(&num_kf);
 
 				KeyFrames kf;
 				kf.frame_id.resize(num_kf);
@@ -1727,8 +1862,17 @@ namespace KlayGE
 				for (uint32_t k_index = 0; k_index < num_kf; ++ k_index)
 				{
 					decoded->read(&kf.frame_id[k_index], sizeof(kf.frame_id[k_index]));
+					LittleEndianToNative<sizeof(kf.frame_id[k_index])>(&kf.frame_id[k_index]);
 					decoded->read(&kf.bind_real[k_index], sizeof(kf.bind_real[k_index]));
+					LittleEndianToNative<sizeof(kf.bind_real[k_index][0])>(&kf.bind_real[k_index][0]);
+					LittleEndianToNative<sizeof(kf.bind_real[k_index][1])>(&kf.bind_real[k_index][1]);
+					LittleEndianToNative<sizeof(kf.bind_real[k_index][2])>(&kf.bind_real[k_index][2]);
+					LittleEndianToNative<sizeof(kf.bind_real[k_index][3])>(&kf.bind_real[k_index][3]);
 					decoded->read(&kf.bind_dual[k_index], sizeof(kf.bind_dual[k_index]));
+					LittleEndianToNative<sizeof(kf.bind_dual[k_index][0])>(&kf.bind_dual[k_index][0]);
+					LittleEndianToNative<sizeof(kf.bind_dual[k_index][1])>(&kf.bind_dual[k_index][1]);
+					LittleEndianToNative<sizeof(kf.bind_dual[k_index][2])>(&kf.bind_dual[k_index][2]);
+					LittleEndianToNative<sizeof(kf.bind_dual[k_index][3])>(&kf.bind_dual[k_index][3]);
 				}
 
 				kfs->insert(std::make_pair(name, kf));
