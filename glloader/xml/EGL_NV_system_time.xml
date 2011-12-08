@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_system_time" reg_no="31">
+	<typedefs>
+		<typedef type="GLint64" synonym="EGLint64NV"/>
+		<typedef type="GLuint64" synonym="EGLuint64NV"/>
+	</typedefs>
+
+	<functions>
+		<function name="eglGetSystemTimeFrequencyNV" return="EGLuint64NV"/>
+		<function name="eglGetSystemTimeNV" return="EGLuint64NV"/>
+	</functions>
+</gl_extension>

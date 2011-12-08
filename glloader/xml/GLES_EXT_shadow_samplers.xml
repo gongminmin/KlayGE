@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_shadow_samplers" reg_no="102">
+	<tokens>
+		<token name="GL_TEXTURE_COMPARE_MODE_EXT" value="0x884C"/>
+		<token name="GL_TEXTURE_COMPARE_FUNC_EXT" value="0x884D"/>
+		<token name="GL_COMPARE_REF_TO_TEXTURE_EXT" value="0x884E"/>
+	</tokens>
+</gl_extension>

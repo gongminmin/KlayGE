@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_debug_marker" reg_no="99">
+	<functions>
+		<function name="glInsertEventMarkerEXT" return="void">
+			<params>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="marker"/>
+			</params>
+		</function>
+		<function name="glPushGroupMarkerEXT" return="void">
+			<params>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="marker"/>
+			</params>
+		</function>
+		<function name="glPopGroupMarkerEXT" return="void"/>
+	</functions>
+</gl_extension>

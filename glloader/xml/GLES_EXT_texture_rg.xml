@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_rg" reg_no="103">
+	<tokens>
+		<token name="GL_RED_EXT" value="0x1903"/>
+		<token name="GL_RG_EXT" value="0x8227"/>
+		<token name="GL_R8_EXT" value="0x8229"/>
+		<token name="GL_RG8_EXT" value="0x822B"/>
+	</tokens>
+</gl_extension>

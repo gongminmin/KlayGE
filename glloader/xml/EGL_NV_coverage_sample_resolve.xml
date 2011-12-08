@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_coverage_sample_resolve" reg_no="30">
+	<tokens>
+		<token name="EGL_COVERAGE_SAMPLE_RESOLVE_NV" value="0x3131"/>
+		<token name="EGL_COVERAGE_SAMPLE_RESOLVE_DEFAULT_NV" value="0x3132"/>
+		<token name="EGL_COVERAGE_SAMPLE_RESOLVE_NONE_NV" value="0x3133"/>
+	</tokens>
+</gl_extension>

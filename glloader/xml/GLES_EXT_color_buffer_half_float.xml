@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_color_buffer_half_float" reg_no="97">
+	<tokens>
+		<token name="GL_RGBA16F_EXT" value="0x881A"/>
+		<token name="GL_RGB16F_EXT" value="0x881B"/>
+		<token name="GL_RG16F_EXT" value="0x822F"/>
+		<token name="GL_R16F_EXT" value="0x822D"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT" value="0x8211"/>
+		<token name="GL_UNSIGNED_NORMALIZED_EXT" value="0x8C17"/>
+	</tokens>
+</gl_extension>

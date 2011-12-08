@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_debug_label" reg_no="98">
+	<tokens>
+		<token name="GL_BUFFER_OBJECT_EXT" value="0x9151"/>
+		<token name="GL_SHADER_OBJECT_EXT" value="0x8B48"/>
+		<token name="GL_PROGRAM_OBJECT_EXT" value="0x8B40"/>
+		<token name="GL_VERTEX_ARRAY_OBJECT_EXT" value="0x9154"/>
+		<token name="GL_QUERY_OBJECT_EXT" value="0x9153"/>
+		<token name="GL_PROGRAM_PIPELINE_OBJECT_EXT" value="0x8A4F"/>
+	</tokens>
+
+	<functions>
+		<function name="glLabelObjectEXT" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="object"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="label"/>
+			</params>
+		</function>
+		<function name="glGetObjectLabelEXT" return="void">
+			<params>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="object"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="label"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_fbo_color_attachments" reg_no="92">
+	<tokens>
+		<token name="GL_MAX_COLOR_ATTACHMENTS_NV" value="0x8CDF"/>
+		<token name="GL_COLOR_ATTACHMENT0_NV" value="0x8CE0"/>
+		<token name="GL_COLOR_ATTACHMENT1_NV" value="0x8CE1"/>
+		<token name="GL_COLOR_ATTACHMENT2_NV" value="0x8CE2"/>
+		<token name="GL_COLOR_ATTACHMENT3_NV" value="0x8CE3"/>
+		<token name="GL_COLOR_ATTACHMENT4_NV" value="0x8CE4"/>
+		<token name="GL_COLOR_ATTACHMENT5_NV" value="0x8CE5"/>
+		<token name="GL_COLOR_ATTACHMENT6_NV" value="0x8CE6"/>
+		<token name="GL_COLOR_ATTACHMENT7_NV" value="0x8CE7"/>
+		<token name="GL_COLOR_ATTACHMENT8_NV" value="0x8CE8"/>
+		<token name="GL_COLOR_ATTACHMENT9_NV" value="0x8CE9"/>
+		<token name="GL_COLOR_ATTACHMENT10_NV" value="0x8CEA"/>
+		<token name="GL_COLOR_ATTACHMENT11_NV" value="0x8CEB"/>
+		<token name="GL_COLOR_ATTACHMENT12_NV" value="0x8CEC"/>
+		<token name="GL_COLOR_ATTACHMENT13_NV" value="0x8CED"/>
+		<token name="GL_COLOR_ATTACHMENT14_NV" value="0x8CEE"/>
+		<token name="GL_COLOR_ATTACHMENT15_NV" value="0x8CEF"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_unpack_subimage" reg_no="90">
+	<tokens>
+		<token name="GL_UNPACK_ROW_LENGTH" value="0x0CF2"/>
+		<token name="GL_UNPACK_SKIP_ROWS" value="0x0CF3"/>
+		<token name="GL_UNPACK_SKIP_PIXELS" value="0x0CF4"/>
+	</tokens>
+</gl_extension>

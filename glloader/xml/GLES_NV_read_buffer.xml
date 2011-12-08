@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_read_buffer" reg_no="93">
+	<tokens>
+		<token name="GL_READ_BUFFER_NV" value="0x0C02"/>
+	</tokens>
+
+	<functions>
+		<function name="glReadBufferNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_query_surface_pointer" reg_no="28">
+	<functions>
+		<function name="eglQuerySurfacePointerANGLE" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="void**" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
