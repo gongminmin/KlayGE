@@ -403,7 +403,8 @@ namespace
 
 		void BindLight(LightSourcePtr const & light)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->BindLight(light);
 			}
@@ -411,7 +412,8 @@ namespace
 
 		void SceneTexture(TexturePtr const & scene_texture)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SceneTexture(scene_texture);
 			}
@@ -419,7 +421,8 @@ namespace
 
 		void SetModelMatrix(float4x4 const & model)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SetModelMatrix(model);
 			}
@@ -427,7 +430,8 @@ namespace
 
 		void SetEnvCube(TexturePtr const & texture)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SetEnvCube(texture);
 			}
@@ -435,7 +439,8 @@ namespace
 
 		void Pass(uint32_t pass)
 		{
-			BOOST_FOREACH(BOOST_TYPEOF(meshes_)::reference mesh, meshes_)
+			typedef BOOST_TYPEOF(meshes_) MeshesType;
+			BOOST_FOREACH(MeshesType::reference mesh, meshes_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->Pass(pass);
 			}

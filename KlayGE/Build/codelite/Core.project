@@ -343,7 +343,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -365,7 +365,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc_d.so" IntermediateDirectory="../../Debug/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -388,9 +390,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Debug_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -412,7 +419,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc_d.so" IntermediateDirectory="../../Debug/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -435,9 +444,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Debug_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -g -O0" C_Options="-m64 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -452,10 +466,10 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_filesystem-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_signals-mgw45-mt-d-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_47"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -463,7 +477,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -486,9 +502,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Debug_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -g -O0" C_Options="-m32 -Wall -g -O0" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -503,10 +524,10 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_signals-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_filesystem-mgw45-mt-d-1_47"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_signals-mgw45-mt-d-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_47"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -514,7 +535,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -537,9 +560,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_linux_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -561,7 +589,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x64/libKlayGE_Core_gcc.so" IntermediateDirectory="../../Release/linux_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -584,9 +614,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_linux_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -608,7 +643,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/linux_x86/libKlayGE_Core_gcc.so" IntermediateDirectory="../../Release/linux_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -631,9 +668,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_win_x64" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m64 -Wall -O2" C_Options="-m64 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -648,10 +690,10 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../External/Python/libs/amd64"/>
         <LibraryPath Value="../../lib/win_x64"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_46_1"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="boost_signals-mgw45-mt-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-1_46_1"/>
+        <Library Value="boost_filesystem-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_signals-mgw45-mt-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-1_47"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -659,7 +701,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Core_mgw.dll" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -682,9 +726,14 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
     <Configuration Name="Release_win_x86" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp">
+      <Compiler Options="-m32 -Wall -O2" C_Options="-m32 -Wall -O2" Required="yes" PreCompiledHeader="../../Core/Include/KlayGE/KlayGE.hpp" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../../External/boost"/>
         <IncludePath Value="../../../External/Python/include"/>
         <IncludePath Value="../../../External/rapidxml"/>
@@ -699,10 +748,10 @@
         <LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../External/Python/libs"/>
         <LibraryPath Value="../../lib/win_x86"/>
-        <Library Value="boost_filesystem-mgw45-mt-1_46_1"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="boost_signals-mgw45-mt-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-1_46_1"/>
+        <Library Value="boost_filesystem-mgw45-mt-1_47"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_signals-mgw45-mt-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-1_47"/>
         <Library Value="gdi32"/>
         <Library Value="oleaut32"/>
         <Library Value="wsock32"/>
@@ -710,7 +759,9 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Core_mgw.dll" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
         <StartupCommands/>
@@ -733,6 +784,11 @@
         <CustomPostBuild/>
         <CustomPreBuild/>
       </AdditionalRules>
+      <Completion>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
     </Configuration>
   </Settings>
 </CodeLite_Project>

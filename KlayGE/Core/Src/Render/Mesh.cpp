@@ -1972,6 +1972,11 @@ namespace KlayGE
 					diffuse.y() = MathLib::linear_to_srgb(mtl->diffuse.y());
 					diffuse.z() = MathLib::linear_to_srgb(mtl->diffuse.z());
 				}
+				else
+				{
+					ambient = mtl->ambient;
+					diffuse = mtl->diffuse;
+				}
 
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_r", ambient.x()));
 				mtl_node->AppendAttrib(doc.AllocAttribFloat("ambient_g", ambient.y()));

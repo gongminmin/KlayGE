@@ -54,7 +54,7 @@ namespace KlayGE
 
 			float time = 0;
 			typedef BOOST_TYPEOF(particles_) ParticlesType;
-			BOOST_FOREACH(ParticlesType::reference particle, particles_)
+			BOOST_FOREACH(typename ParticlesType::reference particle, particles_)
 			{
 				particle.life = -1;
 				particle.birth_time = time;
@@ -76,7 +76,7 @@ namespace KlayGE
 			}
 
 			typedef BOOST_TYPEOF(particles_) ParticlesType;
-			BOOST_FOREACH(ParticlesType::reference particle, particles_)
+			BOOST_FOREACH(typename ParticlesType::reference particle, particles_)
 			{
 				if (particle.life > 0)
 				{

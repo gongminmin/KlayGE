@@ -110,7 +110,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -147,7 +147,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName)_d.exe" IntermediateDirectory="../../Debug/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -256,7 +256,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/win_x64/$(ProjectName)_x64.exe" IntermediateDirectory="../../Release/win_x64/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -293,7 +293,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="yes"/>
       <General OutputFile="../../../bin/win_x86/$(ProjectName).exe" IntermediateDirectory="../../Release/win_x86/$(ProjectName)" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>

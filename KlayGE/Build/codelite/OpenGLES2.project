@@ -166,7 +166,7 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
         <Library Value="glloader_es_x64_d"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
@@ -218,7 +218,7 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
         <Library Value="glloader_es_x86_d"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
@@ -370,7 +370,7 @@
         <LibraryPath Value="../../lib/win_x64"/>
         <LibraryPath Value="../../../glloader/lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
         <Library Value="glloader_es_x64"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>
@@ -422,7 +422,7 @@
         <LibraryPath Value="../../lib/win_x86"/>
         <LibraryPath Value="../../../glloader/lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
         <Library Value="glloader_es_x86"/>
         <Library Value="glu32"/>
         <Library Value="Gdi32"/>

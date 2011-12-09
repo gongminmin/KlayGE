@@ -111,7 +111,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Scene_OCTree_mgw_d.dll" IntermediateDirectory="../../Debug/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -153,7 +153,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Scene_OCTree_mgw_d.dll" IntermediateDirectory="../../Debug/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -275,7 +275,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../lib/win_x64"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x64/libKlayGE_Scene_OCTree_mgw.dll" IntermediateDirectory="../../Release/win_x64/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
@@ -317,7 +317,7 @@
 		<LibraryPath Value="../../../External/boost/lib_gcc_x86/lib"/>
         <LibraryPath Value="../../lib/win_x86"/>
         <Library Value="KlayGE_Core_mgw"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../lib/win_x86/libKlayGE_Scene_OCTree_mgw.dll" IntermediateDirectory="../../Release/win_x86/OCTree" Command="" CommandArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes"/>
