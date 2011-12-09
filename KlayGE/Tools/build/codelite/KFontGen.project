@@ -25,7 +25,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
         <LibraryPath Value="../../../../External/freetype/objs/linux_x64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
@@ -66,7 +66,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86_d"/>
+        <Library Value="KlayGE_Core_gcc_d"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
@@ -108,10 +108,10 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_program_options-mgw45-mt-d-1_46_1"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_47"/>
+        <Library Value="boost_program_options-mgw45-mt-d-1_47"/>
         <Library Value="freetype244D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -150,10 +150,10 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86_d"/>
-        <Library Value="boost_system-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-d-1_46_1"/>
-        <Library Value="boost_program_options-mgw45-mt-d-1_46_1"/>
+        <Library Value="KlayGE_Core_mgw_d"/>
+        <Library Value="boost_system-mgw45-mt-d-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-d-1_47"/>
+        <Library Value="boost_program_options-mgw45-mt-d-1_47"/>
         <Library Value="freetype244D"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -191,7 +191,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/linux_x64"/>
         <LibraryPath Value="../../../lib/linux_x64"/>
-        <Library Value="KlayGE_Core_gcc_x64"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
@@ -232,7 +232,7 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/linux_x86"/>
         <LibraryPath Value="../../../lib/linux_x86"/>
-        <Library Value="KlayGE_Core_gcc_x86"/>
+        <Library Value="KlayGE_Core_gcc"/>
         <Library Value="boost_system"/>
         <Library Value="boost_thread"/>
         <Library Value="boost_program_options"/>
@@ -274,10 +274,10 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x64/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/win_x64"/>
         <LibraryPath Value="../../../lib/win_x64"/>
-        <Library Value="KlayGE_Core_mgw_x64"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-1_46_1"/>
-        <Library Value="boost_program_options-mgw45-mt-1_46_1"/>
+        <Library Value="KlayGE_Core_mgw"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-1_47"/>
+        <Library Value="boost_program_options-mgw45-mt-1_47"/>
         <Library Value="freetype244"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -316,10 +316,10 @@
         <LibraryPath Value="../../../../External/boost/lib_gcc_x86/lib"/>
 		<LibraryPath Value="../../../../External/freetype/objs/win_x86"/>
         <LibraryPath Value="../../../lib/win_x86"/>
-        <Library Value="KlayGE_Core_mgw_x86"/>
-        <Library Value="boost_system-mgw45-mt-1_46_1"/>
-        <Library Value="boost_thread-mgw45-mt-1_46_1"/>
-        <Library Value="boost_program_options-mgw45-mt-1_46_1"/>
+        <Library Value="KlayGE_Core_mgw"/>
+        <Library Value="boost_system-mgw45-mt-1_47"/>
+        <Library Value="boost_thread-mgw45-mt-1_47"/>
+        <Library Value="boost_program_options-mgw45-mt-1_47"/>
         <Library Value="freetype244"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>

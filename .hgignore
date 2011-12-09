@@ -9,6 +9,8 @@ glloader/build/android/obj/
 glloader/build/codelite/*.mk
 glloader/build/codelite/*.tags
 glloader/build/codelite/*.session
+glloader/build/codelite/.build-*
+glloader/build/codelite/*.txt
 glloader/build/vc-9_0/*.ncb
 glloader/build/vc-9_0/*.user
 glloader/build/vc-9_0/*.suo
@@ -49,6 +51,8 @@ KlayGE/Build/android/Plugins/Scene/OCTree/obj
 KlayGE/Build/codelite/*.mk
 KlayGE/Build/codelite/*.tags
 KlayGE/Build/codelite/*.session
+KlayGE/Build/codelite/.build-*
+KlayGE/Build/codelite/*.txt
 KlayGE/Build/vc-9_0/*.ncb
 KlayGE/Build/vc-9_0/*.user
 KlayGE/Build/vc-9_0/*.suo
@@ -87,6 +91,8 @@ KlayGE/Samples/Release/
 KlayGE/Samples/build/codelite/*.mk
 KlayGE/Samples/build/codelite/*.tags
 KlayGE/Samples/build/codelite/*.session
+KlayGE/Samples/build/codelite/.build-*
+KlayGE/Samples/build/codelite/*.txt
 KlayGE/Samples/build/vc-9_0/*.ncb
 KlayGE/Samples/build/vc-9_0/*.user
 KlayGE/Samples/build/vc-9_0/*.suo
@@ -102,6 +108,8 @@ KlayGE/Tools/Release/
 KlayGE/Tools/build/codelite/*.mk
 KlayGE/Tools/build/codelite/*.tags
 KlayGE/Tools/build/codelite/*.session
+KlayGE/Tools/build/codelite/.build-*
+KlayGE/Tools/build/codelite/*.txt
 KlayGE/Tools/build/vc-9_0/*.ncb
 KlayGE/Tools/build/vc-9_0/*.user
 KlayGE/Tools/build/vc-9_0/*.suo

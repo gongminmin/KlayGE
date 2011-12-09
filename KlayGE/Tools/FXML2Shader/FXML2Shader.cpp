@@ -53,12 +53,14 @@ public:
 		ofs << "\r\n";
 
 		BOOST_AUTO(cbuffers, effect->CBuffers());
-		BOOST_FOREACH(BOOST_TYPEOF(cbuffers)::const_reference cbuff, cbuffers)
+		typedef BOOST_TYPEOF(cbuffers) CBuffersType;
+		BOOST_FOREACH(CBuffersType::const_reference cbuff, cbuffers)
 		{
 			ofs << "cbuffer " << cbuff.first << "\r\n";
 			ofs << "{" << "\r\n";
 
-			BOOST_FOREACH(BOOST_TYPEOF(cbuff.second)::const_reference param_index, cbuff.second)
+			typedef BOOST_TYPEOF(cbuff.second) CBuffersSecondType;
+			BOOST_FOREACH(CBuffersSecondType::const_reference param_index, cbuff.second)
 			{
 				RenderEffectParameter& param = *(effect->ParameterByIndex(param_index));
 				switch (param.type())
