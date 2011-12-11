@@ -132,7 +132,7 @@
 		<function name="eglGetConfigAttrib" return="EGLBoolean" link="static">
 			<params>
 				<param type="EGLDisplay" name="dpy"/>
-				<param type="EGLConfig*" name="configs"/>
+				<param type="EGLConfig" name="configs"/>
 				<param type="EGLint" name="attribute"/>
 				<param type="EGLint*" name="value"/>
 			</params>

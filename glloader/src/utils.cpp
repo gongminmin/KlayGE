@@ -27,6 +27,11 @@
 #endif
 #endif
 
+#if defined(__ANDROID__) || defined(ANDROID)
+#include <android/log.h>
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "glloader", __VA_ARGS__))
+#endif
+
 #include <string>
 #include <vector>
 
@@ -636,7 +641,11 @@ void* glloader_get_gl_proc_address(const char* name)
 #ifdef GLLOADER_DEBUG
 	if (NULL == ret)
 	{
+#if defined(__ANDROID__) || defined(ANDROID)
+		LOGW("%s is missing!\n", name);
+#else
 		std::cerr << name << " is missing!" << std::endl;
+#endif
 	}
 #endif
 
