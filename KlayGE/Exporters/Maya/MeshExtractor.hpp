@@ -174,16 +174,20 @@ namespace KlayGE
 		{
 			int joint_id;  // Will be set by WriteJointChunk() internally
 			std::string parent_name;
-			Point3 position;
-			Quat quaternion;
+			Quat bind_real;
+			Quat bind_dual;
+			//** Point3 position;
+			//** Quat quaternion;
 		};
 		typedef std::map<std::string, JointStruct> JointMap;
 
 		struct KeyframeStruct
 		{
 			std::string joint;
-			std::vector<Point3> positions;
-			std::vector<Quat> quaternions;
+			std::vector<Quat> bind_reals;
+			std::vector<Quat> bind_duals;
+			//** std::vector<Point3> positions;
+			//** std::vector<Quat> quaternions;
 		};
 
 	public:

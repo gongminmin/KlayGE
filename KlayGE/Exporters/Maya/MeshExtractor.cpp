@@ -149,13 +149,14 @@ namespace KlayGE
 				parent_id = fitr->second.joint_id;
 
 			os << "\" parent=\"" << parent_id << "\">" << std::endl;
-			os << "\t\t\t<bind_pos x=\"" << joint.position[0]
-				<< "\" y=\"" << joint.position[1]
-				<< "\" z=\"" << joint.position[2] << "\"/>" << std::endl;
-			os << "\t\t\t<bind_quat x=\"" << joint.quaternion[0]
-				<< "\" y=\"" << joint.quaternion[1]
-				<< "\" z=\"" << joint.quaternion[2]
-				<< "\" w=\"" << joint.quaternion[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_real x=\"" << joint.bind_real[0]
+				<< "\" y=\"" << joint.bind_real[1]
+				<< "\" z=\"" << joint.bind_real[2]
+				<< "\" w=\"" << joint.bind_real[3] << "\"/>" << std::endl;
+			os << "\t\t\t<bind_dual x=\"" << joint.bind_dual[0]
+				<< "\" y=\"" << joint.bind_dual[1]
+				<< "\" z=\"" << joint.bind_dual[2]
+				<< "\" w=\"" << joint.bind_dual[3] << "\"/>" << std::endl;
 			os << "\t\t</bone>" << std::endl;
 		}
 		os << "\t</bones_chunk>" << std::endl;
@@ -319,22 +320,23 @@ namespace KlayGE
 		for (size_t i = 0; i < keyframes_.size(); ++ i)
 		{
 			KeyframeStruct& kf = keyframes_[i];
-			size_t frames = std::min<size_t>(kf.positions.size(), kf.quaternions.size());
+			size_t frames = std::min<size_t>(kf.bind_reals.size(), kf.bind_duals.size());
 
 			os << "\t\t<key_frame joint=\"" << kf.joint << "\">" << std::endl;
 			for (size_t j = 0; j < frames; ++ j)
 			{
-				Point3& pos = kf.positions[j];
-				Quat& quat = kf.quaternions[j];
+				Quat const & bind_real = kf.bind_duals[j];
+				Quat const & bind_dual = kf.bind_duals[j];
 
 				os << "\t\t\t<key>" << std::endl;
-				os << "\t\t\t\t<pos x=\"" << pos[0]
-					<< "\" y=\"" << pos[1]
-					<< "\" z=\"" << pos[2] << "\"/>" << std::endl;
-				os << "\t\t\t\t<quat x=\"" << quat[0]
-					<< "\" y=\"" << quat[1]
-					<< "\" z=\"" << quat[2]
-					<< "\" w=\"" << quat[3] << "\"/>" << std::endl;
+				os << "\t\t\t\t<bind_real x=\"" << bind_real[0]
+					<< "\" y=\"" << bind_real[1]
+					<< "\" z=\"" << bind_real[2]
+					<< "\" w=\"" << bind_real[3] << "\"/>" << std::endl;
+				os << "\t\t\t\t<bind_dual x=\"" << bind_dual[0]
+					<< "\" y=\"" << bind_dual[1]
+					<< "\" z=\"" << bind_dual[2]
+					<< "\" w=\"" << bind_dual[3] << "\"/>" << std::endl;
 				os << "\t\t\t</key>" << std::endl;
 			}
 			os << "\t\t</key_frame>" << std::endl;

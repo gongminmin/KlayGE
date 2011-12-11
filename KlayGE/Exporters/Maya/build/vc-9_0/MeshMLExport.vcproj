@@ -373,7 +373,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			>
 			<File
-				RelativePath="..\exporter.cpp"
+				RelativePath="..\..\exporter.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -417,7 +417,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\MeshExtractor.cpp"
+				RelativePath="..\..\MeshExtractor.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

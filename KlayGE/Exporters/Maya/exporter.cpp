@@ -39,7 +39,16 @@
 #include <set>
 
 using namespace KlayGE;
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+MeshExtractor::Quat QuatTransToUDQ(MeshExtractor::Quat const & q, MeshExtractor::Point3 const & t)
+{
+	return MeshExtractor::Quat(4,
+		+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
+		+0.5f * (-t[0] * q[2] + t[1] * q[3] + t[2] * q[0]),
+		+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
+		-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 class MayaMeshExporter
 {
 public:
@@ -647,9 +656,12 @@ void MayaMeshExporter::ExportJoint(MString const * parentName, MFnIkJoint& fnJoi
 	double qx, qy, qz, qw;
 	MVector pos = localMatrix.translation(MSpace::kPostTransform);
 	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
-	export_joint->position = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
-	export_joint->quaternion = MeshExtractor::Quat(4, qx, qy, qz, qw);
-
+	MeshExtractor::Point3 bind_pos = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
+	MeshExtractor::Quat bind_quat = MeshExtractor::Quat(4, qx, qy, qz, qw);
+	MeshExtractor::Quat bind_dual = QuatTransToUDQ(bind_quat, bind_pos);
+	export_joint->bind_real = bind_quat;
+	export_joint->bind_dual = bind_dual;
+	
 	// Traverse child joints
 	for (unsigned int i=0; i<dagPath.childCount(); ++i)
 	{
@@ -683,8 +695,11 @@ void MayaMeshExporter::ExportKeyframe(MeshExtractor::KeyframeStruct* key, MTrans
 	MVector pos = localMatrix.translation(MSpace::kPostTransform);
 	localMatrix.getRotationQuaternion(qx, qy, qz, qw);
 #endif
-	key->positions.push_back(MeshExtractor::Point3(3, pos.x, pos.y, pos.z));
-	key->quaternions.push_back(MeshExtractor::Quat(4, qx, qy, qz, qw));
+	MeshExtractor::Point3 bind_pos = MeshExtractor::Point3(3, pos.x, pos.y, pos.z);
+	MeshExtractor::Quat bind_quat = MeshExtractor::Quat(4, qx, qy, qz, qw);
+	MeshExtractor::Quat bind_dual = QuatTransToUDQ(bind_quat, bind_pos);
+	key->bind_reals.push_back(bind_quat);
+	key->bind_duals.push_back(bind_dual);
 }
 
 int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray const & /*textures*/)
