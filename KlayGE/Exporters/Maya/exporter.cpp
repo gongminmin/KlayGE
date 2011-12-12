@@ -170,7 +170,7 @@ void MayaMeshExporter::WriteMeshFile(std::string const & savefile)
 	}
 
 	// Write to file and cleanup
-	exporter_.WriteMeshML(4);
+	exporter_.WriteMeshML(5);
 
 	delete defMaterial;
 	for (size_t i=0; i<export_materials_.size(); ++i)

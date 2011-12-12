@@ -109,8 +109,8 @@ namespace KlayGE
 
 	struct joint_t
 	{
-		Point3 pos;
-		Quat quat;
+		Quat real;
+		Quat dual;
 
 		std::string parent_name;
 	};
@@ -121,8 +121,8 @@ namespace KlayGE
 	{
 		std::string joint;
 
-		std::vector<Point3> positions;
-		std::vector<Quat> quaternions;
+		std::vector<Quat> reals;
+		std::vector<Quat> duals;
 	};
 
 	typedef std::vector<key_frame_t> key_frames_t;

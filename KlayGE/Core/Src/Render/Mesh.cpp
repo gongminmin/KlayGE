@@ -645,6 +645,8 @@ namespace KlayGE
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(file);
 
+			BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 4));
+
 			XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
 			if (materials_chunk)
 			{
@@ -1913,7 +1915,7 @@ namespace KlayGE
 
 		XMLNodePtr root = doc.AllocNode(XNT_Element, "model");
 		doc.RootNode(root);
-		root->AppendAttrib(doc.AllocAttribUInt("version", 4));
+		root->AppendAttrib(doc.AllocAttribUInt("version", 5));
 
 		if (kfs)
 		{

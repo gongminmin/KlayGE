@@ -160,6 +160,14 @@ namespace
 			binormal = (s1 * v2v0 - s2 * v1v0) / denominator;
 		}
 	}
+
+	Quat QuatTransToUDQ(Quat const & q, Point3 const & t)
+	{
+		return Quat(+0.5f * (+t[0] * q[3] + t[1] * q[2] - t[2] * q[1]),
+			+0.5f * (-t[0] * q[2] + t[1] * q[3] + t[2] * q[0]),
+			+0.5f * (+t[0] * q[1] - t[1] * q[0] + t[2] * q[3]),
+			-0.5f * (+t[0] * q[0] + t[1] * q[1] + t[2] * q[2]));
+	}
 }
 
 namespace KlayGE
@@ -196,8 +204,8 @@ namespace KlayGE
 		{
 			// root bone
 			joint_t root;
-			root.pos = Point3(0, 0, 0);
-			root.quat.Identity();
+			root.real.Identity();
+			root.dual.x = root.dual.y = root.dual.z = root.dual.w = 0;
 			root.parent_name = "";
 			std::string root_name = tstr_to_str(root_node_->GetName());
 			joints_.insert(std::make_pair(root_name, root));
@@ -210,8 +218,10 @@ namespace KlayGE
 			{
 				Matrix3 root_tm = root_node_->GetNodeTM(i * tpf);
 
-				kf.positions.push_back(this->point_from_matrix(root_tm));
-				kf.quaternions.push_back(this->quat_from_matrix(root_tm));
+				Quat quat = this->quat_from_matrix(root_tm);
+				Point3 pos = this->point_from_matrix(root_tm);
+				kf.reals.push_back(quat);
+				kf.duals.push_back(QuatTransToUDQ(quat, pos));
 			}
 			kfs_.push_back(kf);
 
@@ -844,8 +854,10 @@ namespace KlayGE
 		{
 			Matrix3 local_tm = node->GetNodeTM(i * tpf) * Inverse(parent_node->GetNodeTM(i * tpf));
 
-			kf.positions.push_back(this->point_from_matrix(local_tm) * unit_scale_);
-			kf.quaternions.push_back(this->quat_from_matrix(local_tm));
+			Quat quat = this->quat_from_matrix(local_tm);
+			Point3 pos = this->point_from_matrix(local_tm) * unit_scale_;
+			kf.reals.push_back(quat);
+			kf.duals.push_back(QuatTransToUDQ(quat, pos));
 		}
 
 		kfs_.push_back(kf);
@@ -913,8 +925,10 @@ namespace KlayGE
 
 			jn.second.mesh_init_matrix = Inverse(jn.second.joint_node->GetNodeTM(0)) * skin_init_tm;
 
-			joint.pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
-			joint.quat = this->quat_from_matrix(skin_init_tm);
+			Quat quat = this->quat_from_matrix(skin_init_tm);
+			Point3 pos = this->point_from_matrix(skin_init_tm) * unit_scale_;
+			joint.real = quat;
+			joint.dual = QuatTransToUDQ(quat, pos);
 
 			joints_[jn.first] = joint;
 		}
@@ -1251,7 +1265,7 @@ namespace KlayGE
 		using std::endl;
 
 		ofs << "<?xml version=\"1.0\"?>" << endl << endl;
-		ofs << "<model version=\"4\">" << endl;
+		ofs << "<model version=\"5\">" << endl;
 
 		if (joints_per_ver_ > 0)
 		{
@@ -1272,14 +1286,14 @@ namespace KlayGE
 
 				joint_t const & joint = joints_[joint_name];
 
-				ofs << "\t\t\t<bind_pos x=\"" << joint.pos.x
-					<< "\" y=\"" << joint.pos.y
-					<< "\" z=\"" << joint.pos.z << "\"/>" << endl;
-
-				ofs << "\t\t\t<bind_quat x=\"" << joint.quat.x
-					<< "\" y=\"" << joint.quat.y
-					<< "\" z=\"" << joint.quat.z
-					<< "\" w=\"" << joint.quat.w << "\"/>" << endl;
+				ofs << "\t\t\t<bind_real x=\"" << joint.real.x
+					<< "\" y=\"" << joint.real.y
+					<< "\" z=\"" << joint.real.z
+					<< "\" w=\"" << joint.real.w << "\"/>" << endl;
+				ofs << "\t\t\t<bind_dual x=\"" << joint.dual.x
+					<< "\" y=\"" << joint.dual.y
+					<< "\" z=\"" << joint.dual.z
+					<< "\" w=\"" << joint.dual.w << "\"/>" << endl;
 
 				ofs << "\t\t</bone>" << endl;
 			}
@@ -1398,22 +1412,22 @@ namespace KlayGE
 				<< "\" frame_rate=\"" << frame_rate_ << "\">" << endl;
 			BOOST_FOREACH(BOOST_TYPEOF(kfs_)::const_reference kf, kfs_)
 			{
-				assert(kf.positions.size() == kf.quaternions.size());
+				assert(kf.reals.size() == kf.duals.size());
 
 				ofs << "\t\t<key_frame joint=\"" << kf.joint << "\">" << endl;
 
-				for (size_t i = 0; i < kf.positions.size(); ++ i)
+				for (size_t i = 0; i < kf.reals.size(); ++ i)
 				{
 					ofs << "\t\t\t<key>" << endl;
 
-					ofs << "\t\t\t\t<pos x=\"" << kf.positions[i].x
-						<< "\" y=\"" << kf.positions[i].y
-						<< "\" z=\"" << kf.positions[i].z << "\"/>" << endl;
-
-					ofs << "\t\t\t\t<quat x=\"" << kf.quaternions[i].x
-						<< "\" y=\"" << kf.quaternions[i].y
-						<< "\" z=\"" << kf.quaternions[i].z
-						<< "\" w=\"" << kf.quaternions[i].w << "\"/>" << endl;
+					ofs << "\t\t\t\t<bind_real x=\"" << kf.reals[i].x
+						<< "\" y=\"" << kf.reals[i].y
+						<< "\" z=\"" << kf.reals[i].z
+						<< "\" w=\"" << kf.reals[i].w << "\"/>" << endl;
+					ofs << "\t\t\t\t<bind_dual x=\"" << kf.duals[i].x
+						<< "\" y=\"" << kf.duals[i].y
+						<< "\" z=\"" << kf.duals[i].z
+						<< "\" w=\"" << kf.duals[i].w << "\"/>" << endl;
 
 					ofs << "\t\t\t</key>" << endl;
 				}
