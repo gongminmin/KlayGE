@@ -48,27 +48,15 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-#ifndef KLAYGE_PLATFORM_ANDROID
 	App3DFramework::App3DFramework(std::string const & name)
 						: name_(name),
 							fps_(0), accumulate_time_(0), num_frames_(0)
 	{
 		Context::Instance().AppInstance(*this);
 
-		ContextCfg cfg = Context::Instance().Config();
-		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
-		cfg.graphics_cfg.left = main_wnd_->Left();
-		cfg.graphics_cfg.top = main_wnd_->Top();
-		cfg.graphics_cfg.width = main_wnd_->Width();
-		cfg.graphics_cfg.height = main_wnd_->Height();
-		Context::Instance().Config(cfg);
-	}
-#else
-	App3DFramework::App3DFramework(std::string const & name, android_app* state)
-						: name_(name), state_(state),
-							fps_(0), accumulate_time_(0), num_frames_(0)
-	{
-		Context::Instance().AppInstance(*this);
+#ifdef KLAYGE_PLATFORM_ANDROID
+		state_ = get_app();
+#endif
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
@@ -78,7 +66,6 @@ namespace KlayGE
 		cfg.graphics_cfg.height = main_wnd_->Height();
 		Context::Instance().Config(cfg);
 	}
-#endif
 
 	App3DFramework::~App3DFramework()
 	{

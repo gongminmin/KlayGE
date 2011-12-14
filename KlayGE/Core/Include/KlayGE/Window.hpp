@@ -44,7 +44,7 @@
 
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
-#include <../../android/native_app_glue/android_native_app_glue.h>
+#include <android_native_app_glue.h>
 #endif
 
 #include <string>

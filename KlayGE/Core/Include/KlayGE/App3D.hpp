@@ -41,7 +41,7 @@
 #include <KlayGE/RenderSettings.hpp>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-#include <../../android/native_app_glue/android_native_app_glue.h>
+#include <android_native_app_glue.h>
 #endif
 
 namespace KlayGE
@@ -71,11 +71,7 @@ namespace KlayGE
 		};
 
 	public:
-#ifndef KLAYGE_PLATFORM_ANDROID
 		explicit App3DFramework(std::string const & name);
-#else
-		App3DFramework(std::string const & name, android_app* state);
-#endif
 		virtual ~App3DFramework();
 
 		virtual void Create();

@@ -10,6 +10,11 @@ copy "%ANDROID_NDK%\sources\cxx-stl\gnu-libstdc++\libs\x86\libgnustl_static.a" o
 
 %ANDROID_NDK%\ndk-build
 
-copy /Y libs\armeabi\libKlayGE_RenderEngine_OpenGLES2_gcc.so ..\..\..\..\..\bin\android_armeabi\Render\
-copy /Y libs\armeabi-v7a\libKlayGE_RenderEngine_OpenGLES2_gcc.so ..\..\..\..\..\bin\android_armeabi-v7a\Render\
-copy /Y libs\x86\libKlayGE_RenderEngine_OpenGLES2_gcc.so ..\..\..\..\..\bin\android_x86\Render\
+if NOT EXIST ..\..\..\..\..\lib\android_armeabi mkdir ..\..\..\..\..\lib\android_armeabi
+copy /Y obj\local\armeabi\libKlayGE_Core_gcc.a ..\..\..\..\..\lib\android_armeabi\
+
+if NOT EXIST ..\..\..\..\..\lib\android_armeabi-v7a mkdir ..\..\..\..\..\lib\android_armeabi-v7a
+copy /Y obj\local\armeabi-v7a\libKlayGE_Core_gcc.a ..\..\..\..\..\lib\android_armeabi-v7a\
+
+if NOT EXIST ..\..\..\..\..\lib\android_x86 mkdir ..\..\..\..\..\lib\android_x86
+copy /Y obj\local\x86\libKlayGE_Core_gcc.a ..\..\..\..\..\lib\android_x86\

@@ -35,6 +35,11 @@
 #include <fstream>
 #include <iostream>
 
+#ifdef KLAYGE_PLATFORM_ANDROID
+#include <KlayGE/OpenGLES2/OGLES2RenderFactory.hpp>
+#include <KlayGE/OCTree/OCTreeFactory.hpp>
+#endif
+
 #include <KlayGE/Context.hpp>
 
 namespace KlayGE
@@ -585,6 +590,8 @@ namespace KlayGE
 	void Context::LoadRenderFactory(std::string const & rf_name)
 	{
 		render_factory_ = RenderFactory::NullObject();
+
+#ifndef KLAYGE_PLATFORM_ANDROID
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
@@ -606,6 +613,9 @@ namespace KlayGE
 			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			render_loader_.Free();
 		}
+#else
+		MakeRenderFactory(render_factory_);
+#endif
 	}
 
 	void Context::LoadAudioFactory(std::string const & af_name)
@@ -688,6 +698,7 @@ namespace KlayGE
 
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
+#ifndef KLAYGE_PLATFORM_ANDROID
 		scene_mgr_ = SceneManager::NullObject();
 		sm_loader_.Free();
 
@@ -710,6 +721,9 @@ namespace KlayGE
 			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
 			sm_loader_.Free();
 		}
+#else
+		MakeSceneManager(scene_mgr_);
+#endif
 	}
 
 	void Context::LoadAudioDataSourceFactory(std::string const & adsf_name)

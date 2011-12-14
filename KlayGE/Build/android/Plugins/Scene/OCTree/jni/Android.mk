@@ -20,7 +20,7 @@ LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_OCTREE_SM_SOURCE
 
 LOCAL_STATIC_LIBRARIES := KlayGE_Core boost_date_time boost_filesystem boost_signals boost_system boost_thread
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 $(call import-module, boost)
 $(call import-module, KlayGE_Core)

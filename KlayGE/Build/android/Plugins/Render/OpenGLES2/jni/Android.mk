@@ -35,7 +35,7 @@ LOCAL_CFLAGS := -DKLAYGE_BUILD_DLL -DKLAYGE_OGL_RE_SOURCE -DGLLOADER_GLES_SUPPOR
 LOCAL_LDLIBS := -llog -landroid
 LOCAL_STATIC_LIBRARIES := KlayGE_Core glloader boost_date_time boost_filesystem boost_signals boost_system boost_thread
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 $(call import-module, boost)
 $(call import-module, KlayGE_Core)
