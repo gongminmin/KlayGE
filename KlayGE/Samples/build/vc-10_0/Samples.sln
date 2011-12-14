@@ -42,6 +42,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GlobalIllumination", "Globa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CausticsMap", "CausticsMap.vcxproj", "{82DC8042-6C7F-4565-A8E3-09A8F086CF94}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EmptyApp", "EmptyApp.vcxproj", "{900668DB-122A-4E6D-AA1D-567C1581E118}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -218,6 +220,14 @@ Global
 		{82DC8042-6C7F-4565-A8E3-09A8F086CF94}.Release|Win32.Build.0 = Release|Win32
 		{82DC8042-6C7F-4565-A8E3-09A8F086CF94}.Release|x64.ActiveCfg = Release|x64
 		{82DC8042-6C7F-4565-A8E3-09A8F086CF94}.Release|x64.Build.0 = Release|x64
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Debug|Win32.ActiveCfg = Debug|Win32
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Debug|Win32.Build.0 = Debug|Win32
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Debug|x64.ActiveCfg = Debug|x64
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Debug|x64.Build.0 = Debug|x64
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Release|Win32.ActiveCfg = Release|Win32
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Release|Win32.Build.0 = Release|Win32
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Release|x64.ActiveCfg = Release|x64
+		{900668DB-122A-4E6D-AA1D-567C1581E118}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
