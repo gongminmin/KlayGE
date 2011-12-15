@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_stream_fifo" reg_no="36">
+	<typedefs>
+		<typedef type="khronos_utime_nanoseconds_t" synonym="EGLTimeKHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_STREAM_FIFO_LENGTH_KHR" value="0x31FC"/>
+		<token name="EGL_STREAM_TIME_NOW_KHR" value="0x31FD"/>
+		<token name="EGL_STREAM_TIME_CONSUMER_KHR" value="0x31FE"/>
+		<token name="EGL_STREAM_TIME_PRODUCER_KHR" value="0x31FF"/>
+	</tokens>
+
+	<functions>
+		<function name="eglQueryStreamTimeKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="attribute"/>
+				<param type="EGLTimeKHR*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

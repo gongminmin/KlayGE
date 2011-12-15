@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_stream_producer_eglsurface" reg_no="34">
+	<tokens>
+		<token name="EGL_STREAM_BIT_KHR" value="0x0800"/>
+	</tokens>
+
+	<functions>	
+		<function name="eglCreateStreamProducerSurface" return="EGLSurface">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLConfig" name="config"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

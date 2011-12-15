@@ -1,0 +1,63 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_stream" reg_no="32">
+	<typedefs>
+		<typedef type="void*" synonym="EGLStreamKHR"/>
+		<typedef type="khronos_uint64_t" synonym="EGLuint64KHR"/>
+	</typedefs>
+
+	<tokens>	
+		<token name="EGL_NO_STREAM_KHR" value="0"/>
+		<token name="EGL_CONSUMER_LATENCY_USEC_KHR" value="0x3210"/>
+		<token name="EGL_PRODUCER_FRAME_KHR" value="0x3212"/>
+		<token name="EGL_CONSUMER_FRAME_KHR" value="0x3213"/>
+		<token name="EGL_STREAM_STATE_KHR" value="0x3214"/>
+		<token name="EGL_STREAM_STATE_CREATED_KHR" value="0x3215"/>
+		<token name="EGL_STREAM_STATE_CONNECTING_KHR" value="0x3216"/>
+		<token name="EGL_STREAM_STATE_EMPTY_KHR" value="0x3217"/>
+		<token name="EGL_STREAM_STATE_NEW_FRAME_AVAILABLE_KHR" value="0x3218"/>
+		<token name="EGL_STREAM_STATE_OLD_FRAME_AVAILABLE_KHR" value="0x3219"/>
+		<token name="EGL_STREAM_STATE_DISCONNECTED_KHR" value="0x321A"/>
+		<token name="EGL_BAD_STREAM_KHR" value="0x321B"/>
+		<token name="EGL_BAD_STATE_KHR" value="0x321C"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCreateStreamKHR" return="EGLStreamKHR">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="const EGLint*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglDestroyStreamKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+			</params>
+		</function>
+		<function name="eglStreamAttribKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="attribute"/>
+				<param type="EGLint" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryStreamKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="attribute"/>
+				<param type="EGLint*" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryStreamu64KHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="attribute"/>
+				<param type="EGLuint64KHR*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
