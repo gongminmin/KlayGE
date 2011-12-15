@@ -153,9 +153,8 @@ namespace KlayGE
 		wnd = x_window_ = main_wnd->XWindow();
 #elif defined KLAYGE_PLATFORM_ANDROID
 		wnd = a_window_ = main_wnd->AWindow();
-		EGLConfig config;
 		EGLint format;
-		eglGetConfigAttrib(display_, &config, EGL_NATIVE_VISUAL_ID, &format);
+		eglGetConfigAttrib(display_, cfg_, EGL_NATIVE_VISUAL_ID, &format);
 		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
 #endif
 

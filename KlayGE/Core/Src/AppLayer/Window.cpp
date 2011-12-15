@@ -643,10 +643,41 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
 	{
+		a_window_ = NULL;
+
 		android_app* state = Context::Instance().AppInstance().AppState();
-		a_window_ = state->window;
 		state->userData = this;
 		state->onAppCmd = MsgProc;
+
+		for (;;)
+		{
+			// Read all pending events.
+			int ident;
+			int events;
+			android_poll_source* source;
+
+			do
+			{
+				ident = ALooper_pollAll(0, NULL, &events, reinterpret_cast<void**>(&source));
+
+				// Process this event.
+				if (source != NULL)
+				{
+					source->process(state, source);
+				}
+
+				if (a_window_ != NULL)
+				{
+					return;
+				}
+
+				// Check if we are exiting.
+				if (state->destroyRequested != 0)
+				{
+					return;
+				}
+			} while (ident >= 0);
+		}
 	}
 
 	Window::~Window()
@@ -662,6 +693,7 @@ namespace KlayGE
 			break;
 
 		case APP_CMD_INIT_WINDOW:
+			win->a_window_ = app->window;
 			break;
         
 		case APP_CMD_TERM_WINDOW:
