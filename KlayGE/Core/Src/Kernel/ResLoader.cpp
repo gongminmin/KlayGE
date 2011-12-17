@@ -43,7 +43,7 @@ namespace KlayGE
 		GetModuleFileNameA(NULL, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
-#elif defined KLAYGE_PLATFORM_LINUX
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 		{
 			char line[1024];
 			void const * symbol = "";
@@ -71,6 +71,13 @@ namespace KlayGE
 				}
 				fclose(fp);
 			}
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/"));
+			exe_path_ = exe_path_.substr(exe_path_.find_last_of("/") + 1);
+			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("-"));
+			exe_path_ = "/data/data/" + exe_path_;
+#endif
 		}
 #endif
 
