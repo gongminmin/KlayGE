@@ -78,18 +78,6 @@ namespace KlayGE
 				glDisable(GL_SCISSOR_TEST);
 			}
 		}
-
-		if (cur_desc.multisample_enable != desc_.multisample_enable)
-		{
-			if (desc_.multisample_enable)
-			{
-				glEnable(GL_MULTISAMPLE);
-			}
-			else
-			{
-				glDisable(GL_MULTISAMPLE);
-			}
-		}
 	}
 
 	void OGLES2RasterizerStateObject::ForceDefaultState()
@@ -124,15 +112,6 @@ namespace KlayGE
 		else
 		{
 			glDisable(GL_SCISSOR_TEST);
-		}
-
-		if (desc.multisample_enable)
-		{
-			glEnable(GL_MULTISAMPLE);
-		}
-		else
-		{
-			glDisable(GL_MULTISAMPLE);
 		}
 	}
 
