@@ -1,4 +1,4 @@
-NDK_MODULE_PATH := $(call my-dir)/../../../../../../../External/boost/android:$(call my-dir)/../../../../Core::$(call my-dir)/../../../../../../../glloader/build/android
+NDK_MODULE_PATH := $(call my-dir)/../../../../../../../External/boost/android$(HOST_DIRSEP)$(call my-dir)/../../../../Core$(HOST_DIRSEP)$(call my-dir)/../../../../../../../glloader/build/android
 
 APP_BUILD_SCRIPT := $(call my-dir)/Android.mk
 
