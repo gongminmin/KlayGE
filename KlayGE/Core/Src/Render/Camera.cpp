@@ -172,7 +172,10 @@ namespace KlayGE
 		if (frustum_dirty_)
 		{
 			frustum_[0].ClipMatrix(viewMat_[0] * projMat_[0]);
-			frustum_[1].ClipMatrix(viewMat_[1] * projMat_[1]);
+			if (this->StereoMode())
+			{
+				frustum_[1].ClipMatrix(viewMat_[1] * projMat_[1]);
+			}
 			frustum_dirty_ = false;
 		}
 		return frustum_[eye];

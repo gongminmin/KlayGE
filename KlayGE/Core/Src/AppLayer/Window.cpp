@@ -641,8 +641,13 @@ namespace KlayGE
 		}
 	}
 #elif defined KLAYGE_PLATFORM_ANDROID
-	Window::Window(std::string const & /*name*/, RenderSettings const & /*settings*/)
+	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
 	{
+		left_ = settings.left;
+		top_ = settings.top;
+		width_ = settings.width;
+		height_ = settings.height;
+
 		a_window_ = NULL;
 
 		android_app* state = Context::Instance().AppInstance().AppState();
