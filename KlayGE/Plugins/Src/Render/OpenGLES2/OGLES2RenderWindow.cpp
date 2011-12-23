@@ -312,6 +312,8 @@ namespace KlayGE
 	void OGLES2RenderWindow::WindowMovedOrResized(Window const & win)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
+		UNREF_PARAM(win);
+
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
 

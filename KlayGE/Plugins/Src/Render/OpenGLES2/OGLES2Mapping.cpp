@@ -474,7 +474,7 @@ namespace KlayGE
 		case EF_D24S8:
 			if (glloader_GLES_OES_packed_depth_stencil())
 			{
-				internalFormat = GL_DEPTH_STENCIL_OES;
+				internalFormat = GL_DEPTH24_STENCIL8_OES;
 				glformat = GL_DEPTH_STENCIL_OES;
 				gltype = GL_UNSIGNED_INT_24_8_OES;
 			}
