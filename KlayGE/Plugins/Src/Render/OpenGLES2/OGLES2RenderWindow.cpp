@@ -309,7 +309,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLES2RenderWindow::WindowMovedOrResized()
+	void OGLES2RenderWindow::WindowMovedOrResized(Window const & win)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
@@ -329,9 +329,19 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_ANDROID
+		uint32_t new_left = win.Left() / 2;
+		uint32_t new_top = win.Top() / 2;
+		if ((new_left != left_) || (new_top != top_))
+		{
+			this->Reposition(new_left, new_top);
+		}
+
 		EGLint new_width, new_height;
 		eglQuerySurface(display_, surf_, EGL_WIDTH, &new_width);
 		eglQuerySurface(display_, surf_, EGL_HEIGHT, &new_height);
+
+		new_width -= new_left;
+		new_height -= new_top;
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
@@ -394,13 +404,13 @@ namespace KlayGE
 		this->Ready(false);
 	}
 
-	void OGLES2RenderWindow::OnExitSizeMove(Window const & /*win*/)
+	void OGLES2RenderWindow::OnExitSizeMove(Window const & win)
 	{
-		this->WindowMovedOrResized();
+		this->WindowMovedOrResized(win);
 		this->Ready(true);
 	}
 
-	void OGLES2RenderWindow::OnSize(Window const & /*win*/, bool active)
+	void OGLES2RenderWindow::OnSize(Window const & win, bool active)
 	{
 		if (!active)
 		{
@@ -411,7 +421,7 @@ namespace KlayGE
 			active_ = true;
 			if (this->Ready())
 			{
-				this->WindowMovedOrResized();
+				this->WindowMovedOrResized(win);
 			}
 		}
 	}

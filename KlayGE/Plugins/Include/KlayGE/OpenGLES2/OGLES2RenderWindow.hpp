@@ -46,7 +46,7 @@ namespace KlayGE
 		void FullScreen(bool fs);
 
 		// Method for dealing with resize / move & 3d library
-		void WindowMovedOrResized();
+		void WindowMovedOrResized(Window const & win);
 
 		bool RequiresFlipping() const
 		{

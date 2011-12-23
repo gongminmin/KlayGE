@@ -26,8 +26,10 @@
 
 #include <KlayGE/Window.hpp>
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
 #ifndef GET_KEYSTATE_WPARAM
 #define GET_KEYSTATE_WPARAM(wParam) (LOWORD(wParam))
+#endif
 #endif
 
 namespace KlayGE
@@ -643,18 +645,13 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
 	{
-		left_ = settings.left;
-		top_ = settings.top;
-		width_ = settings.width;
-		height_ = settings.height;
-
 		a_window_ = NULL;
 
 		android_app* state = Context::Instance().AppInstance().AppState();
 		state->userData = this;
 		state->onAppCmd = MsgProc;
 
-		for (;;)
+		while (NULL == a_window_)
 		{
 			// Read all pending events.
 			int ident;
@@ -671,18 +668,23 @@ namespace KlayGE
 					source->process(state, source);
 				}
 
-				if (a_window_ != NULL)
-				{
-					return;
-				}
-
 				// Check if we are exiting.
 				if (state->destroyRequested != 0)
 				{
 					return;
 				}
-			} while (ident >= 0);
+			} while ((NULL == a_window_) && (ident >= 0));
 		}
+
+		ANativeWindow_Buffer buffer;
+		if (ANativeWindow_lock(a_window_, &buffer, NULL) >= 0)
+		{
+			ANativeWindow_unlockAndPost(a_window_);
+		}
+		left_ = settings.left;
+		top_ = settings.top;
+		width_ = buffer.width;
+		height_ = buffer.height;
 	}
 
 	Window::~Window()
@@ -711,6 +713,15 @@ namespace KlayGE
 
 		case APP_CMD_LOST_FOCUS:
 			win->OnActive()(*win, false);
+			break;
+
+		case APP_CMD_WINDOW_RESIZED:
+		case APP_CMD_CONTENT_RECT_CHANGED:
+			win->left_ = app->contentRect.left;
+			win->top_ = app->contentRect.top;
+			win->width_ = app->contentRect.right;
+			win->height_ = app->contentRect.bottom;
+			win->OnSize()(*win, true);
 			break;
 		}
 	}
