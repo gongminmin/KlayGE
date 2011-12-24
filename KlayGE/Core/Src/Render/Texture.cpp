@@ -1127,6 +1127,7 @@ namespace KlayGE
 			LittleEndianToNative<sizeof(desc10.array_size)>(&desc10.array_size);
 			LittleEndianToNative<sizeof(desc10.reserved)>(&desc10.reserved);
 			LittleEndianToNative<sizeof(desc10.array_size)>(&desc10.array_size);
+			array_size = desc10.array_size;
 		}
 		else
 		{
