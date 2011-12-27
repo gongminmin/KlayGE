@@ -397,9 +397,20 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
+		ElementFormat ds_fmt;
+		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
+		{
+			ds_fmt = EF_D24S8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+
+			ds_fmt = EF_D16;
+		}
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
-		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
@@ -416,8 +427,15 @@ namespace KlayGE
 		aa_pp_ = MakeSharedPtr<FXAAPostProcess>();
 		skip_aa_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 
-		color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
 		skip_color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+		if (caps.max_texture_depth > 1)
+		{
+			color_grading_pp_ = LoadPostProcess(ResLoader::Instance().Open("ColorGrading.ppml"), "color_grading");
+		}
+		else
+		{
+			color_grading_pp_ = skip_color_grading_pp_;
+		}
 
 		if (caps.max_simultaneous_rts > 1)
 		{
@@ -607,8 +625,19 @@ namespace KlayGE
 				fmt = EF_ABGR16F;
 			}
 		}
+		ElementFormat ds_fmt;
+		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
+		{
+			ds_fmt = EF_D24S8;
+		}
+		else
+		{
+			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-		opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+			ds_fmt = EF_D16;
+		}
+
+		opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
 		opaque_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
@@ -621,7 +650,7 @@ namespace KlayGE
 		}
 		opaque_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
 
-		transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
 		transparency_back_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
@@ -634,7 +663,7 @@ namespace KlayGE
 		}
 		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
 
-		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
 		RenderViewPtr transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
 		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
@@ -662,7 +691,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 			{
 				TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
-					1, 1, EF_D24S8, 1, 0,  EAH_GPU_Write, NULL);
+					1, 1, ds_fmt, 1, 0,  EAH_GPU_Write, NULL);
 
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
@@ -746,7 +775,11 @@ namespace KlayGE
 		}
 		if (Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt = MakeSRGB(fmt);
+			ElementFormat fmt_srgb = MakeSRGB(fmt);
+			if (caps.rendertarget_format_support(fmt_srgb, 1, 0))
+			{
+				fmt = fmt_srgb;
+			}
 		}
 		ldr_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		grading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -1034,9 +1067,12 @@ namespace KlayGE
 										}
 										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
 
-										light->ConditionalRenderQuery(0)->Begin();
-										re.Render(*technique_light_depth_only_, *rl_cone_);
-										light->ConditionalRenderQuery(0)->End();
+										if (light->ConditionalRenderQuery(0))
+										{
+											light->ConditionalRenderQuery(0)->Begin();
+											re.Render(*technique_light_depth_only_, *rl_cone_);
+											light->ConditionalRenderQuery(0)->End();
+										}
 									}
 								}
 								break;
@@ -1067,9 +1103,12 @@ namespace KlayGE
 												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
 											}
 
-											light->ConditionalRenderQuery(j)->Begin();
-											re.Render(*technique_light_depth_only_, *rl_pyramid_);
-											light->ConditionalRenderQuery(j)->End();
+											if (light->ConditionalRenderQuery(j))
+											{
+												light->ConditionalRenderQuery(j)->Begin();
+												re.Render(*technique_light_depth_only_, *rl_pyramid_);
+												light->ConditionalRenderQuery(j)->End();
+											}
 										}
 									}
 									{
@@ -1090,9 +1129,12 @@ namespace KlayGE
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
 
-											light->ConditionalRenderQuery(6)->Begin();
-											re.Render(*technique_light_depth_only_, *rl_box_);
-											light->ConditionalRenderQuery(6)->End();
+											if (light->ConditionalRenderQuery(6))
+											{
+												light->ConditionalRenderQuery(6)->Begin();
+												re.Render(*technique_light_depth_only_, *rl_box_);
+												light->ConditionalRenderQuery(6)->End();
+											}
 										}
 									}
 								}
@@ -1458,14 +1500,20 @@ namespace KlayGE
 						if (LT_Point == type)
 						{
 							sm_filter_pps_[index_in_pass]->Apply();
-							light->ConditionalRenderQuery(index_in_pass - 1)->EndConditionalRender();
+							if (light->ConditionalRenderQuery(index_in_pass - 1))
+							{
+								light->ConditionalRenderQuery(index_in_pass - 1)->EndConditionalRender();
+							}
 						}
 						else
 						{
 							sm_filter_pps_[0]->Apply();
 							if (!(light->Attrib() & LSA_IndirectLighting))
 							{
-								light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+								if (light->ConditionalRenderQuery(index_in_pass))
+								{
+									light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+								}
 							}
 						}
 					}
@@ -1473,7 +1521,10 @@ namespace KlayGE
 
 				if (PT_GenShadowMap == pass_type)
 				{
-					light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+					if (light->ConditionalRenderQuery(index_in_pass))
+					{
+						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+					}
 
 					// Shadow map generation
 					re.BindFrameBuffer(sm_buffer_);
@@ -1496,7 +1547,10 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+						if (light->ConditionalRenderQuery(index_in_pass))
+						{
+							light->ConditionalRenderQuery(index_in_pass)->BeginConditionalRender();
+						}
 					}
 
 					re.Render(*technique_shadows_[type], *rl);
@@ -1557,7 +1611,10 @@ namespace KlayGE
 
 					if ((type != LT_Ambient) && (type != LT_Directional))
 					{
-						light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+						if (light->ConditionalRenderQuery(index_in_pass))
+						{
+							light->ConditionalRenderQuery(index_in_pass)->EndConditionalRender();
+						}
 					}
 
 					return App3DFramework::URV_Flushed;

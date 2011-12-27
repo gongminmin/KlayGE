@@ -342,37 +342,25 @@ void ModelViewerApp::InitObjects()
 	grid_->AddToSceneManager();
 
 	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
-	uint32_t texel;
-	ElementFormat fmt;
 	if (Context::Instance().Config().graphics_cfg.gamma)
 	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8_SRGB))
-		{
-			fmt = EF_ABGR8_SRGB;
-			texel = clear_clr.ABGR();
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8_SRGB));
-
-			fmt = EF_ARGB8_SRGB;
-			texel = clear_clr.ARGB();
-		}
+		clear_clr.r() = 0.029f;
+		clear_clr.g() = 0.133f;
+		clear_clr.b() = 0.325f;
+	}
+	uint32_t texel;
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+		texel = clear_clr.ABGR();
 	}
 	else
 	{
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-		{
-			fmt = EF_ABGR8;
-			texel = clear_clr.ABGR();
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
 
-			fmt = EF_ARGB8;
-			texel = clear_clr.ARGB();
-		}
+		fmt = EF_ARGB8;
+		texel = clear_clr.ARGB();
 	}
 	ElementInitData init_data[6];
 	for (int i = 0; i < 6; ++ i)
