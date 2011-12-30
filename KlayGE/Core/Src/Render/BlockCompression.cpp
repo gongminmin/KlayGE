@@ -1776,7 +1776,6 @@ namespace KlayGE
 		bool swap_clr = false;
 		if (bc4.alpha_0 < bc4.alpha_1)
 		{
-			std::swap(bc1.clr_0, bc1.clr_1);
 			swap_clr = true;
 		}
 		for (int i = 0; i < 2; ++ i)

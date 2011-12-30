@@ -312,42 +312,6 @@ namespace KlayGE
 			gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
 			break;
 
-		case EF_R16:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_UNSIGNED_SHORT;
-			break;
-
-		case EF_SIGNED_R16:
-			internalFormat = GL_LUMINANCE;
-			glformat = GL_LUMINANCE;
-			gltype = GL_SHORT;
-			break;
-
-		case EF_BGR16:
-			internalFormat = GL_RGB;
-			glformat = GL_RGB;
-			gltype = GL_UNSIGNED_SHORT;
-			break;
-
-		case EF_SIGNED_BGR16:
-			internalFormat = GL_RGB;
-			glformat = GL_RGB;
-			gltype = GL_SHORT;
-			break;
-
-		case EF_ABGR16:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_SHORT;
-			break;
-
-		case EF_SIGNED_ABGR16:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_SHORT;
-			break;
-
 		case EF_R16F:
 			if (glloader_GLES_OES_texture_half_float())
 			{
@@ -474,7 +438,7 @@ namespace KlayGE
 		case EF_D24S8:
 			if (glloader_GLES_OES_packed_depth_stencil())
 			{
-				internalFormat = GL_DEPTH24_STENCIL8_OES;
+				internalFormat = GL_DEPTH_STENCIL_OES;
 				glformat = GL_DEPTH_STENCIL_OES;
 				gltype = GL_UNSIGNED_INT_24_8_OES;
 			}

@@ -768,12 +768,6 @@ namespace KlayGE
 		texture_format_.insert(EF_R8);
 		texture_format_.insert(EF_SIGNED_R8);
 		texture_format_.insert(EF_ABGR8);
-		texture_format_.insert(EF_R16);
-		texture_format_.insert(EF_SIGNED_R16);
-		texture_format_.insert(EF_BGR16);
-		texture_format_.insert(EF_SIGNED_BGR16);
-		texture_format_.insert(EF_ABGR16);
-		texture_format_.insert(EF_SIGNED_ABGR16);
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{
 			texture_format_.insert(EF_ARGB8);
@@ -796,9 +790,14 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_BC1);
 		}
-		texture_format_.insert(EF_D16);
-		texture_format_.insert(EF_D24S8);
-		texture_format_.insert(EF_D32F);
+		if (glloader_GLES_OES_depth_texture())
+		{
+			texture_format_.insert(EF_D16);
+		}
+		if (glloader_GLES_OES_packed_depth_stencil())
+		{
+			texture_format_.insert(EF_D24S8);
+		}
 
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{

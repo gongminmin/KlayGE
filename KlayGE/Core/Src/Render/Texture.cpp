@@ -37,6 +37,7 @@
 #include <KlayGE/Util.hpp>
 #include <KlayGE/BlockCompression.hpp>
 #include <KlayGE/thread.hpp>
+#include <KlayGE/half.hpp>
 
 #include <cstring>
 #include <fstream>
@@ -747,6 +748,12 @@ namespace
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
 
+			uint32_t array_size = tex_desc_.array_size;
+			if (Texture::TT_Cube == tex_desc_.type)
+			{
+				array_size *= 6;
+			}
+
 			if (((EF_BC5 == tex_desc_.format) && !caps.texture_format_support(EF_BC5))
 				|| ((EF_BC5_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_BC5_SRGB)))
 			{
@@ -777,7 +784,7 @@ namespace
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -819,7 +826,7 @@ namespace
 				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -844,7 +851,7 @@ namespace
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -886,7 +893,7 @@ namespace
 				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -911,7 +918,7 @@ namespace
 				std::vector<uint8_t> rgba_data_block;
 
 				uint32_t rgba[16];
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -953,7 +960,7 @@ namespace
 				tex_desc_.format = EF_ARGB8;
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -974,7 +981,7 @@ namespace
 			}
 			if ((EF_ARGB8_SRGB == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8_SRGB))
 			{
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -1003,7 +1010,7 @@ namespace
 			}
 			if ((EF_ARGB8 == tex_desc_.format) && !caps.texture_format_support(EF_ARGB8))
 			{
-				for (size_t index = 0; index < tex_desc_.array_size; ++ index)
+				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.width;
 					uint32_t height = tex_desc_.height;
@@ -1027,6 +1034,77 @@ namespace
 				}
 
 				tex_desc_.format = EF_ABGR8;
+			}
+			if ((EF_R16 == tex_desc_.format) && !caps.texture_format_support(EF_R16))
+			{
+				if (caps.texture_format_support(EF_R16F))
+				{
+					for (size_t index = 0; index < tex_desc_.tex_data.size(); ++ index)
+					{
+						uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data[index].data));
+
+						for (size_t j = 0; j < tex_desc_.tex_data[index].slice_pitch / sizeof(uint16_t); ++ j)
+						{
+							*reinterpret_cast<half*>(&p[j]) = half(p[j] / 65535.0f);
+						}
+					}
+
+					tex_desc_.format = EF_R16F;
+				}
+				else if (caps.texture_format_support(EF_R8))
+				{
+					std::vector<uint8_t> r8_data_block;
+
+					for (size_t index = 0; index < array_size; ++ index)
+					{
+						uint32_t width = tex_desc_.width;
+						uint32_t height = tex_desc_.height;
+						for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+						{
+							size_t const old_size = r8_data_block.size();
+							r8_data_block.resize(old_size + width * height);
+							uint8_t* sub_r8_data_block = &r8_data_block[old_size];
+
+							size_t i = index * tex_desc_.num_mipmaps + level;
+
+							uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data[i].data));
+							for (size_t y = 0; y < height; ++ y)
+							{
+								for (size_t x = 0; x < width; ++ x)
+								{
+									sub_r8_data_block[x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((p[x] / 65535.0f) * 255 + 0.5f), 0, 255));
+								}
+								sub_r8_data_block += width;
+								p += (tex_desc_.tex_data[i].row_pitch) / sizeof(uint16_t);
+							}
+
+							width = std::max<uint32_t>(1U, width / 2);
+							height = std::max<uint32_t>(1U, height / 2);
+						}
+					}
+
+					tex_desc_.format = EF_R8;
+					tex_desc_.data_block = r8_data_block;
+					size_t start = 0;
+					for (size_t index = 0; index < array_size; ++ index)
+					{
+						uint32_t width = tex_desc_.width;
+						uint32_t height = tex_desc_.height;
+						for (size_t level = 0; level < tex_desc_.num_mipmaps; ++ level)
+						{
+							size_t i = index * tex_desc_.num_mipmaps + level;
+
+							tex_desc_.tex_data[i].row_pitch = width;
+							tex_desc_.tex_data[i].slice_pitch = width * height;
+							tex_desc_.tex_data[i].data = &tex_desc_.data_block[start];
+
+							start += tex_desc_.tex_data[i].slice_pitch;
+
+							width = std::max<uint32_t>(1U, width / 2);
+							height = std::max<uint32_t>(1U, height / 2);
+						}
+					}
+				}
 			}
 
 			if (caps.multithread_res_creating_support)
