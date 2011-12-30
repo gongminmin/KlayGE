@@ -997,9 +997,16 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0));
+		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_R32F, 1, 0))
+		{
+			fmt = EF_R32F;
+		}
+		else
+		{
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
 
-		fmt = EF_R32F;
+			fmt = EF_ABGR16F;
+		}
 	}
 	refraction_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 

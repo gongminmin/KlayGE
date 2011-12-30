@@ -37,7 +37,11 @@ float4 DepthToVSMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 	float dist = non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q.x, near_q.y);
 	dist *= length(view_dir) / view_dir.z;
 
+#ifndef KLAYGE_OPENGLES2
 	float2 dxdy = float2(ddx(dist), ddy(dist));
+#else
+	float2 dxdy = 0;
+#endif
 	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
