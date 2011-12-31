@@ -771,11 +771,11 @@ namespace
 
 				if (IsSRGB(tex_desc_.format))
 				{
-					tex_desc_.format = EF_BC3;
+					tex_desc_.format = EF_BC3_SRGB;
 				}
 				else
 				{
-					tex_desc_.format = EF_BC3_SRGB;
+					tex_desc_.format = EF_BC3;
 				}
 			}
 			if (((EF_BC1 == tex_desc_.format) && !caps.texture_format_support(EF_BC1))
@@ -801,7 +801,6 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								p += sizeof(BC1_layout);
 								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC1_sRGB(rgba, p);
@@ -810,6 +809,7 @@ namespace
 								{
 									DecodeBC1(rgba, p);
 								}
+								p += sizeof(BC1_layout);
 
 								for (int y = 0; y < 4; ++ y)
 								{
@@ -823,7 +823,14 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
+				if (IsSRGB(tex_desc_.format))
+				{
+					tex_desc_.format = EF_ARGB8_SRGB;
+				}
+				else
+				{
+					tex_desc_.format = EF_ARGB8;
+				}
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
@@ -868,7 +875,6 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								p += sizeof(BC2_layout);
 								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC2_sRGB(rgba, p);
@@ -877,6 +883,7 @@ namespace
 								{
 									DecodeBC2(rgba, p);
 								}
+								p += sizeof(BC2_layout);
 
 								for (int y = 0; y < 4; ++ y)
 								{
@@ -890,7 +897,14 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
+				if (IsSRGB(tex_desc_.format))
+				{
+					tex_desc_.format = EF_ARGB8_SRGB;
+				}
+				else
+				{
+					tex_desc_.format = EF_ARGB8;
+				}
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
@@ -935,7 +949,6 @@ namespace
 						{
 							for (uint32_t block_x = 0; block_x < width; block_x += 4)
 							{
-								p += sizeof(BC3_layout);
 								if (IsSRGB(tex_desc_.format))
 								{
 									DecodeBC3_sRGB(rgba, p);
@@ -944,6 +957,7 @@ namespace
 								{
 									DecodeBC3(rgba, p);
 								}
+								p += sizeof(BC3_layout);
 
 								for (int y = 0; y < 4; ++ y)
 								{
@@ -957,7 +971,14 @@ namespace
 					}
 				}
 
-				tex_desc_.format = EF_ARGB8;
+				if (IsSRGB(tex_desc_.format))
+				{
+					tex_desc_.format = EF_ARGB8_SRGB;
+				}
+				else
+				{
+					tex_desc_.format = EF_ARGB8;
+				}
 				tex_desc_.data_block = rgba_data_block;
 				size_t start = 0;
 				for (size_t index = 0; index < array_size; ++ index)
@@ -2629,7 +2650,7 @@ namespace KlayGE
 								uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 								{
-									Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
+									Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
 									char* data = mapper.Pointer<char>();
 
 									base[index] = data_block.size();
