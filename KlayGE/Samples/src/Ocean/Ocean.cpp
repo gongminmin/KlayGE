@@ -889,6 +889,7 @@ void OceanApp::InitObjects()
 	inputEngine.ActionMap(actionMap, input_handler, true);
 
 	copy_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
+	copy_composed_pp_ = LoadPostProcess(ResLoader::Instance().Open("Copy.ppml"), "copy");
 	depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
 
 	refraction_fb_ = rf.MakeFrameBuffer();
@@ -1040,6 +1041,9 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 	composed_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	copy_pp_->InputPin(0, composed_tex_);
+
+	copy_composed_pp_->InputPin(0, refraction_tex_);
+	copy_composed_pp_->OutputPin(0, composed_tex_);
 
 	depth_to_linear_pp_->InputPin(0, refraction_ds_tex);
 	depth_to_linear_pp_->OutputPin(0, refraction_depth_tex_);
@@ -1223,7 +1227,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 
 	case 2:
 		blur_y_->Apply();
-		refraction_tex_->CopyToTexture(*composed_tex_);
+		copy_composed_pp_->Apply();
 		re.BindFrameBuffer(composed_fb_);
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
