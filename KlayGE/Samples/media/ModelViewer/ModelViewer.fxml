@@ -960,6 +960,16 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		<![CDATA[
 void SkinnedStreamOutVS(float3 pos : POSITION,
 					float2 texcoord0 : TEXCOORD0,
+					float4 blend_weights : BLENDWEIGHT,
+#ifdef KLAYGE_OPENGL
+					float4 blend_indices_f : BLENDINDICES,
+#else
+#ifdef KLAYGE_OPENGLES2
+					float4 blend_indices_f : BLENDINDICES,
+#else
+					uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
 					float3 N : NORMAL,
 					float4 T : Tangent,
 
@@ -969,7 +979,8 @@ void SkinnedStreamOutVS(float3 pos : POSITION,
 					out float4 oTangent : TANGENT)
 {
 	float3 result_pos, result_normal, result_tangent, result_binormal;
-	CalcMesh(texcoord0, float4(pos, 1),
+	CalcSkinnedMesh(texcoord0, float4(pos, 1),
+				blend_weights, blend_indices,
 				N, T,
 				oTex0, result_pos,
 				result_normal, result_tangent, result_binormal);
