@@ -167,7 +167,7 @@ namespace KlayGE
 		TFOE_Mag_Linear = 0x2,
 		TFOE_Min_Point = 0x0,
 		TFOE_Min_Linear = 0x4,
-		TFOE_Anisotropic = 0x0F,
+		TFOE_Anisotropic = 0x08,
 		TFOE_Comparison = 0x10,
 
 		// Use these
