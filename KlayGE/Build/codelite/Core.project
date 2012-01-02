@@ -282,8 +282,6 @@
       <File Name="../../Core/Src/Pack/LzFind.hpp"/>
       <File Name="../../Core/Src/Pack/LzHash.hpp"/>
       <File Name="../../Core/Include/KlayGE/LZMACodec.hpp"/>
-      <File Name="../../Core/Src/Pack/LzmaDec.hpp"/>
-      <File Name="../../Core/Src/Pack/LzmaEnc.hpp"/>
       <File Name="../../Core/Src/Pack/LzTypes.hpp"/>
       <File Name="../../Core/Src/Pack/Streams.hpp"/>
     </VirtualDirectory>
@@ -294,8 +292,6 @@
       <File Name="../../Core/Src/Pack/Extract7z.cpp"/>
       <File Name="../../Core/Src/Pack/LzFind.cpp"/>
       <File Name="../../Core/Src/Pack/LZMACodec.cpp"/>
-      <File Name="../../Core/Src/Pack/LzmaDec.cpp"/>
-      <File Name="../../Core/Src/Pack/LzmaEnc.cpp"/>
       <File Name="../../Core/Src/Pack/Streams.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>

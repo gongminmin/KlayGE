@@ -49,8 +49,6 @@ LOCAL_SRC_FILES := \
 		Pack/Extract7z.cpp \
 		Pack/LzFind.cpp \
 		Pack/LZMACodec.cpp \
-		Pack/LzmaDec.cpp \
-		Pack/LzmaEnc.cpp \
 		Pack/Streams.cpp \
 		Render/BlockCompression.cpp \
 		Render/Camera.cpp \

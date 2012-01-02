@@ -869,7 +869,6 @@ namespace KlayGE
 	void SaveJudaTexture(JudaTexturePtr const & juda_tex, std::string const & file_name)
 	{
 		LZMACodec lzma_enc;
-		lzma_enc.EncodeProps(5, juda_tex->TileSize() * juda_tex->TileSize() * NumFormatBytes(juda_tex->Format()));
 
 		std::vector<JudaTexture::quadtree_node_ptr> this_level;
 		std::vector<JudaTexture::quadtree_node_ptr> next_level;

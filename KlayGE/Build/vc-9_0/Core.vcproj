@@ -1350,14 +1350,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Pack\LzmaDec.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzmaEnc.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Src\Pack\LzTypes.hpp"
 					>
 				</File>
@@ -1391,14 +1383,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Src\Pack\LZMACodec.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzmaDec.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzmaEnc.cpp"
 					>
 				</File>
 				<File

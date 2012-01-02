@@ -13,17 +13,20 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/DllLoader.hpp>
 
 #include <cstring>
 
 #include "LzTypes.hpp"
-#include "LzmaEnc.hpp"
-#include "LzmaDec.hpp"
+#include <LzmaEnc.h>
+#include <LzmaDec.h>
 
 #include <KlayGE/LZMACodec.hpp>
 
 namespace
 {
+	using namespace KlayGE;
+
 	void* SzAlloc(void* /*p*/, size_t size)
 	{
 		return malloc(size);
@@ -35,28 +38,78 @@ namespace
 	}
 
 	ISzAlloc lzma_alloc = { SzAlloc, SzFree };
+
+
+	typedef void (*LzmaEncProps_InitFunc)(CLzmaEncProps* p);
+	typedef SRes (*LzmaEncodeFunc)(Byte* dest, SizeT* destLen, Byte const * src, SizeT srcLen,
+		CLzmaEncProps const * props, Byte* propsEncoded, SizeT* propsSize, int writeEndMark,
+		ICompressProgress* progress, ISzAlloc* alloc, ISzAlloc* allocBig);
+	typedef SRes (*LzmaDecodeFunc)(Byte* dest, SizeT* destLen, Byte const * src, SizeT* srcLen,
+		Byte const * propData, unsigned int propSize, ELzmaFinishMode finishMode,
+		ELzmaStatus* status, ISzAlloc* alloc);
+
+	class SevenZipLoader
+	{
+	public:
+		static SevenZipLoader& Instance()
+		{
+			static SevenZipLoader ret;
+			return ret;
+		}
+
+		void LzmaEncProps_Init(CLzmaEncProps* p)
+		{
+			return lzmaEncProps_InitFunc_(p);
+		}
+
+		SRes LzmaEncode(Byte* dest, SizeT* destLen, Byte const * src, SizeT srcLen,
+			CLzmaEncProps const * props, Byte* propsEncoded, SizeT* propsSize, int writeEndMark,
+			ICompressProgress* progress, ISzAlloc* alloc, ISzAlloc* allocBig)
+		{
+			return lzmaEncodeFuncFunc_(dest, destLen, src, srcLen, props, propsEncoded, propsSize, writeEndMark,
+				progress, alloc, allocBig);
+		}
+		SRes LzmaDecode(Byte* dest, SizeT* destLen, Byte const * src, SizeT* srcLen,
+			Byte const * propData, unsigned int propSize, ELzmaFinishMode finishMode,
+			ELzmaStatus* status, ISzAlloc* alloc)
+		{
+			return lzmaDecodeFuncFunc_(dest, destLen, src, srcLen, propData, propSize, finishMode,
+				status, alloc);
+		}
+
+	private:
+		SevenZipLoader()
+		{
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			dll_loader_.Load("7z.dll");
+#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+			dll_loader_.Load("7z.so");
+#endif
+			lzmaEncProps_InitFunc_ = (LzmaEncProps_InitFunc)dll_loader_.GetProcAddress("LzmaEncProps_Init");
+			lzmaEncodeFuncFunc_ = (LzmaEncodeFunc)dll_loader_.GetProcAddress("LzmaEncode");
+			lzmaDecodeFuncFunc_ = (LzmaDecodeFunc)dll_loader_.GetProcAddress("LzmaDecode");
+
+			BOOST_ASSERT(lzmaEncProps_InitFunc_);
+			BOOST_ASSERT(lzmaEncodeFuncFunc_);
+			BOOST_ASSERT(lzmaDecodeFuncFunc_);
+		}
+
+	private:
+		DllLoader dll_loader_;
+		LzmaEncProps_InitFunc lzmaEncProps_InitFunc_;
+		LzmaEncodeFunc lzmaEncodeFuncFunc_;
+		LzmaDecodeFunc lzmaDecodeFuncFunc_;
+	};
 }
 
 namespace KlayGE
 {
 	LZMACodec::LZMACodec()
 	{
-		lzma_enc_ = LzmaEnc_Create(&lzma_alloc);
-		this->EncodeProps(5, 1UL << 24);
 	}
 
 	LZMACodec::~LZMACodec()
 	{
-		LzmaEnc_Destroy(lzma_enc_, &lzma_alloc, &lzma_alloc);
-	}
-
-	void LZMACodec::EncodeProps(int level, uint32_t dict_size)
-	{
-		CLzmaEncProps props;
-		LzmaEncProps_Init(&props);
-		props.level = level;
-		props.dictSize = dict_size;
-		LzmaEnc_SetProps(lzma_enc_, &props);
 	}
 
 	uint64_t LZMACodec::Encode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len)
@@ -67,6 +120,7 @@ namespace KlayGE
 		std::vector<uint8_t> output;
 		this->Encode(output, &input[0], len);
 		os.write(reinterpret_cast<char*>(&output[0]), output.size() * sizeof(output[0]));
+
 		return output.size();
 	}
 
@@ -88,17 +142,18 @@ namespace KlayGE
 
 	void LZMACodec::Encode(std::vector<uint8_t>& output, void const * input, uint64_t len)
 	{
+		CLzmaEncProps props;
+		SevenZipLoader::Instance().LzmaEncProps_Init(&props);
+		props.level = 5;
+		props.dictSize = std::min<uint32_t>(static_cast<uint32_t>(len), 1UL << 24);
+
 		SizeT out_len = static_cast<SizeT>(std::max(len * 11 / 10, static_cast<uint64_t>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
-		int res = LzmaEnc_WriteProperties(lzma_enc_, &output[0], &out_props_size);
-		Verify(0 == res);
-		res = LzmaEnc_MemEncode(lzma_enc_, &output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(input), static_cast<SizeT>(len),
-			0, NULL, &lzma_alloc, &lzma_alloc);
-		Verify(0 == res);
+		SevenZipLoader::Instance().LzmaEncode(&output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(input), static_cast<SizeT>(len),
+			&props, &output[0], &out_props_size, 0, NULL, &lzma_alloc, &lzma_alloc);
 
-		uint64_t u64_out_len = static_cast<uint64_t>(out_len);
-		output.resize(static_cast<size_t>(LZMA_PROPS_SIZE + u64_out_len));
+		output.resize(LZMA_PROPS_SIZE + out_len);
 	}
 
 	uint64_t LZMACodec::Decode(std::ostream& os, ResIdentifierPtr const & is, uint64_t len, uint64_t original_len)
@@ -147,22 +202,13 @@ namespace KlayGE
 
 		SizeT s_out_len = static_cast<SizeT>(original_len);
 
-		CLzmaDec dec;
-		LzmaDec_Construct(&dec);
-		int res = LzmaDec_AllocateProbs(&dec, &in_data[0], LZMA_PROPS_SIZE, &lzma_alloc);
-		Verify(0 == res);
-
-		dec.dic = static_cast<uint8_t*>(output);
-		dec.dicBufSize = s_out_len;
-		LzmaDec_Init(&dec);
-
 		SizeT s_src_len = static_cast<SizeT>(len - LZMA_PROPS_SIZE);
 		ELzmaStatus status;
-		res = LzmaDec_DecodeToDic(&dec, s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len, LZMA_FINISH_ANY, &status);
+		int res = SevenZipLoader::Instance().LzmaDecode(static_cast<Byte*>(output), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
+			&in_data[0], LZMA_PROPS_SIZE, LZMA_FINISH_ANY,
+			&status, &lzma_alloc);
+
 		Verify(0 == res);
 		Verify(status != LZMA_STATUS_NEEDS_MORE_INPUT);
-		Verify(dec.dicPos == original_len);
-
-		LzmaDec_FreeProbs(&dec, &lzma_alloc);
 	}
 }

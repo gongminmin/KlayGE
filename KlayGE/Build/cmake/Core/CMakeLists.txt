@@ -297,8 +297,6 @@ SET(PACKING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Extract7z.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzFind.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LZMACodec.cpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzmaDec.cpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzmaEnc.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.cpp
 )
 
@@ -315,8 +313,6 @@ SET(PACKING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzFind.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzHash.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LZMACodec.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzmaDec.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzmaEnc.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzTypes.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.hpp
 )

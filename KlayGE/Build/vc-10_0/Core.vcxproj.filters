@@ -297,12 +297,6 @@
     <ClCompile Include="..\..\Core\Src\Pack\LZMACodec.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Pack\LzmaDec.cpp">
-      <Filter>Packing System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Pack\LzmaEnc.cpp">
-      <Filter>Packing System\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Core\Src\Pack\Streams.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
@@ -651,12 +645,6 @@
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\LzmaDec.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\LzmaEnc.hpp">
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Src\Pack\LzTypes.hpp">

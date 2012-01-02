@@ -753,7 +753,6 @@ void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, float4 const &
 	float const fbase = min_value_inv_scale_frscale_fbase.w();
 
 	LZMACodec lzma_enc;
-	lzma_enc.EncodeProps(5, char_size_sq);
 	std::vector<uint8_t> uint8_dist(char_size_sq);
 	std::vector<uint8_t> bc4_dist(char_size_sq / 2);
 	std::vector<uint8_t> char_lzma_dist;
