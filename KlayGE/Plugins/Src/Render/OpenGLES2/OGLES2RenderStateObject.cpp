@@ -369,14 +369,15 @@ namespace KlayGE
 		}
 		else
 		{
-			if (desc_.filter & TFOE_Mip_Linear)
+			ogl_min_filter_ = GL_NEAREST;
+			/*if (desc_.filter & TFOE_Mip_Linear)
 			{
 				ogl_min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
 			}
 			else
 			{
 				ogl_min_filter_ = GL_NEAREST_MIPMAP_NEAREST;
-			}
+			}*/
 		}
 		if (desc_.filter & TFOE_Mag_Linear)
 		{

@@ -152,19 +152,45 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		if (Context::Instance().Config().graphics_cfg.gamma)
 		{
-			fmt = EF_ABGR8;
+			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8_SRGB))
+			{
+				fmt = EF_ABGR8_SRGB;
+			}
+			else
+			{
+				if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8_SRGB))
+				{
+					fmt = EF_ARGB8_SRGB;
+				}
+				else
+				{
+					if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+					{
+						fmt = EF_ABGR8;
+					}
+					else
+					{
+						BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+						fmt = EF_ARGB8;
+					}
+				}
+			}
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
 
-			fmt = EF_ARGB8;
-		}
-		if (Context::Instance().Config().graphics_cfg.gamma)
-		{
-			fmt = MakeSRGB(fmt);
+				fmt = EF_ARGB8;
+			}
 		}
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read, NULL);
 
@@ -387,9 +413,10 @@ namespace KlayGE
 
 			uint8_t const * src = static_cast<uint8_t const *>(d3dlocked_rc.pBits);
 			{
+				ElementFormat fmt = present_tex_->Format();
 				Texture::Mapper mapper(*present_tex_, 0, 0, TMA_Write_Only, 0, 0, width, height);
 				uint8_t* dst = mapper.Pointer<uint8_t>();
-				if (EF_ARGB8 == present_tex_->Format())
+				if ((EF_ARGB8 == fmt) || (EF_ARGB8_SRGB == fmt))
 				{
 					for (uint32_t y = 0; y < height; ++ y)
 					{
@@ -400,7 +427,7 @@ namespace KlayGE
 				}
 				else
 				{
-					BOOST_ASSERT(EF_ABGR8 == present_tex_->Format());
+					BOOST_ASSERT((EF_ABGR8 == fmt) || (EF_ABGR8_SRGB == fmt));
 
 					for (uint32_t y = 0; y < height; ++ y)
 					{
