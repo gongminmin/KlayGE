@@ -49,7 +49,6 @@ LOCAL_SRC_FILES := \
 		Pack/ArchiveOpenCallback.cpp \
 		Pack/BSTR.cpp \
 		Pack/Extract7z.cpp \
-		Pack/LzFind.cpp \
 		Pack/LZMACodec.cpp \
 		Pack/Streams.cpp \
 		Render/BlockCompression.cpp \

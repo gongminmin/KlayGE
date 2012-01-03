@@ -291,9 +291,6 @@
     <ClCompile Include="..\..\Core\Src\Pack\Extract7z.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Pack\LzFind.cpp">
-      <Filter>Packing System\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Core\Src\Pack\LZMACodec.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
@@ -641,16 +638,7 @@
     <ClInclude Include="..\..\Core\Src\Pack\IStream.hpp">
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\LzFind.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\LzHash.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\LzTypes.hpp">
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Src\Pack\Streams.hpp">

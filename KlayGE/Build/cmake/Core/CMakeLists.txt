@@ -294,7 +294,6 @@ SET(PACKING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/BSTR.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Extract7z.cpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzFind.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LZMACodec.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.cpp
 )
@@ -309,10 +308,7 @@ SET(PACKING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IPassword.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IProgress.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IStream.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzFind.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzHash.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LZMACodec.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LzTypes.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.hpp
 )
 

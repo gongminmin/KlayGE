@@ -1346,19 +1346,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Pack\LzFind.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzHash.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\LZMACodec.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzTypes.hpp"
 					>
 				</File>
 				<File
@@ -1383,10 +1371,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Src\Pack\Extract7z.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\LzFind.cpp"
 					>
 				</File>
 				<File

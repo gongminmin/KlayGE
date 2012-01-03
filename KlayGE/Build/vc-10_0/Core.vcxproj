@@ -272,7 +272,6 @@
     <ClCompile Include="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\BSTR.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\Extract7z.cpp" />
-    <ClCompile Include="..\..\Core\Src\Pack\LzFind.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\LZMACodec.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\Streams.cpp" />
     <ClCompile Include="..\..\Core\Src\UI\UI.cpp" />
@@ -388,10 +387,7 @@
     <ClInclude Include="..\..\Core\Src\Pack\IPassword.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\IProgress.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\IStream.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\LzFind.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\LzHash.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\LzTypes.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\Streams.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\UI.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\App3D.hpp" />
