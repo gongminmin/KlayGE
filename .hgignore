@@ -151,3 +151,8 @@ External/7z/CPP/7zip/Bundles/Format7zF/Release
 External/7z/CPP/7zip/Bundles/Format7zF/Debug
 External/7z/CPP/7zip/Bundles/Format7zF/x64
 External/7z/CPP/7zip/Bundles/Format7zF/ipch/
+External/7z/C/Util/LzmaLib/Release
+External/7z/C/Util/LzmaLib/Debug
+External/7z/C/Util/LzmaLib/x64
+External/7z/C/Util/LzmaLib/ipch/
+External/7z/android/LZMA/obj/

@@ -51,21 +51,31 @@ namespace
 			unsigned char* outProps, size_t* outPropsSize, int level, unsigned int dictSize,
 			int lc, int lp, int pb, int fb, int numThreads)
 		{
+#ifndef KLAYGE_PLATFORM_ANDROID
 			return lzmaCompressFunc_(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
 				lc, lp, pb, fb, numThreads);
+#else
+			return LzmaCompress(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
+				lc, lp, pb, fb, numThreads);
+#endif
 		}
 		int LzmaUncompress(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
 			unsigned char const * props, size_t propsSize)
 		{
+#ifndef KLAYGE_PLATFORM_ANDROID
 			return lzmaUncompressFunc_(dest, destLen, src, srcLen, props, propsSize);
+#else
+			return LzmaUncompress(dest, destLen, src, srcLen, props, propsSize);
+#endif
 		}
 
 	private:
 		LZMALoader()
 		{
+#ifndef KLAYGE_PLATFORM_ANDROID
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			dll_loader_.Load("LZMA.dll");
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#elif defined KLAYGE_PLATFORM_LINUX
 			dll_loader_.Load("LZMA.so");
 #endif
 			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
@@ -73,12 +83,15 @@ namespace
 
 			BOOST_ASSERT(lzmaCompressFunc_);
 			BOOST_ASSERT(lzmaUncompressFunc_);
+#endif
 		}
 
 	private:
+#ifndef KLAYGE_PLATFORM_ANDROID
 		DllLoader dll_loader_;
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
+#endif
 	};
 }
 
