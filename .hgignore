@@ -150,3 +150,4 @@ External/libvorbis/win32/*/*/x64
 External/7z/CPP/7zip/Bundles/Format7zF/Release
 External/7z/CPP/7zip/Bundles/Format7zF/Debug
 External/7z/CPP/7zip/Bundles/Format7zF/x64
+External/7z/CPP/7zip/Bundles/Format7zF/ipch/
