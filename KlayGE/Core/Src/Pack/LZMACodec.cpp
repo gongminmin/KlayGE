@@ -38,12 +38,12 @@ namespace
 	typedef int (MY_STD_CALL *LzmaUncompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
 		unsigned char const * props, size_t propsSize);
 
-	class SevenZipLoader
+	class LZMALoader
 	{
 	public:
-		static SevenZipLoader& Instance()
+		static LZMALoader& Instance()
 		{
-			static SevenZipLoader ret;
+			static LZMALoader ret;
 			return ret;
 		}
 
@@ -61,12 +61,12 @@ namespace
 		}
 
 	private:
-		SevenZipLoader()
+		LZMALoader()
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("7z.dll");
+			dll_loader_.Load("LZMA.dll");
 #elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
-			dll_loader_.Load("7z.so");
+			dll_loader_.Load("LZMA.so");
 #endif
 			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
 			lzmaUncompressFunc_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
@@ -125,7 +125,7 @@ namespace KlayGE
 		SizeT out_len = static_cast<SizeT>(std::max(len * 11 / 10, static_cast<uint64_t>(32)));
 		output.resize(LZMA_PROPS_SIZE + out_len);
 		SizeT out_props_size = LZMA_PROPS_SIZE;
-		SevenZipLoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(input), static_cast<SizeT>(len),
+		LZMALoader::Instance().LzmaCompress(&output[LZMA_PROPS_SIZE], &out_len, static_cast<Byte const *>(input), static_cast<SizeT>(len),
 			&output[0], &out_props_size, 5, std::min<uint32_t>(static_cast<uint32_t>(len), 1UL << 24), 3, 0, 2, 32, 1);
 
 		output.resize(LZMA_PROPS_SIZE + out_len);
@@ -178,7 +178,7 @@ namespace KlayGE
 		SizeT s_out_len = static_cast<SizeT>(original_len);
 
 		SizeT s_src_len = static_cast<SizeT>(len - LZMA_PROPS_SIZE);
-		int res = SevenZipLoader::Instance().LzmaUncompress(static_cast<Byte*>(output), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
+		int res = LZMALoader::Instance().LzmaUncompress(static_cast<Byte*>(output), &s_out_len, &in_data[LZMA_PROPS_SIZE], &s_src_len,
 			&in_data[0], LZMA_PROPS_SIZE);
 		Verify(0 == res);
 	}
