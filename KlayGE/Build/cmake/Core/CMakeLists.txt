@@ -135,6 +135,7 @@ SET(KERNEL_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/CpuInfo.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/DllLoader.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/KlayGE.cpp
+    ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Log.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ResLoader.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/ThrowErr.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Kernel/Timer.cpp
@@ -146,15 +147,13 @@ SET(KERNEL_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/aligned_allocator.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/atomic.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/config/auto_link.hpp
-#   ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ClosedHashMap.hpp
-#   ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ClosedHashSet.hpp
-#   ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ClosedHashTable.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/COMPtr.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Config.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Context.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CpuInfo.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DllLoader.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/KlayGE.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Log.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MapVector.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp

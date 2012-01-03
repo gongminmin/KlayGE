@@ -77,6 +77,11 @@ namespace KlayGE
 		virtual void Create();
 		virtual void Destroy();
 
+		std::string const & Name() const
+		{
+			return name_;
+		}
+
 		WindowPtr MakeWindow(std::string const & name, RenderSettings const & settings);
 		WindowPtr MainWnd() const
 		{

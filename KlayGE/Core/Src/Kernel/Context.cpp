@@ -22,6 +22,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 #include <KlayGE/Math.hpp>
+#include <KlayGE/Log.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/AudioFactory.hpp>
@@ -33,7 +34,6 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
-#include <iostream>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <KlayGE/OpenGLES2/OGLES2RenderFactory.hpp>
@@ -610,7 +610,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			render_loader_.Free();
 		}
 #else
@@ -639,7 +639,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			audio_loader_.Free();
 		}
 	}
@@ -665,7 +665,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			input_loader_.Free();
 		}
 	}
@@ -691,7 +691,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			show_loader_.Free();
 		}
 	}
@@ -718,7 +718,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			sm_loader_.Free();
 		}
 #else
@@ -747,7 +747,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::cerr << "ERROR: Loading " << path << " failed" << std::endl;
+			LogError("Loading %s failed", path.c_str());
 			ads_loader_.Free();
 		}
 	}

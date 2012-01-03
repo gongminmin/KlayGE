@@ -381,6 +381,9 @@
     <ClCompile Include="..\..\Core\Src\Render\DeferredRenderingLayer.cpp">
       <Filter>Rendering System\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Core\Src\Kernel\Log.cpp">
+      <Filter>Kernel\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp">
@@ -691,6 +694,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\DeferredRenderingLayer.hpp">
       <Filter>Rendering System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\Log.hpp">
+      <Filter>Kernel\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

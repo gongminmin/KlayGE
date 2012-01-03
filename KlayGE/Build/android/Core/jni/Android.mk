@@ -34,6 +34,7 @@ LOCAL_SRC_FILES := \
 		Kernel/CpuInfo.cpp \
 		Kernel/DllLoader.cpp \
 		Kernel/KlayGE.cpp \
+		Kernel/Log.cpp \
 		Kernel/ResLoader.cpp \
 		Kernel/ThrowErr.cpp \
 		Kernel/Timer.cpp \

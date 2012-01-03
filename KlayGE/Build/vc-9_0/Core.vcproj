@@ -870,6 +870,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\Core\Src\Kernel\Log.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\Core\Src\Kernel\ResLoader.cpp"
 					>
 				</File>
@@ -939,6 +943,10 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Include\KlayGE\KlayGE.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\Core\Include\KlayGE\Log.hpp"
 					>
 				</File>
 				<File

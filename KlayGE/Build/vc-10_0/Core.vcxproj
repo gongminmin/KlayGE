@@ -198,6 +198,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Core\Src\Kernel\Log.cpp" />
     <ClCompile Include="..\..\Core\Src\Math\Frustum.cpp" />
     <ClCompile Include="..\..\Core\Src\Math\Math.cpp" />
     <ClCompile Include="..\..\Core\Src\Render\BlockCompression.cpp" />
@@ -307,6 +308,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\JudaTexture.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\LensFlare.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Light.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Log.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Mesh.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\ParticleSystem.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\PostProcess.hpp" />

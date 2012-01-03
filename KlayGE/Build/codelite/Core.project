@@ -137,6 +137,7 @@
       <File Name="../../Core/Src/Kernel/CpuInfo.cpp"/>
       <File Name="../../Core/Src/Kernel/DllLoader.cpp"/>
       <File Name="../../Core/Src/Kernel/KlayGE.cpp"/>
+      <File Name="../../Core/Src/Kernel/Log.cpp"/>
       <File Name="../../Core/Src/Kernel/ResLoader.cpp"/>
       <File Name="../../Core/Src/Kernel/ThrowErr.cpp"/>
       <File Name="../../Core/Src/Kernel/Timer.cpp"/>
@@ -156,6 +157,7 @@
       <File Name="../../Core/Include/KlayGE/CpuInfo.hpp"/>
       <File Name="../../Core/Include/KlayGE/DllLoader.hpp"/>
       <File Name="../../Core/Include/KlayGE/KlayGE.hpp"/>
+      <File Name="../../Core/Include/KlayGE/Log.hpp"/>
       <File Name="../../Core/Include/KlayGE/MapVector.hpp"/>
       <File Name="../../Core/Include/KlayGE/PreDeclare.hpp"/>
       <File Name="../../Core/Include/KlayGE/ResLoader.hpp"/>
