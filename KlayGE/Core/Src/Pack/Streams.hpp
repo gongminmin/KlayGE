@@ -30,7 +30,7 @@
 #pragma warning(pop)
 #endif
 
-#include "IStream.hpp"
+#include <CPP/7zip/IStream.h>
 
 namespace KlayGE
 {
@@ -144,7 +144,7 @@ namespace KlayGE
 
 		STDMETHOD(Write)(const void* data, uint32_t size, uint32_t* processedSize);
 		STDMETHOD(Seek)(int64_t offset, uint32_t seekOrigin, uint64_t* newPosition);
-		STDMETHOD(SetSize)(int64_t newSize);
+		STDMETHOD(SetSize)(uint64_t newSize);
 
 	private:
 		atomic<int32_t> ref_count_;

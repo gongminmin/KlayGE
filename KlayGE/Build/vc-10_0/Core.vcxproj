@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z/C;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -117,7 +117,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z/C;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -145,7 +145,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z/C;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -174,7 +174,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z/C;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../External/boost;../../../External/Python/include;../../../External/rapidxml;../../../External/7z;../../Core/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;_USRDLL;KLAYGE_BUILD_DLL;KLAYGE_CORE_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -270,7 +270,6 @@
     <ClCompile Include="..\..\Core\Src\Scene\SceneObjectHelper.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\ArchiveExtractCallback.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp" />
-    <ClCompile Include="..\..\Core\Src\Pack\BSTR.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\Extract7z.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\LZMACodec.cpp" />
     <ClCompile Include="..\..\Core\Src\Pack\Streams.cpp" />
@@ -380,13 +379,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\SceneObjectHelper.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\ArchiveExtractCallback.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\BaseDefines.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\BSTR.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Extract7z.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\IArchive.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\IPassword.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\IProgress.hpp" />
-    <ClInclude Include="..\..\Core\Src\Pack\IStream.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp" />
     <ClInclude Include="..\..\Core\Src\Pack\Streams.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\UI.hpp" />

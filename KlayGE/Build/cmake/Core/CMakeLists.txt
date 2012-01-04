@@ -292,7 +292,6 @@ SOURCE_GROUP( "Scene Management\\Header Files" FILES ${SCENE_HEADER_FILES} )
 SET(PACKING_SOURCE_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.cpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/BSTR.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Extract7z.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/LZMACodec.cpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.cpp
@@ -301,13 +300,7 @@ SET(PACKING_SOURCE_FILES
 SET(PACKING_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveExtractCallback.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/ArchiveOpenCallback.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/BaseDefines.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/BSTR.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Extract7z.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IArchive.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IPassword.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IProgress.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/IStream.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LZMACodec.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Src/Pack/Streams.hpp
 )

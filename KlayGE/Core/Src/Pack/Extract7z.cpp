@@ -19,7 +19,7 @@
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/COMPtr.hpp>
 
-#include "BaseDefines.hpp"
+#include <CPP/Common/MyWindows.h>
 
 #include <KlayGE/DllLoader.hpp>
 
@@ -29,58 +29,13 @@
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "IArchive.hpp"
+#include <CPP/7zip/Archive/IArchive.h>
 
 #include "Streams.hpp"
 #include "ArchiveExtractCallback.hpp"
 #include "ArchiveOpenCallback.hpp"
 
 #include <KlayGE/Extract7z.hpp>
-
-enum
-{
-	kpidNoProperty = 0,
-
-	kpidHandlerItemIndex = 2,
-	kpidPath,
-	kpidName,
-	kpidExtension,
-	kpidIsFolder,
-	kpidSize,
-	kpidPackedSize,
-	kpidAttributes,
-	kpidCreationTime,
-	kpidLastAccessTime,
-	kpidLastWriteTime,
-	kpidSolid,
-	kpidCommented,
-	kpidEncrypted,
-	kpidSplitBefore,
-	kpidSplitAfter,
-	kpidDictionarySize,
-	kpidCRC,
-	kpidType,
-	kpidIsAnti,
-	kpidMethod,
-	kpidHostOS,
-	kpidFileSystem,
-	kpidUser,
-	kpidGroup,
-	kpidBlock,
-	kpidComment,
-	kpidPosition,
-	kpidPrefix,
-
-	kpidTotalSize = 0x1100,
-	kpidFreeSpace,
-	kpidClusterSize,
-	kpidVolumeName,
-
-	kpidLocalName = 0x1200,
-	kpidProvider,
-
-	kpidUserDefined = 0x10000
-};
 
 #ifndef WINAPI
 #ifdef _MSC_VER
@@ -124,7 +79,7 @@ namespace
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
-		TIF(archive->GetProperty(index, kpidIsFolder, &prop));
+		TIF(archive->GetProperty(index, kpidIsDir, &prop));
 		switch (prop.vt)
 		{
 		case VT_BOOL:

@@ -19,8 +19,8 @@
 
 #include <string>
 
-#include "IArchive.hpp"
-#include "IPassword.hpp"
+#include <CPP/7zip/Archive/IArchive.h>
+#include <CPP/7zip/IPassword.h>
 
 namespace KlayGE
 {

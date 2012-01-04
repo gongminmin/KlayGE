@@ -8,7 +8,7 @@ LOCAL_C_INCLUDES := $(KLAYGE_SRC_PATH)/../../../External/boost \
 		$(KLAYGE_SRC_PATH)/../../../External/Python/include \
 		$(KLAYGE_SRC_PATH)/../../../External/rapidxml \
 		$(KLAYGE_SRC_PATH)/../../../External/android_native_app_glue \
-		$(KLAYGE_SRC_PATH)/../../../External/7z/C \
+		$(KLAYGE_SRC_PATH)/../../../External/7z \
 		$(KLAYGE_SRC_PATH)/../Include \
 		$(KLAYGE_SRC_PATH)/../../Plugins/Include \
 		
@@ -47,7 +47,6 @@ LOCAL_SRC_FILES := \
 		Net/Socket.cpp \
 		Pack/ArchiveExtractCallback.cpp \
 		Pack/ArchiveOpenCallback.cpp \
-		Pack/BSTR.cpp \
 		Pack/Extract7z.cpp \
 		Pack/LZMACodec.cpp \
 		Pack/Streams.cpp \

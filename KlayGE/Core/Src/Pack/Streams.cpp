@@ -15,7 +15,7 @@
 
 #include <boost/assert.hpp>
 
-#include "BaseDefines.hpp"
+#include <CPP/Common/MyWindows.h>
 
 #include "Streams.hpp"
 
@@ -128,7 +128,7 @@ namespace KlayGE
 		return (*os_ != NULL) ? S_OK: E_FAIL;
 	}
 
-	STDMETHODIMP COutStream::SetSize(int64_t /*newSize*/)
+	STDMETHODIMP COutStream::SetSize(uint64_t /*newSize*/)
 	{
 		return E_NOTIMPL;
 	}

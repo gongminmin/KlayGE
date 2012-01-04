@@ -17,7 +17,7 @@
 
 #include <cstring>
 
-#include <LzmaLib.h>
+#include <C/LzmaLib.h>
 
 #include <KlayGE/LZMACodec.hpp>
 

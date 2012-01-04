@@ -285,9 +285,6 @@
     <ClCompile Include="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Core\Src\Pack\BSTR.cpp">
-      <Filter>Packing System\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Core\Src\Pack\Extract7z.cpp">
       <Filter>Packing System\Source Files</Filter>
     </ClCompile>
@@ -617,25 +614,7 @@
     <ClInclude Include="..\..\Core\Src\Pack\ArchiveOpenCallback.hpp">
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\BaseDefines.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\BSTR.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Extract7z.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\IArchive.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\IPassword.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\IProgress.hpp">
-      <Filter>Packing System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Core\Src\Pack\IStream.hpp">
       <Filter>Packing System\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\LZMACodec.hpp">

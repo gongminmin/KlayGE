@@ -1318,31 +1318,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Src\Pack\BaseDefines.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\BSTR.hpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\Core\Include\KlayGE\Extract7z.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\IArchive.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\IPassword.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\IProgress.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\IStream.hpp"
 					>
 				</File>
 				<File
@@ -1363,10 +1339,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Core\Src\Pack\ArchiveOpenCallback.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\Core\Src\Pack\BSTR.cpp"
 					>
 				</File>
 				<File

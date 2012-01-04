@@ -274,20 +274,13 @@
     <VirtualDirectory Name="Header Files">
       <File Name="../../Core/Src/Pack/ArchiveExtractCallback.hpp"/>
       <File Name="../../Core/Src/Pack/ArchiveOpenCallback.hpp"/>
-      <File Name="../../Core/Src/Pack/BaseDefines.hpp"/>
-      <File Name="../../Core/Src/Pack/BSTR.hpp"/>
       <File Name="../../Core/Include/KlayGE/Extract7z.hpp"/>
-      <File Name="../../Core/Src/Pack/IArchive.hpp"/>
-      <File Name="../../Core/Src/Pack/IPassword.hpp"/>
-      <File Name="../../Core/Src/Pack/IProgress.hpp"/>
-      <File Name="../../Core/Src/Pack/IStream.hpp"/>
       <File Name="../../Core/Include/KlayGE/LZMACodec.hpp"/>
       <File Name="../../Core/Src/Pack/Streams.hpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="Source Files">
       <File Name="../../Core/Src/Pack/ArchiveExtractCallback.cpp"/>
       <File Name="../../Core/Src/Pack/ArchiveOpenCallback.cpp"/>
-      <File Name="../../Core/Src/Pack/BSTR.cpp"/>
       <File Name="../../Core/Src/Pack/Extract7z.cpp"/>
       <File Name="../../Core/Src/Pack/LZMACodec.cpp"/>
       <File Name="../../Core/Src/Pack/Streams.cpp"/>

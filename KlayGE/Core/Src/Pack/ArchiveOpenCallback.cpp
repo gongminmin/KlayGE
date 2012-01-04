@@ -13,9 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Util.hpp>
 
-#include "BaseDefines.hpp"
+#include <CPP/Common/MyWindows.h>
 
-#include "BSTR.hpp"
 #include "ArchiveOpenCallback.hpp"
 
 namespace KlayGE
@@ -38,7 +37,7 @@ namespace KlayGE
 		}
 		else
 		{
-			*password = AllocBSTR(password_.c_str());
+			*password = SysAllocString(password_.c_str());
 			return S_OK;
 		}
 	}
