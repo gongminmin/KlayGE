@@ -54,7 +54,7 @@ namespace
 			return lzmaCompressFunc_(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
 				lc, lp, pb, fb, numThreads);
 #else
-			return LzmaCompress(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
+			return ::LzmaCompress(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
 				lc, lp, pb, fb, numThreads);
 #endif
 		}
@@ -64,7 +64,7 @@ namespace
 #ifndef KLAYGE_PLATFORM_ANDROID
 			return lzmaUncompressFunc_(dest, destLen, src, srcLen, props, propsSize);
 #else
-			return LzmaUncompress(dest, destLen, src, srcLen, props, propsSize);
+			return ::LzmaUncompress(dest, destLen, src, srcLen, props, propsSize);
 #endif
 		}
 
