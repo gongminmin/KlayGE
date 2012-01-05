@@ -162,8 +162,8 @@ def build_external_libs(cfg):
 		os.system("build_%s%d_all.bat" % (compiler_name, compiler_version))
 		os.chdir("../../")
 
-	copy_to_dst("External/7z/CPP/7zip/Bundles/Format7zF/Release/7z.%s" % dll_suffix, dst_dir_x86)
-	copy_to_dst("External/7z/CPP/7zip/Bundles/Format7zF/x64/Release/7z.%s" % dll_suffix, dst_dir_x86)
+	copy_to_dst("External/7z/CPP/7zip/Bundles/Format7zExtract/Release/7zxa.%s" % dll_suffix, dst_dir_x86)
+	copy_to_dst("External/7z/CPP/7zip/Bundles/Format7zExtract/x64/Release/7zxa.%s" % dll_suffix, dst_dir_x86)
 	copy_to_dst("External/7z/C/Util/LzmaLib/Release/LZMA.%s" % dll_suffix, dst_dir_x86)
 	copy_to_dst("External/7z/C/Util/LzmaLib/x64/Release/LZMA.%s" % dll_suffix, dst_dir_x86)
 

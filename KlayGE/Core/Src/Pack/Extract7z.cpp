@@ -113,9 +113,9 @@ namespace
 		SevenZipLoader()
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			dll_loader_.Load("7z.dll");
+			dll_loader_.Load("7zxa.dll");
 #elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
-			dll_loader_.Load("7z.so");
+			dll_loader_.Load("7zxa.so");
 #endif
 			createObjectFunc_ = (CreateObjectFunc)dll_loader_.GetProcAddress("CreateObject");
 

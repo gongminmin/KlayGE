@@ -147,10 +147,10 @@ External/libvorbis/libs/Win32/*.lib
 External/libvorbis/libs/x64/*.lib
 External/libvorbis/win32/*/*/Win32
 External/libvorbis/win32/*/*/x64
-External/7z/CPP/7zip/Bundles/Format7zF/Release
-External/7z/CPP/7zip/Bundles/Format7zF/Debug
-External/7z/CPP/7zip/Bundles/Format7zF/x64
-External/7z/CPP/7zip/Bundles/Format7zF/ipch/
+External/7z/CPP/7zip/Bundles/Format7zExtract/Release
+External/7z/CPP/7zip/Bundles/Format7zExtract/Debug
+External/7z/CPP/7zip/Bundles/Format7zExtract/x64
+External/7z/CPP/7zip/Bundles/Format7zExtract/ipch/
 External/7z/C/Util/LzmaLib/Release
 External/7z/C/Util/LzmaLib/Debug
 External/7z/C/Util/LzmaLib/x64
