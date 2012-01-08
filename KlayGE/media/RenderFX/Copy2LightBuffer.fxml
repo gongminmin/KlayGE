@@ -18,6 +18,7 @@
 	<parameter type="float" name="scaling_factor"/>
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="float3" name="depth_near_far_invfar"/>
+	<parameter type="float4x4" name="inv_proj"/>
 	<parameter type="texture2D" name="indirect_lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
@@ -46,10 +47,24 @@ float4 NearestDepthUpsamplingIL(float2 tc)
 	}
 }
 
-float4 CopyToLightBufferPS(float2 tc : TEXCOORD0) : SV_Target
+void CopyToLightBufferVS(float4 pos : POSITION,
+				out float2 oTc0 : TEXCOORD0,
+				out float3 oViewDir : TEXCOORD1,
+				out float4 oPos : SV_Position)
 {
+	PostProcessVS(pos, oTc0, oPos);
+	oViewDir = -mul(oPos, inv_proj).xyz;
+}
+
+float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	view_dir = normalize(view_dir);
+	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
+	
+	float detail_factor = dot(view_dir, normal) * 0.5f + 0.5f;
+
 	float3 color = NearestDepthUpsamplingIL(tc).xyz;
-	return float4(color * scaling_factor, 0);
+	return float4(color * scaling_factor * detail_factor, 0);
 }
     ]]>
 	</shader>
@@ -66,7 +81,7 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0) : SV_Target
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="CopyToLightBufferVS()"/>
 			<state name="pixel_shader" value="CopyToLightBufferPS()"/>
 		</pass>
 	</technique>
@@ -77,7 +92,7 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="blend_enable" value="false"/>
 
-			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="vertex_shader" value="CopyToLightBufferVS()"/>
 			<state name="pixel_shader" value="CopyToLightBufferPS()"/>
 		</pass>
 	</technique>
