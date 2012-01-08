@@ -748,6 +748,15 @@ namespace
 			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
 
+			if ((Texture::TT_3D == tex_desc_.type) && (caps.max_texture_depth < tex_desc_.depth))
+			{
+				tex_desc_.type = Texture::TT_2D;
+				tex_desc_.height *= tex_desc_.depth;
+				tex_desc_.depth = 1;
+				tex_desc_.num_mipmaps = 1;
+				tex_desc_.tex_data.resize(1);
+			}
+
 			uint32_t array_size = tex_desc_.array_size;
 			if (Texture::TT_Cube == tex_desc_.type)
 			{

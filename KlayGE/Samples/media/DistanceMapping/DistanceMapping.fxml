@@ -72,21 +72,28 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
 
 	float3 texUV = texCoord0;
+#if KLAYGE_MAX_TEX_DEPTH > 1
 	for (int i = 0; i < 8; ++ i)
 	{
 		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
 	}
+#endif
 
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
 	{
 		discard;
 	}
 
+#ifndef KLAYGE_OPENGLES2
 	float2 dx = ddx(texCoord0.xy);
 	float2 dy = ddy(texCoord0.xy);
 
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
+#else
+	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
+	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
+#endif
 	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal);
 }
 
@@ -99,10 +106,13 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	float3 view = normalize(V.xyz) * float3(1, 1, 16) * 0.06;
 
 	float3 texUV = texCoord0;
+#if KLAYGE_MAX_TEX_DEPTH > 1
 	for (int i = 0; i < 2; ++ i)
 	{
 		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
+		texUV -= view * distance_tex.Sample(linear_sampler, float2(texUV.x, texUV.z + texUV.y / 16)).r;
 	}
+#endif
 	
 	if ((texUV.x < 0) || (texUV.y < 0) || (texUV.x > 1) || (texUV.y > 1))
 	{
