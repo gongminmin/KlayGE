@@ -122,7 +122,7 @@ namespace KlayGE
 		// update flare
 		if (angle > FLARE_RENDERANGLE)
 		{
-			this->Visible(true);
+			lf_visible_ = true;
 
 			// get angle amount by current angle
 			float angle_amount = 1 - (1 - angle) / (1 - FLARE_RENDERANGLE);	// convert angle to percent 
@@ -158,7 +158,7 @@ namespace KlayGE
 		}
 		else
 		{
-			this->Visible(false);
+			lf_visible_ = false;
 		}
 	}
 }

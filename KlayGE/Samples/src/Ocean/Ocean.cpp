@@ -1232,7 +1232,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		terrain_->Visible(false);
 		sky_box_->Visible(false);
 		ocean_->Visible(true);
-		sun_flare_->Visible(true);
+		sun_flare_->Visible(checked_pointer_cast<LensFlareSceneObject>(sun_flare_)->LFVisible());
 		return App3DFramework::URV_Need_Flush;
 
 	default:
