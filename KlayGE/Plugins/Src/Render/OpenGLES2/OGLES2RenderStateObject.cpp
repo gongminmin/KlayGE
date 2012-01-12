@@ -354,30 +354,27 @@ namespace KlayGE
 			ogl_addr_mode_v_(OGLES2Mapping::Mapping(desc_.addr_mode_v)),
 			ogl_addr_mode_w_(OGLES2Mapping::Mapping(desc_.addr_mode_w))
 	{
-		// AMD's GLES2 emulator don't support MIPMAP well
 		if (desc_.filter & TFOE_Min_Linear)
 		{
-			ogl_min_filter_ = GL_LINEAR;
-			/*if (desc_.filter & TFOE_Mip_Linear)
+			if (desc_.filter & TFOE_Mip_Linear)
 			{
 				ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
 			}
 			else
 			{
 				ogl_min_filter_ = GL_LINEAR_MIPMAP_NEAREST;
-			}*/
+			}
 		}
 		else
 		{
-			ogl_min_filter_ = GL_NEAREST;
-			/*if (desc_.filter & TFOE_Mip_Linear)
+			if (desc_.filter & TFOE_Mip_Linear)
 			{
 				ogl_min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
 			}
 			else
 			{
 				ogl_min_filter_ = GL_NEAREST_MIPMAP_NEAREST;
-			}*/
+			}
 		}
 		if (desc_.filter & TFOE_Mag_Linear)
 		{
@@ -390,8 +387,7 @@ namespace KlayGE
 		if (desc_.filter & TFOE_Anisotropic)
 		{
 			ogl_mag_filter_ = GL_LINEAR;
-			ogl_min_filter_ = GL_LINEAR;
-			//ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
 		}
 	}
 
@@ -407,7 +403,25 @@ namespace KlayGE
 		}
 
 		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
-		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
+		GLenum min_filter = ogl_min_filter_;
+		// Only POT texture with full mipmap chain supports mipmap filter for now.
+		uint32_t pot = 1UL << (texture->NumMipMaps() - 1);
+		if ((pot != texture->Width(0)) || (pot != texture->Height(0)))
+		{
+			switch (ogl_min_filter_)
+			{
+			case GL_NEAREST_MIPMAP_NEAREST:
+			case GL_NEAREST_MIPMAP_LINEAR:
+				min_filter = GL_NEAREST;
+				break;
+
+			case GL_LINEAR_MIPMAP_NEAREST:
+			case GL_LINEAR_MIPMAP_LINEAR:
+				min_filter = GL_LINEAR;
+				break;
+			}
+		}
+		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, min_filter);
 
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
