@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_robustness" reg_no="107">
+	<tokens>
+		<token name="GL_NO_ERROR" value="0x0000"/>
+		<token name="GL_GUILTY_CONTEXT_RESET_EXT" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET_EXT" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET_EXT" value="0x8255"/>
+		<token name="GL_CONTEXT_ROBUST_ACCESS_EXT" value="0x90F3"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY_EXT" value="0x8256"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET_EXT" value="0x8252"/>
+		<token name="GL_NO_RESET_NOTIFICATION_EXT" value="0x8261"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetGraphicsResetStatusEXT" return="GLenum"/>
+		<function name="glReadnPixelsEXT" return="void">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetnUniformfvEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformivEXT" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

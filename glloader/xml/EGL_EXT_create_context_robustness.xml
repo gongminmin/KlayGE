@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_create_context_robustness" reg_no="37">
+	<tokens>
+		<token name="EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT" value="0x30BF"/>
+		<token name="EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_EXT" value="0x3138"/>
+		<token name="EGL_NO_RESET_NOTIFICATION_EXT" value="0x31BE"/>
+		<token name="EGL_LOSE_CONTEXT_ON_RESET_EXT" value="0x31BF"/>
+	</tokens>
+</gl_extension>

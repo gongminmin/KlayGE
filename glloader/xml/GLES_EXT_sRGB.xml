@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_sRGB" reg_no="105">
+	<tokens>
+		<token name="SRGB_EXT" value="0x8C40"/>
+		<token name="SRGB_ALPHA_EXT" value="0x8C42"/>
+		<token name="SRGB8_ALPHA8_EXT" value="0x8C43"/>
+		<token name="FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING_EXT" value="0x8210"/>
+	</tokens>
+</gl_extension>

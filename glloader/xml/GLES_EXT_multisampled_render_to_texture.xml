@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_multisampled_render_to_texture" reg_no="106">
+	<tokens>
+		<token name="GL_RENDERBUFFER_SAMPLES_EXT" value="0x9133"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT" value="0x9134"/>
+		<token name="GL_MAX_SAMPLES_EXT" value="0x9135"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_SAMPLES_EXT" value="0x8D6C"/>
+	</tokens>
+
+	<functions>
+		<function name="glRenderbufferStorageMultisampleEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glFramebufferTexture2DMultisampleEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLsizei" name="samples"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
