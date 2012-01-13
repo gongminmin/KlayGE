@@ -374,6 +374,7 @@ namespace KlayGE
 		{
 			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
+			technique_merge_shading_ = dr_effect_->TechniqueByName("MergeShadingTech");
 			technique_merge_shading_alpha_blend_ = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 		}
 
@@ -626,13 +627,13 @@ namespace KlayGE
 			}
 		}
 		ElementFormat ds_fmt;
-		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
+		if (caps.texture_format_support(EF_D24S8))
 		{
 			ds_fmt = EF_D24S8;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+			BOOST_ASSERT(caps.texture_format_support(EF_D16));
 
 			ds_fmt = EF_D16;
 		}
@@ -749,7 +750,6 @@ namespace KlayGE
 
 		all_shading_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		all_shading_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*all_shading_tex_, 0, 1, 0));
-		all_shading_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
 
 		if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
 		{
@@ -1297,7 +1297,10 @@ namespace KlayGE
 				{
 					re.BindFrameBuffer(all_shading_buffer_);
 
-					opaque_shading_tex_->CopyToTexture(*all_shading_tex_);						
+					{
+						*shading_tex_param_ = opaque_shading_tex_;
+						re.Render(*technique_merge_shading_, *rl_quad_);
+					}
 					if (has_transparency_objs_)
 					{
 						*shading_tex_param_ = transparency_back_shading_tex_;

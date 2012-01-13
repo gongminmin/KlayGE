@@ -209,6 +209,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_clear_stencil_;
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
+		RenderTechniquePtr technique_merge_shading_;
 		RenderTechniquePtr technique_merge_shading_alpha_blend_;
 
 		FrameBufferPtr sm_buffer_;
