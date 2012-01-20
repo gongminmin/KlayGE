@@ -153,10 +153,10 @@ namespace KlayGE
 				{
 					if (obj->Attrib() & SceneObject::SOA_Cullable)
 					{
-						Box bb_ws;
+						AABBox bb_ws;
 						if (obj->Attrib() & SceneObject::SOA_Moveable)
 						{
-							Box const & box = obj->GetBound();
+							AABBox const & box = obj->GetBound();
 							float4x4 const & mat = obj->GetModelMatrix();
 
 							float3 min, max;
@@ -168,7 +168,7 @@ namespace KlayGE
 								max = MathLib::maximize(max, vec);
 							}
 
-							bb_ws = Box(min, max);
+							bb_ws = AABBox(min, max);
 						}
 						else
 						{
@@ -224,7 +224,7 @@ namespace KlayGE
 			&& !(attr & SceneObject::SOA_Overlay)
 			&& !(attr & SceneObject::SOA_Moveable))
 		{
-			Box const & box = obj->GetBound();
+			AABBox const & box = obj->GetBound();
 			float4x4 const & mat = obj->GetModelMatrix();
 
 			float3 min, max;
@@ -235,11 +235,11 @@ namespace KlayGE
 				min = MathLib::minimize(min, vec);
 				max = MathLib::maximize(max, vec);
 			}
-			scene_obj_bbs_.push_back(MakeSharedPtr<Box>(min, max));
+			scene_obj_bbs_.push_back(MakeSharedPtr<AABBox>(min, max));
 		}
 		else
 		{
-			scene_obj_bbs_.push_back(boost::shared_ptr<Box>());
+			scene_obj_bbs_.push_back(boost::shared_ptr<AABBox>());
 		}
 
 		this->OnAddSceneObject(obj);
@@ -310,9 +310,9 @@ namespace KlayGE
 		}
 	}
 
-	bool SceneManager::AABBVisible(Box const & box)
+	bool SceneManager::AABBVisible(AABBox const & aabb)
 	{
-		return frustum_->Visiable(box) != Frustum::VIS_NO;
+		return frustum_->CollisionDet(aabb) != BO_No;
 	}
 
 	SceneManager::SceneObjectsType& SceneManager::SceneObjects()
@@ -498,7 +498,7 @@ namespace KlayGE
 				for (size_t j = 0; j < min_depthes.size(); ++ j)
 				{
 					RenderablePtr const & renderable = items.second[j];
-					Box const & box = renderable->GetBound();
+					AABBox const & box = renderable->GetBound();
 					uint32_t const num = renderable->NumInstances();
 					float md = 1e10f;
 					for (uint32_t i = 0; i < num; ++ i)

@@ -27,7 +27,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneNode.hpp>
 #include <KlayGE/SceneManager.hpp>
-#include <KlayGE/Box.hpp>
+#include <KlayGE/AABBox.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -50,7 +50,7 @@ namespace KlayGE
 		void MaxTreeDepth(uint32_t max_tree_depth);
 		uint32_t MaxTreeDepth() const;
 
-		bool AABBVisible(Box const & box);
+		bool AABBVisible(AABBox const & aabb);
 
 	private:
 		void ClipScene();
@@ -60,7 +60,7 @@ namespace KlayGE
 		void OnDelSceneObject(SceneObjectsType::iterator iter);
 
 		void NodeVisible(size_t index);
-		bool BBVisible(size_t index, Box const & box) const;
+		bool BBVisible(size_t index, AABBox const & aabb) const;
 
 	private:
 		OCTree(OCTree const & rhs);
@@ -69,9 +69,9 @@ namespace KlayGE
 	private:
 		struct octree_node_t
 		{
-			Box bb;
+			AABBox bb;
 			int first_child_index;
-			Frustum::VIS visible;
+			BoundOverlap visible;
 		};
 
 		std::vector<octree_node_t, boost::pool_allocator<octree_node_t> > octree_;

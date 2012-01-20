@@ -86,7 +86,7 @@ namespace KlayGE
 		virtual void OnInstanceBegin(uint32_t id);
 		virtual void OnInstanceEnd(uint32_t id);
 
-		virtual Box const & GetBound() const = 0;
+		virtual AABBox const & GetBound() const = 0;
 
 		virtual void AddToRenderQueue();
 

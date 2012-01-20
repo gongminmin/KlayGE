@@ -87,7 +87,7 @@ namespace KlayGE
 		SceneObjectsType& SceneObjects();
 		SceneObjectsType const & SceneObjects() const;
 
-		virtual bool AABBVisible(Box const & box);
+		virtual bool AABBVisible(AABBox const & aabb);
 
 		virtual void Clear();
 
@@ -108,7 +108,7 @@ namespace KlayGE
 		Frustum const * frustum_;
 		LightSourcesType lights_;
 		SceneObjectsType scene_objs_;
-		std::vector<boost::shared_ptr<Box> > scene_obj_bbs_;
+		std::vector<boost::shared_ptr<AABBox> > scene_obj_bbs_;
 		boost::shared_ptr<std::vector<char> > visible_marks_;
 
 		boost::unordered_map<size_t, boost::shared_ptr<std::vector<char> >, boost::hash<size_t>, std::equal_to<size_t>,

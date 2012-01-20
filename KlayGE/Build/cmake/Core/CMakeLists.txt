@@ -195,7 +195,7 @@ SET(MATH_SOURCE_FILES
 
 SET(MATH_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Bound.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Box.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/AABBox.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Color.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/half.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Math.hpp

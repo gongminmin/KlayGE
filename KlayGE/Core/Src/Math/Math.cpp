@@ -1486,20 +1486,20 @@ namespace KlayGE
 			return true;
 		}
 
-		template KLAYGE_CORE_API bool vec_in_box(Box const & box, float3 const & v);
+		template KLAYGE_CORE_API bool vec_in_box(AABBox const & aabb, float3 const & v);
 
 		template <typename T>
-		bool vec_in_box(Box_T<T> const & box, Vector_T<T, 3> const & v)
+		bool vec_in_box(AABBox_T<T> const & aabb, Vector_T<T, 3> const & v)
 		{
-			return (in_bound(v.x(), box.Min().x(), box.Max().x()))
-				&& (in_bound(v.y(), box.Min().y(), box.Max().y()))
-				&& (in_bound(v.z(), box.Min().z(), box.Max().z()));
+			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
+				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
+				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
 		}
 
-		template KLAYGE_CORE_API bool intersect_ray(Box const & box, float3 const & orig, float3 const & dir);
+		template KLAYGE_CORE_API bool intersect_ray(AABBox const & aabb, float3 const & orig, float3 const & dir);
 
 		template <typename T>
-		bool intersect_ray(Box_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		bool intersect_ray(AABBox_T<T> const & aabb, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
 		{
 			float t_near = -1e10f;
 			float t_far = +1e10f;
@@ -1508,15 +1508,15 @@ namespace KlayGE
 			{
 				if (equal(dir[i], T(0)))
 				{
-					if ((dir[i] < box.Min()[i]) || (dir[i] > box.Max()[i]))
+					if ((dir[i] < aabb.Min()[i]) || (dir[i] > aabb.Max()[i]))
 					{
 						return false;
 					}
 				}
 				else
 				{
-					float t1 = (box.Min()[i] - orig[i]) / dir[i];
-					float t2 = (box.Max()[i] - orig[i]) / dir[i];
+					float t1 = (aabb.Min()[i] - orig[i]) / dir[i];
+					float t2 = (aabb.Max()[i] - orig[i]) / dir[i];
 					if (t1 > t2)
 					{
 						std::swap(t1, t2);

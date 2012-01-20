@@ -176,7 +176,7 @@ namespace
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindIndexStream(ib, EF_R16UI);
 
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 
 			model_mat_ = MathLib::rotation_x(-0.5f);
 			inv_model_mat_ = MathLib::inverse(model_mat_);

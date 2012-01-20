@@ -32,7 +32,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Renderable.hpp>
-#include <KlayGE/Box.hpp>
+#include <KlayGE/AABBox.hpp>
 
 namespace KlayGE
 {
@@ -47,14 +47,14 @@ namespace KlayGE
 		virtual RenderTechniquePtr const & GetRenderTechnique() const;
 		virtual RenderLayoutPtr const & GetRenderLayout() const;
 
-		virtual Box const & GetBound() const;
+		virtual AABBox const & GetBound() const;
 
 		virtual std::wstring const & Name() const;
 
 	protected:
 		std::wstring name_;
 
-		Box box_;
+		AABBox aabb_;
 
 		RenderLayoutPtr rl_;
 
@@ -98,7 +98,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableTriBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableTriBox(Box const & box, Color const & clr);
+		explicit RenderableTriBox(AABBox const & aabb, Color const & clr);
 		virtual ~RenderableTriBox()
 		{
 		}
@@ -109,7 +109,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderableLineBox : public RenderableHelper
 	{
 	public:
-		explicit RenderableLineBox(Box const & box, Color const & clr);
+		explicit RenderableLineBox(AABBox const & aabb, Color const & clr);
 		virtual ~RenderableLineBox()
 		{
 		}

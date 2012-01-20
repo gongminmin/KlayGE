@@ -1046,7 +1046,7 @@ namespace KlayGE
 										max = MathLib::maximize(max, vec);
 									}
 
-									//if (scene_mgr.AABBVisible(Box(min, max)))
+									//if (scene_mgr.AABBVisible(AABBox(min, max)))
 									{
 										if (attr & LSA_IndirectLighting)
 										{
@@ -1096,7 +1096,7 @@ namespace KlayGE
 											max = MathLib::maximize(max, vec);
 										}
 
-										//if (scene_mgr.AABBVisible(Box(min, max)))
+										//if (scene_mgr.AABBVisible(AABBox(min, max)))
 										{
 											if (0 == (attr & LSA_NoShadow))
 											{
@@ -1125,7 +1125,7 @@ namespace KlayGE
 											max = MathLib::maximize(max, vec);
 										}
 
-										//if (scene_mgr.AABBVisible(Box(min, max)))
+										//if (scene_mgr.AABBVisible(AABBox(min, max)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
 

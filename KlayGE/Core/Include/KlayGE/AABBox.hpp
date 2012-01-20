@@ -1,4 +1,4 @@
-// Box.hpp
+// AABBox.hpp
 // KlayGE AABB边框盒 头文件
 // Ver 2.5.0
 // 版权所有(C) 龚敏敏, 2004-2005
@@ -16,8 +16,8 @@
 // 修改记录
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _BOX_HPP
-#define _BOX_HPP
+#ifndef _AABBOX_HPP
+#define _AABBOX_HPP
 
 #pragma once
 
@@ -30,67 +30,67 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Box_T : boost::addable2<Box_T<T>, Vector_T<T, 3>,
-						boost::subtractable2<Box_T<T>, Vector_T<T, 3>,
-						boost::andable<Box_T<T>,
-						boost::orable<Box_T<T>,
-						boost::equality_comparable<Box_T<T> > > > > >,
+	class AABBox_T : boost::addable2<AABBox_T<T>, Vector_T<T, 3>,
+						boost::subtractable2<AABBox_T<T>, Vector_T<T, 3>,
+						boost::andable<AABBox_T<T>,
+						boost::orable<AABBox_T<T>,
+						boost::equality_comparable<AABBox_T<T> > > > > >,
 				public Bound_T<T>
 	{
 	public:
-		Box_T()
+		AABBox_T()
 		{
 		}
-		Box_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
+		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax)
 			: min_(vMin), max_(vMax)
 		{
 			BOOST_ASSERT(vMin.x() <= vMax.x());
 			BOOST_ASSERT(vMin.y() <= vMax.y());
 			BOOST_ASSERT(vMin.z() <= vMax.z());
 		}
-		Box_T(Box_T const & rhs)
+		AABBox_T(AABBox_T const & rhs)
 			: Bound_T<T>(rhs),
 				min_(rhs.min_), max_(rhs.max_)
 		{
 		}
 
 		// 赋值操作符
-		Box_T& operator+=(Vector_T<T, 3> const & rhs)
+		AABBox_T& operator+=(Vector_T<T, 3> const & rhs)
 		{
 			min_ += rhs;
 			max_ += rhs;
 			return *this;
 		}
-		Box_T& operator-=(Vector_T<T, 3> const & rhs)
+		AABBox_T& operator-=(Vector_T<T, 3> const & rhs)
 		{
 			min_ -= rhs;
 			max_ -= rhs;
 			return *this;
 		}
-		Box_T& operator*=(T const & rhs)
+		AABBox_T& operator*=(T const & rhs)
 		{
 			this->Min() *= rhs;
 			this->Max() *= rhs;
 			return *this;
 		}
-		Box_T& operator/=(T const & rhs)
+		AABBox_T& operator/=(T const & rhs)
 		{
 			return this->operator*=(1.0f / rhs);
 		}
-		Box_T& operator&=(Box_T const & rhs)
+		AABBox_T& operator&=(AABBox_T const & rhs)
 		{
 			min_ = MathLib::maximize(this->Min(), rhs.Min());
 			max_ = MathLib::minimize(this->Max(), rhs.Max());
 			return *this;
 		}
-		Box_T& operator|=(Box_T const & rhs)
+		AABBox_T& operator|=(AABBox_T const & rhs)
 		{
 			min_ = MathLib::minimize(this->Min(), rhs.Min());
 			max_ = MathLib::maximize(this->Max(), rhs.Max());
 			return *this;
 		}
 
-		Box_T& operator=(Box_T const & rhs)
+		AABBox_T& operator=(AABBox_T const & rhs)
 		{
 			if (this != &rhs)
 			{
@@ -100,19 +100,19 @@ namespace KlayGE
 			return *this;
 		}
 
-		bool operator==(Box_T const & rhs)
+		bool operator==(AABBox_T const & rhs)
 		{
 			return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 		}
 
 		// 一元操作符
-		Box_T const operator+() const
+		AABBox_T const operator+() const
 		{
 			return *this;
 		}
-		Box_T const operator-() const
+		AABBox_T const operator-() const
 		{
-			return Box_T(-this->Max(), -this->Min());
+			return AABBox_T(-this->Max(), -this->Min());
 		}
 
 		Vector_T<T, 3> operator[](size_t i) const
@@ -209,18 +209,28 @@ namespace KlayGE
 			return std::max<T>(MathLib::length_sq(this->Max()), MathLib::length_sq(this->Min()));
 		}
 
-		bool Overlap(Box_T<T> const & rhs) const
+		BoundOverlap CollisionDet(AABBox_T<T> const & aabb) const
 		{
-			float3 const t = rhs.Center() - this->Center();
-			float3 const e = this->HalfSize() + rhs.HalfSize();
-			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
+			if (((min_.x() <= aabb.Min().x()) && (min_.y() <= aabb.Min().y()) && (min_.z() <= aabb.Min().z())
+				&& (max_.x() >= aabb.Max().x()) && (max_.y() >= aabb.Max().y()) && (max_.z() >= aabb.Max().z()))
+				|| ((min_.x() >= aabb.Min().x()) && (min_.y() >= aabb.Min().y()) && (min_.z() >= aabb.Min().z())
+					&& (max_.x() <= aabb.Max().x()) && (max_.y() <= aabb.Max().y()) && (max_.z() <= aabb.Max().z())))
+			{
+				return BO_Yes;
+			}
+			else
+			{
+				float3 const t = aabb.Center() - this->Center();
+				float3 const e = this->HalfSize() + aabb.HalfSize();
+				return ((MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z())) ? BO_Partial : BO_No;
+			}
 		}
 
 	private:
 		Vector_T<T, 3> min_, max_;
 	};
 
-	typedef Box_T<float> Box;
+	typedef AABBox_T<float> AABBox;
 }
 
 #endif			// _BOX_HPP

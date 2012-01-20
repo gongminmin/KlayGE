@@ -530,9 +530,6 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Bound.hpp">
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\Box.hpp">
-      <Filter>Math Library\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Color.hpp">
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
@@ -664,6 +661,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Log.hpp">
       <Filter>Kernel\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Core\Include\KlayGE\AABBox.hpp">
+      <Filter>Math Library\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

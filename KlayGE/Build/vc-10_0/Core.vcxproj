@@ -290,6 +290,7 @@
     <ClCompile Include="..\..\Core\Src\AppLayer\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Core\Include\KlayGE\AABBox.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\BlockCompression.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Camera.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\CameraController.hpp" />
@@ -351,7 +352,6 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\AudioDataSource.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\AudioFactory.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Bound.hpp" />
-    <ClInclude Include="..\..\Core\Include\KlayGE\Box.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Color.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\half.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Math.hpp" />

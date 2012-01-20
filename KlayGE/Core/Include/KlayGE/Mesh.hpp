@@ -73,8 +73,8 @@ namespace KlayGE
 			return rl_;
 		}
 
-		virtual Box const & GetBound() const;
-		void SetBound(Box const & box);
+		virtual AABBox const & GetBound() const;
+		void SetBound(AABBox const & aabb);
 
 		virtual std::wstring const & Name() const;
 
@@ -151,7 +151,7 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_;
 
-		Box box_;
+		AABBox aabb_;
 
 		int32_t mtl_id_;
 
@@ -205,9 +205,9 @@ namespace KlayGE
 		void OnRenderBegin();
 		void OnRenderEnd();
 
-		Box const & GetBound() const
+		AABBox const & GetBound() const
 		{
-			return box_;
+			return aabb_;
 		}
 		std::wstring const & Name() const
 		{
@@ -246,7 +246,7 @@ namespace KlayGE
 
 		RenderLayoutPtr rl_;
 
-		Box box_;
+		AABBox aabb_;
 
 		std::vector<RenderMaterialPtr> materials_;
 
@@ -409,7 +409,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<AABBox>& bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,

@@ -1066,7 +1066,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\Box.hpp"
+					RelativePath="..\..\Core\Include\KlayGE\AABBox.hpp"
 					>
 				</File>
 				<File

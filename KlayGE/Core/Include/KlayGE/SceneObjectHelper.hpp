@@ -23,7 +23,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/SceneObject.hpp>
-#include <KlayGE/Box.hpp>
+#include <KlayGE/AABBox.hpp>
 
 namespace KlayGE
 {

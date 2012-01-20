@@ -20,6 +20,13 @@
 
 namespace KlayGE
 {
+	enum BoundOverlap
+	{
+		BO_Yes,
+		BO_No,
+		BO_Partial
+	};
+
 	template <typename T>
 	class Bound_T
 	{

@@ -54,7 +54,29 @@ namespace KlayGE
 		}
 	}
 
-	Frustum::VIS Frustum::Visiable(Box const & box) const
+	bool Frustum::IsEmpty() const
+	{
+		return false;
+	}
+
+	bool Frustum::VecInBound(float3 const & v) const
+	{
+		for (int i = 0; i < 6; ++ i)
+		{
+			if (MathLib::dot_coord(planes_[i], v) < 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	float Frustum::MaxRadiusSq() const
+	{
+		return 0;
+	}
+
+	BoundOverlap Frustum::CollisionDet(AABBox const & aabb) const
 	{
 		bool intersect = false;
 		for (int i = 0; i < 6; ++ i)
@@ -62,12 +84,12 @@ namespace KlayGE
 			int const n = vertex_lut_[i];
 
 			// v1 is diagonally opposed to v0
-			float3 v0((n & 1) ? box.Min().x() : box.Max().x(), (n & 2) ? box.Min().y() : box.Max().y(), (n & 4) ? box.Min().z() : box.Max().z());
-			float3 v1((n & 1) ? box.Max().x() : box.Min().x(), (n & 2) ? box.Max().y() : box.Min().y(), (n & 4) ? box.Max().z() : box.Min().z());
+			float3 v0((n & 1) ? aabb.Min().x() : aabb.Max().x(), (n & 2) ? aabb.Min().y() : aabb.Max().y(), (n & 4) ? aabb.Min().z() : aabb.Max().z());
+			float3 v1((n & 1) ? aabb.Max().x() : aabb.Min().x(), (n & 2) ? aabb.Max().y() : aabb.Min().y(), (n & 4) ? aabb.Max().z() : aabb.Min().z());
 
 			if (MathLib::dot_coord(planes_[i], v0) < 0)
 			{
-				return VIS_NO;
+				return BO_No;
 			}
 			if (MathLib::dot_coord(planes_[i], v1) < 0)
 			{
@@ -75,6 +97,6 @@ namespace KlayGE
 			}
 		}
 
-		return intersect ? VIS_PART : VIS_YES;
+		return intersect ? BO_Partial : BO_Yes;
 	}
 }

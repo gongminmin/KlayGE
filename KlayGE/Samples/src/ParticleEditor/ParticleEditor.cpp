@@ -90,7 +90,7 @@ namespace
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			box_ = MathLib::compute_bounding_box<float>(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
+			aabb_ = MathLib::compute_bounding_box<float>(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
 
 			*(technique_->Effect().ParameterByName("grass_tex")) = grass();
 		}

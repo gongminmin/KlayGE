@@ -476,7 +476,7 @@ namespace
 			GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
 			rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
-			box_ = Box(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
+			aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
 
 			RenderEffectPtr effect = rf.LoadEffect("Caustics.fxml");
 			single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMap");

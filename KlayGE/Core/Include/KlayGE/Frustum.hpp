@@ -33,19 +33,17 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Frustum
+	class KLAYGE_CORE_API Frustum : public Bound_T<float>
 	{
 	public:
-		enum VIS
-		{
-			VIS_YES,
-			VIS_NO,
-			VIS_PART,
-		};
-
-	public:
 		void ClipMatrix(float4x4 const & clip);
-		VIS Visiable(Box const & box) const;
+
+		bool IsEmpty() const;
+
+		bool VecInBound(float3 const & v) const;
+		float MaxRadiusSq() const;
+
+		BoundOverlap CollisionDet(AABBox const & aabb) const;
 
 	private:
 		typedef boost::array<Plane, 6> planes_t;

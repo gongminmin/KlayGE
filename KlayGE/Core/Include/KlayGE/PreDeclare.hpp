@@ -73,8 +73,8 @@ namespace KlayGE
 	class Sphere_T;
 	typedef Sphere_T<float> Sphere;
 	template <typename T>
-	class Box_T;
-	typedef Box_T<float> Box;
+	class AABBox_T;
+	typedef AABBox_T<float> AABBox;
 
 	class SceneManager;
 	typedef boost::shared_ptr<SceneManager> SceneManagerPtr;

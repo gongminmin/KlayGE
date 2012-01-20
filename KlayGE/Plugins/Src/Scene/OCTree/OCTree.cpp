@@ -55,7 +55,7 @@ namespace
 	{
 	public:
 		NodeRenderable()
-			: RenderableLineBox(Box(float3(-1, -1, -1), float3(1, 1, 1)), Color(1, 1, 1, 1))
+			: RenderableLineBox(AABBox(float3(-1, -1, -1), float3(1, 1, 1)), Color(1, 1, 1, 1))
 		{
 		}
 
@@ -122,7 +122,7 @@ namespace KlayGE
 			typedef std::vector<size_t> ObjIndicesTypes;
 			std::vector<ObjIndicesTypes> obj_indices(1);
 			octree_.resize(1);
-			Box bb_root(float3(0, 0, 0), float3(0, 0, 0));
+			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			for (size_t i = 0; i < scene_objs_.size(); ++ i)
 			{
@@ -132,7 +132,7 @@ namespace KlayGE
 					&& !(attr & SceneObject::SOA_Overlay)
 					&& !(attr & SceneObject::SOA_Moveable))
 				{
-					Box const & aabb_in_ws = *scene_obj_bbs_[i];
+					AABBox const & aabb_in_ws = *scene_obj_bbs_[i];
 
 					bb_root |= aabb_in_ws;
 					obj_indices[0].push_back(i);
@@ -189,11 +189,11 @@ namespace KlayGE
 							{
 								bb_center.z() = parent_center.z() - new_half_size.z();
 							}
-							new_node.bb = Box(bb_center - new_half_size, bb_center + new_half_size);
+							new_node.bb = AABBox(bb_center - new_half_size, bb_center + new_half_size);
 
 							BOOST_FOREACH(size_t obj_index, parent_obj_indices)
 							{
-								Box const & aabb_in_ws = *scene_obj_bbs_[obj_index];
+								AABBox const & aabb_in_ws = *scene_obj_bbs_[obj_index];
 								if (((aabb_in_ws.Min().x() <= new_node.bb.Max().x()) && (aabb_in_ws.Max().x() >= new_node.bb.Min().x()))
 									&& ((aabb_in_ws.Min().y() <= new_node.bb.Max().y()) && (aabb_in_ws.Max().y() >= new_node.bb.Min().y()))
 									&& ((aabb_in_ws.Min().z() <= new_node.bb.Max().z()) && (aabb_in_ws.Max().z() >= new_node.bb.Min().z())))
@@ -268,9 +268,9 @@ namespace KlayGE
 		BOOST_ASSERT(index < octree_.size());
 
 		octree_node_t& node = octree_[index];
-		Frustum::VIS const vis = frustum_->Visiable(node.bb);
+		BoundOverlap const vis = frustum_->CollisionDet(node.bb);
 		node.visible = vis;
-		if (Frustum::VIS_PART == vis)
+		if (BO_Partial == vis)
 		{
 			if (node.first_child_index != -1)
 			{
@@ -289,7 +289,7 @@ namespace KlayGE
 #endif
 	}
 
-	bool OCTree::AABBVisible(Box const & box)
+	bool OCTree::AABBVisible(AABBox const & box)
 	{
 		// Frustum VS node
 		bool visible = true;
@@ -311,13 +311,13 @@ namespace KlayGE
 		if (visible)
 		{
 			// Frustum VS AABB
-			Frustum::VIS const vis = frustum_->Visiable(box);
-			visible = (vis != Frustum::VIS_NO);
+			BoundOverlap const bo = frustum_->CollisionDet(box);
+			visible = (bo != BO_No);
 		}
 		return visible;
 	}
 
-	bool OCTree::BBVisible(size_t index, Box const & box) const
+	bool OCTree::BBVisible(size_t index, AABBox const & box) const
 	{
 		BOOST_ASSERT(index < octree_.size());
 
@@ -326,16 +326,16 @@ namespace KlayGE
 			&& ((box.Min().y() <= node.bb.Max().y()) && (box.Max().y() >= node.bb.Min().y()))
 			&& ((box.Min().z() <= node.bb.Max().z()) && (box.Max().z() >= node.bb.Min().z())))
 		{
-			Frustum::VIS const vis = node.visible;
+			BoundOverlap const vis = node.visible;
 			switch (vis)
 			{
-			case Frustum::VIS_YES:
+			case BO_Yes:
 				return true;
 
-			case Frustum::VIS_NO:
+			case BO_No:
 				return false;
 
-			case Frustum::VIS_PART:
+			case BO_Partial:
 				if (node.first_child_index != -1)
 				{
 					float3 const center = node.bb.Center();

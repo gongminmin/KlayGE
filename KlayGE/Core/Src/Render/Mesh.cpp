@@ -66,7 +66,7 @@ namespace
 			std::vector<uint8_t> merged_indices;
 			std::vector<std::string> mesh_names;
 			std::vector<int32_t> mtl_ids;
-			std::vector<Box> bbs;
+			std::vector<AABBox> bbs;
 			std::vector<uint32_t> mesh_num_vertices;
 			std::vector<uint32_t> mesh_base_vertices;
 			std::vector<uint32_t> mesh_num_indices;
@@ -259,11 +259,11 @@ namespace KlayGE
 
 	void RenderModel::UpdateBoundBox()
 	{
-		box_ = Box(float3(0, 0, 0), float3(0, 0, 0));
+		aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		typedef BOOST_TYPEOF(meshes_) MeshesType;
 		BOOST_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			box_ |= mesh->GetBound();
+			aabb_ |= mesh->GetBound();
 		}
 	}
 
@@ -386,14 +386,14 @@ namespace KlayGE
 		return name_;
 	}
 
-	Box const & StaticMesh::GetBound() const
+	AABBox const & StaticMesh::GetBound() const
 	{
-		return box_;
+		return aabb_;
 	}
 
-	void StaticMesh::SetBound(Box const & box)
+	void StaticMesh::SetBound(AABBox const & aabb)
 	{
-		box_ = box;
+		aabb_ = aabb;
 	}
 
 	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
@@ -405,12 +405,12 @@ namespace KlayGE
 			switch (ve.format)
 			{
 			case EF_BGR32F:
-				box_ = MathLib::compute_bounding_box<float>(static_cast<float3 const *>(buf),
+				aabb_ = MathLib::compute_bounding_box<float>(static_cast<float3 const *>(buf),
 					static_cast<float3 const *>(buf) + size / sizeof(float3));
 				break;
 
 			case EF_ABGR32F:
-				box_ = MathLib::compute_bounding_box<float>(static_cast<float4 const *>(buf),
+				aabb_ = MathLib::compute_bounding_box<float>(static_cast<float4 const *>(buf),
 					static_cast<float4 const *>(buf) + size / sizeof(float4));
 				break;
 
@@ -1064,7 +1064,7 @@ namespace KlayGE
 				int const index_elem_size = is_index_16_bit ? 2 : 4;
 
 				std::vector<uint8_t> merged_indices(mesh_start_indices.back() * index_elem_size);
-				std::vector<Box> bounding_boxes;
+				std::vector<AABBox> bounding_boxes;
 				mesh_index = 0;
 				for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 				{
@@ -1324,7 +1324,7 @@ namespace KlayGE
 						}
 					}
 
-					bounding_boxes.push_back(Box(min_bb, max_bb));
+					bounding_boxes.push_back(AABBox(min_bb, max_bb));
 
 					{
 						XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
@@ -1622,7 +1622,7 @@ namespace KlayGE
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<Box>& bbs,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<AABBox>& bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, boost::shared_ptr<KeyFramesType>& kfs,
@@ -1801,7 +1801,7 @@ namespace KlayGE
 			LittleEndianToNative<sizeof(max_bb.x())>(&max_bb.x());
 			LittleEndianToNative<sizeof(max_bb.y())>(&max_bb.y());
 			LittleEndianToNative<sizeof(max_bb.z())>(&max_bb.z());
-			bbs[mesh_index] = Box(min_bb, max_bb);
+			bbs[mesh_index] = AABBox(min_bb, max_bb);
 
 			decoded->read(&mesh_num_vertices[mesh_index], sizeof(mesh_num_vertices[mesh_index]));
 			LittleEndianToNative<sizeof(mesh_num_vertices[mesh_index])>(&mesh_num_vertices[mesh_index]);

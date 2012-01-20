@@ -64,7 +64,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void OnRenderBegin()
@@ -125,7 +125,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
-			box_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 		}
 
 		void OnRenderBegin()
@@ -449,7 +449,7 @@ void ModelViewerApp::OpenModel(std::string const & name)
 		dialog_model_->Control<UIComboBox>(id_mesh_)->AddItem(model->Mesh(i)->Name());
 	}
 
-	Box const & bb = model_->GetBound();
+	AABBox const & bb = model_->GetBound();
 	float3 center = bb.Center();
 	float3 half_size = bb.HalfSize();
 	this->LookAt(center + float3(half_size.x() * 2, half_size.y() * 2.5f, half_size.z() * 3), float3(0, center.y(), 0), float3(0.0f, 1.0f, 0.0f));

@@ -602,14 +602,14 @@ namespace KlayGE
 		bool intersect_ray(Sphere_T<T> const & sphere, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir);
 
 		template <typename T>
-		bool vec_in_box(Box_T<T> const & box, Vector_T<T, 3> const & v);
+		bool vec_in_box(AABBox_T<T> const & box, Vector_T<T, 3> const & v);
 
 		template <typename T>
-		bool intersect_ray(Box_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir);
+		bool intersect_ray(AABBox_T<T> const & box, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir);
 
 		// from Graphics Gems I p301
 		template <typename value_type, typename Iterator>
-		inline Box_T<value_type>
+		inline AABBox_T<value_type>
 		compute_bounding_box(Iterator first, Iterator last)
 		{
 			Vector_T<value_type, 3> minVec = *first;
@@ -622,7 +622,7 @@ namespace KlayGE
 				minVec = minimize(minVec, v);
 				maxVec = maximize(maxVec, v);
 			}
-			return Box_T<value_type>(minVec, maxVec);
+			return AABBox_T<value_type>(minVec, maxVec);
 		}
 
 		template <typename value_type, typename Iterator>
@@ -906,6 +906,6 @@ namespace KlayGE
 #include <KlayGE/Color.hpp>
 #include <KlayGE/Bound.hpp>
 #include <KlayGE/Sphere.hpp>
-#include <KlayGE/Box.hpp>
+#include <KlayGE/AABBox.hpp>
 
 #endif		// _MATH_HPP

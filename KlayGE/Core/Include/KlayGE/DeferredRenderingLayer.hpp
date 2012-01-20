@@ -194,9 +194,9 @@ namespace KlayGE
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
-		Box cone_bbox_;
-		Box pyramid_bbox_;
-		Box box_bbox_;
+		AABBox cone_bbox_;
+		AABBox pyramid_bbox_;
+		AABBox box_bbox_;
 
 		std::vector<LightSourcePtr> lights_;
 

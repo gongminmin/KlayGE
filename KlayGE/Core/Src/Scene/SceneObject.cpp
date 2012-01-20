@@ -40,7 +40,7 @@ namespace KlayGE
 		return renderable_;
 	}
 
-	Box const & SceneObject::GetBound() const
+	AABBox const & SceneObject::GetBound() const
 	{
 		BOOST_ASSERT(renderable_);
 		return renderable_->GetBound();
