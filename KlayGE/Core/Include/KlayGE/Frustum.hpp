@@ -44,6 +44,7 @@ namespace KlayGE
 		float MaxRadiusSq() const;
 
 		BoundOverlap CollisionDet(AABBox const & aabb) const;
+		BoundOverlap CollisionDet(Sphere const & sphere) const;
 
 	private:
 		typedef boost::array<Plane, 6> planes_t;

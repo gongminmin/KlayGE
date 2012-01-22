@@ -282,7 +282,7 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_DEBUG
-		if ((vis != Frustum::VIS_NO) && (-1 == node.first_child_index))
+		if ((vis != BO_No) && (-1 == node.first_child_index))
 		{
 			checked_pointer_cast<NodeRenderable>(node_renderable_)->AddInstance(MathLib::scaling(node.bb.HalfSize()) * MathLib::translation(node.bb.Center()));
 		}

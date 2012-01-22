@@ -99,4 +99,23 @@ namespace KlayGE
 
 		return intersect ? BO_Partial : BO_Yes;
 	}
+
+	BoundOverlap Frustum::CollisionDet(Sphere const & sphere) const
+	{
+		bool intersect = false;
+		for (int i = 0; i < 6; ++ i)
+		{
+			float d = MathLib::dot_coord(planes_[i], sphere.Center());
+			if (d <= -sphere.Radius())
+			{
+				return BO_No;
+			}
+			if (d > sphere.Radius())
+			{
+				intersect = true;
+			}
+		}
+
+		return intersect ? BO_Partial : BO_Yes;
+	}
 }

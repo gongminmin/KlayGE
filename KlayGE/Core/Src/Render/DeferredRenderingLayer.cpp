@@ -1046,7 +1046,7 @@ namespace KlayGE
 										max = MathLib::maximize(max, vec);
 									}
 
-									//if (scene_mgr.AABBVisible(AABBox(min, max)))
+									if (scene_mgr.AABBVisible(AABBox(min, max)))
 									{
 										if (attr & LSA_IndirectLighting)
 										{
@@ -1125,7 +1125,7 @@ namespace KlayGE
 											max = MathLib::maximize(max, vec);
 										}
 
-										//if (scene_mgr.AABBVisible(AABBox(min, max)))
+										if (scene_mgr.AABBVisible(AABBox(min, max)))
 										{
 											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
 
@@ -1421,7 +1421,6 @@ namespace KlayGE
 								float4x4 light_model = MathLib::scaling(scale, scale, 1.0f);
 								*light_volume_mv_param_ = light_model * mat_v;
 								*light_volume_mvp_param_ = light_model * mat_vp;
-								*view_to_light_model_param_ = MathLib::inverse(mat_v);
 							}
 							break;
 
@@ -1439,7 +1438,6 @@ namespace KlayGE
 								rl = rl_pyramid_;
 								*light_volume_mv_param_ = mat_v;
 								*light_volume_mvp_param_ = mat_vp;
-								*view_to_light_model_param_ = MathLib::inverse(mat_v);
 							}
 							break;
 
