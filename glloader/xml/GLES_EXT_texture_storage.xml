@@ -39,7 +39,7 @@
 				<param type="GLsizei" name="height"/>
 			</params>
 		</function>
-		<function name="glTexStorage2DEXT" return="void">
+		<function name="glTexStorage3DEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
 				<param type="GLsizei" name="levels"/>

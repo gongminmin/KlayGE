@@ -139,22 +139,43 @@ namespace
 			}
 			else
 			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-				fmt = EF_ARGB8;
-
-				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8))
 				{
-					normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 0);
+					fmt = EF_ARGB8;
+
+					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+					{
+						normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 0);
+					}
+					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+					{
+						tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
+					}
 				}
-				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				else
 				{
-					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
+					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8));
+
+					fmt = EF_ABGR8;
+
+					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+					{
+						normal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].x() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal_float3[j].z() * 255), 0, 255) << 16);
+					}
+					for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+					{
+						tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].x() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].z() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent_float4[j].w() * 255), 0, 255) << 24);
+					}
 				}
 			}
 			

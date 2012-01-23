@@ -801,19 +801,6 @@ namespace KlayGE
 
 			if (meshes_chunk)
 			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				ElementFormat tbn_format;
-				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-				{
-					tbn_format = EF_A2BGR10;
-				}
-				else
-				{
-					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-					tbn_format = EF_ARGB8;
-				}
-
 				std::vector<std::vector<vertex_element> > ves;
 				std::vector<uint32_t> mesh_num_vertices;
 				std::vector<uint32_t> mesh_base_vertices(1, 0);
@@ -924,7 +911,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Normal;
 								ve.usage_index = 0;
-								ve.format = tbn_format;
+								ve.format = EF_A2BGR10;
 								vertex_elements.push_back(ve);
 							}
 
@@ -986,7 +973,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Tangent;
 								ve.usage_index = 0;
-								ve.format = tbn_format;
+								ve.format = EF_A2BGR10;
 								vertex_elements.push_back(ve);
 							}
 
@@ -994,7 +981,7 @@ namespace KlayGE
 							{
 								ve.usage = VEU_Binormal;
 								ve.usage_index = 0;
-								ve.format = tbn_format;
+								ve.format = EF_A2BGR10;
 								vertex_elements.push_back(ve);
 							}
 						}
@@ -1110,21 +1097,9 @@ namespace KlayGE
 											normal_node->Attrib("y")->ValueFloat(), normal_node->Attrib("z")->ValueFloat());
 										normal = MathLib::normalize(normal) * 0.5f + 0.5f;
 
-										uint32_t compact;
-										if (EF_A2BGR10 == ves[mesh_index][i].format)
-										{	
-											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
-										}
-										else
-										{
-											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
-
-											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 255), 0, 255) << 16)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 255), 0, 255) << 8)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 255), 0, 255) << 0);
-										}
+										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.x() * 1023), 0, 1023)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.y() * 1023), 0, 1023) << 10)
+											| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normal.z() * 1023), 0, 1023) << 20);
 
 										uint32_t buf_index = ves_mapping[mesh_index][i];
 										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
@@ -1262,23 +1237,11 @@ namespace KlayGE
 											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
 										tangent = MathLib::normalize(tangent) * 0.5f + 0.5f;
 
-										uint32_t compact;
-										if (EF_A2BGR10 == ves[mesh_index][i].format)
-										{	
-											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 1023), 0, 1023)
+										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 1023), 0, 1023)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.y() * 1023), 0, 1023) << 10)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.z() * 1023), 0, 1023) << 20)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((k * 0.5f + 0.5f) * 3), 0, 3) << 30);
-										}
-										else
-										{
-											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
 
-											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.x() * 255), 0, 255) << 16)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.y() * 255), 0, 255) << 8)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangent.z() * 255), 0, 255) << 0)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((k * 0.5f + 0.5f) * 255), 0, 255) << 24);
-										}
 										uint32_t buf_index = ves_mapping[mesh_index][i];
 										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
 										break;
@@ -1297,21 +1260,9 @@ namespace KlayGE
 											tangent_node->Attrib("y")->ValueFloat(), tangent_node->Attrib("z")->ValueFloat());
 										binormal = MathLib::normalize(binormal) * 0.5f + 0.5f;
 
-										uint32_t compact;
-										if (EF_A2BGR10 == ves[mesh_index][i].format)
-										{	
-											compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 1023), 0, 1023)
+										uint32_t compact = MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 1023), 0, 1023)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.y() * 1023), 0, 1023) << 10)
 												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.z() * 1023), 0, 1023) << 20);
-										}
-										else
-										{
-											BOOST_ASSERT(EF_ARGB8 == ves[mesh_index][i].format);
-
-											compact = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.x() * 255), 0, 255) << 16)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.y() * 255), 0, 255) << 8)
-												| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(binormal.z() * 255), 0, 255) << 0);
-										}
 
 										uint32_t buf_index = ves_mapping[mesh_index][i];
 										memcpy(&merged_buff[buf_index][(mesh_base_vertices[mesh_index] + index) * merged_ves[buf_index].element_size()], &compact, sizeof(compact));
@@ -1769,11 +1720,51 @@ namespace KlayGE
 
 		int const index_elem_size = all_is_index_16_bit ? 2 : 4;
 
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		merged_buff.resize(merged_ves.size());
 		for (size_t i = 0; i < merged_buff.size(); ++ i)
 		{
 			merged_buff[i].resize(all_num_vertices * merged_ves[i].element_size());
 			decoded->read(&merged_buff[i][0], merged_buff[i].size() * sizeof(merged_buff[i][0]));
+
+			if ((EF_A2BGR10 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+			{
+				merged_ves[i].format = EF_ARGB8;
+
+				uint32_t* p = reinterpret_cast<uint32_t*>(&merged_buff[i][0]);
+				for (uint32_t j = 0; j < all_num_vertices; ++ j)
+				{
+					float x = ((p[j] >>  0) & 0x3FF) / 1023.0f;
+					float y = ((p[j] >> 10) & 0x3FF) / 1023.0f;
+					float z = ((p[j] >> 20) & 0x3FF) / 1023.0f;
+					float w = ((p[j] >> 30) & 0x3) / 3.0f;
+
+					p[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+				}
+			}
+			if ((EF_ARGB8 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8))
+			{
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8));
+
+				merged_ves[i].format = EF_ABGR8;
+
+				uint32_t* p = reinterpret_cast<uint32_t*>(&merged_buff[i][0]);
+				for (uint32_t j = 0; j < all_num_vertices; ++ j)
+				{
+					float x = ((p[j] >> 16) & 0xFF) / 255.0f;
+					float y = ((p[j] >>  8) & 0xFF) / 255.0f;
+					float z = ((p[j] >>  0) & 0xFF) / 255.0f;
+					float w = ((p[j] >> 24) & 0xFF) / 255.0f;
+
+					p[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(x * 255), 0, 255) << 0)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(y * 255), 0, 255) << 8)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(z * 255), 0, 255) << 16)
+						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
+				}
+			}
 		}
 		merged_indices.resize(all_num_indices * index_elem_size);
 		decoded->read(&merged_indices[0], merged_indices.size() * sizeof(merged_indices[0]));
@@ -2108,6 +2099,17 @@ namespace KlayGE
 									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
 									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+									if (VEU_Tangent == ve.usage)
+									{
+										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
+									}
+								}
+								else if (EF_ABGR8 == ve.format)
+								{
+									uint32_t const * p = reinterpret_cast<uint32_t const *>(&buffs[mesh_index][k][0]);
+									sub_node->AppendAttrib(doc.AllocAttribFloat("x", ((p[j] >>  0) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("y", ((p[j] >>  8) & 0xFF) / 255.0f * 2 - 1));
+									sub_node->AppendAttrib(doc.AllocAttribFloat("z", ((p[j] >> 16) & 0xFF) / 255.0f * 2 - 1));
 									if (VEU_Tangent == ve.usage)
 									{
 										sub_node->AppendAttrib(doc.AllocAttribFloat("w", ((p[j] >> 24) & 0xFF) / 255.0f * 2 - 1));
