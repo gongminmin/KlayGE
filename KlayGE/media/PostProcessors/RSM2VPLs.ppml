@@ -13,7 +13,6 @@
 			<param name="upper_left"/>
 			<param name="x_dir"/>
 			<param name="y_dir"/>
-			<param name="near_q"/>
 		</params>
 		<input>
 			<pin name="albedo_tex"/>

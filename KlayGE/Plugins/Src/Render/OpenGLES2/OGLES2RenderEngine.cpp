@@ -725,7 +725,10 @@ namespace KlayGE
 		vertex_format_.insert(EF_GR8I);
 		vertex_format_.insert(EF_BGR8I);
 		vertex_format_.insert(EF_ABGR8I);
-		vertex_format_.insert(EF_A2BGR10);
+		if (glloader_GLES_OES_vertex_type_10_10_10_2())
+		{
+			vertex_format_.insert(EF_A2BGR10);
+		}
 		vertex_format_.insert(EF_R16);
 		vertex_format_.insert(EF_GR16);
 		vertex_format_.insert(EF_BGR16);
@@ -767,6 +770,10 @@ namespace KlayGE
 		texture_format_.insert(EF_ARGB4);
 		texture_format_.insert(EF_R8);
 		texture_format_.insert(EF_SIGNED_R8);
+		if (glloader_GLES_EXT_texture_rg())
+		{
+			texture_format_.insert(EF_GR8);
+		}
 		texture_format_.insert(EF_ABGR8);
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{

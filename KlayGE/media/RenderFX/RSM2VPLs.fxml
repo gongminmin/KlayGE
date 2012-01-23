@@ -4,7 +4,6 @@
 	<include name="PostProcess.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
-	<include name="util.fxml"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -29,8 +28,6 @@
 	<parameter type="float3" name="upper_left"/>
 	<parameter type="float3" name="x_dir"/>
 	<parameter type="float3" name="y_dir"/>
-
-	<parameter type="float2" name="near_q"/>
 
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_es_tex"/>
@@ -57,7 +54,7 @@ float4 RSM2VPLsSpotPS(float2 tc : TEXCOORD0) : SV_Target
 	float3 normal_ls = normal_shininess.xyz * 2 - 1;
 	float shininess = normal_shininess.w * 256.0f;
 	float3 normal_es = mul(float4(normal_ls, 0), ls_to_es).xyz;
-	float depth_ls = non_linear_depth_to_linear(depth_tex.Sample(point_sampler, rsm_tc).r, near_q.x, near_q.y);
+	float depth_ls = depth_tex.Sample(point_sampler, rsm_tc).x;
 
 	float3 view_dir = texcoord_to_view(float2(rsm_tc.x, flipping < 0 ? rsm_tc.y : 1 - rsm_tc.y));
 	float3 pos_ls = view_dir * (depth_ls / view_dir.z);

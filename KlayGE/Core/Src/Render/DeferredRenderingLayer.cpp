@@ -374,9 +374,9 @@ namespace KlayGE
 		{
 			technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
 			technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
-			technique_merge_shading_ = dr_effect_->TechniqueByName("MergeShadingTech");
-			technique_merge_shading_alpha_blend_ = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 		}
+		technique_merge_shading_ = dr_effect_->TechniqueByName("MergeShadingTech");
+		technique_merge_shading_alpha_blend_ = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
 
 		sm_buffer_ = rf.MakeFrameBuffer();
 		ElementFormat fmt;
@@ -399,13 +399,13 @@ namespace KlayGE
 			fmt = EF_ABGR16F;
 		}
 		ElementFormat ds_fmt;
-		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
+		if (caps.texture_format_support(EF_D24S8))
 		{
 			ds_fmt = EF_D24S8;
 		}
 		else
 		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+			BOOST_ASSERT(caps.texture_format_support(EF_D16));
 
 			ds_fmt = EF_D16;
 		}
@@ -465,7 +465,7 @@ namespace KlayGE
 			rsm_to_vpls_pps[LT_Spot] = LoadPostProcess(ResLoader::Instance().Open("RSM2VPLs.ppml"), "RSM2VPLsSpot");
 			rsm_to_vpls_pps[LT_Spot]->InputPin(0, rsm_texs_[0]);
 			rsm_to_vpls_pps[LT_Spot]->InputPin(1, rsm_texs_[1]);
-			rsm_to_vpls_pps[LT_Spot]->InputPin(2, sm_depth_tex_);
+			rsm_to_vpls_pps[LT_Spot]->InputPin(2, sm_tex_);
 			rsm_to_vpls_pps[LT_Spot]->OutputPin(0, vpl_tex_);
 
 			gbuffer_to_depth_derivate_pp_ = LoadPostProcess(ResLoader::Instance().Open("CustomMipMap.ppml"), "GBuffer2DepthDerivate");
@@ -634,7 +634,7 @@ namespace KlayGE
 		else
 		{
 			BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
+				
 			ds_fmt = EF_D16;
 		}
 
@@ -1398,11 +1398,6 @@ namespace KlayGE
 							
 							float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
 							depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
-
-							if (PT_GenReflectiveShadowMap == pass_type)
-							{
-								rsm_to_vpls_pps[type]->SetParam(10, near_q);
-							}
 						}
 
 						float3 const & p = light->Position();
@@ -1486,6 +1481,8 @@ namespace KlayGE
 				}
 				else if (PT_IndirectLighting == pass_type)
 				{
+					depth_to_vsm_pp_->Apply();
+
 					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
 					this->VPLsLighting(light);
 
@@ -1496,7 +1493,10 @@ namespace KlayGE
 				{
 					if (0 == (attr & LSA_NoShadow))
 					{
-						depth_to_vsm_pp_->Apply();
+						if (!((light->Attrib() & LSA_IndirectLighting) && (illum_ != 1)))
+						{
+							depth_to_vsm_pp_->Apply();
+						}
 
 						if (LT_Point == type)
 						{
