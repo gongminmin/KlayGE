@@ -41,6 +41,9 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			depth_tech_ = deferred_effect_->TechniqueByName("AxisDepthTech");
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("AxisTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("AxisShadingTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("AxisMRTTech");
 
 			float4 xyzs[] =
@@ -102,6 +105,9 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			this->BindDeferredEffect(rf.LoadEffect("MVUtil.fxml"));
+			depth_tech_ = deferred_effect_->TechniqueByName("GridDepthTech");
+			gbuffer_tech_ = deferred_effect_->TechniqueByName("GridTech");
+			shading_tech_ = deferred_effect_->TechniqueByName("GridShadingTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GridMRTTech");
 
 			float3 xyzs[(21 + 21) * 2];

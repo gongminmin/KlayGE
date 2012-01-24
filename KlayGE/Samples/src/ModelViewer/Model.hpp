@@ -17,6 +17,7 @@ public:
 	void BuildModelInfo();
 
 	void Pass(KlayGE::PassType type);
+	void LightingTex(KlayGE::TexturePtr const & tex);
 
 	void SetTime(float time);
 
@@ -36,11 +37,21 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechniquePtr depth_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr depth_techs_[3][2][2][2];	
+	KlayGE::RenderTechniquePtr depth_alpha_test_techs_[3][2][2][2];	
+	KlayGE::RenderTechniquePtr depth_alpha_blend_back_techs_[3][2][2][2];	
+	KlayGE::RenderTechniquePtr depth_alpha_blend_front_techs_[3][2][2][2];	
+	KlayGE::RenderTechniquePtr gbuffer_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_test_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_mrt_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_alpha_test_mrt_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_mrt_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_mrt_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr shading_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr shading_alpha_blend_back_techs_[3][2][2][2];
+	KlayGE::RenderTechniquePtr shading_alpha_blend_front_techs_[3][2][2][2];
 };
 
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
