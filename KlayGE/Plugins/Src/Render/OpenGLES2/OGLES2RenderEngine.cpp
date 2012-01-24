@@ -793,9 +793,21 @@ namespace KlayGE
 			texture_format_.insert(EF_BGR32F);
 			texture_format_.insert(EF_ABGR32F);
 		}
-		if (glloader_GLES_EXT_texture_compression_dxt1())
+		if (glloader_GLES_EXT_texture_compression_dxt1() || glloader_GLES_EXT_texture_compression_s3tc())
 		{
 			texture_format_.insert(EF_BC1);
+		}
+		if (glloader_GLES_EXT_texture_compression_s3tc())
+		{
+			texture_format_.insert(EF_BC2);
+			texture_format_.insert(EF_BC3);
+		}
+		if (glloader_GLES_EXT_texture_compression_latc())
+		{
+			texture_format_.insert(EF_BC4);
+			texture_format_.insert(EF_BC5);
+			texture_format_.insert(EF_SIGNED_BC4);
+			texture_format_.insert(EF_SIGNED_BC5);
 		}
 		if (glloader_GLES_OES_depth_texture())
 		{
