@@ -327,6 +327,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 		effect_ = rf.LoadEffect("ModelViewer.fxml", &num_joints_macro[0]);
 	}
 
+	std::string depth_tech_str;
 	std::string g_buffer_mrt_tech_str;
 	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
@@ -342,6 +343,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 					switch (i)
 					{
 					case 0:
+						depth_tech_str = "Depth";
 						g_buffer_mrt_tech_str = "GBuffer";
 						break;
 
@@ -356,15 +358,18 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 
 					if (0 == j)
 					{
+						depth_tech_str += "Fill";
 						g_buffer_mrt_tech_str += "Fill";
 					}
 					else
 					{
+						depth_tech_str += "Line";
 						g_buffer_mrt_tech_str += "Line";
 					}
 					
 					if (1 == l)
 					{
+						depth_tech_str += "Skinned";
 						g_buffer_mrt_tech_str += "Skinned";
 					}
 					
@@ -384,6 +389,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 						switch (caps.tess_method)
 						{
 						case TM_Hardware:
+							depth_tech_str += "Smooth5";
 							g_buffer_mrt_tech_str += "Smooth5";
 							g_buffer_alpha_test_mrt_tech_str += "Smooth5";
 							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth5";
@@ -391,6 +397,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 							break;
 
 						case TM_Instanced:
+							depth_tech_str += "Smooth4";
 							g_buffer_mrt_tech_str += "Smooth4";
 							g_buffer_alpha_test_mrt_tech_str += "Smooth4";
 							g_buffer_alpha_blend_back_mrt_tech_str += "Smooth4";
@@ -402,6 +409,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 						}
 					}
 
+					depth_techs_[i][j][k][l] = effect_->TechniqueByName(depth_tech_str + "Tech");
 					gbuffer_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
 					gbuffer_alpha_test_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
 					gbuffer_alpha_blend_back_mrt_techs_[i][j][k][l] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
@@ -530,6 +538,15 @@ void DetailedSkinnedModel::BuildModelInfo()
 						(*p)[j].x() = ((n_32[j] >>  0) & 0x3FF) / 1023.0f * 2 - 1;
 						(*p)[j].y() = ((n_32[j] >> 10) & 0x3FF) / 1023.0f * 2 - 1;
 						(*p)[j].z() = ((n_32[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1;
+					}
+				}
+				else if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
+				{
+					for (uint32_t j = 0; j < total_num_vertices; ++ j)
+					{
+						(*p)[j].x() = ((n_32[j] >>  0) & 0xFF) / 255.0f * 2 - 1;
+						(*p)[j].y() = ((n_32[j] >>  8) & 0xFF) / 255.0f * 2 - 1;
+						(*p)[j].z() = ((n_32[j] >> 16) & 0xFF) / 255.0f * 2 - 1;
 					}
 				}
 				else

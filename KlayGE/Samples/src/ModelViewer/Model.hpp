@@ -36,6 +36,7 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
+	KlayGE::RenderTechniquePtr depth_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_mrt_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_alpha_test_mrt_techs_[3][2][2][2];
 	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_mrt_techs_[3][2][2][2];

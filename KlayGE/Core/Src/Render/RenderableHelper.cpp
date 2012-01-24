@@ -297,6 +297,7 @@ namespace KlayGE
 
 		if (deferred_effect_)
 		{
+			depth_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
 			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
 			shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
@@ -351,6 +352,10 @@ namespace KlayGE
 	{
 		switch (type)
 		{
+		case PT_OpaqueDepth:
+			technique_ = depth_tech_;
+			break;
+
 		case PT_OpaqueGBuffer:
 			technique_ = gbuffer_tech_;
 			break;

@@ -251,19 +251,47 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
+		ElementFormat ds_fmt;
+		if (caps.texture_format_support(EF_D24S8))
+		{
+			ds_fmt = EF_D24S8;
+			depth_texture_ = true;
+		}
+		else
+		{
+			if (caps.texture_format_support(EF_D16))
+			{				
+				ds_fmt = EF_D16;
+				depth_texture_ = true;
+			}
+			else
+			{
+				ds_fmt = EF_Unknown;
+				depth_texture_ = false;
+			}
+		}
+
+		if (!depth_texture_)
+		{
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueDepth << 24) + 0));
+		}
+
 		mrt_g_buffer_ = (caps.max_simultaneous_rts > 1);
 
 		if (mrt_g_buffer_)
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 28) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 28) + 1));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 24) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueMRTGBuffer << 24) + 1));
 		}
 		else
 		{
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 28) + 0));
-			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 28) + 1));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 24) + 0));
+			pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueGBuffer << 24) + 1));
 		}
 
+		opaque_pre_depth_buffer_ = rf.MakeFrameBuffer();
+		transparency_back_pre_depth_buffer_ = rf.MakeFrameBuffer();
+		transparency_front_pre_depth_buffer_ = rf.MakeFrameBuffer();
 		opaque_g_buffer_ = rf.MakeFrameBuffer();
 		transparency_back_g_buffer_ = rf.MakeFrameBuffer();
 		transparency_front_g_buffer_ = rf.MakeFrameBuffer();
@@ -398,21 +426,18 @@ namespace KlayGE
 
 			fmt = EF_ABGR16F;
 		}
-		ElementFormat ds_fmt;
-		if (caps.texture_format_support(EF_D24S8))
+		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
+		RenderViewPtr sm_depth_view;
+		if (depth_texture_)
 		{
-			ds_fmt = EF_D24S8;
+			sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+			sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
 		}
 		else
 		{
-			BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
-			ds_fmt = EF_D16;
+			sm_depth_view = rf.Make2DDepthStencilRenderView(SM_SIZE, SM_SIZE, EF_D16, 1, 0);
 		}
-		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		sm_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
-		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
 		sm_buffer_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 		blur_sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -532,11 +557,14 @@ namespace KlayGE
 				}
 			}
 		}
-		depth_to_vsm_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToVSM");
-		depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
-		depth_to_vsm_pp_->OutputPin(0, sm_tex_);
+		if (depth_texture_)
+		{
+			depth_to_vsm_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToVSM");
+			depth_to_vsm_pp_->InputPin(0, sm_depth_tex_);
+			depth_to_vsm_pp_->OutputPin(0, sm_tex_);
 
-		depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+			depth_to_linear_pp_ = LoadPostProcess(ResLoader::Instance().Open("DepthToSM.ppml"), "DepthToSM");
+		}
 
 		*(dr_effect_->ParameterByName("shadow_map_tex")) = blur_sm_tex_;
 		*(dr_effect_->ParameterByName("shadow_map_cube_tex")) = sm_cube_tex_;
@@ -585,6 +613,9 @@ namespace KlayGE
 
 		RenderEngine& re = rf.RenderEngineInstance();
 		CameraPtr const & camera = re.CurFrameBuffer()->GetViewport().camera;
+		opaque_pre_depth_buffer_->GetViewport().camera = camera;
+		transparency_back_pre_depth_buffer_->GetViewport().camera = camera;
+		transparency_front_pre_depth_buffer_->GetViewport().camera = camera;
 		opaque_g_buffer_->GetViewport().camera = camera;
 		transparency_back_g_buffer_->GetViewport().camera = camera;
 		transparency_front_g_buffer_->GetViewport().camera = camera;
@@ -626,20 +657,40 @@ namespace KlayGE
 				fmt = EF_ABGR16F;
 			}
 		}
-		ElementFormat ds_fmt;
-		if (caps.texture_format_support(EF_D24S8))
+
+		RenderViewPtr opaque_ds_view;
+		RenderViewPtr transparency_back_ds_view;
+		RenderViewPtr transparency_front_ds_view;
+		if (depth_texture_)
 		{
-			ds_fmt = EF_D24S8;
+			ElementFormat ds_fmt;
+			if (caps.texture_format_support(EF_D24S8))
+			{
+				ds_fmt = EF_D24S8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_D16));
+				
+				ds_fmt = EF_D16;
+			}
+
+			opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+			opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
+
+			transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+			transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
+
+			transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
+			transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
 		}
 		else
 		{
-			BOOST_ASSERT(caps.texture_format_support(EF_D16));
-				
-			ds_fmt = EF_D16;
+			opaque_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+			transparency_back_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
+			transparency_front_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 		}
 
-		opaque_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr opaque_ds_view = rf.Make2DDepthStencilRenderView(*opaque_ds_tex_, 0, 0, 0);
 		opaque_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		opaque_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
@@ -651,8 +702,9 @@ namespace KlayGE
 		}
 		opaque_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
 
-		transparency_back_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr transparency_back_ds_view = rf.Make2DDepthStencilRenderView(*transparency_back_ds_tex_, 0, 0, 0);
+		opaque_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_depth_tex_, 0, 1, 0));
+		opaque_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, opaque_ds_view);
+
 		transparency_back_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		transparency_back_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
@@ -664,8 +716,9 @@ namespace KlayGE
 		}
 		transparency_back_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
 
-		transparency_front_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write, NULL);
-		RenderViewPtr transparency_front_ds_view = rf.Make2DDepthStencilRenderView(*transparency_front_ds_tex_, 0, 0, 0);
+		transparency_back_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_back_depth_tex_, 0, 1, 0));
+		transparency_back_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_back_ds_view);
+
 		transparency_front_depth_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
 
 		transparency_front_g_buffer_rt0_tex_ = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, NULL);
@@ -676,6 +729,9 @@ namespace KlayGE
 			transparency_front_g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*transparency_front_g_buffer_rt1_tex_, 0, 1, 0));
 		}
 		transparency_front_g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
+
+		transparency_front_pre_depth_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*transparency_front_depth_tex_, 0, 1, 0));
+		transparency_front_pre_depth_buffer_->Attach(FrameBuffer::ATT_DepthStencil, transparency_front_ds_view);
 
 		if (rsm_buffer_)
 		{
@@ -692,7 +748,7 @@ namespace KlayGE
 			for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 			{
 				TexturePtr subsplat_ds_tex = rf.MakeTexture2D(indirect_lighting_tex_->Width(i), indirect_lighting_tex_->Height(i),
-					1, 1, ds_fmt, 1, 0,  EAH_GPU_Write, NULL);
+					1, 1, opaque_ds_view->Format(), 1, 0,  EAH_GPU_Write, NULL);
 
 				FrameBufferPtr fb = rf.MakeFrameBuffer();
 				fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*indirect_lighting_tex_, 0, 1, i));
@@ -844,9 +900,9 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		int32_t pass_type = pass_scaned_[pass] >> 28;        //  4 bits, [31 - 28]
-		int32_t org_no = (pass_scaned_[pass] >> 16) & 0xFFF; // 12 bits, [27 - 16]
-		int32_t index_in_pass = pass_scaned_[pass] & 0xFFFF; // 16 bits, [15 -  0]
+		int32_t pass_type = pass_scaned_[pass] >> 24;        //  8 bits, [31 - 24]
+		int32_t org_no = (pass_scaned_[pass] >> 12) & 0xFFF; // 12 bits, [23 - 12]
+		int32_t index_in_pass = pass_scaned_[pass] & 0xFFF;  // 12 bits, [11 -  0]
 
 		if (0 == pass)
 		{
@@ -909,9 +965,12 @@ namespace KlayGE
 			inv_proj_ = MathLib::inverse(proj_);
 			depth_near_far_invfar_ = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 
-			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
-			float2 near_q(camera.NearPlane() * q, q);
-			depth_to_linear_pp_->SetParam(0, near_q);
+			if (depth_texture_)
+			{
+				float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+				float2 near_q(camera.NearPlane() * q, q);
+				depth_to_linear_pp_->SetParam(0, near_q);
+			}
 		}
 
 		if ((pass_type != PT_Lighting) && (pass_type != PT_IndirectLighting)
@@ -948,7 +1007,33 @@ namespace KlayGE
 			}
 		}
 
-		if ((PT_OpaqueGBuffer == pass_type) || (PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyFrontGBuffer == pass_type)
+		if ((PT_OpaqueDepth == pass_type) || (PT_TransparencyBackDepth == pass_type) || (PT_TransparencyFrontDepth == pass_type))
+		{
+			// Pre depth for no depth texture support platforms
+
+			if (PT_OpaqueDepth == pass_type)
+			{
+				re.BindFrameBuffer(opaque_pre_depth_buffer_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 0);
+				return App3DFramework::URV_Need_Flush | App3DFramework::URV_Opaque_Only;
+			}
+			else
+			{
+				if (PT_TransparencyBackDepth == pass_type)
+				{
+					re.BindFrameBuffer(transparency_back_pre_depth_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 0.0f, 128);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+				}
+				else
+				{
+					re.BindFrameBuffer(transparency_front_pre_depth_buffer_);
+					re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil, Color(0, 0, 0, 0), 1.0f, 128);
+					return App3DFramework::URV_Need_Flush | App3DFramework::URV_Transparency_Only;
+				}
+			}
+		}
+		else if ((PT_OpaqueGBuffer == pass_type) || (PT_TransparencyBackGBuffer == pass_type) || (PT_TransparencyFrontGBuffer == pass_type)
 			|| (PT_OpaqueMRTGBuffer == pass_type) || (PT_TransparencyBackMRTGBuffer == pass_type) || (PT_TransparencyFrontMRTGBuffer == pass_type))
 		{
 			if (0 == index_in_pass)
@@ -985,9 +1070,12 @@ namespace KlayGE
 				{
 					opaque_g_buffer_rt0_tex_->BuildMipSubLevels();
 
-					depth_to_linear_pp_->InputPin(0, opaque_ds_tex_);
-					depth_to_linear_pp_->OutputPin(0, opaque_depth_tex_);
-					depth_to_linear_pp_->Apply();
+					if (depth_texture_)
+					{
+						depth_to_linear_pp_->InputPin(0, opaque_ds_tex_);
+						depth_to_linear_pp_->OutputPin(0, opaque_depth_tex_);
+						depth_to_linear_pp_->Apply();
+					}
 
 					opaque_depth_tex_->BuildMipSubLevels();
 
@@ -1004,17 +1092,17 @@ namespace KlayGE
 
 					re.BindFrameBuffer(opaque_lighting_buffer_);
 
-					pass_scaned_.resize(2);
+					pass_scaned_.resize(2 + !depth_texture_);
 
 					if (has_transparency_objs_)
 					{
 						if (mrt_g_buffer_)
 						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 28) + 0));
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 28) + 1));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackMRTGBuffer << 24) + 1));
 
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 28) + 0));
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 28) + 1));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontMRTGBuffer << 24) + 1));
 						}
 					}
 
@@ -1050,22 +1138,36 @@ namespace KlayGE
 									{
 										if (attr & LSA_IndirectLighting)
 										{
-											if (illum_ != 1)
+											if (rsm_buffer_ && (illum_ != 1))
 											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 28) + (i << 16) + 0));
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 28) + (i << 16) + 0));
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenReflectiveShadowMap << 24) + (i << 12) + 0));
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_IndirectLighting << 24) + (i << 12) + 0));
 											}
 											else
 											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+												if (depth_texture_)
+												{
+													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
+												}
+												else
+												{
+													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
+												}
 											}
 										}
 
 										if ((0 == (attr & LSA_NoShadow)) && (0 == (attr & LSA_IndirectLighting)))
 										{
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+											if (depth_texture_)
+											{
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
+											}
+											else
+											{
+												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
+											}
 										}
-										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 0));
 
 										if (light->ConditionalRenderQuery(0))
 										{
@@ -1100,7 +1202,14 @@ namespace KlayGE
 										{
 											if (0 == (attr & LSA_NoShadow))
 											{
-												pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + j));
+												if (depth_texture_)
+												{
+													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + j));
+												}
+												else
+												{
+													pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + j));
+												}
 											}
 
 											if (light->ConditionalRenderQuery(j))
@@ -1127,7 +1236,7 @@ namespace KlayGE
 
 										if (scene_mgr.AABBVisible(AABBox(min, max)))
 										{
-											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 6));
+											pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 6));
 
 											if (light->ConditionalRenderQuery(6))
 											{
@@ -1143,32 +1252,39 @@ namespace KlayGE
 							default:
 								if (0 == (attr & LSA_NoShadow))
 								{
-									pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 28) + (i << 16) + 0));
+									if (depth_texture_)
+									{
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMap << 24) + (i << 12) + 0));
+									}
+									else
+									{
+										pass_scaned_.push_back(static_cast<uint32_t>((PT_GenShadowMapWODepthTexture << 24) + (i << 12) + 0));
+									}
 								}
-								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 28) + (i << 16) + 0));
+								pass_scaned_.push_back(static_cast<uint32_t>((PT_Lighting << 24) + (i << 12) + 0));
 								break;
 							}
 						}
 					}
-					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 28) + 0));
+					pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 0));
 					if (has_transparency_objs_)
 					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 28) + 0));
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 28) + 0));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackShading << 24) + 0));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontShading << 24) + 0));
 					}
 					if (mrt_g_buffer_)
 					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 28) + 0));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 0));
 						if (has_transparency_objs_)
 						{
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 28) + 0));
-							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 28) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyBackSpecialShading << 24) + 0));
+							pass_scaned_.push_back(static_cast<uint32_t>((PT_TransparencyFrontSpecialShading << 24) + 0));
 						}
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 28) + 1));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueSpecialShading << 24) + 1));
 					}
 					else
 					{
-						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 28) + 1));
+						pass_scaned_.push_back(static_cast<uint32_t>((PT_OpaqueShading << 24) + 1));
 					}
 				}
 				else
@@ -1177,9 +1293,12 @@ namespace KlayGE
 					{
 						transparency_back_g_buffer_rt0_tex_->BuildMipSubLevels();
 
-						depth_to_linear_pp_->InputPin(0, transparency_back_ds_tex_);
-						depth_to_linear_pp_->OutputPin(0, transparency_back_depth_tex_);
-						depth_to_linear_pp_->Apply();
+						if (depth_texture_)
+						{
+							depth_to_linear_pp_->InputPin(0, transparency_back_ds_tex_);
+							depth_to_linear_pp_->OutputPin(0, transparency_back_depth_tex_);
+							depth_to_linear_pp_->Apply();
+						}
 
 						transparency_back_depth_tex_->BuildMipSubLevels();
 					}
@@ -1187,9 +1306,12 @@ namespace KlayGE
 					{
 						transparency_front_g_buffer_rt0_tex_->BuildMipSubLevels();
 
-						depth_to_linear_pp_->InputPin(0, transparency_front_ds_tex_);
-						depth_to_linear_pp_->OutputPin(0, transparency_front_depth_tex_);
-						depth_to_linear_pp_->Apply();
+						if (depth_texture_)
+						{
+							depth_to_linear_pp_->InputPin(0, transparency_front_ds_tex_);
+							depth_to_linear_pp_->OutputPin(0, transparency_front_depth_tex_);
+							depth_to_linear_pp_->Apply();
+						}
 
 						transparency_front_depth_tex_->BuildMipSubLevels();
 					}
@@ -1392,12 +1514,15 @@ namespace KlayGE
 
 						if ((PT_GenShadowMap == pass_type) || (PT_GenReflectiveShadowMap == pass_type))
 						{
-							float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
-							float2 near_q(sm_camera->NearPlane() * q, q);
-							depth_to_vsm_pp_->SetParam(0, near_q);
+							if (depth_texture_)
+							{
+								float q = sm_camera->FarPlane() / (sm_camera->FarPlane() - sm_camera->NearPlane());
+								float2 near_q(sm_camera->NearPlane() * q, q);
+								depth_to_vsm_pp_->SetParam(0, near_q);
 							
-							float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
-							depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+								float4x4 inv_sm_proj = MathLib::inverse(sm_camera->ProjMatrix());
+								depth_to_vsm_pp_->SetParam(1, inv_sm_proj);
+							}
 						}
 
 						float3 const & p = light->Position();
@@ -1481,7 +1606,10 @@ namespace KlayGE
 				}
 				else if (PT_IndirectLighting == pass_type)
 				{
-					depth_to_vsm_pp_->Apply();
+					if (depth_texture_)
+					{
+						depth_to_vsm_pp_->Apply();
+					}
 
 					this->ExtractVPLs(rsm_buffer_->GetViewport().camera, light);
 					this->VPLsLighting(light);
@@ -1495,7 +1623,10 @@ namespace KlayGE
 					{
 						if (!((light->Attrib() & LSA_IndirectLighting) && (illum_ != 1)))
 						{
-							depth_to_vsm_pp_->Apply();
+							if (depth_texture_)
+							{
+								depth_to_vsm_pp_->Apply();
+							}
 						}
 
 						if (LT_Point == type)
@@ -1520,7 +1651,7 @@ namespace KlayGE
 					}
 				}
 
-				if (PT_GenShadowMap == pass_type)
+				if ((PT_GenShadowMap == pass_type) || (PT_GenShadowMapWODepthTexture == pass_type))
 				{
 					if (light->ConditionalRenderQuery(index_in_pass))
 					{

@@ -69,7 +69,7 @@ namespace KlayGE
 	void SceneObjectSkyBox::Pass(PassType type)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->Pass(type);
-		this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+		this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
 	}
 
 	SceneObjectHDRSkyBox::SceneObjectHDRSkyBox(uint32_t attrib)
@@ -158,7 +158,7 @@ namespace KlayGE
 	void SceneObjectLightSourceProxy::Pass(PassType type)
 	{
 		renderable_->Pass(type);
-		this->Visible((PT_GenShadowMap != type) && (PT_GenReflectiveShadowMap != type));
+		this->Visible((PT_GenShadowMap != type) && (PT_GenShadowMapWODepthTexture != type) && (PT_GenReflectiveShadowMap != type));
 	}
 
 

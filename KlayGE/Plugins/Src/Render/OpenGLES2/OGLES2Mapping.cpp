@@ -430,10 +430,88 @@ namespace KlayGE
 			break;
 
 		case EF_BC1:
-			if (glloader_GLES_EXT_texture_compression_dxt1())
+			if (glloader_GLES_EXT_texture_compression_dxt1() || glloader_GLES_EXT_texture_compression_s3tc())
 			{
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 				glformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_BC2:
+			if (glloader_GLES_EXT_texture_compression_s3tc())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_BC3:
+			if (glloader_GLES_EXT_texture_compression_s3tc())
+			{
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				glformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_BC4:
+			if (glloader_GLES_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE_LATC1_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_BC5:
+			if (glloader_GLES_EXT_texture_compression_dxt1())
+			{
+				internalFormat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
+				glformat = GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_SIGNED_BC4:
+			if (glloader_GLES_EXT_texture_compression_latc())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT;
+				glformat = GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
+			break;
+
+		case EF_SIGNED_BC5:
+			if (glloader_GLES_EXT_texture_compression_dxt1())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
+				glformat = GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else

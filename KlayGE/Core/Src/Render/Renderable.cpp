@@ -68,6 +68,15 @@ namespace KlayGE
 
 			switch (type_)
 			{
+			case PT_OpaqueDepth:
+			case PT_TransparencyBackDepth:
+			case PT_TransparencyFrontDepth:
+				*diffuse_tex_param_ = diffuse_tex_;
+				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
+				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
+				break;
+
 			case PT_OpaqueGBuffer:
 			case PT_TransparencyBackGBuffer:
 			case PT_TransparencyFrontGBuffer:
@@ -89,6 +98,7 @@ namespace KlayGE
 				break;
 
 			case PT_GenShadowMap:
+			case PT_GenShadowMapWODepthTexture:
 				*diffuse_tex_param_ = diffuse_tex_;
 				break;
 
@@ -236,6 +246,10 @@ namespace KlayGE
 	{
 		deferred_effect_ = deferred_effect;
 			
+		depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
+		depth_alpha_test_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
+		depth_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendBackTech");
+		depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendFrontTech");
 		gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferTech");
 		gbuffer_alpha_test_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestTech");
 		gbuffer_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackTech");
@@ -248,6 +262,8 @@ namespace KlayGE
 		gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 		gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
 		gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+		gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
+		gen_sm_wo_dt_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
 		shading_tech_ = deferred_effect_->TechniqueByName("ShadingTech");
 		shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendBackTech");
 		shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("ShadingAlphaBlendFrontTech");
@@ -281,6 +297,22 @@ namespace KlayGE
 	{
 		switch (type)
 		{
+		case PT_OpaqueDepth:
+			if (need_alpha_test_)
+			{
+				return depth_alpha_test_tech_;
+			}
+			else
+			{
+				return depth_tech_;
+			}
+
+		case PT_TransparencyBackDepth:
+			return depth_alpha_blend_back_tech_;
+
+		case PT_TransparencyFrontDepth:
+			return depth_alpha_blend_front_tech_;
+
 		case PT_OpaqueGBuffer:
 			if (need_alpha_test_)
 			{
@@ -331,6 +363,16 @@ namespace KlayGE
 			else
 			{
 				return gen_sm_tech_;
+			}
+
+		case PT_GenShadowMapWODepthTexture:
+			if (need_alpha_test_)
+			{
+				return gen_sm_wo_dt_alpha_test_tech_;
+			}
+			else
+			{
+				return gen_sm_wo_dt_tech_;
 			}
 
 		case PT_OpaqueShading:

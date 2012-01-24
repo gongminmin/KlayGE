@@ -72,6 +72,59 @@
 #define NOPERSPECTIVE_SUPPORT
 #endif
 
+void DepthVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float3 normal : NORMAL,
+			float4 tangent : TANGENT,
+			out float3 oTexCoordDepth : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oScreenTc : TEXCOORD2,
+#else
+			out float3 oScreenTc : TEXCOORD2,
+#endif
+			out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTexCoordDepth.xy = texcoord;
+	oTexCoordDepth.z = oPos.w;
+	
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= flipping;
+	oScreenTc.xy += 0.5f;
+	
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
+}
+
+float4 DepthPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
+{
+	return texcoord_depth.z;
+}
+
+float4 DepthAlphaTestPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_depth.xy).a - ALPHA_TEST_THRESHOLD);
+	return texcoord_depth.z;
+}
+
+float4 DepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD2
+#else
+					float3 screen_tc_w : TEXCOORD2
+#endif
+		) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
+#endif
+
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).r - texcoord_depth.z);	
+	return texcoord_depth.z;
+}
+
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float3 normal : NORMAL,
@@ -239,6 +292,37 @@ void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Tar
 }
 		]]>
 	</shader>
+
+	<technique name="DepthTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="DepthVS()"/>
+			<state name="pixel_shader" value="DepthPS()"/>
+		</pass>
+	</technique>
+	<technique name="DepthAlphaTestTech" inherit="DepthTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="DepthAlphaTestPS()"/>
+		</pass>
+	</technique>
+	<technique name="DepthAlphaBlendBackTech">
+		<pass name="p0">
+			<state name="depth_func" value="greater"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="DepthVS()"/>
+			<state name="pixel_shader" value="DepthAlphaBlendPS()"/>
+		</pass>
+	</technique>
+	<technique name="DepthAlphaBlendFrontTech" inherit="DepthAlphaBlendBackTech">
+		<pass name="p0">
+			<state name="depth_func" value="less"/>
+
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
 
 	<technique name="GBufferTech">
 		<pass name="p0">
@@ -448,8 +532,46 @@ float4 GenShadowMapPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);	
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
 	return 0;
+}
+
+void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
+						float2 texcoord : TEXCOORD0,
+						out float2 oTc : TEXCOORD0,
+						out float3 oViewDir : TEXCOORD1,
+						out float4 oPos : SV_Position)
+{
+	oPos = mul(pos, mvp);
+	oTc = texcoord;
+	
+	oViewDir = mul(pos, model_view).xyz;
+}
+
+float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	float dist = length(view_dir);
+	
+#ifndef KLAYGE_OPENGLES2
+	float2 dxdy = float2(ddx(dist), ddy(dist));
+#else
+	float2 dxdy = 0;
+#endif
+	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
+}
+
+float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
+	
+	float dist = length(view_dir);
+	
+#ifndef KLAYGE_OPENGLES2
+	float2 dxdy = float2(ddx(dist), ddy(dist));
+#else
+	float2 dxdy = 0;
+#endif
+	return float4(dist, dist * dist + 0.2f * dot(dxdy, dxdy), 0, 1);
 }
 		]]>
 	</shader>
@@ -466,6 +588,20 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 	<technique name="GenShadowMapAlphaTestTech" inherit="GenShadowMapTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="GenShadowMapWODepthTextureTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenShadowMapWODepthTextureVS()"/>
+			<state name="pixel_shader" value="GenShadowMapWODepthTexturePS()"/>
+		</pass>
+	</technique>
+	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
 		</pass>
 	</technique>
 

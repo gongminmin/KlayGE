@@ -124,9 +124,14 @@ namespace KlayGE
 
 	private:
 		bool mrt_g_buffer_;
+		bool depth_texture_;
 
 		RenderEffectPtr g_buffer_effect_;
 		RenderEffectPtr dr_effect_;
+
+		FrameBufferPtr opaque_pre_depth_buffer_;
+		FrameBufferPtr transparency_back_pre_depth_buffer_;
+		FrameBufferPtr transparency_front_pre_depth_buffer_;
 
 		FrameBufferPtr opaque_g_buffer_;
 		TexturePtr opaque_g_buffer_rt0_tex_;

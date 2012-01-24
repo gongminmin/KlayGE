@@ -33,6 +33,9 @@ namespace KlayGE
 {
 	enum PassType
 	{
+		PT_OpaqueDepth,
+		PT_TransparencyBackDepth,
+		PT_TransparencyFrontDepth,
 		PT_OpaqueGBuffer,
 		PT_TransparencyBackGBuffer,
 		PT_TransparencyFrontGBuffer,
@@ -40,6 +43,7 @@ namespace KlayGE
 		PT_TransparencyBackMRTGBuffer,
 		PT_TransparencyFrontMRTGBuffer,
 		PT_GenShadowMap,
+		PT_GenShadowMapWODepthTexture,
 		PT_GenReflectiveShadowMap,
 		PT_Lighting,
 		PT_IndirectLighting,
@@ -144,6 +148,10 @@ namespace KlayGE
 
 		RenderEffectPtr deferred_effect_;
 
+		RenderTechniquePtr depth_tech_;
+		RenderTechniquePtr depth_alpha_test_tech_;
+		RenderTechniquePtr depth_alpha_blend_back_tech_;
+		RenderTechniquePtr depth_alpha_blend_front_tech_;
 		RenderTechniquePtr gbuffer_tech_;
 		RenderTechniquePtr gbuffer_alpha_test_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_tech_;
@@ -154,6 +162,8 @@ namespace KlayGE
 		RenderTechniquePtr gbuffer_alpha_blend_front_mrt_tech_;
 		RenderTechniquePtr gen_sm_tech_;
 		RenderTechniquePtr gen_sm_alpha_test_tech_;
+		RenderTechniquePtr gen_sm_wo_dt_tech_;
+		RenderTechniquePtr gen_sm_wo_dt_alpha_test_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
 		RenderTechniquePtr gen_rsm_alpha_test_tech_;
 		RenderTechniquePtr shading_tech_;
