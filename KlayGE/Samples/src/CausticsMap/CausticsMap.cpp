@@ -59,6 +59,9 @@ namespace
 	};
 
 
+	bool use_gs = false;
+
+
 	class ReceivePlane : public RenderablePlane
 	{
 	public:
@@ -105,22 +108,43 @@ namespace
 			}
 			else
 			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-				fmt = EF_ARGB8;
-
-				for (uint32_t j = 0; j < vertex_num; ++ j)
+				if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
 				{
-					inormal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 255), 0, 255) << 0);
+					fmt = EF_ABGR8;
+
+					for (uint32_t j = 0; j < vertex_num; ++ j)
+					{
+						inormal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 255), 0, 255) << 16);
+					}
+					for (uint32_t j = 0; j < vertex_num; ++ j)
+					{
+						itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 255), 0, 255) << 24);
+					}
 				}
-				for (uint32_t j = 0; j < vertex_num; ++ j)
+				else
 				{
-					itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 255), 0, 255) << 16)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 255), 0, 255) << 8)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 255), 0, 255) << 0)
-						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 255), 0, 255) << 24);
+					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+
+					fmt = EF_ARGB8;
+
+					for (uint32_t j = 0; j < vertex_num; ++ j)
+					{
+						inormal[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].x() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(normals[j].z() * 255), 0, 255) << 0);
+					}
+					for (uint32_t j = 0; j < vertex_num; ++ j)
+					{
+						itangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].x() * 255), 0, 255) << 16)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].y() * 255), 0, 255) << 8)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].z() * 255), 0, 255) << 0)
+							| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(tangents[j].w() * 255), 0, 255) << 24);
+					}
 				}
 			}
 
@@ -467,24 +491,69 @@ namespace
 			}
 
 			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_PointList);
-
-			ElementInitData init_data;
-			init_data.row_pitch = xys.size() * sizeof(xys[0]);
-			init_data.slice_pitch = 0;
-			init_data.data = &xys[0];
-			GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read, &init_data);
-			rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-
-			aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
 
 			RenderEffectPtr effect = rf.LoadEffect("Caustics.fxml");
-			single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMap");
-			BOOST_ASSERT(single_caustics_pass_->Validate());
-			dual_caustics_pass_ = effect->TechniqueByName("GenDualFaceCausticsMap");
-			BOOST_ASSERT(dual_caustics_pass_->Validate());
+			if (use_gs)
+			{
+				rl_->TopologyType(RenderLayout::TT_PointList);
+
+				ElementInitData init_data;
+				init_data.row_pitch = xys.size() * sizeof(xys[0]);
+				init_data.slice_pitch = 0;
+				init_data.data = &xys[0];
+				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMapWithGS");
+				BOOST_ASSERT(single_caustics_pass_->Validate());
+				dual_caustics_pass_ = effect->TechniqueByName("GenDualFaceCausticsMapWithGS");
+				BOOST_ASSERT(dual_caustics_pass_->Validate());
+			}
+			else
+			{
+				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+				ElementInitData init_data;
+				init_data.row_pitch = xys.size() * sizeof(xys[0]);
+				init_data.slice_pitch = 0;
+				init_data.data = &xys[0];
+				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				rl_->BindVertexStream(point_vb, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
+
+				float2 texs[] =
+				{
+					float2(-1.0f, 1.0f),
+					float2(1.0f, 1.0f),
+					float2(-1.0f, -1.0f),
+					float2(1.0f, -1.0f)
+				};
+
+				uint16_t indices[] =
+				{
+					0, 1, 2, 3
+				};
+
+				init_data.row_pitch = sizeof(texs);
+				init_data.slice_pitch = 0;
+				init_data.data = texs;
+				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
+
+				init_data.row_pitch = sizeof(indices);
+				init_data.slice_pitch = 0;
+				init_data.data = indices;
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				rl_->BindIndexStream(ib, EF_R16UI);
+
+				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMap");
+				BOOST_ASSERT(single_caustics_pass_->Validate());
+				dual_caustics_pass_ = effect->TechniqueByName("GenDualFaceCausticsMap");
+				BOOST_ASSERT(dual_caustics_pass_->Validate());
+			}
 
 			point_texture_ = point_texture_loader();
+
+			aabb_ = AABBox(float3(0.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f));
 		}
 
 		void Pass(uint32_t pass)
@@ -494,7 +563,7 @@ namespace
 			{
 				technique_ = single_caustics_pass_;
 			}
-			else if (Dual_Caustics_Pass == pass_)
+			else //if (Dual_Caustics_Pass == pass_)
 			{
 				technique_ = dual_caustics_pass_;
 			}
@@ -597,6 +666,7 @@ bool CausticsMapApp::ConfirmDevice() const
 void CausticsMapApp::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	use_gs = false;//rf.RenderEngineInstance().DeviceCaps().gs_support;
 
 	//Font config
 	font_ = rf.MakeFont("gkai00mp.kfont");
@@ -703,14 +773,27 @@ void CausticsMapApp::InitBuffer()
 		}
 		else
 		{
+			BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+
 			fmt = EF_ARGB8;
 		}
+	}
+	ElementFormat ds_fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D24S8))
+	{
+		ds_fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16));
+
+		ds_fmt = EF_D16;
 	}
 
 	refract_obj_N_texture_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	refract_obj_N_texture_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	refract_obj_depth_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	refract_obj_depth_tex_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	refract_obj_depth_tex_f_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	refract_obj_depth_tex_b_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	if (re.DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
 	{
@@ -721,7 +804,7 @@ void CausticsMapApp::InitBuffer()
 		fmt = EF_ARGB8;
 	}
 	TexturePtr dummy_tex = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	background_depth_tex_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+	background_depth_tex_ = rf.MakeTexture2D(CAUSTICS_GRID_SIZE, CAUSTICS_GRID_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
 	background_fb_ = rf.MakeFrameBuffer();
 	background_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*dummy_tex, 0, 1, 0));
@@ -748,7 +831,18 @@ void CausticsMapApp::InitEnvCube()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	TexturePtr env_cube_depth_tex = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Write, NULL);
+	ElementFormat ds_fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D24S8))
+	{
+		ds_fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_D16));
+
+		ds_fmt = EF_D16;
+	}
+	TexturePtr env_cube_depth_tex = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, ds_fmt, 1, 0, EAH_GPU_Write, NULL);
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		env_cube_tex_ = rf.MakeTextureCube(ENV_CUBE_MAP_SIZE, 1, 1, EF_B10G11R11F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
@@ -774,7 +868,18 @@ void CausticsMapApp::InitCubeSM()
 {	
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, EF_D24S8, 1, 0);
+	ElementFormat ds_fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	{
+		ds_fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+
+		ds_fmt = EF_D16;
+	}
+	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
 	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
@@ -868,12 +973,24 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 		}
 		else
 		{
+			BOOST_ASSERT(re.DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+
 			fmt = EF_ARGB8;
 		}
 	}
 	scene_texture_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	scene_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_texture_, 0, 0, 0));
-	scene_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
+	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	{
+		fmt = EF_D24S8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+
+		fmt = EF_D16;
+	}
+	scene_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, fmt, 1, 0));
 
 	copy_pp_->InputPin(0, scene_texture_);
 }
@@ -995,13 +1112,19 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport().camera = light_->SMCamera(0);
 
-			occlusion_query_->Begin();
+			if (occlusion_query_)
+			{
+				occlusion_query_->Begin();
+			}
 		}
 		return App3DFramework::URV_Need_Flush;
 
 	case 2:
 		{
-			occlusion_query_->End();
+			if (occlusion_query_)
+			{
+				occlusion_query_->End();
+			}
 
 			if (enable_dual_face_caustics_)
 			{
@@ -1031,7 +1154,14 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport().camera = light_->SMCamera(0);
 
-			occlusion_pixs_ = occlusion_query_->SamplesPassed();
+			if (occlusion_query_)
+			{
+				occlusion_pixs_ = occlusion_query_->SamplesPassed();
+			}
+			else
+			{
+				occlusion_pixs_ = 20000;
+			}
 
 			caustics_grid_->Render();
 			caustics_map_pps_->Apply();

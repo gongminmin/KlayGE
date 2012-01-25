@@ -103,9 +103,8 @@ float3 texcoord_to_world(float2 tex)
 	return ttow_z.xyz + tex.x * ttow_x + tex.y * ttow_y;
 }
 
-void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
-									out float4 oPos : POSITION,
-									out float4 oColor : TEXCOORD0)
+void GenSingleFaceCausticsMap(float2 idx,
+						out float4 oPos, out float4 oColor)
 {
 	float depth;
 	float3 view_dir;
@@ -139,14 +138,55 @@ void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
 	oColor = float4(clr, alpha);
 }
 
+void GenSingleFaceCausticsMapVS(float2 idx : POSITION,
+									float2 pos : TEXCOORD0,
+									out float2 oTc : TEXCOORD0,
+									out float4 oColor : TEXCOORD1,
+									out float4 oPos : SV_Position)
+{
+	float4 point_center;
+	GenSingleFaceCausticsMap(idx, point_center, oColor);
+
+	point_center = mul(point_center, light_view);
+	oTc = pos * 0.5f + 0.5f;
+	oPos = mul(float4(point_center.xy + point_size * pos, point_center.zw), light_proj);
+}
+
+void GenSingleFaceCausticsMapVS2(float2 idx : POSITION,
+									out float4 oPos : POSITION,
+									out float4 oColor : TEXCOORD0)
+{
+	GenSingleFaceCausticsMap(idx, oPos, oColor);
+}
+
 float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Target
 {
 	return color * pt_texture.Sample(linear_sampler, tc);
 }
 		]]>
 	</shader>
-	
+
 	<technique name="GenSingleFaceCausticsMap">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="polygon_mode" value="fill"/>
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="GenSingleFaceCausticsMapVS()"/>
+			<state name="pixel_shader" value="GenCausticsMapPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="GenSingleFaceCausticsMapWithGS">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			
@@ -161,7 +201,7 @@ float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Ta
 			<state name="polygon_mode" value="fill"/>
 			<state name="cull_mode" value="none"/>
 			
-			<state name="vertex_shader" value="GenSingleFaceCausticsMapVS()"/>
+			<state name="vertex_shader" value="GenSingleFaceCausticsMapVS2()"/>
 			<state name="geometry_shader" value="PointGS()"/>
 			<state name="pixel_shader" value="GenCausticsMapPS()"/>
 		</pass>
@@ -172,9 +212,8 @@ float4 GenCausticsMapPS(float2 tc : TEXCOORD0, float4 color : TEXCOORD1) : SV_Ta
 	
 	<shader>
 		<![CDATA[
-void GenDualFaceCausticsMapVS(float2 idx : POSITION,
-									out float4 oPos : POSITION,
-									out float4 oColor : TEXCOORD0)
+void GenDualFaceCausticsMap(float2 idx,
+							out float4 oPos, out float4 oColor)
 {
 	float depth;
 	float3 view_dir;
@@ -232,12 +271,38 @@ void GenDualFaceCausticsMapVS(float2 idx : POSITION,
 	oPos = float4(caustics_pt, 1);
 	oColor = float4(clr, alpha);
 }
+
+void GenDualFaceCausticsMapVS(float2 idx : POSITION,
+									float2 pos : TEXCOORD0,
+									out float2 oTc : TEXCOORD0,
+									out float4 oColor : TEXCOORD1,
+									out float4 oPos : SV_Position)
+{
+	float4 point_center;
+	GenDualFaceCausticsMap(idx, point_center, oColor);
+
+	point_center = mul(point_center, light_view);
+	oTc = pos * 0.5f + 0.5f;
+	oPos = mul(float4(point_center.xy + point_size * pos, point_center.zw), light_proj);
+}
+
+void GenDualFaceCausticsMapVS2(float2 idx : POSITION,
+									out float4 oPos : POSITION,
+									out float4 oColor : TEXCOORD0)
+{
+	GenDualFaceCausticsMap(idx, oPos, oColor);
+}
 		]]>
 	</shader>
-	
+
 	<technique name="GenDualFaceCausticsMap" inherit="GenSingleFaceCausticsMap">
 		<pass name="p0">
 			<state name="vertex_shader" value="GenDualFaceCausticsMapVS()"/>
+		</pass>
+	</technique>
+	<technique name="GenDualFaceCausticsMapWithGS" inherit="GenSingleFaceCausticsMapWithGS">
+		<pass name="p0">
+			<state name="vertex_shader" value="GenDualFaceCausticsMapVS2()"/>
 		</pass>
 	</technique>
 </effect>
