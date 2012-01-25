@@ -1482,10 +1482,7 @@ namespace KlayGE
 						if (LT_Spot == type)
 						{
 							dir_es = MathLib::transform_normal(light->Direction(), view_);
-							if (0 == (attr & LSA_NoShadow))
-							{
-								sm_camera = light->SMCamera(0);
-							}
+							sm_camera = light->SMCamera(0);
 						}
 						else
 						{
@@ -1493,10 +1490,7 @@ namespace KlayGE
 							{
 								std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(index_in_pass));
 								dir_es = MathLib::transform_normal(ad.first, view_);
-								if (0 == (attr & LSA_NoShadow))
-								{
-									sm_camera = light->SMCamera(index_in_pass);
-								}
+								sm_camera = light->SMCamera(index_in_pass);
 							}
 						}
 						float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
@@ -1685,7 +1679,10 @@ namespace KlayGE
 						}
 					}
 
-					re.Render(*technique_shadows_[type], *rl);
+					if (0 == (attr & LSA_NoShadow))
+					{
+						re.Render(*technique_shadows_[type], *rl);
+					}
 
 
 					// Lighting

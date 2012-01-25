@@ -208,11 +208,6 @@ bool DeferredRenderingApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
-
 	return true;
 }
 
