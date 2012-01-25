@@ -66,9 +66,6 @@
     <None Include="..\..\media\PostProcessing\NightVisionPP.fxml">
       <Filter>Effects</Filter>
     </None>
-    <None Include="..\..\media\PostProcessing\PostProcessing.fxml">
-      <Filter>Effects</Filter>
-    </None>
     <None Include="..\..\media\PostProcessing\TilingPP.fxml">
       <Filter>Effects</Filter>
     </None>

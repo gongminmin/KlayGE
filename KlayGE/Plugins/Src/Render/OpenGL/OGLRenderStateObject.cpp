@@ -80,6 +80,21 @@ namespace KlayGE
 			glPolygonOffset(desc_.polygon_offset_factor, desc_.polygon_offset_units);
 		}
 
+		if (cur_desc.depth_clip_enable != desc_.depth_clip_enable)
+		{
+			if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_depth_clamp())
+			{
+				if (desc_.depth_clip_enable)
+				{
+					glDisable(GL_DEPTH_CLAMP);
+				}
+				else
+				{
+					glEnable(GL_DEPTH_CLAMP);
+				}
+			}
+		}
+
 		if (cur_desc.scissor_enable != desc_.scissor_enable)
 		{
 			if (desc_.scissor_enable)
