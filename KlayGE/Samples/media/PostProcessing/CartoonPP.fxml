@@ -2,22 +2,9 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
-
-	<shader>
-		<![CDATA[
-float3 GetNormal(float4 ndc)
-{
-	return float3(ndc.xy, -sqrt(1 - dot(ndc.xy, ndc.xy)));
-}
-
-float GetDepth(float4 ndc)
-{
-	return ndc.z;
-}
-		]]>
-	</shader>
 	
 	<parameter type="float2" name="inv_width_height"/>
+	<parameter type="float" name="inv_far"/>
 
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -25,7 +12,8 @@ float GetDepth(float4 ndc)
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="normal_depth_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="color_tex"/>
 
 	<shader>
@@ -52,38 +40,36 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 				float4 tc3 : TEXCOORD3,
 				float4 tc4 : TEXCOORD4) : SV_Target
 {
-	float4 ndc = normal_depth_tex.Sample(point_sampler, tc0);
-	
 	float4 color = color_tex.Sample(point_sampler, tc0);
 	float toon = dot(saturate(color.rgb), float3(0.2126f, 0.7152f, 0.0722f));
 
 	float4 nd[9];
 	// Retrieve normal and depth data for all neighbors.
-	nd[0] = normal_depth_tex.Sample(point_sampler, tc0);
-	nd[1] = normal_depth_tex.Sample(point_sampler, tc1.xy);
-	nd[2] = normal_depth_tex.Sample(point_sampler, tc1.zw);
-	nd[3] = normal_depth_tex.Sample(point_sampler, tc2.xy);
-	nd[4] = normal_depth_tex.Sample(point_sampler, tc2.zw);
-	nd[5] = normal_depth_tex.Sample(point_sampler, tc3.xy);
-	nd[6] = normal_depth_tex.Sample(point_sampler, tc3.zw);
-	nd[7] = normal_depth_tex.Sample(point_sampler, tc4.xy);
-	nd[8] = normal_depth_tex.Sample(point_sampler, tc4.zw);
+	nd[0] = float4(normalize(normal_tex.Sample(point_sampler, tc0).xyz), depth_tex.Sample(point_sampler, tc0).x);
+	nd[1] = float4(normalize(normal_tex.Sample(point_sampler, tc1.xy).xyz), depth_tex.Sample(point_sampler, tc1.xy).x);
+	nd[2] = float4(normalize(normal_tex.Sample(point_sampler, tc1.zw).xyz), depth_tex.Sample(point_sampler, tc1.zw).x);
+	nd[3] = float4(normalize(normal_tex.Sample(point_sampler, tc2.xy).xyz), depth_tex.Sample(point_sampler, tc2.xy).x);
+	nd[4] = float4(normalize(normal_tex.Sample(point_sampler, tc2.zw).xyz), depth_tex.Sample(point_sampler, tc2.zw).x);
+	nd[5] = float4(normalize(normal_tex.Sample(point_sampler, tc3.xy).xyz), depth_tex.Sample(point_sampler, tc3.xy).x);
+	nd[6] = float4(normalize(normal_tex.Sample(point_sampler, tc3.zw).xyz), depth_tex.Sample(point_sampler, tc3.zw).x);
+	nd[7] = float4(normalize(normal_tex.Sample(point_sampler, tc4.xy).xyz), depth_tex.Sample(point_sampler, tc4.xy).x);
+	nd[8] = float4(normalize(normal_tex.Sample(point_sampler, tc4.zw).xyz), depth_tex.Sample(point_sampler, tc4.zw).x);
 
 	// Compute Deltas in Depth.
 	float4 Deltas1;
 	float4 Deltas2;
-	float depth0 = GetDepth(nd[0]);
-	Deltas1.x = GetDepth(nd[1]);
-	Deltas1.y = GetDepth(nd[2]);
-	Deltas1.z = GetDepth(nd[3]);
-	Deltas1.w = GetDepth(nd[4]);
-	Deltas2.x = GetDepth(nd[5]);
-	Deltas2.y = GetDepth(nd[6]);
-	Deltas2.z = GetDepth(nd[7]);
-	Deltas2.w = GetDepth(nd[8]);
+	float depth0 = nd[0].w;
+	Deltas1.x = nd[1].w;
+	Deltas1.y = nd[2].w;
+	Deltas1.z = nd[3].w;
+	Deltas1.w = nd[4].w;
+	Deltas2.x = nd[5].w;
+	Deltas2.y = nd[6].w;
+	Deltas2.z = nd[7].w;
+	Deltas2.w = nd[8].w;
 	// Compute andbsolute gradients from center.
-	Deltas1 = abs(Deltas1 - depth0);
-	Deltas2 = abs(depth0 - Deltas2);
+	Deltas1 = abs(Deltas1 - depth0) * inv_far;
+	Deltas2 = abs(depth0 - Deltas2) * inv_far;
 	// Find min and max gradient, ensuring min != 0
 	float4 maxDeltas = max(Deltas1, Deltas2);
 	float4 minDeltas = max(min(Deltas1, Deltas2), 0.00001);
@@ -95,15 +81,15 @@ float4 PostToonPS(float2 tc0 : TEXCOORD0,
 	// and how sensitive the edge detection should be.
 	float4 depthResults = step(minDeltas * 10.0, maxDeltas);
 	// Compute change in the cosine of the angle between normals.
-	float3 normal0 = GetNormal(nd[0]);
-	Deltas1.x = dot(GetNormal(nd[1]), normal0);
-	Deltas1.y = dot(GetNormal(nd[2]), normal0);
-	Deltas1.z = dot(GetNormal(nd[3]), normal0);
-	Deltas1.w = dot(GetNormal(nd[4]), normal0);
-	Deltas2.x = dot(GetNormal(nd[5]), normal0);
-	Deltas2.y = dot(GetNormal(nd[6]), normal0);
-	Deltas2.z = dot(GetNormal(nd[7]), normal0);
-	Deltas2.w = dot(GetNormal(nd[8]), normal0);
+	float3 normal0 = nd[0].xyz;
+	Deltas1.x = dot(nd[1].xyz, normal0);
+	Deltas1.y = dot(nd[2].xyz, normal0);
+	Deltas1.z = dot(nd[3].xyz, normal0);
+	Deltas1.w = dot(nd[4].xyz, normal0);
+	Deltas2.x = dot(nd[5].xyz, normal0);
+	Deltas2.y = dot(nd[6].xyz, normal0);
+	Deltas2.z = dot(nd[7].xyz, normal0);
+	Deltas2.w = dot(nd[8].xyz, normal0);
 	Deltas1 = abs(Deltas1 - Deltas2);
 	// Compare change in the cosine of the angles, flagging changes
 	// above some constant threshold. The cosine of the angle is not a

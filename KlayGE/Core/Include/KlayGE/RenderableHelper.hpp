@@ -135,6 +135,7 @@ namespace KlayGE
 		virtual void Pass(PassType type);
 
 	protected:
+		RenderEffectParameterPtr depth_far_ep_;
 		RenderEffectParameterPtr inv_mvp_ep_;
 		RenderEffectParameterPtr skybox_cube_tex_ep_;
 	};

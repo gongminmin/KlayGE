@@ -297,7 +297,7 @@ namespace KlayGE
 
 		if (deferred_effect_)
 		{
-			depth_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
+			depth_tech_ = deferred_effect_->TechniqueByName("DepthSkyBoxTech");
 			gbuffer_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxTech");
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSkyBoxMRTTech");
 			shading_tech_ = deferred_effect_->TechniqueByName("ShadingLDRSkyBoxTech");
@@ -305,6 +305,7 @@ namespace KlayGE
 			this->Technique(gbuffer_tech_);
 
 			skybox_cube_tex_ep_ = deferred_effect_->ParameterByName("skybox_tex");
+			depth_far_ep_ = deferred_effect_->ParameterByName("depth_far");
 			inv_mvp_ep_ = deferred_effect_->ParameterByName("inv_mvp");
 
 			special_shading_ = true;
@@ -340,6 +341,7 @@ namespace KlayGE
 	{
 		technique_ = tech;
 		skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
+		depth_far_ep_ = technique_->Effect().ParameterByName("depth_far");
 		inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
 	}
 
@@ -381,6 +383,8 @@ namespace KlayGE
 	{
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
+
+		*depth_far_ep_ = camera.FarPlane();
 
 		float4x4 rot_view = camera.ViewMatrix();
 		rot_view(3, 0) = 0;

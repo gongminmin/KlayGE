@@ -35,6 +35,8 @@ namespace KlayGE
 		void AAEnabled(int aa);
 		void ColorGradingEnabled(bool cg);
 
+		void OutputPin(TexturePtr const & tex);
+
 		void OnResize(uint32_t width, uint32_t height);
 		uint32_t Update(uint32_t pass);
 

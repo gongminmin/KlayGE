@@ -606,6 +606,12 @@ namespace KlayGE
 		color_grading_enabled_ = cg;
 	}
 
+	void DeferredRenderingLayer::OutputPin(TexturePtr const & tex)
+	{
+		color_grading_pp_->OutputPin(0, tex);
+		skip_color_grading_pp_->OutputPin(0, tex);
+	}
+
 	void DeferredRenderingLayer::OnResize(uint32_t width, uint32_t height)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();

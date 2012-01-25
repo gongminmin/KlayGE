@@ -26,7 +26,6 @@
     <File Name="../../media/PostProcessing/CartoonPP.fxml"/>
     <File Name="../../media/PostProcessing/NightVisionPP.fxml"/>
     <File Name="../../media/PostProcessing/OldFashion.fxml"/>
-    <File Name="../../media/PostProcessing/PostProcessing.fxml"/>
     <File Name="../../media/PostProcessing/TilingPP.fxml"/>
   </VirtualDirectory>
   <VirtualDirectory Name="UI">

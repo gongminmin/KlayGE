@@ -279,8 +279,6 @@ namespace
 			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
 			light.Position(MathLib::transform_coord(float3(0, 2.0f, 0), inv_view));
 		}
-
-	private:
 	};
 }
 

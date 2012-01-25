@@ -32,13 +32,13 @@ private:
 	void OldFashionHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
-	KlayGE::SceneObjectPtr torus_;
+	KlayGE::SceneObjectPtr scene_obj_;
 	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::FrameBufferPtr g_buffer_;
-	KlayGE::TexturePtr normal_depth_tex_;
+	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+
 	KlayGE::TexturePtr color_tex_;
 	KlayGE::PostProcessPtr active_pp_;
 	KlayGE::PostProcessPtr copy_;
@@ -58,6 +58,8 @@ private:
 	int id_hdr_;
 	int id_night_vision_;
 	int id_old_fashion_;
+
+	KlayGE::PointLightSourcePtr point_light_;
 };
 
 #endif		// _POSTPROCESSING_HPP

@@ -17,6 +17,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/HDRPostProcess.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -35,91 +36,17 @@ using namespace KlayGE;
 
 namespace
 {
-	class RenderTorus : public StaticMesh
+	class PointLightSourceUpdate
 	{
 	public:
-		RenderTorus(RenderModelPtr model, std::wstring const & /*name*/)
-			: StaticMesh(model, L"Torus"),
-				model_(float4x4::Identity())
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-			technique_ = rf.LoadEffect("PostProcessing.fxml")->TechniqueByName("GBufferTech");
-		}
-
-		void BuildMeshInfo()
+		PointLightSourceUpdate()
 		{
 		}
 
-		void SetModelMatrix(float4x4 const & model)
+		void operator()(LightSource& light)
 		{
-			model_ = model;
-		}
-
-		void OnRenderBegin()
-		{
-			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-
-			float4x4 const & view = camera.ViewMatrix();
-			float4x4 const & proj = camera.ProjMatrix();
-
-			*(technique_->Effect().ParameterByName("model_view")) = model_ * view;
-			*(technique_->Effect().ParameterByName("proj")) = proj;
-
-			*(technique_->Effect().ParameterByName("light_in_eye")) = MathLib::transform_coord(float3(2, 2, -3), view);
-			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
-		}
-
-	private:
-		float4x4 model_;
-	};
-
-	class TorusObject : public SceneObjectHelper
-	{
-	public:
-		TorusObject()
-			: SceneObjectHelper(SOA_Cullable),
-				model_(float4x4::Identity())
-		{
-			renderable_ = SyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderTorus>())->Mesh(0);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-		void Update()
-		{
-			model_ = MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f);
-			checked_pointer_cast<RenderTorus>(renderable_)->SetModelMatrix(model_);
-		}
-
-	private:
-		float4x4 model_;
-		Timer timer_;
-	};
-
-	class RenderableDeferredHDRSkyBox : public RenderableHDRSkyBox
-	{
-	public:
-		RenderableDeferredHDRSkyBox()
-		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			technique_ = rf.LoadEffect("PostProcessing.fxml")->TechniqueByName("GBufferSkyBoxTech");
-
-			skybox_cube_tex_ep_ = technique_->Effect().ParameterByName("skybox_tex");
-			skybox_Ccube_tex_ep_ = technique_->Effect().ParameterByName("skybox_C_tex");
-			inv_mvp_ep_ = technique_->Effect().ParameterByName("inv_mvp");
-		}
-	};
-
-	class SceneObjectDeferredHDRSkyBox : public SceneObjectHDRSkyBox
-	{
-	public:
-		SceneObjectDeferredHDRSkyBox()
-		{
-			renderable_ = MakeSharedPtr<RenderableDeferredHDRSkyBox>();
+			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());
+			light.Position(MathLib::transform_coord(float3(2, 2, -3), inv_view));
 		}
 	};
 
@@ -139,6 +66,11 @@ int main()
 	ResLoader::Instance().AddPath("../../Samples/media/Common");
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
+
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.graphics_cfg.hdr = false;
+	cfg.deferred_rendering = true;
+	Context::Instance().Config(cfg);
 
 	PostProcessingApp app;
 	app.Create();
@@ -160,37 +92,33 @@ bool PostProcessingApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (caps.max_simultaneous_rts < 2)
-	{
-		return false;
-	}
-	if (!caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		return false;
-	}
-
 	return true;
 }
 
 void PostProcessingApp::InitObjects()
 {
-	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
-
-	torus_ = MakeSharedPtr<TorusObject>();
-	torus_->AddToSceneManager();
-
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 100.0f);
 
-	TexturePtr y_cube_map = SyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr c_cube_map = SyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	sky_box_ = MakeSharedPtr<SceneObjectDeferredHDRSkyBox>();
-	checked_pointer_cast<SceneObjectDeferredHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
-	sky_box_->AddToSceneManager();
+	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("dino50.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
+	boost::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	boost::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
 
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-	g_buffer_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-	g_buffer_->GetViewport().camera = renderEngine.CurFrameBuffer()->GetViewport().camera;
+	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
+
+	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	deferred_rendering_->SSVOEnabled(false);
+	deferred_rendering_->HDREnabled(false);
+	deferred_rendering_->AAEnabled(1);
+	deferred_rendering_->ColorGradingEnabled(false);
+
+	point_light_ = MakeSharedPtr<PointLightSource>();
+	point_light_->Attrib(LSA_NoShadow);
+	point_light_->Color(float3(1, 1, 1));
+	point_light_->Position(float3(0, 0, 0));
+	point_light_->Falloff(float3(1, 0, 0));
+	point_light_->BindUpdateFunc(PointLightSourceUpdate());
+	point_light_->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.1f);
 
@@ -231,25 +159,44 @@ void PostProcessingApp::InitObjects()
 	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::NightVisionHandler, this, _1));
 	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(boost::bind(&PostProcessingApp::OldFashionHandler, this, _1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
+
+	RenderModelPtr scene_model = model_ml();
+	scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable);
+	scene_obj_->AddToSceneManager();
+
+	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();
+	checked_pointer_cast<SceneObjectHDRSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl(), c_cube_tl());
+	sky_box_->AddToSceneManager();
 }
 
 void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
+	deferred_rendering_->OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	normal_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	g_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*normal_depth_tex_, 0, 1, 0));
-	g_buffer_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0));
+	ElementFormat fmt;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+
+		fmt = EF_ARGB8;
+	}
+	color_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+
+	deferred_rendering_->OutputPin(color_tex_);
 
 	copy_->InputPin(0, color_tex_);
 
 	ascii_arts_->InputPin(0, color_tex_);
 
-	cartoon_->InputPin(0, normal_depth_tex_);
-	cartoon_->InputPin(1, color_tex_);
+	cartoon_->InputPin(0, deferred_rendering_->OpaqueGBufferRT0Tex());
+	cartoon_->InputPin(1, deferred_rendering_->OpaqueDepthTex());
+	cartoon_->InputPin(2, color_tex_);
 
 	tiling_->InputPin(0, color_tex_);
 
@@ -357,20 +304,18 @@ void PostProcessingApp::DoUpdateOverlay()
 
 uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 {
-	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-	switch (pass)
+	uint32_t ret = deferred_rendering_->Update(pass);
+	if (ret & App3DFramework::URV_Finished)
 	{
-	case 0:
-		renderEngine.BindFrameBuffer(g_buffer_);
-		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 1, 1), 1.0f, 0);
-		return App3DFramework::URV_Need_Flush;
-
-	default:
+		RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		renderEngine.BindFrameBuffer(FrameBufferPtr());
 		renderEngine.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 		active_pp_->Apply();
 
 		return App3DFramework::URV_Skip_Postprocess | App3DFramework::URV_Finished;
+	}
+	else
+	{
+		return ret;
 	}
 }

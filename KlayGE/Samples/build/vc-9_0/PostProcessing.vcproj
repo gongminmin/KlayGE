@@ -416,10 +416,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\media\PostProcessing\PostProcessing.fxml"
-				>
-			</File>
-			<File
 				RelativePath="..\..\media\PostProcessing\TilingPP.fxml"
 				>
 			</File>
