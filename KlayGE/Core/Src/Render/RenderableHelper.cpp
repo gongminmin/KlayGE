@@ -384,7 +384,10 @@ namespace KlayGE
 		App3DFramework const & app = Context::Instance().AppInstance();
 		Camera const & camera = app.ActiveCamera();
 
-		*depth_far_ep_ = camera.FarPlane();
+		if (depth_far_ep_)
+		{
+			*depth_far_ep_ = camera.FarPlane();
+		}
 
 		float4x4 rot_view = camera.ViewMatrix();
 		rot_view(3, 0) = 0;
