@@ -9,6 +9,19 @@
 
 	<shader>
 		<![CDATA[
+void DepthTexWODTVS(float4 pos : POSITION,
+	out float oDepth : TEXCOORD0,
+	out float4 oPos : SV_Position)
+{
+    oPos = mul(pos, mvp);
+	oDepth = oPos.w;
+}  
+
+float4 DepthTexWODTPS(float depth : TEXCOORD0) : SV_Target
+{
+    return depth;
+}
+
 void PosTexVS(float4 pos : POSITION,
 	out float4 oPos : SV_Position)
 {
@@ -21,7 +34,17 @@ float4 PosTexPS() : SV_Target
 }
 		]]>
 	</shader>
-	
+
+	<technique name="DepthTexWODT">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="DepthTexWODTVS()"/>
+			<state name="pixel_shader" value="DepthTexWODTPS()"/>
+		</pass>
+	</technique>
+
 	<technique name="PositionTex">
 		<pass name="p0">
 			<state name="cull_mode" value="back"/>
@@ -50,6 +73,22 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 }
 		]]>
 	</shader>
+
+	<technique name="DepthTexWODTBack">
+		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			<state name="depth_enable" value="true"/>
+
+			<state name="vertex_shader" value="DepthTexWODTVS()"/>
+			<state name="pixel_shader" value="DepthTexWODTPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthTexWODTFront" inherit="DepthTexWODTBack">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
 	
 	<technique name="PosNormTexBack">
 		<pass name="p0">

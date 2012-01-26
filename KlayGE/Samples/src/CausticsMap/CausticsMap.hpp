@@ -78,6 +78,8 @@ private:
 	void ModelSelectionComboBox(KlayGE::UIComboBox const & sender);
 
 private:
+	bool depth_texture_;
+
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController trackball_controller_;
 	KlayGE::SceneObjectPtr light_proxy_;
@@ -96,7 +98,9 @@ private:
 	KlayGE::TexturePtr refract_obj_depth_tex_f_;
 	KlayGE::TexturePtr refract_obj_depth_tex_b_;
 	KlayGE::TexturePtr background_depth_tex_;
-	KlayGE::FrameBufferPtr background_fb_;
+	KlayGE::FrameBufferPtr background_fb_;	
+	KlayGE::FrameBufferPtr refract_obj_fb_d_f_;
+	KlayGE::FrameBufferPtr refract_obj_fb_d_b_;
 	KlayGE::FrameBufferPtr refract_obj_fb_f_;
 	KlayGE::FrameBufferPtr refract_obj_fb_b_;
 

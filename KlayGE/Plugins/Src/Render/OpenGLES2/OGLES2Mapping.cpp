@@ -314,15 +314,16 @@ namespace KlayGE
 			break;
 
 		case EF_A2BGR10:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
-			break;
-
-		case EF_SIGNED_A2BGR10:
-			internalFormat = GL_RGBA;
-			glformat = GL_RGBA;
-			gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+			if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+			{
+				internalFormat = GL_RGBA;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+			}
+			else
+			{
+				THR(boost::system::posix_error::not_supported);
+			}
 			break;
 
 		case EF_R16F:

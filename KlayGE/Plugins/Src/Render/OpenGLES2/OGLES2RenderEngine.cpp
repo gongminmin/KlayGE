@@ -779,6 +779,10 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_ARGB8);
 		}
+		if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+		{
+			texture_format_.insert(EF_A2BGR10);
+		}
 		if (glloader_GLES_OES_texture_half_float())
 		{
 			texture_format_.insert(EF_R16F);
@@ -824,10 +828,10 @@ namespace KlayGE
 		}
 		rendertarget_format_.insert(EF_ABGR8);
 		rendertarget_format_.insert(EF_SIGNED_ABGR8);
-		rendertarget_format_.insert(EF_A2BGR10);
-		rendertarget_format_.insert(EF_SIGNED_A2BGR10);
-		rendertarget_format_.insert(EF_ABGR16);
-		rendertarget_format_.insert(EF_SIGNED_ABGR16);
+		if (glloader_GLES_EXT_texture_type_2_10_10_10_REV())
+		{
+			rendertarget_format_.insert(EF_A2BGR10);
+		}
 		if (glloader_GLES_OES_texture_half_float())
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
