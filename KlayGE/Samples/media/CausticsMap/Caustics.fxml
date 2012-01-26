@@ -56,9 +56,7 @@ void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCO
 
 	<parameter type="texture2D" name="t_first_depth"/>
 	<parameter type="texture2D" name="t_first_normals"/>
-	<parameter type="texture2D" name="t_background_positions"/>
 	<parameter type="texture2D" name="t_background_depth"/>
-	<parameter type="float2" name="near_q"/>
 	<parameter type="sampler" name="point_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
@@ -109,7 +107,7 @@ void GenSingleFaceCausticsMap(float2 idx,
 	float depth;
 	float3 view_dir;
 	
-	depth = non_linear_depth_to_linear(t_first_depth.SampleLevel(point_sampler, idx, 0).x, near_q.x, near_q.y);
+	depth = t_first_depth.SampleLevel(point_sampler, idx, 0).x;
 	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
 	float3 incident_light = view_dir * (depth / ttow_z.w);
 	float3 surface_pt = incident_light + light_pos;
@@ -122,11 +120,11 @@ void GenSingleFaceCausticsMap(float2 idx,
 	//2 steps
 	float2 intersect_uv;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
@@ -218,7 +216,7 @@ void GenDualFaceCausticsMap(float2 idx,
 	float depth;
 	float3 view_dir;
 	
-	depth = non_linear_depth_to_linear(t_first_depth.SampleLevel(point_sampler, idx, 0).x, near_q.x, near_q.y);
+	depth = t_first_depth.SampleLevel(point_sampler, idx, 0).x;
 	view_dir = texcoord_to_world(float2(idx.x, flipping < 0 ? idx.y : 1 - idx.y));
 	float3 incident_light = view_dir * (depth / ttow_z.w);
 	float3 surface_pt = incident_light + light_pos;
@@ -236,11 +234,11 @@ void GenDualFaceCausticsMap(float2 idx,
 	float2 intersect_uv;
 	
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_second_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 
@@ -256,11 +254,11 @@ void GenDualFaceCausticsMap(float2 idx,
 
 	//2 steps second refract
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 	intersect_uv = CalcIntersectionPtUV(surface_pt, caustics_pt, refract_light);
-	depth = non_linear_depth_to_linear(t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x, near_q.x, near_q.y);
+	depth = t_background_depth.SampleLevel(linear_sampler, intersect_uv, 0).x;
 	view_dir = texcoord_to_world(float2(intersect_uv.x, flipping < 0 ? intersect_uv.y : 1 - intersect_uv.y));
 	caustics_pt = view_dir * (depth / ttow_z.w) + light_pos;
 

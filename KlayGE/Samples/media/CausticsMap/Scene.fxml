@@ -94,6 +94,11 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
 	</parameter>
+	<parameter type="sampler" name="linear_border_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="border"/>
+		<state name="address_v" value="border"/>
+	</parameter>
 	<parameter type="float4x4" name="obj_model_to_light_model"/>
 	<parameter type="float4x4" name="obj_model_to_light_view"/>
 
@@ -204,10 +209,9 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
-	if ((lookup_uv.x > 0) && (lookup_uv.x < 1) && (lookup_uv.y > 0) && (lookup_uv.y < 1))
-	{
-		caustics = float4(caustics_tex.SampleLevel(linear_clamp_sampler, lookup_uv + (texUV.xy - texCoord0.xy), 0).xyz + 1, 1);
-	}
+	float2 delta = texUV.xy - texCoord0.xy;
+	lookup_uv += float2(delta.x, -flipping * delta.y);
+	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
 	
 #ifndef KLAYGE_OPENGLES2
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
@@ -260,10 +264,9 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 
 	float4 caustics = 1;
 	float2 lookup_uv = CalcLookupUV(LightProjPos);
-	if ((lookup_uv.x > 0) && (lookup_uv.x < 1) && (lookup_uv.y > 0) && (lookup_uv.y < 1))
-	{
-		caustics = float4(caustics_tex.SampleLevel(linear_clamp_sampler, lookup_uv + (texUV.xy - texCoord0.xy), 0).xyz + 1, 1);
-	}
+	float2 delta = texUV.xy - texCoord0.xy;
+	lookup_uv += float2(delta.x, -flipping * delta.y);
+	caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz + 1, 1);
 
 	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
@@ -321,7 +324,7 @@ float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1,
     float3 reflect_vec = reflect(wViewVec, wNormal);
     float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
 
-    float3 reflected_clr = env_cube.Sample(trilinear_sampler, reflect_vec).xyz;
+    float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -flipping * reflect_vec.y, reflect_vec.z)).xyz;
 
     float dist = 10.0f;
     float3 intersection_pt = wPosition + dist * refract_vec;

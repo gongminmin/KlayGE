@@ -38,10 +38,6 @@ public:
 	{
 		return point_size_;
 	}
-	uint64_t OcclusionQueryResult()
-	{
-		return occlusion_pixs_;
-	}
 	KlayGE::LightSourcePtr GetLightSource()
 	{
 		return light_;
@@ -94,6 +90,9 @@ private:
 
 	KlayGE::TexturePtr refract_obj_N_texture_f_;
 	KlayGE::TexturePtr refract_obj_N_texture_b_;
+	KlayGE::TexturePtr refract_obj_ds_tex_f_;
+	KlayGE::TexturePtr refract_obj_ds_tex_b_;
+	KlayGE::TexturePtr background_ds_tex_;
 	KlayGE::TexturePtr refract_obj_depth_tex_f_;
 	KlayGE::TexturePtr refract_obj_depth_tex_b_;
 	KlayGE::TexturePtr background_depth_tex_;
@@ -105,24 +104,23 @@ private:
 	KlayGE::TexturePtr caustics_texture_filtered_;
 	KlayGE::FrameBufferPtr caustics_fb_;
 	KlayGE::PostProcessPtr caustics_map_pps_;
-	KlayGE::OcclusionQueryPtr occlusion_query_;
-	KlayGE::uint64_t occlusion_pixs_;
 
 	KlayGE::FrameBufferPtr shadow_cube_buffer_;
 	KlayGE::TexturePtr shadow_tex_;
 	KlayGE::TexturePtr shadow_cube_tex_;
 	KlayGE::PostProcessPtr sm_filter_pps_[6];
 
-	KlayGE::FrameBufferPtr env_cube_buffers_[6];
-	KlayGE::RenderViewPtr env_cube_rvs_[6];
-	KlayGE::RenderViewPtr env_cube_depth_rvs_[6];
+	KlayGE::FrameBufferPtr env_cube_buffer_;
+	KlayGE::TexturePtr env_tex_;
 	KlayGE::TexturePtr env_cube_tex_;
+	KlayGE::PostProcessPtr env_filter_pps_[6];
 	KlayGE::LightSourcePtr dummy_light_env_;
 
 	KlayGE::TexturePtr scene_texture_;
 	KlayGE::FrameBufferPtr scene_fb_;
 
 	KlayGE::PostProcessPtr copy_pp_;
+	KlayGE::PostProcessPtr depth_to_linear_pp_;
 
 	KlayGE::SceneObjectPtr plane_object_;
 	KlayGE::SceneObjectPtr refract_obj_;
