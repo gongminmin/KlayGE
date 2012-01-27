@@ -3,7 +3,7 @@
 <gl_extension name="EGL_KHR_stream" reg_no="32">
 	<typedefs>
 		<typedef type="void*" synonym="EGLStreamKHR"/>
-		<typedef type="khronos_uint64_t" synonym="EGLuint64KHR"/>
+		<typedef type="GLuint64" synonym="EGLuint64KHR"/>
 	</typedefs>
 
 	<tokens>	

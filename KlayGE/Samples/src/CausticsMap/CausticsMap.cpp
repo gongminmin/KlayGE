@@ -42,6 +42,8 @@ namespace
 		Position_Pass,
 		Depth_Front_WODT_Pass,
 		Depth_Back_WODT_Pass,
+		Normal_Front_WODT_Pass,
+		Normal_Back_WODT_Pass,
 		Position_Normal_Front_Pass,
 		Position_Normal_Back_Pass,
 		Single_Caustics_Pass,
@@ -313,6 +315,10 @@ namespace
 			BOOST_ASSERT(depth_wodt_tech_f_->Validate());
 			depth_wodt_tech_b_ = effect->TechniqueByName("DepthTexWODTBack");
 			BOOST_ASSERT(depth_wodt_tech_b_->Validate());
+			normal_wodt_tech_f_ = effect->TechniqueByName("NormalTexWODTFront");
+			BOOST_ASSERT(normal_wodt_tech_f_->Validate());
+			normal_wodt_tech_b_ = effect->TechniqueByName("NormalTexWODTBack");
+			BOOST_ASSERT(normal_wodt_tech_b_->Validate());
 			caustics_input_tech_f_ = effect->TechniqueByName("PosNormTexFront");
 			BOOST_ASSERT(caustics_input_tech_f_->Validate());
 			caustics_input_tech_b_ = effect->TechniqueByName("PosNormTexBack");
@@ -357,6 +363,8 @@ namespace
 			{
 			case Depth_Front_WODT_Pass:
 			case Depth_Back_WODT_Pass:
+			case Normal_Front_WODT_Pass:
+			case Normal_Back_WODT_Pass:
 			case Position_Normal_Front_Pass:
 			case Position_Normal_Back_Pass:
 				{
@@ -411,6 +419,14 @@ namespace
 				technique_ = depth_wodt_tech_b_;
 				break;
 
+			case Normal_Front_WODT_Pass:
+				technique_ = normal_wodt_tech_f_;
+				break;
+
+			case Normal_Back_WODT_Pass:
+				technique_ = normal_wodt_tech_b_;
+				break;
+
 			case Position_Normal_Front_Pass:
 				technique_ = caustics_input_tech_f_;
 				break;
@@ -433,6 +449,8 @@ namespace
 		RenderTechniquePtr refract_tech_;
 		RenderTechniquePtr depth_wodt_tech_f_;
 		RenderTechniquePtr depth_wodt_tech_b_;
+		RenderTechniquePtr normal_wodt_tech_f_;
+		RenderTechniquePtr normal_wodt_tech_b_;
 		RenderTechniquePtr caustics_input_tech_f_;
 		RenderTechniquePtr caustics_input_tech_b_;
 		RenderTechniquePtr gen_cube_sm_tech_;
@@ -682,6 +700,11 @@ CausticsMapApp::CausticsMapApp()
 
 bool CausticsMapApp::ConfirmDevice() const
 {
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < 3)
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -1275,10 +1298,10 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			plane_object_->Visible(false);
 			refract_obj_->Visible(true);
 
-			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->Pass(Position_Normal_Front_Pass);
+			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->Pass(Normal_Front_WODT_Pass);
 
 			re.BindFrameBuffer(refract_obj_fb_f_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport().camera = light_->SMCamera(0);
 
 			return App3DFramework::URV_Need_Flush;
@@ -1329,10 +1352,10 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 		if (enable_dual_face_caustics_)
 		{
 			refract_obj_->Visible(true);
-			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->Pass(Position_Normal_Back_Pass);
+			checked_pointer_cast<RefractModel>(refract_obj_->GetRenderable())->Pass(Normal_Back_WODT_Pass);
 
 			re.BindFrameBuffer(refract_obj_fb_b_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport().camera = light_->SMCamera(0);
 			return App3DFramework::URV_Need_Flush;
 		}

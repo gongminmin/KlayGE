@@ -89,6 +89,23 @@ float4 PosNormTexPS(float3 normal : TEXCOORD0) : SV_Target
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
+
+	<technique name="NormalTexWODTBack">
+		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="equal"/>
+
+			<state name="vertex_shader" value="PosNormTexVS()"/>
+			<state name="pixel_shader" value="PosNormTexPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="NormalTexWODTFront" inherit="NormalTexWODTBack">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
 	
 	<technique name="PosNormTexBack">
 		<pass name="p0">
