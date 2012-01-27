@@ -1,6 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/ThrowErr.hpp>
 #include <KlayGE/Util.hpp>
+#include <KlayGE/half.hpp>
 #include <KlayGE/Math.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
@@ -47,6 +48,7 @@ namespace
 {
 	bool use_gs = false;
 	bool use_so = false;
+	bool use_mrt = false;
 
 	int const NUM_PARTICLE = 65536;
 
@@ -111,19 +113,23 @@ namespace
 		}
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 		TexturePtr ret;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		if (caps.max_texture_depth >= vol_size)
 		{
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
-		}
-		else
-		{
-			for (uint32_t i = 0; i < vol_size * vol_size * vol_size; ++ i)
+			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 			{
-				std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, &init_data);
 			}
+			else
+			{
+				for (uint32_t i = 0; i < vol_size * vol_size * vol_size; ++ i)
+				{
+					std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
+				}
 
-			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read, &init_data);
+			}
 		}
 
 		return ret;
@@ -164,13 +170,14 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 
+			RenderEffectPtr effect = rf.LoadEffect("GPUParticleSystem.fxml");
 			if (use_gs)
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
 				if (use_so)
 				{
-					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGSSO");
+					technique_ = effect->TechniqueByName("ParticlesWithGSSO");
 					rl_->NumVertices(max_num_particles);
 				}
 				else
@@ -187,7 +194,7 @@ namespace
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
 					rl_->BindVertexStream(pos, boost::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-					technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("ParticlesWithGS");
+					technique_ = effect->TechniqueByName("ParticlesWithGS");
 				}
 			}
 			else
@@ -220,7 +227,7 @@ namespace
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Particles");
+				technique_ = effect->TechniqueByName("Particles");
 			}
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
@@ -304,13 +311,15 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
 
+			RenderEffectPtr effect = rf.LoadEffect("GPUParticleSystem.fxml");
 			if (use_so)
 			{
 				rl_ = rf.MakeRenderLayout();
 				rl_->TopologyType(RenderLayout::TT_PointList);
 				rl_->NumVertices(max_num_particles);
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("UpdateSO");
+				update_so_tech_ = effect->TechniqueByName("UpdateSO");
+				technique_ = update_so_tech_;
 
 				std::vector<float4> p(max_num_particles_);
 				for (size_t i = 0; i < p.size(); ++ i)
@@ -394,48 +403,85 @@ namespace
 					rl_->BindVertexStream(tex_vb, boost::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 				}
 
-				technique_ = rf.LoadEffect("GPUParticleSystem.fxml")->TechniqueByName("Update");
-
-				std::vector<float4> p(tex_width_ * tex_height_);
-				for (size_t i = 0; i < p.size(); ++ i)
+				if (use_mrt)
 				{
-					p[i] = float4(0, 0, 0, -1);
+					update_mrt_tech_ = effect->TechniqueByName("Update");
+					technique_ = update_mrt_tech_;
+				}
+				else
+				{
+					update_pos_tech_ = effect->TechniqueByName("UpdatePos");
+					update_vel_tech_ = effect->TechniqueByName("UpdateVel");
+					technique_ = update_pos_tech_;
+				}
+
+				std::vector<half> p(tex_width_ * tex_height_ * 4);
+				for (size_t i = 0; i < p.size(); i += 4)
+				{
+					p[i + 0] = half(0.0f);
+					p[i + 1] = half(0.0f);
+					p[i + 2] = half(0.0f);
+					p[i + 3] = half(-1.0f);
 				}
 				ElementInitData pos_init;
 				pos_init.data = &p[0];
-				pos_init.row_pitch = tex_width_ * sizeof(float4);
+				pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
 				pos_init.slice_pitch = 0;
 
-				particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-				particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+				particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+				particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
+				particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-				pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
-				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 1, 0));
-				pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 1, 0));
+				FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
+				if (use_mrt)
+				{
+					pos_vel_rt_buffer_[0] = rf.MakeFrameBuffer();
+					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 1, 0));
+					pos_vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 1, 0));
 
-				pos_vel_rt_buffer_[1] = rf.MakeFrameBuffer();
-				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
-				pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
+					pos_vel_rt_buffer_[1] = rf.MakeFrameBuffer();
+					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
+					pos_vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
 
-				FrameBufferPtr screen_buffer = re.CurFrameBuffer();
-				pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
-					= screen_buffer->GetViewport().camera;
+					pos_vel_rt_buffer_[0]->GetViewport().camera = pos_vel_rt_buffer_[1]->GetViewport().camera
+						= screen_buffer->GetViewport().camera;
+				}
+				else
+				{
+					pos_rt_buffer_[0] = rf.MakeFrameBuffer();
+					pos_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[0], 0, 1, 0));
+
+					vel_rt_buffer_[0] = rf.MakeFrameBuffer();
+					vel_rt_buffer_[0]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_vel_texture_[0], 0, 1, 0));
+
+					pos_rt_buffer_[1] = rf.MakeFrameBuffer();
+					pos_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_pos_texture_[1], 0, 1, 0));
+
+					vel_rt_buffer_[1] = rf.MakeFrameBuffer();
+					vel_rt_buffer_[1]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*particle_vel_texture_[1], 0, 1, 0));
+
+					pos_rt_buffer_[0]->GetViewport().camera = pos_rt_buffer_[1]->GetViewport().camera
+						= vel_rt_buffer_[0]->GetViewport().camera = vel_rt_buffer_[1]->GetViewport().camera
+						= screen_buffer->GetViewport().camera;
+				}
 			
 				for (int i = 0; i < tex_width_ * tex_height_; ++ i)
 				{
 					float const angel = random_gen_() / 0.05f * PI;
 					float const r = random_gen_() * 3;
 
-					p[i] = float4(r * cos(angel), 0.2f + abs(random_gen_()) * 3, r * sin(angel), 0);
+					p[i * 4 + 0] = half(r * cos(angel));
+					p[i * 4 + 1] = half(0.2f + abs(random_gen_()) * 3);
+					p[i * 4 + 2] = half(r * sin(angel));
+					p[i * 4 + 3] = half(0.0f);
 				}
 				ElementInitData vel_init;
 				vel_init.data = &p[0];
-				vel_init.row_pitch = tex_width_ * sizeof(float4);
+				vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 				vel_init.slice_pitch = 0;
 
-				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read, &vel_init);
+				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read, &vel_init);
 				*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
 				particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
@@ -467,10 +513,10 @@ namespace
 
 			float time = 0;
 
-			std::vector<float> time_v(tex_width_ * tex_height_);
+			std::vector<half> time_v(tex_width_ * tex_height_);
 			for (size_t i = 0; i < time_v.size(); ++ i)
 			{
-				time_v[i] = time;
+				time_v[i] = half(time);
 				time += inv_emit_freq_;
 			}
 			ElementInitData init_data;
@@ -480,16 +526,16 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			if (use_so)
 			{
-				init_data.row_pitch = max_num_particles_ * sizeof(float);
+				init_data.row_pitch = max_num_particles_ * sizeof(half);
 
-				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_R32F);
+				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_R16F);
 				*(technique_->Effect().ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
 			}
 			else
 			{
-				init_data.row_pitch = tex_width_ * sizeof(float);
+				init_data.row_pitch = tex_width_ * sizeof(half);
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, &init_data);
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read, &init_data);
 				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -512,15 +558,35 @@ namespace
 				re.BindSOBuffers(particle_rl_[rt_index_]);
 				*particle_pos_buff_param_ = this->PosVB();
 				*particle_vel_buff_param_ = this->VelVB();
+
+				technique_ = update_so_tech_;
 			}
 			else
 			{
-				re.BindFrameBuffer(pos_vel_rt_buffer_[rt_index_]);
+				if (use_mrt)
+				{
+					technique_ = update_mrt_tech_;
+					re.BindFrameBuffer(pos_vel_rt_buffer_[rt_index_]);
+				}
+				else
+				{
+					technique_ = update_pos_tech_;
+					re.BindFrameBuffer(pos_rt_buffer_[rt_index_]);
+				}
+
 				*particle_pos_tex_param_ = this->PosTexture();
 				*particle_vel_tex_param_ = this->VelTexture();
 			}
 
 			this->Render();
+
+			if (!use_so && !use_mrt)
+			{
+				technique_ = update_vel_tech_;
+				re.BindFrameBuffer(vel_rt_buffer_[rt_index_]);
+
+				this->Render();
+			}
 
 			if (use_so)
 			{
@@ -564,6 +630,8 @@ namespace
 		RenderLayoutPtr particle_rl_[2];
 
 		FrameBufferPtr pos_vel_rt_buffer_[2];
+		FrameBufferPtr pos_rt_buffer_[2];
+		FrameBufferPtr vel_rt_buffer_[2];
 
 		bool rt_index_;
 
@@ -572,6 +640,10 @@ namespace
 
 		boost::variate_generator<boost::lagged_fibonacci607, boost::uniform_real<float> > random_gen_;
 
+		RenderTechniquePtr update_so_tech_;
+		RenderTechniquePtr update_mrt_tech_;
+		RenderTechniquePtr update_pos_tech_;
+		RenderTechniquePtr update_vel_tech_;
 		RenderEffectParameterPtr vel_offset_param_;
 		RenderEffectParameterPtr particle_pos_tex_param_;
 		RenderEffectParameterPtr particle_vel_tex_param_;
@@ -595,7 +667,7 @@ namespace
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
-			if (caps.max_shader_model < 4)
+			if (3 == caps.max_shader_model)
 			{
 				TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read, NULL);
 				height_map->CopyToTexture(*height_32f);
@@ -678,22 +750,19 @@ bool GPUParticleSystemApp::ConfirmDevice() const
 	{
 		return false;
 	}
-	if (caps.max_simultaneous_rts < 2)
-	{
-		return false;
-	}
-	if (!(caps.rendertarget_format_support(EF_R32F, 1, 0) || caps.rendertarget_format_support(EF_ABGR32F, 1, 0)))
-	{
-		return false;
-	}
 
 	return true;
 }
 
 void GPUParticleSystemApp::InitObjects()
 {
-	use_gs = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().gs_support;
-	use_so = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps().stream_output_support;
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+
+	use_gs = caps.gs_support;
+	use_so = caps.stream_output_support;
+	use_mrt = caps.max_simultaneous_rts > 1;
 
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
@@ -722,9 +791,6 @@ void GPUParticleSystemApp::InitObjects()
 
 	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height(), terrain_normal());
 	terrain_->AddToSceneManager();
-
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
 
 	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
 	
