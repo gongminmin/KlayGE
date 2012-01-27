@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_stencil_operation_extended" reg_no="413">
+	<tokens>
+		<token name="GL_SET_AMD" value="0x874A"/>
+		<token name="GL_AND" value="0x1501"/>
+		<token name="GL_XOR" value="0x1506"/>
+		<token name="GL_OR" value="0x1507"/>
+		<token name="GL_NOR" value="0x1508"/>
+		<token name="GL_EQUIV" value="0x1509"/>
+		<token name="GL_NAND" value="0x150E"/>
+		<token name="GL_REPLACE_VALUE_AMD" value="0x874B"/>
+		<token name="GL_STENCIL_OP_VALUE_AMD" value="0x874C"/>
+		<token name="GL_STENCIL_BACK_OP_VALUE_AMD" value="0x874D"/>
+	</tokens>
+
+	<functions>
+		<function name="glStencilOpValueAMD" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLuint" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
