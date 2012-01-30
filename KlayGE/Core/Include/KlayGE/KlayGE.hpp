@@ -1,23 +1,32 @@
-// KlayGE.hpp
-// KlayGE 头文件
-// Ver 3.8.0
-// 版权所有(C) 龚敏敏, 2003-2010
-// Homepage: http://www.klayge.org
-//
-// 3.8.0
-// 改成DLL的形式 (2008.10.17)
-//
-// 2.2.0
-// 去掉了Safe*函数 (2004.10.31)
-//
-// 2.1.0
-// 去掉了汇编代码 (2004.4.20)
-//
-// 2.0.0
-// 初次建立 (2003.8.10)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file KlayGE.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #ifndef _KLAYGE_HPP
 #define _KLAYGE_HPP
@@ -30,7 +39,7 @@
 
 #define KLAYGE_NAME			KlayGE
 #define KLAYGE_VER_MAJOR	4
-#define KLAYGE_VER_MINOR	0
+#define KLAYGE_VER_MINOR	1
 #define KLAYGE_VER_RELEASE	0
 #define KLAYGE_VER_STR		KLAYGE_STRINGIZE(KLAYGE_NAME)" "KLAYGE_STRINGIZE(KLAYGE_VER_MAJOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_MINOR)"."KLAYGE_STRINGIZE(KLAYGE_VER_RELEASE)
 
