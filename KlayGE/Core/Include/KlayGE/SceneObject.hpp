@@ -36,6 +36,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#include <boost/function.hpp>
 
 namespace KlayGE
 {
@@ -56,11 +57,14 @@ namespace KlayGE
 
 		RenderablePtr const & GetRenderable() const;
 
+		virtual void SetModelMatrix(float4x4 const & mat);
 		virtual float4x4 const & GetModelMatrix() const;
 		virtual AABBox const & GetBound() const;
 
 		virtual void AddToSceneManager();
 		virtual void DelFromSceneManager();
+
+		void BindUpdateFunc(boost::function<void(SceneObject&)> const & update_func);
 
 		virtual void Update();
 
@@ -85,6 +89,10 @@ namespace KlayGE
 
 		RenderablePtr renderable_;
 		vertex_elements_type instance_format_;
+
+		float4x4 model_;
+
+		boost::function<void(SceneObject&)> update_func_;
 	};
 }
 

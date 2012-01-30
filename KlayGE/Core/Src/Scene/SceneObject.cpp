@@ -27,7 +27,7 @@
 namespace KlayGE
 {
 	SceneObject::SceneObject(uint32_t attrib)
-		: attrib_(attrib)
+		: attrib_(attrib), model_(float4x4::Identity())
 	{
 	}
 
@@ -46,14 +46,28 @@ namespace KlayGE
 		return renderable_->GetBound();
 	}
 
+	void SceneObject::SetModelMatrix(float4x4 const & mat)
+	{
+		model_ = mat;
+		renderable_->SetModelMatrix(model_);
+	}
+
 	float4x4 const & SceneObject::GetModelMatrix() const
 	{
-		static float4x4 iden = float4x4::Identity();
-		return iden;
+		return model_;
+	}
+
+	void SceneObject::BindUpdateFunc(boost::function<void(SceneObject&)> const & update_func)
+	{
+		update_func_ = update_func;
 	}
 
 	void SceneObject::Update()
 	{
+		if (update_func_)
+		{
+			update_func_(*this);
+		}
 	}
 
 	void SceneObject::AddToSceneManager()

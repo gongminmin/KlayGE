@@ -210,7 +210,7 @@ namespace
 
 		void Instance(float4x4 const & mat, Color const & clr)
 		{
-			mat_ = mat;
+			model_ = mat;
 			inst_.clr = clr.ABGR();
 		}
 
@@ -224,25 +224,20 @@ namespace
 			renderable_ = ra;
 		}
 
-		float4x4 const & GetModelMatrix() const
-		{
-			return mat_;
-		}
-
 		void Update()
 		{
-			last_mats_.push_back(mat_);
+			last_mats_.push_back(model_);
 
 			float4x4 matT = MathLib::transpose(last_mats_.front());
 			inst_.last_mat[0] = matT.Row(0);
 			inst_.last_mat[1] = matT.Row(1);
 			inst_.last_mat[2] = matT.Row(2);
 
-			double e = rotate_timer_.elapsed() * 0.3f * -mat_(3, 1);
+			double e = rotate_timer_.elapsed() * 0.3f * -model_(3, 1);
 			rotate_timer_.restart();
-			mat_ *= MathLib::rotation_y(static_cast<float>(e));
+			model_ *= MathLib::rotation_y(static_cast<float>(e));
 
-			matT = MathLib::transpose(mat_);
+			matT = MathLib::transpose(model_);
 			inst_.mat[0] = matT.Row(0);
 			inst_.mat[1] = matT.Row(1);
 			inst_.mat[2] = matT.Row(2);
@@ -255,7 +250,6 @@ namespace
 
 	private:
 		InstData inst_;
-		float4x4 mat_;
 		boost::circular_buffer<float4x4> last_mats_;
 
 		Timer rotate_timer_;

@@ -36,6 +36,22 @@ using namespace KlayGE;
 
 namespace
 {
+	class ObjectUpdate
+	{
+	public:
+		ObjectUpdate()
+		{
+		}
+
+		void operator()(SceneObject& obj)
+		{
+			obj.SetModelMatrix(MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f));
+		}
+
+	private:
+		Timer timer_;
+	};
+
 	class PointLightSourceUpdate
 	{
 	public:
@@ -161,7 +177,8 @@ void PostProcessingApp::InitObjects()
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 
 	RenderModelPtr scene_model = model_ml();
-	scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable);
+	scene_obj_ = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+	scene_obj_->BindUpdateFunc(ObjectUpdate());
 	scene_obj_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectHDRSkyBox>();

@@ -75,12 +75,9 @@ namespace KlayGE
 		void Translation(float x, float y, float z);
 		void Translation(float3 const & t);
 
-		float4x4 const & GetModelMatrix() const;
-
 		void Pass(PassType type);
 
 	protected:
-		float4x4 model_;
 		float4x4 model_scaling_;
 		float4x4 model_translation_;
 
@@ -101,10 +98,7 @@ namespace KlayGE
 		void UpVec(float x, float y, float z);
 		void UpVec(float3 const & t);
 
-		float4x4 const & GetModelMatrix() const;
-
 	protected:
-		float4x4 model_;
 		float3 eye_pos_;
 		float3 look_at_;
 		float3 up_vec_;

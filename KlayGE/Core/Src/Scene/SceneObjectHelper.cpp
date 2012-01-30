@@ -150,11 +150,6 @@ namespace KlayGE
 		model_translation_ = MathLib::translation(t);
 	}
 
-	float4x4 const & SceneObjectLightSourceProxy::GetModelMatrix() const
-	{
-		return model_;
-	}
-
 	void SceneObjectLightSourceProxy::Pass(PassType type)
 	{
 		renderable_->Pass(type);
@@ -205,10 +200,5 @@ namespace KlayGE
 	void SceneObjectCameraProxy::UpVec(float3 const & t)
 	{
 		up_vec_ = t;
-	}
-
-	float4x4 const & SceneObjectCameraProxy::GetModelMatrix() const
-	{
-		return model_;
 	}
 }

@@ -352,11 +352,6 @@ namespace
 			*(effect_->ParameterByName("bleeding_reduce")) = bleeding_reduce;
 		}
 
-		void SetModelMatrix(float4x4 const & model)
-		{
-			model_matrix_ = model;
-		}
-
 		void GenShadowMapPass(bool gen_sm, SM_TYPE sm_type, int pass_index)
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
@@ -424,7 +419,7 @@ namespace
 
 		void OnRenderBegin()
 		{
-			ShadowMapped::OnRenderBegin(model_matrix_, effect_);
+			ShadowMapped::OnRenderBegin(model_mat_, effect_);
 
 			if (smooth_mesh_)
 			{
@@ -478,9 +473,7 @@ namespace
 			StaticMesh::Render();
 		}
 
-	private:
-		float4x4 model_matrix_;
-	
+	private:	
 		RenderEffectPtr effect_;
 
 		bool smooth_mesh_;
@@ -495,26 +488,19 @@ namespace
 	class OccluderObject : public SceneObjectHelper
 	{
 	public:
-		explicit OccluderObject(std::string const & model_name)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
+		explicit OccluderObject(StaticMeshPtr const & mesh)
+			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Moveable)
 		{
-			renderable_ = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())->Mesh(0);
-			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
+			renderable_->SetModelMatrix(model_);
 		}
 
 		void Update()
 		{
 			model_ = MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f);
-			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
+			renderable_->SetModelMatrix(model_);
 		}
 
 	private:
-		float4x4 model_;
 		Timer timer_;
 	};
 
@@ -522,25 +508,10 @@ namespace
 	{
 	public:
 		explicit RoomObject(StaticMeshPtr const & mesh)
-			: SceneObjectHelper(SOA_Cullable | SOA_Moveable)
+			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Moveable)
 		{
-			model_ = float4x4::Identity();
-
-			renderable_ = mesh;
-			checked_pointer_cast<OccluderMesh>(renderable_)->SetModelMatrix(model_);
+			renderable_->SetModelMatrix(model_);
 		}
-
-		void Update()
-		{
-		}
-
-		float4x4 const & GetModelMatrix() const
-		{
-			return model_;
-		}
-
-	private:
-		float4x4 model_;
 	};
 
 
@@ -627,7 +598,7 @@ void ShadowCubeMap::InitObjects()
 	{
 		scene_objs_[i] = MakeSharedPtr<RoomObject>(scene_model->Mesh(i));
 	}
-	scene_objs_.back() = MakeSharedPtr<OccluderObject>("teapot.meshml");
+	scene_objs_.back() = MakeSharedPtr<OccluderObject>(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())->Mesh(0));
 
 	for (size_t i = 0; i < scene_objs_.size(); ++ i)
 	{
