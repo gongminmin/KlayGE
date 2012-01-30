@@ -49,6 +49,10 @@ namespace KlayGE
 		: SceneObject(attrib)
 	{
 		renderable_ = renderable;
+		if (renderable_)
+		{
+			renderable_->SetModelMatrix(model_);
+		}
 	}
 
 	SceneObjectSkyBox::SceneObjectSkyBox(uint32_t attrib)

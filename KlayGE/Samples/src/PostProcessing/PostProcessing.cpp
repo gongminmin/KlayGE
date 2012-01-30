@@ -39,10 +39,6 @@ namespace
 	class ObjectUpdate
 	{
 	public:
-		ObjectUpdate()
-		{
-		}
-
 		void operator()(SceneObject& obj)
 		{
 			obj.SetModelMatrix(MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f));
@@ -55,10 +51,6 @@ namespace
 	class PointLightSourceUpdate
 	{
 	public:
-		PointLightSourceUpdate()
-		{
-		}
-
 		void operator()(LightSource& light)
 		{
 			float4x4 inv_view = MathLib::inverse(Context::Instance().AppInstance().ActiveCamera().ViewMatrix());

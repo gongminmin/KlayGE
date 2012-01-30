@@ -485,33 +485,16 @@ namespace
 		GraphicsBufferPtr bindable_ib_;
 	};
 
-	class OccluderObject : public SceneObjectHelper
+	class OccluderObjectUpdate
 	{
 	public:
-		explicit OccluderObject(StaticMeshPtr const & mesh)
-			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Moveable)
+		void operator()(SceneObject& obj)
 		{
-			renderable_->SetModelMatrix(model_);
-		}
-
-		void Update()
-		{
-			model_ = MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f);
-			renderable_->SetModelMatrix(model_);
+			obj.SetModelMatrix(MathLib::scaling(5.0f, 5.0f, 5.0f) * MathLib::translation(5.0f, 5.0f, 0.0f) * MathLib::rotation_y(-static_cast<float>(timer_.elapsed()) / 1.5f));
 		}
 
 	private:
 		Timer timer_;
-	};
-
-	class RoomObject : public SceneObjectHelper
-	{
-	public:
-		explicit RoomObject(StaticMeshPtr const & mesh)
-			: SceneObjectHelper(mesh, SOA_Cullable | SOA_Moveable)
-		{
-			renderable_->SetModelMatrix(model_);
-		}
 	};
 
 
@@ -586,6 +569,7 @@ void ShadowCubeMap::InitObjects()
 	font_ = rf.MakeFont("gkai00mp.kfont");
 
 	boost::function<RenderModelPtr()> model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	boost::function<RenderModelPtr()> teapot_ml = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.01f, 500);
@@ -596,9 +580,10 @@ void ShadowCubeMap::InitObjects()
 	scene_objs_.resize(scene_model->NumMeshes() + 1);
 	for (size_t i = 0; i < scene_model->NumMeshes(); ++ i)
 	{
-		scene_objs_[i] = MakeSharedPtr<RoomObject>(scene_model->Mesh(i));
+		scene_objs_[i] = MakeSharedPtr<SceneObjectHelper>(scene_model->Mesh(i), SceneObject::SOA_Cullable);
 	}
-	scene_objs_.back() = MakeSharedPtr<OccluderObject>(SyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>())->Mesh(0));
+	scene_objs_.back() = MakeSharedPtr<SceneObjectHelper>(teapot_ml()->Mesh(0), SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
+	scene_objs_.back()->BindUpdateFunc(OccluderObjectUpdate());
 
 	for (size_t i = 0; i < scene_objs_.size(); ++ i)
 	{
