@@ -6,7 +6,7 @@
   <Project Name="Core" Path="Core.project" Active="No"/>
   <Project Name="DSound Audio System" Path="DSound.project"/>
   <Project Name="OCTree Scene Management" Path="OCTree.project"/>
-  <Project Name="OpenGL ES 2 Rendering System" Path="OpenGLES2.project" Active="No"/>
+  <Project Name="OpenGL ES Rendering System" Path="OpenGLES.project" Active="No"/>
   <Project Name="DShow Show System" Path="DShow.project"/>
   <Project Name="KGEConfig" Path="KGEConfig.project" Active="Yes"/>
   <Project Name="OpenGL Rendering System" Path="OpenGL.project"/>

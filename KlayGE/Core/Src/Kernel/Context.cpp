@@ -36,7 +36,7 @@
 #include <fstream>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-#include <KlayGE/OpenGLES2/OGLES2RenderFactory.hpp>
+#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 #endif
 

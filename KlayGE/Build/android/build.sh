@@ -6,9 +6,9 @@ cd Core
 ./build.sh
 cd ..
 
-echo "Building KlayGE OpenGLES2 plugin..."
+echo "Building KlayGE OpenGLES plugin..."
 
-cd Plugins/Render/OpenGLES2
+cd Plugins/Render/OpenGLES
 ./build.sh
 cd ../../..
 

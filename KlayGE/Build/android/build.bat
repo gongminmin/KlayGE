@@ -4,9 +4,9 @@ cd Core
 call build.bat
 cd ..
 
-echo "Building KlayGE OpenGLES2 plugin..."
+echo "Building KlayGE OpenGLES plugin..."
 
-cd Plugins/Render/OpenGLES2
+cd Plugins/Render/OpenGLES
 call build.bat
 cd ../../..
 
