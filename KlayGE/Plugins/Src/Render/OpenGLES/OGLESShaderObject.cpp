@@ -1330,70 +1330,77 @@ namespace KlayGE
 						ResIdentifierPtr bin_res = ResLoader::Instance().Open(fxml_bin_name);
 						if (bin_res)
 						{
-							uint32_t fourcc;
-							bin_res->read(&fourcc, sizeof(fourcc));
-							if (fourcc != MakeFourCC<'F', 'X', 'M', 'L'>::value)
+							if (effect.Timestamp() < bin_res->Timestamp())
 							{
-								recompile_cg = true;
-							}
-							else
-							{
-								uint32_t ver;
-								bin_res->read(&ver, sizeof(ver));
-								if (ver != 1)
+								uint32_t fourcc;
+								bin_res->read(&fourcc, sizeof(fourcc));
+								if (fourcc != MakeFourCC<'F', 'X', 'M', 'L'>::value)
 								{
 									recompile_cg = true;
 								}
 								else
 								{
-									uint32_t len;
-									bin_res->read(&len, sizeof(len));
-									(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len, '\0');
-									bin_res->read(&(*(*glsl_srcs_)[type])[0], len);
-
-									uint32_t num;
-									bin_res->read(&num, sizeof(num));
-									(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
-									for (size_t i = 0; i < num; ++ i)
+									uint32_t ver;
+									bin_res->read(&ver, sizeof(ver));
+									if (ver != 1)
 									{
-										bin_res->read(&len, sizeof(len));
-											
-										(*(*pnames_)[type])[i].resize(len);
-										bin_res->read(&(*(*pnames_)[type])[i][0], len);
+										recompile_cg = true;
 									}
-
-									bin_res->read(&num, sizeof(num));
-									(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
-									for (size_t i = 0; i < num; ++ i)
+									else
 									{
+										uint32_t len;
 										bin_res->read(&len, sizeof(len));
+										(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(len, '\0');
+										bin_res->read(&(*(*glsl_srcs_)[type])[0], len);
+
+										uint32_t num;
+										bin_res->read(&num, sizeof(num));
+										(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
+										for (size_t i = 0; i < num; ++ i)
+										{
+											bin_res->read(&len, sizeof(len));
 											
-										(*(*glsl_res_names_)[type])[i].resize(len);
-										bin_res->read(&(*(*glsl_res_names_)[type])[i][0], len);
-									}
+											(*(*pnames_)[type])[i].resize(len);
+											bin_res->read(&(*(*pnames_)[type])[i][0], len);
+										}
 
-									bin_res->read(&num, sizeof(num));
-									vs_usages_->resize(num);
-									bin_res->read(&(*vs_usages_)[0], num * sizeof((*vs_usages_)[0]));
-
-									bin_res->read(&num, sizeof(num));
-									vs_usage_indices_->resize(num);
-									bin_res->read(&(*vs_usage_indices_)[0], num * sizeof((*vs_usage_indices_)[0]));
-
-									bin_res->read(&num, sizeof(num));
-									glsl_vs_attrib_names_->resize(num);
-									for (size_t i = 0; i < num; ++ i)
-									{
-										bin_res->read(&len, sizeof(len));
+										bin_res->read(&num, sizeof(num));
+										(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num);
+										for (size_t i = 0; i < num; ++ i)
+										{
+											bin_res->read(&len, sizeof(len));
 											
-										(*glsl_vs_attrib_names_)[i].resize(len);
-										bin_res->read(&(*glsl_vs_attrib_names_)[i][0], len);
-									}
+											(*(*glsl_res_names_)[type])[i].resize(len);
+											bin_res->read(&(*(*glsl_res_names_)[type])[i][0], len);
+										}
 
-									recompile_cg = false;
+										bin_res->read(&num, sizeof(num));
+										vs_usages_->resize(num);
+										bin_res->read(&(*vs_usages_)[0], num * sizeof((*vs_usages_)[0]));
+
+										bin_res->read(&num, sizeof(num));
+										vs_usage_indices_->resize(num);
+										bin_res->read(&(*vs_usage_indices_)[0], num * sizeof((*vs_usage_indices_)[0]));
+
+										bin_res->read(&num, sizeof(num));
+										glsl_vs_attrib_names_->resize(num);
+										for (size_t i = 0; i < num; ++ i)
+										{
+											bin_res->read(&len, sizeof(len));
+											
+											(*glsl_vs_attrib_names_)[i].resize(len);
+											bin_res->read(&(*glsl_vs_attrib_names_)[i][0], len);
+										}
+
+										recompile_cg = false;
+									}
 								}
 							}
-
+							else
+							{
+								recompile_cg = true;
+							}
+							
 							bin_res.reset();
 						}
 						else

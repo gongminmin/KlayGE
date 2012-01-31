@@ -479,6 +479,10 @@ namespace KlayGE
 		{
 			return *res_name_;
 		}
+		uint64_t Timestamp() const
+		{
+			return timestamp_;
+		}
 
 		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
 		{
@@ -545,6 +549,7 @@ namespace KlayGE
 
 	private:
 		boost::shared_ptr<std::string> res_name_;
+		uint64_t timestamp_;
 
 		std::vector<RenderEffectParameterPtr> params_;
 		boost::shared_ptr<std::vector<std::pair<std::string, std::vector<uint32_t> > > > cbuffers_;

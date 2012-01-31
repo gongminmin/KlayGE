@@ -1522,6 +1522,7 @@ namespace KlayGE
 		if (source)
 		{
 			res_name_ = MakeSharedPtr<std::string>(source->ResName());
+			timestamp_ = source->Timestamp();
 
 			shader_descs_ = MakeSharedPtr<BOOST_TYPEOF(*shader_descs_)>(1);
 
@@ -1650,6 +1651,9 @@ namespace KlayGE
 	RenderEffectPtr RenderEffect::Clone()
 	{
 		RenderEffectPtr ret = MakeSharedPtr<RenderEffect>();
+
+		ret->res_name_ = res_name_;
+		ret->timestamp_ = timestamp_;
 
 		ret->prototype_effect_ = prototype_effect_;
 		ret->macros_ = macros_;
