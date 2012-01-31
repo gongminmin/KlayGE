@@ -19,6 +19,7 @@
 #include <KlayGE/OpenGLES/OGLESFrameBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderLayout.hpp>
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>
+#include <KlayGE/OpenGLES/OGLESQuery.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderView.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
@@ -89,7 +90,14 @@ namespace KlayGE
 
 	QueryPtr OGLESRenderFactory::MakeConditionalRender()
 	{
-		return QueryPtr();
+		if (glloader_GLES_EXT_occlusion_query_boolean())
+		{
+			return MakeSharedPtr<OGLESConditionalRender>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
 	}
 
 	RenderViewPtr OGLESRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)

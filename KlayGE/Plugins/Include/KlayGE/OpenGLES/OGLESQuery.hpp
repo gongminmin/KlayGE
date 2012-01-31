@@ -1,5 +1,5 @@
-// OGLQuery.hpp
-// KlayGE OpenGL遮挡检测类 实现文件
+// OGLESQuery.hpp
+// KlayGE OpenGL ES遮挡检测类 实现文件
 // Ver 3.0.0
 // 版权所有(C) 龚敏敏, 2005
 // Homepage: http://www.klayge.org
@@ -10,8 +10,8 @@
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _OGLQUERY_HPP
-#define _OGLQUERY_HPP
+#ifndef _OGLESQUERY_HPP
+#define _OGLESQUERY_HPP
 
 #pragma once
 
@@ -19,26 +19,11 @@
 
 namespace KlayGE
 {
-	class OGLOcclusionQuery : public OcclusionQuery
+	class OGLESConditionalRender : public ConditionalRender
 	{
 	public:
-		OGLOcclusionQuery();
-		~OGLOcclusionQuery();
-
-		void Begin();
-		void End();
-
-		uint64_t SamplesPassed();
-
-	private:
-		GLuint query_;
-	};
-
-	class OGLConditionalRender : public ConditionalRender
-	{
-	public:
-		OGLConditionalRender();
-		~OGLConditionalRender();
+		OGLESConditionalRender();
+		~OGLESConditionalRender();
 
 		void Begin();
 		void End();

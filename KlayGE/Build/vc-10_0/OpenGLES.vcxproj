@@ -202,6 +202,7 @@
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESFrameBuffer.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESGraphicsBuffer.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESMapping.cpp" />
+    <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESQuery.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESRenderEngine.cpp" />
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESRenderFactory.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -224,6 +225,7 @@
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESFrameBuffer.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESGraphicsBuffer.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESMapping.hpp" />
+    <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESQuery.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESRenderEngine.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESRenderFactory.hpp" />
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESRenderFactoryInternal.hpp" />

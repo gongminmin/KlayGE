@@ -357,6 +357,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\Plugins\Src\Render\OpenGLES\OGLESQuery.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Plugins\Src\Render\OpenGLES\OGLESRenderEngine.cpp"
 				>
 			</File>
@@ -452,6 +456,10 @@
 			</File>
 			<File
 				RelativePath="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESMapping.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESQuery.hpp"
 				>
 			</File>
 			<File

@@ -11,6 +11,7 @@
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESFrameBuffer.cpp"/>
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESGraphicsBuffer.cpp"/>
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESMapping.cpp"/>
+    <File Name="../../Plugins/Src/Render/OpenGLES/OGLESQuery.cpp"/>
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESRenderEngine.cpp"/>
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESRenderFactory.cpp"/>
     <File Name="../../Plugins/Src/Render/OpenGLES/OGLESRenderLayout.cpp"/>
@@ -28,6 +29,7 @@
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESFrameBuffer.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESMapping.hpp"/>
+    <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESQuery.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESRenderEngine.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESRenderFactory.hpp"/>
     <File Name="../../Plugins/Include/KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp"/>

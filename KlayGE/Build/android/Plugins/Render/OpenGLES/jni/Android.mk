@@ -16,6 +16,7 @@ LOCAL_SRC_FILES := \
 		OGLESFrameBuffer.cpp \
 		OGLESGraphicsBuffer.cpp \
 		OGLESMapping.cpp \
+		OGLESQuery.cpp \
 		OGLESRenderEngine.cpp \
 		OGLESRenderFactory.cpp \
 		OGLESRenderLayout.cpp \

@@ -56,6 +56,9 @@
     <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESTextureCube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Plugins\Src\Render\OpenGLES\OGLESQuery.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESFrameBuffer.hpp">
@@ -92,6 +95,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESTexture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Plugins\Include\KlayGE\OpenGLES\OGLESQuery.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
