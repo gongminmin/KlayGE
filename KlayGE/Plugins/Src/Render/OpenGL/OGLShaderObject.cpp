@@ -105,22 +105,38 @@ namespace
 	char const * predefined_funcs = "\n									\
 	float4 tex1DLevel(sampler1D s, float location, float lod)\n			\
 	{\n																	\
+	#if KLAYGE_NO_TEX_LOD\n												\
+		return tex1D(s, location);\n									\
+	#else\n																\
 		return tex1Dlod(s, float4(location, 0, 0, lod));\n				\
+	#endif\n															\
 	}\n																	\
 	\n																	\
 	float4 tex2DLevel(sampler2D s, float2 location, float lod)\n		\
 	{\n																	\
+	#if KLAYGE_NO_TEX_LOD\n												\
+		return tex2D(s, location);\n									\
+	#else\n																\
 		return tex2Dlod(s, float4(location, 0, lod));\n					\
+	#endif\n															\
 	}\n																	\
 	\n																	\
 	float4 tex3DLevel(sampler3D s, float3 location, float lod)\n		\
 	{\n																	\
+	#if KLAYGE_NO_TEX_LOD\n												\
+		return tex3D(s, location);\n									\
+	#else\n																\
 		return tex3Dlod(s, float4(location, lod));\n					\
+	#endif\n															\
 	}\n																	\
 	\n																	\
 	float4 texCUBELevel(samplerCUBE s, float3 location, float lod)\n	\
 	{\n																	\
+	#if KLAYGE_NO_TEX_LOD\n												\
+		return texCUBE(s, location);\n									\
+	#else\n																\
 		return texCUBElod(s, float4(location, lod));\n					\
+	#endif\n															\
 	}\n																	\
 	\n																	\
 	\n																	\
@@ -1535,6 +1551,7 @@ namespace KlayGE
 		args.push_back(max_sm_str.c_str());
 		args.push_back(max_tex_array_str.c_str());
 		args.push_back(max_tex_depth_str.c_str());
+		args.push_back(NULL);
 		if (!re.DeviceCaps().texture_format_support(EF_BC5))
 		{
 			args.push_back("-DKLAYGE_BC5_AS_AG");
@@ -1650,6 +1667,14 @@ namespace KlayGE
 							profile = CG_PROFILE_UNKNOWN;
 							break;
 						}
+
+						std::string no_tex_lod_str;
+						{
+							std::stringstream ss;
+							ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : ((glloader_GL_VERSION_2_1() || glloader_GL_ARB_shader_texture_lod()) ? 0 : 1));
+							no_tex_lod_str = ss.str();
+						}
+						args[4] = no_tex_lod_str.c_str();
 
 						CGprogram cg_shader = cgCreateProgram(CGContextIniter::Instance().Context(),
 								CG_SOURCE, shader_text.c_str(), profile, sd.func_name.c_str(), &args[0]);
