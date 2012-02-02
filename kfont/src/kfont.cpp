@@ -1,6 +1,7 @@
 #include <kfont/kfont.hpp>
 
 #include <fstream>
+#include <cstring>
 #include <algorithm>
 
 #include <boost/assert.hpp>
@@ -121,11 +122,13 @@ namespace KlayGE
 		std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
 		kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]), static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
 
-		BOOST_FOREACH(BOOST_TYPEOF(temp_char_index)::reference ci, temp_char_index)
+		typedef BOOST_TYPEOF(temp_char_index) TCIType;
+		BOOST_FOREACH(TCIType::reference ci, temp_char_index)
 		{
 			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
 		}
-		BOOST_FOREACH(BOOST_TYPEOF(temp_char_advance)::reference ca, temp_char_advance)
+		typedef BOOST_TYPEOF(temp_char_advance) TCAType;
+		BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
 		{
 			BOOST_AUTO(iter, char_index_advance_.find(ca.first));
 			if (iter != char_index_advance_.end())
@@ -179,7 +182,8 @@ namespace KlayGE
 
 			std::vector<std::pair<int32_t, int32_t> > temp_char_index;
 			std::vector<std::pair<int32_t, uint32_t> > temp_char_advance;
-			BOOST_FOREACH(BOOST_TYPEOF(char_index_advance_)::reference ci, char_index_advance_)
+			typedef BOOST_TYPEOF(char_index_advance_) CIAType;
+			BOOST_FOREACH(CIAType::reference ci, char_index_advance_)
 			{
 				if (ci.second.first != -1)
 				{
@@ -342,7 +346,8 @@ namespace KlayGE
 	void KFont::Compact()
 	{
 		std::vector<int32_t> chars;
-		BOOST_FOREACH(BOOST_TYPEOF(char_index_advance_)::reference cia, char_index_advance_)
+		typedef BOOST_TYPEOF(char_index_advance_) CIAType;
+		BOOST_FOREACH(CIAType::reference cia, char_index_advance_)
 		{
 			chars.push_back(cia.first);
 		}
@@ -353,7 +358,8 @@ namespace KlayGE
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;
 		std::vector<uint8_t> new_distances_lzma;
-		BOOST_FOREACH(BOOST_TYPEOF(chars)::reference ch, chars)
+		typedef BOOST_TYPEOF(chars) CharsType;
+		BOOST_FOREACH(CharsType::reference ch, chars)
 		{
 			std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
 			int32_t new_ci;
