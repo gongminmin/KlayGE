@@ -70,47 +70,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API KFontLoader
-	{
-	public:
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(push, 1)
-#endif
-		struct font_info
-		{
-			int16_t top;
-			int16_t left;
-			uint16_t width;
-			uint16_t height;
-		};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(pop)
-#endif
-
-	public:
-		explicit KFontLoader(std::string const & font_name);
-
-		uint32_t CharSize() const;
-		int16_t DistBase() const;
-		int16_t DistScale() const;
-
-		std::pair<int32_t, uint32_t> const & CharIndexAdvance(wchar_t ch) const;
-		int32_t CharIndex(wchar_t ch) const;
-		uint32_t CharAdvance(wchar_t ch) const;
-
-		font_info const & CharInfo(int32_t offset) const;
-		void DistanceData(uint8_t* p, uint32_t pitch, int32_t offset) const;
-
-	private:
-		uint32_t char_size_;
-		int16_t dist_base_;
-		int16_t dist_scale_;
-		boost::unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
-			boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance_;
-		std::vector<font_info> char_info_;
-		std::vector<size_t> distances_addr_;
-		std::vector<uint8_t> distances_lzma_;
-	};
+	class KFont;
 
 	class KLAYGE_CORE_API FontRenderable : public RenderableHelper
 	{
@@ -192,7 +152,7 @@ namespace KlayGE
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr mvp_ep_;
 
-		KFontLoader kfont_loader_;
+		boost::shared_ptr<KFont> kfont_loader_;
 
 		uint64_t tick_;
 	};

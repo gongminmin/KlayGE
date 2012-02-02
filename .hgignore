@@ -29,6 +29,16 @@ glloader/src/glloader_gl.c
 glloader/src/glloader_gles.c
 glloader/src/glloader_glx.c
 glloader/src/glloader_wgl.c
+kfont/Debug/
+kfont/Release/
+kfont/build/android/obj/
+kfont/build/codelite/*.mk
+kfont/build/codelite/*.tags
+kfont/build/codelite/*.session
+kfont/build/codelite/.build-*
+kfont/build/codelite/*.txt
+kfont/build/vc-10_0/ipch/
+kfont/lib/
 KlayGE/Debug/
 KlayGE/Release/
 KlayGE/lib/
@@ -43,8 +53,8 @@ KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*.pyc
 KlayGE/Build/android/Core/obj
-KlayGE/Build/android/Plugins/Render/OpenGLES2/libs
-KlayGE/Build/android/Plugins/Render/OpenGLES2/obj
+KlayGE/Build/android/Plugins/Render/OpenGLES/libs
+KlayGE/Build/android/Plugins/Render/OpenGLES/obj
 KlayGE/Build/android/Plugins/Scene/OCTree/libs
 KlayGE/Build/android/Plugins/Scene/OCTree/obj
 KlayGE/Build/codelite/*.mk

@@ -75,185 +75,23 @@
 #include <boost/typeof/typeof.hpp>
 #include <boost/foreach.hpp>
 
+#include <kfont/kfont.hpp>
+
 #include <KlayGE/Font.hpp>
 
 using namespace std;
 
 namespace KlayGE
 {
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(push, 1)
-#endif
-	struct kfont_header
-	{
-		uint32_t fourcc;
-		uint32_t version;
-		uint32_t start_ptr;
-		uint32_t validate_chars;
-		uint32_t non_empty_chars;
-		uint32_t char_size;
-
-		int16_t base;
-		int16_t scale;
-	};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#pragma pack(pop)
-#endif
-
-	KFontLoader::KFontLoader(std::string const & font_name)
-	{
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_name);
-		BOOST_ASSERT(kfont_input);
-
-		kfont_header header;
-		kfont_input->read(&header, sizeof(header));
-		LittleEndianToNative<sizeof(header.fourcc)>(&header.fourcc);
-		LittleEndianToNative<sizeof(header.version)>(&header.version);
-		LittleEndianToNative<sizeof(header.start_ptr)>(&header.start_ptr);
-		LittleEndianToNative<sizeof(header.validate_chars)>(&header.validate_chars);
-		LittleEndianToNative<sizeof(header.non_empty_chars)>(&header.non_empty_chars);
-		LittleEndianToNative<sizeof(header.char_size)>(&header.char_size);
-		LittleEndianToNative<sizeof(header.base)>(&header.base);
-		LittleEndianToNative<sizeof(header.scale)>(&header.scale);
-		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
-		BOOST_ASSERT((2 == header.version));
-
-		char_size_ = header.char_size;
-		dist_base_ = header.base;
-		dist_scale_ = header.scale;
-
-		kfont_input->seekg(header.start_ptr, std::ios_base::beg);
-
-		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
-		kfont_input->read(&temp_char_index[0], static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
-		{
-			LittleEndianToNative<sizeof(temp_char_index[i].first)>(&temp_char_index[i].first);
-			LittleEndianToNative<sizeof(temp_char_index[i].second)>(&temp_char_index[i].second);
-		}
-		std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
-		kfont_input->read(&temp_char_advance[0], static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
-		for (uint32_t i = 0; i < header.validate_chars; ++ i)
-		{
-			LittleEndianToNative<sizeof(temp_char_advance[i].first)>(&temp_char_advance[i].first);
-			LittleEndianToNative<sizeof(temp_char_advance[i].second)>(&temp_char_advance[i].second);
-		}
-
-		typedef BOOST_TYPEOF(temp_char_index) TempCharIndexType;
-		BOOST_FOREACH(TempCharIndexType::reference ci, temp_char_index)
-		{
-			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
-		}
-		typedef BOOST_TYPEOF(temp_char_advance) TempCharAdvanceType;
-		BOOST_FOREACH(TempCharAdvanceType::reference ca, temp_char_advance)
-		{
-			BOOST_AUTO(iter, char_index_advance_.find(ca.first));
-			if (iter != char_index_advance_.end())
-			{
-				iter->second.second = ca.second;
-			}
-			else
-			{
-				char_index_advance_[ca.first] = std::make_pair(-1, ca.second);
-			}
-		}
-
-		char_info_.resize(header.non_empty_chars);
-		kfont_input->read(&char_info_[0], static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
-		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
-		{
-			LittleEndianToNative<sizeof(char_info_[i].top)>(&char_info_[i].top);
-			LittleEndianToNative<sizeof(char_info_[i].left)>(&char_info_[i].left);
-			LittleEndianToNative<sizeof(char_info_[i].width)>(&char_info_[i].width);
-			LittleEndianToNative<sizeof(char_info_[i].height)>(&char_info_[i].height);
-		}
-
-		distances_addr_.resize(header.non_empty_chars + 1);
-
-		std::vector<uint8_t> dist;
-		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
-		{
-			distances_addr_[i] = distances_lzma_.size();
-
-			uint64_t len;
-			kfont_input->read(&len, sizeof(len));
-			LittleEndianToNative<sizeof(len)>(&len);
-			distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
-
-			kfont_input->read(&distances_lzma_[distances_addr_[i]], static_cast<size_t>(len));
-		}
-
-		distances_addr_[header.non_empty_chars] = distances_lzma_.size();
-	}
-
-	uint32_t KFontLoader::CharSize() const
-	{
-		return char_size_;
-	}
-
-	int16_t KFontLoader::DistBase() const
-	{
-		return dist_base_;
-	}
-
-	int16_t KFontLoader::DistScale() const
-	{
-		return dist_scale_;
-	}
-
-	std::pair<int32_t, uint32_t> const & KFontLoader::CharIndexAdvance(wchar_t ch) const
-	{
-		BOOST_AUTO(iter, char_index_advance_.find(ch));
-		if (iter != char_index_advance_.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			static std::pair<int32_t, uint32_t> ret(-1, 0);
-			return ret;
-		}
-	}
-
-	int32_t KFontLoader::CharIndex(wchar_t ch) const
-	{
-		return this->CharIndexAdvance(ch).first;
-	}
-
-	uint32_t KFontLoader::CharAdvance(wchar_t ch) const
-	{
-		return this->CharIndexAdvance(ch).second;
-	}
-
-	KFontLoader::font_info const & KFontLoader::CharInfo(int32_t offset) const
-	{
-		return char_info_[offset];
-	}
-
-	void KFontLoader::DistanceData(uint8_t* p, uint32_t pitch, int32_t offset) const
-	{
-		LZMACodec lzma_dec;
-		std::vector<uint8_t> decoded;
-		lzma_dec.Decode(decoded, &distances_lzma_[distances_addr_[offset]],
-			distances_addr_[offset + 1] - distances_addr_[offset], char_size_ * char_size_);
-
-		uint8_t const * char_data = &decoded[0];
-		for (uint32_t y = 0; y < char_size_; ++ y)
-		{
-			std::memcpy(p, char_data, char_size_);
-			p += pitch;
-			char_data += char_size_;
-		}
-	}
-
-
 	FontRenderable::FontRenderable(std::string const & font_name)
 			: RenderableHelper(L"Font"),
                 dirty_(false),
 				three_dim_(false),
-				kfont_loader_(font_name),
+				kfont_loader_(MakeSharedPtr<KFont>()),
 				tick_(0)
 	{
+		kfont_loader_->Load(ResLoader::Instance().Locate(font_name));
+
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		restart_ = rf.RenderEngineInstance().DeviceCaps().primitive_restart_support;
@@ -268,7 +106,7 @@ namespace KlayGE
 			rl_->TopologyType(RenderLayout::TT_TriangleList);
 		}
 
-		uint32_t const kfont_char_size = kfont_loader_.CharSize();
+		uint32_t const kfont_char_size = kfont_loader_->CharSize();
 
 		RenderEngine const & renderEngine = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
@@ -280,7 +118,7 @@ namespace KlayGE
 
 		effect_ = rf.LoadEffect("Font.fxml");
 		*(effect_->ParameterByName("distance_tex")) = dist_texture_;
-		*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_.DistBase() / 32768.0f * 32 + 1, (kfont_loader_.DistScale() / 32768.0f + 1.0f) * 32);
+		*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_->DistBase() / 32768.0f * 32 + 1, (kfont_loader_->DistScale() / 32768.0f + 1.0f) * 32);
 
 		half_width_height_ep_ = effect_->ParameterByName("half_width_height");
 		mvp_ep_ = effect_->ParameterByName("mvp");
@@ -364,7 +202,7 @@ namespace KlayGE
 	{
 		this->UpdateTexture(text);
 
-		BOOST_TYPEOF(kfont_loader_)& kl = kfont_loader_;
+		KFont& kl = *kfont_loader_;
 
 		float const rel_size = static_cast<float>(font_height) / kl.CharSize();
 
@@ -417,7 +255,7 @@ namespace KlayGE
 	{
 		this->UpdateTexture(text);
 
-		BOOST_TYPEOF(kfont_loader_)& kl = kfont_loader_;
+		KFont& kl = *kfont_loader_;
 		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
 		BOOST_TYPEOF(vertices_)& verts = vertices_;
 		BOOST_TYPEOF(indices_)& inds = indices_;
@@ -530,7 +368,7 @@ namespace KlayGE
 				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
 				{
-					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
+					KFont::font_info const & ci = kl.CharInfo(offset_adv.first);
 
 					float left = ci.left * rel_size_x;
 					float top = ci.top * rel_size_y;
@@ -589,7 +427,7 @@ namespace KlayGE
 	{
 		this->UpdateTexture(text);
 
-		BOOST_TYPEOF(kfont_loader_)& kl = kfont_loader_;
+		KFont& kl = *kfont_loader_;
 		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
 		BOOST_TYPEOF(vertices_)& verts = vertices_;
 		BOOST_TYPEOF(indices_)& inds = indices_;
@@ -628,7 +466,7 @@ namespace KlayGE
 				std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 				if (offset_adv.first != -1)
 				{
-					KFontLoader::font_info const & ci = kl.CharInfo(offset_adv.first);
+					KFont::font_info const & ci = kl.CharInfo(offset_adv.first);
 
 					float left = ci.left * rel_size_x;
 					float top = ci.top * rel_size_y;
@@ -701,7 +539,7 @@ namespace KlayGE
 
 		uint32_t const tex_size = dist_texture_->Width(0);
 
-		BOOST_TYPEOF(kfont_loader_)& kl = kfont_loader_;
+		KFont& kl = *kfont_loader_;
 		BOOST_TYPEOF(char_info_map_)& cim = char_info_map_;
 
 		uint32_t const kfont_char_size = kl.CharSize();
@@ -726,7 +564,7 @@ namespace KlayGE
 				{
 					// 在现有纹理中找不到，所以得在现有纹理中添加新字
 
-					KFontLoader::font_info const & ci = kl.CharInfo(offset);
+					KFont::font_info const & ci = kl.CharInfo(offset);
 
 					uint32_t width = ci.width;
 					uint32_t height = ci.height;
@@ -815,7 +653,7 @@ namespace KlayGE
 					{
 						Texture::Mapper mapper(*a_char_texture_, 0, 0, TMA_Write_Only,
 							0, 0, kfont_char_size, kfont_char_size);
-						kl.DistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
+						kl.GetDistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
 					}
 
 					a_char_texture_->CopyToSubTexture2D(*dist_texture_,
