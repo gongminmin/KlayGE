@@ -1090,7 +1090,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\Core\Include\KlayGE\PerlinNoise.hpp"
+					RelativePath="..\..\Core\Include\KlayGE\Noise.hpp"
 					>
 				</File>
 				<File

@@ -27,93 +27,148 @@ static uint8_t const permutation[] =
 
 static uint8_t const grad3[] = 
 {
-	128, 255, 255, 128,
-	128, 255, 0,   128,
-	128, 0,   255, 128,
-	128, 0,   0,   128,
-	255, 128, 255, 128,
-	255, 128, 0,   128,
-	0,   128, 255, 128,
-	0,   128, 0,   128,
 	255, 255, 128, 128,
-	255, 0,   128, 128,
 	0,   255, 128, 128,
-	0,   0,   128, 128,
-	128, 255, 255, 128,
 	255, 0,   128, 128,
+	0,   0,   128, 128,
+
+	255, 128, 255, 128,
+	0,   128, 255, 128,
+	255, 128, 0,   128,
+	0,   128, 0,   128,
+
+	128, 255, 255, 128,
+	128, 0,   255, 128,
 	128, 255, 0,   128,
-	0,   0,   128, 128
+	128, 0,   0,   128
 };
 
 static uint8_t const grad4[] =
 {
-	128, 0, 0, 0,
-	128, 0, 0, 255,
-	128, 0, 255, 0,
-	128, 0, 255, 255,
-	128, 255, 0, 0,
-	128, 255, 0, 255,
-	128, 255, 255, 0,
 	128, 255, 255, 255,
-	0, 0, 128, 0,
-	0, 255, 128, 0,
-	255, 0, 128, 0,
-	255, 255, 128, 0,
-	0, 0, 128, 255,
-	0, 255, 128, 255,
-	255, 0, 128, 255,
-	255, 255, 128, 255,
+	128, 255, 255, 0,
+	128, 255, 0,   255,
+	128, 255, 0,   0,
+
+	128, 0,   255, 255,
+	128, 0,   255, 0,
+	128, 0,   0,   255,
+	128, 0,   0,   0,
 	
-	0, 128, 0, 0,
-	255, 128, 0, 0,
-	0, 128, 0, 255,
-	255, 128, 0, 255,
-	0, 128, 255, 0,
-	255, 128, 255, 0,
-	0, 128, 255, 255,
 	255, 128, 255, 255,
-	128, 0, 0, 128,
-	128, 0, 0, 128,
-	128, 0, 255, 128,
-	128, 0, 255, 128,
-	128, 255, 0, 128,
-	128, 255, 0, 128,
-	128, 255, 255, 128,
-	128, 255, 255, 128,
+	255, 128, 255, 0,
+	255, 128, 0,   255,
+	255, 128, 0,   0,
+	
+	0,   128, 255, 255,
+	0,   128, 255, 0,
+	0,   128, 0,   255,
+	0,   128, 0,   0,
+	
+	255, 255, 128, 255,
+	255, 255, 128, 0,
+	255, 0,   128, 255,
+	255, 0,   128, 0,
+	
+	0,   255, 128, 255,
+	0,   255, 128, 0,
+	0,   0,   128, 255,
+	0,   0,   128, 0,
+	
+	255, 255, 255, 128,
+	255, 255, 0,   128,
+	255, 0,   255, 128,
+	255, 0,   0,   128,
+	
+	0,   255, 255, 128,
+	0,   255, 0,   128,
+	0,   0,   255, 128,
+	0,   0,   0,   128
 };
 
-uint8_t perm_2d[256][256 * 4];
+static uint8_t simplex[][4] =
+{
+    { 0, 1, 2, 3 },
+	{ 0, 1, 3, 2 },
+	{ 0, 0, 0, 0 },
+	{ 0, 2, 3, 1 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 1, 2, 3, 0 },
+
+    { 0, 2, 1, 3 },
+	{ 0, 0, 0, 0 },
+	{ 0, 3, 1, 2 },
+	{ 0, 3, 2, 1 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 1, 3, 2, 0 },
+
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+
+    { 1, 2, 0, 3 },
+	{ 0, 0, 0, 0 },
+	{ 1, 3, 0, 2 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 2, 3, 0, 1 },
+	{ 2, 3, 1, 0 },
+
+    { 1, 0, 2, 3 },
+	{ 1, 0, 3, 2 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 2, 0, 3, 1 },
+	{ 0, 0, 0, 0 },
+	{ 2, 1, 3, 0 },
+
+    { 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+
+    { 2, 0, 1, 3 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 3, 0, 1, 2 },
+	{ 3, 0, 2, 1 },
+	{ 0, 0, 0, 0 },
+	{ 3, 1, 2, 0 },
+
+    { 2, 1, 0, 3 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 3, 1, 0, 2 },
+	{ 0, 0, 0, 0 },
+	{ 3, 2, 0, 1 },
+	{ 3, 2, 1, 0 }
+};
 
 int main()
 {
+	uint8_t perm_2d[256][256];
 	for (int y = 0; y < 256; ++ y)
 	{
 		for (int x = 0; x < 256; ++ x)
 		{
-			int A = permutation[x & 255] + y;
-			int B = permutation[(x + 1) & 255] + y;
-			perm_2d[y][x * 4 + 2] = permutation[A & 255];
-			perm_2d[y][x * 4 + 1] = permutation[(A + 1) & 255];
-			perm_2d[y][x * 4 + 0] = permutation[B & 255];
-			perm_2d[y][x * 4 + 3] = permutation[(B + 1) & 255];
-		}
-	}
-
-	uint8_t grad3_perm[256 * 4];
-	for (int x = 0; x < 256; ++ x)
-	{
-		for (int i = 0; i < 4; ++ i)
-		{
-			grad3_perm[x * 4 + i] = grad3[(permutation[x] & 15) * 4 + i];
-		}
-	}
-
-	uint8_t grad4_perm[256 * 4];
-	for (int x = 0; x < 256; ++ x)
-	{
-		for (int i = 0; i < 4; ++ i)
-		{
-			grad4_perm[x * 4 + i] = grad4[(permutation[x] & 31) * 4 + i];
+			perm_2d[y][x] = permutation[(x + permutation[y & 255]) & 255];
 		}
 	}
 	
@@ -124,21 +179,51 @@ int main()
 	SaveTexture("noise_perm.dds", Texture::TT_2D,
 		256, 1, 1, 1, 1, EF_R8, init_data);
 
+	init_data[0].data = simplex;
+	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(simplex);
+	SaveTexture("noise_simplex.dds", Texture::TT_2D,
+		64, 1, 1, 1, 1, EF_ABGR8, init_data);
+
 	init_data[0].data = perm_2d;
-	init_data[0].row_pitch = 256 * 4;
+	init_data[0].row_pitch = 256;
 	init_data[0].slice_pitch = sizeof(perm_2d);
 	SaveTexture("noise_perm_2d.dds", Texture::TT_2D,
-		256, 256, 1, 1, 1, EF_ARGB8, init_data);
+		256, 256, 1, 1, 1, EF_R8, init_data);
 
-	init_data[0].data = grad3_perm;
-	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(grad3_perm);
+	uint8_t grad_perm[256][256 * 4];
+	for (int y = 0; y < 256; ++ y)
+	{
+		for (int x = 0; x < 256; ++ x)
+		{
+			int index = perm_2d[y][x] % 12;
+			grad_perm[y][x * 4 + 0] = grad3[index * 4 + 0];
+			grad_perm[y][x * 4 + 1] = grad3[index * 4 + 1];
+			grad_perm[y][x * 4 + 2] = grad3[index * 4 + 2];
+			grad_perm[y][x * 4 + 3] = grad3[index * 4 + 3];
+		}
+	}
+	init_data[0].data = grad_perm;
+	init_data[0].row_pitch = 256 * 4;
+	init_data[0].slice_pitch = sizeof(grad_perm);
 	SaveTexture("noise_grad3_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, 1, EF_ARGB8, init_data);
+		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 
-	init_data[0].data = grad4_perm;
-	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(grad4_perm);
+	for (int y = 0; y < 256; ++ y)
+	{
+		for (int x = 0; x < 256; ++ x)
+		{
+			int index = perm_2d[y][x] % 32;
+			grad_perm[y][x * 4 + 0] = grad4[index * 4 + 0];
+			grad_perm[y][x * 4 + 1] = grad4[index * 4 + 1];
+			grad_perm[y][x * 4 + 2] = grad4[index * 4 + 2];
+			grad_perm[y][x * 4 + 3] = grad4[index * 4 + 3];
+		}
+	}
+	init_data[0].data = grad_perm;
+	init_data[0].row_pitch = 256 * 4;
+	init_data[0].slice_pitch = sizeof(grad_perm);
 	SaveTexture("noise_grad4_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, 1, EF_ARGB8, init_data);
+		256, 256, 1, 1, 1, EF_ABGR8, init_data);
 
 	cout << "DONE" << endl;
 

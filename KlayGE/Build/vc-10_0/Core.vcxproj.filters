@@ -542,7 +542,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\Matrix.hpp">
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Core\Include\KlayGE\PerlinNoise.hpp">
+    <ClInclude Include="..\..\Core\Include\KlayGE\Noise.hpp">
       <Filter>Math Library\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Core\Include\KlayGE\Plane.hpp">

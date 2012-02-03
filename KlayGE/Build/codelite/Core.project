@@ -198,7 +198,7 @@
       <File Name="../../Core/Include/KlayGE/half.hpp"/>
       <File Name="../../Core/Include/KlayGE/Math.hpp"/>
       <File Name="../../Core/Include/KlayGE/Matrix.hpp"/>
-      <File Name="../../Core/Include/KlayGE/PerlinNoise.hpp"/>
+      <File Name="../../Core/Include/KlayGE/Noise.hpp"/>
       <File Name="../../Core/Include/KlayGE/Plane.hpp"/>
       <File Name="../../Core/Include/KlayGE/Quaternion.hpp"/>
       <File Name="../../Core/Include/KlayGE/Rect.hpp"/>

@@ -200,7 +200,7 @@ SET(MATH_HEADER_FILES
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/half.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Math.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Matrix.hpp
-    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PerlinNoise.hpp
+    ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Noise.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Plane.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Quaternion.hpp
     ${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Rect.hpp

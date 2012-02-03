@@ -356,7 +356,7 @@
     <ClInclude Include="..\..\Core\Include\KlayGE\half.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Math.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Matrix.hpp" />
-    <ClInclude Include="..\..\Core\Include\KlayGE\PerlinNoise.hpp" />
+    <ClInclude Include="..\..\Core\Include\KlayGE\Noise.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Plane.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Quaternion.hpp" />
     <ClInclude Include="..\..\Core\Include\KlayGE\Rect.hpp" />
