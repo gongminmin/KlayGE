@@ -67,6 +67,15 @@
 	#endif
 #endif
 
+// Defines the native endian
+#if defined(__arm__)
+	#define KFONT_BIG_ENDIAN
+#elif defined(_M_IX86) || defined(_M_X64) || defined(KFONT_PLATFORM_WINDOWS) || defined(__x86_64__) || defined(__i386__)
+	#define KFONT_LITTLE_ENDIAN
+#else
+	#define KFONT_BIG_ENDIAN
+#endif
+
 #if defined(KFONT_PLATFORM_WINDOWS)
 	#if !defined(__GNUC__) && !defined(KFONT_HAS_DECLSPEC)
 		#define KFONT_HAS_DECLSPEC
@@ -145,8 +154,8 @@ namespace KlayGE
 	public:
 		KFont();
 		
-		void Load(std::string const & file_name);
-		void Save(std::string const & file_name);
+		bool Load(std::string const & file_name);
+		bool Save(std::string const & file_name);
 
 		uint32_t CharSize() const;
 		int16_t DistBase() const;

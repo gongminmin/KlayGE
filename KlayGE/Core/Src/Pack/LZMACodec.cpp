@@ -25,6 +25,8 @@ namespace
 {
 	using namespace KlayGE;
 
+	boost::mutex singleton_mutex;
+
 	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
 		int level,      /* 0 <= level <= 9, default = 5 */
@@ -42,8 +44,15 @@ namespace
 	public:
 		static LZMALoader& Instance()
 		{
-			static LZMALoader ret;
-			return ret;
+			if (!instance_)
+			{
+				boost::mutex::scoped_lock lock(singleton_mutex);
+				if (!instance_)
+				{
+					instance_ = MakeSharedPtr<LZMALoader>();
+				}
+			}
+			return *instance_;
 		}
 
 		int LzmaCompress(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
@@ -68,7 +77,6 @@ namespace
 #endif
 		}
 
-	private:
 		LZMALoader()
 		{
 #ifndef KLAYGE_PLATFORM_ANDROID
@@ -91,7 +99,10 @@ namespace
 		LzmaCompressFunc lzmaCompressFunc_;
 		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
+
+		static boost::shared_ptr<LZMALoader> instance_;
 	};
+	boost::shared_ptr<LZMALoader> LZMALoader::instance_;
 }
 
 namespace KlayGE

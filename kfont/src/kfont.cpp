@@ -16,6 +16,65 @@
 #include <dlfcn.h>
 #endif
 
+namespace
+{
+	template <int size>
+	void EndianSwitch(void* p);
+
+	template <>
+	void EndianSwitch<2>(void* p)
+	{
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[1]);
+	}
+	template <>
+	void EndianSwitch<4>(void* p)
+	{
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[3]);
+		std::swap(bytes[1], bytes[2]);
+	}
+	template <>
+	void EndianSwitch<8>(void* p)
+	{
+		uint8_t* bytes = static_cast<uint8_t*>(p);
+		std::swap(bytes[0], bytes[7]);
+		std::swap(bytes[1], bytes[6]);
+		std::swap(bytes[2], bytes[5]);
+		std::swap(bytes[3], bytes[4]);
+	}
+
+	template <int size>
+	void NativeToBigEndian(void* p)
+	{
+#ifdef KFONT_LITTLE_ENDIAN
+		EndianSwitch<size>(p);
+#else
+		p;
+#endif
+	}
+	template <int size>
+	void NativeToLittleEndian(void* p)
+	{
+#ifdef KFONT_LITTLE_ENDIAN
+		p;
+#else
+		EndianSwitch<size>(p);
+#endif
+	}
+
+	template <int size>
+	void BigEndianToNative(void* p)
+	{
+		NativeToBigEndian<size>(p);
+	}
+	template <int size>
+	void LittleEndianToNative(void* p)
+	{
+		NativeToLittleEndian<size>(p);
+	}
+}
+
 namespace KlayGE
 {
 	int const KFONT_VERSION = 2;
@@ -101,67 +160,96 @@ namespace KlayGE
 	{
 	}
 	
-	void KFont::Load(std::string const & file_name)
+	bool KFont::Load(std::string const & file_name)
 	{
 		std::ifstream kfont_input(file_name.c_str(), std::ios_base::binary | std::ios_base::in);
-		BOOST_ASSERT(kfont_input);
-
-		kfont_header header;
-		kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
-		BOOST_ASSERT((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc));
-		BOOST_ASSERT(KFONT_VERSION == header.version);
-
-		char_size_ = header.char_size;
-		dist_base_ = header.base;
-		dist_scale_ = header.scale;
-
-		kfont_input.seekg(header.start_ptr, std::ios_base::beg);
-
-		std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
-		kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]), static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
-		std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
-		kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]), static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
-
-		typedef BOOST_TYPEOF(temp_char_index) TCIType;
-		BOOST_FOREACH(TCIType::reference ci, temp_char_index)
+		if (kfont_input)
 		{
-			char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
-		}
-		typedef BOOST_TYPEOF(temp_char_advance) TCAType;
-		BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
-		{
-			BOOST_AUTO(iter, char_index_advance_.find(ca.first));
-			if (iter != char_index_advance_.end())
+			kfont_header header;
+			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+			LittleEndianToNative<sizeof(header.fourcc)>(&header.fourcc);
+			LittleEndianToNative<sizeof(header.version)>(&header.version);
+			LittleEndianToNative<sizeof(header.start_ptr)>(&header.start_ptr);
+			LittleEndianToNative<sizeof(header.validate_chars)>(&header.validate_chars);
+			LittleEndianToNative<sizeof(header.non_empty_chars)>(&header.non_empty_chars);
+			LittleEndianToNative<sizeof(header.char_size)>(&header.char_size);
+			LittleEndianToNative<sizeof(header.base)>(&header.base);
+			LittleEndianToNative<sizeof(header.scale)>(&header.scale);
+			if ((MakeFourCC<'K', 'F', 'N', 'T'>::value == header.fourcc) && (KFONT_VERSION == header.version))
 			{
-				iter->second.second = ca.second;
-			}
-			else
-			{
-				char_index_advance_[ca.first] = std::make_pair(-1, ca.second);
+				char_size_ = header.char_size;
+				dist_base_ = header.base;
+				dist_scale_ = header.scale;
+
+				kfont_input.seekg(header.start_ptr, std::ios_base::beg);
+
+				std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
+				kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]), static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+				std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
+				kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]), static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+
+				typedef BOOST_TYPEOF(temp_char_index) TCIType;
+				BOOST_FOREACH(TCIType::reference ci, temp_char_index)
+				{
+					LittleEndianToNative<sizeof(ci.first)>(&ci.first);
+					LittleEndianToNative<sizeof(ci.second)>(&ci.second);
+
+					char_index_advance_.insert(std::make_pair(ci.first, std::make_pair(ci.second, 0)));
+				}
+				typedef BOOST_TYPEOF(temp_char_advance) TCAType;
+				BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
+				{
+					LittleEndianToNative<sizeof(ca.first)>(&ca.first);
+					LittleEndianToNative<sizeof(ca.second)>(&ca.second);
+
+					BOOST_AUTO(iter, char_index_advance_.find(ca.first));
+					if (iter != char_index_advance_.end())
+					{
+						iter->second.second = ca.second;
+					}
+					else
+					{
+						char_index_advance_[ca.first] = std::make_pair(-1, ca.second);
+					}
+				}
+
+				char_info_.resize(header.non_empty_chars);
+				kfont_input.read(reinterpret_cast<char*>(&char_info_[0]), static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
+
+				typedef BOOST_TYPEOF(char_info_) CIType;
+				BOOST_FOREACH(CIType::reference ci, char_info_)
+				{
+					LittleEndianToNative<sizeof(ci.left)>(&ci.left);
+					LittleEndianToNative<sizeof(ci.top)>(&ci.top);
+					LittleEndianToNative<sizeof(ci.width)>(&ci.width);
+					LittleEndianToNative<sizeof(ci.height)>(&ci.height);
+				}
+
+				distances_addr_.resize(header.non_empty_chars + 1);
+
+				std::vector<uint8_t> dist;
+				for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
+				{
+					distances_addr_[i] = distances_lzma_.size();
+
+					uint64_t len;
+					kfont_input.read(reinterpret_cast<char*>(&len), sizeof(len));
+					LittleEndianToNative<sizeof(len)>(&len);
+					distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
+
+					kfont_input.read(reinterpret_cast<char*>(&distances_lzma_[distances_addr_[i]]), static_cast<size_t>(len));
+				}
+
+				distances_addr_[header.non_empty_chars] = distances_lzma_.size();
+
+				return true;
 			}
 		}
 
-		char_info_.resize(header.non_empty_chars);
-		kfont_input.read(reinterpret_cast<char*>(&char_info_[0]), static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
-
-		distances_addr_.resize(header.non_empty_chars + 1);
-
-		std::vector<uint8_t> dist;
-		for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
-		{
-			distances_addr_[i] = distances_lzma_.size();
-
-			uint64_t len;
-			kfont_input.read(reinterpret_cast<char*>(&len), sizeof(len));
-			distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
-
-			kfont_input.read(reinterpret_cast<char*>(&distances_lzma_[distances_addr_[i]]), static_cast<size_t>(len));
-		}
-
-		distances_addr_[header.non_empty_chars] = distances_lzma_.size();
+		return false;
 	}
 
-	void KFont::Save(std::string const & file_name)
+	bool KFont::Save(std::string const & file_name)
 	{
 		std::ofstream kfont_output(file_name.c_str(), std::ios_base::binary | std::ios_base::out);
 		if (kfont_output)
@@ -177,42 +265,93 @@ namespace KlayGE
 			header.char_size = char_size_;
 			header.base = dist_base_;
 			header.scale = dist_scale_;
+			NativeToLittleEndian<sizeof(header.fourcc)>(&header.fourcc);
+			NativeToLittleEndian<sizeof(header.version)>(&header.version);
+			NativeToLittleEndian<sizeof(header.start_ptr)>(&header.start_ptr);
+			NativeToLittleEndian<sizeof(header.validate_chars)>(&header.validate_chars);
+			NativeToLittleEndian<sizeof(header.non_empty_chars)>(&header.non_empty_chars);
+			NativeToLittleEndian<sizeof(header.char_size)>(&header.char_size);
+			NativeToLittleEndian<sizeof(header.base)>(&header.base);
+			NativeToLittleEndian<sizeof(header.scale)>(&header.scale);
 
 			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
 
+			std::vector<int32_t> chars;
+			typedef BOOST_TYPEOF(char_index_advance_) CIAType;
+			BOOST_FOREACH(CIAType::reference cia, char_index_advance_)
+			{
+				chars.push_back(cia.first);
+			}
+			std::sort(chars.begin(), chars.end());
+
 			std::vector<std::pair<int32_t, int32_t> > temp_char_index;
 			std::vector<std::pair<int32_t, uint32_t> > temp_char_advance;
-			typedef BOOST_TYPEOF(char_index_advance_) CIAType;
-			BOOST_FOREACH(CIAType::reference ci, char_index_advance_)
+			typedef BOOST_TYPEOF(chars) CharsType;
+			BOOST_FOREACH(CharsType::reference ch, chars)
 			{
-				if (ci.second.first != -1)
+				std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
+
+				if (ci.first != -1)
 				{
-					temp_char_index.push_back(std::make_pair(ci.first, ci.second.first));
+					temp_char_index.push_back(std::make_pair(ch, ci.first));
 				}
-				temp_char_advance.push_back(std::make_pair(ci.first, ci.second.second));
+				temp_char_advance.push_back(std::make_pair(ch, ci.second));
 			}
-			BOOST_ASSERT(temp_char_index.size() == header.non_empty_chars);
-			BOOST_ASSERT(temp_char_advance.size() == header.validate_chars);
+			BOOST_ASSERT(temp_char_index.size() == char_info_.size());
+			BOOST_ASSERT(temp_char_advance.size() == char_index_advance_.size());
 
-			kfont_output.write(reinterpret_cast<char*>(&temp_char_index[0]),
-				static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+			typedef BOOST_TYPEOF(temp_char_index) TCIType;
+			BOOST_FOREACH(TCIType::reference ci, temp_char_index)
+			{
+				TCIType::value_type tci = ci;
+				NativeToLittleEndian<sizeof(tci.first)>(&tci.first);
+				NativeToLittleEndian<sizeof(tci.second)>(&tci.second);
 
-			kfont_output.write(reinterpret_cast<char*>(&temp_char_advance[0]),
-				static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+				kfont_output.write(reinterpret_cast<char*>(&tci), sizeof(tci));
+			}
+			typedef BOOST_TYPEOF(temp_char_advance) TCAType;
+			BOOST_FOREACH(TCAType::reference ca, temp_char_advance)
+			{
+				TCAType::value_type tca = ca;
+				NativeToLittleEndian<sizeof(tca.first)>(&tca.first);
+				NativeToLittleEndian<sizeof(tca.second)>(&tca.second);
+
+				kfont_output.write(reinterpret_cast<char*>(&tca), sizeof(tca));
+			}
 
 			for (size_t i = 0; i < temp_char_index.size(); ++ i)
 			{
-				int const ch = temp_char_index[i].first;
+				int const index = temp_char_index[i].second;
 
-				kfont_output.write(reinterpret_cast<char*>(&char_info_[ch].top), sizeof(char_info_[ch].top));
-				kfont_output.write(reinterpret_cast<char*>(&char_info_[ch].left), sizeof(char_info_[ch].left));
-				kfont_output.write(reinterpret_cast<char*>(&char_info_[ch].width), sizeof(char_info_[ch].width));
-				kfont_output.write(reinterpret_cast<char*>(&char_info_[ch].height), sizeof(char_info_[ch].height));
+				int16_t tmp = char_info_[index].top;
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				tmp = char_info_[index].left;
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				tmp = char_info_[index].width;
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
+				tmp = char_info_[index].height;
+				NativeToLittleEndian<sizeof(tmp)>(&tmp);
+				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 			}
 
-			kfont_output.write(reinterpret_cast<char*>(&distances_lzma_[0]),
-				static_cast<std::streamsize>(distances_lzma_.size() * sizeof(distances_lzma_[0])));
+			for (size_t i = 0; i < temp_char_index.size(); ++ i)
+			{
+				uint32_t index = temp_char_index[i].second;
+				size_t addr = distances_addr_[index];
+				uint64_t len = distances_addr_[index + 1] - addr;
+				NativeToLittleEndian<sizeof(len)>(&len);
+				kfont_output.write(reinterpret_cast<char*>(&len), sizeof(len));
+				kfont_output.write(reinterpret_cast<char*>(&distances_lzma_[addr]),
+					static_cast<std::streamsize>(len * sizeof(distances_lzma_[0])));
+			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 	uint32_t KFont::CharSize() const
@@ -325,7 +464,7 @@ namespace KlayGE
 		int32_t ci;
 		if (size > 0)
 		{
-			ci = distances_addr_.size();
+			ci = distances_addr_.size() - 1;
 			uint32_t offset = distances_lzma_.size();
 			distances_addr_.back() = offset;
 			distances_addr_.push_back(offset + size);
@@ -371,8 +510,10 @@ namespace KlayGE
 				new_char_info.push_back(char_info_[old_offset]);
 				new_distances_addr.push_back(new_distances_lzma.size());
 
-				new_distances_lzma.insert(new_distances_lzma.end(), &distances_lzma_[distances_addr_[old_offset]],
-					&distances_lzma_[distances_addr_[old_offset + 1]]);
+				size_t addr = distances_addr_[old_offset];
+				size_t len = distances_addr_[old_offset + 1] - distances_addr_[old_offset];
+				uint8_t const * p = &distances_lzma_[addr];
+				new_distances_lzma.insert(new_distances_lzma.end(), p, p + len);
 			}
 			else
 			{

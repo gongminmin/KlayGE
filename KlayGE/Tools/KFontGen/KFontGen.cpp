@@ -9,6 +9,8 @@
 #include <KlayGE/aligned_allocator.hpp>
 #include <KlayGE/atomic.hpp>
 
+#include <kfont/kfont.hpp>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,9 +24,10 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/typeof/typeof.hpp>
+#include <boost/foreach.hpp>
 
 #include <mmintrin.h>
 #include <emmintrin.h>
@@ -52,25 +55,6 @@ using namespace KlayGE;
 
 uint32_t const INTERNAL_CHAR_SIZE = 4096;
 uint32_t const NUM_CHARS = 65536;
-
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(push, 1)
-#endif
-struct kfont_header
-{
-	uint32_t fourcc;
-	uint32_t version;
-	uint32_t start_ptr;
-	uint32_t validate_chars;
-	uint32_t non_empty_chars;
-	uint32_t char_size;
-
-	int16_t base;
-	int16_t scale;
-};
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#pragma pack(pop)
-#endif
 
 struct font_info
 {
@@ -667,52 +651,58 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 		}
 	}
 
-	atomic<int32_t> cur_package(0);
-	for (int i = 0; i < num_threads; ++ i)
+	if (!validate_chars.empty())
 	{
-		joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, &validate_chars[0],
-			&char_info[0], &char_dist_data[0], cur_num_char[i],
-			cur_package, static_cast<uint32_t>(validate_chars.size()), i, num_threads, 64));
-	}
-	
-	Timer timer;
-	int32_t total_chars = static_cast<int32_t>(validate_chars.size());
-	double last_disp_time = 0;
-	for (;;)
-	{
-		int32_t dist_cur_num_char = 0;
+		atomic<int32_t> cur_package(0);
 		for (int i = 0; i < num_threads; ++ i)
 		{
-			dist_cur_num_char += cur_num_char[i];
+			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], char_size, &validate_chars[0],
+				&char_info[0], &char_dist_data[0], cur_num_char[i],
+				cur_package, static_cast<uint32_t>(validate_chars.size()), i, num_threads, 64));
 		}
-
-		double this_disp_time = timer.elapsed();
-		if ((dist_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+	
+		Timer timer;
+		int32_t total_chars = static_cast<int32_t>(validate_chars.size());
+		double last_disp_time = 0;
+		for (;;)
 		{
-			cout << '\r';
-			cout.width(5);
-			cout << dist_cur_num_char << " / ";
-			cout.width(5);
-			cout << total_chars;
-			cout.precision(2);
-			cout << "  Time remaining (estimated): "
-				<< fixed << this_disp_time / dist_cur_num_char * (total_chars - dist_cur_num_char) << " s     ";
-
-			last_disp_time = this_disp_time;
-
-			if (dist_cur_num_char == total_chars)
+			int32_t dist_cur_num_char = 0;
+			for (int i = 0; i < num_threads; ++ i)
 			{
-				break;
+				dist_cur_num_char += cur_num_char[i];
 			}
+
+			double this_disp_time = timer.elapsed();
+			if ((dist_cur_num_char == total_chars) || (this_disp_time - last_disp_time > 1))
+			{
+				cout << '\r';
+				cout.width(5);
+				cout << dist_cur_num_char << " / ";
+				cout.width(5);
+				cout << total_chars;
+				cout.precision(2);
+				cout << "  Time remaining (estimated): "
+					<< fixed << this_disp_time / dist_cur_num_char * (total_chars - dist_cur_num_char) << " s     ";
+
+				last_disp_time = this_disp_time;
+
+				if (dist_cur_num_char == total_chars)
+				{
+					break;
+				}
+			}
+
+			KlayGE::Sleep(1000);
 		}
 
-		KlayGE::Sleep(1000);
+		for (int i = 0; i < num_threads; ++ i)
+		{
+			joiners[i]();
+		}
 	}
 
 	for (int i = 0; i < num_threads; ++ i)
 	{
-		joiners[i]();
-
 		FT_Done_Face(ft_faces[i]);
 		FT_Done_FreeType(ft_libs[i]);
 	}
@@ -754,7 +744,6 @@ void quantizer_chars(std::vector<uint8_t>& lzma_dist, float& mse, float4 const &
 
 	LZMACodec lzma_enc;
 	std::vector<uint8_t> uint8_dist(char_size_sq);
-	std::vector<uint8_t> bc4_dist(char_size_sq / 2);
 	std::vector<uint8_t> char_lzma_dist;
 	for (uint32_t i = s; i < e; ++ i)
 	{
@@ -917,61 +906,47 @@ int main(int argc, char* argv[])
 			char_info[i].dist_index = static_cast<uint32_t>(-1);
 		}
 
-		ResIdentifierPtr kfont_input = ResLoader::Instance().Open(kfont_name);
-		if (kfont_input)
+		KFont kfont_input;
+		if (kfont_input.Load(kfont_name))
 		{
-			kfont_header header2;
-			kfont_input->read(&header2, sizeof(header2));
-
-			if ((MakeFourCC<'K', 'F', 'N', 'T'>::value == header2.fourcc)
-				&& (2 == header2.version)
-				&& (header2.char_size == header.char_size))
+			if (kfont_input.CharSize() == header.char_size)
 			{
-				kfont_input->seekg(header2.start_ptr, ios_base::beg);
-
-				char_index.resize(header2.non_empty_chars);
-				kfont_input->read(reinterpret_cast<char*>(&char_index[0]),
-					static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
-
-				std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance(header2.validate_chars);
-				kfont_input->read(reinterpret_cast<char*>(&advance[0]),
-					static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
-				for (size_t i = 0; i < advance.size(); ++ i)
+				for (size_t i = 0; i < char_info.size(); ++ i)
 				{
-					int const ch = advance[i].first;
+					wchar_t ch = static_cast<wchar_t>(i);
+					std::pair<int32_t, uint32_t> const & offset_adv = kfont_input.CharIndexAdvance(ch);
+					if (offset_adv.first != -1)
+					{
+						BOOST_ASSERT(offset_adv.first == static_cast<int32_t>(char_index.size()));
 
-					char_info[ch].advance_x = advance[i].second.first;
-					char_info[ch].advance_y = advance[i].second.second;
+						char_index.push_back(std::make_pair(ch, offset_adv.first));
+
+						KFont::font_info const & ci = kfont_input.CharInfo(offset_adv.first);
+						char_info[ch].top = ci.top;
+						char_info[ch].left = ci.left;
+						char_info[ch].width = ci.width;
+						char_info[ch].height = ci.height;
+
+						char_info[ch].dist_index = static_cast<uint32_t>(offset_adv.first * header.char_size * header.char_size);
+					}
+					char_info[ch].advance_x = offset_adv.second & 0xFFFF;
+					char_info[ch].advance_y = offset_adv.second >> 16;
 				}
 
-				for (size_t i = 0; i < char_index.size(); ++ i)
-				{
-					int const ch = char_index[i].first;
-
-					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
-					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
-					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
-					kfont_input->read(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
-				}
-
-				LZMACodec lzma_dec;
 				char_dist_data.resize(char_index.size() * header.char_size * header.char_size);
 				for (size_t i = 0; i < char_index.size(); ++ i)
 				{
 					int const ch = char_index[i].first;
 
-					uint64_t len;
-					kfont_input->read(&len, sizeof(len));
+					std::vector<uint8_t> uint8_dist(header.char_size * header.char_size);
+					kfont_input.GetDistanceData(&uint8_dist[0], header.char_size, char_index[i].second);
 
-					std::vector<uint8_t> uint8_dist;
-					lzma_dec.Decode(uint8_dist, kfont_input, len, header.char_size * header.char_size);
-					BOOST_ASSERT(uint8_dist.size() == header.char_size * header.char_size);
-
-					char_info[ch].dist_index = static_cast<uint32_t>(i * header.char_size * header.char_size);
+					int16_t base = kfont_input.DistBase();
+					int16_t scale = kfont_input.DistScale();
 					for (size_t j = 0; j < uint8_dist.size(); ++ j)
 					{
 						char_dist_data[char_info[ch].dist_index + j]
-							= uint8_dist[j] / 255.0f * (header2.scale / 32768.0f + 1) + header2.base / 32768.0f;
+							= uint8_dist[j] / 255.0f * (scale / 32768.0f + 1) + base / 32768.0f;
 					}
 				}
 			}
@@ -1052,8 +1027,11 @@ int main(int argc, char* argv[])
 	cout << "Quantize..." << endl;
 	timer_stage.restart();
 	std::vector<uint8_t> lzma_dist;
-	quantizer(lzma_dist, header.non_empty_chars, num_threads, &char_index[0], &char_info[0], &char_dist_data[0],
-		header.char_size * header.char_size, header.base, header.scale);
+	if (!char_index.empty())
+	{
+		quantizer(lzma_dist, header.non_empty_chars, num_threads, &char_index[0], &char_info[0], &char_dist_data[0],
+			header.char_size * header.char_size, header.base, header.scale);
+	}
 	cout << "Time elapsed: " << timer_stage.elapsed() << " s" << endl;
 
 	int processed_chars = 0;
@@ -1069,29 +1047,74 @@ int main(int argc, char* argv[])
 	cout << fixed << processed_chars / timer_total.elapsed() << " Characters/Second" << endl;
 
 	{
-		ofstream kfont_output(kfont_name.c_str(), ios_base::binary);
-		if (kfont_output)
+		KFont kfont_output;
+		kfont_output.CharSize(header.char_size);
+		kfont_output.DistBase(header.base);
+		kfont_output.DistScale(header.scale);
+
+		if (!advance.empty())
 		{
-			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
-
-			kfont_output.write(reinterpret_cast<char*>(&char_index[0]),
-				static_cast<std::streamsize>(char_index.size() * sizeof(char_index[0])));
-
-			kfont_output.write(reinterpret_cast<char*>(&advance[0]),
-				static_cast<std::streamsize>(advance.size() * sizeof(advance[0])));
-
+			boost::unordered_map<int32_t, std::pair<int32_t, uint32_t>, boost::hash<int32_t>, std::equal_to<int32_t>,
+				boost::fast_pool_allocator<std::pair<int32_t, std::pair<int32_t, uint32_t> > > > char_index_advance;
+			for (size_t i = 0; i < advance.size(); ++ i)
+			{
+				char_index_advance.insert(std::make_pair(advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first)));
+			}
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{
-				int const ch = char_index[i].first;
+				BOOST_AUTO(iter, char_index_advance.find(char_index[i].first));
+				BOOST_ASSERT(iter != char_index_advance.end());
 
-				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].top), sizeof(char_info[ch].top));
-				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].left), sizeof(char_info[ch].left));
-				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].width), sizeof(char_info[ch].width));
-				kfont_output.write(reinterpret_cast<char*>(&char_info[ch].height), sizeof(char_info[ch].height));
+				iter->second.first = char_index[i].second;
 			}
 
-			kfont_output.write(reinterpret_cast<char*>(&lzma_dist[0]),
-				static_cast<std::streamsize>(lzma_dist.size() * sizeof(lzma_dist[0])));
+			std::vector<size_t> distances_size(char_index.size());
+			std::vector<size_t> distances_addr(char_index.size());
+			if (!lzma_dist.empty())
+			{
+				uint8_t const * p0 = &lzma_dist[0];
+				uint8_t const * p = p0;
+				for (uint32_t i = 0; i < char_index.size(); ++ i)
+				{
+					uint64_t len;
+					memcpy(&len, p, sizeof(len));
+					p += sizeof(len);
+
+					distances_size[i] = static_cast<size_t>(len);
+					distances_addr[i] = p - p0;
+
+					p += len;
+				}
+			}
+		
+			typedef BOOST_TYPEOF(char_index_advance) CIAType;
+			BOOST_FOREACH(CIAType::reference cia, char_index_advance)
+			{
+				int const ch = cia.first;
+				int const index = cia.second.first;
+
+				KFont::font_info fi;
+				fi.left = char_info[ch].left;
+				fi.top = char_info[ch].top;
+				fi.width = char_info[ch].width;
+				fi.height = char_info[ch].height;
+
+				uint8_t const * p;
+				uint32_t size;
+				if (index != -1)
+				{
+					p = &lzma_dist[distances_addr[index]];
+					size = distances_size[index];
+				}
+				else
+				{
+					p = NULL;
+					size = 0;
+				}
+				kfont_output.SetLZMADistanceData(static_cast<wchar_t>(ch), p, size, cia.second.second, fi);
+			}
 		}
+
+		kfont_output.Save(kfont_name);
 	}
 }
