@@ -198,8 +198,11 @@ namespace
 			rl_->BindIndexStream(ib, EF_R16UI);
 
 			aabb_ = MathLib::compute_bounding_box<float>(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+		}
 
-			model_mat_ = MathLib::rotation_x(-0.5f);
+		void SetModelMatrix(float4x4 const & mat)
+		{
+			RenderableHelper::SetModelMatrix(mat);
 			inv_model_mat_ = MathLib::inverse(model_mat_);
 		}
 
@@ -327,6 +330,7 @@ void DistanceMapping::InitObjects()
 	font_ = Context::Instance().RenderFactoryInstance().MakeFont("gkai00mp.kfont");
 
 	polygon_ = MakeSharedPtr<PolygonObject>();
+	polygon_->SetModelMatrix(MathLib::rotation_x(-0.5f));
 	polygon_->AddToSceneManager();
 
 	this->LookAt(float3(2, 0, -2), float3(0, 0, 0));

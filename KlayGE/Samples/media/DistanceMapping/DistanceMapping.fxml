@@ -110,7 +110,6 @@ float4 DistanceMappingPS_20(float4 L	: TEXCOORD0,
 	for (int i = 0; i < 2; ++ i)
 	{
 		texUV -= view * distance_tex.Sample(linear_sampler, texUV).r;
-		texUV -= view * distance_tex.Sample(linear_sampler, float2(texUV.x, texUV.z + texUV.y / 16)).r;
 	}
 #endif
 	
