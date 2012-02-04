@@ -407,9 +407,7 @@
     <None Include="..\..\media\RenderFX\DeferredRendering.fxml" />
     <None Include="..\..\media\RenderFX\DeferredRenderingUtil.fxml" />
     <None Include="..\..\media\RenderFX\DepthToSM.fxml" />
-    <None Include="..\..\media\RenderFX\DownSample.fxml">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="..\..\media\RenderFX\DownSample.fxml" />
     <None Include="..\..\media\RenderFX\Fog.fxml" />
     <None Include="..\..\media\RenderFX\Font.fxml" />
     <None Include="..\..\media\RenderFX\FXAA.fxml" />

@@ -174,21 +174,10 @@ int main()
 	
 	std::vector<ElementInitData> init_data(1);
 
-	init_data[0].data = permutation;
-	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(permutation);
-	SaveTexture("noise_perm.dds", Texture::TT_2D,
-		256, 1, 1, 1, 1, EF_R8, init_data);
-
 	init_data[0].data = simplex;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(simplex);
 	SaveTexture("noise_simplex.dds", Texture::TT_2D,
 		64, 1, 1, 1, 1, EF_ABGR8, init_data);
-
-	init_data[0].data = perm_2d;
-	init_data[0].row_pitch = 256;
-	init_data[0].slice_pitch = sizeof(perm_2d);
-	SaveTexture("noise_perm_2d.dds", Texture::TT_2D,
-		256, 256, 1, 1, 1, EF_R8, init_data);
 
 	uint8_t grad_perm[256][256 * 4];
 	for (int y = 0; y < 256; ++ y)
@@ -199,7 +188,7 @@ int main()
 			grad_perm[y][x * 4 + 0] = grad3[index * 4 + 0];
 			grad_perm[y][x * 4 + 1] = grad3[index * 4 + 1];
 			grad_perm[y][x * 4 + 2] = grad3[index * 4 + 2];
-			grad_perm[y][x * 4 + 3] = grad3[index * 4 + 3];
+			grad_perm[y][x * 4 + 3] = perm_2d[y][x];
 		}
 	}
 	init_data[0].data = grad_perm;
