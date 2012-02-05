@@ -33,7 +33,7 @@ float4 marble(float3 tex_coord)
 	float3 color1 = float3(0.03f, 0.03f, 0.2f);
 	float3 color2 = float3(0.5f, 0.5f, 0.7f);
 
-	return float4(lerp(color1, color2, cos(tex_coord.x * 0.1f + 6 * fBm(tex_coord, 5, 2, 0.6f))), 1);
+	return float4(lerp(color1, color2, cos(tex_coord.x * 0.1f + 6 * fBm(tex_coord, 5, 2, 0.5f))), 1);
 }
 
 float4 cloud(float3 tex_coord)
@@ -48,7 +48,7 @@ float4 electro(float3 tex_coord)
 {
 	float3 color = float3(1.70f, 1.48f, 1.78f);
 
-	float turb = fBm(float4(tex_coord * 2.5f, t), 6);
+	float turb = fBm(float4(tex_coord * 2.5f, t * 0.6f), 6);
 	float3 grow = (1 - pow(abs(turb), 0.2)) * color;
 	return float4(pow(grow, 4), 1);
 }
@@ -63,7 +63,7 @@ void ProceduralTexVS(float4 pos			: POSITION,
 	oPos = mul(pos, mvp);
 	oPosOS = pos.xyz;
 	oNormalOS = normal * 2 - 1;
-	oTexCoord = pos.xyz * freq;
+	oTexCoord = pos.xyz * freq * 0.6f;
 }
 
 float4 WoodPS(float3 pos_os : TEXCOORD0,
