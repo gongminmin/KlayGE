@@ -43,7 +43,10 @@ public:
 		ofs << "#define CONSTANT_BUFFER" << "\r\n";
 		ofs << "#define KLAYGE_D3D11" << "\r\n";
 		ofs << "#define KLAYGE_SHADER_MODEL 5" << "\r\n";
-		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n\r\n";
+		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n";
+		ofs << "#define KLAYGE_MAX_TEX_DEPTH 512" << "\r\n";
+		ofs << "#define KLAYGE_NO_TEX_LOD 0" << "\r\n";
+		ofs << "#define KLAYGE_FLIPPING -1" << "\r\n\r\n";
 
 		for (uint32_t i = 0; i < effect->NumMacros(); ++ i)
 		{
