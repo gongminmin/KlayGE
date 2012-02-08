@@ -963,22 +963,6 @@ void CausticsMapApp::InitEnvCube()
 
 		env_filter_pps_[i]->InputPin(0, env_tex_);
 		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);
-		if (!re.RequiresFlipping())
-		{
-			switch (i)
-			{
-			case Texture::CF_Positive_Y:
-				env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, Texture::CF_Negative_Y);
-				break;
-
-			case Texture::CF_Negative_Y:
-				env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, Texture::CF_Positive_Y);
-				break;
-
-			default:
-				break;
-			}
-		}
 	}
 }
 
@@ -1024,22 +1008,6 @@ void CausticsMapApp::InitCubeSM()
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
-		if (!re.RequiresFlipping())
-		{
-			switch (i)
-			{
-			case Texture::CF_Positive_Y:
-				sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, Texture::CF_Negative_Y);
-				break;
-
-			case Texture::CF_Negative_Y:
-				sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, Texture::CF_Positive_Y);
-				break;
-
-			default:
-				break;
-			}
-		}
 	}
 }
 

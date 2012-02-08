@@ -541,22 +541,6 @@ namespace KlayGE
 		{
 			sm_filter_pps_[i]->InputPin(0, sm_tex_);
 			sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, i - 1);
-			if (!re.RequiresFlipping())
-			{
-				switch (i - 1)
-				{
-				case Texture::CF_Positive_Y:
-					sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, Texture::CF_Negative_Y);
-					break;
-
-				case Texture::CF_Negative_Y:
-					sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, Texture::CF_Positive_Y);
-					break;
-
-				default:
-					break;
-				}
-			}
 		}
 		if (depth_texture_)
 		{

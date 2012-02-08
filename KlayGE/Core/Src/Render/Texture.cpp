@@ -2847,4 +2847,68 @@ namespace KlayGE
 	{
 		return access_hint_;
 	}
+
+
+	template KLAYGE_CORE_API std::pair<float3, float3> CubeMapViewVector(Texture::CubeFaces face);
+
+	template <typename T>
+	std::pair<Vector_T<T, 3>, Vector_T<T, 3> > CubeMapViewVector(Texture::CubeFaces face)
+	{
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+
+		Vector_T<T, 3> look_dir;
+		Vector_T<T, 3> up_dir;
+
+		switch (face)
+		{
+		case Texture::CF_Positive_X:
+			look_dir	= Vector_T<T, 3>(1, 0, 0);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Negative_X:
+			look_dir	= Vector_T<T, 3>(-1, 0, 0);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Positive_Y:
+			if (re.RequiresFlipping())
+			{
+				look_dir	= Vector_T<T, 3>(0, 1, 0);
+				up_dir		= Vector_T<T, 3>(0, 0, -1);
+			}
+			else
+			{
+				look_dir	= Vector_T<T, 3>(0, -1, 0);
+				up_dir		= Vector_T<T, 3>(0, 0, 1);
+			}
+			break;
+
+		case Texture::CF_Negative_Y:
+			if (re.RequiresFlipping())
+			{
+				look_dir	= Vector_T<T, 3>(0, -1, 0);
+				up_dir		= Vector_T<T, 3>(0, 0, 1);
+			}
+			else
+			{
+				look_dir	= Vector_T<T, 3>(0, 1, 0);
+				up_dir		= Vector_T<T, 3>(0, 0, -1);
+			}
+			break;
+
+		case Texture::CF_Positive_Z:
+			look_dir	= Vector_T<T, 3>(0, 0, 1);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+
+		case Texture::CF_Negative_Z:
+		default:
+			look_dir	= Vector_T<T, 3>(0, 0, -1);
+			up_dir		= Vector_T<T, 3>(0, 1, 0);
+			break;
+		}
+
+		return std::make_pair(look_dir, up_dir);
+	}
 }

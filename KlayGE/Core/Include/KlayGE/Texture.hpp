@@ -295,52 +295,10 @@ namespace KlayGE
 		ElementFormat format, std::vector<ElementInitData> const & init_data);
 	KLAYGE_CORE_API void SaveTexture(TexturePtr const & texture, std::string const & tex_name);
 
-	// 返回立方环境映射的lookat和up向量
+	// return the lookat and up vector in cubemap view
 	//////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	inline std::pair<Vector_T<T, 3>, Vector_T<T, 3> >
-	CubeMapViewVector(Texture::CubeFaces face)
-	{
-		Vector_T<T, 3> look_dir;
-		Vector_T<T, 3> up_dir;
-
-		switch (face)
-		{
-		case Texture::CF_Positive_X:
-			look_dir	= Vector_T<T, 3>(1, 0, 0);
-			up_dir		= Vector_T<T, 3>(0, 1, 0);
-			break;
-
-		case Texture::CF_Negative_X:
-			look_dir	= Vector_T<T, 3>(-1, 0, 0);
-			up_dir		= Vector_T<T, 3>(0, 1, 0);
-			break;
-
-		case Texture::CF_Positive_Y:
-			look_dir	= Vector_T<T, 3>(0, 1, 0);
-			up_dir		= Vector_T<T, 3>(0, 0, -1);
-			break;
-
-		case Texture::CF_Negative_Y:
-			look_dir	= Vector_T<T, 3>(0, -1, 0);
-			up_dir		= Vector_T<T, 3>(0, 0, 1);
-			break;
-
-		case Texture::CF_Positive_Z:
-			look_dir	= Vector_T<T, 3>(0, 0, 1);
-			up_dir		= Vector_T<T, 3>(0, 1, 0);
-			break;
-
-		case Texture::CF_Negative_Z:
-		default:
-			look_dir	= Vector_T<T, 3>(0, 0, -1);
-			up_dir		= Vector_T<T, 3>(0, 1, 0);
-			break;
-		}
-
-		// 设置立方体环境映射的观察矩阵
-		return std::make_pair(look_dir, up_dir);
-	}
+	std::pair<Vector_T<T, 3>, Vector_T<T, 3> > CubeMapViewVector(Texture::CubeFaces face);
 }
 
 #endif			// _TEXTURE_HPP
