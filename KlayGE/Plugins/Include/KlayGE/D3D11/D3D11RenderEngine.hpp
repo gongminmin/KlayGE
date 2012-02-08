@@ -78,6 +78,11 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		bool RequiresFlipping() const
+		{
+			return true;
+		}
+
 		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;

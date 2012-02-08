@@ -34,11 +34,6 @@ namespace KlayGE
 		virtual void OnBind();
 		virtual void OnUnbind();
 
-		bool RequiresFlipping() const
-		{
-			return true;
-		}
-
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
 
 	private:

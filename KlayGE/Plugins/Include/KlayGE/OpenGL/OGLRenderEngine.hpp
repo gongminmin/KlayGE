@@ -65,6 +65,11 @@ namespace KlayGE
 
 		std::wstring const & Name() const;
 
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
+
 		void StartRendering();
 
 		void BeginFrame();

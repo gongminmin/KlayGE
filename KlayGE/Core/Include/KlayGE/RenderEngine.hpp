@@ -97,6 +97,8 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const = 0;
 
+		virtual bool RequiresFlipping() const = 0;
+
 		virtual void StartRendering() = 0;
 
 		virtual void BeginFrame() = 0;

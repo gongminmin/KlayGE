@@ -249,7 +249,8 @@ namespace KlayGE
 			illum_(0), indirect_scale_(1.0f)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+		RenderEngine& re = rf.RenderEngineInstance();
+		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		ElementFormat ds_fmt;
 		if (caps.texture_format_support(EF_D24S8))
@@ -540,7 +541,7 @@ namespace KlayGE
 		{
 			sm_filter_pps_[i]->InputPin(0, sm_tex_);
 			sm_filter_pps_[i]->OutputPin(0, sm_cube_tex_, 0, 0, i - 1);
-			if (!sm_buffer_->RequiresFlipping())
+			if (!re.RequiresFlipping())
 			{
 				switch (i - 1)
 				{
@@ -852,7 +853,7 @@ namespace KlayGE
 		}
 
 		*(dr_effect_->ParameterByName("shadowing_tex")) = shadowing_tex_;
-		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
+		*(dr_effect_->ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 		ssvo_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 		ssvo_pp_->InputPin(1, opaque_depth_tex_);
@@ -877,12 +878,12 @@ namespace KlayGE
 		{
 			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("gbuffer_tex")) = opaque_g_buffer_rt0_tex_;
 			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("depth_tex")) = opaque_depth_tex_;
-			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
+			*(vpls_lighting_instance_id_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_deriv_tex")) = depth_deriative_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("normal_cone_tex")) = normal_cone_tex_;
 			*(subsplat_stencil_tech_->Effect().ParameterByName("depth_normal_threshold")) = float2(0.001f * camera->FarPlane(), 0.77f);
-			*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(opaque_g_buffer_->RequiresFlipping() ? -1 : +1);
+			*(subsplat_stencil_tech_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 
 			gbuffer_to_depth_derivate_pp_->InputPin(0, opaque_g_buffer_rt0_tex_);
 			gbuffer_to_depth_derivate_pp_->InputPin(1, opaque_depth_tex_);

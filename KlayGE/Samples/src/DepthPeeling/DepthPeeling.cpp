@@ -423,7 +423,7 @@ uint32_t DepthPeelingApp::DoUpdate(uint32_t pass)
 				{
 					if (!finished)
 					{
-						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2], peeling_fbs_[layer - 1]->RequiresFlipping());
+						checked_pointer_cast<PolygonObject>(polygon_)->LastDepth(depth_texs_[(layer - 1) % 2], re.RequiresFlipping());
 
 						re.BindFrameBuffer(peeling_fbs_[layer]);
 						peeling_fbs_[layer]->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1, 0);

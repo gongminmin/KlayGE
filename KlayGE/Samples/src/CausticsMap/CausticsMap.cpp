@@ -271,7 +271,7 @@ namespace
 				*(technique_->Effect().ParameterByName("obj_model_to_light_view")) = model * first_light_view;
 
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-				*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 			}			
 			
 		}
@@ -399,7 +399,7 @@ namespace
 					*(technique_->Effect().ParameterByName("absorption_idx")) = absorption_idx;
 
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+					*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 				}
 				break;
 			}
@@ -666,7 +666,7 @@ namespace
 			}
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 		}
 
 	private:
@@ -933,28 +933,30 @@ void CausticsMapApp::InitBuffer()
 void CausticsMapApp::InitEnvCube()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat ds_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		ds_fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		ds_fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(ENV_CUBE_MAP_SIZE, ENV_CUBE_MAP_SIZE, ds_fmt, 1, 0);
 	env_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		fmt = EF_B10G11R11F;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		fmt = EF_ABGR16F;
 	}
@@ -970,7 +972,7 @@ void CausticsMapApp::InitEnvCube()
 
 		env_filter_pps_[i]->InputPin(0, env_tex_);
 		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);
-		if (!env_cube_buffer_->RequiresFlipping())
+		if (!re.RequiresFlipping())
 		{
 			switch (i)
 			{
@@ -990,30 +992,32 @@ void CausticsMapApp::InitEnvCube()
 }
 
 void CausticsMapApp::InitCubeSM()
-{	
+{
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat ds_fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		ds_fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		ds_fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, ds_fmt, 1, 0);
 	shadow_cube_buffer_ = rf.MakeFrameBuffer();
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
 	{
 		fmt = EF_GR16F;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		fmt = EF_ABGR16F;
 	}
@@ -1029,7 +1033,7 @@ void CausticsMapApp::InitCubeSM()
 
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
-		if (!shadow_cube_buffer_->RequiresFlipping())
+		if (!re.RequiresFlipping())
 		{
 			switch (i)
 			{
@@ -1084,15 +1088,16 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	ElementFormat fmt;
-	if (re.DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 	{
 		fmt = EF_B10G11R11F;
 	}
 	else
 	{
-		if (re.DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 		{
 			fmt = EF_ABGR8;
 		}
@@ -1105,13 +1110,13 @@ void CausticsMapApp::OnResize(uint32_t width, uint32_t height)
 	}
 	scene_texture_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 	scene_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_texture_, 0, 1, 0));
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		fmt = EF_D16;
 	}

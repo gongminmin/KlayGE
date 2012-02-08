@@ -69,11 +69,6 @@ namespace KlayGE
 		// Method for dealing with resize / move & 3d library
 		void WindowMovedOrResized();
 
-		bool RequiresFlipping() const
-		{
-			return false;
-		}
-
 	private:
 		void OnActive(Window const & win, bool active);
 		void OnPaint(Window const & win);

@@ -73,7 +73,7 @@ namespace KlayGE
 			case PT_TransparencyFrontDepth:
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
-				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*flipping_param_ = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
 				break;
 
@@ -93,7 +93,7 @@ namespace KlayGE
 				*specular_tex_param_ = specular_tex_;
 				*specular_level_param_ = float4(MathLib::clamp(mtl_ ? mtl_->specular_level : 0, 0.0f, 1.0f), 0, 0, static_cast<float>(!!specular_tex_));
 				*shininess_param_ = MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f);
-				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*flipping_param_ = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->OpaqueDepthTex();
 				break;
 
@@ -114,7 +114,7 @@ namespace KlayGE
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
-				*flipping_param_ = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+				*flipping_param_ = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 				break;
 
 			case PT_OpaqueSpecialShading:

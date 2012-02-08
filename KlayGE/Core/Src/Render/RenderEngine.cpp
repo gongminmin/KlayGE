@@ -64,6 +64,11 @@ namespace KlayGE
 			return name;
 		}
 
+		bool RequiresFlipping() const
+		{
+			return false;
+		}
+
 		void StartRendering()
 		{
 		}
@@ -285,7 +290,6 @@ namespace KlayGE
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			pp_chain_->InputPin(0, before_pp_tex_);
-
 			copy_pp_->InputPin(0, before_pp_tex_);
 
 			default_frame_buffers_[0 * 2 + 0] = default_frame_buffers_[0 * 2 + 1] = before_pp_frame_buffer_;
@@ -454,18 +458,7 @@ namespace KlayGE
 
 		if (gamma_pp_)
 		{
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
-			}
-
+			ElementFormat fmt = before_gamma_tex_->Format();
 			before_gamma_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_gamma_tex_, 0, 1, 0));
 			before_gamma_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -481,17 +474,7 @@ namespace KlayGE
 
 		if (pp_chain_)
 		{
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-			{
-				fmt = EF_B10G11R11F;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-				fmt = EF_ABGR16F;
-			}
+			ElementFormat fmt = before_pp_tex_->Format();
 			before_pp_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*before_pp_tex_, 0, 1, 0));
 			before_pp_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -628,7 +611,7 @@ namespace KlayGE
 			static_cast<float>(screen_frame_buffer_->Height()));
 		*(stereoscopic_effect_->ParameterByName("left_tex")) = stereo_colors_[0];
 		*(stereoscopic_effect_->ParameterByName("right_tex")) = stereo_colors_[1];
-		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(stereo_frame_buffers_[0]->RequiresFlipping() ? -1 : +1);
+		*(stereoscopic_effect_->ParameterByName("flipping")) = static_cast<int32_t>(this->RequiresFlipping() ? -1 : +1);
 	}
 
 	void RenderEngine::StereoscopicForLCDShutter()

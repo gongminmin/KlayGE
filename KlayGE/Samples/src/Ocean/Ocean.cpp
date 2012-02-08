@@ -241,7 +241,7 @@ namespace
 			InfTerrainRenderable::OnRenderBegin();
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.CurFrameBuffer()->RequiresFlipping() ? -1 : +1);
+			*(technique_->Effect().ParameterByName("flipping")) = static_cast<int32_t>(re.RequiresFlipping() ? -1 : +1);
 		}
 	};
 

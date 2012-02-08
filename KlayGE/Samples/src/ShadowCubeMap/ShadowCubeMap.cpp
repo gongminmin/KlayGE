@@ -117,8 +117,8 @@ namespace
 		explicit ShadowMapped(uint32_t shadow_map_size)
 			: shadow_map_size_(shadow_map_size), pass_index_(0)
 		{
-			FrameBufferPtr fb = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
-			flipping_ = static_cast<int32_t>(fb->RequiresFlipping() ? +1 : -1);
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			flipping_ = static_cast<int32_t>(re.RequiresFlipping() ? +1 : -1);
 		}
 
 		float4x4 LightViewProj() const
@@ -564,6 +564,8 @@ bool ShadowCubeMap::ConfirmDevice() const
 void ShadowCubeMap::InitObjects()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	// ½¨Á¢×ÖÌå
 	font_ = rf.MakeFont("gkai00mp.kfont");
@@ -592,24 +594,24 @@ void ShadowCubeMap::InitObjects()
 	}
 
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		fmt = EF_D16;
 	}
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_GR16F, 1, 0))
+	if (caps.rendertarget_format_support(EF_GR16F, 1, 0))
 	{
 		fmt = EF_GR16F;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
 
 		fmt = EF_ABGR16F;
 	}
@@ -620,7 +622,7 @@ void ShadowCubeMap::InitObjects()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 
-	if (rf.RenderEngineInstance().DeviceCaps().max_texture_array_length > 1)
+	if (caps.max_texture_array_length > 1)
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
@@ -667,7 +669,7 @@ void ShadowCubeMap::InitObjects()
 	
 		sm_filter_pps_[i]->InputPin(0, shadow_tex_);
 		sm_filter_pps_[i]->OutputPin(0, shadow_cube_tex_, 0, 0, i);
-		if (!shadow_cube_buffer_->RequiresFlipping())
+		if (!re.RequiresFlipping())
 		{
 			switch (i)
 			{

@@ -172,25 +172,28 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	App3DFramework::OnResize(width, height);
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+	RenderDeviceCaps const & caps = re.DeviceCaps();
+
 	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ABGR8, 1, 0))
+	if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 	{
 		fmt = EF_ABGR8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_ARGB8, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 
 		fmt = EF_ARGB8;
 	}
 	TexturePtr dummy_color_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, NULL);
-	if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D24S8, 1, 0))
+	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 	{
 		fmt = EF_D24S8;
 	}
 	else
 	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_D16, 1, 0));
+		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
 		fmt = EF_D16;
 	}
@@ -201,7 +204,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	FrameBufferPtr screen_buffer = rf.RenderEngineInstance().CurFrameBuffer();
 	back_face_depth_fb_->GetViewport().camera = screen_buffer->GetViewport().camera;
 
-	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_, back_face_depth_fb_->RequiresFlipping());
+	checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex_, re.RequiresFlipping());
 
 	UIManager::Instance().SettleCtrls(width, height);
 }

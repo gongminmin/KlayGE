@@ -84,8 +84,6 @@ namespace KlayGE
 		bool Active() const;
 		void Active(bool state);
 
-		virtual bool RequiresFlipping() const = 0;
-
 		void Attach(uint32_t att, RenderViewPtr const & view);
 		void Detach(uint32_t att);
 		RenderViewPtr Attached(uint32_t att) const;

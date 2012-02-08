@@ -286,7 +286,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
 
 		checked_pointer_cast<RefractorObject>(refractor_)->Pass(1);
-		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_, render_buffer_->RequiresFlipping());
+		checked_pointer_cast<RefractorObject>(refractor_)->BackFaceTexture(render_tex_, re.RequiresFlipping());
 
 		sky_box_->Visible(true);
 		return App3DFramework::URV_Need_Flush | App3DFramework::URV_Finished;
